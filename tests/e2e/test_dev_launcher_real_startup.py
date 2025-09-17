@@ -59,7 +59,7 @@ class TestRealDevLauncherer:
         self.started_processes: List[subprocess.Popen] = []
         self.launcher_instance = None  # Store launcher instance for cleanup
         self.test_ports = {"auth": 8081, "backend": 8000, "frontend": 3000}  # Use correct auth port
-        self.health_endpoints = { )
+        self.health_endpoints = { }
         "auth": "http://localhost:8081/auth/config",
         "backend": "http://localhost:8000/health/ready",
         "frontend": "http://localhost:3000"
@@ -99,7 +99,7 @@ class TestRealDevLauncherer:
         response = requests.get(endpoint, timeout=timeout)
         response_time = (time.time() - start_time) * 1000  # Convert to ms
 
-        return { )
+        return { }
         "service": service,
         "endpoint": endpoint,
         "status_code": response.status_code,
@@ -109,7 +109,7 @@ class TestRealDevLauncherer:
         
         except requests.exceptions.RequestException as e:
         response_time = (time.time() - start_time) * 1000
-        return { )
+        return { }
         "service": service,
         "endpoint": endpoint,
         "status_code": None,
@@ -125,19 +125,19 @@ class TestRealDevLauncherer:
         if self.original_config_path.exists():
         import shutil
         shutil.copy2(self.original_config_path, self.backup_config_path)
-        print("formatted_string")
+        print("")
 
             # Copy test config to main config location
         if self.test_config_path.exists():
         shutil.copy2(self.test_config_path, self.original_config_path)
         print(f"Using test config with mock databases")
         else:
-        print("formatted_string")
+        print("")
 
                     # Force mock database URLs in environment to override any existing values
         import secrets
         self.backup_env_vars = {}
-        mock_env_vars = { )
+        mock_env_vars = { }
         'DATABASE_URL': 'postgresql://mock:mock@localhost:5432/mock',
         'REDIS_URL': 'redis://localhost:6379/0',
         'CLICKHOUSE_URL': 'clickhouse://default@localhost:8123/netra_dev',
@@ -159,10 +159,10 @@ class TestRealDevLauncherer:
         self.backup_env_vars[key] = None
                                 # Set mock value
         os.environ[key] = value
-        print("formatted_string")
+        print("")
 
         except Exception as e:
-        print("formatted_string")
+        print("")
 
     def restore_test_environment(self):
         """Restore original environment configuration."""
@@ -191,7 +191,7 @@ class TestRealDevLauncherer:
         print("Restored original configuration")
 
         except Exception as e:
-        print("formatted_string")
+        print("")
 
     def cleanup_processes(self):
         """Clean up all started processes and launcher instance."""
@@ -201,7 +201,7 @@ class TestRealDevLauncherer:
         print("Cleaning up launcher instance...")
         self.launcher_instance._graceful_shutdown()
         except Exception as e:
-        print("formatted_string")
+        print("")
         finally:
         self.launcher_instance = None
 
@@ -222,7 +222,7 @@ class TestRealDevLauncherer:
         process.kill()
         process.wait()
         except Exception as e:
-        print("formatted_string")
+        print("")
 
         self.started_processes.clear()
 
@@ -279,7 +279,7 @@ class TestDevLauncherRealStartup:
         of the dev launcher to start the entire system.
         '''
         pass
-        print(" )
+        print("")
         === STARTING REAL DEV LAUNCHER STARTUP TEST ===")
 
         # Verify ports are available before starting
@@ -300,21 +300,21 @@ class TestDevLauncherRealStartup:
         if healthy_count == 0:
             # If no services are healthy, fail the test
         services_status = {k: v for k, v in health_results.items()}
-        assert False, "formatted_string"
+        assert False, ""
 
             # Report on service health
         for service, result in health_results.items():
         if result.get("healthy", False):
-        print("formatted_string")
+        print("")
         else:
-        print("formatted_string")
+        print("")
 
-        print("formatted_string")
+        print("")
 
                         # Print detailed results for healthy services
         for service in ["auth", "backend", "frontend"]:
         if service in health_results and health_results[service].get("healthy", False):
-        print("formatted_string")
+        print("")
 
     async def _verify_ports_available(self, tester: RealDevLauncherTester):
         """Verify required ports are available before starting."""
@@ -327,7 +327,7 @@ class TestDevLauncherRealStartup:
 
             # Re-check availability
         if not tester.is_port_available(port):
-        pytest.skip("formatted_string")
+        pytest.skip("")
 
     async def _attempt_port_cleanup(self, port: int):
         """Attempt to clean up port by killing process using it."""
@@ -335,7 +335,7 @@ class TestDevLauncherRealStartup:
         try:
         if sys.platform == "win32":
             # Windows: Use netstat and taskkill
-        cmd = "formatted_string"
+        cmd = ""
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         if result.stdout:
                 Extract PID from netstat output
@@ -346,18 +346,18 @@ class TestDevLauncherRealStartup:
         parts = line.split()
         if len(parts) > 4:
         pid = parts[-1]
-        subprocess.run("formatted_string", shell=True)
+        subprocess.run("", shell=True)
         break
         else:
                                 # Unix: Use lsof and kill
-        cmd = "formatted_string"
+        cmd = ""
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         if result.stdout:
         pid = result.stdout.strip()
         if pid.isdigit():
-        subprocess.run("formatted_string", shell=True)
+        subprocess.run("", shell=True)
         except Exception as e:
-        print("formatted_string")
+        print("")
 
         async def _start_real_dev_launcher( )
         self, tester: RealDevLauncherTester, config: LauncherConfig
@@ -377,7 +377,7 @@ class TestDevLauncherRealStartup:
         await asyncio.sleep(0)
         return await launcher.run()
         except Exception as e:
-        print("formatted_string")
+        print("")
         return 1
 
             # Create launcher task
@@ -434,11 +434,11 @@ class TestDevLauncherRealStartup:
         if result == 0:  # Success
         return await self._verify_ports_bound(tester)
         else:
-        print("formatted_string")
+        print("")
         return False
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         import traceback
         traceback.print_exc()
         return False
@@ -475,9 +475,9 @@ class TestDevLauncherRealStartup:
 
         if is_bound:
         bound_ports += 1
-        print("formatted_string")
+        print("")
         else:
-        print("formatted_string")
+        print("")
 
                 # For this test, we accept partial success as the main goal is testing the launcher sequence
                 # The launcher should at least successfully go through its startup process
@@ -485,7 +485,7 @@ class TestDevLauncherRealStartup:
         print(" FAIL:  No services bound to ports - launcher startup failed")
         return False
         elif bound_ports >= 1:
-        print("formatted_string")
+        print("")
         return True
         else:
         return False
@@ -502,15 +502,15 @@ class TestDevLauncherRealStartup:
 
         # First verify port is bound
         if tester.is_port_available(port):
-        health_results[service] = { )
+        health_results[service] = { }
         "service": service,
         "healthy": False,
-        "error": "formatted_string"
+        "error": ""
             
-        print("formatted_string")
+        print("")
         continue
 
-        print("formatted_string")
+        print("")
 
             # Wait a moment for service to fully initialize
         await asyncio.sleep(2)
@@ -528,7 +528,7 @@ class TestDevLauncherRealStartup:
         Business Value: Prevents cascade failures that could lose customers
         '''
         pass
-        print(" )
+        print("")
         === TESTING SERVICE STARTUP ORDER ===")
 
                 # Check if critical ports are already in use
@@ -538,7 +538,7 @@ class TestDevLauncherRealStartup:
         critical_ports_in_use.append((service, port))
 
         if len(critical_ports_in_use) >= 2:
-        pytest.skip("formatted_string")
+        pytest.skip("")
 
                             # Track service startup timing
         startup_times = {}
@@ -572,11 +572,11 @@ class TestDevLauncherRealStartup:
                     # Verify startup order (Auth should start first, then Backend)
         if len(startup_times) >= 2:
         services_by_time = sorted(startup_times.items(), key=lambda x: None x[1])
-        print("formatted_string")
+        print("")
 
                         # Auth should be among the first services to start
         first_service = services_by_time[0][0]
-        assert first_service in ["auth", "backend"], "formatted_string"
+        assert first_service in ["auth", "backend"], ""
 
         print(" PASS:  Service startup order validation passed")
 
@@ -589,7 +589,7 @@ class TestDevLauncherRealStartup:
         Business Value: Ensures monitoring systems can detect service health
         '''
         pass
-        print(" )
+        print("")
         === TESTING HEALTH ENDPOINT RESPONSES ===")
 
                             # Start services
@@ -611,11 +611,11 @@ class TestDevLauncherRealStartup:
         health_result = launcher_tester.check_health_endpoint(service)
 
                                 # Validate health response structure
-        assert health_result["healthy"], "formatted_string"
-        assert health_result["status_code"] in [200, 201], "formatted_string"
-        assert health_result["response_time_ms"] < 10000, "formatted_string"
+        assert health_result["healthy"], ""
+        assert health_result["status_code"] in [200, 201], ""
+        assert health_result["response_time_ms"] < 10000, ""
 
-        print("formatted_string")
+        print("")
 
         print(" PASS:  Health endpoint response validation passed")
 

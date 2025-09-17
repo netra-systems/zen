@@ -33,7 +33,7 @@ CRITICAL COVERAGE REQUIREMENTS:
 import asyncio
 import pytest
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from typing import Dict, List, Set, Any, Optional
 import logging
@@ -42,7 +42,7 @@ import gc
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 # SSOT imports - Issue #824 remediation
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.canonical_imports import (
     ConnectionLifecycleManager,
     FactoryInitializationError,
@@ -60,7 +60,7 @@ from netra_backend.app.monitoring.websocket_metrics import (
     ManagerMetrics
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 
 
@@ -447,7 +447,7 @@ class ConnectionLifecycleManagerComprehensiveTests(SSotAsyncTestCase):
         # Verify health timestamp
         health_time = self.lifecycle_manager._connection_health[connection.connection_id]
         assert isinstance(health_time, datetime)
-        assert (datetime.utcnow() - health_time).total_seconds() < 1  # Recent
+        assert (datetime.now(UTC) - health_time).total_seconds() < 1  # Recent
 
 
 class WebSocketFactorySecurityIsolationTests(SSotAsyncTestCase):

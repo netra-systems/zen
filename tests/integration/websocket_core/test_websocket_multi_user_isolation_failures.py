@@ -112,7 +112,7 @@ class WebSocketMultiUserIsolationFailuresTests(SSotAsyncTestCase, unittest.TestC
         websockets_by_user = {}
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             # Create WebSocket managers for each user
             for user in users:
@@ -248,7 +248,7 @@ class WebSocketMultiUserIsolationFailuresTests(SSotAsyncTestCase, unittest.TestC
         connection_pools = {}
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             # Create managers and examine their connection pools
             for user in users:
@@ -318,7 +318,7 @@ class WebSocketMultiUserIsolationFailuresTests(SSotAsyncTestCase, unittest.TestC
         managers_created = []
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             # Create many manager instances (simulating fragmentation load)
             for i in range(20):
@@ -419,7 +419,7 @@ class WebSocketEnterpriseComplianceFailuresTests(SSotAsyncTestCase, unittest.Tes
         ]
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             phi_tracking = {}  # Track Protected Health Information
 
@@ -538,7 +538,7 @@ class WebSocketEnterpriseComplianceFailuresTests(SSotAsyncTestCase, unittest.Tes
         ]
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             financial_tracking = {}
 

@@ -70,6 +70,7 @@ def fix_websocket_imports_and_types(file_path: str) -> bool:
     WEBSOCKETS_AVAILABLE = True
 except ImportError:
     WEBSOCKETS_AVAILABLE = False
+    WebSocketServerProtocol = None
     WebSocketServerProtocol = None''',
             content,
             flags=re.MULTILINE

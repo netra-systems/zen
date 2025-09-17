@@ -32,12 +32,12 @@ class TestSyntaxFix:
         """Create test FastAPI app."""
         app = FastAPI()
 
-        @pytest.fixture
+        # @pytest.fixture
     async def test_endpoint():
         await asyncio.sleep(0)
         return {"message": "test"}
 
-        @pytest.fixture
+        # @pytest.fixture
     async def test_options():
         await asyncio.sleep(0)
         return Response(status_code=200)
@@ -49,13 +49,13 @@ class TestSyntaxFix:
         pass
         app = FastAPI()
 
-        @pytest.fixture
+        # @pytest.fixture
     async def test_endpoint():
         pass
         await asyncio.sleep(0)
         return {"message": "test"}
 
-        @pytest.fixture
+        # @pytest.fixture
     async def test_options():
         pass
         await asyncio.sleep(0)
@@ -70,7 +70,7 @@ class TestSyntaxFix:
         # Register test services
         discovery.write_backend_info(8000)
         discovery.write_frontend_info(3000)
-        discovery.write_auth_info({ ))
+        discovery.write_auth_info({ })
         'port': 8081,
         'url': 'http://localhost:8081',
         'api_url': 'http://localhost:8081/api'

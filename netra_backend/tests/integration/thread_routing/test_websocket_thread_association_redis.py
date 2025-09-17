@@ -25,7 +25,7 @@ import uuid
 import pytest
 import json
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Dict, Any, List, Optional, Set, Tuple
 from unittest.mock import patch
 from collections import defaultdict
@@ -48,7 +48,7 @@ def ensure_session_id(value: str) -> SessionID:
     return SessionID(value)
 
 # WebSocket and thread routing components
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
 # Helper function for tests
 def generate_websocket_id() -> str:
@@ -138,7 +138,7 @@ class WebSocketThreadAssociationRedisTests(BaseIntegrationTest):
                     "thread_id": str(thread_id),
                     "session_id": user_data["session_id"],
                     "auth_token_hash": hashlib.sha256(user_data["access_token"].encode()).hexdigest()[:16],
-                    "connected_at": datetime.utcnow().isoformat(),
+                    "connected_at": datetime.now(UTC).isoformat(),
                     "connection_state": ConnectionState.CONNECTED.value,
                     "user_context": user_context.dict(),
                     "precision_test": True
@@ -343,7 +343,7 @@ class WebSocketThreadAssociationRedisTests(BaseIntegrationTest):
                 "thread_id": str(thread_id),
                 "session_id": user_data["session_id"],
                 "auth_token_hash": hashlib.sha256(user_data["access_token"].encode()).hexdigest()[:16],
-                "updated_at": datetime.utcnow().isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
                 "connection_state": ConnectionState.CONNECTED.value,
                 "switch_index": switch_index,
                 "user_context": user_context.dict(),
@@ -391,7 +391,7 @@ class WebSocketThreadAssociationRedisTests(BaseIntegrationTest):
                 "from_thread": str(current_thread) if i > 0 else None,
                 "to_thread": str(target_thread),
                 "duration_ms": switch_duration * 1000,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "auth_context_preserved": True
             }
             switch_log.append(switch_record)
@@ -577,7 +577,7 @@ class WebSocketThreadAssociationRedisTests(BaseIntegrationTest):
                         "thread_id": str(thread_id),
                         "session_id": user_data["session_id"],
                         "auth_token_hash": hashlib.sha256(user_data["access_token"].encode()).hexdigest()[:16],
-                        "connected_at": datetime.utcnow().isoformat(),
+                        "connected_at": datetime.now(UTC).isoformat(),
                         "connection_state": ConnectionState.CONNECTING.value,
                         "concurrent_test": True,
                         "operation_id": operation["operation_id"]
@@ -595,7 +595,7 @@ class WebSocketThreadAssociationRedisTests(BaseIntegrationTest):
                     # Update connection state
                     connection_key = f"websocket:connection:{websocket_id}"
                     await redis_client.hset(connection_key, "connection_state", ConnectionState.CONNECTED.value)
-                    await redis_client.hset(connection_key, "last_activity", datetime.utcnow().isoformat())
+                    await redis_client.hset(connection_key, "last_activity", datetime.now(UTC).isoformat())
                     
                 elif op_type == "message":
                     # Simulate message routing operation
@@ -605,7 +605,7 @@ class WebSocketThreadAssociationRedisTests(BaseIntegrationTest):
                         "thread_id": str(thread_id),
                         "user_id": str(user_id),
                         "content": f"Concurrent test message from operation {operation['operation_id']}",
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(UTC).isoformat()
                     }
                     
                     # Store message routing info
@@ -804,7 +804,7 @@ class WebSocketThreadAssociationRedisTests(BaseIntegrationTest):
                     "thread_id": str(thread_id),
                     "session_id": user_data["session_id"],
                     "auth_token_hash": hashlib.sha256(user_data["access_token"].encode()).hexdigest()[:16],
-                    "connected_at": datetime.utcnow().isoformat(),
+                    "connected_at": datetime.now(UTC).isoformat(),
                     "connection_state": ConnectionState.CONNECTING.value,
                     "lifecycle_test": True,
                     "lifecycle_index": lifecycle_index
@@ -824,7 +824,7 @@ class WebSocketThreadAssociationRedisTests(BaseIntegrationTest):
                 
                 # Phase 2: Active connection with message activity
                 await redis_client.hset(connection_key, "connection_state", ConnectionState.CONNECTED.value)
-                await redis_client.hset(connection_key, "last_activity", datetime.utcnow().isoformat())
+                await redis_client.hset(connection_key, "last_activity", datetime.now(UTC).isoformat())
                 lifecycle_log.append("connected")
                 
                 # Simulate message activity
@@ -833,7 +833,7 @@ class WebSocketThreadAssociationRedisTests(BaseIntegrationTest):
                         "message_id": str(uuid.uuid4()),
                         "websocket_id": str(websocket_id),
                         "content": f"Lifecycle message {msg_idx}",
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(UTC).isoformat()
                     }
                     
                     message_key = f"websocket:pending_message:{websocket_id}"
@@ -847,7 +847,7 @@ class WebSocketThreadAssociationRedisTests(BaseIntegrationTest):
                 
                 # Phase 3: Disconnection initiated
                 await redis_client.hset(connection_key, "connection_state", ConnectionState.DISCONNECTING.value)
-                await redis_client.hset(connection_key, "disconnect_initiated_at", datetime.utcnow().isoformat())
+                await redis_client.hset(connection_key, "disconnect_initiated_at", datetime.now(UTC).isoformat())
                 lifecycle_log.append("disconnecting")
                 
                 # Phase 4: Complete cleanup
@@ -859,7 +859,7 @@ class WebSocketThreadAssociationRedisTests(BaseIntegrationTest):
                 
                 # Clean up connection record
                 pipe.hset(connection_key, "connection_state", ConnectionState.DISCONNECTED.value)
-                pipe.hset(connection_key, "disconnected_at", datetime.utcnow().isoformat())
+                pipe.hset(connection_key, "disconnected_at", datetime.now(UTC).isoformat())
                 pipe.expire(connection_key, 60)  # Keep for 1 minute for audit, then auto-delete
                 
                 # Clean up message queues

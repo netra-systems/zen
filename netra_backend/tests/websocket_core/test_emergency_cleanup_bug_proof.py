@@ -18,7 +18,7 @@ from datetime import datetime
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Core WebSocket components
-from netra_backend.app.websocket_core.websocket_manager import MAX_CONNECTIONS_PER_USER
+from netra_backend.app.websocket_core.unified_manager import MAX_CONNECTIONS_PER_USER
 from shared.logging.unified_logging_ssot import get_logger
 
 logger = get_logger(__name__)

@@ -3,13 +3,13 @@ Auth debug helpers for diagnosing login failures in staging.
 Provides comprehensive logging and error analysis for auth service communication.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Dict, Any, Optional
 import httpx
 from fastapi import HTTPException
 from shared.isolated_environment import get_env
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class AuthServiceDebugger:

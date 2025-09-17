@@ -35,7 +35,7 @@ import pytest
 import time
 import unittest
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -190,7 +190,7 @@ class AgentExecutionCoreGoldenPathTests(SSotAsyncTestCase, unittest.TestCase):
             state_history = []
 
             def track_state_change(old_state, new_state):
-                state_history.append((old_state, new_state, datetime.utcnow()))
+                state_history.append((old_state, new_state, datetime.now(UTC)))
             from netra_backend.app.schemas.agent import SubAgentLifecycle
             original_set_state = supervisor.set_state
 

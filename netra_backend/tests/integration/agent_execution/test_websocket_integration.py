@@ -42,7 +42,7 @@ from netra_backend.app.services.user_execution_context import (
 from netra_backend.app.services.agent_websocket_bridge import (
     AgentWebSocketBridge, create_agent_websocket_bridge
 )
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.logging_config import central_logger
 
@@ -567,7 +567,7 @@ class WebSocketIntegrationTests(BaseAgentExecutionTest):
                     logger.debug(f"Received WebSocket message: {parsed_message.get('type', 'unknown')}")
                 except json.JSONDecodeError:
                     logger.warning(f"Failed to parse WebSocket message: {message}")
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             logger.info("WebSocket connection closed")
         except Exception as e:
             logger.error(f"WebSocket listener error: {e}")

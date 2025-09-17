@@ -21,11 +21,11 @@ class AuthServicePortValidator:
     def __init__(self):
         pass
         self.correct_port = 8081  # Port configured in dev launcher
-        self.auth_url = "formatted_string"
+        self.auth_url = ""
 
     async def validate_auth_service_accessibility(self) -> Dict[str, Any]:
         """Test that auth service is accessible on the correct port."""
-        result = { )
+        result = { }
         "port": self.correct_port,
         "accessible": False,
         "health_status": None,
@@ -54,20 +54,20 @@ class AuthServicePortValidator:
         result["verified_auth_service"] = False
         result["actual_service"] = service_name
         else:
-        result["error"] = "formatted_string"
+        result["error"] = ""
 
         except httpx.ConnectError:
-        result["error"] = "formatted_string"
+        result["error"] = ""
         except httpx.TimeoutException:
-        result["error"] = "formatted_string"
+        result["error"] = ""
         except Exception as e:
-        result["error"] = "formatted_string"
+        result["error"] = ""
 
         return result
 
     async def validate_auth_endpoints(self) -> Dict[str, Any]:
         """Validate that key auth endpoints are available."""
-        endpoints = { )
+        endpoints = { }
         "/health": "Health check endpoint",
         "/": "Root endpoint",
         "/oauth/google": "Google OAuth endpoint",
@@ -78,7 +78,7 @@ class AuthServicePortValidator:
 
         async with httpx.AsyncClient(timeout=5.0) as client:
         for endpoint, description in endpoints.items():
-        endpoint_result = { )
+        endpoint_result = { }
         "description": description,
         "accessible": False,
         "status_code": None,
@@ -122,26 +122,26 @@ result = await validator.validate_auth_service_accessibility()
                                     # Print results for debugging
 print(f" )
 === AUTH SERVICE PORT VALIDATION ===")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string" if result['response_time_ms'] else "N/A")
+print("")
+print("")
+print("")
+print("" if result['response_time_ms'] else "N/A")
 
 if result['error']:
-print("formatted_string")
+    print("")
 
                                         # Validate auth service is accessible
-assert result['accessible'], "formatted_string"
+assert result['accessible'], ""
 
                                         # Validate health endpoint responds successfully
-assert result['health_status'] == 200, "formatted_string"
+assert result['health_status'] == 200, ""
 
                                         # Validate response time is reasonable (under 5 seconds)
-assert result['response_time_ms'] < 5000, "formatted_string"
+assert result['response_time_ms'] < 5000, ""
 
                                         # If we can verify it's the auth service, do so
 if 'verified_auth_service' in result:
-assert result['verified_auth_service'], "formatted_string"
+assert result['verified_auth_service'], ""
 
 
 @pytest.mark.asyncio
@@ -160,19 +160,19 @@ print(f" )
 === AUTH SERVICE ENDPOINTS ===")
 for endpoint, result in results.items():
 status = " PASS: " if result['accessible'] else " FAIL: "
-print("formatted_string")
+print("")
 if result['error']:
-print("formatted_string")
+    print("")
 
                                                         # Health endpoint must be accessible
 health_result = results.get('/health')
-assert health_result['accessible'], "formatted_string"
-assert health_result['status_code'] == 200, "formatted_string"
+assert health_result['accessible'], ""
+assert health_result['status_code'] == 200, ""
 
                                                         # Root endpoint should be accessible
 root_result = results.get('/')
-assert root_result['accessible'], "formatted_string"
-assert root_result['status_code'] == 200, "formatted_string"
+assert root_result['accessible'], ""
+assert root_result['status_code'] == 200, ""
 
                                                         # OAuth endpoints should be accessible (may redirect, which is expected)
 oauth_google = results.get('/oauth/google')
@@ -180,7 +180,7 @@ if oauth_google['accessible']:
                                                             # OAuth endpoints typically redirect, so 200 or 3xx are acceptable
 acceptable_codes = [200, 302, 307, 308, 400]  # 400 might occur if no proper OAuth request
 assert oauth_google['status_code'] in acceptable_codes, \
-"formatted_string"
+""
 
 
 @pytest.mark.asyncio
@@ -217,20 +217,20 @@ min_response_time = min(request_times)
 
 print(f" )
 === AUTH SERVICE TIMING ANALYSIS ===")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
 
                                                                         # Validate timing expectations for WebSocket handshakes
                                                                         # WebSocket auth should complete within 2 seconds for good UX
-assert avg_response_time < 2000, "formatted_string"
-assert max_response_time < 5000, "formatted_string"
+assert avg_response_time < 2000, ""
+assert max_response_time < 5000, ""
 
                                                                         # Consistency check - responses should be reasonably consistent
 if len(request_times) > 2:
 response_range = max_response_time - min_response_time
-assert response_range < 3000, "formatted_string"
+assert response_range < 3000, ""
 
 
 if __name__ == "__main__":
@@ -240,12 +240,12 @@ validator = AuthServicePortValidator()
 
 print("=== AUTH SERVICE PORT VALIDATION ===")
 result = await validator.validate_auth_service_accessibility()
-print("formatted_string")
+print("")
 
-print(" )
+print("")
 === AUTH SERVICE ENDPOINTS ===")
 endpoints = await validator.validate_auth_endpoints()
 for endpoint, result in endpoints.items():
-print("formatted_string")
+    print("")
 
 asyncio.run(main())

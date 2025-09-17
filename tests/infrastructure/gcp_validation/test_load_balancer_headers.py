@@ -121,7 +121,7 @@ class GCPLoadBalancerHeaderForwardingTests(SSotBaseTestCase):
         try:
             async with websockets.connect(websocket_url, extra_headers=auth_headers, timeout=10.0) as websocket:
                 self.fail('WebSocket connection succeeded - headers may be forwarded correctly')
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             if e.code == 1011:
                 self.logger.info(f'✅ WebSocket 1011 error confirms header stripping: {e}')
                 self.assertTrue(True, '1011 error confirms authentication headers are stripped')

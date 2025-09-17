@@ -524,7 +524,7 @@ class WebSocketEventSLAComplianceTests(BaseE2ETest):
                     # Continue waiting for more events
                     continue
                     
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             self.logger.warning("WebSocket connection closed during event collection")
         
         return events

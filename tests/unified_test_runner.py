@@ -2929,13 +2929,27 @@ class UnifiedTestRunner:
 
         # Execute tests with timeout
         start_time = time.time()
-        # Set timeout based on service type and category
-        if service == "frontend":
-            timeout_seconds = 120  # 2 minutes for frontend tests (mostly unit tests)
-        elif category_name == "unit":
-            timeout_seconds = 180  # 3 minutes for unit tests specifically
+        # Set timeout based on service type, category, and environment (Issue #818 fix)
+        if self._detect_staging_environment(args):
+            # Staging environment needs longer timeouts due to network latency and GCP constraints
+            if service == "frontend":
+                timeout_seconds = 300  # 5min for staging frontend tests
+            elif category_name == "unit":
+                timeout_seconds = 300  # 5min for staging unit tests
+            elif category_name in ["websocket", "agent", "websocket_events", "agent_execution"]:
+                timeout_seconds = 900  # 15min for staging websocket/agent tests
+            else:
+                timeout_seconds = 600  # 10min for staging other tests
         else:
-            timeout_seconds = 600  # 10 minutes timeout for integration tests
+            # Local environment timeouts
+            if service == "frontend":
+                timeout_seconds = 120  # 2 minutes for frontend tests (mostly unit tests)
+            elif category_name == "unit":
+                timeout_seconds = 180  # 3 minutes for unit tests specifically
+            elif category_name in ["websocket", "agent", "websocket_events", "agent_execution"]:
+                timeout_seconds = 600  # 10min for local websocket/agent tests
+            else:
+                timeout_seconds = 600  # 10 minutes timeout for integration tests
         try:
             # Fix stdout flush issue with Windows-safe flushing
             import sys
@@ -3464,12 +3478,16 @@ class UnifiedTestRunner:
                 cmd_parts.extend(["--timeout=300", "--timeout-method=thread"])  # 5min for staging unit tests
             elif category_name in ["e2e", "integration", "e2e_critical", "e2e_full"]:
                 cmd_parts.extend(["--timeout=900", "--timeout-method=thread"])  # 15min for staging e2e tests
+            elif category_name in ["websocket", "agent", "websocket_events", "agent_execution"]:
+                cmd_parts.extend(["--timeout=900", "--timeout-method=thread"])  # 15min for staging websocket/agent tests
             else:
-                cmd_parts.extend(["--timeout=600", "--timeout-method=thread"])  # 10min for staging integration tests
+                cmd_parts.extend(["--timeout=600", "--timeout-method=thread"])  # 10min for staging other tests
         elif category_name == "unit":
             cmd_parts.extend(["--timeout=180", "--timeout-method=thread"])  # 3min for local unit tests
         elif category_name in ["e2e", "integration", "e2e_critical", "e2e_full"]:
             cmd_parts.extend(["--timeout=600", "--timeout-method=thread"])   # 10min for local e2e tests
+        elif category_name in ["websocket", "agent", "websocket_events", "agent_execution"]:
+            cmd_parts.extend(["--timeout=600", "--timeout-method=thread"])   # 10min for local websocket/agent tests
         elif category_name == "frontend":
             cmd_parts.extend(["--timeout=120", "--timeout-method=thread"])   # 2min for frontend tests
         else:
@@ -4488,10 +4506,24 @@ def main():
         help="Number of parallel workers (default: 4)"
     )
     
+    # PHASE 2: Enhanced fast-fail options for flexible failure handling
     parser.add_argument(
         "--fast-fail",
         action="store_true",
-        help="Stop on first test failure"
+        help="Stop on first test failure (legacy compatibility)"
+    )
+
+    parser.add_argument(
+        "--no-fast-fail",
+        action="store_true",
+        help="Disable fast-fail behavior entirely - run all tests regardless of failures"
+    )
+
+    parser.add_argument(
+        "--maxfail",
+        type=int,
+        default=10,
+        help="Stop after N failures (default: 10, range: 0-100). Use 0 to disable fast-fail."
     )
     
     parser.add_argument(
@@ -4934,7 +4966,23 @@ def main():
         )
     
     args = parser.parse_args()
-    
+
+    # PHASE 2: Validate fast-fail configuration
+    if hasattr(args, 'maxfail') and args.maxfail is not None:
+        if args.maxfail < 0 or args.maxfail > 100:
+            print("[ERROR] --maxfail must be between 0 and 100")
+            return 1
+        # Normalize fast-fail logic
+        if args.maxfail == 0:
+            args.no_fast_fail = True
+        elif args.maxfail == 1:
+            args.fast_fail = True
+
+    # Handle conflicting fast-fail options
+    if getattr(args, 'fast_fail', False) and getattr(args, 'no_fast_fail', False):
+        print("[ERROR] Cannot specify both --fast-fail and --no-fast-fail")
+        return 1
+
     # Set Docker pull policy in environment for UnifiedDockerManager
     # This prevents Docker Hub rate limit issues by controlling when images are pulled
     if hasattr(args, 'docker_pull_policy'):

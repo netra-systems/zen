@@ -15,7 +15,7 @@ import pytest
 import asyncio
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, AsyncIterator, List
 from contextlib import asynccontextmanager
 
@@ -30,7 +30,7 @@ from shared.types.core_types import (
 )
 
 # SSOT WebSocket and ID Management
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 # SSOT Real Services Test Management
@@ -91,7 +91,7 @@ class WebSocketConnectionEstablishmentApplicationStateIntegrationTests(WebSocket
             connection_id=ensure_connection_id(connection_id),
             user_id=user_id,
             websocket=real_websocket_connection,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={
                 "connection_type": "test_establishment",
                 "client_info": {"browser": "integration_test", "version": "1.0"},
@@ -218,7 +218,7 @@ class WebSocketConnectionEstablishmentApplicationStateIntegrationTests(WebSocket
                 connection_id=ensure_connection_id(connection_id),
                 user_id=ensure_user_id(user_id),
                 websocket=real_websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={
                     "connection_type": "concurrent_test",
                     "connection_index": connection_index,
@@ -233,7 +233,7 @@ class WebSocketConnectionEstablishmentApplicationStateIntegrationTests(WebSocket
             # Simulate concurrent state updates in database
             await real_services_fixture["postgres"].execute(
                 "UPDATE auth.users SET updated_at = $1 WHERE id = $2",
-                datetime.utcnow(),
+                datetime.now(UTC),
                 user_id
             )
             
@@ -241,7 +241,7 @@ class WebSocketConnectionEstablishmentApplicationStateIntegrationTests(WebSocket
             await real_redis_fixture.set(
                 f"user_activity:{user_id}",
                 json.dumps({
-                    "last_activity": datetime.utcnow().isoformat(),
+                    "last_activity": datetime.now(UTC).isoformat(),
                     "connection_count": len(websocket_manager.get_user_connections(ensure_user_id(user_id))),
                     "connection_index": connection_index
                 }),
@@ -371,7 +371,7 @@ class WebSocketConnectionEstablishmentApplicationStateIntegrationTests(WebSocket
             connection_id=ensure_connection_id(connection_id),
             user_id=user_id,
             websocket=failing_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={
                 "connection_type": "failure_test",
                 "session_id": session_data['session_key'],
@@ -389,7 +389,7 @@ class WebSocketConnectionEstablishmentApplicationStateIntegrationTests(WebSocket
         test_message = {
             "type": "test_message",
             "data": {"message": "This should fail"},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         # This should handle the failure gracefully and clean up the connection
@@ -429,7 +429,7 @@ class WebSocketConnectionEstablishmentApplicationStateIntegrationTests(WebSocket
             connection_id=ensure_connection_id(recovery_connection_id),
             user_id=user_id,
             websocket=working_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={
                 "connection_type": "recovery_test",
                 "session_id": session_data['session_key'],
@@ -447,7 +447,7 @@ class WebSocketConnectionEstablishmentApplicationStateIntegrationTests(WebSocket
         recovery_message = {
             "type": "recovery_test",
             "data": {"message": "Recovery successful"},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         await websocket_manager.send_to_user(user_id, recovery_message)
@@ -534,12 +534,12 @@ class WebSocketConnectionEstablishmentApplicationStateIntegrationTests(WebSocket
         await connection.send_json({
             'type': 'connection_established',
             'user_id': str(user_id),
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': datetime.now(UTC).isoformat()
         })
         await connection.send_json({
             'type': 'application_state_initialized',
             'user_id': str(user_id),
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': datetime.now(UTC).isoformat()
         })
         
         return connection

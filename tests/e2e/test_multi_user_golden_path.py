@@ -34,6 +34,7 @@ import json
 import time
 import pytest
 import websockets
+from websockets import ClientConnection as WebSocketClientProtocol
 import ssl
 from typing import Dict, List, Optional, Any, Set
 from concurrent.futures import ThreadPoolExecutor
@@ -486,7 +487,7 @@ class MultiUserGoldenPathTests(SSotAsyncTestCase):
 
     async def _send_and_collect_isolation_response(
         self, 
-        connection: websockets.WebSocketClientProtocol,
+        connection: websockets.ClientConnection,
         message: Dict[str, Any],
         expected_marker: str
     ) -> Dict[str, Any]:
@@ -581,7 +582,7 @@ class MultiUserGoldenPathTests(SSotAsyncTestCase):
     async def _establish_user_websocket_connection(
         self, 
         user: Dict[str, Any]
-    ) -> Optional[websockets.WebSocketClientProtocol]:
+    ) -> Optional[websockets.ClientConnection]:
         """Establish WebSocket connection for specific user"""
         try:
             subprotocols = ['jwt-auth', f"jwt.{user['encoded_token']}"]

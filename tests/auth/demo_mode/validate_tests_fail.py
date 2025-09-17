@@ -77,12 +77,12 @@ def run_quick_validation():
     print("\nTest 4: Extended JWT Validation")
     try:
         import jwt
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, UTC
         
         # Create 25-hour JWT token
         payload = {
             "sub": "demo_user",
-            "exp": int((datetime.utcnow() + timedelta(hours=25)).timestamp())
+            "exp": int((datetime.now(UTC) + timedelta(hours=25)).timestamp())
         }
         
         token = jwt.encode(payload, "test_secret", algorithm="HS256")

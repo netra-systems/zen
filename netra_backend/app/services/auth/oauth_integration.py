@@ -11,15 +11,15 @@ Business Value Justification (BVJ):
 - Strategic Impact: Critical for enterprise market penetration and compliance
 """
 
-import logging
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 from enum import Enum
 import asyncio
+from shared.logging.unified_logging_ssot import get_logger
 
 # Note: OAuth operations integrate with auth service through auth_client when needed
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class OAuthProvider(Enum):

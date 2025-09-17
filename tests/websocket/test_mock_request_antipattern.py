@@ -18,7 +18,7 @@ import json
 import os
 import pytest
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Optional, Dict, Any
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
@@ -52,7 +52,7 @@ class WebSocketAntiPatternEliminationTests(SSotBaseTestCase):
         self.auth_config = E2EAuthConfig()
         self.auth_helper = E2EAuthHelper(config=self.auth_config)
         self.ws_auth_helper = E2EWebSocketAuthHelper(config=self.auth_config)
-        self.test_user_id = f'test_user_{int(datetime.utcnow().timestamp())}'
+        self.test_user_id = f'test_user_{int(datetime.now(UTC).timestamp())}'
         self.test_thread_id = f'test_thread_{uuid.uuid4().hex[:8]}'
         self.test_run_id = f'test_run_{uuid.uuid4().hex[:8]}'
 
@@ -157,7 +157,7 @@ class WebSocketAntiPatternEliminationTests(SSotBaseTestCase):
         """
         contexts = []
         for i in range(3):
-            user_id = f'user_{i}_{int(datetime.utcnow().timestamp())}'
+            user_id = f'user_{i}_{int(datetime.now(UTC).timestamp())}'
             thread_id = f'thread_{i}_{uuid.uuid4().hex[:8]}'
             run_id = f'run_{i}_{uuid.uuid4().hex[:8]}'
             mock_websocket = self._create_test_websocket()
@@ -197,8 +197,8 @@ class WebSocketAntiPatternEliminationTests(SSotBaseTestCase):
         faulty_websocket = FaultyWebSocket()
         context = WebSocketContext(connection_id='test_conn_faulty', websocket=faulty_websocket, user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
         assert not context.is_active
-        from datetime import timedelta
-        old_time = datetime.utcnow() - timedelta(days=2)
+        from datetime import timedelta, UTC
+        old_time = datetime.now(UTC) - timedelta(days=2)
         old_context = WebSocketContext(connection_id='old_conn', websocket=self._create_test_websocket(), user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id, connected_at=old_time)
         assert old_context.validate_for_message_processing()
 

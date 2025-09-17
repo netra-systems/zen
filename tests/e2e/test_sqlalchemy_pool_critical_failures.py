@@ -278,9 +278,9 @@ class SQLAlchemyPoolCriticalFailuresTests:
                         f"Error should indicate session/database issue. Got: {response_data}"
                     )
             
-            except (websockets.exceptions.ConnectionClosed, 
-                   websockets.exceptions.InvalidStatusCode,
-                   websockets.exceptions.WebSocketException,
+            except (websockets.ConnectionClosed, 
+                   websockets.InvalidStatusCode,
+                   websockets.WebSocketException,
                    OSError) as e:
                 # Connection failure is expected due to session creation failure
                 logger.info(f"WebSocket connection failed as expected: {e}")

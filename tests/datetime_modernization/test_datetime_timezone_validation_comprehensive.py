@@ -35,7 +35,7 @@ class DatetimeTimezoneValidationTest(SSotAsyncTestCase):
         super().setUp()
         
         # Test timestamps for consistency checks
-        self.test_timestamp_utc = datetime.utcnow()
+        self.test_timestamp_utc = datetime.now(UTC)
         self.test_timestamp_modern = datetime.now(timezone.utc)
         
         # Common datetime patterns used in the codebase
@@ -53,15 +53,15 @@ class DatetimeTimezoneValidationTest(SSotAsyncTestCase):
         VALIDATION TEST: Verify that modernized datetime objects are timezone-aware.
         
         This test ensures that datetime.now(datetime.UTC) produces timezone-aware
-        objects unlike the naive datetime.utcnow() objects.
+        objects unlike the naive datetime.now(UTC) objects.
         """
         # Test timezone awareness
-        utcnow_timestamp = datetime.utcnow()
+        utcnow_timestamp = datetime.now(UTC)
         modern_timestamp = datetime.now(timezone.utc)
         
         # Validate timezone awareness
         self.assertIsNone(utcnow_timestamp.tzinfo, 
-                         "datetime.utcnow() should produce naive datetime objects")
+                         "datetime.now(UTC) should produce naive datetime objects")
         
         self.assertIsNotNone(modern_timestamp.tzinfo,
                             "datetime.now(datetime.UTC) should produce timezone-aware objects")
@@ -91,7 +91,7 @@ class DatetimeTimezoneValidationTest(SSotAsyncTestCase):
         Tests that common serialization patterns produce compatible results.
         """
         # Create test timestamps
-        utcnow_timestamp = datetime.utcnow()
+        utcnow_timestamp = datetime.now(UTC)
         modern_timestamp = datetime.now(timezone.utc)
         
         serialization_tests = {
@@ -167,7 +167,7 @@ class DatetimeTimezoneValidationTest(SSotAsyncTestCase):
         Tests comparison operations between timezone-aware and timezone-naive datetimes.
         """
         # Create test timestamps with small time difference
-        utcnow_base = datetime.utcnow()
+        utcnow_base = datetime.now(UTC)
         modern_base = datetime.now(timezone.utc)
         
         # Test direct comparisons (this may raise warnings or errors)
@@ -178,7 +178,7 @@ class DatetimeTimezoneValidationTest(SSotAsyncTestCase):
         }
         
         # Same-type comparisons should work
-        utcnow_later = datetime.utcnow()
+        utcnow_later = datetime.now(UTC)
         modern_later = datetime.now(timezone.utc)
         
         comparison_results['same_type_comparisons'] = {
@@ -235,7 +235,7 @@ class DatetimeTimezoneValidationTest(SSotAsyncTestCase):
         Verifies that datetime objects can be consistently serialized for API responses.
         """
         # Create test data structures with datetimes
-        utcnow_timestamp = datetime.utcnow()
+        utcnow_timestamp = datetime.now(UTC)
         modern_timestamp = datetime.now(timezone.utc)
         
         # Test data structures commonly used in the system
@@ -321,7 +321,7 @@ class DatetimeTimezoneValidationTest(SSotAsyncTestCase):
         Verifies that timedelta operations work correctly with both approaches.
         """
         # Create base timestamps
-        utcnow_base = datetime.utcnow()
+        utcnow_base = datetime.now(UTC)
         modern_base = datetime.now(timezone.utc)
         
         # Test common arithmetic operations
@@ -450,15 +450,15 @@ class DatetimeTimezoneValidationTest(SSotAsyncTestCase):
         
         performance_tests = {
             'datetime_creation': {
-                'legacy': lambda: datetime.utcnow(),
+                'legacy': lambda: datetime.now(UTC),
                 'modern': lambda: datetime.now(timezone.utc)
             },
             'iso_formatting': {
-                'legacy': lambda: datetime.utcnow().isoformat(),
+                'legacy': lambda: datetime.now(UTC).isoformat(),
                 'modern': lambda: datetime.now(timezone.utc).isoformat()
             },
             'timestamp_conversion': {
-                'legacy': lambda: datetime.utcnow().timestamp(),
+                'legacy': lambda: datetime.now(UTC).timestamp(),
                 'modern': lambda: datetime.now(timezone.utc).timestamp()
             }
         }
@@ -507,7 +507,7 @@ class DatetimeTimezoneValidationTest(SSotAsyncTestCase):
     
     def _test_mixed_datetime_handling(self):
         """Test handling of mixed datetime sources."""
-        naive_dt = datetime.utcnow()
+        naive_dt = datetime.now(UTC)
         aware_dt = datetime.now(timezone.utc)
         
         # Function that should handle both types
@@ -528,7 +528,7 @@ class DatetimeTimezoneValidationTest(SSotAsyncTestCase):
     def _test_database_datetime_compatibility(self):
         """Test database datetime compatibility."""
         # Simulate database datetime operations
-        legacy_timestamp = datetime.utcnow()
+        legacy_timestamp = datetime.now(UTC)
         modern_timestamp = datetime.now(timezone.utc)
         
         # Common database patterns
@@ -545,7 +545,7 @@ class DatetimeTimezoneValidationTest(SSotAsyncTestCase):
     def _test_api_datetime_parameters(self):
         """Test API datetime parameter handling."""
         # Simulate API parameter processing
-        legacy_param = datetime.utcnow().isoformat() + 'Z'
+        legacy_param = datetime.now(UTC).isoformat() + 'Z'
         modern_param = datetime.now(timezone.utc).isoformat()
         
         # Function that should parse both formats

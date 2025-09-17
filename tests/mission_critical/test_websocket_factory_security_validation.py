@@ -35,7 +35,7 @@ import time
 import weakref
 import gc
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Set, Optional, Any
 import logging
 from shared.isolated_environment import IsolatedEnvironment
@@ -47,7 +47,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
     get_websocket_manager_factory,
     create_websocket_manager
 )
-from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketConnection
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from shared.isolated_environment import get_env
@@ -67,7 +67,7 @@ class SecurityAuditTracker:
     def record_event(self, event_type: str, **kwargs):
         """Record a security event."""
         self.events.append({
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(UTC),
             "event_type": event_type,
             **kwargs
         })
@@ -75,7 +75,7 @@ class SecurityAuditTracker:
     def record_violation(self, violation_type: str, severity: str, **kwargs):
         """Record a security violation."""
         violation = {
-            "timestamp": datetime.utcnow(), 
+            "timestamp": datetime.now(UTC), 
             "violation_type": violation_type,
             "severity": severity,
             **kwargs
@@ -92,7 +92,7 @@ class SecurityAuditTracker:
         memory_info = process.memory_info()
         
         snapshot = {
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(UTC),
             "description": description,
             "rss_mb": memory_info.rss / 1024 / 1024,
             "vms_mb": memory_info.vms / 1024 / 1024,
@@ -245,7 +245,7 @@ class FactoryIsolationTests:
             connection_id=user1_context.websocket_connection_id,
             user_id=user1_context.user_id,
             websocket=mock_websocket,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         
         # Add legitimate connection
@@ -257,7 +257,7 @@ class FactoryIsolationTests:
             connection_id=user2_context.websocket_connection_id,
             user_id=user2_context.user_id,  # Different user!
             websocket=mock_websocket,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         
         # This should raise a security violation
@@ -289,7 +289,7 @@ class FactoryIsolationTests:
                 connection_id=context.websocket_connection_id,
                 user_id=context.user_id,
                 websocket=websocket,
-                connected_at=datetime.utcnow()
+                connected_at=datetime.now(UTC)
             )
             
             await manager.add_connection(connection)
@@ -393,7 +393,7 @@ class ConcurrencySafetyTests:
                 connection_id=context.websocket_connection_id,
                 user_id=context.user_id,
                 websocket=websocket,
-                connected_at=datetime.utcnow()
+                connected_at=datetime.now(UTC)
             )
             
             await manager.add_connection(connection)
@@ -464,7 +464,7 @@ class ConcurrencySafetyTests:
                 connection_id=f"{context.websocket_connection_id}_{i}",
                 user_id=context.user_id,
                 websocket=websocket,
-                connected_at=datetime.utcnow()
+                connected_at=datetime.now(UTC)
             )
             connections.append(connection)
         
@@ -535,7 +535,7 @@ class ResourceManagementTests:
                 connection_id=f"{context.websocket_connection_id}_{i}",
                 user_id=context.user_id,
                 websocket=websocket,
-                connected_at=datetime.utcnow()
+                connected_at=datetime.now(UTC)
             )
             
             await manager.add_connection(connection)
@@ -673,7 +673,7 @@ class ResourceManagementTests:
                     connection_id=unique_context.websocket_connection_id,
                     user_id=unique_context.user_id,
                     websocket=websocket,
-                    connected_at=datetime.utcnow()
+                    connected_at=datetime.now(UTC)
                 )
                 
                 await manager.add_connection(connection)
@@ -746,7 +746,7 @@ class PerformanceScalingTests:
                     connection_id=context.websocket_connection_id,
                     user_id=context.user_id,
                     websocket=websocket,
-                    connected_at=datetime.utcnow()
+                    connected_at=datetime.now(UTC)
                 )
                 
                 await manager.add_connection(connection)
@@ -823,7 +823,7 @@ class PerformanceScalingTests:
                 connection_id=context.websocket_connection_id,
                 user_id=context.user_id,
                 websocket=websocket,
-                connected_at=datetime.utcnow()
+                connected_at=datetime.now(UTC)
             )
             
             await manager.add_connection(connection)
@@ -937,7 +937,7 @@ class SecurityBoundariesTests:
             connection_id=context.websocket_connection_id,
             user_id=context.user_id,
             websocket=legitimate_websocket,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         
         await manager.add_connection(legitimate_connection)
@@ -949,7 +949,7 @@ class SecurityBoundariesTests:
             connection_id="malicious_conn",
             user_id="different_user",  # Wrong user!
             websocket=malicious_websocket,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         
         # Should raise security violation
@@ -988,7 +988,7 @@ class SecurityBoundariesTests:
             connection_id=context.websocket_connection_id,
             user_id=context.user_id,
             websocket=websocket,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         
         await manager.add_connection(connection)
@@ -1060,7 +1060,7 @@ class CompleteSecurityValidationTests:
                 connection_id=context.websocket_connection_id,
                 user_id=context.user_id,
                 websocket=websocket,
-                connected_at=datetime.utcnow()
+                connected_at=datetime.now(UTC)
             )
             
             await manager.add_connection(connection)
@@ -1193,7 +1193,7 @@ class SecurityPerformanceTests:
                 connection_id=f"perf_{id(manager)}",
                 user_id=manager.user_context.user_id,
                 websocket=websocket,
-                connected_at=datetime.utcnow()
+                connected_at=datetime.now(UTC)
             )
             
             await manager.add_connection(connection)

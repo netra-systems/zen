@@ -53,7 +53,7 @@ class HealthConfigurationChaosDetector:
 
     def add_config_conflict(self, conflict_type: str, details: Dict[str, Any]):
         """Add a detected configuration conflict."""
-        self.config_conflicts.append({ ))
+        self.config_conflicts.append({ })
         'type': conflict_type,
         'details': details,
         'timestamp': datetime.now(timezone.utc).isoformat()
@@ -62,7 +62,7 @@ class HealthConfigurationChaosDetector:
     def add_env_inconsistency(self, environment: str, inconsistency: Dict[str, Any]):
         """Add an environment-specific inconsistency."""
         pass
-        self.env_inconsistencies.append({ ))
+        self.env_inconsistencies.append({ })
         'environment': environment,
         'inconsistency': inconsistency,
         'timestamp': datetime.now(timezone.utc).isoformat()
@@ -70,7 +70,7 @@ class HealthConfigurationChaosDetector:
 
     def add_timeout_conflict(self, service: str, conflict: Dict[str, Any]):
         """Add a timeout configuration conflict."""
-        self.timeout_conflicts.append({ ))
+        self.timeout_conflicts.append({ })
         'service': service,
         'conflict': conflict,
         'timestamp': datetime.now(timezone.utc).isoformat()
@@ -89,7 +89,7 @@ class TestHealthRouteConfigurationChaos:
     def backend_app_dev(self):
         """Create backend app with development configuration."""
         pass
-        with patch.dict('os.environ', { ))
+        with patch.dict('os.environ', { })
         'ENVIRONMENT': 'development',
         'SKIP_STARTUP_TASKS': 'true',
         'DATABASE_URL': 'postgresql://test:test@localhost/test',
@@ -101,7 +101,7 @@ class TestHealthRouteConfigurationChaos:
         @pytest.fixture
     def backend_app_staging(self):
         """Create backend app with staging configuration."""
-        with patch.dict('os.environ', { ))
+        with patch.dict('os.environ', { })
         'ENVIRONMENT': 'staging',
         'SKIP_STARTUP_TASKS': 'true',
         'DATABASE_URL': 'postgresql://staging:staging@staging-db/staging',
@@ -115,7 +115,7 @@ class TestHealthRouteConfigurationChaos:
     def backend_app_prod(self):
         """Create backend app with production-like configuration."""
         pass
-        with patch.dict('os.environ', { ))
+        with patch.dict('os.environ', { })
         'ENVIRONMENT': 'production',
         'SKIP_STARTUP_TASKS': 'true',
         'DATABASE_URL': 'postgresql://prod:prod@prod-db/prod',
@@ -131,7 +131,7 @@ class TestHealthRouteConfigurationChaos:
         ):
         """Test that health behavior differs inconsistently across environments - SHOULD FAIL."""
 
-        environments = { )
+        environments = { }
         'development': TestClient(backend_app_dev),
         'staging': TestClient(backend_app_staging),
         'production': TestClient(backend_app_prod)
@@ -146,14 +146,14 @@ class TestHealthRouteConfigurationChaos:
         health_resp = client.get('/health')
         ready_resp = client.get('/ready')
 
-        health_responses[env_name] = { )
+        health_responses[env_name] = { }
         'health_status': health_resp.status_code,
         'health_data': health_resp.json() if health_resp.status_code == 200 else None,
         'ready_status': ready_resp.status_code,
         'ready_data': ready_resp.json() if ready_resp.status_code == 200 else None
                     
         except Exception as e:
-        health_responses[env_name] = { )
+        health_responses[env_name] = { }
         'error': str(e)
                         
 
@@ -166,7 +166,7 @@ class TestHealthRouteConfigurationChaos:
         status_codes[env] = (health_status, ready_status)
 
         if len(set(status_codes.values())) > 1:
-        chaos_detector.add_env_inconsistency('cross-environment', { ))
+        chaos_detector.add_env_inconsistency('cross-environment', { })
         'type': 'inconsistent_status_codes',
         'status_codes': status_codes,
         'issue': 'Same endpoint returns different status codes in different environments'
@@ -180,7 +180,7 @@ class TestHealthRouteConfigurationChaos:
         response_formats[env] = sorted(health_data.keys()) if isinstance(health_data, dict) else None
 
         if len(set(str(fmt) for fmt in response_formats.values() if fmt)) > 1:
-        chaos_detector.add_env_inconsistency('cross-environment', { ))
+        chaos_detector.add_env_inconsistency('cross-environment', { })
         'type': 'inconsistent_response_formats',
         'formats': response_formats,
         'issue': 'Health endpoint response format differs between environments'
@@ -226,14 +226,14 @@ class TestWebSocketConnection:
         ")
         for i, line in enumerate(lines):
         if 'environment' in line.lower() and any(word in line for word in ['if', 'config', 'development', 'staging', 'production']):
-        env_conditionals.append({ ))
+        env_conditionals.append({ })
         'line_number': i + 1,
         'content': line.strip(),
         'context': lines[max(0, i-2):i+3]  # 2 lines before and after
             
 
         if env_conditionals:
-        chaos_detector.add_env_inconsistency('environment-conditional', { ))
+        chaos_detector.add_env_inconsistency('environment-conditional', { })
         'type': 'environment_specific_health_logic',
         'conditionals': env_conditionals,
         'file': 'health.py'
@@ -241,7 +241,7 @@ class TestWebSocketConnection:
 
                 # This should FAIL - we expect environment inconsistencies
         assert len(chaos_detector.env_inconsistencies) == 0, \
-        "formatted_string"
+        ""
 
     async def test_configuration_drift_between_environments(self, chaos_detector):
         """Test that configuration files have drifted between environments - SHOULD FAIL."""
@@ -250,7 +250,7 @@ class TestWebSocketConnection:
         config_drift = []
 
                     # Check for environment-specific configuration files
-        config_locations = [ )
+        config_locations = [ ]
         project_root / 'netra_backend/app/core/configuration.py',
         project_root / 'auth_service/config.py',
         project_root / '.env',
@@ -271,10 +271,10 @@ class TestWebSocketConnection:
         env_configs.extend(config_path.glob('**/*config*'))
         for env_config in env_configs:
         if env_config.is_file():
-        config_contents["formatted_string"] = env_config.read_text()
+        config_contents[""] = env_config.read_text()
 
                                             # Look for health-related configuration drift
-        health_config_patterns = [ )
+        health_config_patterns = [ ]
         r'HEALTH_CHECK_TIMEOUT\s*=\s*(\d+)',
         r'HEALTH_CHECK_STRICT\s*=\s*(\w+)',
         r'DATABASE_HEALTH_CHECK\s*=\s*(\w+)',
@@ -314,7 +314,7 @@ class TestWebSocketConnection:
         unique_values.update(values)
 
         if len(unique_values) > 1:
-        config_drift.append({ ))
+        config_drift.append({ })
         'config_pattern': config_key,
         'different_values': dict(values_by_file),
         'unique_values': list(unique_values)
@@ -343,7 +343,7 @@ class TestWebSocketConnection:
         missing_in.append(env_file)
 
         if missing_in:
-        config_drift.append({ ))
+        config_drift.append({ })
         'type': 'missing_config_in_environments',
         'config': config,
         'missing_in': missing_in,
@@ -354,7 +354,7 @@ class TestWebSocketConnection:
         chaos_detector.add_config_conflict('configuration_drift', drift)
 
                                                                                                                                 # This should FAIL - we expect configuration drift
-        assert len(config_drift) == 0, "formatted_string"
+        assert len(config_drift) == 0, ""
 
     async def test_health_check_timeout_configuration_conflicts(self, chaos_detector):
         """Test that health check timeout configurations conflict - SHOULD FAIL."""
@@ -364,7 +364,7 @@ class TestWebSocketConnection:
         timeout_conflicts = []
 
                                                                                                                                     # Find all timeout configurations across the system
-        timeout_sources = [ )
+        timeout_sources = [ ]
         ('health_routes', project_root / 'netra_backend/app/routes/health.py'),
         ('auth_main', project_root / 'auth_service/main.py'),
         ('configuration', project_root / 'netra_backend/app/core/configuration.py'),
@@ -380,7 +380,7 @@ class TestWebSocketConnection:
 
                                                                                                                                             # Extract various timeout patterns
         import re
-        timeout_patterns = [ )
+        timeout_patterns = [ ]
         ('asyncio_wait_for', r'asyncio\.wait_for[^,]*timeout\s*=\s*(\d+\.?\d*)'),
         ('timeout_param', r'timeout\s*=\s*(\d+\.?\d*)'),
         ('health_timeout', r'health.*timeout[^=]*=\s*(\d+\.?\d*)'),
@@ -420,7 +420,7 @@ class TestWebSocketConnection:
 
                                                                                                                                                                                 # Conflict if timeout values differ by more than 100%
         if max_timeout > min_timeout * 2:
-        timeout_conflicts.append({ ))
+        timeout_conflicts.append({ })
         'timeout_type': timeout_type,
         'min_timeout': min_timeout,
         'max_timeout': max_timeout,
@@ -447,7 +447,7 @@ class TestWebSocketConnection:
         min_launcher = min(launcher_timeouts)
 
         if max_health >= min_launcher:
-        hierarchy_conflicts.append({ ))
+        hierarchy_conflicts.append({ })
         'type': 'health_timeout_exceeds_launcher_timeout',
         'max_health_timeout': max_health,
         'min_launcher_timeout': min_launcher,
@@ -461,7 +461,7 @@ class TestWebSocketConnection:
         chaos_detector.add_timeout_conflict('multi-service', conflict)
 
                                                                                                                                                                                                                 # This should FAIL - we expect timeout conflicts
-        assert len(timeout_conflicts) == 0, "formatted_string"
+        assert len(timeout_conflicts) == 0, ""
 
     async def test_service_priority_misconfigurations(self, chaos_detector):
         """Test that service priorities are misconfigured in health checks - SHOULD FAIL."""
@@ -481,7 +481,7 @@ class TestWebSocketConnection:
 
                                                                                                                                                                                                                         # Look for startup sequence
         import re
-        startup_patterns = [ )
+        startup_patterns = [ ]
         r'start.*auth.*service',
         r'start.*backend.*service',
         r'start.*frontend.*service',
@@ -495,7 +495,7 @@ class TestWebSocketConnection:
         ")):
         for pattern in startup_patterns:
         if re.search(pattern, line, re.IGNORECASE):
-        startup_order.append({ ))
+        startup_order.append({ })
         'line': i + 1,
         'content': line.strip(),
         'pattern': pattern
@@ -505,7 +505,7 @@ class TestWebSocketConnection:
         content = startup_validator.read_text()
 
                                                                                                                                                                                                                                         # Look for health check dependency order
-        dependency_patterns = [ )
+        dependency_patterns = [ ]
         r'validate.*auth.*health',
         r'validate.*backend.*health',
         r'auth.*before.*backend',
@@ -517,7 +517,7 @@ class TestWebSocketConnection:
         ")):
         for pattern in dependency_patterns:
         if re.search(pattern, line, re.IGNORECASE):
-        health_dependencies.append({ ))
+        health_dependencies.append({ })
         'line': i + 1,
         'content': line.strip(),
         'pattern': pattern
@@ -529,7 +529,7 @@ class TestWebSocketConnection:
         backend_checks_auth = any('backend' in item['content'] and 'auth' in item['content'] for item in health_dependencies)
 
         if not auth_starts_first and backend_checks_auth:
-        priority_misconfigs.append({ ))
+        priority_misconfigs.append({ })
         'type': 'startup_health_dependency_mismatch',
         'issue': 'Backend may check auth health but auth might not start first',
         'startup_order': startup_order,
@@ -549,7 +549,7 @@ class TestWebSocketConnection:
 
         for i, line in enumerate(lines):
         if any(db in line.lower() for db in ['postgres', 'redis', 'clickhouse']) and 'check' in line.lower():
-        health_check_order.append({ ))
+        health_check_order.append({ })
         'line': i + 1,
         'content': line.strip(),
         'database': next(db for db in ['postgres', 'redis', 'clickhouse'] if db in line.lower())
@@ -564,7 +564,7 @@ class TestWebSocketConnection:
         first_clickhouse = min(clickhouse_checks, key=lambda x: None x['line'])['line']
 
         if first_clickhouse < first_postgres:
-        priority_misconfigs.append({ ))
+        priority_misconfigs.append({ })
         'type': 'optional_db_checked_before_critical',
         'critical_db': 'postgres',
         'optional_db': 'clickhouse',
@@ -593,7 +593,7 @@ class TestWebSocketConnection:
         for breaker_endpoint in breaker_endpoints:
         for main_endpoint in main_health_endpoints:
         if breaker_endpoint.startswith(main_endpoint) or main_endpoint.startswith(breaker_endpoint):
-        priority_misconfigs.append({ ))
+        priority_misconfigs.append({ })
         'type': 'circuit_breaker_endpoint_conflict',
         'breaker_endpoint': breaker_endpoint,
         'main_endpoint': main_endpoint,
@@ -604,7 +604,7 @@ class TestWebSocketConnection:
         chaos_detector.priority_misconfigs.append(misconfig)
 
                                                                                                                                                                                                                                                                                                         # This should FAIL - we expect priority misconfigurations
-        assert len(priority_misconfigs) == 0, "formatted_string"
+        assert len(priority_misconfigs) == 0, ""
 
     async def test_circuit_breaker_health_check_interactions(self, chaos_detector):
         """Test that circuit breaker and health checks have problematic interactions - SHOULD FAIL."""
@@ -656,7 +656,7 @@ class TestWebSocketConnection:
         if dep == 'database':
                                                                                                                                                                                                                                                                                                                                                             # Both might use the same database connection pool
         if 'get_db' in content and 'get_db' in regular_content:
-        shared_connection_risks.append({ ))
+        shared_connection_risks.append({ })
         'dependency': dep,
         'risk': 'shared_database_connection_pool',
         'issue': 'Circuit breaker and regular health may compete for database connections'
@@ -665,7 +665,7 @@ class TestWebSocketConnection:
         elif dep == 'redis':
                                                                                                                                                                                                                                                                                                                                                                     # Both might use the same Redis connection
         if 'redis' in content and 'redis' in regular_content:
-        shared_connection_risks.append({ ))
+        shared_connection_risks.append({ })
         'dependency': dep,
         'risk': 'shared_redis_connection',
         'issue': 'Circuit breaker and regular health may interfere with Redis connections'
@@ -684,7 +684,7 @@ class TestWebSocketConnection:
                                                                                                                                                                                                                                                                                                                                                                             # Check if it calls other health endpoints
         for endpoint in cb_endpoints:
         if endpoint in content:
-        circuit_breaker_issues.append({ ))
+        circuit_breaker_issues.append({ })
         'type': 'potential_self_reference',
         'endpoint': endpoint,
         'issue': 'Circuit breaker health endpoint may call itself or other health endpoints'
@@ -694,14 +694,14 @@ class TestWebSocketConnection:
         if 'circuit' in content and 'state' in content:
                                                                                                                                                                                                                                                                                                                                                                                         # Circuit breaker state might affect health reporting
         if not any(pattern in content for pattern in ['bypass', 'ignore_circuit', 'circuit_independent']):
-        circuit_breaker_issues.append({ ))
+        circuit_breaker_issues.append({ })
         'type': 'circuit_state_affects_health',
         'issue': 'Health check results may be affected by circuit breaker state',
         'recommendation': 'Health checks should bypass circuit breaker or report circuit state separately'
                                                                                                                                                                                                                                                                                                                                                                                             
 
                                                                                                                                                                                                                                                                                                                                                                                             # Check for circuit breaker configuration conflicts
-        config_files = [ )
+        config_files = [ ]
         project_root / 'netra_backend/app/core/configuration.py',
         project_root / 'netra_backend/app/core/circuit_breaker.py'
                                                                                                                                                                                                                                                                                                                                                                                             
@@ -725,7 +725,7 @@ class TestWebSocketConnection:
 
                                                                                                                                                                                                                                                                                                                                                                                                         # Conflict if circuit breaker timeout > health timeout
         if max_cb_timeout > min_health_timeout:
-        cb_config_conflicts.append({ ))
+        cb_config_conflicts.append({ })
         'type': 'timeout_conflict',
         'circuit_breaker_timeout': max_cb_timeout,
         'health_timeout': min_health_timeout,
@@ -739,7 +739,7 @@ class TestWebSocketConnection:
         chaos_detector.circuit_breaker_issues.append(issue)
 
                                                                                                                                                                                                                                                                                                                                                                                                                 # This should FAIL - we expect circuit breaker issues
-        assert len(circuit_breaker_issues) == 0, "formatted_string"
+        assert len(circuit_breaker_issues) == 0, ""
 
     async def test_environment_variable_conflicts_in_health_checks(self, chaos_detector):
         """Test that environment variables conflict in health check configurations - SHOULD FAIL."""
@@ -747,34 +747,34 @@ class TestWebSocketConnection:
         env_var_conflicts = []
 
                                                                                                                                                                                                                                                                                                                                                                                                                     # Test different environment variable combinations that might conflict
-        conflicting_env_combinations = [ )
-        { )
+        conflicting_env_combinations = [ ]
+        { }
         'name': 'database_url_conflicts',
-        'vars': { )
+        'vars': { }
         'DATABASE_URL': 'postgresql://user1:pass1@host1/db1',
         'POSTGRES_URL': 'postgresql://user2:pass2@host2/db2',
         'DB_URL': 'postgresql://user3:pass3@host3/db3'
                                                                                                                                                                                                                                                                                                                                                                                                                     
         },
-        { )
+        { }
         'name': 'health_timeout_conflicts',
-        'vars': { )
+        'vars': { }
         'HEALTH_CHECK_TIMEOUT': '5',
         'HEALTH_TIMEOUT': '10',
         'TIMEOUT': '15'
                                                                                                                                                                                                                                                                                                                                                                                                                     
         },
-        { )
+        { }
         'name': 'debug_mode_conflicts',
-        'vars': { )
+        'vars': { }
         'DEBUG': 'true',
         'LOG_LEVEL': 'ERROR',
         'ENVIRONMENT': 'production'
                                                                                                                                                                                                                                                                                                                                                                                                                     
         },
-        { )
+        { }
         'name': 'service_url_conflicts',
-        'vars': { )
+        'vars': { }
         'AUTH_SERVICE_URL': 'http://localhost:8080',
         'AUTH_URL': 'http://localhost:8081',
         'NETRA_AUTH_URL': 'http://localhost:8082'
@@ -799,7 +799,7 @@ class TestWebSocketConnection:
 
                                                                                                                                                                                                                                                                                                                                                                                                                                 # Check if conflicting env vars cause issues
         if response.status_code not in [200, 503]:  # Unexpected status
-        env_var_conflicts.append({ ))
+        env_var_conflicts.append({ })
         'conflict_type': conflict_name,
         'env_vars': env_vars,
         'unexpected_status': response.status_code,
@@ -820,7 +820,7 @@ class TestWebSocketConnection:
         db_hosts = ['host1', 'host2', 'host3']
         found_hosts = [item for item in []]
         if len(found_hosts) > 1:
-        env_var_conflicts.append({ ))
+        env_var_conflicts.append({ })
         'conflict_type': conflict_name,
         'env_vars': env_vars,
         'found_hosts': found_hosts,
@@ -831,21 +831,21 @@ class TestWebSocketConnection:
         timeout_values = ['5', '10', '15']
         found_timeouts = [item for item in []]
         if len(found_timeouts) > 1:
-        env_var_conflicts.append({ ))
+        env_var_conflicts.append({ })
         'conflict_type': conflict_name,
         'env_vars': env_vars,
         'found_timeouts': found_timeouts,
         'issue': 'Health response contains multiple conflicting timeout values'
                                                                                                                                                                                                                                                                                                                                                                                                                                                             
         except:
-        env_var_conflicts.append({ ))
+        env_var_conflicts.append({ })
         'conflict_type': conflict_name,
         'env_vars': env_vars,
         'issue': 'Health endpoint returned invalid JSON with conflicting env vars'
                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
 
         except Exception as e:
-        env_var_conflicts.append({ ))
+        env_var_conflicts.append({ })
         'conflict_type': conflict_name,
         'env_vars': env_vars,
         'error': str(e),
@@ -882,7 +882,7 @@ class TestWebSocketConnection:
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         # the app handles the env var without crashing
 
         except Exception as e:
-        precedence_conflicts.append({ ))
+        precedence_conflicts.append({ })
         'env_var': env_var,
         'error': str(e),
         'issue': 'formatted_string'
@@ -894,7 +894,7 @@ class TestWebSocketConnection:
         chaos_detector.env_var_conflicts.append(conflict)
 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 # This should FAIL - we expect environment variable conflicts
-        assert len(env_var_conflicts) == 0, "formatted_string"
+        assert len(env_var_conflicts) == 0, ""
 
 
 class TestHealthRouteConfigurationConsistency:
@@ -907,7 +907,7 @@ class TestHealthRouteConfigurationConsistency:
         pool_conflicts = []
 
         # Check database configuration files for connection pool settings
-        db_files = [ )
+        db_files = [ ]
         project_root / 'netra_backend/app/db/postgres.py',
         project_root / 'netra_backend/app/db/postgres_core.py',
         project_root / 'auth_service/auth_core/database/connection.py'
@@ -921,7 +921,7 @@ class TestHealthRouteConfigurationConsistency:
 
                 # Look for connection pool configurations
         import re
-        pool_patterns = [ )
+        pool_patterns = [ ]
         r'pool_size\s*=\s*(\d+)',
         r'max_overflow\s*=\s*(\d+)',
         r'pool_timeout\s*=\s*(\d+\.?\d*)',
@@ -955,7 +955,7 @@ class TestHealthRouteConfigurationConsistency:
         all_values.extend(values)
 
         if len(set(all_values)) > 1:
-        pool_conflicts.append({ ))
+        pool_conflicts.append({ })
         'type': 'formatted_string',
         'files': files_with_pattern,
         'values': list(set(all_values)),
@@ -963,7 +963,7 @@ class TestHealthRouteConfigurationConsistency:
                                                         
 
                                                         # Check health endpoints for database connection usage
-        health_files = [ )
+        health_files = [ ]
         project_root / 'netra_backend/app/routes/health.py',
         project_root / 'auth_service/main.py'
                                                         
@@ -975,7 +975,7 @@ class TestHealthRouteConfigurationConsistency:
         content = health_file.read_text()
 
                                                                 # Check if health endpoints create their own database connections
-        db_connection_patterns = [ )
+        db_connection_patterns = [ ]
         'create_engine',
         'async_engine',
         'get_db',
@@ -996,7 +996,7 @@ class TestHealthRouteConfigurationConsistency:
         if health_db_usage:
         for file_path, patterns in health_db_usage.items():
         if any(pattern in ['create_engine', 'connect()'] for pattern in patterns):
-        pool_conflicts.append({ ))
+        pool_conflicts.append({ })
         'type': 'health_creates_own_connections',
         'file': file_path,
         'patterns': patterns,
@@ -1004,7 +1004,7 @@ class TestHealthRouteConfigurationConsistency:
                                                                                         
 
                                                                                         # This should FAIL - we expect pool conflicts
-        assert len(pool_conflicts) == 0, "formatted_string"
+        assert len(pool_conflicts) == 0, ""
 
     async def test_logging_configuration_inconsistencies_in_health(self):
         """Test that health routes have inconsistent logging configurations - SHOULD FAIL."""
@@ -1014,7 +1014,7 @@ class TestHealthRouteConfigurationConsistency:
         logging_inconsistencies = []
 
                                                                                             # Check logging configurations across health-related files
-        health_files = [ )
+        health_files = [ ]
         project_root / 'netra_backend/app/routes/health.py',
         project_root / 'auth_service/main.py',
         project_root / 'netra_backend/app/logging_config.py',
@@ -1029,7 +1029,7 @@ class TestHealthRouteConfigurationConsistency:
 
                                                                                                     # Extract logging configurations
         import re
-        logging_patterns = [ )
+        logging_patterns = [ ]
         r'logger\.(\w+)\(',
         r'log_level[^=]*=\s*["\'](\w+)["\']',
         r'LOG_LEVEL[^=]*=\s*["\'](\w+)["\']',
@@ -1060,7 +1060,7 @@ class TestHealthRouteConfigurationConsistency:
         all_levels.update(levels)
 
         if len(all_levels) > 1:
-        logging_inconsistencies.append({ ))
+        logging_inconsistencies.append({ })
         'type': 'inconsistent_log_levels',
         'files': files_with_levels,
         'levels': list(all_levels),
@@ -1087,7 +1087,7 @@ class TestHealthRouteConfigurationConsistency:
         uses_module_name = any('__name__' in name for name in names)
         uses_hardcoded = any('__name__' not in name for name in names)
 
-        logger_name_patterns[file_path] = { )
+        logger_name_patterns[file_path] = { }
         'uses_module_name': uses_module_name,
         'uses_hardcoded': uses_hardcoded,
         'names': names
@@ -1098,7 +1098,7 @@ class TestHealthRouteConfigurationConsistency:
         hardcoded_files = [item for item in []]]
 
         if module_name_files and hardcoded_files:
-        logging_inconsistencies.append({ ))
+        logging_inconsistencies.append({ })
         'type': 'mixed_logger_naming_conventions',
         'module_name_files': module_name_files,
         'hardcoded_files': hardcoded_files,
@@ -1106,7 +1106,7 @@ class TestHealthRouteConfigurationConsistency:
                                                                                                                                                             
 
                                                                                                                                                             # This should FAIL - we expect logging inconsistencies
-        assert len(logging_inconsistencies) == 0, "formatted_string"
+        assert len(logging_inconsistencies) == 0, ""
 
 
         if __name__ == "__main__":

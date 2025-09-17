@@ -84,7 +84,7 @@ class Python313WebSocketCompatibilityTests:
 
                 logger.info("additional_headers parameter works correctly")
 
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             # Expected for some test servers
             logger.info("Connection closed by server (expected for some test endpoints)")
 
@@ -184,7 +184,7 @@ class Python313WebSocketCompatibilityTests:
             # Test standard imports
             import websockets
             from websockets import ConnectionClosed, InvalidStatus, WebSocketException
-            from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
+            from websockets import ConnectionClosedError, ConnectionClosedOK
 
             logger.info("websockets library imports successful")
 

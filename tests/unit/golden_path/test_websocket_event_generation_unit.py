@@ -44,7 +44,7 @@ from test_framework.real_service_setup import setup_real_websocket_test, create_
 # Golden Path Components Under Test
 try:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
     from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier

@@ -14,7 +14,7 @@ This module follows the same pattern as get_database_manager() and other
 SSOT service accessors in the codebase.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Optional, Any
 
 # Import redis for type annotations only - SSOT pattern
@@ -26,7 +26,7 @@ except ImportError:
 from netra_backend.app.services.redis_service import redis_service
 from netra_backend.app.redis_manager import redis_manager as RedisConnectionHandler
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class RedisClientError(Exception):

@@ -2705,9 +2705,9 @@ class UnifiedDockerManager:
                 _get_logger().debug(f" PASS:  WebSocket health check succeeded: {ws_url}")
                 return True
                 
-        except (websockets.exceptions.ConnectionClosed,
-                websockets.exceptions.InvalidStatusCode,
-                websockets.exceptions.InvalidHandshake,
+        except (websockets.ConnectionClosed,
+                websockets.InvalidStatusCode,
+                websockets.InvalidHandshake,
                 asyncio.TimeoutError,
                 OSError) as e:
             _get_logger().debug(f" FAIL:  WebSocket health check failed for {ws_url}: {e}")

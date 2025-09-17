@@ -13,7 +13,7 @@ import json
 import os
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 import argparse
@@ -171,7 +171,7 @@ class WebSocketTestRunnerIntegration:
         
         report_lines = [
             "# WebSocket Deployment Validation Report",
-            f"**Generated:** {datetime.utcnow().isoformat()}",
+            f"**Generated:** {datetime.now(UTC).isoformat()}",
             f"**Environment:** {self.environment}",
             "",
             "## Executive Summary",

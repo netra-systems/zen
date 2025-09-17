@@ -1,4 +1,4 @@
-"""
+"""Empty docstring."""
 WebSocket Reconnection Flow E2E Test
 
 Business Value Justification (BVJ):
@@ -28,7 +28,7 @@ This test ensures:
 - Seamless experience during server maintenance
 - Enterprise-grade connection reliability
 - Proper handling of mobile network disruptions
-"""
+"""Empty docstring."""
 import asyncio
 import json
 import time
@@ -45,16 +45,16 @@ from test_framework.websocket_helpers import assert_websocket_events_sent, WebSo
 from shared.isolated_environment import get_env
 
 class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
-    """
+"""Empty docstring."""
     E2E test for WebSocket reconnection flow using REAL services only.
     
     This test validates that the platform provides seamless reconnection
     capabilities that maintain user experience during network disruptions.
-    """
+"""Empty docstring."""
 
     @pytest.fixture(autouse=True)
     async def setup_test_environment(self):
-        """Set up test environment for WebSocket reconnection testing."""
+        "Set up test environment for WebSocket reconnection testing."""
         await self.initialize_test_environment()
         self.auth_helper = E2EAuthHelper(environment='test')
         self.active_connections = []
@@ -67,8 +67,8 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
                 pass
 
     async def create_authenticated_websocket_session(self, email: str) -> Tuple[Any, Any, Any]:
-        """Create authenticated WebSocket session."""
-        auth_user = await self.auth_helper.create_authenticated_user(email=email, permissions=['read', 'write', 'agent_execute'])
+        ""Create authenticated WebSocket session.
+        auth_user = await self.auth_helper.create_authenticated_user(email=email, permissions=['read', 'write', 'agent_execute']
         user_context = await create_authenticated_user_context(user_email=auth_user.email, user_id=auth_user.user_id, environment='test', permissions=auth_user.permissions, websocket_enabled=True)
         websocket_url = 'ws://localhost:8000/ws/chat'
         headers = self.auth_helper.get_websocket_headers(auth_user.jwt_token)
@@ -77,11 +77,11 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
         return (auth_user, websocket_connection, user_context)
 
     async def simulate_connection_drop(self, websocket_connection: Any) -> None:
-        """
+    ""
         Simulate connection drop for testing reconnection.
         
         This simulates real network disconnection scenarios.
-        """
+        
         logger.info('[U+1F50C] Simulating connection drop...')
         try:
             await WebSocketTestHelpers.close_test_connection(websocket_connection)
@@ -92,7 +92,7 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
         logger.info(' PASS:  Connection drop simulated')
 
     async def establish_reconnection(self, auth_user: Any, delay_seconds: float=1.0) -> Any:
-        """
+"""Empty docstring."""
         Establish reconnection after simulated drop.
         
         Args:
@@ -101,7 +101,7 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
             
         Returns:
             New WebSocket connection
-        """
+"""Empty docstring."""
         logger.info(f' CYCLE:  Waiting {delay_seconds}s before reconnection attempt...')
         await asyncio.sleep(delay_seconds)
         logger.info(' CYCLE:  Attempting WebSocket reconnection...')
@@ -113,7 +113,7 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
         return new_connection
 
     async def send_message_and_collect_events(self, websocket_connection: Any, message: Dict[str, Any], timeout: float=30.0, expect_completion: bool=True) -> List[Dict[str, Any]]:
-        """Send message and collect events until completion."""
+        Send message and collect events until completion.""
         received_events = []
         await WebSocketTestHelpers.send_test_message(websocket_connection, message)
         start_time = time.time()
@@ -140,12 +140,12 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
     @pytest.mark.real_services
     @pytest.mark.mission_critical
     async def test_basic_websocket_reconnection_flow(self, real_services_fixture):
-        """
+        
         Test basic WebSocket reconnection after connection drop.
         
         This test validates that users can reconnect after network interruptions
         and continue their agent interactions seamlessly.
-        """
+""
         logger.info('[U+1F680] Starting basic WebSocket reconnection flow test')
         auth_user, websocket_connection, user_context = await self.create_authenticated_websocket_session('reconnection_basic_test@example.com')
         logger.info(f' PASS:  Created authenticated session: {auth_user.email}')
@@ -169,7 +169,7 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
         auth_preserved = False
         context_preserved = False
         for event in reconnection_events:
-            event_data = event.get('data', {})
+            event_data = event.get('data', {}
             if event_data.get('user_id') == auth_user.user_id:
                 auth_preserved = True
             if event_data.get('thread_id') == str(user_context.thread_id):
@@ -182,7 +182,7 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
             logger.warning(' WARNING: [U+FE0F] Thread context not preserved (acceptable but not optimal)')
         completion_events = [e for e in reconnection_events if e.get('type') == 'agent_completed']
         assert len(completion_events) > 0, 'Agent should complete after reconnection'
-        response_data = completion_events[0].get('data', {})
+        response_data = completion_events[0].get('data', {}
         response_text = response_data.get('result', '') or response_data.get('response', '')
         assert len(response_text) > 20, 'Agent response too brief after reconnection'
         logger.info(' CELEBRATION:  BASIC WEBSOCKET RECONNECTION FLOW TEST PASSED')
@@ -195,12 +195,12 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
     @pytest.mark.e2e
     @pytest.mark.real_services
     async def test_reconnection_with_message_queuing(self, real_services_fixture):
-        """
+"""Empty docstring."""
         Test reconnection with message queuing during disconnection.
         
         This test validates that messages sent during disconnection periods
         are properly handled when reconnection occurs.
-        """
+"""Empty docstring."""
         logger.info('[U+1F680] Starting reconnection with message queuing test')
         auth_user, websocket_connection, user_context = await self.create_authenticated_websocket_session('reconnection_queuing_test@example.com')
         logger.info('[U+1F4E4] Testing baseline before disconnection...')
@@ -220,7 +220,7 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
         assert 'agent_started' in queued_event_types, 'Queued message should start agent execution'
         assert 'agent_completed' in queued_event_types, 'Queued message should complete'
         completion_events = [e for e in queued_events if e.get('type') == 'agent_completed']
-        response_data = completion_events[0].get('data', {})
+        response_data = completion_events[0].get('data', {}
         response_text = response_data.get('result', '') or response_data.get('response', '')
         assert len(response_text) > 30, 'Response should be substantive after queuing'
         logger.info(' CELEBRATION:  RECONNECTION WITH MESSAGE QUEUING TEST PASSED')
@@ -231,12 +231,12 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
     @pytest.mark.e2e
     @pytest.mark.real_services
     async def test_multiple_reconnection_cycles(self, real_services_fixture):
-        """
+        
         Test multiple disconnection/reconnection cycles.
         
         This test validates that the system can handle repeated disconnections
         without degrading performance or losing functionality.
-        """
+""
         logger.info('[U+1F680] Starting multiple reconnection cycles test')
         auth_user, websocket_connection, user_context = await self.create_authenticated_websocket_session('reconnection_multiple_test@example.com')
         num_cycles = 3
@@ -270,12 +270,12 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
     @pytest.mark.e2e
     @pytest.mark.real_services
     async def test_reconnection_authentication_validation(self, real_services_fixture):
-        """
+"""Empty docstring."""
         Test that reconnection properly validates authentication tokens.
         
         This test ensures that expired or invalid tokens are properly handled
         during reconnection attempts.
-        """
+"""Empty docstring."""
         logger.info('[U+1F680] Starting reconnection authentication validation test')
         auth_user, websocket_connection, user_context = await self.create_authenticated_websocket_session('reconnection_auth_test@example.com')
         logger.info('[U+1F510] Testing baseline with valid authentication...')
@@ -293,12 +293,12 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
         valid_event_types = [event.get('type') for event in valid_events]
         assert 'agent_started' in valid_event_types, 'Valid auth should allow agent execution'
         assert 'agent_completed' in valid_event_types, 'Valid auth should complete successfully'
-        auth_contexts = [event.get('data', {}).get('user_id') for event in valid_events if event.get('data', {}).get('user_id')]
+        auth_contexts = [event.get('data', {}.get('user_id') for event in valid_events if event.get('data', {}.get('user_id')]
         for auth_context in auth_contexts:
             assert auth_context == auth_user.user_id, 'User ID should be consistent in all events'
         logger.info(' PASS:  Reconnection with valid authentication successful')
         logger.info('[U+1F6AB] Testing reconnection authentication validation...')
-        different_user = await self.auth_helper.create_authenticated_user(email='different_user@example.com', permissions=['read'])
+        different_user = await self.auth_helper.create_authenticated_user(email='different_user@example.com', permissions=['read']
         await self.simulate_connection_drop(valid_reconnection)
         try:
             invalid_reconnection = await self.establish_reconnection(different_user, delay_seconds=1.0)
@@ -320,12 +320,12 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
     @pytest.mark.e2e
     @pytest.mark.real_services
     async def test_reconnection_performance_impact(self, real_services_fixture):
-        """
+        
         Test that reconnection doesn't significantly impact performance.
         
         This test validates that reconnected sessions perform comparably
         to initial connections.
-        """
+""""""
         logger.info('[U+1F680] Starting reconnection performance impact test')
         auth_user, websocket_connection, user_context = await self.create_authenticated_websocket_session('reconnection_performance_test@example.com')
         logger.info('[U+23F1][U+FE0F] Measuring baseline performance...')

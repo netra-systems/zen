@@ -26,7 +26,7 @@ import pytest
 import asyncio
 import time
 import jwt
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from unittest import mock
 import uuid
 from contextlib import asynccontextmanager
@@ -73,7 +73,7 @@ class Phase2TokenLifecycleIntegrationTests:
 
     def _create_test_jwt_token(self, user_id: str, expires_in_seconds: int) -> str:
         """Create JWT token for Phase 2 testing."""
-        payload = {'sub': user_id, 'user_id': user_id, 'email': f'test+{user_id[:8]}@netra.com', 'exp': datetime.utcnow() + timedelta(seconds=expires_in_seconds), 'iat': datetime.utcnow(), 'iss': 'netra-phase2-test', 'permissions': ['execute_agents', 'websocket_access']}
+        payload = {'sub': user_id, 'user_id': user_id, 'email': f'test+{user_id[:8]}@netra.com', 'exp': datetime.now(UTC) + timedelta(seconds=expires_in_seconds), 'iat': datetime.now(UTC), 'iss': 'netra-phase2-test', 'permissions': ['execute_agents', 'websocket_access']}
         return jwt.encode(payload, self.jwt_secret, algorithm='HS256')
 
     def _create_test_user_context(self, user_id: str) -> UserExecutionContext:

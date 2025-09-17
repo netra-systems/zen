@@ -2,6 +2,7 @@
 Test Secret Configuration Validation for Issue #683
 
 This test reproduces the configuration validation failures identified in staging environment
+"""
 configuration validation tests. Focus on SecretConfig class validation and secret injection
 bridge gaps between SecretConfig and GCP deployment.
 
@@ -11,7 +12,7 @@ Priority: P0 - Mission Critical
 Issue #683: Staging environment configuration validation failures
 Root Cause: Secret injection bridge gaps between SecretConfig and GCP deployment
 Test Strategy: Reproduce actual secret configuration validation failures
-"""
+"
 
 import pytest
 from unittest.mock import patch, MagicMock
@@ -20,22 +21,22 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
-    """
+    "
     Unit tests to reproduce secret configuration validation failures in staging environment.
 
     These tests identify specific validation gaps in SecretConfig class that cause
     staging deployment failures.
-    """
+"
 
     def setup_method(self, method):
-        """Set up test environment for secret configuration validation."""
+        "Set up test environment for secret configuration validation.
         super().setup_method(method)
         self.env = IsolatedEnvironment()
         # Store original environment to restore after test
         self.original_env = self.env.get_all()
 
     def teardown_method(self, method):
-        """Clean up test environment."""
+        ""Clean up test environment.
         # Restore original environment
         current_env = self.env.get_all()
         for key in list(current_env.keys()):
@@ -46,12 +47,12 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
         super().teardown_method(method)
 
     def test_secret_config_missing_required_secrets_staging(self):
-        """
+    ""
         REPRODUCER: Test secret configuration validation failure when required secrets are missing.
 
         This reproduces the actual staging environment issue where SecretConfig
         fails validation due to missing required secret values.
-        """
+        
         # Clear all secret-related environment variables to simulate staging issue
         secret_env_vars = [
             'JWT_SECRET_KEY', 'SERVICE_SECRET', 'FERNET_KEY',
@@ -84,31 +85,31 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
                 target_field = secret_ref.target_field
 
                 # This should fail because the secret is not available
-                if secret_name == "jwt-secret-key":
+                if secret_name == jwt-secret-key:"
                     jwt_secret = self.env.get('JWT_SECRET_KEY')
                     if not jwt_secret or jwt_secret.strip() == '':
-                        raise ValueError(f"JWT secret validation failed: missing required secret '{secret_name}' for field '{target_field}'")
+                        raise ValueError(f"JWT secret validation failed: missing required secret '{secret_name}' for field '{target_field}')
 
-                elif secret_name == "service-secret":
+                elif secret_name == service-secret:
                     service_secret = self.env.get('SERVICE_SECRET')
                     if not service_secret or service_secret.strip() == '':
-                        raise ValueError(f"Service secret validation failed: missing required secret '{secret_name}' for field '{target_field}'")
+                        raise ValueError(fService secret validation failed: missing required secret '{secret_name}' for field '{target_field}')
 
-                elif secret_name == "gemini-api-key":
+                elif secret_name == gemini-api-key":"
                     gemini_key = self.env.get('GEMINI_API_KEY')
                     if not gemini_key or gemini_key.strip() == '':
-                        raise ValueError(f"Gemini API key validation failed: missing required secret '{secret_name}' for field '{target_field}'")
+                        raise ValueError(fGemini API key validation failed: missing required secret '{secret_name}' for field '{target_field}')
 
             # Verify the specific error indicates missing secret configuration
-            assert "missing required secret" in str(exc_info.value) or "validation failed" in str(exc_info.value)
+            assert missing required secret in str(exc_info.value) or validation failed in str(exc_info.value)
 
     def test_secret_config_project_id_resolution_failure(self):
-        """
+        ""
         REPRODUCER: Test SecretReference project ID resolution failure in staging.
 
         This reproduces the issue where SecretReference._get_project_id_safe()
         fails to resolve the correct GCP project ID for staging environment.
-        """
+
         # Clear GCP project ID environment variables
         self.env.set('GCP_PROJECT_ID_NUMERICAL_STAGING', '')
         self.env.set('SECRET_MANAGER_PROJECT_ID', '')
@@ -125,17 +126,17 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
 
         # This test will FAIL if project ID resolution is broken
         assert project_id == expected_staging_project_id, (
-            f"Project ID resolution failed: expected '{expected_staging_project_id}', "
-            f"got '{project_id}'. This indicates staging environment configuration issue."
+            fProject ID resolution failed: expected '{expected_staging_project_id}', 
+            fgot '{project_id}'. This indicates staging environment configuration issue.
         )
 
     def test_secret_config_validation_with_partial_secrets(self):
-        """
+        ""
         REPRODUCER: Test validation failure with partially configured secrets.
 
         This reproduces staging issues where some secrets are configured but others are missing,
         causing validation to fail in unexpected ways.
-        """
+
         # Configure only some secrets to simulate partial staging configuration
         self.env.set('ENVIRONMENT', 'staging')
         self.env.set('JWT_SECRET_KEY', 'test-jwt-secret')
@@ -157,16 +158,16 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
         # This should fail for missing secrets
         gemini_key = secrets_manager.get_secret('GEMINI_API_KEY')
         assert gemini_key is None or gemini_key == '', (
-            f"Expected missing GEMINI_API_KEY to be None or empty, got '{gemini_key}'"
+            f"Expected missing GEMINI_API_KEY to be None or empty, got '{gemini_key}'
         )
 
     def test_unified_secrets_manager_staging_initialization(self):
-        """
+        "
         REPRODUCER: Test UnifiedSecretsManager initialization failure in staging environment.
 
         This reproduces the issue where UnifiedSecretsManager fails to initialize
         properly in staging due to missing configuration.
-        """
+"
         # Set staging environment
         self.env.set('ENVIRONMENT', 'staging')
 
@@ -191,19 +192,19 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
             jwt_secret = secrets_manager.get_jwt_secret()
             # If it doesn't raise an exception, it should at least be empty or None
             if jwt_secret is None or jwt_secret.strip() == '':
-                raise ValueError("JWT secret is missing or empty in staging environment")
+                raise ValueError("JWT secret is missing or empty in staging environment)
 
         # Verify the error indicates staging configuration issue
         error_message = str(exc_info.value).lower()
-        assert any(keyword in error_message for keyword in ['missing', 'empty', 'not found', 'staging'])
+        assert any(keyword in error_message for keyword in ['missing', 'empty', 'not found', 'staging']
 
     def test_secret_config_environment_isolation_failure(self):
-        """
+        
         REPRODUCER: Test secret configuration environment isolation failure.
 
         This reproduces issues where staging environment configuration
         leaks into other environments or fails to isolate properly.
-        """
+""
         # Test multiple environment configurations
         environments = ['staging', 'production', 'development']
 
@@ -242,8 +243,8 @@ class SecretConfigValidationIssue683Tests(SSotBaseTestCase):
 
             if env_name in ['staging', 'production']:
                 assert project_id == expected_id, (
-                    f"Environment isolation failed: {env_name} environment "
-                    f"expected project ID '{expected_id}', got '{project_id}'"
+                    fEnvironment isolation failed: {env_name} environment 
+                    fexpected project ID '{expected_id}', got '{project_id}'"
                 )
 
 

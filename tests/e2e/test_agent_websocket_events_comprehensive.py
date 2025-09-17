@@ -202,7 +202,7 @@ async def test_agent_websocket_events_comprehensive():
                             logger.info(f"Received event: {event.get('type')}")
                     except asyncio.TimeoutError:
                         pass
-                    except websockets.exceptions.ConnectionClosed:
+                    except websockets.ConnectionClosed:
                         pass
                 
                 # Start listener task

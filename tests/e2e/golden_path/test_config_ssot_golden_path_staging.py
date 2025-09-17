@@ -139,9 +139,9 @@ class ConfigSSotGoldenPathStagingTests(SSotAsyncTestCase):
                     return True
                 except asyncio.TimeoutError:
                     return True
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             pytest.fail(f'WebSocket connection closed: {str(e)}')
-        except websockets.exceptions.InvalidURI as e:
+        except websockets.InvalidURI as e:
             pytest.fail(f'Invalid WebSocket URI: {str(e)}')
         except Exception as e:
             pytest.fail(f'WebSocket connection failed: {str(e)}')
@@ -191,7 +191,7 @@ class ConfigSSotGoldenPathStagingTests(SSotAsyncTestCase):
                     return {'golden_path_partial': True, 'events_received': golden_path_events, 'note': 'Agent started but may not have completed'}
                 else:
                     pytest.fail(f'Golden Path failed: No agent events received. Events: {golden_path_events}')
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             pytest.fail(f'WebSocket connection closed during Golden Path test: {str(e)}')
         except Exception as e:
             pytest.fail(f'Golden Path end-to-end test failed: {str(e)}')

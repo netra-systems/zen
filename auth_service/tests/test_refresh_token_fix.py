@@ -24,7 +24,7 @@ class TestRefreshTokenFix:
         pass
         service = AuthService()
     # Mock database session
-        service.db_session = AsyncNone  # TODO: Use real service instance
+        service.db_session = MagicMock()  # TODO: Use real service instance
         return service
 
         @pytest.fixture
@@ -200,13 +200,13 @@ generated_tokens = set()
         # Perform multiple refresh operations
 for i in range(3):
 result = await auth_service.refresh_tokens(refresh_token)
-assert result is not None, "formatted_string"
+assert result is not None, ""
 
 access_token, new_refresh_token = result
 
             # Verify tokens are unique
-assert access_token not in generated_tokens, "formatted_string"
-assert new_refresh_token not in generated_tokens, "formatted_string"
+assert access_token not in generated_tokens, ""
+assert new_refresh_token not in generated_tokens, ""
 
 generated_tokens.add(access_token)
 generated_tokens.add(new_refresh_token)

@@ -110,9 +110,9 @@ class WebSocketSupportTests(GCPDeploymentRequirementsTestBase):
                 print('[OK] WebSocket connection established successfully')
                 assert uri.startswith('wss://'), f'WebSocket should use secure protocol: {uri}'
                 print('[OK] WebSocket uses secure protocol (WSS)')
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             pytest.fail('WebSocket connection was closed unexpectedly')
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             pytest.fail(f'WebSocket connection failed with status code: {e}')
         except Exception as e:
             pytest.fail(f'WebSocket connection failed: {e}')
@@ -132,7 +132,7 @@ class WebSocketSupportTests(GCPDeploymentRequirementsTestBase):
                 print(f'[OK] WebSocket connection maintained for {elapsed:.1f} seconds')
                 await websocket.ping()
                 print('[OK] WebSocket connection still active after extended duration')
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             pytest.fail('WebSocket connection was closed before timeout period')
         except Exception as e:
             pytest.fail(f'WebSocket long-duration test failed: {e}')
@@ -360,7 +360,7 @@ class CloudRunIngressTests(GCPDeploymentRequirementsTestBase):
             async with websockets.connect(uri, timeout=10, ssl=self.ssl_context) as websocket:
                 await websocket.ping()
                 print('[OK] WebSocket service accessible via external ingress')
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             pytest.fail('WebSocket service not accessible from external traffic')
         except Exception as e:
             pytest.fail(f'WebSocket external access test failed: {e}')

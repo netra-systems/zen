@@ -60,7 +60,7 @@ from typing import Dict, Any, List
 from shared.types.core_types import UserID, ensure_user_id
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, is_valid_id_format, is_valid_id_format_compatible, IDType
 from netra_backend.app.websocket_core.service_readiness_validator import ServiceReadinessValidator
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 

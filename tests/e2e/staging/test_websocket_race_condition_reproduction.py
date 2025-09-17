@@ -158,7 +158,7 @@ class WebSocketRaceConditionStagingTests(BaseE2ETest):
                     except json.JSONDecodeError as e:
                         connection_result["error"] = f"Invalid JSON in welcome message: {e}"
                         
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 connection_result["error"] = f"Connection closed during handshake: {e}"
                 connection_result["close_code"] = e.code
                 connection_result["duration"] = time.time() - start_time
@@ -371,7 +371,7 @@ class WebSocketRaceConditionStagingTests(BaseE2ETest):
                     result["response_received"] = True
                     result["response"] = json.loads(response)
                     
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 result["error"] = str(e)
                 result["close_code"] = e.code
                 

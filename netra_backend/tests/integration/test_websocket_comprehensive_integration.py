@@ -64,7 +64,7 @@ from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, RunID, ensure_user_id
 
 # Application imports using SSOT patterns from registry
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager, WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager, WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
 from netra_backend.app.agents.base_agent import BaseAgent, AgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext, UserContextManager

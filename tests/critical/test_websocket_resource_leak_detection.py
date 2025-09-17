@@ -54,15 +54,15 @@ import weakref
 import gc
 import psutil
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Set, Optional, Any
 import logging
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
 from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
@@ -423,7 +423,7 @@ class WebSocketResourceLeakDetectionTests(SSotAsyncTestCase):
             connection_id=connection_id,
             user_id=user_id,
             websocket=test_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={}
         )
 
@@ -759,7 +759,7 @@ class WebSocketResourceLeakDetectionTests(SSotAsyncTestCase):
             
             # Make first 6 managers "old" by setting their activity time  
             if i < 6:
-                old_time = datetime.utcnow() - timedelta(minutes=10)
+                old_time = datetime.now(UTC) - timedelta(minutes=10)
                 manager._metrics.last_activity = old_time
                 # Also update creation time in factory
                 for key, active_manager in self.factory._active_managers.items():

@@ -30,7 +30,7 @@ from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.core.managers.unified_lifecycle_manager import SystemLifecycle, SystemLifecycleFactory, LifecyclePhase, ComponentType, setup_application_lifecycle
 from netra_backend.app.db.database_manager import get_database_manager
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.agents.supervisor.agent_registry import get_agent_registry
 from netra_backend.app.services.redis_client import get_redis_client
 

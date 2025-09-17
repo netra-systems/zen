@@ -49,7 +49,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         '''
         # Mock the auth service to await asyncio.sleep(0)
         return unauthenticated state
-        mock_auth_state = { )
+        mock_auth_state = { }
         'user': None,
         'loading': False,
         'isAuthenticated': False,
@@ -71,13 +71,13 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
 
             # This assertion SHOULD FAIL - redirect should be fast
         assert redirect_time <= 200, ( )
-        "formatted_string"
+        ""
         f"Slow auth state detection causes poor user experience."
             
 
             # This assertion SHOULD FAIL - should redirect to login
         assert redirect_target == '/login', ( )
-        "formatted_string"
+        ""
         f"Landing page authentication logic is not working correctly."
             
 
@@ -92,7 +92,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         pass
                 # Mock the auth service to await asyncio.sleep(0)
         return authenticated state
-        mock_auth_state = { )
+        mock_auth_state = { }
         'user': {'id': 'test-user-123', 'email': 'test@example.com'},
         'loading': False,
         'isAuthenticated': True,
@@ -112,13 +112,13 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
 
                     # This assertion SHOULD FAIL - redirect should be fast
         assert redirect_time <= 200, ( )
-        "formatted_string"
+        ""
         f"Auth state detection performance issue affecting authenticated users."
                     
 
                     # This assertion SHOULD FAIL - should redirect to chat
         assert redirect_target == '/chat', ( )
-        "formatted_string"
+        ""
         f"Landing page fails to handle authenticated users correctly."
                     
 
@@ -132,7 +132,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         '''
         pass
                         # Test sequence: loading -> loaded with auth state
-        auth_states = [ )
+        auth_states = [ ]
         {'user': None, 'loading': True, 'isAuthenticated': False, 'token': None},
         {'user': {'id': 'test-user'}, 'loading': False, 'isAuthenticated': True, 'token': 'token'}
                         
@@ -147,12 +147,12 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         redirect_target = await self._simulate_landing_page_logic(auth_state)
 
         if auth_state['loading'] and redirect_target != 'loading':
-        redirects_during_loading.append("formatted_string")
+        redirects_during_loading.append("")
 
                                     # This assertion SHOULD FAIL - no redirects should happen while loading
         assert len(redirects_during_loading) == 0, ( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
                                     
 
         @pytest.mark.e2e
@@ -165,7 +165,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         '''
         pass
                                         # Simulate rapid auth state changes
-        rapid_auth_states = [ )
+        rapid_auth_states = [ ]
         {'user': None, 'loading': True, 'isAuthenticated': False, 'token': None},
         {'user': None, 'loading': False, 'isAuthenticated': False, 'token': None},
         {'user': {'id': 'user1'}, 'loading': False, 'isAuthenticated': True, 'token': 'token1'},
@@ -185,7 +185,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         redirect_history.append(redirect_target)
 
                                                 # Track state changes for analysis
-        self.auth_state_changes.append({ ))
+        self.auth_state_changes.append({ })
         'state': auth_state,
         'redirect': redirect_target,
         'timestamp': time.time()
@@ -198,7 +198,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
 
                                                 # This assertion SHOULD FAIL due to redirect loops
         assert len(loops) == 0, ( )
-        "formatted_string"
+        ""
         f"Rapid auth state changes are causing unstable routing behavior."
                                                 
 
@@ -227,7 +227,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         missing_keys = expected_auth_interface - actual_keys
 
         if missing_keys:
-        inconsistencies.append("formatted_string")
+        inconsistencies.append("")
 
                                                             # Test 2: Auth state timing consistency
                                                             # Mock: Component isolation for testing without external dependencies
@@ -240,13 +240,13 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         check_time = (time.time() - start_time) * 1000
 
         if check_time < 10:  # Real auth check takes at least 10ms
-        inconsistencies.append("formatted_string")
+        inconsistencies.append("")
 
                                                                 # This assertion SHOULD FAIL due to mock inconsistencies
         assert len(inconsistencies) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join("formatted_string" for issue in inconsistencies) +
+        ".join("" for issue in inconsistencies) +
         f"
 
         Mocks should accurately reflect real service behavior to ensure test validity."
@@ -262,7 +262,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         '''
         pass
                                                                         # Simulate logout sequence
-        logout_sequence = [ )
+        logout_sequence = [ ]
         {'user': {'id': 'user1'}, 'loading': False, 'isAuthenticated': True, 'token': 'token'},
         {'user': {'id': 'user1'}, 'loading': True, 'isAuthenticated': True, 'token': 'token'},  # Logout loading
         {'user': None, 'loading': False, 'isAuthenticated': False, 'token': None},  # Logged out
@@ -283,8 +283,8 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
 
                                                                                 # This assertion SHOULD FAIL if logout doesn't redirect properly
         assert final_redirect == '/login', ( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
         f"Landing page not handling logout transitions correctly."
                                                                                 
 
@@ -321,12 +321,12 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         max_time = max(self.auth_redirect_times)
         print(f" )
         === Auth Redirect Performance ===")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
 
         if self.auth_state_changes:
-        print("formatted_string")
+        print("")
 
 
         if __name__ == "__main__":

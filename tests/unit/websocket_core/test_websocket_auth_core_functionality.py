@@ -20,7 +20,7 @@ import asyncio
 import pytest
 import jwt
 import time
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -47,7 +47,7 @@ class WebSocketAuthenticatorCoreTests(SSotAsyncTestCase):
 
     def create_test_jwt_token(self, user_id: str, expires_in_minutes: int=60) -> str:
         """Create a test JWT token."""
-        payload = {'user_id': user_id, 'exp': datetime.utcnow() + timedelta(minutes=expires_in_minutes), 'iat': datetime.utcnow(), 'iss': 'netra-test'}
+        payload = {'user_id': user_id, 'exp': datetime.now(UTC) + timedelta(minutes=expires_in_minutes), 'iat': datetime.now(UTC), 'iss': 'netra-test'}
         return jwt.encode(payload, self.test_secret, algorithm='HS256')
 
     def test_authenticator_initialization(self):
@@ -85,7 +85,7 @@ class WebSocketAuthenticatorCoreTests(SSotAsyncTestCase):
     async def test_token_with_wrong_secret(self):
         """Test authentication with token signed with wrong secret."""
         wrong_secret = 'wrong_secret_key'
-        payload = {'user_id': 'test_user_003', 'exp': datetime.utcnow() + timedelta(hours=1), 'iat': datetime.utcnow()}
+        payload = {'user_id': 'test_user_003', 'exp': datetime.now(UTC) + timedelta(hours=1), 'iat': datetime.now(UTC)}
         wrong_token = jwt.encode(payload, wrong_secret, algorithm='HS256')
         result = await self.authenticator.authenticate_token(wrong_token)
         self.assertFalse(result.success)
@@ -93,7 +93,7 @@ class WebSocketAuthenticatorCoreTests(SSotAsyncTestCase):
 
     async def test_missing_user_id_in_token(self):
         """Test authentication with token missing user_id."""
-        payload = {'exp': datetime.utcnow() + timedelta(hours=1), 'iat': datetime.utcnow()}
+        payload = {'exp': datetime.now(UTC) + timedelta(hours=1), 'iat': datetime.now(UTC)}
         invalid_token = jwt.encode(payload, self.test_secret, algorithm='HS256')
         result = await self.authenticator.authenticate_token(invalid_token)
         self.assertFalse(result.success)
@@ -143,7 +143,7 @@ class WebSocketAuthenticatorCoreTests(SSotAsyncTestCase):
     async def test_authentication_with_custom_claims(self):
         """Test authentication with custom JWT claims."""
         user_id = 'custom_claims_user'
-        payload = {'user_id': user_id, 'exp': datetime.utcnow() + timedelta(hours=1), 'iat': datetime.utcnow(), 'iss': 'netra-test', 'custom_role': 'premium_user', 'subscription_tier': 'enterprise'}
+        payload = {'user_id': user_id, 'exp': datetime.now(UTC) + timedelta(hours=1), 'iat': datetime.now(UTC), 'iss': 'netra-test', 'custom_role': 'premium_user', 'subscription_tier': 'enterprise'}
         token = jwt.encode(payload, self.test_secret, algorithm='HS256')
         result = await self.authenticator.authenticate_token(token)
         self.assertTrue(result.success)
@@ -164,7 +164,7 @@ class WebSocketAuthenticationIntegrationTests(SSotAsyncTestCase):
 
     def create_test_jwt_token(self, user_id: str, expires_in_minutes: int=60) -> str:
         """Create a test JWT token."""
-        payload = {'user_id': user_id, 'exp': datetime.utcnow() + timedelta(minutes=expires_in_minutes), 'iat': datetime.utcnow(), 'iss': 'netra-test'}
+        payload = {'user_id': user_id, 'exp': datetime.now(UTC) + timedelta(minutes=expires_in_minutes), 'iat': datetime.now(UTC), 'iss': 'netra-test'}
         return jwt.encode(payload, self.test_secret, algorithm='HS256')
 
     async def test_auth_integration_with_user_context(self):
@@ -224,7 +224,7 @@ class WebSocketAuthenticationSecurityTests(SSotAsyncTestCase):
 
     def create_test_jwt_token(self, user_id: str, expires_in_minutes: int=60) -> str:
         """Create a test JWT token."""
-        payload = {'user_id': user_id, 'exp': datetime.utcnow() + timedelta(minutes=expires_in_minutes), 'iat': datetime.utcnow(), 'iss': 'netra-test'}
+        payload = {'user_id': user_id, 'exp': datetime.now(UTC) + timedelta(minutes=expires_in_minutes), 'iat': datetime.now(UTC), 'iss': 'netra-test'}
         return jwt.encode(payload, self.test_secret, algorithm='HS256')
 
     async def test_token_expiration_security(self):
@@ -238,7 +238,7 @@ class WebSocketAuthenticationSecurityTests(SSotAsyncTestCase):
 
     async def test_algorithm_security(self):
         """Test that only supported algorithms are accepted."""
-        payload = {'user_id': 'algo_test_user', 'exp': datetime.utcnow() + timedelta(hours=1), 'iat': datetime.utcnow()}
+        payload = {'user_id': 'algo_test_user', 'exp': datetime.now(UTC) + timedelta(hours=1), 'iat': datetime.now(UTC)}
         try:
             hs512_token = jwt.encode(payload, self.test_secret, algorithm='HS512')
             result = await self.authenticator.authenticate_token(hs512_token)

@@ -46,7 +46,7 @@ async def test_websocket_connection():
             except asyncio.TimeoutError:
                 print(f"[INFO] No response within timeout (may be expected)")
             
-    except websockets.exceptions.InvalidStatus as e:
+    except websockets.InvalidStatus as e:
         print(f"[ERROR] WebSocket InvalidStatus error: {e}")
         print(f"[DEBUG] Exception type: {type(e).__name__}")
         
@@ -157,7 +157,7 @@ async def test_with_auth():
                 print(f"[INFO] No response within timeout")
                 return "AUTH_SUCCESS_NO_RESPONSE"
                 
-    except websockets.exceptions.InvalidStatus as e:
+    except websockets.InvalidStatus as e:
         print(f"[ERROR] WebSocket auth error: {e}")
         status_code = getattr(e.response, 'status', None) if hasattr(e, 'response') else getattr(e, 'status', None)
         

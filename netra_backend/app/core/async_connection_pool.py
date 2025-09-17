@@ -22,7 +22,6 @@ Fixes Permanent Failure State Anti-Pattern:
 """
 
 import asyncio
-import logging
 import time
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Awaitable, Callable, Set, TypeVar, Optional, Any, Dict
@@ -30,13 +29,14 @@ from typing import AsyncGenerator, Awaitable, Callable, Set, TypeVar, Optional, 
 from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.core.exceptions_service import ServiceError
 from netra_backend.app.core.resilience.unified_circuit_breaker import (
-    UnifiedCircuitBreaker, 
-    UnifiedCircuitConfig, 
+    UnifiedCircuitBreaker,
+    UnifiedCircuitConfig,
     UnifiedCircuitBreakerState
 )
+from shared.logging.unified_logging_ssot import get_logger
 
 T = TypeVar('T')
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class AsyncConnectionPool:

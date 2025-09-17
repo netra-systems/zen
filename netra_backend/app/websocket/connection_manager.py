@@ -10,7 +10,7 @@ Prevents breaking changes for existing imports while system transitions to new s
 """
 
 # Import the actual implementations from websocket_core
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as CoreManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as CoreManager
 from netra_backend.app.websocket_core.connection_info import ConnectionInfo as CoreConnectionInfo
 from netra_backend.app.websocket_core.types import WebSocketConnectionState, WebSocketMessage
 from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
@@ -74,7 +74,7 @@ class ConnectionExecutionOrchestrator:
 # Compatibility functions
 def get_connection_manager():
     """Get the global connection manager instance."""
-    from netra_backend.app.websocket_core.websocket_manager import get_manager
+    from netra_backend.app.websocket_core.canonical_import_patterns import get_manager
     return get_manager()
 
 

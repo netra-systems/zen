@@ -27,7 +27,7 @@ from typing import Dict, Any, List
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
 from netra_backend.app.services.user_scoped_websocket_event_router import UserScopedWebSocketEventRouter
 from netra_backend.app.services.websocket_broadcast_service import WebSocketBroadcastService, BroadcastResult
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from shared.types.core_types import ensure_user_id
 from shared.logging.unified_logging_ssot import get_logger

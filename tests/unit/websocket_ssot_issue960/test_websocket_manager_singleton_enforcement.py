@@ -39,8 +39,8 @@ class WebSocketManagerSingletonEnforcementTests(SSotBaseTestCase):
         """
         logger.info('Testing WebSocket manager import path SSOT compliance - EXPECTING FAILURE')
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
             user_context = {'user_id': 'test_user_123', 'thread_id': 'test_thread_456'}
             manager1 = get_websocket_manager(user_context=user_context)
             manager2 = UnifiedWebSocketManager(user_context=user_context)
@@ -62,7 +62,7 @@ class WebSocketManagerSingletonEnforcementTests(SSotBaseTestCase):
         logger.info('Testing WebSocket manager factory SSOT delegation - EXPECTING FAILURE')
         try:
             from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             user_context = {'user_id': 'test_user_789', 'thread_id': 'test_thread_101'}
             factory_manager = await create_websocket_manager(user_context=user_context)
             direct_manager = get_websocket_manager(user_context=user_context)
@@ -83,7 +83,7 @@ class WebSocketManagerSingletonEnforcementTests(SSotBaseTestCase):
         """
         logger.info('Testing WebSocket manager instance sharing - EXPECTING FAILURE')
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             user_context1 = {'user_id': 'test_user_shared', 'thread_id': 'thread_1'}
             user_context2 = {'user_id': 'test_user_shared', 'thread_id': 'thread_2'}
             manager1 = get_websocket_manager(user_context=user_context1)
@@ -102,7 +102,7 @@ class WebSocketManagerSingletonEnforcementTests(SSotBaseTestCase):
         """
         logger.info('Testing WebSocket manager memory isolation - EXPECTING FAILURE')
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             context1 = {'user_id': 'user_isolation_1', 'thread_id': 'thread_1'}
             context2 = {'user_id': 'user_isolation_2', 'thread_id': 'thread_2'}
             manager1 = get_websocket_manager(user_context=context1)

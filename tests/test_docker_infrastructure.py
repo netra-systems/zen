@@ -20,47 +20,47 @@ logger = logging.getLogger(__name__)
 
 def test_docker_service_detection():
 """Test Docker service detection and startup."""
-print(" )
+print("")
 === Testing Docker Service Infrastructure ===
 ")
 
     # Check Docker availability
 docker_manager = DockerServiceManager()
-print("formatted_string")
+print("")
 
 if not docker_manager.docker_available:
-print(" )
+    print("")
 [X] Docker is not available. Please ensure Docker Desktop is running.")
 print("   Run: 'docker version' to verify Docker is working")
 return False
 
         # Check and start services
-print(" )
+    print("")
 [*] Checking Docker services...")
 port_mappings = docker_manager.check_and_start_services()
 
 if port_mappings:
-print(" )
+    print("")
 [OK] Docker services discovered:")
 for service, port in port_mappings.items():
-print("formatted_string")
+    print("")
 else:
-print(" )
+    print("")
 [!] No Docker services found. Services may need to be started.")
 print("   Run: docker compose -f docker-compose.alpine-test.yml up -d")
 
                     # Test port discovery
-print(" )
+    print("")
 [*] Testing port discovery...")
 port_discovery = DockerPortDiscovery()
 all_ports = port_discovery.discover_all_ports()
 
-print(" )
+print("")
 Discovered service ports:")
 for service, mapping in all_ports.items():
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+    print("")
+print("")
+print("")
 
 return True
 
@@ -68,7 +68,7 @@ return True
     async def test_service_connections():
 """Test actual service connections."""
 pass
-print(" )
+print("")
 === Testing Service Connections ===
 ")
 
@@ -79,37 +79,37 @@ try:
 services = RealServices()
 
                                 # Check all services
-print("[*] Checking service availability...")
+    print("[*] Checking service availability...")
 await services.ensure_all_services_available()
 print("[OK] All services are available!")
 
                                 # Test individual services
-print(" )
+    print("")
 [*] Testing individual services:")
 
                                 # Test PostgreSQL
 async with services.postgres() as db:
 result = await db.fetchval("SELECT 1")
-print("formatted_string")
+print("")
 
                                     # Test Redis
 async with services.redis() as redis:
 await redis.set("test_key", "test_value")
 value = await redis.get("test_key")
-print("formatted_string")
+print("")
 
                                         # Test ClickHouse
 try:
 result = await services.clickhouse.execute("SELECT 1")
-print("formatted_string")
+print("")
 except Exception as e:
-print("formatted_string")
+    print("")
 
 await asyncio.sleep(0)
 return True
 
 except Exception as e:
-print("formatted_string")
+    print("")
 import traceback
 traceback.print_exc()
 return False
@@ -123,9 +123,9 @@ print("=" * 60)
 
     # Test Docker detection
 if not test_docker_service_detection():
-print(" )
+    print("")
 [!] Docker infrastructure test failed.")
-print(" )
+print("")
 To fix:")
 print("1. Start Docker Desktop")
 print("2. Run: docker compose -f docker-compose.alpine-test.yml up -d")
@@ -133,16 +133,16 @@ print("3. Re-run this test")
 return 1
 
         # Test service connections
-print(" )
-" + "=" * 60)
+    print("")
+ + =" * 60)
 success = asyncio.run(test_service_connections())
 
 if success:
-print(" )
+    print("")
 [OK] All infrastructure tests passed!")
 return 0
 else:
-print(" )
+    print("")
 [X] Some infrastructure tests failed.")
 return 1
 

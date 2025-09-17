@@ -39,7 +39,7 @@ from netra_backend.app.websocket_core.message_buffer import (
     WebSocketMessageBuffer, BufferedMessage, BufferPriority, BufferConfig
 )
 from netra_backend.app.websocket_core.utils import WebSocketMessageQueue
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 
 from shared.types.core_types import UserID, ConnectionID
 

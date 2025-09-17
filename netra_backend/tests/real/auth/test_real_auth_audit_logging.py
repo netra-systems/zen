@@ -112,7 +112,7 @@ class RealAuthAuditLoggingTests:
 
     def create_audit_event(self, event_type: AuditEventType, user_id: Optional[int]=None, severity: AuditSeverity=AuditSeverity.MEDIUM, **kwargs) -> Dict[str, Any]:
         """Create audit event record."""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         return {'event_id': secrets.token_hex(16), 'event_type': event_type.value, 'severity': severity.value, 'timestamp': now.isoformat(), 'user_id': user_id, 'session_id': kwargs.get('session_id', secrets.token_hex(8)), 'ip_address': kwargs.get('ip_address', '127.0.0.1'), 'user_agent': kwargs.get('user_agent', 'pytest-audit-test'), 'endpoint': kwargs.get('endpoint', '/auth/test'), 'method': kwargs.get('method', 'POST'), 'status_code': kwargs.get('status_code', 200), 'details': kwargs.get('details', {}), 'resource': kwargs.get('resource'), 'action': kwargs.get('action'), 'result': kwargs.get('result', 'success'), 'risk_score': kwargs.get('risk_score', 0), 'country_code': kwargs.get('country_code', 'US'), 'organization_id': kwargs.get('organization_id'), 'correlation_id': kwargs.get('correlation_id', str(secrets.token_hex(8)))}
 
     @pytest.mark.asyncio
@@ -280,7 +280,7 @@ class RealAuthAuditLoggingTests:
         audit_keys = []
         try:
             for period in time_periods:
-                event_time = datetime.utcnow() - timedelta(days=period['days_ago'])
+                event_time = datetime.now(UTC) - timedelta(days=period['days_ago'])
                 audit_event = self.create_audit_event(AuditEventType.LOGIN_SUCCESS, user_id=60000 + period['days_ago'], details={'retention_test': True, 'period_label': period['label'], 'days_ago': period['days_ago']})
                 audit_event['timestamp'] = event_time.isoformat()
                 audit_event['retention_classification'] = period['label']
@@ -288,7 +288,7 @@ class RealAuthAuditLoggingTests:
                 audit_keys.append(audit_key)
                 retention_test_events.append(audit_event)
                 await redis_client.setex(audit_key, 3600, json.dumps(audit_event))
-            compliance_report = {'report_id': secrets.token_hex(8), 'generated_at': datetime.utcnow().isoformat(), 'reporting_period': 'test_period', 'total_audit_events': len(retention_test_events), 'events_by_category': {}, 'events_by_severity': {}, 'retention_analysis': {}, 'compliance_status': {}}
+            compliance_report = {'report_id': secrets.token_hex(8), 'generated_at': datetime.now(UTC).isoformat(), 'reporting_period': 'test_period', 'total_audit_events': len(retention_test_events), 'events_by_category': {}, 'events_by_severity': {}, 'retention_analysis': {}, 'compliance_status': {}}
             for event in retention_test_events:
                 event_type = event['event_type']
                 severity = event['severity']
@@ -297,7 +297,7 @@ class RealAuthAuditLoggingTests:
                 compliance_report['events_by_severity'][severity] = compliance_report['events_by_severity'].get(severity, 0) + 1
                 compliance_report['retention_analysis'][retention_class] = compliance_report['retention_analysis'].get(retention_class, 0) + 1
             compliance_report['compliance_status'] = {'gdpr_compliant': True, 'sox_compliant': True, 'pci_compliant': True, 'hipaa_compliant': True, 'retention_policy_followed': True}
-            current_time = datetime.utcnow()
+            current_time = datetime.now(UTC)
             events_to_purge = []
             for event in retention_test_events:
                 event_time = datetime.fromisoformat(event['timestamp'])

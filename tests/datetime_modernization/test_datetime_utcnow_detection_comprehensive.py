@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Comprehensive datetime.utcnow() Detection Test Suite for Issue #826
+Comprehensive datetime.now(UTC) Detection Test Suite for Issue #826
 
-This test suite detects all deprecated datetime.utcnow() usage patterns in the codebase
+This test suite detects all deprecated datetime.now(UTC) usage patterns in the codebase
 and validates that they can be successfully modernized to datetime.now(datetime.UTC).
 
 Business Justification (BVJ):
@@ -12,7 +12,7 @@ Business Justification (BVJ):
 - Revenue Impact: Maintains system reliability as Python versions evolve
 
 Test Plan Coverage:
-1. Detection of all datetime.utcnow() usage patterns
+1. Detection of all datetime.now(UTC) usage patterns
 2. Validation of timezone-aware replacements
 3. Consistency checks for datetime handling
 4. Regression prevention for datetime operations
@@ -31,7 +31,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
 class DatetimeUtcnowDetectionTest(SSotAsyncTestCase):
-    """Tests for detecting deprecated datetime.utcnow() usage patterns."""
+    """Tests for detecting deprecated datetime.now(UTC) usage patterns."""
     
     @classmethod
     def setUpClass(cls):
@@ -51,14 +51,14 @@ class DatetimeUtcnowDetectionTest(SSotAsyncTestCase):
 
     def test_detect_datetime_utcnow_usage_patterns(self):
         """
-        DETECTION TEST: Find all datetime.utcnow() usage patterns in Python files.
+        DETECTION TEST: Find all datetime.now(UTC) usage patterns in Python files.
         
         This test SHOULD PASS, indicating that deprecated usage exists and needs modernization.
         """
         utcnow_patterns = self._scan_for_datetime_utcnow()
         
         # Log findings for analysis
-        self.logger.info(f"Found {len(utcnow_patterns)} datetime.utcnow() usage patterns")
+        self.logger.info(f"Found {len(utcnow_patterns)} datetime.now(UTC) usage patterns")
         
         for file_path, occurrences in utcnow_patterns.items():
             self.logger.info(f"File: {file_path}")
@@ -67,7 +67,7 @@ class DatetimeUtcnowDetectionTest(SSotAsyncTestCase):
         
         # This test should PASS if deprecated usage is found (indicating work needed)
         self.assertGreater(len(utcnow_patterns), 0, 
-                          "Expected to find datetime.utcnow() usage requiring modernization")
+                          "Expected to find datetime.now(UTC) usage requiring modernization")
         
         # Store results for use in other tests
         self._store_detection_results(utcnow_patterns)
@@ -76,7 +76,7 @@ class DatetimeUtcnowDetectionTest(SSotAsyncTestCase):
 
     def test_categorize_datetime_utcnow_usage_types(self):
         """
-        ANALYSIS TEST: Categorize different types of datetime.utcnow() usage.
+        ANALYSIS TEST: Categorize different types of datetime.now(UTC) usage.
         
         Categories:
         - Direct timestamp creation
@@ -112,7 +112,7 @@ class DatetimeUtcnowDetectionTest(SSotAsyncTestCase):
         
         # Validate we found various usage patterns
         total_occurrences = sum(len(items) for items in categories.values())
-        self.assertGreater(total_occurrences, 0, "Should find datetime.utcnow() usage patterns")
+        self.assertGreater(total_occurrences, 0, "Should find datetime.now(UTC) usage patterns")
         
         return categories
 
@@ -184,21 +184,21 @@ class DatetimeUtcnowDetectionTest(SSotAsyncTestCase):
         VALIDATION TEST: Verify that datetime.now(datetime.UTC) produces compatible results.
         
         This test validates that the modernized approach produces equivalent results
-        to the deprecated datetime.utcnow().
+        to the deprecated datetime.now(UTC).
         """
         # Test equivalence of datetime operations
         test_cases = [
             # Basic timestamp creation
-            ('datetime.utcnow()', 'datetime.now(datetime.UTC)'),
+            ('datetime.now(UTC)', 'datetime.now(datetime.UTC)'),
             
             # ISO formatting
-            ('datetime.utcnow().isoformat()', 'datetime.now(datetime.UTC).isoformat()'),
+            ('datetime.now(UTC).isoformat()', 'datetime.now(datetime.UTC).isoformat()'),
             
             # Timestamp conversion
-            ('datetime.utcnow().timestamp()', 'datetime.now(datetime.UTC).timestamp()'),
+            ('datetime.now(UTC).timestamp()', 'datetime.now(datetime.UTC).timestamp()'),
             
             # String representation
-            ('str(datetime.utcnow())', 'str(datetime.now(datetime.UTC))'),
+            ('str(datetime.now(UTC))', 'str(datetime.now(datetime.UTC))'),
         ]
         
         compatibility_results = []
@@ -385,19 +385,19 @@ class DatetimeUtcnowDetectionTest(SSotAsyncTestCase):
             'test_cases': [
                 {
                     'name': 'basic_replacement',
-                    'old_code': 'timestamp = datetime.utcnow()',
+                    'old_code': 'timestamp = datetime.now(UTC)',
                     'new_code': 'timestamp = datetime.now(datetime.UTC)',
                     'validation': 'assert timestamp.tzinfo is not None'
                 },
                 {
                     'name': 'iso_format',
-                    'old_code': 'iso_time = datetime.utcnow().isoformat()',
+                    'old_code': 'iso_time = datetime.now(UTC).isoformat()',
                     'new_code': 'iso_time = datetime.now(datetime.UTC).isoformat()',
                     'validation': 'assert iso_time.endswith("+00:00") or iso_time.endswith("Z")'
                 },
                 {
                     'name': 'timestamp_conversion',
-                    'old_code': 'unix_time = datetime.utcnow().timestamp()',
+                    'old_code': 'unix_time = datetime.now(UTC).timestamp()',
                     'new_code': 'unix_time = datetime.now(datetime.UTC).timestamp()',
                     'validation': 'assert isinstance(unix_time, float)'
                 }
@@ -425,7 +425,7 @@ class DatetimeUtcnowDetectionTest(SSotAsyncTestCase):
     # Helper methods
     
     def _scan_for_datetime_utcnow(self) -> Dict[str, List[Tuple[int, str]]]:
-        """Scan codebase for datetime.utcnow() usage patterns."""
+        """Scan codebase for datetime.now(UTC) usage patterns."""
         patterns = {}
         
         for py_file in self._get_python_files():
@@ -435,7 +435,7 @@ class DatetimeUtcnowDetectionTest(SSotAsyncTestCase):
                 
                 file_patterns = []
                 for line_num, line in enumerate(lines, 1):
-                    if 'datetime.utcnow()' in line:
+                    if 'datetime.now(UTC)' in line:
                         file_patterns.append((line_num, line))
                 
                 if file_patterns:
@@ -462,7 +462,7 @@ class DatetimeUtcnowDetectionTest(SSotAsyncTestCase):
         return python_files
     
     def _categorize_usage(self, line_content: str) -> str:
-        """Categorize the type of datetime.utcnow() usage."""
+        """Categorize the type of datetime.now(UTC) usage."""
         line_lower = line_content.lower().strip()
         
         if any(op in line_content for op in ['=', 'return']):

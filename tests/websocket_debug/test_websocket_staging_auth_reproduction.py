@@ -100,7 +100,7 @@ class WebSocketStagingAuthReproduction:
                     step2_result["connection_state"] = "established"
                     results["success"] = True
                     
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 # This is the expected failure
                 print(f" FAIL:  WebSocket connection rejected: {e}")
                 step2_result["error"] = f"Connection closed: {e.code} - {e.reason}"
@@ -111,7 +111,7 @@ class WebSocketStagingAuthReproduction:
                     print("[REPRODUCED] HTTP 403 WebSocket authentication failure!")
                     step2_result["reproduced_issue"] = True
                     
-            except websockets.exceptions.InvalidStatus as e:
+            except websockets.InvalidStatus as e:
                 # Also expected for HTTP 403 responses
                 print(f" FAIL:  WebSocket connection rejected with HTTP status: {e.status_code}")
                 step2_result["error"] = f"HTTP {e.status_code}: {e.response.reason_phrase}"

@@ -19,8 +19,9 @@ This test ensures that regardless of LLM API failure patterns:
 5. agent_completed - Users get clear resolution even if degraded
 
 CRITICAL: This test MUST pass or the platform loses all user value during LLM outages.
-"""
+"
 
+"""
 import asyncio
 import json
 import time
@@ -56,7 +57,7 @@ from shared.types import UserID, ThreadID, RunID
 
 
 class CriticalLLMFailureSimulator:
-    """Simulates the most critical LLM failure scenarios for mission critical testing."""
+    "Simulates the most critical LLM failure scenarios for mission critical testing.
     
     def __init__(self, failure_mode: str):
         self.failure_mode = failure_mode
@@ -65,19 +66,18 @@ class CriticalLLMFailureSimulator:
         self.failed_calls = 0
     
     async def simulate_critical_llm_call(self, prompt: str, config_name: str) -> str:
-        """Simulate LLM calls with critical failure patterns."""
+        "Simulate LLM calls with critical failure patterns."
         self.call_count += 1
         
-        if self.failure_mode == "complete_outage":
+        if self.failure_mode == complete_outage:"
             # Complete LLM outage - all calls fail
             self.failed_calls += 1
             raise ServiceError(
-                f"LLM service completely unavailable: {config_name}",
-                error_code="LLM_SERVICE_UNAVAILABLE",
+                f"LLM service completely unavailable: {config_name},
+                error_code=LLM_SERVICE_UNAVAILABLE,
                 context={'total_attempts': self.call_count}
-            )
         
-        elif self.failure_mode == "cascading_timeouts":
+        elif self.failure_mode == cascading_timeouts:"
             # Cascading timeout scenario - gets worse over time
             timeout_delay = min(15.0, 2.0 * self.call_count)
             self.failed_calls += 1
@@ -85,62 +85,59 @@ class CriticalLLMFailureSimulator:
             raise ServiceTimeoutError(
                 timeout_seconds=timeout_delay,
                 context={'cascading_attempt': self.call_count, 'config': config_name}
-            )
         
-        elif self.failure_mode == "partial_recovery":
+        elif self.failure_mode == partial_recovery":
             # Partial recovery - some succeed after failures
             if self.call_count <= 3:
                 self.failed_calls += 1
                 raise ServiceError(
-                    f"LLM temporarily unavailable: {config_name}",
-                    error_code="LLM_TEMPORARY_FAILURE",
+                    fLLM temporarily unavailable: {config_name},
+                    error_code=LLM_TEMPORARY_FAILURE,"
                     context={'recovery_attempt': self.call_count}
-                )
             else:
                 # Recovery starts after 3 attempts
                 self.successful_calls += 1
                 await asyncio.sleep(1.0)  # Simulate normal latency
-                return f"Recovered LLM response: {prompt[:50]}... (attempt {self.call_count})"
+                return f"Recovered LLM response: {prompt[:50]}... (attempt {self.call_count}
         
-        elif self.failure_mode == "intermittent_success":
+        elif self.failure_mode == intermittent_success:
             # Intermittent success pattern
             if self.call_count % 3 == 0:
                 self.successful_calls += 1
                 await asyncio.sleep(0.8)
-                return f"Intermittent success: {prompt[:50]}... (call {self.call_count})"
+                return fIntermittent success: {prompt[:50]}... (call {self.call_count}
             else:
                 self.failed_calls += 1
                 raise ServiceError(
-                    f"LLM intermittent failure: {config_name}",
-                    error_code="LLM_INTERMITTENT_FAILURE", 
+                    fLLM intermittent failure: {config_name}","
+                    error_code=LLM_INTERMITTENT_FAILURE, 
                     context={'pattern_attempt': self.call_count}
-                )
         
         else:
             # Default failure
             self.failed_calls += 1
-            raise ServiceError(f"Unknown LLM failure mode: {self.failure_mode}")
+            raise ServiceError(fUnknown LLM failure mode: {self.failure_mode})"
 
 
 class AgentExecutionLLMFailureWebSocketEventsTests:
-    """Mission critical test for WebSocket events during LLM failures."""
+    "Mission critical test for WebSocket events during LLM failures.
     
     @pytest.mark.mission_critical
     @pytest.mark.no_skip  # NEVER skip this test
     @pytest.mark.real_services
     async def test_all_websocket_events_sent_during_complete_llm_outage(self, real_services_fixture):
-        """
+        ""
         MISSION CRITICAL: All 5 WebSocket events MUST be sent even during complete LLM outage.
         
         This is the most critical test - if LLM APIs are completely down,
         users MUST still receive feedback about what's happening.
-        """
+
         
-        if not real_services_fixture["database_available"]:
-            pytest.skip("Real database required for mission critical WebSocket testing")
+        if not real_services_fixture["database_available]:"
+            pytest.skip(Real database required for mission critical WebSocket testing)
         
         # Setup complete LLM outage scenario
-        outage_simulator = CriticalLLMFailureSimulator("complete_outage")
+        outage_simulator = CriticalLLMFailureSimulator(complete_outage)"
         
         # Create real user context
         user_context = await self._create_mission_critical_user_context(real_services_fixture)
@@ -154,9 +151,8 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
             
             # Create agent registry and execution core
             agent_registry = AgentRegistry(
-                postgres_pool=real_services_fixture["postgres"],
-                redis_client=real_services_fixture["redis"]
-            )
+                postgres_pool=real_services_fixture[postgres"],
+                redis_client=real_services_fixture[redis]
             
             websocket_bridge = AgentWebSocketBridge()
             await websocket_bridge.initialize()
@@ -167,9 +163,8 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
             websocket_events = []
             
             async with WebSocketTestClient(
-                token=user_context["auth_token"],
-                base_url=real_services_fixture["backend_url"]
-            ) as ws_client:
+                token=user_context[auth_token"],"
+                base_url=real_services_fixture[backend_url] as ws_client:
                 
                 # Start event collection
                 event_collection_task = asyncio.create_task(
@@ -178,18 +173,18 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
                 
                 # Create execution context
                 execution_context = AgentExecutionContext(
-                    agent_name="critical_test_agent",
+                    agent_name=critical_test_agent,"
                     run_id=RunID(str(uuid4())),
                     correlation_id=str(uuid4()),
-                    user_id=UserID(user_context["user_id"]),
-                    thread_id=ThreadID(user_context["thread_id"])
+                    user_id=UserID(user_context["user_id],
+                    thread_id=ThreadID(user_context[thread_id]
                 )
                 
                 agent_state = DeepAgentState(
-                    user_id=user_context["user_id"],
-                    thread_id=user_context["thread_id"],
-                    organization_id=user_context["organization_id"],
-                    conversation_context="Mission critical test during LLM outage"
+                    user_id=user_context["user_id],"
+                    thread_id=user_context[thread_id],
+                    organization_id=user_context[organization_id],"
+                    conversation_context=Mission critical test during LLM outage"
                 )
                 
                 # Execute agent - should handle complete LLM failure gracefully
@@ -201,7 +196,7 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
                     )
                 except Exception as e:
                     # Even if execution fails, events should still be sent
-                    logger.info(f"Agent execution failed as expected during outage: {e}")
+                    logger.info(fAgent execution failed as expected during outage: {e})
                 
                 # Stop event collection
                 event_collection_task.cancel()
@@ -216,17 +211,17 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
     @pytest.mark.no_skip
     @pytest.mark.real_services
     async def test_websocket_events_during_cascading_llm_timeouts(self, real_services_fixture):
-        """
+        "
         MISSION CRITICAL: WebSocket events must continue during cascading timeouts.
         
         This tests the worst-case scenario where LLM timeouts get progressively worse.
         Users must still receive progress updates.
-        """
+"
         
-        if not real_services_fixture["database_available"]:
-            pytest.skip("Real database required for mission critical timeout testing")
+        if not real_services_fixture[database_available]:"
+            pytest.skip(Real database required for mission critical timeout testing")
         
-        timeout_simulator = CriticalLLMFailureSimulator("cascading_timeouts")
+        timeout_simulator = CriticalLLMFailureSimulator(cascading_timeouts)
         
         user_context = await self._create_mission_critical_user_context(real_services_fixture)
         
@@ -237,9 +232,8 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
             mock_llm_class.return_value = mock_llm_client
             
             agent_registry = AgentRegistry(
-                postgres_pool=real_services_fixture["postgres"], 
-                redis_client=real_services_fixture["redis"]
-            )
+                postgres_pool=real_services_fixture[postgres"], "
+                redis_client=real_services_fixture[redis]
             
             websocket_bridge = AgentWebSocketBridge()
             await websocket_bridge.initialize()
@@ -249,27 +243,26 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
             websocket_events = []
             
             async with WebSocketTestClient(
-                token=user_context["auth_token"],
-                base_url=real_services_fixture["backend_url"]
-            ) as ws_client:
+                token=user_context[auth_token],"
+                base_url=real_services_fixture["backend_url] as ws_client:
                 
                 event_collection_task = asyncio.create_task(
                     self._collect_critical_events(ws_client, websocket_events)
                 )
                 
                 execution_context = AgentExecutionContext(
-                    agent_name="timeout_test_agent",
+                    agent_name=timeout_test_agent,
                     run_id=RunID(str(uuid4())),
                     correlation_id=str(uuid4()),
-                    user_id=UserID(user_context["user_id"]),
-                    thread_id=ThreadID(user_context["thread_id"])
+                    user_id=UserID(user_context["user_id],"
+                    thread_id=ThreadID(user_context[thread_id]
                 )
                 
                 agent_state = DeepAgentState(
-                    user_id=user_context["user_id"],
-                    thread_id=user_context["thread_id"],
-                    organization_id=user_context["organization_id"],
-                    conversation_context="Testing cascading timeout resilience"
+                    user_id=user_context[user_id],"
+                    thread_id=user_context[thread_id"],
+                    organization_id=user_context[organization_id],
+                    conversation_context=Testing cascading timeout resilience""
                 )
                 
                 start_time = time.time()
@@ -281,7 +274,7 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
                         timeout=25.0
                     )
                 except Exception as e:
-                    logger.info(f"Agent execution failed during cascading timeouts: {e}")
+                    logger.info(fAgent execution failed during cascading timeouts: {e})
                 
                 execution_duration = time.time() - start_time
                 event_collection_task.cancel()
@@ -296,16 +289,16 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
     @pytest.mark.no_skip
     @pytest.mark.real_services
     async def test_websocket_events_during_llm_partial_recovery(self, real_services_fixture):
-        """
+        
         MISSION CRITICAL: WebSocket events during LLM partial recovery scenarios.
         
         Tests that users receive proper progress updates as LLM service gradually recovers.
-        """
+""
         
-        if not real_services_fixture["database_available"]:
-            pytest.skip("Real database required for mission critical recovery testing")
+        if not real_services_fixture[database_available]:
+            pytest.skip(Real database required for mission critical recovery testing")"
         
-        recovery_simulator = CriticalLLMFailureSimulator("partial_recovery")
+        recovery_simulator = CriticalLLMFailureSimulator(partial_recovery)
         
         user_context = await self._create_mission_critical_user_context(real_services_fixture)
         
@@ -316,9 +309,8 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
             mock_llm_class.return_value = mock_llm_client
             
             agent_registry = AgentRegistry(
-                postgres_pool=real_services_fixture["postgres"],
-                redis_client=real_services_fixture["redis"]
-            )
+                postgres_pool=real_services_fixture[postgres],"
+                redis_client=real_services_fixture["redis]
             
             websocket_bridge = AgentWebSocketBridge()
             await websocket_bridge.initialize()
@@ -328,27 +320,26 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
             websocket_events = []
             
             async with WebSocketTestClient(
-                token=user_context["auth_token"],
-                base_url=real_services_fixture["backend_url"]
-            ) as ws_client:
+                token=user_context[auth_token],
+                base_url=real_services_fixture["backend_url] as ws_client:"
                 
                 event_collection_task = asyncio.create_task(
                     self._collect_critical_events(ws_client, websocket_events)
                 )
                 
                 execution_context = AgentExecutionContext(
-                    agent_name="recovery_test_agent",
+                    agent_name=recovery_test_agent,
                     run_id=RunID(str(uuid4())),
                     correlation_id=str(uuid4()),
-                    user_id=UserID(user_context["user_id"]),
-                    thread_id=ThreadID(user_context["thread_id"])
+                    user_id=UserID(user_context[user_id],"
+                    thread_id=ThreadID(user_context[thread_id"]
                 )
                 
                 agent_state = DeepAgentState(
-                    user_id=user_context["user_id"],
-                    thread_id=user_context["thread_id"],
-                    organization_id=user_context["organization_id"],
-                    conversation_context="Testing LLM recovery patterns"
+                    user_id=user_context[user_id],
+                    thread_id=user_context[thread_id"],"
+                    organization_id=user_context[organization_id],
+                    conversation_context=Testing LLM recovery patterns"
                 )
                 
                 result = await execution_core.execute_agent(
@@ -363,7 +354,7 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
                 self._validate_all_five_websocket_events_sent(websocket_events)
                 
                 # Should eventually complete successfully with recovery
-                assert result is not None, "Agent should complete successfully after LLM recovery"
+                assert result is not None, "Agent should complete successfully after LLM recovery
                 
                 # Validate recovery pattern events
                 self._validate_recovery_scenario_events(websocket_events, recovery_simulator)
@@ -371,78 +362,78 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
     # Helper methods for mission critical testing
     
     async def _create_mission_critical_user_context(self, real_services: Dict) -> Dict:
-        """Create user context for mission critical testing."""
-        db_session = real_services["db"]
+        Create user context for mission critical testing.""
+        db_session = real_services[db]
         
         user_id = str(uuid4())
-        user_email = f"mission-critical-{user_id[:8]}@example.com"
+        user_email = fmission-critical-{user_id[:8]}@example.com"
         
         # Create user with mission critical context
-        await db_session.execute("""
+        await db_session.execute("
             INSERT INTO auth.users (id, email, name, is_active)
             VALUES (:id, :email, :name, :is_active)
             ON CONFLICT (email) DO UPDATE SET is_active = EXCLUDED.is_active
-        """, {
-            "id": user_id,
-            "email": user_email,
-            "name": "Mission Critical Test User",
-            "is_active": True
-        })
+        , {
+            id": user_id,"
+            email: user_email,
+            name: "Mission Critical Test User,
+            is_active": True
+        }
         
         org_id = str(uuid4())
-        await db_session.execute("""
+        await db_session.execute(
             INSERT INTO backend.organizations (id, name, slug, plan)
             VALUES (:id, :name, :slug, :plan)
             ON CONFLICT (slug) DO UPDATE SET plan = EXCLUDED.plan
-        """, {
-            "id": org_id,
-            "name": "Mission Critical Org",
-            "slug": f"mission-critical-{user_id[:8]}",
-            "plan": "enterprise"  # Enterprise plan for critical testing
-        })
+        "", {
+            id: org_id,
+            name: Mission Critical Org",
+            "slug: fmission-critical-{user_id[:8]},
+            plan: enterprise  # Enterprise plan for critical testing
+        }
         
         thread_id = str(uuid4())
-        await db_session.execute("""
+        await db_session.execute(""
             INSERT INTO backend.threads (id, user_id, title, created_at)
             VALUES (:id, :user_id, :title, :created_at)
-        """, {
-            "id": thread_id,
-            "user_id": user_id,
-            "title": "Mission Critical LLM Failure Test",
-            "created_at": datetime.utcnow()
-        })
+        , {
+            id: thread_id,"
+            "user_id: user_id,
+            title: Mission Critical LLM Failure Test,
+            created_at": datetime.utcnow()"
+        }
         
         await db_session.commit()
         
         return {
-            "user_id": user_id,
-            "organization_id": org_id,
-            "thread_id": thread_id,
-            "auth_token": f"mission-critical-token-{user_id}"
+            user_id: user_id,
+            organization_id: org_id,"
+            "thread_id: thread_id,
+            auth_token: fmission-critical-token-{user_id}
         }
     
-    async def _collect_critical_events(self, ws_client: WebSocketTestClient, events_list: List[Dict]):
-        """Collect WebSocket events for mission critical validation."""
+    async def _collect_critical_events(self, ws_client: WebSocketTestClient, events_list: List[Dict]:
+        "Collect WebSocket events for mission critical validation."
         try:
             async for event in ws_client.receive_events(timeout=35):
                 events_list.append(event)
-                logger.info(f"Collected critical event: {event.get('type')} at {time.time()}")
+                logger.info(fCollected critical event: {event.get('type')} at {time.time()})
                 
                 # Continue collecting until agent completes or fails
                 if event.get('type') in ['agent_completed', 'agent_failed']:
                     break
         except asyncio.CancelledError:
-            logger.info("Event collection cancelled - normal operation")
+            logger.info(Event collection cancelled - normal operation)"
         except Exception as e:
-            logger.error(f"Critical event collection error: {e}")
+            logger.error(f"Critical event collection error: {e})
     
-    def _validate_all_five_websocket_events_sent(self, events: List[Dict]):
-        """
+    def _validate_all_five_websocket_events_sent(self, events: List[Dict]:
+        
         MISSION CRITICAL: Validate all 5 required WebSocket events are sent.
         
         This is the most important validation - without these events,
         the chat interface provides NO business value.
-        """
+""
         
         event_types = [event.get('type') for event in events]
         
@@ -460,67 +451,67 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
         
         for mandatory_event in mandatory_events:
             assert mandatory_event in event_types, \
-                f"MISSION CRITICAL FAILURE: Missing mandatory WebSocket event '{mandatory_event}'. " \
-                f"Without this event, users have no feedback during LLM failures. " \
-                f"Events received: {event_types}"
+                fMISSION CRITICAL FAILURE: Missing mandatory WebSocket event '{mandatory_event}'.  \
+                fWithout this event, users have no feedback during LLM failures.  \
+                f"Events received: {event_types}
         
         # Tool events are optional depending on agent implementation
-        tool_events_present = any(event in event_types for event in ['tool_executing', 'tool_completed'])
+        tool_events_present = any(event in event_types for event in ['tool_executing', 'tool_completed']
         
         if tool_events_present:
             # If any tool events are present, both should be present for consistency
             assert 'tool_executing' in event_types or 'tool_completed' in event_types, \
-                "If tool events are sent, both executing and completed should be present"
+                If tool events are sent, both executing and completed should be present"
         
         # Log successful validation
-        logger.info(f"MISSION CRITICAL SUCCESS: All required WebSocket events sent during LLM failure: {event_types}")
+        logger.info(fMISSION CRITICAL SUCCESS: All required WebSocket events sent during LLM failure: {event_types})
     
     def _validate_outage_scenario_events(self, events: List[Dict], simulator: CriticalLLMFailureSimulator):
-        """Validate WebSocket events specific to complete LLM outage."""
+        "Validate WebSocket events specific to complete LLM outage."
         
         # Should have retry or error information in events
         error_or_retry_events = [
             event for event in events
-            if 'error' in str(event.get('data', {})).lower() or
-               'retry' in str(event.get('data', {})).lower() or
-               'unavailable' in str(event.get('data', {})).lower()
+            if 'error' in str(event.get('data', {}).lower() or
+               'retry' in str(event.get('data', {}).lower() or
+               'unavailable' in str(event.get('data', {}).lower()
         ]
         
         # During complete outage, users should be informed about the issue
         assert len(error_or_retry_events) > 0, \
-            "During complete LLM outage, users must be informed about service issues"
+            During complete LLM outage, users must be informed about service issues
         
         # Should show multiple LLM call attempts
         assert simulator.call_count >= 2, \
-            f"Expected multiple retry attempts during outage, got {simulator.call_count}"
+            fExpected multiple retry attempts during outage, got {simulator.call_count}""
         
         assert simulator.failed_calls == simulator.call_count, \
-            "All LLM calls should fail during complete outage"
+            All LLM calls should fail during complete outage
     
     def _validate_timeout_scenario_events(self, events: List[Dict], execution_duration: float):
-        """Validate WebSocket events during cascading timeouts."""
+        "Validate WebSocket events during cascading timeouts."
         
         # Execution should take significant time due to cascading timeouts
         assert execution_duration > 5.0, \
-            f"Expected longer execution time due to cascading timeouts, got {execution_duration}s"
+            fExpected longer execution time due to cascading timeouts, got {execution_duration}s
         
         # Should have multiple thinking events during long execution
         thinking_events = [event for event in events if event.get('type') == 'agent_thinking']
         assert len(thinking_events) >= 1, \
-            "Users should receive thinking updates during long timeout scenarios"
+            Users should receive thinking updates during long timeout scenarios"
         
         # Events should span the execution duration
         if len(events) >= 2 and events[0].get('timestamp') and events[-1].get('timestamp'):
             event_span = events[-1]['timestamp'] - events[0]['timestamp']
             assert event_span >= 3.0, \
-                f"WebSocket events should span timeout duration, got {event_span}s"
+                f"WebSocket events should span timeout duration, got {event_span}s
     
     def _validate_recovery_scenario_events(self, events: List[Dict], simulator: CriticalLLMFailureSimulator):
-        """Validate WebSocket events during LLM recovery."""
+        Validate WebSocket events during LLM recovery."
         
         # Should show both failures and eventual success
-        assert simulator.failed_calls > 0, "Should have some failed calls before recovery"
-        assert simulator.successful_calls > 0, "Should have successful calls after recovery"
+        assert simulator.failed_calls > 0, "Should have some failed calls before recovery
+        assert simulator.successful_calls > 0, Should have successful calls after recovery
         
         # Agent should eventually complete successfully
         completion_events = [event for event in events if event.get('type') == 'agent_completed']
@@ -528,10 +519,10 @@ class AgentExecutionLLMFailureWebSocketEventsTests:
         
         # Should not indicate error in final completion
         final_completion = completion_events[-1]
-        completion_data = final_completion.get('data', {})
+        completion_data = final_completion.get('data', {}
         
         # Final result should indicate success, not error
         status = completion_data.get('status', '').lower()
-        assert status != 'failed', f"Final completion should not be failed status: {status}"
+        assert status != 'failed', fFinal completion should not be failed status: {status}
         
-        logger.info(f"Recovery scenario validated: {simulator.failed_calls} failures, {simulator.successful_calls} successes")
+        logger.info(fRecovery scenario validated: {simulator.failed_calls} failures, {simulator.successful_calls} successes")

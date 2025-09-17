@@ -31,7 +31,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.environment_isolation import get_test_env_manager
 from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreaker
 from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.external_api_client import HTTPError
 logger = logging.getLogger(__name__)
 

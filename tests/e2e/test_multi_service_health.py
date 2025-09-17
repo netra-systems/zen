@@ -42,25 +42,25 @@ from netra_backend.app.redis_manager import RedisManager
 logger = central_logger.get_logger(__name__)
 
         # Service endpoints and timeouts
-SERVICE_ENDPOINTS = { )
-"auth": { )
+SERVICE_ENDPOINTS = { }
+"auth": { }
 "url": "http://localhost:8081/health",
 "timeout": 5.0,
 "expected_service": "auth-service"
 },
-"backend": { )
+"backend": { }
 "url": "http://localhost:8000/health",
 "timeout": 5.0,
 "expected_service": "netra-ai-platform"
 },
-"frontend": { )
+"frontend": { }
 "url": "http://localhost:3000",
 "timeout": 10.0,
 "check_type": "build_verification"
         
         
 
-DATABASE_TIMEOUTS = { )
+DATABASE_TIMEOUTS = { }
 "postgres": 3.0,
 "clickhouse": 5.0,
 "redis": 2.0
@@ -120,14 +120,14 @@ class MultiServiceHealthChecker:
         service=service_name,
         status="unhealthy",
         response_time_ms=response_time_ms,
-        error="formatted_string"
+        error=""
                             
         else:
         return HealthCheckResult( )
         service=service_name,
         status="unhealthy",
         response_time_ms=response_time_ms,
-        error="formatted_string"
+        error=""
                                 
 
         except asyncio.TimeoutError:
@@ -301,7 +301,7 @@ class MultiServiceHealthChecker:
         service="inter_service",
         status="healthy",
         response_time_ms=response_time_ms,
-        details={ )
+        details={ }
         "auth_to_backend": "accessible",
         "backend_to_auth": "accessible"
                     
@@ -334,7 +334,7 @@ class MultiServiceHealthChecker:
         tasks.append(self.check_service_endpoint(service_name, config))
 
         # Database connection checks
-        tasks.extend([ ))
+        tasks.extend([ ])
         self.check_postgres_connection(),
         self.check_clickhouse_connection(),
         self.check_redis_connection()
@@ -351,7 +351,7 @@ class MultiServiceHealthChecker:
         for i, result in enumerate(self.results):
         if isinstance(result, Exception):
         processed_results.append(HealthCheckResult( ))
-        service="formatted_string",
+        service="",
         status="error",
         response_time_ms=0,
         error=str(result)
@@ -375,21 +375,21 @@ service_names = [r.service for r in results]
 expected_services = ["auth", "backend", "postgres", "clickhouse", "redis", "inter_service"]
 
 for expected_service in expected_services:
-assert expected_service in service_names, "formatted_string"
+assert expected_service in service_names, ""
 
                             # Validate response times are reasonable (< 30 seconds total)
 total_response_time = sum(r.response_time_ms for r in results)
-assert total_response_time < 30000, "formatted_string"
+assert total_response_time < 30000, ""
 
                             # Log detailed results for operational monitoring
 healthy_count = sum(1 for r in results if r.status == "healthy")
-logger.info("formatted_string")
+logger.info("")
 
 for result in results:
 status_symbol = "[OK]" if result.status == "healthy" else "[FAIL]"
-logger.info("formatted_string")
+logger.info("")
 if result.error:
-logger.warning("formatted_string")
+logger.warning("")
 
 
 @pytest.mark.asyncio
@@ -406,12 +406,12 @@ critical_services = ["auth", "backend", "postgres"]
 
 for result in results:
 if result.service in critical_services:
-assert result.status in ["healthy", "disabled"], "formatted_string"
+assert result.status in ["healthy", "disabled"], ""
 
                                                 # Validate critical services response times
 for result in results:
 if result.service in critical_services and result.status == "healthy":
-assert result.response_time_ms < 5000, "formatted_string"
+assert result.response_time_ms < 5000, ""
 
 
 @pytest.mark.asyncio
@@ -428,7 +428,7 @@ SERVICE_ENDPOINTS["backend"]["timeout"] = 0.001  # 1ms timeout
 try:
 result = await checker.check_service_endpoint("backend", SERVICE_ENDPOINTS["backend"])
                                                                 # Should either timeout or complete very quickly
-assert result.status in ["timeout", "healthy", "error"], "formatted_string"
+assert result.status in ["timeout", "healthy", "error"], ""
 
 finally:
                                                                     # Restore original timeout
@@ -441,15 +441,15 @@ async def main():
 checker = MultiServiceHealthChecker()
 results = await checker.run_comprehensive_health_check()
 
-print(" )
+print("")
 === Multi-Service Health Check Results ===")
 for result in results:
 status_symbol = {"healthy": "[OK]", "unhealthy": "[FAIL]", "timeout": "[TIMEOUT]", "error": "[ERROR]", "disabled": "[DISABLED]", "skipped": "[SKIP]"}.get(result.status, "[?]")
-print("formatted_string")
+print("")
 if result.error:
-print("formatted_string")
+    print("")
 if result.details:
-print("formatted_string")
+    print("")
 
 asyncio.run(main())
 pass

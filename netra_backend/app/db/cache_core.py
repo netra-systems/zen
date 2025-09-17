@@ -15,11 +15,11 @@ from netra_backend.app.db.cache_strategies import (
     EvictionStrategyFactory,
     QueryPatternTracker,
 )
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.redis_manager import redis_manager
-from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.config import get_config
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class QueryCache:
@@ -28,7 +28,7 @@ class QueryCache:
     def __init__(self, config: Optional[Any] = None):
         """Initialize query cache."""
         # Use unified config for cache settings
-        unified_config = get_unified_config()
+        unified_config = get_config()
         self.config = self._build_cache_config(unified_config)
         self.redis = redis_manager
         self.metrics = CacheMetrics()

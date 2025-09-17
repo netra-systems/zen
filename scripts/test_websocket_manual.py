@@ -51,7 +51,7 @@ async def test_websocket_connection():
                 logger.info(" PASS:  Connection established but no response (may be expected)")
                 return True
                 
-    except websockets.exceptions.ConnectionClosedError as e:
+    except websockets.ConnectionClosedError as e:
         logger.error(f" FAIL:  WebSocket connection closed: {e.code} - {e.reason}")
         
         # Check if this is an auth error (expected without token)

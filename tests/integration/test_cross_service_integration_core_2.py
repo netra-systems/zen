@@ -44,7 +44,7 @@ class TestSyntaxFix:
         # Register test services
         discovery.write_backend_info(8000)
         discovery.write_frontend_info(3000)
-        discovery.write_auth_info({ ))
+        discovery.write_auth_info({ })
         'port': 8081,
         'url': 'http://localhost:8081',
         'api_url': 'http://localhost:8081/api'

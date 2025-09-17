@@ -27,14 +27,14 @@ from test_framework.environment_markers import env, env_requires, env_safe, all_
 @pytest.fixture
 def health_check_config():
 """Configuration for health check tests."""
-return { )
-"services": { )
-"backend": { )
+return { }
+"services": { }
+"backend": { }
 "url": "http://localhost:8000",
 "health_path": "/health",
 "timeout": 5.0
 },
-"auth": { )
+"auth": { }
 "url": "http://localhost:8080",
 "health_path": "/health",
 "timeout": 5.0
@@ -59,9 +59,9 @@ class TestBasicHealthChecker:
         health_path = service_config["health_path"]
         timeout = service_config.get("timeout", 5.0)
 
-        health_url = "formatted_string"
+        health_url = ""
 
-        result = { )
+        result = { }
         "service": service_name,
         "url": health_url,
         "accessible": False,
@@ -104,17 +104,17 @@ class TestBasicHealthChecker:
         result["health_data"] = health_data
         result["healthy"] = True
         except Exception as parse_error:
-        result["error"] = "formatted_string"
+        result["error"] = ""
         result["healthy"] = False
         else:
-        result["error"] = "formatted_string"
+        result["error"] = ""
 
         except asyncio.TimeoutError:
-        result["error"] = "formatted_string"
+        result["error"] = ""
         except aiohttp.ClientConnectionError as e:
-        result["error"] = "formatted_string"
+        result["error"] = ""
         except Exception as e:
-        result["error"] = "formatted_string"
+        result["error"] = ""
 
         return result
 
@@ -132,11 +132,11 @@ class TestBasicHealthChecker:
         result = await task
         results[service_name] = result
         except Exception as e:
-        results[service_name] = { )
+        results[service_name] = { }
         "service": service_name,
         "accessible": False,
         "healthy": False,
-        "error": "formatted_string"
+        "error": ""
                     
 
         return results
@@ -147,7 +147,7 @@ class TestBasicHealthChecker:
         accessible_services = sum(1 for r in results.values() if r.get("accessible", False))
         healthy_services = sum(1 for r in results.values() if r.get("healthy", False))
 
-        return { )
+        return { }
         "total_services": total_services,
         "accessible_services": accessible_services,
         "healthy_services": healthy_services,
@@ -167,7 +167,7 @@ class TestBasicHealthChecksE2E:
 @pytest.mark.e2e
 @pytest.fixture
 @pytest.fixture
-@pytest.fixture
+# @pytest.fixture
     async def test_health_check_infrastructure_works(self, health_check_config):
 """Test that health check infrastructure itself works."""
 tester = TestBasicHealthChecker(health_check_config)
@@ -182,14 +182,14 @@ services = tester.config["services"]
 assert len(services) > 0, "Should have at least one service configured"
 
 for service_name, service_config in services.items():
-assert "url" in service_config, "formatted_string"
-assert "health_path" in service_config, "formatted_string"
+assert "url" in service_config, ""
+assert "health_path" in service_config, ""
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.fixture
 @pytest.fixture
-@pytest.fixture
+# @pytest.fixture
     async def test_service_connectivity_attempt(self, health_check_config):
 """Test service connectivity - passes regardless of service status."""
 pass
@@ -206,28 +206,28 @@ assert isinstance(results, dict)
 summary = tester.get_service_summary(results)
 print(f" )
 Service Connectivity Summary:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
+print("")
 
                 # Detailed results
 for service_name, result in results.items():
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+    print("")
+print("")
+print("")
+print("")
 if result.get('error'):
-print("formatted_string")
+    print("")
 if result.get('response_time'):
-print("formatted_string")
+    print("")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.fixture
 @pytest.fixture
-@pytest.fixture
+# @pytest.fixture
     async def test_auth_service_health_if_running(self, health_check_config):
 """Test auth service health if it's running."""
 tester = TestBasicHealthChecker(health_check_config)
@@ -252,18 +252,18 @@ assert health_data.get("status") in ["healthy", "ok"], "formatted_string"
 
 print(f" )
 [SUCCESS] Auth service is running and healthy:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 else:
-print("formatted_string")
+    print("")
                                         # This is OK - service might not be running
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.fixture
 @pytest.fixture
-@pytest.fixture
+# @pytest.fixture
     async def test_backend_service_health_if_running(self, health_check_config):
 """Test backend service health if it's running."""
 pass
@@ -283,23 +283,23 @@ assert "status" in health_data, "Health response should include status"
                                                 # Backend should have more detailed health info
 expected_fields = ["status", "timestamp"]
 for field in expected_fields:
-assert field in health_data, "formatted_string"
+assert field in health_data, ""
 
 print(f" )
 [SUCCESS] Backend service is running and healthy:")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 if "version" in health_data:
-print("formatted_string")
+    print("")
 else:
-print("formatted_string")
+    print("")
                                                             # This is OK - service might not be running
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.fixture
 @pytest.fixture
-@pytest.fixture
+# @pytest.fixture
     async def test_e2e_test_framework_basic_functionality(self, health_check_config):
 """Test basic E2E test framework functionality."""
                                                                 # Test async functionality
@@ -314,7 +314,7 @@ assert health_check_config is not None
 assert "services" in health_check_config
 
                                                                     # Test results can be structured properly
-test_result = { )
+test_result = { }
 "framework_test": True,
 "async_support": True,
 "http_client_support": True,
@@ -324,24 +324,24 @@ test_result = { )
 
 assert all(test_result.values()), "All framework components should be working"
 
-print(" )
+print("")
 [SUCCESS] E2E test framework basic functionality verified:")
 for key, value in test_result.items():
-print("formatted_string")
+    print("")
 
 
                                                                         # Integration point for external test runners
 async def run_basic_health_checks():
 """Standalone function to run basic health checks."""
 pass
-config = { )
-"services": { )
-"backend": { )
+config = { }
+"services": { }
+"backend": { }
 "url": "http://localhost:8000",
 "health_path": "/health",
 "timeout": 5.0
 },
-"auth": { )
+"auth": { }
 "url": "http://localhost:8080",
 "health_path": "/health",
 "timeout": 5.0
@@ -356,7 +356,7 @@ results = await tester.check_all_services()
 summary = tester.get_service_summary(results)
 
 await asyncio.sleep(0)
-return { )
+return { }
 "results": results,
 "summary": summary,
 "success": summary["any_accessible"]
@@ -370,6 +370,6 @@ import asyncio
 async def main():
 pass
 result = await run_basic_health_checks()
-print("formatted_string")
+print("")
 
 asyncio.run(main())

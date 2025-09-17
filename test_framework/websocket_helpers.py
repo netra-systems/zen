@@ -768,8 +768,8 @@ class WebSocketTestHelpers:
 
                 return connection
 
-            except (websockets.exceptions.ConnectionClosedError,
-                   websockets.exceptions.InvalidStatus,
+            except (websockets.ConnectionClosedError,
+                   websockets.InvalidStatus,
                    asyncio.TimeoutError) as e:
                 last_error = e
                 if attempt < max_retries - 1:
@@ -1119,7 +1119,7 @@ class HighVolumeWebSocketServer:
                 # Send welcome message to confirm connection
                 await websocket.send(json.dumps({"type": "connected", "timestamp": time.time()}))
                 await websocket.wait_closed()
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 pass
             finally:
                 self.connected_clients.discard(websocket)

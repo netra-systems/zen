@@ -10,8 +10,9 @@ Prevents cascading failures that could bring down the entire test infrastructure
 
 CRITICAL: These tests are designed to be STRICT and UNFORGIVING.
 They catch violations that could lead to system instability or cascade failures.
-"""
+"
 
+"""
 import asyncio
 import ast
 import importlib
@@ -54,13 +55,13 @@ logger = logging.getLogger(__name__)
 
 
 class SSOTRegressionPreventionTests:
-    """
+    "
     REGRESSION CRITICAL: Prevent SSOT framework regression.
     These tests catch violations before they can cause system-wide issues.
-    """
+"
     
     def setUp(self):
-        """Set up regression prevention test environment with REAL services."""
+        "Set up regression prevention test environment with REAL services.
         self.test_id = uuid.uuid4().hex[:8]
         self.project_root = Path(__file__).parent.parent.parent
         
@@ -80,17 +81,17 @@ class SSOTRegressionPreventionTests:
                 port=int(get_env('REDIS_PORT', '6379')),
                 decode_responses=True
             )
-        self.test_context = TestContext(user_id=f"test_user_{self.test_id}")
+        self.test_context = TestContext(user_id=ftest_user_{self.test_id}")"
         
         # Create isolated test environment
         self.user_contexts = {}
         self.websocket_connections = {}
         self.database_sessions = {}
         
-        logger.info(f"Starting regression prevention test with REAL services: {getattr(self, '_testMethodName', 'unknown')} (ID: {self.test_id})")
+        logger.info(fStarting regression prevention test with REAL services: {getattr(self, '_testMethodName', 'unknown')} (ID: {self.test_id})
     
     def tearDown(self):
-        """Clean up regression prevention test and REAL service connections."""
+        Clean up regression prevention test and REAL service connections.""
         # Clean up all real service connections - sync version for non-async tests
         for db_session in self.database_sessions.values():
             try:
@@ -103,19 +104,19 @@ class SSOTRegressionPreventionTests:
         except:
             pass
             
-        logger.info(f"Completed regression prevention test cleanup (ID: {self.test_id})")
+        logger.info(fCompleted regression prevention test cleanup (ID: {self.test_id})
     
     def test_user_context_isolation_concurrent_database_access(self):
-        """
+        
         ISOLATION CRITICAL: Test database session isolation between concurrent users.
         Verifies each user has completely isolated database sessions with no data leakage.
-        """
+""
         num_users = 15
         operations_per_user = 10
         isolation_failures = []
         
         async def user_database_operations(user_id):
-            """Simulate database operations for a specific user."""
+            Simulate database operations for a specific user.""
             failures = []
             try:
                 # Create isolated database session for this user
@@ -134,8 +135,8 @@ class SSOTRegressionPreventionTests:
                 # Create user-specific data
                 user_data = {
                     'user_id': user_id,
-                    'session_id': f"session_{user_id}_{uuid.uuid4().hex[:8]}",
-                    'secret_data': f"secret_for_user_{user_id}",
+                    'session_id': fsession_{user_id}_{uuid.uuid4().hex[:8]},
+                    'secret_data': fsecret_for_user_{user_id},
                     'timestamp': datetime.now().isoformat()
                 }
                 
@@ -153,15 +154,15 @@ class SSOTRegressionPreventionTests:
                         
                         # Store user-specific data
                         redis_client.hset(
-                            f"user:{user_id}:data",
-                            f"operation_{op_num}",
+                            fuser:{user_id}:data","
+                            foperation_{op_num},
                             str(user_data)
                         )
                         
                         # Verify data isolation - should only see own data
                         stored_data = redis_client.hget(
-                            f"user:{user_id}:data",
-                            f"operation_{op_num}"
+                            fuser:{user_id}:data,
+                            f"operation_{op_num}
                         )
                         
                         if not stored_data or user_id not in str(stored_data):
@@ -171,14 +172,14 @@ class SSOTRegressionPreventionTests:
                                 'issue': 'data_isolation_failure',
                                 'expected_data': str(user_data),
                                 'actual_data': str(stored_data)
-                            })
+                            }
                         
                         # Verify no cross-contamination
                         for other_user in range(num_users):
                             if other_user != user_id:
                                 other_data = redis_client.hget(
-                                    f"user:{other_user}:data",
-                                    f"operation_{op_num}"
+                                    fuser:{other_user}:data",
+                                    foperation_{op_num}
                                 )
                                 if other_data and str(user_id) in str(other_data):
                                     failures.append({
@@ -186,7 +187,7 @@ class SSOTRegressionPreventionTests:
                                         'contaminated_user': other_user,
                                         'issue': 'cross_user_contamination',
                                         'contaminated_data': str(other_data)
-                                    })
+                                    }
                         
                         time.sleep(0.01)  # Small delay to test race conditions
                         
@@ -196,14 +197,14 @@ class SSOTRegressionPreventionTests:
                             'operation': op_num,
                             'issue': 'operation_failure',
                             'error': str(e)
-                        })
+                        }
                         
             except Exception as e:
                 failures.append({
                     'user_id': user_id,
                     'issue': 'setup_failure',
                     'error': str(e)
-                })
+                }
             
             return failures
         
@@ -228,27 +229,27 @@ class SSOTRegressionPreventionTests:
                         'user_id': user_id,
                         'issue': 'execution_failure',
                         'error': str(e)
-                    })
+                    }
         
         # Verify isolation success
         if isolation_failures:
-            logger.error(f"Database isolation failures detected: {isolation_failures[:10]}")
+            logger.error(fDatabase isolation failures detected: {isolation_failures[:10]})"
         
-        assert len(isolation_failures) == 0, f"Database isolation failed: {len(isolation_failures)} failures detected"
+        assert len(isolation_failures) == 0, f"Database isolation failed: {len(isolation_failures)} failures detected
     
     async def test_websocket_channel_isolation_concurrent_sessions(self):
-        """
+        
         ISOLATION CRITICAL: Test WebSocket channel isolation between concurrent user sessions.
         Verifies each user has completely isolated WebSocket channels with no message leakage.
-        """
+""
         num_users = 12
         messages_per_user = 8
         isolation_failures = []
         
         async def user_websocket_session(user_id):
-            """Simulate WebSocket session for a specific user."""
+            Simulate WebSocket session for a specific user."
             failures = []
-            ws_uri = f"ws://localhost:8000/ws/user_{user_id}"
+            ws_uri = fws://localhost:8000/ws/user_{user_id}"
             
             try:
                 async with websockets.connect(ws_uri) as websocket:
@@ -259,8 +260,8 @@ class SSOTRegressionPreventionTests:
                     for msg_num in range(messages_per_user):
                         message = {
                             'user_id': user_id,
-                            'message_id': f"msg_{user_id}_{msg_num}",
-                            'content': f"Secret message {msg_num} for user {user_id}",
+                            'message_id': fmsg_{user_id}_{msg_num},
+                            'content': fSecret message {msg_num} for user {user_id},"
                             'timestamp': time.time()
                         }
                         
@@ -279,7 +280,7 @@ class SSOTRegressionPreventionTests:
                                     'issue': 'response_isolation_failure',
                                     'sent_message': str(message),
                                     'received_response': response
-                                })
+                                }
                             
                             # Check for data leakage from other users
                             for other_user in range(num_users):
@@ -289,7 +290,7 @@ class SSOTRegressionPreventionTests:
                                         'contaminated_by': other_user,
                                         'issue': 'websocket_cross_contamination',
                                         'response': response
-                                    })
+                                    }
                         
                         except asyncio.TimeoutError:
                             failures.append({
@@ -297,7 +298,7 @@ class SSOTRegressionPreventionTests:
                                 'message_num': msg_num,
                                 'issue': 'response_timeout',
                                 'message': str(message)
-                            })
+                            }
                         
                         await asyncio.sleep(0.05)  # Small delay to test race conditions
                     
@@ -321,51 +322,51 @@ class SSOTRegressionPreventionTests:
                     isolation_failures.append({
                         'issue': 'task_execution_failure',
                         'error': str(result)
-                    })
+                    }
                 elif isinstance(result, list):
                     isolation_failures.extend(result)
         except Exception as e:
             isolation_failures.append({
                 'issue': 'test_execution_failure',
                 'error': str(e)
-            })
+            }
         
         # Verify WebSocket isolation success
         if isolation_failures:
-            logger.error(f"WebSocket isolation failures: {isolation_failures[:10]}")
+            logger.error(f"WebSocket isolation failures: {isolation_failures[:10]})
         
-        assert len(isolation_failures) == 0, f"WebSocket isolation failed: {len(isolation_failures)} failures detected"
+        assert len(isolation_failures) == 0, fWebSocket isolation failed: {len(isolation_failures)} failures detected
     
     def test_agent_registry_isolation_concurrent_execution(self):
-        """
+    ""
         ISOLATION CRITICAL: Test agent registry isolation between concurrent executions.
         Verifies each execution context has isolated agent registries with no state sharing.
-        """
+        
         num_contexts = 10
         agents_per_context = 5
         isolation_failures = []
         
         def context_agent_operations(context_id):
-            """Simulate agent operations within an isolated execution context."""
+            "Simulate agent operations within an isolated execution context."
             failures = []
             
             try:
                 # Create isolated execution context
-                context = TestContext(user_id=f"context_user_{context_id}")
+                context = TestContext(user_id=fcontext_user_{context_id})
                 registry = AgentRegistry()
                 execution_factory = ExecutionFactory()
                 
                 # Create context-specific agents
                 context_agents = []
                 for agent_num in range(agents_per_context):
-                    agent_id = f"agent_{context_id}_{agent_num}"
+                    agent_id = fagent_{context_id}_{agent_num}"
                     
                     # Register agent with context-specific data
                     agent_config = {
                         'agent_id': agent_id,
                         'context_id': context_id,
-                        'secret_key': f"secret_for_context_{context_id}_agent_{agent_num}",
-                        'execution_data': f"private_data_{context_id}_{agent_num}"
+                        'secret_key': f"secret_for_context_{context_id}_agent_{agent_num},
+                        'execution_data': fprivate_data_{context_id}_{agent_num}
                     }
                     
                     registry.register_agent(agent_id, agent_config)
@@ -380,7 +381,7 @@ class SSOTRegressionPreventionTests:
                             'issue': 'agent_config_isolation_failure',
                             'expected_context': context_id,
                             'actual_config': retrieved_config
-                        })
+                        }
                     
                     # Check for cross-context contamination
                     all_agents = registry.list_agents()
@@ -395,7 +396,7 @@ class SSOTRegressionPreventionTests:
                                     'contaminated_agent': other_agent,
                                     'issue': 'cross_context_agent_contamination',
                                     'contaminated_config': other_config
-                                })
+                                }
                 
                 # Test execution isolation
                 for agent_id in context_agents:
@@ -406,14 +407,14 @@ class SSOTRegressionPreventionTests:
                         )
                         
                         # Verify execution context isolation
-                        if execution.context.user_id != f"context_user_{context_id}":
+                        if execution.context.user_id != fcontext_user_{context_id}:
                             failures.append({
                                 'context_id': context_id,
                                 'agent_id': agent_id,
                                 'issue': 'execution_context_isolation_failure',
-                                'expected_user': f"context_user_{context_id}",
+                                'expected_user': fcontext_user_{context_id}","
                                 'actual_user': execution.context.user_id
-                            })
+                            }
                     
                     except Exception as e:
                         failures.append({
@@ -421,7 +422,7 @@ class SSOTRegressionPreventionTests:
                             'agent_id': agent_id,
                             'issue': 'execution_creation_failure',
                             'error': str(e)
-                        })
+                        }
                 
                 return failures
                 
@@ -449,26 +450,26 @@ class SSOTRegressionPreventionTests:
                         'context_id': context_id,
                         'issue': 'execution_future_failure',
                         'error': str(e)
-                    })
+                    }
         
         # Verify agent registry isolation success
         if isolation_failures:
-            logger.error(f"Agent registry isolation failures: {isolation_failures[:10]}")
+            logger.error(fAgent registry isolation failures: {isolation_failures[:10]})
         
-        assert len(isolation_failures) == 0, f"Agent registry isolation failed: {len(isolation_failures)} failures detected"
+        assert len(isolation_failures) == 0, fAgent registry isolation failed: {len(isolation_failures)} failures detected
     
     async def test_race_condition_prevention_concurrent_state_access(self):
-        """
+    ""
         ISOLATION CRITICAL: Test race condition prevention in concurrent state access.
         Verifies state management prevents race conditions and maintains data integrity.
-        """
+        
         num_workers = 20
         operations_per_worker = 15
-        shared_state_key = f"shared_state_{self.test_id}"
+        shared_state_key = fshared_state_{self.test_id}""
         race_condition_failures = []
         
         async def concurrent_state_operations(worker_id):
-            """Perform concurrent state operations to detect race conditions."""
+            Perform concurrent state operations to detect race conditions."
             failures = []
             
             try:
@@ -482,7 +483,7 @@ class SSOTRegressionPreventionTests:
                 )
                 
                 for op_num in range(operations_per_worker):
-                    operation_id = f"worker_{worker_id}_op_{op_num}"
+                    operation_id = fworker_{worker_id}_op_{op_num}"
                     
                     # Simulate atomic state updates
                     try:
@@ -498,7 +499,7 @@ class SSOTRegressionPreventionTests:
                         # Read current state
                         current_state = redis_client.get(shared_state_key)
                         if current_state is None:
-                            current_state = "0"
+                            current_state = 0
                         
                         current_value = int(current_state)
                         new_value = current_value + 1
@@ -508,7 +509,7 @@ class SSOTRegressionPreventionTests:
                         pipe.watch(shared_state_key)
                         pipe.multi()
                         pipe.set(shared_state_key, str(new_value))
-                        pipe.set(f"operation:{operation_id}", f"updated_to_{new_value}")
+                        pipe.set(foperation:{operation_id}", f"updated_to_{new_value})
                         
                         try:
                             result = pipe.execute()
@@ -523,20 +524,20 @@ class SSOTRegressionPreventionTests:
                                 'issue': 'race_condition_detected',
                                 'attempted_value': new_value,
                                 'current_state': current_state
-                            })
+                            }
                         
                         # Verify state consistency
                         final_state = redis_client.get(shared_state_key)
-                        operation_record = redis_client.get(f"operation:{operation_id}")
+                        operation_record = redis_client.get(foperation:{operation_id})
                         
-                        if operation_record and f"updated_to_{final_state}" not in operation_record:
+                        if operation_record and fupdated_to_{final_state} not in operation_record:
                             failures.append({
                                 'worker_id': worker_id,
                                 'operation_id': operation_id,
                                 'issue': 'state_consistency_failure',
                                 'final_state': final_state,
                                 'operation_record': operation_record
-                            })
+                            }
                     
                     except Exception as e:
                         failures.append({
@@ -544,7 +545,7 @@ class SSOTRegressionPreventionTests:
                             'operation_id': operation_id,
                             'issue': 'atomic_operation_failure',
                             'error': str(e)
-                        })
+                        }
                     
                     time.sleep(0.001)  # Tiny delay to increase race condition likelihood
                 
@@ -565,7 +566,7 @@ class SSOTRegressionPreventionTests:
             port=int(get_env('REDIS_PORT', '6379')),
             decode_responses=True
         )
-        redis_client.set(shared_state_key, "0")
+        redis_client.set(shared_state_key, 0)"
         
         # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
         def run_state_operations(worker_id):
@@ -588,32 +589,32 @@ class SSOTRegressionPreventionTests:
                         'worker_id': worker_id,
                         'issue': 'worker_execution_failure',
                         'error': str(e)
-                    })
+                    }
         
         # Verify final state consistency
-        final_value = int(redis_client.get(shared_state_key) or "0")
+        final_value = int(redis_client.get(shared_state_key) or "0)
         expected_max_value = num_workers * operations_per_worker
         
         # Some race conditions are expected and handled properly
-        race_condition_count = len([f for f in race_condition_failures if f.get('issue') == 'race_condition_detected'])
+        race_condition_count = len([f for f in race_condition_failures if f.get('issue') == 'race_condition_detected']
         critical_failures = [f for f in race_condition_failures if f.get('issue') != 'race_condition_detected']
         
         # Log race condition statistics
-        logger.info(f"Race condition test results: final_value={final_value}, expected_max={expected_max_value}, ")
-        logger.info(f"detected_races={race_condition_count}, critical_failures={len(critical_failures)}")
+        logger.info(fRace condition test results: final_value={final_value}, expected_max={expected_max_value}, )
+        logger.info(f"detected_races={race_condition_count}, critical_failures={len(critical_failures)})
         
         if critical_failures:
-            logger.error(f"Critical race condition failures: {critical_failures[:5]}")
+            logger.error(fCritical race condition failures: {critical_failures[:5]}")
         
         # Allow detected race conditions (they should be handled properly)
         # But fail on critical consistency failures
-        assert len(critical_failures) == 0, f"Critical race condition failures detected: {len(critical_failures)} failures"
+        assert len(critical_failures) == 0, fCritical race condition failures detected: {len(critical_failures)} failures
     
     async def test_security_boundary_validation_user_isolation(self):
-        """
+        "
         SECURITY CRITICAL: Test security boundary validation between isolated users.
         Verifies users cannot access each other's data or execute unauthorized operations.
-        """
+"
         num_users = 8
         security_failures = []
         user_secrets = {}
@@ -629,7 +630,7 @@ class SSOTRegressionPreventionTests:
         
         # Setup isolated user environments with secrets
         for user_id in range(num_users):
-            user_secret = f"top_secret_data_for_user_{user_id}_{uuid.uuid4().hex}"
+            user_secret = ftop_secret_data_for_user_{user_id}_{uuid.uuid4().hex}
             user_secrets[user_id] = user_secret
             
             # Get Redis client
@@ -643,27 +644,27 @@ class SSOTRegressionPreventionTests:
             
             # Store user's private data
             sync_redis_client.hset(
-                f"user:{user_id}:private",
-                "secret_data",
+                fuser:{user_id}:private","
+                secret_data,
                 user_secret
             )
             
             # Store user's authorization token
-            auth_token = f"auth_token_{user_id}_{uuid.uuid4().hex}"
+            auth_token = fauth_token_{user_id}_{uuid.uuid4().hex}"
             sync_redis_client.hset(
-                f"user:{user_id}:auth",
-                "token",
+                f"user:{user_id}:auth,
+                token,
                 auth_token
             )
         
         async def attempt_security_breach(attacker_user_id, target_user_id):
-            """Attempt to breach security boundaries between users."""
+            Attempt to breach security boundaries between users.""
             failures = []
             
             try:
                 # Create attacker's context
                 attacker_env = IsolatedEnvironment()
-                attacker_context = TestContext(user_id=f"user_{attacker_user_id}")
+                attacker_context = TestContext(user_id=fuser_{attacker_user_id})
                 
                 # Get Redis client for security test
                 from shared.isolated_environment import get_env_var as get_env
@@ -677,8 +678,8 @@ class SSOTRegressionPreventionTests:
                 # Attempt 1: Direct data access to other user's private data
                 try:
                     stolen_secret = sync_redis_client.hget(
-                        f"user:{target_user_id}:private",
-                        "secret_data"
+                        f"user:{target_user_id}:private,
+                        secret_data"
                     )
                     
                     if stolen_secret and stolen_secret == user_secrets[target_user_id]:
@@ -688,7 +689,7 @@ class SSOTRegressionPreventionTests:
                             'breach_type': 'direct_data_access',
                             'stolen_data': stolen_secret,
                             'issue': 'security_boundary_breach'
-                        })
+                        }
                 except Exception:
                     # Good - access should be restricted
                     pass
@@ -696,8 +697,8 @@ class SSOTRegressionPreventionTests:
                 # Attempt 2: Auth token theft
                 try:
                     stolen_token = sync_redis_client.hget(
-                        f"user:{target_user_id}:auth",
-                        "token"
+                        fuser:{target_user_id}:auth,
+                        token"
                     )
                     
                     if stolen_token:
@@ -707,38 +708,38 @@ class SSOTRegressionPreventionTests:
                             'breach_type': 'auth_token_theft',
                             'stolen_token': stolen_token,
                             'issue': 'authentication_boundary_breach'
-                        })
+                        }
                 except Exception:
                     # Good - access should be restricted
                     pass
                 
                 # Attempt 3: Context impersonation
                 try:
-                    imposter_context = TestContext(user_id=f"user_{target_user_id}")
+                    imposter_context = TestContext(user_id=f"user_{target_user_id})
                     
                     # If successful, this is a security issue
-                    if imposter_context.user_id != f"user_{attacker_user_id}":
+                    if imposter_context.user_id != fuser_{attacker_user_id}:
                         failures.append({
                             'attacker_user': attacker_user_id,
                             'target_user': target_user_id,
                             'breach_type': 'context_impersonation',
                             'imposter_context': imposter_context.user_id,
                             'issue': 'context_security_breach'
-                        })
+                        }
                 except Exception:
                     # Good - impersonation should fail
                     pass
                 
                 # Attempt 4: Cross-user command injection
                 try:
-                    malicious_command = f"user:{target_user_id}:private"
+                    malicious_command = fuser:{target_user_id}:private
                     
                     # Try to use attacker's context to access target's data
                     backend_client = BackendClient(context=attacker_context)
                     
                     # This should fail due to proper isolation
                     result = backend_client.execute_command(
-                        f"GET {malicious_command}"
+                        fGET {malicious_command}""
                     )
                     
                     if result and str(target_user_id) in str(result):
@@ -748,7 +749,7 @@ class SSOTRegressionPreventionTests:
                             'breach_type': 'command_injection',
                             'malicious_result': str(result),
                             'issue': 'command_security_breach'
-                        })
+                        }
                 
                 except Exception:
                     # Good - command should be blocked
@@ -786,25 +787,25 @@ class SSOTRegressionPreventionTests:
                     security_failures.append({
                         'issue': 'security_test_execution_failure',
                         'error': str(e)
-                    })
+                    }
         
         # Verify security boundary integrity
         if security_failures:
-            logger.error(f"CRITICAL: Security boundary breaches detected: {security_failures}")
+            logger.error(fCRITICAL: Security boundary breaches detected: {security_failures})
         
-        assert len(security_failures) == 0, f"CRITICAL SECURITY FAILURE: {len(security_failures)} boundary breaches detected"
+        assert len(security_failures) == 0, fCRITICAL SECURITY FAILURE: {len(security_failures)} boundary breaches detected
     
     async def test_database_session_isolation_transaction_boundaries(self):
-        """
+    ""
         ISOLATION CRITICAL: Test database session isolation with transaction boundaries.
         Verifies each session has proper transaction isolation with no data leakage.
-        """
+        
         num_sessions = 12
         transactions_per_session = 8
         isolation_failures = []
         
         async def session_transaction_operations(session_id):
-            """Perform database transactions within an isolated session."""
+            ""Perform database transactions within an isolated session.
             failures = []
             
             try:
@@ -815,18 +816,18 @@ class SSOTRegressionPreventionTests:
                 # Create session-specific transaction data
                 session_data = {
                     'session_id': session_id,
-                    'user_id': f"session_user_{session_id}",
-                    'transaction_data': f"private_transaction_data_{session_id}"
+                    'user_id': fsession_user_{session_id},
+                    'transaction_data': fprivate_transaction_data_{session_id}""
                 }
                 
                 for tx_num in range(transactions_per_session):
-                    tx_id = f"tx_{session_id}_{tx_num}"
+                    tx_id = ftx_{session_id}_{tx_num}
                     
                     try:
                         # Begin transaction - using sync redis for non-async context
                         with db_manager.get_session() as db_session:
                             # Store transaction data
-                            tx_key = f"transaction:{tx_id}"
+                            tx_key = ftransaction:{tx_id}
                             from shared.isolated_environment import get_env_var as get_env
                             import redis
                             sync_redis_client = redis.Redis(
@@ -836,12 +837,12 @@ class SSOTRegressionPreventionTests:
                             )
                             sync_redis_client.hset(
                                 tx_key,
-                                "data",
+                                "data,"
                                 str(session_data)
                             )
                             
                             # Verify transaction isolation
-                            stored_data = sync_redis_client.hget(tx_key, "data")
+                            stored_data = sync_redis_client.hget(tx_key, data)
                             if not stored_data or str(session_id) not in stored_data:
                                 failures.append({
                                     'session_id': session_id,
@@ -849,37 +850,37 @@ class SSOTRegressionPreventionTests:
                                     'issue': 'transaction_data_isolation_failure',
                                     'expected_data': str(session_data),
                                     'actual_data': stored_data
-                                })
+                                }
                             
                             # Check for cross-session contamination
-                            all_tx_keys = sync_redis_client.keys("transaction:*")
+                            all_tx_keys = sync_redis_client.keys(transaction:*)"
                             for other_key in all_tx_keys:
                                 if tx_id not in other_key:
-                                    other_data = sync_redis_client.hget(other_key, "data")
+                                    other_data = sync_redis_client.hget(other_key, data")
                                     if other_data and str(session_id) in other_data:
-                                        other_tx_id = other_key.split(":")[1]
-                                        if not other_tx_id.startswith(f"tx_{session_id}_"):
+                                        other_tx_id = other_key.split(:)[1]
+                                        if not other_tx_id.startswith(ftx_{session_id}_"):"
                                             failures.append({
                                                 'session_id': session_id,
                                                 'transaction_id': tx_id,
                                                 'contaminated_transaction': other_tx_id,
                                                 'issue': 'cross_session_transaction_contamination',
                                                 'contaminated_data': other_data
-                                            })
+                                            }
                             
                             # Simulate transaction rollback scenario
                             if tx_num % 3 == 0:  # Rollback every 3rd transaction
                                 sync_redis_client.delete(tx_key)
                                 
                                 # Verify rollback isolation
-                                rollback_data = sync_redis_client.hget(tx_key, "data")
+                                rollback_data = sync_redis_client.hget(tx_key, data)
                                 if rollback_data:
                                     failures.append({
                                         'session_id': session_id,
                                         'transaction_id': tx_id,
                                         'issue': 'transaction_rollback_isolation_failure',
                                         'unexpected_data': rollback_data
-                                    })
+                                    }
                     
                     except Exception as e:
                         failures.append({
@@ -887,7 +888,7 @@ class SSOTRegressionPreventionTests:
                             'transaction_id': tx_id,
                             'issue': 'transaction_operation_failure',
                             'error': str(e)
-                        })
+                        }
                     
                     time.sleep(0.01)  # Small delay for race condition testing
                 
@@ -921,19 +922,19 @@ class SSOTRegressionPreventionTests:
                         'session_id': session_id,
                         'issue': 'session_execution_failure',
                         'error': str(e)
-                    })
+                    }
         
         # Verify database session isolation success
         if isolation_failures:
-            logger.error(f"Database session isolation failures: {isolation_failures[:10]}")
+            logger.error(fDatabase session isolation failures: {isolation_failures[:10]})"
         
-        assert len(isolation_failures) == 0, f"Database session isolation failed: {len(isolation_failures)} failures detected"
+        assert len(isolation_failures) == 0, f"Database session isolation failed: {len(isolation_failures)} failures detected
     
     async def test_performance_metrics_concurrent_load_testing(self):
-        """
+        
         PERFORMANCE CRITICAL: Test performance metrics under concurrent load.
         Verifies system maintains performance standards with high concurrent usage.
-        """
+""
         import psutil
         
         process = psutil.Process()
@@ -951,7 +952,7 @@ class SSOTRegressionPreventionTests:
         }
         
         async def performance_load_operation(thread_id):
-            """Execute performance-intensive operations for load testing."""
+            Execute performance-intensive operations for load testing."
             thread_metrics = {
                 'response_times': [],
                 'errors': [],
@@ -964,7 +965,7 @@ class SSOTRegressionPreventionTests:
                     
                     try:
                         # Memory-intensive operation
-                        large_data = [f"data_{thread_id}_{op_num}_{i}" for i in range(1000)]
+                        large_data = [fdata_{thread_id}_{op_num}_{i}" for i in range(1000)]
                         
                         # CPU-intensive operation
                         result = sum(hash(item) for item in large_data)
@@ -980,22 +981,22 @@ class SSOTRegressionPreventionTests:
                         
                         for i in range(10):
                             sync_redis_client.set(
-                                f"perf_test:{thread_id}:{op_num}:{i}",
-                                f"performance_data_{result}_{i}"
+                                fperf_test:{thread_id}:{op_num}:{i},
+                                fperformance_data_{result}_{i}"
                             )
                             
                             # Verify data integrity
                             retrieved = sync_redis_client.get(
-                                f"perf_test:{thread_id}:{op_num}:{i}"
+                                f"perf_test:{thread_id}:{op_num}:{i}
                             )
                             
                             if not retrieved or str(result) not in retrieved:
                                 thread_metrics['errors'].append({
-                                    'operation': f"{thread_id}_{op_num}_{i}",
+                                    'operation': f{thread_id}_{op_num}_{i},
                                     'issue': 'data_integrity_failure',
-                                    'expected': f"performance_data_{result}_{i}",
+                                    'expected': fperformance_data_{result}_{i},
                                     'actual': retrieved
-                                })
+                                }
                         
                         end_time = time.time()
                         response_time = end_time - start_time
@@ -1005,18 +1006,18 @@ class SSOTRegressionPreventionTests:
                         # Performance threshold checks
                         if response_time > 2.0:  # 2 second threshold
                             thread_metrics['errors'].append({
-                                'operation': f"{thread_id}_{op_num}",
+                                'operation': f{thread_id}_{op_num}","
                                 'issue': 'response_time_threshold_exceeded',
                                 'response_time': response_time,
                                 'threshold': 2.0
-                            })
+                            }
                     
                     except Exception as e:
                         thread_metrics['errors'].append({
-                            'operation': f"{thread_id}_{op_num}",
+                            'operation': f{thread_id}_{op_num},
                             'issue': 'operation_exception',
                             'error': str(e)
-                        })
+                        }
                 
                 return thread_metrics
                 
@@ -1054,27 +1055,27 @@ class SSOTRegressionPreventionTests:
                     thread_metrics = future.result(timeout=120)
                     
                     # Aggregate metrics
-                    performance_metrics['response_times'].extend(thread_metrics['response_times'])
-                    performance_failures.extend(thread_metrics['errors'])
+                    performance_metrics['response_times'].extend(thread_metrics['response_times']
+                    performance_failures.extend(thread_metrics['errors']
                     
                     # Calculate thread-specific metrics
                     if thread_metrics['response_times']:
-                        avg_response_time = sum(thread_metrics['response_times']) / len(thread_metrics['response_times'])
-                        max_response_time = max(thread_metrics['response_times'])
+                        avg_response_time = sum(thread_metrics['response_times'] / len(thread_metrics['response_times']
+                        max_response_time = max(thread_metrics['response_times']
                         
                         performance_metrics['throughput_metrics'].append({
                             'thread_id': thread_id,
                             'operations_completed': thread_metrics['operations_completed'],
                             'avg_response_time': avg_response_time,
                             'max_response_time': max_response_time
-                        })
+                        }
                 
                 except Exception as e:
                     performance_failures.append({
                         'thread_id': thread_id,
                         'issue': 'thread_execution_failure',
                         'error': str(e)
-                    })
+                    }
         
         end_time = time.time()
         total_test_time = end_time - start_time
@@ -1084,12 +1085,12 @@ class SSOTRegressionPreventionTests:
         final_cpu = process.cpu_percent()
         
         # Calculate overall performance metrics
-        total_operations = sum(m['operations_completed'] for m in performance_metrics['throughput_metrics'])
+        total_operations = sum(m['operations_completed'] for m in performance_metrics['throughput_metrics']
         overall_throughput = total_operations / total_test_time if total_test_time > 0 else 0
         
         if performance_metrics['response_times']:
-            avg_response_time = sum(performance_metrics['response_times']) / len(performance_metrics['response_times'])
-            max_response_time = max(performance_metrics['response_times'])
+            avg_response_time = sum(performance_metrics['response_times'] / len(performance_metrics['response_times']
+            max_response_time = max(performance_metrics['response_times']
         else:
             avg_response_time = 0
             max_response_time = 0
@@ -1108,7 +1109,7 @@ class SSOTRegressionPreventionTests:
             'error_count': len(performance_failures)
         }
         
-        logger.info(f"Performance test results: {performance_summary}")
+        logger.info(fPerformance test results: {performance_summary})
         
         # Performance thresholds
         if avg_response_time > 1.0:  # Average response time threshold
@@ -1117,7 +1118,7 @@ class SSOTRegressionPreventionTests:
                 'value': avg_response_time,
                 'threshold': 1.0,
                 'issue': 'average_response_time_exceeded'
-            })
+            }
         
         if overall_throughput < 50:  # Minimum throughput threshold
             performance_failures.append({
@@ -1125,7 +1126,7 @@ class SSOTRegressionPreventionTests:
                 'value': overall_throughput,
                 'threshold': 50,
                 'issue': 'throughput_below_minimum'
-            })
+            }
         
         if memory_increase > 100 * 1024 * 1024:  # 100MB memory increase threshold
             performance_failures.append({
@@ -1133,19 +1134,19 @@ class SSOTRegressionPreventionTests:
                 'value': memory_increase,
                 'threshold': 100 * 1024 * 1024,
                 'issue': 'excessive_memory_usage'
-            })
+            }
         
         # Verify performance standards met
         if performance_failures:
-            logger.error(f"Performance standard failures: {performance_failures[:10]}")
+            logger.error(f"Performance standard failures: {performance_failures[:10]})
         
-        assert len(performance_failures) <= 5, f"Too many performance failures: {len(performance_failures)} detected"
+        assert len(performance_failures) <= 5, fToo many performance failures: {len(performance_failures)} detected"
     
     def test_prevent_dependency_violations(self):
-        """
+    "
         DEPENDENCY CRITICAL: Prevent dependency violations in SSOT framework.
         This ensures SSOT doesn't introduce unwanted dependencies.
-        """
+        "
         violations = []
         
         # Allowed dependencies for SSOT framework
@@ -1170,7 +1171,7 @@ class SSOTRegressionPreventionTests:
         ]
         
         # Scan SSOT framework files for dependencies
-        ssot_files = list((self.project_root / 'test_framework' / 'ssot').rglob("*.py"))
+        ssot_files = list((self.project_root / 'test_framework' / 'ssot').rglob(*.py))
         
         for ssot_file in ssot_files:
             try:
@@ -1205,7 +1206,7 @@ class SSOTRegressionPreventionTests:
                                 'file': str(ssot_file),
                                 'import': import_name,
                                 'violation': 'forbidden_dependency'
-                            })
+                            }
                         
                         # Check for unexpected dependencies
                         if (root_module not in allowed_dependencies and 
@@ -1217,7 +1218,7 @@ class SSOTRegressionPreventionTests:
                                 'file': str(ssot_file),
                                 'import': import_name,
                                 'violation': 'unexpected_dependency'
-                            })
+                            }
                             
                 except SyntaxError:
                     pass
@@ -1226,23 +1227,23 @@ class SSOTRegressionPreventionTests:
                 pass
         
         if violations:
-            logger.error(f"Dependency violations in SSOT framework: {violations}")
+            logger.error(f"Dependency violations in SSOT framework: {violations})
         
         self.assertEqual(len(violations), 0,
-                        f"SSOT framework dependency violations: {violations}")
+                        fSSOT framework dependency violations: {violations}")
     
     def test_prevent_circular_import_violations(self):
-        """
+    "
         IMPORT CRITICAL: Prevent circular import violations.
         This ensures the SSOT framework doesn't create circular dependencies.
-        """
+        "
         violations = []
         
         # Build dependency graph
         dependency_graph = defaultdict(set)
         
         # Scan Python files to build import graph
-        python_files = list(self.project_root.rglob("*.py"))
+        python_files = list(self.project_root.rglob(*.py))
         
         for python_file in python_files[:50]:  # Limit for performance
             try:
@@ -1308,7 +1309,7 @@ class SSOTRegressionPreventionTests:
             
             for node in graph:
                 if node not in visited:
-                    dfs(node, [])
+                    dfs(node, []
             
             return cycles
         
@@ -1318,16 +1319,16 @@ class SSOTRegressionPreventionTests:
             violations.append({
                 'cycle': cycle,
                 'violation': 'circular_import'
-            })
+            }
         
         if violations:
-            logger.error(f"Circular import violations: {violations}")
+            logger.error(f"Circular import violations: {violations})
         
         self.assertEqual(len(violations), 0,
-                        f"Circular import dependencies detected: {violations}")
+                        fCircular import dependencies detected: {violations}")
     
     def _validate_isolation_boundaries(self, test_results):
-        """Validate that isolation boundaries are maintained in test results."""
+        Validate that isolation boundaries are maintained in test results.""
         boundary_violations = []
         
         for result in test_results:
@@ -1337,19 +1338,19 @@ class SSOTRegressionPreventionTests:
                     boundary_violations.append({
                         'violation_type': 'data_contamination',
                         'details': result
-                    })
+                    }
             
             # Check for shared state violations
             if 'shared_state_detected' in result and result['shared_state_detected']:
                 boundary_violations.append({
                     'violation_type': 'shared_state',
                     'details': result
-                })
+                }
         
         return boundary_violations
     
     def _measure_concurrent_performance(self, operation_func, num_threads, operations_per_thread):
-        """Measure performance of concurrent operations."""
+        Measure performance of concurrent operations."
         performance_metrics = {
             'start_time': time.time(),
             'operation_times': [],
@@ -1386,7 +1387,7 @@ class SSOTRegressionPreventionTests:
             for future in as_completed(futures):
                 try:
                     result = future.result(timeout=30)
-                    performance_metrics['operation_times'].append(result['duration'])
+                    performance_metrics['operation_times'].append(result['duration']
                     
                     if result['success']:
                         performance_metrics['success_count'] += 1
@@ -1396,27 +1397,27 @@ class SSOTRegressionPreventionTests:
                 except Exception as e:
                     performance_metrics['errors'].append({
                         'future_error': str(e)
-                    })
+                    }
         
         performance_metrics['end_time'] = time.time()
         performance_metrics['total_time'] = performance_metrics['end_time'] - performance_metrics['start_time']
         
         if performance_metrics['operation_times']:
-            performance_metrics['avg_operation_time'] = sum(performance_metrics['operation_times']) / len(performance_metrics['operation_times'])
-            performance_metrics['max_operation_time'] = max(performance_metrics['operation_times'])
-            performance_metrics['min_operation_time'] = min(performance_metrics['operation_times'])
+            performance_metrics['avg_operation_time'] = sum(performance_metrics['operation_times'] / len(performance_metrics['operation_times']
+            performance_metrics['max_operation_time'] = max(performance_metrics['operation_times']
+            performance_metrics['min_operation_time'] = min(performance_metrics['operation_times']
         
         return performance_metrics
 
 
 class SSOTContinuousComplianceTests:
-    """
+    "
     COMPLIANCE CRITICAL: Continuous SSOT compliance monitoring.
     These tests run continuously to ensure SSOT compliance is maintained.
-    """
+    "
     
     def setUp(self):
-        """Set up continuous compliance test environment with REAL services."""
+        "Set up continuous compliance test environment with REAL services.
         self.test_id = uuid.uuid4().hex[:8]
         
         # Initialize REAL service connections for compliance testing
@@ -1430,24 +1431,24 @@ class SSOTContinuousComplianceTests:
             port=int(get_env('REDIS_PORT', '6379')),
             decode_responses=True
         )
-        self.test_context = TestContext(user_id=f"compliance_user_{self.test_id}")
+        self.test_context = TestContext(user_id=f"compliance_user_{self.test_id})
         
-        logger.info(f"Starting continuous compliance test with REAL services (ID: {self.test_id})")
+        logger.info(fStarting continuous compliance test with REAL services (ID: {self.test_id}")
     
     def tearDown(self):
-        """Clean up continuous compliance test and REAL service connections."""
+        Clean up continuous compliance test and REAL service connections.""
         try:
             self.redis_client.flushdb()
         except:
             pass
             
-        logger.info(f"Completed continuous compliance test cleanup (ID: {self.test_id})")
+        logger.info(fCompleted continuous compliance test cleanup (ID: {self.test_id})
     
     def test_continuous_system_health_real_services(self):
-        """
+    ""
         HEALTH CRITICAL: Continuously monitor system health with REAL services.
         This test runs regularly to ensure all real service components are healthy.
-        """
+        
         health_issues = []
         service_health = {}
         
@@ -1456,7 +1457,7 @@ class SSOTContinuousComplianceTests:
             db_start_time = time.time()
             with self.db_manager.get_session() as session:
                 # Test basic database operations
-                test_key = f"health_check_{self.test_id}"
+                test_key = fhealth_check_{self.test_id}"
                 from shared.isolated_environment import get_env_var as get_env
                 import redis
                 sync_redis_client = redis.Redis(
@@ -1464,22 +1465,22 @@ class SSOTContinuousComplianceTests:
                     port=int(get_env('REDIS_PORT', '6379')),
                     decode_responses=True
                 )
-                sync_redis_client.set(test_key, "healthy")
+                sync_redis_client.set(test_key, "healthy)
                 result = sync_redis_client.get(test_key)
                 
-                if result != "healthy":
+                if result != healthy:
                     health_issues.append({
                         'service': 'database',
                         'issue': 'basic_operation_failure',
                         'expected': 'healthy',
                         'actual': result
-                    })
+                    }
                 
                 sync_redis_client.delete(test_key)
             
             db_response_time = time.time() - db_start_time
             service_health['database'] = {
-                'status': 'healthy' if len([h for h in health_issues if h.get('service') == 'database']) == 0 else 'unhealthy',
+                'status': 'healthy' if len([h for h in health_issues if h.get('service') == 'database'] == 0 else 'unhealthy',
                 'response_time': db_response_time,
                 'operations_tested': ['set', 'get', 'delete']
             }
@@ -1490,14 +1491,14 @@ class SSOTContinuousComplianceTests:
                     'issue': 'slow_response_time',
                     'response_time': db_response_time,
                     'threshold': 1.0
-                })
+                }
         
         except Exception as e:
             health_issues.append({
                 'service': 'database',
                 'issue': 'connection_failure',
                 'error': str(e)
-            })
+            }
             service_health['database'] = {'status': 'failed', 'error': str(e)}
         
         # Test Redis Health
@@ -1505,7 +1506,7 @@ class SSOTContinuousComplianceTests:
             redis_start_time = time.time()
             
             # Test Redis operations
-            test_hash = f"redis_health_{self.test_id}"
+            test_hash = f"redis_health_{self.test_id}
             from shared.isolated_environment import get_env_var as get_env
             import redis
             sync_redis_client = redis.Redis(
@@ -1513,24 +1514,24 @@ class SSOTContinuousComplianceTests:
                 port=int(get_env('REDIS_PORT', '6379')),
                 decode_responses=True
             )
-            sync_redis_client.hset(test_hash, "field1", "value1")
-            sync_redis_client.hset(test_hash, "field2", "value2")
+            sync_redis_client.hset(test_hash, field1", value1)
+            sync_redis_client.hset(test_hash, field2, value2)
             
             all_fields = sync_redis_client.hgetall(test_hash)
-            if len(all_fields) != 2 or all_fields.get("field1") != "value1":
+            if len(all_fields) != 2 or all_fields.get(field1") != "value1:
                 health_issues.append({
                     'service': 'redis',
                     'issue': 'hash_operation_failure',
                     'expected_fields': 2,
                     'actual_fields': len(all_fields),
                     'data': all_fields
-                })
+                }
             
             sync_redis_client.delete(test_hash)
             
             redis_response_time = time.time() - redis_start_time
             service_health['redis'] = {
-                'status': 'healthy' if len([h for h in health_issues if h.get('service') == 'redis']) == 0 else 'unhealthy',
+                'status': 'healthy' if len([h for h in health_issues if h.get('service') == 'redis'] == 0 else 'unhealthy',
                 'response_time': redis_response_time,
                 'operations_tested': ['hset', 'hgetall', 'delete']
             }
@@ -1541,14 +1542,14 @@ class SSOTContinuousComplianceTests:
                     'issue': 'slow_response_time',
                     'response_time': redis_response_time,
                     'threshold': 0.5
-                })
+                }
         
         except Exception as e:
             health_issues.append({
                 'service': 'redis',
                 'issue': 'connection_failure',
                 'error': str(e)
-            })
+            }
             service_health['redis'] = {'status': 'failed', 'error': str(e)}
         
         # Test Service Integration Health
@@ -1557,20 +1558,20 @@ class SSOTContinuousComplianceTests:
             
             # Test service integration through BackendClient
             backend_client = BackendClient(context=self.test_context)
-            test_command = "PING"
+            test_command = PING
             result = backend_client.execute_command(test_command)
             
-            if not result or "PONG" not in str(result).upper():
+            if not result or PONG not in str(result).upper():"
                 health_issues.append({
                     'service': 'integration',
                     'issue': 'service_integration_failure',
                     'command': test_command,
                     'result': str(result)
-                })
+                }
             
             integration_response_time = time.time() - integration_start_time
             service_health['integration'] = {
-                'status': 'healthy' if len([h for h in health_issues if h.get('service') == 'integration']) == 0 else 'unhealthy',
+                'status': 'healthy' if len([h for h in health_issues if h.get('service') == 'integration'] == 0 else 'unhealthy',
                 'response_time': integration_response_time,
                 'operations_tested': ['ping']
             }
@@ -1580,14 +1581,14 @@ class SSOTContinuousComplianceTests:
                 'service': 'integration',
                 'issue': 'integration_test_failure',
                 'error': str(e)
-            })
+            }
             service_health['integration'] = {'status': 'failed', 'error': str(e)}
         
         # Log comprehensive health status
-        logger.info(f"System health check results: {service_health}")
+        logger.info(fSystem health check results: {service_health}")
         
         if health_issues:
-            logger.error(f"System health issues detected: {health_issues}")
+            logger.error(fSystem health issues detected: {health_issues})
         
         # Categorize health issues
         critical_issues = [
@@ -1601,14 +1602,14 @@ class SSOTContinuousComplianceTests:
         ]
         
         # Verify system health
-        assert len(critical_issues) == 0, f"Critical system health issues: {critical_issues}"
-        assert len(warning_issues) <= 2, f"Too many warning health issues: {warning_issues}"
+        assert len(critical_issues) == 0, fCritical system health issues: {critical_issues}"
+        assert len(warning_issues) <= 2, f"Too many warning health issues: {warning_issues}
     
     def test_continuous_regression_monitoring_real_performance(self):
-        """
+        
         REGRESSION CRITICAL: Monitor real system performance to detect regressions.
         This test tracks actual system metrics over time to detect gradual regression.
-        """
+""
         import psutil
         
         process = psutil.Process()
@@ -1642,15 +1643,15 @@ class SSOTContinuousComplianceTests:
                 decode_responses=True
             )
             for i in range(50):
-                key = f"regression_test_{self.test_id}_{i}"
-                sync_redis_client.set(key, f"test_data_{i}")
+                key = fregression_test_{self.test_id}_{i}
+                sync_redis_client.set(key, ftest_data_{i})
                 result = sync_redis_client.get(key)
                 if not result:
                     regression_issues.append({
                         'metric': 'database_operations',
                         'operation': i,
                         'issue': 'data_persistence_failure'
-                    })
+                    }
                 sync_redis_client.delete(key)
             
             db_time = time.time() - db_start
@@ -1662,14 +1663,14 @@ class SSOTContinuousComplianceTests:
                     'value': db_time,
                     'threshold': 2.0,
                     'issue': 'database_performance_regression'
-                })
+                }
         
         except Exception as e:
             regression_issues.append({
                 'metric': 'database_test',
                 'issue': 'database_test_failure',
                 'error': str(e)
-            })
+            }
         
         # Test 2: Memory Usage Regression
         try:
@@ -1678,7 +1679,7 @@ class SSOTContinuousComplianceTests:
             # Create memory-intensive operations
             test_data = []
             for i in range(1000):
-                test_data.append(f"memory_test_data_{self.test_id}_{i}" * 100)
+                test_data.append(f"memory_test_data_{self.test_id}_{i} * 100)
             
             memory_peak = process.memory_info().rss
             memory_increase = memory_peak - memory_start
@@ -1698,7 +1699,7 @@ class SSOTContinuousComplianceTests:
                     'value': memory_increase,
                     'threshold': 100 * 1024 * 1024,
                     'issue': 'excessive_memory_usage'
-                })
+                }
             
             if memory_cleanup < memory_increase * 0.8:  # Should clean up at least 80%
                 regression_issues.append({
@@ -1706,14 +1707,14 @@ class SSOTContinuousComplianceTests:
                     'cleanup_ratio': memory_cleanup / memory_increase if memory_increase > 0 else 0,
                     'threshold': 0.8,
                     'issue': 'poor_memory_cleanup'
-                })
+                }
         
         except Exception as e:
             regression_issues.append({
                 'metric': 'memory_test',
                 'issue': 'memory_test_failure',
                 'error': str(e)
-            })
+            }
         
         # Test 3: Isolation Performance Regression
         try:
@@ -1721,7 +1722,7 @@ class SSOTContinuousComplianceTests:
             
             # Test concurrent isolation operations
             def quick_isolation_test(test_id):
-                context = TestContext(user_id=f"regression_user_{test_id}")
+                context = TestContext(user_id=fregression_user_{test_id}")
                 from shared.isolated_environment import get_env_var as get_env
                 import redis
                 sync_redis_client = redis.Redis(
@@ -1730,10 +1731,10 @@ class SSOTContinuousComplianceTests:
                     decode_responses=True
                 )
                 sync_redis_client.set(
-                    f"isolation_test:{test_id}",
-                    f"data_{test_id}"
+                    fisolation_test:{test_id},
+                    fdata_{test_id}"
                 )
-                return sync_redis_client.get(f"isolation_test:{test_id}")
+                return sync_redis_client.get(f"isolation_test:{test_id})
             
             def run_quick_isolation_test(test_id):
                 return quick_isolation_test(test_id)
@@ -1754,7 +1755,7 @@ class SSOTContinuousComplianceTests:
                             'metric': 'isolation_operations',
                             'issue': 'isolation_operation_failure',
                             'error': str(e)
-                        })
+                        }
             
             isolation_time = time.time() - isolation_start
             regression_metrics['isolation_metrics']['concurrent_ops_time'] = isolation_time
@@ -1766,7 +1767,7 @@ class SSOTContinuousComplianceTests:
                     'value': isolation_time,
                     'threshold': 5.0,
                     'issue': 'isolation_performance_regression'
-                })
+                }
             
             if len(results) < 8:  # Should complete at least 8/10 operations
                 regression_issues.append({
@@ -1775,14 +1776,14 @@ class SSOTContinuousComplianceTests:
                     'total_ops': 10,
                     'threshold': 8,
                     'issue': 'isolation_reliability_regression'
-                })
+                }
         
         except Exception as e:
             regression_issues.append({
                 'metric': 'isolation_test',
                 'issue': 'isolation_test_failure',
                 'error': str(e)
-            })
+            }
         
         # Calculate overall system metrics
         system_total_time = time.time() - system_start_time
@@ -1793,13 +1794,13 @@ class SSOTContinuousComplianceTests:
             'total_test_time': system_total_time,
             'memory_change': final_memory - initial_memory,
             'cpu_usage': final_cpu
-        })
+        }
         
         # Log comprehensive regression monitoring results
-        logger.info(f"Regression monitoring metrics: {regression_metrics}")
+        logger.info(fRegression monitoring metrics: {regression_metrics})
         
         if regression_issues:
-            logger.warning(f"Regression monitoring issues detected: {regression_issues}")
+            logger.warning(fRegression monitoring issues detected: {regression_issues})
         
         # Categorize regression issues
         critical_regressions = [
@@ -1813,12 +1814,12 @@ class SSOTContinuousComplianceTests:
         ]
         
         # Verify regression thresholds
-        assert len(critical_regressions) == 0, f"Critical system regressions detected: {critical_regressions}"
-        assert len(performance_regressions) <= 2, f"Too many performance regressions: {performance_regressions}"
-        assert len(regression_issues) <= 5, f"Too many total regression issues: {len(regression_issues)} detected"
+        assert len(critical_regressions) == 0, fCritical system regressions detected: {critical_regressions}""
+        assert len(performance_regressions) <= 2, fToo many performance regressions: {performance_regressions}
+        assert len(regression_issues) <= 5, fToo many total regression issues: {len(regression_issues)} detected
     
     def _check_real_service_health(self):
-        """Check real service health metrics."""
+        "Check real service health metrics."
         try:
             health_metrics = {
                 'redis_connection': True,
@@ -1850,7 +1851,7 @@ class SSOTContinuousComplianceTests:
             return {'error': str(e), 'healthy': False}
     
     def _measure_real_service_load_time(self):
-        """Measure real service initialization load time."""
+        "Measure real service initialization load time."
         start_time = time.time()
         
         try:
@@ -1874,7 +1875,7 @@ class SSOTContinuousComplianceTests:
             return -1  # Error indicator
     
     def _measure_system_memory_usage(self):
-        """Measure current system memory usage."""
+        Measure current system memory usage.""
         try:
             import psutil
             process = psutil.Process()
@@ -1887,10 +1888,10 @@ class SSOTContinuousComplianceTests:
             return {'error': 'memory_measurement_failed'}
 
     def test_comprehensive_data_leakage_detection(self):
-        """
+        
         ISOLATION CRITICAL: Comprehensive data leakage detection across all boundaries.
         Tests for any form of data leakage between isolated contexts.
-        """
+""
         num_isolated_contexts = 15
         operations_per_context = 12
         leakage_violations = []
@@ -1899,24 +1900,24 @@ class SSOTContinuousComplianceTests:
         context_secrets = {}
         for context_id in range(num_isolated_contexts):
             context_secrets[context_id] = {
-                'secret_key': f"ULTRA_SECRET_{context_id}_{uuid.uuid4().hex}",
-                'private_data': f"PRIVATE_DATA_{context_id}_{time.time()}",
-                'auth_token': f"AUTH_{context_id}_{uuid.uuid4().hex[:16]}",
-                'session_id': f"SESSION_{context_id}_{uuid.uuid4().hex[:12]}"
+                'secret_key': fULTRA_SECRET_{context_id}_{uuid.uuid4().hex},
+                'private_data': fPRIVATE_DATA_{context_id}_{time.time()},
+                'auth_token': f"AUTH_{context_id}_{uuid.uuid4().hex[:16]},
+                'session_id': fSESSION_{context_id}_{uuid.uuid4().hex[:12]}"
             }
         
         def isolated_context_operations(context_id):
-            """Perform operations within an isolated context and check for leakage."""
+            Perform operations within an isolated context and check for leakage.""
             violations = []
             
             try:
                 # Create truly isolated environment
                 context_env = IsolatedEnvironment()
-                context = TestContext(user_id=f"leak_test_user_{context_id}")
+                context = TestContext(user_id=fleak_test_user_{context_id})
                 secrets = context_secrets[context_id]
                 
                 for op_num in range(operations_per_context):
-                    operation_key = f"context:{context_id}:operation:{op_num}"
+                    operation_key = fcontext:{context_id}:operation:{op_num}
                     
                     # Store context-specific secret data - using sync redis for non-async context
                     from shared.isolated_environment import get_env_var as get_env
@@ -1928,15 +1929,13 @@ class SSOTContinuousComplianceTests:
                     )
                     sync_redis_client.hset(
                         operation_key,
-                        "secret_data",
+                        secret_data","
                         secrets['secret_key']
-                    )
                     
                     sync_redis_client.hset(
                         operation_key,
-                        "private_data",
+                        private_data,
                         secrets['private_data']
-                    )
                     
                     # Verify data isolation - no leakage to other contexts
                     for other_context in range(num_isolated_contexts):
@@ -1944,7 +1943,7 @@ class SSOTContinuousComplianceTests:
                             other_secrets = context_secrets[other_context]
                             
                             # Check if current context's data leaked to other context
-                            other_keys = sync_redis_client.keys(f"context:{other_context}:*")
+                            other_keys = sync_redis_client.keys(fcontext:{other_context}:*)"
                             for other_key in other_keys:
                                 other_data = sync_redis_client.hgetall(other_key)
                                 
@@ -1961,7 +1960,7 @@ class SSOTContinuousComplianceTests:
                                             'leaked_data_type': 'secret_data',
                                             'leaked_content': str(value),
                                             'issue': 'critical_data_leakage'
-                                        })
+                                        }
                             
                             # Check reverse leakage - other context data in current context
                             current_data = sync_redis_client.hgetall(operation_key)
@@ -1977,7 +1976,7 @@ class SSOTContinuousComplianceTests:
                                         'contaminated_data_type': 'reverse_leakage',
                                         'contaminated_content': str(value),
                                         'issue': 'critical_reverse_leakage'
-                                    })
+                                    }
                     
                     time.sleep(0.005)  # Small delay to test concurrent access patterns
                 
@@ -2017,7 +2016,7 @@ class SSOTContinuousComplianceTests:
                         'context_id': context_id,
                         'issue': 'future_execution_failure',
                         'error': str(e)
-                    })
+                    }
         
         # Clean up test data
         from shared.isolated_environment import get_env_var as get_env
@@ -2028,24 +2027,24 @@ class SSOTContinuousComplianceTests:
             decode_responses=True
         )
         for context_id in range(num_isolated_contexts):
-            keys_to_delete = cleanup_redis_client.keys(f"context:{context_id}:*")
+            keys_to_delete = cleanup_redis_client.keys(f"context:{context_id}:*)
             if keys_to_delete:
                 cleanup_redis_client.delete(*keys_to_delete)
         
         # Verify NO data leakage detected
         if leakage_violations:
-            logger.error(f"CRITICAL: Data leakage violations detected: {leakage_violations[:10]}")
+            logger.error(fCRITICAL: Data leakage violations detected: {leakage_violations[:10]})
         
         critical_leakages = [v for v in leakage_violations if 'leakage' in v.get('issue', '')]
         
-        assert len(critical_leakages) == 0, f"CRITICAL: Data leakage detected in {len(critical_leakages)} cases"
-        assert len(leakage_violations) == 0, f"Total isolation violations: {len(leakage_violations)} detected"
+        assert len(critical_leakages) == 0, fCRITICAL: Data leakage detected in {len(critical_leakages)} cases
+        assert len(leakage_violations) == 0, fTotal isolation violations: {len(leakage_violations)} detected""
 
     def test_stress_test_concurrent_user_isolation_boundaries(self):
-        """
+
         STRESS CRITICAL: Stress test isolation boundaries under extreme concurrent load.
         Tests isolation integrity under maximum stress conditions.
-        """
+        ""
         num_concurrent_users = 30
         operations_per_user = 25
         stress_test_duration = 45  # seconds
@@ -2054,16 +2053,16 @@ class SSOTContinuousComplianceTests:
         stress_test_start = time.time()
         
         def extreme_stress_user_operations(user_id):
-            """Execute extreme stress operations for a specific user."""
+            Execute extreme stress operations for a specific user."
             failures = []
             user_start_time = time.time()
             
             try:
                 # Create user-specific stress test environment
                 user_env = IsolatedEnvironment()
-                user_context = TestContext(user_id=f"stress_user_{user_id}")
+                user_context = TestContext(user_id=f"stress_user_{user_id})
                 
-                user_data_signature = f"STRESS_USER_{user_id}_SIGNATURE_{uuid.uuid4().hex[:8]}"
+                user_data_signature = fSTRESS_USER_{user_id}_SIGNATURE_{uuid.uuid4().hex[:8]}
                 
                 operation_count = 0
                 while (time.time() - stress_test_start) < stress_test_duration:
@@ -2072,18 +2071,18 @@ class SSOTContinuousComplianceTests:
                     try:
                         # High-frequency data operations
                         for i in range(5):  # Burst of 5 operations
-                            key = f"stress:{user_id}:{operation_count}:{i}"
+                            key = fstress:{user_id}:{operation_count}:{i}
                             
                             # Complex data structure to stress system
                             complex_data = {
                                 'user_signature': user_data_signature,
-                                'operation_id': f"{user_id}_{operation_count}_{i}",
+                                'operation_id': f{user_id}_{operation_count}_{i}","
                                 'timestamp': time.time(),
-                                'payload': f"payload_{user_id}_{operation_count}_{i}" * 50,
+                                'payload': fpayload_{user_id}_{operation_count}_{i} * 50,
                                 'nested_data': {
-                                    'level_1': f"level1_{user_id}_{i}",
+                                    'level_1': flevel1_{user_id}_{i},
                                     'level_2': {
-                                        'level_2_data': f"level2_{user_id}_{operation_count}"
+                                        'level_2_data': f"level2_{user_id}_{operation_count}
                                     }
                                 }
                             }
@@ -2098,12 +2097,12 @@ class SSOTContinuousComplianceTests:
                             )
                             sync_redis_client.hset(
                                 key,
-                                "complex_data",
+                                complex_data",
                                 str(complex_data)
                             )
                             
                             # Immediate verification
-                            retrieved = sync_redis_client.hget(key, "complex_data")
+                            retrieved = sync_redis_client.hget(key, complex_data)
                             if not retrieved or user_data_signature not in retrieved:
                                 failures.append({
                                     'user_id': user_id,
@@ -2112,19 +2111,19 @@ class SSOTContinuousComplianceTests:
                                     'issue': 'stress_data_integrity_failure',
                                     'expected_signature': user_data_signature,
                                     'retrieved_data': str(retrieved)[:200]  # Truncate for logging
-                                })
+                                }
                             
                             # Stress test: Check for contamination from random other users
                             random_other_users = [u for u in range(num_concurrent_users) if u != user_id]
                             if random_other_users:
                                 random_user = random_other_users[operation_count % len(random_other_users)]
-                                random_keys = sync_redis_client.keys(f"stress:{random_user}:*")
+                                random_keys = sync_redis_client.keys(fstress:{random_user}:*")"
                                 
                                 if random_keys:
                                     # Sample a few random keys to check for contamination
                                     sample_keys = random_keys[:min(3, len(random_keys))]
                                     for sample_key in sample_keys:
-                                        sample_data = sync_redis_client.hget(sample_key, "complex_data")
+                                        sample_data = sync_redis_client.hget(sample_key, complex_data)
                                         if sample_data and user_data_signature in sample_data:
                                             failures.append({
                                                 'user_id': user_id,
@@ -2133,7 +2132,7 @@ class SSOTContinuousComplianceTests:
                                                 'contaminated_key': sample_key,
                                                 'issue': 'stress_cross_user_contamination',
                                                 'user_signature': user_data_signature
-                                            })
+                                            }
                         
                         operation_count += 1
                         
@@ -2149,7 +2148,7 @@ class SSOTContinuousComplianceTests:
                                 'issue': 'stress_performance_degradation',
                                 'operation_duration': op_duration,
                                 'threshold': 1.0
-                            })
+                            }
                     
                     except Exception as e:
                         failures.append({
@@ -2157,7 +2156,7 @@ class SSOTContinuousComplianceTests:
                             'operation': operation_count,
                             'issue': 'stress_operation_exception',
                             'error': str(e)
-                        })
+                        }
                 
                 user_total_time = time.time() - user_start_time
                 
@@ -2193,13 +2192,13 @@ class SSOTContinuousComplianceTests:
                 try:
                     user_result = future.result(timeout=stress_test_duration + 30)
                     stress_results.append(user_result)
-                    isolation_stress_failures.extend(user_result['failures'])
+                    isolation_stress_failures.extend(user_result['failures']
                 except Exception as e:
                     isolation_stress_failures.append({
                         'user_id': user_id,
                         'issue': 'stress_user_execution_failure',
                         'error': str(e)
-                    })
+                    }
         
         # Calculate stress test metrics
         total_operations = sum(result['operations_completed'] for result in stress_results)
@@ -2214,7 +2213,7 @@ class SSOTContinuousComplianceTests:
             'failure_count': len(isolation_stress_failures)
         }
         
-        logger.info(f"Stress test isolation metrics: {stress_metrics}")
+        logger.info(fStress test isolation metrics: {stress_metrics})"
         
         # Clean up stress test data
         try:
@@ -2225,7 +2224,7 @@ class SSOTContinuousComplianceTests:
                 port=int(get_env('REDIS_PORT', '6379')),
                 decode_responses=True
             )
-            keys_to_delete = cleanup_redis_client.keys("stress:*")
+            keys_to_delete = cleanup_redis_client.keys("stress:*)
             if keys_to_delete:
                 # Delete in batches to avoid overwhelming Redis
                 batch_size = 100
@@ -2233,35 +2232,35 @@ class SSOTContinuousComplianceTests:
                     batch = keys_to_delete[i:i + batch_size]
                     cleanup_redis_client.delete(*batch)
         except Exception as e:
-            logger.warning(f"Stress test cleanup warning: {e}")
+            logger.warning(fStress test cleanup warning: {e})
         
         # Analyze stress test results
         critical_failures = [f for f in isolation_stress_failures if 'contamination' in f.get('issue', '') or 'integrity_failure' in f.get('issue', '')]
         performance_issues = [f for f in isolation_stress_failures if 'performance' in f.get('issue', '')]
         
         if critical_failures:
-            logger.error(f"CRITICAL: Stress test isolation failures: {critical_failures[:5]}")
+            logger.error(f"CRITICAL: Stress test isolation failures: {critical_failures[:5]})
         
         if isolation_stress_failures:
-            logger.warning(f"Stress test issues detected: {len(isolation_stress_failures)} total issues")
+            logger.warning(fStress test issues detected: {len(isolation_stress_failures)} total issues")
         
         # Verify stress test isolation integrity
-        assert len(critical_failures) == 0, f"CRITICAL: Isolation failed under stress: {len(critical_failures)} critical failures"
-        assert operations_per_second >= 10, f"Stress test performance too low: {operations_per_second} ops/sec"
-        assert len(isolation_stress_failures) <= 20, f"Too many stress test issues: {len(isolation_stress_failures)} detected"
+        assert len(critical_failures) == 0, fCRITICAL: Isolation failed under stress: {len(critical_failures)} critical failures
+        assert operations_per_second >= 10, fStress test performance too low: {operations_per_second} ops/sec"
+        assert len(isolation_stress_failures) <= 20, f"Too many stress test issues: {len(isolation_stress_failures)} detected
 
 
 def run_websocket_tests():
-    """Run WebSocket isolation tests."""
+    Run WebSocket isolation tests."
     test_instance = SSOTRegressionPreventionTests()
     test_instance.setUp()
     
     try:
         # Run the WebSocket test synchronously by using asyncio.run
         asyncio.run(test_instance.test_websocket_channel_isolation_concurrent_sessions())
-        logger.info("WebSocket isolation tests completed successfully")
+        logger.info("WebSocket isolation tests completed successfully)
     except Exception as e:
-        logger.error(f"WebSocket isolation tests failed: {e}")
+        logger.error(fWebSocket isolation tests failed: {e})
         raise
     finally:
         test_instance.tearDown()

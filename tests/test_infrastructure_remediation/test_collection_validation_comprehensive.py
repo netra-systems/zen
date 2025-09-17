@@ -61,8 +61,8 @@ class TestCollectionInfrastructureValidation:
         assert callable(get_websocket_manager)
         
         # Canonical paths
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
         
         assert WebSocketManager is not None
         assert UnifiedWebSocketManager is not None

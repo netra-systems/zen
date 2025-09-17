@@ -5,7 +5,7 @@ for monitoring, error reporting, and logging services.
 """
 
 import asyncio
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Any, Dict, Optional, List
 from datetime import datetime, timezone
 
@@ -24,7 +24,7 @@ except ImportError:
     gcp_logging = None
     service_account = None
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class GCPCredentials:

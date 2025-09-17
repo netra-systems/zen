@@ -52,7 +52,7 @@ class TestWebSocketManagerIntegrationViolations(SSotAsyncTestCase):
             state_conflicts.append(f"WebSocketManagerFactory error: {e}")
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import _WebSocketManagerImplementation
+            from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation
             manager2 = _UnifiedWebSocketManagerImplementation("user1")
             managers_created.append(("_UnifiedWebSocketManagerImplementation", id(manager2)))
         except Exception as e:
@@ -149,7 +149,7 @@ class TestWebSocketManagerIntegrationViolations(SSotAsyncTestCase):
 
             try:
                 # Source 2: Direct instantiation
-                from netra_backend.app.websocket_core.websocket_manager import _WebSocketManagerImplementation
+                from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation
                 manager2 = _UnifiedWebSocketManagerImplementation(user_id)
                 user_managers[user_id].append(("Direct", manager2, id(manager2)))
             except Exception:
@@ -292,7 +292,7 @@ class TestWebSocketConnectionManagementViolations(SSotAsyncTestCase):
             state_inconsistencies.append(f"Manager1 connection error: {e}")
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import _WebSocketManagerImplementation
+            from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation
             manager2 = _UnifiedWebSocketManagerImplementation(user_id)
 
             if hasattr(manager2, 'add_connection'):

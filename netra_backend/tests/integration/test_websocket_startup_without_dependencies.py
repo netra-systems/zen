@@ -42,7 +42,7 @@ class TestWebSocketStartupWithoutDependencies(SSotAsyncTestCase):
                 del sys.modules[module]
 
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 
                 # Should be able to create manager
                 manager = UnifiedWebSocketManager()
@@ -69,7 +69,7 @@ class TestWebSocketStartupWithoutDependencies(SSotAsyncTestCase):
                 del sys.modules[module]
 
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 
                 # Should use auth_integration instead of direct auth_service
                 manager = UnifiedWebSocketManager()
@@ -220,7 +220,7 @@ class TestWebSocketStartupWithoutDependencies(SSotAsyncTestCase):
         with patch.dict('os.environ', container_env):
             try:
                 # This should work in container environment
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 
                 manager = UnifiedWebSocketManager()
                 assert manager is not None
@@ -237,7 +237,7 @@ class TestWebSocketStartupWithoutDependencies(SSotAsyncTestCase):
         # EXPECTED: Core functionality works, advanced features degrade gracefully
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 
             # Simulate missing advanced features
             with patch('netra_backend.app.services.monitoring.gcp_error_reporter.set_request_context', side_effect=ImportError):
@@ -322,7 +322,7 @@ class TestWebSocketDependencyIsolation(SSotAsyncTestCase):
         # EXPECTED: Should handle errors locally or degrade gracefully
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 
             manager = UnifiedWebSocketManager()
 

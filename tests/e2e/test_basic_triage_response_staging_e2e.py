@@ -107,7 +107,7 @@ class StagingWebSocketClient:
             raise Exception('WebSocket not connected to staging')
         if thread_id is None:
             thread_id = f'staging_thread_{uuid.uuid4().hex[:8]}'
-        message = {'type': message_type, 'content': content, 'thread_id': thread_id, 'user_id': self.user.user_id, 'timestamp': datetime.utcnow().isoformat(), 'metadata': {'environment': 'staging', 'test_client': True}}
+        message = {'type': message_type, 'content': content, 'thread_id': thread_id, 'user_id': self.user.user_id, 'timestamp': datetime.now(UTC).isoformat(), 'metadata': {'environment': 'staging', 'test_client': True}}
         try:
             await self.websocket.send(json.dumps(message))
             return True
@@ -139,7 +139,7 @@ class StagingWebSocketClient:
                     if len(events) >= 3:
                         break
                     continue
-                except websockets.exceptions.ConnectionClosed:
+                except websockets.ConnectionClosed:
                     raise Exception('WebSocket connection closed by staging server')
         except Exception as e:
             raise Exception(f'Failed to receive events from staging: {e}')
@@ -210,7 +210,7 @@ class StagingAuthManager:
                         user_data = await response.json()
                     else:
                         user_data = {'user_id': f'staging_user_{uuid.uuid4().hex[:8]}', 'email': email}
-            return StagingTestUser(user_id=user_data.get('user_id', f'staging_user_{uuid.uuid4().hex[:8]}'), email=email, access_token=auth_data['access_token'], refresh_token=auth_data.get('refresh_token', ''), subscription_tier=subscription_tier, created_at=datetime.utcnow())
+            return StagingTestUser(user_id=user_data.get('user_id', f'staging_user_{uuid.uuid4().hex[:8]}'), email=email, access_token=auth_data['access_token'], refresh_token=auth_data.get('refresh_token', ''), subscription_tier=subscription_tier, created_at=datetime.now(UTC))
         except Exception as e:
             raise Exception(f'Failed to create staging test user: {e}')
 
@@ -288,7 +288,7 @@ class BasicTriageResponseStagingE2ETests(SSotAsyncTestCase):
                         test_ws = await asyncio.wait_for(websockets.connect(ws_url, ping_timeout=5), timeout=10.0)
                         await test_ws.close()
                         connectivity_results['websocket_endpoint_available'] = True
-                    except websockets.exceptions.ConnectionClosed:
+                    except websockets.ConnectionClosed:
                         connectivity_results['websocket_endpoint_available'] = True
                     except Exception as e:
                         if '1011' in str(e) or 'unauthorized' in str(e).lower():
@@ -373,7 +373,7 @@ class BasicTriageResponseStagingE2ETests(SSotAsyncTestCase):
             connection_time = time.time() - connection_start
             assert connected, 'WebSocket connection to staging failed'
             websocket_steps['connection_established'] = True
-            test_message = {'type': 'ping', 'data': {'test': 'connection_verification'}, 'timestamp': datetime.utcnow().isoformat()}
+            test_message = {'type': 'ping', 'data': {'test': 'connection_verification'}, 'timestamp': datetime.now(UTC).isoformat()}
             await ws_client.websocket.send(json.dumps(test_message))
             websocket_steps['authentication_verified'] = True
             websocket_steps['message_send_ready'] = True

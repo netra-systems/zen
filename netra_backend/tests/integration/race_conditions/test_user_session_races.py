@@ -23,7 +23,7 @@ import pytest
 import uuid
 import time
 import weakref
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Set, Any
 from unittest.mock import patch
 
@@ -109,8 +109,8 @@ class UserSessionStateRacesTests(BaseIntegrationTest):
         session_data = {
             'session_id': session_id,
             'user_id': user_id,
-            'created_at': datetime.utcnow(),
-            'last_access': datetime.utcnow(),
+            'created_at': datetime.now(UTC),
+            'last_access': datetime.now(UTC),
             'is_active': True,
             'auth_token': f"token_{session_id[:8]}"
         }
@@ -157,7 +157,7 @@ class UserSessionStateRacesTests(BaseIntegrationTest):
                     
                     # Simulate rapid access
                     if session_id in self.active_sessions:
-                        self.active_sessions[session_id]['last_access'] = datetime.utcnow()
+                        self.active_sessions[session_id]['last_access'] = datetime.now(UTC)
                         self._track_session_operation('access', session_id, user_id)
                     
                     # Small delay to create timing pressure
@@ -223,7 +223,7 @@ class UserSessionStateRacesTests(BaseIntegrationTest):
                         session = self.active_sessions[session_id]
                         
                         # Update last access time
-                        session['last_access'] = datetime.utcnow()
+                        session['last_access'] = datetime.now(UTC)
                         
                         # Update session metadata
                         if 'update_count' not in session:
@@ -330,7 +330,7 @@ class UserSessionStateRacesTests(BaseIntegrationTest):
                         
                         # Update session with new token
                         session['auth_token'] = new_token
-                        session['token_refreshed_at'] = datetime.utcnow()
+                        session['token_refreshed_at'] = datetime.now(UTC)
                         session['refresh_count'] = session.get('refresh_count', 0) + 1
                         
                         successful_refreshes += 1
@@ -424,7 +424,7 @@ class UserSessionStateRacesTests(BaseIntegrationTest):
                             # Update session with user-specific operations
                             session['operation_count'] += 1
                             session['last_operation'] = f"op_{user_index}_{op_num}"
-                            session['last_access'] = datetime.utcnow()
+                            session['last_access'] = datetime.now(UTC)
                             
                             self._track_session_operation('user_operation', session_id, user_id,
                                                         operation_num=op_num,
@@ -518,7 +518,7 @@ class UserSessionStateRacesTests(BaseIntegrationTest):
             try:
                 # Set short expiration for testing
                 session = self.active_sessions[session_id]
-                session['expires_at'] = datetime.utcnow() + timedelta(seconds=1)
+                session['expires_at'] = datetime.now(UTC) + timedelta(seconds=1)
                 session['renewal_count'] = 0
                 
                 session_lifecycle_events.append({
@@ -530,7 +530,7 @@ class UserSessionStateRacesTests(BaseIntegrationTest):
                 
                 # Perform rapid renewal attempts
                 for renewal_num in range(renewal_attempts_per_session):
-                    current_time = datetime.utcnow()
+                    current_time = datetime.now(UTC)
                     
                     if session_id in self.active_sessions:
                         session = self.active_sessions[session_id]
@@ -596,7 +596,7 @@ class UserSessionStateRacesTests(BaseIntegrationTest):
             if event['event'] == 'session_renewed' and 'expires_at' in event:
                 # Check for unrealistic expiration times
                 expires_at = event.get('new_expires_at')
-                if expires_at and expires_at < datetime.utcnow() - timedelta(seconds=5):
+                if expires_at and expires_at < datetime.now(UTC) - timedelta(seconds=5):
                     timing_violations.append({
                         'type': 'past_expiration_renewal',
                         'session_id': event['session_id'],

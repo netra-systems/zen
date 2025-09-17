@@ -122,7 +122,7 @@ class TestWebSocketActualState(SSotBaseTestCase):
         isolation_test_results = []
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             # Test user isolation
             user1_context = {"user_id": "test_user_1", "session_id": "session_1"}

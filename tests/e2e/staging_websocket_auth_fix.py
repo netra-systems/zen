@@ -213,7 +213,7 @@ class StagingWebSocketAuthFix:
                 result["success"] = True
                 result["details"]["connection_state"] = "established"
                 
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             result["error"] = f"Connection closed: {e.code} - {e.reason}"
             result["details"]["close_code"] = e.code
             result["details"]["close_reason"] = e.reason

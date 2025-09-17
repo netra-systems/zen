@@ -5,14 +5,14 @@ Provides key management and encryption functionality.
 Manages API keys, encryption keys, and other sensitive data.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 import os
 import secrets
 from typing import Dict, Optional, Any, List
 from dataclasses import dataclass
 from enum import Enum
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class KeyType(Enum):

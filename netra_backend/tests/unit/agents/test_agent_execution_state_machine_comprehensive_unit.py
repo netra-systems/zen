@@ -14,7 +14,7 @@ through execution to completion. These tests are critical for the Golden Path re
 
 import pytest
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from enum import Enum
 from typing import Dict, List, Optional, Any, Callable
 from unittest.mock import Mock, AsyncMock, patch
@@ -256,42 +256,42 @@ class MockAgentExecutionStateMachine:
     
     def _on_entering_ready(self):
         """Actions when entering READY state."""
-        self.context.execution_metadata['ready_at'] = datetime.utcnow().isoformat()
+        self.context.execution_metadata['ready_at'] = datetime.now(UTC).isoformat()
         self.context.execution_metadata['agent_initialized'] = True
     
     def _on_entering_starting(self):
         """Actions when entering STARTING state."""
-        self.context.started_at = datetime.utcnow()
+        self.context.started_at = datetime.now(UTC)
         self.context.execution_metadata['execution_started'] = True
         self._emit_websocket_event("agent_started")
     
     def _on_entering_thinking(self):
         """Actions when entering THINKING state."""
-        self.context.execution_metadata['thinking_started'] = datetime.utcnow().isoformat()
+        self.context.execution_metadata['thinking_started'] = datetime.now(UTC).isoformat()
         self._emit_websocket_event("agent_thinking")
     
     def _on_entering_tool_executing(self):
         """Actions when entering TOOL_EXECUTING state."""
         self.execution_metrics['tool_executions'] += 1
-        self.context.execution_metadata['current_tool_started'] = datetime.utcnow().isoformat()
+        self.context.execution_metadata['current_tool_started'] = datetime.now(UTC).isoformat()
         self._emit_websocket_event("tool_executing")
     
     def _on_entering_tool_completed(self):
         """Actions when entering TOOL_COMPLETED state."""
-        self.context.execution_metadata['tool_completed_at'] = datetime.utcnow().isoformat()
+        self.context.execution_metadata['tool_completed_at'] = datetime.now(UTC).isoformat()
         self._emit_websocket_event("tool_completed")
     
     def _on_entering_analyzing(self):
         """Actions when entering ANALYZING state."""
-        self.context.execution_metadata['analyzing_started'] = datetime.utcnow().isoformat()
+        self.context.execution_metadata['analyzing_started'] = datetime.now(UTC).isoformat()
     
     def _on_entering_responding(self):
         """Actions when entering RESPONDING state."""
-        self.context.execution_metadata['responding_started'] = datetime.utcnow().isoformat()
+        self.context.execution_metadata['responding_started'] = datetime.now(UTC).isoformat()
     
     def _on_entering_completed(self):
         """Actions when entering COMPLETED state."""
-        self.context.completed_at = datetime.utcnow()
+        self.context.completed_at = datetime.now(UTC)
         if self.context.started_at:
             total_time = (self.context.completed_at - self.context.started_at).total_seconds()
             self.execution_metrics['total_execution_time'] = total_time
@@ -301,35 +301,35 @@ class MockAgentExecutionStateMachine:
     def _on_entering_error(self):
         """Actions when entering ERROR state."""
         self.execution_metrics['error_count'] += 1
-        self.context.execution_metadata['error_occurred_at'] = datetime.utcnow().isoformat()
+        self.context.execution_metadata['error_occurred_at'] = datetime.now(UTC).isoformat()
         self._emit_websocket_event("agent_error")
     
     def _on_entering_paused(self):
         """Actions when entering PAUSED state."""
         self.execution_paused = True
-        self.context.execution_metadata['paused_at'] = datetime.utcnow().isoformat()
+        self.context.execution_metadata['paused_at'] = datetime.now(UTC).isoformat()
     
     def _on_exiting_thinking(self):
         """Actions when exiting THINKING state."""
         if 'thinking_started' in self.context.execution_metadata:
             thinking_duration = (
-                datetime.utcnow() - 
+                datetime.now(UTC) - 
                 datetime.fromisoformat(self.context.execution_metadata['thinking_started'])
             ).total_seconds()
             self.execution_metrics['thinking_duration'] += thinking_duration
     
     def _on_exiting_tool_executing(self):
         """Actions when exiting TOOL_EXECUTING state."""
-        self.context.execution_metadata['tool_execution_completed'] = datetime.utcnow().isoformat()
+        self.context.execution_metadata['tool_execution_completed'] = datetime.now(UTC).isoformat()
     
     def _on_exiting_paused(self):
         """Actions when exiting PAUSED state."""
         self.execution_paused = False
-        self.context.execution_metadata['resumed_at'] = datetime.utcnow().isoformat()
+        self.context.execution_metadata['resumed_at'] = datetime.now(UTC).isoformat()
     
     def _on_exiting_error(self):
         """Actions when exiting ERROR state."""
-        self.context.execution_metadata['error_recovery_attempted'] = datetime.utcnow().isoformat()
+        self.context.execution_metadata['error_recovery_attempted'] = datetime.now(UTC).isoformat()
     
     def _emit_websocket_event(self, event_type: str):
         """Emit WebSocket event (critical for Golden Path user experience)."""
@@ -340,10 +340,10 @@ class MockAgentExecutionStateMachine:
                 'user_id': self.context.user_id,
                 'thread_id': self.context.thread_id,
                 'run_id': self.context.run_id,
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'state': self.current_state.value
             },
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': datetime.now(UTC).isoformat()
         }
         
         # Add state-specific data
@@ -392,7 +392,7 @@ class MockAgentExecutionStateMachine:
         self.state_history.append({
             'state': state.value,
             'action': 'entry',
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(UTC).isoformat(),
             'reason': reason
         })
     
@@ -404,7 +404,7 @@ class MockAgentExecutionStateMachine:
             'from_state': from_state.value,
             'to_state': to_state.value,
             'event': event.value,
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(UTC).isoformat(),
             'metadata': metadata or {},
             'execution_context': {
                 'user_id': self.context.user_id,
@@ -421,7 +421,7 @@ class MockAgentExecutionStateMachine:
             'from_state': from_state.value,
             'to_state': to_state.value,
             'event': event.value,
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(UTC).isoformat(),
             'valid': False,
             'error': 'invalid_state_transition'
         })
@@ -443,7 +443,7 @@ class MockAgentExecutionStateMachine:
             'tool': tool_name,
             'params': tool_params,
             'execution_time': execution_time,
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(UTC).isoformat(),
             'success': random.random() < success_rate
         }
         

@@ -10,14 +10,14 @@ Business Value Justification (BVJ):
 - Strategic Impact: Foundation for secure authentication workflows
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
 
 from shared.isolated_environment import get_env
 from netra_backend.app.core.environment_constants import EnvironmentDetector
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class OAuthConfigGenerator:

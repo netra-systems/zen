@@ -411,10 +411,10 @@ timeout: Optional[float] = None) -> CollectionPerformanceResult:
 
 args = ["--collect-only", "-q"] + [str(p) for p in test_paths]
 if extra_args:
-args.extend(extra_args)
+    args.extend(extra_args)
 
 with self.collection_tracking() as tracking:
-try:
+    try:
                 # Run pytest as subprocess to isolate collection
 cmd = [sys.executable, "-m", "pytest"] + args
 
@@ -428,11 +428,11 @@ cwd=str(self.temp_dir)
                 
 
 try:
-stdout, stderr = process.communicate(timeout=timeout)
+    stdout, stderr = process.communicate(timeout=timeout)
 collection_successful = process.returncode == 0
 timeout_occurred = False
 except subprocess.TimeoutExpired:
-process.kill()
+    process.kill()
 stdout, stderr = process.communicate()
 collection_successful = False
 timeout_occurred = True
@@ -442,18 +442,18 @@ end_time = time.time()
                         # Parse collection output to count tests
 tests_collected = 0
 if stdout:
-for line in stdout.split(" )
+    for line in stdout.split(" )
 "):
 if 'collected' in line and 'item' in line:
                                     Extract number from lines like "collected 1500 items"
 words = line.split()
 for i, word in enumerate(words):
-if word == 'collected' and i + 1 < len(words):
-try:
-tests_collected = int(words[i + 1])
+    if word == 'collected' and i + 1 < len(words):
+        try:
+            tests_collected = int(words[i + 1])
 break
 except ValueError:
-continue
+    continue
 
                                                     # Count files processed
 files_processed = len(test_paths)
@@ -461,18 +461,18 @@ files_processed = len(test_paths)
                                                     # Parse errors
 errors = []
 if stderr:
-errors = stderr.split(" )
+    errors = stderr.split(" )
 ")
 
 if not collection_successful:
-errors.append("formatted_string")
+    errors.append("formatted_string")
 
 tracking['tests_collected'] = tests_collected
 tracking['files_processed'] = files_processed
 tracking['errors'] = errors
 
 except Exception as e:
-tracking['errors'].append("formatted_string")
+    tracking['errors'].append("formatted_string")
 tests_collected = 0
 files_processed = len(test_paths)
 collection_successful = False

@@ -103,7 +103,7 @@ class Issue463ResolutionValidator:
                             }
                         })
                         
-            except websockets.exceptions.WebSocketException as e:
+            except websockets.WebSocketException as e:
                 if "403" in str(e) or "Forbidden" in str(e):
                     logger.error(f" FAIL:  WebSocket authentication still failing: {e}")
                     test_results.update({

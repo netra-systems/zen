@@ -14,14 +14,14 @@ and maintain application state notifications for comprehensive user experience.
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List, Callable
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ConnectionID, WebSocketID
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
@@ -56,7 +56,7 @@ class WebSocketConnectionEventEmissionApplicationStateIntegrationTests(BaseInteg
                 if data.get('type') in ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']:
                     self.events_emitted.append({
                         'event_type': data['type'],
-                        'timestamp': datetime.utcnow().isoformat(),
+                        'timestamp': datetime.now(UTC).isoformat(),
                         'data': data.get('data', {})
                     })
                 
@@ -77,7 +77,7 @@ class WebSocketConnectionEventEmissionApplicationStateIntegrationTests(BaseInteg
             connection_id=connection_id,
             user_id=user_id,
             websocket=event_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"connection_type": "event_emission_test"}
         )
         
@@ -88,31 +88,31 @@ class WebSocketConnectionEventEmissionApplicationStateIntegrationTests(BaseInteg
             {
                 "type": "agent_started",
                 "data": {"agent_id": "test_agent", "user_id": user_id},
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "critical": True
             },
             {
                 "type": "agent_thinking", 
                 "data": {"progress": "analyzing", "reasoning": "Processing user request"},
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "critical": True
             },
             {
                 "type": "tool_executing",
                 "data": {"tool_name": "data_analyzer", "status": "running"},
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "critical": True
             },
             {
                 "type": "tool_completed",
                 "data": {"tool_name": "data_analyzer", "result": "analysis_complete"},
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "critical": True
             },
             {
                 "type": "agent_completed",
                 "data": {"agent_id": "test_agent", "result": "task_finished", "insights": ["insight1", "insight2"]},
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "critical": True
             }
         ]
@@ -146,7 +146,7 @@ class WebSocketConnectionEventEmissionApplicationStateIntegrationTests(BaseInteg
             'connection_id': connection_id,
             'events_emitted': event_websocket.events_emitted,
             'total_events': len(event_websocket.events_emitted),
-            'log_created_at': datetime.utcnow().isoformat()
+            'log_created_at': datetime.now(UTC).isoformat()
         }
         
         await real_services_fixture["redis"].set(
@@ -206,7 +206,7 @@ class WebSocketConnectionEventEmissionApplicationStateIntegrationTests(BaseInteg
                 if random.random() < self.fail_rate:
                     self.failed_sends.append({
                         'data': data,
-                        'timestamp': datetime.utcnow().isoformat(),
+                        'timestamp': datetime.now(UTC).isoformat(),
                         'attempt': self.delivery_attempts
                     })
                     raise ConnectionError("Simulated delivery failure")
@@ -230,7 +230,7 @@ class WebSocketConnectionEventEmissionApplicationStateIntegrationTests(BaseInteg
             connection_id=connection_id,
             user_id=user_id,
             websocket=reliability_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"connection_type": "event_reliability_test"}
         )
         

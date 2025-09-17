@@ -164,8 +164,8 @@ def execute_migration(logger) -> None:
     
     try:
         # Use stamp if tables exist but no alembic_version table
-        from netra_backend.app.core.configuration.base import get_unified_config
-        config = get_unified_config()
+        from netra_backend.app.config import get_config
+        config = get_config()
         sync_url = get_sync_database_url(config.database_url)
         
         # Check if we need to stamp instead of migrate

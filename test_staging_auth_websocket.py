@@ -66,7 +66,7 @@ async def test_websocket_with_auth():
         print(f"[{datetime.now()}] ❌ WebSocket timeout after {elapsed:.2f} seconds")
         print("This confirms the Redis authentication issue exists in staging")
         return False
-    except websockets.exceptions.ConnectionClosedError as e:
+    except websockets.ConnectionClosedError as e:
         elapsed = time.time() - start_time
         print(f"[{datetime.now()}] 🔒 Connection closed (auth rejected) after {elapsed:.2f} seconds: {e}")
         if elapsed > 5:

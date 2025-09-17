@@ -60,7 +60,7 @@ class WebSocketFactorySSotEnforcementTests(SSotBaseTestCase, unittest.TestCase):
         AFTER REMEDIATION: This test should PASS (SSOT function still exists)
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             import inspect
             self.assertTrue(inspect.iscoroutinefunction(get_websocket_manager), 'get_websocket_manager should be an async function')
             sig = inspect.signature(get_websocket_manager)
@@ -98,7 +98,7 @@ class WebSocketFactorySSotEnforcementTests(SSotBaseTestCase, unittest.TestCase):
         AFTER REMEDIATION: This test should PASS (SSOT pattern still works)
         """
         mock_user_context = {'user_id': 'test_user_ssot_enforcement', 'thread_id': 'test_thread_ssot_enforcement'}
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         import asyncio
 
         async def test_manager_creation():
@@ -126,7 +126,7 @@ class WebSocketFactorySSotEnforcementTests(SSotBaseTestCase, unittest.TestCase):
         """
         expected_ssot_import = 'netra_backend.app.websocket_core.websocket_manager.get_websocket_manager'
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             self.assertTrue(True, f'SSOT import successful: {expected_ssot_import}')
         except ImportError as e:
             self.fail(f'SSOT import should always work: {expected_ssot_import} - {e}')

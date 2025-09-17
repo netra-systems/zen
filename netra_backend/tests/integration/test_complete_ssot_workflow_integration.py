@@ -30,7 +30,7 @@ import asyncio
 import json
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock
 import pytest
@@ -55,7 +55,7 @@ from netra_backend.app.core.configuration.base import (
 )
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.core.managers.unified_state_manager import (
     UnifiedStateManager,
     StateScope,
@@ -172,12 +172,12 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
         mock_websocket = AsyncMock()
         
         # UnifiedWebSocketManager: Establish user connection
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
         websocket_conn = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,
             websocket=mock_websocket,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         await self.websocket_manager.add_connection(websocket_conn)
         
@@ -186,7 +186,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
             key="user_session",
             value={
                 "user_id": user_id,
-                "connected_at": datetime.utcnow().isoformat(),
+                "connected_at": datetime.now(UTC).isoformat(),
                 "active": True
             },
             state_type=StateType.SESSION_DATA,
@@ -320,7 +320,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 "user_id": user_id,
                 "email": email,
                 "isolated": True,
-                "created_at": datetime.utcnow().isoformat()
+                "created_at": datetime.now(UTC).isoformat()
             },
             source=ConfigurationSource.OVERRIDE,
             scope=ConfigurationScope.USER,
@@ -347,12 +347,12 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
         connection_id = f"conn_{user_id}_{uuid.uuid4()}"
         mock_websocket = AsyncMock()
         
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
         websocket_conn = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,
             websocket=mock_websocket,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         await self.websocket_manager.add_connection(websocket_conn)
         
@@ -419,8 +419,8 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 "thread_id": thread_id,
                 "user_id": user_id,
                 "messages": [],
-                "created_at": datetime.utcnow().isoformat(),
-                "last_activity": datetime.utcnow().isoformat()
+                "created_at": datetime.now(UTC).isoformat(),
+                "last_activity": datetime.now(UTC).isoformat()
             },
             state_type=StateType.THREAD_CONTEXT,
             scope=StateScope.THREAD,
@@ -446,7 +446,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
             message_entry = {
                 "id": message_id,
                 "user_message": message,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "sequence": i + 1
             }
             
@@ -459,7 +459,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 user_id=user_id
             )
             updated_state.value["messages"] = conversation_history
-            updated_state.value["last_activity"] = datetime.utcnow().isoformat()
+            updated_state.value["last_activity"] = datetime.now(UTC).isoformat()
             await self.state_manager.set_state(updated_state)
             
             # Simulate processing delay
@@ -560,7 +560,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
             value={
                 "service_name": service_name,
                 "startup_phase": "initializing",
-                "startup_time": datetime.utcnow().isoformat(),
+                "startup_time": datetime.now(UTC).isoformat(),
                 "health_status": "starting"
             },
             state_type=StateType.CONFIGURATION_STATE,
@@ -585,7 +585,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 scope=StateScope.GLOBAL
             )
             current_state.value["startup_phase"] = phase
-            current_state.value["last_update"] = datetime.utcnow().isoformat()
+            current_state.value["last_update"] = datetime.now(UTC).isoformat()
             current_state.value["phase_description"] = description
             await self.state_manager.set_state(current_state)
             
@@ -661,12 +661,12 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
             
         mock_websocket.send_json = mock_send_json
         
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
         websocket_conn = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,
             websocket=mock_websocket,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         await self.websocket_manager.add_connection(websocket_conn)
         
@@ -735,7 +735,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 """Send WebSocket event."""
                 event_data = {
                     "type": event_type,
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     "data": data
                 }
                 await mock_websocket.send_json(event_data)
@@ -751,7 +751,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 "user_id": user_id,
                 "agent_type": agent_type,
                 "status": "running",
-                "started_at": datetime.utcnow().isoformat()
+                "started_at": datetime.now(UTC).isoformat()
             },
             state_type=StateType.AGENT_EXECUTION,
             scope=StateScope.AGENT,
@@ -773,7 +773,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
             user_id=user_id
         )
         completed_state.value["status"] = "completed"
-        completed_state.value["completed_at"] = datetime.utcnow().isoformat()
+        completed_state.value["completed_at"] = datetime.now(UTC).isoformat()
         completed_state.value["result"] = result
         await self.state_manager.set_state(completed_state)
         
@@ -852,8 +852,8 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 "user_id": user_id,
                 "email": email,
                 "authenticated": True,
-                "created_at": datetime.utcnow().isoformat(),
-                "last_activity": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
+                "last_activity": datetime.now(UTC).isoformat(),
                 "permissions": ["agent_execute", "data_read", "config_modify"]
             },
             state_type=StateType.SESSION_DATA,
@@ -867,12 +867,12 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
         connection_id = f"conn_{uuid.uuid4()}"
         mock_websocket = AsyncMock()
         
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
         websocket_conn = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,
             websocket=mock_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"session_id": session_id}
         )
         await self.websocket_manager.add_connection(websocket_conn)
@@ -895,7 +895,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
             "session_id": session_id,
             "user_id": user_id,
             "execution_successful": True,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         # Update session activity
@@ -904,7 +904,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
             scope=StateScope.SESSION,
             user_id=user_id
         )
-        current_session.value["last_activity"] = datetime.utcnow().isoformat()
+        current_session.value["last_activity"] = datetime.now(UTC).isoformat()
         current_session.value["last_execution"] = execution_result
         await self.state_manager.set_state(current_session)
         
@@ -1007,7 +1007,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
         error_recovery_state = StateEntry(
             key="error_recovery_test",
             value={
-                "test_started": datetime.utcnow().isoformat(),
+                "test_started": datetime.now(UTC).isoformat(),
                 "errors_handled": 0,
                 "recovery_successful": False
             },
@@ -1030,7 +1030,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 )
                 recovery_state.value["recovery_successful"] = True
                 recovery_state.value["errors_handled"] = attempt
-                recovery_state.value["recovered_at"] = datetime.utcnow().isoformat()
+                recovery_state.value["recovered_at"] = datetime.now(UTC).isoformat()
                 await self.state_manager.set_state(recovery_state)
                 break
                 
@@ -1137,7 +1137,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 "success_rate": success_rate,
                 "execution_time": execution_time,
                 "operations_per_second": operations_per_second,
-                "test_completed_at": datetime.utcnow().isoformat()
+                "test_completed_at": datetime.now(UTC).isoformat()
             },
             state_type=StateType.CACHE_DATA,
             scope=StateScope.GLOBAL
@@ -1191,12 +1191,12 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                     connection_id = f"load_conn_{user_id}_{operation_idx}"
                     mock_websocket = AsyncMock()
                     
-                    from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+                    from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
                     websocket_conn = WebSocketConnection(
                         connection_id=connection_id,
                         user_id=user_id,
                         websocket=mock_websocket,
-                        connected_at=datetime.utcnow()
+                        connected_at=datetime.now(UTC)
                     )
                     await self.websocket_manager.add_connection(websocket_conn)
                     
@@ -1294,7 +1294,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 "service_name": service_name,
                 "authenticated": False,
                 "auth_attempts": 0,
-                "last_auth_attempt": datetime.utcnow().isoformat()
+                "last_auth_attempt": datetime.now(UTC).isoformat()
             },
             state_type=StateType.CONFIGURATION_STATE,
             scope=StateScope.SERVICE,
@@ -1312,13 +1312,13 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
             )
             
             current_auth_state.value["auth_attempts"] = attempt
-            current_auth_state.value["last_auth_attempt"] = datetime.utcnow().isoformat()
+            current_auth_state.value["last_auth_attempt"] = datetime.now(UTC).isoformat()
             
             # Simulate successful authentication on final attempt
             if attempt == max_auth_attempts:
                 current_auth_state.value["authenticated"] = True
                 current_auth_state.value["auth_token"] = f"service_token_{uuid.uuid4()}"
-                current_auth_state.value["auth_success_at"] = datetime.utcnow().isoformat()
+                current_auth_state.value["auth_success_at"] = datetime.now(UTC).isoformat()
             
             await self.state_manager.set_state(current_auth_state)
             await asyncio.sleep(0.02)  # Simulate auth processing time
@@ -1388,18 +1388,18 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
         
         async def mock_send_json(data):
             received_messages.append({
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "data": data
             })
         
         mock_websocket.send_json = mock_send_json
         
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
         websocket_conn = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,
             websocket=mock_websocket,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         await self.websocket_manager.add_connection(websocket_conn)
         
@@ -1411,7 +1411,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 "user_id": user_id,
                 "message_count": 0,
                 "messages": [],
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 "last_message_at": None
             },
             state_type=StateType.THREAD_CONTEXT,
@@ -1451,7 +1451,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 "thread_id": thread_id,
                 "user_id": user_id,
                 "sequence": msg_idx + 1,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "original_message": message,
                 "routing_status": "processed"
             }
@@ -1482,7 +1482,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 "type": "agent_response",
                 "message_id": message_id,
                 "response": f"I've received your message about {message['content'][:20]}...",
-                "response_time": datetime.utcnow().isoformat()
+                "response_time": datetime.now(UTC).isoformat()
             }
             await mock_websocket.send_json(agent_response)
             
@@ -1495,7 +1495,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
             
             current_thread.value["messages"].append(routed_message)
             current_thread.value["message_count"] += 1
-            current_thread.value["last_message_at"] = datetime.utcnow().isoformat()
+            current_thread.value["last_message_at"] = datetime.now(UTC).isoformat()
             
             await self.state_manager.set_state(current_thread)
             processed_messages.append(routed_message)
@@ -1580,7 +1580,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 "status": "initialized",
                 "tools_executed": [],
                 "current_tool": None,
-                "started_at": datetime.utcnow().isoformat()
+                "started_at": datetime.now(UTC).isoformat()
             },
             state_type=StateType.AGENT_EXECUTION,
             scope=StateScope.AGENT,
@@ -1596,18 +1596,18 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
         
         async def mock_send_json(data):
             websocket_notifications.append({
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "notification": data
             })
         
         mock_websocket.send_json = mock_send_json
         
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
         websocket_conn = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,
             websocket=mock_websocket,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         await self.websocket_manager.add_connection(websocket_conn)
         
@@ -1694,7 +1694,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                     "insights": [f"Insight {i+1} from {tool['name']}" for i in range(2)],
                     "metrics": {"execution_time": tool["estimated_duration"], "confidence": 0.9}
                 },
-                "completed_at": datetime.utcnow().isoformat()
+                "completed_at": datetime.now(UTC).isoformat()
             }
             
             tool_results.append(tool_result)
@@ -1727,7 +1727,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
             user_id=user_id
         )
         final_execution_state.value["status"] = "completed"
-        final_execution_state.value["completed_at"] = datetime.utcnow().isoformat()
+        final_execution_state.value["completed_at"] = datetime.now(UTC).isoformat()
         final_execution_state.value["total_tools"] = len(tools_to_execute)
         await self.state_manager.set_state(final_execution_state)
         
@@ -1819,7 +1819,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
         
         async def mock_send_json(data):
             websocket_data_log.append({
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "event_type": data.get("type", "unknown"),
                 "data_size": len(json.dumps(data)),
                 "data": data
@@ -1827,12 +1827,12 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
         
         mock_websocket.send_json = mock_send_json
         
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
         websocket_conn = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,
             websocket=mock_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"session_id": session_id}
         )
         await self.websocket_manager.add_connection(websocket_conn)
@@ -1853,7 +1853,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 **event,
                 "user_id": user_id,
                 "session_id": session_id,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "event_id": f"evt_{uuid.uuid4()}"
             }
             await mock_websocket.send_json(event_with_metadata)
@@ -1890,7 +1890,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 "event_data": log_entry["data"],
                 "timestamp": log_entry["timestamp"],
                 "data_size": log_entry["data_size"],
-                "stored_at": datetime.utcnow().isoformat()
+                "stored_at": datetime.now(UTC).isoformat()
             }
             database_records.append(db_record)
         
@@ -1901,7 +1901,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 "session_id": session_id,
                 "total_records": len(database_records),
                 "records": database_records,
-                "storage_completed_at": datetime.utcnow().isoformat()
+                "storage_completed_at": datetime.now(UTC).isoformat()
             },
             state_type=StateType.CACHE_DATA,
             scope=StateScope.SESSION,
@@ -2006,10 +2006,10 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 value={
                     "component": component,
                     "status": "healthy",
-                    "last_check": datetime.utcnow().isoformat(),
+                    "last_check": datetime.now(UTC).isoformat(),
                     "check_count": 0,
                     "failure_count": 0,
-                    "uptime_start": datetime.utcnow().isoformat()
+                    "uptime_start": datetime.now(UTC).isoformat()
                 },
                 state_type=StateType.CACHE_DATA,
                 scope=StateScope.GLOBAL
@@ -2037,7 +2037,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                     scope=StateScope.GLOBAL
                 )
                 
-                current_health.value["last_check"] = datetime.utcnow().isoformat()
+                current_health.value["last_check"] = datetime.now(UTC).isoformat()
                 current_health.value["check_count"] += 1
                 current_health.value["status"] = health_check_result["status"]
                 
@@ -2051,7 +2051,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
                 key=f"health_check_round_{round_num}",
                 value={
                     "round": round_num,
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     "components_checked": len(service_components),
                     "healthy_components": len([r for r in round_results if r["status"] == "healthy"]),
                     "unhealthy_components": len([r for r in round_results if r["status"] != "healthy"]),
@@ -2066,7 +2066,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
         
         # Phase 4: Generate Health Summary Report
         health_summary = {
-            "monitoring_completed_at": datetime.utcnow().isoformat(),
+            "monitoring_completed_at": datetime.now(UTC).isoformat(),
             "total_rounds": monitoring_rounds,
             "components_monitored": len(service_components),
             "component_health": {}
@@ -2150,7 +2150,7 @@ class CompleteSSotWorkflowIntegrationTests(BaseIntegrationTest):
         return {
             "component": component,
             "status": status,
-            "check_time": datetime.utcnow().isoformat(),
+            "check_time": datetime.now(UTC).isoformat(),
             "round": round_num,
             "details": f"Health check for {component} in round {round_num}"
         }

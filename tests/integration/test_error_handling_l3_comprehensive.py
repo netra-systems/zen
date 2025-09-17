@@ -136,7 +136,7 @@ class TestErrorHandlingL3Integration:
 error_handler = ErrorHandler()
 
 with patch.object(error_handler, 'handle_exception') as mock_handle:
-mock_handle.return_value = { )
+mock_handle.return_value = { }
 "error_id": "err_123",
 "handled": True,
 "logged": True
@@ -158,13 +158,13 @@ assert result["logged"] is True
 pass
 error_handler = ErrorHandler()
 
-validation_errors = [ )
+validation_errors = [ ]
 {"field": "email", "message": "Invalid email format"},
 {"field": "age", "message": "Must be between 0 and 120"}
                         
 
 with patch.object(error_handler, 'handle_validation_errors') as mock_validate:
-mock_validate.return_value = { )
+mock_validate.return_value = { }
 "status": "validation_failed",
 "errors": validation_errors,
 "error_code": "VALIDATION_ERROR"
@@ -208,17 +208,17 @@ assert attempt_count == 3
 pass
 error_handler = ErrorHandler()
 
-errors = [ )
+errors = [ ]
 ApplicationError("Error 1", code="ERR001"),
 ApplicationError("Error 2", code="ERR002"),
 ApplicationError("Error 3", code="ERR001")  # Duplicate code
             
 
 with patch.object(error_handler, 'aggregate_errors') as mock_aggregate:
-mock_aggregate.return_value = { )
+mock_aggregate.return_value = { }
 "total_errors": 3,
 "unique_errors": 2,
-"error_summary": { )
+"error_summary": { }
 "ERR001": 2,
 "ERR002": 1
                 
@@ -235,7 +235,7 @@ assert result["unique_errors"] == 2
 """Test dead letter queue for failed messages."""
 error_handler = ErrorHandler()
 
-failed_message = { )
+failed_message = { }
 "id": "msg_123",
 "content": "Failed to process",
 "attempts": 5,
@@ -243,7 +243,7 @@ failed_message = { )
                     
 
 with patch.object(error_handler, 'send_to_dlq') as mock_dlq:
-mock_dlq.return_value = { )
+mock_dlq.return_value = { }
 "queued": True,
 "dlq_id": "dlq_456",
 "retry_after": datetime.now(timezone.utc) + timedelta(hours=1)
@@ -268,7 +268,7 @@ severity="critical"
                             
 
 with patch.object(error_handler, 'send_alert') as mock_alert:
-mock_alert.return_value = { )
+mock_alert.return_value = { }
 "alert_sent": True,
 "channels": ["email", "slack", "pagerduty"],
 "alert_id": "alert_789"
@@ -285,7 +285,7 @@ assert "pagerduty" in result["channels"]
 """Test structured error logging with context."""
 logging_service = LoggingService()
 
-error_context = { )
+error_context = { }
 "user_id": "user_123",
 "request_id": "req_456",
 "endpoint": "/api/users",
@@ -293,7 +293,7 @@ error_context = { )
                                     
 
 with patch.object(logging_service, 'log_error') as mock_log:
-mock_log.return_value = { )
+mock_log.return_value = { }
 "logged": True,
 "log_id": "log_123",
 "timestamp": datetime.now(timezone.utc).isoformat()
@@ -316,7 +316,7 @@ pass
 error_handler = ErrorHandler()
 
 with patch.object(error_handler, 'handle_service_failure') as mock_degrade:
-mock_degrade.return_value = { )
+mock_degrade.return_value = { }
 "degraded_mode": True,
 "fallback_service": "cache",
 "features_disabled": ["real_time_updates", "advanced_search"]
@@ -333,14 +333,14 @@ assert result["fallback_service"] == "cache"
 """Test different error recovery strategies."""
 error_handler = ErrorHandler()
 
-strategies = { )
+strategies = { }
 "retry": {"max_attempts": 3, "delay": 1},
 "fallback": {"service": "backup_service"},
 "circuit_break": {"threshold": 5, "timeout": 30}
                                                     
 
 with patch.object(error_handler, 'apply_recovery_strategy') as mock_recover:
-mock_recover.return_value = { )
+mock_recover.return_value = { }
 "recovered": True,
 "strategy_used": "fallback",
 "recovery_time_ms": 150
@@ -365,7 +365,7 @@ trace_id = "trace_123"
 span_id = "span_456"
 
 with patch.object(error_handler, 'correlate_errors') as mock_correlate:
-mock_correlate.return_value = { )
+mock_correlate.return_value = { }
 "trace_id": trace_id,
 "related_errors": 3,
 "services_affected": ["auth", "api", "database"],
@@ -384,7 +384,7 @@ assert "database" in result["services_affected"]
 error_handler = ErrorHandler()
 
 with patch.object(error_handler, 'check_error_rate_limit') as mock_limit:
-mock_limit.return_value = { )
+mock_limit.return_value = { }
 "rate_limited": True,
 "retry_after": 60,
 "limit": 100,
@@ -404,7 +404,7 @@ pass
 error_handler = ErrorHandler()
 
 with patch.object(error_handler, 'check_error_budget') as mock_budget:
-mock_budget.return_value = { )
+mock_budget.return_value = { }
 "budget_remaining": 0.1,  # 10% remaining
 "errors_this_period": 450,
 "budget_exhausted": False,
@@ -422,16 +422,16 @@ assert result["alert_threshold_reached"] is True
 """Test compensation transactions for failed operations."""
 error_handler = ErrorHandler()
 
-failed_transaction = { )
+failed_transaction = { }
 "id": "tx_123",
-"operations": [ )
+"operations": [ ]
 {"type": "debit", "amount": 100, "account": "acc_1"},
 {"type": "credit", "amount": 100, "account": "acc_2"}
                                                                                     
                                                                                     
 
 with patch.object(error_handler, 'compensate_transaction') as mock_compensate:
-mock_compensate.return_value = { )
+mock_compensate.return_value = { }
 "compensated": True,
 "reversed_operations": 2,
 "compensation_id": "comp_456"
@@ -449,14 +449,14 @@ assert result["reversed_operations"] == 2
 pass
 error_handler = ErrorHandler()
 
-duplicate_errors = [ )
+duplicate_errors = [ ]
 ApplicationError("Connection timeout", code="TIMEOUT"),
 ApplicationError("Connection timeout", code="TIMEOUT"),
 ApplicationError("Connection timeout", code="TIMEOUT")
                                                                                             
 
 with patch.object(error_handler, 'deduplicate_errors') as mock_dedup:
-mock_dedup.return_value = { )
+mock_dedup.return_value = { }
 "unique_errors": 1,
 "total_occurrences": 3,
 "deduplication_ratio": 0.67
@@ -473,7 +473,7 @@ assert result["total_occurrences"] == 3
 """Test preservation of error context through layers."""
 error_handler = ErrorHandler()
 
-original_context = { )
+original_context = { }
 "user_id": "user_123",
 "session_id": "session_456",
 "request_path": "/api/orders",
@@ -481,7 +481,7 @@ original_context = { )
                                                                                                     
 
 with patch.object(error_handler, 'wrap_with_context') as mock_wrap:
-mock_wrap.return_value = { )
+mock_wrap.return_value = { }
 "error": "Processing failed",
 "context": original_context,
 "stack_trace": ["frame1", "frame2", "frame3"],

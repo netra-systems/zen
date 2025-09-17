@@ -9,7 +9,7 @@ Related to: AttributeError 'IsolatedWebSocketManager' object has no attribute 'g
 
 import asyncio
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any, Dict
 from unittest.mock import AsyncMock
 import sys
@@ -23,7 +23,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
     IsolatedWebSocketManager
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from shared.id_generation import UnifiedIdGenerator
 
 
@@ -106,7 +106,7 @@ class WebSocketManagerMethodCompatibilityTests:
             connection_id=connection_id,
             websocket=websocket,
             user_id="email_user_john.doe@example.com",
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         # Set thread_id after creation since it's not in constructor
         connection.thread_id = "thread_2025_09_08_14_45_02_mno345"
@@ -152,7 +152,7 @@ class WebSocketManagerMethodCompatibilityTests:
             connection_id=connection_id,
             websocket=websocket,
             user_id="oauth_user_567890123456",
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         # Set thread_id after creation since it's not in constructor
         connection.thread_id = "thread_2025_09_08_14_45_03_initial"
@@ -209,7 +209,7 @@ class WebSocketManagerMethodCompatibilityTests:
                 connection_id=UnifiedIdGenerator.generate_websocket_connection_id(user_id),
                 websocket=websocket,
                 user_id=user_id,
-                connected_at=datetime.utcnow()
+                connected_at=datetime.now(UTC)
             )
             # Set thread_id after creation since it's not in constructor
             connection.thread_id = "thread_2025_09_08_14_45_04_old"

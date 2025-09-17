@@ -18,7 +18,7 @@ import asyncio
 import hashlib
 import secrets
 import urllib.parse
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List
 from unittest.mock import patch, MagicMock
 import pytest
@@ -130,7 +130,7 @@ class RealOAuthFlowTests:
         assert state.isalnum() or '_' in state or '-' in state, 'State should be URL-safe'
         state2 = self.generate_oauth_state()
         assert state != state2, 'OAuth states must be unique'
-        stored_state = {'state': state, 'created_at': datetime.utcnow(), 'expires_at': datetime.utcnow() + timedelta(minutes=10), 'client_id': oauth_credentials['client_id']}
+        stored_state = {'state': state, 'created_at': datetime.now(UTC), 'expires_at': datetime.now(UTC) + timedelta(minutes=10), 'client_id': oauth_credentials['client_id']}
         assert stored_state['state'] == state
         assert stored_state['expires_at'] > stored_state['created_at']
         print(' PASS:  OAuth state validation and storage tested successfully')
@@ -202,7 +202,7 @@ class RealOAuthFlowTests:
     async def test_oauth_session_creation_and_management(self, real_db_session, oauth_credentials: Dict[str, str]):
         """Test OAuth session creation and management after successful authentication."""
         oauth_user_data = {'external_id': 'oauth_session_user_789', 'email': 'session.test@gmail.com', 'full_name': 'Session Test User', 'oauth_provider': OAuthConstants.GOOGLE, 'access_token': 'session_access_token_xyz', 'refresh_token': 'session_refresh_token_abc'}
-        user_session = {'user_id': 12345, 'email': oauth_user_data['email'], 'oauth_provider': oauth_user_data['oauth_provider'], 'external_id': oauth_user_data['external_id'], 'session_id': secrets.token_hex(16), 'created_at': datetime.utcnow(), 'expires_at': datetime.utcnow() + timedelta(hours=24), 'is_active': True}
+        user_session = {'user_id': 12345, 'email': oauth_user_data['email'], 'oauth_provider': oauth_user_data['oauth_provider'], 'external_id': oauth_user_data['external_id'], 'session_id': secrets.token_hex(16), 'created_at': datetime.now(UTC), 'expires_at': datetime.now(UTC) + timedelta(hours=24), 'is_active': True}
         assert user_session['user_id'] > 0
         assert '@' in user_session['email']
         assert user_session['oauth_provider'] == OAuthConstants.GOOGLE

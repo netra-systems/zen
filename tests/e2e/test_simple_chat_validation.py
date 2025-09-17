@@ -109,7 +109,7 @@ class AuthenticatedChatTester:
         except asyncio.TimeoutError:
             logger.error("Authenticated connection timed out after 10 seconds")
             return False
-        except websockets.exceptions.WebSocketException as e:
+        except websockets.WebSocketException as e:
             logger.error(f"Authenticated WebSocket connection failed: {e}")
             return False
         except Exception as e:
@@ -172,7 +172,7 @@ class AuthenticatedChatTester:
                 except asyncio.TimeoutError:
                     continue  # Keep trying until main timeout
                     
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             logger.warning("Connection closed during receive")
             
         return events

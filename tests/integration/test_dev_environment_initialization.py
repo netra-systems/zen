@@ -67,7 +67,7 @@ class TestDevEnvironmentInitialization:
         (self.project_root / "dev_launcher").mkdir(exist_ok=True)
 
     # Essential environment for testing
-        self.test_env = { )
+        self.test_env = { }
         'DATABASE_URL': 'postgresql://test:test@localhost:5433/netra_test',
         'REDIS_URL': 'redis://localhost:6380/1',
         'CLICKHOUSE_URL': 'clickhouse://test:test@localhost:8124/netra_test',
@@ -160,7 +160,7 @@ class TestDevEnvironmentInitialization:
         optimizer = StartupOptimizer(cache_manager)
 
                             # Register test startup steps
-        test_steps = [ )
+        test_steps = [ ]
         StartupStep( )
         name="env_check",
         func=lambda x: None True,
@@ -481,38 +481,38 @@ class TestDevEnvironmentInitialization:
         init_time = time.time() - start_time
 
                                     # Initialization should be fast
-        assert init_time < 5.0, "formatted_string"
+        assert init_time < 5.0, ""
 
                                     # Test environment check timing
         start_time = time.time()
         env_result = launcher.check_environment()
         env_check_time = time.time() - start_time
-        assert env_check_time < 3.0, "formatted_string"
+        assert env_check_time < 3.0, ""
 
                                     # Test database validation timing
         start_time = time.time()
         db_result = await launcher._validate_databases()
         db_check_time = time.time() - start_time
-        assert db_check_time < 30.0, "formatted_string"
+        assert db_check_time < 30.0, ""
 
                                     # Test startup optimizer performance
         optimizer = launcher.startup_optimizer
         start_time = time.time()
 
                                     # Register some quick test steps
-        test_steps = [ )
+        test_steps = [ ]
         StartupStep("quick_step_1", lambda x: None True, [], parallel=True),
         StartupStep("quick_step_2", lambda x: None True, [], parallel=True),
         StartupStep("quick_step_3", lambda x: None True, ["quick_step_1"], parallel=True)
                                     
         optimizer.register_steps(test_steps)
 
-        results = optimizer.execute_optimized_sequence([ ))
+        results = optimizer.execute_optimized_sequence([ ])
         "quick_step_1", "quick_step_2", "quick_step_3"
                                     
 
         optimizer_time = time.time() - start_time
-        assert optimizer_time < 2.0, "formatted_string"
+        assert optimizer_time < 2.0, ""
 
                                     # All steps should succeed
         assert all(result.success for result in results.values())
@@ -532,7 +532,7 @@ class TestDevEnvironmentInitialization:
         '''
         pass
                                             # Test with minimal environment (missing some variables)
-        minimal_env = { )
+        minimal_env = { }
         'DATABASE_URL': 'postgresql://test:test@localhost:5433/netra_test',
         'ENVIRONMENT': 'development'
                                             # Missing JWT_SECRET_KEY, REDIS_URL, etc.
@@ -714,7 +714,7 @@ class TestDevEnvironmentEdgeCases:
     async def test_invalid_configuration_handling(self):
         """Test handling of invalid configurations."""
         # Test with completely invalid environment
-        invalid_env = { )
+        invalid_env = { }
         'DATABASE_URL': 'not-a-valid-url',
         'ENVIRONMENT': 'invalid-env',
         'JWT_SECRET_KEY': 'too-short',
@@ -757,14 +757,14 @@ db_connector = DatabaseConnector(use_emoji=False)
 result = await db_connector.validate_all_connections()
 
             # Log results for manual verification
-print("formatted_string")
-print("formatted_string")
+    print("")
+print("")
 
             # Cleanup
 await db_connector.stop_health_monitoring()
 
 except Exception as e:
-pytest.skip("formatted_string")
+pytest.skip("")
 
 @pytest.mark.asyncio
     async def test_end_to_end_startup_with_real_services(self):
@@ -792,21 +792,21 @@ start_time = time.time()
 launcher = DevLauncher(config)
 init_time = time.time() - start_time
 
-print("formatted_string")
+print("")
 
                             # Test environment validation
 env_result = launcher.check_environment()
-print("formatted_string")
+print("")
 
                             # Test database validation
 db_result = await launcher._validate_databases()
-print("formatted_string")
+print("")
 
                             # Cleanup
 shutil.rmtree(temp_dir, ignore_errors=True)
 
 except Exception as e:
-pytest.skip("formatted_string")
+pytest.skip("")
 
 class TestWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""

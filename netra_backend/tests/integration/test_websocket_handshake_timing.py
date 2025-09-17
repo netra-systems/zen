@@ -52,7 +52,7 @@ from test_framework.ssot.e2e_auth_helper import (
 )
 
 # Application imports using absolute paths - FIXED: Use SSOT WebSocket imports
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.redis_manager import RedisManager
@@ -479,7 +479,7 @@ class WebSocketHandshakeTimingTests(BaseIntegrationTest):
         invalid_headers = {"Authorization": "Bearer invalid-token-123"}
         
         # Attempt connection with invalid token (should fail)
-        with pytest.raises((websockets.exceptions.ConnectionClosedError, OSError, Exception)):
+        with pytest.raises((websockets.ConnectionClosedError, OSError, Exception)):
             invalid_websocket = await asyncio.wait_for(
                 websockets.connect(
                     self.websocket_base_url,

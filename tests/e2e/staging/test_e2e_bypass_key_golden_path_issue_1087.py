@@ -413,4 +413,4 @@ class E2EBypassKeyGoldenPathIssue1087Tests(SSotAsyncTestCase):
     def get_current_timestamp(self) -> str:
         """Get current timestamp for test messages."""
         import datetime
-        return datetime.datetime.utcnow().isoformat() + "Z"
+        return datetime.datetime.now(UTC).isoformat() + "Z"

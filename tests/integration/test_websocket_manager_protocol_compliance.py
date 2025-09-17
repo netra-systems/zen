@@ -19,14 +19,14 @@ agent execution.
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, Mock
-from datetime import datetime
+from datetime import datetime, UTC
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol, WebSocketManagerProtocolValidator
 from netra_backend.app.websocket_core.protocol_validator import validate_websocket_manager_on_startup, create_protocol_compliance_report, test_critical_method_functionality
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager, IsolatedWebSocketManager
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 @pytest.mark.integration
 class WebSocketManagerProtocolComplianceTests:
@@ -45,7 +45,7 @@ class WebSocketManagerProtocolComplianceTests:
         thread_id, run_id, request_id = UnifiedIdGenerator.generate_user_context_ids(self.test_user_id, 'protocol_test')
         self.user_context = UserExecutionContext(user_id=self.test_user_id, thread_id=thread_id, run_id=run_id, request_id=request_id, websocket_client_id=f'ws_client_{self.test_user_id}')
         self.mock_websocket = AsyncMock()
-        self.test_connection = WebSocketConnection(connection_id=self.test_connection_id, user_id=self.test_user_id, websocket=self.mock_websocket, connected_at=datetime.utcnow(), thread_id=self.test_thread_id)
+        self.test_connection = WebSocketConnection(connection_id=self.test_connection_id, user_id=self.test_user_id, websocket=self.mock_websocket, connected_at=datetime.now(UTC), thread_id=self.test_thread_id)
 
     def test_isolated_manager_protocol_compliance(self):
         """

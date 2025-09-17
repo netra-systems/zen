@@ -31,7 +31,7 @@ backend_url = "http://localhost:8000"
 auth_url = "http://localhost:8081"
 
     # Common SQL injection payloads
-sql_payloads = [ )
+sql_payloads = [ ]
 ""; DROP TABLE users; --",
 "1' OR '1'='1",
 "1'; SELECT * FROM users WHERE '1'='1",
@@ -45,11 +45,11 @@ injection_vulnerabilities = []
 
 async with aiohttp.ClientSession() as session:
         # Test injection in various endpoints
-test_endpoints = [ )
-{"url": "formatted_string", "param": "user_id"},
-{"url": "formatted_string", "param": "email"},
-{"url": "formatted_string", "param": "search"},
-{"url": "formatted_string", "param": "query"}
+test_endpoints = [ ]
+{"url": "", "param": "user_id"},
+{"url": "", "param": "email"},
+{"url": "", "param": "search"},
+{"url": "", "param": "query"}
         
 
 for endpoint_info in test_endpoints:
@@ -64,7 +64,7 @@ async with session.get(url, params=params) as response:
 response_text = await response.text()
 
                         # Look for SQL error messages that might indicate vulnerability
-sql_error_indicators = [ )
+sql_error_indicators = [ ]
 "SQL syntax error",
 "mysql_fetch_array",
 "ORA-01756",
@@ -79,7 +79,7 @@ sql_error_indicators = [ )
 for indicator in sql_error_indicators:
 if indicator.lower() in response_text.lower():
 injection_vulnerabilities.append( )
-"formatted_string"
+""
                                 
 break
 
@@ -94,7 +94,7 @@ response_text = await response.text()
 for indicator in sql_error_indicators:
 if indicator.lower() in response_text.lower():
 injection_vulnerabilities.append( )
-"formatted_string"
+""
                                                 
 break
 
@@ -104,14 +104,14 @@ pass
 
                                                     # Report findings
 if injection_vulnerabilities:
-print(" ALERT:  SECURITY VULNERABILITY - SQL Injection Risks:")
+    print(" ALERT:  SECURITY VULNERABILITY - SQL Injection Risks:")
 for vuln in injection_vulnerabilities:
-print("formatted_string")
+    print("")
 else:
-print(" PASS:  No SQL injection vulnerabilities detected in tested endpoints")
+    print(" PASS:  No SQL injection vulnerabilities detected in tested endpoints")
 
                                                                 # This test should identify any SQL injection vulnerabilities
-assert not injection_vulnerabilities, "formatted_string"
+assert not injection_vulnerabilities, ""
 
 
 @pytest.mark.asyncio
@@ -127,7 +127,7 @@ pass
 backend_url = "http://localhost:8000"
 
                                                                     # Common XSS payloads
-xss_payloads = [ )
+xss_payloads = [ ]
 "<script>alert('XSS')</script>",
 "javascript:alert('XSS')",
 "<img src=x onerror=alert('XSS')>",
@@ -143,17 +143,17 @@ xss_vulnerabilities = []
 async with aiohttp.ClientSession() as session:
                                                                         # Test XSS in endpoints that might await asyncio.sleep(0)
 return user input
-test_endpoints = [ )
-"formatted_string",
-"formatted_string",
-"formatted_string"
+test_endpoints = [ ]
+"",
+"",
+""
                                                                         
 
 for url in test_endpoints:
 for payload in xss_payloads:
 try:
                                                                                     # Test in various parameters
-test_params = [ )
+test_params = [ ]
 {"name": payload},
 {"title": payload},
 {"content": payload},
@@ -169,7 +169,7 @@ response_text = await response.text()
                                                                                                 # Check if the payload is reflected without proper encoding
 if payload in response_text and "<script>" in payload:
 xss_vulnerabilities.append( )
-"formatted_string"
+""
                                                                                                     
 
                                                                                                     # Test POST requests with JSON payloads
@@ -179,7 +179,7 @@ if response.status == 200:
 response_text = await response.text()
 if payload in response_text and "<script>" in payload:
 xss_vulnerabilities.append( )
-"formatted_string"
+""
                                                                                                                     
 
 except Exception as e:
@@ -188,14 +188,14 @@ pass
 
                                                                                                                         # Report findings
 if xss_vulnerabilities:
-print(" ALERT:  SECURITY VULNERABILITY - XSS Risks:")
+    print(" ALERT:  SECURITY VULNERABILITY - XSS Risks:")
 for vuln in xss_vulnerabilities:
-print("formatted_string")
+    print("")
 else:
-print(" PASS:  No XSS vulnerabilities detected in tested endpoints")
+    print(" PASS:  No XSS vulnerabilities detected in tested endpoints")
 
                                                                                                                                     # This test should identify any XSS vulnerabilities
-assert not xss_vulnerabilities, "formatted_string"
+assert not xss_vulnerabilities, ""
 
 
 @pytest.mark.asyncio
@@ -215,11 +215,11 @@ bypass_vulnerabilities = []
 
 async with aiohttp.ClientSession() as session:
                                                                                                                                             # Test protected endpoints without authentication
-protected_endpoints = [ )
-"formatted_string",
-"formatted_string",
-"formatted_string",
-"formatted_string"
+protected_endpoints = [ ]
+"",
+"",
+"",
+""
                                                                                                                                             
 
 for url in protected_endpoints:
@@ -227,14 +227,14 @@ try:
                                                                                                                                                     # Test without any authentication
 async with session.get(url) as response:
 if response.status == 200:
-bypass_vulnerabilities.append("formatted_string")
+bypass_vulnerabilities.append("")
 elif response.status not in [401, 403]:
 bypass_vulnerabilities.append( )
-"formatted_string"
+""
                                                                                                                                                                 
 
                                                                                                                                                                 # Test with invalid/malformed tokens
-malformed_tokens = [ )
+malformed_tokens = [ ]
 "Bearer invalid_token",
 "Bearer ",
 "Bearer null",
@@ -250,13 +250,13 @@ headers = {"Authorization": token}
 async with session.get(url, headers=headers) as response:
 if response.status == 200:
 bypass_vulnerabilities.append( )
-"formatted_string"
+""
                                                                                                                                                                             
 
                                                                                                                                                                             # Test parameter pollution
 async with session.get("formatted_string") as response:
 if response.status == 200:
-bypass_vulnerabilities.append("formatted_string")
+bypass_vulnerabilities.append("")
 
                                                                                                                                                                                     # Test HTTP method bypass
 if url.startswith(backend_url):
@@ -264,7 +264,7 @@ for method in ["POST", "PUT", "DELETE", "PATCH"]:
 async with session.request(method, url) as response:
 if response.status == 200:
 bypass_vulnerabilities.append( )
-"formatted_string"
+""
                                                                                                                                                                                                     
 
 except Exception as e:
@@ -273,14 +273,14 @@ pass
 
                                                                                                                                                                                                         # Report findings
 if bypass_vulnerabilities:
-print(" ALERT:  SECURITY VULNERABILITY - Authentication Bypass:")
+    print(" ALERT:  SECURITY VULNERABILITY - Authentication Bypass:")
 for vuln in bypass_vulnerabilities:
-print("formatted_string")
+    print("")
 else:
-print(" PASS:  No authentication bypass vulnerabilities detected")
+    print(" PASS:  No authentication bypass vulnerabilities detected")
 
                                                                                                                                                                                                                     # This test should identify authentication bypass issues
-assert not bypass_vulnerabilities, "formatted_string"
+assert not bypass_vulnerabilities, ""
 
 
 @pytest.mark.asyncio
@@ -300,11 +300,11 @@ rate_limiting_issues = []
 
 async with aiohttp.ClientSession() as session:
                                                                                                                                                                                                                             # Test endpoints for rate limiting
-test_endpoints = [ )
-"formatted_string",
-"formatted_string",
-"formatted_string",
-"formatted_string"
+test_endpoints = [ ]
+"",
+"",
+"",
+""
                                                                                                                                                                                                                             
 
 for url in test_endpoints:
@@ -343,10 +343,10 @@ response.close()
                                                                                                                                                                                                                                                             # Check if any rate limiting occurred
 if rate_limited_count == 0 and len(status_codes) > 10:
 rate_limiting_issues.append( )
-"formatted_string"
+""
                                                                                                                                                                                                                                                                 
 elif rate_limited_count > 0:
-print("formatted_string")
+    print("")
 
                                                                                                                                                                                                                                                                     # Check for rate limiting headers
 if responses and hasattr(responses[0], 'headers'):
@@ -356,24 +356,24 @@ has_rate_headers = any(header in headers for header in rate_headers)
 
 if not has_rate_headers:
 rate_limiting_issues.append( )
-"formatted_string"
+""
                                                                                                                                                                                                                                                                             
 
 except Exception as e:
                                                                                                                                                                                                                                                                                 # Connection errors might indicate rate limiting working
 if "Connection" in str(e):
-print("formatted_string")
+    print("")
 
                                                                                                                                                                                                                                                                                     # Report findings
 if rate_limiting_issues:
-print(" ALERT:  SECURITY GAP - Rate Limiting Issues:")
+    print(" ALERT:  SECURITY GAP - Rate Limiting Issues:")
 for issue in rate_limiting_issues:
-print("formatted_string")
+    print("")
 
                                                                                                                                                                                                                                                                                             # For now, skip this test as it identifies coverage gaps
 pytest.skip("Rate limiting not fully implemented - security gap identified")
 else:
-print(" PASS:  Rate limiting appears to be properly configured")
+    print(" PASS:  Rate limiting appears to be properly configured")
 
 
 if __name__ == "__main__":

@@ -267,7 +267,7 @@ class WebSocketEventDeliveryDeadlockReproductionTests:
                             "This suggests the event delivery issue may be fixed."
                         )
                     
-            except websockets.exceptions.InvalidStatus as e:
+            except websockets.InvalidStatus as e:
                 if e.status_code in [401, 403]:
                     print(f" SEARCH:  WebSocket connection rejected: {e}")
                     print(" SEARCH:  Cannot test event delivery without connection")
@@ -339,7 +339,7 @@ class WebSocketEventDeliveryDeadlockReproductionTests:
                     # Continue monitoring - timeouts are expected
                     continue
                     
-                except websockets.exceptions.ConnectionClosed:
+                except websockets.ConnectionClosed:
                     print(f" SEARCH:  {stream_name}: WebSocket connection closed")
                     break
                     

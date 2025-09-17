@@ -20,7 +20,7 @@ import logging
 import pytest
 import uuid
 from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
@@ -150,7 +150,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
             "user_id": user_id,
             "agent_type": "data_analysis", 
             "status": "running",
-            "created_at": datetime.utcnow(),
+            "created_at": datetime.now(UTC),
             "pipeline_config": {
                 "tools": ["data_collector", "analyzer", "report_generator"],
                 "output_format": "structured_report",
@@ -162,7 +162,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
         await real_services_fixture["db"].execute("""
             INSERT INTO execution_contexts (id, user_id, agent_type, status, created_at, config)
             VALUES ($1, $2, $3, $4, $5, $6)
-        """, execution_id, user_id, "data_analysis", "running", datetime.utcnow(), str(context_data["pipeline_config"]))
+        """, execution_id, user_id, "data_analysis", "running", datetime.now(UTC), str(context_data["pipeline_config"]))
         
         # Simulate pipeline execution with results
         await real_services_fixture["db"].execute("""
@@ -173,7 +173,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
         
         # Record pipeline completion events
         events = [
-            ("pipeline_started", {"timestamp": datetime.utcnow().isoformat()}),
+            ("pipeline_started", {"timestamp": datetime.now(UTC).isoformat()}),
             ("agent_initialized", {"agent_type": "data_analysis"}), 
             ("tool_execution_complete", {"tools_executed": 3}),
             ("results_generated", {"results_count": 1, "business_value": 8.5})
@@ -183,7 +183,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
             await real_services_fixture["db"].execute("""
                 INSERT INTO pipeline_events (id, execution_id, event_type, event_data, timestamp)
                 VALUES ($1, $2, $3, $4, $5)
-            """, UnifiedIdGenerator.generate_base_id("event"), execution_id, event_type, str(event_data), datetime.utcnow())
+            """, UnifiedIdGenerator.generate_base_id("event"), execution_id, event_type, str(event_data), datetime.now(UTC))
         
         # Validate pipeline execution
         validation_result = await validator.validate_agent_pipeline_execution(context_data)
@@ -212,7 +212,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
         await real_services_fixture["db"].execute("""
             INSERT INTO execution_contexts (id, user_id, agent_type, status, created_at, config)
             VALUES ($1, $2, $3, $4, $5, $6)
-        """, execution_id, user_id, "comprehensive_analysis", "running", datetime.utcnow(), 
+        """, execution_id, user_id, "comprehensive_analysis", "running", datetime.now(UTC), 
             '{"tools": ["data_collector", "trend_analyzer", "cost_optimizer", "report_generator", "recommendations_engine"]}')
         
         # Simulate multiple tool execution results
@@ -243,7 +243,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
             await real_services_fixture["db"].execute("""
                 INSERT INTO pipeline_events (id, execution_id, event_type, event_data, timestamp)
                 VALUES ($1, $2, $3, $4, $5)
-            """, UnifiedIdGenerator.generate_base_id("event"), execution_id, event_type, str(event_data), datetime.utcnow())
+            """, UnifiedIdGenerator.generate_base_id("event"), execution_id, event_type, str(event_data), datetime.now(UTC))
         
         # Validate comprehensive pipeline
         context_data = {"execution_id": execution_id, "user_id": user_id}
@@ -270,7 +270,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
         await real_services_fixture["db"].execute("""
             INSERT INTO execution_contexts (id, user_id, agent_type, status, created_at, config)
             VALUES ($1, $2, $3, $4, $5, $6)
-        """, execution_id, user_id, "resilient_analysis", "partially_failed", datetime.utcnow(),
+        """, execution_id, user_id, "resilient_analysis", "partially_failed", datetime.now(UTC),
             '{"tools": ["data_collector", "analyzer", "failing_tool", "report_generator"]}')
         
         # Simulate partial success - some tools worked, others failed
@@ -298,7 +298,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
             await real_services_fixture["db"].execute("""
                 INSERT INTO pipeline_events (id, execution_id, event_type, event_data, timestamp)
                 VALUES ($1, $2, $3, $4, $5)
-            """, UnifiedIdGenerator.generate_base_id("event"), execution_id, event_type, str(event_data), datetime.utcnow())
+            """, UnifiedIdGenerator.generate_base_id("event"), execution_id, event_type, str(event_data), datetime.now(UTC))
         
         # Validate recovery delivered partial value
         validator = AgentExecutionPipelineValidator(real_services_fixture)
@@ -330,7 +330,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
             await real_services_fixture["db"].execute("""
                 INSERT INTO execution_contexts (id, user_id, agent_type, status, created_at, config)
                 VALUES ($1, $2, $3, $4, $5, $6)
-            """, execution_id, user_id, f"concurrent_analysis_{i}", "completed", datetime.utcnow(),
+            """, execution_id, user_id, f"concurrent_analysis_{i}", "completed", datetime.now(UTC),
                 f'{{"user_scope": "{user_id}", "isolation_level": "strict"}}')
             
             # Create isolated results for each user
@@ -378,7 +378,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
         user_id = UnifiedIdGenerator.generate_base_id("user_performance")
         execution_id = UnifiedIdGenerator.generate_base_id("exec_performance")
         
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         end_time = start_time + timedelta(seconds=120)  # 2 minute execution
         
         # Store timed execution
@@ -435,7 +435,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
         await real_services_fixture["db"].execute("""
             INSERT INTO execution_contexts (id, user_id, agent_type, status, created_at, config)
             VALUES ($1, $2, $3, $4, $5, $6)
-        """, execution_id, user_id, "resource_intensive", "completed", datetime.utcnow(),
+        """, execution_id, user_id, "resource_intensive", "completed", datetime.now(UTC),
             '{"max_memory_mb": 512, "max_cpu_percent": 80, "cleanup_required": true}')
         
         # Create resource usage tracking
@@ -458,7 +458,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
             await real_services_fixture["db"].execute("""
                 INSERT INTO pipeline_events (id, execution_id, event_type, event_data, timestamp)
                 VALUES ($1, $2, $3, $4, $5)
-            """, UnifiedIdGenerator.generate_base_id("cleanup"), execution_id, event_type, str(event_data), datetime.utcnow())
+            """, UnifiedIdGenerator.generate_base_id("cleanup"), execution_id, event_type, str(event_data), datetime.now(UTC))
         
         # Validate resource management
         resource_query = """
@@ -498,7 +498,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
         await real_services_fixture["db"].execute("""
             INSERT INTO execution_contexts (id, user_id, agent_type, status, created_at, config)
             VALUES ($1, $2, $3, $4, $5, $6)
-        """, execution_id, user_id, "error_prone_analysis", "failed", datetime.utcnow(),
+        """, execution_id, user_id, "error_prone_analysis", "failed", datetime.now(UTC),
             '{"error_handling": "comprehensive", "user_notification": true}')
         
         # Store detailed error information
@@ -521,7 +521,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
             await real_services_fixture["db"].execute("""
                 INSERT INTO pipeline_events (id, execution_id, event_type, event_data, timestamp)
                 VALUES ($1, $2, $3, $4, $5)
-            """, UnifiedIdGenerator.generate_base_id("error_event"), execution_id, event_type, str(event_data), datetime.utcnow())
+            """, UnifiedIdGenerator.generate_base_id("error_event"), execution_id, event_type, str(event_data), datetime.now(UTC))
         
         # Validate error handling and user notification
         error_query = """
@@ -562,7 +562,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
         await real_services_fixture["db"].execute("""
             INSERT INTO execution_contexts (id, user_id, agent_type, status, created_at, config)
             VALUES ($1, $2, $3, $4, $5, $6)
-        """, execution_id, user_id, "business_value_optimizer", "completed", datetime.utcnow(),
+        """, execution_id, user_id, "business_value_optimizer", "completed", datetime.now(UTC),
             '{"value_tracking": "enabled", "roi_measurement": true, "business_context": "cost_optimization"}')
         
         # Create high business value results
@@ -599,7 +599,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
             await real_services_fixture["db"].execute("""
                 INSERT INTO pipeline_events (id, execution_id, event_type, event_data, timestamp)
                 VALUES ($1, $2, $3, $4, $5)
-            """, UnifiedIdGenerator.generate_base_id("value_event"), execution_id, event_type, str(event_data), datetime.utcnow())
+            """, UnifiedIdGenerator.generate_base_id("value_event"), execution_id, event_type, str(event_data), datetime.now(UTC))
         
         # Validate business value tracking
         validator = AgentExecutionPipelineValidator(real_services_fixture)
@@ -637,7 +637,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
         await real_services_fixture["db"].execute("""
             INSERT INTO execution_contexts (id, user_id, agent_type, status, created_at, config)
             VALUES ($1, $2, $3, $4, $5, $6)
-        """, execution_id, user_id, "compliance_aware_analysis", "completed", datetime.utcnow(),
+        """, execution_id, user_id, "compliance_aware_analysis", "completed", datetime.now(UTC),
             '{"audit_level": "full", "compliance_framework": "SOC2", "data_classification": "confidential"}')
         
         # Create audit trail entries
@@ -653,7 +653,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
             await real_services_fixture["db"].execute("""
                 INSERT INTO audit_trail (id, execution_id, action, description, actor, timestamp)
                 VALUES ($1, $2, $3, $4, $5, $6)
-            """, UnifiedIdGenerator.generate_base_id("audit"), execution_id, action, description, actor, datetime.utcnow())
+            """, UnifiedIdGenerator.generate_base_id("audit"), execution_id, action, description, actor, datetime.now(UTC))
         
         # Add compliance verification events
         compliance_events = [
@@ -667,7 +667,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
             await real_services_fixture["db"].execute("""
                 INSERT INTO pipeline_events (id, execution_id, event_type, event_data, timestamp)
                 VALUES ($1, $2, $3, $4, $5)
-            """, UnifiedIdGenerator.generate_base_id("compliance"), execution_id, event_type, str(event_data), datetime.utcnow())
+            """, UnifiedIdGenerator.generate_base_id("compliance"), execution_id, event_type, str(event_data), datetime.now(UTC))
         
         # Validate complete audit trail
         audit_query = """
@@ -713,7 +713,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
         await real_services_fixture["db"].execute("""
             INSERT INTO execution_contexts (id, user_id, agent_type, status, created_at, config)
             VALUES ($1, $2, $3, $4, $5, $6)
-        """, execution_id, user_id, "integrated_analysis", "completed", datetime.utcnow(),
+        """, execution_id, user_id, "integrated_analysis", "completed", datetime.now(UTC),
             '{"external_apis": ["aws_cost_api", "github_api", "monitoring_api"], "integration_level": "comprehensive"}')
         
         # Create integration results
@@ -734,7 +734,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
             await real_services_fixture["db"].execute("""
                 INSERT INTO external_api_calls (id, execution_id, api_name, description, status, timestamp)
                 VALUES ($1, $2, $3, $4, $5, $6)
-            """, UnifiedIdGenerator.generate_base_id("api_call"), execution_id, api_name, description, status, datetime.utcnow())
+            """, UnifiedIdGenerator.generate_base_id("api_call"), execution_id, api_name, description, status, datetime.now(UTC))
         
         # Record integration events
         integration_events = [
@@ -749,7 +749,7 @@ class AgentPipelineReportDeliveryIntegrationTests(BaseIntegrationTest):
             await real_services_fixture["db"].execute("""
                 INSERT INTO pipeline_events (id, execution_id, event_type, event_data, timestamp)
                 VALUES ($1, $2, $3, $4, $5)
-            """, UnifiedIdGenerator.generate_base_id("integration_event"), execution_id, event_type, str(event_data), datetime.utcnow())
+            """, UnifiedIdGenerator.generate_base_id("integration_event"), execution_id, event_type, str(event_data), datetime.now(UTC))
         
         # Validate external integrations
         api_query = """

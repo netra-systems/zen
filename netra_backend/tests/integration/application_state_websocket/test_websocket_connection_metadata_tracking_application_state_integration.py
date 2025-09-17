@@ -21,7 +21,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ConnectionID, WebSocketID
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
@@ -55,12 +55,12 @@ class WebSocketConnectionMetadataTrackingApplicationStateIntegrationTests(BaseIn
                     'timezone': 'UTC-8',
                     'language': 'en-US',
                     'connection_quality': 'excellent',
-                    'last_seen': datetime.utcnow().isoformat()
+                    'last_seen': datetime.now(UTC).isoformat()
                 }
             
             async def send_json(self, data):
                 # Update metadata with each interaction
-                self.metadata['last_seen'] = datetime.utcnow().isoformat()
+                self.metadata['last_seen'] = datetime.now(UTC).isoformat()
                 self.metadata['message_count'] = len(self.messages_sent) + 1
                 
                 data['_metadata_snapshot'] = self.metadata.copy()
@@ -98,7 +98,7 @@ class WebSocketConnectionMetadataTrackingApplicationStateIntegrationTests(BaseIn
             connection_id=connection_id,
             user_id=user_id,
             websocket=metadata_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata=connection_metadata
         )
         
@@ -110,7 +110,7 @@ class WebSocketConnectionMetadataTrackingApplicationStateIntegrationTests(BaseIn
             'user_id': user_id,
             'connection_id': connection_id,
             'connection_metadata': connection_metadata,
-            'created_at': datetime.utcnow().isoformat(),
+            'created_at': datetime.now(UTC).isoformat(),
             'interaction_history': []
         }
         
@@ -125,14 +125,14 @@ class WebSocketConnectionMetadataTrackingApplicationStateIntegrationTests(BaseIn
             message = {
                 "type": "metadata_test_message",
                 "data": {"message_index": i, "test_metadata": True},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
             await websocket_manager.send_to_user(user_id, message)
             
             # Update analytics with interaction
             analytics_data['interaction_history'].append({
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'message_type': message['type'],
                 'message_index': i
             })
@@ -209,14 +209,14 @@ class WebSocketConnectionMetadataTrackingApplicationStateIntegrationTests(BaseIn
                     'connection_phase': 'initial',
                     'message_count': 0,
                     'quality_score': 1.0,
-                    'last_updated': datetime.utcnow().isoformat()
+                    'last_updated': datetime.now(UTC).isoformat()
                 }
                 self._record_metadata_snapshot('initialization')
             
             def _record_metadata_snapshot(self, trigger: str):
                 """Record metadata snapshot for evolution tracking."""
                 snapshot = {
-                    'timestamp': datetime.utcnow().isoformat(),
+                    'timestamp': datetime.now(UTC).isoformat(),
                     'trigger': trigger,
                     'metadata': self.current_metadata.copy()
                 }
@@ -239,7 +239,7 @@ class WebSocketConnectionMetadataTrackingApplicationStateIntegrationTests(BaseIn
                 elif evolution_type == 'quality_improvement':
                     self.current_metadata['quality_score'] = min(1.0, self.current_metadata['quality_score'] + 0.1)
                 
-                self.current_metadata['last_updated'] = datetime.utcnow().isoformat()
+                self.current_metadata['last_updated'] = datetime.now(UTC).isoformat()
                 self._record_metadata_snapshot(evolution_type)
             
             async def send_json(self, data):
@@ -277,7 +277,7 @@ class WebSocketConnectionMetadataTrackingApplicationStateIntegrationTests(BaseIn
             connection_id=connection_id,
             user_id=user_id,
             websocket=evolution_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={
                 "connection_type": "metadata_evolution_test",
                 "tracks_evolution": True
@@ -291,7 +291,7 @@ class WebSocketConnectionMetadataTrackingApplicationStateIntegrationTests(BaseIn
             message = {
                 "type": "evolution_test_message",
                 "data": {"message_index": i},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
             await websocket_manager.send_to_user(user_id, message)

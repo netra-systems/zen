@@ -13,7 +13,7 @@ from typing import List
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Import WebSocket components - these must be real components, not mocked
-from netra_backend.app.websocket_core.websocket_manager import MAX_CONNECTIONS_PER_USER
+from netra_backend.app.websocket_core.unified_manager import MAX_CONNECTIONS_PER_USER
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.types import create_isolated_mode
 from shared.types.core_types import UserID, ThreadID, ConnectionID

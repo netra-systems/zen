@@ -65,14 +65,14 @@ all_tokens.add(initial_refresh)
 current_refresh = initial_refresh
 for i in range(10):
 result = await auth_service.refresh_tokens(current_refresh)
-assert result is not None, "formatted_string"
+assert result is not None, ""
 
 access_token, new_refresh = result
 
             # CRITICAL ASSERTIONS - These prevent refresh loops
-assert access_token not in all_tokens, "formatted_string"
-assert new_refresh not in all_tokens, "formatted_string"
-assert new_refresh != current_refresh, "formatted_string"
+assert access_token not in all_tokens, ""
+assert new_refresh not in all_tokens, ""
+assert new_refresh != current_refresh, ""
 
 all_tokens.add(access_token)
 all_tokens.add(new_refresh)
@@ -82,7 +82,7 @@ current_refresh = new_refresh
 time.sleep(0.001)
 
             # Verify all tokens are unique
-assert len(all_tokens) == 21, "formatted_string"
+assert len(all_tokens) == 21, ""
 
 @pytest.mark.asyncio
     async def test_refresh_token_cannot_be_reused(self, auth_service):
@@ -176,12 +176,12 @@ assert results[0] is not None, "First refresh should succeed"
 
             # Subsequent attempts with same token should fail
 for i in range(1, 5):
-assert results[i] is None, "formatted_string"
+assert results[i] is None, ""
 
 def test_refresh_endpoint_handles_malformed_tokens(self, client):
 """Test refresh endpoint properly rejects malformed tokens"""
 pass
-malformed_tokens = [ )
+malformed_tokens = [ ]
 "",
 "invalid",
 "a.b.c",
@@ -194,7 +194,7 @@ response = client.post( )
 "/auth/refresh",
 json={"refresh_token": token}
         
-assert response.status_code in [401, 422], "formatted_string"
+assert response.status_code in [401, 422], ""
 
 @pytest.mark.asyncio
     async def test_concurrent_refresh_race_condition(self, auth_service):
@@ -218,8 +218,8 @@ successful = [item for item in []]
 failed = [item for item in []]
 
     # Only one should succeed (race condition protection)
-assert len(successful) <= 1, "formatted_string"
-assert len(failed) >= 9, "formatted_string"
+assert len(successful) <= 1, ""
+assert len(failed) >= 9, ""
 
 def test_jwt_components_are_unique(self, jwt_handler):
 """Test that JWT components (jti, iat) ensure uniqueness"""
@@ -227,10 +227,10 @@ pass
 tokens_data = []
 
 for i in range(20):
-token = jwt_handler.create_access_token("formatted_string", "formatted_string")
+token = jwt_handler.create_access_token("", "")
 payload = jwt_handler.validate_token(token, "access")
 
-token_info = { )
+token_info = { }
 "token": token,
 "jti": payload.get("jti"),
 "iat": payload.get("iat"),
@@ -279,14 +279,14 @@ user_id, email, permissions
                 # Perform multiple refresh cycles
 for cycle in range(5):
 result = await auth_service.refresh_tokens(current_refresh)
-assert result is not None, "formatted_string"
+assert result is not None, ""
 
 access_token, new_refresh = result
 
                     # Verify user data in access token
 access_payload = auth_service.jwt_handler.validate_token(access_token, "access")
-assert access_payload["sub"] == user_id, "formatted_string"
-assert access_payload["email"] == email, "formatted_string"
+assert access_payload["sub"] == user_id, ""
+assert access_payload["email"] == email, ""
 assert access_payload["email"] != "user@example.com", "Placeholder email detected!"
 
                     # Verify user data in refresh token

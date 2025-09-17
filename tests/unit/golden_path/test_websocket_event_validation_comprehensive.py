@@ -28,7 +28,7 @@ import json
 import pytest
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -36,7 +36,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from test_framework.ssot.websocket import WebSocketTestUtility
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.websocket_core.agent_handler import AgentHandler
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.base_agent import BaseAgent, AgentState
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
@@ -68,7 +68,7 @@ class WebSocketEventValidationComprehensiveTests(SSotAsyncTestCase):
         self.event_timestamps = {}
 
         async def capture_event(event_type: str, data: Dict[str, Any], **kwargs):
-            timestamp = datetime.utcnow()
+            timestamp = datetime.now(UTC)
             event = {'type': event_type, 'data': data, 'timestamp': timestamp, 'user_id': kwargs.get('user_id'), 'thread_id': kwargs.get('thread_id'), 'run_id': kwargs.get('run_id')}
             self.captured_events.append(event)
             self.event_timestamps[event_type] = timestamp
@@ -92,7 +92,7 @@ class WebSocketEventValidationComprehensiveTests(SSotAsyncTestCase):
         async def mock_send_event(event_type: str, data: Dict[str, Any], **kwargs):
             await self.capture_event(event_type, data, **kwargs)
         emitter.send_event = mock_send_event
-        await emitter.send_event('agent_started', {'agent_name': 'supervisor', 'message': 'Beginning AI cost analysis', 'start_time': datetime.utcnow().isoformat()}, user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
+        await emitter.send_event('agent_started', {'agent_name': 'supervisor', 'message': 'Beginning AI cost analysis', 'start_time': datetime.now(UTC).isoformat()}, user_id=self.test_user_id, thread_id=self.test_thread_id, run_id=self.test_run_id)
         await emitter.send_event('agent_thinking', {'thought': 'Analyzing current infrastructure costs and usage patterns', 'reasoning_step': 1, 'estimated_completion': '2 minutes'}, user_id=self.test_user_id, thread_id=self.test_thread_id)
         await emitter.send_event('tool_executing', {'tool_name': 'cost_analyzer', 'action': 'Fetching cloud infrastructure costs', 'expected_duration': '30 seconds'}, user_id=self.test_user_id, thread_id=self.test_thread_id)
         await emitter.send_event('tool_completed', {'tool_name': 'cost_analyzer', 'result': {'monthly_cost': 5247.83, 'cost_breakdown': {'compute': 3200, 'storage': 1500, 'network': 547.83}}, 'execution_time': '28 seconds'}, user_id=self.test_user_id, thread_id=self.test_thread_id)
@@ -115,7 +115,7 @@ class WebSocketEventValidationComprehensiveTests(SSotAsyncTestCase):
         """
         emitter = UnifiedWebSocketEmitter(manager=self.mock_websocket_manager, user_id=self.test_user_id)
         emitter.send_event = self.capture_event
-        await emitter.send_event('agent_started', {'agent_name': 'data_helper', 'message': 'Starting data collection', 'start_time': datetime.utcnow().isoformat(), 'estimated_duration': '1 minute'}, user_id=self.test_user_id, thread_id=self.test_thread_id)
+        await emitter.send_event('agent_started', {'agent_name': 'data_helper', 'message': 'Starting data collection', 'start_time': datetime.now(UTC).isoformat(), 'estimated_duration': '1 minute'}, user_id=self.test_user_id, thread_id=self.test_thread_id)
         await emitter.send_event('tool_executing', {'tool_name': 'database_query', 'action': 'Querying usage metrics', 'parameters': {'time_range': '30_days', 'granularity': 'daily'}, 'expected_duration': '15 seconds'}, user_id=self.test_user_id)
         assert len(self.captured_events) == 2
         agent_started_event = self.captured_events[0]
@@ -250,7 +250,7 @@ class WebSocketEventValidationComprehensiveTests(SSotAsyncTestCase):
         async def resilient_send_event(event_type: str, data: Dict[str, Any], **kwargs):
             nonlocal error_count, success_count
             try:
-                await failing_websocket.send_text(json.dumps({'type': event_type, 'data': data, 'timestamp': datetime.utcnow().isoformat()}))
+                await failing_websocket.send_text(json.dumps({'type': event_type, 'data': data, 'timestamp': datetime.now(UTC).isoformat()}))
                 success_count += 1
             except Exception as e:
                 error_count += 1
@@ -325,7 +325,7 @@ class WebSocketEventValidationComprehensiveTests(SSotAsyncTestCase):
         payload_sizes = []
 
         async def size_tracking_capture(event_type: str, data: Dict[str, Any], **kwargs):
-            payload = {'type': event_type, 'data': data, 'user_id': kwargs.get('user_id'), 'thread_id': kwargs.get('thread_id'), 'timestamp': datetime.utcnow().isoformat()}
+            payload = {'type': event_type, 'data': data, 'user_id': kwargs.get('user_id'), 'thread_id': kwargs.get('thread_id'), 'timestamp': datetime.now(UTC).isoformat()}
             payload_json = json.dumps(payload)
             payload_size = len(payload_json.encode('utf-8'))
             payload_sizes.append(payload_size)

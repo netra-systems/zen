@@ -42,9 +42,9 @@ return TransactionConsistencyTester()
 def sample_user_data():
 """Create sample user data for testing."""
 pass
-return { )
-"user_id": "formatted_string",
-"email": "formatted_string",
+return { }
+"user_id": "",
+"email": "",
 "full_name": "Test User",
 "plan_tier": "mid"
     
@@ -140,7 +140,7 @@ class TestConcurrentWriteConflicts:
     async def test_concurrent_write_conflicts(self, transaction_tester):
 """Test conflict resolution for concurrent user updates."""
         # BVJ: Prevents data corruption during high-load scenarios
-user_id = "formatted_string"
+user_id = ""
 
         # Create two concurrent transactions
 tx1_id = await transaction_tester.manager.begin_transaction({"user": "transaction_1"})

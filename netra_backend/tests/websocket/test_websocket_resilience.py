@@ -3,7 +3,7 @@
 Tests focused on connection resilience, error recovery, and network instability scenarios.
 """
 import pytest
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 pytestmark = pytest.mark.skip(reason='Missing dependencies: get_unified_websocket_manager not yet implemented')

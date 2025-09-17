@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 """
 
 import asyncio
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Optional
 
@@ -20,7 +20,7 @@ from sqlalchemy.pool import NullPool
 
 from shared.isolated_environment import get_env
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Global database engine and sessionmaker
 _engine = None

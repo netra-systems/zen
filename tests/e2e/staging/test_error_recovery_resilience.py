@@ -388,7 +388,7 @@ class ErrorRecoveryResilienceTests:
                         await asyncio.sleep(5.0)
                         logger.info("[U+1F310] Simulating network interruption")
                     
-            except (websockets.exceptions.ConnectionClosed, websockets.exceptions.WebSocketException, OSError) as e:
+            except (websockets.ConnectionClosed, websockets.WebSocketException, OSError) as e:
                 resilience_metrics["disconnection_events"] += 1
                 disconnection_time = time.time()
                 downtime_start = disconnection_time

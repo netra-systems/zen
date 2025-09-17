@@ -11,7 +11,7 @@ Key regression scenarios tested:
 3. Cross-agent ExecutionResult creation patterns
 """
 import pytest
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, Any
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.agents.base.interface import ExecutionResult, ExecutionContext
@@ -86,7 +86,7 @@ class ExecutionResultCreationPatternsTests:
         """Test the pattern for creating successful execution results."""
         test_data = {'analysis': 'complete', 'recommendations': ['opt1', 'opt2']}
         execution_time = 1234.5
-        result = ExecutionResult(status=ExecutionStatus.COMPLETED, request_id='test_request_123', data=test_data, execution_time_ms=execution_time, completed_at=datetime.utcnow())
+        result = ExecutionResult(status=ExecutionStatus.COMPLETED, request_id='test_request_123', data=test_data, execution_time_ms=execution_time, completed_at=datetime.now(UTC))
         assert result.status == ExecutionStatus.COMPLETED
         assert result.is_success is True
         assert result.is_complete is True
@@ -99,7 +99,7 @@ class ExecutionResultCreationPatternsTests:
         """Test the pattern for creating failed execution results."""
         error_msg = 'Agent execution failed due to timeout'
         error_code = 'TIMEOUT_ERROR'
-        result = ExecutionResult(status=ExecutionStatus.FAILED, request_id='test_request_123', error_message=error_msg, error_code=error_code, completed_at=datetime.utcnow())
+        result = ExecutionResult(status=ExecutionStatus.FAILED, request_id='test_request_123', error_message=error_msg, error_code=error_code, completed_at=datetime.now(UTC))
         assert result.status == ExecutionStatus.FAILED
         assert result.is_failed is True
         assert result.is_complete is True
@@ -112,7 +112,7 @@ class ExecutionResultCreationPatternsTests:
 
     def test_execution_result_with_metrics_and_artifacts(self):
         """Test ExecutionResult with full metadata."""
-        result = ExecutionResult(status=ExecutionStatus.COMPLETED, request_id='test_request_123', data={'key': 'value'}, artifacts=['report.pdf', 'analysis.json'], execution_time_ms=2345.6, metrics={'tokens_used': 150, 'api_calls': 3}, trace_id='trace_abc123', started_at=datetime.utcnow(), completed_at=datetime.utcnow())
+        result = ExecutionResult(status=ExecutionStatus.COMPLETED, request_id='test_request_123', data={'key': 'value'}, artifacts=['report.pdf', 'analysis.json'], execution_time_ms=2345.6, metrics={'tokens_used': 150, 'api_calls': 3}, trace_id='trace_abc123', started_at=datetime.now(UTC), completed_at=datetime.now(UTC))
         assert result.artifacts == ['report.pdf', 'analysis.json']
         assert result.metrics['tokens_used'] == 150
         assert result.trace_id == 'trace_abc123'

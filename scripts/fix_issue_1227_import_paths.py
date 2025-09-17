@@ -3,8 +3,8 @@
 Issue #1227 Import Path Correction Script
 
 This script corrects the SSOT import path violations:
-- FROM: from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
-- TO:   from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+- FROM: from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+- TO:   from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
 The websocket_manager.py is the SSOT public interface that imports from unified_manager.py (private implementation).
 
@@ -58,7 +58,7 @@ def fix_import_in_file(file_path: str) -> Tuple[bool, str]:
 
         # Pattern to match the wrong import
         wrong_import_pattern = r'from netra_backend\.app\.websocket_core\.unified_manager import UnifiedWebSocketManager'
-        correct_import = 'from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager'
+        correct_import = 'from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager'
 
         # Check if file contains the wrong import
         if re.search(wrong_import_pattern, content):
@@ -85,9 +85,9 @@ def validate_import_fix(file_path: str) -> Tuple[bool, str]:
             content = f.read()
 
         # Check for correct import
-        if 'from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager' in content:
+        if 'from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager' in content:
             # Check that wrong import is gone
-            if 'from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager' not in content:
+            if 'from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager' not in content:
                 return True, f"✓ Import fixed and validated in {file_path}"
             else:
                 return False, f"✗ Still contains wrong import in {file_path}"

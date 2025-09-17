@@ -54,7 +54,7 @@ class TestConfigurationImportPatterns:
     def test_no_mixed_config_patterns(self):
         """Ensure no files mix old DatabaseConfig with new get_unified_config patterns."""
     # Files that might have mixed patterns
-        test_files = [ )
+        test_files = [
         'netra_backend/app/db/postgres.py',
         'netra_backend/app/services/corpus_service.py',
         'auth_service/auth_core/database/connection.py',
@@ -74,19 +74,19 @@ class TestConfigurationImportPatterns:
                     Check if it's just an import for backward compatibility
         lines = content.split(" )
         ")
-        database_config_uses = [ )
+        database_config_uses = [ ]
         line for line in lines
         if 'DatabaseConfig.' in line and not line.strip().startswith('#')
                     
 
         if database_config_uses:
-        pytest.fail("formatted_string")
+        pytest.fail("")
 
         @pytest.mark.e2e
     def test_all_config_imports_are_explicit(self):
         """Verify all configuration imports are explicit and not using wildcards."""
         pass
-        critical_files = [ )
+        critical_files = [ ]
         'netra_backend/app/db/postgres_core.py',
         'netra_backend/app/db/postgres_events.py',
         'auth_service/auth_core/database/connection.py'
@@ -99,10 +99,10 @@ class TestConfigurationImportPatterns:
 
                 # Check for wildcard imports that could hide missing dependencies
         if 'from netra_backend.app.db import *' in content:
-        pytest.fail("formatted_string")
+        pytest.fail("")
 
         if 'from netra_backend.app.core.configuration import *' in content:
-        pytest.fail("formatted_string")
+        pytest.fail("")
 
 
         @pytest.mark.e2e
@@ -162,13 +162,13 @@ class TestServiceDependencyImports:
         except ImportError as e:
         if "auth_service" not in str(e):
                 # Only fail if it's not a missing auth_service module
-        pytest.fail("formatted_string")
+        pytest.fail("")
 
         @pytest.mark.e2e
     def test_backend_service_core_imports(self):
         """Test backend service has all core imports."""
         pass
-        required_imports = [ )
+        required_imports = [ ]
         ("netra_backend.app.core.configuration.base", "get_unified_config"),
         ("netra_backend.app.db.database_manager", "DatabaseManager"),
         ("netra_backend.app.db.postgres_core", "initialize_postgres"),
@@ -178,9 +178,9 @@ class TestServiceDependencyImports:
         for module_path, attr_name in required_imports:
         try:
         module = importlib.import_module(module_path)
-        assert hasattr(module, attr_name), "formatted_string"
+        assert hasattr(module, attr_name), ""
         except ImportError as e:
-        pytest.fail("formatted_string")
+        pytest.fail("")
 
 
         @pytest.mark.e2e
@@ -196,7 +196,7 @@ class TestDeploymentScriptConfiguration:
     # Check script has required functions
         with open(deploy_script, 'r') as f:
         content = f.read()
-        required_functions = [ )
+        required_functions = [ ]
         'def deploy_backend',
         'def deploy_auth_service',
         'def build_and_push_image',
@@ -204,7 +204,7 @@ class TestDeploymentScriptConfiguration:
         
 
         for func in required_functions:
-        assert func in content, "formatted_string"
+        assert func in content, ""
 
         @pytest.mark.e2e
     def test_deployment_uses_correct_project(self):
@@ -230,7 +230,7 @@ class TestContainerLifecycleHandling:
         @pytest.mark.e2e
     def test_sigterm_handler_exists(self):
         """Verify SIGTERM handler is implemented for graceful shutdown."""
-        main_files = [ )
+        main_files = [ ]
         'netra_backend/app/main.py',
         'auth_service/main.py'
     
@@ -245,12 +245,12 @@ class TestContainerLifecycleHandling:
         has_sigterm_handler = 'SIGTERM' in content or 'signal.SIGTERM' in content
 
         if not (has_signal_import and has_sigterm_handler):
-        print("formatted_string")
+        print("")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_database_connection_cleanup(self):
-"""Test database connections are properly cleaned up on shutdown."""
+        """Test database connections are properly cleaned up on shutdown."""
 pass
 from netra_backend.app.db.postgres_core import async_engine
 
@@ -260,9 +260,9 @@ assert hasattr(async_engine, 'dispose')
 
                             # Test that dispose can be called without errors
 try:
-await async_engine.dispose()
+    await async_engine.dispose()
 except Exception as e:
-pytest.fail("formatted_string")
+    pytest.fail("")
 
 
 @pytest.mark.e2e
@@ -272,7 +272,7 @@ class TestStagingSpecificValidation:
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_staging_health_check_endpoint(self):
-"""Test health check endpoint works in staging configuration."""
+        """Test health check endpoint works in staging configuration."""
 with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
             # Mock the FastAPI app
             # Mock: Generic component isolation for controlled unit testing
@@ -284,7 +284,7 @@ assert health_check_response["environment"] in ["staging", "testing"]
 
 @pytest.mark.e2e
 def test_staging_cors_configuration(self):
-"""Test CORS is properly configured for staging."""
+    """Test CORS is properly configured for staging."""
 pass
 with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
         # Expected staging frontend URL
@@ -299,8 +299,8 @@ assert config.environment in ['staging', 'testing']
 
 @pytest.mark.e2e
 def test_staging_database_url_format(self):
-"""Test database URL format is correct for Cloud SQL in staging."""
-with patch.dict(os.environ, { ))
+    """Test database URL format is correct for Cloud SQL in staging."""
+with patch.dict(os.environ, { })
 'ENVIRONMENT': 'staging',
 'DATABASE_URL': 'postgresql://user:pass@/dbname?host=/cloudsql/project:region:instance'
 }):

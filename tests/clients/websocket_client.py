@@ -6,6 +6,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 import websockets
+from websockets import ClientConnection as WebSocketClientProtocol
 from websockets.asyncio.client import ClientConnection as WebSocketClientProtocol
 
 logger = logging.getLogger(__name__)
@@ -87,7 +88,7 @@ class WebSocketTestClient:
                 except json.JSONDecodeError:
                     logger.warning(f"Received non-JSON message: {message}")
                     
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             logger.info("WebSocket connection closed")
         except Exception as e:
             logger.error(f"Error receiving messages: {e}")

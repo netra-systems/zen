@@ -75,7 +75,7 @@ class TestAlpineParameterAcceptance:
         """Test that use_alpine parameter handles different input types correctly."""
         pass
     # This will FAIL until implemented
-        test_cases = [ )
+        test_cases = ]
         (True, True),
         (False, False),
         (1, True),  # Truthy values
@@ -91,7 +91,7 @@ class TestAlpineParameterAcceptance:
         environment_type=EnvironmentType.SHARED,
         use_alpine=input_val
             
-        assert bool(manager.use_alpine) == expected, "formatted_string"
+        assert bool(manager.use_alpine) == expected, ""
         except (TypeError, AttributeError):
         pytest.skip("use_alpine parameter not yet implemented")
 
@@ -106,7 +106,7 @@ class TestComposeFileSelection:
         temp_path = Path(temp_dir)
 
         # Create mock compose files
-        compose_files = { )
+        compose_files = }
         "docker-compose.yml": self._create_mock_compose_content(),
         "docker-compose.test.yml": self._create_mock_compose_content(test=True),
         "docker-compose.alpine.yml": self._create_mock_alpine_compose_content(),
@@ -123,7 +123,7 @@ class TestComposeFileSelection:
         pass
         prefix = "test-" if test else "dev-"
         if alpine:
-        prefix = "formatted_string"
+        prefix = ""
 
         return f'''
         version: '3.8'
@@ -155,7 +155,7 @@ class TestComposeFileSelection:
         use_alpine=True
             
         compose_file = manager._get_compose_file()
-        assert "alpine-test.yml" in compose_file, "formatted_string"
+        assert "alpine-test.yml" in compose_file, ""
         except (TypeError, AttributeError):
         pytest.skip("use_alpine parameter not yet implemented")
 
@@ -170,7 +170,7 @@ class TestComposeFileSelection:
             
         compose_file = manager._get_compose_file()
         assert "alpine.yml" in compose_file and "test" not in compose_file, \
-        "formatted_string"
+        ""
         except (TypeError, AttributeError):
         pytest.skip("use_alpine parameter not yet implemented")
 
@@ -184,9 +184,9 @@ class TestComposeFileSelection:
         use_alpine=False
             
         compose_file = manager._get_compose_file()
-        assert "alpine" not in compose_file, "formatted_string"
+        assert "alpine" not in compose_file, ""
         assert "test.yml" in compose_file or compose_file.endswith(".yml"), \
-        "formatted_string"
+        ""
         except (TypeError, AttributeError):
         pytest.skip("use_alpine parameter not yet implemented")
 
@@ -203,7 +203,7 @@ class TestComposeFileSelection:
             
         compose_file = manager._get_compose_file()
             # Should fall back to regular test compose if Alpine test doesn't exist
-        assert "test.yml" in compose_file, "formatted_string"
+        assert "test.yml" in compose_file, ""
         except (TypeError, AttributeError):
         pytest.skip("use_alpine parameter not yet implemented")
 
@@ -222,7 +222,7 @@ class TestComposeFileSelection:
                 
         compose_file = manager._get_compose_file()
                 # Should gracefully fall back to regular compose
-        assert "alpine" not in compose_file, "formatted_string"
+        assert "alpine" not in compose_file, ""
         except (TypeError, AttributeError):
         pytest.skip("use_alpine parameter not yet implemented")
 
@@ -271,7 +271,7 @@ class TestAlpineIntegration:
             # Verify containers are actually Alpine-based
         container_info = manager.get_enhanced_container_status(services)
         for service, info in container_info.items():
-        assert "alpine" in info.image.lower(), "formatted_string"
+        assert "alpine" in info.image.lower(), ""
 
                 # Cleanup
         asyncio.run(manager.graceful_shutdown(services))
@@ -338,7 +338,7 @@ class TestAlpineIntegration:
         memory_usage[service] = float(mem_str.replace('GB', '')) * 1000
 
         except Exception as e:
-        pytest.fail("formatted_string")
+        pytest.fail("")
 
         return memory_usage
 
@@ -360,14 +360,14 @@ class TestAlpineIntegration:
 
             # Verify all services are healthy
         health_report = manager.get_health_report()
-        assert "FAILED" not in health_report, "formatted_string"
+        assert "FAILED" not in health_report, ""
 
             # Test individual service health
         for service in services:
         health = manager.service_health.get(service)
-        assert health is not None, "formatted_string"
-        assert health.is_healthy, "formatted_string"
-        assert health.response_time_ms < 5000, "formatted_string"
+        assert health is not None, ""
+        assert health.is_healthy, ""
+        assert health.response_time_ms < 5000, ""
 
         asyncio.run(manager.graceful_shutdown(services))
 
@@ -535,13 +535,13 @@ class TestAlpinePerformanceBenchmarks:
 
         # Alpine should be faster or at least not significantly slower
         assert alpine_time <= regular_time * 1.5, \
-        "formatted_string"
+        ""
 
-        print(f" )
+        print(f"")
         [BENCHMARK] Startup Time Comparison:")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
 
         except (TypeError, AttributeError):
         pytest.skip("use_alpine parameter not yet implemented")
@@ -576,18 +576,18 @@ class TestAlpinePerformanceBenchmarks:
         # Alpine images should be smaller
         for image_base in regular_images:
         regular_size = regular_images[image_base]
-        alpine_key = "formatted_string"
+        alpine_key = ""
         if alpine_key in alpine_images:
         alpine_size = alpine_images[alpine_key]
 
         assert alpine_size < regular_size, \
-        "formatted_string"
+        ""
 
         savings = (regular_size - alpine_size) / regular_size * 100
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
+        print("")
 
         except (TypeError, AttributeError):
         pytest.skip("use_alpine parameter not yet implemented")
@@ -666,7 +666,7 @@ class TestAlpineEnvironmentIntegration:
         
 
         # Mock environment setup - should handle missing method gracefully
-        with patch.dict(os.environ, { ))
+        with patch.dict(os.environ, })
         "DOCKER_ENV": "test",
         "DOCKER_TAG": "alpine",
         "BUILD_TARGET": "alpine"
@@ -707,7 +707,7 @@ class TestAlpineFullIntegration:
 
         # Verify all services are healthy and responding
         health_report = manager.get_health_report()
-        assert "FAILED" not in health_report, "formatted_string"
+        assert "FAILED" not in health_report, ""
 
         # Run a simple smoke test on each service
         for service in all_services:
@@ -723,14 +723,14 @@ class TestAlpineFullIntegration:
         """Run basic smoke test on a service."""
         pass
         health = manager.service_health.get(service)
-        assert health is not None, "formatted_string"
-        assert health.is_healthy, "formatted_string"
-        assert health.response_time_ms < 10000, "formatted_string"
+        assert health is not None, ""
+        assert health.is_healthy, ""
+        assert health.response_time_ms < 10000, ""
 
 
         if __name__ == "__main__":
         # Run tests with verbose output to see all failures
-        pytest.main([ ))
+        pytest.main(])
         __file__,
         "-v",
         "--tb=short",

@@ -97,7 +97,7 @@ async def test_broken_websocket_endpoint():
         async with websockets.connect(url, close_timeout=5) as ws:
             print("❓ Unexpected success on /ws endpoint")
             return True, []
-    except websockets.exceptions.InvalidStatus as e:
+    except websockets.InvalidStatus as e:
         if "500" in str(e):
             print("❌ Confirmed: /ws returns HTTP 500 (server error)")
         elif "404" in str(e):

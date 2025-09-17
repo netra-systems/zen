@@ -127,7 +127,7 @@ async def test_websocket_connection_and_events():
                         # Send a ping to keep connection alive
                         await websocket.ping()
                         
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 print("[U+1F50C] WebSocket connection closed by server")
             except Exception as e:
                 print(f" WARNING: [U+FE0F]  Error during message listening: {e}")
@@ -195,7 +195,7 @@ async def test_agent_event_simulation():
                         
                 except asyncio.TimeoutError:
                     print("[U+23F1][U+FE0F]  Waiting for more events...")
-                except websockets.exceptions.ConnectionClosed:
+                except websockets.ConnectionClosed:
                     print("[U+1F50C] Connection closed during agent test")
                     break
             

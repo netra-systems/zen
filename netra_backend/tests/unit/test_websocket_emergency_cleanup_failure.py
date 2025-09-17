@@ -44,7 +44,7 @@ from netra_backend.app.websocket_core.websocket_manager import (
     _get_user_key,
     _validate_user_isolation
 )
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.unified_manager import (
     _UnifiedWebSocketManagerImplementation,
     MAX_CONNECTIONS_PER_USER
 )

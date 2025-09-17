@@ -69,10 +69,10 @@ class GCPStagingWebSocketTester:
                 await websocket.send('test message')
                 response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                 result['response'] = response
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             self.protocol_errors.append({'error': 'Invalid WebSocket status', 'details': str(e), 'status_code': getattr(e, 'status_code', None)})
             result['error'] = f'Protocol error: {e}'
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             self.middleware_conflicts.append({'error': 'Connection closed unexpectedly', 'details': str(e), 'code': e.code, 'reason': e.reason})
             result['error'] = f'Connection closed: {e.code} {e.reason}'
         except asyncio.TimeoutError:
@@ -235,7 +235,7 @@ class Issue449GCPStagingWebSocketProtocolTests(SSotBaseTestCase):
                 await websocket.send(json.dumps({'type': 'auth_test', 'token': 'test-token'}))
                 response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                 result['response'] = response
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             if e.code == 1011:
                 result['error'] = f'WebSocket auth middleware conflict: {e.code} {e.reason}'
             else:

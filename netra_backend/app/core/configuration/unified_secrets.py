@@ -8,11 +8,11 @@ Follows SSOT principles for secret access and management.
 import os
 from typing import Dict, Optional, Any
 from dataclasses import dataclass
-import logging
 
 from shared.isolated_environment import get_env
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass

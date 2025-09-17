@@ -46,7 +46,7 @@ print("=" * 80)
 
 test_file = "tests/performance/test_agent_performance_metrics.py"
 
-cmd = [ )
+cmd = ]
 "python", "-m", "pytest",
 test_file,
 "-v",
@@ -58,8 +58,8 @@ test_file,
 if detailed_reports:
 cmd.extend(["--capture=no", "-s"])
 
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 print()
 
         # Set environment variable for concurrent load
@@ -69,9 +69,9 @@ env["AGENT_PERFORMANCE_CONCURRENT_LOAD"] = str(concurrent_load)
 result = subprocess.run(cmd, env=env, capture_output=False)
 
 if result.returncode == 0:
-print("[SUCCESS] Performance tests completed successfully")
+    print("[SUCCESS] Performance tests completed successfully")
 else:
-print("[FAILED] Performance tests failed")
+    print("[FAILED] Performance tests failed")
 
 return result.returncode
 
@@ -84,7 +84,7 @@ print("=" * 80)
 
 test_file = "tests/integration/test_agent_error_recovery.py"
 
-cmd = [ )
+cmd = ]
 "python", "-m", "pytest",
 test_file,
 "-v",
@@ -96,15 +96,15 @@ test_file,
 if detailed_reports:
 cmd.extend(["--capture=no", "-s"])
 
-print("formatted_string")
+print("")
 print()
 
 result = subprocess.run(cmd, capture_output=False)
 
 if result.returncode == 0:
-print("[SUCCESS] Error recovery tests completed successfully")
+    print("[SUCCESS] Error recovery tests completed successfully")
 else:
-print("[FAILED] Error recovery tests failed")
+    print("[FAILED] Error recovery tests failed")
 
 return result.returncode
 
@@ -120,7 +120,7 @@ start_time = time.time()
     # Run performance tests
 perf_result = run_performance_tests(concurrent_load, detailed_reports)
 
-print(" )
+print("")
 ")
 
     # Run error recovery tests
@@ -130,21 +130,21 @@ recovery_result = run_error_recovery_tests(detailed_reports)
 end_time = time.time()
 duration = end_time - start_time
 
-print(" )
-" + "=" * 80)
+print("")
+ + =" * 80)
 print("TEST SUITE SUMMARY")
 print("=" * 80)
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
 overall_result = 0 if (perf_result == 0 and recovery_result == 0) else 1
 
 if overall_result == 0:
-print(" )
+    print("")
 [SUCCESS] ALL AGENT ORCHESTRATION TESTS PASSED!")
 else:
-print(" )
+    print("")
 [WARNING] SOME TESTS FAILED - CHECK OUTPUT ABOVE")
 
 print("=" * 80)
@@ -159,7 +159,7 @@ print("RUNNING QUICK AGENT ORCHESTRATION VALIDATION")
 print("=" * 80)
 
     # Quick performance validation
-cmd_perf = [ )
+cmd_perf = ]
 "python", "-m", "pytest",
 "tests/performance/test_agent_performance_metrics.py::test_single_agent_execution_time_benchmarks",
 "-v", "--asyncio-mode=auto", "--tb=short", "-x"
@@ -169,23 +169,23 @@ print("Running quick performance validation...")
 perf_result = subprocess.run(cmd_perf, capture_output=False)
 
     # Quick error recovery validation
-cmd_recovery = [ )
+cmd_recovery = ]
 "python", "-m", "pytest",
 "tests/integration/test_agent_error_recovery.py::test_individual_agent_timeout_recovery",
 "-v", "--asyncio-mode=auto", "--tb=short", "-x"
     
 
-print(" )
+print("")
 Running quick error recovery validation...")
 recovery_result = subprocess.run(cmd_recovery, capture_output=False)
 
 overall_result = 0 if (perf_result.returncode == 0 and recovery_result.returncode == 0) else 1
 
 if overall_result == 0:
-print(" )
+    print("")
 [SUCCESS] Quick validation passed - full test suite should work")
 else:
-print(" )
+    print("")
 [FAILED] Quick validation failed - check environment setup")
 
 return overall_result
@@ -233,17 +233,17 @@ help="Generate detailed test reports with console output"
 args = parser.parse_args()
 
 print(f"Agent Orchestration Test Runner")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 print()
 
     # Validate environment
 if not os.path.exists("tests/performance/test_agent_performance_metrics.py"):
-print("[ERROR] Performance test file not found")
+    print("[ERROR] Performance test file not found")
 return 1
 
 if not os.path.exists("tests/integration/test_agent_error_recovery.py"):
-print("[ERROR] Error recovery test file not found")
+    print("[ERROR] Error recovery test file not found")
 return 1
 
 try:
@@ -257,11 +257,11 @@ else:
 return run_all_agent_orchestration_tests(args.concurrent_load, args.detailed_reports)
 
 except KeyboardInterrupt:
-print(" )
+    print("")
 [WARNING] Test execution interrupted by user")
 return 1
 except Exception as e:
-print("formatted_string")
+    print("")
 return 1
 
 

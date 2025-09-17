@@ -30,7 +30,7 @@ from uuid import uuid4
 from shared.isolated_environment import IsolatedEnvironment
 
 import httpx
-from websockets.exceptions import ConnectionClosed
+from websockets import ConnectionClosed
 
 # =============================================================================
 # E2E TEST INFRASTRUCTURE

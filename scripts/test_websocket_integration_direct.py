@@ -103,7 +103,7 @@ async def test_websocket_integration_auth():
                     logger.info("[U+23F1][U+FE0F] No response received (timeout) but connection successful")
                     return True
                     
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             logger.error(f" FAIL:  WebSocket connection closed: {e}")
             logger.error("This may indicate authentication was rejected")
             return False

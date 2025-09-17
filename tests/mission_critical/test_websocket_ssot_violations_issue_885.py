@@ -186,7 +186,7 @@ class TestWebSocketSSotViolations(SSotAsyncTestCase):
                 pass
 
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             except ImportError:
                 pass
 
@@ -213,7 +213,7 @@ class TestWebSocketSSotViolations(SSotAsyncTestCase):
 
         # Try to create multiple managers and check for shared state
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             # Create managers for different users
             user1_context = {"user_id": "user1", "session_id": "session1"}

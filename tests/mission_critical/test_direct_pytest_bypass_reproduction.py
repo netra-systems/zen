@@ -28,8 +28,9 @@ EXPECTED BEHAVIOR AFTER REMEDIATION:
 
 Author: SSOT Gardener Agent - Issue #1075 Step 1
 Date: 2025-09-14
-"""
+"
 
+"""
 import ast
 import os
 import sys
@@ -47,9 +48,9 @@ from shared.isolated_environment import IsolatedEnvironment
 
 @dataclass
 class PytestBypassViolation:
-    """Details about a direct # MIGRATED: Use SSOT unified test runner
+    "Details about a direct # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution bypass violation."""
+    pass  # TODO: Replace with appropriate SSOT test execution bypass violation.
     file_path: str
     line_number: int
     violation_code: str
@@ -57,14 +58,14 @@ class PytestBypassViolation:
 
 
 class DirectPytestBypassReproductionTests(SSotBaseTestCase):
-    """
+    ""
     Test suite to reproduce and validate direct # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution bypass violations.
     
     This test is DESIGNED TO FAIL until SSOT remediation is complete, demonstrating
     the extent of the violation across the codebase.
-    """
+    
 
     def setUp(self):
         super().setUp()
@@ -79,7 +80,7 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
         ]
 
     def scan_file_for_pytest_bypass_violations(self, file_path: Path) -> List[PytestBypassViolation]:
-        """
+        ""
         Scan a Python file for direct # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution bypass violations.
@@ -91,7 +92,7 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
         2. subprocess.run with pytest
         3. os.system with pytest
         4. pytest.main with exit codes
-        """
+
         violations = []
         
         try:
@@ -124,7 +125,7 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
                           isinstance(node.func, ast.Attribute) and
                           isinstance(node.func.value, ast.Name) and
                           node.func.value.id == 'subprocess' and
-                          node.func.attr in ['run', 'call', 'Popen']):
+                          node.func.attr in ['run', 'call', 'Popen']:
                         
                         # Check if args contain 'pytest'
                         for arg in node.args:
@@ -153,8 +154,8 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
                 # Direct pytest.main patterns
                 if (line_clean.find('pytest.main') != -1 and
                     not line_clean.startswith('#') and
-                    not line_clean.startswith('"""') and
-                    not line_clean.startswith("'")):
+                    not line_clean.startswith('"') and"
+                    not line_clean.startswith(')):
                     
                     violation = PytestBypassViolation(
                         file_path=str(file_path.relative_to(self.project_root)),
@@ -192,12 +193,12 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
                     
         except Exception as e:
             # Log but don't fail on individual file errors
-            print(f"Warning: Could not scan {file_path}: {e}")
+            print(fWarning: Could not scan {file_path}: {e})
             
         return violations
 
     def scan_codebase_for_pytest_bypass_violations(self) -> List[PytestBypassViolation]:
-        """Scan entire codebase for pytest bypass violations."""
+        "Scan entire codebase for pytest bypass violations."
         all_violations = []
         
         for test_dir in self.test_directories:
@@ -217,10 +218,10 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
         return all_violations
 
     def validate_unified_test_runner_functionality(self) -> bool:
-        """
+    "
         Validate that the SSOT unified_test_runner.py exists and is functional.
         This should PASS even before remediation.
-        """
+"
         unified_runner_path = self.project_root / 'tests' / 'unified_test_runner.py'
         
         # Check file exists
@@ -255,74 +256,74 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
             return False
 
     def test_reproduce_direct_pytest_bypass_violations(self):
-        """
+        "
         REPRODUCTION TEST: This test WILL FAIL until violations are remediated.
         
         Scans codebase and identifies all files that directly call # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
         bypassing the SSOT unified_test_runner.py pattern.
-        """
+        "
         violations = self.scan_codebase_for_pytest_bypass_violations()
         self.violations_found = violations
         
         # Generate detailed violation report
         violation_report = self.generate_violation_report(violations)
-        print("\n" + "="*80)
-        print("PYTEST BYPASS VIOLATION REPRODUCTION RESULTS")
-        print("="*80)
+        print(\n + =*80)
+        print(PYTEST BYPASS VIOLATION REPRODUCTION RESULTS")
+        print("=*80)
         print(violation_report)
         
         # This assertion SHOULD FAIL until remediation is complete
         self.assertEqual(
             len(violations), 0, 
-            f"CRITICAL VIOLATION REPRODUCED: Found {len(violations)} direct pytest bypass violations. "
-            f"All test execution should go through unified_test_runner.py (SSOT). "
-            f"Violations found in: {[v.file_path for v in violations[:10]]}{'...' if len(violations) > 10 else ''}"
+            fCRITICAL VIOLATION REPRODUCED: Found {len(violations)} direct pytest bypass violations. 
+            fAll test execution should go through unified_test_runner.py (SSOT). 
+            fViolations found in: {[v.file_path for v in violations[:10]]}{'...' if len(violations) > 10 else ''}
         )
 
     def test_validate_unified_test_runner_ssot_functionality(self):
-        """
+        ""
         VALIDATION TEST: This test should PASS both before and after remediation.
         
         Validates that the SSOT unified_test_runner.py exists and is functional.
-        """
+        
         is_functional = self.validate_unified_test_runner_functionality()
         
         self.assertTrue(
             is_functional,
-            "CRITICAL: SSOT unified_test_runner.py must be functional. "
-            "This is the canonical way to run tests in the system."
+            CRITICAL: SSOT unified_test_runner.py must be functional. 
+            This is the canonical way to run tests in the system."
         )
 
     def test_ssot_pattern_compliance_detection(self):
-        """
+    "
         COMPLIANCE TEST: Validates detection of SSOT-compliant test execution patterns.
         
         This test should PASS - it validates our ability to detect proper patterns.
-        """
+""
         # Test that we can detect proper imports
         proper_patterns = [
-            "from tests.unified_test_runner import main",
-            "from tests.unified_test_runner import run_tests", 
-            "python tests/unified_test_runner.py",
-            "if __name__ == '__main__':\n    from tests.unified_test_runner import main"
+            from tests.unified_test_runner import main,
+            from tests.unified_test_runner import run_tests, 
+            python tests/unified_test_runner.py",
+            if __name__ == '__main__':\n    from tests.unified_test_runner import main
         ]
         
         # This should pass - we're just validating detection capability
         for pattern in proper_patterns:
             # This is a positive test - we're checking we can identify good patterns
-            self.assertIsInstance(pattern, str, f"Should be able to process pattern: {pattern}")
+            self.assertIsInstance(pattern, str, f"Should be able to process pattern: {pattern})
 
-    def generate_violation_report(self, violations: List[PytestBypassViolation]) -> str:
-        """Generate detailed report of pytest bypass violations."""
+    def generate_violation_report(self, violations: List[PytestBypassViolation] -> str:
+        Generate detailed report of pytest bypass violations.
         if not violations:
-            return "✅ NO VIOLATIONS FOUND - All test execution follows SSOT patterns"
+            return ✅ NO VIOLATIONS FOUND - All test execution follows SSOT patterns"
             
         report_lines = [
-            f"🚨 CRITICAL VIOLATIONS FOUND: {len(violations)} pytest bypass violations",
-            "",
-            "VIOLATION BREAKDOWN BY TYPE:"
+            f🚨 CRITICAL VIOLATIONS FOUND: {len(violations)} pytest bypass violations,
+            ",
+            VIOLATION BREAKDOWN BY TYPE:
         ]
         
         # Group by violation type
@@ -333,37 +334,37 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
             by_type[violation.violation_type].append(violation)
             
         for violation_type, type_violations in by_type.items():
-            report_lines.append(f"  {violation_type}: {len(type_violations)} violations")
+            report_lines.append(f  {violation_type}: {len(type_violations)} violations)
             
         report_lines.extend([
-            "",
-            "DETAILED VIOLATIONS (first 20):"
-        ])
+            ,
+            DETAILED VIOLATIONS (first 20):"
+        ]
         
-        for i, violation in enumerate(violations[:20]):
+        for i, violation in enumerate(violations[:20]:
             report_lines.extend([
-                f"  {i+1}. File: {violation.file_path}",
-                f"     Line {violation.line_number}: {violation.violation_code}",
-                f"     Type: {violation.violation_type}",
-                ""
-            ])
+                f  {i+1}. File: {violation.file_path},
+                f"     Line {violation.line_number}: {violation.violation_code},
+                f     Type: {violation.violation_type},
+                
+            ]
             
         if len(violations) > 20:
-            report_lines.append(f"  ... and {len(violations) - 20} more violations")
+            report_lines.append(f  ... and {len(violations) - 20} more violations)
             
         report_lines.extend([
-            "",
-            "REMEDIATION REQUIRED:",
-    "1. Replace all direct pytest.main calls with unified_test_runner.py imports",
-            "2. Update all subprocess pytest calls to use unified_test_runner.py",
-            "3. Ensure consistent test execution patterns across all test files",
-            "4. Maintain SSOT compliance for test infrastructure"
-        ])
+            ",
+            REMEDIATION REQUIRED:,
+    "1. Replace all direct pytest.main calls with unified_test_runner.py imports,
+            2. Update all subprocess pytest calls to use unified_test_runner.py,
+            3. Ensure consistent test execution patterns across all test files,
+            4. Maintain SSOT compliance for test infrastructure
+        ]
         
         return "\n".join(report_lines)
 
     def import_module_from_path(self, module_name: str, file_path: str):
-        """Helper to import module from file path."""
+        Helper to import module from file path.
         import importlib.util
         try:
             spec = importlib.util.spec_from_file_location(module_name, file_path)
@@ -376,10 +377,10 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
         return None
 
     def tearDown(self):
-        """Clean up after test execution."""
+        "Clean up after test execution."
         # Log summary for debugging
         if hasattr(self, 'violations_found') and self.violations_found:
-            print(f"\nTest completed. Found {len(self.violations_found)} pytest bypass violations.")
+            print(f\nTest completed. Found {len(self.violations_found)} pytest bypass violations.)
         super().tearDown()
 
 
@@ -388,5 +389,5 @@ if __name__ == '__main__':
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution directly
     # It should be run through unified_test_runner.py
-    print("WARNING: This test should be run through unified_test_runner.py for SSOT compliance")
-    print("Example: python tests/unified_test_runner.py --file tests/mission_critical/test_direct_pytest_bypass_reproduction.py")
+    print(WARNING: This test should be run through unified_test_runner.py for SSOT compliance")
+    print("Example: python tests/unified_test_runner.py --file tests/mission_critical/test_direct_pytest_bypass_reproduction.py"")

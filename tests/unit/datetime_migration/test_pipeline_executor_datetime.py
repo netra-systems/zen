@@ -6,7 +6,7 @@ Tests are designed to detect deprecated patterns and validate migration behavior
 """
 
 import warnings
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 import unittest
@@ -26,7 +26,7 @@ class PipelineExecutorDateTimeMigrationTests(unittest.TestCase):
         self.warnings_captured = []
 
     def test_deprecated_datetime_patterns_in_pipeline_executor(self):
-        """FAILING TEST: Detects deprecated datetime.utcnow() usage in pipeline executor."""
+        """FAILING TEST: Detects deprecated datetime.now(UTC) usage in pipeline executor."""
         target_file = project_root / "netra_backend" / "app" / "agents" / "supervisor" / "pipeline_executor.py"
 
         with open(target_file, 'r', encoding='utf-8') as f:
@@ -34,8 +34,8 @@ class PipelineExecutorDateTimeMigrationTests(unittest.TestCase):
 
         # Check for deprecated patterns
         deprecated_patterns = [
-            "datetime.utcnow()",
-            "return datetime.utcnow().isoformat()",
+            "datetime.now(UTC)",
+            "return datetime.now(UTC).isoformat()",
         ]
 
         found_deprecated = []
@@ -57,7 +57,7 @@ class PipelineExecutorDateTimeMigrationTests(unittest.TestCase):
         # Mock pipeline step execution timing
         def get_step_timestamp_old() -> str:
             """Get step timestamp using old pattern."""
-            return datetime.utcnow().isoformat()
+            return datetime.now(UTC).isoformat()
 
         def get_step_timestamp_new() -> str:
             """Get step timestamp using new pattern."""
@@ -89,7 +89,7 @@ class PipelineExecutorDateTimeMigrationTests(unittest.TestCase):
         """FAILING TEST: Validates timezone awareness in pipeline execution timestamps."""
 
         # Mock getting current timestamp from pipeline executor
-        current_timestamp = datetime.utcnow()  # Current implementation
+        current_timestamp = datetime.now(UTC)  # Current implementation
 
         # This test SHOULD FAIL before migration (naive datetime objects)
         self.assertIsNotNone(current_timestamp.tzinfo,
@@ -100,7 +100,7 @@ class PipelineExecutorDateTimeMigrationTests(unittest.TestCase):
 
         def calculate_step_duration_old(start_time: datetime) -> float:
             """Calculate step duration using old pattern."""
-            end_time = datetime.utcnow()
+            end_time = datetime.now(UTC)
             return (end_time - start_time).total_seconds()
 
         def calculate_step_duration_new(start_time: datetime) -> float:
@@ -109,7 +109,7 @@ class PipelineExecutorDateTimeMigrationTests(unittest.TestCase):
             return (end_time - start_time).total_seconds()
 
         # Test with a step that started 2 seconds ago
-        step_start = datetime.utcnow() - timedelta(seconds=2)
+        step_start = datetime.now(UTC) - timedelta(seconds=2)
 
         duration_old = calculate_step_duration_old(step_start)
         duration_new = calculate_step_duration_new(step_start)
@@ -130,8 +130,8 @@ class PipelineExecutorDateTimeMigrationTests(unittest.TestCase):
         # Mock pipeline execution metrics
         def create_performance_metrics_old(steps_executed: int) -> Dict[str, Any]:
             """Create performance metrics using old pattern."""
-            start_time = datetime.utcnow() - timedelta(seconds=steps_executed * 0.5)
-            end_time = datetime.utcnow()
+            start_time = datetime.now(UTC) - timedelta(seconds=steps_executed * 0.5)
+            end_time = datetime.now(UTC)
 
             return {
                 'steps_executed': steps_executed,
@@ -186,7 +186,7 @@ class PipelineExecutorDateTimeMigrationTests(unittest.TestCase):
         def create_log_entry_old(step_name: str, message: str) -> Dict[str, Any]:
             """Create log entry using old pattern."""
             return {
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'step_name': step_name,
                 'message': message,
                 'log_level': 'INFO'
@@ -229,12 +229,12 @@ class PipelineExecutorPerformanceTests(unittest.TestCase):
         # Mock step execution timing
         def time_pipeline_step_old(step_function) -> Dict[str, Any]:
             """Time a pipeline step using old pattern."""
-            start_time = datetime.utcnow()
+            start_time = datetime.now(UTC)
 
             # Simulate step execution
             result = step_function()
 
-            end_time = datetime.utcnow()
+            end_time = datetime.now(UTC)
             duration = (end_time - start_time).total_seconds()
 
             return {
@@ -291,7 +291,7 @@ class PipelineExecutorPerformanceTests(unittest.TestCase):
 
         def is_step_timeout_old(start_time: datetime, timeout_seconds: int = 30) -> bool:
             """Check if step has timed out using old pattern."""
-            elapsed = (datetime.utcnow() - start_time).total_seconds()
+            elapsed = (datetime.now(UTC) - start_time).total_seconds()
             return elapsed > timeout_seconds
 
         def is_step_timeout_new(start_time: datetime, timeout_seconds: int = 30) -> bool:
@@ -301,13 +301,13 @@ class PipelineExecutorPerformanceTests(unittest.TestCase):
             return elapsed > timeout_seconds
 
         # Test with step that should timeout (started 45 seconds ago)
-        timeout_start = datetime.utcnow() - timedelta(seconds=45)
+        timeout_start = datetime.now(UTC) - timedelta(seconds=45)
 
         self.assertTrue(is_step_timeout_old(timeout_start, 30))
         self.assertTrue(is_step_timeout_new(timeout_start, 30))
 
         # Test with step that should not timeout (started 15 seconds ago)
-        normal_start = datetime.utcnow() - timedelta(seconds=15)
+        normal_start = datetime.now(UTC) - timedelta(seconds=15)
 
         self.assertFalse(is_step_timeout_old(normal_start, 30))
         self.assertFalse(is_step_timeout_new(normal_start, 30))
@@ -323,7 +323,7 @@ class PipelineExecutorPerformanceTests(unittest.TestCase):
                 'average_duration': sum(step_durations) / len(step_durations) if step_durations else 0,
                 'min_duration': min(step_durations) if step_durations else 0,
                 'max_duration': max(step_durations) if step_durations else 0,
-                'calculated_at': datetime.utcnow().isoformat()
+                'calculated_at': datetime.now(UTC).isoformat()
             }
 
         def calculate_execution_stats_new(step_durations: List[float]) -> Dict[str, Any]:

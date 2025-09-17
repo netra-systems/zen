@@ -35,7 +35,7 @@ import json
 import time
 import uuid
 import base64
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional
 import aiohttp
 import websockets
@@ -82,7 +82,7 @@ class GoldenPathCompleteStagingTests(SSotAsyncTestCase):
     @classmethod
     async def _create_staging_test_user(cls) -> Dict[str, Any]:
         """Create or retrieve staging test user for Golden Path testing"""
-        test_user_data = {'email': f'golden_path_test_{int(time.time())}@netra-staging.ai', 'name': 'Golden Path Test User', 'user_id': f'golden_path_user_{uuid.uuid4()}', 'created_at': datetime.utcnow().isoformat()}
+        test_user_data = {'email': f'golden_path_test_{int(time.time())}@netra-staging.ai', 'name': 'Golden Path Test User', 'user_id': f'golden_path_user_{uuid.uuid4()}', 'created_at': datetime.now(UTC).isoformat()}
         try:
             timeout = aiohttp.ClientTimeout(total=15)
             async with aiohttp.ClientSession(timeout=timeout) as session:
@@ -128,7 +128,7 @@ class GoldenPathCompleteStagingTests(SSotAsyncTestCase):
             golden_path_steps[-1]['status'] = 'completed'
             golden_path_steps[-1]['duration'] = time.time() - golden_path_steps[-1]['start_time']
             golden_path_steps.append({'step': 'chat_message_send', 'status': 'starting', 'start_time': time.time()})
-            chat_message = {'type': 'chat_message', 'data': {'message': 'Hello! This is a Golden Path test. Please analyze the current system status and provide an AI-powered response with actionable insights.', 'user_id': self.test_user['user_id'], 'thread_id': str(uuid.uuid4()), 'timestamp': datetime.utcnow().isoformat(), 'golden_path_test': True, 'business_critical': True, 'expected_ai_response': True}}
+            chat_message = {'type': 'chat_message', 'data': {'message': 'Hello! This is a Golden Path test. Please analyze the current system status and provide an AI-powered response with actionable insights.', 'user_id': self.test_user['user_id'], 'thread_id': str(uuid.uuid4()), 'timestamp': datetime.now(UTC).isoformat(), 'golden_path_test': True, 'business_critical': True, 'expected_ai_response': True}}
             await websocket_connection.send(json.dumps(chat_message))
             golden_path_steps[-1]['status'] = 'completed'
             golden_path_steps[-1]['duration'] = time.time() - golden_path_steps[-1]['start_time']
@@ -147,7 +147,7 @@ class GoldenPathCompleteStagingTests(SSotAsyncTestCase):
                             agent_response = event_data
                             break
                     except json.JSONDecodeError:
-                        websocket_events.append({'raw_message': message, 'timestamp': datetime.utcnow().isoformat()})
+                        websocket_events.append({'raw_message': message, 'timestamp': datetime.now(UTC).isoformat()})
                 except asyncio.TimeoutError:
                     if len(websocket_events) >= 3 and agent_response:
                         break
@@ -253,7 +253,7 @@ class GoldenPathCompleteStagingTests(SSotAsyncTestCase):
         except Exception as e:
             return {'success': False, 'error': f'Auth request failed: {e}'}
 
-    async def _establish_staging_websocket_connection(self, test_user: Dict[str, Any]) -> Optional[websockets.WebSocketClientProtocol]:
+    async def _establish_staging_websocket_connection(self, test_user: Dict[str, Any]) -> Optional[websockets.ClientConnection]:
         """Establish WebSocket connection to staging environment"""
         try:
             access_token = test_user.get('access_token', 'mock_token')
@@ -275,7 +275,7 @@ class GoldenPathCompleteStagingTests(SSotAsyncTestCase):
         try:
             connection = await self._establish_staging_websocket_connection(test_user)
             if connection:
-                test_message = {'type': 'race_condition_test', 'data': {'connection_id': connection_id, 'user_id': test_user['user_id'], 'timestamp': datetime.utcnow().isoformat()}}
+                test_message = {'type': 'race_condition_test', 'data': {'connection_id': connection_id, 'user_id': test_user['user_id'], 'timestamp': datetime.now(UTC).isoformat()}}
                 await connection.send(json.dumps(test_message))
                 try:
                     response = await asyncio.wait_for(connection.recv(), timeout=5.0)

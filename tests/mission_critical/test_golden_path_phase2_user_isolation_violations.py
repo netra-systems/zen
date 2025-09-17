@@ -8,13 +8,14 @@ migration to proper user context factories eliminates contamination between user
 Business Value Justification:
 - Segment: Platform/Enterprise
 - Business Goal: Stability & Security 
+"""
 - Value Impact: Prevents $500K+ ARR loss from multi-user data leakage
 - Strategic Impact: Enables regulatory compliance (HIPAA/SOC2) for enterprise customers
 
 The tests prove that:
 1. DEPRECATED: get_agent_instance_factory() creates user contamination vulnerabilities
 2. SSOT COMPLIANT: create_agent_instance_factory(user_context) provides proper isolation
-"""
+"
 
 import asyncio
 import pytest
@@ -39,9 +40,9 @@ logger = central_logger.get_logger(__name__)
 
 
 class MockAgent(BaseAgent):
-    """Mock agent for testing with contamination tracking."""
+    "Mock agent for testing with contamination tracking.
     
-    def __init__(self, agent_name: str = "MockAgent", llm_manager=None, tool_dispatcher=None):
+    def __init__(self, agent_name: str = "MockAgent, llm_manager=None, tool_dispatcher=None):"
         super().__init__()
         self.agent_name = agent_name
         self.llm_manager = llm_manager
@@ -52,37 +53,37 @@ class MockAgent(BaseAgent):
         
     @classmethod
     def create_agent_with_context(cls, user_context: UserExecutionContext):
-        """Factory method that binds agent to specific user context."""
-        agent = cls(agent_name=f"MockAgent_{user_context.user_id}")
+        Factory method that binds agent to specific user context."
+        agent = cls(agent_name=f"MockAgent_{user_context.user_id})
         agent.user_context = user_context
-        agent.contamination_marker = f"user_{user_context.user_id}_{int(time.time() * 1000)}"
+        agent.contamination_marker = fuser_{user_context.user_id}_{int(time.time() * 1000)}
         return agent
         
     async def execute(self, state: Dict, run_id: str, **kwargs):
-        """Mock execution that tracks contamination."""
-        execution_id = f"exec_{run_id}_{int(time.time() * 1000)}"
+        Mock execution that tracks contamination.""
+        execution_id = fexec_{run_id}_{int(time.time() * 1000)}
         self.execution_history.append({
             'execution_id': execution_id,
             'run_id': run_id,
             'user_context': self.user_context,
             'contamination_marker': self.contamination_marker,
             'timestamp': time.time()
-        })
+        }
         
         # Return execution result with contamination tracking
         return {
-            'result': f"Executed by {self.agent_name}",
+            'result': f"Executed by {self.agent_name},
             'execution_id': execution_id,
             'contamination_marker': self.contamination_marker,
             'user_id': self.user_context.user_id if self.user_context else 'unknown'
         }
         
     def get_contamination_marker(self) -> str:
-        """Get the contamination marker for this agent instance."""
+        "Get the contamination marker for this agent instance.
         return self.contamination_marker
         
     def has_cross_user_contamination(self, expected_user_id: str) -> bool:
-        """Check if this agent has been contaminated by another user's data."""
+        "Check if this agent has been contaminated by another user's data."
         if not self.user_context:
             return True  # No user context is contamination
             
@@ -99,20 +100,20 @@ class MockAgent(BaseAgent):
 
 
 class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
-    """
+    "
     CRITICAL: Test user isolation violations in Golden Path Phase 2 migration.
     
     These tests demonstrate the security vulnerabilities created by deprecated
     singleton patterns and validate that proper SSOT patterns prevent contamination.
-    """
+"
 
     async def asyncSetUp(self):
-        """Set up test infrastructure with proper SSOT patterns."""
+        Set up test infrastructure with proper SSOT patterns.""
         await super().asyncSetUp()
         
         # Create mock infrastructure components
         self.mock_agent_class_registry = AgentClassRegistry()
-        self.mock_agent_class_registry.register_agent_class("MockAgent", MockAgent)
+        self.mock_agent_class_registry.register_agent_class(MockAgent, MockAgent)
         
         self.mock_websocket_bridge = AsyncMock(spec=AgentWebSocketBridge)
         self.mock_websocket_bridge.register_run_thread_mapping = AsyncMock(return_value=True)
@@ -122,30 +123,29 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         self.user_executions = {}
         
     async def asyncTearDown(self):
-        """Clean up test resources."""
+        "Clean up test resources."
         await super().asyncTearDown()
         
-    def create_test_user_context(self, user_id: str, suffix: str = "") -> UserExecutionContext:
-        """Create test user execution context with unique identifiers."""
-        thread_id = f"thread_{user_id}_{suffix}_{uuid.uuid4().hex[:8]}"
-        run_id = f"run_{user_id}_{suffix}_{uuid.uuid4().hex[:8]}"
+    def create_test_user_context(self, user_id: str, suffix: str = ) -> UserExecutionContext:"
+        "Create test user execution context with unique identifiers.
+        thread_id = fthread_{user_id}_{suffix}_{uuid.uuid4().hex[:8]}""
+        run_id = frun_{user_id}_{suffix}_{uuid.uuid4().hex[:8]}
         
         return UserExecutionContext.from_request_supervisor(
             user_id=user_id,
             thread_id=thread_id,
             run_id=run_id,
-            request_id=f"req_{user_id}_{suffix}",
+            request_id=freq_{user_id}_{suffix},
             metadata={'test_suffix': suffix, 'created_for': user_id}
-        )
 
     async def test_deprecated_singleton_factory_raises_error(self):
-        """
+    ""
         TEST 1: Verify deprecated singleton factory is completely disabled.
         
         CRITICAL: The get_agent_instance_factory() function must raise an error
         to prevent multi-user contamination vulnerabilities.
-        """
-        logger.info("TEST 1: Verifying deprecated singleton factory raises error")
+        
+        logger.info(TEST 1: Verifying deprecated singleton factory raises error")"
         
         # EXPECTATION: Deprecated function should raise ValueError
         with self.assertRaises(ValueError) as context:
@@ -153,24 +153,24 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
             
         # Validate error message contains security warning
         error_message = str(context.exception)
-        self.assertIn("SINGLETON PATTERN ELIMINATED", error_message)
-        self.assertIn("multi-user state contamination", error_message)
-        self.assertIn("create_agent_instance_factory(user_context)", error_message)
+        self.assertIn(SINGLETON PATTERN ELIMINATED, error_message)
+        self.assertIn(multi-user state contamination, error_message)"
+        self.assertIn("create_agent_instance_factory(user_context), error_message)
         
-        logger.info("✅ PASS: Deprecated singleton factory correctly raises security error")
+        logger.info(✅ PASS: Deprecated singleton factory correctly raises security error)
 
     async def test_ssot_factory_provides_user_isolation(self):
-        """
+    ""
         TEST 2: Verify SSOT factory provides proper user isolation.
         
         CRITICAL: create_agent_instance_factory(user_context) must create
         completely isolated factories for different users.
-        """
-        logger.info("TEST 2: Verifying SSOT factory provides user isolation")
+        
+        logger.info(TEST 2: Verifying SSOT factory provides user isolation")"
         
         # Create contexts for two different users
-        user1_context = self.create_test_user_context("user1", "isolation_test")
-        user2_context = self.create_test_user_context("user2", "isolation_test")
+        user1_context = self.create_test_user_context(user1, isolation_test)
+        user2_context = self.create_test_user_context(user2, isolation_test")
         
         # Create per-user factories using SSOT pattern
         factory1 = create_agent_instance_factory(user1_context)
@@ -187,53 +187,53 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         )
         
         # Create agents for each user
-        agent1 = await factory1.create_agent_instance("MockAgent", user1_context)
-        agent2 = await factory2.create_agent_instance("MockAgent", user2_context)
+        agent1 = await factory1.create_agent_instance("MockAgent, user1_context)
+        agent2 = await factory2.create_agent_instance(MockAgent, user2_context)
         
         # VALIDATION: Agents should be completely isolated
-        self.assertNotEqual(agent1, agent2, "Agents should be different instances")
-        self.assertEqual(agent1.user_context.user_id, "user1")
-        self.assertEqual(agent2.user_context.user_id, "user2")
+        self.assertNotEqual(agent1, agent2, "Agents should be different instances)"
+        self.assertEqual(agent1.user_context.user_id, user1)
+        self.assertEqual(agent2.user_context.user_id, user2)"
         
         # VALIDATION: Contamination markers should be different
         marker1 = agent1.get_contamination_marker()
         marker2 = agent2.get_contamination_marker()
-        self.assertNotEqual(marker1, marker2, "Contamination markers should be unique")
+        self.assertNotEqual(marker1, marker2, Contamination markers should be unique")
         
         # VALIDATION: No cross-user contamination
-        self.assertFalse(agent1.has_cross_user_contamination("user1"))
-        self.assertFalse(agent2.has_cross_user_contamination("user2"))
+        self.assertFalse(agent1.has_cross_user_contamination(user1))
+        self.assertFalse(agent2.has_cross_user_contamination(user2"))"
         
-        logger.info("✅ PASS: SSOT factory provides proper user isolation")
+        logger.info(✅ PASS: SSOT factory provides proper user isolation)
 
     async def test_concurrent_user_execution_isolation(self):
-        """
+        "
         TEST 3: Verify concurrent user executions remain isolated.
         
         CRITICAL: Multiple users executing agents simultaneously should have
         no cross-contamination of state or context.
-        """
-        logger.info("TEST 3: Testing concurrent user execution isolation")
+"
+        logger.info(TEST 3: Testing concurrent user execution isolation)"
         
         # Create contexts for multiple concurrent users
-        users = ["alice", "bob", "charlie", "diana"]
+        users = [alice", bob, charlie, diana]
         user_contexts = {}
         factories = {}
         agents = {}
         
         # Set up isolated factories for each user
         for user_id in users:
-            user_contexts[user_id] = self.create_test_user_context(user_id, "concurrent")
-            factories[user_id] = create_agent_instance_factory(user_contexts[user_id])
+            user_contexts[user_id] = self.create_test_user_context(user_id, concurrent")"
+            factories[user_id] = create_agent_instance_factory(user_contexts[user_id]
             factories[user_id].configure(
                 agent_class_registry=self.mock_agent_class_registry,
                 websocket_bridge=self.mock_websocket_bridge
             )
-            agents[user_id] = await factories[user_id].create_agent_instance("MockAgent", user_contexts[user_id])
+            agents[user_id] = await factories[user_id].create_agent_instance(MockAgent, user_contexts[user_id]
         
         # Execute agents concurrently
         async def execute_for_user(user_id: str):
-            """Execute agent for specific user and track results."""
+            "Execute agent for specific user and track results."
             context = user_contexts[user_id]
             agent = agents[user_id]
             
@@ -266,29 +266,29 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
             for result in results:
                 if result['user_id'] != user_id:
                     contamination_detected = True
-                    logger.error(f"CONTAMINATION: User {user_id} got result for user {result['user_id']}")
+                    logger.error(fCONTAMINATION: User {user_id} got result for user {result['user_id']})
             
             # Check for cross-user contamination in agent
             if agent.has_cross_user_contamination(user_id):
                 contamination_detected = True
-                logger.error(f"CONTAMINATION: Agent for {user_id} has cross-user contamination")
+                logger.error(fCONTAMINATION: Agent for {user_id} has cross-user contamination)"
         
-        self.assertFalse(contamination_detected, "No cross-user contamination should be detected")
+        self.assertFalse(contamination_detected, "No cross-user contamination should be detected)
         
-        logger.info("✅ PASS: Concurrent user executions remain properly isolated")
+        logger.info(✅ PASS: Concurrent user executions remain properly isolated)
 
     async def test_factory_memory_isolation(self):
-        """
+    ""
         TEST 4: Verify factory instances don't share memory state.
         
         CRITICAL: Each factory instance should have completely separate
         memory space to prevent state leakage.
-        """
-        logger.info("TEST 4: Testing factory memory isolation")
+        
+        logger.info(TEST 4: Testing factory memory isolation")"
         
         # Create multiple user contexts
-        context1 = self.create_test_user_context("memory_user1", "memory_test")
-        context2 = self.create_test_user_context("memory_user2", "memory_test")
+        context1 = self.create_test_user_context(memory_user1, memory_test)
+        context2 = self.create_test_user_context(memory_user2, memory_test")
         
         # Create separate factories
         factory1 = create_agent_instance_factory(context1)
@@ -305,7 +305,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         )
         
         # VALIDATION: Factories should be different instances
-        self.assertNotEqual(factory1, factory2, "Factories should be different instances")
+        self.assertNotEqual(factory1, factory2, "Factories should be different instances)
         
         # VALIDATION: Factories should have separate user contexts
         self.assertEqual(factory1._user_context, context1)
@@ -313,8 +313,8 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         self.assertNotEqual(factory1._user_context, factory2._user_context)
         
         # Create agents and check isolation
-        agent1 = await factory1.create_agent_instance("MockAgent", context1)
-        agent2 = await factory2.create_agent_instance("MockAgent", context2)
+        agent1 = await factory1.create_agent_instance(MockAgent, context1)
+        agent2 = await factory2.create_agent_instance("MockAgent, context2)"
         
         # VALIDATION: Agents should be bound to correct contexts
         self.assertEqual(agent1.user_context, context1)
@@ -328,16 +328,16 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         self.assertEqual(metrics1['total_instances_created'], 1)
         self.assertEqual(metrics2['total_instances_created'], 1)
         
-        logger.info("✅ PASS: Factory instances have proper memory isolation")
+        logger.info(✅ PASS: Factory instances have proper memory isolation)
 
     async def test_user_context_binding_validation(self):
-        """
+    ""
         TEST 5: Verify user context binding is mandatory and enforced.
         
         CRITICAL: Factories must require user context and fail gracefully
         without it to prevent context-less execution.
-        """
-        logger.info("TEST 5: Testing user context binding validation")
+        
+        logger.info(TEST 5: Testing user context binding validation)"
         
         # TEST: Factory creation without user context should work but be flagged
         factory_without_context = AgentInstanceFactory()  # No user context
@@ -348,32 +348,32 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         
         # TEST: Agent creation should require user context
         with self.assertRaises((ValueError, RuntimeError)) as context:
-            await factory_without_context.create_agent_instance("MockAgent", None)
+            await factory_without_context.create_agent_instance("MockAgent, None)
         
         error_message = str(context.exception)
-        self.assertIn("UserExecutionContext is required", error_message)
+        self.assertIn(UserExecutionContext is required, error_message)
         
         # TEST: SSOT factory creation should require user context
         with self.assertRaises(ValueError) as context:
             create_agent_instance_factory(None)
         
         error_message = str(context.exception)
-        self.assertIn("UserExecutionContext is required", error_message)
+        self.assertIn("UserExecutionContext is required, error_message)"
         
-        logger.info("✅ PASS: User context binding is properly validated")
+        logger.info(✅ PASS: User context binding is properly validated)
 
     async def test_resource_cleanup_isolation(self):
-        """
+    ""
         TEST 6: Verify resource cleanup doesn't affect other users.
         
         CRITICAL: When one user's context is cleaned up, other users
         should remain unaffected.
-        """
-        logger.info("TEST 6: Testing resource cleanup isolation")
+        
+        logger.info(TEST 6: Testing resource cleanup isolation)"
         
         # Create contexts for multiple users
-        user1_context = self.create_test_user_context("cleanup_user1", "cleanup_test")
-        user2_context = self.create_test_user_context("cleanup_user2", "cleanup_test")
+        user1_context = self.create_test_user_context("cleanup_user1, cleanup_test)
+        user2_context = self.create_test_user_context(cleanup_user2, cleanup_test)
         
         # Create factories and agents
         factory1 = create_agent_instance_factory(user1_context)
@@ -385,8 +385,8 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
                 websocket_bridge=self.mock_websocket_bridge
             )
         
-        agent1 = await factory1.create_agent_instance("MockAgent", user1_context)
-        agent2 = await factory2.create_agent_instance("MockAgent", user2_context)
+        agent1 = await factory1.create_agent_instance("MockAgent, user1_context)"
+        agent2 = await factory2.create_agent_instance(MockAgent, user2_context)
         
         # Execute agents to create state
         result1 = await agent1.execute({'task': 'user1_task'}, user1_context.run_id)
@@ -406,24 +406,24 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         # Verify user2's contamination marker unchanged
         self.assertFalse(agent2.has_cross_user_contamination('cleanup_user2'))
         
-        logger.info("✅ PASS: Resource cleanup maintains proper isolation")
+        logger.info(✅ PASS: Resource cleanup maintains proper isolation)"
 
     async def test_golden_path_contamination_prevention(self):
-        """
+        "
         TEST 7: Golden Path end-to-end contamination prevention.
         
         CRITICAL: Full Golden Path workflow should maintain perfect user
         isolation throughout the entire execution pipeline.
-        """
-        logger.info("TEST 7: Testing Golden Path contamination prevention")
+"
+        logger.info("TEST 7: Testing Golden Path contamination prevention)
         
         # Simulate complete Golden Path workflow for multiple users
-        golden_path_users = ["golden_alice", "golden_bob"]
+        golden_path_users = [golden_alice, golden_bob]
         results = {}
         
         for user_id in golden_path_users:
             # Step 1: Create user context (as would happen in real request)
-            user_context = self.create_test_user_context(user_id, "golden_path")
+            user_context = self.create_test_user_context(user_id, golden_path")"
             
             # Step 2: Create per-request factory (SSOT pattern)
             factory = create_agent_instance_factory(user_context)
@@ -433,7 +433,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
             )
             
             # Step 3: Create agent instance
-            agent = await factory.create_agent_instance("MockAgent", user_context)
+            agent = await factory.create_agent_instance(MockAgent, user_context)
             
             # Step 4: Execute agent workflow
             async with factory.user_execution_scope(
@@ -463,31 +463,31 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         self.assertEqual(bob_result['execution_result']['user_id'], 'golden_bob')
         
         # Contamination markers should be unique
-        self.assertNotEqual(alice_result['agent_marker'], bob_result['agent_marker'])
+        self.assertNotEqual(alice_result['agent_marker'], bob_result['agent_marker']
         
         # No cross-user contamination
         self.assertFalse(alice_result['agent_instance'].has_cross_user_contamination('golden_alice'))
         self.assertFalse(bob_result['agent_instance'].has_cross_user_contamination('golden_bob'))
         
-        logger.info("✅ PASS: Golden Path maintains perfect user isolation")
+        logger.info(✅ PASS: Golden Path maintains perfect user isolation)"
 
     async def test_performance_isolation_under_load(self):
-        """
+    "
         TEST 8: Verify isolation holds under concurrent load.
         
         CRITICAL: User isolation must remain intact even under high
         concurrent load scenarios.
-        """
-        logger.info("TEST 8: Testing performance isolation under load")
+        "
+        logger.info(TEST 8: Testing performance isolation under load")
         
         # Create high concurrent load scenario
         concurrent_users = 10
         executions_per_user = 5
         
         async def stress_test_user(user_index: int):
-            """Stress test for individual user with multiple executions."""
-            user_id = f"stress_user_{user_index}"
-            user_context = self.create_test_user_context(user_id, "stress_test")
+            Stress test for individual user with multiple executions.""
+            user_id = fstress_user_{user_index}
+            user_context = self.create_test_user_context(user_id, stress_test)"
             
             # Create factory and agent
             factory = create_agent_instance_factory(user_context)
@@ -495,7 +495,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
                 agent_class_registry=self.mock_agent_class_registry,
                 websocket_bridge=self.mock_websocket_bridge
             )
-            agent = await factory.create_agent_instance("MockAgent", user_context)
+            agent = await factory.create_agent_instance(MockAgent", user_context)
             
             # Perform multiple rapid executions
             user_results = []
@@ -520,21 +520,21 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
             # Check all results belong to correct user
             for result in results:
                 if result['user_id'] != user_id:
-                    contamination_errors.append(f"User {user_id} got result for {result['user_id']}")
+                    contamination_errors.append(fUser {user_id} got result for {result['user_id']})
             
             # Check agent contamination
             if agent.has_cross_user_contamination(user_id):
-                contamination_errors.append(f"Agent for {user_id} has cross-user contamination")
+                contamination_errors.append(fAgent for {user_id} has cross-user contamination)"
         
         # Report any contamination errors
         if contamination_errors:
-            logger.error("CONTAMINATION ERRORS DETECTED:")
+            logger.error("CONTAMINATION ERRORS DETECTED:)
             for error in contamination_errors:
-                logger.error(f"  - {error}")
-            self.fail(f"Contamination detected under load: {len(contamination_errors)} errors")
+                logger.error(f  - {error})
+            self.fail(f"Contamination detected under load: {len(contamination_errors)} errors)
         
-        logger.info(f"✅ PASS: Isolation maintained under load ({concurrent_users} users, {executions_per_user} executions each)")
+        logger.info(f✅ PASS: Isolation maintained under load ({concurrent_users} users, {executions_per_user} executions each)")"
 
 
 if __name__ == '__main__':
-    pytest.main([__file__, '-v', '--tb=short'])
+    pytest.main([__file__, '-v', '--tb=short']

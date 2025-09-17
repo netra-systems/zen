@@ -4,7 +4,7 @@ Ensures all required ClickHouse databases and tables are created on startup
 """
 
 import asyncio
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Dict, Any, Optional
 from pathlib import Path
 from netra_backend.app.db.clickhouse import get_clickhouse_client, ClickHouseClient, CLICKHOUSE_AVAILABLE as CLICKHOUSE_DRIVER_AVAILABLE
@@ -17,7 +17,7 @@ except ImportError:
     class ErrorCodes:
         DATABASE_ALREADY_EXISTS = 81
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ClickHouseInitializer:

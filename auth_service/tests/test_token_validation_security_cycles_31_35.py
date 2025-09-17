@@ -70,7 +70,7 @@ class TestTokenValidationSecurity:
         logger.info("Testing JWT signature tampering detection - Cycle 31")
 
     # Create valid token
-        user_data = { )
+        user_data = { }
         "user_id": "test_user_31",
         "role": "user",
         "permissions": ["read"],
@@ -103,7 +103,7 @@ class TestTokenValidationSecurity:
         tampered_payload = base64.b64encode(tampered_payload_bytes).decode().rstrip('=')
 
     # Create tampered token
-        tampered_token = "formatted_string"
+        tampered_token = ""
 
     # Attempt to validate tampered token - should fail
         with pytest.raises(jwt.InvalidSignatureError):
@@ -122,7 +122,7 @@ class TestTokenValidationSecurity:
         logger.info("Testing token expiration enforcement - Cycle 32")
 
     # Create token with very short expiration
-        user_data = { )
+        user_data = { }
         "user_id": "test_user_32",
         "role": "user",
         "exp": datetime.now(UTC) + timedelta(seconds=1)  # 1 second expiration
@@ -155,7 +155,7 @@ class TestTokenValidationSecurity:
         logger.info("Testing token replay attack detection - Cycle 33")
 
     # Create token with JTI (JWT ID) for replay detection
-        user_data = { )
+        user_data = { }
         "user_id": "test_user_33",
         "role": "user",
         "jti": "unique_token_id_33",
@@ -193,7 +193,7 @@ class TestTokenValidationSecurity:
         logger.info("Testing token revocation enforcement - Cycle 34")
 
     # Create valid token
-        user_data = { )
+        user_data = { }
         "user_id": "test_user_34",
         "role": "user",
         "jti": "revocation_test_token_34",
@@ -233,7 +233,7 @@ class TestTokenValidationSecurity:
         import asyncio
 
     # Create token for concurrent testing
-        user_data = { )
+        user_data = { }
         "user_id": "test_user_35",
         "role": "user",
         "jti": "concurrent_test_token_35",
@@ -256,7 +256,7 @@ class TestTokenValidationSecurity:
         security_manager.record_token_usage(decoded["jti"], decoded["user_id"])
 
         await asyncio.sleep(0)
-        return { )
+        return { }
         "validation_id": validation_id,
         "success": True,
         "revoked": is_revoked,
@@ -264,7 +264,7 @@ class TestTokenValidationSecurity:
         
 
         except Exception as e:
-        return { )
+        return { }
         "validation_id": validation_id,
         "success": False,
         "error": str(e)
@@ -286,11 +286,11 @@ class TestTokenValidationSecurity:
         exceptions = [item for item in []]
 
     # All validations should complete without race conditions
-        assert len(successful) >= 8, "formatted_string"
-        assert len(exceptions) == 0, "formatted_string"
+        assert len(successful) >= 8, ""
+        assert len(exceptions) == 0, ""
 
     # Security state should remain consistent
         final_usage_count = security_manager.get_token_usage_count("concurrent_test_token_35")
-        assert final_usage_count == len(successful), "formatted_string"
+        assert final_usage_count == len(successful), ""
 
-        logger.info("formatted_string")
+        logger.info("")

@@ -11,11 +11,11 @@ Business Value Justification (BVJ):
 - Revenue Impact: Supports quality features that drive customer retention
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from datetime import UTC, datetime
 from typing import Any, Dict
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 async def start_real_time_monitoring(config: Dict[str, Any]) -> Dict[str, Any]:

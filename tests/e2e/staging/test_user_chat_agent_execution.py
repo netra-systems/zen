@@ -143,7 +143,7 @@ class UserChatAgentExecutionTests:
                 else:
                     logger.warning(f'[U+23F0] No response received after {time.time() - start_time:.1f}s')
                     continue
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 logger.warning('[U+1F50C] WebSocket connection closed during response collection')
                 break
             except Exception as e:

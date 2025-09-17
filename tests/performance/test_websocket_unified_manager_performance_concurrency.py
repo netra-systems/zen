@@ -58,7 +58,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import RealServicesTestFixtures
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, ConnectionID, WebSocketID, RequestID, ensure_user_id, ensure_thread_id, ensure_websocket_id
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection, WebSocketManagerMode
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection, WebSocketManagerMode
 from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
@@ -137,7 +137,7 @@ class LoadTestWebSocketServer:
                     self.connected_clients[client_id]['message_count'] += 1
                     response = {'type': 'echo', 'original_message': json.loads(message), 'server_timestamp': datetime.now(timezone.utc).isoformat(), 'message_id': self.message_count}
                     await websocket.send(json.dumps(response))
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 pass
             finally:
                 if client_id in self.connected_clients:

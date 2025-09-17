@@ -83,7 +83,7 @@ def assess_websocket_ssot_compliance():
 
     isolation_violations = 0
     try:
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
         user1_context = {"user_id": "test_user_1", "session_id": "session_1"}
         user2_context = {"user_id": "test_user_2", "session_id": "session_2"}

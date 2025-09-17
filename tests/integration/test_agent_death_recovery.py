@@ -50,9 +50,9 @@ class MockWebSocketBridge:
         async def notify_execution_started(self, run_id: str, agent_name: str,
         execution_id: str, estimated_duration_ms: int):
         """Mock execution started notification"""
-        self.notifications.append({ ))
+        self.notifications.append({ })
         'type': 'execution_started',
-        'data': { )
+        'data': { }
         'run_id': run_id,
         'agent_name': agent_name,
         'execution_id': execution_id,
@@ -64,9 +64,9 @@ class MockWebSocketBridge:
         async def notify_execution_progress(self, run_id: str, agent_name: str,
         progress_data: Dict[str, Any]):
         """Mock execution progress notification"""
-        self.notifications.append({ ))
+        self.notifications.append({ })
         'type': 'execution_progress',
-        'data': { )
+        'data': { }
         'run_id': run_id,
         'agent_name': agent_name,
         'progress_data': progress_data
@@ -77,9 +77,9 @@ class MockWebSocketBridge:
         async def notify_execution_completed(self, run_id: str, agent_name: str,
         execution_result: Dict[str, Any]):
         """Mock execution completed notification"""
-        self.notifications.append({ ))
+        self.notifications.append({ })
         'type': 'execution_completed',
-        'data': { )
+        'data': { }
         'run_id': run_id,
         'agent_name': agent_name,
         'execution_result': execution_result
@@ -90,9 +90,9 @@ class MockWebSocketBridge:
         async def notify_execution_failed(self, run_id: str, agent_name: str,
         error_details: Dict[str, Any]):
         """Mock execution failed notification"""
-        self.notifications.append({ ))
+        self.notifications.append({ })
         'type': 'execution_failed',
-        'data': { )
+        'data': { }
         'run_id': run_id,
         'agent_name': agent_name,
         'error_details': error_details
@@ -103,9 +103,9 @@ class MockWebSocketBridge:
         async def notify_agent_death(self, run_id: str, agent_name: str,
         death_type: str, details: Dict[str, Any]):
         """Mock agent death notification"""
-        self.notifications.append({ ))
+        self.notifications.append({ })
         'type': 'agent_death',
-        'data': { )
+        'data': { }
         'run_id': run_id,
         'agent_name': agent_name,
         'death_type': death_type,
@@ -205,8 +205,8 @@ class TestAgentDeathRecoveryIntegration:
 self, execution_tracker, websocket_bridge
 ):
 """Test that agent death is detected and WebSocket notifications are sent"""
-print(" )
-" + "="*80)
+print("")
+ + ="*80)
 print("INTEGRATION TEST: Agent Death Detection with WebSocket")
 print("="*80)
 
@@ -228,7 +228,7 @@ context.agent_name,
 context
         
 
-print("formatted_string")
+print("")
 
         # Verify startup notification
 startup_notifications = websocket_bridge.get_notifications_by_type('execution_started')
@@ -237,7 +237,7 @@ assert startup_notifications[0]['data']['agent_name'] == context.agent_name
 print(" PASS:  Execution started notification sent")
 
         # Simulate agent working normally
-work_phases = [ )
+work_phases = [ ]
 {'stage': 'initialization', 'percentage': 20, 'message': 'Initializing triage...', 'duration': 0.5},
 {'stage': 'analysis', 'percentage': 40, 'message': 'Analyzing user request...', 'duration': 0.5},
 {'stage': 'processing', 'percentage': 60, 'message': 'Processing triage logic...', 'duration': 0.5}
@@ -248,7 +248,7 @@ await simulator.do_work_phases(work_phases)
         # Verify progress notifications
 progress_notifications = websocket_bridge.get_notifications_by_type('execution_progress')
 assert len(progress_notifications) >= 3
-print("formatted_string")
+print("")
 
         # Verify execution is healthy
 status = await execution_tracker.get_execution_status(execution_id)
@@ -256,7 +256,7 @@ assert status.heartbeat_status.is_alive
 print(" PASS:  Agent confirmed alive and working")
 
         # AGENT DEATH SIMULATION
-print("\
+    print("\
 [U+1F480] SIMULATING AGENT DEATH...")
 await simulator.die_silently()
 
@@ -273,14 +273,14 @@ failure_notifications = websocket_bridge.get_notifications_by_type('execution_fa
 
 if death_notifications or failure_notifications:
 death_detected = True
-print("formatted_string")
+print("")
 break
 
                 # Also check execution status
 status = await execution_tracker.get_execution_status(execution_id)
 if status and status.execution_record.state in [ExecutionState.FAILED, ExecutionState.TIMEOUT]:
 death_detected = True
-print("formatted_string")
+print("")
 break
 
                     # Verify death was detected and notifications sent
@@ -292,7 +292,7 @@ failure_notifications = websocket_bridge.get_notifications_by_type('execution_fa
 total_death_notifications = len(death_notifications) + len(failure_notifications)
 assert total_death_notifications > 0, "No death notifications were sent"
 
-print("formatted_string")
+print("")
 
                     # Verify final execution state
 final_status = await execution_tracker.get_execution_status(execution_id)
@@ -304,8 +304,8 @@ print("="*80)
 @pytest.mark.asyncio
     async def test_multiple_agent_death_scenarios(self, execution_tracker, websocket_bridge):
 """Test multiple agents dying in different ways"""
-print(" )
-" + "="*80)
+print("")
+ + ="*80)
 print("INTEGRATION TEST: Multiple Agent Death Scenarios")
 print("="*80)
 
@@ -313,7 +313,7 @@ print("="*80)
 simulators = []
 execution_ids = []
 
-scenarios = [ )
+scenarios = [ ]
 {'name': 'heartbeat-death', 'agent': 'heartbeat-agent'},
 {'name': 'timeout-death', 'agent': 'timeout-agent'},
 {'name': 'error-death', 'agent': 'error-agent'}
@@ -325,9 +325,9 @@ simulator = AgentSimulator(execution_tracker)
 simulators.append(simulator)
 
 context = AgentExecutionContext( )
-run_id="formatted_string",
+run_id="",
 agent_name=scenario['agent'],
-thread_id="formatted_string",
+thread_id="",
 user_id="multi-user"
                             
 
@@ -338,7 +338,7 @@ context
                             
 execution_ids.append(exec_id)
 
-print("formatted_string")
+print("")
 
                             # All agents start working
 work_phase = {'stage': 'working', 'percentage': 30, 'message': 'Processing...', 'duration': 1.0}
@@ -349,7 +349,7 @@ await simulator.do_work_phases([work_phase])
 print(" PASS:  All agents started working")
 
                                 # Kill agents in different ways
-print("\
+    print("\
 [U+1F480] Killing agents with different scenarios...")
 
                                 # Agent 0: Silent death (heartbeat failure)
@@ -375,28 +375,28 @@ await asyncio.sleep(1)
 for j, exec_id in enumerate(execution_ids):
 if not deaths_detected[j]:
 status = await execution_tracker.get_execution_status(exec_id)
-if status and status.execution_record.state in [ )
+if status and status.execution_record.state in [ ]
 ExecutionState.FAILED,
 ExecutionState.TIMEOUT
 ]:
 deaths_detected[j] = True
-print("formatted_string")
+print("")
 
 if all(deaths_detected):
 break
 
                                                     # Verify all deaths were detected
 for j, detected in enumerate(deaths_detected):
-assert detected, "formatted_string"
+assert detected, ""
 
                                                         # Verify WebSocket notifications
 death_notifications = websocket_bridge.get_notifications_by_type('agent_death')
 failure_notifications = websocket_bridge.get_notifications_by_type('execution_failed')
 total_notifications = len(death_notifications) + len(failure_notifications)
 
-assert total_notifications >= 3, "formatted_string"
+assert total_notifications >= 3, ""
 
-print("formatted_string")
+print("")
 print(" PASS:  MULTI-AGENT DEATH TEST PASSED")
 print("="*80)
 
@@ -404,8 +404,8 @@ print("="*80)
     async def test_agent_recovery_after_death_detection(self, execution_tracker, websocket_bridge):
 """Test recovery mechanisms after agent death is detected"""
 pass
-print(" )
-" + "="*80)
+print("")
+ + ="*80)
 print("INTEGRATION TEST: Agent Recovery After Death Detection")
 print("="*80)
 
@@ -415,7 +415,7 @@ recovery_events = []
                                                             # Mock recovery callback
 async def mock_recovery_callback(execution_id: str, error: Exception):
 pass
-recovery_events.append({ ))
+recovery_events.append({ })
 'execution_id': execution_id,
 'error': str(error),
 'timestamp': time.time()
@@ -438,11 +438,11 @@ context
     
 
     # Agent works briefly
-    # Removed problematic line: await simulator.do_work_phases([ ))
+    # Removed problematic line: await simulator.do_work_phases([ ])
 {'stage': 'initial', 'percentage': 25, 'message': 'Starting work...', 'duration': 0.5}
     
 
-print("formatted_string")
+print("")
 
     # Simulate death
 await simulator.die_silently()
@@ -456,13 +456,13 @@ status = await execution_tracker.get_execution_status(execution_id)
 
 if status and status.execution_record.state in [ExecutionState.FAILED, ExecutionState.TIMEOUT]:
 death_detected = True
-print("formatted_string")
+print("")
 break
 
 assert death_detected, "Death was not detected"
 
             # Simulate recovery attempt (new execution)
-print("\
+    print("\
 CYCLE:  Attempting recovery...")
 
 recovery_simulator = AgentSimulator(execution_tracker)
@@ -481,7 +481,7 @@ recovery_context
             
 
             # Recovery agent does the work
-            # Removed problematic line: await recovery_simulator.do_work_phases([ ))
+            # Removed problematic line: await recovery_simulator.do_work_phases([ ])
 {'stage': 'recovery_init', 'percentage': 20, 'message': 'Recovery starting...', 'duration': 0.5},
 {'stage': 'recovery_work', 'percentage': 60, 'message': 'Redoing work...', 'duration': 0.5},
 {'stage': 'recovery_complete', 'percentage': 100, 'message': 'Recovery complete', 'duration': 0.5}
@@ -508,16 +508,16 @@ print("="*80)
 @pytest.mark.asyncio
     async def test_health_monitoring_integration(self, execution_tracker, websocket_bridge):
 """Test health monitoring integration with execution tracking"""
-print(" )
-" + "="*80)
+print("")
+ + ="*80)
 print("INTEGRATION TEST: Health Monitoring Integration")
 print("="*80)
 
                 # Get initial health status
 initial_health = await execution_tracker.get_health_status()
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
                 # Start several executions
 simulators = []
@@ -528,9 +528,9 @@ simulator = AgentSimulator(execution_tracker)
 simulators.append(simulator)
 
 context = AgentExecutionContext( )
-run_id="formatted_string",
-agent_name="formatted_string",
-thread_id="formatted_string",
+run_id="",
+agent_name="",
+thread_id="",
 user_id="health-user"
                     
 
@@ -543,7 +543,7 @@ execution_ids.append(exec_id)
 
                     # Let agents work briefly
 for simulator in simulators:
-                        # Removed problematic line: await simulator.do_work_phases([ ))
+                        # Removed problematic line: await simulator.do_work_phases([ ])
 {'stage': 'health_work', 'percentage': 40, 'message': 'Health testing...', 'duration': 0.5}
                         
 
@@ -551,9 +551,9 @@ for simulator in simulators:
 active_health = await execution_tracker.get_health_status()
 print(f"\
 CHART:  Health with active executions:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
 assert active_health['active_executions'] > 0
 assert active_health['status'] in ['healthy', 'degraded']  # Should still be healthy
@@ -570,10 +570,10 @@ await asyncio.sleep(8)  # Wait for heartbeat failures
 death_health = await execution_tracker.get_health_status()
 print(f"\
 [U+1F480] Health after agent deaths:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
 
                         # Health status should reflect the problems
 assert death_health['dead_agents'] > 0 or death_health['timed_out_agents'] > 0
@@ -587,8 +587,8 @@ await asyncio.sleep(2)  # Let cleanup happen
 final_health = await execution_tracker.get_health_status()
 print(f"\
 [U+1F3C1] Final health status:")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 
 print(" PASS:  HEALTH MONITORING INTEGRATION TEST PASSED")
 print("="*80)
@@ -597,20 +597,20 @@ print("="*80)
     async def test_execution_metrics_during_death_scenarios(self, execution_tracker, websocket_bridge):
 """Test that execution metrics are accurate during death scenarios"""
 pass
-print(" )
-" + "="*80)
+print("")
+ + ="*80)
 print("INTEGRATION TEST: Execution Metrics During Death Scenarios")
 print("="*80)
 
                             # Get initial metrics
 initial_metrics = await execution_tracker.get_tracker_metrics()
 print(f" CHART:  Initial metrics:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
                             # Create executions with different outcomes
-scenarios = [ )
+scenarios = [ ]
 {'name': 'success', 'outcome': 'complete'},
 {'name': 'heartbeat_death', 'outcome': 'die'},
 {'name': 'timeout_death', 'outcome': 'die'},
@@ -627,9 +627,9 @@ simulator = AgentSimulator(execution_tracker)
 simulators.append(simulator)
 
 context = AgentExecutionContext( )
-run_id="formatted_string",
-agent_name="formatted_string",
-thread_id="formatted_string",
+run_id="",
+agent_name="",
+thread_id="",
 user_id="metrics-user"
                                 
 
@@ -640,16 +640,16 @@ context
                                 
 execution_ids.append(exec_id)
 
-print("formatted_string")
+print("")
 
                                 # Let all agents work briefly
 for simulator in simulators:
-                                    # Removed problematic line: await simulator.do_work_phases([ ))
+                                    # Removed problematic line: await simulator.do_work_phases([ ])
 {'stage': 'metrics_work', 'percentage': 50, 'message': 'Working...', 'duration': 0.5}
                                     
 
                                     # Execute different outcomes
-print("\
+    print("\
 CHART:  Executing different scenarios...")
 
                                     # Success cases
@@ -675,10 +675,10 @@ tracker_metrics = final_metrics['tracker_metrics']
 
 print(f"\
 CHART:  Final metrics:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
 
                                     # Verify metrics accuracy
 expected_total = initial_metrics['tracker_metrics']['total_executions_started'] + 5
@@ -695,7 +695,7 @@ actual_rate = tracker_metrics['success_rate']
 
                                     # Allow some tolerance for timing
 assert abs(actual_rate - expected_rate) < 0.2, \
-"formatted_string"
+""
 
 print(" PASS:  METRICS TEST PASSED - All metrics accurate during death scenarios")
 print("="*80)
@@ -703,8 +703,8 @@ print("="*80)
 @pytest.mark.asyncio
     async def test_concurrent_agent_deaths(self, execution_tracker, websocket_bridge):
 """Test handling of multiple simultaneous agent deaths"""
-print(" )
-" + "="*80)
+print("")
+ + ="*80)
 print("INTEGRATION TEST: Concurrent Agent Deaths")
 print("="*80)
 
@@ -713,7 +713,7 @@ num_agents = 8
 simulators = []
 execution_ids = []
 
-print("formatted_string")
+print("")
 
                                         # Start all agents
 for i in range(num_agents):
@@ -721,9 +721,9 @@ simulator = AgentSimulator(execution_tracker)
 simulators.append(simulator)
 
 context = AgentExecutionContext( )
-run_id="formatted_string",
-agent_name="formatted_string",
-thread_id="formatted_string",
+run_id="",
+agent_name="",
+thread_id="",
 user_id="concurrent-user"
                                             
 
@@ -734,11 +734,11 @@ context
                                             
 execution_ids.append(exec_id)
 
-print("formatted_string")
+print("")
 
                                             # Let all agents start working
 for simulator in simulators:
-                                                # Removed problematic line: await simulator.do_work_phases([ ))
+                                                # Removed problematic line: await simulator.do_work_phases([ ])
 {'stage': 'concurrent_work', 'percentage': 30, 'message': 'Working concurrently...', 'duration': 0.2}
                                                 
 
@@ -746,7 +746,7 @@ print(" PASS:  All agents working")
 
                                                 # Kill most agents simultaneously
 kill_count = 6  # Kill 6 out of 8
-print("formatted_string")
+print("")
 
                                                 # Kill agents at the same time
 kill_tasks = []
@@ -755,16 +755,16 @@ kill_tasks.append(simulators[i].die_silently())
 
                                                     # Execute all kills concurrently
 await asyncio.gather(*kill_tasks)
-print("formatted_string")
+print("")
 
                                                     # Let remaining agents complete
 for i in range(kill_count, num_agents):
-await simulators[i].complete_successfully({"concurrent_test": "formatted_string"})
+await simulators[i].complete_successfully({"concurrent_test": ""})
 
-print("formatted_string")
+print("")
 
                                                         # Wait for all deaths to be detected
-print("\
+    print("\
 SEARCH:  Waiting for death detection...")
 deaths_detected = 0
 max_wait_seconds = 20
@@ -780,7 +780,7 @@ current_deaths += 1
 
 if current_deaths > deaths_detected:
 deaths_detected = current_deaths
-print("formatted_string")
+print("")
 
 if deaths_detected >= kill_count:
 break
@@ -794,25 +794,25 @@ final_deaths_detected += 1
 
 print(f"\
 CHART:  Final results:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
                                                                                 # We should detect most deaths (allow some tolerance for timing)
 detection_rate = final_deaths_detected / kill_count
 assert detection_rate >= 0.8, \
-"formatted_string"
+""
 
                                                                                 # Check WebSocket notifications
 death_notifications = websocket_bridge.get_notifications_by_type('agent_death')
 failure_notifications = websocket_bridge.get_notifications_by_type('execution_failed')
 total_death_notifications = len(death_notifications) + len(failure_notifications)
 
-print("formatted_string")
+print("")
 
                                                                                 # Should have notifications for most/all deaths
 assert total_death_notifications >= final_deaths_detected, \
-"formatted_string"
+""
 
 print(" PASS:  CONCURRENT DEATH TEST PASSED")
 print("="*80)
@@ -822,8 +822,8 @@ if __name__ == "__main__":
                                                                                     # Run integration tests
 import sys
 
-print(" )
-" + "="*80)
+print("")
+ + ="*80)
 print("AGENT DEATH RECOVERY INTEGRATION TEST SUITE")
 print("="*80)
 print("Testing integration of execution tracking with agent death recovery")

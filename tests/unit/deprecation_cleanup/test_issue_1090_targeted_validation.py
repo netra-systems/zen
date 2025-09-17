@@ -183,7 +183,7 @@ class TestIssue1090TargetedValidation(SSotBaseTestCase):
                 'should_warn': True
             },
             {
-                'pattern': 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager',
+                'pattern': 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager',
                 'type': 'specific_module_import', 
                 'should_warn': False
             }
@@ -396,7 +396,7 @@ def legacy_websocket_setup():
                 'name': 'migration_import_scenario',
                 'code': '''
 def migrated_websocket_setup():
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     return WebSocketManager
                 ''',
                 'should_warn': False,

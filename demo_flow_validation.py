@@ -14,7 +14,7 @@ from datetime import datetime
 from typing import List, Dict, Any
 
 import websockets
-from websockets.exceptions import ConnectionClosedError, WebSocketException
+from websockets import ConnectionClosedError, WebSocketException
 
 
 class DemoFlowValidator:

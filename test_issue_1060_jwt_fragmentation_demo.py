@@ -9,7 +9,7 @@ import unittest
 import jwt
 import sys
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import patch, Mock
 
 # Add the project root to Python path
@@ -44,8 +44,8 @@ def test_jwt_secret_fragmentation():
     jwt_payload = {
         "user_id": "test-user-123",
         "email": "test@example.com",
-        "iat": int(datetime.utcnow().timestamp()),
-        "exp": int((datetime.utcnow() + timedelta(hours=1)).timestamp())
+        "iat": int(datetime.now(UTC).timestamp()),
+        "exp": int((datetime.now(UTC) + timedelta(hours=1)).timestamp())
     }
     
     # Generate tokens with different secrets (showing fragmentation)

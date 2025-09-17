@@ -34,11 +34,11 @@ class TestOAuthCloudArmor:
         self.environment = environment
         self.base_url = self._get_base_url(environment)
         self.auth_url = self._get_auth_url(environment)
-        self.results = { )
+        self.results = { }
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "environment": environment,
         "tests": {},
-        "summary": { )
+        "summary": { }
         "passed": 0,
         "failed": 0,
         "warnings": 0
@@ -47,7 +47,7 @@ class TestOAuthCloudArmor:
 
     def _get_base_url(self, env: str) -> str:
         """Get API base URL for environment."""
-        urls = { )
+        urls = { }
         "staging": "https://api.staging.netrasystems.ai",
         "production": "https://api.netrasystems.ai",
         "dev": "http://localhost:8000"
@@ -56,7 +56,7 @@ class TestOAuthCloudArmor:
 
     def _get_auth_url(self, env: str) -> str:
         """Get auth service URL for environment."""
-        urls = { )
+        urls = { }
         "staging": "https://auth.staging.netrasystems.ai",
         "production": "https://auth.netrasystems.ai",
         "dev": "http://localhost:8001"
@@ -67,33 +67,33 @@ class TestOAuthCloudArmor:
         @pytest.mark.e2e
     async def test_oauth_callback_not_blocked(self) -> Dict:
         """Test that OAuth callback with encoded parameters is not blocked."""
-        print(" )
+        print("")
         SEARCH:  Testing OAuth callback endpoint...")
 
         # Simulate OAuth callback with encoded parameters that triggered the issue
-        callback_url = "formatted_string"
+        callback_url = ""
 
         # Multiple test cases with different encoded patterns
-        test_cases = [ )
-        { )
+        test_cases = [ ]
+        { }
         "name": "Google OAuth pattern",
-        "params": { )
+        "params": { }
         "state": "test_state_123",
         "code": "4/0AVMBsJtest_code_with_encoded_slash",  # Google pattern
         "scope": "email profile openid"
         
         },
-        { )
+        { }
         "name": "URL-encoded slashes",
-        "params": { )
+        "params": { }
         "state": "state_with_encoded",
         "code": "code%2Fwith%2Fslashes",  # Direct encoded slashes
         "scope": "email%20profile"
         
         },
-        { )
+        { }
         "name": "Complex encoded params",
-        "params": { )
+        "params": { }
         "state": "complex%3Dstate%26test",
         "code": "4%2F0%3Dcomplex%26code",
         "scope": "https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email"
@@ -103,7 +103,7 @@ class TestOAuthCloudArmor:
 
         results = []
         for test_case in test_cases:
-        print("formatted_string")
+        print("")
 
         try:
         async with aiohttp.ClientSession() as session:
@@ -116,7 +116,7 @@ class TestOAuthCloudArmor:
 
                         Should not get 403 from Cloud Armor
         if response.status == 403:
-        results.append({ ))
+        results.append({ })
         "case": test_case["name"],
         "status": "FAILED",
         "http_status": response.status,
@@ -124,22 +124,22 @@ class TestOAuthCloudArmor:
                             
         print(f"     FAIL:  FAILED: Got 403 (blocked)")
         else:
-        results.append({ ))
+        results.append({ })
         "case": test_case["name"],
         "status": "PASSED",
         "http_status": response.status
                                 
-        print("formatted_string")
+        print("")
 
         except Exception as e:
-        results.append({ ))
+        results.append({ })
         "case": test_case["name"],
         "status": "ERROR",
         "error": str(e)
                                     
-        print("formatted_string")
+        print("")
 
-        return { )
+        return { }
         "test": "oauth_callback_not_blocked",
         "results": results,
         "passed": all(r["status"] == "PASSED" for r in results)
@@ -147,18 +147,18 @@ class TestOAuthCloudArmor:
 
     def check_cloud_armor_logs(self, minutes_back: int = 10) -> Dict:
         """Check Cloud Armor logs for recent OAuth blocks."""
-        print("formatted_string")
+        print("")
 
     # Build command based on OS
         if os.name == 'nt':
         # Windows
-        cmd = [ )
+        cmd = [ ]
         "python", "scripts/analyze_cloud_armor_logs.py",
         "--oauth", "--limit", "20", "--hours", "1"
         
         else:
             # Linux/Mac
-        cmd = [ )
+        cmd = [ ]
         "python3", "scripts/analyze_cloud_armor_logs.py",
         "--oauth", "--limit", "20", "--hours", "1"
             
@@ -177,12 +177,12 @@ class TestOAuthCloudArmor:
         oauth_blocks = result.stdout.count("/auth/callback")
 
         if blocked_count > 0:
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
         else:
         print(f"   PASS:  No blocked OAuth requests found")
 
-        return { )
+        return { }
         "blocked_requests": blocked_count,
         "oauth_callbacks_blocked": oauth_blocks,
         "status": "WARNING" if blocked_count > 0 else "PASSED",
@@ -190,8 +190,8 @@ class TestOAuthCloudArmor:
                         
 
         except Exception as e:
-        print("formatted_string")
-        return { )
+        print("")
+        return { }
         "status": "ERROR",
         "error": str(e)
                             
@@ -200,26 +200,26 @@ class TestOAuthCloudArmor:
         @pytest.mark.e2e
     async def test_sql_injection_still_blocked(self) -> Dict:
         """Ensure SQL injection attempts are still blocked on other paths."""
-        print(" )
+        print("")
         [U+1F6E1][U+FE0F]  Testing SQL injection protection...")
 
                                 # Test paths that should still be protected
-        test_cases = [ )
-        { )
+        test_cases = [ ]
+        { }
         "name": "API endpoint with SQL injection",
-        "url": "formatted_string",
+        "url": "",
         "params": {"id": "1' OR '1'='1"}
         },
-        { )
+        { }
         "name": "Search with SQL injection",
-        "url": "formatted_string",
+        "url": "",
         "params": {"q": ""; DROP TABLE users; --"}
                                 
                                 
 
         results = []
         for test_case in test_cases:
-        print("formatted_string")
+        print("")
 
         try:
         async with aiohttp.ClientSession() as session:
@@ -232,7 +232,7 @@ class TestOAuthCloudArmor:
 
                                                 # These SHOULD be blocked (403)
         if response.status == 403:
-        results.append({ ))
+        results.append({ })
         "case": test_case["name"],
         "status": "PASSED",
         "http_status": response.status,
@@ -240,24 +240,24 @@ class TestOAuthCloudArmor:
                                                     
         print(f"     PASS:  PASSED: SQL injection blocked (403)")
         else:
-        results.append({ ))
+        results.append({ })
         "case": test_case["name"],
         "status": "FAILED",
         "http_status": response.status,
-        "error": "formatted_string"
+        "error": ""
                                                         
-        print("formatted_string")
+        print("")
 
         except Exception as e:
                                                             # Connection errors might mean it was blocked at network level
-        results.append({ ))
+        results.append({ })
         "case": test_case["name"],
         "status": "PASSED",
-        "note": "formatted_string"
+        "note": ""
                                                             
         print(f"     PASS:  PASSED: Likely blocked (connection failed)")
 
-        return { )
+        return { }
         "test": "sql_injection_protection",
         "results": results,
         "passed": all(r["status"] == "PASSED" for r in results)
@@ -265,10 +265,10 @@ class TestOAuthCloudArmor:
 
     def verify_security_policy(self) -> Dict:
         """Verify Cloud Armor security policy configuration."""
-        print(" )
+        print("")
         [U+1F510] Verifying security policy configuration...")
 
-        cmd = [ )
+        cmd = [ ]
         "gcloud", "compute", "security-policies", "rules", "describe", "50",
         "--security-policy=staging-security-policy",
         "--project=netra-staging",
@@ -289,7 +289,7 @@ class TestOAuthCloudArmor:
         rule_data = json.loads(result.stdout) if result.stdout else {}
 
             # Verify rule configuration
-        checks = { )
+        checks = { }
         "rule_exists": len(rule_data) > 0,
         "priority_correct": rule_data[0].get("priority") == 50 if rule_data else False,
         "action_correct": rule_data[0].get("action") == "allow" if rule_data else False,
@@ -300,9 +300,9 @@ class TestOAuthCloudArmor:
 
         for check, passed in checks.items():
         status = " PASS: " if passed else " FAIL: "
-        print("formatted_string")
+        print("")
 
-        return { )
+        return { }
         "test": "security_policy_verification",
         "checks": checks,
         "passed": all_passed,
@@ -310,16 +310,16 @@ class TestOAuthCloudArmor:
                 
 
         else:
-        print("formatted_string")
-        return { )
+        print("")
+        return { }
         "test": "security_policy_verification",
         "passed": False,
         "error": result.stderr
                     
 
         except Exception as e:
-        print("formatted_string")
-        return { )
+        print("")
+        return { }
         "test": "security_policy_verification",
         "passed": False,
         "error": str(e)
@@ -329,8 +329,8 @@ class TestOAuthCloudArmor:
         """Run complete test suite."""
         print("=" * 60)
         print(f"[U+1F680] OAuth Cloud Armor Test Suite")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
         print("=" * 60)
 
     # Test 1: OAuth callback should not be blocked
@@ -367,20 +367,20 @@ class TestOAuthCloudArmor:
         self.results["overall_status"] = "PASSED" if self.results["summary"]["failed"] == 0 else "FAILED"
 
                                 # Print summary
-        print(" )
-        " + "=" * 60)
+        print("")
+         + =" * 60)
         print("[U+1F4CB] TEST SUMMARY")
         print("=" * 60)
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
+        print("")
 
                                 # Save results
-        results_file = "formatted_string"
+        results_file = ""
         with open(results_file, "w") as f:
         json.dump(self.results, f, indent=2)
-        print("formatted_string")
+        print("")
 
         return self.results
 

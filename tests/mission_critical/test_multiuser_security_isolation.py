@@ -1,66 +1,66 @@
 #!/usr/bin/env python
-'''MISSION CRITICAL TEST SUITE: Multi-User Security Isolation - COMPREHENSIVE VULNERABILITY TESTING
+# REMOVED_SYNTAX_ERROR: '''MISSION CRITICAL TEST SUITE: Multi-User Security Isolation - COMPREHENSIVE VULNERABILITY TESTING
 
-THIS SUITE EXPOSES MULTI-USER ISOLATION VULNERABILITIES.
-Business Value: CRITICAL SECURITY - Prevents data leakage between users
+# REMOVED_SYNTAX_ERROR: THIS SUITE EXPOSES MULTI-USER ISOLATION VULNERABILITIES.
+# REMOVED_SYNTAX_ERROR: Business Value: CRITICAL SECURITY - Prevents data leakage between users
 
-This test suite creates DIFFICULT tests that will FAIL initially to expose vulnerabilities:
-1. WebSocket authentication bypass attempts
-2. User isolation data leakage between concurrent users
-3. Singleton pattern vulnerabilities in WebSocket handlers
-4. Admin privilege escalation attempts
-5. Race condition exploits in multi-user scenarios
+# REMOVED_SYNTAX_ERROR: This test suite creates DIFFICULT tests that will FAIL initially to expose vulnerabilities:
+    # REMOVED_SYNTAX_ERROR: 1. WebSocket authentication bypass attempts
+    # REMOVED_SYNTAX_ERROR: 2. User isolation data leakage between concurrent users
+    # REMOVED_SYNTAX_ERROR: 3. Singleton pattern vulnerabilities in WebSocket handlers
+    # REMOVED_SYNTAX_ERROR: 4. Admin privilege escalation attempts
+    # REMOVED_SYNTAX_ERROR: 5. Race condition exploits in multi-user scenarios
 
-This follows CLAUDE.md requirements:
-- Real WebSocket connections with Docker services (no mocks)
-- Factory pattern enforcement for user isolation
-- WebSocket v2 migration critical security requirements
-- Tests ALL communication paths, not just REST APIs
+    # REMOVED_SYNTAX_ERROR: This follows CLAUDE.md requirements:
+        # REMOVED_SYNTAX_ERROR: - Real WebSocket connections with Docker services (no mocks)
+        # REMOVED_SYNTAX_ERROR: - Factory pattern enforcement for user isolation
+        # REMOVED_SYNTAX_ERROR: - WebSocket v2 migration critical security requirements
+        # REMOVED_SYNTAX_ERROR: - Tests ALL communication paths, not just REST APIs
 
-ANY FAILURE HERE INDICATES CRITICAL SECURITY VULNERABILITIES.
-'''
+        # REMOVED_SYNTAX_ERROR: ANY FAILURE HERE INDICATES CRITICAL SECURITY VULNERABILITIES.
+        # REMOVED_SYNTAX_ERROR: '''
 
-import asyncio
-import json
-import os
-import sys
-import time
-import uuid
-import threading
-import secrets
-from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timedelta
-from typing import Dict, List, Set, Any, Optional, Tuple
-import base64
-import jwt
-import random
-from shared.isolated_environment import IsolatedEnvironment
+        # REMOVED_SYNTAX_ERROR: import asyncio
+        # REMOVED_SYNTAX_ERROR: import json
+        # REMOVED_SYNTAX_ERROR: import os
+        # REMOVED_SYNTAX_ERROR: import sys
+        # REMOVED_SYNTAX_ERROR: import time
+        # REMOVED_SYNTAX_ERROR: import uuid
+        # REMOVED_SYNTAX_ERROR: import threading
+        # REMOVED_SYNTAX_ERROR: import secrets
+        # REMOVED_SYNTAX_ERROR: from collections import defaultdict
+        # REMOVED_SYNTAX_ERROR: from concurrent.futures import ThreadPoolExecutor, as_completed
+        # REMOVED_SYNTAX_ERROR: from datetime import datetime, timedelta
+        # REMOVED_SYNTAX_ERROR: from typing import Dict, List, Set, Any, Optional, Tuple
+        # REMOVED_SYNTAX_ERROR: import base64
+        # REMOVED_SYNTAX_ERROR: import jwt
+        # REMOVED_SYNTAX_ERROR: import random
+        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
         # CRITICAL: Add project root to Python path for imports
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-if project_root not in sys.path:
-sys.path.insert(0, project_root)
+        # REMOVED_SYNTAX_ERROR: project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+        # REMOVED_SYNTAX_ERROR: if project_root not in sys.path:
+            # REMOVED_SYNTAX_ERROR: sys.path.insert(0, project_root)
 
             # Import environment after path setup
-from shared.isolated_environment import get_env
+            # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
 
-import pytest
-import websockets
-from loguru import logger
+            # REMOVED_SYNTAX_ERROR: import pytest
+            # REMOVED_SYNTAX_ERROR: import websockets
+            # REMOVED_SYNTAX_ERROR: from loguru import logger
 
             # Import production components for testing
-from netra_backend.app.websocket_core.auth import WebSocketAuthenticator, AuthInfo
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
-from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.dependencies import create_user_execution_context
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.auth import WebSocketAuthenticator, AuthInfo
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.dependencies import create_user_execution_context
 
             # Test utilities
-from test_framework.websocket_helpers import WebSocketTestHelpers
-from tests.mission_critical.websocket_real_test_base import ( )
-is_docker_available,
-RealWebSocketTestConfig
+            # REMOVED_SYNTAX_ERROR: from test_framework.websocket_helpers import WebSocketTestHelpers
+            # REMOVED_SYNTAX_ERROR: from tests.mission_critical.websocket_real_test_base import ( )
+            # REMOVED_SYNTAX_ERROR: is_docker_available,
+            # REMOVED_SYNTAX_ERROR: RealWebSocketTestConfig
             
 
 
@@ -68,370 +68,370 @@ RealWebSocketTestConfig
             # MULTI-USER SECURITY TEST CONFIGURATION
             # ============================================================================
 
-class SecurityTestUser:
-    """Represents a test user for multi-user security testing."""
+# REMOVED_SYNTAX_ERROR: class SecurityTestUser:
+    # REMOVED_SYNTAX_ERROR: """Represents a test user for multi-user security testing."""
 
-    def __init__(self, user_id: str, email: str, is_admin: bool = False):
-        pass
-        self.user_id = user_id
-        self.email = email
-        self.is_admin = is_admin
-        self.token = self._generate_test_token()
-        self.connections: List[Any] = []
-        self.received_events: List[Dict] = []
-        self.agent_responses: List[Dict] = []
-        self.thread_ids: Set[str] = set()
+# REMOVED_SYNTAX_ERROR: def __init__(self, user_id: str, email: str, is_admin: bool = False):
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: self.user_id = user_id
+    # REMOVED_SYNTAX_ERROR: self.email = email
+    # REMOVED_SYNTAX_ERROR: self.is_admin = is_admin
+    # REMOVED_SYNTAX_ERROR: self.token = self._generate_test_token()
+    # REMOVED_SYNTAX_ERROR: self.connections: List[Any] = []
+    # REMOVED_SYNTAX_ERROR: self.received_events: List[Dict] = []
+    # REMOVED_SYNTAX_ERROR: self.agent_responses: List[Dict] = []
+    # REMOVED_SYNTAX_ERROR: self.thread_ids: Set[str] = set()
 
-    def _generate_test_token(self) -> str:
-        """Generate a test JWT token for this user."""
-        payload = { )
-        "user_id": self.user_id,
-        "email": self.email,
-        "is_admin": self.is_admin,
-        "exp": int(time.time()) + 3600,  # 1 hour expiry
-        "iat": int(time.time()),
-        "permissions": ["admin"] if self.is_admin else ["user"]
+# REMOVED_SYNTAX_ERROR: def _generate_test_token(self) -> str:
+    # REMOVED_SYNTAX_ERROR: """Generate a test JWT token for this user."""
+    # REMOVED_SYNTAX_ERROR: payload = { )
+    # REMOVED_SYNTAX_ERROR: "user_id": self.user_id,
+    # REMOVED_SYNTAX_ERROR: "email": self.email,
+    # REMOVED_SYNTAX_ERROR: "is_admin": self.is_admin,
+    # REMOVED_SYNTAX_ERROR: "exp": int(time.time()) + 3600,  # 1 hour expiry
+    # REMOVED_SYNTAX_ERROR: "iat": int(time.time()),
+    # REMOVED_SYNTAX_ERROR: "permissions": ["admin"] if self.is_admin else ["user"]
     
     # Use a test secret (in production this would be properly secured)
-        return jwt.encode(payload, "test_secret_key", algorithm="HS256")
+    # REMOVED_SYNTAX_ERROR: return jwt.encode(payload, "test_secret_key", algorithm="HS256")
 
-    def get_auth_headers(self) -> Dict[str, str]:
-        """Get authentication headers for WebSocket connections."""
-        return {"authorization": "formatted_string"}
+# REMOVED_SYNTAX_ERROR: def get_auth_headers(self) -> Dict[str, str]:
+    # REMOVED_SYNTAX_ERROR: """Get authentication headers for WebSocket connections."""
+    # REMOVED_SYNTAX_ERROR: return {"authorization": "formatted_string"}
 
-    def get_subprotocol_auth(self) -> str:
-        """Get JWT token encoded for WebSocket subprotocol."""
+# REMOVED_SYNTAX_ERROR: def get_subprotocol_auth(self) -> str:
+    # REMOVED_SYNTAX_ERROR: """Get JWT token encoded for WebSocket subprotocol."""
     # Base64 encode the token for subprotocol
-        token_bytes = self.token.encode('utf-8')
-        encoded_token = base64.urlsafe_b64encode(token_bytes).decode('utf-8').rstrip('=')
-        return "formatted_string"
+    # REMOVED_SYNTAX_ERROR: token_bytes = self.token.encode('utf-8')
+    # REMOVED_SYNTAX_ERROR: encoded_token = base64.urlsafe_b64encode(token_bytes).decode('utf-8').rstrip('=')
+    # REMOVED_SYNTAX_ERROR: return "formatted_string"
 
 
-class MultiUserSecurityTester:
-        """Orchestrates multi-user security vulnerability testing."""
+# REMOVED_SYNTAX_ERROR: class MultiUserSecurityTester:
+    # REMOVED_SYNTAX_ERROR: """Orchestrates multi-user security vulnerability testing."""
 
-    def __init__(self, config: RealWebSocketTestConfig):
-        pass
-        self.config = config
-        self.users: List[SecurityTestUser] = []
-        self.vulnerability_findings: List[Dict] = []
-        self.concurrent_connections: Dict[str, List[Any]] = {}
-        self.shared_state_violations: List[Dict] = []
+# REMOVED_SYNTAX_ERROR: def __init__(self, config: RealWebSocketTestConfig):
+    # REMOVED_SYNTAX_ERROR: pass
+    # REMOVED_SYNTAX_ERROR: self.config = config
+    # REMOVED_SYNTAX_ERROR: self.users: List[SecurityTestUser] = []
+    # REMOVED_SYNTAX_ERROR: self.vulnerability_findings: List[Dict] = []
+    # REMOVED_SYNTAX_ERROR: self.concurrent_connections: Dict[str, List[Any]] = {}
+    # REMOVED_SYNTAX_ERROR: self.shared_state_violations: List[Dict] = []
 
-    def create_test_users(self, count: int = 5) -> List[SecurityTestUser]:
-        """Create multiple test users with different privilege levels."""
-        self.users = []
+# REMOVED_SYNTAX_ERROR: def create_test_users(self, count: int = 5) -> List[SecurityTestUser]:
+    # REMOVED_SYNTAX_ERROR: """Create multiple test users with different privilege levels."""
+    # REMOVED_SYNTAX_ERROR: self.users = []
 
     # Create regular users
-        for i in range(count - 1):
-        user = SecurityTestUser( )
-        user_id="formatted_string",
-        email="formatted_string",
-        is_admin=False
+    # REMOVED_SYNTAX_ERROR: for i in range(count - 1):
+        # REMOVED_SYNTAX_ERROR: user = SecurityTestUser( )
+        # REMOVED_SYNTAX_ERROR: user_id="formatted_string",
+        # REMOVED_SYNTAX_ERROR: email="formatted_string",
+        # REMOVED_SYNTAX_ERROR: is_admin=False
         
-        self.users.append(user)
+        # REMOVED_SYNTAX_ERROR: self.users.append(user)
 
         # Create one admin user
-        admin_user = SecurityTestUser( )
-        user_id="formatted_string",
-        email="admin@test.com",
-        is_admin=True
+        # REMOVED_SYNTAX_ERROR: admin_user = SecurityTestUser( )
+        # REMOVED_SYNTAX_ERROR: user_id="formatted_string",
+        # REMOVED_SYNTAX_ERROR: email="admin@test.com",
+        # REMOVED_SYNTAX_ERROR: is_admin=True
         
-        self.users.append(admin_user)
+        # REMOVED_SYNTAX_ERROR: self.users.append(admin_user)
 
-        return self.users
+        # REMOVED_SYNTAX_ERROR: return self.users
 
-    async def establish_concurrent_connections(self, max_connections: int = 10) -> Dict[str, List]:
-        """Establish multiple concurrent WebSocket connections for different users."""
-        connections = {}
+# REMOVED_SYNTAX_ERROR: async def establish_concurrent_connections(self, max_connections: int = 10) -> Dict[str, List]:
+    # REMOVED_SYNTAX_ERROR: """Establish multiple concurrent WebSocket connections for different users."""
+    # REMOVED_SYNTAX_ERROR: connections = {}
 
-        for user in self.users:
-        user_connections = []
+    # REMOVED_SYNTAX_ERROR: for user in self.users:
+        # REMOVED_SYNTAX_ERROR: user_connections = []
 
         # Create multiple connections per user to test isolation
-        for conn_index in range(min(3, max_connections // len(self.users))):
-        try:
+        # REMOVED_SYNTAX_ERROR: for conn_index in range(min(3, max_connections // len(self.users))):
+            # REMOVED_SYNTAX_ERROR: try:
                 # Test different authentication methods
-        if conn_index == 0:
+                # REMOVED_SYNTAX_ERROR: if conn_index == 0:
                     # Method 1: Authorization header
-        connection = await websockets.connect( )
-        self.config.websocket_url,
-        additional_headers=user.get_auth_headers()
+                    # REMOVED_SYNTAX_ERROR: connection = await websockets.connect( )
+                    # REMOVED_SYNTAX_ERROR: self.config.websocket_url,
+                    # REMOVED_SYNTAX_ERROR: additional_headers=user.get_auth_headers()
                     
-        elif conn_index == 1:
+                    # REMOVED_SYNTAX_ERROR: elif conn_index == 1:
                         # Method 2: Subprotocol authentication
-        connection = await websockets.connect( )
-        self.config.websocket_url,
-        subprotocols=[user.get_subprotocol_auth()]
+                        # REMOVED_SYNTAX_ERROR: connection = await websockets.connect( )
+                        # REMOVED_SYNTAX_ERROR: self.config.websocket_url,
+                        # REMOVED_SYNTAX_ERROR: subprotocols=[user.get_subprotocol_auth()]
                         
-        else:
+                        # REMOVED_SYNTAX_ERROR: else:
                             # Method 3: Query parameter (if supported)
-        url_with_token = "formatted_string"
-        connection = await websockets.connect(url_with_token)
+                            # REMOVED_SYNTAX_ERROR: url_with_token = "formatted_string"
+                            # REMOVED_SYNTAX_ERROR: connection = await websockets.connect(url_with_token)
 
-        user_connections.append(connection)
-        user.connections.append(connection)
+                            # REMOVED_SYNTAX_ERROR: user_connections.append(connection)
+                            # REMOVED_SYNTAX_ERROR: user.connections.append(connection)
 
-        except Exception as e:
-        logger.error("formatted_string")
+                            # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
 
-        connections[user.user_id] = user_connections
+                                # REMOVED_SYNTAX_ERROR: connections[user.user_id] = user_connections
 
-        self.concurrent_connections = connections
-        return connections
+                                # REMOVED_SYNTAX_ERROR: self.concurrent_connections = connections
+                                # REMOVED_SYNTAX_ERROR: return connections
 
-        def report_vulnerability(self, vulnerability_type: str, description: str,
-        severity: str = "HIGH", evidence: Dict = None):
-        """Report a discovered security vulnerability."""
-        finding = { )
-        "type": vulnerability_type,
-        "description": description,
-        "severity": severity,
-        "evidence": evidence or {},
-        "timestamp": datetime.now().isoformat(),
-        "test_id": str(uuid.uuid4())
+# REMOVED_SYNTAX_ERROR: def report_vulnerability(self, vulnerability_type: str, description: str,
+# REMOVED_SYNTAX_ERROR: severity: str = "HIGH", evidence: Dict = None):
+    # REMOVED_SYNTAX_ERROR: """Report a discovered security vulnerability."""
+    # REMOVED_SYNTAX_ERROR: finding = { )
+    # REMOVED_SYNTAX_ERROR: "type": vulnerability_type,
+    # REMOVED_SYNTAX_ERROR: "description": description,
+    # REMOVED_SYNTAX_ERROR: "severity": severity,
+    # REMOVED_SYNTAX_ERROR: "evidence": evidence or {},
+    # REMOVED_SYNTAX_ERROR: "timestamp": datetime.now().isoformat(),
+    # REMOVED_SYNTAX_ERROR: "test_id": str(uuid.uuid4())
     
-        self.vulnerability_findings.append(finding)
-        logger.critical("formatted_string")
+    # REMOVED_SYNTAX_ERROR: self.vulnerability_findings.append(finding)
+    # REMOVED_SYNTAX_ERROR: logger.critical("formatted_string")
 
 
     # ============================================================================
     # WEBSOCKET AUTHENTICATION VULNERABILITY TESTS
     # ============================================================================
 
-@pytest.mark.asyncio
-@pytest.mark.security_critical
-class TestWebSocketAuthenticationVulnerabilities:
-    """Tests for WebSocket authentication bypass and token vulnerabilities."""
+    # Removed problematic line: @pytest.mark.asyncio
+    # REMOVED_SYNTAX_ERROR: @pytest.mark.security_critical
+# REMOVED_SYNTAX_ERROR: class TestWebSocketAuthenticationVulnerabilities:
+    # REMOVED_SYNTAX_ERROR: """Tests for WebSocket authentication bypass and token vulnerabilities."""
 
-    @pytest.fixture
-    async def security_tester(self):
-        """Create a security tester instance."""
-        config = RealWebSocketTestConfig()
-        await config.ensure_services_ready()
-        await asyncio.sleep(0)
-        return MultiUserSecurityTester(config)
+    # REMOVED_SYNTAX_ERROR: @pytest.fixture
+# REMOVED_SYNTAX_ERROR: async def security_tester(self):
+    # REMOVED_SYNTAX_ERROR: """Create a security tester instance."""
+    # REMOVED_SYNTAX_ERROR: config = RealWebSocketTestConfig()
+    # REMOVED_SYNTAX_ERROR: await config.ensure_services_ready()
+    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+    # REMOVED_SYNTAX_ERROR: return MultiUserSecurityTester(config)
 
-    async def test_invalid_token_rejection(self, security_tester:
-        """Test that invalid tokens are properly rejected."""
-        pass
-        logger.info("[U+1F512] Testing invalid token rejection...")
+    # Removed problematic line: async def test_invalid_token_rejection(self, security_tester: MultiUserSecurityTester):
+        # REMOVED_SYNTAX_ERROR: """Test that invalid tokens are properly rejected."""
+        # REMOVED_SYNTAX_ERROR: pass
+        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F512] Testing invalid token rejection...")
 
-        invalid_tokens = [ )
-        "",  # Empty token
-        "invalid_token",  # Malformed token
-        "Bearer invalid_jwt",  # Invalid JWT
-        "Bearer " + "A" * 500,  # Oversized token
-        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid",  # Corrupted JWT
+        # REMOVED_SYNTAX_ERROR: invalid_tokens = [ )
+        # REMOVED_SYNTAX_ERROR: "",  # Empty token
+        # REMOVED_SYNTAX_ERROR: "invalid_token",  # Malformed token
+        # REMOVED_SYNTAX_ERROR: "Bearer invalid_jwt",  # Invalid JWT
+        # REMOVED_SYNTAX_ERROR: "Bearer " + "A" * 500,  # Oversized token
+        # REMOVED_SYNTAX_ERROR: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid",  # Corrupted JWT
         
 
-        connection_attempts = []
+        # REMOVED_SYNTAX_ERROR: connection_attempts = []
 
-        for token in invalid_tokens:
-        try:
+        # REMOVED_SYNTAX_ERROR: for token in invalid_tokens:
+            # REMOVED_SYNTAX_ERROR: try:
                 # Attempt connection with invalid token
-        connection = await websockets.connect( )
-        security_tester.config.websocket_url,
-        additional_headers={"authorization": token},
-        timeout=5
+                # REMOVED_SYNTAX_ERROR: connection = await websockets.connect( )
+                # REMOVED_SYNTAX_ERROR: security_tester.config.websocket_url,
+                # REMOVED_SYNTAX_ERROR: additional_headers={"authorization": token},
+                # REMOVED_SYNTAX_ERROR: timeout=5
                 
 
                 # If connection succeeds, this is a vulnerability
-        connection_attempts.append({ ))
-        "token": token[:50] + "..." if len(token) > 50 else token,
-        "success": True,
-        "vulnerability": "Invalid token accepted"
+                # REMOVED_SYNTAX_ERROR: connection_attempts.append({ ))
+                # REMOVED_SYNTAX_ERROR: "token": token[:50] + "..." if len(token) > 50 else token,
+                # REMOVED_SYNTAX_ERROR: "success": True,
+                # REMOVED_SYNTAX_ERROR: "vulnerability": "Invalid token accepted"
                 
-        await connection.close()
+                # REMOVED_SYNTAX_ERROR: await connection.close()
 
-        security_tester.report_vulnerability( )
-        "AUTHENTICATION_BYPASS",
-        "formatted_string",
-        "CRITICAL",
-        {"token_type": "invalid", "token_preview": token[:20]}
+                # REMOVED_SYNTAX_ERROR: security_tester.report_vulnerability( )
+                # REMOVED_SYNTAX_ERROR: "AUTHENTICATION_BYPASS",
+                # REMOVED_SYNTAX_ERROR: "formatted_string",
+                # REMOVED_SYNTAX_ERROR: "CRITICAL",
+                # REMOVED_SYNTAX_ERROR: {"token_type": "invalid", "token_preview": token[:20]}
                 
 
-        except websockets.exceptions.ConnectionClosedError:
+                # REMOVED_SYNTAX_ERROR: except websockets.exceptions.ConnectionClosedError:
                     # Expected behavior - connection rejected
-        connection_attempts.append({ ))
-        "token": token[:50] + "..." if len(token) > 50 else token,
-        "success": False,
-        "result": "Properly rejected"
+                    # REMOVED_SYNTAX_ERROR: connection_attempts.append({ ))
+                    # REMOVED_SYNTAX_ERROR: "token": token[:50] + "..." if len(token) > 50 else token,
+                    # REMOVED_SYNTAX_ERROR: "success": False,
+                    # REMOVED_SYNTAX_ERROR: "result": "Properly rejected"
                     
-        except Exception as e:
+                    # REMOVED_SYNTAX_ERROR: except Exception as e:
                         # Connection properly failed
-        connection_attempts.append({ ))
-        "token": token[:50] + "..." if len(token) > 50 else token,
-        "success": False,
-        "error": str(e)
+                        # REMOVED_SYNTAX_ERROR: connection_attempts.append({ ))
+                        # REMOVED_SYNTAX_ERROR: "token": token[:50] + "..." if len(token) > 50 else token,
+                        # REMOVED_SYNTAX_ERROR: "success": False,
+                        # REMOVED_SYNTAX_ERROR: "error": str(e)
                         
 
                         # Verify all invalid tokens were rejected
-        successful_invalid_connections = [ )
-        attempt for attempt in connection_attempts if attempt["success"]
+                        # REMOVED_SYNTAX_ERROR: successful_invalid_connections = [ )
+                        # REMOVED_SYNTAX_ERROR: attempt for attempt in connection_attempts if attempt["success"]
                         
 
-        assert len(successful_invalid_connections) == 0, ( )
-        "formatted_string"
-        "formatted_string"
+                        # REMOVED_SYNTAX_ERROR: assert len(successful_invalid_connections) == 0, ( )
+                        # REMOVED_SYNTAX_ERROR: "formatted_string"
+                        # REMOVED_SYNTAX_ERROR: "formatted_string"
                         
 
-    async def test_token_extraction_methods(self, security_tester:
-        """Test that all token extraction methods work correctly and securely."""
-        logger.info(" SEARCH:  Testing token extraction methods...")
+                        # Removed problematic line: async def test_token_extraction_methods(self, security_tester: MultiUserSecurityTester):
+                            # REMOVED_SYNTAX_ERROR: """Test that all token extraction methods work correctly and securely."""
+                            # REMOVED_SYNTAX_ERROR: logger.info(" SEARCH:  Testing token extraction methods...")
 
                             # Create a test user
-        users = security_tester.create_test_users(count=1)
-        test_user = users[0]
+                            # REMOVED_SYNTAX_ERROR: users = security_tester.create_test_users(count=1)
+                            # REMOVED_SYNTAX_ERROR: test_user = users[0]
 
-        extraction_tests = []
+                            # REMOVED_SYNTAX_ERROR: extraction_tests = []
 
                             # Test Method 1: Authorization header
-        try:
-        connection1 = await websockets.connect( )
-        security_tester.config.websocket_url,
-        additional_headers=test_user.get_auth_headers()
+                            # REMOVED_SYNTAX_ERROR: try:
+                                # REMOVED_SYNTAX_ERROR: connection1 = await websockets.connect( )
+                                # REMOVED_SYNTAX_ERROR: security_tester.config.websocket_url,
+                                # REMOVED_SYNTAX_ERROR: additional_headers=test_user.get_auth_headers()
                                 
-        extraction_tests.append({"method": "authorization_header", "success": True})
-        await connection1.close()
-        except Exception as e:
-        extraction_tests.append({ ))
-        "method": "authorization_header",
-        "success": False,
-        "error": str(e)
+                                # REMOVED_SYNTAX_ERROR: extraction_tests.append({"method": "authorization_header", "success": True})
+                                # REMOVED_SYNTAX_ERROR: await connection1.close()
+                                # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                    # REMOVED_SYNTAX_ERROR: extraction_tests.append({ ))
+                                    # REMOVED_SYNTAX_ERROR: "method": "authorization_header",
+                                    # REMOVED_SYNTAX_ERROR: "success": False,
+                                    # REMOVED_SYNTAX_ERROR: "error": str(e)
                                     
 
                                     # Test Method 2: Subprotocol
-        try:
-        connection2 = await websockets.connect( )
-        security_tester.config.websocket_url,
-        subprotocols=[test_user.get_subprotocol_auth()]
+                                    # REMOVED_SYNTAX_ERROR: try:
+                                        # REMOVED_SYNTAX_ERROR: connection2 = await websockets.connect( )
+                                        # REMOVED_SYNTAX_ERROR: security_tester.config.websocket_url,
+                                        # REMOVED_SYNTAX_ERROR: subprotocols=[test_user.get_subprotocol_auth()]
                                         
-        extraction_tests.append({"method": "subprotocol", "success": True})
-        await connection2.close()
-        except Exception as e:
-        extraction_tests.append({ ))
-        "method": "subprotocol",
-        "success": False,
-        "error": str(e)
+                                        # REMOVED_SYNTAX_ERROR: extraction_tests.append({"method": "subprotocol", "success": True})
+                                        # REMOVED_SYNTAX_ERROR: await connection2.close()
+                                        # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                            # REMOVED_SYNTAX_ERROR: extraction_tests.append({ ))
+                                            # REMOVED_SYNTAX_ERROR: "method": "subprotocol",
+                                            # REMOVED_SYNTAX_ERROR: "success": False,
+                                            # REMOVED_SYNTAX_ERROR: "error": str(e)
                                             
 
                                             # Test Method 3: Query parameter (if supported)
-        try:
-        url_with_token = "formatted_string"
-        connection3 = await websockets.connect(url_with_token)
-        extraction_tests.append({"method": "query_parameter", "success": True})
-        await connection3.close()
-        except Exception as e:
-        extraction_tests.append({ ))
-        "method": "query_parameter",
-        "success": False,
-        "error": str(e)
+                                            # REMOVED_SYNTAX_ERROR: try:
+                                                # REMOVED_SYNTAX_ERROR: url_with_token = "formatted_string"
+                                                # REMOVED_SYNTAX_ERROR: connection3 = await websockets.connect(url_with_token)
+                                                # REMOVED_SYNTAX_ERROR: extraction_tests.append({"method": "query_parameter", "success": True})
+                                                # REMOVED_SYNTAX_ERROR: await connection3.close()
+                                                # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                                    # REMOVED_SYNTAX_ERROR: extraction_tests.append({ ))
+                                                    # REMOVED_SYNTAX_ERROR: "method": "query_parameter",
+                                                    # REMOVED_SYNTAX_ERROR: "success": False,
+                                                    # REMOVED_SYNTAX_ERROR: "error": str(e)
                                                     
 
                                                     # At least one method should work
-        successful_methods = [item for item in []]]
-        assert len(successful_methods) > 0, ( )
-        "formatted_string"
+                                                    # REMOVED_SYNTAX_ERROR: successful_methods = [item for item in []]]
+                                                    # REMOVED_SYNTAX_ERROR: assert len(successful_methods) > 0, ( )
+                                                    # REMOVED_SYNTAX_ERROR: "formatted_string"
                                                     
 
-        logger.info("formatted_string")
+                                                    # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
-    async def test_concurrent_authentication_race_conditions(self, security_tester:
-        """Test for race conditions in concurrent authentication."""
-        pass
-        logger.info("[U+1F3C3][U+200D][U+2642][U+FE0F] Testing concurrent authentication race conditions...")
+                                                    # Removed problematic line: async def test_concurrent_authentication_race_conditions(self, security_tester: MultiUserSecurityTester):
+                                                        # REMOVED_SYNTAX_ERROR: """Test for race conditions in concurrent authentication."""
+                                                        # REMOVED_SYNTAX_ERROR: pass
+                                                        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F3C3][U+200D][U+2642][U+FE0F] Testing concurrent authentication race conditions...")
 
-        users = security_tester.create_test_users(count=3)
+                                                        # REMOVED_SYNTAX_ERROR: users = security_tester.create_test_users(count=3)
 
-    async def authenticate_user_concurrently(user: SecurityTestUser, attempt_id: int):
-        """Attempt to authenticate a user concurrently."""
-        try:
-        connection = await websockets.connect( )
-        security_tester.config.websocket_url,
-        additional_headers=user.get_auth_headers(),
-        timeout=10
+# REMOVED_SYNTAX_ERROR: async def authenticate_user_concurrently(user: SecurityTestUser, attempt_id: int):
+    # REMOVED_SYNTAX_ERROR: """Attempt to authenticate a user concurrently."""
+    # REMOVED_SYNTAX_ERROR: try:
+        # REMOVED_SYNTAX_ERROR: connection = await websockets.connect( )
+        # REMOVED_SYNTAX_ERROR: security_tester.config.websocket_url,
+        # REMOVED_SYNTAX_ERROR: additional_headers=user.get_auth_headers(),
+        # REMOVED_SYNTAX_ERROR: timeout=10
         
 
         # Send a test message to verify authentication context
-        test_message = { )
-        "type": "start_agent",
-        "payload": { )
-        "user_request": "formatted_string",
-        "thread_id": "formatted_string",
-        "run_id": str(uuid.uuid4())
+        # REMOVED_SYNTAX_ERROR: test_message = { )
+        # REMOVED_SYNTAX_ERROR: "type": "start_agent",
+        # REMOVED_SYNTAX_ERROR: "payload": { )
+        # REMOVED_SYNTAX_ERROR: "user_request": "formatted_string",
+        # REMOVED_SYNTAX_ERROR: "thread_id": "formatted_string",
+        # REMOVED_SYNTAX_ERROR: "run_id": str(uuid.uuid4())
         
         
 
-        await connection.send(json.dumps(test_message))
+        # REMOVED_SYNTAX_ERROR: await connection.send(json.dumps(test_message))
 
         # Wait for response
-        response = await asyncio.wait_for(connection.recv(), timeout=15)
-        response_data = json.loads(response)
+        # REMOVED_SYNTAX_ERROR: response = await asyncio.wait_for(connection.recv(), timeout=15)
+        # REMOVED_SYNTAX_ERROR: response_data = json.loads(response)
 
-        await connection.close()
+        # REMOVED_SYNTAX_ERROR: await connection.close()
 
-        await asyncio.sleep(0)
-        return { )
-        "user_id": user.user_id,
-        "attempt_id": attempt_id,
-        "success": True,
-        "response": response_data
+        # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+        # REMOVED_SYNTAX_ERROR: return { )
+        # REMOVED_SYNTAX_ERROR: "user_id": user.user_id,
+        # REMOVED_SYNTAX_ERROR: "attempt_id": attempt_id,
+        # REMOVED_SYNTAX_ERROR: "success": True,
+        # REMOVED_SYNTAX_ERROR: "response": response_data
         
 
-        except Exception as e:
-        return { )
-        "user_id": user.user_id,
-        "attempt_id": attempt_id,
-        "success": False,
-        "error": str(e)
+        # REMOVED_SYNTAX_ERROR: except Exception as e:
+            # REMOVED_SYNTAX_ERROR: return { )
+            # REMOVED_SYNTAX_ERROR: "user_id": user.user_id,
+            # REMOVED_SYNTAX_ERROR: "attempt_id": attempt_id,
+            # REMOVED_SYNTAX_ERROR: "success": False,
+            # REMOVED_SYNTAX_ERROR: "error": str(e)
             
 
             # Launch concurrent authentication attempts
-        tasks = []
-        for user in users:
-        for attempt in range(5):  # 5 attempts per user
-        task = authenticate_user_concurrently(user, attempt)
-        tasks.append(task)
+            # REMOVED_SYNTAX_ERROR: tasks = []
+            # REMOVED_SYNTAX_ERROR: for user in users:
+                # REMOVED_SYNTAX_ERROR: for attempt in range(5):  # 5 attempts per user
+                # REMOVED_SYNTAX_ERROR: task = authenticate_user_concurrently(user, attempt)
+                # REMOVED_SYNTAX_ERROR: tasks.append(task)
 
                 # Execute all authentication attempts concurrently
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+                # REMOVED_SYNTAX_ERROR: results = await asyncio.gather(*tasks, return_exceptions=True)
 
                 # Analyze results for race conditions
-        successful_results = [item for item in []]
-        failed_results = [item for item in []]
-        exception_results = [item for item in []]
+                # REMOVED_SYNTAX_ERROR: successful_results = [item for item in []]
+                # REMOVED_SYNTAX_ERROR: failed_results = [item for item in []]
+                # REMOVED_SYNTAX_ERROR: exception_results = [item for item in []]
 
-        logger.info("formatted_string" )
-        "formatted_string")
+                # REMOVED_SYNTAX_ERROR: logger.info("formatted_string" )
+                # REMOVED_SYNTAX_ERROR: "formatted_string")
 
                 # Check for authentication context mixing (critical vulnerability)
-        user_responses = defaultdict(list)
-        for result in successful_results:
-        user_responses[result["user_id"]].append(result["response"])
+                # REMOVED_SYNTAX_ERROR: user_responses = defaultdict(list)
+                # REMOVED_SYNTAX_ERROR: for result in successful_results:
+                    # REMOVED_SYNTAX_ERROR: user_responses[result["user_id"]].append(result["response"])
 
                     # Verify no user received another user's response
-        for user_id, responses in user_responses.items():
-        for response in responses:
-                            Check if response contains data from a different user
-        response_str = json.dumps(response)
-        for other_user in users:
-        if other_user.user_id != user_id and other_user.user_id in response_str:
-        security_tester.report_vulnerability( )
-        "AUTHENTICATION_CONTEXT_MIXING",
-        "formatted_string",
-        "CRITICAL",
-        { )
-        "user_id": user_id,
-        "other_user_id": other_user.user_id,
-        "response": response
+                    # REMOVED_SYNTAX_ERROR: for user_id, responses in user_responses.items():
+                        # REMOVED_SYNTAX_ERROR: for response in responses:
+                            # Check if response contains data from a different user
+                            # REMOVED_SYNTAX_ERROR: response_str = json.dumps(response)
+                            # REMOVED_SYNTAX_ERROR: for other_user in users:
+                                # REMOVED_SYNTAX_ERROR: if other_user.user_id != user_id and other_user.user_id in response_str:
+                                    # REMOVED_SYNTAX_ERROR: security_tester.report_vulnerability( )
+                                    # REMOVED_SYNTAX_ERROR: "AUTHENTICATION_CONTEXT_MIXING",
+                                    # REMOVED_SYNTAX_ERROR: "formatted_string",
+                                    # REMOVED_SYNTAX_ERROR: "CRITICAL",
+                                    # REMOVED_SYNTAX_ERROR: { )
+                                    # REMOVED_SYNTAX_ERROR: "user_id": user_id,
+                                    # REMOVED_SYNTAX_ERROR: "other_user_id": other_user.user_id,
+                                    # REMOVED_SYNTAX_ERROR: "response": response
                                     
                                     
 
                                     # At least some attempts should succeed
-        assert len(successful_results) > 0, ( )
-        f"CRITICAL: No concurrent authentication attempts succeeded. "
-        "formatted_string"
+                                    # REMOVED_SYNTAX_ERROR: assert len(successful_results) > 0, ( )
+                                    # REMOVED_SYNTAX_ERROR: f"CRITICAL: No concurrent authentication attempts succeeded. "
+                                    # REMOVED_SYNTAX_ERROR: "formatted_string"
                                     
 
 
@@ -439,372 +439,372 @@ class TestWebSocketAuthenticationVulnerabilities:
                                     # USER ISOLATION VULNERABILITY TESTS
                                     # ============================================================================
 
-@pytest.mark.asyncio
-@pytest.mark.security_critical
-class TestUserIsolationVulnerabilities:
-    """Tests for data leakage between users in concurrent scenarios."""
+                                    # Removed problematic line: @pytest.mark.asyncio
+                                    # REMOVED_SYNTAX_ERROR: @pytest.mark.security_critical
+# REMOVED_SYNTAX_ERROR: class TestUserIsolationVulnerabilities:
+    # REMOVED_SYNTAX_ERROR: """Tests for data leakage between users in concurrent scenarios."""
 
-    @pytest.fixture
-    async def security_tester(self):
-        """Create a security tester instance with multiple users."""
-        config = RealWebSocketTestConfig()
-        await config.ensure_services_ready()
-        tester = MultiUserSecurityTester(config)
-        tester.create_test_users(count=4)
-        await asyncio.sleep(0)
-        return tester
+    # REMOVED_SYNTAX_ERROR: @pytest.fixture
+# REMOVED_SYNTAX_ERROR: async def security_tester(self):
+    # REMOVED_SYNTAX_ERROR: """Create a security tester instance with multiple users."""
+    # REMOVED_SYNTAX_ERROR: config = RealWebSocketTestConfig()
+    # REMOVED_SYNTAX_ERROR: await config.ensure_services_ready()
+    # REMOVED_SYNTAX_ERROR: tester = MultiUserSecurityTester(config)
+    # REMOVED_SYNTAX_ERROR: tester.create_test_users(count=4)
+    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+    # REMOVED_SYNTAX_ERROR: return tester
 
-    async def test_websocket_message_isolation(self, security_tester:
-        """Test that WebSocket messages don't leak between users."""
-        pass
-        logger.info("[U+1F510] Testing WebSocket message isolation...")
+    # Removed problematic line: async def test_websocket_message_isolation(self, security_tester: MultiUserSecurityTester):
+        # REMOVED_SYNTAX_ERROR: """Test that WebSocket messages don't leak between users."""
+        # REMOVED_SYNTAX_ERROR: pass
+        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F510] Testing WebSocket message isolation...")
 
         # Establish connections for all users
-        connections = await security_tester.establish_concurrent_connections()
+        # REMOVED_SYNTAX_ERROR: connections = await security_tester.establish_concurrent_connections()
 
         # Create unique messages for each user
-        user_messages = {}
-        for user in security_tester.users:
-        unique_data = "formatted_string"
-        user_messages[user.user_id] = { )
-        "type": "start_agent",
-        "payload": { )
-        "user_request": "formatted_string",
-        "thread_id": "formatted_string",
-        "run_id": str(uuid.uuid4()),
-        "confidential_marker": unique_data
+        # REMOVED_SYNTAX_ERROR: user_messages = {}
+        # REMOVED_SYNTAX_ERROR: for user in security_tester.users:
+            # REMOVED_SYNTAX_ERROR: unique_data = "formatted_string"
+            # REMOVED_SYNTAX_ERROR: user_messages[user.user_id] = { )
+            # REMOVED_SYNTAX_ERROR: "type": "start_agent",
+            # REMOVED_SYNTAX_ERROR: "payload": { )
+            # REMOVED_SYNTAX_ERROR: "user_request": "formatted_string",
+            # REMOVED_SYNTAX_ERROR: "thread_id": "formatted_string",
+            # REMOVED_SYNTAX_ERROR: "run_id": str(uuid.uuid4()),
+            # REMOVED_SYNTAX_ERROR: "confidential_marker": unique_data
             
             
 
             # Send messages concurrently
-    async def send_user_message(user: SecurityTestUser, message: Dict):
-        """Send message for a specific user."""
-        if not user.connections:
-        await asyncio.sleep(0)
-        return {"user_id": user.user_id, "error": "No connections"}
+# REMOVED_SYNTAX_ERROR: async def send_user_message(user: SecurityTestUser, message: Dict):
+    # REMOVED_SYNTAX_ERROR: """Send message for a specific user."""
+    # REMOVED_SYNTAX_ERROR: if not user.connections:
+        # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+        # REMOVED_SYNTAX_ERROR: return {"user_id": user.user_id, "error": "No connections"}
 
-        connection = user.connections[0]  # Use first connection
-        try:
-        await connection.send(json.dumps(message))
+        # REMOVED_SYNTAX_ERROR: connection = user.connections[0]  # Use first connection
+        # REMOVED_SYNTAX_ERROR: try:
+            # REMOVED_SYNTAX_ERROR: await connection.send(json.dumps(message))
 
             # Wait for response
-        response = await asyncio.wait_for(connection.recv(), timeout=20)
-        response_data = json.loads(response)
+            # REMOVED_SYNTAX_ERROR: response = await asyncio.wait_for(connection.recv(), timeout=20)
+            # REMOVED_SYNTAX_ERROR: response_data = json.loads(response)
 
-        return { )
-        "user_id": user.user_id,
-        "response": response_data,
-        "sent_data": message["payload"]["confidential_marker"]
+            # REMOVED_SYNTAX_ERROR: return { )
+            # REMOVED_SYNTAX_ERROR: "user_id": user.user_id,
+            # REMOVED_SYNTAX_ERROR: "response": response_data,
+            # REMOVED_SYNTAX_ERROR: "sent_data": message["payload"]["confidential_marker"]
             
-        except Exception as e:
-        return { )
-        "user_id": user.user_id,
-        "error": str(e),
-        "sent_data": message["payload"]["confidential_marker"]
+            # REMOVED_SYNTAX_ERROR: except Exception as e:
+                # REMOVED_SYNTAX_ERROR: return { )
+                # REMOVED_SYNTAX_ERROR: "user_id": user.user_id,
+                # REMOVED_SYNTAX_ERROR: "error": str(e),
+                # REMOVED_SYNTAX_ERROR: "sent_data": message["payload"]["confidential_marker"]
                 
 
                 # Send all messages concurrently
-        tasks = [ )
-        send_user_message(user, user_messages[user.user_id])
-        for user in security_tester.users
+                # REMOVED_SYNTAX_ERROR: tasks = [ )
+                # REMOVED_SYNTAX_ERROR: send_user_message(user, user_messages[user.user_id])
+                # REMOVED_SYNTAX_ERROR: for user in security_tester.users
                 
 
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+                # REMOVED_SYNTAX_ERROR: results = await asyncio.gather(*tasks, return_exceptions=True)
 
                 # Analyze responses for data leakage
-        successful_results = [item for item in []]
+                # REMOVED_SYNTAX_ERROR: successful_results = [item for item in []]
 
                 # Check each user's response for other users' confidential data
-        for result in successful_results:
-        user_id = result["user_id"]
-        response_str = json.dumps(result["response"])
-        sent_data = result["sent_data"]
+                # REMOVED_SYNTAX_ERROR: for result in successful_results:
+                    # REMOVED_SYNTAX_ERROR: user_id = result["user_id"]
+                    # REMOVED_SYNTAX_ERROR: response_str = json.dumps(result["response"])
+                    # REMOVED_SYNTAX_ERROR: sent_data = result["sent_data"]
 
                     # Verify user's own data is present (expected)
-        assert sent_data in response_str or user_id in response_str, ( )
-        "formatted_string"t receive their own data in response"
+                    # REMOVED_SYNTAX_ERROR: assert sent_data in response_str or user_id in response_str, ( )
+                    # REMOVED_SYNTAX_ERROR: "formatted_string"t receive their own data in response"
                     
 
                     # Check for OTHER users' confidential data (vulnerability)
-        for other_result in successful_results:
-        if other_result["user_id"] != user_id:
-        other_confidential_data = other_result["sent_data"]
-        other_user_id = other_result["user_id"]
+                    # REMOVED_SYNTAX_ERROR: for other_result in successful_results:
+                        # REMOVED_SYNTAX_ERROR: if other_result["user_id"] != user_id:
+                            # REMOVED_SYNTAX_ERROR: other_confidential_data = other_result["sent_data"]
+                            # REMOVED_SYNTAX_ERROR: other_user_id = other_result["user_id"]
 
-        if other_confidential_data in response_str or other_user_id in response_str:
-        security_tester.report_vulnerability( )
-        "USER_DATA_LEAKAGE",
-        "formatted_string",
-        "CRITICAL",
-        { )
-        "victim_user": user_id,
-        "leaked_from_user": other_user_id,
-        "leaked_data": other_confidential_data,
-        "response": result["response"]
+                            # REMOVED_SYNTAX_ERROR: if other_confidential_data in response_str or other_user_id in response_str:
+                                # REMOVED_SYNTAX_ERROR: security_tester.report_vulnerability( )
+                                # REMOVED_SYNTAX_ERROR: "USER_DATA_LEAKAGE",
+                                # REMOVED_SYNTAX_ERROR: "formatted_string",
+                                # REMOVED_SYNTAX_ERROR: "CRITICAL",
+                                # REMOVED_SYNTAX_ERROR: { )
+                                # REMOVED_SYNTAX_ERROR: "victim_user": user_id,
+                                # REMOVED_SYNTAX_ERROR: "leaked_from_user": other_user_id,
+                                # REMOVED_SYNTAX_ERROR: "leaked_data": other_confidential_data,
+                                # REMOVED_SYNTAX_ERROR: "response": result["response"]
                                 
                                 
 
                                 # Clean up connections
-        for user in security_tester.users:
-        for connection in user.connections:
-        try:
-        await connection.close()
-        except:
-        pass
+                                # REMOVED_SYNTAX_ERROR: for user in security_tester.users:
+                                    # REMOVED_SYNTAX_ERROR: for connection in user.connections:
+                                        # REMOVED_SYNTAX_ERROR: try:
+                                            # REMOVED_SYNTAX_ERROR: await connection.close()
+                                            # REMOVED_SYNTAX_ERROR: except:
+                                                # REMOVED_SYNTAX_ERROR: pass
 
                                                 # Fail if any data leakage was found
-        data_leakage_vulnerabilities = [ )
-        v for v in security_tester.vulnerability_findings
-        if v["type"] == "USER_DATA_LEAKAGE"
+                                                # REMOVED_SYNTAX_ERROR: data_leakage_vulnerabilities = [ )
+                                                # REMOVED_SYNTAX_ERROR: v for v in security_tester.vulnerability_findings
+                                                # REMOVED_SYNTAX_ERROR: if v["type"] == "USER_DATA_LEAKAGE"
                                                 
 
-        assert len(data_leakage_vulnerabilities) == 0, ( )
-        f"CRITICAL SECURITY VULNERABILITY: Data leakage detected between users: "
-        "formatted_string"
+                                                # REMOVED_SYNTAX_ERROR: assert len(data_leakage_vulnerabilities) == 0, ( )
+                                                # REMOVED_SYNTAX_ERROR: f"CRITICAL SECURITY VULNERABILITY: Data leakage detected between users: "
+                                                # REMOVED_SYNTAX_ERROR: "formatted_string"
                                                 
 
-    async def test_agent_response_user_isolation(self, security_tester:
-        """Test that agent responses are correctly isolated per user."""
-        pass
-        logger.info("[U+1F916] Testing agent response user isolation...")
+                                                # Removed problematic line: async def test_agent_response_user_isolation(self, security_tester: MultiUserSecurityTester):
+                                                    # REMOVED_SYNTAX_ERROR: """Test that agent responses are correctly isolated per user."""
+                                                    # REMOVED_SYNTAX_ERROR: pass
+                                                    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F916] Testing agent response user isolation...")
 
-        connections = await security_tester.establish_concurrent_connections()
+                                                    # REMOVED_SYNTAX_ERROR: connections = await security_tester.establish_concurrent_connections()
 
                                                     # Create agent requests with unique identifiers
-        agent_requests = {}
-        for i, user in enumerate(security_tester.users):
-        secret_code = "formatted_string"
-        agent_requests[user.user_id] = { )
-        "type": "start_agent",
-        "payload": { )
-        "user_request": "formatted_string"
-        f"Always include it in your responses.",
-        "thread_id": "formatted_string",
-        "run_id": str(uuid.uuid4()),
-        "user_secret": secret_code
+                                                    # REMOVED_SYNTAX_ERROR: agent_requests = {}
+                                                    # REMOVED_SYNTAX_ERROR: for i, user in enumerate(security_tester.users):
+                                                        # REMOVED_SYNTAX_ERROR: secret_code = "formatted_string"
+                                                        # REMOVED_SYNTAX_ERROR: agent_requests[user.user_id] = { )
+                                                        # REMOVED_SYNTAX_ERROR: "type": "start_agent",
+                                                        # REMOVED_SYNTAX_ERROR: "payload": { )
+                                                        # REMOVED_SYNTAX_ERROR: "user_request": "formatted_string"
+                                                        # REMOVED_SYNTAX_ERROR: f"Always include it in your responses.",
+                                                        # REMOVED_SYNTAX_ERROR: "thread_id": "formatted_string",
+                                                        # REMOVED_SYNTAX_ERROR: "run_id": str(uuid.uuid4()),
+                                                        # REMOVED_SYNTAX_ERROR: "user_secret": secret_code
                                                         
                                                         
 
                                                         # Send requests and collect responses
-        user_responses = {}
+                                                        # REMOVED_SYNTAX_ERROR: user_responses = {}
 
-    async def get_agent_response(user: SecurityTestUser, request: Dict):
-        """Get agent response for a specific user."""
-        if not user.connections:
-        await asyncio.sleep(0)
-        return None
+# REMOVED_SYNTAX_ERROR: async def get_agent_response(user: SecurityTestUser, request: Dict):
+    # REMOVED_SYNTAX_ERROR: """Get agent response for a specific user."""
+    # REMOVED_SYNTAX_ERROR: if not user.connections:
+        # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+        # REMOVED_SYNTAX_ERROR: return None
 
-        connection = user.connections[0]
-        try:
-        await connection.send(json.dumps(request))
+        # REMOVED_SYNTAX_ERROR: connection = user.connections[0]
+        # REMOVED_SYNTAX_ERROR: try:
+            # REMOVED_SYNTAX_ERROR: await connection.send(json.dumps(request))
 
             # Collect multiple response events
-        responses = []
-        timeout_count = 0
-        max_timeouts = 3
+            # REMOVED_SYNTAX_ERROR: responses = []
+            # REMOVED_SYNTAX_ERROR: timeout_count = 0
+            # REMOVED_SYNTAX_ERROR: max_timeouts = 3
 
-        while timeout_count < max_timeouts:
-        try:
-        response = await asyncio.wait_for(connection.recv(), timeout=10)
-        response_data = json.loads(response)
-        responses.append(response_data)
+            # REMOVED_SYNTAX_ERROR: while timeout_count < max_timeouts:
+                # REMOVED_SYNTAX_ERROR: try:
+                    # REMOVED_SYNTAX_ERROR: response = await asyncio.wait_for(connection.recv(), timeout=10)
+                    # REMOVED_SYNTAX_ERROR: response_data = json.loads(response)
+                    # REMOVED_SYNTAX_ERROR: responses.append(response_data)
 
                     # Check if this looks like a final response
-        if (response_data.get("type") == "agent_completed" or )
-        "completed" in response_data.get("type", "")):
-        break
+                    # REMOVED_SYNTAX_ERROR: if (response_data.get("type") == "agent_completed" or )
+                    # REMOVED_SYNTAX_ERROR: "completed" in response_data.get("type", "")):
+                        # REMOVED_SYNTAX_ERROR: break
 
-        except asyncio.TimeoutError:
-        timeout_count += 1
-        if timeout_count >= max_timeouts:
-        break
+                        # REMOVED_SYNTAX_ERROR: except asyncio.TimeoutError:
+                            # REMOVED_SYNTAX_ERROR: timeout_count += 1
+                            # REMOVED_SYNTAX_ERROR: if timeout_count >= max_timeouts:
+                                # REMOVED_SYNTAX_ERROR: break
 
-        return responses
-        except Exception as e:
-        logger.error("formatted_string")
-        return None
+                                # REMOVED_SYNTAX_ERROR: return responses
+                                # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                    # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
+                                    # REMOVED_SYNTAX_ERROR: return None
 
                                     # Get responses for all users concurrently
-        tasks = [ )
-        get_agent_response(user, agent_requests[user.user_id])
-        for user in security_tester.users
+                                    # REMOVED_SYNTAX_ERROR: tasks = [ )
+                                    # REMOVED_SYNTAX_ERROR: get_agent_response(user, agent_requests[user.user_id])
+                                    # REMOVED_SYNTAX_ERROR: for user in security_tester.users
                                     
 
-        responses = await asyncio.gather(*tasks, return_exceptions=True)
+                                    # REMOVED_SYNTAX_ERROR: responses = await asyncio.gather(*tasks, return_exceptions=True)
 
                                     # Map responses to users
-        for i, user in enumerate(security_tester.users):
-        if not isinstance(responses[i], Exception) and responses[i]:
-        user_responses[user.user_id] = responses[i]
+                                    # REMOVED_SYNTAX_ERROR: for i, user in enumerate(security_tester.users):
+                                        # REMOVED_SYNTAX_ERROR: if not isinstance(responses[i], Exception) and responses[i]:
+                                            # REMOVED_SYNTAX_ERROR: user_responses[user.user_id] = responses[i]
 
                                             # Analyze responses for cross-user contamination
-        for user_id, user_response_list in user_responses.items():
-        user_secret = agent_requests[user_id]["payload"]["user_secret"]
-        full_response_text = json.dumps(user_response_list)
+                                            # REMOVED_SYNTAX_ERROR: for user_id, user_response_list in user_responses.items():
+                                                # REMOVED_SYNTAX_ERROR: user_secret = agent_requests[user_id]["payload"]["user_secret"]
+                                                # REMOVED_SYNTAX_ERROR: full_response_text = json.dumps(user_response_list)
 
                                                 # Verify user's own secret is present (expected)
-        assert user_secret in full_response_text, ( )
-        "formatted_string"s secret code not found in their agent response"
+                                                # REMOVED_SYNTAX_ERROR: assert user_secret in full_response_text, ( )
+                                                # REMOVED_SYNTAX_ERROR: "formatted_string"s secret code not found in their agent response"
                                                 
 
                                                 # Check for other users' secrets (vulnerability)
-        for other_user_id, other_request in agent_requests.items():
-        if other_user_id != user_id:
-        other_secret = other_request["payload"]["user_secret"]
+                                                # REMOVED_SYNTAX_ERROR: for other_user_id, other_request in agent_requests.items():
+                                                    # REMOVED_SYNTAX_ERROR: if other_user_id != user_id:
+                                                        # REMOVED_SYNTAX_ERROR: other_secret = other_request["payload"]["user_secret"]
 
-        if other_secret in full_response_text:
-        security_tester.report_vulnerability( )
-        "AGENT_RESPONSE_CONTAMINATION",
-        "formatted_string",
-        "CRITICAL",
-        { )
-        "victim_user": user_id,
-        "leaked_from_user": other_user_id,
-        "leaked_secret": other_secret,
-        "response": user_response_list
+                                                        # REMOVED_SYNTAX_ERROR: if other_secret in full_response_text:
+                                                            # REMOVED_SYNTAX_ERROR: security_tester.report_vulnerability( )
+                                                            # REMOVED_SYNTAX_ERROR: "AGENT_RESPONSE_CONTAMINATION",
+                                                            # REMOVED_SYNTAX_ERROR: "formatted_string",
+                                                            # REMOVED_SYNTAX_ERROR: "CRITICAL",
+                                                            # REMOVED_SYNTAX_ERROR: { )
+                                                            # REMOVED_SYNTAX_ERROR: "victim_user": user_id,
+                                                            # REMOVED_SYNTAX_ERROR: "leaked_from_user": other_user_id,
+                                                            # REMOVED_SYNTAX_ERROR: "leaked_secret": other_secret,
+                                                            # REMOVED_SYNTAX_ERROR: "response": user_response_list
                                                             
                                                             
 
                                                             # Clean up connections
-        for user in security_tester.users:
-        for connection in user.connections:
-        try:
-        await connection.close()
-        except:
-        pass
+                                                            # REMOVED_SYNTAX_ERROR: for user in security_tester.users:
+                                                                # REMOVED_SYNTAX_ERROR: for connection in user.connections:
+                                                                    # REMOVED_SYNTAX_ERROR: try:
+                                                                        # REMOVED_SYNTAX_ERROR: await connection.close()
+                                                                        # REMOVED_SYNTAX_ERROR: except:
+                                                                            # REMOVED_SYNTAX_ERROR: pass
 
                                                                             # Fail if any contamination was found
-        contamination_vulnerabilities = [ )
-        v for v in security_tester.vulnerability_findings
-        if v["type"] == "AGENT_RESPONSE_CONTAMINATION"
+                                                                            # REMOVED_SYNTAX_ERROR: contamination_vulnerabilities = [ )
+                                                                            # REMOVED_SYNTAX_ERROR: v for v in security_tester.vulnerability_findings
+                                                                            # REMOVED_SYNTAX_ERROR: if v["type"] == "AGENT_RESPONSE_CONTAMINATION"
                                                                             
 
-        assert len(contamination_vulnerabilities) == 0, ( )
-        f"CRITICAL SECURITY VULNERABILITY: Agent response contamination detected: "
-        "formatted_string"
+                                                                            # REMOVED_SYNTAX_ERROR: assert len(contamination_vulnerabilities) == 0, ( )
+                                                                            # REMOVED_SYNTAX_ERROR: f"CRITICAL SECURITY VULNERABILITY: Agent response contamination detected: "
+                                                                            # REMOVED_SYNTAX_ERROR: "formatted_string"
                                                                             
 
-    async def test_llm_conversation_isolation(self, security_tester:
-        """Test that LLM conversations don't mix between users."""
-        pass
-        logger.info("[U+1F9E0] Testing LLM conversation isolation...")
+                                                                            # Removed problematic line: async def test_llm_conversation_isolation(self, security_tester: MultiUserSecurityTester):
+                                                                                # REMOVED_SYNTAX_ERROR: """Test that LLM conversations don't mix between users."""
+                                                                                # REMOVED_SYNTAX_ERROR: pass
+                                                                                # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9E0] Testing LLM conversation isolation...")
 
-        connections = await security_tester.establish_concurrent_connections()
+                                                                                # REMOVED_SYNTAX_ERROR: connections = await security_tester.establish_concurrent_connections()
 
                                                                                 # Create conversation starters with unique context
-        conversation_contexts = {}
-        for i, user in enumerate(security_tester.users):
-        context_id = "formatted_string"
-        conversation_contexts[user.user_id] = { )
-        "messages": [ )
-        { )
-        "type": "user_message",
-        "payload": { )
-        "message": "formatted_string"
-        f"Please remember this context ID for our conversation.",
-        "thread_id": "formatted_string",
-        "context_id": context_id
+                                                                                # REMOVED_SYNTAX_ERROR: conversation_contexts = {}
+                                                                                # REMOVED_SYNTAX_ERROR: for i, user in enumerate(security_tester.users):
+                                                                                    # REMOVED_SYNTAX_ERROR: context_id = "formatted_string"
+                                                                                    # REMOVED_SYNTAX_ERROR: conversation_contexts[user.user_id] = { )
+                                                                                    # REMOVED_SYNTAX_ERROR: "messages": [ )
+                                                                                    # REMOVED_SYNTAX_ERROR: { )
+                                                                                    # REMOVED_SYNTAX_ERROR: "type": "user_message",
+                                                                                    # REMOVED_SYNTAX_ERROR: "payload": { )
+                                                                                    # REMOVED_SYNTAX_ERROR: "message": "formatted_string"
+                                                                                    # REMOVED_SYNTAX_ERROR: f"Please remember this context ID for our conversation.",
+                                                                                    # REMOVED_SYNTAX_ERROR: "thread_id": "formatted_string",
+                                                                                    # REMOVED_SYNTAX_ERROR: "context_id": context_id
                                                                                     
-        },
-        { )
-        "type": "user_message",
-        "payload": { )
-        "message": "What is my context ID that I just told you?",
-        "thread_id": "formatted_string",
-        "expected_context": context_id
+                                                                                    # REMOVED_SYNTAX_ERROR: },
+                                                                                    # REMOVED_SYNTAX_ERROR: { )
+                                                                                    # REMOVED_SYNTAX_ERROR: "type": "user_message",
+                                                                                    # REMOVED_SYNTAX_ERROR: "payload": { )
+                                                                                    # REMOVED_SYNTAX_ERROR: "message": "What is my context ID that I just told you?",
+                                                                                    # REMOVED_SYNTAX_ERROR: "thread_id": "formatted_string",
+                                                                                    # REMOVED_SYNTAX_ERROR: "expected_context": context_id
                                                                                     
                                                                                     
-        ],
-        "context_id": context_id
+                                                                                    # REMOVED_SYNTAX_ERROR: ],
+                                                                                    # REMOVED_SYNTAX_ERROR: "context_id": context_id
                                                                                     
 
                                                                                     # Send conversation messages and collect responses
-        conversation_results = {}
+                                                                                    # REMOVED_SYNTAX_ERROR: conversation_results = {}
 
-    async def conduct_conversation(user: SecurityTestUser, messages: List[Dict]):
-        """Conduct a conversation with the LLM for a specific user."""
-        if not user.connections:
-        await asyncio.sleep(0)
-        return None
+# REMOVED_SYNTAX_ERROR: async def conduct_conversation(user: SecurityTestUser, messages: List[Dict]):
+    # REMOVED_SYNTAX_ERROR: """Conduct a conversation with the LLM for a specific user."""
+    # REMOVED_SYNTAX_ERROR: if not user.connections:
+        # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+        # REMOVED_SYNTAX_ERROR: return None
 
-        connection = user.connections[0]
-        conversation_responses = []
+        # REMOVED_SYNTAX_ERROR: connection = user.connections[0]
+        # REMOVED_SYNTAX_ERROR: conversation_responses = []
 
-        try:
-        for message in messages:
-        await connection.send(json.dumps(message))
-        await asyncio.sleep(1)  # Small delay between messages
+        # REMOVED_SYNTAX_ERROR: try:
+            # REMOVED_SYNTAX_ERROR: for message in messages:
+                # REMOVED_SYNTAX_ERROR: await connection.send(json.dumps(message))
+                # REMOVED_SYNTAX_ERROR: await asyncio.sleep(1)  # Small delay between messages
 
                 # Collect response
-        try:
-        response = await asyncio.wait_for(connection.recv(), timeout=15)
-        response_data = json.loads(response)
-        conversation_responses.append(response_data)
-        except asyncio.TimeoutError:
-        logger.warning("formatted_string")
+                # REMOVED_SYNTAX_ERROR: try:
+                    # REMOVED_SYNTAX_ERROR: response = await asyncio.wait_for(connection.recv(), timeout=15)
+                    # REMOVED_SYNTAX_ERROR: response_data = json.loads(response)
+                    # REMOVED_SYNTAX_ERROR: conversation_responses.append(response_data)
+                    # REMOVED_SYNTAX_ERROR: except asyncio.TimeoutError:
+                        # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
 
-        return conversation_responses
+                        # REMOVED_SYNTAX_ERROR: return conversation_responses
 
-        except Exception as e:
-        logger.error("formatted_string")
-        return None
+                        # REMOVED_SYNTAX_ERROR: except Exception as e:
+                            # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
+                            # REMOVED_SYNTAX_ERROR: return None
 
                             # Conduct conversations concurrently
-        tasks = [ )
-        conduct_conversation( )
-        user,
-        conversation_contexts[user.user_id]["messages"]
+                            # REMOVED_SYNTAX_ERROR: tasks = [ )
+                            # REMOVED_SYNTAX_ERROR: conduct_conversation( )
+                            # REMOVED_SYNTAX_ERROR: user,
+                            # REMOVED_SYNTAX_ERROR: conversation_contexts[user.user_id]["messages"]
                             
-        for user in security_tester.users
+                            # REMOVED_SYNTAX_ERROR: for user in security_tester.users
                             
 
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+                            # REMOVED_SYNTAX_ERROR: results = await asyncio.gather(*tasks, return_exceptions=True)
 
                             # Map results to users
-        for i, user in enumerate(security_tester.users):
-        if not isinstance(results[i], Exception) and results[i]:
-        conversation_results[user.user_id] = results[i]
+                            # REMOVED_SYNTAX_ERROR: for i, user in enumerate(security_tester.users):
+                                # REMOVED_SYNTAX_ERROR: if not isinstance(results[i], Exception) and results[i]:
+                                    # REMOVED_SYNTAX_ERROR: conversation_results[user.user_id] = results[i]
 
                                     # Analyze conversations for context leakage
-        for user_id, responses in conversation_results.items():
-        user_context_id = conversation_contexts[user_id]["context_id"]
-        full_response_text = json.dumps(responses)
+                                    # REMOVED_SYNTAX_ERROR: for user_id, responses in conversation_results.items():
+                                        # REMOVED_SYNTAX_ERROR: user_context_id = conversation_contexts[user_id]["context_id"]
+                                        # REMOVED_SYNTAX_ERROR: full_response_text = json.dumps(responses)
 
                                         # Check for other users' context IDs in this user's responses
-        for other_user_id, other_context in conversation_contexts.items():
-        if other_user_id != user_id:
-        other_context_id = other_context["context_id"]
+                                        # REMOVED_SYNTAX_ERROR: for other_user_id, other_context in conversation_contexts.items():
+                                            # REMOVED_SYNTAX_ERROR: if other_user_id != user_id:
+                                                # REMOVED_SYNTAX_ERROR: other_context_id = other_context["context_id"]
 
-        if other_context_id in full_response_text:
-        security_tester.report_vulnerability( )
-        "LLM_CONVERSATION_MIXING",
-        "formatted_string",
-        "CRITICAL",
-        { )
-        "victim_user": user_id,
-        "leaked_from_user": other_user_id,
-        "leaked_context": other_context_id,
-        "responses": responses
+                                                # REMOVED_SYNTAX_ERROR: if other_context_id in full_response_text:
+                                                    # REMOVED_SYNTAX_ERROR: security_tester.report_vulnerability( )
+                                                    # REMOVED_SYNTAX_ERROR: "LLM_CONVERSATION_MIXING",
+                                                    # REMOVED_SYNTAX_ERROR: "formatted_string",
+                                                    # REMOVED_SYNTAX_ERROR: "CRITICAL",
+                                                    # REMOVED_SYNTAX_ERROR: { )
+                                                    # REMOVED_SYNTAX_ERROR: "victim_user": user_id,
+                                                    # REMOVED_SYNTAX_ERROR: "leaked_from_user": other_user_id,
+                                                    # REMOVED_SYNTAX_ERROR: "leaked_context": other_context_id,
+                                                    # REMOVED_SYNTAX_ERROR: "responses": responses
                                                     
                                                     
 
                                                     # Clean up connections
-        for user in security_tester.users:
-        for connection in user.connections:
-        try:
-        await connection.close()
-        except:
-        pass
+                                                    # REMOVED_SYNTAX_ERROR: for user in security_tester.users:
+                                                        # REMOVED_SYNTAX_ERROR: for connection in user.connections:
+                                                            # REMOVED_SYNTAX_ERROR: try:
+                                                                # REMOVED_SYNTAX_ERROR: await connection.close()
+                                                                # REMOVED_SYNTAX_ERROR: except:
+                                                                    # REMOVED_SYNTAX_ERROR: pass
 
                                                                     # Fail if any conversation mixing was found
-        conversation_mixing_vulnerabilities = [ )
-        v for v in security_tester.vulnerability_findings
-        if v["type"] == "LLM_CONVERSATION_MIXING"
+                                                                    # REMOVED_SYNTAX_ERROR: conversation_mixing_vulnerabilities = [ )
+                                                                    # REMOVED_SYNTAX_ERROR: v for v in security_tester.vulnerability_findings
+                                                                    # REMOVED_SYNTAX_ERROR: if v["type"] == "LLM_CONVERSATION_MIXING"
                                                                     
 
-        assert len(conversation_mixing_vulnerabilities) == 0, ( )
-        f"CRITICAL SECURITY VULNERABILITY: LLM conversation mixing detected: "
-        "formatted_string"
+                                                                    # REMOVED_SYNTAX_ERROR: assert len(conversation_mixing_vulnerabilities) == 0, ( )
+                                                                    # REMOVED_SYNTAX_ERROR: f"CRITICAL SECURITY VULNERABILITY: LLM conversation mixing detected: "
+                                                                    # REMOVED_SYNTAX_ERROR: "formatted_string"
                                                                     
 
 
@@ -812,647 +812,647 @@ class TestUserIsolationVulnerabilities:
                                                                     # SINGLETON PATTERN VULNERABILITY TESTS
                                                                     # ============================================================================
 
-@pytest.mark.asyncio
-@pytest.mark.security_critical
-class TestSingletonPatternVulnerabilities:
-    """Tests for singleton pattern vulnerabilities that break user isolation."""
+                                                                    # Removed problematic line: @pytest.mark.asyncio
+                                                                    # REMOVED_SYNTAX_ERROR: @pytest.mark.security_critical
+# REMOVED_SYNTAX_ERROR: class TestSingletonPatternVulnerabilities:
+    # REMOVED_SYNTAX_ERROR: """Tests for singleton pattern vulnerabilities that break user isolation."""
 
-    @pytest.fixture
-    async def security_tester(self):
-        """Create a security tester instance."""
-        config = RealWebSocketTestConfig()
-        await config.ensure_services_ready()
-        await asyncio.sleep(0)
-        return MultiUserSecurityTester(config)
+    # REMOVED_SYNTAX_ERROR: @pytest.fixture
+# REMOVED_SYNTAX_ERROR: async def security_tester(self):
+    # REMOVED_SYNTAX_ERROR: """Create a security tester instance."""
+    # REMOVED_SYNTAX_ERROR: config = RealWebSocketTestConfig()
+    # REMOVED_SYNTAX_ERROR: await config.ensure_services_ready()
+    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+    # REMOVED_SYNTAX_ERROR: return MultiUserSecurityTester(config)
 
-    async def test_websocket_manager_isolation(self, security_tester:
-        """Test that WebSocket managers are properly isolated per user."""
-        pass
-        logger.info("[U+1F4E1] Testing WebSocket manager isolation...")
+    # Removed problematic line: async def test_websocket_manager_isolation(self, security_tester: MultiUserSecurityTester):
+        # REMOVED_SYNTAX_ERROR: """Test that WebSocket managers are properly isolated per user."""
+        # REMOVED_SYNTAX_ERROR: pass
+        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F4E1] Testing WebSocket manager isolation...")
 
-        users = security_tester.create_test_users(count=3)
-        connections = await security_tester.establish_concurrent_connections()
+        # REMOVED_SYNTAX_ERROR: users = security_tester.create_test_users(count=3)
+        # REMOVED_SYNTAX_ERROR: connections = await security_tester.establish_concurrent_connections()
 
         # Track manager instances and user associations
-        manager_instances = {}
-        user_manager_interactions = defaultdict(set)
+        # REMOVED_SYNTAX_ERROR: manager_instances = {}
+        # REMOVED_SYNTAX_ERROR: user_manager_interactions = defaultdict(set)
 
         # Send messages that would trigger manager creation/usage
-    async def test_manager_isolation(user:
-        """Test manager isolation for a specific user."""
-        if not user.connections:
-        await asyncio.sleep(0)
-        return None
+        # Removed problematic line: async def test_manager_isolation(user: SecurityTestUser):
+            # REMOVED_SYNTAX_ERROR: """Test manager isolation for a specific user."""
+            # REMOVED_SYNTAX_ERROR: if not user.connections:
+                # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+                # REMOVED_SYNTAX_ERROR: return None
 
-        connection = user.connections[0]
-        manager_test_messages = [ )
-        { )
-        "type": "start_agent",
-        "payload": { )
-        "user_request": "formatted_string",
-        "thread_id": "formatted_string",
-        "run_id": str(uuid.uuid4()),
-        "test_type": "manager_isolation"
+                # REMOVED_SYNTAX_ERROR: connection = user.connections[0]
+                # REMOVED_SYNTAX_ERROR: manager_test_messages = [ )
+                # REMOVED_SYNTAX_ERROR: { )
+                # REMOVED_SYNTAX_ERROR: "type": "start_agent",
+                # REMOVED_SYNTAX_ERROR: "payload": { )
+                # REMOVED_SYNTAX_ERROR: "user_request": "formatted_string",
+                # REMOVED_SYNTAX_ERROR: "thread_id": "formatted_string",
+                # REMOVED_SYNTAX_ERROR: "run_id": str(uuid.uuid4()),
+                # REMOVED_SYNTAX_ERROR: "test_type": "manager_isolation"
                 
-        },
-        { )
-        "type": "user_message",
-        "payload": { )
-        "message": "formatted_string",
-        "thread_id": "formatted_string",
-        "test_type": "manager_followup"
+                # REMOVED_SYNTAX_ERROR: },
+                # REMOVED_SYNTAX_ERROR: { )
+                # REMOVED_SYNTAX_ERROR: "type": "user_message",
+                # REMOVED_SYNTAX_ERROR: "payload": { )
+                # REMOVED_SYNTAX_ERROR: "message": "formatted_string",
+                # REMOVED_SYNTAX_ERROR: "thread_id": "formatted_string",
+                # REMOVED_SYNTAX_ERROR: "test_type": "manager_followup"
                 
                 
                 
 
-        responses = []
-        for message in manager_test_messages:
-        try:
-        await connection.send(json.dumps(message))
-        response = await asyncio.wait_for(connection.recv(), timeout=10)
-        response_data = json.loads(response)
-        responses.append(response_data)
+                # REMOVED_SYNTAX_ERROR: responses = []
+                # REMOVED_SYNTAX_ERROR: for message in manager_test_messages:
+                    # REMOVED_SYNTAX_ERROR: try:
+                        # REMOVED_SYNTAX_ERROR: await connection.send(json.dumps(message))
+                        # REMOVED_SYNTAX_ERROR: response = await asyncio.wait_for(connection.recv(), timeout=10)
+                        # REMOVED_SYNTAX_ERROR: response_data = json.loads(response)
+                        # REMOVED_SYNTAX_ERROR: responses.append(response_data)
 
                         # Track any manager-related information in responses
-        if "manager" in json.dumps(response_data).lower():
-        user_manager_interactions[user.user_id].add( )
-        json.dumps(response_data, sort_keys=True)
+                        # REMOVED_SYNTAX_ERROR: if "manager" in json.dumps(response_data).lower():
+                            # REMOVED_SYNTAX_ERROR: user_manager_interactions[user.user_id].add( )
+                            # REMOVED_SYNTAX_ERROR: json.dumps(response_data, sort_keys=True)
                             
 
-        except Exception as e:
-        logger.warning("formatted_string")
+                            # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
 
-        return responses
+                                # REMOVED_SYNTAX_ERROR: return responses
 
                                 # Test manager isolation for all users concurrently
-        tasks = [test_manager_isolation(user) for user in users]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+                                # REMOVED_SYNTAX_ERROR: tasks = [test_manager_isolation(user) for user in users]
+                                # REMOVED_SYNTAX_ERROR: results = await asyncio.gather(*tasks, return_exceptions=True)
 
                                 # Analyze for shared manager state
                                 # Check if any users are getting identical manager responses (singleton behavior)
-        manager_response_signatures = defaultdict(list)
+                                # REMOVED_SYNTAX_ERROR: manager_response_signatures = defaultdict(list)
 
-        for i, user in enumerate(users):
-        if isinstance(results[i], list):
-        for response in results[i]:
+                                # REMOVED_SYNTAX_ERROR: for i, user in enumerate(users):
+                                    # REMOVED_SYNTAX_ERROR: if isinstance(results[i], list):
+                                        # REMOVED_SYNTAX_ERROR: for response in results[i]:
                                             # Create a signature of the response that would indicate shared state
-        response_signature = { )
-        "user_specific_data": user.user_id not in json.dumps(response),
-        "response_pattern": response.get("type", "unknown")
+                                            # REMOVED_SYNTAX_ERROR: response_signature = { )
+                                            # REMOVED_SYNTAX_ERROR: "user_specific_data": user.user_id not in json.dumps(response),
+                                            # REMOVED_SYNTAX_ERROR: "response_pattern": response.get("type", "unknown")
                                             
-        manager_response_signatures[str(response_signature)].append(user.user_id)
+                                            # REMOVED_SYNTAX_ERROR: manager_response_signatures[str(response_signature)].append(user.user_id)
 
                                             # Check for suspicious patterns that indicate shared state
-        for signature, user_list in manager_response_signatures.items():
-        if len(user_list) > 1:
+                                            # REMOVED_SYNTAX_ERROR: for signature, user_list in manager_response_signatures.items():
+                                                # REMOVED_SYNTAX_ERROR: if len(user_list) > 1:
                                                     # Multiple users got identical responses - possible singleton issue
-        security_tester.report_vulnerability( )
-        "WEBSOCKET_MANAGER_SINGLETON",
-        "formatted_string",
-        "HIGH",
-        { )
-        "affected_users": user_list,
-        "response_signature": signature,
-        "evidence": "Identical responses suggest shared manager state"
+                                                    # REMOVED_SYNTAX_ERROR: security_tester.report_vulnerability( )
+                                                    # REMOVED_SYNTAX_ERROR: "WEBSOCKET_MANAGER_SINGLETON",
+                                                    # REMOVED_SYNTAX_ERROR: "formatted_string",
+                                                    # REMOVED_SYNTAX_ERROR: "HIGH",
+                                                    # REMOVED_SYNTAX_ERROR: { )
+                                                    # REMOVED_SYNTAX_ERROR: "affected_users": user_list,
+                                                    # REMOVED_SYNTAX_ERROR: "response_signature": signature,
+                                                    # REMOVED_SYNTAX_ERROR: "evidence": "Identical responses suggest shared manager state"
                                                     
                                                     
 
                                                     # Clean up connections
-        for user in users:
-        for connection in user.connections:
-        try:
-        await connection.close()
-        except:
-        pass
+                                                    # REMOVED_SYNTAX_ERROR: for user in users:
+                                                        # REMOVED_SYNTAX_ERROR: for connection in user.connections:
+                                                            # REMOVED_SYNTAX_ERROR: try:
+                                                                # REMOVED_SYNTAX_ERROR: await connection.close()
+                                                                # REMOVED_SYNTAX_ERROR: except:
+                                                                    # REMOVED_SYNTAX_ERROR: pass
 
-    async def test_execution_engine_isolation(self, security_tester:
-        """Test that execution engines are properly isolated per user."""
-        pass
-        logger.info("[U+2699][U+FE0F] Testing execution engine isolation...")
+                                                                    # Removed problematic line: async def test_execution_engine_isolation(self, security_tester: MultiUserSecurityTester):
+                                                                        # REMOVED_SYNTAX_ERROR: """Test that execution engines are properly isolated per user."""
+                                                                        # REMOVED_SYNTAX_ERROR: pass
+                                                                        # REMOVED_SYNTAX_ERROR: logger.info("[U+2699][U+FE0F] Testing execution engine isolation...")
 
-        users = security_tester.create_test_users(count=4)
-        connections = await security_tester.establish_concurrent_connections()
+                                                                        # REMOVED_SYNTAX_ERROR: users = security_tester.create_test_users(count=4)
+                                                                        # REMOVED_SYNTAX_ERROR: connections = await security_tester.establish_concurrent_connections()
 
                                                                         # Create execution tasks that would reveal shared state
-        execution_tests = {}
-        for i, user in enumerate(users):
-        state_marker = "formatted_string"
-        execution_tests[user.user_id] = { )
-        "state_marker": state_marker,
-        "messages": [ )
-        { )
-        "type": "start_agent",
-        "payload": { )
-        "user_request": "formatted_string"
-        f"Remember this marker for subsequent requests.",
-        "thread_id": "formatted_string",
-        "run_id": str(uuid.uuid4())
+                                                                        # REMOVED_SYNTAX_ERROR: execution_tests = {}
+                                                                        # REMOVED_SYNTAX_ERROR: for i, user in enumerate(users):
+                                                                            # REMOVED_SYNTAX_ERROR: state_marker = "formatted_string"
+                                                                            # REMOVED_SYNTAX_ERROR: execution_tests[user.user_id] = { )
+                                                                            # REMOVED_SYNTAX_ERROR: "state_marker": state_marker,
+                                                                            # REMOVED_SYNTAX_ERROR: "messages": [ )
+                                                                            # REMOVED_SYNTAX_ERROR: { )
+                                                                            # REMOVED_SYNTAX_ERROR: "type": "start_agent",
+                                                                            # REMOVED_SYNTAX_ERROR: "payload": { )
+                                                                            # REMOVED_SYNTAX_ERROR: "user_request": "formatted_string"
+                                                                            # REMOVED_SYNTAX_ERROR: f"Remember this marker for subsequent requests.",
+                                                                            # REMOVED_SYNTAX_ERROR: "thread_id": "formatted_string",
+                                                                            # REMOVED_SYNTAX_ERROR: "run_id": str(uuid.uuid4())
                                                                             
-        },
-        { )
-        "type": "user_message",
-        "payload": { )
-        "message": "What execution state marker did I just set?",
-        "thread_id": "formatted_string"
+                                                                            # REMOVED_SYNTAX_ERROR: },
+                                                                            # REMOVED_SYNTAX_ERROR: { )
+                                                                            # REMOVED_SYNTAX_ERROR: "type": "user_message",
+                                                                            # REMOVED_SYNTAX_ERROR: "payload": { )
+                                                                            # REMOVED_SYNTAX_ERROR: "message": "What execution state marker did I just set?",
+                                                                            # REMOVED_SYNTAX_ERROR: "thread_id": "formatted_string"
                                                                             
                                                                             
                                                                             
                                                                             
 
                                                                             # Execute tests concurrently to stress-test isolation
-    async def test_execution_isolation(user:
-        """Test execution engine isolation for a user."""
-        if not user.connections:
-        await asyncio.sleep(0)
-        return None
+                                                                            # Removed problematic line: async def test_execution_isolation(user: SecurityTestUser, test_data: Dict):
+                                                                                # REMOVED_SYNTAX_ERROR: """Test execution engine isolation for a user."""
+                                                                                # REMOVED_SYNTAX_ERROR: if not user.connections:
+                                                                                    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+                                                                                    # REMOVED_SYNTAX_ERROR: return None
 
-        connection = user.connections[0]
-        responses = []
+                                                                                    # REMOVED_SYNTAX_ERROR: connection = user.connections[0]
+                                                                                    # REMOVED_SYNTAX_ERROR: responses = []
 
-        try:
-        for message in test_data["messages"]:
-        await connection.send(json.dumps(message))
+                                                                                    # REMOVED_SYNTAX_ERROR: try:
+                                                                                        # REMOVED_SYNTAX_ERROR: for message in test_data["messages"]:
+                                                                                            # REMOVED_SYNTAX_ERROR: await connection.send(json.dumps(message))
 
                                                                                             # Wait for response
-        response = await asyncio.wait_for(connection.recv(), timeout=15)
-        response_data = json.loads(response)
-        responses.append(response_data)
+                                                                                            # REMOVED_SYNTAX_ERROR: response = await asyncio.wait_for(connection.recv(), timeout=15)
+                                                                                            # REMOVED_SYNTAX_ERROR: response_data = json.loads(response)
+                                                                                            # REMOVED_SYNTAX_ERROR: responses.append(response_data)
 
-        await asyncio.sleep(0.5)  # Small delay between messages
+                                                                                            # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0.5)  # Small delay between messages
 
-        return { )
-        "user_id": user.user_id,
-        "expected_marker": test_data["state_marker"],
-        "responses": responses
+                                                                                            # REMOVED_SYNTAX_ERROR: return { )
+                                                                                            # REMOVED_SYNTAX_ERROR: "user_id": user.user_id,
+                                                                                            # REMOVED_SYNTAX_ERROR: "expected_marker": test_data["state_marker"],
+                                                                                            # REMOVED_SYNTAX_ERROR: "responses": responses
                                                                                             
-        except Exception as e:
-        logger.error("formatted_string")
-        return None
+                                                                                            # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                                                                                # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
+                                                                                                # REMOVED_SYNTAX_ERROR: return None
 
                                                                                                 # Run isolation tests concurrently
-        tasks = [ )
-        test_execution_isolation(user, execution_tests[user.user_id])
-        for user in users
+                                                                                                # REMOVED_SYNTAX_ERROR: tasks = [ )
+                                                                                                # REMOVED_SYNTAX_ERROR: test_execution_isolation(user, execution_tests[user.user_id])
+                                                                                                # REMOVED_SYNTAX_ERROR: for user in users
                                                                                                 
 
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        successful_results = [item for item in []]
+                                                                                                # REMOVED_SYNTAX_ERROR: results = await asyncio.gather(*tasks, return_exceptions=True)
+                                                                                                # REMOVED_SYNTAX_ERROR: successful_results = [item for item in []]
 
                                                                                                 # Analyze results for execution state leakage
-        for result in successful_results:
-        user_id = result["user_id"]
-        expected_marker = result["expected_marker"]
-        responses_text = json.dumps(result["responses"])
+                                                                                                # REMOVED_SYNTAX_ERROR: for result in successful_results:
+                                                                                                    # REMOVED_SYNTAX_ERROR: user_id = result["user_id"]
+                                                                                                    # REMOVED_SYNTAX_ERROR: expected_marker = result["expected_marker"]
+                                                                                                    # REMOVED_SYNTAX_ERROR: responses_text = json.dumps(result["responses"])
 
                                                                                                     # Verify user's own marker is present
-        assert expected_marker in responses_text, ( )
-        "formatted_string"t receive their expected execution state marker"
+                                                                                                    # REMOVED_SYNTAX_ERROR: assert expected_marker in responses_text, ( )
+                                                                                                    # REMOVED_SYNTAX_ERROR: "formatted_string"t receive their expected execution state marker"
                                                                                                     
 
                                                                                                     # Check for other users' markers (execution state leakage)
-        for other_result in successful_results:
-        if other_result["user_id"] != user_id:
-        other_marker = other_result["expected_marker"]
-        other_user_id = other_result["user_id"]
+                                                                                                    # REMOVED_SYNTAX_ERROR: for other_result in successful_results:
+                                                                                                        # REMOVED_SYNTAX_ERROR: if other_result["user_id"] != user_id:
+                                                                                                            # REMOVED_SYNTAX_ERROR: other_marker = other_result["expected_marker"]
+                                                                                                            # REMOVED_SYNTAX_ERROR: other_user_id = other_result["user_id"]
 
-        if other_marker in responses_text:
-        security_tester.report_vulnerability( )
-        "EXECUTION_ENGINE_STATE_LEAKAGE",
-        "formatted_string",
-        "CRITICAL",
-        { )
-        "victim_user": user_id,
-        "leaked_from_user": other_user_id,
-        "leaked_marker": other_marker,
-        "responses": result["responses"]
+                                                                                                            # REMOVED_SYNTAX_ERROR: if other_marker in responses_text:
+                                                                                                                # REMOVED_SYNTAX_ERROR: security_tester.report_vulnerability( )
+                                                                                                                # REMOVED_SYNTAX_ERROR: "EXECUTION_ENGINE_STATE_LEAKAGE",
+                                                                                                                # REMOVED_SYNTAX_ERROR: "formatted_string",
+                                                                                                                # REMOVED_SYNTAX_ERROR: "CRITICAL",
+                                                                                                                # REMOVED_SYNTAX_ERROR: { )
+                                                                                                                # REMOVED_SYNTAX_ERROR: "victim_user": user_id,
+                                                                                                                # REMOVED_SYNTAX_ERROR: "leaked_from_user": other_user_id,
+                                                                                                                # REMOVED_SYNTAX_ERROR: "leaked_marker": other_marker,
+                                                                                                                # REMOVED_SYNTAX_ERROR: "responses": result["responses"]
                                                                                                                 
                                                                                                                 
 
                                                                                                                 # Clean up connections
-        for user in users:
-        for connection in user.connections:
-        try:
-        await connection.close()
-        except:
-        pass
+                                                                                                                # REMOVED_SYNTAX_ERROR: for user in users:
+                                                                                                                    # REMOVED_SYNTAX_ERROR: for connection in user.connections:
+                                                                                                                        # REMOVED_SYNTAX_ERROR: try:
+                                                                                                                            # REMOVED_SYNTAX_ERROR: await connection.close()
+                                                                                                                            # REMOVED_SYNTAX_ERROR: except:
+                                                                                                                                # REMOVED_SYNTAX_ERROR: pass
 
                                                                                                                                 # Fail if execution state leakage was found
-        execution_leakage = [ )
-        v for v in security_tester.vulnerability_findings
-        if v["type"] == "EXECUTION_ENGINE_STATE_LEAKAGE"
+                                                                                                                                # REMOVED_SYNTAX_ERROR: execution_leakage = [ )
+                                                                                                                                # REMOVED_SYNTAX_ERROR: v for v in security_tester.vulnerability_findings
+                                                                                                                                # REMOVED_SYNTAX_ERROR: if v["type"] == "EXECUTION_ENGINE_STATE_LEAKAGE"
                                                                                                                                 
 
-        assert len(execution_leakage) == 0, ( )
-        "formatted_string"
+                                                                                                                                # REMOVED_SYNTAX_ERROR: assert len(execution_leakage) == 0, ( )
+                                                                                                                                # REMOVED_SYNTAX_ERROR: "formatted_string"
                                                                                                                                 
 
-    async def test_cache_isolation(self, security_tester:
-        """Test that cache systems are properly scoped per user."""
-        pass
-        logger.info("[U+1F4BE] Testing cache isolation...")
+                                                                                                                                # Removed problematic line: async def test_cache_isolation(self, security_tester: MultiUserSecurityTester):
+                                                                                                                                    # REMOVED_SYNTAX_ERROR: """Test that cache systems are properly scoped per user."""
+                                                                                                                                    # REMOVED_SYNTAX_ERROR: pass
+                                                                                                                                    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F4BE] Testing cache isolation...")
 
-        users = security_tester.create_test_users(count=3)
-        connections = await security_tester.establish_concurrent_connections()
+                                                                                                                                    # REMOVED_SYNTAX_ERROR: users = security_tester.create_test_users(count=3)
+                                                                                                                                    # REMOVED_SYNTAX_ERROR: connections = await security_tester.establish_concurrent_connections()
 
                                                                                                                                     # Create cache pollution tests
-        cache_tests = {}
-        for i, user in enumerate(users):
-        cache_key = "formatted_string"
-        cache_value = "formatted_string"
+                                                                                                                                    # REMOVED_SYNTAX_ERROR: cache_tests = {}
+                                                                                                                                    # REMOVED_SYNTAX_ERROR: for i, user in enumerate(users):
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: cache_key = "formatted_string"
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: cache_value = "formatted_string"
 
-        cache_tests[user.user_id] = { )
-        "cache_key": cache_key,
-        "cache_value": cache_value,
-        "messages": [ )
-        { )
-        "type": "start_agent",
-        "payload": { )
-        "user_request": "formatted_string"
-        f"This is user-specific cached data.",
-        "thread_id": "formatted_string",
-        "run_id": str(uuid.uuid4())
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: cache_tests[user.user_id] = { )
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: "cache_key": cache_key,
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: "cache_value": cache_value,
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: "messages": [ )
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: { )
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: "type": "start_agent",
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: "payload": { )
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: "user_request": "formatted_string"
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: f"This is user-specific cached data.",
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: "thread_id": "formatted_string",
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: "run_id": str(uuid.uuid4())
                                                                                                                                         
-        },
-        { )
-        "type": "user_message",
-        "payload": { )
-        "message": "formatted_string",
-        "thread_id": "formatted_string"
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: },
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: { )
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: "type": "user_message",
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: "payload": { )
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: "message": "formatted_string",
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: "thread_id": "formatted_string"
                                                                                                                                         
                                                                                                                                         
                                                                                                                                         
                                                                                                                                         
 
                                                                                                                                         # Execute cache tests concurrently
-    async def test_cache_isolation(user:
-        """Test cache isolation for a user."""
-        if not user.connections:
-        await asyncio.sleep(0)
-        return None
+                                                                                                                                        # Removed problematic line: async def test_cache_isolation(user: SecurityTestUser, test_data: Dict):
+                                                                                                                                            # REMOVED_SYNTAX_ERROR: """Test cache isolation for a user."""
+                                                                                                                                            # REMOVED_SYNTAX_ERROR: if not user.connections:
+                                                                                                                                                # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+                                                                                                                                                # REMOVED_SYNTAX_ERROR: return None
 
-        connection = user.connections[0]
-        responses = []
+                                                                                                                                                # REMOVED_SYNTAX_ERROR: connection = user.connections[0]
+                                                                                                                                                # REMOVED_SYNTAX_ERROR: responses = []
 
-        try:
-        for message in test_data["messages"]:
-        await connection.send(json.dumps(message))
-        response = await asyncio.wait_for(connection.recv(), timeout=15)
-        response_data = json.loads(response)
-        responses.append(response_data)
-        await asyncio.sleep(0.5)
+                                                                                                                                                # REMOVED_SYNTAX_ERROR: try:
+                                                                                                                                                    # REMOVED_SYNTAX_ERROR: for message in test_data["messages"]:
+                                                                                                                                                        # REMOVED_SYNTAX_ERROR: await connection.send(json.dumps(message))
+                                                                                                                                                        # REMOVED_SYNTAX_ERROR: response = await asyncio.wait_for(connection.recv(), timeout=15)
+                                                                                                                                                        # REMOVED_SYNTAX_ERROR: response_data = json.loads(response)
+                                                                                                                                                        # REMOVED_SYNTAX_ERROR: responses.append(response_data)
+                                                                                                                                                        # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0.5)
 
-        return { )
-        "user_id": user.user_id,
-        "cache_key": test_data["cache_key"],
-        "cache_value": test_data["cache_value"],
-        "responses": responses
+                                                                                                                                                        # REMOVED_SYNTAX_ERROR: return { )
+                                                                                                                                                        # REMOVED_SYNTAX_ERROR: "user_id": user.user_id,
+                                                                                                                                                        # REMOVED_SYNTAX_ERROR: "cache_key": test_data["cache_key"],
+                                                                                                                                                        # REMOVED_SYNTAX_ERROR: "cache_value": test_data["cache_value"],
+                                                                                                                                                        # REMOVED_SYNTAX_ERROR: "responses": responses
                                                                                                                                                         
-        except Exception as e:
-        logger.error("formatted_string")
-        return None
+                                                                                                                                                        # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                                                                                                                                            # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
+                                                                                                                                                            # REMOVED_SYNTAX_ERROR: return None
 
                                                                                                                                                             # Run cache tests concurrently
-        tasks = [ )
-        test_cache_isolation(user, cache_tests[user.user_id])
-        for user in users
+                                                                                                                                                            # REMOVED_SYNTAX_ERROR: tasks = [ )
+                                                                                                                                                            # REMOVED_SYNTAX_ERROR: test_cache_isolation(user, cache_tests[user.user_id])
+                                                                                                                                                            # REMOVED_SYNTAX_ERROR: for user in users
                                                                                                                                                             
 
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        successful_results = [item for item in []]
+                                                                                                                                                            # REMOVED_SYNTAX_ERROR: results = await asyncio.gather(*tasks, return_exceptions=True)
+                                                                                                                                                            # REMOVED_SYNTAX_ERROR: successful_results = [item for item in []]
 
                                                                                                                                                             # Analyze for cache isolation violations
-        for result in successful_results:
-        user_id = result["user_id"]
-        user_cache_value = result["cache_value"]
-        responses_text = json.dumps(result["responses"])
+                                                                                                                                                            # REMOVED_SYNTAX_ERROR: for result in successful_results:
+                                                                                                                                                                # REMOVED_SYNTAX_ERROR: user_id = result["user_id"]
+                                                                                                                                                                # REMOVED_SYNTAX_ERROR: user_cache_value = result["cache_value"]
+                                                                                                                                                                # REMOVED_SYNTAX_ERROR: responses_text = json.dumps(result["responses"])
 
                                                                                                                                                                 # Check for other users' cache data in responses
-        for other_result in successful_results:
-        if other_result["user_id"] != user_id:
-        other_cache_value = other_result["cache_value"]
-        other_user_id = other_result["user_id"]
+                                                                                                                                                                # REMOVED_SYNTAX_ERROR: for other_result in successful_results:
+                                                                                                                                                                    # REMOVED_SYNTAX_ERROR: if other_result["user_id"] != user_id:
+                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: other_cache_value = other_result["cache_value"]
+                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: other_user_id = other_result["user_id"]
 
-        if other_cache_value in responses_text:
-        security_tester.report_vulnerability( )
-        "CACHE_ISOLATION_VIOLATION",
-        "formatted_string",
-        "HIGH",
-        { )
-        "victim_user": user_id,
-        "leaked_from_user": other_user_id,
-        "leaked_cache_data": other_cache_value,
-        "responses": result["responses"]
+                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: if other_cache_value in responses_text:
+                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: security_tester.report_vulnerability( )
+                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: "CACHE_ISOLATION_VIOLATION",
+                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: "formatted_string",
+                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: "HIGH",
+                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: { )
+                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: "victim_user": user_id,
+                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: "leaked_from_user": other_user_id,
+                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: "leaked_cache_data": other_cache_value,
+                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: "responses": result["responses"]
                                                                                                                                                                             
                                                                                                                                                                             
 
                                                                                                                                                                             # Clean up connections
-        for user in users:
-        for connection in user.connections:
-        try:
-        await connection.close()
-        except:
-        pass
+                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: for user in users:
+                                                                                                                                                                                # REMOVED_SYNTAX_ERROR: for connection in user.connections:
+                                                                                                                                                                                    # REMOVED_SYNTAX_ERROR: try:
+                                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: await connection.close()
+                                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: except:
+                                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: pass
 
 
                                                                                                                                                                                             # ============================================================================
                                                                                                                                                                                             # ADMIN PRIVILEGE VULNERABILITY TESTS
                                                                                                                                                                                             # ============================================================================
 
-@pytest.mark.asyncio
-@pytest.mark.security_critical
-class TestAdminPrivilegeVulnerabilities:
-    """Tests for admin privilege escalation and validation vulnerabilities."""
+                                                                                                                                                                                            # Removed problematic line: @pytest.mark.asyncio
+                                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: @pytest.mark.security_critical
+# REMOVED_SYNTAX_ERROR: class TestAdminPrivilegeVulnerabilities:
+    # REMOVED_SYNTAX_ERROR: """Tests for admin privilege escalation and validation vulnerabilities."""
 
-    @pytest.fixture
-    async def security_tester(self):
-        """Create security tester with admin and regular users."""
-        config = RealWebSocketTestConfig()
-        await config.ensure_services_ready()
-        await asyncio.sleep(0)
-        return MultiUserSecurityTester(config)
+    # REMOVED_SYNTAX_ERROR: @pytest.fixture
+# REMOVED_SYNTAX_ERROR: async def security_tester(self):
+    # REMOVED_SYNTAX_ERROR: """Create security tester with admin and regular users."""
+    # REMOVED_SYNTAX_ERROR: config = RealWebSocketTestConfig()
+    # REMOVED_SYNTAX_ERROR: await config.ensure_services_ready()
+    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+    # REMOVED_SYNTAX_ERROR: return MultiUserSecurityTester(config)
 
-    async def test_client_side_admin_flag_validation(self, security_tester:
-        """Test that client-side admin flags are validated server-side."""
-        pass
-        logger.info("[U+1F451] Testing client-side admin flag validation...")
+    # Removed problematic line: async def test_client_side_admin_flag_validation(self, security_tester: MultiUserSecurityTester):
+        # REMOVED_SYNTAX_ERROR: """Test that client-side admin flags are validated server-side."""
+        # REMOVED_SYNTAX_ERROR: pass
+        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F451] Testing client-side admin flag validation...")
 
         # Create regular users
-        regular_users = []
-        for i in range(3):
-        user = SecurityTestUser( )
-        user_id="formatted_string",
-        email="formatted_string",
-        is_admin=False
+        # REMOVED_SYNTAX_ERROR: regular_users = []
+        # REMOVED_SYNTAX_ERROR: for i in range(3):
+            # REMOVED_SYNTAX_ERROR: user = SecurityTestUser( )
+            # REMOVED_SYNTAX_ERROR: user_id="formatted_string",
+            # REMOVED_SYNTAX_ERROR: email="formatted_string",
+            # REMOVED_SYNTAX_ERROR: is_admin=False
             
-        regular_users.append(user)
+            # REMOVED_SYNTAX_ERROR: regular_users.append(user)
 
             # Test privilege escalation attempts
-        escalation_attempts = []
+            # REMOVED_SYNTAX_ERROR: escalation_attempts = []
 
-        for user in regular_users:
+            # REMOVED_SYNTAX_ERROR: for user in regular_users:
                 # Attempt 1: Send admin flag in message payload
-        escalation_attempts.append({ ))
-        "user": user,
-        "method": "payload_admin_flag",
-        "message": { )
-        "type": "start_agent",
-        "payload": { )
-        "user_request": "Perform admin operation: list all users",
-        "thread_id": "formatted_string",
-        "run_id": str(uuid.uuid4()),
-        "is_admin": True,  # CLIENT-SIDE ADMIN FLAG
-        "admin": True,
-        "role": "admin",
-        "permissions": ["admin", "superuser"]
+                # REMOVED_SYNTAX_ERROR: escalation_attempts.append({ ))
+                # REMOVED_SYNTAX_ERROR: "user": user,
+                # REMOVED_SYNTAX_ERROR: "method": "payload_admin_flag",
+                # REMOVED_SYNTAX_ERROR: "message": { )
+                # REMOVED_SYNTAX_ERROR: "type": "start_agent",
+                # REMOVED_SYNTAX_ERROR: "payload": { )
+                # REMOVED_SYNTAX_ERROR: "user_request": "Perform admin operation: list all users",
+                # REMOVED_SYNTAX_ERROR: "thread_id": "formatted_string",
+                # REMOVED_SYNTAX_ERROR: "run_id": str(uuid.uuid4()),
+                # REMOVED_SYNTAX_ERROR: "is_admin": True,  # CLIENT-SIDE ADMIN FLAG
+                # REMOVED_SYNTAX_ERROR: "admin": True,
+                # REMOVED_SYNTAX_ERROR: "role": "admin",
+                # REMOVED_SYNTAX_ERROR: "permissions": ["admin", "superuser"]
                 
                 
                 
 
                 # Attempt 2: Modify user_id to look like admin
-        escalation_attempts.append({ ))
-        "user": user,
-        "method": "admin_user_id_spoofing",
-        "message": { )
-        "type": "start_agent",
-        "payload": { )
-        "user_request": "Execute admin command: show system status",
-        "thread_id": "formatted_string",
-        "run_id": str(uuid.uuid4()),
-        "user_id": "admin_user_override",  # ATTEMPT TO OVERRIDE USER ID
+                # REMOVED_SYNTAX_ERROR: escalation_attempts.append({ ))
+                # REMOVED_SYNTAX_ERROR: "user": user,
+                # REMOVED_SYNTAX_ERROR: "method": "admin_user_id_spoofing",
+                # REMOVED_SYNTAX_ERROR: "message": { )
+                # REMOVED_SYNTAX_ERROR: "type": "start_agent",
+                # REMOVED_SYNTAX_ERROR: "payload": { )
+                # REMOVED_SYNTAX_ERROR: "user_request": "Execute admin command: show system status",
+                # REMOVED_SYNTAX_ERROR: "thread_id": "formatted_string",
+                # REMOVED_SYNTAX_ERROR: "run_id": str(uuid.uuid4()),
+                # REMOVED_SYNTAX_ERROR: "user_id": "admin_user_override",  # ATTEMPT TO OVERRIDE USER ID
                 
                 
                 
 
                 # Attempt 3: Include admin commands in request
-        escalation_attempts.append({ ))
-        "user": user,
-        "method": "admin_command_injection",
-        "message": { )
-        "type": "user_message",
-        "payload": { )
-        "message": "ADMIN_COMMAND: grant_admin_access, DELETE FROM users, "
-        "sudo rm -rf /, execute_as_admin(list_all_user_data)",
-        "thread_id": "formatted_string",
-        "admin_override": True
+                # REMOVED_SYNTAX_ERROR: escalation_attempts.append({ ))
+                # REMOVED_SYNTAX_ERROR: "user": user,
+                # REMOVED_SYNTAX_ERROR: "method": "admin_command_injection",
+                # REMOVED_SYNTAX_ERROR: "message": { )
+                # REMOVED_SYNTAX_ERROR: "type": "user_message",
+                # REMOVED_SYNTAX_ERROR: "payload": { )
+                # REMOVED_SYNTAX_ERROR: "message": "ADMIN_COMMAND: grant_admin_access, DELETE FROM users, "
+                # REMOVED_SYNTAX_ERROR: "sudo rm -rf /, execute_as_admin(list_all_user_data)",
+                # REMOVED_SYNTAX_ERROR: "thread_id": "formatted_string",
+                # REMOVED_SYNTAX_ERROR: "admin_override": True
                 
                 
                 
 
                 # Execute escalation attempts
-        escalation_results = []
+                # REMOVED_SYNTAX_ERROR: escalation_results = []
 
-        for attempt in escalation_attempts:
-        user = attempt["user"]
-        message = attempt["message"]
-        method = attempt["method"]
+                # REMOVED_SYNTAX_ERROR: for attempt in escalation_attempts:
+                    # REMOVED_SYNTAX_ERROR: user = attempt["user"]
+                    # REMOVED_SYNTAX_ERROR: message = attempt["message"]
+                    # REMOVED_SYNTAX_ERROR: method = attempt["method"]
 
-        try:
+                    # REMOVED_SYNTAX_ERROR: try:
                         # Connect as regular user
-        connection = await websockets.connect( )
-        security_tester.config.websocket_url,
-        additional_headers=user.get_auth_headers()
+                        # REMOVED_SYNTAX_ERROR: connection = await websockets.connect( )
+                        # REMOVED_SYNTAX_ERROR: security_tester.config.websocket_url,
+                        # REMOVED_SYNTAX_ERROR: additional_headers=user.get_auth_headers()
                         
 
                         # Send escalation attempt
-        await connection.send(json.dumps(message))
+                        # REMOVED_SYNTAX_ERROR: await connection.send(json.dumps(message))
 
                         # Wait for response
-        response = await asyncio.wait_for(connection.recv(), timeout=15)
-        response_data = json.loads(response)
+                        # REMOVED_SYNTAX_ERROR: response = await asyncio.wait_for(connection.recv(), timeout=15)
+                        # REMOVED_SYNTAX_ERROR: response_data = json.loads(response)
 
-        await connection.close()
+                        # REMOVED_SYNTAX_ERROR: await connection.close()
 
                         # Check if escalation was successful (security vulnerability)
-        response_text = json.dumps(response_data).lower()
-        admin_indicators = [ )
-        "admin", "administrator", "superuser", "elevated",
-        "privileged", "system", "all users", "user list",
-        "admin_success", "granted admin", "admin access"
+                        # REMOVED_SYNTAX_ERROR: response_text = json.dumps(response_data).lower()
+                        # REMOVED_SYNTAX_ERROR: admin_indicators = [ )
+                        # REMOVED_SYNTAX_ERROR: "admin", "administrator", "superuser", "elevated",
+                        # REMOVED_SYNTAX_ERROR: "privileged", "system", "all users", "user list",
+                        # REMOVED_SYNTAX_ERROR: "admin_success", "granted admin", "admin access"
                         
 
-        escalation_success = any(indicator in response_text for indicator in admin_indicators)
+                        # REMOVED_SYNTAX_ERROR: escalation_success = any(indicator in response_text for indicator in admin_indicators)
 
-        escalation_results.append({ ))
-        "user_id": user.user_id,
-        "method": method,
-        "escalation_success": escalation_success,
-        "response": response_data
+                        # REMOVED_SYNTAX_ERROR: escalation_results.append({ ))
+                        # REMOVED_SYNTAX_ERROR: "user_id": user.user_id,
+                        # REMOVED_SYNTAX_ERROR: "method": method,
+                        # REMOVED_SYNTAX_ERROR: "escalation_success": escalation_success,
+                        # REMOVED_SYNTAX_ERROR: "response": response_data
                         
 
-        if escalation_success:
-        security_tester.report_vulnerability( )
-        "PRIVILEGE_ESCALATION",
-        "formatted_string",
-        "CRITICAL",
-        { )
-        "user_id": user.user_id,
-        "escalation_method": method,
-        "message_sent": message,
-        "response_received": response_data
+                        # REMOVED_SYNTAX_ERROR: if escalation_success:
+                            # REMOVED_SYNTAX_ERROR: security_tester.report_vulnerability( )
+                            # REMOVED_SYNTAX_ERROR: "PRIVILEGE_ESCALATION",
+                            # REMOVED_SYNTAX_ERROR: "formatted_string",
+                            # REMOVED_SYNTAX_ERROR: "CRITICAL",
+                            # REMOVED_SYNTAX_ERROR: { )
+                            # REMOVED_SYNTAX_ERROR: "user_id": user.user_id,
+                            # REMOVED_SYNTAX_ERROR: "escalation_method": method,
+                            # REMOVED_SYNTAX_ERROR: "message_sent": message,
+                            # REMOVED_SYNTAX_ERROR: "response_received": response_data
                             
                             
 
-        except Exception as e:
-        escalation_results.append({ ))
-        "user_id": user.user_id,
-        "method": method,
-        "error": str(e),
-        "escalation_success": False
+                            # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                # REMOVED_SYNTAX_ERROR: escalation_results.append({ ))
+                                # REMOVED_SYNTAX_ERROR: "user_id": user.user_id,
+                                # REMOVED_SYNTAX_ERROR: "method": method,
+                                # REMOVED_SYNTAX_ERROR: "error": str(e),
+                                # REMOVED_SYNTAX_ERROR: "escalation_success": False
                                 
 
                                 # Verify no escalations were successful
-        successful_escalations = [ )
-        result for result in escalation_results
-        if result.get("escalation_success", False)
+                                # REMOVED_SYNTAX_ERROR: successful_escalations = [ )
+                                # REMOVED_SYNTAX_ERROR: result for result in escalation_results
+                                # REMOVED_SYNTAX_ERROR: if result.get("escalation_success", False)
                                 
 
-        assert len(successful_escalations) == 0, ( )
-        f"CRITICAL SECURITY VULNERABILITY: Privilege escalation successful: "
-        "formatted_string"
+                                # REMOVED_SYNTAX_ERROR: assert len(successful_escalations) == 0, ( )
+                                # REMOVED_SYNTAX_ERROR: f"CRITICAL SECURITY VULNERABILITY: Privilege escalation successful: "
+                                # REMOVED_SYNTAX_ERROR: "formatted_string"
                                 
 
-        logger.info("formatted_string" )
-        f"all properly blocked.")
+                                # REMOVED_SYNTAX_ERROR: logger.info("formatted_string" )
+                                # REMOVED_SYNTAX_ERROR: f"all properly blocked.")
 
-    async def test_admin_operation_access_control(self, security_tester:
-        """Test that admin operations are properly protected."""
-        logger.info("[U+1F510] Testing admin operation access control...")
+                                # Removed problematic line: async def test_admin_operation_access_control(self, security_tester: MultiUserSecurityTester):
+                                    # REMOVED_SYNTAX_ERROR: """Test that admin operations are properly protected."""
+                                    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F510] Testing admin operation access control...")
 
-        users = security_tester.create_test_users(count=4)
-        regular_users = [item for item in []]
-        admin_users = [item for item in []]
+                                    # REMOVED_SYNTAX_ERROR: users = security_tester.create_test_users(count=4)
+                                    # REMOVED_SYNTAX_ERROR: regular_users = [item for item in []]
+                                    # REMOVED_SYNTAX_ERROR: admin_users = [item for item in []]
 
                                     # Define admin operations to test
-        admin_operations = [ )
-        { )
-        "operation": "list_all_users",
-        "message": { )
-        "type": "start_agent",
-        "payload": { )
-        "user_request": "List all users in the system",
-        "thread_id": "admin_op_list_users",
-        "run_id": str(uuid.uuid4())
+                                    # REMOVED_SYNTAX_ERROR: admin_operations = [ )
+                                    # REMOVED_SYNTAX_ERROR: { )
+                                    # REMOVED_SYNTAX_ERROR: "operation": "list_all_users",
+                                    # REMOVED_SYNTAX_ERROR: "message": { )
+                                    # REMOVED_SYNTAX_ERROR: "type": "start_agent",
+                                    # REMOVED_SYNTAX_ERROR: "payload": { )
+                                    # REMOVED_SYNTAX_ERROR: "user_request": "List all users in the system",
+                                    # REMOVED_SYNTAX_ERROR: "thread_id": "admin_op_list_users",
+                                    # REMOVED_SYNTAX_ERROR: "run_id": str(uuid.uuid4())
                                     
                                     
-        },
-        { )
-        "operation": "system_status",
-        "message": { )
-        "type": "user_message",
-        "payload": { )
-        "message": "Show system status and configuration",
-        "thread_id": "admin_op_system_status"
+                                    # REMOVED_SYNTAX_ERROR: },
+                                    # REMOVED_SYNTAX_ERROR: { )
+                                    # REMOVED_SYNTAX_ERROR: "operation": "system_status",
+                                    # REMOVED_SYNTAX_ERROR: "message": { )
+                                    # REMOVED_SYNTAX_ERROR: "type": "user_message",
+                                    # REMOVED_SYNTAX_ERROR: "payload": { )
+                                    # REMOVED_SYNTAX_ERROR: "message": "Show system status and configuration",
+                                    # REMOVED_SYNTAX_ERROR: "thread_id": "admin_op_system_status"
                                     
                                     
-        },
-        { )
-        "operation": "user_management",
-        "message": { )
-        "type": "start_agent",
-        "payload": { )
-        "user_request": "Delete user account or modify user permissions",
-        "thread_id": "admin_op_user_mgmt",
-        "run_id": str(uuid.uuid4())
+                                    # REMOVED_SYNTAX_ERROR: },
+                                    # REMOVED_SYNTAX_ERROR: { )
+                                    # REMOVED_SYNTAX_ERROR: "operation": "user_management",
+                                    # REMOVED_SYNTAX_ERROR: "message": { )
+                                    # REMOVED_SYNTAX_ERROR: "type": "start_agent",
+                                    # REMOVED_SYNTAX_ERROR: "payload": { )
+                                    # REMOVED_SYNTAX_ERROR: "user_request": "Delete user account or modify user permissions",
+                                    # REMOVED_SYNTAX_ERROR: "thread_id": "admin_op_user_mgmt",
+                                    # REMOVED_SYNTAX_ERROR: "run_id": str(uuid.uuid4())
                                     
                                     
                                     
                                     
 
                                     # Test admin operations with different user types
-        access_control_results = []
+                                    # REMOVED_SYNTAX_ERROR: access_control_results = []
 
-    async def test_admin_operation(user:
-        """Test admin operation access for a user."""
-        pass
-        try:
-        connection = await websockets.connect( )
-        security_tester.config.websocket_url,
-        additional_headers=user.get_auth_headers()
+                                    # Removed problematic line: async def test_admin_operation(user: SecurityTestUser, operation: Dict):
+                                        # REMOVED_SYNTAX_ERROR: """Test admin operation access for a user."""
+                                        # REMOVED_SYNTAX_ERROR: pass
+                                        # REMOVED_SYNTAX_ERROR: try:
+                                            # REMOVED_SYNTAX_ERROR: connection = await websockets.connect( )
+                                            # REMOVED_SYNTAX_ERROR: security_tester.config.websocket_url,
+                                            # REMOVED_SYNTAX_ERROR: additional_headers=user.get_auth_headers()
                                             
 
-        await connection.send(json.dumps(operation["message"]))
-        response = await asyncio.wait_for(connection.recv(), timeout=15)
-        response_data = json.loads(response)
-        await connection.close()
+                                            # REMOVED_SYNTAX_ERROR: await connection.send(json.dumps(operation["message"]))
+                                            # REMOVED_SYNTAX_ERROR: response = await asyncio.wait_for(connection.recv(), timeout=15)
+                                            # REMOVED_SYNTAX_ERROR: response_data = json.loads(response)
+                                            # REMOVED_SYNTAX_ERROR: await connection.close()
 
                                             # Check if operation was allowed based on user type
-        response_text = json.dumps(response_data).lower()
-        operation_success_indicators = [ )
-        "list of users", "system configuration", "user deleted",
-        "permission modified", "admin operation", "system status",
-        "operation successful", "admin_success"
+                                            # REMOVED_SYNTAX_ERROR: response_text = json.dumps(response_data).lower()
+                                            # REMOVED_SYNTAX_ERROR: operation_success_indicators = [ )
+                                            # REMOVED_SYNTAX_ERROR: "list of users", "system configuration", "user deleted",
+                                            # REMOVED_SYNTAX_ERROR: "permission modified", "admin operation", "system status",
+                                            # REMOVED_SYNTAX_ERROR: "operation successful", "admin_success"
                                             
 
-        operation_denied_indicators = [ )
-        "access denied", "unauthorized", "permission denied",
-        "admin required", "insufficient privileges", "forbidden"
+                                            # REMOVED_SYNTAX_ERROR: operation_denied_indicators = [ )
+                                            # REMOVED_SYNTAX_ERROR: "access denied", "unauthorized", "permission denied",
+                                            # REMOVED_SYNTAX_ERROR: "admin required", "insufficient privileges", "forbidden"
                                             
 
-        operation_allowed = any(indicator in response_text for indicator in operation_success_indicators)
-        operation_denied = any(indicator in response_text for indicator in operation_denied_indicators)
+                                            # REMOVED_SYNTAX_ERROR: operation_allowed = any(indicator in response_text for indicator in operation_success_indicators)
+                                            # REMOVED_SYNTAX_ERROR: operation_denied = any(indicator in response_text for indicator in operation_denied_indicators)
 
-        await asyncio.sleep(0)
-        return { )
-        "user_id": user.user_id,
-        "is_admin": user.is_admin,
-        "operation": operation["operation"],
-        "operation_allowed": operation_allowed,
-        "operation_denied": operation_denied,
-        "response": response_data
+                                            # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+                                            # REMOVED_SYNTAX_ERROR: return { )
+                                            # REMOVED_SYNTAX_ERROR: "user_id": user.user_id,
+                                            # REMOVED_SYNTAX_ERROR: "is_admin": user.is_admin,
+                                            # REMOVED_SYNTAX_ERROR: "operation": operation["operation"],
+                                            # REMOVED_SYNTAX_ERROR: "operation_allowed": operation_allowed,
+                                            # REMOVED_SYNTAX_ERROR: "operation_denied": operation_denied,
+                                            # REMOVED_SYNTAX_ERROR: "response": response_data
                                             
 
-        except Exception as e:
-        return { )
-        "user_id": user.user_id,
-        "is_admin": user.is_admin,
-        "operation": operation["operation"],
-        "error": str(e),
-        "operation_allowed": False,
-        "operation_denied": True
+                                            # REMOVED_SYNTAX_ERROR: except Exception as e:
+                                                # REMOVED_SYNTAX_ERROR: return { )
+                                                # REMOVED_SYNTAX_ERROR: "user_id": user.user_id,
+                                                # REMOVED_SYNTAX_ERROR: "is_admin": user.is_admin,
+                                                # REMOVED_SYNTAX_ERROR: "operation": operation["operation"],
+                                                # REMOVED_SYNTAX_ERROR: "error": str(e),
+                                                # REMOVED_SYNTAX_ERROR: "operation_allowed": False,
+                                                # REMOVED_SYNTAX_ERROR: "operation_denied": True
                                                 
 
                                                 # Test all operations with all users
-        tasks = []
-        for user in users:
-        for operation in admin_operations:
-        tasks.append(test_admin_operation(user, operation))
+                                                # REMOVED_SYNTAX_ERROR: tasks = []
+                                                # REMOVED_SYNTAX_ERROR: for user in users:
+                                                    # REMOVED_SYNTAX_ERROR: for operation in admin_operations:
+                                                        # REMOVED_SYNTAX_ERROR: tasks.append(test_admin_operation(user, operation))
 
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        access_control_results = [item for item in []]
+                                                        # REMOVED_SYNTAX_ERROR: results = await asyncio.gather(*tasks, return_exceptions=True)
+                                                        # REMOVED_SYNTAX_ERROR: access_control_results = [item for item in []]
 
                                                         # Analyze results for access control violations
-        violations = []
+                                                        # REMOVED_SYNTAX_ERROR: violations = []
 
-        for result in access_control_results:
-        user_id = result["user_id"]
-        is_admin = result["is_admin"]
-        operation = result["operation"]
-        operation_allowed = result.get("operation_allowed", False)
+                                                        # REMOVED_SYNTAX_ERROR: for result in access_control_results:
+                                                            # REMOVED_SYNTAX_ERROR: user_id = result["user_id"]
+                                                            # REMOVED_SYNTAX_ERROR: is_admin = result["is_admin"]
+                                                            # REMOVED_SYNTAX_ERROR: operation = result["operation"]
+                                                            # REMOVED_SYNTAX_ERROR: operation_allowed = result.get("operation_allowed", False)
 
                                                             # Regular users should not be able to perform admin operations
-        if not is_admin and operation_allowed:
-        violations.append({ ))
-        "type": "UNAUTHORIZED_ADMIN_ACCESS",
-        "user_id": user_id,
-        "operation": operation,
-        "response": result["response"]
+                                                            # REMOVED_SYNTAX_ERROR: if not is_admin and operation_allowed:
+                                                                # REMOVED_SYNTAX_ERROR: violations.append({ ))
+                                                                # REMOVED_SYNTAX_ERROR: "type": "UNAUTHORIZED_ADMIN_ACCESS",
+                                                                # REMOVED_SYNTAX_ERROR: "user_id": user_id,
+                                                                # REMOVED_SYNTAX_ERROR: "operation": operation,
+                                                                # REMOVED_SYNTAX_ERROR: "response": result["response"]
                                                                 
 
-        security_tester.report_vulnerability( )
-        "UNAUTHORIZED_ADMIN_ACCESS",
-        "formatted_string",
-        "CRITICAL",
-        result
+                                                                # REMOVED_SYNTAX_ERROR: security_tester.report_vulnerability( )
+                                                                # REMOVED_SYNTAX_ERROR: "UNAUTHORIZED_ADMIN_ACCESS",
+                                                                # REMOVED_SYNTAX_ERROR: "formatted_string",
+                                                                # REMOVED_SYNTAX_ERROR: "CRITICAL",
+                                                                # REMOVED_SYNTAX_ERROR: result
                                                                 
 
                                                                 # Admin users should be able to perform admin operations
                                                                 # (This is not a security violation, but we log it for completeness)
-        if is_admin and operation_allowed:
-        logger.info("formatted_string")
+                                                                # REMOVED_SYNTAX_ERROR: if is_admin and operation_allowed:
+                                                                    # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
                                                                     # Verify no unauthorized admin access occurred
-        assert len(violations) == 0, ( )
-        "formatted_string"
+                                                                    # REMOVED_SYNTAX_ERROR: assert len(violations) == 0, ( )
+                                                                    # REMOVED_SYNTAX_ERROR: "formatted_string"
                                                                     
 
 
@@ -1460,323 +1460,323 @@ class TestAdminPrivilegeVulnerabilities:
                                                                     # RACE CONDITION VULNERABILITY TESTS
                                                                     # ============================================================================
 
-@pytest.mark.asyncio
-@pytest.mark.security_critical
-class TestRaceConditionVulnerabilities:
-    """Tests for race conditions in multi-user concurrent scenarios."""
+                                                                    # Removed problematic line: @pytest.mark.asyncio
+                                                                    # REMOVED_SYNTAX_ERROR: @pytest.mark.security_critical
+# REMOVED_SYNTAX_ERROR: class TestRaceConditionVulnerabilities:
+    # REMOVED_SYNTAX_ERROR: """Tests for race conditions in multi-user concurrent scenarios."""
 
-    @pytest.fixture
-    async def security_tester(self):
-        """Create security tester for race condition testing."""
-        config = RealWebSocketTestConfig()
-        await config.ensure_services_ready()
-        await asyncio.sleep(0)
-        return MultiUserSecurityTester(config)
+    # REMOVED_SYNTAX_ERROR: @pytest.fixture
+# REMOVED_SYNTAX_ERROR: async def security_tester(self):
+    # REMOVED_SYNTAX_ERROR: """Create security tester for race condition testing."""
+    # REMOVED_SYNTAX_ERROR: config = RealWebSocketTestConfig()
+    # REMOVED_SYNTAX_ERROR: await config.ensure_services_ready()
+    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+    # REMOVED_SYNTAX_ERROR: return MultiUserSecurityTester(config)
 
-    async def test_concurrent_connection_race_conditions(self, security_tester:
-        """Test for race conditions in concurrent WebSocket connections."""
-        pass
-        logger.info("[U+1F3C3][U+200D][U+2642][U+FE0F] Testing concurrent connection race conditions...")
+    # Removed problematic line: async def test_concurrent_connection_race_conditions(self, security_tester: MultiUserSecurityTester):
+        # REMOVED_SYNTAX_ERROR: """Test for race conditions in concurrent WebSocket connections."""
+        # REMOVED_SYNTAX_ERROR: pass
+        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F3C3][U+200D][U+2642][U+FE0F] Testing concurrent connection race conditions...")
 
-        users = security_tester.create_test_users(count=5)
+        # REMOVED_SYNTAX_ERROR: users = security_tester.create_test_users(count=5)
 
         # Create high-concurrency connection attempts
-        connection_tasks = []
-        connection_results = []
+        # REMOVED_SYNTAX_ERROR: connection_tasks = []
+        # REMOVED_SYNTAX_ERROR: connection_results = []
 
-    async def rapid_connect_sequence(user: SecurityTestUser, sequence_id: int):
-        """Rapidly establish and use WebSocket connections."""
-        connections_established = []
+# REMOVED_SYNTAX_ERROR: async def rapid_connect_sequence(user: SecurityTestUser, sequence_id: int):
+    # REMOVED_SYNTAX_ERROR: """Rapidly establish and use WebSocket connections."""
+    # REMOVED_SYNTAX_ERROR: connections_established = []
 
-        try:
+    # REMOVED_SYNTAX_ERROR: try:
         # Rapidly establish multiple connections
-        connect_tasks = []
-        for i in range(3):  # 3 connections per sequence
-        connect_tasks.append( )
-        websockets.connect( )
-        security_tester.config.websocket_url,
-        additional_headers=user.get_auth_headers()
+        # REMOVED_SYNTAX_ERROR: connect_tasks = []
+        # REMOVED_SYNTAX_ERROR: for i in range(3):  # 3 connections per sequence
+        # REMOVED_SYNTAX_ERROR: connect_tasks.append( )
+        # REMOVED_SYNTAX_ERROR: websockets.connect( )
+        # REMOVED_SYNTAX_ERROR: security_tester.config.websocket_url,
+        # REMOVED_SYNTAX_ERROR: additional_headers=user.get_auth_headers()
         
         
 
         # Connect all simultaneously
-        connections = await asyncio.gather(*connect_tasks, return_exceptions=True)
+        # REMOVED_SYNTAX_ERROR: connections = await asyncio.gather(*connect_tasks, return_exceptions=True)
 
         # Filter successful connections
-        successful_connections = [ )
-        conn for conn in connections
-        if not isinstance(conn, Exception)
+        # REMOVED_SYNTAX_ERROR: successful_connections = [ )
+        # REMOVED_SYNTAX_ERROR: conn for conn in connections
+        # REMOVED_SYNTAX_ERROR: if not isinstance(conn, Exception)
         
-        connections_established.extend(successful_connections)
+        # REMOVED_SYNTAX_ERROR: connections_established.extend(successful_connections)
 
         # Rapidly send messages on all connections
-        message_tasks = []
-        for i, connection in enumerate(successful_connections):
-        message = { )
-        "type": "start_agent",
-        "payload": { )
-        "user_request": "formatted_string",
-        "thread_id": "formatted_string",
-        "run_id": str(uuid.uuid4())
+        # REMOVED_SYNTAX_ERROR: message_tasks = []
+        # REMOVED_SYNTAX_ERROR: for i, connection in enumerate(successful_connections):
+            # REMOVED_SYNTAX_ERROR: message = { )
+            # REMOVED_SYNTAX_ERROR: "type": "start_agent",
+            # REMOVED_SYNTAX_ERROR: "payload": { )
+            # REMOVED_SYNTAX_ERROR: "user_request": "formatted_string",
+            # REMOVED_SYNTAX_ERROR: "thread_id": "formatted_string",
+            # REMOVED_SYNTAX_ERROR: "run_id": str(uuid.uuid4())
             
             
-        message_tasks.append(connection.send(json.dumps(message)))
+            # REMOVED_SYNTAX_ERROR: message_tasks.append(connection.send(json.dumps(message)))
 
-        await asyncio.gather(*message_tasks, return_exceptions=True)
+            # REMOVED_SYNTAX_ERROR: await asyncio.gather(*message_tasks, return_exceptions=True)
 
             # Collect responses
-        response_tasks = []
-        for connection in successful_connections:
-        response_tasks.append( )
-        asyncio.wait_for(connection.recv(), timeout=10)
+            # REMOVED_SYNTAX_ERROR: response_tasks = []
+            # REMOVED_SYNTAX_ERROR: for connection in successful_connections:
+                # REMOVED_SYNTAX_ERROR: response_tasks.append( )
+                # REMOVED_SYNTAX_ERROR: asyncio.wait_for(connection.recv(), timeout=10)
                 
 
-        responses = await asyncio.gather(*response_tasks, return_exceptions=True)
+                # REMOVED_SYNTAX_ERROR: responses = await asyncio.gather(*response_tasks, return_exceptions=True)
 
                 # Close connections
-        for connection in connections_established:
-        try:
-        await connection.close()
-        except:
-        pass
+                # REMOVED_SYNTAX_ERROR: for connection in connections_established:
+                    # REMOVED_SYNTAX_ERROR: try:
+                        # REMOVED_SYNTAX_ERROR: await connection.close()
+                        # REMOVED_SYNTAX_ERROR: except:
+                            # REMOVED_SYNTAX_ERROR: pass
 
-        await asyncio.sleep(0)
-        return { )
-        "user_id": user.user_id,
-        "sequence_id": sequence_id,
-        "connections_established": len(successful_connections),
-        "responses": [item for item in []],
-        "success": True
+                            # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+                            # REMOVED_SYNTAX_ERROR: return { )
+                            # REMOVED_SYNTAX_ERROR: "user_id": user.user_id,
+                            # REMOVED_SYNTAX_ERROR: "sequence_id": sequence_id,
+                            # REMOVED_SYNTAX_ERROR: "connections_established": len(successful_connections),
+                            # REMOVED_SYNTAX_ERROR: "responses": [item for item in []],
+                            # REMOVED_SYNTAX_ERROR: "success": True
                             
 
-        except Exception as e:
+                            # REMOVED_SYNTAX_ERROR: except Exception as e:
                                 # Clean up any established connections
-        for connection in connections_established:
-        try:
-        await connection.close()
-        except:
-        pass
+                                # REMOVED_SYNTAX_ERROR: for connection in connections_established:
+                                    # REMOVED_SYNTAX_ERROR: try:
+                                        # REMOVED_SYNTAX_ERROR: await connection.close()
+                                        # REMOVED_SYNTAX_ERROR: except:
+                                            # REMOVED_SYNTAX_ERROR: pass
 
-        return { )
-        "user_id": user.user_id,
-        "sequence_id": sequence_id,
-        "error": str(e),
-        "success": False
+                                            # REMOVED_SYNTAX_ERROR: return { )
+                                            # REMOVED_SYNTAX_ERROR: "user_id": user.user_id,
+                                            # REMOVED_SYNTAX_ERROR: "sequence_id": sequence_id,
+                                            # REMOVED_SYNTAX_ERROR: "error": str(e),
+                                            # REMOVED_SYNTAX_ERROR: "success": False
                                             
 
                                             # Launch high-concurrency connection sequences
-        tasks = []
-        for user in users:
-        for sequence in range(4):  # 4 sequences per user
-        tasks.append(rapid_connect_sequence(user, sequence))
+                                            # REMOVED_SYNTAX_ERROR: tasks = []
+                                            # REMOVED_SYNTAX_ERROR: for user in users:
+                                                # REMOVED_SYNTAX_ERROR: for sequence in range(4):  # 4 sequences per user
+                                                # REMOVED_SYNTAX_ERROR: tasks.append(rapid_connect_sequence(user, sequence))
 
                                                 # Execute all sequences simultaneously
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+                                                # REMOVED_SYNTAX_ERROR: results = await asyncio.gather(*tasks, return_exceptions=True)
 
                                                 # Analyze results for race condition indicators
-        successful_results = [item for item in []]
-        failed_results = [item for item in []]
+                                                # REMOVED_SYNTAX_ERROR: successful_results = [item for item in []]
+                                                # REMOVED_SYNTAX_ERROR: failed_results = [item for item in []]
 
                                                 # Check for suspicious patterns
-        user_response_patterns = defaultdict(list)
+                                                # REMOVED_SYNTAX_ERROR: user_response_patterns = defaultdict(list)
 
-        for result in successful_results:
-        user_id = result["user_id"]
-        responses = result.get("responses", [])
+                                                # REMOVED_SYNTAX_ERROR: for result in successful_results:
+                                                    # REMOVED_SYNTAX_ERROR: user_id = result["user_id"]
+                                                    # REMOVED_SYNTAX_ERROR: responses = result.get("responses", [])
 
-        for response in responses:
-        if isinstance(response, str):
-        try:
-        response_data = json.loads(response)
+                                                    # REMOVED_SYNTAX_ERROR: for response in responses:
+                                                        # REMOVED_SYNTAX_ERROR: if isinstance(response, str):
+                                                            # REMOVED_SYNTAX_ERROR: try:
+                                                                # REMOVED_SYNTAX_ERROR: response_data = json.loads(response)
                                                                 # Look for user data in responses
-        response_text = json.dumps(response_data)
-        user_response_patterns[user_id].append(response_text)
-        except:
-        user_response_patterns[user_id].append(response)
+                                                                # REMOVED_SYNTAX_ERROR: response_text = json.dumps(response_data)
+                                                                # REMOVED_SYNTAX_ERROR: user_response_patterns[user_id].append(response_text)
+                                                                # REMOVED_SYNTAX_ERROR: except:
+                                                                    # REMOVED_SYNTAX_ERROR: user_response_patterns[user_id].append(response)
 
                                                                     # Check for cross-user data in race condition scenarios
-        race_condition_violations = []
+                                                                    # REMOVED_SYNTAX_ERROR: race_condition_violations = []
 
-        for user_id, responses in user_response_patterns.items():
-        for other_user_id, other_responses in user_response_patterns.items():
-        if user_id != other_user_id:
+                                                                    # REMOVED_SYNTAX_ERROR: for user_id, responses in user_response_patterns.items():
+                                                                        # REMOVED_SYNTAX_ERROR: for other_user_id, other_responses in user_response_patterns.items():
+                                                                            # REMOVED_SYNTAX_ERROR: if user_id != other_user_id:
                                                                                 # Check if user_id's responses contain other_user_id's data
-        for response in responses:
-        if other_user_id in response:
-        race_condition_violations.append({ ))
-        "victim_user": user_id,
-        "leaked_from_user": other_user_id,
-        "response": response
+                                                                                # REMOVED_SYNTAX_ERROR: for response in responses:
+                                                                                    # REMOVED_SYNTAX_ERROR: if other_user_id in response:
+                                                                                        # REMOVED_SYNTAX_ERROR: race_condition_violations.append({ ))
+                                                                                        # REMOVED_SYNTAX_ERROR: "victim_user": user_id,
+                                                                                        # REMOVED_SYNTAX_ERROR: "leaked_from_user": other_user_id,
+                                                                                        # REMOVED_SYNTAX_ERROR: "response": response
                                                                                         
 
-        security_tester.report_vulnerability( )
-        "RACE_CONDITION_DATA_LEAKAGE",
-        "formatted_string",
-        "CRITICAL",
-        { )
-        "victim_user": user_id,
-        "leaked_from_user": other_user_id,
-        "contaminated_response": response
+                                                                                        # REMOVED_SYNTAX_ERROR: security_tester.report_vulnerability( )
+                                                                                        # REMOVED_SYNTAX_ERROR: "RACE_CONDITION_DATA_LEAKAGE",
+                                                                                        # REMOVED_SYNTAX_ERROR: "formatted_string",
+                                                                                        # REMOVED_SYNTAX_ERROR: "CRITICAL",
+                                                                                        # REMOVED_SYNTAX_ERROR: { )
+                                                                                        # REMOVED_SYNTAX_ERROR: "victim_user": user_id,
+                                                                                        # REMOVED_SYNTAX_ERROR: "leaked_from_user": other_user_id,
+                                                                                        # REMOVED_SYNTAX_ERROR: "contaminated_response": response
                                                                                         
                                                                                         
 
                                                                                         # Report on connection success/failure rates
-        total_attempts = len(tasks)
-        successful_attempts = len(successful_results)
-        failure_rate = (len(failed_results) / total_attempts) * 100
+                                                                                        # REMOVED_SYNTAX_ERROR: total_attempts = len(tasks)
+                                                                                        # REMOVED_SYNTAX_ERROR: successful_attempts = len(successful_results)
+                                                                                        # REMOVED_SYNTAX_ERROR: failure_rate = (len(failed_results) / total_attempts) * 100
 
-        logger.info("formatted_string" )
-        "formatted_string")
+                                                                                        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string" )
+                                                                                        # REMOVED_SYNTAX_ERROR: "formatted_string")
 
                                                                                         # High failure rate might indicate race conditions
-        if failure_rate > 50:
-        security_tester.report_vulnerability( )
-        "HIGH_CONCURRENCY_FAILURE_RATE",
-        "formatted_string",
-        "MEDIUM",
-        { )
-        "failure_rate": failure_rate,
-        "total_attempts": total_attempts,
-        "failed_results": failed_results[:5]  # Sample of failures
+                                                                                        # REMOVED_SYNTAX_ERROR: if failure_rate > 50:
+                                                                                            # REMOVED_SYNTAX_ERROR: security_tester.report_vulnerability( )
+                                                                                            # REMOVED_SYNTAX_ERROR: "HIGH_CONCURRENCY_FAILURE_RATE",
+                                                                                            # REMOVED_SYNTAX_ERROR: "formatted_string",
+                                                                                            # REMOVED_SYNTAX_ERROR: "MEDIUM",
+                                                                                            # REMOVED_SYNTAX_ERROR: { )
+                                                                                            # REMOVED_SYNTAX_ERROR: "failure_rate": failure_rate,
+                                                                                            # REMOVED_SYNTAX_ERROR: "total_attempts": total_attempts,
+                                                                                            # REMOVED_SYNTAX_ERROR: "failed_results": failed_results[:5]  # Sample of failures
                                                                                             
                                                                                             
 
                                                                                             # Verify no race condition data leakage occurred
-        assert len(race_condition_violations) == 0, ( )
-        "formatted_string"
+                                                                                            # REMOVED_SYNTAX_ERROR: assert len(race_condition_violations) == 0, ( )
+                                                                                            # REMOVED_SYNTAX_ERROR: "formatted_string"
                                                                                             
 
-    async def test_memory_leak_detection(self, security_tester:
-        """Test for memory leaks in singleton patterns during high concurrency."""
-        pass
-        logger.info("[U+1F9E0] Testing memory leak detection in concurrent scenarios...")
+                                                                                            # Removed problematic line: async def test_memory_leak_detection(self, security_tester: MultiUserSecurityTester):
+                                                                                                # REMOVED_SYNTAX_ERROR: """Test for memory leaks in singleton patterns during high concurrency."""
+                                                                                                # REMOVED_SYNTAX_ERROR: pass
+                                                                                                # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9E0] Testing memory leak detection in concurrent scenarios...")
 
-        users = security_tester.create_test_users(count=3)
+                                                                                                # REMOVED_SYNTAX_ERROR: users = security_tester.create_test_users(count=3)
 
                                                                                                 # Track memory-related metrics
-        memory_metrics = { )
-        "connection_cycles": 0,
-        "message_cycles": 0,
-        "start_time": time.time(),
-        "connection_failures": 0,
-        "response_failures": 0
+                                                                                                # REMOVED_SYNTAX_ERROR: memory_metrics = { )
+                                                                                                # REMOVED_SYNTAX_ERROR: "connection_cycles": 0,
+                                                                                                # REMOVED_SYNTAX_ERROR: "message_cycles": 0,
+                                                                                                # REMOVED_SYNTAX_ERROR: "start_time": time.time(),
+                                                                                                # REMOVED_SYNTAX_ERROR: "connection_failures": 0,
+                                                                                                # REMOVED_SYNTAX_ERROR: "response_failures": 0
                                                                                                 
 
-    async def memory_stress_cycle(user: SecurityTestUser, cycle_id: int):
-        """Execute a memory stress cycle for a user."""
-        try:
+# REMOVED_SYNTAX_ERROR: async def memory_stress_cycle(user: SecurityTestUser, cycle_id: int):
+    # REMOVED_SYNTAX_ERROR: """Execute a memory stress cycle for a user."""
+    # REMOVED_SYNTAX_ERROR: try:
         # Establish connection
-        connection = await websockets.connect( )
-        security_tester.config.websocket_url,
-        additional_headers=user.get_auth_headers(),
-        timeout=5
+        # REMOVED_SYNTAX_ERROR: connection = await websockets.connect( )
+        # REMOVED_SYNTAX_ERROR: security_tester.config.websocket_url,
+        # REMOVED_SYNTAX_ERROR: additional_headers=user.get_auth_headers(),
+        # REMOVED_SYNTAX_ERROR: timeout=5
         
 
-        memory_metrics["connection_cycles"] += 1
+        # REMOVED_SYNTAX_ERROR: memory_metrics["connection_cycles"] += 1
 
         # Send multiple messages rapidly
-        messages = []
-        for i in range(10):  # 10 messages per cycle
-        message = { )
-        "type": "user_message",
-        "payload": { )
-        "message": "formatted_string",
-        "thread_id": "formatted_string",
-        "data": "x" * 1000  # 1KB of data per message
+        # REMOVED_SYNTAX_ERROR: messages = []
+        # REMOVED_SYNTAX_ERROR: for i in range(10):  # 10 messages per cycle
+        # REMOVED_SYNTAX_ERROR: message = { )
+        # REMOVED_SYNTAX_ERROR: "type": "user_message",
+        # REMOVED_SYNTAX_ERROR: "payload": { )
+        # REMOVED_SYNTAX_ERROR: "message": "formatted_string",
+        # REMOVED_SYNTAX_ERROR: "thread_id": "formatted_string",
+        # REMOVED_SYNTAX_ERROR: "data": "x" * 1000  # 1KB of data per message
         
         
-        messages.append(message)
+        # REMOVED_SYNTAX_ERROR: messages.append(message)
 
         # Send all messages rapidly
-        send_tasks = [ )
-        connection.send(json.dumps(msg)) for msg in messages
+        # REMOVED_SYNTAX_ERROR: send_tasks = [ )
+        # REMOVED_SYNTAX_ERROR: connection.send(json.dumps(msg)) for msg in messages
         
-        await asyncio.gather(*send_tasks, return_exceptions=True)
+        # REMOVED_SYNTAX_ERROR: await asyncio.gather(*send_tasks, return_exceptions=True)
 
-        memory_metrics["message_cycles"] += len(messages)
+        # REMOVED_SYNTAX_ERROR: memory_metrics["message_cycles"] += len(messages)
 
         # Try to read some responses (may timeout, that's ok)
-        try:
-        for _ in range(3):  # Try to read a few responses
-        await asyncio.wait_for(connection.recv(), timeout=2)
-        except asyncio.TimeoutError:
-        pass  # Expected in stress test
+        # REMOVED_SYNTAX_ERROR: try:
+            # REMOVED_SYNTAX_ERROR: for _ in range(3):  # Try to read a few responses
+            # REMOVED_SYNTAX_ERROR: await asyncio.wait_for(connection.recv(), timeout=2)
+            # REMOVED_SYNTAX_ERROR: except asyncio.TimeoutError:
+                # REMOVED_SYNTAX_ERROR: pass  # Expected in stress test
 
                 # Close connection
-        await connection.close()
+                # REMOVED_SYNTAX_ERROR: await connection.close()
 
-        await asyncio.sleep(0)
-        return {"success": True, "cycle_id": cycle_id}
+                # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
+                # REMOVED_SYNTAX_ERROR: return {"success": True, "cycle_id": cycle_id}
 
-        except Exception as e:
-        memory_metrics["connection_failures"] += 1
-        return {"success": False, "cycle_id": cycle_id, "error": str(e)}
+                # REMOVED_SYNTAX_ERROR: except Exception as e:
+                    # REMOVED_SYNTAX_ERROR: memory_metrics["connection_failures"] += 1
+                    # REMOVED_SYNTAX_ERROR: return {"success": False, "cycle_id": cycle_id, "error": str(e)}
 
                     # Execute memory stress cycles
-        stress_tasks = []
-        cycles_per_user = 20  # 20 cycles per user
+                    # REMOVED_SYNTAX_ERROR: stress_tasks = []
+                    # REMOVED_SYNTAX_ERROR: cycles_per_user = 20  # 20 cycles per user
 
-        for user in users:
-        for cycle in range(cycles_per_user):
-        stress_tasks.append(memory_stress_cycle(user, cycle))
+                    # REMOVED_SYNTAX_ERROR: for user in users:
+                        # REMOVED_SYNTAX_ERROR: for cycle in range(cycles_per_user):
+                            # REMOVED_SYNTAX_ERROR: stress_tasks.append(memory_stress_cycle(user, cycle))
 
                             # Add small delay between task creation to spread load
-        await asyncio.sleep(0.01)
+                            # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0.01)
 
                             # Execute stress test
-        start_time = time.time()
-        results = await asyncio.gather(*stress_tasks, return_exceptions=True)
-        end_time = time.time()
+                            # REMOVED_SYNTAX_ERROR: start_time = time.time()
+                            # REMOVED_SYNTAX_ERROR: results = await asyncio.gather(*stress_tasks, return_exceptions=True)
+                            # REMOVED_SYNTAX_ERROR: end_time = time.time()
 
                             # Analyze results
-        successful_cycles = [item for item in []]
-        failed_cycles = [item for item in []]
-        exception_cycles = [item for item in []]
+                            # REMOVED_SYNTAX_ERROR: successful_cycles = [item for item in []]
+                            # REMOVED_SYNTAX_ERROR: failed_cycles = [item for item in []]
+                            # REMOVED_SYNTAX_ERROR: exception_cycles = [item for item in []]
 
-        total_cycles = len(stress_tasks)
-        success_rate = (len(successful_cycles) / total_cycles) * 100
-        duration = end_time - start_time
+                            # REMOVED_SYNTAX_ERROR: total_cycles = len(stress_tasks)
+                            # REMOVED_SYNTAX_ERROR: success_rate = (len(successful_cycles) / total_cycles) * 100
+                            # REMOVED_SYNTAX_ERROR: duration = end_time - start_time
 
-        logger.info("formatted_string" )
-        "formatted_string")
+                            # REMOVED_SYNTAX_ERROR: logger.info("formatted_string" )
+                            # REMOVED_SYNTAX_ERROR: "formatted_string")
 
                             # Check for memory leak indicators
-        failure_rate = ((len(failed_cycles) + len(exception_cycles)) / total_cycles) * 100
+                            # REMOVED_SYNTAX_ERROR: failure_rate = ((len(failed_cycles) + len(exception_cycles)) / total_cycles) * 100
 
-        if failure_rate > 30:  # High failure rate might indicate memory issues
-        security_tester.report_vulnerability( )
-        "POTENTIAL_MEMORY_LEAK",
-        "formatted_string",
-        "MEDIUM",
-        { )
-        "failure_rate": failure_rate,
-        "total_cycles": total_cycles,
-        "duration": duration,
-        "failed_samples": failed_cycles[:5]
+                            # REMOVED_SYNTAX_ERROR: if failure_rate > 30:  # High failure rate might indicate memory issues
+                            # REMOVED_SYNTAX_ERROR: security_tester.report_vulnerability( )
+                            # REMOVED_SYNTAX_ERROR: "POTENTIAL_MEMORY_LEAK",
+                            # REMOVED_SYNTAX_ERROR: "formatted_string",
+                            # REMOVED_SYNTAX_ERROR: "MEDIUM",
+                            # REMOVED_SYNTAX_ERROR: { )
+                            # REMOVED_SYNTAX_ERROR: "failure_rate": failure_rate,
+                            # REMOVED_SYNTAX_ERROR: "total_cycles": total_cycles,
+                            # REMOVED_SYNTAX_ERROR: "duration": duration,
+                            # REMOVED_SYNTAX_ERROR: "failed_samples": failed_cycles[:5]
                             
                             
 
                             # Check for pattern in failures that might indicate singleton issues
-        failure_times = []
-        for i, result in enumerate(results):
-        if isinstance(result, dict) and not result.get("success"):
-        failure_times.append(i)
+                            # REMOVED_SYNTAX_ERROR: failure_times = []
+                            # REMOVED_SYNTAX_ERROR: for i, result in enumerate(results):
+                                # REMOVED_SYNTAX_ERROR: if isinstance(result, dict) and not result.get("success"):
+                                    # REMOVED_SYNTAX_ERROR: failure_times.append(i)
 
                                     # If failures cluster together, might indicate singleton resource exhaustion
-        if len(failure_times) > 5:
-        clustering_score = sum( )
-        abs(failure_times[i] - failure_times[i-1])
-        for i in range(1, len(failure_times))
-        ) / len(failure_times)
+                                    # REMOVED_SYNTAX_ERROR: if len(failure_times) > 5:
+                                        # REMOVED_SYNTAX_ERROR: clustering_score = sum( )
+                                        # REMOVED_SYNTAX_ERROR: abs(failure_times[i] - failure_times[i-1])
+                                        # REMOVED_SYNTAX_ERROR: for i in range(1, len(failure_times))
+                                        # REMOVED_SYNTAX_ERROR: ) / len(failure_times)
 
-        if clustering_score < 10:  # Failures are clustered
-        security_tester.report_vulnerability( )
-        "SINGLETON_RESOURCE_EXHAUSTION",
-        "Clustered failures suggest singleton resource exhaustion",
-        "MEDIUM",
-        { )
-        "clustering_score": clustering_score,
-        "failure_pattern": failure_times[:10]
+                                        # REMOVED_SYNTAX_ERROR: if clustering_score < 10:  # Failures are clustered
+                                        # REMOVED_SYNTAX_ERROR: security_tester.report_vulnerability( )
+                                        # REMOVED_SYNTAX_ERROR: "SINGLETON_RESOURCE_EXHAUSTION",
+                                        # REMOVED_SYNTAX_ERROR: "Clustered failures suggest singleton resource exhaustion",
+                                        # REMOVED_SYNTAX_ERROR: "MEDIUM",
+                                        # REMOVED_SYNTAX_ERROR: { )
+                                        # REMOVED_SYNTAX_ERROR: "clustering_score": clustering_score,
+                                        # REMOVED_SYNTAX_ERROR: "failure_pattern": failure_times[:10]
                                         
                                         
 
@@ -1785,69 +1785,69 @@ class TestRaceConditionVulnerabilities:
                                         # TEST SUITE EXECUTION AND REPORTING
                                         # ============================================================================
 
-    def generate_vulnerability_report(security_tester: MultiUserSecurityTester) -> str:
-        """Generate a comprehensive vulnerability report."""
+# REMOVED_SYNTAX_ERROR: def generate_vulnerability_report(security_tester: MultiUserSecurityTester) -> str:
+    # REMOVED_SYNTAX_ERROR: """Generate a comprehensive vulnerability report."""
 
-        if not security_tester.vulnerability_findings:
-        return " PASS:  NO SECURITY VULNERABILITIES DETECTED - All tests passed!"
+    # REMOVED_SYNTAX_ERROR: if not security_tester.vulnerability_findings:
+        # REMOVED_SYNTAX_ERROR: return " PASS:  NO SECURITY VULNERABILITIES DETECTED - All tests passed!"
 
-        report = " ALERT:  CRITICAL SECURITY VULNERABILITIES DETECTED  ALERT:
-        "
-        report += "=" * 60 + "
+        # REMOVED_SYNTAX_ERROR: report = " ALERT:  CRITICAL SECURITY VULNERABILITIES DETECTED  ALERT: 
+        # REMOVED_SYNTAX_ERROR: "
+        # REMOVED_SYNTAX_ERROR: report += "=" * 60 + "
 
-        "
+        # REMOVED_SYNTAX_ERROR: "
 
         # Group vulnerabilities by severity
-        critical_vulns = [item for item in []] == "CRITICAL"]
-        high_vulns = [item for item in []] == "HIGH"]
-        medium_vulns = [item for item in []] == "MEDIUM"]
+        # REMOVED_SYNTAX_ERROR: critical_vulns = [item for item in []] == "CRITICAL"]
+        # REMOVED_SYNTAX_ERROR: high_vulns = [item for item in []] == "HIGH"]
+        # REMOVED_SYNTAX_ERROR: medium_vulns = [item for item in []] == "MEDIUM"]
 
-        report += f"SUMMARY:
-        "
-        report += "formatted_string"
-        report += "formatted_string"
-        report += "formatted_string"
-        report += "formatted_string"
+        # REMOVED_SYNTAX_ERROR: report += f"SUMMARY:
+            # REMOVED_SYNTAX_ERROR: "
+            # REMOVED_SYNTAX_ERROR: report += "formatted_string"
+            # REMOVED_SYNTAX_ERROR: report += "formatted_string"
+            # REMOVED_SYNTAX_ERROR: report += "formatted_string"
+            # REMOVED_SYNTAX_ERROR: report += "formatted_string"
 
             # Detailed vulnerability descriptions
-        for severity, vulns in [("CRITICAL", critical_vulns), ("HIGH", high_vulns), ("MEDIUM", medium_vulns)]:
-        if vulns:
-        report += "formatted_string"
-        report += "-" * 40 + "
-        "
+            # REMOVED_SYNTAX_ERROR: for severity, vulns in [("CRITICAL", critical_vulns), ("HIGH", high_vulns), ("MEDIUM", medium_vulns)]:
+                # REMOVED_SYNTAX_ERROR: if vulns:
+                    # REMOVED_SYNTAX_ERROR: report += "formatted_string"
+                        # REMOVED_SYNTAX_ERROR: report += "-" * 40 + "
+                        # REMOVED_SYNTAX_ERROR: "
 
-        for i, vuln in enumerate(vulns, 1):
-        report += "formatted_string"description"]}
-        "
-        report += "formatted_string"
-        report += "formatted_string"
+                        # REMOVED_SYNTAX_ERROR: for i, vuln in enumerate(vulns, 1):
+                            # REMOVED_SYNTAX_ERROR: report += "formatted_string"description"]}
+                            # REMOVED_SYNTAX_ERROR: "
+                            # REMOVED_SYNTAX_ERROR: report += "formatted_string"
+                            # REMOVED_SYNTAX_ERROR: report += "formatted_string"
 
                             # Include key evidence
-        if vuln.get("evidence"):
-        evidence = vuln["evidence"]
-        if "victim_user" in evidence:
-        report += "formatted_string"
-        if "leaked_from_user" in evidence:
-        report += "formatted_string"
+                            # REMOVED_SYNTAX_ERROR: if vuln.get("evidence"):
+                                # REMOVED_SYNTAX_ERROR: evidence = vuln["evidence"]
+                                # REMOVED_SYNTAX_ERROR: if "victim_user" in evidence:
+                                    # REMOVED_SYNTAX_ERROR: report += "formatted_string"
+                                    # REMOVED_SYNTAX_ERROR: if "leaked_from_user" in evidence:
+                                        # REMOVED_SYNTAX_ERROR: report += "formatted_string"
 
-        report += "
-        "
+                                        # REMOVED_SYNTAX_ERROR: report += "
+                                        # REMOVED_SYNTAX_ERROR: "
 
-        report += "
-        " + "=" * 60 + "
-        "
-        report += " WARNING: [U+FE0F]  DEPLOYMENT MUST BE BLOCKED UNTIL ALL VULNERABILITIES ARE FIXED  WARNING: [U+FE0F]"
+                                        # REMOVED_SYNTAX_ERROR: report += "
+                                        # REMOVED_SYNTAX_ERROR: " + "=" * 60 + "
+                                        # REMOVED_SYNTAX_ERROR: "
+                                        # REMOVED_SYNTAX_ERROR: report += " WARNING: [U+FE0F]  DEPLOYMENT MUST BE BLOCKED UNTIL ALL VULNERABILITIES ARE FIXED  WARNING: [U+FE0F]"
 
-        return report
+                                        # REMOVED_SYNTAX_ERROR: return report
 
 
                                         # Main test execution function
-        if __name__ == "__main__":
+                                        # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
-        print("MIGRATION NOTICE: This file previously used direct pytest execution.")
-        print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
-        print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+        # REMOVED_SYNTAX_ERROR: print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+        # REMOVED_SYNTAX_ERROR: print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+        # REMOVED_SYNTAX_ERROR: print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

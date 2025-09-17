@@ -17,7 +17,7 @@ overload as described in auth rate limiting security requirements.
 import asyncio
 import json
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List
 from collections import defaultdict
 import pytest
@@ -302,7 +302,7 @@ class RealAuthRateLimitingTests:
         """Test rate limiting metrics collection and alerting thresholds."""
         metrics_key = 'rate_limiting_metrics'
         alert_key = 'rate_limiting_alerts'
-        metrics_data = {'total_requests': 0, 'allowed_requests': 0, 'blocked_requests': 0, 'unique_ips': set(), 'blocked_ips': set(), 'suspicious_patterns': [], 'last_updated': datetime.utcnow().isoformat()}
+        metrics_data = {'total_requests': 0, 'allowed_requests': 0, 'blocked_requests': 0, 'unique_ips': set(), 'blocked_ips': set(), 'suspicious_patterns': [], 'last_updated': datetime.now(UTC).isoformat()}
         try:
             request_patterns = [{'ip': '192.168.1.1', 'requests': 3, 'pattern': 'normal'}, {'ip': '192.168.1.2', 'requests': 8, 'pattern': 'burst'}, {'ip': '10.0.0.1', 'requests': 15, 'pattern': 'attack'}, {'ip': '10.0.0.2', 'requests': 20, 'pattern': 'sustained_attack'}]
             ip_limit = 5
@@ -329,7 +329,7 @@ class RealAuthRateLimitingTests:
                 if blocked_count > 0:
                     metrics_data['blocked_ips'].add(ip)
                 if blocked_count > 5:
-                    metrics_data['suspicious_patterns'].append({'ip': ip, 'pattern_type': pattern_type, 'blocked_requests': blocked_count, 'timestamp': datetime.utcnow().isoformat()})
+                    metrics_data['suspicious_patterns'].append({'ip': ip, 'pattern_type': pattern_type, 'blocked_requests': blocked_count, 'timestamp': datetime.now(UTC).isoformat()})
                 await redis_client.delete(ip_key)
             metrics_data['unique_ips'] = list(metrics_data['unique_ips'])
             metrics_data['blocked_ips'] = list(metrics_data['blocked_ips'])
@@ -337,9 +337,9 @@ class RealAuthRateLimitingTests:
             alerts = []
             block_rate = metrics_data['blocked_requests'] / metrics_data['total_requests'] * 100 if metrics_data['total_requests'] > 0 else 0
             if block_rate > 30:
-                alerts.append({'type': 'high_block_rate', 'severity': 'warning', 'message': f'High rate limiting block rate: {block_rate:.1f}%', 'timestamp': datetime.utcnow().isoformat()})
+                alerts.append({'type': 'high_block_rate', 'severity': 'warning', 'message': f'High rate limiting block rate: {block_rate:.1f}%', 'timestamp': datetime.now(UTC).isoformat()})
             if len(metrics_data['suspicious_patterns']) > 2:
-                alerts.append({'type': 'multiple_attacks', 'severity': 'critical', 'message': f"Multiple suspicious IP patterns detected: {len(metrics_data['suspicious_patterns'])}", 'timestamp': datetime.utcnow().isoformat()})
+                alerts.append({'type': 'multiple_attacks', 'severity': 'critical', 'message': f"Multiple suspicious IP patterns detected: {len(metrics_data['suspicious_patterns'])}", 'timestamp': datetime.now(UTC).isoformat()})
             if alerts:
                 await redis_client.setex(alert_key, 3600, json.dumps(alerts))
             stored_metrics = json.loads(await redis_client.get(metrics_key))

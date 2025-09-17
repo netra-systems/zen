@@ -54,7 +54,7 @@ class DatabaseURLFormationDiagnostic:
         try:
         # Environment variables
         env_vars = self.env.get_all()
-        urls['environment_vars'] = { )
+        urls['environment_vars'] = { }
         'DATABASE_URL': env_vars.get('DATABASE_URL'),
         'POSTGRES_HOST': env_vars.get('POSTGRES_HOST'),
         'POSTGRES_PORT': env_vars.get('POSTGRES_PORT'),
@@ -66,7 +66,7 @@ class DatabaseURLFormationDiagnostic:
         # DatabaseURLBuilder URLs
         try:
         builder = DatabaseURLBuilder(env_vars)
-        urls['builder'] = { )
+        urls['builder'] = { }
         'async_url': builder.get_url_for_environment(sync=False),
         'sync_url': builder.get_url_for_environment(sync=True)
             
@@ -80,7 +80,7 @@ class DatabaseURLFormationDiagnostic:
 
                 # AuthDatabaseManager URLs
         try:
-        urls['auth_manager'] = { )
+        urls['auth_manager'] = { }
         'async_url': AuthDatabaseManager.get_auth_database_url_async(),
         'migration_url': AuthDatabaseManager.get_migration_url_sync_format(),
         'base_url': AuthDatabaseManager.get_base_database_url()
@@ -90,7 +90,7 @@ class DatabaseURLFormationDiagnostic:
 
                         # AuthConfig URL
         try:
-        urls['auth_config'] = { )
+        urls['auth_config'] = { }
         'database_url': AuthConfig.get_database_url()
                             
         except Exception as e:
@@ -112,7 +112,7 @@ class DatabaseURLFormationDiagnostic:
         if isinstance(source_urls, dict):
         for url_type, url in source_urls.items():
         if isinstance(url, str) and url:
-        issues.extend(self._check_single_url(url, "formatted_string"))
+        issues.extend(self._check_single_url(url, ""))
 
         return issues
 
@@ -123,7 +123,7 @@ class DatabaseURLFormationDiagnostic:
     # SSL parameter issues
         if "postgresql+asyncpg://" in url or "+asyncpg" in url:
         if "sslmode=" in url:
-        issues.append({ ))
+        issues.append({ })
         'source': source,
         'severity': 'critical',
         'issue': 'AsyncPG URL contains sslmode parameter',
@@ -133,7 +133,7 @@ class DatabaseURLFormationDiagnostic:
 
         if "postgresql+psycopg2://" in url or "+psycopg2" in url:
         if "ssl=" in url and "sslmode=" not in url:
-        issues.append({ ))
+        issues.append({ })
         'source': source,
         'severity': 'warning',
         'issue': 'psycopg2 URL contains ssl parameter without sslmode',
@@ -143,7 +143,7 @@ class DatabaseURLFormationDiagnostic:
 
                     # Driver specification issues
         if url.startswith("postgres://"):
-        issues.append({ ))
+        issues.append({ })
         'source': source,
         'severity': 'medium',
         'issue': 'URL uses postgres:// scheme',
@@ -154,8 +154,8 @@ class DatabaseURLFormationDiagnostic:
                         # Port issues
         env_port = self.env.get('POSTGRES_PORT')
         if env_port and env_port != '5432':
-        if "formatted_string" not in url and not url.startswith('sqlite'):
-        issues.append({ ))
+        if "" not in url and not url.startswith('sqlite'):
+        issues.append({ })
         'source': source,
         'severity': 'high',
         'issue': 'formatted_string',
@@ -167,7 +167,7 @@ class DatabaseURLFormationDiagnostic:
 
     async def test_url_connectivity(self, url:
         """Test connectivity for a specific URL."""
-        result = { )
+        result = { }
         'description': description,
         'url_masked': DatabaseURLBuilder.mask_url_for_logging(url),
         'success': False,
@@ -199,14 +199,14 @@ class DatabaseURLFormationDiagnostic:
 
         await conn.close()
 
-        result.update({ ))
+        result.update({ })
         'success': True,
         'connection_time': time.time() - start_time,
         'driver_compatibility': 'asyncpg_compatible'
                                             
 
         except Exception as e:
-        result.update({ ))
+        result.update({ })
         'connection_time': time.time() - start_time,
         'error': str(e)
                                                 
@@ -253,32 +253,32 @@ class TestDatabaseURLFormationAndConnectivity:
 
     # Display URLs
         for source, source_data in urls.items():
-        print("formatted_string")
+        print("")
         if isinstance(source_data, dict):
         for key, value in source_data.items():
         if key == 'validation':
-        print("formatted_string")
+        print("")
         elif isinstance(value, str) and value:
         masked_value = DatabaseURLBuilder.mask_url_for_logging(value)
-        print("formatted_string")
+        print("")
         else:
-        print("formatted_string")
+        print("")
         else:
-        print("formatted_string")
+        print("")
 
                                 # Display errors
         if errors:
         print(f" )
         URL Formation Errors:")
         for source, error in errors.items():
-        print("formatted_string")
+        print("")
 
                                         # Analyze issues
         issues = diagnostic.analyze_url_issues(url_data)
 
         print(f" )
         URL Issues Analysis:")
-        print("formatted_string")
+        print("")
 
         critical_issues = []
         high_issues = []
@@ -286,10 +286,10 @@ class TestDatabaseURLFormationAndConnectivity:
 
         for issue in issues:
         severity = issue.get('severity', 'unknown')
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
+        print("")
 
         if severity == 'critical':
         critical_issues.append(issue)
@@ -306,7 +306,7 @@ class TestDatabaseURLFormationAndConnectivity:
         f"Critical URL formation issues found that will cause connection failures:
         " +
         "
-        ".join("formatted_string"issue"]}" for issue in critical_issues) +
+        ".join(""issue"]}" for issue in critical_issues) +
         f"
 
         These issues must be fixed before database connections will work properly."
@@ -317,7 +317,7 @@ class TestDatabaseURLFormationAndConnectivity:
         print(f" )
         WARNING: [U+FE0F]  High-priority issues that should be addressed:")
         for issue in high_issues:
-        print("formatted_string")
+        print("")
 
         print(f" )
         PASS:  Database URL formation analysis completed")
@@ -344,9 +344,9 @@ for source, source_data in urls.items():
 if isinstance(source_data, dict):
 for key, url in source_data.items():
 if isinstance(url, str) and url and not url.startswith('sqlite'):
-urls_to_test.append(("formatted_string", url))
+urls_to_test.append(("", url))
 
-print("formatted_string")
+print("")
 
                                                                                             # Test connectivity for each URL
 connectivity_results = []
@@ -360,20 +360,20 @@ failed_connections = [item for item in []]]
 
 print(f" )
 Connectivity Test Results:")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 
                                                                                                 # Display detailed results
 for result in connectivity_results:
 status = " PASS:  SUCCESS" if result['success'] else " FAIL:  FAILED"
-time_str = "formatted_string" if result['connection_time'] else "N/A"
+time_str = "" if result['connection_time'] else "N/A"
 
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
 if result.get('error'):
-print("formatted_string")
+    print("")
 
                                                                                                         # Group failures by type
 ssl_failures = [item for item in []]
@@ -383,10 +383,10 @@ other_failures = [item for item in []]
 
 print(f" )
 Failure Analysis:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
 
                                                                                                         # Assert that at least one URL works for basic connectivity
 assert len(successful_connections) > 0, ( )
@@ -394,7 +394,7 @@ f"No database URLs successfully connected. This indicates a fundamental "
 f"connectivity or configuration issue. Failure details:
 " +
 "
-".join("formatted_string"error"]}" for r in failed_connections[:3])
+".join(""error"]}" for r in failed_connections[:3])
                                                                                                             
 
                                                                                                             # Warn if primary URLs fail but others work
@@ -418,20 +418,20 @@ pass
 logger.info("=== SSL PARAMETER COMPATIBILITY CHECK ===")
 
     # Test URL transformations for SSL parameters
-test_cases = [ )
-{ )
+test_cases = [ ]
+{ }
 'name': 'sslmode_to_ssl_for_asyncpg',
 'input_url': 'postgresql://user:pass@host:5432/db?sslmode=require',
 'expected_asyncpg': 'ssl=require',
 'expected_psycopg2': 'sslmode=require'
 },
-{ )
+{ }
 'name': 'ssl_to_sslmode_for_psycopg2',
 'input_url': 'postgresql://user:pass@host:5432/db?ssl=require',
 'expected_asyncpg': 'ssl=require',
 'expected_psycopg2': 'sslmode=require'
 },
-{ )
+{ }
 'name': 'cloud_sql_no_ssl_params',
 'input_url': 'postgresql://user:pass@/db?host=/cloudsql/project:region:instance&sslmode=require',
 'expected_asyncpg': 'no_ssl_params',
@@ -445,8 +445,8 @@ SSL Parameter Compatibility Tests:")
 compatibility_issues = []
 
 for test_case in test_cases:
-print("formatted_string")
-print("formatted_string")
+    print("")
+print("")
 
         # Test AuthDatabaseManager URL transformations
 try:
@@ -459,29 +459,29 @@ env.set('DATABASE_URL', test_case['input_url'])
 
             # Get async URL (for asyncpg)
 async_url = AuthDatabaseManager.get_auth_database_url_async()
-print("formatted_string")
+print("")
 
             # Get migration URL (for psycopg2)
 migration_url = AuthDatabaseManager.get_migration_url_sync_format()
-print("formatted_string")
+print("")
 
             # Check async URL for asyncpg compatibility
 if test_case['expected_asyncpg'] == 'ssl=require':
 if 'ssl=require' not in async_url:
-compatibility_issues.append("formatted_string")
+compatibility_issues.append("")
 if 'sslmode=' in async_url:
-compatibility_issues.append("formatted_string")
+compatibility_issues.append("")
 elif test_case['expected_asyncpg'] == 'no_ssl_params':
 if 'ssl=' in async_url or 'sslmode=' in async_url:
-compatibility_issues.append("formatted_string")
+compatibility_issues.append("")
 
                                 # Check migration URL for psycopg2 compatibility
 if test_case['expected_psycopg2'] == 'sslmode=require':
 if 'sslmode=require' not in migration_url:
-compatibility_issues.append("formatted_string")
+compatibility_issues.append("")
 elif test_case['expected_psycopg2'] == 'no_ssl_params':
 if 'ssl=' in migration_url or 'sslmode=' in migration_url:
-compatibility_issues.append("formatted_string")
+compatibility_issues.append("")
 
                                                 # Restore original URL
 if original_url:
@@ -492,18 +492,18 @@ env.set('DATABASE_URL', 'sqlite+aiosqlite:///test.db')
 print(f"   PASS:  SSL parameter transformation working")
 
 except Exception as e:
-compatibility_issues.append("formatted_string")
-print("formatted_string")
+compatibility_issues.append("")
+print("")
 
 print(f" )
 SSL Parameter Compatibility Summary:")
-print("formatted_string")
+print("")
 
 for issue in compatibility_issues:
-print("formatted_string")
+    print("")
 
 if not compatibility_issues:
-print("   PASS:  All SSL parameter transformations working correctly")
+    print("   PASS:  All SSL parameter transformations working correctly")
 
                                                                     # Assert no critical SSL compatibility issues
 critical_ssl_issues = [item for item in []]
@@ -512,7 +512,7 @@ assert len(critical_ssl_issues) == 0, ( )
 f"Critical SSL parameter compatibility issues found:
 " +
 "
-".join("formatted_string" for issue in critical_ssl_issues) +
+".join("" for issue in critical_ssl_issues) +
 f"
 
 These will cause "unexpected keyword argument sslmode" errors with asyncpg."
@@ -531,17 +531,17 @@ print("=== DATABASE URL FORMATION AND CONNECTIVITY DIAGNOSIS ===")
 diagnostic = DatabaseURLFormationDiagnostic()
 
     # Analyze URL formation
-print("1. Analyzing URL formation...")
+    print("1. Analyzing URL formation...")
 url_data = diagnostic.get_all_database_urls()
 issues = diagnostic.analyze_url_issues(url_data)
 
-print("formatted_string")
+print("")
 
 for issue in issues:
-print("formatted_string")
+    print("")
 
         # Test connectivity
-print(" )
+    print("")
 2. Testing URL connectivity...")
 urls = url_data.get('urls', {})
 
@@ -550,7 +550,7 @@ for source, source_data in urls.items():
 if isinstance(source_data, dict):
 for key, url in source_data.items():
 if isinstance(url, str) and url and not url.startswith('sqlite'):
-test_urls.append(("formatted_string", url))
+test_urls.append(("", url))
 
 connectivity_results = []
 for description, url in test_urls[:3]:  # Test first 3 URLs
@@ -558,11 +558,11 @@ result = await diagnostic.test_url_connectivity(url, description)
 connectivity_results.append(result)
 
 successful = [item for item in []]]
-print("formatted_string")
+print("")
 
 if successful:
-print(" PASS:  Database URL formation and connectivity working")
+    print(" PASS:  Database URL formation and connectivity working")
 else:
-print(" FAIL:  Database URL formation or connectivity issues found")
+    print(" FAIL:  Database URL formation or connectivity issues found")
 
 asyncio.run(main())

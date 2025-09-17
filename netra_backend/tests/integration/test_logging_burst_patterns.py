@@ -28,7 +28,7 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Any, Dict, List, Optional, Set
 from unittest.mock import patch
 
@@ -260,7 +260,7 @@ class LoggingBurstPatternsTests(SSotBaseTestCase):
                             'user_id': user_id,
                             'event_sequence': i,
                             'user_context_data': user_context.get_context_summary(),
-                            'timestamp': datetime.utcnow().isoformat(),
+                            'timestamp': datetime.now(UTC).isoformat(),
                             'concurrent_test': True
                         }
                     )
@@ -383,7 +383,7 @@ class LoggingBurstPatternsTests(SSotBaseTestCase):
                                 'stress_round': stress_round,
                                 'burst_sequence': burst_log,
                                 'user_context': self.user_contexts[stress_user_id].get_context_summary(),
-                                'timestamp': datetime.utcnow().isoformat(),
+                                'timestamp': datetime.now(UTC).isoformat(),
                                 'gcp_environment': self._env.get('GCP_PROJECT'),
                                 'complex_data': {
                                     'nested_dict': {'level1': {'level2': {'level3': 'deep_value'}}},

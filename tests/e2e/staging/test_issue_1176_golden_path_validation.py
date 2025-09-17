@@ -172,7 +172,7 @@ class TestGoldenPathValidationStaging(SSotAsyncTestCase):
 
             except asyncio.TimeoutError:
                 return {"success": False, "error": "WebSocket connection timeout"}
-            except websockets.exceptions.ConnectionClosed as e:
+            except websockets.ConnectionClosed as e:
                 return {"success": False, "error": f"WebSocket connection closed: {e}"}
             except Exception as e:
                 return {"success": False, "error": f"WebSocket connection failed: {e}"}

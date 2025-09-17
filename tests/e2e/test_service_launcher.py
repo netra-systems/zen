@@ -36,7 +36,7 @@ class TestServiceLauncher:
 
     # Set test environment variables
         test_env = get_env().as_dict().copy()
-        test_env.update({ ))
+        test_env.update({ })
         "TESTING": "1",
         "ENVIRONMENT": "test",
         "AUTH_FAST_TEST_MODE": "true",
@@ -48,7 +48,7 @@ class TestServiceLauncher:
     
 
     # Start backend with minimal configuration
-        cmd = [ )
+        cmd = [ ]
         sys.executable, "-m", "uvicorn",
         "netra_backend.app.main:app",
         "--host", "0.0.0.0",
@@ -56,7 +56,7 @@ class TestServiceLauncher:
         "--log-level", "warning"
     
 
-        logger.info("formatted_string")
+        logger.info("")
         process = subprocess.Popen( )
         cmd,
         cwd=str(self.project_root),
@@ -77,16 +77,16 @@ class TestServiceLauncher:
         try:
         response = await self.http_client.get("formatted_string")
         if response.status_code == 200:
-        logger.info("formatted_string")
+        logger.info("")
         return True
         except Exception:
         pass
 
                 # If not running, try to start it
-        logger.warning("formatted_string")
+        logger.warning("")
 
         test_env = get_env().as_dict().copy()
-        test_env.update({ ))
+        test_env.update({ })
         "PORT": str(port),
         "ENVIRONMENT": "test",
         "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
@@ -118,59 +118,59 @@ class TestServiceLauncher:
             
         for line in result.stdout.split(" )
         "):
-        if "formatted_string" in line and "LISTENING" in line:
+        if "" in line and "LISTENING" in line:
         parts = line.split()
         if len(parts) > 4:
         pid = parts[-1]
         subprocess.run(["taskkill", "/F", "/PID", pid],
         capture_output=True)
-        logger.info("formatted_string")
+        logger.info("")
         else:
                             # Unix/Linux
         result = subprocess.run( )
-        ["lsof", "-ti", "formatted_string"],
+        ["lsof", "-ti", ""],
         capture_output=True, text=True
                             
         if result.stdout:
         pid = result.stdout.strip()
         subprocess.run(["kill", "-9", pid])
-        logger.info("formatted_string")
+        logger.info("")
         except Exception as e:
-        logger.debug("formatted_string")
+        logger.debug("")
 
     async def _wait_for_service_ready(self, service_name: str, port: int, health_path: str, timeout: int = 30) -> bool:
         """Wait for service to be ready."""
         pass
-        url = "formatted_string"
+        url = ""
         start_time = asyncio.get_event_loop().time()
 
         while (asyncio.get_event_loop().time() - start_time) < timeout:
         try:
         response = await self.http_client.get(url)
         if response.status_code == 200:
-        logger.info("formatted_string")
+        logger.info("")
         await asyncio.sleep(0)
         return True
         except Exception as e:
-        logger.debug("formatted_string")
+        logger.debug("")
 
         await asyncio.sleep(0.5)
 
-        logger.error("formatted_string")
+        logger.error("")
         return False
 
     async def check_service_health(self, service: str, port: int) -> Dict:
         """Check service health."""
         try:
-        url = "formatted_string"
+        url = ""
         response = await self.http_client.get(url)
-        return { )
+        return { }
         "healthy": response.status_code == 200,
         "status_code": response.status_code,
         "response": response.json() if response.status_code == 200 else None
         
         except Exception as e:
-        return { )
+        return { }
         "healthy": False,
         "error": str(e)
             
@@ -181,12 +181,12 @@ class TestServiceLauncher:
         try:
         process.terminate()
         process.wait(timeout=5)
-        logger.info("formatted_string")
+        logger.info("")
         except subprocess.TimeoutExpired:
         process.kill()
-        logger.warning("formatted_string")
+        logger.warning("")
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
 
         self.processes.clear()
         await self.http_client.aclose()
@@ -200,7 +200,7 @@ class TestServiceLauncher:
     # Removed problematic line: '''Ensure test services are running and await asyncio.sleep(0)
         return their status.'''
         pass
-        results = { )
+        results = { }
     # Removed problematic line: "auth": await test_launcher.start_auth_test_mode(),
     # Removed problematic line: "backend": await test_launcher.start_backend_test_mode()
     

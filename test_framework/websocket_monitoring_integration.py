@@ -13,7 +13,7 @@ import json
 import os
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
 from pathlib import Path
@@ -40,7 +40,7 @@ class WebSocketHealthMetric:
     
     def __post_init__(self):
         if self.timestamp is None:
-            self.timestamp = datetime.utcnow()
+            self.timestamp = datetime.now(UTC)
         if self.details is None:
             self.details = {}
             
@@ -340,7 +340,7 @@ class WebSocketHealthMonitor:
                 severity="critical",
                 title="Critical WebSocket Health Issues Detected",
                 description=f"WebSocket service has {len(critical_metrics)} critical health issues",
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 environment=self.environment,
                 metrics={m.name: {"value": m.value, "details": m.details} for m in critical_metrics},
                 resolution_suggestions=[
@@ -360,7 +360,7 @@ class WebSocketHealthMonitor:
                 severity="warning",
                 title="WebSocket Performance Degradation",
                 description=f"WebSocket service has {len(warning_metrics)} performance warnings",
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 environment=self.environment,
                 metrics={m.name: {"value": m.value, "details": m.details} for m in warning_metrics},
                 resolution_suggestions=[
@@ -381,7 +381,7 @@ class WebSocketHealthMonitor:
                 severity="critical",
                 title="High Business Impact - WebSocket Chat Functionality at Risk",
                 description=f"WebSocket handshake success rate at {handshake_success.value:.1f}% - Chat functionality severely impacted",
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 environment=self.environment,
                 metrics={"handshake_success_rate": {"value": handshake_success.value, "details": handshake_success.details}},
                 resolution_suggestions=[
@@ -410,7 +410,7 @@ class WebSocketHealthMonitor:
         logger.info(f"Starting WebSocket monitoring cycle for {duration_minutes} minutes...")
         
         monitoring_results = {
-            "start_time": datetime.utcnow().isoformat(),
+            "start_time": datetime.now(UTC).isoformat(),
             "environment": self.environment,
             "duration_minutes": duration_minutes,
             "cycles": [],
@@ -437,7 +437,7 @@ class WebSocketHealthMonitor:
                 
                 cycle_result = {
                     "cycle_number": cycle_count,
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     "metrics": [
                         {
                             "name": m.name,
@@ -500,7 +500,7 @@ class WebSocketHealthMonitor:
         critical_alerts = len([a for a in monitoring_results["alerts_generated"] if a["severity"] == "critical"])
         warning_alerts = len([a for a in monitoring_results["alerts_generated"] if a["severity"] == "warning"])
         
-        monitoring_results["end_time"] = datetime.utcnow().isoformat()
+        monitoring_results["end_time"] = datetime.now(UTC).isoformat()
         monitoring_results["summary"] = {
             "total_cycles": cycle_count,
             "total_alerts": total_alerts,

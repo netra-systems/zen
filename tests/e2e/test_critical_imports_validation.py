@@ -46,7 +46,7 @@ class CriticalImportsValidator:
         self.start_time = 0.0
 
     Define CRITICAL modules that must import successfully
-        self.critical_modules = [ )
+        self.critical_modules = [ ]
     # Main Services
         "netra_backend.app.main",
         "auth_service.main",
@@ -111,7 +111,7 @@ class CriticalImportsValidator:
     
 
     # Dependencies that MUST be available
-        self.required_dependencies = [ )
+        self.required_dependencies = [ ]
         "fastapi",
         "uvicorn",
         "pydantic",
@@ -138,12 +138,12 @@ class CriticalImportsValidator:
         importlib.import_module(dep)
         except ImportError as e:
         missing_deps.append(dep)
-        dependency_errors[dep] = { )
+        dependency_errors[dep] = { }
         "error": str(e),
         "type": "ImportError"
                 
 
-        return { )
+        return { }
         "missing_dependencies": missing_deps,
         "dependency_errors": dependency_errors,
         "all_dependencies_available": len(missing_deps) == 0
@@ -161,14 +161,14 @@ class CriticalImportsValidator:
         return True, None, None
 
         except ImportError as e:
-        return False, "ImportError", "formatted_string"
+        return False, "ImportError", ""
         except SyntaxError as e:
-        return False, "SyntaxError", "formatted_string"
+        return False, "SyntaxError", ""
         except ModuleNotFoundError as e:
         return False, "ModuleNotFoundError", str(e)
         except Exception as e:
         error_type = type(e).__name__
-        return False, error_type, "formatted_string"
+        return False, error_type, ""
 
     def validate_critical_imports(self) -> Dict[str, Any]:
         """Validate all critical imports work correctly"""
@@ -186,7 +186,7 @@ class CriticalImportsValidator:
         if success:
         successful_imports.append(module_name)
         else:
-        self.failed_imports[module_name] = { )
+        self.failed_imports[module_name] = { }
         "error_type": error_type,
         "error_message": error_msg,
         "critical": True
@@ -194,7 +194,7 @@ class CriticalImportsValidator:
 
         elapsed_time = time.time() - self.start_time
 
-        return { )
+        return { }
         "total_critical_modules": len(self.critical_modules),
         "successful_imports": len(successful_imports),
         "failed_imports": len(self.failed_imports),
@@ -225,10 +225,10 @@ class CriticalImportsValidator:
         importlib.import_module(module_name)
 
         except RecursionError:
-        circular_issues.append("formatted_string")
+        circular_issues.append("")
         except ImportError as e:
         if "circular" in str(e).lower() or "recursion" in str(e).lower():
-        circular_issues.append("formatted_string")
+        circular_issues.append("")
 
         return circular_issues
 
@@ -257,13 +257,13 @@ class TestCriticalImportsValidation:
         missing_deps = dependency_validation["missing_dependencies"]
         error_details = dependency_validation["dependency_errors"]
 
-        failure_msg = "formatted_string"
+        failure_msg = ""
         failure_msg += "Install missing packages:
         "
 
         for dep in missing_deps:
         error_info = error_details.get(dep, {})
-        failure_msg += "formatted_string"
+        failure_msg += ""
 
         pytest.fail(failure_msg)
 
@@ -275,16 +275,16 @@ class TestCriticalImportsValidation:
         success_rate = validation_results["success_rate"]
 
         if failed_imports > 0:
-        failure_report = "formatted_string"
-        failure_report += "formatted_string"
+        failure_report = ""
+        failure_report += ""
         failure_report += "=" * 80 + "
         "
 
         # Report each failure with detailed information
         for module_name, error_info in validation_results["failed_import_details"].items():
-        failure_report += "formatted_string"
-        failure_report += "formatted_string"
-        failure_report += "formatted_string"
+        failure_report += ""
+        failure_report += ""
+        failure_report += ""
         failure_report += "-" * 60 + "
         "
 
@@ -305,7 +305,7 @@ class TestCriticalImportsValidation:
         failure_msg = "Circular import dependencies detected in critical modules:
         "
         for issue in circular_issues:
-        failure_msg += "formatted_string"
+        failure_msg += ""
         failure_msg += "
         Circular imports must be resolved to prevent runtime failures."
 
@@ -320,7 +320,7 @@ class TestCriticalImportsValidation:
 
         if elapsed_time > max_time:
         pytest.fail( )
-        "formatted_string"
+        ""
         f"Slow imports indicate dependency or configuration issues."
         
 
@@ -334,7 +334,7 @@ class TestCriticalImportsValidation:
         total_count = validation_results["total_critical_modules"]
 
         pytest.fail( )
-        "formatted_string"
+        ""
         f"100% success rate required for critical service imports. "
         f"ANY critical import failure compromises entire system stability."
         
@@ -346,7 +346,7 @@ class TestCriticalImportsValidation:
         successful_modules = validation_results["successful_modules"]
 
     Verify we have successful imports from each critical category
-        required_categories = { )
+        required_categories = { }
         "main_services": ["netra_backend.app.main", "auth_service.main", "dev_launcher.launcher"],
         "agent_core": ["netra_backend.app.agents.supervisor_agent_modern", "netra_backend.app.agents.base_agent"],
         "auth": ["netra_backend.app.auth_integration.auth"],
@@ -357,39 +357,39 @@ class TestCriticalImportsValidation:
         missing_categories = []
         for category, required_modules in required_categories.items():
         if not any(module in successful_modules for module in required_modules):
-        missing_categories.append("formatted_string")
+        missing_categories.append("")
 
         if missing_categories:
         pytest.fail( )
         f"Missing critical service categories:
         " +
         "
-        ".join("formatted_string" for cat in missing_categories)
+        ".join("" for cat in missing_categories)
                     
 
         @pytest.mark.e2e
     def test_validation_summary_report(self, validation_results):
         """Generate comprehensive validation summary report"""
-        print(" )
-        " + "=" * 26 + " CRITICAL IMPORTS VALIDATION " + "=" * 26)
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+         + =" * 26 + " CRITICAL IMPORTS VALIDATION  + =" * 26)
+        print("")
+        print("")
+        print("")
+        print("")
+        print("")
 
         dependency_validation = validation_results["dependency_validation"]
         if dependency_validation["all_dependencies_available"]:
         print("All required dependencies available")
         else:
         missing_count = len(dependency_validation["missing_dependencies"])
-        print("formatted_string")
+        print("")
 
         if validation_results["failed_imports"] == 0:
-        print(" )
+        print("")
         ALL CRITICAL IMPORTS SUCCESSFUL - Test infrastructure ready!")
         else:
-        print("formatted_string")
+        print("")
 
         print("=" * 80)
 
@@ -404,21 +404,21 @@ class TestCriticalImportsValidation:
         validator = CriticalImportsValidator()
         results = validator.validate_critical_imports()
 
-        print(" )
-        " + "="*80)
+        print("")
+         + ="*80)
         print("CRITICAL IMPORTS VALIDATION RESULTS")
         print("="*80)
 
         if results["failed_imports"] == 0:
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
         return True
         else:
-        print("formatted_string")
-        print(" )
+        print("")
+        print("")
         Failed modules:")
         for module, error in results["failed_import_details"].items():
-        print("formatted_string")
+        print("")
         return False
 
 

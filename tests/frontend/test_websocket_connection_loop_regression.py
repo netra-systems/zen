@@ -111,7 +111,7 @@ class WebSocketConnectionLoopTest:
 
     # Effect 1: Main connection effect (line 109 in WebSocketProvider)
         if auth_state.get("initialized") and auth_state.get("token"):
-        effects_triggered.append({ ))
+        effects_triggered.append({ })
         "type": "main_effect",
         "timestamp": time.time(),
         "trigger": "auth_initialized && token"
@@ -119,7 +119,7 @@ class WebSocketConnectionLoopTest:
 
         # Effect 2: Token synchronization effect (line 307)
         if auth_state.get("token"):
-        effects_triggered.append({ ))
+        effects_triggered.append({ })
         "type": "token_sync_effect",
         "timestamp": time.time(),
         "trigger": "token_changed"
@@ -129,7 +129,7 @@ class WebSocketConnectionLoopTest:
 
     def simulate_connection_attempt(self, ws_service_mock, attempt_number: int):
         """Simulate a WebSocket connection attempt"""
-        connection_record = { )
+        connection_record = { }
         "attempt": attempt_number,
         "timestamp": time.time(),
         "state": "connecting"
@@ -139,7 +139,7 @@ class WebSocketConnectionLoopTest:
     # Simulate auth failure on staging (code 1008)
         if attempt_number > 0 and attempt_number % 2 == 0:
         # Every second attempt fails with auth error
-        self.auth_failures.append({ ))
+        self.auth_failures.append({ })
         "attempt": attempt_number,
         "code": 1008,
         "reason": "Policy Violation - Token expired"
@@ -164,7 +164,7 @@ class WebSocketConnectionLoopTest:
         time.sleep(0.1)  # 100ms between attempts (simulating the bug)
 
         rate = len(attempts_in_window) / duration_seconds
-        return { )
+        return { }
         "total_attempts": len(attempts_in_window),
         "duration": duration_seconds,
         "rate_per_second": rate,
@@ -174,7 +174,7 @@ class WebSocketConnectionLoopTest:
 
 @pytest.mark.asyncio
     async def test_websocket_connection_loop_bug():
-'''
+        '''
 Test that reproduces the WebSocket connection loop bug.
 This test SHOULD FAIL with the current implementation,
 demonstrating the bug exists.
@@ -194,14 +194,14 @@ auth_state = test_harness.simulate_auth_delay(200)
 
             # Step 4: Simulate multiple effects triggering (THE BUG)
 effects = test_harness.simulate_websocket_provider_effects(auth_state)
-assert len(effects) >= 2, "formatted_string"
+assert len(effects) >= 2, ""
 
             # Step 5: Simulate WebSocket service handling multiple connection requests
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
 connection_results = []
 
 for i, effect in enumerate(effects):
-result = test_harness.simulate_connection_attempt(ws_service_mock, i)
+    result = test_harness.simulate_connection_attempt(ws_service_mock, i)
 connection_results.append(result)
 
                 # Step 6: Measure connection loop rate
@@ -211,28 +211,28 @@ loop_metrics = test_harness.measure_connection_loop_rate(duration_seconds=2)
 
                 Bug indicator 1: Multiple connection attempts from single auth change
 assert len(test_harness.connection_attempts) <= 1, \
-"formatted_string"
+""
 
                 # Bug indicator 2: Rapid reconnection rate (connection loop)
 assert not loop_metrics["is_looping"], \
-"formatted_string"
+""
 
                 # Bug indicator 3: Auth failures triggering immediate reconnects
 assert len(test_harness.auth_failures) == 0 or \
 len(test_harness.reconnection_attempts) < len(test_harness.auth_failures), \
-"formatted_string"
+""
 
 
 @pytest.mark.asyncio
     async def test_websocket_connection_deduplication():
-'''
+        '''
 Test that WebSocket service properly deduplicates rapid connection attempts.
 This test SHOULD FAIL with current implementation.
 '''
 
                     # Mock the WebSocket service
 with patch('frontend.services.webSocketService.WebSocketService') as MockWSService:
-ws_service = MockWSService.return_value
+    ws_service = MockWSService.return_value
 ws_service.websocket = TestWebSocketConnection()
 ws_service.isConnecting = False
 ws_service.state = 'disconnected'
@@ -241,7 +241,7 @@ ws_service.state = 'disconnected'
 connection_tasks = []
 for i in range(5):
                             # These should be deduplicated but currently aren't
-task = asyncio.create_task(ws_service.connect("formatted_string", {}))
+task = asyncio.create_task(ws_service.connect("", {}))
 connection_tasks.append(task)
                             # No delay - simulating race condition
 
@@ -250,12 +250,12 @@ await asyncio.gather(*connection_tasks, return_exceptions=True)
                             # SHOULD only connect once, but currently connects multiple times
 actual_calls = ws_service.connect.call_count
 assert actual_calls == 1, \
-"formatted_string"
+""
 
 
 @pytest.mark.asyncio
     async def test_websocket_auth_failure_backoff():
-'''
+        '''
 Test that auth failures trigger proper exponential backoff.
 This test SHOULD FAIL with current implementation.
 '''
@@ -265,7 +265,7 @@ reconnect_delays = []
 
                                 # Simulate series of auth failures
 for attempt in range(5):
-result = test_harness.simulate_connection_attempt( )
+    result = test_harness.simulate_connection_attempt( )
 if not result["success"] and result["code"] == 1008:
                                         # Measure time until next reconnect attempt
 reconnect_delay = 0.1 * (2 ** attempt)  # Expected exponential backoff
@@ -274,14 +274,14 @@ await asyncio.sleep(0.01)  # Minimal delay in test
 
                                         # Verify exponential backoff is applied
 for i in range(1, len(reconnect_delays)):
-expected_increase = reconnect_delays[i] > reconnect_delays[i-1]
+    expected_increase = reconnect_delays[i] > reconnect_delays[i-1]
 assert expected_increase, \
-"formatted_string"
+""
 
 
 @pytest.mark.asyncio
     async def test_websocket_provider_effect_coordination():
-'''
+        '''
 Test that WebSocketProvider properly coordinates multiple effects.
 This test SHOULD FAIL with current implementation.
 '''
@@ -290,14 +290,14 @@ This test SHOULD FAIL with current implementation.
 effect_executions = []
 
 def track_effect(effect_name: str):
-pass
-effect_executions.append({ ))
+    pass
+effect_executions.append({ })
 "name": effect_name,
 "timestamp": time.time()
     
 
     # Simulate auth state changes triggering effects
-auth_states = [ )
+auth_states = [ ]
 {"initialized": False, "token": None},
 {"initialized": True, "token": None},
 {"initialized": True, "token": "token1"},
@@ -305,7 +305,7 @@ auth_states = [ )
     
 
 for state in auth_states:
-if state["initialized"] and state["token"]:
+    if state["initialized"] and state["token"]:
             # Both effects trigger (the bug)
 track_effect("main_connection_effect")
 track_effect("token_sync_effect")
@@ -315,11 +315,11 @@ connection_effects = [item for item in []]]
 
             # Should have coordinated effects, not duplicates
 assert len(connection_effects) <= len(auth_states) - 2, \
-"formatted_string"
+""
 
 
 def test_websocket_connection_race_condition():
-'''
+    '''
 Synchronous test for the race condition between auth and connection.
 This test SHOULD FAIL, proving the bug exists.
 '''
@@ -330,9 +330,9 @@ connection_log = []
 lock = threading.Lock()
 
 def connect_websocket(source: str):
-pass
+    pass
 with lock:
-connection_log.append({ ))
+    connection_log.append({ })
 "source": source,
 "timestamp": time.time(),
 "thread": threading.current_thread().name
@@ -355,15 +355,15 @@ threads.append(t3)
 
         # Start all threads simultaneously (race condition)
 for t in threads:
-t.start()
+    t.start()
 
             # Wait for completion
 for t in threads:
-t.join()
+    t.join()
 
                 # Should have connection coordination, but doesn't
 assert len(connection_log) == 1, \
-"formatted_string"
+""
 
 
 if __name__ == "__main__":
@@ -384,5 +384,5 @@ asyncio.run(test_websocket_provider_effect_coordination())
                     # Run sync test
 test_websocket_connection_race_condition()
 
-print(" )
+print("")
 PASS:  All tests passed! The SSOT fix successfully prevents connection loops.")

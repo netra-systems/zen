@@ -135,29 +135,29 @@ class TestStagingBackendServiceFailures:
 
     # Should be a valid PostgreSQL URL format
         assert database_url.startswith(("postgresql://", "postgres://")), ( )
-        "formatted_string"
+        ""
     
 
     # Should point to staging database, not localhost or development
         assert "localhost" not in database_url, ( )
-        "formatted_string"
+        ""
     
         assert "127.0.0.1" not in database_url, ( )
-        "formatted_string"
+        ""
     
 
     # Should use staging database name
         staging_db_patterns = ["netra_staging", "netra-staging", "staging"]
         has_staging_pattern = any(pattern in database_url for pattern in staging_db_patterns)
         assert has_staging_pattern, ( )
-        "formatted_string"
+        ""
     
 
     # Should use Cloud SQL or staging host
         staging_host_patterns = ["staging", "cloudsql", "cloud-sql-proxy"]
         has_staging_host = any(pattern in database_url for pattern in staging_host_patterns)
         assert has_staging_host, ( )
-        "formatted_string"
+        ""
     
 
         @pytest.fixture
@@ -188,7 +188,7 @@ class TestStagingBackendServiceFailures:
         parsed = urlparse(database_url)
 
             # Connection parameters
-        conn_params = { )
+        conn_params = { }
         'host': parsed.hostname,
         'port': parsed.port or 5432,
         'database': parsed.path.lstrip('/') if parsed.path else None,
@@ -208,10 +208,10 @@ class TestStagingBackendServiceFailures:
         connection_time = time.time() - start_time
 
                     # Connection succeeded - test database exists
-        assert connection_time < 5.0, "formatted_string"
+        assert connection_time < 5.0, ""
 
                     # This test expects failure, but if it passes, auth service is configured correctly
-        print("formatted_string")
+        print("")
 
         except psycopg2.Error as e:
                         # Expected failure - database connectivity broken
@@ -223,7 +223,7 @@ class TestStagingBackendServiceFailures:
 
         assert False, ( )
         f"CRITICAL DATABASE FAILURE: Auth service cannot connect to staging database "
-        "formatted_string"
+        ""
         f"Check: 1) Database exists, 2) Credentials valid, 3) Network access, 4) SSL config"
                         
 
@@ -245,28 +245,28 @@ class TestStagingBackendServiceFailures:
         '''
         pass
     # Critical environment variables for auth service
-        critical_auth_vars = { )
-        'DATABASE_URL': { )
+        critical_auth_vars = { }
+        'DATABASE_URL': { }
         'required': True,
         'validation': lambda x: None v.startswith(('postgresql://', 'postgres://')) and 'staging' in v,
         'staging_requirement': 'Must point to staging database with Cloud SQL or staging host'
         },
-        'JWT_SECRET_KEY': { )
+        'JWT_SECRET_KEY': { }
         'required': True,
         'validation': lambda x: None len(v) >= 32,
         'staging_requirement': 'Must be minimum 32 characters for security'
         },
-        'REDIS_URL': { )
+        'REDIS_URL': { }
         'required': True,
         'validation': lambda x: None v.startswith('redis://') and 'localhost' not in v,
         'staging_requirement': 'Must point to staging Redis, not localhost'
         },
-        'CLICKHOUSE_URL': { )
+        'CLICKHOUSE_URL': { }
         'required': True,
         'validation': lambda x: None 'staging' in v and 'localhost' not in v,
         'staging_requirement': 'Must point to staging ClickHouse, not localhost'
         },
-        'NETRA_ENVIRONMENT': { )
+        'NETRA_ENVIRONMENT': { }
         'required': True,
         'validation': lambda x: None v in ['staging', 'production'],
         'staging_requirement': 'Must be "staging" to enforce staging behavior'
@@ -280,24 +280,24 @@ class TestStagingBackendServiceFailures:
 
         # Check if variable exists
         if requirements['required'] and value is None:
-        failures.append("formatted_string")
+        failures.append("")
         continue
 
             # Check if value is empty
         if requirements['required'] and value == "":
-        failures.append("formatted_string")
+        failures.append("")
         continue
 
                 # Check staging-specific validation
         if value and not requirements['validation'](value):
-        failures.append("formatted_string")
+        failures.append("")
 
                     # Report all configuration failures
         if failures:
         failure_report = "
-        ".join("formatted_string" for failure in failures)
+        ".join("" for failure in failures)
         assert False, ( )
-        "formatted_string"
+        ""
         f"These missing/invalid environment variables will cause auth service startup failure, "
         f"resulting in 100% authentication breakdown and complete platform unavailability."
                             
@@ -327,7 +327,7 @@ class TestStagingBackendServiceFailures:
 
     # Configuration validation
         if clickhouse_url:
-        assert "staging" in clickhouse_url, "formatted_string"
+        assert "staging" in clickhouse_url, ""
         Extract host from URL if provided
         if "://" in clickhouse_url:
         url_part = clickhouse_url.split("://")[1]
@@ -344,33 +344,33 @@ class TestStagingBackendServiceFailures:
         connection_time = time.time() - start_time
 
                     # Connection succeeded - ClickHouse is accessible
-        assert connection_time < 2.0, "formatted_string"
-        print("formatted_string")
+        assert connection_time < 2.0, ""
+        print("")
 
         except socket.timeout:
         connection_time = time.time() - start_time
         assert False, ( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
         f"blocking deployment validation and indicating analytics system failure."
                         
 
         except socket.gaierror as e:
         assert False, ( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
                             
 
         except ConnectionRefusedError:
         assert False, ( )
-        "formatted_string"
+        ""
         f"refused connection. Check ClickHouse service provisioning in staging environment."
                                 
 
         except OSError as e:
         assert False, ( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
                                     
 
         @pytest.fixture
@@ -391,7 +391,7 @@ class TestStagingBackendServiceFailures:
         try:
         from netra_backend.app.db.clickhouse import ClickHouseService as ClickHouseClient
         except ImportError as e:
-        assert False, "formatted_string"
+        assert False, ""
 
                                                 # Test client configuration and connection
         try:
@@ -411,13 +411,13 @@ class TestStagingBackendServiceFailures:
                                                         # Connection succeeded
                                                         # Removed problematic line: assert connection_result is True, "ClickHouse client connection should await asyncio.sleep(0)
         return True on success"
-        assert connection_time < 5.0, "formatted_string"
-        print("formatted_string")
+        assert connection_time < 5.0, ""
+        print("")
 
         except asyncio.TimeoutError:
         connection_time = time.time() - start_time
         assert False, ( )
-        "formatted_string"
+        ""
         f"This causes health checks to fail with 503 status, blocking deployment validation. "
         f"Check ClickHouse service availability and network connectivity."
                                                             
@@ -426,13 +426,13 @@ class TestStagingBackendServiceFailures:
         connection_time = time.time() - start_time
         error_type = type(e).__name__
         assert False, ( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
         f"This prevents analytics functionality and health check validation."
                                                                 
 
         except Exception as e:
-        assert False, "formatted_string"
+        assert False, ""
 
                                                                     # ===================================================================
                                                                     # CRITICAL: Redis Connectivity Failure Tests
@@ -482,7 +482,7 @@ class TestStagingBackendServiceFailures:
         test_host = host_part
         test_port = 6379
         else:
-        assert False, "formatted_string"
+        assert False, ""
         else:
         test_host = redis_host or "localhost"
         test_port = int(redis_port) if redis_port else 6379
@@ -490,11 +490,11 @@ class TestStagingBackendServiceFailures:
                                     # Should not use localhost in staging
         assert test_host != "localhost", ( )
         f"CRITICAL: Redis configured for localhost instead of staging Redis service. "
-        "formatted_string"
+        ""
                                     
         assert test_host != "127.0.0.1", ( )
         f"CRITICAL: Redis configured for local IP instead of staging Redis service. "
-        "formatted_string"
+        ""
                                     
 
                                     # Test raw Redis connectivity
@@ -505,33 +505,33 @@ class TestStagingBackendServiceFailures:
         connection_time = time.time() - start_time
 
                                         # Connection succeeded
-        assert connection_time < 2.0, "formatted_string"
-        print("formatted_string")
+        assert connection_time < 2.0, ""
+        print("")
 
         except socket.timeout:
         connection_time = time.time() - start_time
         assert False, ( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
         f"persistence failure, impacting user experience and performance."
                                             
 
         except ConnectionRefusedError:
         assert False, ( )
-        "formatted_string"
+        ""
         f"refused connection. Check Redis service provisioning in staging environment."
                                                 
 
         except socket.gaierror as e:
         assert False, ( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
                                                     
 
         except OSError as e:
         assert False, ( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
                                                         
 
         @pytest.fixture
@@ -562,13 +562,13 @@ class TestStagingBackendServiceFailures:
                                                                 # In staging, Redis should be required, not optional with fallback
         assert not redis_fallback_enabled, ( )
         "CRITICAL REDIS FALLBACK MISCONFIGURATION: "
-        "formatted_string"
+        ""
         f"Fallback mode masks infrastructure issues and creates staging/production drift."
                                                                 
 
         assert redis_required, ( )
         "CRITICAL REDIS REQUIREMENT MISCONFIGURATION: "
-        "formatted_string"
+        ""
         f"Redis must be mandatory to validate infrastructure readiness."
                                                                 
 
@@ -588,13 +588,13 @@ class TestStagingBackendServiceFailures:
         except Exception as e:
                                                                             # Expected failure in broken staging environment
         assert False, ( )
-        "formatted_string"
+        ""
         f"In staging environment, this should cause service startup failure, not silent fallback. "
         f"Check Redis service provisioning and connectivity."
                                                                             
 
         except ImportError as e:
-        assert False, "formatted_string"
+        assert False, ""
 
         @pytest.fixture
         @pytest.mark.critical
@@ -616,7 +616,7 @@ class TestStagingBackendServiceFailures:
         google_cloud_project = self.env.get("GOOGLE_CLOUD_PROJECT")
 
     # Staging environment indicators
-        staging_indicators = [ )
+        staging_indicators = [ ]
         netra_env == "staging",
         k_service is not None,  # Cloud Run
         google_cloud_project is not None,  # GCP environment
@@ -627,7 +627,7 @@ class TestStagingBackendServiceFailures:
 
         if is_staging:
         # Staging should have strict service requirements
-        service_requirements = { )
+        service_requirements = { }
         'REDIS_FALLBACK_ENABLED': 'false',
         'CLICKHOUSE_FALLBACK_ENABLED': 'false',
         'DATABASE_FALLBACK_ENABLED': 'false',
@@ -641,14 +641,14 @@ class TestStagingBackendServiceFailures:
 
         if actual_value != expected_value:
         failures.append( )
-        "formatted_string"
+        ""
                 
 
         if failures:
         failure_report = "
-        ".join("formatted_string" for failure in failures)
+        ".join("" for failure in failures)
         assert False, ( )
-        "formatted_string"
+        ""
         f"Staging environment is configured like development with permissive fallbacks. "
         f"This masks infrastructure issues and creates staging/production divergence, "
         f"leading to production failures that weren"t caught in staging."
@@ -675,7 +675,7 @@ class TestStagingBackendServiceFailures:
         pass
                             # Test backend health endpoint
         backend_url = self.env.get("BACKEND_URL", "http://localhost:8000")
-        health_url = "formatted_string"
+        health_url = ""
 
         start_time = time.time()
         try:
@@ -685,7 +685,7 @@ class TestStagingBackendServiceFailures:
 
                                     # Health endpoint should return 200
         if response.status_code == 200:
-        print("formatted_string")
+        print("")
 
                                         # Validate health response structure
         try:
@@ -697,11 +697,11 @@ class TestStagingBackendServiceFailures:
         for service_name, service_status in health_data["services"].items():
         if service_name in ["clickhouse", "redis"]:
         assert service_status.get("healthy", False), ( )
-        "formatted_string"
+        ""
                                                         
         except Exception as parse_error:
                                                             # Health endpoint returned 200 but invalid JSON
-        assert False, "formatted_string"
+        assert False, ""
 
         elif response.status_code == 503:
                                                                 # Expected failure - health check failing due to external services
@@ -712,29 +712,29 @@ class TestStagingBackendServiceFailures:
         error_details = response.text
 
         assert False, ( )
-        "formatted_string"
+        ""
         f"This indicates external service connectivity issues preventing deployment validation.
         "
-        "formatted_string"
+        ""
                                                                             
         else:
                                                                                 # Unexpected status code
         assert False, ( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
                                                                                 
 
         except httpx.TimeoutException:
         response_time = time.time() - start_time
         assert False, ( )
-        "formatted_string"
+        ""
         f"This indicates backend service failure or network connectivity issues."
                                                                                     
 
         except httpx.ConnectError as e:
         assert False, ( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
                                                                                         
 
                                                                                         # ===================================================================
@@ -756,7 +756,7 @@ class TestStagingBackendServiceFailures:
         '''
         pass
     Search for deprecated import patterns in loaded modules
-        deprecated_patterns = [ )
+        deprecated_patterns = [ ]
         "from starlette.websockets import",
         "import starlette.websockets",
         "from starlette.websocket import",
@@ -781,7 +781,7 @@ class TestStagingBackendServiceFailures:
         ")
         for i, line in enumerate(lines, 1):
         if pattern in line:
-        deprecated_usage_found.append({ ))
+        deprecated_usage_found.append({ })
         'module': module_name,
         'pattern': pattern,
         'line': i,
@@ -798,11 +798,11 @@ class TestStagingBackendServiceFailures:
         if deprecated_usage_found:
         usage_report = "
         ".join( )
-        "formatted_string"
+        ""
         for usage in deprecated_usage_found
                                                     
         assert False, ( )
-        "formatted_string"
+        ""
         f"These should be updated to use FastAPI imports:
         "
         f"  OLD: from starlette.websockets import WebSocket
@@ -858,7 +858,7 @@ class TestStagingBackendServiceFailures:
 
                     # Should prefer modern imports
         assert import_preference == "modern", ( )
-        "formatted_string"
+        ""
         f"Set WEBSOCKET_IMPORT_PREFERENCE=modern to enforce modern import patterns."
                     
 
@@ -881,7 +881,7 @@ class TestStagingBackendServiceFailures:
         '''
         pass
     # Test multiple environment detection methods
-        detection_methods = { )
+        detection_methods = { }
         'NETRA_ENVIRONMENT': self.env.get("NETRA_ENVIRONMENT"),
         'K_SERVICE': self.env.get("K_SERVICE"),  # Cloud Run
         'GOOGLE_CLOUD_PROJECT': self.env.get("GOOGLE_CLOUD_PROJECT"),  # GCP
@@ -890,7 +890,7 @@ class TestStagingBackendServiceFailures:
     
 
     # At least one detection method should indicate staging
-        staging_detected = any([ ))
+        staging_detected = any([ ])
         detection_methods['NETRA_ENVIRONMENT'] == 'staging',
         detection_methods['K_SERVICE'] is not None,
         detection_methods['GOOGLE_CLOUD_PROJECT'] is not None,
@@ -899,14 +899,14 @@ class TestStagingBackendServiceFailures:
 
         assert staging_detected, ( )
         f"CRITICAL STAGING DETECTION FAILURE: No staging environment indicators found. "
-        "formatted_string"
+        ""
         f"Without proper staging detection, service will use development behavior patterns "
         f"with inappropriate fallbacks, masking production readiness issues."
     
 
     # If staging detected, validate strict configuration enforcement
         if staging_detected:
-        strict_config_vars = { )
+        strict_config_vars = { }
         'STRICT_VALIDATION_MODE': 'true',
         'FAIL_FAST_ON_MISSING_SERVICES': 'true',
         'ALLOW_LOCALHOST_FALLBACK': 'false',
@@ -917,13 +917,13 @@ class TestStagingBackendServiceFailures:
         for var_name, expected_value in strict_config_vars.items():
         actual_value = self.env.get(var_name, "undefined")
         if actual_value != expected_value:
-        config_failures.append("formatted_string")
+        config_failures.append("")
 
         if config_failures:
         failure_report = "
-        ".join("formatted_string" for failure in config_failures)
+        ".join("" for failure in config_failures)
         assert False, ( )
-        "formatted_string"
+        ""
         f"Staging environment detected but strict validation not enforced. "
         f"This allows inappropriate fallbacks that mask production readiness issues."
                         
@@ -943,13 +943,13 @@ class TestStagingBackendServiceFailures:
         '''
         pass
                             # Test comprehensive service readiness
-        services_to_test = [ )
-        { )
+        services_to_test = [ ]
+        { }
         'name': 'backend',
         'url': self.env.get("BACKEND_URL", "http://localhost:8000"),
         'critical_endpoints': ['/health/', '/health/ready', '/docs']
         },
-        { )
+        { }
         'name': 'auth_service',
         'url': self.env.get("AUTH_SERVICE_URL", "http://localhost:8080"),
         'critical_endpoints': ['/health', '/auth/health', '/docs']
@@ -963,7 +963,7 @@ class TestStagingBackendServiceFailures:
         base_url = service_config['url']
 
         for endpoint in service_config['critical_endpoints']:
-        full_url = "formatted_string"
+        full_url = ""
 
         try:
         async with httpx.AsyncClient(timeout=10.0) as client:
@@ -972,7 +972,7 @@ class TestStagingBackendServiceFailures:
         response_time = time.time() - start_time
 
         if response.status_code != 200:
-        service_failures.append({ ))
+        service_failures.append({ })
         'service': service_name,
         'endpoint': endpoint,
         'url': full_url,
@@ -982,7 +982,7 @@ class TestStagingBackendServiceFailures:
                                                 
 
         except Exception as e:
-        service_failures.append({ ))
+        service_failures.append({ })
         'service': service_name,
         'endpoint': endpoint,
         'url': full_url,
@@ -995,12 +995,12 @@ class TestStagingBackendServiceFailures:
         if service_failures:
         failure_report = "
         ".join( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
         for failure in service_failures
                                                         
         assert False, ( )
-        "formatted_string"
+        ""
         f"Critical service endpoints are failing, indicating backend service "
         f"infrastructure issues that will cause production deployment failures."
                                                             
@@ -1089,8 +1089,8 @@ assert database_url is not None, ( )
             
 
             # Additional validation
-assert "staging" in database_url, "formatted_string"
-assert "localhost" not in database_url, "formatted_string"
+assert "staging" in database_url, ""
+assert "localhost" not in database_url, ""
 
 finally:
 env.reset_to_original()
@@ -1117,11 +1117,11 @@ start_time = time.time()
 try:
 sock = socket.create_connection((host, port), timeout=5.0)
 sock.close()
-print("formatted_string")
+print("")
 except Exception as e:
 assert False, ( )
-"formatted_string"
-"formatted_string"
+""
+""
                                 
 finally:
 env.reset_to_original()
@@ -1161,10 +1161,10 @@ print("Running staging backend service failure tests...")
 
                                                     # Quick validation of test setup
 env = IsolatedEnvironment()
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
 
                                                     # Run basic connectivity tests
 asyncio.run(test_auth_service_database_url_undefined_critical_failure())

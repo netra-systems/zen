@@ -40,7 +40,7 @@ class WebSocketManagerCrossServiceIntegrationTests(SSotAsyncTestCase, unittest.T
         super().setup_method(method)
         
         # Clear WebSocket manager registry for clean state
-        from netra_backend.app.websocket_core.websocket_manager import reset_manager_registry
+        from netra_backend.app.websocket_core.canonical_import_patterns import reset_manager_registry
         reset_manager_registry()
         
         # Set up test user contexts
@@ -60,13 +60,13 @@ class WebSocketManagerCrossServiceIntegrationTests(SSotAsyncTestCase, unittest.T
 
     def teardown_method(self, method):
         """Clean up test environment."""
-        from netra_backend.app.websocket_core.websocket_manager import reset_manager_registry
+        from netra_backend.app.websocket_core.canonical_import_patterns import reset_manager_registry
         reset_manager_registry()
         super().teardown_method(method)
 
     def test_websocket_manager_service_integration_consistency(self):
         """Test WebSocket manager consistency across service integrations."""
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         # Get managers for each user through different service integration paths
         managers_direct = []
@@ -103,7 +103,7 @@ class WebSocketManagerCrossServiceIntegrationTests(SSotAsyncTestCase, unittest.T
 
     async def test_websocket_event_delivery_consistency_integration(self):
         """Test WebSocket event delivery consistency across manager instances."""
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         # Create mock WebSocket connections for testing
         mock_websockets = []
@@ -184,7 +184,7 @@ class WebSocketManagerCrossServiceIntegrationTests(SSotAsyncTestCase, unittest.T
 
     def test_multi_user_concurrent_session_isolation_integration(self):
         """Test multi-user session isolation under concurrent load."""
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         # Concurrent execution tracking
         execution_results = {}
@@ -280,7 +280,7 @@ class WebSocketManagerRealServiceIntegrationTests(SSotAsyncTestCase, unittest.Te
         super().setup_method(method)
         
         # Clear manager registry
-        from netra_backend.app.websocket_core.websocket_manager import reset_manager_registry
+        from netra_backend.app.websocket_core.canonical_import_patterns import reset_manager_registry
         reset_manager_registry()
         
         method_name = method.__name__ if method else "unknown_method"
@@ -288,13 +288,13 @@ class WebSocketManagerRealServiceIntegrationTests(SSotAsyncTestCase, unittest.Te
 
     def teardown_method(self, method):
         """Clean up test environment."""
-        from netra_backend.app.websocket_core.websocket_manager import reset_manager_registry
+        from netra_backend.app.websocket_core.canonical_import_patterns import reset_manager_registry
         reset_manager_registry()
         super().teardown_method(method)
 
     async def test_websocket_manager_auth_service_integration(self):
         """Test WebSocket Manager integration with authentication service."""
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         # Create authenticated user context
         auth_user_context = type('AuthenticatedUserContext', (), {
@@ -333,7 +333,7 @@ class WebSocketManagerRealServiceIntegrationTests(SSotAsyncTestCase, unittest.Te
 
     def test_websocket_manager_database_service_integration(self):
         """Test WebSocket Manager integration with database services."""
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         # Create user context with database requirements
         db_user_context = type('DatabaseUserContext', (), {
@@ -367,7 +367,7 @@ class WebSocketManagerRealServiceIntegrationTests(SSotAsyncTestCase, unittest.Te
 
     async def test_websocket_manager_agent_service_integration(self):
         """Test WebSocket Manager integration with agent services."""
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         # Create agent execution user context
         agent_user_context = type('AgentUserContext', (), {

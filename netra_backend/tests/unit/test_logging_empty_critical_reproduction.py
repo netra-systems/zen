@@ -65,7 +65,7 @@ import logging
 import time
 import traceback
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any, Dict, List, Optional
 from unittest.mock import MagicMock, Mock, patch
 
@@ -167,7 +167,7 @@ class LoggingEmptyCriticalReproductionTests(SSotBaseTestCase):
         with self._setup_log_capture():
             # Create a malformed record that triggers timestamp issues
             with patch('shared.logging.unified_logging_ssot.datetime') as mock_datetime:
-                # Simulate datetime.utcnow() returning None or invalid data
+                # Simulate datetime.now(UTC) returning None or invalid data
                 mock_datetime.utcnow.return_value = None
                 
                 try:
@@ -338,7 +338,7 @@ class LoggingEmptyCriticalReproductionTests(SSotBaseTestCase):
                     'component': 'websocket_manager',
                     'retry_count': i,
                     'burst_test': True,
-                    'timestamp_manual': datetime.utcnow().isoformat()
+                    'timestamp_manual': datetime.now(UTC).isoformat()
                 })
                 
                 # Small delay to create rapid burst within 2 seconds
@@ -458,7 +458,7 @@ class LoggingEmptyCriticalReproductionTests(SSotBaseTestCase):
                         'retry_attempts': 3,
                         'error_details': {
                             'connection': websocket_mock,  # Non-serializable object
-                            'timestamp': datetime.utcnow(),
+                            'timestamp': datetime.now(UTC),
                             'stack_trace': traceback.format_stack()
                         }
                     }

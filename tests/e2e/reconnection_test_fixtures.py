@@ -68,7 +68,7 @@ class ReconnectionTestFixture:
 
     def record_reconnection_attempt(self, connection_id: str, success: bool, reason: str) -> None:
         """Record reconnection attempt for analysis."""
-        attempt = { )
+        attempt = { }
         "connection_id": connection_id,
         "success": success,
         "reason": reason,

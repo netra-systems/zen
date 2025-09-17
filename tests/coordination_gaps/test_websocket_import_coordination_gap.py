@@ -40,7 +40,7 @@ class TestWebSocketImportCoordinationGap(SSotAsyncTestCase):
         This shows what the fix should be - import from canonical_import_patterns
         """
         # This should work - it's the correct import path
-        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 
         # Verify it's the right class
         assert UnifiedWebSocketManager is not None

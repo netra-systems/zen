@@ -180,7 +180,7 @@ class Issue860WebSocketInfrastructureFailuresTests(BaseIntegrationTest):
                 "error_type": "TimeoutError"
             }
 
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             return {
                 "url": url,
                 "status": "connection_closed",

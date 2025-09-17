@@ -118,7 +118,7 @@ class StagingSupervisorValidator:
                 "Connection timeout - service may not be responding"
             )
             return False
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             self.results.add_result(
                 "WebSocket Connection",
                 False,
@@ -295,7 +295,7 @@ class StagingSupervisorValidator:
                     except asyncio.TimeoutError:
                         # Continue listening
                         continue
-                    except websockets.exceptions.ConnectionClosed:
+                    except websockets.ConnectionClosed:
                         break
             
             received_count = len(events_received)

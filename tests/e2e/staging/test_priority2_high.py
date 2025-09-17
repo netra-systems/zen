@@ -712,7 +712,7 @@ class HighSecurityTests:
                     else:
                         safe_print(" WARNING:  WebSocket may not enforce authentication")
                         
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             # Expected: WebSocket rejects connection with 403/401 
             if "403" in str(e) or "401" in str(e):
                 auth_enforced = True
@@ -755,7 +755,7 @@ class HighSecurityTests:
                         "response_received": True,
                         "response": json.loads(response)
                     }
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             # Expected: WebSocket rejects malformed auth with 403/401
             if "403" in str(e) or "401" in str(e):
                 malformed_auth_enforced = True

@@ -64,7 +64,7 @@ from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.db.models_postgres import User
 backend_available = True
 except ImportError as e:
-print("formatted_string")
+    print("")
 backend_available = False
 
 try:
@@ -73,7 +73,7 @@ from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.services.auth_service import AuthService
 auth_service_available = True
 except ImportError as e:
-print("formatted_string")
+    print("")
 auth_app = None
 auth_service_available = False
 
@@ -89,7 +89,7 @@ class TestAuthCrossSystemFailures:
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_concurrent_login_race_condition(self):
 '''Test 1: Concurrent Login Race Condition
 
@@ -101,12 +101,12 @@ The race condition occurs when:
 3. Database updates can overwrite each other
 '''
 pass
-user_email = "formatted_string"
+user_email = ""
 password = "testpass123"
 
             # Create test user first
 auth_client_test = TestClient(auth_app)
-response = auth_client_test.post("/auth/register", json={ ))
+response = auth_client_test.post("/auth/register", json={ })
 "email": user_email,
 "password": password,
 "confirm_password": password
@@ -139,7 +139,7 @@ successful_tokens.append(token_data['access_token'])
                     # THIS ASSERTION WILL FAIL - multiple valid tokens should not exist
                     # The system should ensure only one valid session per user
 assert len(successful_tokens) <= 1, ( )
-"formatted_string"
+""
 f"This indicates the auth system doesn"t properly handle concurrent logins."
                     
 
@@ -152,7 +152,7 @@ assert len(unique_tokens) == len(successful_tokens), ( )
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture, reason="Auth service or backend not available")
+# @pytest.fixture, reason="Auth service or backend not available")
     async def test_token_invalidation_propagation(self):
 '''Test 2: Token Invalidation Propagation
 
@@ -161,14 +161,14 @@ doesn"t properly propagate to netra_backend, causing stale tokens
 to remain valid in the backend service.
 '''
 pass
-user_email = "formatted_string"
+user_email = ""
 password = "testpass123"
 
                         # Create user and get token
 auth_client_test = TestClient(auth_app)
 
                         # Register user
-register_response = auth_client_test.post("/auth/register", json={ ))
+register_response = auth_client_test.post("/auth/register", json={ })
 "email": user_email,
 "password": password,
 "confirm_password": password
@@ -176,7 +176,7 @@ register_response = auth_client_test.post("/auth/register", json={ ))
 assert register_response.status_code == 201
 
                         # Login to get token
-login_response = auth_client_test.post("/auth/login", json={ ))
+login_response = auth_client_test.post("/auth/login", json={ })
 "email": user_email,
 "password": password
                         
@@ -187,14 +187,14 @@ token = login_response.json()["access_token"]
 backend_client_test = TestClient(backend_app)
 health_response = backend_client_test.get( )
 "/api/demo/",
-headers={"Authorization": "formatted_string"}
+headers={"Authorization": ""}
                         
 assert health_response.status_code == 200
 
                         # Invalidate token in auth service (logout)
 logout_response = auth_client_test.post( )
 "/auth/logout",
-headers={"Authorization": "formatted_string"}
+headers={"Authorization": ""}
                         
 assert logout_response.status_code == 200
 
@@ -205,17 +205,17 @@ await asyncio.sleep(0.1)
                         # But the backend service doesn't know the token was invalidated
 backend_health_response = backend_client_test.get( )
 "/api/demo/",
-headers={"Authorization": "formatted_string"}
+headers={"Authorization": ""}
                         
 assert backend_health_response.status_code == 401, ( )
 f"TOKEN INVALIDATION FAILURE: Invalidated token still accepted by backend. "
-"formatted_string"
+""
 f"This indicates token blacklisting isn"t synchronized across services."
                         
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture, reason="Auth service or backend not available")
+# @pytest.fixture, reason="Auth service or backend not available")
     async def test_session_state_desync(self):
 '''Test 3: Session State Desync
 
@@ -224,19 +224,19 @@ and netra_backend can become desynchronized, leading to
 inconsistent user states across services.
 '''
 pass
-user_email = "formatted_string"
+user_email = ""
 password = "testpass123"
 
                             # Create user and establish session
 auth_client_test = TestClient(auth_app)
-register_response = auth_client_test.post("/auth/register", json={ ))
+register_response = auth_client_test.post("/auth/register", json={ })
 "email": user_email,
 "password": password,
 "confirm_password": password
                             
 assert register_response.status_code == 201
 
-login_response = auth_client_test.post("/auth/login", json={ ))
+login_response = auth_client_test.post("/auth/login", json={ })
 "email": user_email,
 "password": password
                             
@@ -246,7 +246,7 @@ token = login_response.json()["access_token"]
                             Get user info from both services
 auth_user_response = auth_client_test.get( )
 "/auth/me",
-headers={"Authorization": "formatted_string"}
+headers={"Authorization": ""}
                             
 assert auth_user_response.status_code == 200
 auth_user_data = auth_user_response.json()
@@ -254,7 +254,7 @@ auth_user_data = auth_user_response.json()
 backend_client_test = TestClient(backend_app)
 backend_user_response = backend_client_test.get( )
 "/auth/me",
-headers={"Authorization": "formatted_string"}
+headers={"Authorization": ""}
                             
 assert backend_user_response.status_code == 200
 backend_user_data = backend_user_response.json()
@@ -262,7 +262,7 @@ backend_user_data = backend_user_response.json()
                             # Modify user state in auth service (e.g., update profile)
 update_response = auth_client_test.put( )
 "/auth/profile",
-headers={"Authorization": "formatted_string"},
+headers={"Authorization": ""},
 json={"display_name": "Updated Name"}
                             
 assert update_response.status_code == 200
@@ -273,11 +273,11 @@ await asyncio.sleep(0.1)
                             Get updated user info from both services
 auth_updated_response = auth_client_test.get( )
 "/auth/me",
-headers={"Authorization": "formatted_string"}
+headers={"Authorization": ""}
                             
 backend_updated_response = backend_client_test.get( )
 "/auth/me",
-headers={"Authorization": "formatted_string"}
+headers={"Authorization": ""}
                             
 
 auth_updated_data = auth_updated_response.json()
@@ -286,13 +286,13 @@ backend_updated_data = backend_updated_response.json()
                             # THIS ASSERTION WILL FAIL - user data should be consistent across services
 assert auth_updated_data == backend_updated_data, ( )
 f"SESSION STATE DESYNC: User data inconsistent across services. "
-"formatted_string"
+""
 f"This indicates session state is not synchronized between services."
                             
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture, reason="Auth service or backend not available")
+# @pytest.fixture, reason="Auth service or backend not available")
     async def test_jwt_secret_rotation_during_request(self):
 '''Test 4: JWT Secret Rotation During Request
 
@@ -301,19 +301,19 @@ rotation gracefully. Active requests fail when secrets rotate,
 and there"s no grace period for old tokens.
 '''
 pass
-user_email = "formatted_string"
+user_email = ""
 password = "testpass123"
 
                                 # Create user and get token with current secret
 auth_client_test = TestClient(auth_app)
-register_response = auth_client_test.post("/auth/register", json={ ))
+register_response = auth_client_test.post("/auth/register", json={ })
 "email": user_email,
 "password": password,
 "confirm_password": password
                                 
 assert register_response.status_code == 201
 
-login_response = auth_client_test.post("/auth/login", json={ ))
+login_response = auth_client_test.post("/auth/login", json={ })
 "email": user_email,
 "password": password
                                 
@@ -324,7 +324,7 @@ token = login_response.json()["access_token"]
 backend_client_test = TestClient(backend_app)
 initial_response = backend_client_test.get( )
 "/health",
-headers={"Authorization": "formatted_string"}
+headers={"Authorization": ""}
                                 
 assert initial_response.status_code == 200
 
@@ -338,7 +338,7 @@ with patch.object(JWTHandler, '_get_secret_key', return_value=new_secret):
                                     # THIS WILL FAIL - old tokens should be handled gracefully
 post_rotation_response = backend_client_test.get( )
 "/health",
-headers={"Authorization": "formatted_string"}
+headers={"Authorization": ""}
                                     
 
                                     # The token should either:
@@ -351,14 +351,14 @@ post_rotation_response.status_code == 200 or
 "rotation" in post_rotation_response.json().get("detail", "").lower())
 ), (
 f"JWT SECRET ROTATION FAILURE: Token handling after rotation failed. "
-"formatted_string"
-"formatted_string"
+""
+""
 f"System should handle secret rotation gracefully."
                                         
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture, reason="Auth service or backend not available")
+# @pytest.fixture, reason="Auth service or backend not available")
     async def test_cross_service_permission_escalation(self):
 '''Test 5: Cross-Service Permission Escalation
 
@@ -368,11 +368,11 @@ privilege escalation through service boundary manipulation.
 '''
 pass
                                             # Create low-privilege user
-user_email = "formatted_string"
+user_email = ""
 password = "testpass123"
 
 auth_client_test = TestClient(auth_app)
-register_response = auth_client_test.post("/auth/register", json={ ))
+register_response = auth_client_test.post("/auth/register", json={ })
 "email": user_email,
 "password": password,
 "confirm_password": password,
@@ -380,7 +380,7 @@ register_response = auth_client_test.post("/auth/register", json={ ))
                                             
 assert register_response.status_code == 201
 
-login_response = auth_client_test.post("/auth/login", json={ ))
+login_response = auth_client_test.post("/auth/login", json={ })
 "email": user_email,
 "password": password
                                             
@@ -413,19 +413,19 @@ backend_client_test = TestClient(backend_app)
                                             # But if token validation is weak, it might accept the malicious token
 admin_response = backend_client_test.get( )
 "/admin/users",  # Admin-only endpoint
-headers={"Authorization": "formatted_string"}
+headers={"Authorization": ""}
                                             
 
 assert admin_response.status_code == 401, ( )
 f"PRIVILEGE ESCALATION VULNERABILITY: Tampered token accepted. "
-"formatted_string"
-"formatted_string"
+""
+""
 f"Backend should validate token integrity and reject tampering."
                                             
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_oauth_state_replay_attack(self):
 '''Test 6: OAuth State Replay Attack
 
@@ -443,10 +443,10 @@ assert oauth_start_response.status_code in [200, 302]
 
                                                 Extract state parameter from response/redirect
                                                 # In real implementation, this would be in the redirect URL
-state_value = "formatted_string"
+state_value = ""
 
                                                 # Simulate successful OAuth callback with valid state
-callback_data = { )
+callback_data = { }
 "code": "valid_oauth_code_123",
 "state": state_value
                                                 
@@ -466,13 +466,13 @@ replay_response = auth_client_test.post("/auth/oauth/google/callback", json=call
 
 assert replay_response.status_code == 400, ( )
 f"OAUTH REPLAY ATTACK VULNERABILITY: State parameter reused successfully. "
-"formatted_string"
+""
 f"OAuth implementation should prevent state parameter replay attacks."
                                                     
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture, reason="Auth service or backend not available")
+# @pytest.fixture, reason="Auth service or backend not available")
     async def test_refresh_token_cross_service_leak(self):
 '''Test 7: Refresh Token Cross-Service Leak
 
@@ -481,19 +481,19 @@ services or be accessible from unintended endpoints,
 creating security vulnerabilities.
 '''
 pass
-user_email = "formatted_string"
+user_email = ""
 password = "testpass123"
 
                                                         # Create user and get tokens
 auth_client_test = TestClient(auth_app)
-register_response = auth_client_test.post("/auth/register", json={ ))
+register_response = auth_client_test.post("/auth/register", json={ })
 "email": user_email,
 "password": password,
 "confirm_password": password
                                                         
 assert register_response.status_code == 201
 
-login_response = auth_client_test.post("/auth/login", json={ ))
+login_response = auth_client_test.post("/auth/login", json={ })
 "email": user_email,
 "password": password
                                                         
@@ -511,13 +511,13 @@ backend_client_test = TestClient(backend_app)
                                                             # Attempt to use refresh token with backend
 backend_refresh_response = backend_client_test.post( )
 "/auth/refresh",
-headers={"Authorization": "formatted_string"}
+headers={"Authorization": ""}
                                                             
 
                                                             # Also try to extract refresh token through backend API
 user_profile_response = backend_client_test.get( )
 "/auth/me",
-headers={"Authorization": "formatted_string"}
+headers={"Authorization": ""}
                                                             
 
 if user_profile_response.status_code == 200:
@@ -526,20 +526,20 @@ profile_data = user_profile_response.json()
                                                                 # THIS ASSERTION WILL FAIL - refresh tokens should not be exposed
 assert "refresh_token" not in profile_data, ( )
 f"REFRESH TOKEN LEAK: Refresh token exposed in user profile. "
-"formatted_string"
+""
 f"Refresh tokens should never be accessible from backend service."
                                                                 
 
                                                                 # Backend should not accept refresh tokens for any operations
 assert backend_refresh_response.status_code == 401, ( )
 f"REFRESH TOKEN CROSS-SERVICE VULNERABILITY: Backend accepted refresh token. "
-"formatted_string"
+""
 f"Only auth service should handle refresh tokens."
                                                                 
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture, reason="Auth service or backend not available")
+# @pytest.fixture, reason="Auth service or backend not available")
     async def test_multi_tab_session_collision(self):
 '''Test 8: Multi-Tab Session Collision
 
@@ -548,12 +548,12 @@ multiple browser tabs with different sessions for the same user,
 leading to session collision and state corruption.
 '''
 pass
-user_email = "formatted_string"
+user_email = ""
 password = "testpass123"
 
                                                                     # Create user
 auth_client_test = TestClient(auth_app)
-register_response = auth_client_test.post("/auth/register", json={ ))
+register_response = auth_client_test.post("/auth/register", json={ })
 "email": user_email,
 "password": password,
 "confirm_password": password
@@ -563,7 +563,7 @@ assert register_response.status_code == 201
                                                                     # Simulate multiple tab logins (should create separate sessions)
 login_responses = []
 for i in range(3):
-response = auth_client_test.post("/auth/login", json={ ))
+response = auth_client_test.post("/auth/login", json={ })
 "email": user_email,
 "password": password
                                                                         
@@ -578,7 +578,7 @@ tokens = [resp["access_token"] for resp in login_responses]
 unique_tokens = set(tokens)
 assert len(unique_tokens) == len(tokens), ( )
 f"SESSION COLLISION: Multiple tabs received identical tokens. "
-"formatted_string"
+""
 f"Each browser tab should have an independent session."
                                                                         
 
@@ -588,8 +588,8 @@ backend_client_test = TestClient(backend_app)
 async def tab_operation(token, tab_id):
 """Simulate user action from specific tab"""
 response = backend_client_test.get( )
-"formatted_string",
-headers={"Authorization": "formatted_string"}
+"",
+headers={"Authorization": ""}
     
 await asyncio.sleep(0)
 return response.status_code, tab_id
@@ -602,14 +602,14 @@ successful_operations = [item for item in []] == 200]
 
     # THIS ASSERTION WILL FAIL - all tabs should work independently
 assert len(successful_operations) == len(tokens), ( )
-"formatted_string"
-"formatted_string"
+""
+""
 f"Multi-tab sessions are interfering with each other."
     
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture, reason="Auth service or backend not available")
+# @pytest.fixture, reason="Auth service or backend not available")
     async def test_service_restart_auth_persistence(self):
 '''Test 9: Service Restart Auth Persistence
 
@@ -618,19 +618,19 @@ properly across service restarts, causing all users to be logged out
 when services restart.
 '''
 pass
-user_email = "formatted_string"
+user_email = ""
 password = "testpass123"
 
         # Create user and establish session
 auth_client_test = TestClient(auth_app)
-register_response = auth_client_test.post("/auth/register", json={ ))
+register_response = auth_client_test.post("/auth/register", json={ })
 "email": user_email,
 "password": password,
 "confirm_password": password
         
 assert register_response.status_code == 201
 
-login_response = auth_client_test.post("/auth/login", json={ ))
+login_response = auth_client_test.post("/auth/login", json={ })
 "email": user_email,
 "password": password
         
@@ -641,7 +641,7 @@ token = login_response.json()["access_token"]
 backend_client_test = TestClient(backend_app)
 pre_restart_response = backend_client_test.get( )
 "/health",
-headers={"Authorization": "formatted_string"}
+headers={"Authorization": ""}
         
 assert pre_restart_response.status_code == 200
 
@@ -656,18 +656,18 @@ await asyncio.sleep(0.1)
         # If auth depends on in-memory state, this will fail
 post_restart_response = backend_client_test.get( )
 "/health",
-headers={"Authorization": "formatted_string"}
+headers={"Authorization": ""}
         
 
 assert post_restart_response.status_code == 200, ( )
 f"SERVICE RESTART AUTH FAILURE: Valid token rejected after restart. "
-"formatted_string"
+""
 f"Authentication should persist across service restarts."
         
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture, reason="Auth service or backend not available")
+# @pytest.fixture, reason="Auth service or backend not available")
     async def test_cross_origin_token_injection(self):
 '''Test 10: Cross-Origin Token Injection
 
@@ -676,19 +676,19 @@ token origins, allowing tokens from unauthorized domains to be
 accepted by the backend service.
 '''
 pass
-user_email = "formatted_string"
+user_email = ""
 password = "testpass123"
 
             # Create legitimate user and token
 auth_client_test = TestClient(auth_app)
-register_response = auth_client_test.post("/auth/register", json={ ))
+register_response = auth_client_test.post("/auth/register", json={ })
 "email": user_email,
 "password": password,
 "confirm_password": password
             
 assert register_response.status_code == 201
 
-login_response = auth_client_test.post("/auth/login", json={ ))
+login_response = auth_client_test.post("/auth/login", json={ })
 "email": user_email,
 "password": password
             
@@ -697,7 +697,7 @@ legitimate_token = login_response.json()["access_token"]
 
             # Create malicious token with different issuer/audience
             This simulates an attack where tokens from different systems are used
-malicious_payload = { )
+malicious_payload = { }
 "sub": user_email,
 "iss": "malicious-issuer.com",  # Wrong issuer
 "aud": "evil-audience",         # Wrong audience
@@ -718,19 +718,19 @@ backend_client_test = TestClient(backend_app)
             # THIS ASSERTION WILL FAIL - backend should validate token origin
 malicious_response = backend_client_test.get( )
 "/health",
-headers={"Authorization": "formatted_string"}
+headers={"Authorization": ""}
             
 
 assert malicious_response.status_code == 401, ( )
 f"CROSS-ORIGIN TOKEN INJECTION: Malicious token accepted. "
-"formatted_string"
+""
 f"Backend should validate token issuer and audience claims."
             
 
             # Verify legitimate token still works
 legitimate_response = backend_client_test.get( )
 "/health",
-headers={"Authorization": "formatted_string"}
+headers={"Authorization": ""}
             
 
 assert legitimate_response.status_code == 200, ( )
@@ -755,15 +755,15 @@ pytest.skip("Backend service not available")
         # Create backend app at test execution time to avoid hanging
 return TestClient(netra_backend.app.main.app)
 
-@pytest.fixture
+# @pytest.fixture
     async def test_user_credentials(self, auth_service_client):
             # Removed problematic line: '''Fixture to create test user and await asyncio.sleep(0)
 return credentials'''
-user_email = "formatted_string"
+user_email = ""
 password = "testpass123"
 
             # Register user
-register_response = auth_service_client.post("/auth/register", json={ ))
+register_response = auth_service_client.post("/auth/register", json={ })
 "email": user_email,
 "password": password,
 "confirm_password": password
@@ -771,13 +771,13 @@ register_response = auth_service_client.post("/auth/register", json={ ))
 assert register_response.status_code == 201
 
             # Login to get token
-login_response = auth_service_client.post("/auth/login", json={ ))
+login_response = auth_service_client.post("/auth/login", json={ })
 "email": user_email,
 "password": password
             
 assert login_response.status_code == 200
 
-return { )
+return { }
 "email": user_email,
 "password": password,
 "token": login_response.json()["access_token"]

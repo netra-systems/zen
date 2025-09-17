@@ -19,7 +19,7 @@ import pytest
 import asyncio
 from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.fixtures.real_services import real_services_fixture
@@ -142,7 +142,7 @@ class EndToEndReportLifecycleIntegrationTests(BaseIntegrationTest):
         lifecycle_data = {
             "user_id": user_id,
             "thread_id": thread_id,
-            "request_timestamp": datetime.utcnow().isoformat(),
+            "request_timestamp": datetime.now(UTC).isoformat(),
             "completed_phases": [
                 "request_initiation", "user_context_creation", "agent_execution",
                 "tool_execution", "report_generation", "delivery_preparation",
@@ -315,7 +315,7 @@ class EndToEndReportLifecycleIntegrationTests(BaseIntegrationTest):
             lifecycle_data = {
                 "user_id": user_id,
                 "execution_isolation_id": UnifiedIdGenerator.generate_base_id(f"isolation_{i}"),
-                "concurrent_execution_start": datetime.utcnow().isoformat(),
+                "concurrent_execution_start": datetime.now(UTC).isoformat(),
                 "data_isolation_verified": True,
                 "context_isolation_verified": True,
                 "resource_isolation_verified": True,

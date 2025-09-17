@@ -6,7 +6,7 @@ Handles loading secrets from various sources based on environment.
 import os
 from typing import Dict, List, Optional
 
-from netra_backend.app.core.configuration.base import config_manager
+from netra_backend.app.config import get_config
 from netra_backend.app.core.secret_manager_types import SecretAccessLevel
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.config_types import EnvironmentType
@@ -20,7 +20,7 @@ class SecretLoader:
     def __init__(self, secret_manager):
         """Initialize with reference to main secret manager."""
         self.secret_manager = secret_manager
-        self._config = config_manager.get_config()
+        self._config = get_config()
     
     def load_secrets(self) -> None:
         """Load secrets based on environment configuration."""

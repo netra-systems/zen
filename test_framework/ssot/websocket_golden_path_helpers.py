@@ -476,7 +476,7 @@ class WebSocketGoldenPathHelper:
                     # Short timeout expired, continue checking overall timeout
                     continue
                     
-                except websockets.exceptions.ConnectionClosed:
+                except websockets.ConnectionClosed:
                     logger.warning("WebSocket connection closed during event capture")
                     break
         

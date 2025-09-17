@@ -49,12 +49,12 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import RealServicesTestFixtures
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, ConnectionID, WebSocketID, RequestID, ensure_user_id, ensure_thread_id, ensure_websocket_id
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection, WebSocketManagerMode
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection, WebSocketManagerMode
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from netra_backend.app.auth_integration.auth import validate_jwt_token
 from netra_backend.app.core.configuration.base import get_unified_config
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 logger = central_logger.get_logger(__name__)
 
 class RealWebSocketServer:
@@ -85,7 +85,7 @@ class RealWebSocketServer:
                             response = await self.message_handlers[message_type](data)
                             if response:
                                 await websocket.send(json.dumps(response))
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 logger.info(f'Real WebSocket client disconnected: {client_id}')
             finally:
                 if client_id in self.connected_clients:
@@ -139,7 +139,7 @@ class RealWebSocketClient:
             async for message in self.websocket:
                 data = json.loads(message)
                 self.received_messages.append({'message': data, 'timestamp': datetime.now(timezone.utc)})
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             self.connected = False
 
     async def send_json(self, data: Dict[str, Any]):

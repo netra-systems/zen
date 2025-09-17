@@ -20,7 +20,7 @@ import sys
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Any
 import threading
 import pytest
@@ -31,7 +31,7 @@ from shared.isolated_environment import IsolatedEnvironment
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 from netra_backend.app.auth_integration.auth import AuthService, AuthUser
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -174,7 +174,7 @@ class FrontendInitializationSimulator:
             if thread_response.status_code != 200:
                 return {'success': False, 'error': f'Thread creation failed: {thread_response.status_code}'}
             thread_id = thread_response.json()['id']
-            test_message = {'type': 'user_message', 'payload': {'content': 'Test first message for initialization', 'thread_id': thread_id, 'message_id': f'msg_{uuid.uuid4().hex[:8]}', 'timestamp': datetime.utcnow().isoformat()}}
+            test_message = {'type': 'user_message', 'payload': {'content': 'Test first message for initialization', 'thread_id': thread_id, 'message_id': f'msg_{uuid.uuid4().hex[:8]}', 'timestamp': datetime.now(UTC).isoformat()}}
             websocket.send_json(test_message)
             start_time = time.time()
             timeout = FrontendInitTestConfig.FIRST_MESSAGE_TIMEOUT / 1000

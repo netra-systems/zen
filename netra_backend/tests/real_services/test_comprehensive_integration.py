@@ -35,7 +35,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 import uvicorn
 from test_framework.environment_isolation import get_test_env_manager
 from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.schemas.agent_models import DeepAgentState
@@ -261,7 +261,7 @@ class ComprehensiveIntegrationClient:
                 message = await self.websocket.recv()
                 data = json.loads(message)
                 self.messages_received.append({'timestamp': time.time(), 'data': data})
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             pass
         except Exception as e:
             logger.error(f'Message receiver error: {e}')

@@ -95,7 +95,7 @@ class WebSocketEventsStagingTests(StagingTestBase):
                 except asyncio.TimeoutError:
                     print("[INFO] No response received within timeout (may be normal)")
                     
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             # Handle expected authentication errors and server errors
             # Extract status code from the exception (different formats possible)
             status_code = 0
@@ -269,7 +269,7 @@ class WebSocketEventsStagingTests(StagingTestBase):
                         print(f"[WARNING] Received non-JSON data: {e}")
                         continue
                         
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             # Handle expected authentication errors and server errors  
             status_code = getattr(e.response, 'status', 0) if hasattr(e, 'response') else e.status if hasattr(e, 'status') else 0
             

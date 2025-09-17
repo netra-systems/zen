@@ -14,7 +14,7 @@ import time
 import uuid
 import httpx
 from typing import Dict, Any, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from tests.e2e.staging_test_config import get_staging_config
 
@@ -265,7 +265,7 @@ class LowMonitoringTests:
         """Test #90: Error reporting"""
         error_report = {
             "error_id": str(uuid.uuid4()),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "error_type": "ValidationError",
             "message": "Invalid input format",
             "stack_trace": "File app.py, line 123...",
@@ -414,7 +414,7 @@ class LowPerformanceMonitoringTests:
             "api_version": "1.0.0",
             "build_number": "12345",
             "git_commit": "abc123def456",
-            "deployment_time": datetime.utcnow().isoformat(),
+            "deployment_time": datetime.now(UTC).isoformat(),
             "environment": "staging"
         }
         
@@ -555,7 +555,7 @@ class LowOperationalTests:
                 "secondary": ["engagement_time", "feature_usage"]
             },
             "status": "running",
-            "start_date": (datetime.utcnow() - timedelta(days=7)).isoformat(),
+            "start_date": (datetime.now(UTC) - timedelta(days=7)).isoformat(),
             "statistical_significance": 0.95
         }
         
@@ -578,13 +578,13 @@ class LowOperationalTests:
                 {
                     "event_type": "page_view",
                     "user_id": "test_user",
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     "properties": {"page": "/dashboard", "referrer": "/home"}
                 },
                 {
                     "event_type": "feature_used",
                     "user_id": "test_user",
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     "properties": {"feature": "chat", "duration_seconds": 120}
                 }
             ],
@@ -611,19 +611,19 @@ class LowOperationalTests:
             "reports": [
                 {
                     "type": "gdpr_audit",
-                    "generated_at": datetime.utcnow().isoformat(),
+                    "generated_at": datetime.now(UTC).isoformat(),
                     "compliant": True,
                     "findings": []
                 },
                 {
                     "type": "security_assessment",
-                    "generated_at": datetime.utcnow().isoformat(),
+                    "generated_at": datetime.now(UTC).isoformat(),
                     "risk_level": "low",
                     "vulnerabilities": 0
                 },
                 {
                     "type": "data_retention",
-                    "generated_at": datetime.utcnow().isoformat(),
+                    "generated_at": datetime.now(UTC).isoformat(),
                     "policies_enforced": True,
                     "records_purged": 150
                 }
@@ -636,7 +636,7 @@ class LowOperationalTests:
         # Verify all reports are recent
         for report in compliance["reports"]:
             generated = datetime.fromisoformat(report["generated_at"])
-            assert (datetime.utcnow() - generated).days <= 30
+            assert (datetime.now(UTC) - generated).days <= 30
         
         assert compliance["audit_trail_enabled"] is True
         assert compliance["automated_reporting"] is True
@@ -666,7 +666,7 @@ class LowOperationalTests:
                 "error_rate_percent": 0.5,
                 "uptime_hours": 720  # 30 days
             },
-            "last_diagnostic_run": datetime.utcnow().isoformat()
+            "last_diagnostic_run": datetime.now(UTC).isoformat()
         }
         
         # Verify all health checks passing
@@ -679,7 +679,7 @@ class LowOperationalTests:
         
         # Verify diagnostic was run recently
         last_run = datetime.fromisoformat(diagnostics["last_diagnostic_run"])
-        assert (datetime.utcnow() - last_run).total_seconds() < 3600  # Within last hour
+        assert (datetime.now(UTC) - last_run).total_seconds() < 3600  # Within last hour
 
 
 # Verification helper to ensure tests are real

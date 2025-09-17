@@ -53,7 +53,7 @@ class PageRefreshTestSuite:
         self.backend_url = env.get('BACKEND_URL', 'http://localhost:8000')
         self.auth_url = env.get('AUTH_SERVICE_URL', 'http://localhost:8081')
         self.jwt_secret = env.get('JWT_SECRET', 'test-secret-key')
-        self.test_results: Dict[str, Any] = { )
+        self.test_results: Dict[str, Any] = { }
         'total': 0,
         'passed': 0,
         'failed': 0,
@@ -64,7 +64,7 @@ class PageRefreshTestSuite:
 
     def generate_test_token(self, user_email: str = "test@example.com", expires_in: int = 3600) -> str:
         """Generate a valid JWT token for testing."""
-        payload = { )
+        payload = { }
         'sub': 'user_123',
         'email': user_email,
         'name': 'Test User',
@@ -80,7 +80,7 @@ class PageRefreshTestSuite:
         Verifies that chat state is preserved across refresh.
         '''
         test_name = "basic_refresh_with_active_chat"
-        print("formatted_string")
+        print("")
 
         try:
             # Setup: Login and start a chat
@@ -89,7 +89,7 @@ class PageRefreshTestSuite:
         localStorage.setItem('jwt_token', '{token}');
         ''')
 
-        await page.goto("formatted_string", wait_until='networkidle')
+        await page.goto("", wait_until='networkidle')
         await page.wait_for_timeout(2000)
 
             # Send a test message
@@ -127,16 +127,16 @@ class PageRefreshTestSuite:
 
                     # At minimum, the sent message should be preserved
         if test_message not in str(messages_after):
-        raise AssertionError("formatted_string")
+        raise AssertionError("")
 
-        print("formatted_string")
+        print("")
         self.test_results['passed'] += 1
         return True
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         self.test_results['failed'] += 1
-        self.test_results['critical_failures'].append({ ))
+        self.test_results['critical_failures'].append({ })
         'test': test_name,
         'error': str(e)
                             
@@ -150,7 +150,7 @@ class PageRefreshTestSuite:
         Ensures WebSocket properly reconnects with authentication.
         '''
         test_name = "websocket_reconnection_on_refresh"
-        print("formatted_string")
+        print("")
 
         try:
                                         # Setup monitoring
@@ -158,7 +158,7 @@ class PageRefreshTestSuite:
 
     def handle_websocket(ws: WebSocket):
         pass
-        ws_connections.append({ ))
+        ws_connections.append({ })
         'url': ws.url,
         'time': time.time(),
         'closed': False
@@ -173,7 +173,7 @@ class PageRefreshTestSuite:
         localStorage.setItem('jwt_token', '{token}');
         ''')
 
-        await page.goto("formatted_string", wait_until='networkidle')
+        await page.goto("", wait_until='networkidle')
         await page.wait_for_timeout(2000)
 
     # Verify initial WebSocket connection
@@ -204,14 +204,14 @@ class PageRefreshTestSuite:
                     # Wait for response (indicates working WebSocket)
         await page.wait_for_timeout(2000)
 
-        print("formatted_string")
+        print("")
         self.test_results['passed'] += 1
         return True
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         self.test_results['failed'] += 1
-        self.test_results['critical_failures'].append({ ))
+        self.test_results['critical_failures'].append({ })
         'test': test_name,
         'error': str(e)
                         
@@ -226,7 +226,7 @@ class PageRefreshTestSuite:
         Ensures system handles rapid refreshes without crashes or connection flooding.
         '''
         test_name = "rapid_refresh_resilience"
-        print("formatted_string")
+        print("")
 
         try:
                                     # Setup authentication
@@ -235,7 +235,7 @@ class PageRefreshTestSuite:
         localStorage.setItem('jwt_token', '{token}');
         ''')
 
-        await page.goto("formatted_string", wait_until='networkidle')
+        await page.goto("", wait_until='networkidle')
 
         errors_caught = []
 
@@ -250,7 +250,7 @@ class PageRefreshTestSuite:
         # Perform rapid refreshes
         refresh_count = 5
         for i in range(refresh_count):
-        print("formatted_string")
+        print("")
         await page.reload(wait_until='domcontentloaded')
         await page.wait_for_timeout(500)  # Short delay between refreshes
 
@@ -264,7 +264,7 @@ class PageRefreshTestSuite:
             
 
         if critical_errors:
-        raise AssertionError("formatted_string")
+        raise AssertionError("")
 
                 # Verify chat is still functional
         chat_visible = await page.is_visible('[data-testid="main-chat"]', timeout=5000)
@@ -279,16 +279,16 @@ class PageRefreshTestSuite:
         ''')
 
         if ws_count > refresh_count * 2:  # Allow some overhead
-        raise AssertionError("formatted_string")
+        raise AssertionError("")
 
-        print("formatted_string")
+        print("")
         self.test_results['passed'] += 1
         return True
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         self.test_results['failed'] += 1
-        self.test_results['critical_failures'].append({ ))
+        self.test_results['critical_failures'].append({ })
         'test': test_name,
         'error': str(e)
                         
@@ -303,7 +303,7 @@ class PageRefreshTestSuite:
         Ensures unsent messages are preserved.
         '''
         test_name = "draft_message_persistence"
-        print("formatted_string")
+        print("")
 
         try:
                                     # Setup and navigate
@@ -312,7 +312,7 @@ class PageRefreshTestSuite:
         localStorage.setItem('jwt_token', '{token}');
         ''')
 
-        await page.goto("formatted_string", wait_until='networkidle')
+        await page.goto("", wait_until='networkidle')
         await page.wait_for_timeout(2000)
 
                                     # Type a draft message (don't send)
@@ -336,17 +336,17 @@ class PageRefreshTestSuite:
 
                                             # Draft persistence is a nice-to-have feature
         if restored_text == draft_text:
-        print("formatted_string")
+        print("")
         self.test_results['passed'] += 1
         return True
         else:
-        print("formatted_string")
+        print("")
                                                     # Not marking as failed since this might be intentional behavior
         self.test_results['passed'] += 1
         return True
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         self.test_results['failed'] += 1
         return False
         finally:
@@ -358,7 +358,7 @@ class PageRefreshTestSuite:
         Ensures authentication remains stable when token expires during refresh.
         '''
         test_name = "token_refresh_during_page_reload"
-        print("formatted_string")
+        print("")
 
         try:
                                                                     # Create a token that expires soon
@@ -367,7 +367,7 @@ class PageRefreshTestSuite:
         localStorage.setItem('jwt_token', '{short_lived_token}');
         ''')
 
-        await page.goto("formatted_string", wait_until='networkidle')
+        await page.goto("", wait_until='networkidle')
         await page.wait_for_timeout(2000)
 
                                                                     # Wait for token to near expiration
@@ -389,16 +389,16 @@ class PageRefreshTestSuite:
         chat_visible = await page.is_visible('[data-testid="main-chat"]', timeout=5000)
         if not chat_visible:
                                                                                 # This might be expected behavior - log but don't fail
-        print("formatted_string")
+        print("")
 
-        print("formatted_string")
+        print("")
         self.test_results['passed'] += 1
         return True
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         self.test_results['failed'] += 1
-        self.test_results['critical_failures'].append({ ))
+        self.test_results['critical_failures'].append({ })
         'test': test_name,
         'error': str(e)
                                                                                     
@@ -412,7 +412,7 @@ class PageRefreshTestSuite:
         Ensures user doesn"t lose their place in the conversation.
         '''
         test_name = "scroll_position_restoration"
-        print("formatted_string")
+        print("")
 
         try:
                                                                                                 # Setup
@@ -421,21 +421,21 @@ class PageRefreshTestSuite:
         localStorage.setItem('jwt_token', '{token}');
         ''')
 
-        await page.goto("formatted_string", wait_until='networkidle')
+        await page.goto("", wait_until='networkidle')
         await page.wait_for_timeout(2000)
 
                                                                                                 # Send multiple messages to create scrollable content
         message_input = await page.query_selector('[data-testid="message-input"], textarea[placeholder*="Message"]')
         if message_input:
         for i in range(5):
-        await message_input.fill("formatted_string")
+        await message_input.fill("")
         await message_input.press("Enter")
         await page.wait_for_timeout(500)
 
                                                                                                         # Scroll to middle of conversation
                                                                                                         # Removed problematic line: await page.evaluate(''' )
         const chatContainer = document.querySelector('[data-testid="chat-messages"], .messages-container, main');
-        if (chatContainer) { )
+        if (chatContainer) { }
         chatContainer.scrollTop = chatContainer.scrollHeight / 2;
                                                                                                         
         ''')
@@ -458,17 +458,17 @@ class PageRefreshTestSuite:
 
                                                                                                         # Check if scroll position is approximately preserved (within 100px)
         if abs(scroll_after - scroll_before) < 100:
-        print("formatted_string")
+        print("")
         self.test_results['passed'] += 1
         return True
         else:
-        print("formatted_string")
+        print("")
                                                                                                                 # Not critical, so we pass anyway
         self.test_results['passed'] += 1
         return True
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         self.test_results['failed'] += 1
         return False
         finally:
@@ -480,7 +480,7 @@ class PageRefreshTestSuite:
         Ensures refresh doesn"t degrade performance.
         '''
         test_name = "performance_metrics_after_refresh"
-        print("formatted_string")
+        print("")
 
         try:
                                                                                                                                 # Setup
@@ -491,7 +491,7 @@ class PageRefreshTestSuite:
 
                                                                                                                                 # Measure initial load
         start_time = time.time()
-        await page.goto("formatted_string", wait_until='networkidle')
+        await page.goto("", wait_until='networkidle')
         initial_load_time = time.time() - start_time
 
                                                                                                                                 # Wait for full initialization
@@ -505,7 +505,7 @@ class PageRefreshTestSuite:
                                                                                                                                 # Get performance metrics
                                                                                                                                 # Removed problematic line: metrics = await page.evaluate(''' )
         const perf = performance.getEntriesByType('navigation')[0];
-        ({ ))
+        ({ })
         domContentLoaded: perf.domContentLoadedEventEnd - perf.domContentLoadedEventStart,
         loadComplete: perf.loadEventEnd - perf.loadEventStart,
         domInteractive: perf.domInteractive - perf.fetchStart,
@@ -514,7 +514,7 @@ class PageRefreshTestSuite:
         ''')
 
                                                                                                                                 # Store metrics
-        self.test_results['performance_metrics'] = { )
+        self.test_results['performance_metrics'] = { }
         'initial_load_time': initial_load_time,
         'refresh_load_time': refresh_load_time,
         'dom_content_loaded': metrics['domContentLoaded'],
@@ -525,21 +525,21 @@ class PageRefreshTestSuite:
 
                                                                                                                                 # Performance thresholds
         if refresh_load_time > initial_load_time * 1.5:
-        print("formatted_string")
+        print("")
 
         if metrics['domInteractive'] > 3000:
-        print("formatted_string")
+        print("")
 
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
+        print("")
 
         self.test_results['passed'] += 1
         return True
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         self.test_results['failed'] += 1
         return False
         finally:
@@ -547,13 +547,13 @@ class PageRefreshTestSuite:
 
     async def run_all_tests(self, browser: Browser) -> Dict[str, Any]:
         """Run all page refresh tests."""
-        print(" )
-        " + "=" * 60)
+        print("")
+         + =" * 60)
         print("[U+1F680] MISSION CRITICAL: Page Refresh Test Suite")
         print("=" * 60)
 
     # Create a new browser context for each test to ensure isolation
-        tests = [ )
+        tests = [ ]
         self.test_basic_refresh_with_active_chat,
         self.test_websocket_reconnection_on_refresh,
         self.test_rapid_refresh_resilience,
@@ -570,46 +570,46 @@ class PageRefreshTestSuite:
         try:
         await test_func(page)
         except Exception as e:
-        print("formatted_string")
+        print("")
         self.test_results['failed'] += 1
         self.test_results['total'] += 1
         finally:
         await context.close()
 
                     # Print summary
-        print(" )
-        " + "=" * 60)
+        print("")
+         + =" * 60)
         print(" CHART:  TEST RESULTS SUMMARY")
         print("=" * 60)
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
 
         if self.test_results['critical_failures']:
-        print(" )
+        print("")
         WARNING: [U+FE0F] CRITICAL FAILURES:")
         for failure in self.test_results['critical_failures']:
-        print("formatted_string")
+        print("")
 
         if self.test_results.get('performance_metrics'):
-        print(" )
+        print("")
         [U+1F4C8] PERFORMANCE METRICS:")
         metrics = self.test_results['performance_metrics']
         for key, value in metrics.items():
         if isinstance(value, float):
-        print("formatted_string")
+        print("")
         else:
-        print("formatted_string")
+        print("")
 
                                             # Determine overall status
         if self.test_results['failed'] == 0:
-        print(" )
+        print("")
         PASS:  ALL TESTS PASSED - Page refresh handling is robust!")
         elif len(self.test_results['critical_failures']) > 0:
-        print(" )
+        print("")
         FAIL:  CRITICAL FAILURES DETECTED - Immediate attention required!")
         else:
-        print(" )
+        print("")
         WARNING: [U+FE0F] SOME TESTS FAILED - Review and fix non-critical issues")
 
         return self.test_results
@@ -631,11 +631,11 @@ results = await test_suite.run_all_tests(browser)
 
                                                                     # Assert no critical failures
 assert len(results['critical_failures']) == 0, \
-"formatted_string"
+""
 
                                                                     # Assert reasonable pass rate
 pass_rate = results['passed'] / results['total'] if results['total'] > 0 else 0
-assert pass_rate >= 0.8, "formatted_string"
+assert pass_rate >= 0.8, ""
 
 finally:
 await browser.close()

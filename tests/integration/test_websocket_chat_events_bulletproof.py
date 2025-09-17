@@ -19,7 +19,7 @@ import sys
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Any, Set
 import threading
 import pytest
@@ -30,7 +30,7 @@ from shared.isolated_environment import IsolatedEnvironment
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
@@ -148,7 +148,7 @@ class WebSocketChatClient:
                         logger.info(f'Client {self.client_id} received: {event_type}')
                 except json.JSONDecodeError:
                     logger.warning(f'Invalid JSON received: {message[:100]}')
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             logger.info(f'Client {self.client_id} connection closed')
             self.connected = False
         except Exception as e:
@@ -161,7 +161,7 @@ class WebSocketChatClient:
             return {'success': False, 'error': 'Not connected'}
         message_id = f'msg_{uuid.uuid4().hex[:8]}'
         thread_id = thread_id or f'thread_{uuid.uuid4().hex[:8]}'
-        message = {'type': 'user_message', 'payload': {'content': content, 'thread_id': thread_id, 'message_id': message_id, 'timestamp': datetime.utcnow().isoformat(), 'client_id': self.client_id}}
+        message = {'type': 'user_message', 'payload': {'content': content, 'thread_id': thread_id, 'message_id': message_id, 'timestamp': datetime.now(UTC).isoformat(), 'client_id': self.client_id}}
         try:
             start_time = time.time()
             await self.websocket.send(json.dumps(message))
@@ -244,7 +244,7 @@ class WebSocketChatIntegrationTest:
         ws_url = 'ws://localhost:8080/ws'
         await client.connect(ws_url, token)
         message_id = f'dup_test_{uuid.uuid4().hex[:8]}'
-        message = {'type': 'user_message', 'payload': {'content': 'Test deduplication', 'message_id': message_id, 'timestamp': datetime.utcnow().isoformat()}}
+        message = {'type': 'user_message', 'payload': {'content': 'Test deduplication', 'message_id': message_id, 'timestamp': datetime.now(UTC).isoformat()}}
         await client.websocket.send(json.dumps(message))
         await asyncio.sleep(0.5)
         await client.websocket.send(json.dumps(message))

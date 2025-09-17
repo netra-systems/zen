@@ -31,7 +31,7 @@ environment: Environment being tested
 Returns:
 Dictionary with validation results
 '''
-validation_results = { )
+validation_results = { }
 "valid": True,
 "errors": [],
 "warnings": [],
@@ -43,7 +43,7 @@ validation_results = { )
 normalized_headers = {k.lower(): v for k, v in response_headers.items()}
 
             # Required CORS headers
-cors_headers = { )
+cors_headers = { }
 "access-control-allow-origin": request_origin,
 "access-control-allow-credentials": "true",
 "access-control-allow-methods": None,  # Should contain common methods
@@ -61,17 +61,17 @@ if header == "access-control-allow-origin":
 actual_origin = normalized_headers[header]
 if actual_origin != request_origin and actual_origin != "*":
 validation_results["errors"].append( )
-"formatted_string"
+""
                                 
 validation_results["valid"] = False
 else:
 validation_results["warnings"].append( )
-"formatted_string"
+""
                                     
 else:
 validation_results["missing_headers"].append(header)
 if header in ["access-control-allow-origin", "access-control-allow-credentials"]:
-validation_results["errors"].append("formatted_string")
+validation_results["errors"].append("")
 validation_results["valid"] = False
 
                                             # Validate specific header content
@@ -80,14 +80,14 @@ methods = normalized_headers["access-control-allow-methods"]
 required_methods = ["GET", "POST", "OPTIONS"]
 for method in required_methods:
 if method not in methods:
-validation_results["warnings"].append("formatted_string")
+validation_results["warnings"].append("")
 
 if "access-control-allow-headers" in normalized_headers:
 headers = normalized_headers["access-control-allow-headers"]
 required_headers = ["Authorization", "Content-Type"]
 for header in required_headers:
 if header not in headers:
-validation_results["warnings"].append("formatted_string")
+validation_results["warnings"].append("")
 
                                                                     # Check for security headers
 security_headers = ["vary", "x-content-type-options", "x-frame-options"]
@@ -95,7 +95,7 @@ for header in security_headers:
 if header in normalized_headers:
 validation_results["headers_found"][header] = normalized_headers[header]
 else:
-validation_results["warnings"].append("formatted_string")
+validation_results["warnings"].append("")
 
 return validation_results
 
@@ -110,20 +110,20 @@ environment: Environment to get origins for
 Returns:
 List of test origins for the environment
 '''
-origins = { )
-"development": [ )
+origins = { }
+"development": [ ]
 "http://localhost:3000",
 "http://localhost:3001",
 "http://127.0.0.1:3000",
 "https://localhost:3000",
 "http://[::1]:3000",  # IPv6
 ],
-"staging": [ )
+"staging": [ ]
 "https://app.staging.netrasystems.ai",
 "https://auth.staging.netrasystems.ai",
 "http://localhost:3000",  # Local testing
 ],
-"production": [ )
+"production": [ ]
 "https://netrasystems.ai",
 "https://app.netrasystems.ai",
 "https://auth.netrasystems.ai",
@@ -145,13 +145,13 @@ Returns:
 Dictionary of request headers
 '''
 if method == "OPTIONS":  # Preflight request
-return { )
+return { }
 "Origin": origin,
 "Access-Control-Request-Method": "POST",
 "Access-Control-Request-Headers": "Authorization, Content-Type"
             
 else:  # Actual request
-return { )
+return { }
 "Origin": origin,
 "Content-Type": "application/json"
             
@@ -173,15 +173,15 @@ headers = dict(response.headers) if hasattr(response, 'headers') else {}
 validation = validate_cors_headers(headers, request_origin, environment)
 
 if not validation["valid"]:
-error_msg = "formatted_string"
-error_msg += "formatted_string"
-error_msg += "formatted_string"
-error_msg += "formatted_string"
+error_msg = ""
+error_msg += ""
+error_msg += ""
+error_msg += ""
 raise AssertionError(error_msg)
 
                     # Check for warnings in development/staging
 if environment != "production" and validation["warnings"]:
-print("formatted_string")
+    print("")
 
 
 def cors_test_decorator(origins: Optional[List[str]] = None, environment: str = "development"):
@@ -229,7 +229,7 @@ class CORSTestMixin:
 
             # Allow 404s for endpoints that don't exist in test environment
         if response.status_code not in [200, 204, 404]:
-        raise AssertionError("formatted_string")
+        raise AssertionError("")
 
         assert_cors_valid(response, origin, self.cors_environment)
         return response

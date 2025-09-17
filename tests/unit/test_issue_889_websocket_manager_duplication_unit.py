@@ -49,7 +49,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 
 # Import core WebSocket components to test duplication patterns
 try:
-    from netra_backend.app.websocket_core.websocket_manager import (
+    from netra_backend.app.websocket_core.canonical_import_patterns import (
         WebSocketManager,
         UnifiedWebSocketManager,
         WebSocketManagerFactory,
@@ -62,7 +62,7 @@ try:
         WebSocketConnection,
         create_isolated_mode
     )
-    from netra_backend.app.websocket_core.websocket_manager import (
+    from netra_backend.app.websocket_core.unified_manager import (
         _UnifiedWebSocketManagerImplementation
     )
     from netra_backend.app.agents.registry import AgentRegistry, AgentType, AgentStatus

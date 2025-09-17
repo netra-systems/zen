@@ -48,7 +48,7 @@ result = cur.fetchone()
 assert result[0] == 1, "Database connectivity test failed"
 print(" PASS:  Basic database connectivity test passed")
 except Exception as e:
-print("formatted_string")
+    print("")
 print("Skipping test - requires PostgreSQL on localhost:5433")
 return
 
@@ -82,7 +82,7 @@ from auth_service.auth_core.database.connection import AuthDatabase
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 print(" PASS:  Auth service imports successful")
 except ImportError as import_error:
-print("formatted_string")
+    print("")
 return
 
                                 # Create database instance
@@ -94,15 +94,15 @@ try:
 asyncio.run(asyncio.wait_for(auth_db.initialize(), timeout=10.0))
 print(" PASS:  Database initialization completed")
 except asyncio.TimeoutError:
-print(" WARNING: [U+FE0F]  Database initialization timed out (may be expected in test environment)")
+    print(" WARNING: [U+FE0F]  Database initialization timed out (may be expected in test environment)")
 except Exception as init_error:
-print("formatted_string")
+    print("")
 
                                             # Get the captured logs
 log_output = log_capture.getvalue()
 
                                             # Check for auth-related error messages that shouldn't be there
-unwanted_auth_patterns = [ )
+unwanted_auth_patterns = [ ]
 "authentication failed",
 "password authentication failed",
 "SCRAM authentication",
@@ -118,19 +118,19 @@ if pattern.lower() in log_output.lower():
 for line in log_output.split(" )
 "):
 if pattern.lower() in line.lower():
-found_auth_issues.append("formatted_string")
+found_auth_issues.append("")
 
                                                             # Report results
 if found_auth_issues:
-print(" FAIL:  Found authentication error logs that indicate auth issues:")
+    print(" FAIL:  Found authentication error logs that indicate auth issues:")
 for issue in found_auth_issues:
-print("formatted_string")
-print(" )
+    print("")
+print("")
 Full log output:")
 print(log_output)
 return False
 else:
-print(" PASS:  No authentication error patterns found in logs")
+    print(" PASS:  No authentication error patterns found in logs")
 
                                                                         # Test basic database operations if possible
 try:
@@ -144,11 +144,11 @@ return result.scalar()
 
 test_result = asyncio.run(test_db_op())
 if test_result == 1:
-print(" PASS:  Database operation test passed")
+    print(" PASS:  Database operation test passed")
 else:
-print("formatted_string")
+    print("")
 except Exception as op_error:
-print("formatted_string")
+    print("")
 
 return True
 
@@ -165,7 +165,7 @@ asyncio.run(auth_db.cleanup())
 elif hasattr(auth_db, 'engine') and auth_db.engine:
 asyncio.run(auth_db.engine.dispose())
 except Exception as cleanup_error:
-print("formatted_string")
+    print("")
 
 
 def test_database_manager_no_credential_logging():
@@ -179,7 +179,7 @@ handler = logging.StreamHandler(log_capture)
 handler.setLevel(logging.DEBUG)
 
     # Get relevant loggers
-loggers_to_check = [ )
+loggers_to_check = [ ]
 logging.getLogger('auth_service.auth_core.database'),
 logging.getLogger('auth_service'),
 logging.getLogger(__name__),
@@ -198,11 +198,11 @@ try:
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 print(" PASS:  AuthDatabaseManager import successful")
 except ImportError as import_error:
-print("formatted_string")
+    print("")
 return False
 
                     # Test various URL transformations with different credential patterns
-test_urls = [ )
+test_urls = [ ]
 "postgresql://user:password123@localhost/dbname",
 "postgresql+asyncpg://user:secret456@host/db?sslmode=require",
 "postgres://admin:pass789@cloudsql/database",
@@ -213,7 +213,7 @@ try:
 manager = AuthDatabaseManager()
 print(" PASS:  AuthDatabaseManager instance created")
 except Exception as manager_error:
-print("formatted_string")
+    print("")
 return False
 
 for i, url in enumerate(test_urls):
@@ -229,9 +229,9 @@ if hasattr(manager, 'get_migration_url_sync_format'):
 migration_url = manager.get_migration_url_sync_format()
 if hasattr(manager, 'get_auth_database_url_async'):
 auth_url = manager.get_auth_database_url_async()
-print("formatted_string")
+print("")
 except Exception as url_error:
-print("formatted_string")
+    print("")
 finally:
                                                         # Restore original URL
 if original_url:
@@ -252,19 +252,19 @@ if credential in log_output:
 for line in log_output.split(" )
 "):
 if credential in line:
-found_credentials.append("formatted_string")
+found_credentials.append("")
 
                                                                                 # Report results
 if found_credentials:
-print(" FAIL:  Found credentials in logs (security issue):")
+    print(" FAIL:  Found credentials in logs (security issue):")
 for cred in found_credentials:
-print("formatted_string")
-print(" )
+    print("")
+print("")
 Full log output:")
 print(log_output)
 return False
 else:
-print(" PASS:  No credentials found in logs")
+    print(" PASS:  No credentials found in logs")
 return True
 
 finally:
@@ -289,7 +289,7 @@ if test_database_connection_no_auth_errors():
 success_count += 1
 print(" PASS:  PASS: Database connection auth logging test")
 else:
-print(" FAIL:  FAIL: Database connection auth logging test")
+    print(" FAIL:  FAIL: Database connection auth logging test")
 print()
 
 print("Test 2: Database manager credential logging")
@@ -298,18 +298,18 @@ if test_database_manager_no_credential_logging():
 success_count += 1
 print(" PASS:  PASS: Database manager credential logging test")
 else:
-print(" FAIL:  FAIL: Database manager credential logging test")
+    print(" FAIL:  FAIL: Database manager credential logging test")
 print()
 
 print("=" * 60)
-print("formatted_string")
+print("")
 print("=" * 60)
 
 if success_count == total_tests:
-print(" CELEBRATION:  All tests passed! Database auth logging is working correctly.")
+    print(" CELEBRATION:  All tests passed! Database auth logging is working correctly.")
 return True
 else:
-print(" WARNING: [U+FE0F]  Some tests failed. Review the output above for details.")
+    print(" WARNING: [U+FE0F]  Some tests failed. Review the output above for details.")
 return False
 
 

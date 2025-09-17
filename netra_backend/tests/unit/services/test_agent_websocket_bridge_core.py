@@ -26,13 +26,13 @@ import unittest
 import time
 from unittest.mock import Mock, AsyncMock, patch, MagicMock, call
 from typing import Dict, Any, Optional, List
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from enum import Enum
 from dataclasses import dataclass
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, IntegrationState, IntegrationConfig, HealthStatus, IntegrationResult, IntegrationMetrics
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext, create_defensive_user_execution_context
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.monitoring.interfaces import MonitorableComponent
@@ -52,7 +52,7 @@ class MockWebSocketManager:
 
     async def send_event(self, event_type: str, data: Dict[str, Any], user_id: str=None, run_id: str=None):
         """Mock event sending."""
-        event = {'type': event_type, 'data': data, 'user_id': user_id, 'run_id': run_id, 'timestamp': datetime.utcnow().isoformat()}
+        event = {'type': event_type, 'data': data, 'user_id': user_id, 'run_id': run_id, 'timestamp': datetime.now(UTC).isoformat()}
         self.events_sent.append(event)
         return True
 
@@ -73,7 +73,7 @@ class MockThreadRunRegistry:
 
     def register_run(self, run_id: str, thread_id: str, user_context: UserExecutionContext):
         """Mock run registration."""
-        self.registrations[run_id] = {'thread_id': thread_id, 'user_context': user_context, 'timestamp': datetime.utcnow()}
+        self.registrations[run_id] = {'thread_id': thread_id, 'user_context': user_context, 'timestamp': datetime.now(UTC)}
         return True
 
     def get_run_info(self, run_id: str):

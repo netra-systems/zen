@@ -388,8 +388,8 @@ class WebSocketServiceIntegrationTests:
                 assert response_data.get("status") == "received"
                 assert response_data.get("type") == "real_time_metric"
                 
-        except (websockets.exceptions.ConnectionClosed, 
-                websockets.exceptions.InvalidURI, 
+        except (websockets.ConnectionClosed, 
+                websockets.InvalidURI, 
                 asyncio.TimeoutError,
                 ConnectionRefusedError) as e:
             pytest.skip(f"WebSocket service not available: {e}")
@@ -422,8 +422,8 @@ class WebSocketServiceIntegrationTests:
                 assert confirmation_data.get("type") == "subscription_confirmed"
                 assert confirmation_data.get("channel") == "analytics_notifications"
                 
-        except (websockets.exceptions.ConnectionClosed, 
-                websockets.exceptions.InvalidURI, 
+        except (websockets.ConnectionClosed, 
+                websockets.InvalidURI, 
                 asyncio.TimeoutError,
                 ConnectionRefusedError) as e:
             pytest.skip(f"WebSocket service not available: {e}")

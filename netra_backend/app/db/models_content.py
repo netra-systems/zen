@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from sqlalchemy import ARRAY, JSON, Boolean, Column, DateTime, Float, ForeignKey, String
 from sqlalchemy.orm import relationship
 
-from netra_backend.app.core.configuration.base import config_manager
+from netra_backend.app.config import config_manager
 from netra_backend.app.db.base import Base
 
 

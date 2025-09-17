@@ -49,13 +49,8 @@ class UnifiedConfigManager:
         shared/logging -> config -> netra_backend/logging_config -> shared/logging loop
         """
         if self._logger is None:
-            try:
-                from netra_backend.app.logging_config import central_logger
-                self._logger = central_logger
-            except ImportError:
-                # Fallback to basic logging if circular dependency still exists
-                import logging
-                self._logger = logging.getLogger(__name__)
+            from shared.logging.unified_logging_ssot import get_logger
+            self._logger = get_logger(__name__)
         return self._logger
     
     def get_config(self, key: str = None, default: Any = None) -> AppConfig:

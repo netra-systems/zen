@@ -93,10 +93,10 @@ class SecurityAuthorizationEdgeCasesE2ETests(SSotAsyncTestCase):
                 await websocket.close()
                 connection_result['success'] = False
                 connection_result['error'] = 'Connection succeeded when it should have failed'
-        except websockets.exceptions.InvalidHandshake as e:
+        except websockets.InvalidHandshake as e:
             connection_result['error'] = f'Invalid handshake: {e}'
             connection_result['success'] = not should_succeed
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             connection_result['error'] = f'Connection closed: {e}'
             connection_result['success'] = not should_succeed
         except asyncio.TimeoutError:

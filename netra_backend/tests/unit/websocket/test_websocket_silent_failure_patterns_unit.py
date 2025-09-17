@@ -30,7 +30,7 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDisp
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.agent_types import AgentExecutionResult
@@ -190,7 +190,7 @@ class WebSocketSilentFailurePatternsUnitTests(SSotAsyncTestCase):
         except Exception:
             pass
         try:
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
             if hasattr(UnifiedWebSocketManager, 'emit_critical_event'):
                 modern_infrastructure_available.append('UnifiedWebSocketManager')
         except Exception:

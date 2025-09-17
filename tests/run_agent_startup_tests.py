@@ -19,7 +19,7 @@ import time
 import uuid
 from typing import Dict, List, Any, Optional
 import logging
-from datetime import datetime
+from datetime import datetime, UTC
 
 # Add project root to path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -182,7 +182,7 @@ async def run_agent_startup_test_suite(real_llm: bool = False, parallel: bool = 
             "duration": total_duration
         },
         "test_results": test_results,
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.now(UTC).isoformat()
     }
     
     logger.info(f"[U+1F3C1] Agent Startup Test Suite Complete: {passed_count}/{len(test_results)} passed in {total_duration:.2f}s")

@@ -4,7 +4,7 @@ from typing import Any, List, Optional, Tuple
 
 from pydantic import ValidationError
 
-from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.config import get_config as get_unified_config
 from netra_backend.app.logging_config import central_logger as logger
 
 try:

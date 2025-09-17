@@ -42,22 +42,22 @@ env.set("ENVIRONMENT", "development", "test_service_startup_sequence")
 env.set("NETRA_ENVIRONMENT", "development", "test_service_startup_sequence")
 
             # Define expected startup sequence
-startup_sequence = [ )
-{ )
+startup_sequence = [ ]
+{ }
 "service": "auth_service",
 "port": 8001,
 "depends_on": [],
 "health_endpoint": "/health",
 "startup_time_limit": 30  # seconds
 },
-{ )
+{ }
 "service": "netra_backend",
 "port": 8000,
 "depends_on": ["auth_service"],
 "health_endpoint": "/api/health",
 "startup_time_limit": 45  # seconds
 },
-{ )
+{ }
 "service": "frontend",
 "port": 3000,
 "depends_on": ["netra_backend", "auth_service"],
@@ -77,15 +77,15 @@ health_endpoint = service_config["health_endpoint"]
 depends_on = service_config["depends_on"]
 time_limit = service_config["startup_time_limit"]
 
-print("formatted_string")
+print("")
 
                     # Check dependencies are running first
 for dependency in depends_on:
 dep_healthy = await _check_service_health(session, dependency)
 if not dep_healthy:
-failed_services.append({ ))
+failed_services.append({ })
 "service": service_name,
-"reason": "formatted_string",
+"reason": "",
 "startup_order_violated": True
                             
 continue
@@ -96,28 +96,28 @@ service_healthy = False
 
 while time.time() - start_time < time_limit:
 try:
-url = "formatted_string"
+url = ""
 async with session.get(url, timeout=aiohttp.ClientTimeout(total=2)) as response:
 if response.status == 200:
 service_healthy = True
 startup_time = time.time() - start_time
-startup_results.append({ ))
+startup_results.append({ })
 "service": service_name,
 "startup_time": startup_time,
 "status": "healthy"
                                             
-print("formatted_string")
+    print("")
 break
 except (aiohttp.ClientError, asyncio.TimeoutError):
 await asyncio.sleep(1)
 
 if not service_healthy:
-failed_services.append({ ))
+failed_services.append({ })
 "service": service_name,
-"reason": "formatted_string",
+"reason": "",
 "startup_timeout": True
                                                     
-print("formatted_string")
+    print("")
 
                                                     # Validate startup sequence compliance
 sequence_violations = []
@@ -127,7 +127,7 @@ service_config = startup_sequence[i]
 expected_service = service_config["service"]
 
 if result["service"] != expected_service:
-sequence_violations.append("formatted_string")
+sequence_violations.append("")
 
                                                             # Test comprehensive failure scenarios
 startup_issues = []
@@ -155,34 +155,34 @@ failure_report = []
 if failed_services:
 failure_report.append("FAILED Services:")
 for failure in failed_services:
-failure_report.append("formatted_string")
+failure_report.append("")
 
 if sequence_violations:
 failure_report.append("Startup Sequence Violations:")
 for violation in sequence_violations:
-failure_report.append("formatted_string")
+failure_report.append("")
 
 if startup_issues:
 failure_report.append("Startup Issues:")
 for issue in startup_issues:
-failure_report.append("formatted_string")
+failure_report.append("")
 
 pytest.fail(f"Service startup sequence validation failed: )
 " + "
 ".join(failure_report))
 
-print("formatted_string")
+print("")
 
 
 async def _check_service_health(session: aiohttp.ClientSession, service_name: str) -> bool:
 """Check if a service is healthy based on service name."""
-service_ports = { )
+service_ports = { }
 "auth_service": 8001,
 "netra_backend": 8000,
 "frontend": 3000
     
 
-service_endpoints = { )
+service_endpoints = { }
 "auth_service": "/health",
 "netra_backend": "/api/health",
 "frontend": "/"
@@ -196,7 +196,7 @@ port = service_ports[service_name]
 endpoint = service_endpoints[service_name]
 
 try:
-url = "formatted_string"
+url = ""
 async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
 return response.status == 200
 except (aiohttp.ClientError, asyncio.TimeoutError):
@@ -235,7 +235,7 @@ for j, other_port in enumerate(ports[i+1:], i+1):
 if port == other_port:
 service1 = startup_sequence[i]["service"]
 service2 = startup_sequence[j]["service"]
-conflicts.append("formatted_string")
+conflicts.append("")
 
 return conflicts
 
@@ -248,7 +248,7 @@ expected_services = {s["service"] for s in startup_sequence}
 actual_services = {r["service"] for r in startup_results}
 
 for service in expected_services - actual_services:
-missing.append("formatted_string")
+missing.append("")
 
 return missing
 

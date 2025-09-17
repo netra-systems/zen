@@ -30,7 +30,7 @@ import pytest
 import time
 from typing import Dict, List, Any, Optional
 from unittest.mock import patch, AsyncMock, MagicMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
@@ -141,8 +141,8 @@ class AuthBackendIntegrationTests(SSotAsyncTestCase):
         payload = {
             'user_id': user_id,
             'email': self.test_email,
-            'exp': datetime.utcnow() + timedelta(minutes=expiry_minutes),
-            'iat': datetime.utcnow(),
+            'exp': datetime.now(UTC) + timedelta(minutes=expiry_minutes),
+            'iat': datetime.now(UTC),
             'iss': 'netra_auth_service'
         }
         

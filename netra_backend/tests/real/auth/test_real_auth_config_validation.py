@@ -18,7 +18,7 @@ import asyncio
 import json
 import os
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List, Set
 from unittest.mock import patch
 import pytest
@@ -84,7 +84,7 @@ class RealAuthConfigValidationTests:
             pytest.skip('JWT_SECRET_KEY not configured - skipping JWT validation tests')
         assert len(jwt_secret) >= 32, 'JWT secret should be at least 32 characters'
         assert jwt_secret != 'default' and jwt_secret != 'secret', 'JWT secret should not be default value'
-        test_payload = {JWTConstants.SUBJECT: 'config_test_user', JWTConstants.EMAIL: 'config@netrasystems.ai', JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=5)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'test': 'config_validation'}
+        test_payload = {JWTConstants.SUBJECT: 'config_test_user', JWTConstants.EMAIL: 'config@netrasystems.ai', JWTConstants.ISSUED_AT: int(datetime.now(UTC).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.now(UTC) + timedelta(minutes=5)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'test': 'config_validation'}
         try:
             test_token = jwt.encode(test_payload, jwt_secret, algorithm=JWTConstants.HS256_ALGORITHM)
             assert test_token is not None

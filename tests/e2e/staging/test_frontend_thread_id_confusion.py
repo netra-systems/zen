@@ -76,7 +76,7 @@ class WebSocketMessageCapture:
         return len(self.thread_id_issues) > 0
 
 
-async def create_authenticated_websocket(auth_token: str) -> websockets.WebSocketServerProtocol:
+async def create_authenticated_websocket(auth_token: str) -> websockets.ServerConnection:
     """Create WebSocket connection with authentication"""
     headers = {
         "Authorization": f"Bearer {auth_token}",
@@ -97,7 +97,7 @@ async def create_authenticated_websocket(auth_token: str) -> websockets.WebSocke
 
 
 async def simulate_thread_navigation_flow(
-    websocket: websockets.WebSocketServerProtocol,
+    websocket: websockets.ServerConnection,
     thread_id: str,
     message_capture: WebSocketMessageCapture
 ) -> None:
@@ -150,7 +150,7 @@ async def simulate_thread_navigation_flow(
         except asyncio.TimeoutError:
             # Continue waiting, no message received in this interval
             continue
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             logger.warning("WebSocket connection closed unexpectedly")
             break
         except Exception as e:

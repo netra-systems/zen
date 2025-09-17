@@ -35,7 +35,7 @@ import websockets
 import ssl
 import re
 from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import httpx
 from collections import defaultdict
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -199,7 +199,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
             assert quality_evaluation['meets_threshold'], f"Response fails business value quality threshold. Score: {quality_evaluation['overall_quality_score']:.3f} (required ≥{self.__class__.QUALITY_THRESHOLD_HIGH}). Metrics: {quality_evaluation}"
             assert quality_evaluation['keyword_relevance']['cost_optimization']['score'] >= 0.4, f"Insufficient cost optimization focus in response. Found keywords: {quality_evaluation['keyword_relevance']['cost_optimization']['found']}"
             assert quality_evaluation['actionability_score'] >= 0.3, f"Response lacks actionable recommendations: {quality_evaluation['actionability_score']:.3f}"
-            ack_message = {'type': 'message_acknowledgment', 'thread_id': self.thread_id, 'run_id': self.run_id, 'acknowledged_at': datetime.utcnow().isoformat()}
+            ack_message = {'type': 'message_acknowledgment', 'thread_id': self.thread_id, 'run_id': self.run_id, 'acknowledged_at': datetime.now(UTC).isoformat()}
             await websocket.send(json.dumps(ack_message))
             try:
                 ack_response = await asyncio.wait_for(websocket.recv(), timeout=5.0)

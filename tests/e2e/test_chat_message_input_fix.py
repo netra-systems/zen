@@ -31,7 +31,7 @@ class TestChatMessageInputFix:
         # Send message like the input field would
         # Removed problematic line: await ws_client.send_json({)
         "type": "start_agent",
-        "payload": { )
+        "payload": { }
         "user_request": test_message,
         "thread_id": None,
         "context": {"source": "message_input"},
@@ -57,7 +57,7 @@ class TestChatMessageInputFix:
             # Send first message (should use start_agent)
             # Removed problematic line: await ws_client.send_json({)
         "type": "start_agent",
-        "payload": { )
+        "payload": { }
         "user_request": first_message,
         "thread_id": thread_id,
         "context": {"source": "message_input"},
@@ -75,7 +75,7 @@ class TestChatMessageInputFix:
         follow_up = "Can you give me specific examples?"
             # Removed problematic line: await ws_client.send_json({)
         "type": "user_message",
-        "payload": { )
+        "payload": { }
         "content": follow_up,
         "references": [],
         "thread_id": thread_id
@@ -95,7 +95,7 @@ class TestChatMessageInputFix:
                 # Send like example prompt does
                 # Removed problematic line: await ws_client.send_json({)
         "type": "start_agent",
-        "payload": { )
+        "payload": { }
         "user_request": example_prompt,
         "thread_id": None,
         "context": {"source": "example_prompt"},
@@ -114,7 +114,7 @@ class TestChatMessageInputFix:
 
                 # Removed problematic line: await ws_client.send_json({)
         "type": "start_agent",
-        "payload": { )
+        "payload": { }
         "user_request": input_message,
         "thread_id": None,
         "context": {"source": "message_input"},
@@ -139,7 +139,7 @@ class TestChatMessageInputFix:
                         # Attempt to send invalid message
                         # Removed problematic line: await ws_client.send_json({)
         "type": "start_agent",
-        "payload": { )
+        "payload": { }
         "user_request": invalid_msg,
         "thread_id": None,
         "context": {"source": "message_input"},
@@ -153,7 +153,7 @@ class TestChatMessageInputFix:
         ws_client.wait_for_event("agent_started"),
         timeout=2
                             
-        assert False, "formatted_string"
+        assert False, ""
         except asyncio.TimeoutError:
         pass  # Expected - no response for empty messages
 
@@ -166,7 +166,7 @@ class TestChatMessageInputFix:
                                     # Start first thread
                                     # Removed problematic line: await ws_client.send_json({)
         "type": "start_agent",
-        "payload": { )
+        "payload": { }
         "user_request": "First thread message",
         "thread_id": thread1,
         "context": {"source": "message_input"},
@@ -179,7 +179,7 @@ class TestChatMessageInputFix:
                                     # Switch to second thread (new conversation)
                                     # Removed problematic line: await ws_client.send_json({)
         "type": "start_agent",
-        "payload": { )
+        "payload": { }
         "user_request": "Second thread message",
         "thread_id": thread2,
         "context": {"source": "message_input"},
@@ -193,7 +193,7 @@ class TestChatMessageInputFix:
                                     # Go back to first thread (existing conversation)
                                     # Removed problematic line: await ws_client.send_json({)
         "type": "user_message",
-        "payload": { )
+        "payload": { }
         "content": "Continue first thread",
         "references": [],
         "thread_id": thread1

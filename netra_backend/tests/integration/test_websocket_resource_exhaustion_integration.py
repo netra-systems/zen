@@ -48,7 +48,7 @@ from netra_backend.app.websocket_core.websocket_manager import (
     _REGISTRY_LOCK,
     get_manager_registry_status
 )
-from netra_backend.app.websocket_core.websocket_manager import MAX_CONNECTIONS_PER_USER
+from netra_backend.app.websocket_core.unified_manager import MAX_CONNECTIONS_PER_USER
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 logger = get_logger(__name__)

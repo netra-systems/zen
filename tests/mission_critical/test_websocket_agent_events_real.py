@@ -50,7 +50,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 
 
 # ============================================================================
@@ -586,16 +586,7 @@ class WebSocketPerformanceRealTests:
 
 
 if __name__ == '__main__':
-    # Execute SSOT mission critical WebSocket tests
-    import asyncio
-    import pytest
-    
-    # Run comprehensive WebSocket agent event tests
-    pytest.main([
-        __file__,
-        "-v",
-        "--tb=short",
-        "--asyncio-mode=auto",
-        "-x",  # Stop on first failure for mission critical tests
-        "--disable-warnings"
-    ])
+    # Run the mission critical tests
+    # MIGRATED: Use SSOT unified test runner
+    # python tests/unified_test_runner.py --category unit
+    pass  # TODO: Replace with appropriate SSOT test execution

@@ -49,7 +49,7 @@ class DatabaseConnectivityValidator:
 
     def get_postgres_config(self) -> Dict[str, str]:
         """Get PostgreSQL configuration from environment."""
-        return { )
+        return { }
         'host': self.env.get('POSTGRES_HOST', 'localhost'),
         'port': self.env.get('POSTGRES_PORT', '5433'),
         'user': self.env.get('POSTGRES_USER', 'postgres'),
@@ -59,7 +59,7 @@ class DatabaseConnectivityValidator:
 
     def get_clickhouse_config(self) -> Dict[str, str]:
         """Get ClickHouse configuration from environment."""
-        return { )
+        return { }
         'host': self.env.get('CLICKHOUSE_HOST', 'localhost'),
         'http_port': self.env.get('CLICKHOUSE_HTTP_PORT', '8123'),
         'native_port': self.env.get('CLICKHOUSE_NATIVE_PORT', '9000'),
@@ -70,7 +70,7 @@ class DatabaseConnectivityValidator:
 
     async def validate_postgres_asyncpg(self, config: Dict[str, str]) -> Dict[str, Any]:
         """Validate PostgreSQL connection using asyncpg (production async driver)."""
-        result = { )
+        result = { }
         'driver': 'asyncpg',
         'success': False,
         'connection_time': None,
@@ -80,7 +80,7 @@ class DatabaseConnectivityValidator:
     
 
     # Build connection URL
-        url = "formatted_string"
+        url = ""
 
         start_time = time.time()
         try:
@@ -91,14 +91,14 @@ class DatabaseConnectivityValidator:
         version_result = await conn.fetchval("SELECT version()")
         await conn.close()
 
-        result.update({ ))
+        result.update({ })
         'success': True,
         'connection_time': connection_time,
         'server_version': version_result[:50] + "..." if len(version_result) > 50 else version_result
         
 
         except Exception as e:
-        result.update({ ))
+        result.update({ })
         'error': str(e),
         'connection_time': time.time() - start_time
             
@@ -107,7 +107,7 @@ class DatabaseConnectivityValidator:
 
     def validate_postgres_psycopg2(self, config: Dict[str, str]) -> Dict[str, Any]:
         """Validate PostgreSQL connection using psycopg2 (migration sync driver)."""
-        result = { )
+        result = { }
         'driver': 'psycopg2',
         'success': False,
         'connection_time': None,
@@ -135,14 +135,14 @@ class DatabaseConnectivityValidator:
         cursor.close()
         conn.close()
 
-        result.update({ ))
+        result.update({ })
         'success': True,
         'connection_time': connection_time,
         'server_version': version_result[:50] + "..." if len(version_result) > 50 else version_result
         
 
         except Exception as e:
-        result.update({ ))
+        result.update({ })
         'error': str(e),
         'connection_time': time.time() - start_time
             
@@ -151,7 +151,7 @@ class DatabaseConnectivityValidator:
 
     def validate_clickhouse_http(self, config: Dict[str, str]) -> Dict[str, Any]:
         """Validate ClickHouse HTTP interface connectivity."""
-        result = { )
+        result = { }
         'interface': 'http',
         'success': False,
         'connection_time': None,
@@ -165,13 +165,13 @@ class DatabaseConnectivityValidator:
         import requests
 
         # Build HTTP URL for ClickHouse
-        url = "formatted_string"
+        url = ""
 
         # Test basic connectivity with authentication
         auth = (config['user'], config['password']) if config['password'] else None
 
         response = requests.get( )
-        "formatted_string",
+        "",
         auth=auth,
         timeout=5
         
@@ -179,25 +179,25 @@ class DatabaseConnectivityValidator:
         if response.status_code == 200:
             # Get server version
         version_response = requests.get( )
-        "formatted_string",
+        "",
         auth=auth,
         timeout=5
             
 
         connection_time = time.time() - start_time
-        result.update({ ))
+        result.update({ })
         'success': True,
         'connection_time': connection_time,
         'server_version': version_response.text.strip() if version_response.status_code == 200 else "Unknown"
             
         else:
-        result.update({ ))
-        'error': "formatted_string",
+        result.update({ })
+        'error': "",
         'connection_time': time.time() - start_time
                 
 
         except Exception as e:
-        result.update({ ))
+        result.update({ })
         'error': str(e),
         'connection_time': time.time() - start_time
                     
@@ -206,7 +206,7 @@ class DatabaseConnectivityValidator:
 
     def validate_clickhouse_native(self, config: Dict[str, str]) -> Dict[str, Any]:
         """Validate ClickHouse native protocol connectivity."""
-        result = { )
+        result = { }
         'interface': 'native',
         'success': False,
         'connection_time': None,
@@ -231,14 +231,14 @@ class DatabaseConnectivityValidator:
         version_result = client.execute("SELECT version()")[0][0]
         connection_time = time.time() - start_time
 
-        result.update({ ))
+        result.update({ })
         'success': True,
         'connection_time': connection_time,
         'server_version': version_result
         
 
         except Exception as e:
-        result.update({ ))
+        result.update({ })
         'error': str(e),
         'connection_time': time.time() - start_time
             
@@ -268,30 +268,30 @@ result = await validator.validate_postgres_asyncpg(config)
 
 print(f" )
 === POSTGRESQL ASYNCPG CONNECTIVITY TEST ===")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string" if result['connection_time'] else "N/A")
+print("")
+print("")
+print("")
+print("")
+print("")
+print("" if result['connection_time'] else "N/A")
 
 if result['success']:
-print("formatted_string")
+    print("")
 else:
-print("formatted_string")
+    print("")
 
                 # Assert connectivity works
 assert result['success'], ( )
 f"PostgreSQL asyncpg connectivity FAILED:
 "
-"formatted_string"port"]}
+""port"]}
 "
-"formatted_string"
-"formatted_string"
-"formatted_string"
+""
+""
+""
 f"This indicates the PostgreSQL database is not accessible with the "
-"formatted_string"
-"formatted_string"
+""
+""
 f"2. User "{config["user"]}" exists and has access
 "
 f"3. Database "{config["database"]}" exists
@@ -302,7 +302,7 @@ f"4. Network connectivity is available"
                         # Validate reasonable connection time (should be under 1 second for local)
 if result['connection_time']:
 assert result['connection_time'] < 2.0, ( )
-"formatted_string"
+""
                             
 
 def test_postgres_port_5433_psycopg2_connectivity(self, validator):
@@ -318,27 +318,27 @@ result = validator.validate_postgres_psycopg2(config)
 
 print(f" )
 === POSTGRESQL PSYCOPG2 CONNECTIVITY TEST ===")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string" if result['connection_time'] else "N/A")
+print("")
+print("")
+print("")
+print("")
+print("")
+print("" if result['connection_time'] else "N/A")
 
 if result['success']:
-print("formatted_string")
+    print("")
 else:
-print("formatted_string")
+    print("")
 
             # Assert connectivity works
 assert result['success'], ( )
 f"PostgreSQL psycopg2 connectivity FAILED:
 "
-"formatted_string"port"]}
+""port"]}
 "
-"formatted_string"
-"formatted_string"
-"formatted_string"
+""
+""
+""
 f"This indicates the PostgreSQL database is not accessible for migration "
 f"operations using psycopg2 driver. Both asyncpg and psycopg2 must work."
                 
@@ -356,35 +356,35 @@ result = validator.validate_clickhouse_http(config)
 
 print(f" )
 === CLICKHOUSE HTTP CONNECTIVITY TEST ===")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string" if result['connection_time'] else "N/A")
+print("")
+print("")
+print("")
+print("")
+print("")
+print("" if result['connection_time'] else "N/A")
 
 if result['success']:
-print("formatted_string")
+    print("")
 else:
-print("formatted_string")
+    print("")
 
             # ClickHouse is now properly configured for local development
 assert result['success'], ( )
 f"ClickHouse HTTP connectivity FAILED:
 "
-"formatted_string"http_port"]}
+""http_port"]}
 "
-"formatted_string"
-"formatted_string"
-"formatted_string"
+""
+""
+""
 f"This indicates ClickHouse is not accessible via HTTP interface. Ensure:
 "
-"formatted_string"
+""
 f"2. HTTP interface is enabled
 "
 f"3. User "{config["user"]}" has proper authentication
 "
-"formatted_string"
+""
                     
 
 def test_clickhouse_native_port_9000_connectivity(self, validator):
@@ -399,27 +399,27 @@ result = validator.validate_clickhouse_native(config)
 
 print(f" )
 === CLICKHOUSE NATIVE CONNECTIVITY TEST ===")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string" if result['connection_time'] else "N/A")
+print("")
+print("")
+print("")
+print("")
+print("")
+print("" if result['connection_time'] else "N/A")
 
 if result['success']:
-print("formatted_string")
+    print("")
 else:
-print("formatted_string")
+    print("")
 
             # ClickHouse is now properly configured for local development
 assert result['success'], ( )
 f"ClickHouse native connectivity FAILED:
 "
-"formatted_string"native_port"]}
+""native_port"]}
 "
-"formatted_string"
-"formatted_string"
-"formatted_string"
+""
+""
+""
 f"This indicates ClickHouse native protocol is not working properly."
                 
 
@@ -440,9 +440,9 @@ sync_url = builder.get_url_for_environment(sync=True)
 
 print(f" )
 === DATABASE URL BUILDER CONSISTENCY TEST ===")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
     Extract ports from URLs
 from tests.database.test_port_configuration_mismatch import DatabasePortConfigurationTester
@@ -452,22 +452,22 @@ async_port = tester.extract_port_from_url(async_url)
 sync_port = tester.extract_port_from_url(sync_url)
 expected_port = env_vars.get('POSTGRES_PORT', '5432')
 
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
 
     # Validate port consistency
 assert async_port == expected_port, ( )
-"formatted_string"
+""
     
 
 assert sync_port == expected_port, ( )
-"formatted_string"
+""
     
 
 assert async_port == sync_port, ( )
-"formatted_string"
+""
     
 
 @pytest.mark.asyncio
@@ -479,7 +479,7 @@ This test performs a complete health check of all database connections
 to ensure the system can start up successfully with all databases accessible.
 '''
 pass
-health_results = { )
+health_results = { }
 'postgres_asyncpg': None,
 'postgres_psycopg2': None,
 'clickhouse_http': None,
@@ -496,14 +496,14 @@ postgres_asyncpg_result = await validator.validate_postgres_asyncpg(postgres_con
 health_results['postgres_asyncpg'] = postgres_asyncpg_result
 if not postgres_asyncpg_result['success']:
 health_results['overall_health'] = False
-health_results['issues'].append("formatted_string")
+health_results['issues'].append("")
 
             # psycopg2 test
 postgres_psycopg2_result = validator.validate_postgres_psycopg2(postgres_config)
 health_results['postgres_psycopg2'] = postgres_psycopg2_result
 if not postgres_psycopg2_result['success']:
 health_results['overall_health'] = False
-health_results['issues'].append("formatted_string")
+health_results['issues'].append("")
 
                 # Test ClickHouse connections (if configured)
 clickhouse_config = validator.get_clickhouse_config()
@@ -513,32 +513,32 @@ clickhouse_http_result = validator.validate_clickhouse_http(clickhouse_config)
 health_results['clickhouse_http'] = clickhouse_http_result
 if not clickhouse_http_result['success']:
 health_results['overall_health'] = False
-health_results['issues'].append("formatted_string")
+health_results['issues'].append("")
 
                         # Native test
 clickhouse_native_result = validator.validate_clickhouse_native(clickhouse_config)
 health_results['clickhouse_native'] = clickhouse_native_result
 if not clickhouse_native_result['success']:
 health_results['overall_health'] = False
-health_results['issues'].append("formatted_string")
+health_results['issues'].append("")
 
 print(f" )
 === COMPREHENSIVE DATABASE HEALTH CHECK ===")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 
 if clickhouse_config['host']:
-print("formatted_string")
-print("formatted_string")
+    print("")
+print("")
 else:
 print(f"ClickHouse: [U+23ED][U+FE0F] SKIPPED (not configured)")
 
-print("formatted_string")
+print("")
 
 if health_results['issues']:
 print(f"Issues Found:")
 for issue in health_results['issues']:
-print("formatted_string")
+    print("")
 
                                             # Assert overall health
 assert health_results['overall_health'], ( )
@@ -546,7 +546,7 @@ f"DATABASE HEALTH CHECK FAILED:
 "
 f"Issues found:
 " + "
-".join("formatted_string" for issue in health_results['issues']) + "
+".join("" for issue in health_results['issues']) + "
 
 "
 f"All configured databases must be accessible for the system to function properly. "
@@ -570,9 +570,9 @@ postgres_url = manager.get_postgres_url()
 
 print(f" )
 === DATABASE CONFIG MANAGER TEST ===")
-print("formatted_string")
+print("")
 if postgres_url:
-print("formatted_string")
+    print("")
 
             # The manager should be able to provide a valid PostgreSQL URL
 assert postgres_url, ( )
@@ -583,14 +583,14 @@ assert postgres_url, ( )
             # Test ClickHouse configuration if available
 try:
 clickhouse_config = manager.get_clickhouse_config()
-print("formatted_string")
+print("")
 except Exception as ch_error:
-print("formatted_string")
+    print("")
 
 except ImportError:
 pytest.skip("DatabaseConfigManager not available in this environment")
 except Exception as e:
-pytest.fail("formatted_string")
+pytest.fail("")
 
 
 class TestDatabaseConfigurationRegression:
@@ -627,11 +627,11 @@ class TestDatabaseConfigurationRegression:
         sync_port = tester.extract_port_from_url(sync_url)
 
         assert async_port == test_port, ( )
-        "formatted_string"
+        ""
         
 
         assert sync_port == test_port, ( )
-        "formatted_string"
+        ""
         
 
         finally:
@@ -664,9 +664,9 @@ class TestDatabaseConfigurationRegression:
         assert clickhouse_user, "ClickHouse user must be configured"
 
         print(f"ClickHouse Authentication Config:")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
 
     def test_database_url_ssl_parameter_conversion(self):
         '''
@@ -715,34 +715,34 @@ class TestDatabaseConfigurationRegression:
 
     # Test PostgreSQL
         postgres_config = validator.get_postgres_config()
-        print("formatted_string"port"]}")
+        print(""port"]}")
 
         asyncpg_result = await validator.validate_postgres_asyncpg(postgres_config)
-        print("formatted_string")
+        print("")
         if not asyncpg_result['success']:
-        print("formatted_string")
+        print("")
 
         psycopg2_result = validator.validate_postgres_psycopg2(postgres_config)
-        print("formatted_string")
+        print("")
         if not psycopg2_result['success']:
-        print("formatted_string")
+        print("")
 
             # Test ClickHouse
         clickhouse_config = validator.get_clickhouse_config()
         if clickhouse_config['host']:
-        print("formatted_string")
+        print("")
 
         http_result = validator.validate_clickhouse_http(clickhouse_config)
-        print("formatted_string")
+        print("")
         if not http_result['success']:
-        print("formatted_string")
+        print("")
 
         native_result = validator.validate_clickhouse_native(clickhouse_config)
-        print("formatted_string")
+        print("")
         if not native_result['success']:
-        print("formatted_string")
+        print("")
         else:
-        print(" )
+        print("")
         ClickHouse not configured")
 
         asyncio.run(main())

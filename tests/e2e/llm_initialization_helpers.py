@@ -80,7 +80,7 @@ class TokenTracker:
     def get_stats(self) -> Dict[str, Any]:
         """Get tracking statistics"""
         avg_tokens = self.total_tokens / max(self.requests, 1)
-        return { )
+        return { }
         "total_tokens": self.total_tokens,
         "total_requests": self.requests,
         "total_cost": float(self.total_cost),
@@ -97,7 +97,7 @@ class LLMTestHelpers:
         anthropic_key = get_env().get("ANTHROPIC_API_KEY")
         openai_key = get_env().get("GOOGLE_API_KEY")
         gemini_key = get_env().get("GEMINI_API_KEY")
-        return { )
+        return { }
         "anthropic": bool(anthropic_key and anthropic_key != "test-key"),
         "openai": bool(openai_key and openai_key != "test-openai-key"),
         "gemini": bool(gemini_key and gemini_key != "test-gemini-key")
@@ -106,7 +106,7 @@ class LLMTestHelpers:
         @staticmethod
     def create_llm_config(provider: str, model: str, api_key: str) -> AppConfig:
         """Create LLM configuration for testing"""
-        config_dict = { )
+        config_dict = { }
         provider: LLMConfig( )
         provider=provider,
         model_name=model,
@@ -119,7 +119,7 @@ class LLMTestHelpers:
         @staticmethod
     def create_mock_llm_manager() -> MagicMock:
         """Create mock LLM manager for testing"""
-        mock_manager = Magic        mock_manager.get_llm.return_value = Magic        mock_manager.ask_llm = AsyncMock(return_value="LLM_INIT_SUCCESS")
+        mock_manager = MagicMock(); mock_manager.get_llm.return_value = MagicMock(); mock_manager.ask_llm = AsyncMock(return_value="LLM_INIT_SUCCESS")
         LLMTestHelpers._setup_mock_responses(mock_manager)
         return mock_manager
 
@@ -134,7 +134,7 @@ class LLMTestHelpers:
         @staticmethod
     def _create_mock_usage_response():
         """Create mock response with usage tracking"""
-        mock_response = Magic        mock_response.usage = Magic        mock_response.usage.prompt_tokens = 100
+        mock_response = MagicMock(); mock_response.usage = MagicMock(); mock_response.usage.prompt_tokens = 100
         mock_response.usage.completion_tokens = 50
         mock_response.usage.total_tokens = 150
         return mock_response
@@ -182,7 +182,7 @@ class LLMTestHelpers:
     def _verify_client_creation(mock_manager, provider):
         """Verify LLM client creation"""
         client = mock_manager.get_llm(provider)
-        assert client is not None, "formatted_string"
+        assert client is not None, ""
 
         @staticmethod
     async def _test_basic_prompt(mock_manager, provider):
@@ -190,13 +190,13 @@ class LLMTestHelpers:
         start_time = time.time()
         response = await mock_manager.ask_llm("Respond with: LLM_INIT_SUCCESS", provider)
         latency = (time.time() - start_time) * 1000
-        assert "LLM_INIT_SUCCESS" in response, "formatted_string"
+        assert "LLM_INIT_SUCCESS" in response, ""
         return latency
 
         @staticmethod
     def _create_success_result(latency, model):
         """Create success result dictionary"""
-        return { )
+        return { }
         "success": True,
         "latency_ms": latency,
         "response": "LLM_INIT_SUCCESS",
@@ -206,7 +206,7 @@ class LLMTestHelpers:
         @staticmethod
     def create_failing_mock_manager():
         """Create mock manager that fails immediately"""
-        mock_manager = Magic        mock_manager.ask_llm = AsyncMock( )
+        mock_manager = MagicMock(); mock_manager.ask_llm = AsyncMock( )
         side_effect=RuntimeError("LLM provider unavailable - no fallback")
     
         return mock_manager
@@ -221,7 +221,7 @@ class LLMTestHelpers:
         @staticmethod
     def create_failure_result():
         """Create provider failure test result"""
-        return { )
+        return { }
         "provider_available": False,
         "error": "Provider unavailable",
         "fallback_available": False
@@ -234,7 +234,7 @@ class ReliabilityTestHelpers:
         @staticmethod
     def create_failing_manager():
         """Create manager that always fails"""
-        mock_manager = Magic        mock_manager.ask_llm = AsyncMock(side_effect=Exception("Service unavailable"))
+        mock_manager = MagicMock(); mock_manager.ask_llm = AsyncMock(side_effect=Exception("Service unavailable"))
         return mock_manager
 
         @staticmethod
@@ -251,7 +251,7 @@ class ReliabilityTestHelpers:
         @staticmethod
     def create_slow_manager():
         """Create manager with slow responses"""
-        mock_manager = Magic        mock_manager.ask_llm = AsyncMock(side_effect=ReliabilityTestHelpers._slow_response)
+        mock_manager = MagicMock(); mock_manager.ask_llm = AsyncMock(side_effect=ReliabilityTestHelpers._slow_response)
         return mock_manager
 
         @staticmethod

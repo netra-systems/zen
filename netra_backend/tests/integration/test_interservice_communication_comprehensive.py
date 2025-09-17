@@ -16,7 +16,7 @@ import json
 import pytest
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Any, Dict, Optional
 from unittest.mock import patch
 
@@ -205,8 +205,8 @@ class InterserviceCommunicationComprehensiveTests(BaseIntegrationTest):
             session_data = {
                 "user_id": self.test_user_id,
                 "email": self.test_email,
-                "created_at": datetime.utcnow().isoformat(),
-                "last_active": datetime.utcnow().isoformat()
+                "created_at": datetime.now(UTC).isoformat(),
+                "last_active": datetime.now(UTC).isoformat()
             }
             
             # Store session in Redis (cache layer)
@@ -714,7 +714,7 @@ class InterserviceCommunicationComprehensiveTests(BaseIntegrationTest):
                 "user_id": test_user_id,
                 "email": f"consistency-test-{int(time.time())}@example.com",
                 "subscription": "enterprise",
-                "last_updated": datetime.utcnow().isoformat()
+                "last_updated": datetime.now(UTC).isoformat()
             }
             
             # Store in database
@@ -785,7 +785,7 @@ class InterserviceCommunicationComprehensiveTests(BaseIntegrationTest):
                 "type": "user_action",
                 "user_id": self.test_user_id,
                 "action": "subscription_upgraded",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "metadata": {"previous_tier": "free", "new_tier": "pro"}
             }
             

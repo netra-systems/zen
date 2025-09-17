@@ -24,7 +24,7 @@ _setup_test_paths()
 class TestCircularImports:
         """Test suite for circular import detection and validation."""
 
-        CRITICAL_MODULES = [ )
+        CRITICAL_MODULES = [ ]
         'shared.isolated_environment',
         'netra_backend.app.startup_module',
         'netra_backend.app.dependencies',
@@ -50,11 +50,11 @@ class TestCircularImports:
         except ImportError as e:
         error_msg = str(e)
         if "circular import" in error_msg.lower() or "partially initialized module" in error_msg:
-        circular_import_errors.append("formatted_string")
+        circular_import_errors.append("")
         else:
-        failed_imports.append("formatted_string")
+        failed_imports.append("")
         except Exception as e:
-        failed_imports.append("formatted_string")
+        failed_imports.append("")
 
                                 # Assert no circular imports detected
         if circular_import_errors:
@@ -62,7 +62,7 @@ class TestCircularImports:
         f"Circular imports detected:
         " +
         "
-        ".join("formatted_string" for error in circular_import_errors)
+        ".join("" for error in circular_import_errors)
                                         
 
                                         Assert no other import failures
@@ -71,7 +71,7 @@ class TestCircularImports:
         f"Module import failures:
         " +
         "
-        ".join("formatted_string" for error in failed_imports)
+        ".join("" for error in failed_imports)
                                                 
 
     def test_startup_module_import_order(self):
@@ -91,7 +91,7 @@ class TestCircularImports:
 
         except ImportError as e:
         if "circular import" in str(e).lower():
-        pytest.fail("formatted_string")
+        pytest.fail("")
         raise
 
     def test_dependencies_module_lazy_imports(self):
@@ -120,7 +120,7 @@ class TestCircularImports:
 
         except ImportError as e:
         if "circular import" in str(e).lower():
-        pytest.fail("formatted_string")
+        pytest.fail("")
         raise
 
     def test_session_manager_type_checking_imports(self):
@@ -144,13 +144,13 @@ class TestCircularImports:
 
         except ImportError as e:
         if "circular import" in str(e).lower():
-        pytest.fail("formatted_string")
+        pytest.fail("")
         raise
 
     def test_import_order_isolation(self):
         """Test that modules can be imported in any order without issues."""
     Test different import orders to ensure robustness
-        import_orders = [ )
+        import_orders = [ ]
     # Standard order
         ['shared.isolated_environment', 'netra_backend.app.database.session_manager', 'netra_backend.app.dependencies'],
 
@@ -174,7 +174,7 @@ class TestCircularImports:
 
         except ImportError as e:
         if "circular import" in str(e).lower():
-        pytest.fail("formatted_string")
+        pytest.fail("")
         raise
 
     def test_pytest_collection_compatibility(self):
@@ -198,7 +198,7 @@ class TestCircularImports:
         importlib.import_module(module)
         except ImportError as e:
         if "circular import" in str(e).lower():
-        pytest.fail("formatted_string")
+        pytest.fail("")
         raise
         finally:
                                     # Restore original module state
@@ -218,7 +218,7 @@ class TestCircularImports:
 
         except ImportError as e:
         if "circular import" in str(e).lower():
-        pytest.fail("formatted_string")
+        pytest.fail("")
         raise
 
         @pytest.fixture
@@ -233,7 +233,7 @@ class TestCircularImports:
         importlib.import_module(module_name)
         except ImportError as e:
         if "circular import" in str(e).lower():
-        pytest.fail("formatted_string")
+        pytest.fail("")
         raise
 
     def test_memory_service_integration(self):
@@ -251,7 +251,7 @@ class TestCircularImports:
 
         except ImportError as e:
         if "circular import" in str(e).lower():
-        pytest.fail("formatted_string")
+        pytest.fail("")
         raise
 
 
@@ -312,19 +312,19 @@ class TestImportHierarchy:
         test_instance.test_all_critical_modules_import_successfully()
         print("PASS: All critical modules import successfully")
         except Exception as e:
-        print("formatted_string")
+        print("")
 
         try:
         test_instance.test_import_order_isolation()
         print("PASS: Import order isolation test passed")
         except Exception as e:
-        print("formatted_string")
+        print("")
 
         try:
         test_instance.test_import_guards_effectiveness()
         print("PASS: Import guards effectiveness test passed")
         except Exception as e:
-        print("formatted_string")
+        print("")
 
         print("\
         Testing import hierarchy...")
@@ -335,13 +335,13 @@ class TestImportHierarchy:
         hierarchy_test.test_shared_isolated_environment_is_foundation()
         print("PASS: shared.isolated_environment foundation test passed")
         except Exception as e:
-        print("formatted_string")
+        print("")
 
         try:
         hierarchy_test.test_startup_module_path_setup()
         print("PASS: startup_module path setup test passed")
         except Exception as e:
-        print("formatted_string")
+        print("")
 
         print("\
         Circular import testing complete!")

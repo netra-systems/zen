@@ -14,14 +14,14 @@ The actual database configuration logic is implemented in the unified configurat
 system, but this module provides backward compatibility for existing imports.
 """
 
-import logging
 from typing import Dict, Any, Optional
 from urllib.parse import urlparse
 
-from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.config import get_config as get_unified_config
 from netra_backend.app.schemas.config import AppConfig
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class DatabaseConfig:

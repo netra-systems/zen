@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, CategoryType
 # Core application components  
 from fastapi import FastAPI
 from netra_backend.app.smd import StartupOrchestrator, StartupPhase, DeterministicStartupError
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, IntegrationState
 from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
 

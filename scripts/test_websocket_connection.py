@@ -111,7 +111,7 @@ async def test_websocket_connection():
                 # Check final connection state
                 logger.info(f"Final connection state: {websocket.state}")
                 
-        except websockets.exceptions.WebSocketException as e:
+        except websockets.WebSocketException as e:
             logger.error(f" FAIL:  WebSocket error: {e}")
         except Exception as e:
             logger.error(f" FAIL:  Unexpected error: {e}", exc_info=True)
@@ -158,7 +158,7 @@ async def monitor_connection_lifecycle():
                     logger.warning(f" WARNING: [U+FE0F] Connection state changed: {websocket.state}")
                     break
                     
-            except websockets.exceptions.ConnectionClosed as e:
+            except websockets.ConnectionClosed as e:
                 logger.error(f" FAIL:  Connection closed: code={e.code}, reason={e.reason}")
                 break
                 

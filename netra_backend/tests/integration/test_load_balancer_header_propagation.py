@@ -299,7 +299,7 @@ class LoadBalancerHeaderPropagationTests(WebSocketIntegrationTest):
                     "real_time_communication"
                 )
                 
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             raise AssertionError(
                 f"CRITICAL: WebSocket connection closed unexpectedly. "
                 f"This may indicate authentication header stripping by load balancer. "

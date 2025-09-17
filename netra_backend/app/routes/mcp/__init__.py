@@ -7,10 +7,10 @@ Each module handles specific MCP functionality with single responsibility.
 Provides conditional MCP imports with graceful degradation when dependencies unavailable.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Optional, Dict, Any
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # MCP availability flag
 MCP_AVAILABLE = False

@@ -174,7 +174,7 @@ class WebSocketNotifierSSOTIntegrationPatternsTests(SSotAsyncTestCase, SSotDatab
         except (ImportError, TypeError):
             pass
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             manager = WebSocketManager()
             direct_instantiation_success.append('WebSocketManager')
         except (ImportError, TypeError):

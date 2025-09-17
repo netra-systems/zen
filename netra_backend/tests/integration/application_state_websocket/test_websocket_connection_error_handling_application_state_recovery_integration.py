@@ -14,14 +14,14 @@ while preserving application state and enabling comprehensive recovery scenarios
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List, Callable
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ConnectionID, WebSocketID
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
@@ -64,7 +64,7 @@ class WebSocketConnectionErrorHandlingApplicationStateRecoveryIntegrationTests(B
                         self.errors_encountered.append({
                             'error_type': 'ConnectionError',
                             'message': str(error),
-                            'timestamp': datetime.utcnow().isoformat(),
+                            'timestamp': datetime.now(UTC).isoformat(),
                             'message_data': data,
                             'message_count': self.message_count
                         })
@@ -75,7 +75,7 @@ class WebSocketConnectionErrorHandlingApplicationStateRecoveryIntegrationTests(B
                         self.errors_encountered.append({
                             'error_type': 'TimeoutError',
                             'message': str(error),
-                            'timestamp': datetime.utcnow().isoformat(),
+                            'timestamp': datetime.now(UTC).isoformat(),
                             'message_data': data,
                             'message_count': self.message_count
                         })
@@ -85,14 +85,14 @@ class WebSocketConnectionErrorHandlingApplicationStateRecoveryIntegrationTests(B
                 data['_message_metadata'] = {
                     'message_count': self.message_count,
                     'errors_so_far': len(self.errors_encountered),
-                    'sent_at': datetime.utcnow().isoformat()
+                    'sent_at': datetime.now(UTC).isoformat()
                 }
                 self.messages_sent.append(data)
             
             async def simulate_recovery(self):
                 """Simulate connection recovery after errors."""
                 self.recovery_attempts.append({
-                    'timestamp': datetime.utcnow().isoformat(),
+                    'timestamp': datetime.now(UTC).isoformat(),
                     'errors_before_recovery': len(self.errors_encountered),
                     'messages_before_recovery': len(self.messages_sent)
                 })
@@ -115,7 +115,7 @@ class WebSocketConnectionErrorHandlingApplicationStateRecoveryIntegrationTests(B
             connection_id=connection_id,
             user_id=user_id,
             websocket=error_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={
                 "connection_type": "error_handling_test",
                 "error_recovery_enabled": True
@@ -132,7 +132,7 @@ class WebSocketConnectionErrorHandlingApplicationStateRecoveryIntegrationTests(B
             'error_log': [],
             'recovery_log': [],
             'failed_messages': [],
-            'created_at': datetime.utcnow().isoformat()
+            'created_at': datetime.now(UTC).isoformat()
         }
         
         await real_services_fixture["redis"].set(
@@ -150,7 +150,7 @@ class WebSocketConnectionErrorHandlingApplicationStateRecoveryIntegrationTests(B
                 message = {
                     "type": "error_test_message",
                     "data": {"message_index": i, "test_content": f"Message {i}"},
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 
                 await websocket_manager.send_to_user(user_id, message)
@@ -164,14 +164,14 @@ class WebSocketConnectionErrorHandlingApplicationStateRecoveryIntegrationTests(B
                     'message_index': i,
                     'error_type': type(e).__name__,
                     'error_message': str(e),
-                    'timestamp': datetime.utcnow().isoformat()
+                    'timestamp': datetime.now(UTC).isoformat()
                 })
                 
                 # Store failed message for potential retry
                 recovery_state['failed_messages'].append({
                     'message_index': i,
                     'message_data': message,
-                    'failed_at': datetime.utcnow().isoformat()
+                    'failed_at': datetime.now(UTC).isoformat()
                 })
                 
                 # Update Redis with error state
@@ -201,7 +201,7 @@ class WebSocketConnectionErrorHandlingApplicationStateRecoveryIntegrationTests(B
         
         # Update recovery state
         recovery_state['recovery_log'].append({
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(UTC).isoformat(),
             'recovery_successful': True,
             'errors_resolved': len(error_websocket.errors_encountered)
         })
@@ -218,7 +218,7 @@ class WebSocketConnectionErrorHandlingApplicationStateRecoveryIntegrationTests(B
             recovery_message = {
                 "type": "post_recovery_message",
                 "data": {"message_index": i, "recovered": True},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
             await websocket_manager.send_to_user(user_id, recovery_message)
@@ -331,7 +331,7 @@ class WebSocketConnectionErrorHandlingApplicationStateRecoveryIntegrationTests(B
                 connection_id=connection_id,
                 user_id=user_id,
                 websocket=cascade_websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={
                     "connection_type": "cascading_error_test",
                     "error_pattern": error_pattern,
@@ -362,7 +362,7 @@ class WebSocketConnectionErrorHandlingApplicationStateRecoveryIntegrationTests(B
                     message = {
                         "type": "cascade_test_message",
                         "data": {"message_index": i, "cascade_test": True},
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(UTC).isoformat()
                     }
                     
                     await websocket_manager.send_to_user(user_id, message)
@@ -437,7 +437,7 @@ class WebSocketConnectionErrorHandlingApplicationStateRecoveryIntegrationTests(B
             connection_id=recovery_connection_id,
             user_id=recovery_user_id,
             websocket=recovery_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"connection_type": "post_cascade_recovery"}
         )
         
@@ -451,7 +451,7 @@ class WebSocketConnectionErrorHandlingApplicationStateRecoveryIntegrationTests(B
             recovery_message = {
                 "type": "system_recovery_test",
                 "data": {"message_index": i, "system_recovered": True},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
             await websocket_manager.send_to_user(recovery_user_id, recovery_message)

@@ -38,7 +38,7 @@ from shared.isolated_environment import IsolatedEnvironment
 # Core component imports - with error handling
 try:
     from netra_backend.app.redis_manager import redis_manager
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketConnection
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketConnection
     from netra_backend.app.services.websocket.message_queue import MessageQueue, QueuedMessage, MessagePriority, MessageStatus
     from netra_backend.app.core.resilience.unified_circuit_breaker import (
         UnifiedCircuitBreaker,
@@ -86,7 +86,7 @@ class CascadingFailureSimulator:
         """Simulate Redis connection failure"""
         failure_id = "redis_failure"
         self.active_failures.add(failure_id)
-        self.failure_start_times[failure_id] = datetime.utcnow()
+        self.failure_start_times[failure_id] = datetime.now(UTC)
         
         # Simulate Redis connection issues
         with patch.object(redis_manager, 'get', side_effect=ConnectionError("Redis connection failed")):
@@ -102,7 +102,7 @@ class CascadingFailureSimulator:
         """Simulate WebSocket transport layer failures"""
         failure_id = "websocket_transport_failure"
         self.active_failures.add(failure_id)
-        self.failure_start_times[failure_id] = datetime.utcnow()
+        self.failure_start_times[failure_id] = datetime.now(UTC)
         
         logger.warning(f"[U+1F534] SIMULATING: WebSocket transport failure for {duration_seconds}s")
         await asyncio.sleep(duration_seconds)
@@ -208,7 +208,7 @@ class ResilienceValidator:
                 connection_id=str(uuid.uuid4()),
                 user_id=test_user_id,
                 websocket=mock_websocket,
-                connected_at=datetime.utcnow()
+                connected_at=datetime.now(UTC)
             ) if hasattr(ws_manager, 'add_connection') else None
             
             if test_connection is None:
@@ -381,7 +381,7 @@ class CascadingFailuresResilienceTests:
         # Phase 3: Monitor other components during Redis failure
         stability_checks = []
         for i in range(3):  # Reduced checks for faster testing
-            check_time = datetime.utcnow()
+            check_time = datetime.now(UTC)
             
             # Check WebSocket manager stability
             try:
@@ -472,7 +472,7 @@ class CascadingFailuresResilienceTests:
         for i in range(2):  # Reduced for faster testing
             health_check = {
                 "attempt": i + 1,
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(UTC),
                 "components": {}
             }
             

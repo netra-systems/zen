@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Direct execution of datetime.utcnow() analysis for Issue #826
+Direct execution of datetime.now(UTC) analysis for Issue #826
 
 This script runs the core datetime detection and analysis functionality
 without the test framework dependencies.
@@ -14,7 +14,7 @@ from typing import Dict, List, Tuple
 
 
 def scan_for_datetime_utcnow(project_root: Path) -> Dict[str, List[Tuple[int, str]]]:
-    """Scan codebase for datetime.utcnow() usage patterns."""
+    """Scan codebase for datetime.now(UTC) usage patterns."""
     patterns = {}
     excluded_dirs = {'__pycache__', '.git', 'node_modules', '.pytest_cache', 'venv', 'env', '.tox'}
     
@@ -31,7 +31,7 @@ def scan_for_datetime_utcnow(project_root: Path) -> Dict[str, List[Tuple[int, st
                     
                     file_patterns = []
                     for line_num, line in enumerate(lines, 1):
-                        if 'datetime.utcnow()' in line:
+                        if 'datetime.now(UTC)' in line:
                             file_patterns.append((line_num, line))
                     
                     if file_patterns:
@@ -45,7 +45,7 @@ def scan_for_datetime_utcnow(project_root: Path) -> Dict[str, List[Tuple[int, st
 
 
 def categorize_usage(line_content: str) -> str:
-    """Categorize the type of datetime.utcnow() usage."""
+    """Categorize the type of datetime.now(UTC) usage."""
     line_lower = line_content.lower().strip()
     
     if any(op in line_content for op in ['=', 'return']):
@@ -116,10 +116,10 @@ def test_modernization_compatibility():
     print("\n=== MODERNIZATION COMPATIBILITY TEST ===")
     
     # Test basic equivalence
-    legacy_dt = datetime.utcnow()
+    legacy_dt = datetime.now(UTC)
     modern_dt = datetime.now(timezone.utc)
     
-    print(f"Legacy datetime.utcnow(): {legacy_dt} (tzinfo: {legacy_dt.tzinfo})")
+    print(f"Legacy datetime.now(UTC): {legacy_dt} (tzinfo: {legacy_dt.tzinfo})")
     print(f"Modern datetime.now(UTC): {modern_dt} (tzinfo: {modern_dt.tzinfo})")
     
     # Test formatting compatibility
@@ -176,7 +176,7 @@ def main():
     total_files = len(utcnow_patterns)
     total_occurrences = sum(len(occurrences) for occurrences in utcnow_patterns.values())
     
-    print(f"Found {total_occurrences} datetime.utcnow() usage patterns in {total_files} files")
+    print(f"Found {total_occurrences} datetime.now(UTC) usage patterns in {total_files} files")
     
     # Show some examples
     print("\nSAMPLE OCCURRENCES:")
@@ -192,7 +192,7 @@ def main():
         count += 1
     
     if total_files > 10:
-        print(f"\n... and {total_files - 10} more files with datetime.utcnow() usage")
+        print(f"\n... and {total_files - 10} more files with datetime.now(UTC) usage")
     
     # 2. Categorization Analysis
     print("\n=== USAGE PATTERN CATEGORIZATION ===")
@@ -261,7 +261,7 @@ def main():
     
     if total_occurrences > 0:
         print("✅ PROCEED WITH MODERNIZATION:")
-        print("  - Found deprecated datetime.utcnow() usage that should be modernized")
+        print("  - Found deprecated datetime.now(UTC) usage that should be modernized")
         print(f"  - {total_occurrences} occurrences across {total_files} files need updating")
         print(f"  - Estimated effort: {effort_hours:.1f} hours")
         print("  - Modern approach provides better timezone handling")
@@ -277,7 +277,7 @@ def main():
         
     else:
         print("ℹ️  NO MODERNIZATION NEEDED:")
-        print("  - No datetime.utcnow() usage found in Python source files")
+        print("  - No datetime.now(UTC) usage found in Python source files")
         print("  - System already uses modern datetime patterns")
     
     return {

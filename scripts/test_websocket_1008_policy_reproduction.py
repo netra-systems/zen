@@ -91,7 +91,7 @@ class WebSocket1008PolicyReproduction:
                 
                 attempt["first_message_response"] = response_data
                 
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             # This is where we expect to see the 1008 error
             attempt["connection_result"] = "CLOSED_WITH_ERROR"
             attempt["error_details"] = {

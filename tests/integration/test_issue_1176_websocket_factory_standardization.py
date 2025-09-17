@@ -1,4 +1,4 @@
-"""
+"""Empty docstring."""
 Integration tests for Issue #1176 Phase 1 - WebSocket Manager Factory Standardization
 
 These tests validate that the standardized factory interface prevents coordination gaps
@@ -8,7 +8,7 @@ Business Justification:
 - Prevents $500K+ ARR risk from WebSocket initialization failures
 - Validates Issue #1176 coordination gap prevention
 - Ensures factory pattern consistency across the codebase
-"""
+"""Empty docstring."""
 
 import pytest
 import asyncio
@@ -27,23 +27,23 @@ from netra_backend.app.websocket_core.types import WebSocketManagerMode
 
 
 class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
-    """
+"""Empty docstring."""
     Integration tests for Issue #1176 WebSocket Manager Factory Standardization.
 
     These tests ensure that the standardized factory interface prevents the
     coordination gaps identified in Issue #1176 by validating factory compliance
     and manager instance creation consistency.
-    """
+"""Empty docstring."""
 
     async def asyncSetUp(self):
-        """Set up test environment for WebSocket factory standardization tests."""
+        "Set up test environment for WebSocket factory standardization tests."""
         await super().asyncSetUp()
         self.factory = StandardizedWebSocketManagerFactory(require_user_context=True)
         self.mock_user_context = Mock()
-        self.mock_user_context.user_id = "test_user_123"
+        self.mock_user_context.user_id = test_user_123""
 
     async def test_standardized_factory_creation(self):
-        """Test that standardized factory can be created and configured properly."""
+        Test that standardized factory can be created and configured properly.""
         # Test factory creation with different configurations
         factory_with_context = StandardizedWebSocketManagerFactory(require_user_context=True)
         factory_without_context = StandardizedWebSocketManagerFactory(require_user_context=False)
@@ -55,7 +55,7 @@ class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
         self.assertFalse(factory_without_context.require_user_context)
 
     async def test_factory_protocol_compliance(self):
-        """Test that standardized factory implements WebSocketManagerFactoryProtocol."""
+        "Test that standardized factory implements WebSocketManagerFactoryProtocol."""
         from netra_backend.app.websocket_core.standardized_factory_interface import (
             WebSocketManagerFactoryProtocol
         )
@@ -71,7 +71,7 @@ class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
 
     @patch('netra_backend.app.websocket_core.canonical_import_patterns.get_websocket_manager')
     async def test_manager_creation_with_validation(self, mock_get_manager):
-        """Test that factory creates managers with proper validation."""
+        "Test that factory creates managers with proper validation."
         # Mock a valid WebSocket manager
         mock_manager = Mock()
         mock_manager.get_user_connections = Mock(return_value=set())
@@ -94,26 +94,26 @@ class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
         )
 
     async def test_manager_validation_comprehensive(self):
-        """Test comprehensive manager validation functionality."""
+        "Test comprehensive manager validation functionality."
         # Create a mock manager with proper interface
         mock_manager = Mock()
         mock_manager.get_user_connections = Mock(return_value=set())
         mock_manager.is_connection_active = Mock(return_value=False)
         mock_manager.user_context = self.mock_user_context
         mock_manager._user_context_handler = Mock()
-        mock_manager.__class__.__name__ = "MockWebSocketManager"
-        mock_manager.__class__.__module__ = "test_module"
+        mock_manager.__class__.__name__ = MockWebSocketManager
+        mock_manager.__class__.__module__ = test_module""
 
         # Validate manager instance
         validation_result = self.factory.validate_manager_instance(mock_manager)
 
         # Check validation result structure
         self.assertIsInstance(validation_result, FactoryValidationResult)
-        self.assertEqual(validation_result.manager_type, "MockWebSocketManager")
+        self.assertEqual(validation_result.manager_type, MockWebSocketManager)
         self.assertIsInstance(validation_result.validation_timestamp, datetime)
 
     async def test_user_context_requirement_validation(self):
-        """Test that factory properly validates user context requirements."""
+        "Test that factory properly validates user context requirements."
         # Test factory that requires user context
         factory_requiring_context = StandardizedWebSocketManagerFactory(require_user_context=True)
 
@@ -121,7 +121,7 @@ class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
         with self.assertRaises(ValueError) as cm:
             factory_requiring_context.create_manager(user_context=None)
 
-        self.assertIn("User context required", str(cm.exception))
+        self.assertIn(User context required, str(cm.exception))
 
         # Test factory that doesn't require user context
         factory_not_requiring_context = StandardizedWebSocketManagerFactory(require_user_context=False)
@@ -138,7 +138,7 @@ class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
             self.assertIsNotNone(manager)
 
     async def test_factory_validator_compliance_checking(self):
-        """Test that WebSocketManagerFactoryValidator properly validates factories."""
+        ""Test that WebSocketManagerFactoryValidator properly validates factories.
         # Test compliant factory
         validation_result = WebSocketManagerFactoryValidator.validate_factory_compliance(self.factory)
 
@@ -148,18 +148,18 @@ class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
         self.assertEqual(validation_result['factory_type'], 'StandardizedWebSocketManagerFactory')
 
         # Test that required methods are detected
-        self.assertEqual(len(validation_result.get('missing_methods', [])), 0)
+        self.assertEqual(len(validation_result.get('missing_methods', []), 0)
 
     async def test_factory_validator_require_compliance(self):
-        """Test that factory validator can enforce compliance requirements."""
+        Test that factory validator can enforce compliance requirements.""
         # Should not raise error for compliant factory
         try:
             WebSocketManagerFactoryValidator.require_factory_compliance(
                 self.factory,
-                context="Test Factory Validation"
+                context=Test Factory Validation
             )
         except RuntimeError:
-            self.fail("require_factory_compliance raised RuntimeError for compliant factory")
+            self.fail("require_factory_compliance raised RuntimeError for compliant factory)"
 
         # Test with non-compliant factory (missing methods)
         non_compliant_factory = Mock()
@@ -169,13 +169,13 @@ class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
         with self.assertRaises(RuntimeError) as cm:
             WebSocketManagerFactoryValidator.require_factory_compliance(
                 non_compliant_factory,
-                context="Non-Compliant Factory Test"
+                context=Non-Compliant Factory Test
             )
 
-        self.assertIn("FACTORY COMPLIANCE FAILURE", str(cm.exception))
+        self.assertIn(FACTORY COMPLIANCE FAILURE, str(cm.exception))""
 
     async def test_get_standardized_factory_function(self):
-        """Test the convenience function for getting standardized factory."""
+        "Test the convenience function for getting standardized factory."""
         # Test with user context requirement
         factory_with_context = get_standardized_websocket_manager_factory(require_user_context=True)
         self.assertIsInstance(factory_with_context, StandardizedWebSocketManagerFactory)
@@ -187,7 +187,7 @@ class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
         self.assertFalse(factory_without_context.require_user_context)
 
     async def test_integration_with_agent_websocket_bridge(self):
-        """Test integration of standardized factory with AgentWebSocketBridge."""
+        "Test integration of standardized factory with AgentWebSocketBridge."
         from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
         # Create bridge instance
@@ -203,23 +203,23 @@ class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
 
     @patch('netra_backend.app.websocket_core.canonical_import_patterns.get_websocket_manager')
     async def test_factory_error_handling(self, mock_get_manager):
-        """Test that factory handles errors gracefully during manager creation."""
+        "Test that factory handles errors gracefully during manager creation."
         # Configure mock to raise exception
-        mock_get_manager.side_effect = Exception("Test manager creation failure")
+        mock_get_manager.side_effect = Exception(Test manager creation failure)
 
         # Factory should handle error and raise RuntimeError
         with self.assertRaises(RuntimeError) as cm:
             self.factory.create_manager(user_context=self.mock_user_context)
 
-        self.assertIn("WebSocket manager creation failed", str(cm.exception))
+        self.assertIn(WebSocket manager creation failed", str(cm.exception))"
 
     async def test_validation_result_production_readiness(self):
-        """Test FactoryValidationResult production readiness assessment."""
+        Test FactoryValidationResult production readiness assessment.""
         # Test production-ready result
         ready_result = FactoryValidationResult(
             is_valid=True,
             validation_errors=[],
-            manager_type="TestManager",
+            manager_type=TestManager","
             user_context_isolated=True,
             interface_compliant=True,
             factory_method_available=True,
@@ -230,8 +230,8 @@ class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
         # Test not production-ready result
         not_ready_result = FactoryValidationResult(
             is_valid=False,
-            validation_errors=["Test error"],
-            manager_type="TestManager",
+            validation_errors=[Test error],
+            manager_type=TestManager","
             user_context_isolated=False,
             interface_compliant=False,
             factory_method_available=False,
@@ -240,7 +240,7 @@ class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
         self.assertFalse(not_ready_result.is_production_ready)
 
     async def test_user_isolation_validation(self):
-        """Test that factory properly validates user isolation capabilities."""
+        Test that factory properly validates user isolation capabilities.""
         # Mock manager with proper isolation
         isolated_manager = Mock()
         isolated_manager.user_context = self.mock_user_context
@@ -263,15 +263,15 @@ class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
 
 
 class TestIssue1176IntegrationPointValidation(SSotAsyncTestCase):
-    """
+"""Empty docstring."""
     Test integration points to ensure they use standardized factory patterns.
 
     These tests validate that key integration points in the codebase
     properly use the standardized WebSocket manager factory interface.
-    """
+"""Empty docstring."""
 
     async def test_agent_websocket_bridge_factory_integration(self):
-        """Test that AgentWebSocketBridge properly integrates with standardized factory."""
+        "Test that AgentWebSocketBridge properly integrates with standardized factory."""
         from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
         bridge = AgentWebSocketBridge()
@@ -290,7 +290,7 @@ class TestIssue1176IntegrationPointValidation(SSotAsyncTestCase):
             self.assertTrue(validation_result.get('compliant', False))
 
     async def test_websocket_manager_setter_validation(self):
-        """Test that WebSocket manager setter includes standardized validation."""
+        ""Test that WebSocket manager setter includes standardized validation.
         from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
         bridge = AgentWebSocketBridge()
@@ -307,7 +307,7 @@ class TestIssue1176IntegrationPointValidation(SSotAsyncTestCase):
             bridge.websocket_manager = valid_manager
             self.assertEqual(bridge.websocket_manager, valid_manager)
         except ValueError:
-            self.fail("Valid manager was rejected by standardized validation")
+            self.fail(Valid manager was rejected by standardized validation)""
 
         # Test with invalid manager (missing required method)
         invalid_manager = Mock()
@@ -318,7 +318,7 @@ class TestIssue1176IntegrationPointValidation(SSotAsyncTestCase):
         with self.assertRaises(ValueError) as cm:
             bridge.websocket_manager = invalid_manager
 
-        self.assertIn("send_to_thread", str(cm.exception))
+        self.assertIn(send_to_thread", str(cm.exception))"
 
 
 if __name__ == '__main__':

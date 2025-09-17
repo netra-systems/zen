@@ -1,4 +1,4 @@
-"""
+"""Empty docstring."""
 Focused WebSocket Coroutine Regression Integration Test
 
 Simplified integration test focused specifically on the coroutine regression issue.
@@ -14,33 +14,33 @@ CLAUDE.MD COMPLIANCE:
 - Tests real environment detection logic
 - No mocks for environment access
 - Focuses on coroutine regression detection
-"""
+"""Empty docstring."""
 import inspect
 import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 class WebSocketCoroutineFocusedTests(BaseIntegrationTest):
-    """
+"""Empty docstring."""
     Focused integration test for WebSocket coroutine regression.
     
     Tests the core environment detection logic that was causing
     the 'coroutine' object has no attribute 'get' error.
-    """
+"""Empty docstring."""
 
     def setUp(self):
-        """Set up test environment."""
+        "Set up test environment."""
         super().setUp()
         self.env = get_env()
 
     @pytest.mark.integration
     def test_websocket_get_env_returns_isolated_environment(self):
-        """
+        ""
         CRITICAL: Test that get_env() returns IsolatedEnvironment, not coroutine.
         
         This is the core test for the regression where get_env() was returning
         a coroutine object instead of the proper IsolatedEnvironment instance.
-        """
+
         env_instance = get_env()
         assert isinstance(env_instance, IsolatedEnvironment), f'get_env() must return IsolatedEnvironment, got {type(env_instance)}'
         assert not inspect.iscoroutine(env_instance), f'get_env() MUST NOT return coroutine, got: {env_instance}'
@@ -49,12 +49,12 @@ class WebSocketCoroutineFocusedTests(BaseIntegrationTest):
 
     @pytest.mark.integration
     def test_websocket_environment_detection_calls(self):
-        """
+        
         Test the exact environment detection calls that were failing.
         
         This tests the specific calls from websocket.py that were causing
         the coroutine regression issue.
-        """
+""
         env = get_env()
         environment = env.get('ENVIRONMENT', 'development').lower()
         is_testing = env.get('TESTING', '0') == '1'
@@ -75,12 +75,12 @@ class WebSocketCoroutineFocusedTests(BaseIntegrationTest):
 
     @pytest.mark.integration
     def test_websocket_conditional_logic_pattern(self):
-        """
+
         Test the conditional logic pattern that was causing the regression.
         
         This tests the exact pattern from websocket.py around line 555 that
         was failing due to coroutine returns.
-        """
+        ""
         env = get_env()
         environment = env.get('ENVIRONMENT', 'development').lower()
         if environment in ['staging', 'production']:
@@ -90,12 +90,12 @@ class WebSocketCoroutineFocusedTests(BaseIntegrationTest):
 
     @pytest.mark.integration
     def test_websocket_singleton_consistency(self):
-        """
+        
         Test that get_env() singleton is consistent.
         
         The regression may have been caused by singleton inconsistency
         leading to coroutine returns.
-        """
+""
         env1 = get_env()
         env2 = get_env()
         env3 = get_env()

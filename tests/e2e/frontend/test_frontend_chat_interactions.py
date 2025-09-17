@@ -185,7 +185,7 @@ class ChatInteractionTestHarness:
         except asyncio.TimeoutError:
             print(f"[WARNING] WebSocket message timeout after {timeout}s")
             return None
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             print(f"[WARNING] WebSocket connection closed: {e}")
             return None
         except json.JSONDecodeError as e:

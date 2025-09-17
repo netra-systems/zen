@@ -179,7 +179,7 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
         # Test patterns that should NOT warn (legitimate specific imports)
         legitimate_patterns = [
             'from netra_backend.app.websocket_core.event_validator import UnifiedEventValidator',
-            'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager',
+            'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager',
             'from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter'
         ]
         
@@ -312,7 +312,7 @@ class TestIssue1090SsotWebSocketImportValidation(SSotBaseTestCase):
         """
         canonical_imports = [
             {
-                'import': 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager',
+                'import': 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager',
                 'class': 'WebSocketManager',
                 'description': 'Primary WebSocket manager for user contexts'
             },

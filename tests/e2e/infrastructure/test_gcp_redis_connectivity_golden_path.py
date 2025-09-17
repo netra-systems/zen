@@ -177,7 +177,7 @@ class GCPRedisConnectivityGoldenPathTests:
             logger.info(' PASS:  Message sent to WebSocket')
             await websocket.close()
             logger.info(' PASS:  WebSocket connection and Redis-dependent operations successful')
-        except (websockets.exceptions.ConnectionClosedError, websockets.exceptions.ConnectionClosedOK, websockets.exceptions.InvalidStatusCode, ConnectionRefusedError, OSError, asyncio.TimeoutError) as e:
+        except (websockets.ConnectionClosedError, websockets.ConnectionClosedOK, websockets.InvalidStatusCode, ConnectionRefusedError, OSError, asyncio.TimeoutError) as e:
             logger.error(f' FAIL:  WEBSOCKET FAILURE: Connection failed, likely due to Redis unavailability: {e}')
             raise AssertionError(f'WebSocket connection test FAILED - Redis dependency not met: {e}')
 

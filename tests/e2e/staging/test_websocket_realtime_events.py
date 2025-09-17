@@ -141,7 +141,7 @@ class WebSocketRealTimeEventsTests:
                     break
             except asyncio.TimeoutError:
                 continue
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 logger.warning('[U+1F50C] WebSocket connection closed during monitoring')
                 break
             except Exception as e:
@@ -593,7 +593,7 @@ class WebSocketRealTimeEventsTests:
                                 break
                         except asyncio.TimeoutError:
                             break
-                        except websockets.exceptions.ConnectionClosed:
+                        except websockets.ConnectionClosed:
                             break
                         except Exception as e:
                             if scenario['name'] == 'malformed_message':

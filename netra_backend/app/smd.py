@@ -1005,13 +1005,10 @@ class StartupOrchestrator:
                     # CLOUD RUN FIX: Allow bypass for staging/production remediation work
                     bypass_validation = get_env('BYPASS_STARTUP_VALIDATION', '').lower() == 'true'
                     environment = get_env('ENVIRONMENT', '').lower()
-
-                    # Issue #1005 Master Plan Phase 1: Enhanced SMD bypass logic with intelligent failure type analysis
-                    should_bypass, bypass_reason = self._determine_intelligent_bypass(
-                        environment, critical_failures, bypass_validation
-                    )
-
-                    if should_bypass:
+                    
+                    # Enhanced bypass logic for Cloud Run staging deployments
+                    if bypass_validation or (environment == 'staging' and critical_failures <= 2):
+                        bypass_reason = "BYPASS_STARTUP_VALIDATION=true" if bypass_validation else f"staging environment with {critical_failures} minor failures"
                         self.logger.warning(
                             f" WARNING: [U+FE0F] BYPASSING STARTUP VALIDATION FOR {environment.upper()} - "
                             f"{critical_failures} critical failures ignored. Reason: {bypass_reason}"
@@ -2129,12 +2126,12 @@ class StartupOrchestrator:
     
     async def _initialize_factory_patterns(self) -> None:
         """Initialize factory patterns for singleton removal - CRITICAL."""
-        from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory
+        from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, get_websocket_bridge_factory
         # PHASE 2A MIGRATION: Removed deprecated get_agent_instance_factory and configure_agent_instance_factory imports
         # These are no longer needed as we use create_agent_instance_factory(user_context) pattern per-request
         from netra_backend.app.services.factory_adapter import FactoryAdapter, AdapterConfig
         # ISSUE #1144 FIX: Use canonical SSOT import path instead of deprecated module import
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         self.logger.info("    - Initializing factory patterns for singleton removal...")
         
@@ -2158,9 +2155,7 @@ class StartupOrchestrator:
             
             # 3. Initialize AgentWebSocketBridge
             # CRITICAL FIX: Always initialize websocket_factory to prevent "not associated with a value" error
-            # Use factory directly since get_agent_websocket_bridge requires request parameter
-            from netra_backend.app.factories.websocket_bridge_factory import create_agent_websocket_bridge
-            websocket_factory = create_agent_websocket_bridge()
+            websocket_factory = get_agent_websocket_bridge()
             
             # Configure with proper parameters including connection pool
             if hasattr(self.app.state, 'agent_supervisor'):
@@ -2493,108 +2488,6 @@ class StartupOrchestrator:
         self.logger.critical("[U+1F534] CRITICAL: CHAT FUNCTIONALITY IS BROKEN")
         self.logger.critical("[U+1F534] SERVICE CANNOT START - DETERMINISTIC FAILURE")
         self.logger.critical("=" * 80)
-
-    def _determine_intelligent_bypass(self, environment: str, critical_failures: int,
-                                    bypass_validation: bool) -> Tuple[bool, str]:
-        """Determine if startup validation should be bypassed using intelligent failure analysis.
-
-        Issue #1005 Master Plan Phase 1: Enhanced SMD bypass logic with intelligent
-        failure type analysis that considers database performance patterns and failure types.
-
-        Args:
-            environment: Environment name (development, test, staging, production)
-            critical_failures: Number of critical failures detected
-            bypass_validation: Manual bypass flag from environment
-
-        Returns:
-            Tuple of (should_bypass: bool, reason: str) for logging and decision tracking
-
-        Business Value Justification (BVJ):
-        - Segment: Platform/Internal
-        - Business Goal: Staging Environment Stability & Golden Path Reliability
-        - Value Impact: Reduces false positive failures while maintaining safety
-        - Strategic Impact: Enables reliable CI/CD deployment pipeline
-        """
-        # Manual bypass always takes precedence (backward compatibility)
-        if bypass_validation:
-            return True, "BYPASS_STARTUP_VALIDATION=true (manual override)"
-
-        # Get failure type analysis from database timeout configuration
-        try:
-            from netra_backend.app.core.database_timeout_config import get_failure_type_analysis
-            failure_analysis = get_failure_type_analysis(environment)
-        except Exception as e:
-            self.logger.warning(f"Could not get failure analysis: {e}, falling back to basic logic")
-            # Fallback to basic logic if analysis fails
-            return self._basic_bypass_logic(environment, critical_failures)
-
-        # Enhanced bypass logic based on failure analysis
-        bypass_recommendation = failure_analysis.get('bypass_recommendation', 'conservative')
-        failure_type = failure_analysis.get('failure_type', 'unknown')
-        severity = failure_analysis.get('severity', 'unknown')
-        reason = failure_analysis.get('reason', 'No specific reason provided')
-
-        # Decision matrix based on failure analysis
-        if bypass_recommendation == 'strict':
-            # No bypass - failures indicate genuine issues
-            return False, f"Strict validation required: {reason}"
-
-        elif bypass_recommendation == 'permissive':
-            # Allow bypass - likely infrastructure-related issues
-            if critical_failures <= 5:  # Reasonable threshold for infrastructure issues
-                return True, f"Infrastructure-related bypass: {failure_type} ({reason})"
-            else:
-                return False, f"Too many failures ({critical_failures}) even for permissive mode"
-
-        elif bypass_recommendation == 'conditional':
-            # Conditional bypass based on environment and failure count
-            if environment == 'staging':
-                if critical_failures <= 3:  # More lenient for staging
-                    return True, f"Staging conditional bypass: {failure_type} ({reason})"
-                else:
-                    return False, f"Staging failure threshold exceeded: {critical_failures} failures"
-            elif environment == 'production':
-                if critical_failures <= 1:  # Very strict for production
-                    return True, f"Production conditional bypass: {failure_type} ({reason})"
-                else:
-                    return False, f"Production failure threshold exceeded: {critical_failures} failures"
-            else:
-                # Development/test environments - moderate threshold
-                if critical_failures <= 2:
-                    return True, f"Conditional bypass: {failure_type} ({reason})"
-                else:
-                    return False, f"Failure threshold exceeded: {critical_failures} failures"
-
-        else:
-            # Conservative fallback - unknown recommendation
-            return self._basic_bypass_logic(environment, critical_failures)
-
-    def _basic_bypass_logic(self, environment: str, critical_failures: int) -> Tuple[bool, str]:
-        """Basic bypass logic for fallback scenarios.
-
-        This preserves the original SMD bypass behavior for backward compatibility
-        when the intelligent analysis is unavailable.
-
-        Args:
-            environment: Environment name
-            critical_failures: Number of critical failures
-
-        Returns:
-            Tuple of (should_bypass: bool, reason: str)
-        """
-        # Original staging bypass logic
-        if environment == 'staging' and critical_failures <= 2:
-            return True, f"staging environment with {critical_failures} minor failures (basic logic)"
-
-        # Very conservative for production
-        if environment == 'production' and critical_failures <= 1:
-            return True, f"production environment with {critical_failures} acceptable failure (basic logic)"
-
-        # Development/test can be more lenient
-        if environment in ['development', 'test'] and critical_failures <= 3:
-            return True, f"{environment} environment with {critical_failures} acceptable failures (basic logic)"
-
-        return False, f"Too many critical failures ({critical_failures}) for {environment} environment"
 
 
 async def run_deterministic_startup(app: FastAPI) -> Tuple[float, logging.Logger]:

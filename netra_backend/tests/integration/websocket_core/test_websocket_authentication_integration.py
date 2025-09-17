@@ -17,7 +17,7 @@ import jwt
 import pytest
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Any, Optional
 from unittest.mock import MagicMock, patch
 
@@ -27,7 +27,7 @@ from test_framework.ssot.websocket import WebSocketTestUtility, WebSocketEventTy
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 # Import production WebSocket and auth components - NO MOCKS per CLAUDE.md
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.isolated_environment import get_env
@@ -66,8 +66,8 @@ def create_test_jwt_token(user_id: str, jwt_secret: str, expires_in_minutes: int
     """Create test JWT token for WebSocket authentication."""
     payload = {
         "user_id": user_id,
-        "exp": datetime.utcnow() + timedelta(minutes=expires_in_minutes),
-        "iat": datetime.utcnow(),
+        "exp": datetime.now(UTC) + timedelta(minutes=expires_in_minutes),
+        "iat": datetime.now(UTC),
         "sub": user_id,
         "websocket_access": True,
         "chat_enabled": True

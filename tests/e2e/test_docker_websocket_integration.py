@@ -42,7 +42,7 @@ from shared.isolated_environment import IsolatedEnvironment
         # CRITICAL: Add project root to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if project_root not in sys.path:
-sys.path.insert(0, project_root)
+    sys.path.insert(0, project_root)
 
 import pytest
 from loguru import logger
@@ -158,11 +158,11 @@ class DockerWebSocketIntegrationTests:
         if hasattr(docker_manager, 'service_health') and docker_manager.service_health:
         for service_name, health in docker_manager.service_health.items():
         if not health.is_healthy:
-        raise RuntimeError("formatted_string")
+        raise RuntimeError("")
         else:
                     # If no health data available, just log the health report
         health_report_str = docker_manager.get_health_report()
-        logger.info("formatted_string")
+        logger.info("")
 
         logger.info(" PASS:  All Docker services are healthy and operational")
 
@@ -213,7 +213,7 @@ class DockerWebSocketIntegrationTests:
         try:
         await ws_client.disconnect()
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("")
 
                     # Stop agent threads gracefully
         for thread_id in self.context.active_agent_threads.copy():
@@ -224,14 +224,14 @@ class DockerWebSocketIntegrationTests:
         try:
         await self.context.websocket_bridge.cleanup()
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("")
 
                                 # Release Docker environment
         try:
         env_name = getattr(self.context, 'env_name', 'test_env')
         self.context.docker_manager.release_environment(env_name)
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("")
 
         logger.info(" PASS:  Test environment cleanup complete")
 
@@ -259,7 +259,7 @@ class DockerWebSocketIntegrationTests:
 
                                                     # Create WebSocket client for event monitoring
         backend_port = self.context.docker_ports.get('backend', 8000)
-        ws_url = "formatted_string"
+        ws_url = ""
 
         ws_client = RealWebSocketClient(ws_url)
         self.context.active_websocket_clients.append(ws_client)
@@ -271,7 +271,7 @@ class DockerWebSocketIntegrationTests:
         pass
         if isinstance(message, dict):
         events_received.append(message)
-        logger.info("formatted_string")
+        logger.info("")
 
         # Connect WebSocket and setup event handling
         connection_start = time.time()
@@ -285,11 +285,11 @@ class DockerWebSocketIntegrationTests:
         logger.info(" PASS:  WebSocket connection established")
 
             # Execute agent task - use a simple task for reliable testing
-        task_request = { )
+        task_request = { }
         "agent_type": "system_info",
         "task": "Get current system time and status",
-        "user_id": "formatted_string",
-        "session_id": "formatted_string"
+        "user_id": "",
+        "session_id": ""
             
 
         agent_start = time.time()
@@ -313,7 +313,7 @@ class DockerWebSocketIntegrationTests:
 
         missing_events = [item for item in []]
         if missing_events:
-        logger.error("formatted_string")
+        logger.error("")
         metrics.error_count += 1
 
         metrics.websocket_events_received = len(events_received)
@@ -321,21 +321,21 @@ class DockerWebSocketIntegrationTests:
 
                 # Validate agent execution result
         if not result or not result.get('success'):
-        logger.error("formatted_string")
+        logger.error("")
         metrics.error_count += 1
         else:
         logger.info(" PASS:  Agent execution completed successfully")
 
                         # Validate response time requirement (< 10 seconds)
         if metrics.agent_execution_time_ms > 10000:
-        logger.warning("formatted_string")
+        logger.warning("")
 
                             # Validate Docker stability
         if hasattr(self.context.docker_manager, 'service_health') and self.context.docker_manager.service_health:
         unhealthy_services = [name for name, health in self.context.docker_manager.service_health.items() )
         if not health.is_healthy]
         if unhealthy_services:
-        logger.error("formatted_string")
+        logger.error("")
         metrics.error_count += 1
         else:
         logger.info(" PASS:  Docker services remained stable during execution")
@@ -345,14 +345,14 @@ class DockerWebSocketIntegrationTests:
         self.test_results["full_agent_execution_flow"] = TestResult.PASS if metrics.error_count == 0 else TestResult.FAIL
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
         metrics.error_count += 1
         self.test_results["full_agent_execution_flow"] = TestResult.ERROR
 
         finally:
         metrics.complete()
         self.performance_metrics.append(metrics)
-        logger.info("formatted_string")
+        logger.info("")
 
         return metrics
 
@@ -383,18 +383,18 @@ class DockerWebSocketIntegrationTests:
 
                                                                 # Create tasks for concurrent users
         for user_idx in range(concurrent_users):
-        user_id = "formatted_string"
-        session_id = "formatted_string"
+        user_id = ""
+        session_id = ""
 
-        task = { )
+        task = { }
         "user_id": user_id,
         "session_id": session_id,
         "agent_type": "system_info",
-        "task": "formatted_string",
-        "expected_unique_data": "formatted_string"
+        "task": "",
+        "expected_unique_data": ""
                                                                     
         user_tasks.append(task)
-        self.context.active_agent_threads.add("formatted_string")
+        self.context.active_agent_threads.add("")
 
                                                                     # Execute all tasks concurrently
     async def execute_user_task(task_info):
@@ -402,7 +402,7 @@ class DockerWebSocketIntegrationTests:
         try:
         # Create WebSocket connection per user
         backend_port = self.context.docker_ports.get('backend', 8000)
-        ws_url = "formatted_string"
+        ws_url = ""
 
         user_ws_client = RealWebSocketClient(ws_url)
         await user_ws_client.connect()
@@ -432,7 +432,7 @@ class DockerWebSocketIntegrationTests:
         await user_ws_client.disconnect()
 
         await asyncio.sleep(0)
-        return { )
+        return { }
         "user_id": task_info["user_id"],
         "success": result and result.get('success', False),
         "events_count": len(user_events),
@@ -441,8 +441,8 @@ class DockerWebSocketIntegrationTests:
         
 
         except Exception as e:
-        logger.error("formatted_string")
-        return { )
+        logger.error("")
+        return { }
         "user_id": task_info["user_id"],
         "success": False,
         "error": str(e),
@@ -470,17 +470,17 @@ class DockerWebSocketIntegrationTests:
         success_rate = successful_executions / concurrent_users
         metrics.thread_isolation_violations = total_isolation_violations
 
-        logger.info("formatted_string")
-        logger.info("formatted_string")
-        logger.info("formatted_string")
+        logger.info("")
+        logger.info("")
+        logger.info("")
 
             # Validate success criteria
         if success_rate < 0.95:  # 95% success rate requirement
-        logger.error("formatted_string")
+        logger.error("")
         metrics.error_count += 1
 
         if total_isolation_violations > 0:
-        logger.error("formatted_string")
+        logger.error("")
         metrics.error_count += 1
 
                 # Check if any services became unhealthy
@@ -488,7 +488,7 @@ class DockerWebSocketIntegrationTests:
         unhealthy_services = [name for name, health in self.context.docker_manager.service_health.items() )
         if not health.is_healthy]
         if unhealthy_services:
-        logger.error("formatted_string")
+        logger.error("")
         metrics.error_count += 1
         else:
         logger.info(" PASS:  All services remained healthy during concurrent execution")
@@ -498,14 +498,14 @@ class DockerWebSocketIntegrationTests:
         self.test_results["multi_user_concurrent_execution"] = TestResult.PASS if metrics.error_count == 0 else TestResult.FAIL
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
         metrics.error_count += 1
         self.test_results["multi_user_concurrent_execution"] = TestResult.ERROR
 
         finally:
         metrics.complete()
         self.performance_metrics.append(metrics)
-        logger.info("formatted_string")
+        logger.info("")
 
         return metrics
 
@@ -536,8 +536,8 @@ class DockerWebSocketIntegrationTests:
         logger.info(" CYCLE:  Testing Docker service restart recovery")
 
                                                     # Start an agent task
-        task_user_id = "formatted_string"
-        task_session_id = "formatted_string"
+        task_user_id = ""
+        task_session_id = ""
 
                                                     # Execute task that should survive service restart
     async def long_running_task():
@@ -562,13 +562,13 @@ class DockerWebSocketIntegrationTests:
         restart_time = (time.time() - restart_start) * 1000
         metrics.docker_startup_time_ms = restart_time
 
-        logger.info("formatted_string")
+        logger.info("")
 
         if restart_time > 30000:  # 30 second threshold
-        logger.warning("formatted_string")
+        logger.warning("")
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
         metrics.error_count += 1
         metrics.recovery_attempts += 1
 
@@ -588,7 +588,7 @@ class DockerWebSocketIntegrationTests:
         logger.info(" CYCLE:  Testing WebSocket disconnection recovery")
 
         backend_port = self.context.docker_ports.get('backend', 8000)
-        ws_url = "formatted_string"
+        ws_url = ""
 
         recovery_ws_client = RealWebSocketClient(ws_url)
         await recovery_ws_client.connect()
@@ -604,7 +604,7 @@ class DockerWebSocketIntegrationTests:
         reconnect_time = (time.time() - reconnect_start) * 1000
 
         if recovery_ws_client.connection_state == ConnectionState.CONNECTED:
-        logger.info("formatted_string")
+        logger.info("")
         metrics.websocket_connection_time_ms = reconnect_time
         else:
         logger.error(" FAIL:  WebSocket reconnection failed")
@@ -626,7 +626,7 @@ class DockerWebSocketIntegrationTests:
         bridge_status = await self.context.websocket_bridge.get_status()
         if bridge_status.get('state') == IntegrationState.ACTIVE.value:
         bridge_recovery_time = (time.time() - bridge_recovery_start) * 1000
-        logger.info("formatted_string")
+        logger.info("")
         metrics.recovery_attempts += 1
         else:
         logger.error(" FAIL:  WebSocket bridge recovery failed")
@@ -634,7 +634,7 @@ class DockerWebSocketIntegrationTests:
         metrics.recovery_attempts += 1
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
         metrics.error_count += 1
         metrics.recovery_attempts += 1
 
@@ -644,7 +644,7 @@ class DockerWebSocketIntegrationTests:
         if not health.is_healthy]
 
         if unhealthy_services:
-        logger.error("formatted_string")
+        logger.error("")
         metrics.error_count += 1
         else:
         logger.info(" PASS:  All services healthy after recovery tests")
@@ -654,14 +654,14 @@ class DockerWebSocketIntegrationTests:
         self.test_results["failure_recovery_scenarios"] = TestResult.PASS if metrics.error_count == 0 else TestResult.FAIL
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
         metrics.error_count += 1
         self.test_results["failure_recovery_scenarios"] = TestResult.ERROR
 
         finally:
         metrics.complete()
         self.performance_metrics.append(metrics)
-        logger.info("formatted_string")
+        logger.info("")
 
         return metrics
 
@@ -697,7 +697,7 @@ class DockerWebSocketIntegrationTests:
         initial_memory = process.memory_info().rss / (1024 * 1024)  # MB
         initial_cpu = process.cpu_percent()
 
-        logger.info("formatted_string")
+        logger.info("")
 
                                                                                                 # Create load test tasks
         load_tasks = []
@@ -705,12 +705,12 @@ class DockerWebSocketIntegrationTests:
 
     async def load_test_agent(agent_idx: int):
         """Individual load test agent execution."""
-        agent_user_id = "formatted_string"
-        agent_session_id = "formatted_string"
+        agent_user_id = ""
+        agent_session_id = ""
 
     # Create WebSocket client for this agent
         backend_port = self.context.docker_ports.get('backend', 8000)
-        ws_url = "formatted_string"
+        ws_url = ""
 
         agent_ws_client = RealWebSocketClient(ws_url)
         agent_events = []
@@ -720,7 +720,7 @@ class DockerWebSocketIntegrationTests:
 
     def agent_event_handler(message):
         if isinstance(message, dict):
-        agent_events.append({ ))
+        agent_events.append({ })
         'agent_idx': agent_idx,
         'timestamp': time.time(),
         'event': message
@@ -737,13 +737,13 @@ class DockerWebSocketIntegrationTests:
 
         result = await self.context.agent_service.execute_agent_task( )
         agent_type="system_info",
-        task="formatted_string",
+        task="",
         user_id=agent_user_id,
-        session_id="formatted_string"
+        session_id=""
             
 
         task_duration = (time.time() - task_start) * 1000
-        agent_results.append({ ))
+        agent_results.append({ })
         'success': result and result.get('success', False),
         'duration_ms': task_duration
             
@@ -754,7 +754,7 @@ class DockerWebSocketIntegrationTests:
         await agent_ws_client.disconnect()
 
         await asyncio.sleep(0)
-        return { )
+        return { }
         'agent_idx': agent_idx,
         'results': agent_results,
         'events': agent_events,
@@ -762,12 +762,12 @@ class DockerWebSocketIntegrationTests:
             
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
         try:
         await agent_ws_client.disconnect()
         except:
         pass
-        return { )
+        return { }
         'agent_idx': agent_idx,
         'error': str(e),
         'events': agent_events,
@@ -775,7 +775,7 @@ class DockerWebSocketIntegrationTests:
                         
 
                         # Execute load test
-        logger.info("formatted_string")
+        logger.info("")
         load_start = time.time()
 
                         # Run all agents concurrently
@@ -838,28 +838,28 @@ class DockerWebSocketIntegrationTests:
 
                                             # Log performance results
         logger.info(f" CHART:  Load Test Results:")
-        logger.info("formatted_string")
-        logger.info("formatted_string")
-        logger.info("formatted_string")
-        logger.info("formatted_string")
-        logger.info("formatted_string")
-        logger.info("formatted_string")
+        logger.info("")
+        logger.info("")
+        logger.info("")
+        logger.info("")
+        logger.info("")
+        logger.info("")
 
                                             # Validate success criteria
         if agent_success_rate < 0.90:  # 90% agent success rate
-        logger.error("formatted_string")
+        logger.error("")
         metrics.error_count += 1
 
         if event_delivery_rate < 0.95:  # 95% event delivery rate
-        logger.error("formatted_string")
+        logger.error("")
         metrics.error_count += 1
 
         if avg_response_time > 5000:  # 5 second response time threshold
-        logger.error("formatted_string")
+        logger.error("")
         metrics.error_count += 1
 
         if memory_increase > 100:  # 100MB memory leak threshold
-        logger.warning("formatted_string")
+        logger.warning("")
         metrics.memory_leaks_detected = 1
 
                                             # Final system health check
@@ -868,7 +868,7 @@ class DockerWebSocketIntegrationTests:
         if not health.is_healthy]
 
         if unhealthy_services:
-        logger.error("formatted_string")
+        logger.error("")
         metrics.error_count += 1
         else:
         logger.info(" PASS:  All services remained healthy during load test")
@@ -878,14 +878,14 @@ class DockerWebSocketIntegrationTests:
         self.test_results["performance_under_load"] = TestResult.PASS if metrics.error_count == 0 else TestResult.FAIL
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
         metrics.error_count += 1
         self.test_results["performance_under_load"] = TestResult.ERROR
 
         finally:
         metrics.complete()
         self.performance_metrics.append(metrics)
-        logger.info("formatted_string")
+        logger.info("")
 
         return metrics
 
@@ -899,8 +899,8 @@ class DockerWebSocketIntegrationTests:
         if not self.performance_metrics:
         return {"error": "No performance metrics collected"}
 
-        report = { )
-        "test_execution_summary": { )
+        report = { }
+        "test_execution_summary": { }
         "total_tests": len(self.performance_metrics),
         "passed_tests": sum(1 for r in self.test_results.values() if r == TestResult.PASS),
         "failed_tests": sum(1 for r in self.test_results.values() if r == TestResult.FAIL),
@@ -909,30 +909,30 @@ class DockerWebSocketIntegrationTests:
         },
         "individual_test_results": {m.test_name: self.test_results.get(m.test_name, TestResult.ERROR) )
         for m in self.performance_metrics},
-        "performance_metrics": { )
-        "docker_metrics": { )
+        "performance_metrics": { }
+        "docker_metrics": { }
         "avg_startup_time_ms": statistics.mean([item for item in []]) if any(m.docker_startup_time_ms > 0 for m in self.performance_metrics) else 0,
         "max_memory_usage_mb": max([item for item in []], default=0),
         "avg_cpu_usage_percent": statistics.mean([item for item in []]) if any(m.container_cpu_usage_percent > 0 for m in self.performance_metrics) else 0
         },
-        "websocket_metrics": { )
+        "websocket_metrics": { }
         "avg_connection_time_ms": statistics.mean([item for item in []]) if any(m.websocket_connection_time_ms > 0 for m in self.performance_metrics) else 0,
         "total_events_received": sum(m.websocket_events_received for m in self.performance_metrics),
         "avg_event_delivery_rate": statistics.mean([item for item in []]) if any(m.websocket_event_delivery_rate > 0 for m in self.performance_metrics) else 0
         },
-        "agent_metrics": { )
+        "agent_metrics": { }
         "avg_execution_time_ms": statistics.mean([item for item in []]) if any(m.agent_execution_time_ms > 0 for m in self.performance_metrics) else 0,
         "avg_response_time_ms": statistics.mean([item for item in []]) if any(m.agent_response_time_ms > 0 for m in self.performance_metrics) else 0,
         "total_tools_executed": sum(m.tools_executed for m in self.performance_metrics)
         },
-        "system_metrics": { )
+        "system_metrics": { }
         "total_thread_isolation_violations": sum(m.thread_isolation_violations for m in self.performance_metrics),
         "total_memory_leaks_detected": sum(m.memory_leaks_detected for m in self.performance_metrics),
         "total_errors": sum(m.error_count for m in self.performance_metrics),
         "total_recovery_attempts": sum(m.recovery_attempts for m in self.performance_metrics)
         
         },
-        "business_value_validation": { )
+        "business_value_validation": { }
         "chat_functionality_validated": self.test_results.get("full_agent_execution_flow") == TestResult.PASS,
         "concurrent_user_support_validated": self.test_results.get("multi_user_concurrent_execution") == TestResult.PASS,
         "system_resilience_validated": self.test_results.get("failure_recovery_scenarios") == TestResult.PASS,
@@ -953,14 +953,14 @@ class DockerWebSocketIntegrationTests:
         if m.agent_response_time_ms > 0]) if any(m.agent_response_time_ms > 0 for m in self.performance_metrics) else 0
 
         if avg_response_time > 3000:  # 3 second threshold
-        recommendations.append("formatted_string")
+        recommendations.append("")
 
     # Check for WebSocket delivery issues
         avg_delivery_rate = statistics.mean([m.websocket_event_delivery_rate for m in self.performance_metrics ))
         if m.websocket_event_delivery_rate > 0]) if any(m.websocket_event_delivery_rate > 0 for m in self.performance_metrics) else 0
 
         if avg_delivery_rate < 0.98:  # 98% threshold
-        recommendations.append("formatted_string")
+        recommendations.append("")
 
     # Check for memory leaks
         total_memory_leaks = sum(m.memory_leaks_detected for m in self.performance_metrics)
@@ -970,12 +970,12 @@ class DockerWebSocketIntegrationTests:
         # Check for thread isolation violations
         total_violations = sum(m.thread_isolation_violations for m in self.performance_metrics)
         if total_violations > 0:
-        recommendations.append("formatted_string")
+        recommendations.append("")
 
             # Check for failed tests
         failed_tests = [item for item in []]
         if failed_tests:
-        recommendations.append("formatted_string")
+        recommendations.append("")
 
         if not recommendations:
         recommendations.append("All tests passed successfully - system is ready for production deployment")
@@ -1034,17 +1034,17 @@ class TestDockerWebSocketIntegration:
 
     for test_name, result in integration_tests.test_results.items():
     status_emoji = " PASS: " if result == TestResult.PASS else " FAIL: "
-    logger.info("formatted_string")
+    logger.info("")
 
-    logger.info("formatted_string")
-    logger.info("formatted_string")
-    logger.info("formatted_string")
+    logger.info("")
+    logger.info("")
+    logger.info("")
 
                 # Recommendations
     logger.info(" )
     SEARCH:  RECOMMENDATIONS:")
     for rec in report['recommendations']:
-    logger.info("formatted_string")
+    logger.info("")
 
     logger.info("=" * 80)
 
@@ -1054,7 +1054,7 @@ class TestDockerWebSocketIntegration:
     if not all_passed:
     failed_tests = [name for name, result in integration_tests.test_results.items() )
     if result != TestResult.PASS]
-    pytest.fail("formatted_string")
+    pytest.fail("")
 
     await asyncio.sleep(0)
     return report
@@ -1091,25 +1091,25 @@ class TestDockerWebSocketIntegration:
         # Generate and display report
         report = integration_tests.generate_performance_report()
 
-        print(" )
-        " + "=" * 60)
+        print("")
+         + =" * 60)
         print(" TARGET:  FINAL TEST RESULTS")
         print("=" * 60)
 
         for test_name, result in integration_tests.test_results.items():
-        status = "PASS  PASS: " if result == TestResult.PASS else "formatted_string"
-        print("formatted_string")
+        status = "PASS  PASS: " if result == TestResult.PASS else ""
+        print("")
 
-        print("formatted_string")
+        print("")
 
         if report['recommendations']:
-        print(" )
+        print("")
         SEARCH:  Recommendations:")
         for rec in report['recommendations']:
-        print("formatted_string")
+        print("")
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         raise
         finally:
         await integration_tests.cleanup_test_environment()

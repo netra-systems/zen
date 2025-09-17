@@ -137,61 +137,61 @@ class TestStagingBackendConfigurationAuditFailures:
         '''
         pass
     # Define comprehensive configuration requirements for staging backend
-        critical_config_matrix = { )
-        'authentication': { )
-        'DATABASE_URL': { )
+        critical_config_matrix = { }
+        'authentication': { }
+        'DATABASE_URL': { }
         'required': True,
         'validation': lambda x: None v.startswith(('postgresql://', 'postgres://')) and 'staging' in v and 'localhost' not in v,
         'business_impact': 'Complete authentication breakdown',
         'staging_requirement': 'Must point to staging database with Cloud SQL or staging host'
         },
-        'JWT_SECRET_KEY': { )
+        'JWT_SECRET_KEY': { }
         'required': True,
         'validation': lambda x: None len(v) >= 32 and v != 'dev-secret-key',
         'business_impact': 'Cross-service authentication failure',
         'staging_requirement': 'Must be production-strength secret (32+ chars)'
         },
-        'AUTH_SERVICE_URL': { )
+        'AUTH_SERVICE_URL': { }
         'required': True,
         'validation': lambda x: None 'staging' in v and 'localhost' not in v,
         'business_impact': 'Service-to-service auth completely broken',
         'staging_requirement': 'Must point to staging auth service'
     
         },
-        'external_services': { )
-        'REDIS_URL': { )
+        'external_services': { }
+        'REDIS_URL': { }
         'required': True,
         'validation': lambda x: None v.startswith('redis://') and 'localhost' not in v,
         'business_impact': 'Cache and session degradation',
         'staging_requirement': 'Must point to staging Redis, not localhost'
         },
-        'CLICKHOUSE_HOST': { )
+        'CLICKHOUSE_HOST': { }
         'required': True,
         'validation': lambda x: None 'staging' in v and 'localhost' not in v,
         'business_impact': 'Analytics system failure, health checks 503',
         'staging_requirement': 'Must point to staging ClickHouse'
         },
-        'CLICKHOUSE_PORT': { )
+        'CLICKHOUSE_PORT': { }
         'required': True,
         'validation': lambda x: None v == '8123',
         'business_impact': 'ClickHouse connectivity failure',
         'staging_requirement': 'Must be standard ClickHouse port 8123'
     
         },
-        'environment_enforcement': { )
-        'NETRA_ENVIRONMENT': { )
+        'environment_enforcement': { }
+        'NETRA_ENVIRONMENT': { }
         'required': True,
         'validation': lambda x: None v == 'staging',
         'business_impact': 'Development behavior in staging',
         'staging_requirement': 'Must be "staging" to enforce staging behavior'
         },
-        'REDIS_FALLBACK_ENABLED': { )
+        'REDIS_FALLBACK_ENABLED': { }
         'required': True,
         'validation': lambda x: None v.lower() == 'false',
         'business_impact': 'Infrastructure issues masked',
         'staging_requirement': 'Must be false to catch Redis provisioning gaps'
         },
-        'FAIL_FAST_ON_SERVICE_ERRORS': { )
+        'FAIL_FAST_ON_SERVICE_ERRORS': { }
         'required': True,
         'validation': lambda x: None v.lower() == 'true',
         'business_impact': 'Silent service degradation',
@@ -219,7 +219,7 @@ class TestStagingBackendConfigurationAuditFailures:
         actual_value=None,
         validation_error=f"Required variable missing",
         business_impact=requirements['business_impact'],
-        fix_recommendation="formatted_string",
+        fix_recommendation="",
         environment_source=self.env.get("NETRA_ENVIRONMENT", "unknown")
                 
         category_failures.append(failure)
@@ -235,7 +235,7 @@ class TestStagingBackendConfigurationAuditFailures:
         actual_value="",
         validation_error="Required variable is empty",
         business_impact=requirements['business_impact'],
-        fix_recommendation="formatted_string",
+        fix_recommendation="",
         environment_source=self.env.get("NETRA_ENVIRONMENT", "unknown")
                     
         category_failures.append(failure)
@@ -249,9 +249,9 @@ class TestStagingBackendConfigurationAuditFailures:
         config_key=var_name,
         expected_value="<valid_staging_value>",
         actual_value=value,
-        validation_error="formatted_string",
+        validation_error="",
         business_impact=requirements['business_impact'],
-        fix_recommendation="formatted_string",
+        fix_recommendation="",
         environment_source=self.env.get("NETRA_ENVIRONMENT", "unknown")
                         
         category_failures.append(failure)
@@ -273,14 +273,14 @@ class TestStagingBackendConfigurationAuditFailures:
                                         # Generate detailed failure report
         failure_report_sections = []
         for category, failures in failures_by_category.items():
-        section_header = "formatted_string"
+        section_header = ""
         failure_details = []
         for failure in failures:
         failure_details.append( )
-        "formatted_string"
-        "formatted_string"
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
+        ""
+        ""
                                                 
         failure_report_sections.append(section_header + " )
         " + "
@@ -290,20 +290,20 @@ class TestStagingBackendConfigurationAuditFailures:
         ".join(failure_report_sections)
 
         assert False, ( )
-        "formatted_string"
+        ""
         f"COMPOUND IMPACT ANALYSIS:
         "
-        "formatted_string"
+        ""
         f" ->  100% auth breakdown
         "
-        "formatted_string"
+        ""
         f" ->  Analytics and cache broken
         "
-        "formatted_string"
+        ""
         f" ->  Development behavior in staging
 
         "
-        "formatted_string"
+        ""
         f"backend service breakdown, preventing production deployment validation."
                                                         
 
@@ -322,29 +322,29 @@ class TestStagingBackendConfigurationAuditFailures:
         '''
         pass
                                                             # Define critical external service dependencies for backend
-        critical_dependencies = { )
-        'auth_service': { )
+        critical_dependencies = { }
+        'auth_service': { }
         'type': 'required',
         'test_endpoint': '/health',
         'expected_response_time_ms': 1000,
         'fallback_acceptable': False,
         'business_impact': 'Authentication completely broken'
         },
-        'postgres_database': { )
+        'postgres_database': { }
         'type': 'required',
         'test_method': 'database_connection',
         'expected_response_time_ms': 2000,
         'fallback_acceptable': False,
         'business_impact': 'Data persistence failure'
         },
-        'redis_cache': { )
+        'redis_cache': { }
         'type': 'required_in_staging',
         'test_method': 'redis_ping',
         'expected_response_time_ms': 500,
         'fallback_acceptable': False,  # Should be False in staging
         'business_impact': 'Performance degradation, session loss'
         },
-        'clickhouse_analytics': { )
+        'clickhouse_analytics': { }
         'type': 'required_in_staging',
         'test_endpoint': '/',
         'expected_response_time_ms': 3000,
@@ -370,7 +370,7 @@ class TestStagingBackendConfigurationAuditFailures:
         connectivity_status=validation_result.connectivity_status,
         configuration_status="fallback_misconfigured",
         fallback_status="inappropriately_enabled",
-        business_impact="formatted_string",
+        business_impact="",
         staging_requirement="Fallback should be disabled in staging"
                                                                         
 
@@ -379,19 +379,19 @@ class TestStagingBackendConfigurationAuditFailures:
         failure_report = []
         for failure in dependency_failures:
         failure_report.append( )
-        "formatted_string"
-        "formatted_string"
-        "formatted_string"
-        "formatted_string"
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
+        ""
+        ""
+        ""
+        ""
                                                                                     
 
         failure_summary = "
         ".join(failure_report)
 
         assert False, ( )
-        "formatted_string"
+        ""
         f"These external service dependency issues prevent backend service from "
         f"reaching fully operational state. Service may report healthy while critical "
         f"functionality is degraded or broken.
@@ -424,7 +424,7 @@ class TestStagingBackendConfigurationAuditFailures:
         '''
         pass
     # Test environment detection accuracy
-        environment_detection_methods = { )
+        environment_detection_methods = { }
         'NETRA_ENVIRONMENT': self.env.get("NETRA_ENVIRONMENT"),
         'K_SERVICE': self.env.get("K_SERVICE"),  # Cloud Run
         'GOOGLE_CLOUD_PROJECT': self.env.get("GOOGLE_CLOUD_PROJECT"),  # GCP
@@ -434,7 +434,7 @@ class TestStagingBackendConfigurationAuditFailures:
     
 
     # At least one method should detect staging
-        staging_detected = any([ ))
+        staging_detected = any([ ])
         environment_detection_methods['NETRA_ENVIRONMENT'] == 'staging',
         environment_detection_methods['K_SERVICE'] is not None,
         environment_detection_methods['GOOGLE_CLOUD_PROJECT'] is not None,
@@ -444,31 +444,31 @@ class TestStagingBackendConfigurationAuditFailures:
         assert staging_detected, ( )
         f"CRITICAL STAGING DETECTION FAILURE: No staging environment indicators found.
         "
-        "formatted_string"
+        ""
         f"Without proper staging detection, service uses development behavior patterns "
         f"with inappropriate fallbacks, masking production readiness issues."
     
 
     # Test staging behavior enforcement configuration
         if staging_detected:
-        staging_enforcement_config = { )
-        'STRICT_VALIDATION_MODE': { )
+        staging_enforcement_config = { }
+        'STRICT_VALIDATION_MODE': { }
         'expected': 'true',
         'impact': 'Validation gaps allow invalid configurations'
         },
-        'FAIL_FAST_ON_MISSING_SERVICES': { )
+        'FAIL_FAST_ON_MISSING_SERVICES': { }
         'expected': 'true',
         'impact': 'Silent service degradation masking issues'
         },
-        'ALLOW_LOCALHOST_FALLBACK': { )
+        'ALLOW_LOCALHOST_FALLBACK': { }
         'expected': 'false',
         'impact': 'Development fallbacks hide infrastructure gaps'
         },
-        'REQUIRE_EXTERNAL_SERVICES': { )
+        'REQUIRE_EXTERNAL_SERVICES': { }
         'expected': 'true',
         'impact': 'Optional services should be required in staging'
         },
-        'ENABLE_DEVELOPMENT_FALLBACKS': { )
+        'ENABLE_DEVELOPMENT_FALLBACKS': { }
         'expected': 'false',
         'impact': 'Development patterns inappropriate in staging'
         
@@ -482,15 +482,15 @@ class TestStagingBackendConfigurationAuditFailures:
 
         if actual_value != expected_value:
         enforcement_failures.append( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
                 
 
         if enforcement_failures:
         failure_report = "
-        ".join("formatted_string" for failure in enforcement_failures)
+        ".join("" for failure in enforcement_failures)
         assert False, ( )
-        "formatted_string"
+        ""
         f"Staging environment detected but enforcement configuration allows development behavior. "
         f"This creates dangerous staging/production drift where issues pass staging validation "
         f"but break production deployment.
@@ -524,7 +524,7 @@ class TestStagingBackendConfigurationAuditFailures:
         pass
                                 # Test backend health endpoint comprehensive validation
         backend_url = self.env.get("BACKEND_URL", "http://localhost:8000")
-        health_endpoints = [ )
+        health_endpoints = [ ]
         '/health/',
         '/health/ready',
         '/health/live'
@@ -533,7 +533,7 @@ class TestStagingBackendConfigurationAuditFailures:
         health_failures = []
 
         for endpoint in health_endpoints:
-        full_url = "formatted_string"
+        full_url = ""
 
         start_time = time.time()
         try:
@@ -552,17 +552,17 @@ class TestStagingBackendConfigurationAuditFailures:
         if service_name in ["clickhouse", "redis", "auth_service"]:
         service_healthy = service_status.get("healthy", False)
         if not service_healthy:
-        health_failures.append({ ))
+        health_failures.append({ })
         'endpoint': endpoint,
         'issue': 'formatted_string',
         'details': service_status,
         'response_time': response_time
                                                                     
 
-        print("formatted_string")
+        print("")
 
         except Exception as parse_error:
-        health_failures.append({ ))
+        health_failures.append({ })
         'endpoint': endpoint,
         'issue': 'Health response parsing failed',
         'details': {'error': str(parse_error), 'response': response.text[:200]},
@@ -576,7 +576,7 @@ class TestStagingBackendConfigurationAuditFailures:
         except:
         error_data = {'raw_response': response.text}
 
-        health_failures.append({ ))
+        health_failures.append({ })
         'endpoint': endpoint,
         'issue': f'Health check returned 503 Service Unavailable',
         'details': error_data,
@@ -586,7 +586,7 @@ class TestStagingBackendConfigurationAuditFailures:
 
         else:
                                                                                         # Unexpected status code
-        health_failures.append({ ))
+        health_failures.append({ })
         'endpoint': endpoint,
         'issue': 'formatted_string',
         'details': {'response': response.text[:200]},
@@ -596,7 +596,7 @@ class TestStagingBackendConfigurationAuditFailures:
 
         except httpx.TimeoutException:
         response_time = time.time() - start_time
-        health_failures.append({ ))
+        health_failures.append({ })
         'endpoint': endpoint,
         'issue': 'Health endpoint timeout',
         'details': {'timeout_seconds': response_time},
@@ -606,7 +606,7 @@ class TestStagingBackendConfigurationAuditFailures:
 
         except Exception as e:
         response_time = time.time() - start_time
-        health_failures.append({ ))
+        health_failures.append({ })
         'endpoint': endpoint,
         'issue': f'Health endpoint connection failed',
         'details': {'error': str(e)},
@@ -619,17 +619,17 @@ class TestStagingBackendConfigurationAuditFailures:
         failure_report = []
         for failure in health_failures:
         failure_report.append( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
                                                                                                         
         if failure.get('status_code') == 503:
-        failure_report.append("formatted_string")
+        failure_report.append("")
 
         failure_summary = "
         ".join(failure_report)
 
         assert False, ( )
-        "formatted_string"
+        ""
         f"Health endpoint failures indicate external service dependency issues "
         f"that will block deployment validation and production releases.
 
@@ -662,20 +662,20 @@ class TestStagingBackendConfigurationAuditFailures:
         '''
         pass
     # Test configuration source detection and priority
-        config_source_vars = { )
-        'CONFIG_SOURCE_PRIORITY': { )
+        config_source_vars = { }
+        'CONFIG_SOURCE_PRIORITY': { }
         'expected': 'secret_manager,environment,defaults',
         'description': 'Secret Manager should have highest priority in staging'
         },
-        'USE_SECRET_MANAGER': { )
+        'USE_SECRET_MANAGER': { }
         'expected': 'true',
         'description': 'GCP Secret Manager should be enabled in staging'
         },
-        'ALLOW_ENV_OVERRIDE_SECRETS': { )
+        'ALLOW_ENV_OVERRIDE_SECRETS': { }
         'expected': 'false',
         'description': 'Environment variables should not override secrets in staging'
         },
-        'SECRET_MANAGER_PROJECT': { )
+        'SECRET_MANAGER_PROJECT': { }
         'required': True,
         'validation': lambda x: None v is not None and 'staging' in v,
         'description': 'Should point to staging GCP project'
@@ -689,17 +689,17 @@ class TestStagingBackendConfigurationAuditFailures:
 
         if 'expected' in requirements and value != requirements['expected']:
         source_validation_failures.append( )
-        "formatted_string"
+        ""
             
 
         if requirements.get('required') and value is None:
         source_validation_failures.append( )
-        "formatted_string"
+        ""
                 
 
         if 'validation' in requirements and value and not requirements['validation'](value):
         source_validation_failures.append( )
-        "formatted_string"
+        ""
                     
 
                     # Test actual configuration loading behavior
@@ -711,15 +711,15 @@ class TestStagingBackendConfigurationAuditFailures:
 
         if value and source == "environment" and "dev" in value.lower():
         source_validation_failures.append( )
-        "formatted_string"
+        ""
                             
 
                             # Report configuration source failures
         if source_validation_failures:
         failure_report = "
-        ".join("formatted_string" for failure in source_validation_failures)
+        ".join("" for failure in source_validation_failures)
         assert False, ( )
-        "formatted_string"
+        ""
         f"Configuration source priority issues cause staging to load development values "
         f"instead of production-like configuration from GCP Secret Manager.
 
@@ -776,7 +776,7 @@ staging_requirement="Must point to staging auth service"
 
         # Test auth service connectivity
 try:
-health_url = "formatted_string"
+health_url = ""
 async with httpx.AsyncClient(timeout=5.0) as client:
 response = await client.get(health_url)
 
@@ -798,7 +798,7 @@ connectivity_status="unhealthy",
 configuration_status="service_error",
 fallback_status="unknown",
 business_impact=requirements['business_impact'],
-staging_requirement="formatted_string"
+staging_requirement=""
                         
 
 except Exception as e:
@@ -809,7 +809,7 @@ connectivity_status="connection_failed",
 configuration_status="network_error",
 fallback_status="unknown",
 business_impact=requirements['business_impact'],
-staging_requirement="formatted_string"
+staging_requirement=""
                             
 
 async def _validate_postgres_dependency(self, requirements: Dict[str, Any]) -> ServiceDependencyValidation:
@@ -844,7 +844,7 @@ import psycopg2
 from urllib.parse import urlparse
 
 parsed = urlparse(database_url)
-conn_params = { )
+conn_params = { }
 'host': parsed.hostname,
 'port': parsed.port or 5432,
 'database': parsed.path.lstrip('/'),
@@ -877,7 +877,7 @@ connectivity_status="connection_failed",
 configuration_status="credentials_invalid",
 fallback_status="unknown",
 business_impact=requirements['business_impact'],
-staging_requirement="formatted_string"
+staging_requirement=""
                         
 
 async def _validate_redis_dependency(self, requirements: Dict[str, Any]) -> ServiceDependencyValidation:
@@ -923,7 +923,7 @@ connectivity_status="connection_failed",
 configuration_status="network_error",
 fallback_status="enabled" if redis_fallback else "disabled",
 business_impact=requirements['business_impact'],
-staging_requirement="formatted_string"
+staging_requirement=""
                 
 
 async def _validate_clickhouse_dependency(self, requirements: Dict[str, Any]) -> ServiceDependencyValidation:
@@ -954,7 +954,7 @@ connectivity_status="connection_failed",
 configuration_status="network_error",
 fallback_status="unknown",
 business_impact=requirements['business_impact'],
-staging_requirement="formatted_string"
+staging_requirement=""
             
 
 def _generate_audit_summary(self):
@@ -975,19 +975,19 @@ if result.category not in by_category:
 by_category[result.category] = []
 by_category[result.category].append(result)
 
-print(" )
-" + "="*80)
+print("")
+ + ="*80)
 print("STAGING BACKEND CONFIGURATION AUDIT SUMMARY")
 print("="*80)
 
 for severity in ["CRITICAL", "HIGH", "MEDIUM", "LOW"]:
 if severity in by_severity:
-print("formatted_string")
+    print("")
 for result in by_severity[severity]:
-print("formatted_string")
+    print("")
 
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 
 
                                 # ===================================================================
@@ -1031,10 +1031,10 @@ issues.append("CLICKHOUSE: Missing or using localhost")
                                                     # Environment enforcement
 netra_env = env.get("NETRA_ENVIRONMENT")
 if netra_env != "staging":
-issues.append("formatted_string")
+issues.append("")
 
 if issues:
-assert False, "formatted_string"
+assert False, ""
 
 print("SUCCESS: Comprehensive backend configuration audit passed")
 
@@ -1048,16 +1048,16 @@ print("Running comprehensive backend configuration audit...")
 
                                                                     # Environment snapshot
 env = IsolatedEnvironment()
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
+print("")
 
                                                                     # Run comprehensive audit
 try:
 asyncio.run(test_staging_backend_comprehensive_configuration_audit())
 except Exception as e:
-print("formatted_string")
+    print("")
 
 print("Backend configuration audit completed.")

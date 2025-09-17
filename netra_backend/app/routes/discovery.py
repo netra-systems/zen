@@ -3,7 +3,7 @@ Service discovery endpoints for dynamic port configuration.
 """
 
 import json
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -13,7 +13,7 @@ from pydantic import BaseModel
 from netra_backend.app.routes.utils.error_handlers import handle_service_error
 from netra_backend.app.core.environment_constants import get_current_environment, Environment
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/api/discovery", tags=["discovery"])
 

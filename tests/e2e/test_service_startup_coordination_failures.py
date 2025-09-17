@@ -86,7 +86,7 @@ class TestServiceStartupSequencing(SSotAsyncTestCase):
         '''
         pass
     # Define service dependency graph
-        service_dependencies = { )
+        service_dependencies = { }
         'infrastructure': [],                    # PostgreSQL, Redis, ClickHouse
         'auth': ['infrastructure'],             # Depends on database
         'backend': ['infrastructure', 'auth'],  # Depends on database and auth
@@ -108,7 +108,7 @@ class TestServiceStartupSequencing(SSotAsyncTestCase):
         for dep in deps:
         if dep in startup_times and service in startup_times:
         self.assertLess(startup_times[dep], startup_times[service],
-        "formatted_string")
+        "")
 
         @pytest.mark.e2e
     def test_startup_coordination_timeout_handling(self):
@@ -120,7 +120,7 @@ class TestServiceStartupSequencing(SSotAsyncTestCase):
         '''
         pass
     # Mock slow dependency startup
-        slow_services = { )
+        slow_services = { }
         'database': 45,  # 45 seconds to be ready (slow)
         'auth': 20,      # 20 seconds to be ready
         'backend': 30    # 30 seconds to be ready
@@ -160,7 +160,7 @@ class TestServiceStartupSequencing(SSotAsyncTestCase):
         '''
         pass
     # Mock independent services that can start in parallel
-        parallel_groups = [ )
+        parallel_groups = [ ]
         ['postgres', 'redis', 'clickhouse'],  # Infrastructure can start in parallel
         ['auth'],                              # Auth waits for infrastructure
         ['backend'],                           # Backend waits for auth
@@ -205,7 +205,7 @@ class TestReadinessCheckCoordination(SSotAsyncTestCase):
         '''
         pass
     # Mock service readiness states
-        service_readiness = { )
+        service_readiness = { }
         'database': {'ready': True, 'stable_for': 30},
         'auth': {'ready': True, 'stable_for': 10},      # Recently ready
         'backend': {'ready': False, 'reason': 'checking dependencies'}
@@ -283,14 +283,14 @@ class TestReadinessCheckCoordination(SSotAsyncTestCase):
         '''
         pass
     # Mock service performance metrics during readiness checking
-        baseline_performance = { )
+        baseline_performance = { }
         'response_time_ms': 50,
         'cpu_usage_percent': 5,
         'memory_usage_mb': 100
     
 
     # Mock increased load during readiness checking
-        readiness_check_load = { )
+        readiness_check_load = { }
         'response_time_ms': 200,    # 4x slower
         'cpu_usage_percent': 20,    # 4x higher CPU
         'memory_usage_mb': 150      # 1.5x memory
@@ -313,9 +313,9 @@ class TestReadinessCheckCoordination(SSotAsyncTestCase):
         actual_cpu_usage = readiness_check_load['cpu_usage_percent']
 
         self.assertLess(actual_response_time, max_response_time,
-        "formatted_string")
+        "")
         self.assertLess(actual_cpu_usage, max_cpu_usage,
-        "formatted_string")
+        "")
 
 
 class TestServiceDiscoveryCoordination(SSotAsyncTestCase):
@@ -337,15 +337,15 @@ class TestServiceDiscoveryCoordination(SSotAsyncTestCase):
         '''
         pass
     # Mock dynamic port assignments
-        allocated_ports = { )
+        allocated_ports = { }
         'backend': 8000,   # Expected port
         'auth': 8081,      # Expected port
         'frontend': 3000   # Expected port
     
 
     # Mock service discovery file
-        discovery_data = { )
-        'backend': { )
+        discovery_data = { }
+        'backend': { }
         'api_url': 'formatted_string',
         'health_url': 'formatted_string'
     
@@ -412,7 +412,7 @@ class TestServiceDiscoveryCoordination(SSotAsyncTestCase):
         '''
         pass
     # Mock discovery file corruption scenarios
-        corruption_scenarios = [ )
+        corruption_scenarios = [ ]
         'file_missing',
         'invalid_json',
         'empty_file',
@@ -447,7 +447,7 @@ class TestServiceDiscoveryCoordination(SSotAsyncTestCase):
         effective_url = backend_url or fallback_url
 
         self.assertIsNotNone(effective_url,
-        "formatted_string")
+        "")
 
 
 class TestStartupErrorRecovery(SSotAsyncTestCase):
@@ -469,7 +469,7 @@ class TestStartupErrorRecovery(SSotAsyncTestCase):
         '''
         pass
     # Mock startup failure in auth service
-        service_startup_results = { )
+        service_startup_results = { }
         'database': 'success',
         'redis': 'success',
         'clickhouse': 'success',
@@ -482,14 +482,14 @@ class TestStartupErrorRecovery(SSotAsyncTestCase):
         independent_services = ['database', 'redis', 'clickhouse']
         for service in independent_services:
         self.assertEqual(service_startup_results[service], 'success',
-        "formatted_string")
+        "")
 
         # FAILING ASSERTION: Dependent services should handle dependency failures gracefully
         dependent_services = ['backend', 'frontend']
         for service in dependent_services:
             # Should not be 'failed' - should be 'waiting' or 'degraded'
         self.assertNotEqual(service_startup_results[service], 'failed',
-        "formatted_string")
+        "")
 
         @pytest.mark.e2e
     def test_startup_retry_coordination(self):
@@ -501,7 +501,7 @@ class TestStartupErrorRecovery(SSotAsyncTestCase):
         '''
         pass
     # Mock coordinated retry scenario
-        retry_schedule = { )
+        retry_schedule = { }
         'auth': [5, 10, 20],      # Retry after 5, 10, 20 seconds
         'backend': [15, 25, 40],  # Wait for auth, then retry
         'frontend': [30, 50, 70]  # Wait for backend, then retry
@@ -514,7 +514,7 @@ class TestStartupErrorRecovery(SSotAsyncTestCase):
                 # FAILING ASSERTION: Retries should be spaced to avoid contention
         min_delay = 5  # Minimum delay between retries
         self.assertGreaterEqual(delay, min_delay,
-        "formatted_string")
+        "")
 
         time.sleep(delay)
 
@@ -535,7 +535,7 @@ class TestStartupErrorRecovery(SSotAsyncTestCase):
         '''
         pass
     # Mock service state during recovery
-        service_states = { )
+        service_states = { }
         'database': {'status': 'running', 'health': 'healthy'},
         'auth': {'status': 'restarting', 'health': 'degraded', 'retry_count': 2},
         'backend': {'status': 'waiting', 'health': 'unknown', 'waiting_for': 'auth'},
@@ -554,7 +554,7 @@ class TestStartupErrorRecovery(SSotAsyncTestCase):
             # If dependency is healthy, waiting service should not be waiting
         if dependency_status == 'running':
         self.assertNotEqual(service_states[service]['status'], 'waiting',
-        "formatted_string")
+        "")
 
                 # FAILING ASSERTION: Recovery state should be tracked centrally
         recovery_coordinator_exists = False  # This should be True

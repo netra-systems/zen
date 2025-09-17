@@ -41,7 +41,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 from netra_backend.app.routes.websocket import websocket_endpoint
 from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry, get_connection_state_machine, ApplicationConnectionState
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from fastapi import WebSocket
 try:
     import websockets
@@ -106,7 +106,7 @@ class WebSocketScopeValidationIntegrationTests(BaseIntegrationTest):
                         logger.info(f' PASS:  Connection {attempt + 1}: Received response')
                     except asyncio.TimeoutError:
                         logger.warning(f' WARNING: [U+FE0F] Connection {attempt + 1}: Response timeout')
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 total_failures += 1
                 if e.code == 1011:
                     scope_related_failures += 1
@@ -114,7 +114,7 @@ class WebSocketScopeValidationIntegrationTests(BaseIntegrationTest):
                     logger.error(f'   Error: {e}')
                 else:
                     logger.error(f' FAIL:  Connection {attempt + 1}: Connection closed - {e}')
-            except websockets.exceptions.InvalidStatusCode as e:
+            except websockets.InvalidStatusCode as e:
                 total_failures += 1
                 if e.status_code >= 500:
                     scope_related_failures += 1

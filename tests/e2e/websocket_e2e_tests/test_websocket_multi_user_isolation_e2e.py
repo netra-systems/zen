@@ -48,7 +48,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 # Import WebSocket core modules for isolation testing
 from netra_backend.app.websocket_core.types import ConnectionInfo, WebSocketMessage, MessageType
 from netra_backend.app.websocket_core.context import WebSocketRequestContext
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
 
 # Import SSOT UnifiedIdGenerator for proper isolation

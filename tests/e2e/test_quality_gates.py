@@ -120,7 +120,7 @@ class TestQualityMetricsStorage:
     async def test_batch_validation_tracking(self, quality_service):
 """Test batch validation properly tracks all metrics"""
 pass
-contents = [ )
+contents = [ ]
 ("GPU memory reduced by 4GB", ContentType.OPTIMIZATION),
 ("Model accuracy maintained at 95.2%", ContentType.DATA_ANALYSIS),
 ("Deploy sharding across 8 nodes", ContentType.ACTION_PLAN)
@@ -136,7 +136,7 @@ assert all(isinstance(result, ValidationResult) for result in results)
     async def test_quality_statistics_retrieval(self, quality_service):
 """Test quality statistics can be retrieved correctly"""
             # Add test data
-test_contents = [ )
+test_contents = [ ]
 "Latency reduced by 40ms", "Memory usage decreased by 2GB",
 "Throughput increased to 3000 QPS", "GPU utilization at 85%"
             
@@ -231,7 +231,7 @@ assert isinstance(result_strict, ValidationResult)
 @pytest.mark.e2e
     async def test_feedback_data_structure(self, quality_service):
 """Test feedback data has expected structure for integration"""
-feedback_data = { )
+feedback_data = { }
 "response_id": "test_response_123",
 "user_rating": 3,
 "quality_issues": ["too_generic", "lacks_specificity"],

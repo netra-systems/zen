@@ -44,7 +44,7 @@ class NetraAppUserValidator:
 
     def get_netra_app_config(self) -> Dict[str, str]:
         """Get database configuration for netra_app user."""
-        return { )
+        return { }
         'host': self.env.get('POSTGRES_HOST', 'localhost'),
         'port': self.env.get('POSTGRES_PORT', '5433'),
         'user': 'netra_app',  # Specific user for application
@@ -54,7 +54,7 @@ class NetraAppUserValidator:
 
     def get_postgres_admin_config(self) -> Dict[str, str]:
         """Get database configuration for postgres admin user."""
-        return { )
+        return { }
         'host': self.env.get('POSTGRES_HOST', 'localhost'),
         'port': self.env.get('POSTGRES_PORT', '5433'),
         'user': self.env.get('POSTGRES_USER', 'postgres'),
@@ -64,7 +64,7 @@ class NetraAppUserValidator:
 
     async def validate_netra_app_user_access(self, config: Dict[str, str]) -> Dict[str, Any]:
         """Validate netra_app user can connect and access database."""
-        result = { )
+        result = { }
         'user': config['user'],
         'success': False,
         'connection_time': None,
@@ -74,7 +74,7 @@ class NetraAppUserValidator:
         'config_used': config
     
 
-        url = "formatted_string"
+        url = ""
 
         start_time = time.time()
         try:
@@ -87,7 +87,7 @@ class NetraAppUserValidator:
 
         await conn.close()
 
-        result.update({ ))
+        result.update({ })
         'success': True,
         'connection_time': connection_time,
         'permissions': permissions,
@@ -95,7 +95,7 @@ class NetraAppUserValidator:
         
 
         except Exception as e:
-        result.update({ ))
+        result.update({ })
         'error': str(e),
         'connection_time': time.time() - start_time
             
@@ -151,7 +151,7 @@ class NetraAppUserValidator:
         netra_app_result = await self.validate_netra_app_user_access(netra_app_config)
         admin_result = await self.validate_netra_app_user_access(admin_config)
 
-        comparison = { )
+        comparison = { }
         'netra_app': netra_app_result,
         'postgres_admin': admin_result,
         'both_successful': netra_app_result['success'] and admin_result['success'],
@@ -168,7 +168,7 @@ class NetraAppUserValidator:
         netra_has = netra_permissions.get(perm, False)
         admin_has = admin_permissions.get(perm, False)
         if netra_has != admin_has:
-        comparison['access_differences'][perm] = { )
+        comparison['access_differences'][perm] = { }
         'netra_app': netra_has,
         'postgres_admin': admin_has
                 
@@ -177,7 +177,7 @@ class NetraAppUserValidator:
         netra_tables = set(netra_app_result.get('accessible_tables', []))
         admin_tables = set(admin_result.get('accessible_tables', []))
 
-        comparison['table_access_comparison'] = { )
+        comparison['table_access_comparison'] = { }
         'netra_app_only': list(netra_tables - admin_tables),
         'admin_only': list(admin_tables - netra_tables),
         'shared': list(netra_tables & admin_tables),
@@ -210,44 +210,44 @@ result = await validator.validate_netra_app_user_access(config)
 
 print(f" )
 === NETRA_APP USER CONNECTIVITY TEST ===")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string" if result['connection_time'] else "N/A")
+print("")
+print("")
+print("")
+print("")
+print("")
+print("" if result['connection_time'] else "N/A")
 
 if result['success']:
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+    print("")
+print("")
+print("")
+print("")
+print("")
 
 if result['accessible_tables']:
-print("formatted_string")
+    print("")
 if len(result['accessible_tables']) > 5:
-print("formatted_string")
+    print("")
 else:
-print("formatted_string")
+    print("")
 
                         # For development environment, allow fallback to postgres user
                         # In production, netra_app user should exist
 if not result['success']:
 env_name = validator.env.get('ENVIRONMENT', 'unknown')
 if env_name == 'development':
-print(" )
+    print("")
 WARNING: [U+FE0F]  netra_app user not found in development - this is acceptable")
 print("   Development can use postgres user as fallback")
 pytest.skip("netra_app user not configured in development environment")
 else:
 assert result['success'], ( )
-"formatted_string"
-"formatted_string"port"]}
+""
+""port"]}
 "
-"formatted_string"
-"formatted_string"
-"formatted_string"
+""
+""
+""
 f"The netra_app user must exist and be accessible in non-development environments.
 "
 f"Run the database initialization scripts to create the user."
@@ -255,7 +255,7 @@ f"Run the database initialization scripts to create the user."
 else:
                                             # Validate the user is actually netra_app
 assert result['permissions'].get('user_matches', False), ( )
-"formatted_string"
+""
                                             
 
 @pytest.mark.asyncio
@@ -271,37 +271,37 @@ comparison = await validator.validate_user_vs_admin_access()
 
 print(f" )
 === USER ACCESS COMPARISON TEST ===")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
 if comparison['both_successful']:
 print(f" )
 Table Access Comparison:")
 table_comp = comparison['table_access_comparison']
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
 if table_comp['netra_app_only']:
-print("formatted_string")
+    print("")
 if table_comp['admin_only']:
-print("formatted_string")
+    print("")
 
 print(f" )
 Permission Differences:")
 if comparison['access_differences']:
 for perm, values in comparison['access_differences'].items():
-print("formatted_string")
+    print("")
 else:
-print("  No permission differences found")
+    print("  No permission differences found")
 
                                                                         # At least one user should be able to connect
 assert (comparison['netra_app']['success'] or comparison['postgres_admin']['success']), ( )
 f"Neither netra_app nor postgres admin user could connect:
 "
-"formatted_string"
-"formatted_string"
+""
+""
 f"At least one database user must be accessible for the system to function."
                                                                             
 
@@ -328,9 +328,9 @@ result = await validator.validate_netra_app_user_access(config)
 if not result['success']:
 pytest.skip("netra_app user not available for testing")
 
-url = "formatted_string"
+url = ""
 
-operations_results = { )
+operations_results = { }
 'create_table': False,
 'insert_data': False,
 'select_data': False,
@@ -343,7 +343,7 @@ operations_results = { )
 try:
 conn = await asyncpg.connect(url, timeout=5)
 
-table_name = "formatted_string"
+table_name = ""
 
 try:
                                                                                                 # Create table
@@ -357,58 +357,58 @@ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 operations_results['create_table'] = True
 
                                                                                                 # Insert data
-await conn.execute("formatted_string")
+await conn.execute("")
 operations_results['insert_data'] = True
 
                                                                                                 # Select data
-rows = await conn.fetch("formatted_string")
+rows = await conn.fetch("")
 assert len(rows) == 1
 operations_results['select_data'] = True
 
                                                                                                 # Update data
-await conn.execute("formatted_string")
+await conn.execute("")
 operations_results['update_data'] = True
 
                                                                                                 # Delete data
-await conn.execute("formatted_string")
+await conn.execute("")
 operations_results['delete_data'] = True
 
                                                                                                 # Drop table
-await conn.execute("formatted_string")
+await conn.execute("")
 operations_results['drop_table'] = True
 
 except Exception as e:
-operations_results['errors'].append("formatted_string")
+operations_results['errors'].append("")
                                                                                                     # Try to clean up table if it exists
 try:
-await conn.execute("formatted_string")
+await conn.execute("")
 except:
 pass
 
 await conn.close()
 
 except Exception as e:
-operations_results['errors'].append("formatted_string")
+operations_results['errors'].append("")
 
 print(f" )
 === NETRA_APP DATABASE OPERATIONS TEST ===")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
+print("")
+print("")
 
 if operations_results['errors']:
-print("formatted_string")
+    print("")
 
                                                                                                                     # Validate critical operations work
 critical_operations = ['create_table', 'insert_data', 'select_data']
 failed_critical = [item for item in []]]
 
 assert len(failed_critical) == 0, ( )
-"formatted_string"
-"formatted_string"
+""
+""
 f"The netra_app user must be able to perform basic database operations."
                                                                                                                     
 
@@ -426,12 +426,12 @@ admin_config = validator.get_postgres_admin_config()
 print(f" )
 === NETRA_APP USER CONFIGURATION TEST ===")
 print(f"Configuration Summary:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
+print("")
+print("")
 
     # Validate configuration consistency
 assert config['host'] == admin_config['host'], "Host should be consistent"
@@ -447,9 +447,9 @@ assert config['user'] == 'netra_app', "User must be 'netra_app'"
     # Port should be numeric and reasonable
 try:
 port_num = int(config['port'])
-assert 1024 <= port_num <= 65535, "formatted_string"
+assert 1024 <= port_num <= 65535, ""
 except ValueError:
-pytest.fail("formatted_string")
+pytest.fail("")
 
 
 if __name__ == "__main__":
@@ -463,25 +463,25 @@ validator = NetraAppUserValidator()
 
     # Test netra_app user
 netra_app_config = validator.get_netra_app_config()
-print("formatted_string"host"]}:{netra_app_config["port"]}")
+print(""host"]}:{netra_app_config["port"]}")
 
 netra_app_result = await validator.validate_netra_app_user_access(netra_app_config)
-print("formatted_string")
+print("")
 if not netra_app_result['success']:
-print("formatted_string")
+    print("")
 else:
-print("formatted_string")
-print("formatted_string")
+    print("")
+print("")
 
             # Test admin user
 admin_config = validator.get_postgres_admin_config()
-print("formatted_string"host"]}:{admin_config["port"]}")
+print(""host"]}:{admin_config["port"]}")
 
 admin_result = await validator.validate_netra_app_user_access(admin_config)
-print("formatted_string")
+print("")
 if not admin_result['success']:
-print("formatted_string")
+    print("")
 else:
-print("formatted_string")
+    print("")
 
 asyncio.run(main())

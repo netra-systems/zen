@@ -7,7 +7,6 @@ It exports from the canonical app_state_contracts implementation.
 SSOT Compliance: Exports from app_state_contracts.py for backward compatibility.
 """
 
-import logging
 from typing import Any, Dict, Optional
 
 # SSOT Import - Export from the canonical app state contracts implementation
@@ -16,8 +15,9 @@ from netra_backend.app.core.app_state_contracts import (
     AppStateContract,
     AppStateValidator
 )
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Simple app state getter for backward compatibility
 def get_app_state() -> Dict[str, Any]:

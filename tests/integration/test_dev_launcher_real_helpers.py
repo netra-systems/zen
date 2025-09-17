@@ -91,7 +91,7 @@ issues = []
     # Check backend port
 backend_port = self.config.backend_port or 8000
 if not self._is_port_in_use(backend_port):
-issues.append("formatted_string")
+issues.append("")
 
         # Check auth port
 if not self._is_port_in_use(8081):
@@ -100,7 +100,7 @@ issues.append("Auth port 8081 not in use")
             # Check frontend port (if enabled)
 if self.config.frontend_port:
 if not self._is_port_in_use(self.config.frontend_port):
-issues.append("formatted_string")
+issues.append("")
 
 return len(issues) == 0, issues
 
@@ -129,7 +129,7 @@ elapsed = time.time() - self.start_time
             # - Frontend readiness: 90s
 
 if elapsed < 5:  # Minimum reasonable startup time
-issues.append("formatted_string")
+issues.append("")
 
             # No maximum time check - some systems are slower
 
@@ -147,7 +147,7 @@ pass
 if sys.platform == "win32":
 try:
 result = subprocess.run( )
-"formatted_string",
+"",
 shell=True, capture_output=True, text=True
             
 if result.stdout:
@@ -158,6 +158,6 @@ parts = line.split()
 if len(parts) >= 5:
 pid = parts[-1]
 if pid.isdigit():
-subprocess.run("formatted_string", shell=True)
+subprocess.run("", shell=True)
 except Exception:
 pass

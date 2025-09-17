@@ -1,4 +1,4 @@
-"""
+"""Empty docstring."""
 WebSocket Authentication SSOT Delegation Integration Tests
 
 MISSION CRITICAL: Integration tests that validate SSOT JWT validation delegation
@@ -11,7 +11,7 @@ SSOT INTEGRATION REQUIREMENTS:
 4. Integration between WebSocket bridge and auth service
 
 These tests are designed to FAIL initially, proving integration-level SSOT violations exist.
-"""
+"""Empty docstring."""
 import pytest
 import asyncio
 import json
@@ -23,19 +23,19 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
 class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
-    """
+"""Empty docstring."""
     Integration tests that validate SSOT delegation in WebSocket authentication flows.
     These tests should FAIL initially to prove integration-level violations exist.
-    """
+"""Empty docstring."""
 
     def setUp(self):
-        """Set up integration test environment."""
+        "Set up integration test environment."""
         super().setUp()
         self.valid_jwt_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0X3VzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJleHAiOjk5OTk5OTk5OTksImlhdCI6MTYwMDAwMDAwMH0.test_signature'
         self.expired_jwt_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0X3VzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJleHAiOjE2MDAwMDAwMDAsImlhdCI6MTYwMDAwMDAwMH0.expired_signature'
 
     def test_integration_ssot_websocket_connection_delegates_to_jwt_handler(self):
-        """
+        ""
         TEST DESIGNED TO FAIL: Integration test for WebSocket connection SSOT delegation.
         
         This test should FAIL initially because:
@@ -45,7 +45,7 @@ class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
         
         Expected: FAILURE - Integration uses multiple JWT validation paths
         After Fix: PASS - Single SSOT JWTHandler delegation throughout
-        """
+
         from netra_backend.app.websocket_core.user_context_extractor import extract_websocket_user_context
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.headers = {'authorization': f'Bearer {self.valid_jwt_token}'}
@@ -89,7 +89,7 @@ class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
                     self.assertEqual(len(integration_violations), 0, f'INTEGRATION SSOT VIOLATIONS: {integration_violations}. WebSocket integration must delegate ONLY to JWTHandler.validate_token()')
 
     def test_integration_ssot_websocket_auth_error_handling_consistency(self):
-        """
+    ""
         TEST DESIGNED TO FAIL: Integration test for consistent SSOT error handling.
         
         This test should FAIL initially because:
@@ -99,7 +99,7 @@ class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
         
         Expected: FAILURE - Inconsistent error handling with multiple JWT paths
         After Fix: PASS - Consistent SSOT error handling throughout
-        """
+        
         from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.headers = {'authorization': f'Bearer {self.expired_jwt_token}'}
@@ -143,7 +143,7 @@ class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
                 self.assertEqual(len(error_handling_violations), 0, f'ERROR HANDLING SSOT VIOLATIONS: {error_handling_violations}. Error handling must use consistent SSOT JWT validation')
 
     def test_integration_ssot_websocket_auth_flow_end_to_end_delegation(self):
-        """
+        ""
         TEST DESIGNED TO FAIL: End-to-end integration test for SSOT delegation.
         
         This test should FAIL initially because:
@@ -153,7 +153,7 @@ class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
         
         Expected: FAILURE - E2E flow uses multiple JWT validation paths
         After Fix: PASS - E2E flow uses only SSOT JWTHandler delegation
-        """
+
         from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuthenticator
         authenticator = UnifiedWebSocketAuthenticator()
         mock_websocket = Mock(spec=WebSocket)
@@ -207,7 +207,7 @@ class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
                 self.assertEqual(len(e2e_violations), 0, f'END-TO-END SSOT VIOLATIONS: {e2e_violations}. Complete E2E flow must use ONLY JWTHandler.validate_token()')
 
     def test_integration_ssot_websocket_context_creation_uses_ssot_validation(self):
-        """
+    ""
         TEST DESIGNED TO FAIL: Integration test for SSOT validation in context creation.
         
         This test should FAIL initially because:
@@ -217,7 +217,7 @@ class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
         
         Expected: FAILURE - Context creation uses non-SSOT JWT processing
         After Fix: PASS - Context creation relies only on SSOT validation results
-        """
+        
         from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         extractor = UserContextExtractor()
@@ -265,7 +265,7 @@ class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
                     self.assertEqual(len(context_violations), 0, f'CONTEXT CREATION SSOT VIOLATIONS: {context_violations}. UserExecutionContext creation must rely only on SSOT validation results')
 
     def tearDown(self):
-        """Clean up integration test environment."""
+        ""Clean up integration test environment.""
         super().tearDown()
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

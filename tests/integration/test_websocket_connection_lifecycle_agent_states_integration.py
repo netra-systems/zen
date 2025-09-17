@@ -40,7 +40,7 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.orchestration import get_orchestration_config
 from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.websocket.connection_handler import ConnectionHandler
 from netra_backend.app.websocket_core.auth import WebSocketAuthenticator

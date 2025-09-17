@@ -7,7 +7,7 @@ Focus on last 15 minutes with full JSON payloads and timezone information
 import json
 import os
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 import subprocess
@@ -36,7 +36,7 @@ def setup_gcp_auth():
 def get_latest_logs_via_gcloud():
     """Get the latest logs using gcloud command"""
     # Calculate time range (last 15 minutes)
-    end_time = datetime.utcnow()
+    end_time = datetime.now(UTC)
     start_time = end_time - timedelta(minutes=15)
 
     print(f"🔍 Getting logs for the last 15 minutes")
@@ -134,7 +134,7 @@ def analyze_timezone_info(logs: List[Dict[str, Any]]):
             print("❌ Unable to parse timestamp format")
 
     # Show current time for comparison
-    current_utc = datetime.utcnow()
+    current_utc = datetime.now(UTC)
     print(f"🕐 Current UTC time: {current_utc.isoformat()}Z")
 
     # Calculate time difference if possible

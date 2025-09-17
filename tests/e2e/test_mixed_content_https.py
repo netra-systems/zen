@@ -59,7 +59,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         Expected failure: isSecureEnvironment() returns false for staging.
         '''
     # Mock staging environment variables
-        staging_env = { )
+        staging_env = { }
         'NEXT_PUBLIC_ENVIRONMENT': 'staging',
         'NODE_ENV': 'production',
         'VERCEL_ENV': 'preview'  # Common staging indicator
@@ -79,7 +79,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         # This assertion SHOULD FAIL if detection is broken
         assert server_side_secure, ( )
         f"Server-side environment detection failed for staging. "
-        "formatted_string"
+        ""
         f"secure-api-config.ts isSecureEnvironment() should return true for staging."
         
 
@@ -97,7 +97,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         causing mixed content warnings when frontend is served over HTTPS.
         '''
         pass
-        staging_env = { )
+        staging_env = { }
         'NEXT_PUBLIC_ENVIRONMENT': 'staging',
         'NEXT_PUBLIC_API_URL': 'http://api.staging.netrasystems.ai',  # Wrong protocol
         'NEXT_PUBLIC_AUTH_URL': 'http://auth.staging.netrasystems.ai',  # Wrong protocol
@@ -111,19 +111,19 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         http_violations = []
 
         if api_config['apiUrl'].startswith('http://'):
-        http_violations.append("formatted_string")
+        http_violations.append("")
 
         if api_config['authUrl'].startswith('http://'):
-        http_violations.append("formatted_string")
+        http_violations.append("")
 
         if api_config['wsUrl'].startswith('ws://'):
-        http_violations.append("formatted_string")
+        http_violations.append("")
 
         self.mixed_content_violations.extend(http_violations)
 
                     # This assertion SHOULD FAIL due to HTTP URLs in staging
         assert len(http_violations) == 0, ( )
-        "formatted_string"""Real WebSocket connection for testing instead of mocks."""
+        """"Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
         pass
@@ -150,7 +150,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
 
         " +
         "
-        ".join("formatted_string" for violation in http_violations) +
+        ".join("" for violation in http_violations) +
         f"
 
         All URLs must use HTTPS/WSS in staging to prevent mixed content errors."
@@ -165,18 +165,18 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         causing connection failures from HTTPS pages due to mixed content restrictions.
         '''
         pass
-        staging_scenarios = [ )
-        { )
+        staging_scenarios = [ ]
+        { }
         'env': {'NEXT_PUBLIC_ENVIRONMENT': 'staging'},
         'client_protocol': 'https:',
         'expected_ws_protocol': 'wss:'
         },
-        { )
+        { }
         'env': {'NEXT_PUBLIC_ENVIRONMENT': 'production'},
         'client_protocol': 'https:',
         'expected_ws_protocol': 'wss:'
         },
-        { )
+        { }
         'env': {'NEXT_PUBLIC_FORCE_HTTPS': 'true'},
         'client_protocol': 'https:',
         'expected_ws_protocol': 'wss:'
@@ -200,15 +200,15 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
 
         if actual_ws_protocol != expected_ws_protocol:
         websocket_violations.append( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
                 
 
                 # This assertion SHOULD FAIL due to WS instead of WSS
         assert len(websocket_violations) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join("formatted_string" for violation in websocket_violations) +
+        ".join("" for violation in websocket_violations) +
         f"
 
         WebSocket URLs must use WSS in secure environments to prevent connection failures."
@@ -223,7 +223,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         may make different protocol decisions, causing hydration mismatches and errors.
         '''
         pass
-        test_environments = [ )
+        test_environments = [ ]
         {'NEXT_PUBLIC_ENVIRONMENT': 'staging'},
         {'NEXT_PUBLIC_ENVIRONMENT': 'production'},
         {'NEXT_PUBLIC_FORCE_HTTPS': 'true'}
@@ -245,23 +245,23 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
             # Check for inconsistencies
         if server_config['apiUrl'] != client_config['apiUrl']:
         consistency_issues.append( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
                 
 
         if server_config['wsUrl'] != client_config['wsUrl']:
         consistency_issues.append( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
                     
 
         self.protocol_inconsistencies.extend(consistency_issues)
 
                     # This assertion SHOULD FAIL due to SSR/client inconsistencies
         assert len(consistency_issues) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join("formatted_string" for issue in consistency_issues) +
+        ".join("" for issue in consistency_issues) +
         f"
 
         Server and client must generate consistent protocols to prevent hydration errors."
@@ -276,26 +276,26 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         complex deployment scenarios like preview branches, custom domains, etc.
         '''
         pass
-        edge_case_scenarios = [ )
-        { )
+        edge_case_scenarios = [ ]
+        { }
         'name': 'Vercel Preview Branch',
         'env': {'VERCEL_ENV': 'preview', 'NEXT_PUBLIC_ENVIRONMENT': 'staging'},
         'client_host': 'netra-git-feature-preview.vercel.app',
         'expected_secure': True
         },
-        { )
+        { }
         'name': 'Custom Staging Domain',
         'env': {'NEXT_PUBLIC_ENVIRONMENT': 'staging'},
         'client_host': 'staging-v2.netrasystems.ai',
         'expected_secure': True
         },
-        { )
+        { }
         'name': 'Local Development with Force HTTPS',
         'env': {'NEXT_PUBLIC_FORCE_HTTPS': 'true'},
         'client_host': 'localhost:3000',
         'expected_secure': True
         },
-        { )
+        { }
         'name': 'Missing Environment Variable',
         'env': {},  # No environment set
         'client_host': 'unknown-domain.com',
@@ -320,14 +320,14 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
 
         if is_secure != scenario['expected_secure']:
         detection_failures.append( )
-        "formatted_string"
+        ""
                 
 
                 # This assertion SHOULD FAIL due to edge case handling issues
         assert len(detection_failures) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join("formatted_string" for failure in detection_failures) +
+        ".join("" for failure in detection_failures) +
         f"
 
         Environment detection must handle complex deployment scenarios correctly."
@@ -343,13 +343,13 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         '''
         pass
     # Mock staging environment with HTTPS frontend
-        staging_env = { )
+        staging_env = { }
         'NEXT_PUBLIC_ENVIRONMENT': 'staging',
         'FRONTEND_URL': 'https://app.staging.netrasystems.ai'
     
 
     # Mock backend CORS configuration (potentially with HTTP origins)
-        mock_cors_origins = [ )
+        mock_cors_origins = [ ]
         'http://app.staging.netrasystems.ai',  # Wrong protocol
         'https://app.staging.netrasystems.ai',  # Correct protocol
         'http://localhost:3000'  # Dev origin
@@ -367,14 +367,14 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         if origin.startswith('http://') and frontend_protocol == 'https:':
         if not origin.startswith('http://localhost'):  # Localhost exception
         protocol_mismatches.append( )
-        "formatted_string"
+        ""
                 
 
                 # This assertion SHOULD FAIL due to protocol mismatches
         assert len(protocol_mismatches) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join("formatted_string" for mismatch in protocol_mismatches) +
+        ".join("" for mismatch in protocol_mismatches) +
         f"
 
         CORS origins must match frontend protocol to prevent connection errors."
@@ -418,7 +418,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         auth_url = auth_url.replace('http://', 'https://')
         ws_url = ws_url.replace('ws://', 'wss://')
 
-        return { )
+        return { }
         'apiUrl': api_url,
         'wsUrl': ws_url,
         'authUrl': auth_url,
@@ -450,13 +450,13 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         print(f" )
         === Mixed Content Violations ===")
         for violation in self.mixed_content_violations:
-        print("formatted_string")
+        print("")
 
         if self.protocol_inconsistencies:
         print(f" )
         === Protocol Inconsistencies ===")
         for inconsistency in self.protocol_inconsistencies:
-        print("formatted_string")
+        print("")
 
 
         if __name__ == "__main__":

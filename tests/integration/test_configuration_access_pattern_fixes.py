@@ -51,10 +51,10 @@ class RealConfigurationPatternValidator:
 
         CRITICAL: We use real services, no mocks per CLAUDE.md requirements.
         '''
-        print(" )
+        print("")
         === STARTING REAL SERVICES (NO MOCKS) ===")
 
-        services_status = { )
+        services_status = { }
         'postgres': False,
         'redis': False
     
@@ -62,7 +62,7 @@ class RealConfigurationPatternValidator:
     # Check if services are already running
         try:
         # Try to start minimal services (postgres + redis only for this test)
-        result = subprocess.run([ ))
+        result = subprocess.run([ ])
         'docker-compose', '-f', 'docker-compose.minimal.yml', 'up', '-d'
         ],
         cwd=project_root,
@@ -73,7 +73,7 @@ class RealConfigurationPatternValidator:
         services_status['postgres'] = True
         services_status['redis'] = True
         else:
-        print("formatted_string")
+        print("")
                 # Check if services are accessible even if command failed
         services_status = self._check_service_connectivity()
 
@@ -81,7 +81,7 @@ class RealConfigurationPatternValidator:
         print(" WARNING: [U+FE0F]  Docker startup timed out, checking existing services...")
         services_status = self._check_service_connectivity()
         except Exception as e:
-        print("formatted_string")
+        print("")
         services_status = self._check_service_connectivity()
 
                         # Wait for services to be ready
@@ -111,7 +111,7 @@ class RealConfigurationPatternValidator:
         services['postgres'] = True
         print(" PASS:  PostgreSQL is accessible")
         except Exception as e:
-        print("formatted_string")
+        print("")
 
             # Check Redis
         try:
@@ -121,20 +121,20 @@ class RealConfigurationPatternValidator:
         services['redis'] = True
         print(" PASS:  Redis is accessible")
         except Exception as e:
-        print("formatted_string")
+        print("")
 
         return services
 
     def setup_test_environment(self):
         """Setup test environment variables through IsolatedEnvironment."""
-        print(" )
+        print("")
         === SETTING UP TEST ENVIRONMENT ===")
 
     # Enable isolation mode for testing
         self.env.enable_isolation()
 
     # Set test environment variables using REAL service connection details
-        test_config = { )
+        test_config = { }
         'ENVIRONMENT': 'test',
         'TESTING': '1',
     Real PostgreSQL from docker-compose.minimal.yml
@@ -166,20 +166,20 @@ class RealConfigurationPatternValidator:
         for key, value in test_config.items():
         success = self.env.set(key, value, source='integration_test')
         if success:
-        print("formatted_string")
+        print("")
         else:
-        print("formatted_string")
-        self.issues_found.append("formatted_string")
+        print("")
+        self.issues_found.append("")
 
-        print("formatted_string")
+        print("")
 
     def validate_isolated_environment_usage(self) -> Dict[str, Any]:
         """Validate that all services use IsolatedEnvironment correctly."""
         pass
-        print(" )
+        print("")
         === VALIDATING ISOLATED ENVIRONMENT USAGE ===")
 
-        results = { )
+        results = { }
         'shared_isolated_environment': self._test_shared_isolated_environment(),
         'netra_backend_config': self._test_netra_backend_config_patterns(),
         'auth_service_config': self._test_auth_service_config_patterns(),
@@ -191,10 +191,10 @@ class RealConfigurationPatternValidator:
 
     def _test_shared_isolated_environment(self) -> Dict[str, Any]:
         """Test shared IsolatedEnvironment functionality."""
-        print(" )
+        print("")
         Testing shared IsolatedEnvironment...")
 
-        test_result = { )
+        test_result = { }
         'success': True,
         'tests': {},
         'issues': []
@@ -227,7 +227,7 @@ class RealConfigurationPatternValidator:
                 
 
         if not test_result['tests']['get_set_operations']:
-        test_result['issues'].append("formatted_string")
+        test_result['issues'].append("")
         test_result['success'] = False
 
                     # Test source tracking
@@ -235,29 +235,29 @@ class RealConfigurationPatternValidator:
         test_result['tests']['source_tracking'] = source == 'isolation_test'
 
         if not test_result['tests']['source_tracking']:
-        test_result['issues'].append("formatted_string")
+        test_result['issues'].append("")
         test_result['success'] = False
 
                         # Clean up test key
         env1.delete(test_key, source='cleanup')
 
-        print("formatted_string")
+        print("")
         for issue in test_result['issues']:
-        print("formatted_string")
+        print("")
 
         except Exception as e:
         test_result['success'] = False
-        test_result['issues'].append("formatted_string")
-        print("formatted_string")
+        test_result['issues'].append("")
+        print("")
 
         return test_result
 
     def _test_netra_backend_config_patterns(self) -> Dict[str, Any]:
         """Test netra_backend configuration patterns."""
-        print(" )
+        print("")
         Testing netra_backend configuration patterns...")
 
-        test_result = { )
+        test_result = { }
         'success': True,
         'tests': {},
         'issues': []
@@ -284,37 +284,37 @@ class RealConfigurationPatternValidator:
                     # Validate it's using our test database
         test_result['tests']['using_test_database'] = 'localhost:5433' in db_url
         if not test_result['tests']['using_test_database']:
-        test_result['issues'].append("formatted_string")
+        test_result['issues'].append("")
 
                         # Test environment detection
         environment = getattr(config, 'environment', None)
         test_result['tests']['environment_detection'] = environment == 'test'
 
         if environment != 'test':
-        test_result['issues'].append("formatted_string")
+        test_result['issues'].append("")
         test_result['success'] = False
 
                             # Test Redis configuration
         redis_url = getattr(config, 'redis_url', None)
         test_result['tests']['redis_configured'] = bool(redis_url)
 
-        print("formatted_string")
+        print("")
         for issue in test_result['issues']:
-        print("formatted_string")
+        print("")
 
         except Exception as e:
         test_result['success'] = False
-        test_result['issues'].append("formatted_string")
-        print("formatted_string")
+        test_result['issues'].append("")
+        print("")
 
         return test_result
 
     def _test_auth_service_config_patterns(self) -> Dict[str, Any]:
         """Test auth_service configuration patterns."""
-        print(" )
+        print("")
         Testing auth_service configuration patterns...")
 
-        test_result = { )
+        test_result = { }
         'success': True,
         'tests': {},
         'issues': []
@@ -329,7 +329,7 @@ class RealConfigurationPatternValidator:
         test_result['tests']['environment_detection'] = environment == 'test'
 
         if environment != 'test':
-        test_result['issues'].append("formatted_string")
+        test_result['issues'].append("")
         test_result['success'] = False
 
             # Test database URL generation
@@ -343,7 +343,7 @@ class RealConfigurationPatternValidator:
                     # Validate it's using our test database
         test_result['tests']['using_test_database'] = 'localhost:5433' in db_url
         if not test_result['tests']['using_test_database']:
-        test_result['issues'].append("formatted_string")
+        test_result['issues'].append("")
 
                         # Test JWT configuration
         jwt_secret = auth_config.get_jwt_secret()
@@ -366,25 +366,25 @@ class RealConfigurationPatternValidator:
         test_result['tests']['redis_configured'] = bool(redis_url)
 
         if redis_url and 'localhost:6380' not in redis_url:
-        test_result['issues'].append("formatted_string")
+        test_result['issues'].append("")
 
-        print("formatted_string")
+        print("")
         for issue in test_result['issues']:
-        print("formatted_string")
+        print("")
 
         except Exception as e:
         test_result['success'] = False
-        test_result['issues'].append("formatted_string")
-        print("formatted_string")
+        test_result['issues'].append("")
+        print("")
 
         return test_result
 
     def _test_environment_isolation(self) -> Dict[str, Any]:
         """Test environment variable isolation."""
-        print(" )
+        print("")
         Testing environment isolation...")
 
-        test_result = { )
+        test_result = { }
         'success': True,
         'tests': {},
         'issues': []
@@ -405,7 +405,7 @@ class RealConfigurationPatternValidator:
         test_result['tests']['isolation_prevents_pollution'] = test_key not in os.environ
 
         if test_key in os.environ:
-        test_result['issues'].append("formatted_string")
+        test_result['issues'].append("")
         test_result['success'] = False
 
                 # Test that we can still retrieve the value
@@ -413,29 +413,29 @@ class RealConfigurationPatternValidator:
         test_result['tests']['isolated_retrieval'] = retrieved_value == test_value
 
         if retrieved_value != test_value:
-        test_result['issues'].append("formatted_string")
+        test_result['issues'].append("")
         test_result['success'] = False
 
                     # Clean up
         env.delete(test_key, source='cleanup')
 
-        print("formatted_string")
+        print("")
         for issue in test_result['issues']:
-        print("formatted_string")
+        print("")
 
         except Exception as e:
         test_result['success'] = False
-        test_result['issues'].append("formatted_string")
-        print("formatted_string")
+        test_result['issues'].append("")
+        print("")
 
         return test_result
 
     def _test_ssot_compliance(self) -> Dict[str, Any]:
         """Test Single Source of Truth compliance."""
-        print(" )
+        print("")
         Testing SSOT compliance...")
 
-        test_result = { )
+        test_result = { }
         'success': True,
         'tests': {},
         'issues': []
@@ -476,29 +476,29 @@ class RealConfigurationPatternValidator:
         test_result['success'] = False
 
         except Exception as e:
-        test_result['issues'].append("formatted_string")
+        test_result['issues'].append("")
         test_result['success'] = False
 
                             # Clean up
         env1.delete(test_key, source='cleanup')
 
-        print("formatted_string")
+        print("")
         for issue in test_result['issues']:
-        print("formatted_string")
+        print("")
 
         except Exception as e:
         test_result['success'] = False
-        test_result['issues'].append("formatted_string")
-        print("formatted_string")
+        test_result['issues'].append("")
+        print("")
 
         return test_result
 
     def validate_real_database_connections(self) -> Dict[str, Any]:
         """Test real database connections using configured URLs."""
-        print(" )
+        print("")
         === TESTING REAL DATABASE CONNECTIONS ===")
 
-        results = { )
+        results = { }
         'backend_database': self._test_backend_database_connection(),
         'auth_database': self._test_auth_database_connection(),
         'redis_connection': self._test_redis_connection()
@@ -508,10 +508,10 @@ class RealConfigurationPatternValidator:
 
     def _test_backend_database_connection(self) -> Dict[str, Any]:
         """Test backend database connection."""
-        print(" )
+        print("")
         Testing backend database connection...")
 
-        test_result = { )
+        test_result = { }
         'success': False,
         'connection_details': {},
         'issues': []
@@ -554,20 +554,20 @@ class RealConfigurationPatternValidator:
         cursor.close()
         conn.close()
 
-        print("formatted_string")
+        print("")
 
         except Exception as e:
-        test_result['issues'].append("formatted_string")
-        print("formatted_string")
+        test_result['issues'].append("")
+        print("")
 
         return test_result
 
     def _test_auth_database_connection(self) -> Dict[str, Any]:
         """Test auth service database connection."""
-        print(" )
+        print("")
         Testing auth database connection...")
 
-        test_result = { )
+        test_result = { }
         'success': False,
         'connection_details': {},
         'issues': []
@@ -610,20 +610,20 @@ class RealConfigurationPatternValidator:
         cursor.close()
         conn.close()
 
-        print("formatted_string")
+        print("")
 
         except Exception as e:
-        test_result['issues'].append("formatted_string")
-        print("formatted_string")
+        test_result['issues'].append("")
+        print("")
 
         return test_result
 
     def _test_redis_connection(self) -> Dict[str, Any]:
         """Test Redis connection."""
-        print(" )
+        print("")
         Testing Redis connection...")
 
-        test_result = { )
+        test_result = { }
         'success': False,
         'connection_details': {},
         'issues': []
@@ -660,18 +660,18 @@ class RealConfigurationPatternValidator:
             # Clean up
         r.delete(test_key)
 
-        print("formatted_string")
+        print("")
 
         except Exception as e:
-        test_result['issues'].append("formatted_string")
-        print("formatted_string")
+        test_result['issues'].append("")
+        print("")
 
         return test_result
 
     def generate_validation_report(self, results: Dict[str, Any]) -> Dict[str, Any]:
         """Generate comprehensive validation report."""
 
-        report = { )
+        report = { }
         'overall_success': True,
         'summary': {},
         'detailed_results': results,
@@ -687,7 +687,7 @@ class RealConfigurationPatternValidator:
                 # Services status is a dict of service_name: boolean
         services_working = all(status for status in category_results.values())
         category_success = services_working
-        issues = [] if services_working else ["formatted_string"]
+        issues = [] if services_working else [""]
         else:
                     # Normal test result format
         category_success = category_results.get('success', False)
@@ -696,7 +696,7 @@ class RealConfigurationPatternValidator:
         if not category_success:
         report['overall_success'] = False
 
-        report['summary'][category] = { )
+        report['summary'][category] = { }
         'success': category_success,
         'issues': issues
                         
@@ -707,7 +707,7 @@ class RealConfigurationPatternValidator:
 
                             # Add recommendations
         if not report['overall_success']:
-        report['recommendations'] = [ )
+        report['recommendations'] = [ ]
         "Fix configuration access patterns to use IsolatedEnvironment",
         "Ensure all services maintain independence while using shared utilities",
         "Verify database connections use real services during testing",
@@ -742,8 +742,8 @@ class TestConfigurationAccessPatternFixes:
     def test_real_configuration_access_patterns(self, setup_test_environment):
         """Test REAL configuration access patterns with REAL services."""
 
-        print(" )
-        " + "="*80)
+        print("")
+         + ="*80)
         print("TESTING REAL CONFIGURATION ACCESS PATTERNS")
         print("Business Goal: Prevent $12K MRR loss from config incidents")
         print("="*80)
@@ -767,7 +767,7 @@ class TestConfigurationAccessPatternFixes:
         db_results = validator.validate_real_database_connections()
 
         # Step 5: Generate comprehensive report
-        all_results = { )
+        all_results = { }
         'services': services_status,
         **config_results,
         **db_results
@@ -778,29 +778,29 @@ class TestConfigurationAccessPatternFixes:
         # Print comprehensive results
         print(f" )
         === CONFIGURATION VALIDATION RESULTS ===")
-        print("formatted_string")
+        print("")
 
         print(f" )
         === SUMMARY BY CATEGORY ===")
         for category, summary in report['summary'].items():
         status = " PASS:  PASS" if summary['success'] else " FAIL:  FAIL"
-        print("formatted_string")
+        print("")
         for issue in summary.get('issues', []):
-        print("formatted_string")
+        print("")
 
         if report['issues_found']:
-        print("formatted_string")
+        print("")
         for i, issue in enumerate(report['issues_found'], 1):
-        print("formatted_string")
+        print("")
 
         if report['recommendations']:
         print(f" )
         === RECOMMENDATIONS ===")
         for i, rec in enumerate(report['recommendations'], 1):
-        print("formatted_string")
+        print("")
 
-        print(" )
-        " + "="*80)
+        print("")
+         + ="*80)
 
                                 # Test assertions
         assert services_status.get('postgres', False), "PostgreSQL service must be available for configuration testing"
@@ -827,7 +827,7 @@ class TestConfigurationAccessPatternFixes:
         assert auth_db_success, "Auth service must connect to real database"
 
                                 # Overall system health check
-        assert report['overall_success'], "formatted_string"
+        assert report['overall_success'], ""
 
         print(" CELEBRATION:  ALL CONFIGURATION ACCESS PATTERNS VALIDATED SUCCESSFULLY!")
 

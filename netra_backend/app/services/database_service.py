@@ -3,14 +3,14 @@
 Provides database transaction management services.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Any, Dict, Optional
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.db.postgres import AsyncSessionLocal
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class DatabaseTransactionManager:

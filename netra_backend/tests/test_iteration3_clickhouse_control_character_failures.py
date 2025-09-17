@@ -10,7 +10,7 @@ Critical Issue: "ClickHouse URL control characters: Still has newline at positio
 import pytest
 import re
 from urllib.parse import urlparse
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 
 from netra_backend.app.db.clickhouse import ClickHouseDatabase

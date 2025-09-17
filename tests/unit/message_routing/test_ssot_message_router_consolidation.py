@@ -64,7 +64,7 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDisp
 from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
 
 # WebSocket manager imports
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -350,7 +350,7 @@ class SSOTMessageRouterConsolidationTests(SSotAsyncTestCase):
                         "UnifiedToolDispatcher import must resolve to SSOT module")
 
         # Test WebSocketManager import resolution
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as ImportedManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as ImportedManager
 
         self.assertEqual(ImportedManager.__module__, "netra_backend.app.websocket_core.websocket_manager",
                         "WebSocketManager import must resolve to SSOT module")

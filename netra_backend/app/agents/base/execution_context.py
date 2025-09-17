@@ -5,7 +5,7 @@ Provides context management for agent execution.
 Tracks execution state, metadata, and resource usage.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 import time
 import uuid
 from typing import Dict, Optional, Any, List
@@ -15,7 +15,7 @@ import threading
 
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ExecutionStatus(Enum):

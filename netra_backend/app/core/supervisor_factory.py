@@ -296,7 +296,7 @@ async def create_streaming_supervisor(
                     run_id=run_id
                 )
                 
-                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
                 websocket_manager = get_websocket_manager(user_context)
                 
                 # Get tool classes for UserContext pattern

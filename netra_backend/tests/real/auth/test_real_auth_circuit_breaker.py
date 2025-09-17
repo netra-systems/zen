@@ -17,7 +17,7 @@ are unavailable, as described in auth circuit breaker requirements.
 import asyncio
 import json
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List
 from enum import Enum
 from unittest.mock import patch, MagicMock
@@ -93,7 +93,7 @@ class RealAuthCircuitBreakerTests:
 
     def create_circuit_breaker_state(self, service_name: str, state: CircuitState=CircuitState.CLOSED, **kwargs) -> Dict[str, Any]:
         """Create circuit breaker state data."""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         return {'service_name': service_name, 'state': state.value, 'failure_count': kwargs.get('failure_count', 0), 'success_count': kwargs.get('success_count', 0), 'last_failure_time': kwargs.get('last_failure_time'), 'last_success_time': kwargs.get('last_success_time'), 'state_changed_at': now.isoformat(), 'failure_threshold': kwargs.get('failure_threshold', 5), 'recovery_timeout': kwargs.get('recovery_timeout', 60), 'half_open_max_calls': kwargs.get('half_open_max_calls', 3), 'circuit_breaker_enabled': kwargs.get('enabled', True), 'service_health_status': kwargs.get('health_status', 'unknown')}
 
     @pytest.mark.asyncio
@@ -101,7 +101,7 @@ class RealAuthCircuitBreakerTests:
         """Test circuit breaker in normal closed state operation."""
         service_name = 'auth_service'
         cb_key = f'circuit_breaker:{service_name}'
-        cb_state = self.create_circuit_breaker_state(service_name, CircuitState.CLOSED, success_count=10, last_success_time=datetime.utcnow().isoformat(), health_status='healthy')
+        cb_state = self.create_circuit_breaker_state(service_name, CircuitState.CLOSED, success_count=10, last_success_time=datetime.now(UTC).isoformat(), health_status='healthy')
         try:
             await redis_client.setex(cb_key, 3600, json.dumps(cb_state))
             stored_state = json.loads(await redis_client.get(cb_key))
@@ -111,7 +111,7 @@ class RealAuthCircuitBreakerTests:
             assert stored_state['circuit_breaker_enabled'] is True
             for i in range(5):
                 stored_state['success_count'] += 1
-                stored_state['last_success_time'] = datetime.utcnow().isoformat()
+                stored_state['last_success_time'] = datetime.now(UTC).isoformat()
                 await redis_client.setex(cb_key, 3600, json.dumps(stored_state))
             final_state = json.loads(await redis_client.get(cb_key))
             assert final_state['state'] == CircuitState.CLOSED.value
@@ -133,10 +133,10 @@ class RealAuthCircuitBreakerTests:
             stored_state = json.loads(await redis_client.get(cb_key))
             for i, failure in enumerate(failure_scenarios):
                 stored_state['failure_count'] += 1
-                stored_state['last_failure_time'] = datetime.utcnow().isoformat()
+                stored_state['last_failure_time'] = datetime.now(UTC).isoformat()
                 if stored_state['failure_count'] >= stored_state['failure_threshold']:
                     stored_state['state'] = CircuitState.OPEN.value
-                    stored_state['state_changed_at'] = datetime.utcnow().isoformat()
+                    stored_state['state_changed_at'] = datetime.now(UTC).isoformat()
                     stored_state['service_health_status'] = 'unhealthy'
                 await redis_client.setex(cb_key, 3600, json.dumps(stored_state))
                 print(f" FAIL:  Failure {i + 1}: {failure['error']} - Count: {stored_state['failure_count']}")
@@ -153,7 +153,7 @@ class RealAuthCircuitBreakerTests:
         """Test circuit breaker rejecting requests in open state."""
         service_name = 'auth_service_open'
         cb_key = f'circuit_breaker:{service_name}'
-        cb_state = self.create_circuit_breaker_state(service_name, CircuitState.OPEN, failure_count=5, last_failure_time=datetime.utcnow().isoformat(), health_status='unhealthy')
+        cb_state = self.create_circuit_breaker_state(service_name, CircuitState.OPEN, failure_count=5, last_failure_time=datetime.now(UTC).isoformat(), health_status='unhealthy')
         try:
             await redis_client.setex(cb_key, 3600, json.dumps(cb_state))
             test_requests = [{'endpoint': '/auth/login', 'method': 'POST'}, {'endpoint': '/auth/validate', 'method': 'GET'}, {'endpoint': '/auth/refresh', 'method': 'POST'}]
@@ -173,16 +173,16 @@ class RealAuthCircuitBreakerTests:
         """Test circuit breaker transition to half-open state and recovery attempts."""
         service_name = 'auth_service_recovery'
         cb_key = f'circuit_breaker:{service_name}'
-        past_time = datetime.utcnow() - timedelta(seconds=70)
+        past_time = datetime.now(UTC) - timedelta(seconds=70)
         cb_state = self.create_circuit_breaker_state(service_name, CircuitState.OPEN, failure_count=5, last_failure_time=past_time.isoformat(), recovery_timeout=60, health_status='unhealthy')
         try:
             await redis_client.setex(cb_key, 3600, json.dumps(cb_state))
             stored_state = json.loads(await redis_client.get(cb_key))
             last_failure = datetime.fromisoformat(stored_state['last_failure_time'])
             recovery_timeout = stored_state['recovery_timeout']
-            if (datetime.utcnow() - last_failure).total_seconds() > recovery_timeout:
+            if (datetime.now(UTC) - last_failure).total_seconds() > recovery_timeout:
                 stored_state['state'] = CircuitState.HALF_OPEN.value
-                stored_state['state_changed_at'] = datetime.utcnow().isoformat()
+                stored_state['state_changed_at'] = datetime.now(UTC).isoformat()
                 stored_state['half_open_attempts'] = 0
                 await redis_client.setex(cb_key, 3600, json.dumps(stored_state))
             half_open_state = json.loads(await redis_client.get(cb_key))
@@ -193,11 +193,11 @@ class RealAuthCircuitBreakerTests:
                 half_open_state['half_open_attempts'] += 1
                 if i < 2:
                     half_open_state['success_count'] += 1
-                    half_open_state['last_success_time'] = datetime.utcnow().isoformat()
+                    half_open_state['last_success_time'] = datetime.now(UTC).isoformat()
                     print(f' PASS:  Half-open test request {i + 1} succeeded')
                 else:
                     half_open_state['failure_count'] += 1
-                    half_open_state['last_failure_time'] = datetime.utcnow().isoformat()
+                    half_open_state['last_failure_time'] = datetime.now(UTC).isoformat()
                     print(f' FAIL:  Half-open test request {i + 1} failed')
                 await redis_client.setex(cb_key, 3600, json.dumps(half_open_state))
             final_half_open = json.loads(await redis_client.get(cb_key))
@@ -209,7 +209,7 @@ class RealAuthCircuitBreakerTests:
             else:
                 final_half_open['state'] = CircuitState.OPEN.value
                 final_half_open['service_health_status'] = 'still_unhealthy'
-            final_half_open['state_changed_at'] = datetime.utcnow().isoformat()
+            final_half_open['state_changed_at'] = datetime.now(UTC).isoformat()
             await redis_client.setex(cb_key, 3600, json.dumps(final_half_open))
             print(f" PASS:  Half-open recovery attempt completed - Final state: {final_half_open['state']}")
         finally:
@@ -229,7 +229,7 @@ class RealAuthCircuitBreakerTests:
             for i in range(max_calls):
                 stored_state['half_open_attempts'] += 1
                 stored_state['success_count'] += 1
-                stored_state['last_success_time'] = datetime.utcnow().isoformat()
+                stored_state['last_success_time'] = datetime.now(UTC).isoformat()
                 await redis_client.setex(cb_key, 3600, json.dumps(stored_state))
                 print(f' PASS:  Recovery attempt {i + 1} succeeded')
             final_state = json.loads(await redis_client.get(cb_key))
@@ -237,8 +237,8 @@ class RealAuthCircuitBreakerTests:
                 final_state['state'] = CircuitState.CLOSED.value
                 final_state['failure_count'] = 0
                 final_state['service_health_status'] = 'healthy'
-                final_state['state_changed_at'] = datetime.utcnow().isoformat()
-                final_state['recovered_at'] = datetime.utcnow().isoformat()
+                final_state['state_changed_at'] = datetime.now(UTC).isoformat()
+                final_state['recovered_at'] = datetime.now(UTC).isoformat()
                 final_state.pop('half_open_attempts', None)
                 await redis_client.setex(cb_key, 3600, json.dumps(final_state))
             recovered_state = json.loads(await redis_client.get(cb_key))
@@ -278,7 +278,7 @@ class RealAuthCircuitBreakerTests:
         cb_key = f'circuit_breaker:{service_name}'
         metrics_key = f'circuit_breaker_metrics:{service_name}'
         cb_state = self.create_circuit_breaker_state(service_name, CircuitState.CLOSED)
-        metrics_data = {'total_requests': 0, 'successful_requests': 0, 'failed_requests': 0, 'circuit_opened_count': 0, 'circuit_closed_count': 0, 'circuit_half_open_count': 0, 'average_response_time': 0.0, 'last_metric_update': datetime.utcnow().isoformat(), 'uptime_percentage': 100.0}
+        metrics_data = {'total_requests': 0, 'successful_requests': 0, 'failed_requests': 0, 'circuit_opened_count': 0, 'circuit_closed_count': 0, 'circuit_half_open_count': 0, 'average_response_time': 0.0, 'last_metric_update': datetime.now(UTC).isoformat(), 'uptime_percentage': 100.0}
         try:
             await redis_client.setex(cb_key, 3600, json.dumps(cb_state))
             await redis_client.setex(metrics_key, 3600, json.dumps(metrics_data))
@@ -299,7 +299,7 @@ class RealAuthCircuitBreakerTests:
                     if stored_state['state'] != CircuitState.OPEN.value:
                         stored_state['state'] = CircuitState.OPEN.value
                         stored_metrics['circuit_opened_count'] += 1
-                stored_metrics['last_metric_update'] = datetime.utcnow().isoformat()
+                stored_metrics['last_metric_update'] = datetime.now(UTC).isoformat()
                 success_rate = stored_metrics['successful_requests'] / stored_metrics['total_requests'] * 100
                 stored_metrics['uptime_percentage'] = success_rate
                 await redis_client.setex(cb_key, 3600, json.dumps(stored_state))

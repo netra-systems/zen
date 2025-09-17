@@ -213,7 +213,7 @@ class WebSocketDevModeTest:
                     
                     return True
                     
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 # Connection closed due to auth failure is expected
                 if e.code == 1008:  # Policy violation (auth failure)
                     logger.info("WebSocket auth properly rejected invalid token - GOOD!")

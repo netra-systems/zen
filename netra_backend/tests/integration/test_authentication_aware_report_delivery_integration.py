@@ -23,7 +23,7 @@ import uuid
 import hashlib
 import jwt
 from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
@@ -53,7 +53,7 @@ class AuthenticationReportValidator:
         
         # Validate expiration
         expires_at = datetime.fromisoformat(auth_context["expires_at"])
-        assert expires_at > datetime.utcnow(), "Auth token must not be expired"
+        assert expires_at > datetime.now(UTC), "Auth token must not be expired"
         
         # Validate session integrity
         session_id = auth_context["session_id"]
@@ -125,7 +125,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
         # Create authenticated user
         user_id = UnifiedIdGenerator.generate_base_id("auth_user")
         session_id = UnifiedIdGenerator.generate_base_id(f"session_{user_id[:8]}")
-        auth_token = hashlib.sha256(f"{user_id}{session_id}{datetime.utcnow().isoformat()}".encode()).hexdigest()
+        auth_token = hashlib.sha256(f"{user_id}{session_id}{datetime.now(UTC).isoformat()}".encode()).hexdigest()
         
         # Create authentication context
         auth_context = {
@@ -136,8 +136,8 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
                 "report_access": {"level": "generate", "resources": ["cost_analysis", "performance"]},
                 "data_access": {"level": "read", "scope": "user_owned"}
             },
-            "issued_at": datetime.utcnow().isoformat(),
-            "expires_at": (datetime.utcnow() + timedelta(hours=2)).isoformat(),
+            "issued_at": datetime.now(UTC).isoformat(),
+            "expires_at": (datetime.now(UTC) + timedelta(hours=2)).isoformat(),
             "auth_method": "session_token"
         }
         
@@ -146,7 +146,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             INSERT INTO user_authentication (id, user_id, session_id, auth_token, permissions, expires_at, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
         """, UnifiedIdGenerator.generate_base_id("auth"), user_id, session_id, auth_token,
-            json.dumps(auth_context["permissions"]), datetime.fromisoformat(auth_context["expires_at"]), datetime.utcnow())
+            json.dumps(auth_context["permissions"]), datetime.fromisoformat(auth_context["expires_at"]), datetime.now(UTC))
         
         # Validate authentication requirements
         auth_validation = await validator.validate_authentication_requirements(auth_context)
@@ -190,7 +190,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, session_id, title, content, auth_verified, business_value_score, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         """, report_id, user_id, session_id, authenticated_report["title"], json.dumps(authenticated_report),
-            True, 8.5, datetime.utcnow())
+            True, 8.5, datetime.now(UTC))
         
         # Verify report was created with proper authentication
         report_query = """
@@ -206,7 +206,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
         assert report_verification["auth_verified"] is True
         assert report_verification["user_id"] == user_id
         assert report_verification["session_id"] == session_id
-        assert report_verification["expires_at"] > datetime.utcnow()  # Valid session
+        assert report_verification["expires_at"] > datetime.now(UTC)  # Valid session
 
     @pytest.mark.asyncio
     async def test_unauthenticated_access_rejection_and_error_handling(self, real_services_fixture):
@@ -224,7 +224,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
         unauth_request = {
             "user_id": unauthenticated_user_id,
             "report_type": "cost_analysis",
-            "requested_at": datetime.utcnow().isoformat(),
+            "requested_at": datetime.now(UTC).isoformat(),
             "auth_provided": False
         }
         
@@ -233,7 +233,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
         await real_services_fixture["db"].execute("""
             INSERT INTO access_attempts (id, user_id, request_type, auth_provided, status, attempted_at)
             VALUES ($1, $2, $3, $4, $5, $6)
-        """, attempt_id, unauthenticated_user_id, "report_generation", False, "rejected", datetime.utcnow())
+        """, attempt_id, unauthenticated_user_id, "report_generation", False, "rejected", datetime.now(UTC))
         
         # Generate security rejection response
         security_rejection = {
@@ -262,7 +262,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             INSERT INTO security_rejections (id, attempt_id, rejection_type, rejection_details, user_guidance, created_at)
             VALUES ($1, $2, $3, $4, $5, $6)
         """, rejection_id, attempt_id, "authentication_required", json.dumps(security_rejection["security_details"]),
-            json.dumps(security_rejection["suggested_actions"]), datetime.utcnow())
+            json.dumps(security_rejection["suggested_actions"]), datetime.now(UTC))
         
         # Verify rejection was properly logged and handled
         rejection_query = """
@@ -297,7 +297,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
         expired_token = hashlib.sha256(f"{user_id}{session_id}expired".encode()).hexdigest()
         
         # Create expired authentication context (expired 1 hour ago)
-        expired_time = datetime.utcnow() - timedelta(hours=1)
+        expired_time = datetime.now(UTC) - timedelta(hours=1)
         expired_auth_context = {
             "user_id": user_id,
             "session_id": session_id,
@@ -330,7 +330,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             "user_message": "Your authentication session has expired. Please refresh your session to continue accessing reports.",
             "expiration_details": {
                 "expired_at": expired_auth_context["expires_at"],
-                "current_time": datetime.utcnow().isoformat(),
+                "current_time": datetime.now(UTC).isoformat(),
                 "session_duration_hours": 2
             },
             "renewal_options": [
@@ -363,19 +363,19 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             INSERT INTO token_renewal_guidance (id, user_id, session_id, expiration_details, renewal_options, created_at)
             VALUES ($1, $2, $3, $4, $5, $6)
         """, renewal_id, user_id, session_id, json.dumps(token_renewal_response["expiration_details"]),
-            json.dumps(token_renewal_response["renewal_options"]), datetime.utcnow())
+            json.dumps(token_renewal_response["renewal_options"]), datetime.now(UTC))
         
         # Simulate successful token renewal
         new_session_id = UnifiedIdGenerator.generate_base_id(f"renewed_{user_id[:8]}")
         new_token = hashlib.sha256(f"{user_id}{new_session_id}renewed".encode()).hexdigest()
-        new_expiry = datetime.utcnow() + timedelta(hours=2)
+        new_expiry = datetime.now(UTC) + timedelta(hours=2)
         
         # Store renewed authentication
         await real_services_fixture["db"].execute("""
             INSERT INTO user_authentication (id, user_id, session_id, auth_token, permissions, expires_at, created_at, status)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         """, UnifiedIdGenerator.generate_base_id("renewed_auth"), user_id, new_session_id, new_token,
-            json.dumps(expired_auth_context["permissions"]), new_expiry, datetime.utcnow(), "active")
+            json.dumps(expired_auth_context["permissions"]), new_expiry, datetime.now(UTC), "active")
         
         # Validate renewed authentication works
         renewed_auth_context = expired_auth_context.copy()
@@ -440,8 +440,8 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
                 INSERT INTO user_authentication (id, user_id, session_id, auth_token, permissions, expires_at, created_at, user_role)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             """, UnifiedIdGenerator.generate_base_id(f"auth_{role_config['role']}"), role_config['user_id'], session_id,
-                auth_token, json.dumps(role_config["permissions"]), datetime.utcnow() + timedelta(hours=2),
-                datetime.utcnow(), role_config['role'])
+                auth_token, json.dumps(role_config["permissions"]), datetime.now(UTC) + timedelta(hours=2),
+                datetime.now(UTC), role_config['role'])
             
             # Test each access level for this role
             role_access_results = {}
@@ -481,7 +481,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
                         INSERT INTO reports (id, user_id, session_id, title, content, user_role, business_value_score, created_at)
                         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
                     """, report_id, role_config['user_id'], session_id, role_report["title"], json.dumps(role_report),
-                        role_config['role'], 8.0, datetime.utcnow())
+                        role_config['role'], 8.0, datetime.now(UTC))
                     
                     role_access_results[access_type]["report_generated"] = report_id
             
@@ -497,7 +497,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
         await real_services_fixture["db"].execute("""
             INSERT INTO rbac_test_results (id, test_results, roles_tested, created_at)
             VALUES ($1, $2, $3, $4)
-        """, rbac_test_id, json.dumps(role_test_results), len(user_roles), datetime.utcnow())
+        """, rbac_test_id, json.dumps(role_test_results), len(user_roles), datetime.now(UTC))
         
         # Validate role-based access control worked correctly
         for result in role_test_results:
@@ -563,7 +563,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
                 INSERT INTO user_authentication (id, user_id, session_id, auth_token, permissions, expires_at, created_at)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
             """, UnifiedIdGenerator.generate_base_id(f"auth_isolated_{i}"), user_id, session_id, auth_token,
-                '{"report_access": {"level": "generate"}}', datetime.utcnow() + timedelta(hours=2), datetime.utcnow())
+                '{"report_access": {"level": "generate"}}', datetime.now(UTC) + timedelta(hours=2), datetime.now(UTC))
             
             # Generate user-specific report with sensitive information
             user_report = {
@@ -589,7 +589,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
                 INSERT INTO reports (id, user_id, session_id, title, content, confidentiality_level, business_value_score, created_at)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             """, report_id, user_id, session_id, user_report["title"], json.dumps(user_report),
-                "user_private", 8.0, datetime.utcnow())
+                "user_private", 8.0, datetime.now(UTC))
             
             users_data.append({
                 "user_id": user_id,
@@ -613,7 +613,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
                     "requesting_session": requesting_user["session_id"],
                     "target_report_id": target_user["report_id"],
                     "target_user_id": target_user["user_id"],
-                    "attempted_at": datetime.utcnow()
+                    "attempted_at": datetime.now(UTC)
                 }
                 
                 # Simulate access check (should fail)
@@ -690,7 +690,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             INSERT INTO isolation_test_results (id, test_summary, users_tested, cross_attempts, created_at)
             VALUES ($1, $2, $3, $4, $5)
         """, UnifiedIdGenerator.generate_base_id("isolation_test"), json.dumps(isolation_summary),
-            len(users_data), len(cross_access_attempts), datetime.utcnow())
+            len(users_data), len(cross_access_attempts), datetime.now(UTC))
         
         # Final validation
         assert isolation_summary["all_cross_access_denied"] is True
@@ -722,8 +722,8 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
                 "report_access": {"level": "generate", "resources": ["automated_reports", "cost_analysis"]},
                 "api_access": {"level": "programmatic", "rate_limit": 1000}
             },
-            "issued_at": datetime.utcnow().isoformat(),
-            "expires_at": (datetime.utcnow() + timedelta(days=90)).isoformat(),  # Long-lived
+            "issued_at": datetime.now(UTC).isoformat(),
+            "expires_at": (datetime.now(UTC) + timedelta(days=90)).isoformat(),  # Long-lived
             "auth_method": "api_key"
         }
         
@@ -733,7 +733,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         """, UnifiedIdGenerator.generate_base_id("api_auth"), user_id, api_key_id, api_key_secret,
             json.dumps(api_auth_context["permissions"]), datetime.fromisoformat(api_auth_context["expires_at"]),
-            datetime.utcnow(), "active")
+            datetime.now(UTC), "active")
         
         # Validate API key authentication
         api_validation = await validator.validate_authentication_requirements(api_auth_context)
@@ -779,12 +779,12 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, api_key_id, title, content, auth_method, business_value_score, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         """, api_report_id, user_id, api_key_id, api_report["title"], json.dumps(api_report),
-            "api_key", 8.5, datetime.utcnow())
+            "api_key", 8.5, datetime.now(UTC))
         
         # Test API key rate limiting simulation
         api_requests = []
         for i in range(10):  # Simulate 10 API requests
-            request_start = datetime.utcnow()
+            request_start = datetime.now(UTC)
             
             # Simulate API request processing
             api_request = {
@@ -819,7 +819,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             INSERT INTO api_key_test_results (id, api_key_id, user_id, test_summary, requests_tested, created_at)
             VALUES ($1, $2, $3, $4, $5, $6)
         """, UnifiedIdGenerator.generate_base_id("api_test_results"), api_key_id, user_id,
-            json.dumps(api_functionality_summary), len(api_requests), datetime.utcnow())
+            json.dumps(api_functionality_summary), len(api_requests), datetime.now(UTC))
         
         # Verify API key report generation was successful
         api_report_query = """
@@ -854,8 +854,8 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             "sub": user_id,
             "client_id": oauth_client_id,
             "scope": "reports:read reports:generate user:profile",
-            "exp": int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
-            "iat": int(datetime.utcnow().timestamp()),
+            "exp": int((datetime.now(UTC) + timedelta(hours=1)).timestamp()),
+            "iat": int(datetime.now(UTC).timestamp()),
             "iss": "netra_oauth_provider"
         }
         
@@ -872,7 +872,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
                 "oauth_scopes": ["reports:read", "reports:generate", "user:profile"],
                 "client_id": oauth_client_id
             },
-            "issued_at": datetime.utcnow().isoformat(),
+            "issued_at": datetime.now(UTC).isoformat(),
             "expires_at": datetime.fromtimestamp(oauth_token_payload["exp"]).isoformat(),
             "auth_method": "oauth_token"
         }
@@ -883,7 +883,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         """, UnifiedIdGenerator.generate_base_id("oauth_auth"), user_id, oauth_client_id, oauth_token,
             json.dumps(oauth_auth_context["permissions"]["oauth_scopes"]), 
-            datetime.fromtimestamp(oauth_token_payload["exp"]), datetime.utcnow(), "active")
+            datetime.fromtimestamp(oauth_token_payload["exp"]), datetime.now(UTC), "active")
         
         # Validate OAuth authentication
         oauth_validation = await validator.validate_authentication_requirements(oauth_auth_context)
@@ -953,7 +953,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, oauth_client_id, title, content, auth_method, business_value_score, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         """, oauth_report_id, user_id, oauth_client_id, oauth_report["title"], json.dumps(oauth_report),
-            "oauth_token", 8.0, datetime.utcnow())
+            "oauth_token", 8.0, datetime.now(UTC))
         
         # Store OAuth test results
         oauth_test_summary = {
@@ -969,7 +969,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             INSERT INTO oauth_test_results (id, user_id, client_id, test_summary, scope_tests, created_at)
             VALUES ($1, $2, $3, $4, $5, $6)
         """, UnifiedIdGenerator.generate_base_id("oauth_test_results"), user_id, oauth_client_id,
-            json.dumps(oauth_test_summary), json.dumps(scope_test_results), datetime.utcnow())
+            json.dumps(oauth_test_summary), json.dumps(scope_test_results), datetime.now(UTC))
         
         # Verify OAuth report was created correctly
         oauth_report_query = """
@@ -1003,7 +1003,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
         
         # Second factor: MFA token (simulate TOTP/SMS)
         mfa_code = "123456"  # In production, would be generated TOTP/SMS code
-        mfa_token = hashlib.sha256(f"{user_id}{mfa_code}{datetime.utcnow().strftime('%Y%m%d%H%M')}".encode()).hexdigest()
+        mfa_token = hashlib.sha256(f"{user_id}{mfa_code}{datetime.now(UTC).strftime('%Y%m%d%H%M')}".encode()).hexdigest()
         
         # Create MFA authentication context
         mfa_auth_context = {
@@ -1018,11 +1018,11 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             "mfa_details": {
                 "primary_auth": "password",
                 "secondary_auth": "totp",
-                "mfa_verified_at": datetime.utcnow().isoformat(),
+                "mfa_verified_at": datetime.now(UTC).isoformat(),
                 "mfa_valid_for_minutes": 15
             },
-            "issued_at": datetime.utcnow().isoformat(),
-            "expires_at": (datetime.utcnow() + timedelta(minutes=15)).isoformat(),  # Shorter expiry for MFA
+            "issued_at": datetime.now(UTC).isoformat(),
+            "expires_at": (datetime.now(UTC) + timedelta(minutes=15)).isoformat(),  # Shorter expiry for MFA
             "auth_method": "mfa"
         }
         
@@ -1033,7 +1033,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         """, UnifiedIdGenerator.generate_base_id("mfa_auth"), user_id, session_id, primary_token, mfa_token,
             True, json.dumps(mfa_auth_context["permissions"]), 
-            datetime.fromisoformat(mfa_auth_context["expires_at"]), datetime.utcnow(), "enhanced")
+            datetime.fromisoformat(mfa_auth_context["expires_at"]), datetime.now(UTC), "enhanced")
         
         # Validate MFA authentication (enhanced requirements)
         mfa_validation = await validator.validate_authentication_requirements(mfa_auth_context)
@@ -1092,14 +1092,14 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
                               mfa_required, mfa_verified, business_value_score, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         """, mfa_report_id, user_id, session_id, mfa_protected_report["title"], 
-            json.dumps(mfa_protected_report), "confidential_mfa_required", True, True, 9.5, datetime.utcnow())
+            json.dumps(mfa_protected_report), "confidential_mfa_required", True, True, 9.5, datetime.now(UTC))
         
         # Test MFA timeout handling
         await asyncio.sleep(0.1)  # Simulate time passage
         
         # Simulate MFA expiration check
         mfa_expiry_check = datetime.fromisoformat(mfa_auth_context["expires_at"])
-        current_time = datetime.utcnow()
+        current_time = datetime.now(UTC)
         mfa_still_valid = current_time < mfa_expiry_check
         
         # Store MFA session monitoring
@@ -1133,7 +1133,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             INSERT INTO mfa_test_results (id, user_id, session_id, test_summary, security_level, created_at)
             VALUES ($1, $2, $3, $4, $5, $6)
         """, UnifiedIdGenerator.generate_base_id("mfa_test_results"), user_id, session_id,
-            json.dumps(mfa_test_summary), "enhanced", datetime.utcnow())
+            json.dumps(mfa_test_summary), "enhanced", datetime.now(UTC))
         
         # Verify MFA-protected report was created correctly
         mfa_report_query = """
@@ -1168,49 +1168,49 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
                 "event_type": "authentication_attempt",
                 "details": {"user_id": audit_user_id, "method": "password", "ip_address": "192.168.1.100"},
                 "outcome": "success",
-                "timestamp": datetime.utcnow()
+                "timestamp": datetime.now(UTC)
             },
             {
                 "event_type": "session_established", 
                 "details": {"user_id": audit_user_id, "session_id": audit_session_id, "duration_hours": 2},
                 "outcome": "success",
-                "timestamp": datetime.utcnow()
+                "timestamp": datetime.now(UTC)
             },
             {
                 "event_type": "permission_check",
                 "details": {"user_id": audit_user_id, "requested_access": "report_generate", "resource": "cost_analysis"},
                 "outcome": "authorized",
-                "timestamp": datetime.utcnow()
+                "timestamp": datetime.now(UTC)
             },
             {
                 "event_type": "report_generation_initiated",
                 "details": {"user_id": audit_user_id, "report_type": "cost_analysis", "data_sources": ["aws", "azure"]},
                 "outcome": "started",
-                "timestamp": datetime.utcnow()
+                "timestamp": datetime.now(UTC)
             },
             {
                 "event_type": "data_access",
                 "details": {"user_id": audit_user_id, "data_type": "financial", "records_accessed": 15000},
                 "outcome": "success", 
-                "timestamp": datetime.utcnow()
+                "timestamp": datetime.now(UTC)
             },
             {
                 "event_type": "report_generated",
                 "details": {"user_id": audit_user_id, "report_id": "audit_report_123", "business_value": 8.5},
                 "outcome": "success",
-                "timestamp": datetime.utcnow()
+                "timestamp": datetime.now(UTC)
             },
             {
                 "event_type": "report_accessed",
                 "details": {"user_id": audit_user_id, "report_id": "audit_report_123", "access_method": "web_ui"},
                 "outcome": "success",
-                "timestamp": datetime.utcnow()
+                "timestamp": datetime.now(UTC)
             },
             {
                 "event_type": "session_expired",
                 "details": {"user_id": audit_user_id, "session_id": audit_session_id, "duration_minutes": 120},
                 "outcome": "timeout",
-                "timestamp": datetime.utcnow() + timedelta(hours=2)
+                "timestamp": datetime.now(UTC) + timedelta(hours=2)
             }
         ]
         
@@ -1270,7 +1270,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             INSERT INTO reports (id, user_id, session_id, title, content, report_type, business_value_score, created_at, audit_related)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         """, audit_report_id, audit_user_id, audit_session_id, comprehensive_audit_report["title"],
-            json.dumps(comprehensive_audit_report), "audit_compliance", 9.0, datetime.utcnow(), True)
+            json.dumps(comprehensive_audit_report), "audit_compliance", 9.0, datetime.now(UTC), True)
         
         # Verify audit trail completeness and integrity
         audit_verification_query = """
@@ -1316,7 +1316,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             VALUES ($1, $2, $3, $4, $5, $6, $7)
         """, UnifiedIdGenerator.generate_base_id("audit_summary"), audit_user_id, audit_session_id,
             json.dumps(audit_summary_metrics), "complete_session", audit_summary_metrics["audit_completeness_percent"],
-            datetime.utcnow())
+            datetime.now(UTC))
         
         # Final audit trail validation
         assert audit_summary_metrics["audit_completeness_percent"] == 100.0
@@ -1352,8 +1352,8 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
                     "report_access": {"level": "generate", "resources": [f"user_{i}_reports"]},
                     "session_isolation": "strict"
                 },
-                "issued_at": datetime.utcnow().isoformat(),
-                "expires_at": (datetime.utcnow() + timedelta(hours=2)).isoformat(),
+                "issued_at": datetime.now(UTC).isoformat(),
+                "expires_at": (datetime.now(UTC) + timedelta(hours=2)).isoformat(),
                 "auth_method": "session_token",
                 "concurrent_session_id": i
             }
@@ -1364,7 +1364,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             """, UnifiedIdGenerator.generate_base_id(f"concurrent_auth_{i}"), user_id, session_id, auth_token,
                 json.dumps(auth_context["permissions"]), datetime.fromisoformat(auth_context["expires_at"]),
-                datetime.utcnow(), i)
+                datetime.now(UTC), i)
             
             concurrent_sessions.append(auth_context)
         
@@ -1404,7 +1404,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
                 INSERT INTO reports (id, user_id, session_id, title, content, concurrent_session_index, business_value_score, created_at)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             """, report_id, session_auth["user_id"], session_auth["session_id"], session_report["title"],
-                json.dumps(session_report), session_index, 8.0, datetime.utcnow())
+                json.dumps(session_report), session_index, 8.0, datetime.now(UTC))
             
             # Log concurrent session activity
             activity_id = UnifiedIdGenerator.generate_base_id(f"concurrent_activity_{session_index}")
@@ -1412,7 +1412,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
                 INSERT INTO session_activity (id, user_id, session_id, activity_type, activity_details, timestamp, concurrent_session_index)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
             """, activity_id, session_auth["user_id"], session_auth["session_id"], "report_generation",
-                json.dumps({"report_id": report_id, "session_index": session_index}), datetime.utcnow(), session_index)
+                json.dumps({"report_id": report_id, "session_index": session_index}), datetime.now(UTC), session_index)
             
             return {
                 "session_index": session_index,
@@ -1480,7 +1480,7 @@ class AuthenticationAwareReportDeliveryIntegrationTests(BaseIntegrationTest):
             INSERT INTO concurrent_session_test_results (id, test_summary, sessions_tested, isolation_tests, created_at)
             VALUES ($1, $2, $3, $4, $5)
         """, UnifiedIdGenerator.generate_base_id("concurrent_test_results"), json.dumps(concurrent_test_summary),
-            session_count, len(session_isolation_tests), datetime.utcnow())
+            session_count, len(session_isolation_tests), datetime.now(UTC))
         
         # Final validation of concurrent session security
         assert len(successful_sessions) == session_count  # All sessions processed successfully

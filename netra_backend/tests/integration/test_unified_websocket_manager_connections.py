@@ -20,14 +20,14 @@ This is a NON-DOCKER integration test that focuses on core UnifiedWebSocketManag
 
 import asyncio
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 # Core imports
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.unified_manager import (
     UnifiedWebSocketManager,
     WebSocketConnection
 )
@@ -61,7 +61,7 @@ class UnifiedWebSocketManagerConnectionsTests(BaseIntegrationTest):
             connection_id=f"conn_{uuid.uuid4().hex[:8]}",
             user_id=f"test_user_{uuid.uuid4().hex[:8]}",
             websocket=mock_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"test": "websocket_connection"}
         )
         return connection
@@ -170,7 +170,7 @@ class UnifiedWebSocketManagerConnectionsTests(BaseIntegrationTest):
             connection_id=f"conn_1_{uuid.uuid4().hex[:8]}",
             user_id="isolation_user_1_alpha",
             websocket=mock_ws1,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"user_data": "sensitive_user_1_data"}
         )
         
@@ -178,7 +178,7 @@ class UnifiedWebSocketManagerConnectionsTests(BaseIntegrationTest):
             connection_id=f"conn_2_{uuid.uuid4().hex[:8]}",
             user_id="isolation_user_2_beta", 
             websocket=mock_ws2,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"user_data": "sensitive_user_2_data"}
         )
         
@@ -255,7 +255,7 @@ class UnifiedWebSocketManagerConnectionsTests(BaseIntegrationTest):
         broadcast_message = {
             "type": "system_announcement",
             "data": {"message": "System maintenance scheduled"},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         mock_websocket.send_json.reset_mock()
@@ -344,7 +344,7 @@ class UnifiedWebSocketManagerConnectionsTests(BaseIntegrationTest):
             connection_id=f"recovery_conn_{uuid.uuid4().hex[:8]}",
             user_id=user_id,
             websocket=mock_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"test": "recovery_connection"}
         )
         
@@ -378,7 +378,7 @@ class UnifiedWebSocketManagerConnectionsTests(BaseIntegrationTest):
                 connection_id=f"stats_conn_{i}_{uuid.uuid4().hex[:8]}",
                 user_id=f"stats_user_{i}",
                 websocket=mock_ws,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={"index": i}
             )
             connections.append(connection)

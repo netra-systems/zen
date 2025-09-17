@@ -34,13 +34,13 @@ import json
 import pytest
 import uuid
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Any, Dict, List, Optional, Set
 from unittest.mock import Mock, AsyncMock, patch
 from contextlib import asynccontextmanager
 
 # Core imports
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.unified_manager import (
     UnifiedWebSocketManager,
     WebSocketConnection,
     RegistryCompat
@@ -79,7 +79,7 @@ class MockWebSocket:
         
         self.sent_messages.append({
             "message": message,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "user_id": self.user_id
         })
         
@@ -183,7 +183,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
             connection_id=connection_id,
             user_id=user_id,
             websocket=websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"test": "lifecycle"}
         )
         
@@ -206,7 +206,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
         test_message = {
             "type": "test_message",
             "data": {"content": "Hello from lifecycle test"},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         # Send message to user
@@ -270,7 +270,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
                 connection_id=connection_id,
                 user_id=user_id,
                 websocket=websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={"isolation_test": True, "user_index": i}
             )
             
@@ -324,7 +324,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
                 message = {
                     "type": "concurrent_test",
                     "data": {"message_id": i, "target_user": target_user_id},
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 await websocket_manager.send_to_user(target_user_id, message)
                 # Small delay to simulate real-world timing
@@ -384,7 +384,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
                 connection_id=connection_id,
                 user_id=user_id,
                 websocket=websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={"role": "broadcaster" if i == 0 else "receiver"}
             )
             
@@ -404,7 +404,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
             "data": {
                 "announcement": "System maintenance in 5 minutes",
                 "priority": "high",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             },
             "broadcast_id": str(uuid.uuid4())
         }
@@ -462,7 +462,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
                 "type": "performance_test",
                 "data": {
                     "message_id": i,
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     "payload": f"Rapid message {i}"
                 }
             }
@@ -511,7 +511,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
                 connection_id=connection_id,
                 user_id=multi_connection_user,
                 websocket=websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={"tab": f"tab_{i}", "browser": "chrome"}
             )
             
@@ -529,7 +529,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
         # TEST 2: Message delivery to all user connections
         multi_connection_message = {
             "type": "multi_tab_sync",
-            "data": {"action": "refresh_data", "timestamp": datetime.utcnow().isoformat()}
+            "data": {"action": "refresh_data", "timestamp": datetime.now(UTC).isoformat()}
         }
         
         await websocket_manager.send_to_user(multi_connection_user, multi_connection_message)
@@ -623,7 +623,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
                 connection_id=connection_id,
                 user_id=user_id,
                 websocket=websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={"auth": auth_info}
             )
             
@@ -770,7 +770,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
             connection_id=initial_connection_id,
             user_id=recovery_user,
             websocket=initial_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"connection_attempt": 1}
         )
         
@@ -809,7 +809,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
             connection_id=recovery_connection_id,
             user_id=recovery_user,
             websocket=recovery_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"connection_attempt": 2, "recovery": True}
         )
         
@@ -846,7 +846,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
                 connection_id=wait_connection_id,
                 user_id=new_user,
                 websocket=wait_websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={"delayed_connection": True}
             )
             
@@ -920,7 +920,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
                 connection_id=critical_connection_id,
                 user_id=critical_user,
                 websocket=critical_websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={"mission_critical": True, "subscription": "enterprise"}
             )
             
@@ -1128,7 +1128,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
             connection_id=health_connection_id,
             user_id=health_user,
             websocket=health_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"health_monitoring": True}
         )
         
@@ -1285,7 +1285,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
             connection_id=bridge_connection_id,
             user_id=bridge_user,
             websocket=bridge_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"integration_test": True, "component": "agent_bridge"}
         )
         
@@ -1396,7 +1396,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
             "bridge_status": "active",
             "registry_connected": True,
             "websocket_manager_connected": True,
-            "last_heartbeat": datetime.utcnow().isoformat()
+            "last_heartbeat": datetime.now(UTC).isoformat()
         }
         
         # Send health update through WebSocket
@@ -1472,7 +1472,7 @@ async def multi_user_websocket_scenario():
                 connection_id=connection_id,
                 user_id=user_id,
                 websocket=websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={
                     "device": f"device_{j}",
                     "user_index": i,

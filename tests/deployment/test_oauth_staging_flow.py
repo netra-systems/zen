@@ -31,18 +31,18 @@ class OAuthStagingTester:
         try:
         response = await client.get("formatted_string")
         if response.status_code != 200:
-        print("formatted_string")
+        print("")
         return False
 
         data = response.json()
         if data.get("status") != "healthy":
-        print("formatted_string")
+        print("")
         return False
 
         print("[PASS] Auth service is healthy")
         return True
         except Exception as e:
-        print("formatted_string")
+        print("")
         return False
 
     async def test_auth_config_endpoint(self) -> bool:
@@ -52,21 +52,21 @@ class OAuthStagingTester:
         response = await client.get("formatted_string")
         if response.status_code != 200:
         print( )
-        "formatted_string"
+        ""
                                             
         return False
 
         data = response.json()
 
                                             # Verify required fields
-        required_fields = [ )
+        required_fields = [ ]
         "google_client_id",
         "endpoints",
         "authorized_redirect_uris",
                                             
         for field in required_fields:
         if field not in data:
-        print("formatted_string")
+        print("")
         return False
 
                                                     # Verify Google client ID is set
@@ -75,21 +75,21 @@ class OAuthStagingTester:
         return False
 
                                                         # Verify redirect URI is correct
-        expected_callback = "formatted_string"
+        expected_callback = ""
         if expected_callback not in data.get("authorized_redirect_uris", []):
         print( )
-        "formatted_string"
+        ""
                                                             
-        print("formatted_string")
+        print("")
         return False
 
         print("[PASS] Auth config is properly configured")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
         return True
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         return False
 
     async def test_oauth_initiation(self) -> bool:
@@ -97,19 +97,19 @@ class OAuthStagingTester:
         async with httpx.AsyncClient(follow_redirects=False) as client:
         try:
         response = await client.get( )
-        "formatted_string", params={"provider": "google"}
+        "", params={"provider": "google"}
                                                                             
 
         if response.status_code != 302:
         print( )
-        f'[FAIL] OAuth initiation didn't redirect: { )
+        f'[FAIL] OAuth initiation didn't redirect: { }
         response.status_code}"
                                                                                 
         return False
 
         location = response.headers.get("location", "")
         if not location.startswith("https://accounts.google.com/o/oauth2/"):
-        print("formatted_string")
+        print("")
         return False
 
                                                                                     # Check for required OAuth parameters
@@ -121,19 +121,19 @@ class OAuthStagingTester:
         print("[FAIL] Missing redirect_uri in OAuth URL")
         return False
 
-        if "formatted_string" not in location:
+        if "" not in location:
         print("[FAIL] Incorrect redirect_uri in OAuth URL")
         return False
 
         print("[PASS] OAuth initiation works correctly")
         print("   Redirects to Google OAuth")
         print( )
-        "formatted_string"
+        ""
                                                                                                 
         return True
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         return False
 
     async def test_frontend_chat_page(self) -> bool:
@@ -144,7 +144,7 @@ class OAuthStagingTester:
         response = await client.get("formatted_string")
         if response.status_code != 200:
         print( )
-        "formatted_string"
+        ""
                                                                                                                     
         return False
 
@@ -158,7 +158,7 @@ class OAuthStagingTester:
         return True
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         return False
 
     async def test_token_validation_endpoint(self) -> bool:
@@ -167,7 +167,7 @@ class OAuthStagingTester:
         try:
                                                                                                                                         # Test with invalid token (should fail gracefully)
         response = await client.post( )
-        "formatted_string",
+        "",
         json={"token": "invalid-test-token"})
 
                                                                                                                                         # Should return 401 for invalid token
@@ -183,12 +183,12 @@ class OAuthStagingTester:
         return True
 
         print( )
-        "formatted_string"
+        ""
                                                                                                                                                     
         return False
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         return False
 
     async def test_api_auth_integration(self) -> bool:
@@ -198,7 +198,7 @@ class OAuthStagingTester:
                                                                                                                                                                     # Test API health endpoint (should work without auth)
         response = await client.get("formatted_string")
         if response.status_code != 200:
-        print("formatted_string")
+        print("")
         return False
 
                                                                                                                                                                         # Test protected endpoint without token (should fail)
@@ -210,26 +210,26 @@ class OAuthStagingTester:
         print("[WARN] API endpoint accessible without authentication")
         return True  # Not a failure, might be intentional
 
-        print("formatted_string")
+        print("")
         return False
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         return False
 
     async def run_all_tests(self):
         """Run all OAuth staging tests"""
-        print(" )
-        " + "=" * 60)
+        print("")
+         + =" * 60)
         print("OAuth Staging Environment Tests")
         print("=" * 60)
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
         print("=" * 60 + " )
         ")
 
-        tests = [ )
+        tests = [ ]
         ("Auth Service Health", self.test_auth_service_health),
         ("Auth Config Endpoint", self.test_auth_config_endpoint),
         ("OAuth Initiation", self.test_oauth_initiation),
@@ -240,15 +240,15 @@ class OAuthStagingTester:
 
         results = []
         for test_name, test_func in tests:
-        print("formatted_string")
+        print("")
         print("-" * 40)
         result = await test_func()
         results.append((test_name, result))
         print()
 
         # Summary
-        print(" )
-        " + "=" * 60)
+        print("")
+         + =" * 60)
         print("Test Summary")
         print("=" * 60)
 
@@ -257,17 +257,17 @@ class OAuthStagingTester:
 
         for test_name, result in results:
         status = "[PASS]" if result else "[FAIL]"
-        print("formatted_string")
+        print("")
 
-        print("formatted_string")
+        print("")
 
         if passed == total:
-        print(" )
+        print("")
         [SUCCESS] All OAuth staging tests passed!")
         await asyncio.sleep(0)
         return True
         else:
-        print("formatted_string")
+        print("")
         return False
 
 

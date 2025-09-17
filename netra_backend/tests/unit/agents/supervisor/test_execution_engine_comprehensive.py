@@ -42,7 +42,7 @@ import pytest
 import sys
 import time
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from typing import Any, Dict, List, Optional, Callable
 from unittest.mock import AsyncMock, MagicMock, patch, call, Mock
 from contextlib import asynccontextmanager
@@ -75,7 +75,7 @@ class MockWebSocketBridgeComprehensive:
         if self.should_fail:
             self.metrics['errors'] += 1
             raise ConnectionError('WebSocket connection failed')
-        self.events.append({'type': 'agent_started', 'run_id': run_id, 'agent_name': agent_name, 'data': data, 'timestamp': datetime.utcnow().isoformat()})
+        self.events.append({'type': 'agent_started', 'run_id': run_id, 'agent_name': agent_name, 'data': data, 'timestamp': datetime.now(UTC).isoformat()})
         self.metrics['messages_sent'] += 1
 
     async def notify_agent_thinking(self, run_id: str, agent_name: str, reasoning: str, step_number: int=None, progress_percentage: float=None):
@@ -84,7 +84,7 @@ class MockWebSocketBridgeComprehensive:
         if self.should_fail:
             self.metrics['errors'] += 1
             raise ConnectionError('WebSocket connection failed')
-        self.events.append({'type': 'agent_thinking', 'run_id': run_id, 'agent_name': agent_name, 'reasoning': reasoning, 'step': step_number, 'progress': progress_percentage, 'timestamp': datetime.utcnow().isoformat()})
+        self.events.append({'type': 'agent_thinking', 'run_id': run_id, 'agent_name': agent_name, 'reasoning': reasoning, 'step': step_number, 'progress': progress_percentage, 'timestamp': datetime.now(UTC).isoformat()})
         self.metrics['messages_sent'] += 1
 
     async def notify_tool_executing(self, run_id: str, agent_name: str, tool_name: str, parameters: Dict):
@@ -93,7 +93,7 @@ class MockWebSocketBridgeComprehensive:
         if self.should_fail:
             self.metrics['errors'] += 1
             raise ConnectionError('WebSocket connection failed')
-        self.events.append({'type': 'tool_executing', 'run_id': run_id, 'agent_name': agent_name, 'tool_name': tool_name, 'parameters': parameters, 'timestamp': datetime.utcnow().isoformat()})
+        self.events.append({'type': 'tool_executing', 'run_id': run_id, 'agent_name': agent_name, 'tool_name': tool_name, 'parameters': parameters, 'timestamp': datetime.now(UTC).isoformat()})
         self.metrics['messages_sent'] += 1
 
     async def notify_tool_completed(self, run_id: str, agent_name: str, tool_name: str, result: Dict, execution_time_ms: float):
@@ -102,7 +102,7 @@ class MockWebSocketBridgeComprehensive:
         if self.should_fail:
             self.metrics['errors'] += 1
             raise ConnectionError('WebSocket connection failed')
-        self.events.append({'type': 'tool_completed', 'run_id': run_id, 'agent_name': agent_name, 'tool_name': tool_name, 'result': result, 'execution_time_ms': execution_time_ms, 'timestamp': datetime.utcnow().isoformat()})
+        self.events.append({'type': 'tool_completed', 'run_id': run_id, 'agent_name': agent_name, 'tool_name': tool_name, 'result': result, 'execution_time_ms': execution_time_ms, 'timestamp': datetime.now(UTC).isoformat()})
         self.metrics['messages_sent'] += 1
 
     async def notify_agent_completed(self, run_id: str, agent_name: str, result: Dict, execution_time_ms: float):
@@ -111,7 +111,7 @@ class MockWebSocketBridgeComprehensive:
         if self.should_fail:
             self.metrics['errors'] += 1
             raise ConnectionError('WebSocket connection failed')
-        self.events.append({'type': 'agent_completed', 'run_id': run_id, 'agent_name': agent_name, 'result': result, 'execution_time': execution_time_ms, 'timestamp': datetime.utcnow().isoformat()})
+        self.events.append({'type': 'agent_completed', 'run_id': run_id, 'agent_name': agent_name, 'result': result, 'execution_time': execution_time_ms, 'timestamp': datetime.now(UTC).isoformat()})
         self.metrics['messages_sent'] += 1
 
     async def notify_agent_error(self, run_id: str, agent_name: str, error: str, error_context: Dict):
@@ -120,7 +120,7 @@ class MockWebSocketBridgeComprehensive:
         if self.should_fail:
             self.metrics['errors'] += 1
             raise ConnectionError('WebSocket connection failed')
-        self.events.append({'type': 'agent_error', 'run_id': run_id, 'agent_name': agent_name, 'error': error, 'context': error_context, 'timestamp': datetime.utcnow().isoformat()})
+        self.events.append({'type': 'agent_error', 'run_id': run_id, 'agent_name': agent_name, 'error': error, 'context': error_context, 'timestamp': datetime.now(UTC).isoformat()})
         self.metrics['messages_sent'] += 1
 
     async def notify_agent_death(self, run_id: str, agent_name: str, death_type: str, data: Dict):
@@ -129,7 +129,7 @@ class MockWebSocketBridgeComprehensive:
         if self.should_fail:
             self.metrics['errors'] += 1
             raise ConnectionError('WebSocket connection failed')
-        self.events.append({'type': 'agent_death', 'run_id': run_id, 'agent_name': agent_name, 'death_type': death_type, 'data': data, 'timestamp': datetime.utcnow().isoformat()})
+        self.events.append({'type': 'agent_death', 'run_id': run_id, 'agent_name': agent_name, 'death_type': death_type, 'data': data, 'timestamp': datetime.now(UTC).isoformat()})
         self.metrics['messages_sent'] += 1
 
     async def get_metrics(self):

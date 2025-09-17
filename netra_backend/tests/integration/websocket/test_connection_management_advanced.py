@@ -240,7 +240,7 @@ class WebSocketConnectionManagementAdvancedTests(BaseIntegrationTest):
             
             # Test connection state after closure
             for user_id, websocket in created_connections:
-                with pytest.raises(websockets.exceptions.ConnectionClosed):
+                with pytest.raises(websockets.ConnectionClosed):
                     await websocket.send(json.dumps({"type": "test", "user_id": user_id}))
             
         except Exception as e:
@@ -391,8 +391,8 @@ class WebSocketConnectionManagementAdvancedTests(BaseIntegrationTest):
                     if not invalid_websocket.closed:
                         await invalid_websocket.close()
                         
-            except (websockets.exceptions.InvalidStatus, 
-                   websockets.exceptions.InvalidHandshake,
+            except (websockets.InvalidStatus, 
+                   websockets.InvalidHandshake,
                    asyncio.TimeoutError,
                    ConnectionRefusedError):
                 # These are expected for invalid authentication
@@ -426,8 +426,8 @@ class WebSocketConnectionManagementAdvancedTests(BaseIntegrationTest):
                     if not no_auth_websocket.closed:
                         await no_auth_websocket.close()
                         
-            except (websockets.exceptions.InvalidStatus, 
-                   websockets.exceptions.InvalidHandshake,
+            except (websockets.InvalidStatus, 
+                   websockets.InvalidHandshake,
                    asyncio.TimeoutError,
                    ConnectionRefusedError):
                 # Expected for missing authentication
@@ -500,7 +500,7 @@ class WebSocketConnectionManagementAdvancedTests(BaseIntegrationTest):
                 assert websocket.closed, f"Connection {iteration} not properly closed"
                 
                 # Test that closed connection cannot be used
-                with pytest.raises(websockets.exceptions.ConnectionClosed):
+                with pytest.raises(websockets.ConnectionClosed):
                     await websocket.send(json.dumps({"type": "after_close"}))
                 
                 # Brief pause between iterations to allow cleanup

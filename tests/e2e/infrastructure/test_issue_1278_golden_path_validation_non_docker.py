@@ -397,7 +397,7 @@ class TestIssue1278GoldenPathValidationNonDocker(SSotAsyncTestCase):
                             f"Connection time {connection_time:.2f}s"
                         )
 
-            except websockets.exceptions.ConnectionClosed as e:
+            except websockets.ConnectionClosed as e:
                 connection_time = time.time() - step_start
                 self.record_metric("websocket_connection_success", False)
                 self.record_metric("websocket_connection_time", connection_time)
@@ -411,7 +411,7 @@ class TestIssue1278GoldenPathValidationNonDocker(SSotAsyncTestCase):
                     f"Time {connection_time:.2f}s, Error: {e}"
                 )
 
-            except websockets.exceptions.InvalidStatusCode as e:
+            except websockets.InvalidStatusCode as e:
                 connection_time = time.time() - step_start
                 self.record_metric("websocket_connection_success", False)
                 self.record_metric("websocket_connection_time", connection_time)

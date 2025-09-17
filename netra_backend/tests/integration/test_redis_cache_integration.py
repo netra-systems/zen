@@ -17,7 +17,7 @@ import asyncio
 import uuid
 import pytest
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -58,7 +58,7 @@ class RedisCacheIntegrationTests(BaseIntegrationTest):
             id=str(user_id),
             email="cache.sync@test.com",
             name="Cache Sync User",
-            created_at=datetime.utcnow()
+            created_at=datetime.now(UTC)
         )
         
         db.add(test_user)
@@ -74,7 +74,7 @@ class RedisCacheIntegrationTests(BaseIntegrationTest):
             "id": str(user_id),
             "email": "cache.sync@test.com",
             "name": "Cache Sync User",
-            "cached_at": datetime.utcnow().isoformat()
+            "cached_at": datetime.now(UTC).isoformat()
         }
         
         await cache_service.set_with_consistency(user_cache_key, user_data, ttl=300)
@@ -86,7 +86,7 @@ class RedisCacheIntegrationTests(BaseIntegrationTest):
         
         # Update user in database
         test_user.name = "Updated Cache Sync User"
-        test_user.updated_at = datetime.utcnow()
+        test_user.updated_at = datetime.now(UTC)
         await db.commit()
         
         # Cache should be automatically invalidated on database update
@@ -101,7 +101,7 @@ class RedisCacheIntegrationTests(BaseIntegrationTest):
             "id": str(user_id),
             "email": "cache.sync@test.com",
             "name": "Updated Cache Sync User",
-            "cached_at": datetime.utcnow().isoformat()
+            "cached_at": datetime.now(UTC).isoformat()
         }
         
         await cache_service.set_with_consistency(user_cache_key, updated_user_data, ttl=300)
@@ -143,7 +143,7 @@ class RedisCacheIntegrationTests(BaseIntegrationTest):
                 "email": email,
                 "name": name,
                 "preferences": {"theme": f"theme_{user_id}", "language": "en"},
-                "cached_at": datetime.utcnow().isoformat()
+                "cached_at": datetime.now(UTC).isoformat()
             }
             
             await cache_manager.set_user_profile(profile_data)
@@ -152,8 +152,8 @@ class RedisCacheIntegrationTests(BaseIntegrationTest):
             session_data = {
                 "session_id": str(uuid.uuid4()),
                 "user_id": str(user_id),
-                "created_at": datetime.utcnow().isoformat(),
-                "last_activity": datetime.utcnow().isoformat()
+                "created_at": datetime.now(UTC).isoformat(),
+                "last_activity": datetime.now(UTC).isoformat()
             }
             
             await cache_manager.set_user_session(session_data["session_id"], session_data)

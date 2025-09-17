@@ -17,7 +17,7 @@ proper request processing as described in auth middleware requirements.
 import asyncio
 import json
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, Callable
 from unittest.mock import patch, MagicMock
 import pytest
@@ -81,7 +81,7 @@ class RealAuthMiddlewareTests:
         """Factory function to create test JWT tokens."""
 
         def _create_token(payload: Dict[str, Any]) -> str:
-            default_payload = {JWTConstants.SUBJECT: 'test_user', JWTConstants.EMAIL: 'test@netrasystems.ai', JWTConstants.ISSUED_AT: int(datetime.utcnow().timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() + timedelta(minutes=30)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'user_id': 12345}
+            default_payload = {JWTConstants.SUBJECT: 'test_user', JWTConstants.EMAIL: 'test@netrasystems.ai', JWTConstants.ISSUED_AT: int(datetime.now(UTC).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.now(UTC) + timedelta(minutes=30)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'user_id': 12345}
             default_payload.update(payload)
             return jwt.encode(default_payload, jwt_secret_key, algorithm=JWTConstants.HS256_ALGORITHM)
         return _create_token
@@ -121,7 +121,7 @@ class RealAuthMiddlewareTests:
     @pytest.mark.asyncio
     async def test_middleware_expired_token_handling(self, async_client: AsyncClient, jwt_secret_key: str):
         """Test middleware handles expired tokens correctly."""
-        expired_payload = {JWTConstants.SUBJECT: 'expired_user', JWTConstants.EMAIL: 'expired@netrasystems.ai', JWTConstants.ISSUED_AT: int((datetime.utcnow() - timedelta(hours=2)).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.utcnow() - timedelta(hours=1)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'user_id': 99999}
+        expired_payload = {JWTConstants.SUBJECT: 'expired_user', JWTConstants.EMAIL: 'expired@netrasystems.ai', JWTConstants.ISSUED_AT: int((datetime.now(UTC) - timedelta(hours=2)).timestamp()), JWTConstants.EXPIRES_AT: int((datetime.now(UTC) - timedelta(hours=1)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'user_id': 99999}
         expired_token = jwt.encode(expired_payload, jwt_secret_key, algorithm=JWTConstants.HS256_ALGORITHM)
         headers = {HeaderConstants.AUTHORIZATION: f'{HeaderConstants.BEARER_PREFIX}{expired_token}', HeaderConstants.CONTENT_TYPE: HeaderConstants.APPLICATION_JSON}
         try:

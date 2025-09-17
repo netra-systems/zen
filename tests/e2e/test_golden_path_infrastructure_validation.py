@@ -438,13 +438,13 @@ class GoldenPathInfrastructureValidationTests:
                     "error": "WebSocket ping timeout - no response received"
                 }
                 
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             return {
                 "connected": False,
                 "error": f"WebSocket connection closed: {str(e)}",
                 "connection_code": getattr(e, 'code', None)
             }
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.InvalidStatusCode as e:
             return {
                 "connected": False,
                 "error": f"WebSocket invalid status: {str(e)}",
@@ -580,7 +580,7 @@ class GoldenPathInfrastructureValidationTests:
                 "response": json.loads(response)
             }
             
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             return {
                 "successful": False,
                 "error": f"Connection closed: {str(e)}",

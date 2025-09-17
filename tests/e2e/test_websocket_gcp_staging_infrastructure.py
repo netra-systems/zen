@@ -1,4 +1,4 @@
-"""
+""""""
 E2E GCP Staging Tests - WebSocket Infrastructure Validation - CRITICAL REGRESSION PREVENTION
 
 Business Value Justification:
@@ -28,7 +28,7 @@ See test_gcp_load_balancer_header_validation.py for comprehensive load balancer 
 
 CLAUDE.MD E2E AUTH COMPLIANCE:
 All tests use real authentication as required by CLAUDE.MD Section 7.3.
-"""
+""""""
 import asyncio
 import json
 import logging
@@ -47,16 +47,16 @@ from shared.isolated_environment import get_env
 
 @pytest.mark.e2e
 class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase):
-    """
+""""""
     CRITICAL E2E Tests for GCP Staging WebSocket Infrastructure
     
     These tests specifically validate GCP Load Balancer configuration
     to prevent the authentication header stripping regression that
     caused complete Golden Path failure.
-    """
+""
 
     def setup_method(self, method=None):
-        """Set up staging environment test configuration."""
+        "Set up staging environment test configuration."""
         super().setup_method(method)
         self.env = get_env()
         self.staging_config = StagingTestConfig()
@@ -66,7 +66,7 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
         self.auth_timeout = 10.0
 
     async def test_gcp_load_balancer_preserves_authorization_header(self):
-        """
+        ""
         CRITICAL: Test that GCP Load Balancer preserves Authorization header for WebSocket.
         
         This is the PRIMARY REGRESSION PREVENTION test for the infrastructure failure
@@ -74,13 +74,13 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
         
         ROOT CAUSE: GCP Load Balancer configuration was missing authentication header
         forwarding for WebSocket paths, causing headers to be stripped.
-        """
-        auth_user = await self.e2e_helper.create_authenticated_user(email='gcp_auth_test@example.com', permissions=['read', 'write', 'websocket'])
+
+        auth_user = await self.e2e_helper.create_authenticated_user(email='gcp_auth_test@example.com', permissions=['read', 'write', 'websocket']
         websocket_headers = self.e2e_helper.get_websocket_headers(auth_user.jwt_token)
         print(f' SEARCH:  CRITICAL TEST: GCP Load Balancer auth header preservation')
         print(f'[U+1F310] Staging WebSocket URL: {self.staging_websocket_url}')
         print(f'[U+1F511] Headers being sent: {list(websocket_headers.keys())}')
-        print(f" PASS:  Authorization header present: {'authorization' in [k.lower() for k in websocket_headers.keys()]}")
+        print(f" PASS:  Authorization header present: {'authorization' in [k.lower() for k in websocket_headers.keys()]})"
         connection_successful = False
         auth_headers_preserved = False
         error_details = None
@@ -94,15 +94,15 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=self.auth_timeout)
                     response_data = json.loads(response)
-                    print(f"[U+1F4E5] Received response: {response_data.get('type', 'unknown')}")
+                    print(f[U+1F4E5] Received response: {response_data.get('type', 'unknown'")})"
                     auth_headers_preserved = True
                 except asyncio.TimeoutError:
                     print(f'[U+23F0] Response timeout - connection established but no immediate response')
                     auth_headers_preserved = True
-        except websockets.exceptions.InvalidHandshake as e:
+        except websockets.InvalidHandshake as e:
             error_details = f'WebSocket handshake failed: {e}'
             print(f' FAIL:  Handshake error (may indicate auth header stripping): {error_details}')
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             error_details = f'Connection closed during handshake: {e}'
             print(f' FAIL:  Connection closed (may indicate auth failure): {error_details}')
         except asyncio.TimeoutError:
@@ -116,17 +116,17 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
         print(f' PASS:  CRITICAL TEST PASSED: GCP Load Balancer preserves Authorization headers')
 
     async def test_gcp_load_balancer_preserves_e2e_bypass_header(self):
-        """
+    ""
         CRITICAL: Test that GCP Load Balancer preserves X-E2E-Bypass header.
         
         This validates E2E testing headers are forwarded through the Load Balancer,
         enabling staging environment testing without OAuth simulation failures.
-        """
-        auth_user = await self.e2e_helper.create_authenticated_user(email='e2e_bypass_test@example.com', permissions=['read', 'write', 'e2e_test'])
+        
+        auth_user = await self.e2e_helper.create_authenticated_user(email='e2e_bypass_test@example.com', permissions=['read', 'write', 'e2e_test']
         websocket_headers = self.e2e_helper.get_websocket_headers(auth_user.jwt_token)
-        websocket_headers.update({'X-E2E-Bypass': 'true', 'X-E2E-Test-Environment': 'staging', 'X-Test-Infrastructure': 'gcp_load_balancer'})
+        websocket_headers.update({'X-E2E-Bypass': 'true', 'X-E2E-Test-Environment': 'staging', 'X-Test-Infrastructure': 'gcp_load_balancer'}
         print(f' SEARCH:  CRITICAL TEST: E2E bypass header preservation through GCP')
-        print(f"[U+1F511] E2E headers: {[k for k in websocket_headers.keys() if 'e2e' in k.lower() or 'test' in k.lower()]}")
+        print(f[U+1F511] E2E headers: {[k for k in websocket_headers.keys() if 'e2e' in k.lower() or 'test' in k.lower()]})""
         e2e_headers_preserved = False
         connection_details = None
         try:
@@ -150,13 +150,13 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
         self.assertTrue(e2e_headers_preserved, f'CRITICAL FAILURE: GCP Load Balancer is stripping E2E bypass headers. This prevents staging environment testing. Connection details: {connection_details}. Required fix: Add X-E2E-Bypass header preservation to load-balancer.tf')
 
     async def test_complete_golden_path_websocket_flow(self):
-        """
+        
         CRITICAL: Test complete Golden Path WebSocket flow through GCP staging.
         
         This validates the end-to-end WebSocket functionality that enables
         core business value delivery through chat interactions.
-        """
-        golden_path_user = await self.e2e_helper.create_authenticated_user(email='golden_path@example.com', permissions=['read', 'write', 'chat', 'agent_interaction'])
+""
+        golden_path_user = await self.e2e_helper.create_authenticated_user(email='golden_path@example.com', permissions=['read', 'write', 'chat', 'agent_interaction']
         websocket_headers = self.e2e_helper.get_websocket_headers(golden_path_user.jwt_token)
         print(f'[U+1F31F] CRITICAL TEST: Complete Golden Path WebSocket flow')
         print(f'[U+1F464] User: {golden_path_user.email} ({golden_path_user.user_id[:8]}...)')
@@ -177,7 +177,7 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
                     response = await asyncio.wait_for(websocket.recv(), timeout=self.auth_timeout)
                     response_data = json.loads(response)
                     golden_path_steps_completed.append('server_response_received')
-                    print(f" PASS:  Step 4: Server response received - {response_data.get('type', 'unknown')}")
+                    print(f PASS:  Step 4: Server response received - {response_data.get('type', 'unknown')})
                 except asyncio.TimeoutError:
                     golden_path_steps_completed.append('connection_stable')
                     print(f' PASS:  Step 4: Connection stable (no immediate errors)')
@@ -192,13 +192,13 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
         self.assertEqual(len(completed_required_steps), len(required_steps), f'CRITICAL FAILURE: Golden Path WebSocket flow incomplete. Required steps: {required_steps}. Completed: {completed_required_steps}. All completed: {golden_path_steps_completed}. This indicates WebSocket infrastructure cannot support core business value.')
 
     async def test_websocket_reconnection_with_auth(self):
-        """
+""""""
         Test WebSocket reconnection scenarios with authentication preservation.
         
         This validates resilience patterns that ensure chat sessions can
         recover from temporary connection issues.
-        """
-        reconnect_user = await self.e2e_helper.create_authenticated_user(email='reconnect_test@example.com', permissions=['read', 'write', 'persistent_session'])
+""""""
+        reconnect_user = await self.e2e_helper.create_authenticated_user(email='reconnect_test@example.com', permissions=['read', 'write', 'persistent_session']
         websocket_headers = self.e2e_helper.get_websocket_headers(reconnect_user.jwt_token)
         print(f' CYCLE:  Testing WebSocket reconnection with auth preservation')
         connection_attempts = []
@@ -220,21 +220,21 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
         self.assertGreater(len(successful_attempts), 0, f'WebSocket reconnection should succeed with preserved auth. Attempts: {connection_attempts}')
 
     async def test_multi_user_websocket_isolation_in_gcp(self):
-        """
+    ""
         CRITICAL: Test multi-user WebSocket isolation through GCP infrastructure.
         
         This validates that GCP Load Balancer preserves user context isolation,
         preventing cross-user data leakage in production.
-        """
+        
         users = []
         for i in range(2):
-            user = await self.e2e_helper.create_authenticated_user(email=f'isolation_user_{i}@example.com', permissions=['read', 'write', f'user_context_{i}'])
+            user = await self.e2e_helper.create_authenticated_user(email=f'isolation_user_{i}@example.com', permissions=['read', 'write', f'user_context_{i}']
             users.append(user)
         print(f'[U+1F465] Testing multi-user isolation through GCP staging')
         print(f'[U+1F464] Users: {[user.email for user in users]}')
 
         async def test_isolated_user(user_index: int, user: AuthenticatedUser):
-            """Test individual user connection with isolation."""
+            "Test individual user connection with isolation."
             headers = self.e2e_helper.get_websocket_headers(user.jwt_token)
             isolation_result = {'user_index': user_index, 'user_id': user.user_id, 'connection_success': False, 'isolation_validated': False, 'error': None}
             try:
@@ -263,7 +263,7 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
             self.assertEqual(len(unique_users), len(user_ids), f'Users should have unique isolated contexts. User IDs: {user_ids}')
 
     async def test_websocket_header_stripping_regression_prevention(self):
-        """
+""""""
         CRITICAL: Specific regression test for GitHub issue #113 header stripping.
         
         This test validates that the specific header stripping issue that caused
@@ -271,11 +271,11 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
         
         COMPLEMENTARY TO: test_gcp_load_balancer_header_validation.py
         This focuses specifically on WebSocket upgrade header preservation.
-        """
+""""""
         logger.info(' SEARCH:  REGRESSION TEST: GitHub issue #113 header stripping prevention')
-        regression_user = await self.e2e_helper.create_authenticated_user(email='github_issue_113_regression@example.com', permissions=['read', 'write', 'websocket', 'regression_test'])
+        regression_user = await self.e2e_helper.create_authenticated_user(email='github_issue_113_regression@example.com', permissions=['read', 'write', 'websocket', 'regression_test']
         problematic_headers = self.e2e_helper.get_websocket_headers(regression_user.jwt_token)
-        problematic_headers.update({'Authorization': f'Bearer {regression_user.jwt_token}', 'X-E2E-Bypass': 'true', 'X-E2E-Test-Environment': 'staging', 'X-GitHub-Issue': '113', 'X-WebSocket-Protocol': 'netra-websocket-v1', 'X-User-Agent': 'E2E-Test-WebSocket-Client', 'X-Forwarded-Proto': 'https', 'Upgrade': 'websocket', 'Connection': 'upgrade'})
+        problematic_headers.update({'Authorization': f'Bearer {regression_user.jwt_token}', 'X-E2E-Bypass': 'true', 'X-E2E-Test-Environment': 'staging', 'X-GitHub-Issue': '113', 'X-WebSocket-Protocol': 'netra-websocket-v1', 'X-User-Agent': 'E2E-Test-WebSocket-Client', 'X-Forwarded-Proto': 'https', 'Upgrade': 'websocket', 'Connection': 'upgrade'}
         print(f' SEARCH:  Testing {len(problematic_headers)} headers that previously failed')
         print(f'[U+1F511] Critical headers: Authorization, X-E2E-Bypass, Upgrade, Connection')
         regression_test_result = {'headers_sent': list(problematic_headers.keys()), 'connection_successful': False, 'header_stripping_detected': False, 'websocket_upgrade_successful': False, 'error_details': None, 'regression_prevented': False}
@@ -294,48 +294,48 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
                     regression_test_result['regression_prevented'] = True
                     regression_test_result['server_response'] = 'timeout_but_connected'
                 print(' PASS:  GitHub issue #113 regression test: WebSocket connection successful')
-        except websockets.exceptions.InvalidHandshake as e:
+        except websockets.InvalidHandshake as e:
             regression_test_result['error_details'] = f'Handshake failed: {e}'
             error_str = str(e).lower()
-            if any((pattern in error_str for pattern in ['401', 'unauthorized', 'forbidden', 'authentication'])):
+            if any((pattern in error_str for pattern in ['401', 'unauthorized', 'forbidden', 'authentication']):
                 regression_test_result['header_stripping_detected'] = True
                 regression_test_result['error_details'] += ' (HEADER STRIPPING DETECTED)'
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             regression_test_result['error_details'] = f'Connection closed: {e}'
             if '1011' in str(e):
                 regression_test_result['header_stripping_detected'] = True
                 regression_test_result['error_details'] += ' (1011 ERROR - HEADER STRIPPING DETECTED)'
         except Exception as e:
             regression_test_result['error_details'] = f'Connection error: {e}'
-        self.assertFalse(regression_test_result['header_stripping_detected'], f"CRITICAL REGRESSION: GitHub issue #113 header stripping has returned! Load balancer is stripping authentication headers again. Error details: {regression_test_result['error_details']}. Headers tested: {regression_test_result['headers_sent']}. IMMEDIATE FIX REQUIRED: Check terraform-gcp-staging/load-balancer.tf deployment")
+        self.assertFalse(regression_test_result['header_stripping_detected'], fCRITICAL REGRESSION: GitHub issue #113 header stripping has returned! Load balancer is stripping authentication headers again. Error details: {regression_test_result['error_details']}. Headers tested: {regression_test_result['headers_sent']}. IMMEDIATE FIX REQUIRED: Check terraform-gcp-staging/load-balancer.tf deployment)
         self.assertTrue(regression_test_result['connection_successful'], f'CRITICAL REGRESSION: WebSocket connection failed with auth headers. This is exactly the symptom of GitHub issue #113. Connection result: {regression_test_result}. IMMEDIATE ACTION: Validate load balancer header forwarding configuration')
         self.assertTrue(regression_test_result['regression_prevented'], f'CRITICAL REGRESSION: GitHub issue #113 symptoms detected. WebSocket upgrade with auth headers is not working properly. Full test result: {regression_test_result}')
         print(' PASS:  REGRESSION TEST PASSED: GitHub issue #113 header stripping prevented')
 
 @pytest.mark.e2e
 class GCPWebSocketInfrastructureResilienceTests(SSotBaseTestCase, unittest.TestCase):
-    """
+    ""
     Tests for GCP WebSocket infrastructure resilience and error handling.
     
     These tests validate proper behavior under various failure conditions
     that can occur in GCP staging and production environments.
-    """
+    
 
     def setup_method(self, method=None):
-        """Set up resilience test environment."""
+        ""Set up resilience test environment.
         super().setup_method(method)
         self.staging_config = StagingTestConfig()
         self.e2e_helper = E2EWebSocketAuthHelper(environment='staging')
         self.staging_websocket_url = self.staging_config.urls.websocket_url
 
     async def test_websocket_gcp_timeout_resilience(self):
-        """
+    ""
         Test WebSocket resilience to GCP Cloud Run timeout limitations.
         
         This validates proper handling of GCP-specific timeout constraints
         that can affect WebSocket connection establishment.
-        """
-        timeout_user = await self.e2e_helper.create_authenticated_user(email='timeout_resilience@example.com', permissions=['read', 'write'])
+        
+        timeout_user = await self.e2e_helper.create_authenticated_user(email='timeout_resilience@example.com', permissions=['read', 'write']
         headers = self.e2e_helper.get_websocket_headers(timeout_user.jwt_token)
         print(f'[U+23F1][U+FE0F] Testing GCP timeout resilience')
         timeout_scenarios = [('aggressive_timeout', 3.0), ('standard_timeout', 10.0), ('generous_timeout', 15.0)]
@@ -347,36 +347,36 @@ class GCPWebSocketInfrastructureResilienceTests(SSotBaseTestCase, unittest.TestC
                     connection_time = time.time() - start_time
                     timeout_message = {'type': 'gcp_timeout_resilience_test', 'scenario': scenario_name, 'timeout_configured': timeout_value, 'actual_connection_time': connection_time, 'timestamp': datetime.now(timezone.utc).isoformat()}
                     await websocket.send(json.dumps(timeout_message))
-                    timeout_results.append({'scenario': scenario_name, 'success': True, 'connection_time': connection_time, 'configured_timeout': timeout_value})
+                    timeout_results.append({'scenario': scenario_name, 'success': True, 'connection_time': connection_time, 'configured_timeout': timeout_value}
                     print(f' PASS:  {scenario_name}: Connected in {connection_time:.2f}s')
             except asyncio.TimeoutError:
-                timeout_results.append({'scenario': scenario_name, 'success': False, 'error': 'timeout', 'configured_timeout': timeout_value})
+                timeout_results.append({'scenario': scenario_name, 'success': False, 'error': 'timeout', 'configured_timeout': timeout_value}
                 print(f'[U+23F0] {scenario_name}: Timeout at {timeout_value}s')
             except Exception as e:
-                timeout_results.append({'scenario': scenario_name, 'success': False, 'error': str(e), 'configured_timeout': timeout_value})
+                timeout_results.append({'scenario': scenario_name, 'success': False, 'error': str(e), 'configured_timeout': timeout_value}
                 print(f' FAIL:  {scenario_name}: Error - {e}')
         successful_scenarios = [r for r in timeout_results if r.get('success')]
         self.assertGreater(len(successful_scenarios), 0, f'At least one timeout scenario should succeed in GCP. Results: {timeout_results}')
 
     async def test_websocket_gcp_infrastructure_error_handling(self):
-        """
+""""""
         Test proper error handling for GCP infrastructure issues.
         
         This validates that infrastructure errors are properly detected
         and reported rather than causing silent failures.
-        """
+""""""
         problematic_scenarios = [{'name': 'malformed_bearer_token', 'headers': {'authorization': 'Bearer malformed.token.structure'}, 'expected_error_types': ['handshake', 'authentication', 'authorization']}, {'name': 'missing_upgrade_headers', 'headers': {'authorization': f'Bearer {self.e2e_helper.create_test_jwt_token()}'}, 'expected_error_types': ['upgrade', 'handshake', 'protocol']}]
         error_handling_results = []
         for scenario in problematic_scenarios:
-            print(f" SEARCH:  Testing error handling: {scenario['name']}")
+            print(f SEARCH:  Testing error handling: {scenario['name']})
             try:
-                async with websockets.connect(self.staging_websocket_url, additional_headers=scenario['headers']) as websocket:
-                    error_handling_results.append({'scenario': scenario['name'], 'result': 'unexpected_success', 'error_handling': 'poor'})
+                async with websockets.connect(self.staging_websocket_url, additional_headers=scenario['headers'] as websocket:
+                    error_handling_results.append({'scenario': scenario['name'], 'result': 'unexpected_success', 'error_handling': 'poor'}
             except Exception as e:
                 error_msg = str(e).lower()
-                error_detected = any((error_type in error_msg for error_type in scenario['expected_error_types']))
-                error_handling_results.append({'scenario': scenario['name'], 'result': 'expected_error', 'error_message': str(e), 'error_properly_detected': error_detected, 'error_handling': 'good' if error_detected else 'unclear'})
-                print(f" PASS:  {scenario['name']}: Proper error handling - {e}")
+                error_detected = any((error_type in error_msg for error_type in scenario['expected_error_types'])
+                error_handling_results.append({'scenario': scenario['name'], 'result': 'expected_error', 'error_message': str(e"), 'error_properly_detected': error_detected, 'error_handling': 'good' if error_detected else 'unclear'}"
+                print(f PASS:  {scenario['name']}: Proper error handling - {e}"")""
         good_error_handling = [r for r in error_handling_results if r.get('error_handling') == 'good']
         self.assertGreater(len(good_error_handling), 0, f'GCP infrastructure should provide clear error handling. Results: {error_handling_results}')
 if __name__ == '__main__':

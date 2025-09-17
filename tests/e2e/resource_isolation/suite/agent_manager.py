@@ -666,7 +666,7 @@ class TenantAgentManager:
                 logger.debug(f"Successfully connected agent {agent.user_id}")
                 return agent
                 
-            except (websockets.exceptions.WebSocketException, 
+            except (websockets.WebSocketException, 
                    asyncio.TimeoutError, 
                    ConnectionRefusedError, 
                    OSError) as e:

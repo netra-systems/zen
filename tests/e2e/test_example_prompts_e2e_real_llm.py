@@ -61,7 +61,7 @@ class TestExamplePromptsData:
     @staticmethod
     def get_all_test_cases() -> List[ExamplePromptCase]:
         """Get all 9 example prompt test cases."""
-        return [ )
+        return [ ]
         ExamplePromptCase( )
         prompt_id="EP-001",
         category="cost-quality",
@@ -195,18 +195,18 @@ self._validate_workflow_result(workflow_result, test_case, use_real_llm)
 
             # Validate performance SLA
 max_time = 10.0 if use_real_llm else 3.0
-assert execution_time < max_time, "formatted_string"
+assert execution_time < max_time, ""
 
 except Exception as e:
                 # Handle API authentication errors gracefully for test environments
 if "API key" in str(e) or "authentication" in str(e).lower() or "invalid key" in str(e).lower():
-print("formatted_string")
-print("formatted_string")
+    print("")
+print("")
 await asyncio.sleep(0)
 return  # Test passes
 else:
                         # Re-raise other exceptions for investigation
-print("formatted_string")
+    print("")
 raise
 
 finally:
@@ -239,7 +239,7 @@ results.append(result)
 
                                                         # Validate all high complexity prompts succeeded
 for i, result in enumerate(results):
-assert result["status"] == "success", "formatted_string"
+assert result["status"] == "success", ""
 assert result.get("agents_executed", 0) >= 4, "formatted_string"
 
 finally:
@@ -333,7 +333,7 @@ execution_results.append((test_case.prompt_id, result))
 
                                                 # Validate all enterprise prompts succeeded
 for prompt_id, result in execution_results:
-assert result["status"] == "success", "formatted_string"
+assert result["status"] == "success", ""
 assert result.get("business_value_score", 0) >= 7, "formatted_string"
 
 finally:
@@ -349,7 +349,7 @@ async def _execute_complete_agent_workflow(self, session_data: Dict[str, Any],
 test_case: ExamplePromptCase,
 use_real_llm: bool) -> Dict[str, Any]:
 """Execute complete agent workflow for a test case."""
-workflow_context = { )
+workflow_context = { }
 "prompt_id": test_case.prompt_id,
 "user_message": test_case.prompt_text,
 "expected_agents": test_case.expected_agents,
@@ -369,7 +369,7 @@ agents_executed.append(agent_result)
 workflow_state["context"].update(agent_result.get("output_context", {}))
 
 await asyncio.sleep(0)
-return { )
+return { }
 "status": "success",
 "prompt_id": test_case.prompt_id,
 "agents_executed": len(agents_executed),
@@ -404,7 +404,7 @@ use_cache=False
 timeout=30
             
 
-return { )
+return { }
 "agent_name": agent_name,
 "status": "success",
 "output": llm_response.content,
@@ -421,10 +421,10 @@ if ("API key" in str(e) or "authentication" in str(e).lower() or "invalid key" i
 "openai" in str(e).lower() or "anthropic" in str(e).lower() or "key" in str(e).lower() or
 "configuration" in str(e).lower() or "not found" in str(e).lower()):
                         # Expected in test environments without proper LLM configuration
-return { )
+return { }
 "agent_name": agent_name,
 "status": "success",
-"output": "formatted_string",
+"output": "",
 "tokens_used": 0,
 "output_context": {"api_key_fallback": True},
 "real_llm": False
@@ -433,10 +433,10 @@ return {"agent_name": agent_name, "status": "error", "error": str(e), "real_llm"
 else:
                             # Mock execution
 await asyncio.sleep(0.5)  # Simulate processing
-return { )
+return { }
 "agent_name": agent_name,
 "status": "success",
-"output": "formatted_string",
+"output": "",
 "tokens_used": 150,
 "output_context": {"mock_context": True},
 "real_llm": False
@@ -452,7 +452,7 @@ Prompt ID: {workflow_context['prompt_id']}
 
 Your specific role:'''
 
-agent_roles = { )
+agent_roles = { }
 "triage": "Categorize the request and determine the optimization approach needed",
 "data": "Analyze current AI usage data and identify patterns",
 "optimization_core": "Generate specific optimization strategies",
@@ -462,7 +462,7 @@ agent_roles = { )
 
 role_description = agent_roles.get(agent_name, "Process the request according to your specialization")
 
-return "formatted_string"
+return ""
 
 def _extract_output_context(self, llm_response) -> Dict[str, Any]:
 """Extract structured context from LLM response."""
@@ -473,7 +473,7 @@ content = llm_response.content
 else:
 content = llm_response.get("content", "")
 
-return { )
+return { }
 "summary": content[:200] + "..." if len(content) > 200 else content,
 "key_points": len(content.split(".")) // 3,  # Rough estimate of complexity
 "timestamp": time.time()
@@ -489,7 +489,7 @@ successful_agents = sum(1 for result in agent_results if result.get("status") ==
 success_bonus = (successful_agents / len(test_case.expected_agents)) * 2
 
     # Adjust based on plan tier
-tier_multiplier = { )
+tier_multiplier = { }
 PlanTier.FREE: 0.5,
 PlanTier.PRO: 1.0,
 PlanTier.ENTERPRISE: 1.5
@@ -500,7 +500,7 @@ return min(10, int(final_score))
 
 def _validate_workflow_result(self, result: Dict[str, Any], test_case: ExamplePromptCase, use_real_llm: bool):
 """Validate workflow execution result."""
-assert result["status"] == "success", "formatted_string"
+assert result["status"] == "success", ""
 assert result["agents_executed"] == len(test_case.expected_agents), "Wrong number of agents executed"
 assert result["final_output_type"] == test_case.expected_output_type, "Wrong output type"
 
@@ -511,14 +511,14 @@ api_key_fallbacks = [item for item in []]
 
         # If we had API key/config fallbacks, that's expected and acceptable in test environments
 if api_key_fallbacks:
-print("formatted_string")
+    print("")
 else:
                 # Only validate tokens if we actually used real LLM (no fallbacks)
 assert len(real_llm_results) > 0, "No real LLM results found"
 total_tokens = sum(ar.get("tokens_used", 0) for ar in real_llm_results)
 assert total_tokens > 0, "No tokens used in real LLM execution"
 
-assert result["business_value_score"] >= 5, "formatted_string"
+assert result["business_value_score"] >= 5, ""
 
 
 class AgentCoordinationTracker:
@@ -531,7 +531,7 @@ class AgentCoordinationTracker:
 
     def record_handoff(self, from_agent: str, to_agent: str, context: Dict[str, Any]):
         """Record agent handoff."""
-        self.handoffs.append({ ))
+        self.handoffs.append({ })
         "from": from_agent,
         "to": to_agent,
         "context": context,
@@ -541,7 +541,7 @@ class AgentCoordinationTracker:
     def record_context(self, agent: str, context: Dict[str, Any]):
         """Record context at each agent step."""
         pass
-        self.context_chain.append({ ))
+        self.context_chain.append({ })
         "agent": agent,
         "context": context,
         "timestamp": time.time()
@@ -568,7 +568,7 @@ class AgentCoordinationTracker:
 
         avg_continuity = sum(continuity_checks) / len(continuity_checks)
 
-        return { )
+        return { }
         "continuity_score": avg_continuity,
-        "details": "formatted_string"
+        "details": ""
             

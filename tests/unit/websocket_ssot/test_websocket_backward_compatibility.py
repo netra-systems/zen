@@ -440,11 +440,11 @@ class WebSocketBackwardCompatibilityTests(BaseIntegrationTest):
     def _get_ssot_websocket_manager(self) -> Optional[Any]:
         """Get SSOT WebSocket Manager implementation."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             return WebSocketManager()
         except ImportError:
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 return UnifiedWebSocketManager()
             except ImportError:
                 return None

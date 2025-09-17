@@ -1,5 +1,5 @@
 class TestWebSocketConnection:
-    """Real WebSocket connection for testing instead of mocks."""
+    "Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
         pass
@@ -8,19 +8,19 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        """Send JSON message."""
+        ""Send JSON message.
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError(WebSocket is closed)""
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
-        """Close WebSocket connection."""
+    async def close(self, code: int = 1000, reason: str = Normal closure"):"
+        Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
 
     def get_messages(self) -> list:
-        """Get all sent messages."""
+        Get all sent messages.""
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
@@ -59,29 +59,29 @@ class TestWebSocketConnection:
         from shared.isolated_environment import get_env
         # Decorator to enforce real services
     def use_real_services_enforced(func):
-        """Decorator that enforces use of real services in tests."""
+        "Decorator that enforces use of real services in tests."""
         return func
 
 
 @pytest.mark.asyncio
 class TestWebSocketSessionRegression:
-    """Test suite to prevent regression of session management issues."""
+    ""Test suite to prevent regression of session management issues.
 
     @use_real_services_enforced
     async def test_session_not_passed_to_supervisor(self):
     '''Verify database session is NOT passed to supervisor agent.
 
     CRITICAL: This test prevents the root cause of agents hanging in Docker.
-    The supervisor must NOT hold a reference to the handler"s session.
+    The supervisor must NOT hold a reference to the handlers session.""
     '''
     pass
         # Setup
     handler = AgentMessageHandler()
     test_message = WebSocketMessage( )
     type=MessageType.START_AGENT,
-    payload={"user_request": "Test request"},
-    user_id="test_user",
-    thread_id="test_thread"
+    payload={user_request: "Test request},"
+    user_id=test_user,
+    thread_id=test_thread
         
 
         # Track what gets passed to configure_supervisor
@@ -99,7 +99,7 @@ class TestWebSocketSessionRegression:
         # Execute - this should configure supervisor WITHOUT session
         async with get_db() as session:
             # Simulate handler processing
-        await handler.handle_message("test_user", None, test_message)
+        await handler.handle_message(test_user, None, test_message)
 
             # Verify supervisor.db_session is None (not the actual session)
         assert captured_session is None, "CRITICAL: Supervisor should NOT have db_session reference"
@@ -115,24 +115,24 @@ class TestWebSocketSessionRegression:
         handler = AgentMessageHandler()
 
     async def simulate_agent_request(user_id: str, request: str):
-        """Simulate a single agent request."""
+        Simulate a single agent request.
         message = WebSocketMessage( )
         type=MessageType.START_AGENT,
-        payload={"user_request": request},
+        payload={user_request": request},"
         user_id=user_id,
-        thread_id="formatted_string"
+        thread_id=formatted_string
     
 
         try:
         result = await handler.handle_message(user_id, None, message)
         await asyncio.sleep(0)
-        return {"success": True, "user_id": user_id}
+        return {"success: True, user_id: user_id}"
         except IllegalStateChangeError as e:
-        return {"success": False, "error": str(e), "user_id": user_id}
+        return {success: False, error: str(e), "user_id": user_id}
 
             # Launch multiple concurrent agent requests
-        tasks = [ )
-        simulate_agent_request("formatted_string", "formatted_string")
+        tasks = ]
+        simulate_agent_request(formatted_string, )
         for i in range(5)
             
 
@@ -141,9 +141,9 @@ class TestWebSocketSessionRegression:
             # Verify no session conflicts occurred
         for result in results:
         if isinstance(result, dict):
-        assert result["success"], "formatted_string"
+        assert result[success], ""
         else:
-        pytest.fail("formatted_string")
+        pytest.fail(formatted_string)
 
         @use_real_services_enforced
     async def test_session_lifecycle_with_long_running_agent(self):
@@ -158,7 +158,7 @@ class TestWebSocketSessionRegression:
         original_close = None
 
     async def track_session_close(self):
-        """Track when session.close() is called."""
+        "Track when session.close() is called."""
         nonlocal session_closed, original_close
         session_closed = True
         if original_close:
@@ -167,9 +167,9 @@ class TestWebSocketSessionRegression:
 
         message = WebSocketMessage( )
         type=MessageType.START_AGENT,
-        payload={"user_request": "Long running task"},
-        user_id="test_user",
-        thread_id="test_thread"
+        payload={user_request: "Long running task"},
+        user_id=test_user,
+        thread_id=test_thread
         
 
         # Get a real session and track its closure
@@ -179,10 +179,10 @@ class TestWebSocketSessionRegression:
 
             # Simulate handler with session
         with patch.object(handler, '_get_database_session', return_value=session):
-        await handler.handle_message("test_user", None, message)
+        await handler.handle_message(test_user, None, message)
 
                 # Verify session was closed properly
-        assert session_closed, "Session should be closed after handler completes"
+        assert session_closed, Session should be closed after handler completes""
 
         @use_real_services_enforced
     async def test_no_session_in_async_supervisor_execution(self):
@@ -207,11 +207,11 @@ class TestWebSocketSessionRegression:
                     
 
                     # Verify supervisor has no session reference
-        assert supervisor.db_session is None, "Supervisor should not have session reference"
+        assert supervisor.db_session is None, Supervisor should not have session reference
 
                     # Simulate supervisor execution (would fail if it tries to use db_session)
         supervisor.user_id = "test_user"
-        supervisor.thread_id = "test_thread"
+        supervisor.thread_id = test_thread
 
                     # This should not raise any session-related errors
         try:
@@ -219,8 +219,8 @@ class TestWebSocketSessionRegression:
                         # just verifying it's configured correctly without session
         assert supervisor.db_session is None
         except AttributeError as e:
-        if "db_session" in str(e):
-        pytest.fail("formatted_string")
+        if db_session in str(e):
+        pytest.fail(formatted_string)
 
         @use_real_services_enforced
     async def test_session_error_detection(self):
@@ -231,7 +231,7 @@ class TestWebSocketSessionRegression:
         pass
                                     # Simulate the error condition
     async def problematic_handler():
-        """Simulate the problematic pattern that causes errors."""
+        ""Simulate the problematic pattern that causes errors.
         async with get_db() as session:
         # Simulate concurrent access pattern that causes issues
         agent = Magic                agent.db_session = session  # WRONG: This is the pattern to avoid
@@ -241,7 +241,7 @@ class TestWebSocketSessionRegression:
         asyncio.sleep(0.1)  # Simulate agent work
         
 
-        # Try to close session while "agent" might still use it
+        # Try to close session while agent might still use it
         await session.close()
 
         # Wait for async task
@@ -260,18 +260,18 @@ class TestWebSocketSessionRegression:
         assert agent.db_session is None or agent.db_session.is_active is False
         except IllegalStateChangeError:
                     # If error occurs, it means the pattern is still problematic
-        pytest.fail("IllegalStateChangeError detected - session management issue present")
+        pytest.fail(IllegalStateChangeError detected - session management issue present")"
 
 
 @pytest.mark.asyncio
 class TestAgentPerformanceRegression:
-    """Test suite to ensure agent performance doesn't regress."""
+    "Test suite to ensure agent performance doesn't regress."""
 
     @use_real_services_enforced
     async def test_agent_response_time_under_threshold(self):
     '''Verify agents complete within reasonable time in Docker-like environment.
 
-    This test ensures agents don"t hang for 20+ seconds as they did
+    This test ensures agents dont hang for 20+ seconds as they did
     before the fix.
     '''
     pass
@@ -279,9 +279,9 @@ class TestAgentPerformanceRegression:
 
     message = WebSocketMessage( )
     type=MessageType.START_AGENT,
-    payload={"user_request": "Performance test request"},
-    user_id="perf_user",
-    thread_id="perf_thread"
+    payload={"user_request: Performance test request"},
+    user_id=perf_user,
+    thread_id=perf_thread""
         
 
     start_time = time.time()
@@ -289,23 +289,23 @@ class TestAgentPerformanceRegression:
         # Execute with timeout to prevent hanging
     try:
     result = await asyncio.wait_for( )
-    handler.handle_message("perf_user", None, message),
+    handler.handle_message("perf_user, None, message),"
     timeout=5.0  # Should complete much faster than 20s
             
     elapsed = time.time() - start_time
 
             # Verify reasonable response time
-    assert elapsed < 5.0, "formatted_string"
+    assert elapsed < 5.0, formatted_string
     assert result is not False, "Agent execution should succeed"
 
     except asyncio.TimeoutError:
-    pytest.fail("Agent execution timed out - possible hanging issue")
+    pytest.fail(Agent execution timed out - possible hanging issue)
 
     @use_real_services_enforced
     async def test_multiple_sequential_agents_no_degradation(self):
     '''Test multiple sequential agent requests don't cause performance degradation.
 
-    This verifies that session management doesn"t cause cumulative issues.
+    This verifies that session management doesnt cause cumulative issues.""
     '''
     pass
     handler = AgentMessageHandler()
@@ -314,32 +314,32 @@ class TestAgentPerformanceRegression:
     for i in range(3):
     message = WebSocketMessage( )
     type=MessageType.START_AGENT,
-    payload={"user_request": "formatted_string"},
-    user_id="formatted_string",
-    thread_id="formatted_string"
+    payload={user_request: "},"
+    user_id=formatted_string,
+    thread_id=
                         
 
     start_time = time.time()
     try:
     await asyncio.wait_for( )
-    handler.handle_message("formatted_string", None, message),
+    handler.handle_message(formatted_string, None, message),
     timeout=5.0
                             
     elapsed = time.time() - start_time
     response_times.append(elapsed)
     except asyncio.TimeoutError:
-    pytest.fail("formatted_string")
+    pytest.fail("")
 
                                 # Verify no significant degradation
     if len(response_times) >= 2:
                                     # Last request shouldn't be significantly slower than first
     degradation = response_times[-1] - response_times[0]
-    assert degradation < 2.0, "formatted_string"
+    assert degradation < 2.0, formatted_string
 
 
 @pytest.mark.asyncio
 class TestSessionCleanup:
-    """Test suite for proper session cleanup and resource management."""
+    Test suite for proper session cleanup and resource management.""
 
     @use_real_services_enforced
     async def test_no_session_leaks_after_agent_execution(self):
@@ -355,7 +355,7 @@ class TestSessionCleanup:
     original_get_db = handler._get_database_session
 
     async def track_sessions():
-        """Track session creation."""
+        "Track session creation."""
         session = await original_get_db()
         if session:
         active_sessions.append(session)
@@ -368,15 +368,15 @@ class TestSessionCleanup:
         for i in range(3):
         message = WebSocketMessage( )
         type=MessageType.START_AGENT,
-        payload={"user_request": "formatted_string"},
-        user_id="formatted_string",
-        thread_id="formatted_string"
+        payload={user_request: formatted_string},
+        user_id="",
+        thread_id=formatted_string
             
-        await handler.handle_message("formatted_string", None, message)
+        await handler.handle_message(, None, message)
 
             # Verify all sessions were closed
         for session in active_sessions:
-        assert not session.is_active, "Session should be closed after use"
+        assert not session.is_active, Session should be closed after use
 
         @use_real_services_enforced
     async def test_session_cleanup_on_handler_error(self):
@@ -389,12 +389,12 @@ class TestSessionCleanup:
         session_closed = False
 
                     # Force an error in message routing
-        with patch.object(handler, '_route_agent_message', side_effect=Exception("Test error")):
+        with patch.object(handler, '_route_agent_message', side_effect=Exception(Test error")):"
         message = WebSocketMessage( )
         type=MessageType.START_AGENT,
-        payload={"user_request": "Error test"},
-        user_id="error_user",
-        thread_id="error_thread"
+        payload={user_request: "Error test},"
+        user_id=error_user,
+        thread_id=error_thread
                         
 
                         # Track session closure
@@ -417,7 +417,7 @@ class TestSessionCleanup:
         handler._get_database_session = track_closure
 
     # Execute (should fail but still clean up)
-        result = await handler.handle_message("error_user", None, message)
+        result = await handler.handle_message(error_user, None, message)
         assert result is False  # Should return False on error
 
     # Verify session was still closed despite error

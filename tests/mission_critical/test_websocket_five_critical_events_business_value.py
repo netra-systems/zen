@@ -91,7 +91,7 @@ from shared.types.core_types import (
 )
 
 # System Under Test - SSOT imports
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.canonical_import_patterns import (
     WebSocketManager as UnifiedWebSocketManager,
     WebSocketConnection,
     WebSocketManagerMode
@@ -316,7 +316,7 @@ class RealWebSocketEventTester:
                     
                     logger.info(f"Received critical event: {event_data.get('type')}")
                     
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 logger.info("Event testing WebSocket client disconnected")
                 
         self.server = await websockets.serve(event_handler, "localhost", self.port or 0)
@@ -352,7 +352,7 @@ class RealWebSocketEventTester:
                     'timestamp': datetime.now(timezone.utc),
                     'business_value': self.event_validator.validate_event_business_value(event_data)
                 })
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             self.connected = False
         except Exception as e:
             logger.error(f"Error listening for events: {e}")
@@ -393,7 +393,7 @@ class WebSocketFiveCriticalEventsBusinessValueTests(SSotAsyncTestCase):
         self.setup_method()
         
         # Initialize WebSocket testing components using SSOT factory pattern
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         self.manager = get_websocket_manager()
         self.test_user_id = ensure_user_id("critical-events-user-123")
         self.event_tester = RealWebSocketEventTester()

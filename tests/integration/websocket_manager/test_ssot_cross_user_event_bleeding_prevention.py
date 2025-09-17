@@ -23,8 +23,8 @@ from typing import Any, Dict, List, Optional, Set
 from unittest.mock import Mock, patch, MagicMock, AsyncMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.types.core_types import UserID, ThreadID, ConnectionID, ensure_user_id
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketManagerMode, WebSocketConnection
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketManagerMode, WebSocketConnection
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 from netra_backend.app.websocket_core.ssot_validation_enhancer import SSotValidationError, UserIsolationViolation, enable_strict_validation, validate_user_isolation
 
 class MockWebSocket:

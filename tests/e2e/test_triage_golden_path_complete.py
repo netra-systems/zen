@@ -71,7 +71,7 @@ import time
 import uuid
 import json
 import websockets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional, Set
 from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
@@ -340,7 +340,7 @@ class E2EAuthManager:
             subscription_tier=subscription_tier,
             jwt_token=auth_data["access_token"],
             refresh_token=auth_data["refresh_token"],
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(UTC),
             metadata={
                 "e2e_test": True,
                 "created_by": "e2e_triage_test"

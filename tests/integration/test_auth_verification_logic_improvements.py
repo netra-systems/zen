@@ -115,7 +115,7 @@ class ImprovedAuthVerifier:
 
     # Update history
         verification_time = time.time() - verification_start
-        self.verification_history.append({ ))
+        self.verification_history.append({ })
         'timestamp': time.time(),
         'duration': verification_time,
         'overall_healthy': self.current_state.overall_healthy,
@@ -134,7 +134,7 @@ class ImprovedAuthVerifier:
 
         start_time = time.time()
 
-        health_endpoints = [ )
+        health_endpoints = [ ]
         '/health',
         '/health/ready',
         '/health/live',
@@ -143,7 +143,7 @@ class ImprovedAuthVerifier:
 
         for endpoint in health_endpoints:
         try:
-        url = "formatted_string"
+        url = ""
         async with httpx.AsyncClient(timeout=timeout) as client:
         response = await client.get(url)
 
@@ -160,7 +160,7 @@ class ImprovedAuthVerifier:
         success=True,
         response_time=time.time() - start_time,
         timestamp=time.time(),
-        details={ )
+        details={ }
         'endpoint': endpoint,
         'status_code': response.status_code,
         'health_data': health_data
@@ -173,7 +173,7 @@ class ImprovedAuthVerifier:
         except httpx.TimeoutException:
         continue  # Try next endpoint
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("")
         continue
 
         return AuthVerificationResult( )
@@ -191,19 +191,19 @@ class ImprovedAuthVerifier:
 
         start_time = time.time()
 
-        auth_endpoints = [ )
-        { )
+        auth_endpoints = [ ]
+        { }
         'path': '/auth/google',
         'expected_status': [200, 302, 400],  # 400 for missing params is OK
         'description': 'Google OAuth endpoint'
         },
-        { )
+        { }
         'path': '/auth/verify',
         'method': 'POST',
         'expected_status': [400, 401, 422],  # Should fail without token
         'description': 'Token verification endpoint'
         },
-        { )
+        { }
         'path': '/auth/logout',
         'method': 'POST',
         'expected_status': [200, 401, 405],  # Various OK responses
@@ -216,7 +216,7 @@ class ImprovedAuthVerifier:
 
         for endpoint_config in auth_endpoints:
         try:
-        url = "formatted_string"
+        url = ""
         method = endpoint_config.get('method', 'GET')
 
         async with httpx.AsyncClient(timeout=timeout / len(auth_endpoints)) as client:
@@ -227,13 +227,13 @@ class ImprovedAuthVerifier:
 
         expected_statuses = endpoint_config['expected_status']
         if response.status_code in expected_statuses:
-        successful_endpoints.append({ ))
+        successful_endpoints.append({ })
         'path': endpoint_config['path'],
         'status_code': response.status_code,
         'description': endpoint_config['description']
                             
         else:
-        failed_endpoints.append({ ))
+        failed_endpoints.append({ })
         'path': endpoint_config['path'],
         'status_code': response.status_code,
         'expected': expected_statuses,
@@ -241,7 +241,7 @@ class ImprovedAuthVerifier:
                                 
 
         except Exception as e:
-        failed_endpoints.append({ ))
+        failed_endpoints.append({ })
         'path': endpoint_config['path'],
         'error': str(e),
         'description': endpoint_config['description']
@@ -256,13 +256,13 @@ class ImprovedAuthVerifier:
         success=success,
         response_time=time.time() - start_time,
         timestamp=time.time(),
-        details={ )
+        details={ }
         'successful_endpoints': successful_endpoints,
         'failed_endpoints': failed_endpoints,
         'success_rate': success_rate
         },
         confidence_score=success_rate,
-        error=None if success else "formatted_string"
+        error=None if success else ""
                                     
 
     async def _verify_token_validation_endpoint(self, timeout: float) -> AuthVerificationResult:
@@ -270,21 +270,21 @@ class ImprovedAuthVerifier:
 
         start_time = time.time()
 
-        verify_url = "formatted_string"
+        verify_url = ""
 
     # Test with various invalid tokens to verify endpoint functionality
-        test_cases = [ )
-        { )
+        test_cases = [ ]
+        { }
         'description': 'No token provided',
         'headers': {},
         'expected_status': [400, 401]
         },
-        { )
+        { }
         'description': 'Invalid token format',
         'headers': {'Authorization': 'invalid_token'},
         'expected_status': [401, 422]
         },
-        { )
+        { }
         'description': 'Malformed Bearer token',
         'headers': {'Authorization': 'Bearer invalid.token.here'},
         'expected_status': [401, 422]
@@ -300,19 +300,19 @@ class ImprovedAuthVerifier:
         response = await client.post(verify_url, headers=test_case['headers'])
 
         if response.status_code in test_case['expected_status']:
-        successful_tests.append({ ))
+        successful_tests.append({ })
         'description': test_case['description'],
         'status_code': response.status_code
                     
         else:
-        failed_tests.append({ ))
+        failed_tests.append({ })
         'description': test_case['description'],
         'status_code': response.status_code,
         'expected': test_case['expected_status']
                         
 
         except Exception as e:
-        failed_tests.append({ ))
+        failed_tests.append({ })
         'description': test_case['description'],
         'error': str(e)
                             
@@ -324,7 +324,7 @@ class ImprovedAuthVerifier:
         success=success,
         response_time=time.time() - start_time,
         timestamp=time.time(),
-        details={ )
+        details={ }
         'successful_tests': successful_tests,
         'failed_tests': failed_tests,
         'endpoint': '/auth/verify'
@@ -338,13 +338,13 @@ class ImprovedAuthVerifier:
 
         start_time = time.time()
 
-        oauth_endpoints = [ )
-        { )
+        oauth_endpoints = [ ]
+        { }
         'path': '/auth/google',
         'expected_status': [200, 302, 400, 422],
         'description': 'Google OAuth initiation'
         },
-        { )
+        { }
         'path': '/auth/google/callback',
         'params': {'code': 'test', 'state': 'test'},
         'expected_status': [400, 422],  # Should fail with test params
@@ -357,7 +357,7 @@ class ImprovedAuthVerifier:
 
         for oauth_config in oauth_endpoints:
         try:
-        url = "formatted_string"
+        url = ""
         params = oauth_config.get('params', {})
 
         async with httpx.AsyncClient( )
@@ -367,13 +367,13 @@ class ImprovedAuthVerifier:
         response = await client.get(url, params=params)
 
         if response.status_code in oauth_config['expected_status']:
-        successful_oauth.append({ ))
+        successful_oauth.append({ })
         'path': oauth_config['path'],
         'status_code': response.status_code,
         'description': oauth_config['description']
                     
         else:
-        failed_oauth.append({ ))
+        failed_oauth.append({ })
         'path': oauth_config['path'],
         'status_code': response.status_code,
         'expected': oauth_config['expected_status'],
@@ -381,7 +381,7 @@ class ImprovedAuthVerifier:
                         
 
         except Exception as e:
-        failed_oauth.append({ ))
+        failed_oauth.append({ })
         'path': oauth_config['path'],
         'error': str(e),
         'description': oauth_config['description']
@@ -394,7 +394,7 @@ class ImprovedAuthVerifier:
         success=success,
         response_time=time.time() - start_time,
         timestamp=time.time(),
-        details={ )
+        details={ }
         'successful_oauth': successful_oauth,
         'failed_oauth': failed_oauth
         },
@@ -408,18 +408,18 @@ class ImprovedAuthVerifier:
         start_time = time.time()
 
     # Test basic connectivity to service
-        connectivity_tests = [ )
-        { )
+        connectivity_tests = [ ]
+        { }
         'description': 'Root endpoint connectivity',
         'path': '/',
         'acceptable_status': [200, 404, 405]  # Any response is good
         },
-        { )
+        { }
         'description': 'API root connectivity',
         'path': '/api',
         'acceptable_status': [200, 404, 405]
         },
-        { )
+        { }
         'description': 'Auth root connectivity',
         'path': '/auth',
         'acceptable_status': [200, 404, 405, 422]
@@ -431,12 +431,12 @@ class ImprovedAuthVerifier:
 
         for test in connectivity_tests:
         try:
-        url = "formatted_string"
+        url = ""
         async with httpx.AsyncClient(timeout=timeout / len(connectivity_tests)) as client:
         response = await client.get(url)
 
         if response.status_code in test['acceptable_status']:
-        successful_connectivity.append({ ))
+        successful_connectivity.append({ })
         'path': test['path'],
         'status_code': response.status_code,
         'description': test['description']
@@ -444,14 +444,14 @@ class ImprovedAuthVerifier:
         else:
                         # Still count as success if we got any response (not server error)
         if response.status_code < 500:
-        successful_connectivity.append({ ))
+        successful_connectivity.append({ })
         'path': test['path'],
         'status_code': response.status_code,
         'description': test['description'],
         'note': 'Unexpected but acceptable response'
                             
         else:
-        failed_connectivity.append({ ))
+        failed_connectivity.append({ })
         'path': test['path'],
         'status_code': response.status_code,
         'description': test['description'],
@@ -459,19 +459,19 @@ class ImprovedAuthVerifier:
                                 
 
         except httpx.ConnectError:
-        failed_connectivity.append({ ))
+        failed_connectivity.append({ })
         'path': test['path'],
         'error': 'Connection refused',
         'description': test['description']
                                     
         except httpx.TimeoutException:
-        failed_connectivity.append({ ))
+        failed_connectivity.append({ })
         'path': test['path'],
         'error': 'Connection timeout',
         'description': test['description']
                                         
         except Exception as e:
-        failed_connectivity.append({ ))
+        failed_connectivity.append({ })
         'path': test['path'],
         'error': str(e),
         'description': test['description']
@@ -484,7 +484,7 @@ class ImprovedAuthVerifier:
         success=success,
         response_time=time.time() - start_time,
         timestamp=time.time(),
-        details={ )
+        details={ }
         'successful_connectivity': successful_connectivity,
         'failed_connectivity': failed_connectivity
         },
@@ -501,7 +501,7 @@ class ImprovedAuthVerifier:
         return
 
         # Weight strategies by importance
-        strategy_weights = { )
+        strategy_weights = { }
         AuthVerificationStrategy.SERVICE_CONNECTIVITY: 0.3,  # Basic requirement
         AuthVerificationStrategy.HEALTH_CHECK: 0.25,        # Important
         AuthVerificationStrategy.ENDPOINT_AVAILABILITY: 0.2, # Important
@@ -552,14 +552,14 @@ class ImprovedAuthVerifier:
     def get_verification_summary(self) -> Dict[str, Any]:
         """Get comprehensive verification summary."""
 
-        return { )
+        return { }
         'service_url': self.current_state.service_url,
         'overall_healthy': self.current_state.overall_healthy,
         'confidence_score': self.current_state.confidence_score,
         'consecutive_failures': self.current_state.consecutive_failures,
         'last_successful_verification': self.current_state.last_successful_verification,
-        'verification_results': [ )
-        { )
+        'verification_results': [ ]
+        { }
         'strategy': result.strategy.value,
         'success': result.success,
         'response_time': result.response_time,
@@ -597,7 +597,7 @@ class AuthVerificationImprover:
         verifier = ImprovedAuthVerifier(auth_service_url)
         state = await verifier.comprehensive_auth_verification()
 
-        return { )
+        return { }
         'auth_verified': state.overall_healthy,
         'confidence_score': state.confidence_score,
         'verification_details': verifier.get_verification_summary(),
@@ -657,21 +657,21 @@ verifier = ImprovedAuthVerifier(auth_service_url)
         # Perform comprehensive verification
 state = await verifier.comprehensive_auth_verification()
 
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
 
         # Show strategy results
 print(f" )
 Verification strategy results:")
 for result in state.verification_results:
 status = " PASS:  PASS" if result.success else " FAIL:  FAIL"
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 
 if result.error:
-print("formatted_string")
+    print("")
 
 if result.details:
 self._print_strategy_details(result.strategy, result.details)
@@ -681,8 +681,8 @@ summary = verifier.get_verification_summary()
 
 print(f" )
 === VERIFICATION SUMMARY ===")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 
                     # Generate recommendations
 recommendations = AuthVerificationImprover._generate_recommendations(state)
@@ -690,7 +690,7 @@ if recommendations:
 print(f" )
 Recommendations:")
 for rec in recommendations:
-print("formatted_string")
+    print("")
 else:
 print(f" )
 PASS:  No specific recommendations - auth verification looks good")
@@ -699,41 +699,41 @@ PASS:  No specific recommendations - auth verification looks good")
 assert len(state.verification_results) >= 5, "Should test multiple verification strategies"
 assert all(hasattr(r, 'confidence_score') for r in state.verification_results), "All results should have confidence scores"
 
-logger.info("formatted_string")
+logger.info("")
 
 def _print_strategy_details(self, strategy: AuthVerificationStrategy, details: Dict[str, Any]):
 """Print detailed results for each strategy."""
 
 if strategy == AuthVerificationStrategy.HEALTH_CHECK:
 if 'endpoint' in details:
-print("formatted_string")
+    print("")
 if 'health_data' in details:
-print("formatted_string")
+    print("")
 
 elif strategy == AuthVerificationStrategy.ENDPOINT_AVAILABILITY:
 successful = details.get('successful_endpoints', [])
 if successful:
-print("formatted_string")
+    print("")
 for endpoint in successful[:2]:  # Show first 2
-print("formatted_string")
+print("")
 
 success_rate = details.get('success_rate', 0)
-print("formatted_string")
+print("")
 
 elif strategy == AuthVerificationStrategy.TOKEN_VALIDATION:
 successful = details.get('successful_tests', [])
 if successful:
-print("formatted_string")
+    print("")
 
 elif strategy == AuthVerificationStrategy.OAUTH_FLOW:
 successful = details.get('successful_oauth', [])
 if successful:
-print("formatted_string")
+    print("")
 
 elif strategy == AuthVerificationStrategy.SERVICE_CONNECTIVITY:
 successful = details.get('successful_connectivity', [])
 if successful:
-print("formatted_string")
+    print("")
 
 @pytest.mark.asyncio
     async def test_resilient_auth_verifier_vs_standard(self):
@@ -745,27 +745,27 @@ print(f" )
 auth_service_url = get_env().get('AUTH_SERVICE_URL', 'http://localhost:8001')
 
                                                     # Standard verification (simplified)
-print("1. Standard auth verification:")
+    print("1. Standard auth verification:")
 standard_start = time.time()
 standard_result = await self._perform_standard_auth_verification(auth_service_url)
 standard_time = time.time() - standard_start
 
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 if standard_result.get('error'):
-print("formatted_string")
+    print("")
 
                                                         # Resilient verification
-print(" )
+    print("")
 2. Resilient auth verification:")
 resilient_verifier = AuthVerificationImprover.create_resilient_auth_verifier(auth_service_url)
 resilient_start = time.time()
 resilient_result = await resilient_verifier()
 resilient_time = time.time() - resilient_start
 
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
                                                         # Compare results
 print(f" )
@@ -780,7 +780,7 @@ print(f" PASS:  IMPROVEMENT DETECTED: Resilient verification succeeded where sta
 print(f"   This demonstrates the value of multi-strategy verification")
 elif both_successful:
 print(f" PASS:  BOTH SUCCESSFUL: Auth service is healthy according to both methods")
-print("formatted_string")
+print("")
 elif both_failed:
 print(f" WARNING: [U+FE0F]  BOTH FAILED: Auth service appears to have genuine issues")
 else:
@@ -792,14 +792,14 @@ if recommendations:
 print(f" )
 Recommendations from resilient verifier:")
 for rec in recommendations:
-print("formatted_string")
+    print("")
 
                                                                                 # Test passes to document comparison
 assert resilient_time >= 0, "Resilient verification should complete"
 assert standard_time >= 0, "Standard verification should complete"
 
 await asyncio.sleep(0)
-return { )
+return { }
 'standard_result': standard_result,
 'resilient_result': resilient_result,
 'improvement_detected': improvement_detected
@@ -816,7 +816,7 @@ response = await client.get("formatted_string")
 if response.status_code == 200:
 return {'verified': True, 'method': 'health_check'}
 else:
-return { )
+return { }
 'verified': False,
 'error': 'formatted_string',
 'method': 'health_check'
@@ -843,13 +843,13 @@ verifier = ImprovedAuthVerifier(auth_service_url)
 verification_results = []
 
 for round_num in range(3):
-print("formatted_string")
+    print("")
 
 state = await verifier.comprehensive_auth_verification()
 verification_results.append(state)
 
 status = " PASS:  HEALTHY" if state.overall_healthy else " FAIL:  UNHEALTHY"
-print("formatted_string")
+print("")
 
                                         # Brief delay between rounds
 await asyncio.sleep(0.5)
@@ -859,23 +859,23 @@ print(f" )
 === VERIFICATION TRENDS ===")
 summary = verifier.get_verification_summary()
 
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
 
                                         # Analyze trend patterns
 if len(verification_results) >= 2:
 trend_analysis = self._analyze_verification_trends(verification_results)
 print(f"Trend analysis:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
 if trend_analysis['recommendations']:
 print(f"  Trending recommendations:")
 for rec in trend_analysis['recommendations']:
-print("formatted_string")
+    print("")
 
                                                     # Test passes to document trending analysis
 assert len(verification_results) >= 3, "Should perform multiple verification rounds"
@@ -932,7 +932,7 @@ elif confidence_trend == "decreasing":
 recommendations.append("Verification confidence decreasing - review service health")
 
 await asyncio.sleep(0)
-return { )
+return { }
 'pattern': pattern,
 'confidence_trend': confidence_trend,
 'stability': stability,

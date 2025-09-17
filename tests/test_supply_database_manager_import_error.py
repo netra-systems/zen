@@ -62,26 +62,26 @@ assert not hasattr(database_manager, 'SupplyDatabaseManager')
 
 if __name__ == "__main__":
         # Run the tests to demonstrate the error
-print("Running test to reproduce SupplyDatabaseManager import error...")
+    print("Running test to reproduce SupplyDatabaseManager import error...")
 
 try:
 test_supply_database_manager_import_error()
 print("[U+2717] Test should have caught ImportError but didn"t!")
 except AssertionError:
-print("[U+2713] Test correctly identified missing SupplyDatabaseManager import")
+    print("[U+2713] Test correctly identified missing SupplyDatabaseManager import")
 
 try:
 test_database_manager_only_has_base_class()
 print("[U+2713] Confirmed database_manager.py only has DatabaseManager class")
 except AssertionError as e:
-print("formatted_string")
+    print("")
 
 try:
 test_supply_researcher_agent_import_fails()
 print("[U+2713] Confirmed supply_researcher agent fails to import")
 except AssertionError:
-print("[U+2717] Supply researcher agent import didn"t fail as expected")
+    print("[U+2717] Supply researcher agent import didn"t fail as expected")
 
-print(" )
+print("")
 Conclusion: SupplyDatabaseManager class is missing and needs to be implemented.")
 pass

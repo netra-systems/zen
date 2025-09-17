@@ -19,9 +19,9 @@ from enum import Enum
 from typing import Any, Callable, Dict, Optional, TypeVar
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 T = TypeVar('T')
 

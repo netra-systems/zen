@@ -10,15 +10,15 @@ Critical for session persistence and caching performance.
 Each function  <= 8 lines, file  <= 300 lines.
 """
 
-import logging
 from typing import Dict, Any, Optional
 
 # MIGRATED: Use SSOT Redis import pattern
 from shared.isolated_environment import get_env
+from shared.logging.unified_logging_ssot import get_logger
 
-from netra_backend.app.core.configuration.base import UnifiedConfigManager
+from netra_backend.app.config import get_config
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class RedisConnectionError(Exception):
@@ -36,7 +36,7 @@ class RedisConnectionHandler:
     def __init__(self):
         """Initialize Redis connection handler with environment configuration."""
         self.env = get_env().get("ENVIRONMENT", "development").lower()
-        self._config = UnifiedConfigManager().get_config()
+        self._config = get_config()
         self._connection_pool = None
         self._connection_info = self._build_connection_info()
         

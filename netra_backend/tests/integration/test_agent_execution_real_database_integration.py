@@ -22,7 +22,7 @@ Test Coverage:
 import pytest
 import asyncio
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any
 
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
@@ -271,7 +271,7 @@ class AgentExecutionRealDatabaseTests:
                 await db_session.execute(test_insert, {
                     "run_id": str(context.run_id),
                     "operation": "test_transaction",
-                    "timestamp": datetime.utcnow()
+                    "timestamp": datetime.now(UTC)
                 })
                 
                 # Verify transaction is working
@@ -321,7 +321,7 @@ class AgentExecutionRealDatabaseTests:
                 await db_session.execute(rollback_insert, {
                     "run_id": str(context_rollback.run_id),
                     "operation": "should_rollback",
-                    "timestamp": datetime.utcnow()
+                    "timestamp": datetime.now(UTC)
                 })
                 
                 # This should fail and trigger rollback

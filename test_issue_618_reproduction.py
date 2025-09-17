@@ -209,7 +209,7 @@ async def test_websocket_handshake_timeouts():
                 'error_type': 'handshake_timeout'
             }, "Successfully reproduced WebSocket handshake timeout from Issue #618")
             
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.InvalidStatusCode as e:
             duration_ms = int((time.time() - start_time) * 1000)
             if "503" in str(e):
                 results.add_result(test_name, 'REPRODUCED', duration_ms, {

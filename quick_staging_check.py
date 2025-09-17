@@ -46,7 +46,7 @@ async def check_staging_connectivity():
         ) as ws:
             print("❌ WebSocket connection SUCCEEDED without auth (security issue!)")
             results.append({"test": "websocket_auth", "status": "FAIL", "details": "Connection succeeded without auth"})
-    except websockets.exceptions.InvalidStatus as e:
+    except websockets.InvalidStatus as e:
         if "403" in str(e):
             print(f"✅ WebSocket auth check PASSED: Got expected 403 error: {e}")
             results.append({"test": "websocket_auth", "status": "PASS", "details": "Auth properly enforced"})

@@ -42,7 +42,7 @@ class SimpleWebSocketImportConsolidator:
         self.replacements = [
             ImportReplacement(
                 old_pattern=r"from netra_backend\.app\.websocket_core\.manager import (\w+)",
-                new_pattern=r"from netra_backend.app.websocket_core.websocket_manager import \1",
+                new_pattern=r"from netra_backend.app.websocket_core.canonical_import_patterns import \1",
                 description="Legacy manager.py import → canonical SSOT",
                 files_affected=[
                     "netra_backend/app/agents/registry.py",
@@ -51,7 +51,7 @@ class SimpleWebSocketImportConsolidator:
             ),
             ImportReplacement(
                 old_pattern=r"from netra_backend\.app\.websocket_core\.websocket_manager import (\w+)",
-                new_pattern=r"from netra_backend.app.websocket_core.websocket_manager import \1",
+                new_pattern=r"from netra_backend.app.websocket_core.canonical_import_patterns import \1",
                 description="Direct websocket_manager.py import → canonical SSOT",
                 files_affected=[
                     "netra_backend/app/agents/registry.py"
@@ -59,7 +59,7 @@ class SimpleWebSocketImportConsolidator:
             ),
             ImportReplacement(
                 old_pattern=r"from netra_backend\.app\.websocket_core import WebSocketManager",
-                new_pattern=r"from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager",
+                new_pattern=r"from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as WebSocketManager",
                 description="Package-level import → canonical SSOT",
                 files_affected=[
                     "netra_backend/app/tools/enhanced_dispatcher.py"

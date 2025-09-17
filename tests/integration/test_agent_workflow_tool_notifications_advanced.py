@@ -36,7 +36,7 @@ from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from test_framework.base_integration_test import BaseIntegrationTest as DockerTestBase
 
@@ -134,7 +134,7 @@ class AgentWorkflowToolNotificationsTests(DockerTestBase):
                 except json.JSONDecodeError as e:
                     logger.warning(f'Failed to parse WebSocket message: {e}')
                     continue
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             logger.info('WebSocket connection closed')
         except Exception as e:
             logger.error(f'WebSocket listening error: {e}')

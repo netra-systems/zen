@@ -102,8 +102,8 @@ from netra_backend.app.clients.auth_client_core import (
 from shared.isolated_environment import get_env
 
 # SSOT WebSocket Infrastructure (verified from registry) 
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 # SSOT Database Models (verified from registry)
 from netra_backend.app.db.models_user import User
@@ -611,14 +611,14 @@ class AuthenticationEdgeCasesBusinessCriticalTests(SSotAsyncTestCase):
                             "BUSINESS IMPACT: HIGH - Chat functionality (90% of platform value) not working."
                         )
             
-            except websockets.exceptions.ConnectionClosed as e:
+            except websockets.ConnectionClosed as e:
                 pytest.fail(
                     f"WebSocket connection closed unexpectedly: {e}. "
                     f"This could indicate authentication failure or network issues. "
                     f"BUSINESS IMPACT: Users cannot access chat functionality."
                 )
             
-            except websockets.exceptions.WebSocketException as e:
+            except websockets.WebSocketException as e:
                 pytest.fail(
                     f"WebSocket error during authentication test: {e}. "
                     f"This could prevent chat functionality from working properly."

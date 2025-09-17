@@ -49,7 +49,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 # Import business value components
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext, UserContextManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, create_agent_websocket_bridge
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
@@ -353,8 +353,8 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             
             # Test that canonical SSOT import path works
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as SSoTManager
-                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as ssot_getter
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as SSoTManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager as ssot_getter
                 
                 # Validate these are the same as what we're using
                 self.assertEqual(
@@ -374,13 +374,13 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             
             # Scan common locations for WebSocket manager duplicates
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 websocket_classes.append("UnifiedWebSocketManager")
             except ImportError:
                 pass
                 
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as LegacyManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as LegacyManager
                 websocket_classes.append("LegacyWebSocketManager")
             except ImportError:
                 pass
