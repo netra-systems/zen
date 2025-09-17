@@ -32,7 +32,7 @@ the factory pattern directly, this adapter should be removed.
 import asyncio
 import uuid
 import warnings
-from datetime import datetime
+from datetime import datetime, timezone, UTC
 from typing import Dict, Optional, Any, Set
 from contextlib import contextmanager
 import weakref
@@ -235,7 +235,7 @@ class _LegacyWebSocketManagerAdapter:
         # Create context for this connection
         connection_info = {
             "user_id": user_id,
-            "connection_id": f"conn_{user_id}_{datetime.utcnow().timestamp()}"
+            "connection_id": f"conn_{user_id}_{datetime.now(UTC).timestamp()}"
         }
         if connection_metadata:
             connection_info.update(connection_metadata)
@@ -251,7 +251,7 @@ class _LegacyWebSocketManagerAdapter:
             connection_id=user_context.websocket_connection_id,
             user_id=user_id,
             websocket=websocket,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         
         # Add to isolated manager
