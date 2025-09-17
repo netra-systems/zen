@@ -145,6 +145,8 @@ deployment/monitoring/
 **/deployment/
 **/gcp/
 **/cloud*
+# EXCEPTION: Allow CloudEnvironmentDetector module (Issue #1305)
+!**/cloud_environment_detector.py
 **/k8s/
 **/kubernetes/
 
