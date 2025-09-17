@@ -572,8 +572,12 @@ class UnifiedWebSocketAuthenticator:
 
         except Exception as e:
             logger.error(f"Auth service API validation error: {e}")
-            # Fall back to legacy service
-            return await self._validate_jwt_via_legacy_service(token, auth_method)
+            # Legacy service removed - return failure
+            return WebSocketAuthResult(
+                success=False,
+                error_message=f"Authentication API error and legacy service has been removed: {str(e)}",
+                auth_method=auth_method
+            )
 
     
 
@@ -594,14 +598,22 @@ class UnifiedWebSocketAuthenticator:
                     auth_method=f"{auth_method}-phase2-fallback"
                 )
             else:
-                # If auth service API fails, try legacy path as last resort
-                logger.warning(f"Auth service API fallback failed, trying legacy JWT decode")
-                return await self._fallback_via_legacy_jwt_decoding(token, auth_method)
+                # Legacy JWT decode removed - return failure
+                logger.error(f"Auth service API fallback failed, legacy JWT decode removed")
+                return WebSocketAuthResult(
+                    success=False,
+                    error_message="Auth service API failed and legacy JWT decode has been removed",
+                    auth_method=auth_method
+                )
 
         except Exception as e:
             logger.error(f"Auth service API fallback error: {e}")
-            # Fall back to legacy as last resort
-            return await self._fallback_via_legacy_jwt_decoding(token, auth_method)
+            # Legacy fallback removed - return failure
+            return WebSocketAuthResult(
+                success=False,
+                error_message=f"Auth service API fallback error and legacy fallback has been removed: {str(e)}",
+                auth_method=auth_method
+            )
 
     
     def _is_e2e_test_environment(self) -> bool:

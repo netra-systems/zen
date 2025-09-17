@@ -950,11 +950,8 @@ class UnifiedTestRunner:
         from shared.isolated_environment import get_env
         env = get_env()
         
-        # Set no-services mode if requested
-        self.no_services_mode = getattr(args, 'no_services', False)
-        if self.no_services_mode:
-            env.set('TEST_NO_SERVICES', 'true', 'test_runner')
-            print("[INFO] Running in no-services mode - external dependencies disabled")
+        # Initialize no-services mode (will be set properly in run_tests)
+        self.no_services_mode = False
         self.max_collection_size = int(env.get("MAX_TEST_COLLECTION_SIZE", "1000"))
         
         # Test configurations - Use project root as working directory to fix import issues

@@ -77,9 +77,8 @@ async def test_real_agent_execution_with_circuit_breaker_protection(isolated_tes
         # Use real JWT token creation
         auth_token = create_real_jwt_token(
             user_id="test_user_cb_simple",
-            extra_claims={
-                "permissions": ["read", "write", "agent_execute"]
-            }
+            permissions=["read", "write", "agent_execute"],
+            email="test_user_cb_simple@test.com"
         )
     except (ImportError, ValueError):
         # Fallback to JWT helper if real JWT creation fails

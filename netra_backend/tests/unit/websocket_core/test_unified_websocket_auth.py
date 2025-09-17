@@ -44,7 +44,6 @@ from netra_backend.app.websocket_core.unified_websocket_auth import (
     authenticate_websocket_ssot,
     authenticate_websocket_connection,
     create_authenticated_user_context,
-    validate_websocket_token_business_logic,
     _validate_critical_environment_configuration,
     _extract_token_from_websocket,
     _validate_auth_service_health
@@ -368,46 +367,6 @@ class UnifiedWebSocketAuthAuthenticationTests(SSotAsyncTestCase):
             self.assertEqual(context, mock_context)
             mock_context_class.assert_called_once()
 
-    async def test_validate_websocket_token_business_logic_valid(self):
-        """Test WebSocket token validation business logic with valid token."""
-        valid_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyXzEyMyIsImV4cCI6OTk5OTk5OTk5OX0.signature"
-
-        with patch('netra_backend.app.websocket_core.unified_websocket_auth.get_unified_auth_service') as mock_service:
-            mock_auth = AsyncMock()
-            mock_service.return_value = mock_auth
-            mock_auth.authenticate_token.return_value = AuthResult(
-                success=True,
-                user_id=self.test_user_id,
-                token_data={"sub": self.test_user_id, "exp": 9999999999},
-                error_message=None
-            )
-
-            # Test token validation
-            result = await validate_websocket_token_business_logic(valid_token)
-
-            # Verify successful validation
-            self.assertIsNotNone(result)
-            self.assertEqual(result["user_id"], self.test_user_id)
-
-    async def test_validate_websocket_token_business_logic_invalid(self):
-        """Test WebSocket token validation business logic with invalid token."""
-        invalid_token = "invalid.jwt.token"
-
-        with patch('netra_backend.app.websocket_core.unified_websocket_auth.get_unified_auth_service') as mock_service:
-            mock_auth = AsyncMock()
-            mock_service.return_value = mock_auth
-            mock_auth.authenticate_token.return_value = AuthResult(
-                success=False,
-                user_id=None,
-                token_data=None,
-                error_message="Invalid token format"
-            )
-
-            # Test token validation
-            result = await validate_websocket_token_business_logic(invalid_token)
-
-            # Verify validation failure
-            self.assertIsNone(result)
 
     def test_validate_critical_environment_configuration_valid(self):
         """Test critical environment configuration validation with valid config."""

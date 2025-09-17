@@ -1284,7 +1284,6 @@ async def authenticate_websocket_ssot(
     CONSOLIDATED IMPLEMENTATIONS:
     1. UnifiedWebSocketAuthenticator.authenticate_websocket_connection (class method)
     2. authenticate_websocket_connection (standalone function) 
-    3. authenticate_websocket_with_remediation (remediation function)
     5. UserContextExtractor.validate_and_decode_jwt (JWT validation method)
     6. _extract_token_from_websocket (token extraction utility)
     
