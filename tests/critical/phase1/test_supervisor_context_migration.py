@@ -16,7 +16,7 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+            raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
     async def close(self, code: int = 1000, reason: str = "Normal closure"):
@@ -82,12 +82,13 @@ class TestWebSocketConnection:
 
         # Import the classes under test
         from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-        from netra_backend.app.agents.supervisor.user_execution_context import ( )
-        UserExecutionContext,
-        InvalidContextError,
-        validate_user_context,
-        clear_shared_objects,
-        register_shared_object
+        from netra_backend.app.agents.supervisor.user_execution_context import (
+            UserExecutionContext,
+            InvalidContextError,
+            validate_user_context,
+            clear_shared_objects,
+            register_shared_object
+        )
         
         from netra_backend.app.agents.base.interface import ExecutionContext
         from netra_backend.app.schemas.agent_models import DeepAgentState
@@ -109,7 +110,7 @@ class TestWebSocketConnection:
 
 
 class TestDataLeakageMonitor:
-        """Monitor for data leakage between test runs."""
+    """Monitor for data leakage between test runs."""
 
     def __init__(self):
         pass

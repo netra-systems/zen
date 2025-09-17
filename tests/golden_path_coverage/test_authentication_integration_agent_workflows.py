@@ -42,9 +42,10 @@ from shared.isolated_environment import get_env, IsolatedEnvironment
 import pytest
 from loguru import logger
 from netra_backend.app.auth_integration.auth import AuthenticationService
-from auth_service.auth_core.core.jwt_handler import JWTHandler
-from auth_service.auth_core.core.session_manager import SessionManager
-from auth_service.auth_core.core.token_validator import TokenValidator
+# Use SSOT backend components instead of direct auth service imports
+from netra_backend.app.database.session_manager import SessionManager
+# Import auth service components dynamically in tests to avoid startup failures
+import importlib
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager

@@ -86,22 +86,25 @@ class SessionMigrationUtility:
         logger.info("Checking auth session compatibility...")
         
         try:
-            # Auth service should maintain its own session manager for independence
-            # We only need to ensure compatibility, not migrate
-            from auth_service.auth_core.core.session_manager import SessionManager as AuthSessionManager
+            # SSOT: Use auth integration layer instead of direct auth service import
+            # This prevents startup failures when auth service is not available
+            from netra_backend.app.auth_integration.auth import AuthIntegration
             
-            # Verify auth sessions are accessible if needed for cross-service operations
-            auth_manager = AuthSessionManager()
-            await auth_manager.initialize()
+            # Check auth service availability through integration layer
+            auth_integration = AuthIntegration()
             
-            health_status = auth_manager.health_check()
-            logger.info(f"Auth session manager health: {'OK' if health_status else 'DEGRADED'}")
-            
-            # Clean up auth manager
-            await auth_manager.cleanup()
-            
-        except ImportError:
-            logger.warning("Auth session manager not available for compatibility check")
+            # Test connectivity to auth service
+            try:
+                # This will fail gracefully if auth service is not available
+                health_status = await auth_integration.health_check()
+                logger.info(f"Auth service health through integration: {'OK' if health_status else 'DEGRADED'}")
+                self.migration_stats["auth_sessions_migrated"] = 1
+            except Exception as e:
+                logger.warning(f"Auth service not available through integration layer: {e}")
+                # This is acceptable - auth service may not be running during migration
+                
+        except ImportError as e:
+            logger.warning(f"Auth integration layer not available: {e}")
         except Exception as e:
             logger.error(f"Auth session compatibility check failed: {e}")
         

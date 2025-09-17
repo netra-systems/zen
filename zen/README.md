@@ -72,10 +72,10 @@ Why activate your "giga-brain" when you can run one command instead?
 pip install -r requirements.txt
 
 # Basic usage
-python zen_orchestrator.py --config config_example.json
+zen --config config_example.json
 
 # With budget control
-python zen_orchestrator.py --config my_config.json --overall-token-budget 50000
+zen --config my_config.json --overall-token-budget 50000
 ```
 
 ## Key Features

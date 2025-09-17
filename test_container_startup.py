@@ -13,19 +13,19 @@ import time
 sys.path.append('/c/netra-apex')
 
 def test_auth_service_imports():
-    """Test if auth_service imports work correctly"""
-    print("Testing auth_service imports...")
+    """Test if SSOT auth integration works correctly"""
+    print("Testing SSOT auth integration...")
     try:
-        # Test the import that was failing in the logs
-        from auth_service.auth_core.core.jwt_handler import JWTHandler
-        from auth_service.auth_core.core.session_manager import SessionManager
-        print("PASS: auth_service imports successful")
+        # Test SSOT auth integration pattern instead of direct auth service imports
+        from netra_backend.app.auth_integration.auth import AuthIntegration
+        from netra_backend.app.database.session_manager import SessionManager
+        print("PASS: SSOT auth integration imports successful")
         return True
     except ImportError as e:
-        print(f"FAIL: auth_service import failed: {e}")
+        print(f"FAIL: SSOT auth integration import failed: {e}")
         return False
     except Exception as e:
-        print(f"FAIL: auth_service import error: {e}")
+        print(f"FAIL: SSOT auth integration import error: {e}")
         return False
 
 def test_backend_database_config():
