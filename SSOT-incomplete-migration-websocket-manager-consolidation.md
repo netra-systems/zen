@@ -27,8 +27,41 @@ WebSocket Manager SSOT Consolidation Required - Three different manager implemen
 - Compatibility shims required
 
 ## Test Discovery
-- Existing tests to protect: TBD
-- New tests needed: TBD
+
+### Existing Tests Analysis (300+ test files found)
+**Mission Critical Tests (Must Pass):**
+- `test_websocket_agent_events_suite.py` - 5 critical WebSocket events
+- `test_websocket_ssot_violations_issue_885.py` - Currently failing (should pass after fix)
+- `test_unified_manager.py` - Core implementation tests
+
+**Key Test Categories:**
+- Unit Tests: 80+ files for SSOT compliance
+- Integration Tests: 50+ files for cross-service validation
+- Performance Tests: Ensure no degradation
+
+### Test Plan Summary
+
+**Phase 1 - Pre-Consolidation Baseline:**
+```bash
+python tests/unit/websocket_ssot/test_websocket_manager_ssot_consolidation.py
+python tests/mission_critical/test_websocket_agent_events_suite.py
+python netra_backend/tests/unit/websocket_core/test_unified_manager.py
+```
+
+**Phase 2 - During Consolidation:**
+- Import compatibility tests must continue working
+- Factory pattern validation
+- User isolation tests
+
+**Phase 3 - Post-Consolidation:**
+- SSOT violation tests should now pass
+- Single manager validation
+- Performance regression tests
+
+### New Tests Needed
+1. **Consolidation Validation Test** - Verify only one manager exists
+2. **Migration Safety Test** - Ensure connections preserved
+3. **Performance Impact Test** - Validate no throughput degradation
 
 ## Remediation Plan
 1. Consolidate to single WebSocketManager class
