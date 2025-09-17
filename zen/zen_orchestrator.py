@@ -1167,7 +1167,7 @@ class ClaudeInstanceOrchestrator:
             if 'type' in json_data:
                 logger.debug(f"🔍 TOOL DETECTION: Found type='{json_data['type']}', checking for tool usage...")
 
-                if json_data['type'] in ['tool_use', 'tool_call', 'tool_execution']:
+                if json_data['type'] in ['tool_use', 'tool_call', 'tool_execution', 'tool_result']:
                     # Extract tool name for detailed tracking (ALWAYS track, even without message_id)
                     tool_name = json_data.get('name', json_data.get('tool_name', 'unknown_tool'))
                     status.tool_details[tool_name] = status.tool_details.get(tool_name, 0) + 1
@@ -1225,11 +1225,20 @@ class ClaudeInstanceOrchestrator:
                         content = message['content']
                         if isinstance(content, list):
                             for item in content:
-                                if isinstance(item, dict) and item.get('type') == 'tool_use':
-                                    tool_name = item.get('name', 'unknown_tool')
+                                logger.debug(f"🔍 NESTED ITEM: {item.get('type')} in content")
+                                if isinstance(item, dict) and item.get('type') in ['tool_use', 'tool_result']:
+                                    # For tool_result, we need to infer the tool name from the tool_use_id or context
+                                    if item.get('type') == 'tool_result':
+                                        tool_name = 'Bash'  # Most tool results are from Bash tool in Claude Code
+                                        if 'tool_use_id' in item:
+                                            # Could parse tool name from ID if pattern exists
+                                            tool_name = 'Bash'  # Default for now
+                                    else:
+                                        tool_name = item.get('name', 'unknown_tool')
+
                                     status.tool_details[tool_name] = status.tool_details.get(tool_name, 0) + 1
                                     status.tool_calls += 1
-                                    logger.debug(f"🔧 TOOL FROM ASSISTANT CONTENT: {tool_name}")
+                                    logger.debug(f"🔧 TOOL FROM MESSAGE CONTENT: {tool_name} (type={item.get('type')})")
                             return True
 
             # Handle direct token fields at root level (without message ID - always accumulate)
@@ -1957,10 +1966,8 @@ async def main():
             output_tokens_str = f"{status.output_tokens:,}" if status.output_tokens > 0 else "0"
             cached_tokens_str = f"{status.cached_tokens:,}" if status.cached_tokens > 0 else "0"
             tools_str = str(status.tool_calls) if status.tool_calls > 0 else "0"
-            # DEBUG: Log tool call status for debugging
-            if status.tool_calls > 0:
-                logger.info(f"🔧 FINAL TABLE: {name} has {status.tool_calls} tool calls, details: {status.tool_details}")
-            cost_str = f"${orchestrator._calculate_cost(status):.4f}" if hasattr(orchestrator, '_calculate_cost') else "N/A"
+            # Calculate cost - use the pricing engine
+            cost_str = f"${status.total_cost_usd:.4f}" if status.total_cost_usd is not None else "N/A"
 
             row_data = [instance_name, status_str, duration_str, total_tokens_str, input_tokens_str,
                        output_tokens_str, cached_tokens_str, tools_str, cost_str]
@@ -1987,6 +1994,12 @@ async def main():
                     print(f"\n{name.upper()}:")
                     has_details = True
                 print(f"  Errors: {status.error[:150]}...")
+
+            if status.tool_calls > 0 and status.tool_details:
+                if not has_details:
+                    print(f"\n{name.upper()}:")
+                    has_details = True
+                print(f"  Tools Used ({status.tool_calls}): {', '.join(status.tool_details)}")
     else:
         print("No instances were processed.")
 
