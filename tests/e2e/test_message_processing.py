@@ -583,7 +583,7 @@ class MessageProcessingTests:
                                         
                             except asyncio.TimeoutError:
                                 continue
-                            except websockets.exceptions.ConnectionClosed:
+                            except websockets.ConnectionClosed:
                                 break
                                 
                 except Exception as e:

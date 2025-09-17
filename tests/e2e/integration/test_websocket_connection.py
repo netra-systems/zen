@@ -97,7 +97,7 @@ async def test_websocket_handshake_success(connection_tester):
 async def test_websocket_handshake_invalid_auth(connection_tester):
     """Test WebSocket handshake fails with invalid auth token."""
     # Act & Assert
-    with pytest.raises(websockets.exceptions.ConnectionClosedError):
+    with pytest.raises(websockets.ConnectionClosedError):
         await connection_tester.create_websocket_connection("invalid_token")
 
 
@@ -106,7 +106,7 @@ async def test_websocket_handshake_invalid_auth(connection_tester):
 async def test_websocket_handshake_no_auth(connection_tester):
     """Test WebSocket handshake fails without auth token."""
     # Act & Assert
-    with pytest.raises(websockets.exceptions.ConnectionClosedError):
+    with pytest.raises(websockets.ConnectionClosedError):
         await connection_tester.create_websocket_connection(None)
 
 

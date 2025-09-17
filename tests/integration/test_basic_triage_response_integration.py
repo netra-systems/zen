@@ -100,7 +100,7 @@ class BasicTriageResponseIntegrationTests(SSotAsyncTestCase):
         
         EXPECTED OUTCOME: Should initially FAIL due to WebSocket 1011 issues.
         """
-        user_message = {'type': 'user_message', 'content': 'I need to optimize my cloud infrastructure costs. Current AWS spend is $8,000/month on EC2 instances.', 'thread_id': self.thread_id, 'user_id': self.user_id, 'timestamp': datetime.utcnow().isoformat(), 'metadata': {'platform': 'aws', 'current_spend': 8000, 'service_type': 'ec2'}}
+        user_message = {'type': 'user_message', 'content': 'I need to optimize my cloud infrastructure costs. Current AWS spend is $8,000/month on EC2 instances.', 'thread_id': self.thread_id, 'user_id': self.user_id, 'timestamp': datetime.now(UTC).isoformat(), 'metadata': {'platform': 'aws', 'current_spend': 8000, 'service_type': 'ec2'}}
         routing_steps = {'message_received': False, 'message_normalized': False, 'handler_found': False, 'handler_invoked': False, 'response_generated': False}
         try:
             routing_steps['message_received'] = True
@@ -240,7 +240,7 @@ class BasicTriageResponseIntegrationTests(SSotAsyncTestCase):
         try:
             for i, event in enumerate(test_events):
                 start_time = time.time()
-                event.update({'user_id': self.user_id, 'thread_id': self.thread_id, 'timestamp': datetime.utcnow().isoformat(), 'sequence': i})
+                event.update({'user_id': self.user_id, 'thread_id': self.thread_id, 'timestamp': datetime.now(UTC).isoformat(), 'sequence': i})
                 await self.mock_websocket.send_text(json.dumps(event))
                 delivery_time = time.time() - start_time
                 event_delivery_metrics['delivery_times'].append(delivery_time)
@@ -406,7 +406,7 @@ class BasicTriageResponseIntegrationTests(SSotAsyncTestCase):
                     golden_path_integration['agent_processing'] = True
             critical_events = [{'type': 'agent_started', 'data': {'agent': 'triage'}}, {'type': 'agent_thinking', 'data': {'analysis': 'processing'}}, {'type': 'agent_completed', 'data': {'results': 'optimization_plan'}}]
             for event in critical_events:
-                event.update({'user_id': self.user_id, 'thread_id': self.thread_id, 'timestamp': datetime.utcnow().isoformat()})
+                event.update({'user_id': self.user_id, 'thread_id': self.thread_id, 'timestamp': datetime.now(UTC).isoformat()})
                 await self.mock_websocket.send_text(json.dumps(event))
             golden_path_integration['event_delivery'] = True
             final_response = {'type': 'assistant_message', 'content': 'Cost optimization analysis complete', 'thread_id': self.thread_id, 'results': {'savings_potential': '30%', 'next_steps': ['implement', 'monitor']}}

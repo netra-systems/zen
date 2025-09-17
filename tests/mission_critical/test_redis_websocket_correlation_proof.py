@@ -26,7 +26,7 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 import pytest
 import websockets
-from websockets.exceptions import ConnectionClosedError, InvalidStatusCode
+from websockets import ConnectionClosedError, InvalidStatusCode
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.redis_manager import redis_manager

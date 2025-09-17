@@ -14,7 +14,7 @@ while preserving application state for graceful recovery and reconnection scenar
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List, Callable
 
 from test_framework.base_integration_test import BaseIntegrationTest
@@ -46,7 +46,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
                 self.timeout_config = timeout_config
                 self.messages_sent = []
                 self.is_closed = False
-                self.last_activity = datetime.utcnow()
+                self.last_activity = datetime.now(UTC)
                 self.timeout_events = []
                 self.state_preservation_data = {}
                 self.graceful_shutdown_in_progress = False
@@ -66,7 +66,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
                 self.state_preservation_data = {
                     'connection_id': self.connection_id,
                     'user_id': self.user_id,
-                    'created_at': datetime.utcnow().isoformat(),
+                    'created_at': datetime.now(UTC).isoformat(),
                     'initial_timeout_config': self.timeout_config.copy(),
                     'message_count': 0,
                     'last_activity': self.last_activity.isoformat()
@@ -74,7 +74,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
             
             def _update_activity(self):
                 """Update last activity timestamp."""
-                self.last_activity = datetime.utcnow()
+                self.last_activity = datetime.now(UTC)
                 self.state_preservation_data['last_activity'] = self.last_activity.isoformat()
             
             async def send_json(self, data):
@@ -139,14 +139,14 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
                 if idle_timeout <= 0:
                     return False
                 
-                idle_duration = (datetime.utcnow() - self.last_activity).total_seconds()
+                idle_duration = (datetime.now(UTC) - self.last_activity).total_seconds()
                 return idle_duration > idle_timeout
             
             def _record_timeout_event(self, timeout_type: str, context: Dict[str, Any]):
                 """Record timeout event with context for analysis."""
                 timeout_event = {
                     'type': timeout_type,
-                    'timestamp': datetime.utcnow().isoformat(),
+                    'timestamp': datetime.now(UTC).isoformat(),
                     'connection_id': self.connection_id,
                     'user_id': self.user_id,
                     'context': context,
@@ -165,7 +165,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
                 
                 preserved_message = {
                     'message': message,
-                    'timestamp': datetime.utcnow().isoformat(),
+                    'timestamp': datetime.now(UTC).isoformat(),
                     'preservation_reason': 'graceful_shutdown'
                 }
                 self.state_preservation_data['preserved_messages'].append(preserved_message)
@@ -179,7 +179,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
                 
                 # Preserve current state
                 self.state_preservation_data.update({
-                    'shutdown_initiated_at': datetime.utcnow().isoformat(),
+                    'shutdown_initiated_at': datetime.now(UTC).isoformat(),
                     'shutdown_reason': reason,
                     'graceful_shutdown': True
                 })
@@ -212,7 +212,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
                 if not self.is_closed:
                     # Final state preservation
                     self.state_preservation_data.update({
-                        'closed_at': datetime.utcnow().isoformat(),
+                        'closed_at': datetime.now(UTC).isoformat(),
                         'close_code': code,
                         'close_reason': reason,
                         'final_message_count': len(self.messages_sent),
@@ -266,7 +266,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
         recovery_data = {
             'user_id': user_id,
             'connection_id': connection_id,
-            'created_at': datetime.utcnow().isoformat(),
+            'created_at': datetime.now(UTC).isoformat(),
             'timeout_events': [],
             'preserved_messages': [],
             'recovery_enabled': True
@@ -296,7 +296,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
         recovery_data = {
             'user_id': timeout_stats['user_id'],
             'connection_id': connection_id,
-            'last_updated': datetime.utcnow().isoformat(),
+            'last_updated': datetime.now(UTC).isoformat(),
             'timeout_events': timeout_stats['timeout_events'],
             'state_preservation_data': timeout_stats['state_preservation_data'],
             'graceful_shutdown': timeout_stats['graceful_shutdown_in_progress']
@@ -374,7 +374,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
             connection_id=connection_id,
             user_id=user_id,
             websocket=timeout_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={
                 "connection_type": "timeout_handling_test",
                 "timeout_config": timeout_config,
@@ -393,7 +393,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
             normal_message = {
                 "type": "normal_message",
                 "data": {"message_index": i, "content": f"Normal message {i}"},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
             await websocket_manager.send_to_user(user_id, normal_message)
@@ -411,7 +411,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
             large_message = {
                 "type": "large_message_write_timeout",
                 "data": {"size": "large", "content": "x" * 1000},  # Large content
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
             await websocket_manager.send_to_user(user_id, large_message)
@@ -437,7 +437,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
                 request_response_message = {
                     "type": "request_response_read_timeout",
                     "data": {"request": "This should trigger read timeout"},
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 
                 await websocket_manager.send_to_user(user_id, request_response_message)
@@ -474,7 +474,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
                 shutdown_message = {
                     "type": "message_during_shutdown",
                     "data": {"content": "This should be preserved for recovery"},
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 
                 await websocket_manager.send_to_user(user_id, shutdown_message)
@@ -568,7 +568,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
             connection_id=initial_connection_id,
             user_id=user_id,
             websocket=initial_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"connection_type": "timeout_recovery_initial"}
         )
         
@@ -584,19 +584,19 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
                     message = {
                         "type": "large_message_write_timeout",
                         "data": {"index": i, "large_data": "x" * 500},
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(UTC).isoformat()
                     }
                 elif i == 3:  # Trigger read timeout
                     message = {
                         "type": "request_response_read_timeout",
                         "data": {"index": i, "request": "timeout_trigger"},
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(UTC).isoformat()
                     }
                 else:
                     message = {
                         "type": "normal_message",
                         "data": {"index": i, "content": f"Message {i}"},
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(UTC).isoformat()
                     }
                 
                 await websocket_manager.send_to_user(user_id, message)
@@ -606,7 +606,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
                 timeout_failures.append({
                     'message_index': i,
                     'error': str(e),
-                    'timestamp': datetime.utcnow().isoformat()
+                    'timestamp': datetime.now(UTC).isoformat()
                 })
             
             await asyncio.sleep(0.1)
@@ -669,7 +669,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
             connection_id=recovery_connection_id,
             user_id=user_id,
             websocket=recovery_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={
                 "connection_type": "timeout_recovery_reconnect",
                 "previous_connection_id": initial_connection_id,
@@ -688,7 +688,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
             recovery_message = {
                 "type": "recovery_test_message",
                 "data": {"index": i, "recovered": True, "content": f"Recovery message {i}"},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
             await websocket_manager.send_to_user(user_id, recovery_message)
@@ -798,7 +798,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
                 connection_id=connection_id,
                 user_id=user_id,
                 websocket=timeout_websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={
                     "connection_type": "concurrent_timeout_test",
                     "user_index": user_index,
@@ -851,7 +851,7 @@ class WebSocketConnectionTimeoutHandlingGracefulStateIntegrationTests(BaseIntegr
                             "message_index": i,
                             "content": f"User {user_index} message {i}"
                         },
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(UTC).isoformat()
                     }
                     
                     await websocket_manager.send_to_user(user_id, message)

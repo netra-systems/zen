@@ -402,7 +402,7 @@ class WebSocketStagingEnvironmentValidationTests:
                         cloud_run_tests["websocket_connection"]["message_exchange"] = False
                         logger.warning(" WARNING: [U+FE0F] WebSocket message exchange timeout (may be expected)")
                     
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 connection_time = time.time() - start_time
                 
                 cloud_run_tests["websocket_connection"] = {
@@ -578,7 +578,7 @@ class WebSocketStagingEnvironmentValidationTests:
                         
                         logger.info(f" PASS:  WSS connection successful in {wss_connection_time:.3f}s")
                         
-                except websockets.exceptions.ConnectionClosedError as e:
+                except websockets.ConnectionClosedError as e:
                     wss_connection_time = time.time() - wss_start_time
                     
                     # Connection closed but SSL handshake worked if we got this far
@@ -813,7 +813,7 @@ class WebSocketStagingEnvironmentValidationTests:
                     "success_rate": successful_phases / total_phases
                 }
                 
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             connection_time = time.time() - start_time
             
             logger.error(f" FAIL:  Infrastructure connection failed: Code {e.code} - {e.reason} in {connection_time:.3f}s")

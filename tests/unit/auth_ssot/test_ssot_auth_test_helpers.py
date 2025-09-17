@@ -638,13 +638,13 @@ class SSOTAuthTestHelpersAsyncContextManagerTests(SSotAsyncTestCase):
             async with helper:
                 # Mock creating users during context
                 from test_framework.ssot.auth_test_helpers import AuthenticatedTestUser
-                from datetime import datetime
+                from datetime import datetime, UTC
                 
                 test_user = AuthenticatedTestUser(
                     user_id="cleanup_user",
                     email="cleanup@example.com",
                     access_token="cleanup_token",
-                    created_at=datetime.utcnow()
+                    created_at=datetime.now(UTC)
                 )
                 helper._test_users.append(test_user)
             

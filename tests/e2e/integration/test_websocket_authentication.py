@@ -121,7 +121,7 @@ async def test_websocket_jwt_authentication_success(auth_tester):
 async def test_websocket_invalid_jwt_token(auth_tester):
     """Test WebSocket rejects invalid JWT tokens."""
     # Act & Assert
-    with pytest.raises(websockets.exceptions.ConnectionClosedError):
+    with pytest.raises(websockets.ConnectionClosedError):
         await websockets.connect(
             "ws://localhost:8000/websocket",
             additional_headers={"Authorization": "Bearer invalid_token"}
@@ -139,7 +139,7 @@ async def test_websocket_expired_jwt_token(auth_tester):
     )
     
     # Act & Assert
-    with pytest.raises(websockets.exceptions.ConnectionClosedError):
+    with pytest.raises(websockets.ConnectionClosedError):
         await websockets.connect(
             "ws://localhost:8000/websocket",
             additional_headers={"Authorization": f"Bearer {expired_token}"}

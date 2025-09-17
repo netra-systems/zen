@@ -8,7 +8,7 @@ import asyncio
 import logging
 import hashlib
 import json
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, UTC
 from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass
 import os
@@ -89,7 +89,7 @@ class EventProcessor:
         self._batch_buffer: List[AnalyticsEvent] = []
         self._processing_tasks: List[asyncio.Task] = []
         self._running = False
-        self._last_flush_time = datetime.utcnow()
+        self._last_flush_time = datetime.now(UTC)
         
         # Metrics
         self._processed_count = 0
@@ -216,7 +216,7 @@ class EventProcessor:
             event_with_context = {
                 'event': event,
                 'user_context': user_context.to_dict() if user_context else None,
-                'processing_timestamp': datetime.utcnow().isoformat()
+                'processing_timestamp': datetime.now(UTC).isoformat()
             }
             await self._processing_queue.put(event_with_context)
             
@@ -228,7 +228,7 @@ class EventProcessor:
     
     async def process_batch(self, batch: EventBatch, user_context: Optional[UserExecutionContext] = None) -> ProcessingResult:
         """Process a batch of events with mandatory user context isolation"""
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         processed_count = 0
         failed_count = 0
         errors = []
@@ -247,7 +247,7 @@ class EventProcessor:
                     failed_count += 1
                     errors.append(f"Failed to process event {event.event_id}")
             
-            processing_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+            processing_time = (datetime.now(UTC) - start_time).total_seconds() * 1000
             
             return ProcessingResult(
                 processed_count=processed_count,
@@ -262,7 +262,7 @@ class EventProcessor:
                 processed_count=processed_count,
                 failed_count=len(batch.events) - processed_count,
                 errors=[str(e)],
-                processing_time_ms=(datetime.utcnow() - start_time).total_seconds() * 1000
+                processing_time_ms=(datetime.now(UTC) - start_time).total_seconds() * 1000
             )
     
     # Background Workers
@@ -474,7 +474,7 @@ class EventProcessor:
     
     def _should_flush_batch(self) -> bool:
         """Check if batch should be flushed"""
-        time_since_last_flush = datetime.utcnow() - self._last_flush_time
+        time_since_last_flush = datetime.now(UTC) - self._last_flush_time
         return time_since_last_flush.total_seconds() >= self.config.flush_interval_seconds
     
     async def _flush_events(self):
@@ -484,7 +484,7 @@ class EventProcessor:
         
         batch = self._batch_buffer.copy()
         self._batch_buffer.clear()
-        self._last_flush_time = datetime.utcnow()
+        self._last_flush_time = datetime.now(UTC)
         
         # SECURITY CRITICAL: Process events by user context to maintain isolation
         events_by_user = {}

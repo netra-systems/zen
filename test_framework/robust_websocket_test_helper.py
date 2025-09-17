@@ -24,7 +24,7 @@ from typing import Any, Dict, List, Optional, Set, Callable, Union
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 import websockets
-from websockets.exceptions import WebSocketException, ConnectionClosedError, InvalidURI
+from websockets import WebSocketException, ConnectionClosedError, InvalidURI
 
 # Add project root to path for imports
 import os

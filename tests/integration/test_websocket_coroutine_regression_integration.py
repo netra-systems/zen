@@ -106,7 +106,7 @@ class WebSocketCoroutineRegressionIntegrationTests(BaseIntegrationTest):
                 
                 # If we get here without coroutine errors, the fix is working
                 
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             # CRITICAL: If connection closes immediately, check for coroutine error
             if coroutine in str(e):
                 self.fail(fWebSocket connection failed with coroutine error: {e})""

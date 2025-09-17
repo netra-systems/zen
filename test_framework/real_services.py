@@ -18,7 +18,7 @@ from unittest.mock import AsyncMock
 
 import aiohttp
 import websockets
-from websockets.exceptions import WebSocketException, ConnectionClosedError
+from websockets import WebSocketException, ConnectionClosedError
 
 # SSOT Import - Use canonical DatabaseManager
 from netra_backend.app.db.database_manager import DatabaseManager

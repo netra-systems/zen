@@ -110,7 +110,7 @@ class WebSocketRESTAuthConsistencyTests(SSotAsyncTestCase):
             assert 'user_id' in websocket_data, 'WebSocket provides user data from auth service'
             logger.info('WebSocket authentication successful')
             return websocket_data
-        except (websockets.exceptions.WebSocketException, ConnectionError) as e:
+        except (websockets.WebSocketException, ConnectionError) as e:
             pytest.skip(f'Staging WebSocket not accessible: {e}')
 
     async def _validate_cross_protocol_consistency(self, rest_data: Dict, websocket_data: Dict):

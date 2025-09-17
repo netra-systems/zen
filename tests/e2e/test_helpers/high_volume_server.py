@@ -80,7 +80,7 @@ class HighVolumeWebSocketServer:
         try:
             async for message in websocket:
                 await self._process_message_high_volume(websocket, message)
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             pass
         except Exception as e:
             logger.error(f"Client {client_id} error: {e}")
@@ -444,7 +444,7 @@ class HighVolumeThroughputClient:
                     
                 except asyncio.TimeoutError:
                     continue
-                except websockets.exceptions.ConnectionClosed:
+                except websockets.ConnectionClosed:
                     logger.info(f"Connection closed for {self.client_id}")
                     break
                 except Exception as e:

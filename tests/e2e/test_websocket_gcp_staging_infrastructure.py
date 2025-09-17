@@ -99,10 +99,10 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
                 except asyncio.TimeoutError:
                     print(f'[U+23F0] Response timeout - connection established but no immediate response')
                     auth_headers_preserved = True
-        except websockets.exceptions.InvalidHandshake as e:
+        except websockets.InvalidHandshake as e:
             error_details = f'WebSocket handshake failed: {e}'
             print(f' FAIL:  Handshake error (may indicate auth header stripping): {error_details}')
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             error_details = f'Connection closed during handshake: {e}'
             print(f' FAIL:  Connection closed (may indicate auth failure): {error_details}')
         except asyncio.TimeoutError:
@@ -294,13 +294,13 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
                     regression_test_result['regression_prevented'] = True
                     regression_test_result['server_response'] = 'timeout_but_connected'
                 print(' PASS:  GitHub issue #113 regression test: WebSocket connection successful')
-        except websockets.exceptions.InvalidHandshake as e:
+        except websockets.InvalidHandshake as e:
             regression_test_result['error_details'] = f'Handshake failed: {e}'
             error_str = str(e).lower()
             if any((pattern in error_str for pattern in ['401', 'unauthorized', 'forbidden', 'authentication']):
                 regression_test_result['header_stripping_detected'] = True
                 regression_test_result['error_details'] += ' (HEADER STRIPPING DETECTED)'
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             regression_test_result['error_details'] = f'Connection closed: {e}'
             if '1011' in str(e):
                 regression_test_result['header_stripping_detected'] = True

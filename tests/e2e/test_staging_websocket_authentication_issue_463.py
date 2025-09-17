@@ -59,12 +59,12 @@ class StagingWebSocketDirectConnectionTests(SSotAsyncTestCase):
                     connection_result['response'] = response
                 except asyncio.TimeoutError:
                     connection_result['response'] = 'TIMEOUT_NO_RESPONSE'
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             connection_result['error_code'] = 'INVALID_STATUS'
             connection_result['http_status'] = e.response.status_code if hasattr(e, 'response') else None
             connection_result['error_message'] = str(e)
             logger.info(f"Expected staging WebSocket error: HTTP {connection_result['http_status']} - {e}")
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             connection_result['error_code'] = 'CONNECTION_CLOSED'
             connection_result['close_code'] = e.code
             connection_result['error_message'] = f'Connection closed with code {e.code}: {e.reason}'
@@ -94,7 +94,7 @@ class StagingWebSocketDirectConnectionTests(SSotAsyncTestCase):
                 async with websockets.connect(self.STAGING_WEBSOCKET_URL, timeout=5, extra_headers=headers) as websocket:
                     connection_result['success'] = True
                     logger.warning(f'UNEXPECTED: Staging WebSocket succeeded with token {token[:20]}')
-            except websockets.exceptions.InvalidStatus as e:
+            except websockets.InvalidStatus as e:
                 connection_result['error_code'] = 'INVALID_STATUS'
                 connection_result['http_status'] = e.response.status_code if hasattr(e, 'response') else None
                 connection_result['error_message'] = str(e)
@@ -123,7 +123,7 @@ class StagingWebSocketDirectConnectionTests(SSotAsyncTestCase):
                         connection_result['success'] = True
                     except asyncio.TimeoutError:
                         pass
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 connection_result['close_code'] = e.code
                 connection_result['error_code'] = 'CONNECTION_CLOSED'
                 connection_result['error_message'] = f'Code {e.code}: {e.reason}'
@@ -199,7 +199,7 @@ class StagingChatFlowFunctionalityTests(SSotAsyncTestCase):
                     if chat_flow_result['message_sent'] and chat_flow_result['response_received']:
                         chat_flow_result['flow_completed'] = True
                         logger.warning('UNEXPECTED: Complete chat flow succeeded in staging')
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             chat_flow_result['failure_point'] = 'websocket_connection'
             chat_flow_result['error_details'] = {'http_status': e.response.status_code if hasattr(e, 'response') else None, 'error_message': str(e)}
             logger.info(f"EXPECTED: Chat flow failed at connection stage: HTTP {chat_flow_result['error_details']['http_status']}")

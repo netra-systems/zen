@@ -88,7 +88,7 @@ class Issue860StagingWebSocketCompatibilityTests(BaseE2ETest):
         except asyncio.TimeoutError:
             pytest.fail(f"Staging WebSocket connection timed out: {websocket_url}")
 
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             pytest.fail(f"Staging WebSocket connection closed: {e}")
 
         except Exception as e:
@@ -344,7 +344,7 @@ class Issue860StagingWebSocketCompatibilityTests(BaseE2ETest):
                     except asyncio.TimeoutError:
                         auth_test_results["response"] = "No response (expected for auth test)"
 
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             auth_test_results["connection_error"] = f"Connection closed: {e}"
             # Connection closed might be expected for auth failure
             if e.code in [1011, 1008]:  # Internal error or policy violation

@@ -6,7 +6,7 @@ Tests are designed to detect deprecated patterns and validate migration behavior
 """
 
 import warnings
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from pathlib import Path
 from typing import Dict, Any, Optional
 import unittest
@@ -26,7 +26,7 @@ class ConnectionManagerDateTimeMigrationTests(unittest.TestCase):
         self.warnings_captured = []
 
     def test_deprecated_datetime_patterns_in_connection_manager(self):
-        """FAILING TEST: Detects deprecated datetime.utcnow() usage in connection manager."""
+        """FAILING TEST: Detects deprecated datetime.now(UTC) usage in connection manager."""
         target_file = project_root / "netra_backend" / "app" / "websocket_core" / "connection_manager.py"
 
         with open(target_file, 'r', encoding='utf-8') as f:
@@ -34,9 +34,9 @@ class ConnectionManagerDateTimeMigrationTests(unittest.TestCase):
 
         # Check for deprecated patterns
         deprecated_patterns = [
-            "datetime.utcnow()",
-            "self.created_at = datetime.utcnow()",
-            "self.last_activity = datetime.utcnow()",
+            "datetime.now(UTC)",
+            "self.created_at = datetime.now(UTC)",
+            "self.last_activity = datetime.now(UTC)",
         ]
 
         found_deprecated = []
@@ -60,12 +60,12 @@ class ConnectionManagerDateTimeMigrationTests(unittest.TestCase):
             def __init__(self, connection_id: str, user_id: str):
                 self.connection_id = connection_id
                 self.user_id = user_id
-                self.created_at = datetime.utcnow()  # Will be migrated
-                self.last_activity = datetime.utcnow()  # Will be migrated
+                self.created_at = datetime.now(UTC)  # Will be migrated
+                self.last_activity = datetime.now(UTC)  # Will be migrated
 
             def update_activity_old_pattern(self):
                 """Update activity using old pattern."""
-                self.last_activity = datetime.utcnow()
+                self.last_activity = datetime.now(UTC)
 
             def update_activity_new_pattern(self):
                 """Update activity using new pattern."""
@@ -99,7 +99,7 @@ class ConnectionManagerDateTimeMigrationTests(unittest.TestCase):
         """FAILING TEST: Validates timezone awareness in connection timestamps."""
 
         # Mock getting current timestamp from connection manager
-        current_timestamp = datetime.utcnow()  # Current implementation
+        current_timestamp = datetime.now(UTC)  # Current implementation
 
         # This test SHOULD FAIL before migration (naive datetime objects)
         self.assertIsNotNone(current_timestamp.tzinfo,
@@ -110,7 +110,7 @@ class ConnectionManagerDateTimeMigrationTests(unittest.TestCase):
 
         def calculate_connection_age_old(created_at: datetime) -> float:
             """Calculate connection age using old pattern."""
-            return (datetime.utcnow() - created_at).total_seconds()
+            return (datetime.now(UTC) - created_at).total_seconds()
 
         def calculate_connection_age_new(created_at: datetime) -> float:
             """Calculate connection age using new pattern."""
@@ -118,7 +118,7 @@ class ConnectionManagerDateTimeMigrationTests(unittest.TestCase):
             return (current_time - created_at).total_seconds()
 
         # Test with a connection created 5 minutes ago
-        creation_time = datetime.utcnow() - timedelta(minutes=5)
+        creation_time = datetime.now(UTC) - timedelta(minutes=5)
 
         age_old = calculate_connection_age_old(creation_time)
         age_new = calculate_connection_age_new(creation_time)
@@ -139,7 +139,7 @@ class ConnectionManagerDateTimeMigrationTests(unittest.TestCase):
         def is_connection_stale_old(last_activity: datetime, timeout_minutes: int = 30) -> bool:
             """Check if connection is stale using old pattern."""
             timeout_delta = timedelta(minutes=timeout_minutes)
-            return (datetime.utcnow() - last_activity) > timeout_delta
+            return (datetime.now(UTC) - last_activity) > timeout_delta
 
         def is_connection_stale_new(last_activity: datetime, timeout_minutes: int = 30) -> bool:
             """Check if connection is stale using new pattern."""
@@ -148,13 +148,13 @@ class ConnectionManagerDateTimeMigrationTests(unittest.TestCase):
             return (current_time - last_activity) > timeout_delta
 
         # Test with stale connection (45 minutes old)
-        stale_activity = datetime.utcnow() - timedelta(minutes=45)
+        stale_activity = datetime.now(UTC) - timedelta(minutes=45)
 
         self.assertTrue(is_connection_stale_old(stale_activity, 30))
         self.assertTrue(is_connection_stale_new(stale_activity, 30))
 
         # Test with fresh connection (15 minutes old)
-        fresh_activity = datetime.utcnow() - timedelta(minutes=15)
+        fresh_activity = datetime.now(UTC) - timedelta(minutes=15)
 
         self.assertFalse(is_connection_stale_old(fresh_activity, 30))
         self.assertFalse(is_connection_stale_new(fresh_activity, 30))
@@ -169,8 +169,8 @@ class ConnectionManagerDateTimeMigrationTests(unittest.TestCase):
             # Create connections with slight time differences
             connection_data = {
                 'id': f'conn_{i}',
-                'created_at': datetime.utcnow(),
-                'last_activity': datetime.utcnow()
+                'created_at': datetime.now(UTC),
+                'last_activity': datetime.now(UTC)
             }
             connections.append(connection_data)
 
@@ -201,7 +201,7 @@ class ConnectionManagerCachingTests(unittest.TestCase):
         def should_cleanup_connection_old(last_activity: datetime, cleanup_threshold_hours: int = 24) -> bool:
             """Check if connection should be cleaned up using old pattern."""
             threshold_delta = timedelta(hours=cleanup_threshold_hours)
-            return (datetime.utcnow() - last_activity) > threshold_delta
+            return (datetime.now(UTC) - last_activity) > threshold_delta
 
         def should_cleanup_connection_new(last_activity: datetime, cleanup_threshold_hours: int = 24) -> bool:
             """Check if connection should be cleaned up using new pattern."""
@@ -210,13 +210,13 @@ class ConnectionManagerCachingTests(unittest.TestCase):
             return (current_time - last_activity) > threshold_delta
 
         # Test with connection that should be cleaned up (25 hours old)
-        old_activity = datetime.utcnow() - timedelta(hours=25)
+        old_activity = datetime.now(UTC) - timedelta(hours=25)
 
         self.assertTrue(should_cleanup_connection_old(old_activity, 24))
         self.assertTrue(should_cleanup_connection_new(old_activity, 24))
 
         # Test with connection that should not be cleaned up (12 hours old)
-        recent_activity = datetime.utcnow() - timedelta(hours=12)
+        recent_activity = datetime.now(UTC) - timedelta(hours=12)
 
         self.assertFalse(should_cleanup_connection_old(recent_activity, 24))
         self.assertFalse(should_cleanup_connection_new(recent_activity, 24))
@@ -229,7 +229,7 @@ class ConnectionManagerCachingTests(unittest.TestCase):
             return {
                 'active_connections': 5,
                 'total_connections': 25,
-                'metrics_timestamp': datetime.utcnow().isoformat(),
+                'metrics_timestamp': datetime.now(UTC).isoformat(),
                 'oldest_connection_age': 3600  # 1 hour in seconds
             }
 

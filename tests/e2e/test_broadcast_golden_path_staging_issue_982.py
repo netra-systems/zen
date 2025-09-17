@@ -149,7 +149,7 @@ class StagingWebSocketClient:
                 except asyncio.TimeoutError:
                     # Continue listening, this is normal
                     continue
-                except websockets.exceptions.ConnectionClosed:
+                except websockets.ConnectionClosed:
                     logger.warning("WebSocket connection closed during event listening")
                     break
 

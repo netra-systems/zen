@@ -2929,13 +2929,27 @@ class UnifiedTestRunner:
 
         # Execute tests with timeout
         start_time = time.time()
-        # Set timeout based on service type and category
-        if service == "frontend":
-            timeout_seconds = 120  # 2 minutes for frontend tests (mostly unit tests)
-        elif category_name == "unit":
-            timeout_seconds = 180  # 3 minutes for unit tests specifically
+        # Set timeout based on service type, category, and environment (Issue #818 fix)
+        if self._detect_staging_environment(args):
+            # Staging environment needs longer timeouts due to network latency and GCP constraints
+            if service == "frontend":
+                timeout_seconds = 300  # 5min for staging frontend tests
+            elif category_name == "unit":
+                timeout_seconds = 300  # 5min for staging unit tests
+            elif category_name in ["websocket", "agent", "websocket_events", "agent_execution"]:
+                timeout_seconds = 900  # 15min for staging websocket/agent tests
+            else:
+                timeout_seconds = 600  # 10min for staging other tests
         else:
-            timeout_seconds = 600  # 10 minutes timeout for integration tests
+            # Local environment timeouts
+            if service == "frontend":
+                timeout_seconds = 120  # 2 minutes for frontend tests (mostly unit tests)
+            elif category_name == "unit":
+                timeout_seconds = 180  # 3 minutes for unit tests specifically
+            elif category_name in ["websocket", "agent", "websocket_events", "agent_execution"]:
+                timeout_seconds = 600  # 10min for local websocket/agent tests
+            else:
+                timeout_seconds = 600  # 10 minutes timeout for integration tests
         try:
             # Fix stdout flush issue with Windows-safe flushing
             import sys

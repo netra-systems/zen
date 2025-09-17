@@ -256,7 +256,7 @@ class UserFlowValidator:
                         }
                     )
                     
-        except websockets.exceptions.WebSocketException as e:
+        except websockets.WebSocketException as e:
             duration_ms = int((time.time() - start_time) * 1000)
             if "401" in str(e) or "authentication" in str(e).lower():
                 result = ValidationResult(
@@ -345,7 +345,7 @@ class UserFlowValidator:
                         }
                     )
                     
-        except websockets.exceptions.WebSocketException as e:
+        except websockets.WebSocketException as e:
             duration_ms = int((time.time() - start_time) * 1000)
             if "401" in str(e) or "authentication" in str(e).lower():
                 result = ValidationResult(

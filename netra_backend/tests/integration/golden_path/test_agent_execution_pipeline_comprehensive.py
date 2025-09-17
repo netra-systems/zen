@@ -21,7 +21,7 @@ import json
 import logging
 import time
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
@@ -197,7 +197,7 @@ class AgentExecutionPipelineComprehensiveTests(BaseIntegrationTest):
             await db_session.execute("""
                 INSERT INTO backend.agent_executions (id, user_id, state, state_data, created_at)
                 VALUES ($1, $2, $3, $4, $5)
-            """, execution_id, user_context["user_id"], state, json.dumps(state_data), datetime.utcnow())
+            """, execution_id, user_context["user_id"], state, json.dumps(state_data), datetime.now(UTC))
             
             await db_session.commit()
             
@@ -709,7 +709,7 @@ class AgentExecutionPipelineComprehensiveTests(BaseIntegrationTest):
             await db_session.execute("""
                 INSERT INTO backend.agent_executions (id, user_id, state, state_data, created_at)
                 VALUES ($1, $2, $3, $4, $5)
-            """, execution_id, user_context["user_id"], state, json.dumps(state_data), datetime.utcnow())
+            """, execution_id, user_context["user_id"], state, json.dumps(state_data), datetime.now(UTC))
         
         await db_session.commit()
         
@@ -740,7 +740,7 @@ class AgentExecutionPipelineComprehensiveTests(BaseIntegrationTest):
                     INSERT INTO backend.agent_executions (id, user_id, state, state_data, created_at)
                     VALUES ($1, $2, $3, $4, $5)
                 """, execution_id, user_context["user_id"], scenario["failed_state"], 
-                json.dumps({"error": scenario["error"]}), datetime.utcnow())
+                json.dumps({"error": scenario["error"]}), datetime.now(UTC))
                 
                 await db_session.commit()
                 
@@ -783,7 +783,7 @@ class AgentExecutionPipelineComprehensiveTests(BaseIntegrationTest):
                     UPDATE backend.agent_executions 
                     SET state_data = $1, updated_at = $2
                     WHERE id = $3 AND state = $4
-                """, json.dumps(recovery_data), datetime.utcnow(), execution_id, recovery_state)
+                """, json.dumps(recovery_data), datetime.now(UTC), execution_id, recovery_state)
                 
                 await db_session.commit()
                 

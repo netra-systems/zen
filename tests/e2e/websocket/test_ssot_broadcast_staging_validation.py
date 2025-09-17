@@ -103,7 +103,7 @@ class SSOTBroadcastStagingValidationTests(SSotAsyncTestCase):
                                 break
                         except asyncio.TimeoutError:
                             continue
-                        except websockets.exceptions.ConnectionClosed:
+                        except websockets.ConnectionClosed:
                             logger.error('WebSocket connection closed during Golden Path validation')
                             break
                     golden_path_results.append({'step': i + 1, 'event_type': event['type'], 'responses': step_responses, 'expected_event': event, 'success': len(step_responses) > 0})
@@ -176,7 +176,7 @@ class SSOTBroadcastStagingValidationTests(SSotAsyncTestCase):
                     auth_validation_results.append(('invalid_auth_handling', invalid_auth_handled, invalid_response))
                 except asyncio.TimeoutError:
                     auth_validation_results.append(('invalid_auth_handling', True, 'no_response'))
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             auth_validation_results.append(('invalid_auth_handling', True, 'connection_rejected'))
         except Exception as e:
             logger.warning(f'Invalid auth test error: {e}')

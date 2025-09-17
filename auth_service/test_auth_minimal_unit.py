@@ -14,7 +14,7 @@ import pytest
 import unittest
 import logging
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, UTC
 import jwt
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
@@ -320,7 +320,7 @@ class TestHealthCheckLogic(SSotBaseTestCase, unittest.TestCase):
         # This represents what a health check should return
         health_response = {
             'status': 'healthy',
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(UTC).isoformat(),
             'service': 'auth-service',
             'version': '1.0.0'
         }

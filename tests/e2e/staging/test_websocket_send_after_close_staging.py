@@ -283,7 +283,7 @@ class WebSocketSendAfterCloseStagingE2ETests(SSotAsyncTestCase):
                             error_list.append(f'Staging error from {user_id}: {data}')
                     except asyncio.TimeoutError:
                         continue
-                    except websockets.exceptions.ConnectionClosed:
+                    except websockets.ConnectionClosed:
                         break
                     except Exception as e:
                         error_list.append(f'Listen error for {user_id}: {e}')

@@ -131,7 +131,7 @@ class WebSocketRateLimitTester:
                         messages_sent += 1
                     except asyncio.TimeoutError:
                         continue
-                    except websockets.exceptions.ConnectionClosed:
+                    except websockets.ConnectionClosed:
                         rate_limited = True
                         break
                 

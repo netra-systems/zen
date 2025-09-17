@@ -14,7 +14,7 @@ are properly managed and that application state persists correctly across state 
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List
 from enum import Enum
 
@@ -61,7 +61,7 @@ class WebSocketConnectionStateMachineApplicationStateIntegrationTests(BaseIntegr
                 transition = {
                     'from_state': from_state.value if from_state else None,
                     'to_state': to_state.value,
-                    'timestamp': datetime.utcnow().isoformat(),
+                    'timestamp': datetime.now(UTC).isoformat(),
                     'reason': reason
                 }
                 self.state_history.append(transition)
@@ -98,7 +98,7 @@ class WebSocketConnectionStateMachineApplicationStateIntegrationTests(BaseIntegr
                 
                 # Add state info to message
                 data['_connection_state'] = self.current_state.value
-                data['_state_timestamp'] = datetime.utcnow().isoformat()
+                data['_state_timestamp'] = datetime.now(UTC).isoformat()
                 self.messages_sent.append(data)
             
             async def close(self, code=1000, reason="Normal closure"):
@@ -122,7 +122,7 @@ class WebSocketConnectionStateMachineApplicationStateIntegrationTests(BaseIntegr
             'connection_id': connection_id,
             'user_id': user_id,
             'current_state': state.value,
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(UTC).isoformat(),
             'metadata': metadata
         }
         
@@ -215,7 +215,7 @@ class WebSocketConnectionStateMachineApplicationStateIntegrationTests(BaseIntegr
             connection_id=connection_id,
             user_id=user_id,
             websocket=state_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={
                 "connection_type": "state_machine_test",
                 "initial_state": ConnectionState.CONNECTED.value,
@@ -244,7 +244,7 @@ class WebSocketConnectionStateMachineApplicationStateIntegrationTests(BaseIntegr
         auth_message = {
             "type": "authentication_complete",
             "data": {"user_id": user_id, "authenticated": True},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         await websocket_manager.send_to_user(user_id, auth_message)
         
@@ -262,7 +262,7 @@ class WebSocketConnectionStateMachineApplicationStateIntegrationTests(BaseIntegr
         active_message = {
             "type": "connection_active",
             "data": {"ready": True, "capabilities": ["messaging", "agent_execution"]},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         await websocket_manager.send_to_user(user_id, active_message)
         
@@ -278,7 +278,7 @@ class WebSocketConnectionStateMachineApplicationStateIntegrationTests(BaseIntegr
         degraded_message = {
             "type": "degraded_connection_warning",
             "data": {"warning": "Connection quality degraded", "retry_recommended": True},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         await websocket_manager.send_to_user(user_id, degraded_message)
         
@@ -393,7 +393,7 @@ class WebSocketConnectionStateMachineApplicationStateIntegrationTests(BaseIntegr
             connection_id=connection_id,
             user_id=user_id,
             websocket=error_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={
                 "connection_type": "error_recovery_test",
                 "session_id": session_data['session_key']
@@ -437,7 +437,7 @@ class WebSocketConnectionStateMachineApplicationStateIntegrationTests(BaseIntegr
         recovery_message = {
             "type": "recovery_test",
             "data": {"recovered": True, "connection_restored": True},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         await websocket_manager.send_to_user(user_id, recovery_message)
         
@@ -486,7 +486,7 @@ class WebSocketConnectionStateMachineApplicationStateIntegrationTests(BaseIntegr
         final_message = {
             "type": "connection_fully_restored",
             "data": {"all_systems_operational": True},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         await websocket_manager.send_to_user(user_id, final_message)
         
@@ -604,7 +604,7 @@ class WebSocketConnectionStateMachineApplicationStateIntegrationTests(BaseIntegr
                 connection_id=connection_id,
                 user_id=user_id,
                 websocket=concurrent_websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={
                     "connection_type": "concurrent_state_test",
                     "user_index": user_index,

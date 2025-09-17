@@ -96,7 +96,7 @@ async def test_websocket_connection_established_timeout():
                 print(" FAIL:  TIMEOUT: No welcome message received within 10 seconds")
                 print("   This confirms the bug - connection_established message not sent")
                 
-    except websockets.exceptions.InvalidStatus as e:
+    except websockets.InvalidStatus as e:
         # Handle authentication errors
         status_code = getattr(e, 'status_code', 0)
         

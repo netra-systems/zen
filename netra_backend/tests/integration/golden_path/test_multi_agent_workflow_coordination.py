@@ -27,7 +27,7 @@ import json
 import logging
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
@@ -292,7 +292,7 @@ class MultiAgentWorkflowCoordinationTests(BaseIntegrationTest):
                 json.dumps(input_data),
                 json.dumps(output),
                 time.time() - processing_start,
-                datetime.utcnow())
+                datetime.now(UTC))
                 
                 await db_session.commit()
             except Exception as e:

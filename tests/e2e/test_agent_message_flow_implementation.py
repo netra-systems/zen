@@ -115,7 +115,7 @@ class RealAgentMessageFlowTester:
                         "payload": data.get("payload", {})
                     })
                     
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             pass
         except Exception as e:
             print(f"Error listening for agent events on {connection_id}: {e}")

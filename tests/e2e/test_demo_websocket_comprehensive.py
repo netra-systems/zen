@@ -21,7 +21,7 @@ import json
 import uuid
 import websockets
 from unittest.mock import patch, MagicMock, AsyncMock
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, Any, List
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -318,7 +318,7 @@ class DemoWebSocketComprehensiveTests(SSotAsyncTestCase):
             async def send_event(self, event_type: str, data: dict):
                 await self.websocket.send_json({
                     "type": event_type,
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     **data
                 })
                 

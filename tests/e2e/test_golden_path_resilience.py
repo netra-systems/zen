@@ -195,7 +195,7 @@ class StagingWebSocketClient:
             except asyncio.TimeoutError:
                 # Continue waiting if overall timeout not reached
                 continue
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 break
             except Exception as e:
                 # Log error but continue

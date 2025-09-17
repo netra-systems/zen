@@ -563,7 +563,7 @@ class UnifiedLoggingSSOT:
         except Exception:
             try:
                 # Fallback 1: UTC now without timezone, add Z
-                return datetime.utcnow().isoformat() + 'Z'
+                return datetime.now(UTC).isoformat() + 'Z'
             except Exception:
                 try:
                     # Fallback 2: Current time with UTC indicator
@@ -833,7 +833,7 @@ class UnifiedLoggingSSOT:
                 error_entry = {
                     'severity': 'CRITICAL',
                     'message': f"Uncaught exception: {exc_type.__name__}: {str(exc_value)}",
-                    'timestamp': datetime.utcnow().isoformat() + 'Z',
+                    'timestamp': datetime.now(UTC).isoformat() + 'Z',
                     'service': self._service_name,
                     'error': {
                         'type': exc_type.__name__,
@@ -1048,27 +1048,27 @@ class UnifiedLoggingSSOT:
             def decorator(func):
                 @wraps(func)
                 def sync_wrapper(*args, **kwargs):
-                    start_time = datetime.utcnow()
+                    start_time = datetime.now(UTC)
                     try:
                         result = func(*args, **kwargs)
-                        duration = (datetime.utcnow() - start_time).total_seconds()
+                        duration = (datetime.now(UTC) - start_time).total_seconds()
                         self.log_performance(operation_name, duration)
                         return result
                     except Exception as e:
-                        duration = (datetime.utcnow() - start_time).total_seconds()
+                        duration = (datetime.now(UTC) - start_time).total_seconds()
                         self.error(f'Operation {operation_name} failed after {duration:.3f}s: {e}')
                         raise
                 
                 @wraps(func)
                 async def async_wrapper(*args, **kwargs):
-                    start_time = datetime.utcnow()
+                    start_time = datetime.now(UTC)
                     try:
                         result = await func(*args, **kwargs)
-                        duration = (datetime.utcnow() - start_time).total_seconds()
+                        duration = (datetime.now(UTC) - start_time).total_seconds()
                         self.log_performance(operation_name, duration)
                         return result
                     except Exception as e:
-                        duration = (datetime.utcnow() - start_time).total_seconds()
+                        duration = (datetime.now(UTC) - start_time).total_seconds()
                         self.error(f'Operation {operation_name} failed after {duration:.3f}s: {e}')
                         raise
                 
@@ -1122,15 +1122,15 @@ def log_performance(operation: str):
         @wraps(func)
         async def async_wrapper(*args, **kwargs):
             ssot_logger = get_ssot_logger()
-            start_time = datetime.utcnow()
+            start_time = datetime.now(UTC)
             
             try:
                 result = await func(*args, **kwargs)
-                duration = (datetime.utcnow() - start_time).total_seconds()
+                duration = (datetime.now(UTC) - start_time).total_seconds()
                 ssot_logger.log_performance(operation, duration, function=func.__name__, status="success")
                 return result
             except Exception as e:
-                duration = (datetime.utcnow() - start_time).total_seconds()
+                duration = (datetime.now(UTC) - start_time).total_seconds()
                 ssot_logger.error(
                     f"Performance: {operation} failed in {duration:.3f}s",
                     operation=operation,
@@ -1145,15 +1145,15 @@ def log_performance(operation: str):
         @wraps(func)
         def sync_wrapper(*args, **kwargs):
             ssot_logger = get_ssot_logger()
-            start_time = datetime.utcnow()
+            start_time = datetime.now(UTC)
             
             try:
                 result = func(*args, **kwargs)
-                duration = (datetime.utcnow() - start_time).total_seconds()
+                duration = (datetime.now(UTC) - start_time).total_seconds()
                 ssot_logger.log_performance(operation, duration, function=func.__name__, status="success")
                 return result
             except Exception as e:
-                duration = (datetime.utcnow() - start_time).total_seconds()
+                duration = (datetime.now(UTC) - start_time).total_seconds()
                 ssot_logger.error(
                     f"Performance: {operation} failed in {duration:.3f}s",
                     operation=operation,

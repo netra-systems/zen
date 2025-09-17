@@ -9,7 +9,7 @@ with all 5 critical WebSocket events.
 import asyncio
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, List, Set
 from unittest.mock import AsyncMock, Mock
 
@@ -88,7 +88,7 @@ class WebSocketEventsValidator:
         
     async def _capture_websocket_event(self, user_id: str, event_data: Dict):
         """Capture WebSocket events for validation."""
-        event_data['captured_at'] = datetime.utcnow().isoformat()
+        event_data['captured_at'] = datetime.now(UTC).isoformat()
         event_data['user_id'] = user_id
         event_data['source'] = 'websocket_manager'
         self.collected_events.append(event_data)
@@ -101,7 +101,7 @@ class WebSocketEventsValidator:
             'data': data,
             'run_id': run_id,
             'agent_name': agent_name,
-            'captured_at': datetime.utcnow().isoformat(),
+            'captured_at': datetime.now(UTC).isoformat(),
             'source': 'agent_bridge'
         }
         self.collected_events.append(event_data)
@@ -126,7 +126,7 @@ class WebSocketEventsValidator:
             },
             audit_metadata={
                 'test_source': 'websocket_events_validation',
-                'created_at': datetime.utcnow().isoformat()
+                'created_at': datetime.now(UTC).isoformat()
             }
         )
         

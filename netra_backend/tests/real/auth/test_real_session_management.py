@@ -18,7 +18,7 @@ import asyncio
 import json
 import secrets
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List
 from unittest.mock import patch, MagicMock
 import pytest
@@ -99,7 +99,7 @@ class RealSessionManagementTests:
 
     def generate_user_session_data(self, user_id: int, **kwargs) -> Dict[str, Any]:
         """Generate user session data structure."""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         return {'session_id': self.generate_session_id(), 'user_id': user_id, 'email': kwargs.get('email', f'user{user_id}@netrasystems.ai'), 'full_name': kwargs.get('full_name', f'Test User {user_id}'), 'created_at': now.isoformat(), 'last_activity': now.isoformat(), 'expires_at': (now + timedelta(hours=24)).isoformat(), 'ip_address': kwargs.get('ip_address', '127.0.0.1'), 'user_agent': kwargs.get('user_agent', 'pytest-session-test'), 'is_active': True, 'permissions': kwargs.get('permissions', ['read']), 'oauth_provider': kwargs.get('oauth_provider', 'google')}
 
     @pytest.mark.asyncio
@@ -175,7 +175,7 @@ class RealSessionManagementTests:
             await redis_client.setex(cache_key, CacheConstants.DEFAULT_TOKEN_CACHE_TTL, json.dumps(session_data))
             await asyncio.sleep(1)
             updated_data = session_data.copy()
-            updated_data['last_activity'] = datetime.utcnow().isoformat()
+            updated_data['last_activity'] = datetime.now(UTC).isoformat()
             updated_data['activity_count'] = updated_data.get('activity_count', 0) + 1
             await redis_client.setex(cache_key, CacheConstants.DEFAULT_TOKEN_CACHE_TTL, json.dumps(updated_data))
             cached_data = await redis_client.get(cache_key)

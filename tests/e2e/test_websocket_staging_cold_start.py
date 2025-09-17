@@ -271,7 +271,7 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
         except asyncio.TimeoutError:
             end_time = time.time()
             return WebSocketConnectionAttempt(attempt_number=1, start_time=start_time, end_time=end_time, success=False, error_code=None, error_message=f'Connection timeout after {timeout}s', handshake_duration=end_time - start_time, service_ready=False)
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             end_time = time.time()
             error_code = getattr(e, 'code', None)
             if error_code is None and '1011' in str(e):

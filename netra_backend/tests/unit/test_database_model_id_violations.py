@@ -27,7 +27,7 @@ import uuid
 import re
 from typing import Dict, Any, List, Optional, Type
 from unittest.mock import patch, MagicMock
-from datetime import datetime
+from datetime import datetime, UTC
 from sqlalchemy import Column, String, DateTime, Text, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -201,7 +201,7 @@ class DatabaseModelIDViolationsTests(BaseTestCase):
                 "id": str(uuid.uuid4()),  # VIOLATION: Raw UUID
                 "email": kwargs.get("email", "test@example.com"),
                 "session_id": str(uuid.uuid4()),  # VIOLATION: Raw UUID
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 **kwargs
             }
         
@@ -211,7 +211,7 @@ class DatabaseModelIDViolationsTests(BaseTestCase):
                 "id": str(uuid.uuid4()),  # VIOLATION: Raw UUID
                 "user_id": user_id or str(uuid.uuid4()),  # VIOLATION: Raw UUID fallback
                 "title": kwargs.get("title", "Test Thread"),
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 **kwargs
             }
         
@@ -222,7 +222,7 @@ class DatabaseModelIDViolationsTests(BaseTestCase):
                 "thread_id": thread_id or str(uuid.uuid4()),  # VIOLATION: Raw UUID fallback
                 "execution_id": str(uuid.uuid4()),  # VIOLATION: Raw UUID
                 "status": kwargs.get("status", "pending"),
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 **kwargs
             }
         
@@ -532,7 +532,7 @@ class DatabaseModelIDViolationsTests(BaseTestCase):
                 "id": UnifiedIdGenerator.generate_base_id("user"),
                 "email": kwargs.get("email", "test@example.com"), 
                 "session_id": UnifiedIdGenerator.generate_base_id("session"),
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 **kwargs
             }
         
@@ -542,7 +542,7 @@ class DatabaseModelIDViolationsTests(BaseTestCase):
                 "id": UnifiedIdGenerator.generate_base_id("session"),
                 "user_id": user_id or UnifiedIdGenerator.generate_base_id("user"),
                 "title": kwargs.get("title", "Test Thread"),
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 **kwargs
             }
         

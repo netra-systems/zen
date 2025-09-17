@@ -24,7 +24,7 @@ import unittest
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
 from typing import Dict, Any, Optional, List
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 # SSOT base test case - all tests must inherit from this
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
@@ -55,8 +55,8 @@ class JWTValidationFragmentationTests(SSotAsyncTestCase):
             "user_id": "test-user-123",
             "email": "test@example.com",
             "sub": "test-user-123",
-            "iat": int(datetime.utcnow().timestamp()),
-            "exp": int((datetime.utcnow() + timedelta(hours=1)).timestamp())
+            "iat": int(datetime.now(UTC).timestamp()),
+            "exp": int((datetime.now(UTC) + timedelta(hours=1)).timestamp())
         }
 
         # Multiple JWT secret scenarios to test fragmentation
@@ -410,7 +410,7 @@ class JWTSecretConfigurationFragmentationTests(SSotBaseTestCase):
         algorithms = ["HS256", "RS256", "HS384"]  # Different algorithms that might be used
 
         # Test token validation with different algorithms
-        payload = {"user_id": "test", "exp": int((datetime.utcnow() + timedelta(hours=1)).timestamp())}
+        payload = {"user_id": "test", "exp": int((datetime.now(UTC) + timedelta(hours=1)).timestamp())}
 
         # Create tokens with different algorithms
         tokens_by_algorithm = {}

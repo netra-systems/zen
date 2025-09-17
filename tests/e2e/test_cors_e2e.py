@@ -252,7 +252,7 @@ class CORSCredentialRequestsAcrossServicesTests:
                 await websocket.send(json.dumps(auth_message))
                 await asyncio.sleep(0.5)
                 assert not websocket.closed, 'WebSocket should remain open with proper CORS'
-        except (websockets.exceptions.ConnectionClosed, websockets.exceptions.InvalidURI, ConnectionRefusedError, OSError):
+        except (websockets.ConnectionClosed, websockets.InvalidURI, ConnectionRefusedError, OSError):
             pytest.skip('WebSocket server not available for auth CORS test')
         except asyncio.TimeoutError:
             pytest.skip('WebSocket timeout for auth CORS test')

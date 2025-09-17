@@ -177,7 +177,7 @@ class WebSocketSSOTGoldenPathE2ETests(SSotAsyncTestCase, unittest.TestCase):
                             }
                             logger.warning(f"WebSocket response timeout for {user_config['user_id']}")
                             
-                except websockets.exceptions.ConnectionClosed as e:
+                except websockets.ConnectionClosed as e:
                     connection_results[user_config['user_id']] = {
                         'success': False,
                         'error': f'Connection closed: {e}',

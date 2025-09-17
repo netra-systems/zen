@@ -48,7 +48,7 @@ class DeprecationPatternDetectionTests(SSotBaseTestCase):
             },
             'datetime_utc_deprecation': {
                 'pattern': r'datetime\.utcnow\(\)',
-                'description': 'datetime.utcnow() needs timezone-aware replacement',
+                'description': 'datetime.now(UTC) needs timezone-aware replacement',
                 'file_extensions': ['.py']
             },
             'logging_import_deprecation': {
@@ -108,7 +108,7 @@ class DeprecationPatternDetectionTests(SSotBaseTestCase):
             self.logger.warning(f"Pydantic Config deprecation affects {len(affected_critical)} critical business files")
 
     def test_datetime_utc_deprecation_detection(self):
-        """Detect all datetime.utcnow() patterns needing modernization."""
+        """Detect all datetime.now(UTC) patterns needing modernization."""
         category = 'datetime_utc_deprecation'
         pattern = self.deprecation_categories[category]['pattern']
 
@@ -116,7 +116,7 @@ class DeprecationPatternDetectionTests(SSotBaseTestCase):
 
         # Validate we found expected scale (275+ mentioned in issue)
         self.assertGreaterEqual(results['total_matches'], 200,
-                               f"Expected at least 200 datetime.utcnow() instances, found {results['total_matches']}")
+                               f"Expected at least 200 datetime.now(UTC) instances, found {results['total_matches']}")
 
         # Store baseline
         self.baseline_counts[category] = results['total_matches']
@@ -295,7 +295,7 @@ class DeprecationPatternDetectionTests(SSotBaseTestCase):
         return results
 
     def _validate_datetime_usage_context(self, file_path: Path):
-        """Validate datetime.utcnow() usage context for replacement planning."""
+        """Validate datetime.now(UTC) usage context for replacement planning."""
         try:
             with open(self.project_root / file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -307,7 +307,7 @@ class DeprecationPatternDetectionTests(SSotBaseTestCase):
             utc_contexts = re.findall(r'.*datetime\.utcnow\(\).*', content)
 
             for context in utc_contexts[:3]:  # Check first few contexts
-                self.assertIsNotNone(context, "Should find datetime.utcnow() context")
+                self.assertIsNotNone(context, "Should find datetime.now(UTC) context")
 
         except Exception as e:
             self.logger.debug(f"Could not validate datetime context in {file_path}: {e}")
@@ -365,7 +365,7 @@ class DeprecationPatternDetectionTests(SSotBaseTestCase):
             import warnings
 
             # Try to trigger some datetime warnings
-            datetime.datetime.utcnow()
+            datetime.datetime.now(UTC)
 
         except Exception:
             pass  # Expected - just trying to trigger warnings

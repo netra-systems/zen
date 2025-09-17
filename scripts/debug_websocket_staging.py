@@ -61,13 +61,13 @@ async def test_websocket_connection():
             except Exception as e:
                 print(f" FAIL:  Error during message exchange: {e}")
                 
-    except websockets.exceptions.InvalidStatus as e:
+    except websockets.InvalidStatus as e:
         print(f" FAIL:  WebSocket connection failed with invalid status: {e}")
         if "403" in str(e):
             print("[U+1F510] This appears to be an authentication issue")
         elif "401" in str(e):
             print("[U+1F510] This appears to be an authorization issue")
-    except websockets.exceptions.ConnectionClosedOK as e:
+    except websockets.ConnectionClosedOK as e:
         print(f"[U+1F51A] WebSocket connection closed normally: {e}")
     except Exception as e:
         print(f"[U+1F4A5] Unexpected error: {e}")

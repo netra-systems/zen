@@ -245,10 +245,10 @@ class TestStagingConfigurationAlignment(SSotBaseTestCase):
                 # If we get here, connection was established
                 print(f"WebSocket connection to {websocket_url} successful")
                 
-        except websockets.exceptions.ConnectionClosedError:
+        except websockets.ConnectionClosedError:
             # This may be expected if auth is required
             print(f"WebSocket connection closed (may require auth): {websocket_url}")
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.InvalidStatusCode as e:
             if e.status_code == 401:
                 print(f"WebSocket connection rejected with 401 (auth required): {websocket_url}")
             else:

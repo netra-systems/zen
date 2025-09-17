@@ -15,7 +15,7 @@ These tests are essential for the Golden Path user flow requirements.
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Any
 from enum import Enum
 
@@ -84,7 +84,7 @@ class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
             'connection_id': connection_id,
             'user_id': user_id,
             'state': state.value,
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(UTC).isoformat(),
             'metadata': metadata or {},
             'environment': get_env().get('ENVIRONMENT', 'test'),
             'service_version': 'integration_test_v1'
@@ -107,7 +107,7 @@ class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
         transition_log_key = f"websocket:state_log:{connection_id}"
         log_entry = {
             'state': state.value,
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(UTC).isoformat(),
             'metadata': metadata or {}
         }
         await real_services_fixture["redis"].lpush(transition_log_key, json.dumps(log_entry))
@@ -194,7 +194,7 @@ class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
                 'connection_id': connection_id,
                 'user_id': user_id,
                 'state': state.value,
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'metadata': metadata
             }
             await self._store_connection_postgres(real_services_fixture, connection_data)
@@ -210,7 +210,7 @@ class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
                 connection_id=connection_id,
                 user_id=user_id,
                 websocket=real_websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={
                     "test_type": "state_persistence",
                     "expected_state": IntegrationConnectionState.ACTIVE.value
@@ -250,7 +250,7 @@ class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
             test_message = {
                 "type": "state_verification_message",
                 "data": {"connection_state": IntegrationConnectionState.ACTIVE.value},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             
             await websocket_manager.send_to_user(user_id, test_message)
@@ -361,7 +361,7 @@ class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
                 connection_id=connection_id,
                 user_id=user_id,
                 websocket=real_websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={
                     "test_type": "multi_user_isolation",
                     "user_index": user_index,
@@ -376,7 +376,7 @@ class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
                 test_message = {
                     "type": f"user_{user_index}_message",
                     "data": {"message_num": msg_num, "user_pattern": user_states[-1][1]["pattern"]},
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 await websocket_manager.send_to_user(user_id, test_message)
                 await asyncio.sleep(0.02)
@@ -450,7 +450,7 @@ class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
             isolation_message = {
                 "type": "isolation_test",
                 "data": {"target_user": i, "should_receive": True},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             await websocket_manager.send_to_user(user_id, isolation_message)
             
@@ -516,7 +516,7 @@ class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
             connection_id=connection_id,
             user_id=user_id,
             websocket=real_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"test_type": "error_recovery"}
         )
         
@@ -528,7 +528,7 @@ class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
         normal_message = {
             "type": "normal_operation_test",
             "data": {"phase": "before_error"},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         await websocket_manager.send_to_user(user_id, normal_message)
         
@@ -583,7 +583,7 @@ class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
                 'connection_id': connection_id,
                 'user_id': user_id,
                 'state': state.value,
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'metadata': metadata
             }
             await self._store_connection_postgres(real_services_fixture, recovery_data)
@@ -622,7 +622,7 @@ class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
         recovery_test_message = {
             "type": "post_recovery_test",
             "data": {"recovery_verified": True, "system_operational": True},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         await websocket_manager.send_to_user(user_id, recovery_test_message)
         
@@ -653,7 +653,7 @@ class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
         health_message = {
             "type": "system_health_check",
             "data": {"multiple_recoveries_completed": True},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         await websocket_manager.send_to_user(user_id, health_message)
         
@@ -696,7 +696,7 @@ class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
         num_concurrent_connections = 5
         message_frequency = 0.01  # 100 messages per second
         
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         
         # Create multiple concurrent connections for load testing
         connections = []
@@ -713,7 +713,7 @@ class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
                 connection_id=perf_connection_id,
                 user_id=user_id,
                 websocket=perf_websocket,
-                connected_at=datetime.utcnow(),
+                connected_at=datetime.now(UTC),
                 metadata={
                     "test_type": "performance_load",
                     "connection_index": i
@@ -764,7 +764,7 @@ class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
                     "type": "performance_test_message",
                     "data": {
                         "message_num": i,
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(UTC).isoformat(),
                         "performance_test": True
                     }
                 }
@@ -784,7 +784,7 @@ class WebSocketConnectionStateMachineIntegrationTests(BaseIntegrationTest):
         
         results = await asyncio.gather(*load_tasks, return_exceptions=True)
         
-        end_time = datetime.utcnow()
+        end_time = datetime.now(UTC)
         test_duration = (end_time - start_time).total_seconds()
         
         # Verify no exceptions during high load

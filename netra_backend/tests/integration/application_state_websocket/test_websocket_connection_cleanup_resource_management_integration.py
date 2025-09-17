@@ -16,7 +16,7 @@ import asyncio
 import json
 import weakref
 import gc
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List
 
 from test_framework.base_integration_test import BaseIntegrationTest
@@ -57,7 +57,7 @@ class WebSocketConnectionCleanupResourceManagementIntegrationTests(BaseIntegrati
                 for resource in resources:
                     self.resource_allocations.append({
                         'resource_id': resource,
-                        'allocated_at': datetime.utcnow().isoformat(),
+                        'allocated_at': datetime.now(UTC).isoformat(),
                         'type': resource.split('_')[0]
                     })
             
@@ -68,7 +68,7 @@ class WebSocketConnectionCleanupResourceManagementIntegrationTests(BaseIntegrati
                 # Track message as resource usage
                 self.resource_allocations.append({
                     'resource_id': f"message_{len(self.messages_sent)}",
-                    'allocated_at': datetime.utcnow().isoformat(),
+                    'allocated_at': datetime.now(UTC).isoformat(),
                     'type': 'message'
                 })
                 
@@ -89,7 +89,7 @@ class WebSocketConnectionCleanupResourceManagementIntegrationTests(BaseIntegrati
                     if allocation not in self.resource_deallocations:
                         self.resource_deallocations.append({
                             'resource_id': allocation['resource_id'],
-                            'deallocated_at': datetime.utcnow().isoformat(),
+                            'deallocated_at': datetime.now(UTC).isoformat(),
                             'originally_allocated': allocation['allocated_at']
                         })
                 
@@ -127,7 +127,7 @@ class WebSocketConnectionCleanupResourceManagementIntegrationTests(BaseIntegrati
             conn_meta_key,
             json.dumps({
                 'user_id': user_id,
-                'created_at': datetime.utcnow().isoformat(),
+                'created_at': datetime.now(UTC).isoformat(),
                 'connection_type': 'cleanup_test'
             }),
             ex=3600
@@ -139,7 +139,7 @@ class WebSocketConnectionCleanupResourceManagementIntegrationTests(BaseIntegrati
         await real_services_fixture["redis"].set(
             activity_key,
             json.dumps({
-                'last_active': datetime.utcnow().isoformat(),
+                'last_active': datetime.now(UTC).isoformat(),
                 'active_connections': [connection_id]
             }),
             ex=1800
@@ -164,8 +164,8 @@ class WebSocketConnectionCleanupResourceManagementIntegrationTests(BaseIntegrati
             """,
             session_id,
             user_id,
-            datetime.utcnow(),
-            datetime.utcnow() + timedelta(hours=24),
+            datetime.now(UTC),
+            datetime.now(UTC) + timedelta(hours=24),
             True,
             json.dumps({'connection_id': connection_id, 'test': 'cleanup'})
         )
@@ -238,7 +238,7 @@ class WebSocketConnectionCleanupResourceManagementIntegrationTests(BaseIntegrati
             connection_id=connection_id,
             user_id=user_id,
             websocket=resource_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={
                 "connection_type": "resource_cleanup_test",
                 "resource_tracking": True
@@ -397,7 +397,7 @@ class WebSocketConnectionCleanupResourceManagementIntegrationTests(BaseIntegrati
             connection_id=connection_id_1,
             user_id=user_id,
             websocket=failing_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"connection_type": "failing_cleanup_test"}
         )
         
@@ -439,7 +439,7 @@ class WebSocketConnectionCleanupResourceManagementIntegrationTests(BaseIntegrati
             connection_id=connection_id_2,
             user_id=user_id,
             websocket=successful_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"connection_type": "successful_cleanup_test"}
         )
         
@@ -471,7 +471,7 @@ class WebSocketConnectionCleanupResourceManagementIntegrationTests(BaseIntegrati
             connection_id=connection_id_3,
             user_id=user_id,
             websocket=recovery_websocket,
-            connected_at=datetime.utcnow(),
+            connected_at=datetime.now(UTC),
             metadata={"connection_type": "recovery_after_failure"}
         )
         
@@ -552,7 +552,7 @@ class WebSocketConnectionCleanupResourceManagementIntegrationTests(BaseIntegrati
                     connection_id=connection_id,
                     user_id=user_id,
                     websocket=resource_websocket,
-                    connected_at=datetime.utcnow(),
+                    connected_at=datetime.now(UTC),
                     metadata={
                         "connection_type": "bulk_cleanup_test",
                         "user_index": user_index,
@@ -590,7 +590,7 @@ class WebSocketConnectionCleanupResourceManagementIntegrationTests(BaseIntegrati
                 test_message = {
                     "type": "bulk_test_message",
                     "data": {"user_id": user_id, "message_index": i},
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
                 await websocket_manager.send_to_user(user_id, test_message)
                 message_counts[user_id] += 1
@@ -648,7 +648,7 @@ class WebSocketConnectionCleanupResourceManagementIntegrationTests(BaseIntegrati
         user_2_test_message = {
             "type": "remaining_connection_test",
             "data": {"message": "This should still work"},
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         await websocket_manager.send_to_user(user_2_info['user_id'], user_2_test_message)

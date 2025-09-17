@@ -30,7 +30,7 @@ async def test_websocket_connection(url: str, attempt_id: int):
                 print(f"  No response within 5s (but connection successful)")
                 return True
                 
-    except websockets.exceptions.ConnectionClosed as e:
+    except websockets.ConnectionClosed as e:
         if e.code == 1011:
             print(f"  *** 1011 ERROR DETECTED! *** - {e}")
             return False

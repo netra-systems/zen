@@ -103,7 +103,7 @@ class GCPWebSocketClient:
                     except:
                         pass
                 self.received_messages.append({'message': data, 'received_at': datetime.now(timezone.utc), 'latency_ms': message_latency * 1000 if message_latency else None})
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             self.connected = False
             logger.info('GCP WebSocket connection closed')
         except Exception as e:

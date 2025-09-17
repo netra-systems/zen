@@ -14,7 +14,7 @@ import json
 import sys
 import argparse
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Any, Optional
 from collections import defaultdict, Counter
 import subprocess
@@ -135,7 +135,7 @@ class GCPLogsAuditor:
         filter_parts = []
 
         # Time filter
-        time_filter = f'timestamp >= "{(datetime.utcnow() - timedelta(hours=hours_back)).isoformat()}Z"'
+        time_filter = f'timestamp >= "{(datetime.now(UTC) - timedelta(hours=hours_back)).isoformat()}Z"'
         filter_parts.append(time_filter)
 
         # Service filter
@@ -434,7 +434,7 @@ class GCPLogsAuditor:
         if not logs:
             print("⚠️  No logs found matching the criteria")
             return {
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'project_id': self.project_id,
                 'summary': 'No logs found',
                 'services': cloud_run_services,
@@ -461,7 +461,7 @@ class GCPLogsAuditor:
         recommendations = self.generate_recommendations(error_patterns, service_health)
 
         audit_results = {
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(UTC).isoformat(),
             'project_id': self.project_id,
             'parameters': {
                 'hours_back': hours_back,

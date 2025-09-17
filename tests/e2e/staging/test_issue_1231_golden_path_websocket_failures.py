@@ -203,7 +203,7 @@ class Issue1231GoldenPathWebSocketFailuresTests:
                     # If we get a response, the bug might be fixed
                     return {"connected": True, "response": response}
 
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 if e.code == 1011:  # Expected due to server-side async/await bug
                     raise RuntimeError(f"WebSocket connection closed with 1011 due to async/await bug: {e}")
                 else:

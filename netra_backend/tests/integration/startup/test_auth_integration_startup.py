@@ -19,7 +19,7 @@ import asyncio
 from typing import Dict, Any, Optional
 from unittest.mock import AsyncMock, patch, MagicMock
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import get_env
 
@@ -167,7 +167,7 @@ class AuthIntegrationStartupTests(BaseIntegrationTest):
             session_manager = MagicMock()
             session_manager_initialized = True
         assert session_manager_initialized, 'Session manager must initialize during startup'
-        test_session_data = {'user_id': 'test_user_123', 'login_time': datetime.utcnow().isoformat(), 'subscription_tier': 'enterprise'}
+        test_session_data = {'user_id': 'test_user_123', 'login_time': datetime.now(UTC).isoformat(), 'subscription_tier': 'enterprise'}
         session_created = await self._mock_session_operation(mock_redis_client.setex, 'session:test_user_123', 3600, test_session_data)
         session_retrieved = await self._mock_session_operation(mock_redis_client.get, 'session:test_user_123')
         assert session_created, 'Session creation must be available'

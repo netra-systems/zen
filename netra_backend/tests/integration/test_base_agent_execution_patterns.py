@@ -27,7 +27,7 @@ import asyncio
 import pytest
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, call
 from test_framework.base_integration_test import BaseIntegrationTest
@@ -68,7 +68,7 @@ def mock_websocket_bridge():
     mock_bridge.events_emitted = []
 
     async def track_event(event_type, *args, **kwargs):
-        mock_bridge.events_emitted.append({'event_type': event_type, 'timestamp': datetime.utcnow(), 'args': args, 'kwargs': kwargs})
+        mock_bridge.events_emitted.append({'event_type': event_type, 'timestamp': datetime.now(UTC), 'args': args, 'kwargs': kwargs})
         return True
     mock_bridge.emit_agent_started = AsyncMock(side_effect=lambda *args, **kwargs: track_event('agent_started', *args, **kwargs))
     mock_bridge.emit_agent_thinking = AsyncMock(side_effect=lambda *args, **kwargs: track_event('agent_thinking', *args, **kwargs))
@@ -90,7 +90,7 @@ def mock_tool_dispatcher():
 def mock_reliability_manager():
     """Create realistic mock reliability manager."""
     mock_rm = AsyncMock()
-    mock_rm.get_health_status = Mock(return_value={'status': 'healthy', 'total_executions': 147, 'success_rate': 0.94, 'circuit_breaker_state': 'closed', 'last_execution': datetime.utcnow(), 'error_rate': 0.06})
+    mock_rm.get_health_status = Mock(return_value={'status': 'healthy', 'total_executions': 147, 'success_rate': 0.94, 'circuit_breaker_state': 'closed', 'last_execution': datetime.now(UTC), 'error_rate': 0.06})
     mock_rm.execute_with_reliability = AsyncMock(side_effect=lambda context, func: func())
     return mock_rm
 

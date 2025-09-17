@@ -63,7 +63,7 @@ import asyncio
 import json
 import logging
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Any, Dict, List, Optional, Set
 from unittest.mock import patch
 
@@ -174,7 +174,7 @@ class GCPLoggingEmptyCriticalTests(SSotBaseTestCase):
             auth_result = {
                 'user_id': user_id,
                 'token': f"test_jwt_token_{user_id}_{int(time.time())}",
-                'authenticated_at': datetime.utcnow().isoformat(),
+                'authenticated_at': datetime.now(UTC).isoformat(),
                 'auth_method': 'e2e_test'
             }
             

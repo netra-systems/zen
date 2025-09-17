@@ -24,7 +24,7 @@ import time
 import subprocess
 import importlib
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, List, Any, Optional
 
 
@@ -36,7 +36,7 @@ class InfrastructureHealthValidator:
     def __init__(self):
         self.project_root = Path(__file__).parent.parent
         self.health_data = {
-            "validation_timestamp": datetime.utcnow().isoformat(),
+            "validation_timestamp": datetime.now(UTC).isoformat(),
             "validation_version": "1176_phase3_week1",
             "overall_health": "UNKNOWN",
             "critical_issues": [],

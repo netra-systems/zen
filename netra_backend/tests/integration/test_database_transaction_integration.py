@@ -18,7 +18,7 @@ import asyncio
 import uuid
 import pytest
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 from contextlib import asynccontextmanager
@@ -67,7 +67,7 @@ class DatabaseTransactionIntegrationTests(BaseIntegrationTest):
             id=str(user_id),
             email="acid.test@example.com",
             name="ACID Test User",
-            created_at=datetime.utcnow()
+            created_at=datetime.now(UTC)
         )
         
         db.add(initial_user)
@@ -88,7 +88,7 @@ class DatabaseTransactionIntegrationTests(BaseIntegrationTest):
                     id=str(thread_id),
                     user_id=str(user_id),
                     title="ACID Test Thread",
-                    created_at=datetime.utcnow()
+                    created_at=datetime.now(UTC)
                 )
                 db.add(test_thread)
                 
@@ -99,7 +99,7 @@ class DatabaseTransactionIntegrationTests(BaseIntegrationTest):
                     thread_id=str(thread_id),
                     user_id=str(user_id),
                     content="Test message content",
-                    created_at=datetime.utcnow()
+                    created_at=datetime.now(UTC)
                 )
                 db.add(test_message)
                 
@@ -149,7 +149,7 @@ class DatabaseTransactionIntegrationTests(BaseIntegrationTest):
                     id=str(user_id),
                     email=f"concurrent.{user_index}@test.com",
                     name=f"Concurrent User {user_index}",
-                    created_at=datetime.utcnow()
+                    created_at=datetime.now(UTC)
                 )
                 db.add(user)
                 
@@ -160,7 +160,7 @@ class DatabaseTransactionIntegrationTests(BaseIntegrationTest):
                         id=str(thread_id),
                         user_id=str(user_id),
                         title=f"Thread {thread_index} for User {user_index}",
-                        created_at=datetime.utcnow()
+                        created_at=datetime.now(UTC)
                     )
                     db.add(thread)
                     
@@ -171,7 +171,7 @@ class DatabaseTransactionIntegrationTests(BaseIntegrationTest):
                             thread_id=str(thread_id),
                             user_id=str(user_id),
                             content=f"Message {msg_index} in Thread {thread_index}",
-                            created_at=datetime.utcnow()
+                            created_at=datetime.now(UTC)
                         )
                         db.add(message)
                 
@@ -240,7 +240,7 @@ class DatabaseTransactionIntegrationTests(BaseIntegrationTest):
                 id=str(user_id),
                 email=f"session.{session_index}@pool.test",
                 name=f"Pool Test User {session_index}",
-                created_at=datetime.utcnow()
+                created_at=datetime.now(UTC)
             )
             
             session.add(user)
@@ -256,7 +256,7 @@ class DatabaseTransactionIntegrationTests(BaseIntegrationTest):
                 id=str(thread_id),
                 user_id=str(user_id),
                 title=f"Pool Test Thread {session_index}",
-                created_at=datetime.utcnow()
+                created_at=datetime.now(UTC)
             )
             
             session.add(thread)
@@ -310,14 +310,14 @@ class DatabaseTransactionIntegrationTests(BaseIntegrationTest):
             id=str(thread1_id),
             user_id=str(user1_id),
             title="User 1 Private Thread",
-            created_at=datetime.utcnow()
+            created_at=datetime.now(UTC)
         )
         
         thread2 = Thread(
             id=str(thread2_id),
             user_id=str(user2_id),
             title="User 2 Private Thread", 
-            created_at=datetime.utcnow()
+            created_at=datetime.now(UTC)
         )
         
         db.add_all([thread1, thread2])
@@ -387,7 +387,7 @@ class DatabaseTransactionIntegrationTests(BaseIntegrationTest):
                 run_id=str(run_id),
                 agent_type="test_agent",
                 status="running",
-                started_at=datetime.utcnow(),
+                started_at=datetime.now(UTC),
                 input_data={"query": "test execution query"},
                 metadata={"test_source": "integration_test"}
             )
@@ -402,7 +402,7 @@ class DatabaseTransactionIntegrationTests(BaseIntegrationTest):
                 user_id=str(user_id),
                 content="Agent execution in progress",
                 message_type="system",
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(UTC),
                 agent_execution_id=execution_id
             )
             
@@ -411,7 +411,7 @@ class DatabaseTransactionIntegrationTests(BaseIntegrationTest):
             
             # Update execution status
             agent_execution.status = "completed"
-            agent_execution.completed_at = datetime.utcnow()
+            agent_execution.completed_at = datetime.now(UTC)
             agent_execution.output_data = {
                 "result": "execution completed successfully",
                 "metrics": {

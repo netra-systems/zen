@@ -45,7 +45,7 @@ from real-time feature failures causing user abandonment.
 import pytest
 import asyncio
 from unittest.mock import MagicMock, AsyncMock, patch
-from datetime import datetime
+from datetime import datetime, UTC
 
 from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -70,7 +70,7 @@ async def test_websocket_state_recovery_after_network_drop():
         connection_id="conn_123",
         user_id=user_id,
         websocket=mock_ws,
-        connected_at=datetime.utcnow(),
+        connected_at=datetime.now(UTC),
         metadata={"active_thread": "thread456"}
     )
     
@@ -89,7 +89,7 @@ async def test_websocket_state_recovery_after_network_drop():
         connection_id="conn_123_new",
         user_id=user_id,
         websocket=mock_ws,
-        connected_at=datetime.utcnow(),
+        connected_at=datetime.now(UTC),
         metadata={"active_thread": "thread456", "recovered": True}
     )
     await ws_manager.add_connection(reconnected)
@@ -117,7 +117,7 @@ async def test_message_queue_preservation_during_disconnect():
         connection_id="conn_456",
         user_id=user_id,
         websocket=mock_ws,
-        connected_at=datetime.utcnow()
+        connected_at=datetime.now(UTC)
     )
     
     await ws_manager.add_connection(connection)
@@ -137,7 +137,7 @@ async def test_message_queue_preservation_during_disconnect():
         connection_id="conn_456_new",
         user_id=user_id,
         websocket=new_mock_ws,
-        connected_at=datetime.utcnow()
+        connected_at=datetime.now(UTC)
     )
     await ws_manager.add_connection(reconnected)
     
@@ -172,7 +172,7 @@ async def test_connection_state_consistency_after_rapid_reconnects():
             connection_id=f"conn_{i}",
             user_id=user_id,
             websocket=mock_ws,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         
         await ws_manager.add_connection(connection)
@@ -187,7 +187,7 @@ async def test_connection_state_consistency_after_rapid_reconnects():
         connection_id="conn_final",
         user_id=user_id,
         websocket=final_ws,
-        connected_at=datetime.utcnow()
+        connected_at=datetime.now(UTC)
     )
     
     await ws_manager.add_connection(final_connection)
@@ -214,7 +214,7 @@ async def test_websocket_cleanup_on_permanent_disconnect():
         connection_id="conn_cleanup",
         user_id=user_id,
         websocket=mock_ws,
-        connected_at=datetime.utcnow(),
+        connected_at=datetime.now(UTC),
         metadata={"data": "should_be_cleaned"}
     )
     

@@ -12,7 +12,7 @@ Based on CRITICAL_CONFIG_REGRESSION_AUDIT_REPORT.md requirements.
 import json
 import hashlib
 import logging
-from datetime import datetime
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple, Any
 from dataclasses import dataclass, asdict
@@ -160,7 +160,7 @@ class ConfigChangeTracker:
             List of detected configuration changes
         """
         detected_changes = []
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(UTC).isoformat()
         
         with self._lock:
             # Check for added or modified keys
@@ -340,7 +340,7 @@ class ConfigChangeTracker:
     
     def get_recent_changes(self, hours: int = 24) -> List[ConfigChange]:
         """Get configuration changes within the specified hours."""
-        cutoff = datetime.utcnow() - timedelta(hours=hours)
+        cutoff = datetime.now(UTC) - timedelta(hours=hours)
         cutoff_str = cutoff.isoformat()
         
         with self._lock:
@@ -428,7 +428,7 @@ class ConfigChangeTracker:
                 data = {
                     'changes': [c.to_dict() for c in self.changes],
                     'current_snapshot_hash': self._hash_snapshot(self.current_snapshot),
-                    'timestamp': datetime.utcnow().isoformat()
+                    'timestamp': datetime.now(UTC).isoformat()
                 }
                 json.dump(data, f, indent=2)
         except Exception as e:
@@ -470,4 +470,4 @@ def get_config_tracker() -> ConfigChangeTracker:
 
 
 # Import timedelta for recent changes
-from datetime import timedelta
+from datetime import timedelta, UTC

@@ -174,7 +174,7 @@ class WebSocketAuthenticationFixTests:
                 response = await asyncio.wait_for(ws.recv(), timeout=5)
                 print(f"WebSocket response: {response}")
                 
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             error_details = {
                 "error_type": "InvalidStatus",
                 "status_code": getattr(e, 'status_code', 'unknown'),
@@ -299,7 +299,7 @@ class WebSocketAuthenticationFixTests:
                     print(f"WebSocket response: {response}")
                     return True
                     
-            except websockets.exceptions.InvalidStatus as e:
+            except websockets.InvalidStatus as e:
                 print(f" FAIL:  Still getting WebSocket error with backend secret: {e}")
                 return False
             except Exception as e:

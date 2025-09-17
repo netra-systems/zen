@@ -211,7 +211,7 @@ class CrossServiceAuthSessionMgmtTests(SSotAsyncTestCase):
     async def _validate_websocket_rejects_expired_session(self):
         """Validate WebSocket rejects expired session"""
         headers = {'Authorization': f'Bearer {self.auth_token}', 'X-Session-ID': self.session_data['session_id']}
-        with pytest.raises(websockets.exceptions.ConnectionClosedError):
+        with pytest.raises(websockets.ConnectionClosedError):
             websocket_connection = await websockets.connect(self.websocket_url, extra_headers=headers, timeout=10)
             await websocket_connection.recv()
 if __name__ == '__main__':

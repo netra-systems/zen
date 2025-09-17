@@ -278,9 +278,9 @@ class ExpiryPerformanceTests:
             ) as ws:
                 await ws.ping()
                 assert False, "WebSocket should reject expired token"
-        except (websockets.exceptions.ConnectionClosed, 
+        except (websockets.ConnectionClosed, 
                 ConnectionRefusedError,
-                websockets.exceptions.InvalidStatus):
+                websockets.InvalidStatus):
             rejection_time_ms = (time.time() - start_time) * 1000
             assert rejection_time_ms < 100, f"WebSocket rejection took {rejection_time_ms:.2f}ms"
         except Exception:
@@ -308,10 +308,10 @@ class WebSocketExpiryDisconnectionTests:
                 
                 await asyncio.sleep(3)
                 
-                with pytest.raises((websockets.exceptions.ConnectionClosed, ConnectionError)):
+                with pytest.raises((websockets.ConnectionClosed, ConnectionError)):
                     await websocket.send('{"type": "ping"}')
                     
-        except (ConnectionRefusedError, websockets.exceptions.InvalidStatus):
+        except (ConnectionRefusedError, websockets.InvalidStatus):
             pytest.skip("WebSocket service not available or token rejected at connection")
     
     @pytest.mark.asyncio
@@ -321,9 +321,9 @@ class WebSocketExpiryDisconnectionTests:
         expired_payload = jwt_helper.create_expired_payload()
         expired_token = jwt_helper.create_token(expired_payload)
         
-        with pytest.raises((websockets.exceptions.ConnectionClosed,
+        with pytest.raises((websockets.ConnectionClosed,
                            ConnectionRefusedError,
-                           websockets.exceptions.InvalidStatus)):
+                           websockets.InvalidStatus)):
             async with websockets.connect(
                 f"{jwt_helper.websocket_url}/ws?token={expired_token}",
                 timeout=2

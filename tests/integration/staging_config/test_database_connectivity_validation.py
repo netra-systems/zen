@@ -24,7 +24,7 @@ Business Value Justification (BVJ):
 import asyncio
 import pytest
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional
 from unittest.mock import patch, MagicMock, AsyncMock
 
@@ -650,21 +650,21 @@ class HealthCheckEndpointsTests:
                 service="postgresql",
                 status="healthy",
                 connected=True,
-                checked_at=datetime.utcnow()
+                checked_at=datetime.now(UTC)
             )
             
             mock_redis.return_value = DatabaseHealthStatus(
                 service="redis", 
                 status="not_configured",
                 connected=False,
-                checked_at=datetime.utcnow()
+                checked_at=datetime.now(UTC)
             )
             
             mock_ch.return_value = DatabaseHealthStatus(
                 service="clickhouse",
                 status="not_configured", 
                 connected=False,
-                checked_at=datetime.utcnow()
+                checked_at=datetime.now(UTC)
             )
             
             system_health = await self.health_manager.check_overall_health()
@@ -702,7 +702,7 @@ class HealthCheckEndpointsTests:
                 status="failed",
                 connected=False,
                 error="Connection refused",
-                checked_at=datetime.utcnow()
+                checked_at=datetime.now(UTC)
             )
             
             # Mock Redis as healthy
@@ -710,7 +710,7 @@ class HealthCheckEndpointsTests:
                 service="redis",
                 status="healthy",
                 connected=True,
-                checked_at=datetime.utcnow()
+                checked_at=datetime.now(UTC)
             )
             
             # Mock ClickHouse as not configured
@@ -718,7 +718,7 @@ class HealthCheckEndpointsTests:
                 service="clickhouse",
                 status="not_configured",
                 connected=False,
-                checked_at=datetime.utcnow()
+                checked_at=datetime.now(UTC)
             )
             
             system_health = await self.health_manager.check_overall_health()

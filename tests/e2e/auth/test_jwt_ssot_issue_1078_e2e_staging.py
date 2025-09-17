@@ -153,7 +153,7 @@ class JWTSSOTIssue1078E2EStagingTests(BaseE2ETest):
                                 "or failing silently, indicating SSOT delegation issues."
                             )
                 
-                except websockets.exceptions.ConnectionClosed as e:
+                except websockets.ConnectionClosed as e:
                     pytest.fail(
                         f"WEBSOCKET CONNECTION FAILED (Issue #1078):\n"
                         f"Connection closed during handshake: {e}\n\n"
@@ -161,7 +161,7 @@ class JWTSSOTIssue1078E2EStagingTests(BaseE2ETest):
                         "Connection failure suggests JWT validation inconsistency."
                     )
                 
-                except websockets.exceptions.InvalidStatusCode as e:
+                except websockets.InvalidStatusCode as e:
                     if e.status_code == 403:
                         pytest.fail(
                             f"WEBSOCKET JWT 403 ERROR (Issue #1078):\n"
@@ -248,7 +248,7 @@ class JWTSSOTIssue1078E2EStagingTests(BaseE2ETest):
                             except asyncio.TimeoutError:
                                 connection_results[pattern_name] = "TIMEOUT"
                     
-                    except websockets.exceptions.InvalidStatusCode as e:
+                    except websockets.InvalidStatusCode as e:
                         connection_results[pattern_name] = f"STATUS_{e.status_code}"
                     
                     except Exception as e:

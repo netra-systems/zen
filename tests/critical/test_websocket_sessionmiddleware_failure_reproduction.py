@@ -109,7 +109,7 @@ class WebSocketSessionMiddlewareFailureReproductionTests:
                     print(" WARNING: [U+FE0F] UNEXPECTED: Welcome message received without SessionMiddleware error")
                     print(" WARNING: [U+FE0F] This suggests the SessionMiddleware issue may be resolved")
                     
-                except websockets.exceptions.ConnectionClosedError as e:
+                except websockets.ConnectionClosedError as e:
                     # EXPECTED: This is the exact failure pattern we want to reproduce
                     error_details["timestamps"]["error_occurred"] = time.time()
                     error_details["websocket_close_code"] = e.code
@@ -147,7 +147,7 @@ class WebSocketSessionMiddlewareFailureReproductionTests:
                         response = await asyncio.wait_for(ws.recv(), timeout=10)
                         print(f" SEARCH:  Unexpected response received: {response[:100]}...")
                         
-                    except websockets.exceptions.ConnectionClosedError as msg_error:
+                    except websockets.ConnectionClosedError as msg_error:
                         error_details["websocket_close_code"] = msg_error.code
                         error_details["websocket_close_reason"] = msg_error.reason
                         error_details["exact_error_message"] = str(msg_error)
@@ -162,7 +162,7 @@ class WebSocketSessionMiddlewareFailureReproductionTests:
                 
                 error_details["timestamps"]["connection_closed"] = time.time()
                 
-        except websockets.exceptions.InvalidStatus as e:
+        except websockets.InvalidStatus as e:
             # Connection rejected - might be auth issue
             print(f" SEARCH:  Connection rejected: {e}")
             if e.status_code in [401, 403]:
@@ -387,7 +387,7 @@ class WebSocketSessionMiddlewareFailureReproductionTests:
                             connection_phases["error_details"] = str(e)
                             print(f" FAIL:  Phase 5 failed: {e}")
                             
-                    except websockets.exceptions.ConnectionClosedError as e:
+                    except websockets.ConnectionClosedError as e:
                         connection_phases["error_phase"] = "session_access"
                         connection_phases["error_details"] = f"Code {e.code}: {e.reason}"
                         print(f" FAIL:  Phase 4 failed - SessionMiddleware error likely: {e}")

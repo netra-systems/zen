@@ -410,7 +410,7 @@ class StagingAuthFlowThroughLoadBalancerTests(SSotBaseTestCase):
                         'affinity_working': True,
                         'error': None
                     }
-            except websockets.exceptions.InvalidStatusCode as e:
+            except websockets.InvalidStatusCode as e:
                 # Expected failure due to authentication, but connection attempt succeeded
                 if e.status_code in [401, 403, 426]:
                     return {

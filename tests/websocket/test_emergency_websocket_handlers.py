@@ -14,7 +14,7 @@ CRITICAL FUNCTIONALITY TESTED:
 import pytest
 import asyncio
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
@@ -45,7 +45,7 @@ class EmergencyWebSocketManagerTests:
                     self.user_context = user_context
                     self._connections = {}
                     self._is_emergency = True
-                    self.created_at = datetime.utcnow()
+                    self.created_at = datetime.now(UTC)
 
                 async def add_connection(self, connection):
                     connection_id = getattr(connection, 'connection_id', f'emergency_{int(asyncio.get_event_loop().time())}')
@@ -73,12 +73,12 @@ class EmergencyWebSocketManagerTests:
                             pass
 
                 async def emit_critical_event(self, event_type, data):
-                    message = {'type': event_type, 'data': data, 'timestamp': datetime.utcnow().isoformat(), 'emergency_mode': True}
+                    message = {'type': event_type, 'data': data, 'timestamp': datetime.now(UTC).isoformat(), 'emergency_mode': True}
                     await self.send_to_user(message)
 
                 async def connect_user(self, user_id, websocket):
                     connection_id = f'emergency_{user_id}_{int(asyncio.get_event_loop().time())}'
-                    connection = type('Connection', (), {'connection_id': connection_id, 'user_id': user_id, 'websocket': websocket, 'connected_at': datetime.utcnow()})()
+                    connection = type('Connection', (), {'connection_id': connection_id, 'user_id': user_id, 'websocket': websocket, 'connected_at': datetime.now(UTC)})()
                     await self.add_connection(connection)
                     return connection_id
 
@@ -114,7 +114,7 @@ class EmergencyWebSocketManagerTests:
         manager = self._create_emergency_manager(user_context)
         mock_websocket = Mock()
         mock_websocket.send_json = AsyncMock()
-        mock_connection = type('Connection', (), {'connection_id': 'emergency_conn_123', 'user_id': 'emergency_user_123', 'websocket': mock_websocket, 'connected_at': datetime.utcnow()})()
+        mock_connection = type('Connection', (), {'connection_id': 'emergency_conn_123', 'user_id': 'emergency_user_123', 'websocket': mock_websocket, 'connected_at': datetime.now(UTC)})()
         await manager.add_connection(mock_connection)
         user_connections = manager.get_user_connections()
         assert 'emergency_conn_123' in user_connections
@@ -133,9 +133,9 @@ class EmergencyWebSocketManagerTests:
         manager = self._create_emergency_manager(user_context)
         mock_websocket = Mock()
         mock_websocket.send_json = AsyncMock()
-        mock_connection = type('Connection', (), {'connection_id': 'emergency_conn_send_test', 'user_id': 'emergency_user_123', 'websocket': mock_websocket, 'connected_at': datetime.utcnow()})()
+        mock_connection = type('Connection', (), {'connection_id': 'emergency_conn_send_test', 'user_id': 'emergency_user_123', 'websocket': mock_websocket, 'connected_at': datetime.now(UTC)})()
         await manager.add_connection(mock_connection)
-        test_message = {'type': 'test_message', 'content': 'Emergency manager test message', 'timestamp': datetime.utcnow().isoformat()}
+        test_message = {'type': 'test_message', 'content': 'Emergency manager test message', 'timestamp': datetime.now(UTC).isoformat()}
         await manager.send_to_user(test_message)
         mock_websocket.send_json.assert_called_once_with(test_message)
 
@@ -146,7 +146,7 @@ class EmergencyWebSocketManagerTests:
         manager = self._create_emergency_manager(user_context)
         mock_websocket = Mock()
         mock_websocket.send_json = AsyncMock()
-        mock_connection = type('Connection', (), {'connection_id': 'emergency_event_conn', 'user_id': 'emergency_user_123', 'websocket': mock_websocket, 'connected_at': datetime.utcnow()})()
+        mock_connection = type('Connection', (), {'connection_id': 'emergency_event_conn', 'user_id': 'emergency_user_123', 'websocket': mock_websocket, 'connected_at': datetime.now(UTC)})()
         await manager.add_connection(mock_connection)
         event_data = {'message': 'Critical emergency event', 'severity': 'high'}
         await manager.emit_critical_event('emergency_alert', event_data)
@@ -164,7 +164,7 @@ class EmergencyWebSocketManagerTests:
         manager = self._create_emergency_manager(user_context)
         mock_websocket = Mock()
         mock_websocket.send_json = AsyncMock(side_effect=Exception('WebSocket connection error'))
-        mock_connection = type('Connection', (), {'connection_id': 'failing_conn', 'user_id': 'emergency_user_123', 'websocket': mock_websocket, 'connected_at': datetime.utcnow()})()
+        mock_connection = type('Connection', (), {'connection_id': 'failing_conn', 'user_id': 'emergency_user_123', 'websocket': mock_websocket, 'connected_at': datetime.now(UTC)})()
         await manager.add_connection(mock_connection)
         test_message = {'type': 'error_test', 'content': 'This should not crash'}
         await manager.send_to_user(test_message)

@@ -17,7 +17,7 @@ Audit Loop: Iteration 3
 import pytest
 import asyncio
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import Mock, AsyncMock, patch
 from typing import Dict, Any, List, Optional
 
@@ -35,7 +35,7 @@ class MockWebSocketConnection:
         self.is_alive = is_alive
         self.responsive = responsive
         self.connection_id = str(uuid.uuid4())[:8]
-        self.last_ping = datetime.utcnow() if responsive else datetime.utcnow() - timedelta(minutes=5)
+        self.last_ping = datetime.now(UTC) if responsive else datetime.now(UTC) - timedelta(minutes=5)
     
     async def ping(self):
         if not self.responsive:
@@ -66,9 +66,9 @@ class MockIsolatedManager:
         self._metrics = Mock()
         if is_zombie:
             # Zombie managers appear to have recent activity but are stuck
-            self._metrics.last_activity = datetime.utcnow() - timedelta(seconds=10)
+            self._metrics.last_activity = datetime.now(UTC) - timedelta(seconds=10)
         else:
-            self._metrics.last_activity = datetime.utcnow() - timedelta(seconds=5)
+            self._metrics.last_activity = datetime.now(UTC) - timedelta(seconds=5)
     
     async def health_check(self) -> bool:
         """Health check that reveals zombie managers"""
@@ -146,7 +146,7 @@ class WebSocketEmergencyCleanupFailureTests:
             for i, (key, manager) in enumerate(active_managers):
                 mock_factory._active_managers[key] = manager
                 user_keys.add(key)
-                mock_factory._creation_times[key] = datetime.utcnow() - timedelta(seconds=45)
+                mock_factory._creation_times[key] = datetime.now(UTC) - timedelta(seconds=45)
 
             # Set up user manager tracking
             mock_factory._user_manager_keys[google_oauth_user_id] = user_keys
@@ -155,7 +155,7 @@ class WebSocketEmergencyCleanupFailureTests:
             async def conservative_emergency_cleanup(user_id: str, cleanup_level=None) -> int:
                 """Simulate current emergency cleanup that's too conservative"""
                 cleaned = 0
-                cutoff_time = datetime.utcnow() - timedelta(seconds=30)
+                cutoff_time = datetime.now(UTC) - timedelta(seconds=30)
                 
                 for key, manager in list(mock_factory._active_managers.items()):
                     if manager.user_context.user_id != user_id:
@@ -237,7 +237,7 @@ class WebSocketEmergencyCleanupFailureTests:
                 mock_factory._active_managers[key] = manager
                 user_keys = {key for key, _ in managers}
                 mock_factory._user_manager_keys[google_oauth_user_id] = user_keys
-                mock_factory._creation_times[key] = datetime.utcnow() - timedelta(seconds=60)
+                mock_factory._creation_times[key] = datetime.now(UTC) - timedelta(seconds=60)
             
             # Test enhanced emergency cleanup with AGGRESSIVE level to handle zombies
             from netra_backend.app.websocket_core.websocket_manager_factory import CleanupLevel
@@ -289,7 +289,7 @@ class WebSocketEmergencyCleanupFailureTests:
                 mock_factory._active_managers[key] = manager
                 user_keys = {key for key, _ in managers}
                 mock_factory._user_manager_keys[google_oauth_user_id] = user_keys
-                mock_factory._creation_times[key] = datetime.utcnow() - timedelta(seconds=60)
+                mock_factory._creation_times[key] = datetime.now(UTC) - timedelta(seconds=60)
             
             # Apply the enhanced emergency cleanup implementation with AGGRESSIVE level
             from netra_backend.app.websocket_core.websocket_manager_factory import CleanupLevel
@@ -339,7 +339,7 @@ class WebSocketEmergencyCleanupFailureTests:
                 mock_factory._active_managers[key] = manager
                 user_keys = {key for key, _ in managers}
                 mock_factory._user_manager_keys[google_oauth_user_id] = user_keys
-                mock_factory._creation_times[key] = datetime.utcnow() - timedelta(seconds=30)
+                mock_factory._creation_times[key] = datetime.now(UTC) - timedelta(seconds=30)
             
             # Even enhanced cleanup can't clean healthy managers
             cleaned_count = await mock_factory._emergency_cleanup_user_managers(google_oauth_user_id)
@@ -397,7 +397,7 @@ class WebSocketEmergencyCleanupFailureTests:
                 mock_factory._active_managers[key] = manager
                 user_keys = {key for key, _ in managers}
                 mock_factory._user_manager_keys[google_oauth_user_id] = user_keys
-                mock_factory._creation_times[key] = datetime.utcnow() - timedelta(seconds=120)
+                mock_factory._creation_times[key] = datetime.now(UTC) - timedelta(seconds=120)
             
             # User rapidly creates 3 more connections (hits limit at 20, then tries for 21)
             for attempt in range(3):

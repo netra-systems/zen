@@ -100,7 +100,7 @@ class WebSocketE2ETester:
             async for message in ws:
                 data = json.loads(message)
                 self.received_messages[conn_id].append(data)
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             # ConnectionClosed is expected during normal teardown
             pass
     
@@ -463,7 +463,7 @@ class WebSocketComprehensiveE2ETests:
             try:
                 await ws_tester.send_message(conn_id, message)
                 messages_sent += 1
-            except (ConnectionError, websockets.exceptions.ConnectionClosed):
+            except (ConnectionError, websockets.ConnectionClosed):
                 connection_errors += 1
                 break  # Stop if connection fails due to rate limiting
         
@@ -513,7 +513,7 @@ class WebSocketComprehensiveE2ETests:
         connection_failed = False
         try:
             await ws_tester.send_message(conn_id, message)
-        except (ConnectionError, websockets.exceptions.ConnectionClosed) as e:
+        except (ConnectionError, websockets.ConnectionClosed) as e:
             connection_failed = True
         
         # Verify connection handling of expired auth

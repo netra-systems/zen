@@ -96,13 +96,13 @@ class WebSocketHeaderStrippingValidator:
                 await websocket.send(json.dumps(test_message))
                 logger.error(" FAIL:  CRITICAL: Successfully sent message without auth!")
                 
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             result["actual_outcome"] = "CONNECTION_CLOSED"
             result["issue_detected"] = True
             result["error_details"] = f"Connection properly rejected: {e}"
             logger.info(" PASS:  GOOD: Connection rejected due to missing auth")
             
-        except websockets.exceptions.InvalidHandshake as e:
+        except websockets.InvalidHandshake as e:
             result["actual_outcome"] = "HANDSHAKE_FAILED"
             result["issue_detected"] = True
             result["error_details"] = f"Handshake failed (proper auth rejection): {e}"
@@ -164,8 +164,8 @@ class WebSocketHeaderStrippingValidator:
                     logger.error(f" FAIL:  SECURITY ISSUE: Malformed auth scenario {i+1} succeeded!")
                     break
                     
-            except (websockets.exceptions.ConnectionClosedError, 
-                   websockets.exceptions.InvalidHandshake) as e:
+            except (websockets.ConnectionClosedError, 
+                   websockets.InvalidHandshake) as e:
                 result["actual_outcome"] = f"SCENARIO_{i+1}_REJECTED" 
                 result["issue_detected"] = True
                 result["error_details"] = f"Properly rejected malformed auth: {e}"

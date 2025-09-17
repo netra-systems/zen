@@ -30,7 +30,7 @@ import pytest
 import time
 import uuid
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Any, Dict, List, Optional, Set, Union
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, call
 from enum import Enum
@@ -54,7 +54,7 @@ class ComplexDataTests:
 
     def __init__(self, value: str):
         self.value = value
-        self.timestamp = datetime.utcnow()
+        self.timestamp = datetime.now(UTC)
 
     def to_dict(self):
         return {'value': self.value, 'timestamp': self.timestamp.isoformat(), 'type': 'ComplexDataTests'}
@@ -101,7 +101,7 @@ class MockWebSocket:
             self.bytes_sent += len(json_str.encode('utf-8'))
         except (TypeError, ValueError) as e:
             raise RuntimeError(f'Message not JSON serializable: {e}')
-        message_with_meta = {**message, '_test_user_id': self.user_id, '_test_connection_id': self.connection_id, '_test_timestamp': datetime.utcnow().isoformat(), '_test_message_number': self.message_count}
+        message_with_meta = {**message, '_test_user_id': self.user_id, '_test_connection_id': self.connection_id, '_test_timestamp': datetime.now(UTC).isoformat(), '_test_message_number': self.message_count}
         self.sent_messages.append(message_with_meta)
         self.message_count += 1
 
@@ -170,13 +170,13 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
             connection_id = self.id_manager.generate_id(IDType.WEBSOCKET, prefix='test_conn', context={'user_id': user_id})
         validated_user_id = UserID(user_id)
         mock_websocket = MockWebSocket(validated_user_id, connection_id, should_fail)
-        connection = WebSocketConnection(connection_id=connection_id, user_id=validated_user_id, websocket=mock_websocket, connected_at=datetime.utcnow(), metadata={'test': True, 'user_agent': 'Test WebSocket Client', 'ip_address': '127.0.0.1', 'session_id': f'session_{user_id}_{int(time.time())}'})
+        connection = WebSocketConnection(connection_id=connection_id, user_id=validated_user_id, websocket=mock_websocket, connected_at=datetime.now(UTC), metadata={'test': True, 'user_agent': 'Test WebSocket Client', 'ip_address': '127.0.0.1', 'session_id': f'session_{user_id}_{int(time.time())}'})
         self.test_metrics['connections_created'] += 1
         return connection
 
     async def send_test_message(self, user_id: str, message_type: str, data: Dict[str, Any]=None) -> None:
         """Helper to send test messages with metrics tracking."""
-        message = {'type': message_type, 'data': data or {}, 'timestamp': datetime.utcnow().isoformat()}
+        message = {'type': message_type, 'data': data or {}, 'timestamp': datetime.now(UTC).isoformat()}
         await self.manager.send_to_user(user_id, message)
         self.test_metrics['messages_sent'] += 1
 
@@ -344,7 +344,7 @@ class UnifiedWebSocketManagerComprehensiveTests(BaseIntegrationTest):
         user_id = self.id_manager.generate_id(IDType.USER, prefix='serialization_test_user')
         connection = self.create_mock_connection(user_id)
         await self.manager.add_connection(connection)
-        complex_test_cases = [{'type': 'enum_test', 'data': {'websocket_state': WebSocketStateTests.OPEN, 'connection_status': WebSocketStateTests.CONNECTING}}, {'type': 'datetime_test', 'data': {'timestamp': datetime.utcnow(), 'scheduled_time': datetime.utcnow() + timedelta(hours=1), 'expiry': datetime.utcnow() + timedelta(days=30)}}, {'type': 'dataclass_test', 'data': {'config': DataClassTests('test_config', 42, True), 'backup_config': DataClassTests('backup', 24, False)}}, {'type': 'nested_complex', 'data': {'user_profile': {'id': user_id, 'preferences': {'notifications': True, 'theme': 'dark', 'auto_save': WebSocketStateTests.OPEN}, 'metadata': ComplexDataTests('user_metadata'), 'created_at': datetime.utcnow()}, 'session_data': [DataClassTests('session_1', 100), DataClassTests('session_2', 200)]}}, {'type': 'large_data_test', 'data': {'large_list': [f'item_{i}' for i in range(1000)], 'large_dict': {f'key_{i}': f'value_{i}' for i in range(500)}, 'timestamp': datetime.utcnow()}}]
+        complex_test_cases = [{'type': 'enum_test', 'data': {'websocket_state': WebSocketStateTests.OPEN, 'connection_status': WebSocketStateTests.CONNECTING}}, {'type': 'datetime_test', 'data': {'timestamp': datetime.now(UTC), 'scheduled_time': datetime.now(UTC) + timedelta(hours=1), 'expiry': datetime.now(UTC) + timedelta(days=30)}}, {'type': 'dataclass_test', 'data': {'config': DataClassTests('test_config', 42, True), 'backup_config': DataClassTests('backup', 24, False)}}, {'type': 'nested_complex', 'data': {'user_profile': {'id': user_id, 'preferences': {'notifications': True, 'theme': 'dark', 'auto_save': WebSocketStateTests.OPEN}, 'metadata': ComplexDataTests('user_metadata'), 'created_at': datetime.now(UTC)}, 'session_data': [DataClassTests('session_1', 100), DataClassTests('session_2', 200)]}}, {'type': 'large_data_test', 'data': {'large_list': [f'item_{i}' for i in range(1000)], 'large_dict': {f'key_{i}': f'value_{i}' for i in range(500)}, 'timestamp': datetime.now(UTC)}}]
         for test_case in complex_test_cases:
             start_time = time.time()
             await self.manager.send_to_user(user_id, test_case)

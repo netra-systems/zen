@@ -8,7 +8,7 @@ import asyncio
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, Any, Optional, List
 import httpx
 import pytest
@@ -109,7 +109,7 @@ class TestStagingEnvironment:
         ws_url = f'{ws_url}/ws'
         try:
             async with websockets.connect(ws_url) as websocket:
-                await websocket.send(json.dumps({'type': 'ping', 'timestamp': datetime.utcnow().isoformat()}))
+                await websocket.send(json.dumps({'type': 'ping', 'timestamp': datetime.now(UTC).isoformat()}))
                 response = await asyncio.wait_for(websocket.recv(), timeout=5)
                 data = json.loads(response)
                 print(f' PASS:  WebSocket connection successful: {data}')
@@ -159,7 +159,7 @@ class TestStagingEnvironment:
         if not token:
             pytest.skip('Cannot authenticate for persistence test')
         headers = {'Authorization': f'Bearer {token}'}
-        test_data = {'test_id': f'test_{datetime.utcnow().timestamp()}', 'data': 'Test persistence data'}
+        test_data = {'test_id': f'test_{datetime.now(UTC).timestamp()}', 'data': 'Test persistence data'}
         create_response = await http_client.post(f'{STAGING_BASE_URL}/api/v1/test/data', json=test_data, headers=headers)
         if create_response.status_code in [200, 201, 404]:
             if create_response.status_code == 404:

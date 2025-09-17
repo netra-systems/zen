@@ -147,7 +147,7 @@ async def test_websocket_orchestrator_validation():
                     if elapsed >= phase_time:
                         print(f"[PASS] PASSED: {phase_desc} - Connection stable at T+{elapsed:.2f}s")
                         
-                except websockets.exceptions.ConnectionClosedError as e:
+                except websockets.ConnectionClosedError as e:
                     elapsed = time.time() - start_time
                     websocket_error = e
                     print(f"[FAIL] FAILED: {phase_desc} - WebSocket closed at T+{elapsed:.2f}s")

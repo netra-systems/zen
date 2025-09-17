@@ -20,7 +20,7 @@ from typing import Any, Dict, List, Optional, Set, Callable, AsyncGenerator
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field
 import websockets
-from websockets.exceptions import WebSocketException, ConnectionClosedError
+from websockets import WebSocketException, ConnectionClosedError
 
 from tests.e2e.staging_config import get_staging_config
 from tests.e2e.staging_auth_client import StagingAuthClient

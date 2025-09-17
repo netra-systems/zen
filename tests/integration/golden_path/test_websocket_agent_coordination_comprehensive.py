@@ -30,7 +30,7 @@ import pytest
 import time
 import uuid
 import websockets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from websockets import ConnectionClosed, WebSocketException
@@ -79,7 +79,7 @@ class WebSocketAgentCoordinationComprehensiveTests(SSotAsyncTestCase):
         await super().async_setup_method(method)
 
         async def capture_websocket_event(event_type: str, data: Dict[str, Any], **kwargs):
-            timestamp = datetime.utcnow()
+            timestamp = datetime.now(UTC)
             user_id = kwargs.get('user_id')
             event = {'type': event_type, 'data': data, 'timestamp': timestamp, 'user_id': user_id, 'thread_id': kwargs.get('thread_id'), 'run_id': kwargs.get('run_id'), 'latency': time.time()}
             self.captured_events.append(event)
@@ -247,7 +247,7 @@ class WebSocketAgentCoordinationComprehensiveTests(SSotAsyncTestCase):
             end_latency = time.time()
             latency = end_latency - start_latency
             event_latencies.append(latency)
-            self.latency_measurements.append({'event_type': event_type, 'latency': latency, 'timestamp': datetime.utcnow(), 'user_id': kwargs.get('user_id')})
+            self.latency_measurements.append({'event_type': event_type, 'latency': latency, 'timestamp': datetime.now(UTC), 'user_id': kwargs.get('user_id')})
         mock_websocket_manager = AsyncMock()
         mock_websocket_manager.send_event = performance_tracking_send_event
         websocket_bridge._websocket_manager = mock_websocket_manager
@@ -312,7 +312,7 @@ class WebSocketAgentCoordinationComprehensiveTests(SSotAsyncTestCase):
                 if self.call_count % 3 == 0:
                     nonlocal failed_operations
                     failed_operations += 1
-                    error_events.append({'event_type': event_type, 'error': 'WebSocket connection failed', 'timestamp': datetime.utcnow(), 'call_count': self.call_count})
+                    error_events.append({'event_type': event_type, 'error': 'WebSocket connection failed', 'timestamp': datetime.now(UTC), 'call_count': self.call_count})
                     raise WebSocketException('Simulated WebSocket failure')
                 else:
                     await self.capture_websocket_event(event_type, data, **kwargs)
@@ -327,7 +327,7 @@ class WebSocketAgentCoordinationComprehensiveTests(SSotAsyncTestCase):
                     if attempt > 0:
                         nonlocal successful_recoveries
                         successful_recoveries += 1
-                        recovery_events.append({'event_type': 'agent_started', 'attempt': attempt + 1, 'recovered': True, 'timestamp': datetime.utcnow()})
+                        recovery_events.append({'event_type': 'agent_started', 'attempt': attempt + 1, 'recovered': True, 'timestamp': datetime.now(UTC)})
                     return True
                 except WebSocketException as e:
                     if attempt == max_retries - 1:

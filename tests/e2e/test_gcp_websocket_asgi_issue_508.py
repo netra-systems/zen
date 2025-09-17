@@ -38,9 +38,9 @@ class GCPWebSocketASGITests:
                 response = await asyncio.wait_for(websocket.recv(), timeout=5)
                 response_data = json.loads(response)
                 assert response_data is not None, 'Should receive response from WebSocket'
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             pytest.fail(f'WebSocket connection closed due to ASGI error: {e}')
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.InvalidStatusCode as e:
             if e.status_code == 500:
                 pytest.fail(f'WebSocket connection failed with 500 error - likely ASGI scope issue: {e}')
             else:
@@ -98,7 +98,7 @@ class GCPWebSocketASGITests:
                     if expected_event not in received_events:
                         pytest.fail(f'Missing critical WebSocket event: {expected_event}')
                 assert len(received_events) >= 5, f'Expected at least 5 events, got {len(received_events)}'
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             pytest.fail(f'WebSocket connection closed during agent event flow: {e}')
         except Exception as e:
             if 'ASGI' in str(e) or 'query_params' in str(e):
@@ -168,7 +168,7 @@ class GCPWebSocketASGITests:
                     assert response_data.get('status') == 'success', f'Error recovery failed for scenario: {scenario_name}'
                     recovery_success_count += 1
                     print(f'✓ Error recovery successful for scenario: {scenario_name}')
-            except websockets.exceptions.ConnectionClosedError:
+            except websockets.ConnectionClosedError:
                 print(f'✗ Connection failed for scenario {scenario_name} - ASGI error likely')
             except asyncio.TimeoutError:
                 print(f'✗ Timeout for scenario {scenario_name} - server processing issue')

@@ -26,7 +26,7 @@ import unittest
 from unittest.mock import Mock, AsyncMock, patch, MagicMock, call
 from typing import Dict, Any, Optional, List
 import time
-from datetime import datetime
+from datetime import datetime, UTC
 from sqlalchemy.ext.asyncio import AsyncSession
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
@@ -60,7 +60,7 @@ class MockWebSocketBridge:
 
     async def send_agent_event(self, event_type: str, data: Dict[str, Any], run_id: str):
         """Mock event sending."""
-        event = {'type': event_type, 'data': data, 'run_id': run_id, 'timestamp': datetime.utcnow().isoformat()}
+        event = {'type': event_type, 'data': data, 'run_id': run_id, 'timestamp': datetime.now(UTC).isoformat()}
         self.events_sent.append(event)
         return True
 

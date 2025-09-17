@@ -567,7 +567,7 @@ class WebSocketIntegrationTests(BaseAgentExecutionTest):
                     logger.debug(f"Received WebSocket message: {parsed_message.get('type', 'unknown')}")
                 except json.JSONDecodeError:
                     logger.warning(f"Failed to parse WebSocket message: {message}")
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             logger.info("WebSocket connection closed")
         except Exception as e:
             logger.error(f"WebSocket listener error: {e}")

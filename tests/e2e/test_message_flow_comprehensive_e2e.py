@@ -114,7 +114,7 @@ class RealMessageFlowTester:
                     })
                     self.websocket_events_received[connection_id].append(event_type)
                     
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             pass
         except Exception as e:
             print(f"Error listening for REAL messages on {connection_id}: {e}")

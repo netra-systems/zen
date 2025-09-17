@@ -12,7 +12,7 @@ import jwt
 import asyncio
 import websockets
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import Mock, patch
 from fastapi import WebSocket
 from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
@@ -35,7 +35,7 @@ class JWTSecretMismatchTests:
         assert token is None, 'Should return None when no JWT present'
         signing_secret = 'auth_service_secret'
         validation_secret = 'backend_service_secret'
-        payload = {'sub': 'test_user_123', 'exp': datetime.utcnow() + timedelta(hours=1), 'iat': datetime.utcnow(), 'permissions': ['read', 'write'], 'roles': ['user']}
+        payload = {'sub': 'test_user_123', 'exp': datetime.now(UTC) + timedelta(hours=1), 'iat': datetime.now(UTC), 'permissions': ['read', 'write'], 'roles': ['user']}
         token = jwt.encode(payload, signing_secret, algorithm='HS256')
         websocket_with_jwt = Mock(spec=WebSocket)
         websocket_with_jwt.headers = {'authorization': f'Bearer {token}'}
@@ -60,7 +60,7 @@ class JWTSecretMismatchTests:
     async def test_jwt_validation_with_correct_secret(self):
         Test that JWT validation succeeds when secrets match.""
         secret = 'shared_secret_123'
-        payload = {'sub': 'user_456', 'exp': datetime.utcnow() + timedelta(hours=1), 'iat': datetime.utcnow(), 'permissions': ['chat', 'read'], 'roles': ['user'], 'session_id': 'session_789'}
+        payload = {'sub': 'user_456', 'exp': datetime.now(UTC) + timedelta(hours=1), 'iat': datetime.now(UTC), 'permissions': ['chat', 'read'], 'roles': ['user'], 'session_id': 'session_789'}
         token = jwt.encode(payload, secret, algorithm='HS256')
         extractor = UserContextExtractor()
         extractor.jwt_secret_key = secret
@@ -74,7 +74,7 @@ class JWTSecretMismatchTests:
         Test the complete WebSocket authentication flow.""
         secret = 'test_secret'
         user_id = 'test_user_123'
-        payload = {'sub': user_id, 'exp': datetime.utcnow() + timedelta(hours=1), 'iat': datetime.utcnow(), 'permissions': ['chat'], 'roles': ['user']}
+        payload = {'sub': user_id, 'exp': datetime.now(UTC) + timedelta(hours=1), 'iat': datetime.now(UTC), 'permissions': ['chat'], 'roles': ['user']}
         token = jwt.encode(payload, secret, algorithm='HS256')
         websocket = Mock(spec=WebSocket)
         websocket.headers = {'authorization': f'Bearer {token}', 'user-agent': 'TestClient/1.0', 'origin': 'http://localhost:3000', 'host': 'localhost:8000'}
@@ -98,7 +98,7 @@ class JWTSecretMismatchTests:
         import base64
         secret = 'test_secret'
         user_id = 'subprotocol_user'
-        payload = {'sub': user_id, 'exp': datetime.utcnow() + timedelta(hours=1), 'iat': datetime.utcnow()}
+        payload = {'sub': user_id, 'exp': datetime.now(UTC) + timedelta(hours=1), 'iat': datetime.now(UTC)}
         token = jwt.encode(payload, secret, algorithm='HS256')
         encoded_token = base64.urlsafe_b64encode(token.encode()).decode().rstrip('=')
         websocket = Mock(spec=WebSocket)
@@ -116,7 +116,7 @@ class JWTSecretMismatchTests:
         from fastapi import HTTPException
         secret_auth = 'auth_secret'
         secret_backend = 'backend_secret'
-        payload = {'sub': 'user_123', 'exp': datetime.utcnow() + timedelta(hours=1), 'iat': datetime.utcnow()}
+        payload = {'sub': 'user_123', 'exp': datetime.now(UTC) + timedelta(hours=1), 'iat': datetime.now(UTC)}
         token = jwt.encode(payload, secret_auth, algorithm='HS256')
         websocket = Mock(spec=WebSocket)
         websocket.headers = {'authorization': f'Bearer {token}'}

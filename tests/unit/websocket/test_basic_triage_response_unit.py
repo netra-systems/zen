@@ -93,7 +93,7 @@ class BasicTriageResponseUnitTests(SSotAsyncTestCase):
         
         EXPECTED OUTCOME: Should initially FAIL due to message processing issues.
         """
-        user_message = {'type': 'user_message', 'content': 'Help me optimize my AI infrastructure costs', 'thread_id': self.thread_id, 'user_id': self.user_id, 'timestamp': datetime.utcnow().isoformat()}
+        user_message = {'type': 'user_message', 'content': 'Help me optimize my AI infrastructure costs', 'thread_id': self.thread_id, 'user_id': self.user_id, 'timestamp': datetime.now(UTC).isoformat()}
         try:
             handler = self.message_router._find_handler('user_message')
             assert handler is not None, 'No handler found for user_message type'
@@ -187,7 +187,7 @@ class BasicTriageResponseUnitTests(SSotAsyncTestCase):
         expected_events = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
 
         async def mock_emit_event(event_type: str, data: Dict[str, Any]):
-            event = {'type': event_type, 'data': data, 'timestamp': datetime.utcnow().isoformat(), 'user_id': self.user_id}
+            event = {'type': event_type, 'data': data, 'timestamp': datetime.now(UTC).isoformat(), 'user_id': self.user_id}
             await self.mock_websocket.send_text(json.dumps(event))
         try:
             for event_type in expected_events:
@@ -211,7 +211,7 @@ class BasicTriageResponseUnitTests(SSotAsyncTestCase):
         about AI processing progress and results.
         """
         completion_event_data = {'agent_type': 'triage', 'status': 'completed', 'results': {'category': 'Cost Optimization', 'priority': 'high', 'confidence_score': 0.92, 'next_agents': ['data_helper', 'optimization_agent']}, 'execution_time': 2.5, 'thread_id': self.thread_id, 'run_id': self.run_id}
-        completion_event = {'type': 'agent_completed', 'data': completion_event_data, 'timestamp': datetime.utcnow().isoformat(), 'user_id': self.user_id}
+        completion_event = {'type': 'agent_completed', 'data': completion_event_data, 'timestamp': datetime.now(UTC).isoformat(), 'user_id': self.user_id}
         await self.mock_websocket.send_text(json.dumps(completion_event))
         assert len(self.sent_events) == 1
         sent_event = self.sent_events[0]
@@ -300,7 +300,7 @@ class BasicTriageResponseUnitTests(SSotAsyncTestCase):
         EXPECTED OUTCOME: Should initially FAIL demonstrating current issues.
         """
         golden_path_steps = {'message_received': False, 'message_parsed': False, 'handler_routed': False, 'triage_processed': False, 'events_emitted': False, 'response_generated': False}
-        user_message = {'type': 'user_message', 'content': 'I need to optimize my machine learning infrastructure costs on AWS. Current spend is $10,000/month.', 'thread_id': self.thread_id, 'user_id': self.user_id, 'timestamp': datetime.utcnow().isoformat()}
+        user_message = {'type': 'user_message', 'content': 'I need to optimize my machine learning infrastructure costs on AWS. Current spend is $10,000/month.', 'thread_id': self.thread_id, 'user_id': self.user_id, 'timestamp': datetime.now(UTC).isoformat()}
         try:
             golden_path_steps['message_received'] = True
             message_obj = self.message_router._prepare_message(user_message)

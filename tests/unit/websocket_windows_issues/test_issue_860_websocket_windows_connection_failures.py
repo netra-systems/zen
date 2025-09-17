@@ -102,14 +102,14 @@ class Issue860WindowsWebSocketFailuresTests(BaseIntegrationTest):
                     "error": str(e)
                 })
 
-            except websockets.exceptions.InvalidURI as e:
+            except websockets.InvalidURI as e:
                 connection_attempts.append({
                     "url": url,
                     "status": "invalid_uri",
                     "error": str(e)
                 })
 
-            except websockets.exceptions.ConnectionClosed as e:
+            except websockets.ConnectionClosed as e:
                 connection_attempts.append({
                     "url": url,
                     "status": "connection_closed",

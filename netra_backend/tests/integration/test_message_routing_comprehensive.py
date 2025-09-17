@@ -29,7 +29,7 @@ import pytest
 import sys
 import time
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from typing import Any, Dict, List, Optional, Set, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
 from contextlib import asynccontextmanager
@@ -452,8 +452,8 @@ class WebSocketMessageRoutingTests(BaseIntegrationTest):
         ws_manager2 = await mock_create_websocket_manager(user2_context)
         websocket1 = MockWebSocket(str(user1_id), 'conn1')
         websocket2 = MockWebSocket(str(user2_id), 'conn2')
-        conn1 = WebSocketConnection(connection_id='conn1', user_id=str(user1_id), websocket=websocket1, connected_at=datetime.utcnow())
-        conn2 = WebSocketConnection(connection_id='conn2', user_id=str(user2_id), websocket=websocket2, connected_at=datetime.utcnow())
+        conn1 = WebSocketConnection(connection_id='conn1', user_id=str(user1_id), websocket=websocket1, connected_at=datetime.now(UTC))
+        conn2 = WebSocketConnection(connection_id='conn2', user_id=str(user2_id), websocket=websocket2, connected_at=datetime.now(UTC))
         await ws_manager1.add_connection(conn1)
         await ws_manager2.add_connection(conn2)
         message1 = {'type': 'agent_response', 'content': 'Response for user 1'}
@@ -482,7 +482,7 @@ class WebSocketMessageRoutingTests(BaseIntegrationTest):
             managers.append(manager)
             websockets.append(websocket)
         for i, (manager, websocket, user_id) in enumerate(zip(managers, websockets, users)):
-            connection = WebSocketConnection(connection_id=f'conn_{i}', user_id=str(user_id), websocket=websocket, connected_at=datetime.utcnow())
+            connection = WebSocketConnection(connection_id=f'conn_{i}', user_id=str(user_id), websocket=websocket, connected_at=datetime.now(UTC))
             await manager.add_connection(connection)
         for i, manager in enumerate(managers):
             connections = manager.get_user_connections()
@@ -516,7 +516,7 @@ class WebSocketMessageRoutingTests(BaseIntegrationTest):
         context = UserExecutionContext.from_request(user_id=str(user_id), thread_id=str(ensure_thread_id(str(uuid.uuid4()))), run_id=str(uuid.uuid4()))
         manager = await mock_create_websocket_manager(context)
         websocket = MockWebSocket(str(user_id), 'sync_conn')
-        connection = WebSocketConnection(connection_id='sync_conn', user_id=str(user_id), websocket=websocket, connected_at=datetime.utcnow())
+        connection = WebSocketConnection(connection_id='sync_conn', user_id=str(user_id), websocket=websocket, connected_at=datetime.now(UTC))
         await manager.add_connection(connection)
         assert manager.is_connection_active(str(user_id))
         websocket.disconnect()
@@ -539,7 +539,7 @@ class WebSocketMessageRoutingTests(BaseIntegrationTest):
             manager = await factory.create_manager(context)
             for j in range(2):
                 websocket = MockWebSocket(str(user_id), f'conn_{i}_{j}')
-                connection = WebSocketConnection(connection_id=f'conn_{i}_{j}', user_id=str(user_id), websocket=websocket, connected_at=datetime.utcnow())
+                connection = WebSocketConnection(connection_id=f'conn_{i}_{j}', user_id=str(user_id), websocket=websocket, connected_at=datetime.now(UTC))
                 await manager.add_connection(connection)
             routing_data.append((user_id, manager))
         for user_id, manager in routing_data:
@@ -562,7 +562,7 @@ class WebSocketMessageRoutingTests(BaseIntegrationTest):
         websockets = []
         for i in range(3):
             websocket = MockWebSocket(str(user_id), f'broadcast_conn_{i}')
-            connection = WebSocketConnection(connection_id=f'broadcast_conn_{i}', user_id=str(user_id), websocket=websocket, connected_at=datetime.utcnow())
+            connection = WebSocketConnection(connection_id=f'broadcast_conn_{i}', user_id=str(user_id), websocket=websocket, connected_at=datetime.now(UTC))
             await manager.add_connection(connection)
             websockets.append(websocket)
         broadcast_message = {'type': 'system_announcement', 'content': 'System maintenance in 5 minutes'}
@@ -582,7 +582,7 @@ class WebSocketMessageRoutingTests(BaseIntegrationTest):
         connections_to_cleanup = []
         for i in range(3):
             websocket = MockWebSocket(str(user_id), f'cleanup_conn_{i}')
-            connection = WebSocketConnection(connection_id=f'cleanup_conn_{i}', user_id=str(user_id), websocket=websocket, connected_at=datetime.utcnow())
+            connection = WebSocketConnection(connection_id=f'cleanup_conn_{i}', user_id=str(user_id), websocket=websocket, connected_at=datetime.now(UTC))
             await manager.add_connection(connection)
             connections_to_cleanup.append(f'cleanup_conn_{i}')
         assert len(manager.get_user_connections()) == 3
@@ -610,8 +610,8 @@ class MultiUserIsolationTests(BaseIntegrationTest):
         manager2 = await factory.create_manager(context2)
         websocket1 = MockWebSocket(str(user1_id), 'user1_conn')
         websocket2 = MockWebSocket(str(user2_id), 'user2_conn')
-        conn1 = WebSocketConnection(connection_id='user1_conn', user_id=str(user1_id), websocket=websocket1, connected_at=datetime.utcnow())
-        conn2 = WebSocketConnection(connection_id='user2_conn', user_id=str(user2_id), websocket=websocket2, connected_at=datetime.utcnow())
+        conn1 = WebSocketConnection(connection_id='user1_conn', user_id=str(user1_id), websocket=websocket1, connected_at=datetime.now(UTC))
+        conn2 = WebSocketConnection(connection_id='user2_conn', user_id=str(user2_id), websocket=websocket2, connected_at=datetime.now(UTC))
         await manager1.add_connection(conn1)
         await manager2.add_connection(conn2)
         user1_message = {'type': 'private_data', 'sensitive': 'user1_secret'}
@@ -638,7 +638,7 @@ class MultiUserIsolationTests(BaseIntegrationTest):
             websockets = []
             for j in range(3):
                 websocket = MockWebSocket(str(user_id), f'user_{i}_conn_{j}')
-                connection = WebSocketConnection(connection_id=f'user_{i}_conn_{j}', user_id=str(user_id), websocket=websocket, connected_at=datetime.utcnow())
+                connection = WebSocketConnection(connection_id=f'user_{i}_conn_{j}', user_id=str(user_id), websocket=websocket, connected_at=datetime.now(UTC))
                 await manager.add_connection(connection)
                 websockets.append(websocket)
             users_data.append((user_id, manager, websockets))
@@ -664,7 +664,7 @@ class MultiUserIsolationTests(BaseIntegrationTest):
             context = UserExecutionContext.from_request(user_id=str(user_id), thread_id=str(ensure_thread_id(str(uuid.uuid4()))), run_id=str(uuid.uuid4()))
             manager = await mock_create_websocket_manager(context)
             websocket = MockWebSocket(str(user_id), f'concurrent_conn_{i}')
-            connection = WebSocketConnection(connection_id=f'concurrent_conn_{i}', user_id=str(user_id), websocket=websocket, connected_at=datetime.utcnow())
+            connection = WebSocketConnection(connection_id=f'concurrent_conn_{i}', user_id=str(user_id), websocket=websocket, connected_at=datetime.now(UTC))
             await manager.add_connection(connection)
             users_setup.append((user_id, manager, websocket))
 
@@ -748,7 +748,7 @@ class MultiUserIsolationTests(BaseIntegrationTest):
             context = UserExecutionContext.from_request(user_id=str(user_id), thread_id=str(ensure_thread_id(str(uuid.uuid4()))), run_id=str(uuid.uuid4()))
             manager = await factory.create_manager(context)
             websocket = MockWebSocket(str(user_id), f'state_conn_{i}')
-            connection = WebSocketConnection(connection_id=f'state_conn_{i}', user_id=str(user_id), websocket=websocket, connected_at=datetime.utcnow())
+            connection = WebSocketConnection(connection_id=f'state_conn_{i}', user_id=str(user_id), websocket=websocket, connected_at=datetime.now(UTC))
             await manager.add_connection(connection)
             state_log.append({'user_id': str(user_id), 'connections': len(manager.get_user_connections()), 'is_active': manager.is_connection_active(str(user_id)), 'manager_stats': manager.get_manager_stats()})
             await manager.send_to_user({'type': 'state_test', 'user': str(user_id)})
@@ -773,7 +773,7 @@ class AgentMessageIntegrationTests(BaseIntegrationTest):
         context = UserExecutionContext.from_request(user_id=str(user_id), thread_id=str(ensure_thread_id(str(uuid.uuid4()))), run_id=str(uuid.uuid4()))
         ws_manager = await mock_create_websocket_manager(context)
         websocket = MockWebSocket(str(user_id), 'agent_conn')
-        connection = WebSocketConnection(connection_id='agent_conn', user_id=str(user_id), websocket=websocket, connected_at=datetime.utcnow())
+        connection = WebSocketConnection(connection_id='agent_conn', user_id=str(user_id), websocket=websocket, connected_at=datetime.now(UTC))
         await ws_manager.add_connection(connection)
         mock_service = MagicMock()
         agent_handler = AgentMessageHandler(mock_service, websocket)
@@ -795,7 +795,7 @@ class AgentMessageIntegrationTests(BaseIntegrationTest):
         context = UserExecutionContext.from_request(user_id=str(user_id), thread_id=str(ensure_thread_id(str(uuid.uuid4()))), run_id=str(uuid.uuid4()))
         manager = await mock_create_websocket_manager(context)
         websocket = MockWebSocket(str(user_id), 'routing_conn')
-        connection = WebSocketConnection(connection_id='routing_conn', user_id=str(user_id), websocket=websocket, connected_at=datetime.utcnow())
+        connection = WebSocketConnection(connection_id='routing_conn', user_id=str(user_id), websocket=websocket, connected_at=datetime.now(UTC))
         await manager.add_connection(connection)
         agent_messages = [{'type': 'start_agent', 'payload': {'message': 'Start analysis'}}, {'type': 'user_message', 'payload': {'content': 'User input'}}, {'type': 'chat', 'payload': {'message': 'Chat message'}}]
         for msg in agent_messages:

@@ -6,7 +6,7 @@ Tests are designed to detect deprecated patterns and validate migration behavior
 """
 
 import warnings
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 from pathlib import Path
 from typing import Dict, Any, Optional
 import unittest
@@ -26,7 +26,7 @@ class ClickHouseDateTimeMigrationTests(unittest.TestCase):
         self.warnings_captured = []
 
     def test_deprecated_datetime_patterns_in_clickhouse(self):
-        """FAILING TEST: Detects deprecated datetime.utcnow() usage in ClickHouse module."""
+        """FAILING TEST: Detects deprecated datetime.now(UTC) usage in ClickHouse module."""
         target_file = project_root / "netra_backend" / "app" / "db" / "clickhouse.py"
 
         with open(target_file, 'r', encoding='utf-8') as f:
@@ -34,8 +34,8 @@ class ClickHouseDateTimeMigrationTests(unittest.TestCase):
 
         # Check for deprecated patterns
         deprecated_patterns = [
-            "datetime.utcnow()",
-            "now = datetime.utcnow()",
+            "datetime.now(UTC)",
+            "now = datetime.now(UTC)",
         ]
 
         found_deprecated = []
@@ -57,7 +57,7 @@ class ClickHouseDateTimeMigrationTests(unittest.TestCase):
         # Simulate the analyze_query_complexity function behavior
         def calculate_cache_ttl_old_pattern(complexity: str) -> float:
             """Calculate cache TTL using old datetime pattern."""
-            now = datetime.utcnow()  # Deprecated pattern
+            now = datetime.now(UTC)  # Deprecated pattern
 
             ttl_mapping = {
                 'simple': 300,      # 5 minutes
@@ -100,8 +100,8 @@ class ClickHouseDateTimeMigrationTests(unittest.TestCase):
             """Mock function simulating the current implementation."""
             metadata = metadata or {}
 
-            # Current implementation uses datetime.utcnow()
-            now = datetime.utcnow()  # This will be migrated
+            # Current implementation uses datetime.now(UTC)
+            now = datetime.now(UTC)  # This will be migrated
 
             return {
                 'run_id': run_id,
@@ -129,7 +129,7 @@ class ClickHouseDateTimeMigrationTests(unittest.TestCase):
         """FAILING TEST: Validates timezone awareness in query complexity analysis."""
 
         # Mock getting current timestamp from analyze_query_complexity
-        current_timestamp = datetime.utcnow()  # Current implementation
+        current_timestamp = datetime.now(UTC)  # Current implementation
 
         # This test SHOULD FAIL before migration (naive datetime objects)
         self.assertIsNotNone(current_timestamp.tzinfo,
@@ -141,8 +141,8 @@ class ClickHouseDateTimeMigrationTests(unittest.TestCase):
         # Test scenario: calculating time since analysis
         def time_since_analysis_old() -> float:
             """Calculate time since analysis using old pattern."""
-            analysis_time = datetime.utcnow() - timedelta(minutes=5)  # 5 minutes ago
-            now = datetime.utcnow()
+            analysis_time = datetime.now(UTC) - timedelta(minutes=5)  # 5 minutes ago
+            now = datetime.now(UTC)
             return (now - analysis_time).total_seconds()
 
         def time_since_analysis_new() -> float:
@@ -171,7 +171,7 @@ class ClickHouseTimestampConsistencyTests(unittest.TestCase):
         """Test that ISO format timestamps remain consistent."""
 
         # Current pattern
-        old_timestamp = datetime.utcnow()
+        old_timestamp = datetime.now(UTC)
         old_iso = old_timestamp.isoformat()
 
         # New pattern
@@ -193,7 +193,7 @@ class ClickHouseTimestampConsistencyTests(unittest.TestCase):
         # with database storage and retrieval operations
 
         # Test timestamp serialization for database storage
-        current_timestamp = datetime.utcnow()
+        current_timestamp = datetime.now(UTC)
         new_timestamp = datetime.now(timezone.utc)
 
         # Both should serialize to strings

@@ -21,7 +21,7 @@ import logging
 import ssl
 from typing import Dict, Any, Optional, List
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidStatusCode
+from websockets import ConnectionClosed, InvalidStatusCode
 import aiohttp
 
 # Test infrastructure imports

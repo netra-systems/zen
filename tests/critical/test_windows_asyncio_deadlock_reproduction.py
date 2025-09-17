@@ -372,7 +372,7 @@ class WindowsAsyncioDeadlockReproductionTests:
                         "This suggests the Windows asyncio issue may be fixed."
                     )
                     
-            except websockets.exceptions.InvalidStatus as e:
+            except websockets.InvalidStatus as e:
                 # Connection might be rejected - not the deadlock we want
                 if e.status_code in [401, 403]:
                     print(f" SEARCH:  WebSocket connection rejected: {e}")

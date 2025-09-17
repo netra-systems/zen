@@ -146,7 +146,7 @@ class WebSocket1011ErrorSolutionValidationTests:
                     "message_exchange": True
                 }
                 
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             connection_time = time.time() - connection_start_time
             logger.error(f" FAIL:  CONNECTION FAILED: Code {e.code}, Reason: {e.reason}")
             
@@ -239,7 +239,7 @@ class WebSocket1011ErrorSolutionValidationTests:
                     "auto_detection": True
                 }
                 
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             connection_time = time.time() - connection_start_time
             logger.error(f" FAIL:  AUTO-DETECTION FAILED: Code {e.code}")
             
@@ -401,7 +401,7 @@ class WebSocket1011ErrorSolutionValidationTests:
                     "responses_received": len(responses) + 1  # +1 for echo response
                 }
                 
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             connection_time = time.time() - connection_start_time
             logger.error(f" FAIL:  COMPREHENSIVE TEST FAILED: Code {e.code}")
             logger.error(f" CHART:  Phases completed: {full_test_results}")
@@ -479,7 +479,7 @@ class WebSocket1011ErrorSolutionValidationTests:
                         "user_email": unique_email
                     }
                     
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 return {
                     "connection_id": connection_id,
                     "success": False,

@@ -26,7 +26,7 @@ import json
 import pytest
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -379,7 +379,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         engine = await factory.create_for_user(user_context)
         execution1_data = {'message': 'Analyze my current AI infrastructure costs', 'context_key': 'initial_analysis'}
         result1 = await engine.execute_agent_pipeline(agent_name='data_helper', execution_context=user_context, input_data=execution1_data)
-        context_data = {'infrastructure_type': 'cloud_ml', 'monthly_spend': 5000.0, 'analysis_timestamp': datetime.utcnow().isoformat()}
+        context_data = {'infrastructure_type': 'cloud_ml', 'monthly_spend': 5000.0, 'analysis_timestamp': datetime.now(UTC).isoformat()}
         engine.set_agent_result('infrastructure_analysis', context_data)
         execution2_data = {'message': 'Based on previous analysis, suggest optimizations', 'context_key': 'optimization_recommendations', 'use_previous_context': True}
         result2 = await engine.execute_agent_pipeline(agent_name='optimization', execution_context=user_context, input_data=execution2_data)
@@ -410,7 +410,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         original_send_event = getattr(websocket_bridge, 'send_event', None)
 
         async def tracked_send_event(event_type: str, data: Dict[str, Any], **kwargs):
-            event_tracker.append({'type': event_type, 'data': data, 'timestamp': datetime.utcnow(), 'user_id': kwargs.get('user_id', user_context.user_id)})
+            event_tracker.append({'type': event_type, 'data': data, 'timestamp': datetime.now(UTC), 'user_id': kwargs.get('user_id', user_context.user_id)})
             if original_send_event and callable(original_send_event):
                 return await original_send_event(event_type, data, **kwargs)
         if hasattr(websocket_bridge, 'send_event'):
@@ -583,7 +583,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         websocket_bridge = AgentWebSocketBridge()
         factory = ExecutionEngineFactory(websocket_bridge=websocket_bridge)
         engine = await factory.create_for_user(user_context)
-        agent_results = [{'agent_type': 'triage', 'result': {'requirements': ['cost_analysis', 'optimization'], 'priority': 'high'}, 'execution_time': 1.2, 'timestamp': datetime.utcnow()}, {'agent_type': 'data_helper', 'result': {'cost_data': {'monthly': 4200}, 'utilization': {'avg': 0.73}}, 'execution_time': 2.8, 'timestamp': datetime.utcnow()}, {'agent_type': 'optimization', 'result': {'recommendations': ['optimize_scaling'], 'savings': 840}, 'execution_time': 3.1, 'timestamp': datetime.utcnow()}]
+        agent_results = [{'agent_type': 'triage', 'result': {'requirements': ['cost_analysis', 'optimization'], 'priority': 'high'}, 'execution_time': 1.2, 'timestamp': datetime.now(UTC)}, {'agent_type': 'data_helper', 'result': {'cost_data': {'monthly': 4200}, 'utilization': {'avg': 0.73}}, 'execution_time': 2.8, 'timestamp': datetime.now(UTC)}, {'agent_type': 'optimization', 'result': {'recommendations': ['optimize_scaling'], 'savings': 840}, 'execution_time': 3.1, 'timestamp': datetime.now(UTC)}]
         for agent_result in agent_results:
             engine.set_agent_result(agent_result['agent_type'], agent_result['result'])
         aggregated_result = engine.get_all_agent_results()
@@ -615,15 +615,15 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
         async def monitored_execute(*args, **kwargs):
             start_time = time.time()
-            execution_logs.append({'event': 'execution_started', 'timestamp': datetime.utcnow(), 'user_id': user_context.user_id, 'test_scenario': 'monitoring_logging_integration'})
+            execution_logs.append({'event': 'execution_started', 'timestamp': datetime.now(UTC), 'user_id': user_context.user_id, 'test_scenario': 'monitoring_logging_integration'})
             try:
                 result = await original_execute(*args, **kwargs)
                 execution_time = time.time() - start_time
-                execution_logs.append({'event': 'execution_completed', 'timestamp': datetime.utcnow(), 'execution_time': execution_time, 'result_size': len(str(result))})
+                execution_logs.append({'event': 'execution_completed', 'timestamp': datetime.now(UTC), 'execution_time': execution_time, 'result_size': len(str(result))})
                 performance_metrics.append({'agent_type': 'data_helper', 'execution_time': execution_time, 'memory_usage': 'tracked', 'success': True})
                 return result
             except Exception as e:
-                execution_logs.append({'event': 'execution_failed', 'error': str(e), 'timestamp': datetime.utcnow()})
+                execution_logs.append({'event': 'execution_failed', 'error': str(e), 'timestamp': datetime.now(UTC)})
                 raise
         agent.execute = monitored_execute
         result = await agent.execute(message='Test monitoring and logging', context=user_context)
@@ -802,7 +802,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         start_time = time.time()
         result = await agent.execute(message='Optimization with metrics collection', context=user_context)
         execution_time = time.time() - start_time
-        execution_metrics = {'user_id': user_context.user_id, 'agent_type': 'optimization', 'execution_time': execution_time, 'tokens_used': result.get('metrics', {}).get('tokens_used', 0), 'api_calls': result.get('metrics', {}).get('api_calls', 0), 'timestamp': datetime.utcnow(), 'success': True}
+        execution_metrics = {'user_id': user_context.user_id, 'agent_type': 'optimization', 'execution_time': execution_time, 'tokens_used': result.get('metrics', {}).get('tokens_used', 0), 'api_calls': result.get('metrics', {}).get('api_calls', 0), 'timestamp': datetime.now(UTC), 'success': True}
         exec_id = execution_tracker.create_execution(agent_name='optimization', user_id=user_context.user_id, thread_id=user_context.thread_id)
         from netra_backend.app.core.agent_execution_tracker import ExecutionState
         execution_tracker.update_execution_state(exec_id, ExecutionState.COMPLETED)
@@ -829,7 +829,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         async def failing_then_succeeding_execution(request_data, context):
             nonlocal execution_attempts
             execution_attempts += 1
-            state_snapshot = {'attempt': execution_attempts, 'context': context.to_dict(), 'timestamp': datetime.utcnow()}
+            state_snapshot = {'attempt': execution_attempts, 'context': context.to_dict(), 'timestamp': datetime.now(UTC)}
             saved_states.append(state_snapshot)
             if execution_attempts <= 2:
                 raise Exception(f'Execution failed on attempt {execution_attempts}')

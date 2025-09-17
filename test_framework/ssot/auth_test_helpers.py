@@ -33,7 +33,7 @@ import asyncio
 import logging
 from typing import Dict, Any, List, Optional, Union
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from shared.isolated_environment import get_env
 
@@ -152,7 +152,7 @@ class SSOTAuthTestHelper:
                 token_type=result["token_type"],
                 expires_in=result["expires_in"],
                 permissions=result["permissions"],
-                created_at=datetime.utcnow()
+                created_at=datetime.now(UTC)
             )
             self._test_users.append(test_user)
             

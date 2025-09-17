@@ -140,7 +140,7 @@ class WebSocket1011ErrorReproductionTests:
                     f"Connection time: {connection_time:.2f}s"
                 )
                 
-        except websockets.exceptions.ConnectionClosedError as e:
+        except websockets.ConnectionClosedError as e:
             connection_time = time.time() - connection_start_time
             error_details = {
                 "code": e.code,
@@ -253,7 +253,7 @@ class WebSocket1011ErrorReproductionTests:
                         "error": None
                     }
                     
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 return {
                     "user_index": user_index,
                     "success": False,
@@ -458,7 +458,7 @@ class WebSocket1011ErrorReproductionTests:
                         "error": None
                     })
                     
-            except websockets.exceptions.ConnectionClosedError as e:
+            except websockets.ConnectionClosedError as e:
                 connection_time = time.time() - start_time
                 connection_attempts.append({
                     "attempt": attempt + 1,

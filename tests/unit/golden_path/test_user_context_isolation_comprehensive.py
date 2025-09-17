@@ -32,7 +32,7 @@ import time
 import uuid
 import weakref
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -206,7 +206,7 @@ class UserContextIsolationComprehensiveTests(SSotAsyncTestCase):
                 current_count = context.agent_context.get('operations_count') or 0
                 context.agent_context['operations_count'] = current_count + 1
                 operation_key = f'operation_{operation_num}'
-                operation_data = {'timestamp': datetime.utcnow().isoformat(), 'user_index': user_index, 'operation_num': operation_num, 'data': f'result_for_user_{user_index}_operation_{operation_num}'}
+                operation_data = {'timestamp': datetime.now(UTC).isoformat(), 'user_index': user_index, 'operation_num': operation_num, 'data': f'result_for_user_{user_index}_operation_{operation_num}'}
                 context.agent_context[operation_key] = operation_data
                 await asyncio.sleep(0.001)
         operation_tasks = [perform_user_operations(context, i) for i, context in enumerate(concurrent_contexts)]
@@ -426,7 +426,7 @@ class UserContextIsolationComprehensiveTests(SSotAsyncTestCase):
         execution_results = []
 
         async def simulate_engine_execution(engine, user_index: int):
-            execution_data = {'message': f'Execute analysis for user {user_index}', 'user_data': f'sensitive_user_{user_index}_data', 'timestamp': datetime.utcnow().isoformat()}
+            execution_data = {'message': f'Execute analysis for user {user_index}', 'user_data': f'sensitive_user_{user_index}_data', 'timestamp': datetime.now(UTC).isoformat()}
             engine.set_execution_state('current_execution', execution_data)
             await asyncio.sleep(0.01)
             result_data = engine.get_execution_state('current_execution')

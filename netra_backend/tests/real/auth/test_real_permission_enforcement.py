@@ -17,7 +17,7 @@ for proper access control and prevents unauthorized data access.
 import asyncio
 import json
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List, Set
 from enum import Enum
 import pytest
@@ -111,13 +111,13 @@ class RealPermissionEnforcementTests:
 
     def create_user_with_role(self, user_id: int, role: Role, permissions: List[Permission], jwt_secret_key: str, **kwargs) -> str:
         """Create JWT token for user with specific role and permissions."""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         payload = {JWTConstants.SUBJECT: f'user_{user_id}', JWTConstants.EMAIL: kwargs.get('email', f'user{user_id}@netrasystems.ai'), JWTConstants.ISSUED_AT: int(now.timestamp()), JWTConstants.EXPIRES_AT: int((now + timedelta(hours=1)).timestamp()), JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE, 'user_id': user_id, 'role': role.value, 'permissions': [p.value for p in permissions], 'workspace_id': kwargs.get('workspace_id', f'workspace_{user_id}'), 'tenant_id': kwargs.get('tenant_id', f'tenant_{user_id}')}
         return jwt.encode(payload, jwt_secret_key, algorithm=JWTConstants.HS256_ALGORITHM)
 
     def create_protected_resource(self, owner_id: int, required_permissions: List[Permission]) -> Dict[str, Any]:
         """Create a protected resource with specific permission requirements."""
-        return {'resource_id': secrets.token_hex(8), 'owner_id': owner_id, 'resource_type': 'protected_document', 'title': f'Protected Resource owned by User {owner_id}', 'content': f'This is sensitive content for user {owner_id}', 'required_permissions': [p.value for p in required_permissions], 'visibility': 'private', 'created_at': datetime.utcnow().isoformat(), 'access_control': {'read_permissions': [p.value for p in required_permissions if p == Permission.READ], 'write_permissions': [p.value for p in required_permissions if p in [Permission.WRITE, Permission.DELETE]], 'admin_permissions': [p.value for p in required_permissions if p == Permission.ADMIN]}}
+        return {'resource_id': secrets.token_hex(8), 'owner_id': owner_id, 'resource_type': 'protected_document', 'title': f'Protected Resource owned by User {owner_id}', 'content': f'This is sensitive content for user {owner_id}', 'required_permissions': [p.value for p in required_permissions], 'visibility': 'private', 'created_at': datetime.now(UTC).isoformat(), 'access_control': {'read_permissions': [p.value for p in required_permissions if p == Permission.READ], 'write_permissions': [p.value for p in required_permissions if p in [Permission.WRITE, Permission.DELETE]], 'admin_permissions': [p.value for p in required_permissions if p == Permission.ADMIN]}}
 
     @pytest.mark.asyncio
     async def test_role_based_permission_assignment(self, role_permission_mapping: Dict[Role, List[Permission]], jwt_secret_key: str):
@@ -245,14 +245,14 @@ class RealPermissionEnforcementTests:
         user_id = 60001
         initial_permissions = [Permission.READ]
         initial_token = self.create_user_with_role(user_id, Role.USER, initial_permissions, jwt_secret_key)
-        permission_cache = {f'user_{user_id}_permissions': {'permissions': [p.value for p in initial_permissions], 'cached_at': datetime.utcnow().isoformat(), 'ttl': 300}}
+        permission_cache = {f'user_{user_id}_permissions': {'permissions': [p.value for p in initial_permissions], 'cached_at': datetime.now(UTC).isoformat(), 'ttl': 300}}
         cached_permissions = set(permission_cache[f'user_{user_id}_permissions']['permissions'])
         expected_initial = set((p.value for p in initial_permissions))
         assert cached_permissions == expected_initial
         print(f' PASS:  Initial permissions cached: {cached_permissions}')
         upgraded_permissions = [Permission.READ, Permission.WRITE, Permission.VIEW_ANALYTICS]
         upgraded_token = self.create_user_with_role(user_id, Role.ADMIN, upgraded_permissions, jwt_secret_key)
-        permission_cache[f'user_{user_id}_permissions'] = {'permissions': [p.value for p in upgraded_permissions], 'cached_at': datetime.utcnow().isoformat(), 'ttl': 300, 'invalidated_previous': True}
+        permission_cache[f'user_{user_id}_permissions'] = {'permissions': [p.value for p in upgraded_permissions], 'cached_at': datetime.now(UTC).isoformat(), 'ttl': 300, 'invalidated_previous': True}
         updated_cached = set(permission_cache[f'user_{user_id}_permissions']['permissions'])
         expected_updated = set((p.value for p in upgraded_permissions))
         assert updated_cached == expected_updated
@@ -260,7 +260,7 @@ class RealPermissionEnforcementTests:
         print(f' PASS:  Permissions upgraded and cache invalidated: {updated_cached}')
         revoked_permissions = [Permission.READ]
         revoked_token = self.create_user_with_role(user_id, Role.USER, revoked_permissions, jwt_secret_key)
-        permission_cache[f'user_{user_id}_permissions'] = {'permissions': [p.value for p in revoked_permissions], 'cached_at': datetime.utcnow().isoformat(), 'ttl': 300, 'revocation_applied': True}
+        permission_cache[f'user_{user_id}_permissions'] = {'permissions': [p.value for p in revoked_permissions], 'cached_at': datetime.now(UTC).isoformat(), 'ttl': 300, 'revocation_applied': True}
         revoked_cached = set(permission_cache[f'user_{user_id}_permissions']['permissions'])
         expected_revoked = set((p.value for p in revoked_permissions))
         assert revoked_cached == expected_revoked

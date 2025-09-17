@@ -302,7 +302,7 @@ class UserAuthenticationFlowComprehensiveTests(DatabaseIntegrationTest, CacheInt
         assert recovery_validation['user_id'] == expired_user.user_id, 'Recovery must maintain user identity'
         try:
             invalid_ws_headers = self.websocket_auth_helper.get_websocket_headers('invalid.token')
-            with pytest.raises((websockets.exceptions.ConnectionClosed, websockets.exceptions.InvalidHandshake, ConnectionError, OSError)):
+            with pytest.raises((websockets.ConnectionClosed, websockets.InvalidHandshake, ConnectionError, OSError)):
                 websocket_conn = await websockets.connect(self.websocket_url, additional_headers=invalid_ws_headers, open_timeout=5.0)
             logger.info(' PASS:  WebSocket authentication error handled correctly')
         except Exception as e:
@@ -686,10 +686,10 @@ class UserAuthenticationFlowComprehensiveTests(DatabaseIntegrationTest, CacheInt
             try:
                 await websocket_conn.send(json.dumps(expired_message))
                 logger.info(' WARNING: [U+FE0F] WebSocket message sent with expired token (server may not check immediately)')
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 logger.info(' PASS:  WebSocket connection closed due to token expiration')
             await websocket_conn.close()
-        except (websockets.exceptions.InvalidHandshake, websockets.exceptions.ConnectionClosed, asyncio.TimeoutError, ConnectionError, OSError) as e:
+        except (websockets.InvalidHandshake, websockets.ConnectionClosed, asyncio.TimeoutError, ConnectionError, OSError) as e:
             logger.info(f' PASS:  WebSocket timeout test handled connection error gracefully: {e}')
         refresh_user = await create_test_user_with_auth(email=f'refresh_test_{int(time.time())}@example.com', name='Refresh Test User', permissions=['read', 'write', 'token_refresh'], environment=self.environment)
         original_token = self.auth_helper.create_test_jwt_token(user_id=refresh_user['user_id'], email=refresh_user['email'], permissions=refresh_user['permissions'], exp_minutes=0.1)

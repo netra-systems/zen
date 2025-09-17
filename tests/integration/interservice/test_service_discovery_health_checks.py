@@ -16,7 +16,7 @@ import asyncio
 import httpx
 from typing import Dict, Any
 from unittest.mock import Mock, patch
-from datetime import datetime
+from datetime import datetime, UTC
 
 from test_framework.ssot.base_test_case import BaseTestCase
 from shared.isolated_environment import get_env
@@ -46,7 +46,7 @@ class ServiceDiscoveryHealthChecksTests(BaseTestCase):
             "status": "healthy",
             "service": "netra_backend",
             "version": "1.0.0",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "checks": {
                 "database": "healthy",
                 "redis": "healthy",
@@ -110,7 +110,7 @@ class ServiceDiscoveryHealthChecksTests(BaseTestCase):
             "status": "healthy",
             "service": "netra_auth",
             "version": "1.0.0",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "checks": {
                 "database": "healthy",
                 "redis": "healthy",
@@ -215,7 +215,7 @@ class ServiceDiscoveryHealthChecksTests(BaseTestCase):
                 "degraded_services": 0,
                 "unhealthy_services": 0
             },
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         
         # Process each service
@@ -297,7 +297,7 @@ class ServiceDiscoveryHealthChecksTests(BaseTestCase):
                             "service": "netra_backend",
                             "error": "health_check_timeout",
                             "timeout_seconds": timeout_seconds,
-                            "timestamp": datetime.utcnow().isoformat()
+                            "timestamp": datetime.now(UTC).isoformat()
                         }
                         
                         # Verify timeout handling

@@ -27,7 +27,7 @@ import time
 import hashlib
 from typing import Dict, Any, List
 from unittest.mock import Mock, patch, AsyncMock, call
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import httpx
 
 from test_framework.ssot.base_test_case import BaseIntegrationTest
@@ -344,7 +344,7 @@ class CrossServiceSecurityIntegrationTests(BaseIntegrationTest):
             audit_event = {
                 "event_id": f"audit-{len(audit_events) + 1}",
                 "event_type": event_type,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "service": service_context.get("service_name"),
                 "user_id": event_data.get("user_id"),
                 "source_ip": event_data.get("source_ip"),

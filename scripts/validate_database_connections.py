@@ -25,7 +25,7 @@ import json
 import logging
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 
@@ -59,7 +59,7 @@ class DatabaseConnectionValidator:
         self.env = get_env()
         self.results: Dict[str, Any] = {
             'environment': self.environment,
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(UTC).isoformat(),
             'postgresql': {},
             'redis': {},
             'clickhouse': {},
@@ -243,7 +243,7 @@ class DatabaseConnectionValidator:
             if "postgresql+asyncpg://" in database_url:
                 clean_url = database_url.replace("postgresql+asyncpg://", "postgresql://")
             
-            start_time = datetime.utcnow()
+            start_time = datetime.now(UTC)
             
             # Connect with timeout
             conn = await asyncio.wait_for(
@@ -251,7 +251,7 @@ class DatabaseConnectionValidator:
                 timeout=10.0
             )
             
-            end_time = datetime.utcnow()
+            end_time = datetime.now(UTC)
             response_time = (end_time - start_time).total_seconds() * 1000
             
             # Test basic query
@@ -369,12 +369,12 @@ class DatabaseConnectionValidator:
             else:
                 client = await get_redis_client()
             
-            start_time = datetime.utcnow()
+            start_time = datetime.now(UTC)
             
             # Test connection with timeout
             await asyncio.wait_for(client.ping(), timeout=5.0)
             
-            end_time = datetime.utcnow()
+            end_time = datetime.now(UTC)
             response_time = (end_time - start_time).total_seconds() * 1000
             
             # Get Redis info
@@ -499,7 +499,7 @@ class DatabaseConnectionValidator:
                 auth_part = f"{user}:{password}@" if password else f"{user}@"
                 url = f"{protocol}://{auth_part}{host}:{port}/"
             
-            start_time = datetime.utcnow()
+            start_time = datetime.now(UTC)
             
             # Test connection with simple query
             async with aiohttp.ClientSession() as session:
@@ -509,7 +509,7 @@ class DatabaseConnectionValidator:
                     if response.status == 200:
                         version_text = await response.text()
                         
-                        end_time = datetime.utcnow()
+                        end_time = datetime.now(UTC)
                         response_time = (end_time - start_time).total_seconds() * 1000
                         
                         connection_result.update({
@@ -665,7 +665,7 @@ class DatabaseConnectionValidator:
     def save_report(self, report_path: Optional[Path] = None) -> Path:
         """Save validation report to file."""
         if report_path is None:
-            report_path = PROJECT_ROOT / "reports" / f"database_validation_{self.environment}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
+            report_path = PROJECT_ROOT / "reports" / f"database_validation_{self.environment}_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}.json"
         
         # Ensure reports directory exists
         report_path.parent.mkdir(parents=True, exist_ok=True)

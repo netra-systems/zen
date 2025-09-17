@@ -244,8 +244,8 @@ class TestHarnessContext:
             "email": user["email"],
             "role": user["role"],
             "tier": user["tier"],
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1),
-            "iat": datetime.datetime.utcnow(),
+            "exp": datetime.datetime.now(UTC) + datetime.timedelta(hours=1),
+            "iat": datetime.datetime.now(UTC),
             "context_id": self.context_id
         }
 

@@ -9,7 +9,7 @@ from analytics_service.analytics_core.models.events import AnalyticsEvent, Event
 from analytics_service.analytics_core.services.event_processor import EventProcessor, ProcessorConfig
 from analytics_service.analytics_core.utils.config import get_analytics_config
 from typing import Optional, Dict, Any
-from datetime import datetime
+from datetime import datetime, UTC
 from uuid import UUID, uuid4
 
 def get_routes():
@@ -142,7 +142,7 @@ def FrontendEvent(
     
     return AnalyticsEvent(
         event_id=event_id or uuid4(),
-        timestamp=timestamp or datetime.utcnow(),
+        timestamp=timestamp or datetime.now(UTC),
         event_type=event_type,
         event_category=event_category.value if isinstance(event_category, EventCategory) else event_category,
         event_action=event_action,

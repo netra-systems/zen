@@ -158,8 +158,8 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                             }
                             logger.error(fCOLD START RACE CONDITION: Response timeout after {connection_time:.3f}s connection)
                 
-                except (websockets.exceptions.ConnectionClosed, 
-                        websockets.exceptions.InvalidStatusCode,
+                except (websockets.ConnectionClosed, 
+                        websockets.InvalidStatusCode,
                         ConnectionRefusedError, 
                         OSError) as e:
                     connection_time = time.time() - connection_start
@@ -413,7 +413,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                             }
                             logger.error(fAUTH RACE CONDITION: Response timeout after {handshake_time:.3f}s auth handshake)
                 
-                except websockets.exceptions.InvalidStatusCode as e:
+                except websockets.InvalidStatusCode as e:
                     handshake_time = time.time() - auth_start_time
                     # Check for specific auth-related status codes
                     if hasattr(e, 'status_code'):
@@ -427,7 +427,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                             }
                             logger.error(fAUTH RACE CONDITION: Auth failure {e.status_code} after {handshake_time:.3f}s")"
                 
-                except (websockets.exceptions.ConnectionClosed, ConnectionRefusedError, OSError) as e:
+                except (websockets.ConnectionClosed, ConnectionRefusedError, OSError) as e:
                     handshake_time = time.time() - auth_start_time
                     auth_race_failures.append({
                         'attempt': attempt,

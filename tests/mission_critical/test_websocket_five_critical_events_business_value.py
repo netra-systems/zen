@@ -316,7 +316,7 @@ class RealWebSocketEventTester:
                     
                     logger.info(f"Received critical event: {event_data.get('type')}")
                     
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 logger.info("Event testing WebSocket client disconnected")
                 
         self.server = await websockets.serve(event_handler, "localhost", self.port or 0)
@@ -352,7 +352,7 @@ class RealWebSocketEventTester:
                     'timestamp': datetime.now(timezone.utc),
                     'business_value': self.event_validator.validate_event_business_value(event_data)
                 })
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.ConnectionClosed:
             self.connected = False
         except Exception as e:
             logger.error(f"Error listening for events: {e}")

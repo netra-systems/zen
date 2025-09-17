@@ -82,7 +82,7 @@ class WebSocketColdStartTester:
                     result['error'] = "Response timeout"
                     print(f"      No response within 3s")
                     
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             result['error'] = f"Connection closed: {e.code}"
             result['error_code'] = e.code
             if e.code == 1011:  # The specific error we're testing for

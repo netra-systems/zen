@@ -13,7 +13,7 @@ Validates state transitions, state persistence, and state synchronization.
 import asyncio
 import json
 import time
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any, Dict, List
 
 import pytest
@@ -60,7 +60,7 @@ class RealWebSocketStateManagementTests:
                 timeout=10
             ) as websocket:
                 # Initial connection state
-                state_transitions.append(("connecting", datetime.utcnow()))
+                state_transitions.append(("connecting", datetime.now(UTC)))
                 
                 # Connect
                 await websocket.send(json.dumps({
@@ -71,7 +71,7 @@ class RealWebSocketStateManagementTests:
                 
                 response = json.loads(await websocket.recv())
                 if response.get("status") == "connected":
-                    state_transitions.append(("connected", datetime.utcnow()))
+                    state_transitions.append(("connected", datetime.now(UTC)))
                 
                 # Active state - send heartbeat
                 await websocket.send(json.dumps({
@@ -83,7 +83,7 @@ class RealWebSocketStateManagementTests:
                 hb_response = await websocket.recv()
                 hb_data = json.loads(hb_response)
                 if hb_data.get("type") == "heartbeat_ack":
-                    state_transitions.append(("active", datetime.utcnow()))
+                    state_transitions.append(("active", datetime.now(UTC)))
                 
                 # Prepare for disconnect
                 await websocket.send(json.dumps({
@@ -95,12 +95,12 @@ class RealWebSocketStateManagementTests:
                 try:
                     disconnect_response = await asyncio.wait_for(websocket.recv(), timeout=2.0)
                     if json.loads(disconnect_response).get("type") == "disconnect_ack":
-                        state_transitions.append(("disconnecting", datetime.utcnow()))
+                        state_transitions.append(("disconnecting", datetime.now(UTC)))
                 except asyncio.TimeoutError:
                     pass
                 
         except WebSocketException:
-            state_transitions.append(("disconnected", datetime.utcnow()))
+            state_transitions.append(("disconnected", datetime.now(UTC)))
         
         # Validate state transitions
         assert len(state_transitions) >= 2, f"Should have multiple state transitions, got: {len(state_transitions)}"

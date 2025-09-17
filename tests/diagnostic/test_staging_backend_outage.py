@@ -177,14 +177,14 @@ class StagingBackendOutageTests:
                 connection_result['status'] = 'CONNECTED'
                 logger.warning("UNEXPECTED: WebSocket connection succeeded")
 
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             connection_result.update({
                 'status': 'CONNECTION_CLOSED',
                 'error_message': str(e)
             })
             logger.info(f"CONFIRMED: WebSocket connection closed - {str(e)}")
 
-        except websockets.exceptions.InvalidURI as e:
+        except websockets.InvalidURI as e:
             connection_result.update({
                 'status': 'INVALID_URI',
                 'error_message': str(e)

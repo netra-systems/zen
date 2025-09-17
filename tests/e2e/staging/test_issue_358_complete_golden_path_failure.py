@@ -253,7 +253,7 @@ class Issue358CompleteGoldenPathFailureTests(SSotAsyncTestCase):
                                     "impact": "WebSocket connects but doesn't respond to messages"
                                 })
                                 
-                    except websockets.exceptions.InvalidStatusCode as e:
+                    except websockets.InvalidStatusCode as e:
                         if e.status_code == 1011:
                             # EXPECTED FAILURE: 1011 Internal Error
                             connection_errors.append({
@@ -270,7 +270,7 @@ class Issue358CompleteGoldenPathFailureTests(SSotAsyncTestCase):
                                 "impact": f"WebSocket connection rejected with status {e.status_code}"
                             })
                             
-                    except websockets.exceptions.InvalidHandshake as e:
+                    except websockets.InvalidHandshake as e:
                         connection_errors.append({
                             "subprotocols": subprotocols,
                             "connection_phase": "WebSocket Handshake",
@@ -655,7 +655,7 @@ class Issue358CompleteGoldenPathFailureTests(SSotAsyncTestCase):
             ) as websocket:
                 return {"success": True, "success_details": ["WebSocket connection successful"]}
                 
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.InvalidStatusCode as e:
             if e.status_code == 1011:
                 return {
                     "success": False,
@@ -817,7 +817,7 @@ class Issue358CompleteGoldenPathFailureTests(SSotAsyncTestCase):
                             "actual": "Timeout"
                         })
                         
-            except websockets.exceptions.InvalidStatusCode as e:
+            except websockets.InvalidStatusCode as e:
                 if e.status_code == 401:
                     # EXPECTED FAILURE: DEMO_MODE not bypassing authentication
                     demo_mode_failures.append({

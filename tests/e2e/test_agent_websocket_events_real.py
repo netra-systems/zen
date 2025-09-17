@@ -64,7 +64,7 @@ class RealWebSocketEventCollector:
                     break
             except asyncio.TimeoutError:
                 continue
-            except websockets.exceptions.ConnectionClosed:
+            except websockets.ConnectionClosed:
                 logger.info('WebSocket connection closed during listening')
                 break
             except Exception as e:

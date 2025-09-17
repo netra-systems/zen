@@ -191,7 +191,7 @@ class WebSocketAgentEventsMissingTests(BaseE2ETest):
                         f"Users won't know when agent finished processing."
                     )
                 
-        except websockets.exceptions.ConnectionClosed as e:
+        except websockets.ConnectionClosed as e:
             pytest.fail(
                 fWEBSOCKET CONNECTION FAILED (E2E): Connection closed during event testing. 
                 fError: {e}. 
@@ -199,7 +199,7 @@ class WebSocketAgentEventsMissingTests(BaseE2ETest):
                 fThis indicates WebSocket infrastructure failure affecting user experience.
             )
         
-        except websockets.exceptions.InvalidStatusCode as e:
+        except websockets.InvalidStatusCode as e:
             pytest.fail(
                 fWEBSOCKET AUTH FAILED (E2E): Invalid status code during connection. 
                 f"Error: {e}. "

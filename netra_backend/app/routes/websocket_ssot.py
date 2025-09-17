@@ -1777,13 +1777,23 @@ class WebSocketSSOTRouter:
     
     # Health and configuration endpoints
     async def websocket_health_check(self):
-        """WebSocket health check endpoint."""
+        """WebSocket health check endpoint with comprehensive service availability."""
         try:
             # SSOT PATTERN: Direct manager access for health checks (no user context required)
             manager = get_websocket_manager(user_context=None)
-            manager = get_websocket_manager(user_context=None)
+
+            # ISSUE #895 IMPLEMENTATION: Add service availability checks
+            from netra_backend.app.websocket_core.service_availability_manager import get_service_availability_manager
+
+            service_manager = get_service_availability_manager()
+            service_health_report = await service_manager.get_health_report()
+
+            # Determine overall status based on service availability
+            allow_connections, denial_reason = service_manager.should_allow_websocket_connection()
+            overall_status = "healthy" if allow_connections else "degraded"
+
             health_status = {
-                "status": "healthy",
+                "status": overall_status,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "mode": "ssot_consolidated",
                 "components": {
@@ -1795,9 +1805,18 @@ class WebSocketSSOTRouter:
                     "competing_routes_eliminated": 4,
                     "ssot_compliance": True,
                     "modes_supported": ["main", "factory", "isolated", "legacy"]
+                },
+                "service_availability": {
+                    "allow_websocket_connections": allow_connections,
+                    "denial_reason": denial_reason,
+                    "overall_service_status": service_health_report["overall_status"],
+                    "critical_services": service_health_report["critical_services"],
+                    "optional_services": service_health_report["optional_services"],
+                    "summary": service_health_report["summary"],
+                    "last_check": service_health_report["last_check"]
                 }
             }
-            
+
             return health_status
         except Exception as e:
             logger.error(f"Health check failed: {e}")

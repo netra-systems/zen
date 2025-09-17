@@ -28,7 +28,7 @@ import json
 import logging
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Any, Dict, List, Optional, Tuple, Union
 from dataclasses import dataclass
 from enum import Enum
@@ -335,7 +335,7 @@ class ToolExecutionPipelineComprehensiveTests(BaseIntegrationTest):
             json.dumps(tool_trace.execution_result) if tool_trace.execution_result else None,
             (tool_trace.end_time - tool_trace.start_time) if tool_trace.end_time else None,
             tool_trace.execution_successful,
-            datetime.utcnow())
+            datetime.now(UTC))
             
             await db_session.commit()
             

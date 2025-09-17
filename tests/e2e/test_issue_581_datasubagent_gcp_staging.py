@@ -173,7 +173,7 @@ class Issue581DataSubAgentGCPStagingTests(SSotAsyncTestCase):
                             elif event.get("type") == "agent_completed":
                                 agent_completed = True
                                 
-                        except websockets.exceptions.ConnectionClosed:
+                        except websockets.ConnectionClosed:
                             break
                         except asyncio.TimeoutError:
                             break
@@ -387,7 +387,7 @@ class Issue581DataSubAgentGCPStagingTests(SSotAsyncTestCase):
                             else:
                                 pytest.fail(f"Other error in quality test: {error_msg}")
                     
-                    except websockets.exceptions.ConnectionClosed:
+                    except websockets.ConnectionClosed:
                         break
             
             # Validate response quality
