@@ -19,7 +19,7 @@ from typing import Dict, List, Any, Type
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class MessageRouterSSOTConsolidationTests(SSotAsyncTestCase):
+class MessageRouterSSOTConsolidationTests(SSotAsyncTestCase, unittest.TestCase):
     """Validate MessageRouter SSOT consolidation is complete."""
     
     def setUp(self):

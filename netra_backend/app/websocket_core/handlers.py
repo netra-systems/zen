@@ -1353,26 +1353,11 @@ class QualityRouterHandler(BaseMessageHandler):
 # This replaces the duplicate implementation and ensures true SSOT compliance
 from netra_backend.app.websocket_core.canonical_message_router import CanonicalMessageRouter as ExternalCanonicalMessageRouter
 
-class MessageRouter(ExternalCanonicalMessageRouter):
-    """
-    SSOT Compatibility adapter for existing MessageRouter usage.
+# SSOT COMPLIANCE: MessageRouter is now a direct ALIAS to CanonicalMessageRouter
+# This ensures the exact same class object ID for true SSOT compliance
+MessageRouter = ExternalCanonicalMessageRouter
 
-    This class extends the EXTERNAL CanonicalMessageRouter (same as QualityMessageRouter) 
-    to ensure true SSOT compliance. Both MessageRouter and QualityMessageRouter now 
-    inherit from the exact same class object.
-
-    Business Impact: Eliminates fragmentation while preserving $500K+ ARR functionality.
-    SSOT Compliance: Issue #220 - Ensures both MessageRouter and QualityMessageRouter 
-    inherit from the same CanonicalMessageRouter instance.
-    """
-
-    def __init__(self, websocket_manager=None, quality_gate_service=None, monitoring_service=None):
-        """Initialize MessageRouter with backward compatibility."""
-        super().__init__(websocket_manager, quality_gate_service, monitoring_service)
-        logger.info("MessageRouter SSOT compatibility adapter initialized - EXTERNAL CanonicalMessageRouter used")
-
-    # All methods are inherited from CanonicalMessageRouter
-    # This maintains 100% API compatibility
+logger.info("MessageRouter SSOT alias established - Issue #1115 COMPLETE")
 
 # Global message router instance
 _message_router: Optional[MessageRouter] = None
