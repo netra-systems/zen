@@ -169,6 +169,8 @@ Master:
     7.1) Git commit remaining related work in conceptual batches. 
     7.2) Do a final update for this loop,
     especially linking created docs and related commits
-    7.3) If closing issue: remove label: actively-being-worked-on
+    7.3) If closing issue: 
+        Close the github issue (remote github repo) itself.
+        remove label: actively-being-worked-on
 
 END PROCESS INSTRUCTIONS
