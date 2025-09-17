@@ -882,5 +882,7 @@ __all__ = [
     'is_background_e2e_available',
     'is_docker_available',
     'is_all_orchestration_available',
-    'get_orchestration_status'
+    'get_orchestration_status',
+    'is_no_services_mode',
+    'check_service_available'
 ]

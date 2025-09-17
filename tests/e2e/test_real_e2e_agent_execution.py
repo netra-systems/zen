@@ -658,7 +658,7 @@ def validate_test_framework_imports():
         assert create_test_execution_context, 'create_test_execution_context import failed'
         assert CommonValidators, 'CommonValidators import failed'
         assert real_postgres_connection, 'real_postgres_connection import failed'
-        assert isolated_test_env, 'isolated_test_env import failed'
+        assert isolated_test_env_fixture, 'isolated_test_env_fixture import failed'
         assert TEST_PORTS['backend'] == 8000, 'Backend port configuration incorrect'
         assert TEST_PORTS['postgresql'] == 5434, 'PostgreSQL test port configuration incorrect'
         logger.info('[U+2713] All test framework imports validated')
