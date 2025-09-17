@@ -1,12 +1,12 @@
 {
-  "timestamp": "2025-09-17T15:56:40.819610",
+  "timestamp": "2025-09-17T16:05:51.319413",
   "total_files_analyzed": 21376,
-  "total_syntax_errors": 779,
+  "total_syntax_errors": 773,
   "error_breakdown": {
     "mismatched_parentheses": 328,
     "unterminated_strings": 64,
     "indentation_errors": 367,
-    "invalid_syntax": 20,
+    "invalid_syntax": 14,
     "encoding_errors": 0,
     "other": 0
   },
@@ -19,60 +19,6 @@
       "offset": 23,
       "text": "connection_params = { )",
       "category": "mismatched_parentheses"
-    },
-    {
-      "file": "tests\\unified_tool_dispatcher\\test_unified_dispatcher_security.py",
-      "error_type": "syntax_error",
-      "message": "(unicode error) 'unicodeescape' codec can't decode bytes in position 99-100: truncated \\uXXXX escape (test_unified_dispatcher_security.py, line 2)",
-      "line": 2,
-      "offset": 1,
-      "text": "\"\"\"\n",
-      "category": "invalid_syntax"
-    },
-    {
-      "file": "tests\\unit\\test_health_monitoring_fix_verification.py",
-      "error_type": "syntax_error",
-      "message": "(unicode error) 'unicodeescape' codec can't decode bytes in position 99-100: truncated \\uXXXX escape (test_health_monitoring_fix_verification.py, line 2)",
-      "line": 2,
-      "offset": 1,
-      "text": "\"\"\"\n",
-      "category": "invalid_syntax"
-    },
-    {
-      "file": "tests\\unit\\test_loguru_gcp_formatter_fix.py",
-      "error_type": "syntax_error",
-      "message": "(unicode error) 'unicodeescape' codec can't decode bytes in position 99-100: truncated \\uXXXX escape (test_loguru_gcp_formatter_fix.py, line 2)",
-      "line": 2,
-      "offset": 1,
-      "text": "\"\"\"\n",
-      "category": "invalid_syntax"
-    },
-    {
-      "file": "tests\\unit\\test_universal_registry.py",
-      "error_type": "syntax_error",
-      "message": "(unicode error) 'unicodeescape' codec can't decode bytes in position 99-100: truncated \\uXXXX escape (test_universal_registry.py, line 2)",
-      "line": 2,
-      "offset": 1,
-      "text": "\"\"\"\n",
-      "category": "invalid_syntax"
-    },
-    {
-      "file": "tests\\unit\\test_websocket_notifications.py",
-      "error_type": "syntax_error",
-      "message": "(unicode error) 'unicodeescape' codec can't decode bytes in position 99-100: truncated \\uXXXX escape (test_websocket_notifications.py, line 2)",
-      "line": 2,
-      "offset": 1,
-      "text": "\"\"\"\n",
-      "category": "invalid_syntax"
-    },
-    {
-      "file": "tests\\unit\\test_websocket_warnings_fix.py",
-      "error_type": "syntax_error",
-      "message": "(unicode error) 'unicodeescape' codec can't decode bytes in position 99-100: truncated \\uXXXX escape (test_websocket_warnings_fix.py, line 2)",
-      "line": 2,
-      "offset": 1,
-      "text": "\"\"\"\n",
-      "category": "invalid_syntax"
     },
     {
       "file": "backups\\test_remediation_20250915_225118\\system_snapshot\\tests\\test_alpine_container_selection.py",
@@ -13862,60 +13808,6 @@
       }
     ],
     "invalid_syntax": [
-      {
-        "file": "tests\\unified_tool_dispatcher\\test_unified_dispatcher_security.py",
-        "error_type": "syntax_error",
-        "message": "(unicode error) 'unicodeescape' codec can't decode bytes in position 99-100: truncated \\uXXXX escape (test_unified_dispatcher_security.py, line 2)",
-        "line": 2,
-        "offset": 1,
-        "text": "\"\"\"\n",
-        "category": "invalid_syntax"
-      },
-      {
-        "file": "tests\\unit\\test_health_monitoring_fix_verification.py",
-        "error_type": "syntax_error",
-        "message": "(unicode error) 'unicodeescape' codec can't decode bytes in position 99-100: truncated \\uXXXX escape (test_health_monitoring_fix_verification.py, line 2)",
-        "line": 2,
-        "offset": 1,
-        "text": "\"\"\"\n",
-        "category": "invalid_syntax"
-      },
-      {
-        "file": "tests\\unit\\test_loguru_gcp_formatter_fix.py",
-        "error_type": "syntax_error",
-        "message": "(unicode error) 'unicodeescape' codec can't decode bytes in position 99-100: truncated \\uXXXX escape (test_loguru_gcp_formatter_fix.py, line 2)",
-        "line": 2,
-        "offset": 1,
-        "text": "\"\"\"\n",
-        "category": "invalid_syntax"
-      },
-      {
-        "file": "tests\\unit\\test_universal_registry.py",
-        "error_type": "syntax_error",
-        "message": "(unicode error) 'unicodeescape' codec can't decode bytes in position 99-100: truncated \\uXXXX escape (test_universal_registry.py, line 2)",
-        "line": 2,
-        "offset": 1,
-        "text": "\"\"\"\n",
-        "category": "invalid_syntax"
-      },
-      {
-        "file": "tests\\unit\\test_websocket_notifications.py",
-        "error_type": "syntax_error",
-        "message": "(unicode error) 'unicodeescape' codec can't decode bytes in position 99-100: truncated \\uXXXX escape (test_websocket_notifications.py, line 2)",
-        "line": 2,
-        "offset": 1,
-        "text": "\"\"\"\n",
-        "category": "invalid_syntax"
-      },
-      {
-        "file": "tests\\unit\\test_websocket_warnings_fix.py",
-        "error_type": "syntax_error",
-        "message": "(unicode error) 'unicodeescape' codec can't decode bytes in position 99-100: truncated \\uXXXX escape (test_websocket_warnings_fix.py, line 2)",
-        "line": 2,
-        "offset": 1,
-        "text": "\"\"\"\n",
-        "category": "invalid_syntax"
-      },
       {
         "file": "backups\\test_remediation_20250915_225118\\system_snapshot\\tests\\test_critical_dev_launcher_issues.py",
         "error_type": "syntax_error",
