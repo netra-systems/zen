@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional, Type, TypeVar, Union
 
 from pydantic import BaseModel
 
-from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.config import get_config
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.config import LLMConfig
 from netra_backend.app.schemas.llm_types import (
@@ -86,7 +86,7 @@ class LLMManager:
             return
         
         try:
-            self._config = get_unified_config()
+            self._config = get_config()
             self._logger.info("LLM Manager initialized successfully")
             self._initialized = True
             self._ever_initialized = True  # Mark as having been successfully initialized

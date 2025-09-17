@@ -14,7 +14,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel
 
-from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.config import get_config
 # SSOT COMPLIANCE: Use auth service client for all JWT operations
 from netra_backend.app.clients.auth_client_core import get_auth_service_client
 from netra_backend.app.core.cross_service_validators.validator_framework import (
@@ -55,7 +55,7 @@ class TokenValidationValidator(BaseValidator):
             return config["jwt_secret"]
         
         # Use unified configuration system
-        unified_config = get_unified_config()
+        unified_config = get_config()
         if unified_config.jwt_secret_key:
             return unified_config.jwt_secret_key
         
