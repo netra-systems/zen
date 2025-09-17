@@ -544,6 +544,3 @@ export class WebSocketTicketService {
 
 // Export singleton instance for application use
 export const websocketTicketService = new WebSocketTicketService();
-
-// Export the class for testing and custom configurations
-export { WebSocketTicketService };
