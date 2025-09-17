@@ -124,7 +124,7 @@ class TestSingletonBridgeRemovalValidation(SSotBaseTestCase):
         """
         # This test should pass if factory patterns are working correctly
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             from netra_backend.app.websocket_core.types import WebSocketManagerMode
 
             factory = get_websocket_manager()
@@ -379,7 +379,7 @@ class TestFactoryPatternCompleteness(SSotBaseTestCase):
 
     def test_websocket_manager_is_complete(self):
         """Test that WebSocket manager factory is fully implemented."""
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
         factory = WebSocketManager(max_managers_per_user=5)
 

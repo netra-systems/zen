@@ -26,7 +26,7 @@ from test_framework.ssot.websocket import WebSocketTestUtility
 from test_framework.conftest_real_services import real_services_fixture
 from shared.isolated_environment import get_env
 from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.services.unified_authentication_service import UnifiedAuthenticationService
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.core.configuration.base import UnifiedConfigManager

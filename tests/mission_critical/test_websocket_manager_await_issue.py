@@ -24,7 +24,7 @@ from unittest.mock import Mock, AsyncMock, patch
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager, get_websocket_manager_async
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager, get_websocket_manager_async
 from netra_backend.app.services.websocket.quality_validation_handler import QualityValidationHandler
 from netra_backend.app.services.websocket.quality_report_handler import QualityReportHandler
 from netra_backend.app.services.websocket.quality_manager import QualityMessageHandler
@@ -83,7 +83,7 @@ class WebSocketManagerAwaitIssueTests(SSotAsyncTestCase):
                         "create_websocket_manager should not return a coroutine")
         
         # Verify it returns correct type
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         self.assertIsInstance(manager, WebSocketManager,
                             "Should return WebSocketManager instance")
         

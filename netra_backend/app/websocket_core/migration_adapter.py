@@ -42,7 +42,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 # ISSUE #1184 REMEDIATION: Import from correct SSOT locations
 from netra_backend.app.websocket_core.types import WebSocketConnection
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from shared.logging.unified_logging_ssot import get_logger
 
 # Use SSOT logging instead of deprecated central_logger
@@ -350,7 +350,7 @@ class _LegacyWSAdapter:
                 if connection and connection.websocket:
                     try:
                         # CRITICAL FIX: Use safe serialization to handle WebSocketState enums and other complex objects
-                        from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+                        from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
                         safe_message = _serialize_message_safely(message)
                         await connection.websocket.send_json(safe_message)
                         logger.debug(f"Sent message to connection {connection_id[:8]}... via isolated manager")

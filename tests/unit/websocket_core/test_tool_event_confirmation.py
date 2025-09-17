@@ -247,7 +247,7 @@ class EventConfirmationIntegrationPointsTests(SSotAsyncTestCase):
         
         EXPECTED TO FAIL: WebSocket manager has no confirmation integration.
         """
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         mock_ws_manager = Mock(spec=UnifiedWebSocketManager)
         with pytest.raises(AttributeError):
             confirmation_handler = mock_ws_manager.get_confirmation_handler()

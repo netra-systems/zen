@@ -183,7 +183,7 @@ class Phase1CanonicalImportPatternsTests(SSotAsyncTestCase):
 
     def test_canonical_pattern_1_factory_function(self):
         """Test Pattern 1: Factory Function Pattern."""
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
         # Test function exists and is callable
         self.assertTrue(callable(get_websocket_manager),
@@ -197,7 +197,7 @@ class Phase1CanonicalImportPatternsTests(SSotAsyncTestCase):
 
     def test_canonical_pattern_2_class_import(self):
         """Test Pattern 2: Class-based Import Pattern."""
-        from netra_backend.app.websocket_core.canonical_import_patterns import (
+        from netra_backend.app.websocket_core.websocket_manager import (
             UnifiedWebSocketManager,
             WebSocketManager
         )
@@ -214,7 +214,7 @@ class Phase1CanonicalImportPatternsTests(SSotAsyncTestCase):
 
     def test_canonical_pattern_3_component_interfaces(self):
         """Test Pattern 3: Component Interface Pattern."""
-        from netra_backend.app.websocket_core.canonical_import_patterns import (
+        from netra_backend.app.websocket_core.websocket_manager import (
             get_component_interface,
             ICoreConnectionManager
         )
@@ -237,7 +237,7 @@ class Phase1CanonicalImportPatternsTests(SSotAsyncTestCase):
 
     def test_canonical_pattern_4_legacy_compatibility(self):
         """Test Pattern 4: Legacy Compatibility Pattern."""
-        from netra_backend.app.websocket_core.canonical_import_patterns import (
+        from netra_backend.app.websocket_core.websocket_manager import (
             create_websocket_manager,
             get_manager,
             create_manager
@@ -251,7 +251,7 @@ class Phase1CanonicalImportPatternsTests(SSotAsyncTestCase):
 
     def test_deprecation_warnings(self):
         """Test that legacy compatibility patterns issue deprecation warnings."""
-        from netra_backend.app.websocket_core.canonical_import_patterns import (
+        from netra_backend.app.websocket_core.websocket_manager import (
             create_websocket_manager,
             CanonicalImportDeprecationWarning
         )
@@ -276,7 +276,7 @@ class Phase1CanonicalImportPatternsTests(SSotAsyncTestCase):
 
     def test_migration_guide_completeness(self):
         """Test that migration guide covers all patterns."""
-        from netra_backend.app.websocket_core.canonical_import_patterns import (
+        from netra_backend.app.websocket_core.websocket_manager import (
             get_migration_guide,
             MIGRATION_GUIDE
         )
@@ -362,7 +362,7 @@ class Phase1BackwardsCompatibilityTests(SSotAsyncTestCase):
         """Test that existing import patterns are not broken."""
         # Test that we can still import from canonical patterns
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import (
+            from netra_backend.app.websocket_core.websocket_manager import (
                 get_websocket_manager,
                 UnifiedWebSocketManager
             )
@@ -394,14 +394,14 @@ class Phase1SystemIntegrityTests(SSotAsyncTestCase):
         """Test that Phase 1 doesn't break existing functionality."""
         # Test that we can still import the unified manager
         try:
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             self.assertTrue(True, "Unified manager should still be importable")
         except ImportError as e:
             self.fail(f"Unified manager import should not fail: {e}")
 
     def test_user_isolation_preserved(self):
         """Test that user isolation mechanisms are preserved."""
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
         # Test that factory function preserves user context parameter
         import inspect
@@ -411,7 +411,7 @@ class Phase1SystemIntegrityTests(SSotAsyncTestCase):
 
     def test_factory_pattern_preserved(self):
         """Test that factory patterns are preserved."""
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
         # Test function exists and follows factory pattern
         self.assertTrue(callable(get_websocket_manager),

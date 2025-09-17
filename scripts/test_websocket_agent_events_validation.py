@@ -9,7 +9,7 @@ This ensures the fix doesn't break the critical WebSocket event system.
 
 import asyncio
 from unittest.mock import Mock, AsyncMock
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
 from datetime import datetime
 
 async def test_websocket_agent_events_with_e2e_user():

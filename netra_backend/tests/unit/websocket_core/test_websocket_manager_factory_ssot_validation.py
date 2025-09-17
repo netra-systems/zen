@@ -25,7 +25,7 @@ from datetime import datetime, timezone
 from typing import Optional, Dict, Any
 
 # SSOT imports - Issue #824 remediation
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.canonical_imports import (
     FactoryInitializationError
 )

@@ -45,7 +45,7 @@ except ImportError:
     AuthManager = None
 
 # SSOT WebSocket imports
-from netra_backend.app.websocket_core.canonical_import_patterns import (
+from netra_backend.app.websocket_core.websocket_manager import (
     get_websocket_manager,
     WebSocketManagerMode
 )
@@ -222,7 +222,7 @@ class TestWebSocketFactoryCleanupGoldenPath(SSotAsyncTestCase):
         # Test SSOT import patterns work in staging-like environment
         try:
             # Test canonical import
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
             # Test manager creation
             manager = get_websocket_manager(user_context={"user_id": "staging_compat_test"})

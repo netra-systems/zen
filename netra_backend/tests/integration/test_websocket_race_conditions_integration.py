@@ -49,7 +49,7 @@ from netra_backend.app.websocket_core.connection_state_machine import (
     ConnectionStateMachine,
     ApplicationConnectionState
 )
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 
 # Shared types for strongly typed integration testing
 from shared.types import UserID, ThreadID, RequestID

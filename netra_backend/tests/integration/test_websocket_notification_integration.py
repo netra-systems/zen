@@ -34,7 +34,7 @@ from shared.types.core_types import (
 )
 
 # WebSocket core components
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.websocket_core.protocols import WebSocketProtocol
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter

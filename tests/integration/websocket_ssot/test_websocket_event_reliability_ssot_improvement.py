@@ -74,7 +74,7 @@ class WebSocketEventReliabilitySsotImprovementTests(SSotAsyncTestCase):
         """
         logger.info("Validating 100% event delivery guarantee with SSOT manager")
         
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         
         # Create SSOT managers for reliability testing
         reliability_managers = []
@@ -427,7 +427,7 @@ class WebSocketEventReliabilitySsotImprovementTests(SSotAsyncTestCase):
         """
         logger.info("Validating event ordering and sequencing reliability")
         
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         
         # Create manager for ordering test
         test_user = self.reliability_users[0]
@@ -495,7 +495,7 @@ class WebSocketEventReliabilitySsotImprovementTests(SSotAsyncTestCase):
         """
         logger.info("Validating event delivery recovery mechanisms")
         
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         
         # Create manager for recovery testing
         recovery_user = self.reliability_users[1]

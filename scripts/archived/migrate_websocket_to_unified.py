@@ -22,13 +22,13 @@ PROJECT_ROOT = Path(__file__).parent.parent
 IMPORT_REPLACEMENTS = [
     # Manager imports
     (r'from netra_backend\.app\.websocket\.manager import.*ConnectionScopedWebSocketManager',
-     'from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as ConnectionScopedWebSocketManager'),
+     'from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as ConnectionScopedWebSocketManager'),
     
     (r'from netra_backend\.app\.websocket_core\.manager import.*WebSocketManager',
-     'from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as WebSocketManager'),
+     'from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager'),
     
     (r'from netra_backend\.app\.websocket_core\.manager import.*get_websocket_manager',
-     'from netra_backend.app.websocket_core.unified_manager import get_websocket_manager'),
+     'from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager'),
     
     # Emitter imports
     (r'from netra_backend\.app\.services\.websocket_event_emitter import.*WebSocketEventEmitter',
@@ -130,7 +130,7 @@ Business Value:
 """
 
 # Unified implementations (SSOT)
-from netra_backend.app.websocket_core.unified_manager import (
+from netra_backend.app.websocket_core.websocket_manager import (
     UnifiedWebSocketManager,
     WebSocketConnection,
     get_websocket_manager,

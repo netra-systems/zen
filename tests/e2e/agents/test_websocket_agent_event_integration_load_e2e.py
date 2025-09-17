@@ -37,7 +37,7 @@ from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecut
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 
 @pytest.mark.e2e

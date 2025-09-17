@@ -37,7 +37,7 @@ from concurrent.futures import ThreadPoolExecutor
 import weakref
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 from shared.types.core_types import UserID, ThreadID, RunID
 import logging

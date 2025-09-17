@@ -51,13 +51,13 @@ class WebSocketImportMigrator:
                 # Legacy manager.py imports
                 {
                     'pattern': r'from\s+netra_backend\.app\.websocket_core\.manager\s+import\s+([^\n]+)',
-                    'replacement': 'from netra_backend.app.websocket_core.canonical_import_patterns import \\1  # MIGRATED: Phase 1 SSOT',
+                    'replacement': 'from netra_backend.app.websocket_core.websocket_manager import \\1  # MIGRATED: Phase 1 SSOT',
                     'deprecation_warning': True
                 },
                 # Direct unified_manager imports (implementation detail)
                 {
                     'pattern': r'from\s+netra_backend\.app\.websocket_core\.unified_manager\s+import\s+([^\n]+)',
-                    'replacement': 'from netra_backend.app.websocket_core.canonical_import_patterns import \\1  # MIGRATED: Phase 1 SSOT',
+                    'replacement': 'from netra_backend.app.websocket_core.websocket_manager import \\1  # MIGRATED: Phase 1 SSOT',
                     'deprecation_warning': True
                 }
             ],
@@ -66,18 +66,18 @@ class WebSocketImportMigrator:
                 # Consolidate all WebSocket manager imports to canonical path
                 {
                     'pattern': r'from\s+netra_backend\.app\.websocket_core\.manager\s+import\s+([^\n]+)',
-                    'replacement': 'from netra_backend.app.websocket_core.canonical_import_patterns import \\1',
+                    'replacement': 'from netra_backend.app.websocket_core.websocket_manager import \\1',
                     'canonical': True
                 },
                 {
                     'pattern': r'from\s+netra_backend\.app\.websocket_core\.unified_manager\s+import\s+([^\n]+)',
-                    'replacement': 'from netra_backend.app.websocket_core.canonical_import_patterns import \\1',
+                    'replacement': 'from netra_backend.app.websocket_core.websocket_manager import \\1',
                     'canonical': True
                 },
                 # Factory pattern consolidation
                 {
                     'pattern': r'from\s+netra_backend\.app\.websocket_core\.websocket_manager_factory\s+import\s+([^\n]+)',
-                    'replacement': 'from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager  # SSOT Factory',
+                    'replacement': 'from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager  # SSOT Factory',
                     'canonical': True
                 },
                 # Remove deprecated test imports
@@ -335,7 +335,7 @@ class WebSocketImportMigrator:
 # This layer provides backward compatibility during WebSocket SSOT consolidation
 
 import warnings
-from netra_backend.app.websocket_core.unified_manager import (
+from netra_backend.app.websocket_core.websocket_manager import (
     _UnifiedWebSocketManagerImplementation as UnifiedWebSocketManager
 )
 
@@ -353,7 +353,7 @@ def get_websocket_manager(user_context=None):
 def _deprecated_import_warning():
     warnings.warn(
         "DEPRECATED: Non-canonical WebSocket manager import detected. "
-        "Use 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager' "
+        "Use 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager' "
         "for SSOT compliance.",
         DeprecationWarning,
         stacklevel=3

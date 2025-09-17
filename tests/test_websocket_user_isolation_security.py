@@ -43,7 +43,7 @@
         # REMOVED_SYNTAX_ERROR: import uuid
         # REMOVED_SYNTAX_ERROR: from datetime import datetime, timezone
         # REMOVED_SYNTAX_ERROR: from typing import Dict, Any
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
         # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -639,7 +639,7 @@
     # Removed problematic line: async def test_real_websocket_manager_integration(self, user_context_1):
         # REMOVED_SYNTAX_ERROR: """Test integration with real WebSocket manager if available."""
         # REMOVED_SYNTAX_ERROR: try:
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
             # Only run if WebSocket manager is available
             # REMOVED_SYNTAX_ERROR: websocket_manager = get_websocket_manager()

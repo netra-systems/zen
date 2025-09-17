@@ -106,7 +106,7 @@ class WebSocketEventStructureGoldenPathTests(RealWebSocketTestBase):
 
             try:
                 # Test the serialization that occurs during WebSocket transmission
-                from netra_backend.app.websocket_core.canonical_import_patterns import _serialize_message_safely
+                from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
                 transmitted_event = _serialize_message_safely(event)
 
                 # GOLDEN PATH STRUCTURE VALIDATION: Business fields must be at top level
@@ -362,7 +362,7 @@ class WebSocketEventStructureGoldenPathTests(RealWebSocketTestBase):
             expected_patterns = test_case["expected_js_access_patterns"]
 
             # Serialize through WebSocket transmission pipeline
-            from netra_backend.app.websocket_core.canonical_import_patterns import _serialize_message_safely
+            from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
             transmitted_event = _serialize_message_safely(sample_event)
 
             # Test each frontend access pattern

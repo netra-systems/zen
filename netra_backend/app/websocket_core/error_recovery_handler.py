@@ -728,7 +728,7 @@ class WebSocketErrorRecoveryHandler:
 
 # Import existing components for compatibility
 from netra_backend.app.websocket_core.recovery import ErrorRecoveryHandler
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 # Create backward compatibility aliases
 WebSocketRecoveryManager = UnifiedWebSocketManager

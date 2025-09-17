@@ -60,7 +60,7 @@ from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     UserContextFactory
 )
-from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from shared.isolated_environment import get_env

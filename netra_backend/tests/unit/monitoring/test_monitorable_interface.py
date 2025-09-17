@@ -14,7 +14,7 @@ import pytest
 import asyncio
 import time
 from typing import Dict, Any, List
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 from shared.monitoring.interfaces import MonitorableComponent, ComponentMonitor, HealthStatus, MonitoringMetrics
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor

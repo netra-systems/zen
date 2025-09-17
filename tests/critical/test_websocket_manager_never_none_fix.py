@@ -119,7 +119,7 @@ class WebSocketTestConnection:
                                                 async def test_websocket_manager_creation_failure_handling():
                                                     """Test handling of WebSocket manager creation failures."""
                                                     pass
-                                                    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+                                                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
                                                     import netra_backend.app.websocket_core.manager as manager_module
                                                     manager_module._websocket_manager = None
                                                     with patch.object(WebSocketManager, '__new__', side_effect=Exception('Creation failed')):

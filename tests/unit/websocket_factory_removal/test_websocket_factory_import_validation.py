@@ -68,8 +68,8 @@ class WebSocketFactoryImportValidationTests(SSotAsyncTestCase):
         """
         logger.info('Testing canonical SSOT import paths...')
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             self.assertTrue(hasattr(WebSocketManager, '__init__'), 'WebSocketManager class missing __init__ method')
             self.assertTrue(callable(get_websocket_manager), 'get_websocket_manager is not callable')
             logger.info('✅ Canonical SSOT imports functional')
@@ -127,7 +127,7 @@ class WebSocketFactoryImportValidationTests(SSotAsyncTestCase):
         """
         logger.info('Testing WebSocket manager initialization without factory...')
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             user_context = UserExecutionContext(user_id=self.test_user_id, websocket_client_id='test_websocket_init_validation')
             websocket_manager = WebSocketManager(user_context=user_context)

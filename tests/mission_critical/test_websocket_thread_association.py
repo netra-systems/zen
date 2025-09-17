@@ -44,7 +44,7 @@
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.message_handlers import MessageHandlerService
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.thread_service import ThreadService
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.models_postgres import Thread, Run

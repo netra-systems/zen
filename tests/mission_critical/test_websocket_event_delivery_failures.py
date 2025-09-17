@@ -34,7 +34,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 # Import WebSocket and agent components
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager, WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager, WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext, create_isolated_execution_context
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine

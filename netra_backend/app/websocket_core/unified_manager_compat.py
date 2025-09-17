@@ -4,7 +4,7 @@ UnifiedWebSocketManager direct import compatibility - COMPATIBILITY SHIM
 This module provides backward compatibility during WebSocket Manager import consolidation.
 
 DEPRECATED: This import path is deprecated as part of Issue #1196 remediation.
-Use canonical import: from netra_backend.app.websocket_core.canonical_import_patterns import ...
+Use canonical import: from netra_backend.app.websocket_core.websocket_manager import ...
 
 PHASE 1 COMPATIBILITY: This shim prevents breaking changes during systematic
 import consolidation while providing deprecation warnings to guide migration.

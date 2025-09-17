@@ -53,7 +53,7 @@ except ImportError:
 
 # WebSocket manager imports
 try:
-    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
     WEBSOCKET_MANAGER_AVAILABLE = True
 except ImportError:
     WEBSOCKET_MANAGER_AVAILABLE = False

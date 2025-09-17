@@ -8,7 +8,7 @@ by actually calling the WebSocket manager and checking the message structure.
 import json
 import asyncio
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 
 class TestIssue1021FixValidation(SSotAsyncTestCase):

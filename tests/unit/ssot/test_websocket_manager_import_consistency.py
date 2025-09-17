@@ -19,8 +19,8 @@ Test Strategy:
 4. Test business-critical WebSocket operations
 
 SSOT Requirements:
-- WORKING path: from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
-- FAILING path: from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+- WORKING path: from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+- FAILING path: from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 - 497+ files need import path consolidation
 """
 
@@ -122,7 +122,7 @@ class WebSocketManagerImportConsistencyTests(SSotBaseTestCase, unittest.TestCase
         logger.info("Detecting WebSocket Manager import fragmentation")
         
         fragmentation_patterns = [
-            "from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager",
+            "from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager",
             "from netra_backend.app.websocket_core.manager import UnifiedWebSocketManager", 
             "import netra_backend.app.websocket_core.unified_manager",
             "from .unified_manager import UnifiedWebSocketManager"

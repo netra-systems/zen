@@ -93,7 +93,7 @@ class WebSocketRaceConditionReproductionTests(BaseIntegrationTest):
 
                 # Attempt 1: Direct WebSocket Manager import (timing sensitive)
                 try:
-                    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                     instance1 = WebSocketManager()
                     initialization_results.append(("direct_manager", id(instance1), time.time() - start_time))
                 except Exception as e:
@@ -101,7 +101,7 @@ class WebSocketRaceConditionReproductionTests(BaseIntegrationTest):
 
                 # Attempt 2: Unified WebSocket Manager (potential singleton conflict)
                 try:
-                    from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+                    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
                     instance2 = UnifiedWebSocketManager()
                     initialization_results.append(("unified_manager", id(instance2), time.time() - start_time))
                 except Exception as e:
@@ -287,7 +287,7 @@ class WebSocketRaceConditionReproductionTests(BaseIntegrationTest):
 
                 # Pattern 2: Direct instantiation (may not respect context)
                 try:
-                    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+                    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                     direct_start = time.time()
                     manager2 = WebSocketManager()
 
@@ -311,7 +311,7 @@ class WebSocketRaceConditionReproductionTests(BaseIntegrationTest):
 
                 # Pattern 3: Unified manager (potential singleton issues)
                 try:
-                    from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+                    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
                     unified_start = time.time()
                     manager3 = UnifiedWebSocketManager()
                     creation_attempts.append({
@@ -479,7 +479,7 @@ class WebSocketRaceConditionReproductionTests(BaseIntegrationTest):
 
                     # Pattern 2: Direct creation (may not be cleanable)
                     try:
-                        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+                        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                         direct_instance = WebSocketManager()
                         created_instances.append(('direct', direct_instance))
                     except ImportError:
@@ -487,7 +487,7 @@ class WebSocketRaceConditionReproductionTests(BaseIntegrationTest):
 
                     # Pattern 3: Unified manager (singleton, may accumulate)
                     try:
-                        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+                        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
                         unified_instance = UnifiedWebSocketManager()
                         created_instances.append(('unified', unified_instance))
                     except ImportError:
@@ -575,7 +575,7 @@ class WebSocketRaceConditionReproductionTests(BaseIntegrationTest):
 
         # Count by attempting to access different implementation types
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             # In real implementation, would have instance tracking
             instance_count += 1  # Simplified counting
         except ImportError:

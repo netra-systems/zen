@@ -31,12 +31,12 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime, timezone
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.canonical_import_patterns import (
+from netra_backend.app.websocket_core.websocket_manager import (
     check_websocket_service_available,
     get_websocket_manager,
     create_test_user_context
 )
-from netra_backend.app.websocket_core.unified_manager import MAX_CONNECTIONS_PER_USER
+from netra_backend.app.websocket_core.websocket_manager import MAX_CONNECTIONS_PER_USER
 from netra_backend.app.websocket_core.types import WebSocketManagerMode
 from shared.types.core_types import ensure_user_id
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType

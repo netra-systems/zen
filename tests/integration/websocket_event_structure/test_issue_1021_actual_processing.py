@@ -4,7 +4,7 @@ Test for Issue #1021: Verify actual backend WebSocket event processing produces 
 
 import time
 import unittest
-from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation
+from netra_backend.app.websocket_core.websocket_manager import _WebSocketManagerImplementation
 
 
 class TestIssue1021ActualProcessing(unittest.TestCase):

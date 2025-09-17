@@ -88,7 +88,7 @@ class Issue1094GoldenPathProtectionTests(BaseIntegrationTest):
         Golden Path functionality depend on the proper async interface that
         Issue #1094 is breaking.
         """
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
         # Golden Path critical events
         critical_events = [
@@ -194,7 +194,7 @@ class Issue1094GoldenPathProtectionTests(BaseIntegrationTest):
         create_websocket_manager) and validates it restores full Golden Path
         functionality without breaking existing business value.
         """
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         from netra_backend.app.services.user_execution_context import get_user_session_context
 
         golden_path_user_id = "golden_path_fix_validation_user"
@@ -243,7 +243,7 @@ class Issue1094GoldenPathProtectionTests(BaseIntegrationTest):
         """
         import inspect
         from netra_backend.app.websocket_core import create_websocket_manager
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
         # Validate interface consistency
         create_sig = inspect.signature(create_websocket_manager)

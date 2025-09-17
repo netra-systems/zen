@@ -7,7 +7,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from netra_backend.app.db.models_postgres import Run, Thread
 from shared.logging.unified_logging_ssot import get_logger
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = get_logger(__name__)

@@ -16,7 +16,7 @@ from typing import List, Dict
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Real WebSocket components (no mocking for critical paths)
-from netra_backend.app.websocket_core.unified_manager import (
+from netra_backend.app.websocket_core.websocket_manager import (
     _UnifiedWebSocketManagerImplementation,
     MAX_CONNECTIONS_PER_USER
 )

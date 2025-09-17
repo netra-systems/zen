@@ -569,7 +569,7 @@ class Issue1182WebSocketManagerSSOTViolationsTests(SSotBaseTestCase):
     def _try_direct_manager_import(self):
         """Try direct manager import"""
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             return WebSocketManager()
         except:
             return None

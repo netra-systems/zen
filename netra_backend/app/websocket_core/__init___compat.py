@@ -35,7 +35,7 @@ WebSocketManager = _CanonicalWebSocketManager
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as _CanonicalWebSocketManager
 UnifiedWebSocketManager = _CanonicalWebSocketManager  # Legacy alias
 
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager as _canonical_get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as _canonical_get_websocket_manager
 get_websocket_manager = _canonical_get_websocket_manager
 
 __all__ = ['WebSocketManager', 'get_websocket_manager', 'UnifiedWebSocketManager']

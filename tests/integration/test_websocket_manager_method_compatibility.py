@@ -23,7 +23,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
     IsolatedWebSocketManager
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
 from shared.id_generation import UnifiedIdGenerator
 
 

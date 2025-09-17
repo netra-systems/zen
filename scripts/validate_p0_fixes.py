@@ -35,7 +35,7 @@ class P0FixValidator:
         
         try:
             # Test 1: Import the updated unified manager
-            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
             print("   PASS:  UnifiedWebSocketManager imports successfully")
             
             # Test 2: Check if the auto-detection code exists

@@ -239,7 +239,7 @@ class TestWebSocketEventDeliveryPostCleanup(SSotBaseTestCase):
         integration_imports = [
             'from netra_backend.app.websocket_core.event_validator import UnifiedEventValidator',
             'from netra_backend.app.services.websocket_error_validator import get_websocket_validator',
-            'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager'
+            'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'
         ]
         
         warnings_detected = 0
@@ -289,7 +289,7 @@ class TestWebSocketEventDeliveryPostCleanup(SSotBaseTestCase):
         
         # Test 1: WebSocket manager creation
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             
             # Create a test user context

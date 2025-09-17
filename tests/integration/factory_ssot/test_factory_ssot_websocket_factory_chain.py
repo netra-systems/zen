@@ -17,7 +17,7 @@ import asyncio
 import time
 from typing import Dict, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
@@ -28,7 +28,7 @@ from netra_backend.app.websocket_core.websocket_manager_factory import WebSocket
 from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory
 from netra_backend.app.agents.supervisor.agent_instance_factory import UserWebSocketEmitter
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 
 class WebSocketFactoryChainViolationsTests(BaseIntegrationTest):

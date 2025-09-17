@@ -58,7 +58,7 @@ from netra_backend.app.services.user_execution_context import (
     InvalidContextError,
     validate_user_context
 )
-from netra_backend.app.websocket_core.unified_manager import (
+from netra_backend.app.websocket_core.websocket_manager import (
     UnifiedWebSocketManager,
     WebSocketConnection
 )
@@ -207,7 +207,7 @@ class SingletonPatternPreventionTests:
         """
         # Test 1: Verify get_websocket_manager() is properly disabled
         with pytest.raises(RuntimeError, match="CRITICAL SECURITY ERROR.*get_websocket_manager.*DISABLED"):
-            from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             get_websocket_manager()
         
         # Test 2: Verify no global manager instances exist

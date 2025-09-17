@@ -38,7 +38,7 @@ from typing import Dict, Any, List
 from datetime import datetime, timezone
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext

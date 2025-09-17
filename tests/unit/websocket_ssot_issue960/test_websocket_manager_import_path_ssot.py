@@ -76,8 +76,8 @@ class WebSocketManagerImportPathSSOTTests(SSotBaseTestCase):
         """
         logger.info('Testing WebSocket event delivery SSOT compliance - EXPECTING FAILURE')
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             user_context = {'user_id': 'event_test_user', 'thread_id': 'event_test_thread'}
             manager1 = get_websocket_manager(user_context=user_context)
             manager2 = UnifiedWebSocketManager()
@@ -148,8 +148,8 @@ class WebSocketManagerImportPathSSOTTests(SSotBaseTestCase):
         """
         logger.info('Testing WebSocket manager initialization consistency - EXPECTING FAILURE')
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             user_context = {'user_id': 'init_test_user', 'thread_id': 'init_test_thread'}
             direct_manager = WebSocketManager(user_context=user_context)
             factory_manager = UnifiedWebSocketManager()

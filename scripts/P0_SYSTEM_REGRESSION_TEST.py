@@ -55,7 +55,7 @@ class P0RegressionTest:
         print("-" * 50)
         
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
             
             # Test 1: Basic instantiation works
             manager = UnifiedWebSocketManager()
@@ -195,7 +195,7 @@ class P0RegressionTest:
         print("-" * 50)
         
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
             
             manager = UnifiedWebSocketManager()
             
@@ -320,7 +320,7 @@ class P0RegressionTest:
             
             # Test workflow patterns
             from shared.types.core_types import UserID, ThreadID
-            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
             
             # Test ID generation patterns
             test_user_id = UserID("usr_4a8f9c2b1e5d")  

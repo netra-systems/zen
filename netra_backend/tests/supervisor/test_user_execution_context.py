@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timezone
 from unittest.mock import Mock
 from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine

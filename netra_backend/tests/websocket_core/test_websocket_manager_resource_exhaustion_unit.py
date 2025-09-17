@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.environment.isolated_environment import IsolatedEnvironment
 
 # WebSocket Core imports - Real components (no mocking per CLAUDE.md)
-from netra_backend.app.websocket_core.unified_manager import (
+from netra_backend.app.websocket_core.websocket_manager import (
     _UnifiedWebSocketManagerImplementation,
     MAX_CONNECTIONS_PER_USER
 )

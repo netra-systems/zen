@@ -25,7 +25,7 @@ from typing import List, Dict, Any
 from unittest.mock import AsyncMock, MagicMock
 from netra_backend.app.core.windows_asyncio_safe import windows_safe_sleep, windows_safe_wait_for, WindowsAsyncioSafePatterns
 from netra_backend.app.routes.websocket_ssot import WebSocketSSOTRouter
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.performance
@@ -99,7 +99,7 @@ class WebSocketPerformanceRegressionTests(SSotBaseTestCase):
         round_trip_times = []
         for message in test_messages:
             start_time = time.time()
-            from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+            from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
             serialized = _serialize_message_safely(message)
             await asyncio.sleep(0.01)
             round_trip_time = time.time() - start_time

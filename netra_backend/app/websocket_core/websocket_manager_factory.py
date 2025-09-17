@@ -36,7 +36,7 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 # Import WebSocket manager types
 from netra_backend.app.websocket_core.types import WebSocketManagerMode
-from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation
+from netra_backend.app.websocket_core.websocket_manager import _WebSocketManagerImplementation
 
 logger = get_logger(__name__)
 

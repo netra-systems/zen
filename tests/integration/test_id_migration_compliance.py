@@ -50,7 +50,7 @@ from test_framework.service_aware_testing import ServiceAwareTesting
 # Real service imports for compliance testing
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType, IDMetadata
 from netra_backend.app.core.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 # Performance and security testing utilities
 from test_framework.performance_helpers import PerformanceProfiler

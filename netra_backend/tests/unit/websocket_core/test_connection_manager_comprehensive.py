@@ -46,7 +46,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SsotTestMetric
 
 # Target Module Under Test
 from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager, ConnectionManager
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection
 
 # Supporting Imports
 from shared.types.core_types import UserID, ThreadID, ConnectionID, WebSocketID, RequestID

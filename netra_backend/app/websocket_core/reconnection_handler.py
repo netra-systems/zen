@@ -55,7 +55,7 @@ import asyncio
 import time
 
 # Import UnifiedWebSocketManager for backward compatibility alias
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 # Backward compatibility alias
 WebSocketReconnectionHandler = UnifiedWebSocketManager

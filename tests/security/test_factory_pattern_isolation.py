@@ -111,7 +111,7 @@
 
         # Create mock WebSocket connections
         # REMOVED_SYNTAX_ERROR: websocket_1 = Magic        websocket_2 = Magic
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
 
         # REMOVED_SYNTAX_ERROR: conn_1 = WebSocketConnection( )
         # REMOVED_SYNTAX_ERROR: connection_id="conn_1",
@@ -296,7 +296,7 @@
                     # REMOVED_SYNTAX_ERROR: assert factory_manager_1.user_context.user_id != factory_manager_2.user_context.user_id
 
                     # Test deprecated singleton pattern behavior
-                    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
+                    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
                     # REMOVED_SYNTAX_ERROR: with pytest.warns():  # Any warning is fine
                     # REMOVED_SYNTAX_ERROR: singleton_manager_1 = get_websocket_manager()
@@ -366,7 +366,7 @@
 
     # Removed problematic line: async def test_websocket_manager_singleton_warning(self):
         # REMOVED_SYNTAX_ERROR: """Test that deprecated WebSocket manager function shows warnings."""
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
         # REMOVED_SYNTAX_ERROR: with pytest.warns():  # Any warning is fine
         # REMOVED_SYNTAX_ERROR: manager = get_websocket_manager()

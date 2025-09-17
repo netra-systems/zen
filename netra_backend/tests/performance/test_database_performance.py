@@ -6,7 +6,7 @@ concurrent access, and ClickHouse optimization patterns.
 """
 import sys
 from pathlib import Path
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 import asyncio

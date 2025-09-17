@@ -44,7 +44,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Import the system under test
 from netra_backend.app.websocket_core import websocket_manager
-from netra_backend.app.websocket_core.canonical_import_patterns import (
+from netra_backend.app.websocket_core.websocket_manager import (
     get_websocket_manager,
     WebSocketManager,
     WebSocketConnection,
@@ -55,7 +55,7 @@ from netra_backend.app.websocket_core.canonical_import_patterns import (
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 
 # Import dependencies for mocking
-from netra_backend.app.websocket_core.unified_manager import (
+from netra_backend.app.websocket_core.websocket_manager import (
     UnifiedWebSocketManager,
     WebSocketManagerMode
 )
@@ -226,7 +226,7 @@ class WebSocketManagerFactoryFunctionsTests(SSotAsyncTestCase):
         
         Business Critical: Backward compatibility must be maintained.
         """
-        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
         
         # WebSocketManager should be the same as UnifiedWebSocketManager
         assert WebSocketManager is UnifiedWebSocketManager

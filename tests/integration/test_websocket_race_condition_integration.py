@@ -35,7 +35,7 @@ from datetime import datetime, timezone
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Core WebSocket components
-from netra_backend.app.websocket_core.canonical_import_patterns import (
+from netra_backend.app.websocket_core.websocket_manager import (
     get_websocket_manager,
     WebSocketManager,
     WebSocketManagerMode,

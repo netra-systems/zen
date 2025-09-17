@@ -27,7 +27,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker, get_execution_tracker
 
 # WebSocket Manager (CRITICAL - VERIFIED 2025-09-11)
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager, WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager, WebSocketManager
 
 # Redis Client (CRITICAL - VERIFIED 2025-09-11)
 from netra_backend.app.services.redis_client import get_redis_client, get_redis_service

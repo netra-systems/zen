@@ -17,7 +17,7 @@ from unittest.mock import Mock, AsyncMock
 # Add the project root to Python path
 sys.path.insert(0, '/Users/rindhujajohnson/Netra/GitHub/netra-apex')
 
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.services.unified_authentication_service import UnifiedAuthenticationService
 from netra_backend.app.services.unified_authentication_service import AuthResult
 

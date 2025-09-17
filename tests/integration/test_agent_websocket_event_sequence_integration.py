@@ -44,7 +44,7 @@ from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOr
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.schemas.agent_models import DeepAgentState

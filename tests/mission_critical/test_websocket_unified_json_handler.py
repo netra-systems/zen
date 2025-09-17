@@ -67,7 +67,7 @@
             # REMOVED_SYNTAX_ERROR: AgentCompleted, StreamChunk, StreamComplete, WebSocketError
             
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import AgentMetadata
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.types import get_frontend_message_type
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager

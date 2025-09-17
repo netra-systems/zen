@@ -25,7 +25,7 @@ import time
 from datetime import datetime, timezone
 from typing import Dict, Any
 from unittest.mock import MagicMock, AsyncMock, Mock, patch
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 import pytest
 from starlette.websockets import WebSocketState

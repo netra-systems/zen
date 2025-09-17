@@ -293,7 +293,7 @@ class TestRealWebSocketSSoTIntegration(SSotAsyncTestCase):
         """Create real WebSocket manager for testing."""
         try:
             # Import real WebSocket manager
-            from netra_backend.app.websocket_core.unified_manager import (
+            from netra_backend.app.websocket_core.websocket_manager import (
                 _UnifiedWebSocketManagerImplementation
             )
 

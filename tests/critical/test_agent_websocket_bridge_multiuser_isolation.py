@@ -27,7 +27,7 @@ import uuid
 from typing import Dict, List, Optional, Set
 from datetime import datetime, timezone
 from unittest.mock import patch, AsyncMock, MagicMock
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry

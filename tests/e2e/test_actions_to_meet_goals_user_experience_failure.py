@@ -36,7 +36,7 @@ from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMe
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.routes.websocket import websocket_endpoint
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient

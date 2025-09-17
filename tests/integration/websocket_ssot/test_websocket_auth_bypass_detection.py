@@ -129,7 +129,7 @@ class WebSocketAuthBypassDetectionTests(SSotAsyncTestCase):
         except Exception as e:
             self.skipTest(f'Auth service token creation failed: {e}')
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             ws_manager = WebSocketManager()
             event_result = await ws_manager.handle_authenticated_event(token=test_token, event_type='agent_started', event_data={'message': 'Test event'})
             assert event_result is not None, 'WebSocket event handling failed'

@@ -2131,7 +2131,7 @@ class StartupOrchestrator:
         # These are no longer needed as we use create_agent_instance_factory(user_context) pattern per-request
         from netra_backend.app.services.factory_adapter import FactoryAdapter, AdapterConfig
         # ISSUE #1144 FIX: Use canonical SSOT import path instead of deprecated module import
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         
         self.logger.info("    - Initializing factory patterns for singleton removal...")
         

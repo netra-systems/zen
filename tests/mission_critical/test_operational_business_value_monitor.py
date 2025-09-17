@@ -107,7 +107,7 @@ class MissionCriticalWebSocketEventMonitoringTests(SSotAsyncTestCase):
         """MISSION CRITICAL: WebSocket event monitoring must integrate with business value - WILL FAIL initially"""
         with pytest.raises((ImportError, AttributeError, ModuleNotFoundError)):
             from netra_backend.app.services.operational_business_value_monitor import OperationalBusinessValueMonitor
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             monitor = OperationalBusinessValueMonitor()
             websocket_manager = WebSocketManager()

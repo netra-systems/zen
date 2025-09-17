@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 from shared.isolated_environment import IsolatedEnvironment
 
 # Import WebSocket components to test
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import (
     WebSocketManagerFactory, ConnectionLifecycleManager
 )
@@ -112,7 +112,7 @@ class WebSocketFactorySsotViolationProofTests(SSotAsyncTestCase):
         )
         
         # Import the SSOT UnifiedWebSocketManager
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedWebSocketManager
         
         # VIOLATION PROOF: Factory creates WebSocketManager instead of using SSOT
         self.assertIsInstance(

@@ -15,7 +15,7 @@ import pytest
 import asyncio
 from unittest.mock import patch, AsyncMock, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from shared.logging.unified_logging_ssot import get_logger
 
 logger = get_logger(__name__)
@@ -28,7 +28,7 @@ class WebSocketFactoryAsyncPatternsTests(SSotAsyncTestCase):
         """Set up test environment."""
         super().setUp()
         # Reset manager registry between tests to prevent cross-test contamination
-        from netra_backend.app.websocket_core.canonical_import_patterns import reset_manager_registry
+        from netra_backend.app.websocket_core.websocket_manager import reset_manager_registry
         reset_manager_registry()
 
     @pytest.mark.issue_1184
@@ -131,13 +131,13 @@ class WebSocketFactoryAsyncPatternsTests(SSotAsyncTestCase):
         user_context = {"user_id": "module-loading-1184", "thread_id": "module-thread"}
         
         # Test 1: Direct import (current working pattern)
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager as direct_import
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as direct_import
         manager1 = direct_import(user_context=user_context)
         assert manager1 is not None, "Direct import pattern failed"
         
         # Test 2: Canonical import pattern
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager as canonical_import
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as canonical_import
             manager2 = canonical_import(user_context=user_context)
             assert manager2 is not None, "Canonical import pattern failed"
             # Should be same instance due to user registry

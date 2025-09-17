@@ -66,7 +66,7 @@ def check_unified_manager_interface_compliance() -> Dict[str, Any]:
     
     try:
         # Import manager
-        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
         results['manager_available'] = True
         
         # Check required methods that failing tests expect

@@ -48,7 +48,7 @@ except ImportError as e:
 
 # WebSocket manager imports - testing staging environment
 try:
-    from netra_backend.app.websocket_core.canonical_import_patterns import (
+    from netra_backend.app.websocket_core.websocket_manager import (
         get_websocket_manager,
         _UnifiedWebSocketManagerImplementation,
         WebSocketManagerMode,

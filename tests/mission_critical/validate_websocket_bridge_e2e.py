@@ -538,7 +538,7 @@ class WebSocketBridgeE2EValidator:
         """Test complete message path from agent to WebSocket manager."""
         try:
             from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             
             bridge = await get_agent_websocket_bridge()
             manager = get_websocket_manager()
@@ -590,7 +590,7 @@ class WebSocketBridgeE2EValidator:
         """Test message queuing when no WebSocket connections exist."""
         try:
             from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             
             bridge = await get_agent_websocket_bridge()
             manager = get_websocket_manager()
