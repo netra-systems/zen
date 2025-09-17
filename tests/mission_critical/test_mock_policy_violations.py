@@ -734,8 +734,6 @@ class TestWebSocketConnection:
         f.write(- [ ] Architecture compliance > 90% )
         ")
 
-        print(")
-
-
+        print("")
         if __name__ == '__main__':
                                                         # Run the tests

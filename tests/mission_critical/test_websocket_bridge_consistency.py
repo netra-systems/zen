@@ -324,7 +324,7 @@ print("")
 if violations:
     print(formatted_string)"
 if len(violations) > 5:
-    print(")
+    print("")
                             # Fail if compliance is below threshold
 assert compliance_score >= 80, ( )
 formatted_string""

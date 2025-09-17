@@ -30,8 +30,7 @@ print("")
 
 print(2. JWT Validation Security)"
 jwt_violations = suite.validate_jwt_validation_security()
-print(")
-
+print("")
 print(
 3. Agent Registry Consolidation"")
 agent_violations = suite.validate_agent_registry_consolidation()
@@ -55,8 +54,7 @@ print("")
 print(
 7. Direct os.environ Access)"
 os_violations = suite.validate_direct_os_environ_access()
-print(")
-
+print("")
     # Calculate results
 all_violations = (websocket_violations + jwt_violations + agent_violations + )
 env_violations + session_violations + tool_violations +
@@ -78,7 +76,7 @@ print(f )
 print(fSSOT COMPLIANCE RESULTS:")
 print("")
 print(formatted_string)"
-print(")
+print("")
 print(formatted_string"")
 
     # Show critical violations details

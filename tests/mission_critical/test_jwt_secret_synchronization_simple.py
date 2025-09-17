@@ -1167,7 +1167,7 @@ class AuthenticationTestSuite:
 
     def run_authentication_flow_tests(suite: AuthenticationTestSuite) -> Dict[str, bool]:
         Run all authentication flow validation tests."
-        print(")
+        print("")
          + "= * 60)"
         print(RUNNING AUTHENTICATION FLOW VALIDATION TESTS)
         print(= * 60)
@@ -1222,7 +1222,7 @@ class AuthenticationTestSuite:
         results = {}
         for test_name, test_func in journey_tests.items():
         try:
-        print(")
+        print("")
         result = test_func()
         results[test_name] = result
         status = [U+2713] PASSED" if result else "[U+2717] FAILED
@@ -1296,7 +1296,7 @@ class AuthenticationTestSuite:
         print("COMPREHENSIVE TEST RESULTS SUMMARY")
         print(= * 80)"
 
-        print(")
+        print("")
         print(formatted_string"")
         print(")"
         print(formatted_string)

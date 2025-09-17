@@ -196,8 +196,7 @@ try:
 except AssertionError as e:
     print(formatted_string")
 except Exception as e:
-    print(")
-
+    print("")
 print()
  + =*70)
 

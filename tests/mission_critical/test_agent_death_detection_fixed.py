@@ -474,12 +474,12 @@ class TestAgentDeathDetectionFixed:
         # 10. Cleanup
         await tracker.stop_monitoring()
 
-        print(")
+        print("")
          + ="*80)
         print( PASS:  AGENT DEATH DETECTION SYSTEM WORKING CORRECTLY)
         print("=*80)
         print(formatted_string)
-        print(")
+        print("")
         print(formatted_string")
         print(=*80)
 

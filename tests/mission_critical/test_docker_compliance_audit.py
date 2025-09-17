@@ -930,10 +930,10 @@ class DockerComplianceInfrastructureTests:
         print(=*80)
         print()
         print(formatted_string")
-        print(")
+        print("")
         print(formatted_string)
 
-        print(")
+        print("")
         [U+1F4E6] Frontend Service Integration Status:)
         for key, value in report['frontend_integration'].items("):
         status =  PASS:  if value else  FAIL: 

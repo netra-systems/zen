@@ -226,7 +226,7 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         if var_info.get(critical, False):
         if formatted_string not in env_content:
         missing_in_env.append(var_name)
-        print(")
+        print("")
         else:
         print(formatted_string)
 
@@ -264,8 +264,7 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         missing_in_env.append(var_name)
         print(formatted_string)"
         else:
-        print(")
-
+        print("")
         self.assertEqual( )
         len(missing_in_env), 0,
         f
@@ -353,7 +352,7 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         This prevents the test from being weakened by accidental removal of checks.
         '''
         pass
-        print(")
+        print("")
         SEARCH:  Meta-test: Validating this test file covers all variables...)"
 
     # Read this test file with UTF-8 encoding
@@ -492,15 +491,15 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         result = runner.run(suite)
 
     # Print summary
-        print(")
+        print("")
          + =" * 80)
         if result.wasSuccessful():
         print( PASS:  SUCCESS: All frontend deployment environment checks passed!)
         print("The deployment configuration contains all critical variables.)
         else:
         print([U+1F534] FAILURE: Frontend deployment environment regression detected!)
-        print(")
-        print(")
+        print("")
+        print("")
         WARNING: [U+FE0F]  CRITICAL: Do NOT deploy without fixing these issues!)
         print(Missing variables will cause complete frontend failure!")"
         print(= * 80)

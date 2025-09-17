@@ -1,8 +1,8 @@
 from shared.isolated_environment import get_env
-"
+"""
 Isolated conftest for WebSocket bridge tests that don't require real services.
 This allows us to test the bridge functionality without Docker dependencies.
-"
+"""
 
 import pytest
 import os
@@ -16,9 +16,9 @@ import asyncio
 os.environ['WEBSOCKET_TEST_ISOLATED'] = 'true'
 os.environ['SKIP_REAL_SERVICES'] = 'true'
 
-@pytest.fixture(scope=session")
+@pytest.fixture(scope="session")
 def event_loop():
-    Create an event loop for the test session.""
+    """Create an event loop for the test session."""
     policy = asyncio.get_event_loop_policy()
     loop = policy.new_event_loop()
     yield loop
@@ -26,7 +26,7 @@ def event_loop():
 
 @pytest.fixture
 def isolated_environment():
-    Fixture to ensure isolated test environment."
+    """Fixture to ensure isolated test environment."""
     # Mock environment variables that might cause real service connections
     old_env = {}
     test_env_vars = {

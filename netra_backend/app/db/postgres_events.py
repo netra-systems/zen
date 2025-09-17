@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.pool import ConnectionPoolEntry, _ConnectionFairy
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.config import get_unified_config
+# Config import handled in get_settings() function to avoid circular dependency
 
 
 # Import settings lazily to avoid circular dependency

@@ -99,8 +99,7 @@ except:
 
                                 # Check handler count after each connection
 current_count = len(message_router.handlers)
-print(")
-
+print("")
                                 # Final handler count should not have grown significantly
 final_count = len(message_router.handlers)
 
@@ -109,9 +108,7 @@ final_count = len(message_router.handlers)
 assert final_count - initial_count <= 1, \
 formatted_string
 
-print(")
-
-
+print("")
 @pytest.mark.asyncio
     async def test_handler_reuse("):
     Test that existing handlers are reused instead of creating new ones.

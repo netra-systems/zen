@@ -420,8 +420,7 @@ async def test_concurrent_users():
     print(fTotal Duration: {total_duration:.2f}s")
     print(f"Overall Throughput: {overall_throughput:.2f} events/s)
     print(fConcurrent Latency: P50={p50:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms, Avg={avg_latency:.2f}ms)
-    print(")
-
+    print("")
     # Validate requirements
     p99_passed = p99 < 50.0
     throughput_passed = overall_throughput > 200.0
@@ -482,8 +481,7 @@ async def test_comprehensive_performance():
         print(f  P99 Latency: {metrics.p99_latency:.2f}ms [CRITICAL])
         print(f  Max Throughput: {metrics.throughput:.2f} events/s [CRITICAL])
         print(f  Avg Connection Time: {metrics.avg_connection_time:.2f}ms")
-        print(")
-
+        print("")
         # Critical requirement validation
         print(CRITICAL REQUIREMENTS VALIDATION:)
         p99_passed = metrics.p99_latency < 50.0

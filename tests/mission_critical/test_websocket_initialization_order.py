@@ -234,7 +234,7 @@ class TestWebSocketInitializationOrder(SSotAsyncTestCase):
         self.assertGreaterEqual(agent_count, 8,
         formatted_string)
     # Log the actual agents for debugging
-        print(")
+        print("")
         print(formatted_string)
     def test_websocket_manager_propagation_to_agents(self):
         '''
@@ -340,12 +340,12 @@ class TestInitializationRaceConditions(SSotAsyncTestCase):
         runner = unittest.TextTestRunner(verbosity=2)
         result = runner.run(suite)
     # Report summary
-        print(")
+        print("")
          + ="*70)
         print(WEBSOCKET INITIALIZATION ORDER TEST RESULTS)
         print("=*70)
         print(formatted_string)
-        print(")
+        print("")
         print(formatted_string)
         if result.wasSuccessful("):
         print()
@@ -359,7 +359,7 @@ class TestInitializationRaceConditions(SSotAsyncTestCase):
         for test, trace in result.failures:
         print()"
         if result.errors:
-        print(")
+        print("")
         Errors:)"
         for test, trace in result.errors:
         print(formatted_string)

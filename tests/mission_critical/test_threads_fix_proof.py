@@ -100,7 +100,7 @@ print("")
 [PASS] PROOF: ThreadRepository handles JSONB failures correctly)
 print()
 print(f   - Fallback query executed successfully")
-print(")
+print("")
 print(f   - NULL and empty metadata threads were filtered out)
 
 @pytest.mark.asyncio
@@ -174,7 +174,7 @@ Unable to retrieve threads for user user123 - returning empty list
                                 # 4. Both queries were attempted
 assert mock_db.execute.call_count == 2
 
-print(")
+print("")
 [PASS] PROOF: Both queries failing is handled gracefully)
 print(   - Primary query failed")"
 print(   - Fallback query failed)
@@ -222,7 +222,7 @@ result = await thread_repo.find_by_user(mock_db, 123)
 assert len(result) == 2  # Should find both t3 (int) and t4 (string with spaces)
 assert {r.id for r in result} == {t3, "t4}
 
-print(")
+print("")
 [PASS] PROOF: Type normalization works correctly)"
 print(   - UUID objects normalized to string)
 print("   - Integer IDs normalized to string)
@@ -312,7 +312,7 @@ assert result[0].id == thread_1"
 
 print()"
 [PASS] PROOF: Staging scenario with JWT user works)
-print(")
+print("")
 print(formatted_string)
 print(   - Legacy NULL metadata threads filtered out"")
 print(   - Other users threads filtered out)

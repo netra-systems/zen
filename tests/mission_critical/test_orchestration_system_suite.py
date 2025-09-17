@@ -693,14 +693,14 @@ print( CYCLE:  Zero-downtime deployments, chaos engineering, observability)
 print([U+1F6E1][U+FE0F] Circuit breakers, health propagation, disaster recovery"")
 print(= * 80)"
 if result == 0:
-    print(")
+    print("")
  + "= * 80)"
 print( PASS:  ALL MISSION CRITICAL INFRASTRUCTURE TESTS PASSED)
 print([U+1F680] Orchestration system ready for ENTERPRISE SCALE deployment)
 print(" CHART:  System validated for 100+ containers, 99.9% uptime SLA")
 print(= * 80)
 else:
-    print(")
+    print("")
  + =" * 80)
 print( FAIL:  MISSION CRITICAL INFRASTRUCTURE TESTS FAILED)"
 print( ALERT:  Orchestration system NOT ready for production scale")

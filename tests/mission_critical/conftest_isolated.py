@@ -20,7 +20,7 @@ env = get_env()
 def disable_service_checks():
     """Disable all service availability checks for isolated tests."""
     with pytest.MonkeyPatch().context() as m:
-        m.setenv(SKIP_REAL_SERVICES", "true)
-        m.setenv(USE_REAL_SERVICES, false)
-        m.setenv(RUN_E2E_TESTS, "false")"
+        m.setenv('SKIP_REAL_SERVICES', 'true')
+        m.setenv('USE_REAL_SERVICES', 'false')
+        m.setenv('RUN_E2E_TESTS', 'false')
         yield

@@ -70,7 +70,7 @@ class TestWebSocketConnection:
         print( FAIL:  FAILED: Should have raised WebSocketContextValidationError)
         return False
         except WebSocketContextValidationError as e:
-        print(")
+        print("")
         assert Missing execution context in str(e")
         return True
         except Exception as e:
@@ -113,7 +113,7 @@ class TestWebSocketConnection:
 
     async def test_agent_notification_failure():
         Test that failed agent notifications raise WebSocketSendFailureError."
-        print(")
+        print("")
         PASS:  Testing: Agent notification failure...)"
 
                                             # Create mock WebSocket bridge that returns failure

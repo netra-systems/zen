@@ -1,9 +1,9 @@
-"
+"""
 Comprehensive Test Suite for SupervisorAgent Golden Pattern Compliance
 
 This test suite contains challenging tests to ensure SupervisorAgent properly follows
 the BaseAgent golden pattern, especially for WebSocket events and execution patterns.
-"
+"""
 
 import pytest
 import asyncio

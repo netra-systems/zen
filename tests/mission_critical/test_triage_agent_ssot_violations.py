@@ -339,7 +339,7 @@ class TestTriageAgentSSOTViolations(SSotAsyncTestCase):
         9. Custom error handling instead of agent_error_handler,
         10. Direct config file access patterns"
     
-        print(")
+        print("")
          + "=*80)"
         print(TRIAGE AGENT SSOT VIOLATIONS FOUND:)
         print(=*80)

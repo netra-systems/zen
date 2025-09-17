@@ -221,9 +221,9 @@ print(=*80)
 print()
 print(formatted_string")
 if final_status:
-    print(")
+    print("")
 print(formatted_string)
-print(")
+print("")
 print(=*80")
 
                                     # The NEW system MUST detect agent death or timeout

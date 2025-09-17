@@ -1338,9 +1338,9 @@ class DockerStabilityValidationTestSuite(unittest.TestCase):
         print(DOCKER STABILITY VALIDATION RESULTS)
         print(=*60)
         print(formatted_string")
-        print(")
+        print("")
         print(formatted_string)
-        print(")
+        print("")
     # Save report
         output_file = args.output_file or formatted_string
         with open(output_file, 'w') as f:

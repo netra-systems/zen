@@ -74,7 +74,7 @@ class SSOTTestRunner:
     def run_suite(self, suite_name: str, verbose: bool = False, stop_on_fail: bool = False) -> int:
         Run a specific test suite."
         if suite_name not in self.test_suites:
-        print(")
+        print("")
         print(formatted_string"")
         return 1
 
@@ -165,7 +165,7 @@ class SSOTTestRunner:
         print("ALL SSOT ORCHESTRATION TESTS PASSED!")
         print(SSOT Orchestration consolidation is BULLETPROOF!)"
         else:
-        print(")
+        print("")
         print(Fix failures before deploying!"")
 
         return len(failed_suites) == 0

@@ -313,8 +313,7 @@ class TestWebSocketConnection:
         Test that WebSocket reconnection follows proper event sequence.
         '''
         test_name = reconnection_event_sequence"
-        print(")
-
+        print("")
         try:
         event_sequence: List[tuple] = []
 
@@ -382,8 +381,7 @@ class TestWebSocketConnection:
         print(formatted_string")
         print("")
         print(formatted_string)"
-        print(")
-
+        print("")
         self.test_results['events_captured'][test_name] = {
         'sequence': actual_pattern[:5],
         'total_events': len(event_sequence)
@@ -476,7 +474,7 @@ class TestWebSocketConnection:
         raise AssertionError(formatted_string)"
 
         except Exception as e:
-        print(")
+        print("")
         self.test_results['failed'] += 1
         return False
         finally:
@@ -656,8 +654,7 @@ class TestWebSocketConnection:
         print(formatted_string")
         print("")
         print(formatted_string)"
-        print(")
-
+        print("")
                                                         # Clean up
         await emitter2.cleanup()
 
@@ -784,7 +781,7 @@ class TestWebSocketConnection:
 
     async def run_all_validations(self, browser: Browser) -> Dict[str, Any]:
         Run all WebSocket event validations including factory-based tests."
-        print(")
+        print("")
          + "= * 70)"
         print( SEARCH:  WebSocket Event Validation During Refresh (Browser + Factory))
         print(=" * 70")
@@ -801,7 +798,7 @@ class TestWebSocketConnection:
         try:
         await test_func()
         except Exception as e:
-        print(")
+        print("")
         self.test_results['failed'] += 1
         self.test_results['total'] += 1
 
@@ -822,7 +819,7 @@ class TestWebSocketConnection:
         try:
         await test_func(page)
         except Exception as e:
-        print(")
+        print("")
         self.test_results['failed'] += 1
         self.test_results['total'] += 1
         finally:
@@ -833,7 +830,7 @@ class TestWebSocketConnection:
          + = * 70)"
         print(" CHART:  VALIDATION RESULTS SUMMARY)
         print(= * 70)
-        print(")
+        print("")
         print(formatted_string")
         print()
 
@@ -882,7 +879,7 @@ class TestWebSocketConnection:
         factory_missing = self.REQUIRED_EVENTS - factory_captured
         print(f )
         [U+1F3ED] FACTORY PATTERN COMPLIANCE:")
-        print(")
+        print("")
         if factory_missing:
         print(formatted_string)
         else:
@@ -897,7 +894,7 @@ class TestWebSocketConnection:
         factory_missing = self.REQUIRED_EVENTS - factory_events if factory_events else set()
 
         if self.test_results['failed'] == 0 and not missing_required and not factory_missing:
-        print(")
+        print("")
         PASS:  ALL VALIDATIONS PASSED - WebSocket events working correctly!)
         print(   PASS:  Browser tests passed")"
         print(   PASS:  Factory tests passed)
@@ -906,7 +903,7 @@ class TestWebSocketConnection:
         all_missing = missing_required | factory_missing
         print(formatted_string)"
         if missing_required:
-        print(")
+        print("")
         if factory_missing:
         print(formatted_string"")
         else:

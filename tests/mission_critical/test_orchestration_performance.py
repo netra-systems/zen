@@ -839,9 +839,7 @@ class TestHighThroughputPerformance:
         utilization_ratio = result[backend_utilization"]["max] / max(1, result[backend_utilization][min]
         assert utilization_ratio < 5.0, formatted_string"
 
-        print(")
-
-
+        print("")
         if __name__ == __main__":"
         # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
         # Issue #1024: Unauthorized test runners blocking Golden Path

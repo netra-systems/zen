@@ -634,7 +634,7 @@ class FactoryPatternReliabilityTestHarness:
         return True
 
         except Exception as e:
-        print(")
+        print("")
         return False
 
     async def cleanup_all_emitters(self"):
@@ -941,7 +941,7 @@ print( PASS:  User experience reliability test passed)
 # @pytest.fixture
     async def test_comprehensive_reliability_suite_factory_pattern(self"):
     "Run the complete comprehensive reliability suite for factory pattern.
-print(")
+print("")
  + =" * 100)
 print([U+1F680] RUNNING COMPREHENSIVE WEBSOCKET RELIABILITY SUITE - FACTORY PATTERN)"
 print(=" * 100)
@@ -1010,7 +1010,7 @@ assert pool_stats[success_rate] >= 0.7, formatted_string
                                                                                                                             # Generate final report
 print(f )
 CELEBRATION:  COMPREHENSIVE RELIABILITY SUITE COMPLETED)"
-print(")
+print("")
 print(formatted_string"")
 print(")"
 print(formatted_string)

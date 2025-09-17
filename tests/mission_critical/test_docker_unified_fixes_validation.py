@@ -225,7 +225,7 @@ class TestDockerUnifiedFixes:
         print(DOCKER UNIFIED FIXES VALIDATION SUMMARY)
         print(=*60)
         for fix, status in fixes_validated.items("):
-        print(")
+        print("")
         print(=*60)
         print(ALL P0 AND P1 ISSUES RESOLVED  PASS: ")
         print(=*60")

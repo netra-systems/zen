@@ -1137,7 +1137,7 @@ print("")
 print(formatted_string)
 print()
 print(formatted_string")
-print(")
+print("")
 print(f PASS:  User Isolation: PERFECT - No violations detected)
 print(=" * 100)
 

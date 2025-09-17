@@ -73,7 +73,7 @@ return True
 
 def test_both_libraries_not_same():
     Verify that clickhouse-driver and clickhouse-connect are different packages."
-print(")
+print("")
  + "=*60)"
 print(Testing if both ClickHouse libraries are different...)
 
@@ -94,7 +94,7 @@ has_connect = 'clickhouse-connect' in package_dict
 
 print(fInstalled packages:)
 if has_driver:
-    print(")
+    print("")
 else:
     print(f  [X] clickhouse-driver NOT installed")
 

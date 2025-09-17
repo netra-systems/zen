@@ -87,7 +87,7 @@ class TestAgentDeathFixComplete:
 @pytest.mark.asyncio
     async def test_complete_death_detection_flow(self):
     Test the complete flow from agent execution to death detection."
-print(")
+print("")
  + "=*80)"
 print(TEST: Complete Agent Death Detection Flow)
 print(=*80)
@@ -231,7 +231,7 @@ for i in range(2):
 await tracker.heartbeat(exec_id)
 print()
         # Stop heartbeats to simulate death
-print(")
+print("")
 [U+1F534] Simulating agent death...")
         # Register death callback
 tracker.registry.on_state_change = death_callback
@@ -265,7 +265,7 @@ timeout_seconds=10
                 
 tracker.start_execution(exec_id)
 exec_ids.append(exec_id")
-print(")
+print("")
                 # Send initial heartbeats
 for exec_id in exec_ids:
     tracker.heartbeat(exec_id)
@@ -273,7 +273,7 @@ print(formatted_string)
                     # Kill 3 agents (stop their heartbeats)
 dead_agents = exec_ids[:3]
 alive_agents = exec_ids[3:]
-print(")
+print("")
                     # Keep alive agents beating, let others die
 for _ in range(12):
     await asyncio.sleep(1)
@@ -328,7 +328,7 @@ user_id='user_1',
 timeout_seconds=30
                                             
 tracker.start_execution(exec_id2)
-print(")
+print("")
                                             # Keep recovery agent alive
 for i in range(3):
     await asyncio.sleep(1)
@@ -581,7 +581,7 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 except ImportError:
     pytest.skip("Required components not available)
 class TimeoutDeathAgent(BaseAgent):
-    def __init__(self, execution_time=0.1, **kwargs):
+    async def __init__(self, execution_time=0.1, **kwargs):
         pass
         super().__init__(**kwargs)
         self.execution_time = execution_time
@@ -708,7 +708,7 @@ except ImportError:
     pytest.skip(Required components not available")"
 death_signals_received = []
 class DeathPropagationAgent(BaseAgent):
-    def __init__(self, **kwargs):
+    async def __init__(self, **kwargs):
         pass
         super().__init__(**kwargs)
         self.death_handlers = []
@@ -1136,7 +1136,7 @@ class ResourceExhaustionAgent(BaseAgent):
         initial_threads = threading.active_count()
         agent = create_death_prone_agent()
                                                         # Start background thread
-    def background_task():
+    async def background_task():
         time.sleep(10)
         thread = threading.Thread(target=background_task)
         thread.daemon = True

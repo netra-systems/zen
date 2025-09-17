@@ -61,20 +61,19 @@ class StagingEndpointTester:
         return response.status_code == 200
 
         except Exception as e:
-        print(")
+        print("")
         return False
 
     async def test_backend_service_health(self):
         Test backend service health endpoint."
         pass
-        print(")
+        print("")
         === BACKEND SERVICE HEALTH TEST ===)
 
         try:
         async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.get(formatted_string)"
-        print(")
-
+        print("")
         if response.status_code == 200:
         try:
         health_data = response.json()
@@ -115,8 +114,7 @@ class StagingEndpointTester:
         print(formatted_string")
 
         if response.status_code not in [404, 405]:  # Not found or method not allowed
-        print(")
-
+        print("")
                                                                             # 2. POST request with test data
         test_data = {
         email: test@staging.netrasystems.ai",
@@ -185,7 +183,7 @@ class StagingEndpointTester:
         # Verify locally
         decoded = jwt.decode(token, local_secret, algorithms=[HS256"], options={verify_aud: False}
         print(f[OK] Local verification successful:)"
-        print(")
+        print("")
         print(formatted_string"")
         print(")"
         print(formatted_string)
@@ -241,7 +239,7 @@ class StagingEndpointTester:
         print(formatted_string)"
         results.append(False)
         elif response.status_code in [200, 404]:  # 200 = success, 404 = endpoint not found (but auth worked)
-        print(")
+        print("")
         results.append(True)
         else:
         print(formatted_string"")

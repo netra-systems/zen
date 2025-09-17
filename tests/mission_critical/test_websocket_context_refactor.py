@@ -542,7 +542,7 @@ class TestPerformanceAndMemory(SSotAsyncTestCase):
                         # Calculate final throughput
         duration = time.perf_counter() - start_time
         throughput = event_count / duration
-        print(")
+        print("")
                         # Verify performance meets requirements
         self.assertGreater(throughput, 500, Throughput below 500 events/second target")"
                         # Check performance consistency
@@ -603,7 +603,7 @@ class TestPerformanceAndMemory(SSotAsyncTestCase):
         print(formatted_string")
         print("")
         print(formatted_string)"
-        print(")
+        print("")
         self.assertGreater(throughput, requirements['min_throughput_eps']
         self.assertLess(max_latency, requirements['max_latency_ms']
         self.assertLess(avg_memory, requirements['max_memory_kb_per_agent']

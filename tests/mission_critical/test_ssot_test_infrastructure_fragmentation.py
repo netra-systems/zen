@@ -537,8 +537,7 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
         print(fTotal Duplicate Instances: {fragmentation_metrics['total_duplicate_instances']}")
         print(fCompliance Percentage: {fragmentation_metrics['compliance_percentage']:.1f}%")
         print(fBusiness Risk Score: {fragmentation_metrics['business_risk_score']:.1f}/100)
-        print(")
-
+        print("")
         print(Fragmentation Breakdown:")
         print(f  Base Class Fragmentation: {fragmentation_metrics['base_class_fragmentation']:.2f}")
         print(f  Mock Implementation Fragmentation: {fragmentation_metrics['mock_fragmentation']:.2f}")

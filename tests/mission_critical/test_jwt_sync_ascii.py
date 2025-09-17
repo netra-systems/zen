@@ -500,7 +500,7 @@ class ASCIIAuthenticationTestSuite:
         return success
 
         except Exception as e:
-        self._ascii_safe_print(")
+        self._ascii_safe_print("")
         return False
 
     def test_token_expiry_handling_ascii(self) -> bool:
@@ -1000,7 +1000,7 @@ class ASCIIAuthenticationTestSuite:
 
         total_duration = time.time() - start_time
 
-        print(")
+        print("")
          + = * 80)
         print(COMPREHENSIVE TEST RESULTS SUMMARY)"
         print("= * 80)
@@ -1011,7 +1011,7 @@ class ASCIIAuthenticationTestSuite:
         print("")
         print(formatted_string)"
 
-        print(")
+        print("")
         print(formatted_string"")
         print(")"
 
@@ -1039,7 +1039,7 @@ class ASCIIAuthenticationTestSuite:
         suite._ascii_safe_print(   System performs well under load")
         return True
         else:
-        suite._ascii_safe_print(")
+        suite._ascii_safe_print("")
         [WARNING] COMPREHENSIVE ASCII TEST SUITE: ISSUES DETECTED)
         suite._ascii_safe_print(   Some critical authentication or user journey issues found")"
         suite._ascii_safe_print(   Review failed tests and fix before production deployment)

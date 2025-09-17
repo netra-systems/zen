@@ -123,7 +123,7 @@ class TestWebSocketConnectionRaceCondition:
         # Simulate messages queued during cold start
         stored_messages = []
 
-        def store_message(u, m, r):
+        async def store_message(u, m, r):
             stored_messages.append((u, m, r))
 
         with patch.object(manager, '_store_failed_message', new_callable=AsyncMock) as mock_store:

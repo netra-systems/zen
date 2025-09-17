@@ -174,7 +174,7 @@ for failure in report['health_check_failures']:
     assert failure['reported_status']['status'] == 'healthy', \
 Health service correctly detected failure (this shouldnt happen with the bug!)"
             # Print detailed failure report
-    print(")
+    print("")
  + ="*80)
 print(CRITICAL BUG REPRODUCTION - AGENT DEATH AFTER TRIAGE)
 print("=*80)
@@ -242,7 +242,7 @@ assert any( )
 msg.get('data', {}.get('status') == '...'
 for msg in messages if msg['type'] == 'agent_response'
 ), Empty agent response sent (bug signature)
-print(")
+print("")
  + =*80)"
 print("WEBSOCKET REMAINS 'HEALTHY' DESPITE AGENT DEATH)
 print(=*80")"
@@ -375,14 +375,14 @@ failed_requirements = [
 check for check, implemented in required_checks.items()
 if not implemented
         
-    print(")
+    print("")
  + ="*80)
 print(MISSING DEATH DETECTION MECHANISMS)"
 print(="*80)
 for requirement in failed_requirements:
     print("")
 print(=*80)"
-print(")
+print("")
 print(CRITICAL: No mechanisms to detect or recover from agent death!"")
 print(=*80)"
             # This assertion WILL FAIL showing we need these mechanisms

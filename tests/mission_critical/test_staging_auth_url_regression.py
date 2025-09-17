@@ -431,7 +431,7 @@ class TestCriticalURLValidation:
                                                                 # Run smoke test first
         try:
         test_smoke_staging_configuration()
-        print(")
+        print("")
         [U+2713] Smoke test passed - running full test suite...
         ")
         except AssertionError as e:

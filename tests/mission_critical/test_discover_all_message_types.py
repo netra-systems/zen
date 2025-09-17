@@ -146,10 +146,10 @@ class TestMessageTypeCompleteness:
         )
         print()
         print(formatted_string")
-        print(")
+        print("")
         print(formatted_string)
         if missing:
-        print(")
+        print("")
         for msg_type in sorted(missing):
         print(formatted_string")
             # Generate suggested mappings
@@ -273,15 +273,15 @@ if unmapped:
     print()"
 WARNING: Critical frontend message types not mapped:)
 for msg_type, desc in unmapped:
-    print(")
+    print("")
                             # These are critical for business value, so fail the test
 assert False, formatted_string
 else:
-    print(")
+    print("")
 SUCCESS: All critical frontend message types are properly mapped)
 def test_generate_comprehensive_mapping_report(self"):
     Generate a comprehensive report of all message type mappings."
-print(")
+print("")
  + ="*60)
 print(COMPREHENSIVE MESSAGE TYPE MAPPING REPORT)
 print("=*60)
@@ -295,7 +295,7 @@ for attr in dir(MessageType):
 if isinstance(value, str):
     enum_values.append((attr, value))
 for attr, value in sorted(enum_values):
-    print(")
+    print("")
                     # Current LEGACY_MESSAGE_TYPE_MAP
 print(formatted_string"")
 for key in sorted(LEGACY_MESSAGE_TYPE_MAP.keys()):

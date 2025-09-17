@@ -48,7 +48,7 @@ class MockWebSocket:
 
     def test_error_handling_improvements():
         Test that WebSocket manager handles errors gracefully"
-        print(")
+        print("")
         [PASS] TEST 1: Error Handling Improvements)"
 
         ws_manager = WebSocketManager()
@@ -88,7 +88,7 @@ class MockWebSocket:
     def test_concurrent_connections():
         Test that multiple connections are isolated"
         pass
-        print(")
+        print("")
         [PASS] TEST 2: Concurrent Connection Isolation)
 
         ws_manager = WebSocketManager()
@@ -264,7 +264,7 @@ class MockWebSocket:
         total = len(results)
 
         if passed == total:
-        print(")
+        print("")
         print("")
         BUSINESS VALUE CONFIRMED:)
         print(- Chat reliability enhanced with error recovery)
@@ -272,7 +272,7 @@ class MockWebSocket:
         print(- Memory leaks prevented)
         print(- Connection health monitoring works)
         print(- Message resilience during failures")
-        print(")
+        print("")
         >>> WebSocket improvements are PRODUCTION READY!)
         return 0
         else:

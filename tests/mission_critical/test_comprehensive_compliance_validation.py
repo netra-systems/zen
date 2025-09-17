@@ -142,7 +142,7 @@ class TestWebSocketConnection:
         mock_violations = self._validate_mock_policy(")
 
     # 2. Environment Isolation Validation
-        print(")
+        print("")
         [U+1F3D7][U+FE0F] 2. ENVIRONMENT ISOLATION VALIDATION)"
         env_violations = self._validate_environment_isolation()
 
@@ -157,7 +157,7 @@ class TestWebSocketConnection:
         service_status = self._validate_real_service_connections()
 
     # 5. WebSocket Agent Events Validation
-        print(")
+        print("")
         CYCLE:  5. WEBSOCKET AGENT EVENTS VALIDATION)
         websocket_status = self._validate_websocket_agent_events()
 
@@ -221,8 +221,7 @@ class TestWebSocketConnection:
         compliance_rate = len(compliant_files) / (len(compliant_files) + len(violations)) if (len(compliant_files) + len(violations)) > 0 else 1.0
 
         print(formatted_string")
-        print(")
-
+        print("")
         return {
         'violations': violations,
         'compliant_files': compliant_files,
@@ -248,8 +247,7 @@ class TestWebSocketConnection:
         total_violations = compliance_data.get('total_violations', 0)
 
         print(formatted_string)
-        print(")
-
+        print("")
         return {
         'compliance_score': compliance_score,
         'total_violations': total_violations,
@@ -331,7 +329,7 @@ class TestWebSocketConnection:
         if event in output and 'PASSED' in output:
         events_working.append(event)
 
-        print(")
+        print("")
         print(formatted_string)
 
         return {
@@ -673,7 +671,7 @@ class TestComprehensiveCompliance:
         PASS:  COMPLIANCE VALIDATION PASSED)
         print()
         print(formatted_string")
-        print(")
+        print("")
         print(formatted_string)
         else:
                     # Generate failure report

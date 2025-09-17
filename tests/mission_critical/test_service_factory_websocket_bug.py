@@ -121,7 +121,7 @@ class TestServiceFactoryWebSocketBug:
         print(= * 60)
         test_suite = TestServiceFactoryWebSocketBug()
                 # Test 1: Direct agent service creation failure
-        print(")
+        print("")
         Test 1: Agent service creation properly fails...")
         try:
         test_suite.test_agent_service_creation_properly_fails()
@@ -143,6 +143,6 @@ class TestServiceFactoryWebSocketBug:
         Test 4: Demonstrating correct initialization with dependencies...)
         test_suite.test_expected_behavior_with_proper_dependencies()
         print([U+2713] Services work correctly when proper dependencies are provided)"
-        print(")
+        print("")
          + =" * 60)
         print("Bug reproduction complete - service factory needs to be fixed!"")

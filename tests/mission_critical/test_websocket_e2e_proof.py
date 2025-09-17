@@ -161,7 +161,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
          + =*70)
         print("END-TO-END FACTORY-BASED WEBSOCKET FLOW PROOF")
         print(=*70)"
-        print(")
+        print("")
         print(formatted_string"")
         print(")"
         print(formatted_string)
@@ -176,7 +176,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         [U+1F4E1] CRITICAL EVENTS VALIDATED:")"
         required_events = [agent_started, agent_thinking, tool_executing, tool_completed", agent_completed]
         for i, event_type in enumerate(required_events, 1):
-        print(")
+        print("")
         print()
         [U+1F510] USER ISOLATION VERIFIED:)"
         print("   PASS:  Per-user execution context)
@@ -188,7 +188,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         print("   PASS:  All events serialize to JSON)
         print(   PASS:  All events deserialize correctly)
         print(   PASS:  No data loss in serialization")
-        print(")
+        print("")
         PASS:  FACTORY-BASED FLOW COMPLETELY PROVEN!)
         print(=*70")"
     def test_factory_user_isolation(self):
@@ -377,7 +377,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         print(formatted_string"")
         except (TypeError, ValueError) as e:
         self.fail("
-        print(")
+        print("")
         PASS:  ALL EVENT TYPES JSON SERIALIZATION VERIFIED)"
     def _create_mock_connection_pool(self):
         "Create mock connection pool for testing.

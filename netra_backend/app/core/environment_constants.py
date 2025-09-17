@@ -27,7 +27,7 @@ from shared.isolated_environment import get_env
 
 # Import unified config for non-bootstrap functionality
 try:
-    from netra_backend.app.core.configuration.base import get_unified_config
+    from netra_backend.app.config import get_config as get_unified_config
     UNIFIED_CONFIG_AVAILABLE = True
 except ImportError:
     UNIFIED_CONFIG_AVAILABLE = False

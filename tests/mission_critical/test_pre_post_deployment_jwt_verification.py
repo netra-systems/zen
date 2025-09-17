@@ -160,8 +160,7 @@ class DeploymentAuthTestSuite:
         self.metrics.append(metrics)
 
         try:
-        print(")
-
+        print("")
         # Backup environment
         self._backup_environment()
 
@@ -328,7 +327,7 @@ class DeploymentAuthTestSuite:
                             # Report results
         print(f )
         === ZERO-DOWNTIME DEPLOYMENT RESULTS ===)"
-        print(")
+        print("")
         print(formatted_string"")
         print(")"
         print(formatted_string)
@@ -363,8 +362,7 @@ class DeploymentAuthTestSuite:
         self.metrics.append(metrics)
 
         try:
-        print(")
-
+        print("")
         verification_results = []
 
         # Service health verification
@@ -512,8 +510,7 @@ class DeploymentAuthTestSuite:
         print(formatted_string")
         print("")
         print(formatted_string)"
-        print(")
-
+        print("")
         for scenario, success in rollback_results:
         status = [PASS]" if success else "[FAIL]
         print(formatted_string)

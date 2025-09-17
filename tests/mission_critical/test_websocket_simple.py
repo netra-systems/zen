@@ -289,22 +289,22 @@ class MockConnectionPool:
         test_results = []
         try:
         # Test 1: Factory emitter creation
-        print(")
+        print("")
         [TEST 1] Factory WebSocket Emitter Creation)
         result1 = await test_factory_websocket_emitter_creation()
         test_results.append((Factory Creation, result1))"
         # Test 2: All required events
-        print(")
+        print("")
         [TEST 2] All 5 Required WebSocket Events)"
         result2 = await test_all_required_websocket_events()
         test_results.append((Required Events, result2))
         # Test 3: JSON serialization
-        print(")
+        print("")
         [TEST 3] WebSocket Event JSON Serialization)
         result3 = await test_websocket_event_json_serialization()
         test_results.append((JSON Serialization, result3))"
         # Summary
-        print(")
+        print("")
          + =" * 60)
         print(TEST RESULTS SUMMARY:)
         print("= * 60)
@@ -314,7 +314,7 @@ class MockConnectionPool:
         print(formatted_string)
         if not result:
         all_passed = False
-        print(")
+        print("")
          + = * 60)"
         if all_passed:
         print("[SUCCESS] All WebSocket event tests passed!)

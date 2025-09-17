@@ -56,7 +56,7 @@ class TestWebSocketConnection:
     # ========================================================================
     # SCENARIO 1: JSONB Query Fails (Exact Staging Error)
     # ========================================================================
-        print(")
+        print("")
         [SCENARIO 1] Simulating Staging JSONB Failure)
         print(- * 50")"
 
@@ -85,9 +85,9 @@ class TestWebSocketConnection:
         with patch('netra_backend.app.services.database.thread_repository.logger') as mock_logger:
         result = await thread_repo.find_by_user(mock_db, jwt_user_id)
 
-        print(")
+        print("")
         print(formatted_string)
-        print(")
+        print("")
         print(formatted_string)
 
         # Verify logging happened
@@ -99,7 +99,7 @@ class TestWebSocketConnection:
         # ========================================================================
         # SCENARIO 2: NULL Metadata Handling
         # ========================================================================
-        print(")
+        print("")
         [SCENARIO 2] Handling NULL and Malformed Metadata)
         print(- * 50")"
 
@@ -157,8 +157,7 @@ class TestWebSocketConnection:
         print("Testing UUID normalization...)
         result = await thread_repo.find_by_user(mock_db, 550e8400-e29b-41d4-a716-446655440000)
 
-        print(")
-
+        print("")
         # Test integer normalization
         mock_db.execute.side_effect = [
         Exception(Force fallback),
@@ -172,7 +171,7 @@ class TestWebSocketConnection:
         # ========================================================================
         # SCENARIO 4: Both Queries Fail (Worst Case)
         # ========================================================================
-        print(")
+        print("")
         [SCENARIO 4] Both Primary and Fallback Fail")
         print(- * 50)
 
@@ -190,8 +189,7 @@ class TestWebSocketConnection:
         print(f )
         [SUCCESS] SUCCESS: Application didn't crash!')
         print(formatted_string")
-        print(")
-
+        print("")
             # ========================================================================
             # SCENARIO 5: Normal Operation (No Errors)
             # ========================================================================
@@ -276,7 +274,7 @@ class TestWebSocketConnection:
         try:
         await handle_route_with_error_logging(failing_handler, listing threads)
         except HTTPException as e:
-        print(")
+        print("")
         assert Database connection failed not in e.detail
         assert "Failed to list threads in e.detail
 
@@ -290,7 +288,7 @@ class TestWebSocketConnection:
         asyncio.run(demonstrate_fix_working())
         asyncio.run(demonstrate_error_handling()")
 
-        print(")
+        print("")
         >>> DEMONSTRATION COMPLETE - FIX IS PROVEN TO WORK! <<<
         )"
         pass
