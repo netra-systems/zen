@@ -16,7 +16,7 @@ Line count: <300 lines (architectural requirement)
 Function limit:  <= 8 lines per function (architectural requirement)
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID, uuid4
@@ -114,7 +114,7 @@ class MCPConnection(BaseModel):
     session_id: Optional[str] = Field(default=None)
     capabilities: Dict[str, Any] = Field(default_factory=dict)
     status: ConnectionStatus = Field(default=ConnectionStatus.DISCONNECTED)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     last_activity: Optional[datetime] = Field(default=None)
     error_count: int = Field(default=0, ge=0)
     
@@ -159,7 +159,7 @@ class MCPToolResult(BaseModel):
     is_error: bool = Field(default=False)
     error_message: Optional[str] = Field(default=None)
     execution_time_ms: int = Field(..., ge=0)
-    executed_at: datetime = Field(default_factory=datetime.utcnow)
+    executed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     cached: bool = Field(default=False)
     
     @field_validator('error_message')
@@ -230,7 +230,7 @@ class MCPOperationContext(BaseModel):
     operation_type: str = Field(..., min_length=1)
     user_id: Optional[str] = Field(default=None)
     trace_id: Optional[str] = Field(default=None)
-    started_at: datetime = Field(default_factory=datetime.utcnow)
+    started_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     timeout_ms: int = Field(default=30000, ge=1000)
     metadata: Dict[str, Any] = Field(default_factory=dict)
     

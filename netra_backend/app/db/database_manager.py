@@ -102,7 +102,7 @@ class DatabaseManager:
                 "pool_recycle": pool_recycle,
                 "pool_timeout": pool_timeout,  # Add timeout to prevent hanging
                 "connect_args": {
-                    "command_timeout": 30,  # 30 second query timeout
+                    "command_timeout": 120,  # Issue #1278: 120 second query timeout for Cloud Run infrastructure delays
                     "server_settings": {
                         "application_name": application_name
                     }
@@ -168,8 +168,8 @@ class DatabaseManager:
         # Issue #1278: Infrastructure-aware retry configuration
         if environment in ["staging", "production"]:
             # Cloud environments need more retries and longer timeouts due to VPC/infrastructure delays
-            max_retries = max(max_retries, 5)  # Minimum 5 retries for cloud
-            base_timeout = 10.0  # 10 second base timeout for infrastructure delays
+            max_retries = max(max_retries, 7)  # Issue #1278: Minimum 7 retries for cloud infrastructure resilience
+            base_timeout = 30.0  # Issue #1278: 30 second base timeout for Cloud Run infrastructure delays
             retry_backoff = 2.0  # 2 second exponential backoff
         else:
             base_timeout = 5.0

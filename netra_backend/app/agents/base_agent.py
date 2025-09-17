@@ -1845,6 +1845,10 @@ class BaseAgent(ABC):
         # Inject context-scoped dependencies (following factory pattern from design doc)
         agent._user_context = context
         
+        # CRITICAL FIX: Set user_context property for consistent factory behavior
+        # This ensures WebSocket integration works and tests pass
+        agent.set_user_context(context)
+        
         # Apply agent-specific configuration
         if agent_config:
             for key, value in agent_config.items():
