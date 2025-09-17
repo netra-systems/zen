@@ -191,10 +191,7 @@ async def validate_configuration(
             if not env.get("SSL_ENABLED"):
                 warnings.append("SSL is not enabled")
         
-        # Validate JWT configuration
-        jwt_secret = env.get("JWT_SECRET_KEY")
-        if jwt_secret and len(jwt_secret) < 32:
-            warnings.append("JWT_SECRET_KEY should be at least 32 characters")
+        # JWT validation removed - JWT operations delegated to auth service (SSOT compliance)
         
     except Exception as e:
         logger.error(f"Configuration validation failed: {e}")
