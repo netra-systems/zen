@@ -307,7 +307,7 @@ class RegistryTestAgent(BaseAgent):
         mock_llm = MagicMock(spec=LLMManager)
         mock_dispatcher = MagicMock(spec=ToolDispatcher)
         mock_dispatcher.has_websocket_support = True
-        mock_dispatcher.executor = Magic        mock_dispatcher.diagnose_websocket_wiring = MagicMock(return_value={"critical_issues: []}
+        mock_dispatcher.executor = MagicMock(); mock_dispatcher.diagnose_websocket_wiring = MagicMock(return_value={"critical_issues: []}
 
         registry = AgentRegistry()
 

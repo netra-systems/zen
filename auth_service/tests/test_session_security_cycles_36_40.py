@@ -80,7 +80,7 @@ class TestSessionSecurity:
         user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 
         # Generate client fingerprint
-        fingerprint_data = "formatted_string"
+        fingerprint_data = ""
         client_fingerprint = hashlib.sha256(fingerprint_data.encode()).hexdigest()
 
         # Create session
@@ -124,7 +124,7 @@ class TestSessionSecurity:
         logger.info("Session hijacking prevention verified")
 
         @pytest.mark.cycle_37
-        @pytest.fixture
+        # @pytest.fixture
     async def test_concurrent_session_limit_prevents_account_sharing(self, session_manager):
         '''
         Cycle 37: Test concurrent session limit prevents unauthorized account sharing.
@@ -145,15 +145,15 @@ class TestSessionSecurity:
         for i in range(max_concurrent_sessions):
         session_id = await session_manager.create_session( )
         user_id=user_id,
-        client_ip="formatted_string",
-        user_agent="formatted_string",
-        device_id="formatted_string"
+        client_ip="",
+        user_agent="",
+        device_id=""
                     
         session_ids.append(session_id)
 
                     # Verify all sessions are active
         active_sessions = await session_manager.get_active_sessions(user_id)
-        assert len(active_sessions) == max_concurrent_sessions, "formatted_string"
+        assert len(active_sessions) == max_concurrent_sessions, ""
 
                     # Attempt to create one more session (should exceed limit)
         with pytest.raises(ValueError, match="Maximum concurrent sessions exceeded"):
@@ -185,7 +185,7 @@ class TestSessionSecurity:
         logger.info("Concurrent session limit verified")
 
         @pytest.mark.cycle_38
-        @pytest.fixture
+        # @pytest.fixture
     async def test_session_timeout_enforcement_prevents_stale_access(self, session_manager):
         '''
         Cycle 38: Test session timeout enforcement prevents stale session access.
@@ -224,7 +224,7 @@ class TestSessionSecurity:
         logger.info("Session timeout enforcement verified")
 
         @pytest.mark.cycle_39
-        @pytest.fixture
+        # @pytest.fixture
     async def test_session_activity_tracking_detects_anomalous_behavior(self, session_manager, security_manager):
         '''
         Cycle 39: Test session activity tracking detects anomalous user behavior.
@@ -244,7 +244,7 @@ class TestSessionSecurity:
                                         
 
                                         # Simulate normal activity pattern
-        normal_activities = [ )
+        normal_activities = [ ]
         {"action": "page_view", "resource": "/dashboard"},
         {"action": "page_view", "resource": "/profile"},
         {"action": "api_call", "resource": "/api/user/data"},
@@ -263,7 +263,7 @@ class TestSessionSecurity:
         assert not activity_analysis["anomaly_detected"], "Normal activity flagged as anomalous"
 
                                             Simulate anomalous activity (rapid API calls from different IP)
-        anomalous_activities = [ )
+        anomalous_activities = [ ]
         {"action": "api_call", "resource": "/api/admin/users", "ip": "10.0.0.50"},
         {"action": "api_call", "resource": "/api/admin/delete_user", "ip": "10.0.0.50"},
         {"action": "api_call", "resource": "/api/admin/create_admin", "ip": "10.0.0.50"},
@@ -291,7 +291,7 @@ class TestSessionSecurity:
         logger.info("Session activity tracking verified")
 
         @pytest.mark.cycle_40
-        @pytest.fixture
+        # @pytest.fixture
     async def test_session_invalidation_cascade_prevents_orphaned_sessions(self, session_manager):
         '''
         Cycle 40: Test session invalidation cascade prevents orphaned sessions.
@@ -308,15 +308,15 @@ class TestSessionSecurity:
         for i in range(3):
         session_id = await session_manager.create_session( )
         user_id=user_id,
-        client_ip="formatted_string",
-        user_agent="formatted_string",
-        device_id="formatted_string"
+        client_ip="",
+        user_agent="",
+        device_id=""
                                                         
         session_ids.append(session_id)
 
                                                         # Verify all sessions are active
         active_sessions = await session_manager.get_active_sessions(user_id)
-        assert len(active_sessions) == 3, "formatted_string"
+        assert len(active_sessions) == 3, ""
 
                                                         # Trigger security event requiring session invalidation (e.g., password change)
         await session_manager.invalidate_all_user_sessions( )
@@ -332,7 +332,7 @@ class TestSessionSecurity:
 
                                                                 # Verify no active sessions remain
         remaining_sessions = await session_manager.get_active_sessions(user_id)
-        assert len(remaining_sessions) == 0, "formatted_string"
+        assert len(remaining_sessions) == 0, ""
 
                                                                 # Create new session after invalidation
         new_session_id = await session_manager.create_session( )

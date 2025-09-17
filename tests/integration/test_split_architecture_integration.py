@@ -126,11 +126,11 @@ class MockAgent(BaseAgent):
 
     async def execute(self, state: DeepAgentState, run_id: str) -> DeepAgentState:
         """Mock execution with comprehensive tracking."""
-        execution_id = "formatted_string"
+        execution_id = ""
         self._execution_count += 1
 
     # Record execution details for isolation validation
-        execution_record = { )
+        execution_record = { }
         'execution_id': execution_id,
         'run_id': run_id,
         'user_id': getattr(self, 'user_id', 'unknown'),
@@ -146,28 +146,28 @@ class MockAgent(BaseAgent):
         if hasattr(self, '_websocket_adapter') and self._websocket_adapter:
         try:
         await self.emit_thinking("Processing user request", step_number=1)
-        self.websocket_events_sent.append({ ))
+        self.websocket_events_sent.append({ })
         'event_type': 'agent_thinking',
         'run_id': run_id,
         'timestamp': datetime.now(timezone.utc),
         'user_context': getattr(self, 'user_id', 'unknown')
             
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("")
 
                 # Simulate processing time and memory usage
         await asyncio.sleep(0.1)  # Simulate work
 
                 # Record memory usage during execution
         memory_during = psutil.Process().memory_info().rss
-        self.memory_footprint.append({ ))
+        self.memory_footprint.append({ })
         'execution_id': execution_id,
         'memory_peak': memory_during,
         'timestamp': datetime.now(timezone.utc)
                 
 
                 # Update execution record with completion details
-        execution_record.update({ ))
+        execution_record.update({ })
         'end_time': datetime.now(timezone.utc),
         'memory_after': psutil.Process().memory_info().rss,
         'memory_delta': memory_during - execution_record['memory_before'],
@@ -176,9 +176,9 @@ class MockAgent(BaseAgent):
 
                 # Return modified state to validate state isolation
         result_state = DeepAgentState( )
-        user_message="formatted_string",
+        user_message="",
         thread_id=getattr(state, 'thread_id', 'unknown'),
-        additional_context={ )
+        additional_context={ }
         'agent_execution_id': execution_id,
         'processed_at': datetime.now(timezone.utc).isoformat(),
         'agent_user_id': getattr(self, 'user_id', 'unknown')
@@ -189,7 +189,7 @@ class MockAgent(BaseAgent):
 
     def get_execution_summary(self) -> Dict[str, Any]:
         """Get summary of agent execution for validation."""
-        return { )
+        return { }
         'agent_name': self.name,
         'agent_id': getattr(self, 'agent_id', 'unknown'),
         'user_id': getattr(self, 'user_id', 'unknown'),
@@ -292,7 +292,7 @@ class ConcurrentUserTestResult:
 
     async def mock_notify_agent_started(run_id, agent_name, context=None):
         pass
-        event = { )
+        event = { }
         'type': 'agent_started',
         'run_id': run_id,
         'agent_name': agent_name,
@@ -306,7 +306,7 @@ class ConcurrentUserTestResult:
 
     async def mock_notify_agent_thinking(run_id, agent_name, reasoning, step_number=None, progress_percentage=None):
         pass
-        event = { )
+        event = { }
         'type': 'agent_thinking',
         'run_id': run_id,
         'agent_name': agent_name,
@@ -322,7 +322,7 @@ class ConcurrentUserTestResult:
 
     async def mock_notify_tool_executing(run_id, agent_name, tool_name, parameters=None):
         pass
-        event = { )
+        event = { }
         'type': 'tool_executing',
         'run_id': run_id,
         'agent_name': agent_name,
@@ -337,7 +337,7 @@ class ConcurrentUserTestResult:
 
     async def mock_notify_tool_completed(run_id, agent_name, tool_name, result=None, execution_time_ms=None):
         pass
-        event = { )
+        event = { }
         'type': 'tool_completed',
         'run_id': run_id,
         'agent_name': agent_name,
@@ -353,7 +353,7 @@ class ConcurrentUserTestResult:
 
     async def mock_notify_agent_completed(run_id, agent_name, result=None, execution_time_ms=None):
         pass
-        event = { )
+        event = { }
         'type': 'agent_completed',
         'run_id': run_id,
         'agent_name': agent_name,
@@ -368,7 +368,7 @@ class ConcurrentUserTestResult:
 
     async def mock_notify_agent_error(run_id, agent_name, error, error_context=None):
         pass
-        event = { )
+        event = { }
         'type': 'agent_error',
         'run_id': run_id,
         'agent_name': agent_name,
@@ -423,7 +423,7 @@ class ConcurrentUserTestResult:
         name="data"
     
 
-        registry.agents = { )
+        registry.agents = { }
         "triage": triage_agent,
         "data": data_agent
     
@@ -441,7 +441,7 @@ class ConcurrentUserTestResult:
         return registry
 
 
-        @pytest.fixture
+        # @pytest.fixture
     async def test_database_sessions():
         """Create test database sessions for isolation testing."""
         # Use in-memory SQLite for testing
@@ -466,7 +466,7 @@ class ConcurrentUserTestResult:
         try:
         await session.close()
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("")
 
         await engine.dispose()
 
@@ -516,8 +516,8 @@ registry = create_test_registry()
 
                 # Register multiple agents
 for i in range(10):
-    agent_name = "formatted_string"
-registry.register(agent_name, MockAgent, "formatted_string")
+    agent_name = ""
+registry.register(agent_name, MockAgent, "")
 
 registry.freeze()
 
@@ -526,11 +526,11 @@ async def concurrent_reader(reader_id: int) -> Dict[str, Any]:
     results = []
 for _ in range(100):
         # Read different agents concurrently
-agent_name = "formatted_string"
+agent_name = ""
 agent_class = registry.get_agent_class(agent_name)
 agent_info = registry.get_agent_info(agent_name)
 
-results.append({ ))
+results.append({ })
 'reader_id': reader_id,
 'agent_name': agent_name,
 'class_found': agent_class is not None,
@@ -551,9 +551,9 @@ assert total_reads == 20 * 100  # 20 readers  x  100 reads each
 
 for results in all_results:
     for result in results:
-        assert result['class_found'], "formatted_string"
-assert result['info_found'], "formatted_string"
-assert result['class_correct'], "formatted_string"
+        assert result['class_found'], ""
+assert result['info_found'], ""
+assert result['class_correct'], ""
 
 @pytest.mark.asyncio
     async def test_registry_dependency_validation(self):
@@ -710,9 +710,9 @@ factory.configure(mock_agent_registry, mock_websocket_bridge)
 contexts = []
 for i in range(3):
     context = await factory.create_user_execution_context( )
-user_id="formatted_string",
-thread_id="formatted_string",
-run_id="formatted_string",
+user_id="",
+thread_id="",
+run_id="",
 db_session=test_database_sessions[i]
                     
 contexts.append(context)
@@ -727,10 +727,10 @@ agents.append(agent)
 tasks = []
 for i, (agent, context) in enumerate(zip(agents, contexts)):
     state = DeepAgentState( )
-user_message="formatted_string",
-thread_id="formatted_string"
+user_message="",
+thread_id=""
                             
-tasks.append(agent.execute(state, "formatted_string"))
+tasks.append(agent.execute(state, ""))
 
 results = await asyncio.gather(*tasks)
 
@@ -746,8 +746,8 @@ events_by_run[run_id].append(event)
 assert len(events_by_run) == 3
 
 for i in range(3):
-    run_id = "formatted_string"
-thread_id = "formatted_string"
+    run_id = ""
+thread_id = ""
 
 assert run_id in events_by_run
 user_events = events_by_run[run_id]
@@ -758,7 +758,7 @@ assert len(thinking_events) > 0
 
                                         # All events for this user should have correct thread_id
 for event in user_events:
-    assert event['thread_id'] == thread_id, "formatted_string"
+    assert event['thread_id'] == thread_id, ""
 
                                             # Cleanup all contexts
 for context in contexts:
@@ -777,8 +777,8 @@ num_concurrent_users = 10
 executions_per_user = 5
 
 async def execute_user_workflow(user_index: int) -> ConcurrentUserTestResult:
-    user_id = "formatted_string"
-thread_id = "formatted_string"
+    user_id = ""
+thread_id = ""
 
 start_time = time.time()
 websocket_events = []
@@ -789,7 +789,7 @@ success = True
 try:
         # Execute multiple operations for this user
 for exec_index in range(executions_per_user):
-    run_id = "formatted_string"
+    run_id = ""
 
             # Use scoped execution context
 async with factory.user_execution_scope( )
@@ -803,7 +803,7 @@ db_session=test_database_sessions[user_index % len(test_database_sessions)]
 agent = await factory.create_agent_instance("triage", context)
 
 state = DeepAgentState( )
-user_message="formatted_string",
+user_message="",
 thread_id=thread_id
                 
 
@@ -812,11 +812,11 @@ result = await agent.execute(state, run_id)
                 # Validate result isolation
 if user_id not in result.user_message:
     success = False
-error_message = "formatted_string"
+error_message = ""
 
 if result.additional_context.get("agent_user_id") != user_id:
     success = False
-error_message = "formatted_string"
+error_message = ""
 
                         # Collect agent execution data
 agent_summary = agent.get_execution_summary()
@@ -824,13 +824,13 @@ agent_logs.append(agent_summary)
 
                         # Collect WebSocket events for this user
 for event in mock_websocket_bridge.events_sent:
-    if event['run_id'].startswith("formatted_string"):
+    if event['run_id'].startswith(""):
         websocket_events.append(event)
 
 except Exception as e:
     success = False
 error_message = str(e)
-logger.error("formatted_string")
+logger.error("")
 
 execution_time_ms = (time.time() - start_time) * 1000
 
@@ -838,7 +838,7 @@ await asyncio.sleep(0)
 return ConcurrentUserTestResult( )
 user_id=user_id,
 thread_id=thread_id,
-run_id="formatted_string",
+run_id="",
 success=success,
 execution_time_ms=execution_time_ms,
 websocket_events_received=websocket_events,
@@ -850,24 +850,24 @@ error_message=error_message
                                     
 
                                     # Execute all users concurrently
-logger.info("formatted_string")
+logger.info("")
 start_time = time.time()
 
 tasks = [execute_user_workflow(i) for i in range(num_concurrent_users)]
 results = await asyncio.gather(*tasks, return_exceptions=True)
 
 total_time = time.time() - start_time
-logger.info("formatted_string")
+logger.info("")
 
                                     # Analyze results
 successful_results = [item for item in []]
 failed_results = [item for item in []]
 
-logger.info("formatted_string")
-logger.info("formatted_string")
+logger.info("")
+logger.info("")
 
                                     # Verify success criteria
-assert len(successful_results) >= (num_concurrent_users * 0.8), "formatted_string"
+assert len(successful_results) >= (num_concurrent_users * 0.8), ""
 
                                     # Verify isolation - each user should have their own events
 all_websocket_events = []
@@ -880,7 +880,7 @@ for event in all_websocket_events:
     run_id = event['run_id']
 user_match = run_id.split('_')
 if len(user_match) >= 3:
-    user_key = "formatted_string"  # stress_user_XXX
+    user_key = ""  # stress_user_XXX
 if user_key not in events_by_user:
     events_by_user[user_key] = []
 events_by_user[user_key].append(event)
@@ -888,9 +888,9 @@ events_by_user[user_key].append(event)
                                                     # Each successful user should have events
 for result in successful_results:
     user_key = result.user_id
-assert user_key in events_by_user, "formatted_string"
+assert user_key in events_by_user, ""
 user_events = events_by_user[user_key]
-assert len(user_events) >= executions_per_user, "formatted_string"
+assert len(user_events) >= executions_per_user, ""
 
 logger.info(" PASS:  Concurrent user stress test passed with proper isolation")
 
@@ -996,10 +996,10 @@ pass
 contexts = []
 for i in range(10):
     context = ModelsUserExecutionContext( )
-user_id="formatted_string",
-thread_id="formatted_string",
-run_id="formatted_string",
-request_id="formatted_string"
+user_id="",
+thread_id="",
+run_id="",
+request_id=""
                                     
 contexts.append(context)
 
@@ -1016,10 +1016,10 @@ assert len(set(request_ids)) == 10  # All unique
 
                                     # Verify contexts don't interfere with each other
 for i, context in enumerate(contexts):
-    expected_user_id = "formatted_string"
-expected_thread_id = "formatted_string"
-expected_run_id = "formatted_string"
-expected_request_id = "formatted_string"
+    expected_user_id = ""
+expected_thread_id = ""
+expected_run_id = ""
+expected_request_id = ""
 
 assert context.user_id == expected_user_id
 assert context.thread_id == expected_thread_id
@@ -1051,9 +1051,9 @@ instance_factory.configure(mock_agent_registry, mock_websocket_bridge)
 
         # Step 2: Simulate FastAPI request processing
 async def simulate_api_request(user_id: str, message: str) -> Dict[str, Any]:
-    thread_id = "formatted_string"
-run_id = "formatted_string"
-request_id = "formatted_string"
+    thread_id = ""
+run_id = ""
+request_id = ""
 
     # Validate request context (simulating middleware)
 request_context = ModelsUserExecutionContext( )
@@ -1085,7 +1085,7 @@ agent = await instance_factory.create_agent_instance("triage", execution_context
 agent_state = DeepAgentState( )
 user_message=message,
 thread_id=thread_id,
-additional_context={ )
+additional_context={ }
 "request_id": request_id,
 "api_request": True
         
@@ -1095,7 +1095,7 @@ result_state = await agent.execute(agent_state, run_id)
 
         # Return API response (simulating response serialization)
 await asyncio.sleep(0)
-return { )
+return { }
 "success": True,
 "user_id": user_id,
 "thread_id": thread_id,
@@ -1107,7 +1107,7 @@ return { )
         
 
         # Step 3: Simulate multiple concurrent API requests
-test_users = [ )
+test_users = [ ]
 ("user_alice", "Hello, I need help with data analysis"),
 ("user_bob", "Can you help me with system diagnostics?"),
 ("user_charlie", "I have a question about integration"),
@@ -1150,9 +1150,9 @@ break
 
                             # Each user should have received their own WebSocket events
 for expected_user, _ in test_users:
-    assert expected_user in events_by_user, "formatted_string"
+    assert expected_user in events_by_user, ""
 user_events = events_by_user[expected_user]
-assert len(user_events) > 0, "formatted_string"
+assert len(user_events) > 0, ""
 
                                 # Verify events contain correct run_id and thread_id
 for event in user_events:
@@ -1160,7 +1160,7 @@ for event in user_events:
 user_response = next(r for r in api_responses if r["user_id"] == expected_user)
 expected_thread_id = user_response["thread_id"]
 
-assert event["thread_id"] == expected_thread_id, "formatted_string"
+assert event["thread_id"] == expected_thread_id, ""
 
 logger.info(" PASS:  Complete end-to-end integration test passed with proper isolation")
 
@@ -1177,7 +1177,7 @@ instance_factory = AgentInstanceFactory()
 instance_factory.configure(mock_agent_registry, mock_websocket_bridge)
 
                                         # Create weak references to track object lifecycle
-weak_refs = { )
+weak_refs = { }
 'contexts': [],
 'agents': [],
 'sessions': [],
@@ -1190,9 +1190,9 @@ memory_before = process.memory_info().rss
 
                                         # Create and execute multiple isolated contexts
 for i in range(50):  # Large number to detect leaks
-user_id = "formatted_string"
-thread_id = "formatted_string"
-run_id = "formatted_string"
+user_id = ""
+thread_id = ""
+run_id = ""
 
                                         # Create context in scope to ensure cleanup
 async with instance_factory.user_execution_scope( )
@@ -1214,7 +1214,7 @@ weak_refs['agents'].append(weakref.ref(agent))
 
                                             # Execute agent to create internal state
 state = DeepAgentState( )
-user_message="formatted_string",
+user_message="",
 thread_id=thread_id
                                             
 
@@ -1236,7 +1236,7 @@ gc.collect()
 memory_after = process.memory_info().rss
 memory_increase_mb = (memory_after - memory_before) / 1024 / 1024
 
-logger.info("formatted_string")
+logger.info("")
 
                                                 # Check weak references - most should be garbage collected
 alive_contexts = sum(1 for ref in weak_refs['contexts'] if ref() is not None)
@@ -1244,15 +1244,15 @@ alive_agents = sum(1 for ref in weak_refs['agents'] if ref() is not None)
 alive_sessions = sum(1 for ref in weak_refs['sessions'] if ref() is not None)
 alive_emitters = sum(1 for ref in weak_refs['emitters'] if ref() is not None)
 
-logger.info("formatted_string")
+logger.info("")
 
                                                 # Memory increase should be reasonable (less than 50MB for 50 iterations)
-assert memory_increase_mb < 50, "formatted_string"
+assert memory_increase_mb < 50, ""
 
                                                 # Most objects should be garbage collected (allow some to remain due to Python's GC behavior)
-assert alive_contexts <= 10, "formatted_string"
-assert alive_agents <= 10, "formatted_string"
-assert alive_emitters <= 10, "formatted_string"
+assert alive_contexts <= 10, ""
+assert alive_agents <= 10, ""
+assert alive_emitters <= 10, ""
 
 logger.info(" PASS:  Memory leak prevention test passed")
 
@@ -1426,7 +1426,7 @@ db_session=None
 
 if __name__ == "__main__":
                                                                 # Run specific test classes for development
-pytest.main([ ))
+pytest.main([ ])
 __file__ + "::TestAgentClassRegistryIsolation::test_registry_immutability_after_freeze",
 "-v"
                                                                 

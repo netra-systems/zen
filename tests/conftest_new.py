@@ -77,7 +77,7 @@ return True
 
             # Check fixture names
 if hasattr(request, 'fixturenames'):
-service_indicators = [ )
+service_indicators = [ ]
 'isolated_db_session', 'memory_optimization_service',
 'session_memory_manager', 'phase0_test_environment'
                 
@@ -108,7 +108,7 @@ return True
 
                     # Check fixture names
 if hasattr(request, 'fixturenames'):
-real_service_indicators = [ )
+real_service_indicators = [ ]
 'real_redis', 'real_postgres', 'real_clickhouse',
 'real_websocket_client', 'real_http_client'
                         
@@ -139,7 +139,7 @@ return True
 
                     # Check fixture names
 if hasattr(request, 'fixturenames'):
-e2e_indicators = [ )
+e2e_indicators = [ ]
 'validate_e2e_environment', 'performance_monitor', 'e2e_logger',
 'high_volume_server', 'throughput_client'
                         
@@ -177,7 +177,7 @@ from test_framework.conftest_real_services import *
 _loaded_modules.add('real_services')
 except ImportError as e:
                         # Real services may not be available in all environments
-pytest.skip("formatted_string")
+pytest.skip("")
 
                         # Load E2E fixtures for end-to-end tests
 if _should_load_e2e(request) and 'e2e' not in _loaded_modules:
@@ -211,7 +211,7 @@ conditional_fixture_loader(request)
 except Exception as e:
                 # Don't fail tests if fixture loading fails, just warn
 import warnings
-warnings.warn("formatted_string", UserWarning)
+warnings.warn("", UserWarning)
 
                 # Memory usage reporting fixture (optional)
 @pytest.fixture
@@ -234,7 +234,7 @@ class MemoryReporter:
     def report(self, label: str = "") -> float:
         current_memory = process.memory_info().rss / 1024 / 1024  # MB
         delta = current_memory - self.initial_memory
-        print("formatted_string")
+        print("")
         return current_memory
 
     def get_loaded_modules(self) -> set:
@@ -290,13 +290,13 @@ class MockMemoryReporter:
         """Report memory usage at end of test session."""
         print(f" )
         === Memory Usage Report ===")
-        print("formatted_string")
+        print("")
 
         try:
         import psutil
         process = psutil.Process(os.getpid())
         memory_mb = process.memory_info().rss / 1024 / 1024
-        print("formatted_string")
+        print("")
         except ImportError:
         print("Memory tracking not available (psutil required)")
 

@@ -58,7 +58,7 @@ class TestOAuthFlower:
         """Test OAuth configuration endpoint"""
         async with httpx.AsyncClient() as client:
         response = await client.get("formatted_string")
-        assert response.status_code == 200, "formatted_string"
+        assert response.status_code == 200, ""
 
         config = response.json()
         assert "google_client_id" in config, "Missing Google client ID"
@@ -66,8 +66,8 @@ class TestOAuthFlower:
         assert "authorized_redirect_uris" in config, "Missing redirect URIs"
 
         print("[PASS] OAuth configuration validated")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
 
         return config
 
@@ -76,11 +76,11 @@ class TestOAuthFlower:
         """Test OAuth login initiation"""
         async with httpx.AsyncClient(follow_redirects=False) as client:
         response = await client.get( )
-        "formatted_string",
+        "",
         params={"provider": "google"}
                     
 
-        assert response.status_code == 302, "formatted_string"
+        assert response.status_code == 302, ""
 
         location = response.headers.get("location", "")
         assert location.startswith("https://accounts.google.com"), "Invalid OAuth redirect"
@@ -96,8 +96,8 @@ class TestOAuthFlower:
 
         redirect_uri = params["redirect_uri"][0]
         print("[PASS] OAuth initiation validated")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
 
         return redirect_uri
 
@@ -110,8 +110,8 @@ class TestOAuthFlower:
         async with httpx.AsyncClient(follow_redirects=False) as client:
                             Simulate callback from Google
         response = await client.get( )
-        "formatted_string",
-        params={ )
+        "",
+        params={ }
         "code": mock_code,
         "state": "test_state"
                             
@@ -129,7 +129,7 @@ class TestOAuthFlower:
         if "access_token" in params:
         self.jwt_token = params["access_token"][0]
         print("[PASS] OAuth callback handled - token in URL fragment")
-        print("formatted_string")
+        print("")
         return {"status": "success", "token": self.jwt_token}
 
         elif "?" in location:
@@ -139,7 +139,7 @@ class TestOAuthFlower:
         if "token" in params:
         self.jwt_token = params["token"][0]
         print("[PASS] OAuth callback handled - token in query params")
-        print("formatted_string")
+        print("")
         return {"status": "success", "token": self.jwt_token}
 
                                                 # If not redirect, check response body
@@ -149,7 +149,7 @@ class TestOAuthFlower:
         if "access_token" in data:
         self.jwt_token = data["access_token"]
         print("[PASS] OAuth callback handled - token in response")
-        print("formatted_string")
+        print("")
         return {"status": "success", "token": self.jwt_token}
         except:
         pass
@@ -161,7 +161,7 @@ class TestOAuthFlower:
 
     def _generate_mock_jwt(self) -> str:
         """Generate a mock JWT for testing"""
-        payload = { )
+        payload = { }
         "sub": "test_user_123",
         "email": self.test_email or "test@example.com",
         "iat": int(time.time()),
@@ -184,7 +184,7 @@ class TestOAuthFlower:
 
         async with httpx.AsyncClient() as client:
         response = await client.post( )
-        "formatted_string",
+        "",
         json={"token": self.jwt_token}
                 
 
@@ -193,8 +193,8 @@ class TestOAuthFlower:
         if data.get("valid"):
         self.user_id = data.get("user_id")
         print("[PASS] Token validation successful")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
         return data
         else:
         print("[INFO] Token marked as invalid (expected for mock)")
@@ -203,7 +203,7 @@ class TestOAuthFlower:
         print("[INFO] Token validation rejected (expected for mock)")
         return {"valid": False}
         else:
-        print("formatted_string")
+        print("")
         return {"status": "error", "code": response.status_code}
 
         @pytest.mark.e2e
@@ -219,25 +219,25 @@ class TestOAuthFlower:
         no_auth_status = response.status_code
 
                                                 # Test with token
-        headers = {"Authorization": "formatted_string"}
+        headers = {"Authorization": ""}
         response = await client.get( )
-        "formatted_string",
+        "",
         headers=headers
                                                 
         with_auth_status = response.status_code
 
         if no_auth_status == 401 and with_auth_status in [200, 404]:
         print("[PASS] API authentication working")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
         return True
         elif with_auth_status == 401:
         print("[INFO] API rejected token (expected for mock)")
         return True
         else:
         print(f"[WARN] Unexpected API auth behavior")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
         return False
 
         @pytest.mark.e2e
@@ -251,7 +251,7 @@ class TestOAuthFlower:
         import websockets
 
                                                                         # Test WebSocket connection with token
-        headers = {"Authorization": "formatted_string"}
+        headers = {"Authorization": ""}
 
         try:
         async with websockets.connect( )
@@ -269,8 +269,8 @@ class TestOAuthFlower:
         data = json.loads(response)
 
         print("[PASS] WebSocket authentication successful")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
         return True
 
         except websockets.exceptions.InvalidStatusCode as e:
@@ -278,20 +278,20 @@ class TestOAuthFlower:
         print("[INFO] WebSocket rejected token (expected for mock)")
         return True
         else:
-        print("formatted_string")
+        print("")
         return False
 
         except ImportError:
         print("[SKIP] websockets library not installed")
         return False
         except Exception as e:
-        print("formatted_string")
+        print("")
         return False
 
         @pytest.mark.e2e
     async def test_service_integration(self) -> Dict:
         """Test integration between all services"""
-        results = { )
+        results = { }
         "auth_to_frontend": False,
         "auth_to_api": False,
         "api_to_auth": False,
@@ -301,7 +301,7 @@ class TestOAuthFlower:
         async with httpx.AsyncClient() as client:
                                                                                                             # Test Auth -> Frontend redirect
         response = await client.get( )
-        "formatted_string",
+        "",
         params={"provider": "google"},
         follow_redirects=False
                                                                                                             
@@ -311,9 +311,9 @@ class TestOAuthFlower:
 
                                                                                                                 # Test Auth -> API token validation
         if self.jwt_token:
-        headers = {"Authorization": "formatted_string"}
+        headers = {"Authorization": ""}
         response = await client.get( )
-        "formatted_string",
+        "",
         headers=headers
                                                                                                                     
         if response.status_code in [200, 401, 404]:
@@ -336,87 +336,87 @@ class TestOAuthFlower:
 
     async def run_comprehensive_test(self):
         """Run comprehensive OAuth flow test"""
-        print(" )
-        " + "=" * 70)
+        print("")
+         + =" * 70)
         print("COMPREHENSIVE OAUTH FLOW TEST - STAGING ENVIRONMENT")
         print("=" * 70)
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
+        print("")
         print("=" * 70 + " )
         ")
 
         results = []
 
     # 1. Test OAuth Configuration
-        print(" )
+        print("")
         [1/7] Testing OAuth Configuration...")
         print("-" * 50)
         try:
         config = await self.test_oauth_configuration()
         results.append(("OAuth Configuration", True))
         except Exception as e:
-        print("formatted_string")
+        print("")
         results.append(("OAuth Configuration", False))
 
             # 2. Test OAuth Initiation
-        print(" )
+        print("")
         [2/7] Testing OAuth Initiation...")
         print("-" * 50)
         try:
         redirect_uri = await self.test_oauth_initiation()
         results.append(("OAuth Initiation", True))
         except Exception as e:
-        print("formatted_string")
+        print("")
         results.append(("OAuth Initiation", False))
 
                     # 3. Test OAuth Callback
-        print(" )
+        print("")
         [3/7] Testing OAuth Callback Handling...")
         print("-" * 50)
         try:
         callback_result = await self.test_oauth_callback_simulation()
         results.append(("OAuth Callback", callback_result["status"] in ["success", "mock"]))
         except Exception as e:
-        print("formatted_string")
+        print("")
         results.append(("OAuth Callback", False))
 
                             # 4. Test Token Validation
-        print(" )
+        print("")
         [4/7] Testing Token Validation...")
         print("-" * 50)
         try:
         validation_result = await self.test_token_validation()
         results.append(("Token Validation", True))
         except Exception as e:
-        print("formatted_string")
+        print("")
         results.append(("Token Validation", False))
 
                                     # 5. Test API Authentication
-        print(" )
+        print("")
         [5/7] Testing API Authentication...")
         print("-" * 50)
         try:
         api_auth_result = await self.test_api_authentication()
         results.append(("API Authentication", api_auth_result))
         except Exception as e:
-        print("formatted_string")
+        print("")
         results.append(("API Authentication", False))
 
                                             # 6. Test WebSocket Authentication
-        print(" )
+        print("")
         [6/7] Testing WebSocket Authentication...")
         print("-" * 50)
         try:
         ws_auth_result = await self.test_websocket_authentication()
         results.append(("WebSocket Authentication", ws_auth_result))
         except Exception as e:
-        print("formatted_string")
+        print("")
         results.append(("WebSocket Authentication", False))
 
                                                     # 7. Test Service Integration
-        print(" )
+        print("")
         [7/7] Testing Service Integration...")
         print("-" * 50)
         try:
@@ -424,12 +424,12 @@ class TestOAuthFlower:
         all_integrated = all(integration_results.values())
         results.append(("Service Integration", all_integrated))
         except Exception as e:
-        print("formatted_string")
+        print("")
         results.append(("Service Integration", False))
 
                                                             # Summary
-        print(" )
-        " + "=" * 70)
+        print("")
+         + =" * 70)
         print("TEST SUMMARY")
         print("=" * 70)
 
@@ -438,19 +438,19 @@ class TestOAuthFlower:
 
         for test_name, result in results:
         status = "[PASS]" if result else "[FAIL]"
-        print("formatted_string")
+        print("")
 
-        print("formatted_string")
+        print("")
 
         if passed == total:
-        print(" )
+        print("")
         [SUCCESS] All OAuth flow tests passed!")
                                                                     # Removed problematic line: print("The OAuth token await asyncio.sleep(0) )
         return flow is working correctly in staging.")
         return True
         else:
-        print("formatted_string")
-        print(" )
+        print("")
+        print("")
         Recommendations:")
 
         failed_tests = [item for item in []]

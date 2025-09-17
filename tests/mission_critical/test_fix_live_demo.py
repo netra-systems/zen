@@ -85,9 +85,9 @@ class TestWebSocketConnection:
         with patch('netra_backend.app.services.database.thread_repository.logger') as mock_logger:
         result = await thread_repo.find_by_user(mock_db, jwt_user_id)
 
-        print("formatted_string")
+        print("")
         print(formatted_string)
-        print("formatted_string")
+        print("")
         print(formatted_string)
 
         # Verify logging happened
@@ -157,7 +157,7 @@ class TestWebSocketConnection:
         print("Testing UUID normalization...")
         result = await thread_repo.find_by_user(mock_db, 550e8400-e29b-41d4-a716-446655440000)
 
-        print("formatted_string")
+        print("")
 
         # Test integer normalization
         mock_db.execute.side_effect = [
@@ -190,7 +190,7 @@ class TestWebSocketConnection:
         print(f" )
         [SUCCESS] SUCCESS: Application didn't crash!')
         print(formatted_string)
-        print("formatted_string")
+        print("")
 
             # ========================================================================
             # SCENARIO 5: Normal Operation (No Errors)
@@ -276,7 +276,7 @@ class TestWebSocketConnection:
         try:
         await handle_route_with_error_logging(failing_handler, listing threads)
         except HTTPException as e:
-        print("formatted_string")
+        print("")
         assert Database connection failed not in e.detail
         assert "Failed to list threads" in e.detail
 

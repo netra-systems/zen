@@ -1,7 +1,7 @@
 "
 Mission Critical Test: WebSocket Import Collision Prevention - Deployment Gate
 
-This test serves as a DEPLOYMENT GATE to prevent the WebSocket coroutine error from
+# This test serves as a DEPLOYMENT GATE to prevent the WebSocket coroutine error from # Incomplete import statement
 reaching production. It validates that the critical chat infrastructure functions
 correctly under all conditions, preventing business impact.
 

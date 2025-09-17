@@ -111,7 +111,7 @@ class SessionTracker:
         'total_accesses': len(self.session_access_log),
         'unique_sessions': len(set(log['session_id'] for log in self.session_access_log))
     
-        @pytest.fixture
+        # @pytest.fixture
     async def test_db_engine():
         "Create a test database engine.""
         engine = create_async_engine( )
@@ -424,9 +424,9 @@ This test should PASS to prove the anti-pattern is detected and prevented.
 pass
 from fastapi import Request
             # Mock request and app
-mock_app = Magic        mock_app.state = Magic
+mock_app = MagicMock(); mock_app.state = Magic
             # Create mock supervisor with stored session (this should be detected and prevented)
-mock_supervisor = Magic        mock_supervisor.db_session = MagicMock(spec=AsyncSession)
+mock_supervisor = MagicMock(); mock_supervisor.db_session = MagicMock(spec=AsyncSession)
 mock_app.state.agent_supervisor = mock_supervisor
             # Simulate a request - this should detect the anti-pattern and raise an error
 mock_request = MagicMock(spec=Request)

@@ -70,26 +70,26 @@ class MockConcurrentTestOrchestrator:
 
     async def establish_websocket_connections(self, users):
         """Mock websocket connections for testing."""
-        logger.info("formatted_string")
+        logger.info("")
         for user in users:
         user.websocket_client = Magic            user.startup_metrics = {'websocket_connection_time': 0.1}
-        logger.info("formatted_string")
+        logger.info("")
         await asyncio.sleep(0)
         return len(users)
 
     async def send_concurrent_first_messages(self, users):
         """Mock sending messages for testing."""
         pass
-        logger.info("formatted_string")
+        logger.info("")
         responses = []
         for user in users:
-        response = { )
+        response = { }
         "user_id": user.user_id,
-        "response": "formatted_string",
+        "response": "",
         "timestamp": time.time()
         
         responses.append(response)
-        logger.info("formatted_string")
+        logger.info("")
         await asyncio.sleep(0)
         return responses
 
@@ -175,13 +175,13 @@ class PerformanceMetricsCollector:
 
         except Exception as e:
 
-        logger.warning("formatted_string")
+        logger.warning("")
 
     async def record_agent_startup_metrics(self, user_id: str, timing_data: Dict[str, float]):
 
         """Record individual agent startup metrics."""
 
-        self.metrics['agent_startups'].append({ ))
+        self.metrics['agent_startups'].append({ })
 
         'user_id': user_id,
 
@@ -200,7 +200,7 @@ class PerformanceMetricsCollector:
         startup_times = [0.5, 0.3, 0.4, 0.6, 0.2]  # Mock startup times
 
         await asyncio.sleep(0)
-        return { )
+        return { }
         'total_agents_started': len(startup_times),
         'avg_startup_time': statistics.mean(startup_times),
         'p95_startup_time': statistics.quantiles(startup_times, n=20)[18] if len(startup_times) >= 20 else max(startup_times),
@@ -256,7 +256,7 @@ performance_summary = orchestrator.metrics_collector.calculate_performance_summa
 
                     # Performance thresholds
 
-thresholds = { )
+thresholds = { }
 
 'max_p95_startup_time': 5.0,
 
@@ -271,17 +271,17 @@ thresholds = { )
                     # Assertions
 
 assert performance_summary['p95_startup_time'] <= thresholds['max_p95_startup_time'], \
-"formatted_string"
+""
 
 assert performance_summary['p99_startup_time'] <= thresholds['max_p99_startup_time'], \
-"formatted_string"
+""
 
 assert performance_summary['max_memory_usage_mb'] / 1024 <= thresholds['max_memory_usage_gb'], \
-"formatted_string"
+""
 
 assert performance_summary['avg_cpu_usage_percent'] <= thresholds['max_cpu_usage_percent'], \
-"formatted_string"
+""
 
 logger.info(f"Test Case 3 completed: Performance within SLA thresholds")
 
-logger.info("formatted_string")
+logger.info("")

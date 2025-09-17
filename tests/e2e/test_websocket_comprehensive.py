@@ -124,7 +124,7 @@ data = response.json()
 return data.get("access_token") or data.get(token)
 
 except Exception as e:
-    print("formatted_string")
+    print("")
 
 continue
 
@@ -170,7 +170,7 @@ class WebSocketTestClient:
         try:
         if subprotocol:
         import base64
-        encoded_token = base64.b64encode("formatted_string".encode()).decode()
+        encoded_token = base64.b64encode("".encode()).decode()
                     # Use subprotocols parameter for WebSocket protocol negotiation
         self.websocket = await asyncio.wait_for( )
         websockets.connect( )
@@ -463,7 +463,7 @@ except Exception as e:
                                                     
 
                                                     # Print comprehensive service discovery results
-print(")
+    print(")
 SERVICE DISCOVERY RESULTS:")
 all_available = True
 
@@ -472,7 +472,7 @@ for service_name, status in service_status.items():
 
 print(formatted_string)
 else:
-    print("formatted_string")
+    print("")
 
 all_available = False
 
@@ -498,7 +498,7 @@ try:
 connected = await client.connect()
 
                                                                             # ASSERTION LIKELY TO FAIL: Connection not established automatically
-assert connected, "formatted_string"
+assert connected, ""
 
 assert client.is_authenticated, WebSocket should be authenticated after connection
 assert client.connection_id is not None, "Should receive connection_id in welcome message"
@@ -526,7 +526,7 @@ try:
 connected = await client.connect()
 
                                                                                         # ASSERTION MIGHT FAIL: Header auth might not work properly
-assert connected, "formatted_string"
+assert connected, ""
 
                                                                                         # Verify welcome message contains expected data
 assert client.connection_id is not None
@@ -552,7 +552,7 @@ try:
 connected = await client.connect(subprotocol=jwt-auth)
 
                                                                                                     # ASSERTION LIKELY TO FAIL: Subprotocol auth implementation issues
-assert connected, "formatted_string"
+assert connected, ""
 
 finally:
 await client.close()
@@ -656,11 +656,11 @@ message_ids.append(message_id)
 payload = {
 sequence: i,
 "message_id": message_id,
-content: "formatted_string"
+content: ""
                                     
 
 sent = await client.send_message(test_message, payload)
-assert sent, "formatted_string"
+assert sent, ""
 
                                     # Small delay between messages
 await asyncio.sleep(0.1)
@@ -776,7 +776,7 @@ test_user_with_token[user_id]
 connected = await client.connect()
 
                                     # ASSERTION MIGHT FAIL: Connection limits might prevent multiple connections
-assert connected, "formatted_string"
+assert connected, ""
 
 clients.append(client)
 
@@ -798,7 +798,7 @@ for i, client in enumerate(clients[1:], 1):
 
                                         # ASSERTION LIKELY TO FAIL: Multi-connection sync not working
 assert received is not None, \
-"formatted_string"
+""
 
 finally:
                                             # Clean up all connections
@@ -1064,7 +1064,7 @@ break
 
                                                                     # Check if rate limiting was enforced - MIGHT FAIL if not implemented
 if messages_sent >= 40:  # If we sent almost all messages
-print("formatted_string")
+print("")
 
                                                                     # Try to receive rate limit error
 for _ in range(5):
@@ -1079,7 +1079,7 @@ if RATE_LIMIT in str(error_code):
 break
 
                                                                                 # This assertion is informational - rate limiting might not be implemented
-print("formatted_string")
+    print("")
 
 finally:
 await client.close()
@@ -1137,7 +1137,7 @@ except:
 
 
                                                                                                                                 # INFORMATIONAL: Check if connections were cleaned up properly
-print("formatted_string")
+    print("")
 
                                                                                                                                 # The third client (normal one) should still be alive
 assert surviving_clients >= 1, At least one normal connection should survive errors
@@ -1200,7 +1200,7 @@ break
 
                                     # ASSERTION MIGHT FAIL: Heartbeat not implemented or not working
 print(formatted_string)
-print("formatted_string")
+print("")
 
 if not heartbeat_received:
     print(WARNING: No heartbeat messages received - heartbeat might not be implemented)
@@ -1243,14 +1243,14 @@ if message:
 
 ping_count += 1
                                                                     # Intentionally don't respond to simulate zombie connection
-print("formatted_string")
+    print("")
 else:
     print(formatted_string)
 
 
                                                                         # Check if connection was forcibly closed
 if client.websocket and client.websocket.closed:
-    print("formatted_string")
+    print("")
 
 break
 
@@ -1271,7 +1271,7 @@ else:
 
                                                                                                 # INFORMATIONAL: Report zombie connection detection results
 elapsed = time.time() - zombie_start_time
-print("formatted_string")
+print("")
 
 if client.websocket and not client.websocket.closed:
     print(WARNING: Zombie connection not detected - connection still alive)
@@ -1338,7 +1338,7 @@ except Exception as e:
                                                                                                                                         # INFORMATIONAL: Report connection cycling results
 print(f"Connection cycle results:")
 print(formatted_string)
-print("formatted_string")
+print("")
 print(formatted_string)
 
 if connection_stats["connection_errors"]:
@@ -1367,7 +1367,7 @@ print(="*80)
 issues_discovered = []
 
         # 1. Service Availability Issues
-print(")
+    print(")
 1. SERVICE AVAILABILITY ISSUES:)
 try:
     async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -1383,23 +1383,23 @@ for service_name, url in services.items():
 
 response = await client.get(url, timeout=2)
 if response.status_code == 200:
-    print("formatted_string")
+    print("")
 
 else:
     print(formatted_string)
 
-issues_discovered.append("formatted_string")
+issues_discovered.append("")
 except Exception:
     print(formatted_string)
 
-issues_discovered.append("formatted_string")
+issues_discovered.append("")
 
 except Exception as e:
     issues_discovered.append(formatted_string)
 
 
                                         # 2. WebSocket Library Availability
-print("")
+    print("")
 2. WEBSOCKET CLIENT LIBRARY AVAILABILITY:)
 if WEBSOCKETS_AVAILABLE:
     print(   [OK] websockets library available for testing")
@@ -1410,7 +1410,7 @@ else:
 issues_discovered.append(websockets library not available for real connection testing")
 
                                                 # 3. Authentication Flow Issues
-print(")
+    print(")
 3. AUTHENTICATION FLOW ISSUES:)
 user_data = create_test_user()
 token = await get_auth_token(user_data["email"], user_data[password]
@@ -1436,7 +1436,7 @@ print("   [EXPECTED] Memory leaks with concurrent connections)
 print(   [EXPECTED] Heartbeat/zombie connection detection not working")
 
                                                         # 5. Test Infrastructure Issues
-print(")
+    print(")
 5. TEST INFRASTRUCTURE STATUS:)
 print("   [OK] Test framework can create mock users")
 print(   [OK] Test framework can simulate WebSocket clients)

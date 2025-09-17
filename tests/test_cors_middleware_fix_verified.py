@@ -171,7 +171,7 @@ app = Magic    middleware = CORSFixMiddleware(app, environment="development")
                         # Create OPTIONS request with origin
 request = MagicMock(spec=Request)
 request.method = "OPTIONS"
-request.headers = { )
+request.headers = }
 "origin": "http://localhost:3000",
 "access-control-request-method": "POST"
                         

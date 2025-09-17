@@ -446,7 +446,7 @@ class WebSocketSupervisorStartupSequenceTests(SSotAsyncTestCase):
         CRITICAL: Validate WebSocket connections work reliably after startup completion.
         
         This test validates that WebSocket connections succeed consistently
-        after the complete startup sequence, preventing revenue loss from
+#         after the complete startup sequence, preventing revenue loss from # Incomplete import statement
         broken chat functionality.
         "
         from fastapi import FastAPI

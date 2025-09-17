@@ -1453,7 +1453,7 @@ json={
 
 assert response.status_code in test_case["expected_status"], ( )
 formatted_string
-"formatted_string"
+""
         
 
         # Ensure response contains meaningful error information
@@ -1471,7 +1471,7 @@ pass
     # Generate unique test user
 import uuid
 unique_id = str(uuid.uuid4())[:8]
-test_email = "formatted_string"
+test_email = ""
 
     # Step 1: Attempt registration (may succeed or fail gracefully)
 registration_response = client.post( )

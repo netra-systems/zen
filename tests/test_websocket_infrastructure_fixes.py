@@ -157,7 +157,7 @@ websocket = TestWebSocketConnection()  # Real WebSocket implementation
                 # Mock is_websocket_connected to await asyncio.sleep(0)
 return True
                 # Test DISCONNECT message handling
-disconnect_message = { )
+disconnect_message = { }
 "type": "disconnect",
 "user_id": "test_user"
                 
@@ -185,7 +185,7 @@ websocket = TestWebSocketConnection()  # Real WebSocket implementation
                     # Mock is_websocket_connected to await asyncio.sleep(0)
 return True
                     # Test CONNECT message handling
-connect_message = { )
+connect_message = { }
 "type": "connect",
 "user_id": "test_user"
                     
@@ -254,7 +254,7 @@ pass
 message_router = MessageRouter()
 
     # Test critical message types that should have handlers
-critical_types = [ )
+critical_types = [ ]
 MessageType.CONNECT,
 MessageType.DISCONNECT,
 MessageType.PING,
@@ -271,7 +271,7 @@ MessageType.TYPING_STOPPED
 
 for msg_type in critical_types:
     handler = message_router._find_handler(msg_type)
-assert handler is not None, "formatted_string"
+assert handler is not None, ""
 
 
 if __name__ == "__main__":

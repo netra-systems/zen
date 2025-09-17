@@ -385,7 +385,7 @@ else:
     print(No successful connections for timing analysis")
 
                                                                                                                                                                             # Don't fail if connections aren't working yet - just log the issue
-print(" WARNING: [U+FE0F]  WebSocket connections not working - may indicate service configuration issues)
+    print(" WARNING: [U+FE0F]  WebSocket connections not working - may indicate service configuration issues)
 
 
 if __name__ == __main__":

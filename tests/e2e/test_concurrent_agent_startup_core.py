@@ -58,12 +58,12 @@ class TestWebSocketConnection:
         from shared.isolated_environment import IsolatedEnvironment
 
     # Test configuration and missing variables
-        CONCURRENT_TEST_CONFIG = { )
+        CONCURRENT_TEST_CONFIG = { }
         "agent_startup_timeout": 30.0,
         "max_concurrent_users": 50
     
 
-        SERVICE_ENDPOINTS = { )
+        SERVICE_ENDPOINTS = { }
         "redis": "redis://localhost:6379",
         "postgres": "postgresql://localhost:5432/test",
         "backend": "http://localhost:8000",
@@ -159,7 +159,7 @@ class ContaminationReport:
 
         """Add contamination incident to report."""
 
-        self.incidents.append({ ))
+        self.incidents.append({ })
 
         "source_user": source_user,
 
@@ -288,7 +288,7 @@ class TestConcurrentEnvironment:
 
         if backend_response.status_code != 200:
 
-        raise RuntimeError("formatted_string")
+        raise RuntimeError("")
 
                 # Auth service check (optional for now)
 
@@ -296,17 +296,17 @@ class TestConcurrentEnvironment:
 
         auth_response = await client.get("formatted_string", timeout=5)
 
-        logger.info("formatted_string")
+        logger.info("")
 
         except Exception as e:
 
-        logger.warning("formatted_string")
+        logger.warning("")
 
     async def seed_user_data(self, users: List[TestUser]):
 
         """Seed user data in databases."""
 
-        logger.info("formatted_string")
+        logger.info("")
 
     # Seed in parallel batches of 20 to avoid overwhelming database
 
@@ -343,7 +343,7 @@ class TestConcurrentEnvironment:
 
         await self.redis_client.hset( )
 
-        "formatted_string",
+        "",
 
         mapping=user.context_data
         
@@ -353,7 +353,7 @@ class TestConcurrentEnvironment:
 
         """Clean up user data from databases."""
 
-        logger.info("formatted_string")
+        logger.info("")
 
         user_ids = [user.user_id for user in users]
 
@@ -385,7 +385,7 @@ class TestConcurrentEnvironment:
 
         # Clean Redis
 
-        redis_keys = ["formatted_string" for user_id in user_ids]
+        redis_keys = ["" for user_id in user_ids]
 
         if redis_keys:
 
@@ -427,8 +427,8 @@ class CrossContaminationDetector:
         user_markers = {}
 
         for user in users:
-        markers = { )
-        "formatted_string"
+        markers = { }
+        ""
         for i in range(10)  # 10 unique markers per user
         
         user_markers[user.user_id] = markers
@@ -439,13 +439,13 @@ class CrossContaminationDetector:
 
         user.context_data['sensitivity_markers'] = list(markers)
 
-        user.sensitive_data.update({ ))
+        user.sensitive_data.update({ })
 
-        'secret_api_key': "formatted_string",
+        'secret_api_key': "",
 
         'private_budget': 10000 * (hash(user.user_id) % 100 + 1),  # Use hash instead of parsing hex
 
-        'confidential_metrics': {"formatted_string": secrets.randbelow(1000) for i in range(5)}
+        'confidential_metrics': {"": secrets.randbelow(1000) for i in range(5)}
 
         
 
@@ -508,21 +508,21 @@ class TestConcurrentOrchestrator:
 
         user = TestUser( )
 
-        user_id="formatted_string",
+        user_id="",
 
-        email="formatted_string",
+        email="",
 
-        session_id="formatted_string",
+        session_id="",
 
-        auth_token=self._generate_test_jwt("formatted_string"),
+        auth_token=self._generate_test_jwt(""),
 
-        context_data={ )
+        context_data={ }
         "budget": 50000 + (i * 1000),  # Unique budget per user
         "region": regions[i % len(regions)],
         "tier": "enterprise",
-        "unique_identifier": "formatted_string",
-        "user_preferences": { )
-        "optimization_focus": "formatted_string",
+        "unique_identifier": "",
+        "user_preferences": { }
+        "optimization_focus": "",
         "risk_tolerance": "medium",
         "notification_settings": {"email": True, "sms": False}
         
@@ -538,7 +538,7 @@ class TestConcurrentOrchestrator:
 
     def _generate_test_jwt(self, user_id: str) -> str:
         """Generate test JWT token for user."""
-        payload = { )
+        payload = { }
         "sub": user_id,
         "iat": int(time.time()),
         "exp": int(time.time()) + 3600,
@@ -548,7 +548,7 @@ class TestConcurrentOrchestrator:
 
     async def establish_websocket_connections(self, users: List[TestUser]) -> int:
         """Establish WebSocket connections for all users concurrently."""
-        logger.info("formatted_string")
+        logger.info("")
 
     # Mock implementation - just mark as connected
         successful_connections = 0
@@ -558,27 +558,27 @@ class TestConcurrentOrchestrator:
         user.websocket_client = Magic            user.startup_metrics['websocket_connection_time'] = 0.1
         successful_connections += 1
 
-        logger.info("formatted_string")
+        logger.info("")
         return successful_connections
 
     async def send_concurrent_first_messages(self, users: List[TestUser]) -> List[Dict[str, Any]]:
         """Send first messages concurrently to all connected users."""
-        logger.info("formatted_string")
+        logger.info("")
 
     # Mock implementation
         responses = []
         for user in users:
         if user.websocket_client:
-        response = { )
+        response = { }
         'user_id': user.user_id,
         'session_id': user.session_id,
-        'response': {"message": "Mock response", "agent_instance_id": "formatted_string"},
+        'response': {"message": "Mock response", "agent_instance_id": ""},
         'startup_time': 0.5,
-        'agent_instance_id': "formatted_string"
+        'agent_instance_id': ""
             
         responses.append(response)
 
-        logger.info("formatted_string")
+        logger.info("")
         return responses
 
 
@@ -591,7 +591,7 @@ class TestSyntaxFix:
 
         """Generate test JWT token for user."""
 
-        payload = { )
+        payload = { }
         "sub": user_id,
         "iat": int(time.time()),
         "exp": int(time.time()) + 3600,
@@ -603,7 +603,7 @@ class TestSyntaxFix:
 
         """Establish WebSocket connections for all users concurrently."""
 
-        logger.info("formatted_string")
+        logger.info("")
 
     # Connect in batches to avoid overwhelming the server
 
@@ -617,7 +617,7 @@ class TestSyntaxFix:
 
         batch_users = users[i:batch_end]
 
-        connection_tasks = [ )
+        connection_tasks = [ ]
 
         self._establish_single_connection(user)
 
@@ -631,7 +631,7 @@ class TestSyntaxFix:
 
         if isinstance(result, Exception):
 
-        logger.warning("formatted_string")
+        logger.warning("")
 
         elif result:
 
@@ -643,7 +643,7 @@ class TestSyntaxFix:
 
         await asyncio.sleep(0.5)
 
-        logger.info("formatted_string")
+        logger.info("")
 
         return successful_connections
 
@@ -657,7 +657,7 @@ class TestSyntaxFix:
 
         # Connect to WebSocket with token in query parameters
 
-        uri = "formatted_string"
+        uri = ""
 
         user.websocket_client = await websockets.connect( )
         uri,
@@ -669,7 +669,7 @@ class TestSyntaxFix:
 
         except Exception as e:
 
-        logger.warning("formatted_string")
+        logger.warning("")
 
         user.startup_metrics['error'] = str(e)
 
@@ -679,7 +679,7 @@ class TestSyntaxFix:
 
         """Send first messages concurrently to all connected users."""
 
-        logger.info("formatted_string")
+        logger.info("")
 
     # Filter users with active connections
 
@@ -693,7 +693,7 @@ class TestSyntaxFix:
 
         # Send messages concurrently
 
-        message_tasks = [ )
+        message_tasks = [ ]
 
         self._send_first_message(user)
 
@@ -711,13 +711,13 @@ class TestSyntaxFix:
 
         if isinstance(response, Exception):
 
-        logger.warning("formatted_string")
+        logger.warning("")
 
         else:
 
         valid_responses.append(response)
 
-        logger.info("formatted_string")
+        logger.info("")
 
         return valid_responses
 
@@ -727,15 +727,15 @@ class TestSyntaxFix:
 
         if not user.websocket_client:
 
-        raise RuntimeError("formatted_string")
+        raise RuntimeError("")
 
         start_time = time.time()
 
         # Create user-specific message with sensitive data
 
-        message = { )
+        message = { }
         "type": "chat_message",
-        "content": "formatted_string",
+        "content": "",
         "session_id": user.session_id,
         "user_data": user.sensitive_data,
         "context": user.context_data
@@ -772,7 +772,7 @@ class TestSyntaxFix:
         user.user_id,
         {**user.startup_metrics, 'total_startup_time': total_time}
             
-        return { )
+        return { }
 
         'user_id': user.user_id,
 
@@ -834,9 +834,9 @@ class TestSyntaxFix:
                     
 
                     # Assertions
-        assert contamination_report.contamination_incidents == 0, "formatted_string"
+        assert contamination_report.contamination_incidents == 0, ""
 
-        assert unauthorized_access_count == 0, "formatted_string"
+        assert unauthorized_access_count == 0, ""
 
         logger.info("Test Case 2 completed: No contamination detected")
 
@@ -894,10 +894,10 @@ class TestSyntaxFix:
                             
                             # Assertions
 
-        assert isolation_violations == 0, "formatted_string"
+        assert isolation_violations == 0, ""
 
-        assert modification_violations == 0, "formatted_string"
+        assert modification_violations == 0, ""
 
-        assert integrity_violations == 0, "formatted_string"
+        assert integrity_violations == 0, ""
 
         logger.info("Test Case 5 completed: State persistence isolation validated")

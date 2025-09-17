@@ -38,7 +38,7 @@ class StagingE2ETester:
 
     def log_result(self, test_name: str, success: bool, details: Dict[str, Any] = None, error: str = None):
         """Log test result."""
-        result = { )
+        result = { }
         "test_name": test_name,
         "success": success,
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -48,15 +48,15 @@ class StagingE2ETester:
         self.test_results.append(result)
 
         status_symbol = "[PASS]" if success else "[FAIL]"
-        print("formatted_string")
+        print("")
         if error:
-        print("formatted_string")
+        print("")
         if details:
-        print("formatted_string")
+        print("")
 
     async def make_request(self, method: str, path: str, **kwargs) -> tuple[int, Dict[str, Any]]:
         """Make HTTP request and return status code and response data."""
-        url = "formatted_string"
+        url = ""
         try:
         async with self.session.request(method, url, **kwargs) as response:
         try:
@@ -69,7 +69,7 @@ class StagingE2ETester:
 
     async def test_health_endpoints(self):
         """Test all health-related endpoints."""
-        print(" )
+        print("")
         === HEALTH ENDPOINTS ===")
 
                             # Basic health
@@ -78,7 +78,7 @@ class StagingE2ETester:
         "Basic Health Check",
         status == 200 and data.get("status") == "healthy",
         {"status_code": status, "response": data},
-        None if status == 200 else "formatted_string"
+        None if status == 200 else ""
                             
 
                             # Liveness probe
@@ -87,7 +87,7 @@ class StagingE2ETester:
         "Liveness Probe",
         status == 200 and data.get("status") == "healthy",
         {"status_code": status, "response": data},
-        None if status == 200 else "formatted_string"
+        None if status == 200 else ""
                             
 
                             # Readiness probe (may timeout - expected)
@@ -97,7 +97,7 @@ class StagingE2ETester:
         "Readiness Probe",
         success,
         {"status_code": status, "response": data},
-        None if success else "formatted_string"
+        None if success else ""
                             
 
                             # Database environment
@@ -106,12 +106,12 @@ class StagingE2ETester:
         "Database Environment Config",
         status == 200 and "environment" in data,
         {"status_code": status, "database_name": data.get("database_name"), "valid": data.get("validation", {}).get("valid")},
-        None if status == 200 else "formatted_string"
+        None if status == 200 else ""
                             
 
     async def test_api_endpoints(self):
         """Test critical API endpoints."""
-        print(" )
+        print("")
         === API ENDPOINTS ===")
 
                                 # Test API root
@@ -120,7 +120,7 @@ class StagingE2ETester:
         "API Root",
         status in [200, 404, 405],  # Various acceptable responses
         {"status_code": status},
-        None if status in [200, 404, 405] else "formatted_string"
+        None if status in [200, 404, 405] else ""
                                 
 
                                 # Test OpenAPI docs
@@ -129,7 +129,7 @@ class StagingE2ETester:
         "API Documentation",
         status == 200,
         {"status_code": status},
-        None if status == 200 else "formatted_string"
+        None if status == 200 else ""
                                 
 
                                 # Test OpenAPI schema
@@ -138,12 +138,12 @@ class StagingE2ETester:
         "OpenAPI Schema",
         status == 200 and isinstance(data, dict) and "openapi" in data,
         {"status_code": status, "has_openapi": "openapi" in data},
-        None if status == 200 else "formatted_string"
+        None if status == 200 else ""
                                 
 
     async def test_auth_endpoints(self):
         """Test authentication-related endpoints."""
-        print(" )
+        print("")
         === AUTHENTICATION ENDPOINTS ===")
 
                                     # Test auth health (if available)
@@ -153,7 +153,7 @@ class StagingE2ETester:
         "Auth Health Check",
         status == 200,
         {"status_code": status, "response": data},
-        None if status == 200 else "formatted_string"
+        None if status == 200 else ""
                                         
 
                                         # Test OAuth endpoints (should return proper responses)
@@ -162,7 +162,7 @@ class StagingE2ETester:
         "Google OAuth Endpoint",
         status in [302, 400, 401, 404],  # Redirect or error expected without params
         {"status_code": status},
-        None if status in [302, 400, 401, 404] else "formatted_string"
+        None if status in [302, 400, 401, 404] else ""
                                         
 
                                         # Test login page or endpoint
@@ -171,12 +171,12 @@ class StagingE2ETester:
         "Login Endpoint",
         status in [200, 302, 404, 405],  # Various acceptable responses
         {"status_code": status},
-        None if status in [200, 302, 404, 405] else "formatted_string"
+        None if status in [200, 302, 404, 405] else ""
                                         
 
     async def test_websocket_info(self):
         """Test WebSocket-related information endpoints."""
-        print(" )
+        print("")
         === WEBSOCKET INFO ===")
 
                                             # Test WebSocket info endpoint if available
@@ -186,18 +186,18 @@ class StagingE2ETester:
         "WebSocket Info",
         status == 200,
         {"status_code": status, "response": data},
-        None if status == 200 else "formatted_string"
+        None if status == 200 else ""
                                                 
         else:
         self.log_result("WebSocket Info", True, {"note": "Endpoint not available (expected)"})
 
     async def test_cors_configuration(self):
         """Test CORS configuration."""
-        print(" )
+        print("")
         === CORS CONFIGURATION ===")
 
                                                         # Test CORS preflight
-        headers = { )
+        headers = { }
         "Origin": "https://example.com",
         "Access-Control-Request-Method": "POST",
         "Access-Control-Request-Headers": "Content-Type"
@@ -207,12 +207,12 @@ class StagingE2ETester:
         "CORS Preflight",
         status in [200, 204],
         {"status_code": status},
-        None if status in [200, 204] else "formatted_string"
+        None if status in [200, 204] else ""
                                                         
 
     async def test_database_operations(self):
         """Test database-related operations indirectly."""
-        print(" )
+        print("")
         === DATABASE OPERATIONS ===")
 
                                                             # Test schema validation endpoint
@@ -222,12 +222,12 @@ class StagingE2ETester:
         "Schema Validation",
         success,
         {"status_code": status, "response": data if status == 200 else "Service error"},
-        None if success else "formatted_string"
+        None if success else ""
                                                             
 
     async def test_error_handling(self):
         """Test error handling for non-existent endpoints."""
-        print(" )
+        print("")
         === ERROR HANDLING ===")
 
                                                                 # Test 404 handling
@@ -236,7 +236,7 @@ class StagingE2ETester:
         "404 Error Handling",
         status == 404,
         {"status_code": status, "response": data},
-        None if status == 404 else "formatted_string"
+        None if status == 404 else ""
                                                                 
 
                                                                 # Test method not allowed
@@ -245,13 +245,13 @@ class StagingE2ETester:
         "Method Not Allowed Handling",
         status in [404, 405],  # Either is acceptable
         {"status_code": status},
-        None if status in [404, 405] else "formatted_string"
+        None if status in [404, 405] else ""
                                                                 
 
     async def run_all_tests(self):
         """Run all test suites."""
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
 
     # Run all test suites
         await self.test_health_endpoints()
@@ -267,53 +267,53 @@ class StagingE2ETester:
 
     def generate_summary(self):
         """Generate test summary report."""
-        print("formatted_string")
+        print("")
         print("TEST EXECUTION SUMMARY")
-        print("formatted_string")
+        print("")
 
         total_tests = len(self.test_results)
         passed_tests = sum(1 for r in self.test_results if r["success"])
         failed_tests = total_tests - passed_tests
 
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
+        print("")
 
         if failed_tests > 0:
         print(f" )
         FAILED TESTS:")
         for result in self.test_results:
         if not result["success"]:
-        print("formatted_string")
+        print("")
 
         print(f" )
         CRITICAL SERVICES STATUS:")
         health_tests = [item for item in []]]
         health_passed = sum(1 for r in health_tests if r["success"])
-        print("formatted_string")
+        print("")
 
         api_tests = [item for item in []]]
         api_passed = sum(1 for r in api_tests if r["success"])
-        print("formatted_string")
+        print("")
 
                 # Overall recommendation
         if passed_tests / total_tests >= 0.8:
-        print("formatted_string")
+        print("")
         print("   Recommendation: Staging environment is ready for testing")
         elif passed_tests / total_tests >= 0.6:
-        print("formatted_string")
+        print("")
         print("   Recommendation: Some issues need attention but core functionality works")
         else:
-        print("formatted_string")
+        print("")
         print("   Recommendation: Significant issues need resolution")
 
                             # Save results
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-        results_file = "formatted_string"
+        results_file = ""
         with open(results_file, 'w') as f:
-        json.dump({ ))
-        "test_run": { )
+        json.dump({ })
+        "test_run": { }
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "base_url": self.base_url,
         "total_tests": total_tests,
@@ -323,7 +323,7 @@ class StagingE2ETester:
         },
         "test_results": self.test_results
         }, f, indent=2)
-        print("formatted_string")
+        print("")
 
 
     async def main():

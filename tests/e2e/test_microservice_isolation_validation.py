@@ -37,7 +37,7 @@ class MicroserviceIsolationValidator:
     def __init__(self):
         pass
         self.project_root = Path(__file__).parent.parent.parent
-        self.backend_services = { )
+        self.backend_services = { }
         "main_backend": self.project_root / "app",
         "auth_service": self.project_root / "auth_service"
     
@@ -68,7 +68,7 @@ class MicroserviceIsolationValidator:
     def validate_import_isolation(self) -> Dict[str, Any]:
         """Validate that services don't import from each other"""
         violations = []
-        forbidden_imports = { )
+        forbidden_imports = { }
         "auth_service": "app.",
         "main_backend": "auth_service."
     
@@ -81,10 +81,10 @@ class MicroserviceIsolationValidator:
         if forbidden_prefix:
         for import_stmt in imports:
         if import_stmt.startswith(forbidden_prefix):
-        violations.append({ ))
+        violations.append({ })
         "service": service_name,
         "file": str(file_path.relative_to(self.project_root)),
-        "violation": "formatted_string",
+        "violation": "",
         "rule": "MS-ARC-002"
                         
 
@@ -96,14 +96,14 @@ class MicroserviceIsolationValidator:
 
         for service_name, service_path in self.backend_services.items():
         if not service_path.exists():
-        violations.append("formatted_string")
+        violations.append("")
         continue
 
         if service_name == "auth_service" and (service_path / "app").exists():
-        violations.append("formatted_string")
+        violations.append("")
 
         if not (service_path / "main.py").exists():
-        violations.append("formatted_string")
+        violations.append("")
 
         return {"violations": violations, "total_violations": len(violations), "independent": len(violations) == 0}
 
@@ -120,7 +120,7 @@ class MicroserviceIsolationValidator:
 
         for module_name, services in module_map.items():
         if len(services) > 1 and module_name != "__init__":
-        violations.append("formatted_string")
+        violations.append("")
 
         return {"violations": violations, "total_violations": len(violations), "boundaries_clean": len(violations) == 0}
 
@@ -132,16 +132,16 @@ class MicroserviceIsolationValidator:
         required_files = ["requirements.txt", "Dockerfile"]
         for file_name in required_files:
         if not (service_path / file_name).exists():
-        violations.append("formatted_string")
+        violations.append("")
 
-        config_files = [ )
+        config_files = [ ]
         service_path / "config.py",
         service_path / "config.yaml",
-        service_path / "formatted_string" / "config.py"
+        service_path / "" / "config.py"
                 
 
         if not any(f.exists() for f in config_files):
-        violations.append("formatted_string")
+        violations.append("")
 
         return {"violations": violations, "total_violations": len(violations), "isolated_config": len(violations) == 0}
 
@@ -163,10 +163,10 @@ class MicroserviceIsolationValidator:
         (service_name == "auth_service" and "auth_service." in match):
         continue
 
-        violations.append({ ))
+        violations.append({ })
         "service": service_name,
         "file": str(file_path.relative_to(self.project_root)),
-        "violation": "formatted_string"
+        "violation": ""
                                 
         except (UnicodeDecodeError, OSError):
         pass
@@ -175,7 +175,7 @@ class MicroserviceIsolationValidator:
 
     def run_full_validation(self) -> Dict[str, Any]:
         """Run all microservice isolation validations"""
-        return { )
+        return { }
         "import_isolation": self.validate_import_isolation(),
         "service_independence": self.validate_service_independence(),
         "code_boundaries": self.validate_code_boundaries(),
@@ -204,8 +204,8 @@ class TestMicroserviceIsolationValidation:
         results = validation_results["import_isolation"]
         if not results["isolated"]:
         violations = "
-        ".join(["formatted_string"violation"]} in {v["file"]}" for v in results["violations"]])
-        pytest.fail("formatted_string")
+        ".join([""violation"]} in {v["file"]}" for v in results["violations"]])
+        pytest.fail("")
 
         @pytest.mark.e2e
     def test_service_independence_maintained(self, validation_results):
@@ -214,8 +214,8 @@ class TestMicroserviceIsolationValidation:
         results = validation_results["service_independence"]
         if not results["independent"]:
         violations = "
-        ".join(["formatted_string" for v in results["violations"]])
-        pytest.fail("formatted_string")
+        ".join(["" for v in results["violations"]])
+        pytest.fail("")
 
         @pytest.mark.e2e
     def test_code_boundaries_clean(self, validation_results):
@@ -223,8 +223,8 @@ class TestMicroserviceIsolationValidation:
         results = validation_results["code_boundaries"]
         if not results["boundaries_clean"]:
         violations = "
-        ".join(["formatted_string" for v in results["violations"]])
-        pytest.fail("formatted_string")
+        ".join(["" for v in results["violations"]])
+        pytest.fail("")
 
         @pytest.mark.e2e
     def test_configuration_isolation_complete(self, validation_results):
@@ -233,8 +233,8 @@ class TestMicroserviceIsolationValidation:
         results = validation_results["configuration_isolation"]
         if not results["isolated_config"]:
         violations = "
-        ".join(["formatted_string" for v in results["violations"]])
-        pytest.fail("formatted_string")
+        ".join(["" for v in results["violations"]])
+        pytest.fail("")
 
         @pytest.mark.e2e
     def test_api_only_communication(self, validation_results):
@@ -242,8 +242,8 @@ class TestMicroserviceIsolationValidation:
         results = validation_results["communication_protocols"]
         if not results["api_only_communication"]:
         violations = "
-        ".join(["formatted_string"violation"]} in {v["file"]}" for v in results["violations"]])
-        pytest.fail("formatted_string")
+        ".join([""violation"]} in {v["file"]}" for v in results["violations"]])
+        pytest.fail("")
 
         @pytest.mark.e2e
     def test_backend_services_only_scope(self, validator):
@@ -260,21 +260,21 @@ class TestMicroserviceIsolationValidation:
         ("Code Boundaries", "code_boundaries"), ("Configuration Isolation", "configuration_isolation"),
         ("Communication Protocols", "communication_protocols")]
 
-        print(" )
-        " + "=" * 25 + " MICROSERVICE ISOLATION REPORT " + "=" * 25)
+        print("")
+         + =" * 25 + " MICROSERVICE ISOLATION REPORT  + =" * 25)
         total_violations = 0
         all_passed = True
 
         for name, key in categories:
         violations = validation_results[key]["total_violations"]
         total_violations += violations
-        status = "PASS" if violations == 0 else "formatted_string"
+        status = "PASS" if violations == 0 else ""
         if violations > 0:
         all_passed = False
-        print("formatted_string")
+        print("")
 
         print("-" * 80)
-        print("formatted_string")
+        print("")
 
         if all_passed:
         print("ALL MICROSERVICE ISOLATION TESTS PASSED )
@@ -294,7 +294,7 @@ class TestMicroserviceIsolationValidation:
         validator = MicroserviceIsolationValidator()
         results = validator.run_full_validation()
         total_violations = sum(category["total_violations"] for category in results.values())
-        print("formatted_string")
+        print("")
         return total_violations == 0
 
 

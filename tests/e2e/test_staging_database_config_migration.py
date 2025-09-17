@@ -45,7 +45,7 @@ class TestDatabaseConfigMigration:
         content = f.read()
 
         # These patterns would cause the staging error
-        problematic_patterns = [ )
+        problematic_patterns = [ ]
         'DatabaseConfig.POOL_SIZE',
         'DatabaseConfig.MAX_OVERFLOW',
         'DatabaseConfig.ECHO',
@@ -56,7 +56,7 @@ class TestDatabaseConfigMigration:
         
 
         for pattern in problematic_patterns:
-        assert pattern not in content, "formatted_string"
+        assert pattern not in content, ""
 
         @pytest.mark.e2e
     def test_postgres_core_imports_required_dependencies(self):
@@ -64,7 +64,7 @@ class TestDatabaseConfigMigration:
         import netra_backend.app.db.postgres_core as postgres_core
 
     # Verify critical imports exist
-        required_functions = [ )
+        required_functions = [ ]
         '_create_engine_components',
         '_initialize_engine_with_url',
         '_build_engine_args',
@@ -73,7 +73,7 @@ class TestDatabaseConfigMigration:
     
 
         for func_name in required_functions:
-        assert hasattr(postgres_core, func_name), "formatted_string"
+        assert hasattr(postgres_core, func_name), ""
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -92,7 +92,7 @@ mock_db_manager.get_application_url_async.return_value = "postgresql+asyncpg://t
 
                 # Mock the create_async_engine to prevent actual engine creation
 with patch('netra_backend.app.db.postgres_core.create_async_engine') as mock_create_engine:
-mock_engine = AsyncNone  # TODO: Use real service instead of Mock
+mock_engine = MagicMock()  # TODO: Use real service instead of Mock
 mock_create_engine.return_value = mock_engine
 
                     # This should not raise "DatabaseConfig is not defined" error
@@ -102,7 +102,7 @@ await initialize_postgres()
 assert True
 except NameError as e:
 if "DatabaseConfig" in str(e):
-pytest.fail("formatted_string")
+pytest.fail("")
 raise
 except Exception:
                                     # Other exceptions are acceptable for this test
@@ -111,7 +111,7 @@ pass
 @pytest.mark.e2e
 def test_no_direct_database_config_usage_in_core_files(self):
 """Verify core database files don't use DatabaseConfig class attributes directly."""
-core_db_files = [ )
+core_db_files = [ ]
 'netra_backend/app/db/postgres_core.py',
 'netra_backend/app/db/postgres_events.py',
 'netra_backend/app/db/postgres.py'
@@ -127,7 +127,7 @@ if 'DatabaseConfig.' in content:
                     # Extract lines with DatabaseConfig references
 lines = content.split(" )
 ")
-problematic_lines = [ )
+problematic_lines = [ ]
 (i+1, line.strip())
 for i, line in enumerate(lines)
 if 'DatabaseConfig.' in line and not line.strip().startswith('#')
@@ -135,8 +135,8 @@ if 'DatabaseConfig.' in line and not line.strip().startswith('#')
 
 if problematic_lines:
 issues = "
-".join(["formatted_string" for num, line in problematic_lines])
-pytest.fail("formatted_string")
+".join(["" for num, line in problematic_lines])
+pytest.fail("")
 
 except FileNotFoundError:
                             # File might not exist in test environment
@@ -149,7 +149,7 @@ pass
 config = get_unified_config()
 
     # Map old DatabaseConfig attributes to new unified config attributes
-required_mappings = { )
+required_mappings = { }
 'POOL_SIZE': 'db_pool_size',
 'MAX_OVERFLOW': 'db_max_overflow',
 'POOL_TIMEOUT': 'db_pool_timeout',
@@ -160,11 +160,11 @@ required_mappings = { )
     
 
 for old_attr, new_attr in required_mappings.items():
-assert hasattr(config, new_attr), "formatted_string"
+assert hasattr(config, new_attr), ""
 
         # Verify the attribute has a reasonable value
 value = getattr(config, new_attr)
-assert value is not None, "formatted_string"
+assert value is not None, ""
 
 
 @pytest.mark.e2e
@@ -193,7 +193,7 @@ assert config.db_max_overflow >= 10, "Max overflow too small for staging load"
 @pytest.mark.e2e
 def test_import_resolution_in_deployment(self):
 """Test that all critical imports resolve correctly as they would in deployment."""
-critical_imports = [ )
+critical_imports = [ ]
 "from netra_backend.app.core.configuration.base import get_unified_config",
 "from netra_backend.app.db.database_manager import DatabaseManager",
 "from sqlalchemy.ext.asyncio import create_async_engine"
@@ -203,7 +203,7 @@ for import_stmt in critical_imports:
 try:
 exec(import_stmt)
 except ImportError as e:
-pytest.fail("formatted_string")
+pytest.fail("")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -221,7 +221,7 @@ mock_db_manager.get_application_url_async.return_value = "postgresql+asyncpg://t
 
 with patch.object(postgres_core, 'create_async_engine') as mock_create_engine:
                             # Mock: Generic component isolation for controlled unit testing
-mock_engine = AsyncNone  # TODO: Use real service instead of Mock
+mock_engine = MagicMock()  # TODO: Use real service instead of Mock
 mock_create_engine.return_value = mock_engine
 
                             # Simulate the initialization sequence
@@ -246,5 +246,5 @@ assert True
 
 except NameError as e:
 if "DatabaseConfig" in str(e):
-pytest.fail("formatted_string")
+pytest.fail("")
 raise

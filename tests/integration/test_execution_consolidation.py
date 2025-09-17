@@ -138,17 +138,17 @@ class TestTool(BaseTool):
 
     def _run(self, query: str) -> str:
         await asyncio.sleep(0)
-        return "formatted_string"
+        return ""
 
     async def _arun(self, query: str) -> str:
-        return "formatted_string"
+        return ""
 
 class AdminTool(BaseTool):
         name: str = "corpus_update"
         description: str = "Admin tool for corpus update"
 
     async def _arun(self, data: str) -> str:
-        return "formatted_string"
+        return ""
 
 class DataTool(BaseTool):
         name: str = "data_fetch"
@@ -156,7 +156,7 @@ class DataTool(BaseTool):
 
     async def _arun(self, query: str) -> str:
         await asyncio.sleep(0.01)  # Simulate data fetch
-        return "formatted_string"
+        return ""
 
         return [TestTool(), AdminTool(), DataTool()]
 
@@ -215,7 +215,7 @@ dispatcher = UnifiedToolDispatcher(websocket_emitter=mock_websocket_emitter)
                     # Register a test tool
     async def test_handler(input:
         await asyncio.sleep(0)
-return "formatted_string"
+return ""
 
 tool_def = ToolDefinition( )
 name="test",
@@ -246,7 +246,7 @@ dispatcher = UnifiedToolDispatcher(strategy=admin_strategy)
                             # Register admin tool
 async def admin_handler(**kwargs) -> str:
     await asyncio.sleep(0)
-return "formatted_string"
+return ""
 
 tool_def = ToolDefinition( )
 name="corpus_update",
@@ -456,8 +456,8 @@ assert metrics['success_rate'] == 1.0
                             # Create multiple engines for different users
 engines = []
 for i in range(12):  # Test with 12 concurrent users
-user_context = Magic            user_context.user_id = "formatted_string"
-user_context.request_id = "formatted_string"
+user_context = Magic            user_context.user_id = ""
+user_context.request_id = ""
 
 engine = UserExecutionEngine( )
 config=EngineConfig( )
@@ -472,7 +472,7 @@ engines.append(engine)
                             # Execute agents concurrently
 tasks = []
 for i, engine in enumerate(engines):
-    task = engine.execute("formatted_string", {"task": "formatted_string"})
+    task = engine.execute("", {"task": ""})
 tasks.append(task)
 
                                 # Wait for all to complete
@@ -619,11 +619,11 @@ assert engine_metrics['success_count'] >= 1
                 # Create multiple request-scoped engines
 requests = []
 for i in range(5):
-    user_context = Magic            user_context.user_id = "formatted_string"
-user_context.request_id = "formatted_string"
+    user_context = Magic            user_context.user_id = ""
+user_context.request_id = ""
 
 engine = ExecutionEngineFactory.create_request_scoped_engine( )
-request_id="formatted_string",
+request_id="",
 user_context=user_context,
 registry=mock_agent_registry
                     
@@ -632,7 +632,7 @@ requests.append((engine, user_context))
                     # Execute concurrently
 tasks = []
 for engine, context in requests:
-    task = engine.execute("formatted_string", {"data": "test"})
+    task = engine.execute("", {"data": "test"})
 tasks.append(task)
 
 results = await asyncio.gather(*tasks)
@@ -732,7 +732,7 @@ dispatch_time = (time.perf_counter() - start) * 1000
 dispatch_times.append(dispatch_time)
 
 avg_dispatch = sum(dispatch_times) / len(dispatch_times)
-assert avg_dispatch < 5, "formatted_string"
+assert avg_dispatch < 5, ""
 
         # Test execution performance (<2s)
 execution_times = []
@@ -743,7 +743,7 @@ execution_time = time.perf_counter() - start
 execution_times.append(execution_time)
 
 avg_execution = sum(execution_times) / len(execution_times)
-assert avg_execution < 2.0, "formatted_string"
+assert avg_execution < 2.0, ""
 
             # Verify metrics
 dispatcher_metrics = dispatcher.get_metrics()
@@ -865,7 +865,7 @@ registry=mock_agent_registry
             # Execute 50 agents concurrently
 tasks = []
 for i in range(50):
-    task = engine.execute("formatted_string", {"task": "formatted_string"})
+    task = engine.execute("", {"task": ""})
 tasks.append(task)
 
 results = await asyncio.gather(*tasks)

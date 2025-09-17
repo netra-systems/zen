@@ -31,7 +31,7 @@ class TestFrontendStagingURLConfiguration:
         @pytest.fixture
     def dockerfile_paths(self, project_root: Path) -> Dict[str, Path]:
         """Get paths to all frontend Dockerfiles."""
-        return { )
+        return { }
         'staging': project_root / 'deployment' / 'docker' / 'frontend.gcp.Dockerfile',
         'production': project_root / 'deployment' / 'docker' / 'frontend.prod.Dockerfile',
     
@@ -48,12 +48,12 @@ CRITICAL: Next.js bakes NEXT_PUBLIC_* variables into the build at BUILD TIME.
 Without these, frontend defaults to localhost URLs.
 '''
 staging_dockerfile = dockerfile_paths['staging']
-assert staging_dockerfile.exists(), "formatted_string"
+assert staging_dockerfile.exists(), ""
 
 content = staging_dockerfile.read_text()
 
     # Check for required environment variables
-required_env_vars = [ )
+required_env_vars = [ ]
 ('NEXT_PUBLIC_ENVIRONMENT', 'staging'),
 ('NEXT_PUBLIC_API_URL', 'https://api.staging.netrasystems.ai'),
 ('NEXT_PUBLIC_WS_URL', 'wss://api.staging.netrasystems.ai'),
@@ -65,15 +65,15 @@ for var_name, expected_value in required_env_vars:
         # Check that ENV variable is set BEFORE npm run build
 pattern = r'formatted_string'
 assert re.search(pattern, content), \
-"formatted_string"
+""
 
         # Verify it comes before the build command
 env_pos = content.find('formatted_string')
 build_pos = content.find('RUN npm run build')
 assert env_pos > 0 and build_pos > 0, \
-"formatted_string"
+""
 assert env_pos < build_pos, \
-"formatted_string"
+""
 
 @pytest.mark.e2e
 def test_production_dockerfile_has_next_public_environment_variables( )
@@ -82,11 +82,11 @@ dockerfile_paths: Dict[str, Path]
 ):
 """Test that production Dockerfile sets correct NEXT_PUBLIC_* variables."""
 prod_dockerfile = dockerfile_paths['production']
-assert prod_dockerfile.exists(), "formatted_string"
+assert prod_dockerfile.exists(), ""
 
 content = prod_dockerfile.read_text()
 
-required_env_vars = [ )
+required_env_vars = [ ]
 ('NEXT_PUBLIC_ENVIRONMENT', 'production'),
 ('NEXT_PUBLIC_API_URL', 'https://api.netrasystems.ai'),
 ('NEXT_PUBLIC_WS_URL', 'wss://api.netrasystems.ai'),
@@ -97,7 +97,7 @@ required_env_vars = [ )
 for var_name, expected_value in required_env_vars:
 pattern = r'formatted_string'
 assert re.search(pattern, content), \
-"formatted_string"
+""
 
 @pytest.mark.e2e
 def test_no_localhost_urls_in_staging_dockerfile( )
@@ -113,7 +113,7 @@ staging_dockerfile = dockerfile_paths['staging']
 content = staging_dockerfile.read_text()
 
     # Check for localhost patterns
-localhost_patterns = [ )
+localhost_patterns = [ ]
 r'localhost:\d+',
 r'127\.0\.0\.1:\d+',
 r'http://localhost',
@@ -123,13 +123,13 @@ r'ws://localhost',
 for pattern in localhost_patterns:
 matches = re.findall(pattern, content, re.IGNORECASE)
 assert not matches, \
-"formatted_string"
+""
 
 @pytest.mark.e2e
 def test_unified_api_config_environment_detection(self, project_root: Path):
 """Test that unified-api-config.ts properly detects environment."""
 config_file = project_root / 'frontend' / 'lib' / 'unified-api-config.ts'
-assert config_file.exists(), "formatted_string"
+assert config_file.exists(), ""
 
 content = config_file.read_text()
 
@@ -156,7 +156,7 @@ def test_auth_service_client_uses_unified_config(self, project_root: Path):
 """Test that auth-service-client.ts uses unified configuration."""
 pass
 client_file = project_root / 'frontend' / 'lib' / 'auth-service-client.ts'
-assert client_file.exists(), "formatted_string"
+assert client_file.exists(), ""
 
 content = client_file.read_text()
 
@@ -188,7 +188,7 @@ dockerfile = project_root / 'deployment' / 'docker' / 'frontend.gcp.Dockerfile'
 
     # Build Docker image
 result = subprocess.run( )
-[ )
+[ ]
 'docker', 'build',
 '-f', str(dockerfile),
 '-t', 'frontend-staging-test:latest',
@@ -201,13 +201,13 @@ timeout=300  # 5 minute timeout for build
     
 
 assert result.returncode == 0, \
-"formatted_string"
+""
 
     # Extract built JavaScript to check for URLs
 with tempfile.TemporaryDirectory() as tmpdir:
         Copy built files from image
 subprocess.run( )
-[ )
+[ ]
 'docker', 'create',
 '--name', 'frontend-test-container',
 'frontend-staging-test:latest'
@@ -217,7 +217,7 @@ check=True
 
 try:
 subprocess.run( )
-[ )
+[ ]
 'docker', 'cp',
 'frontend-test-container:/app/.next/static',
 tmpdir
@@ -250,7 +250,7 @@ found_localhost_urls.extend(localhost_matches)
 assert found_staging_urls, \
 "Built JavaScript must contain auth.staging.netrasystems.ai"
 assert not found_localhost_urls, \
-"formatted_string"
+""
 
 finally:
                             # Cleanup
@@ -263,7 +263,7 @@ capture_output=True
 def test_deployment_script_configuration(self, project_root: Path):
 """Test that deploy_to_gcp.py has correct frontend configuration."""
 deploy_script = project_root / 'scripts' / 'deploy_to_gcp.py'
-assert deploy_script.exists(), "formatted_string"
+assert deploy_script.exists(), ""
 
 content = deploy_script.read_text(encoding='utf-8', errors='ignore')
 
@@ -273,7 +273,7 @@ assert 'frontend.gcp.Dockerfile' in content, \
 
     # Check it doesn't try to override NEXT_PUBLIC vars at runtime
     # (they won't work, must be build-time)
-lines_with_next_public = [ )
+lines_with_next_public = [ ]
 line for line in content.split(" )
 ")
 if 'NEXT_PUBLIC_' in line and 'environment_vars' in line
@@ -328,7 +328,7 @@ context = "
 ".join(lines[max(0, i-2):min(len(lines), i+3)])
                         # This is just a warning, not an assertion
 if 'build' not in context.lower() and 'compile' not in context.lower():
-print("formatted_string")
+    print("")
 
 
 class TestFrontendURLRegression:
@@ -352,14 +352,14 @@ class TestFrontendURLRegression:
         """Test that frontend Dockerfiles exist and have content."""
         project_root = Path(__file__).parent.parent.parent
 
-        dockerfiles = [ )
+        dockerfiles = [ ]
         project_root / 'deployment' / 'docker' / 'frontend.gcp.Dockerfile',
         project_root / 'deployment' / 'docker' / 'frontend.prod.Dockerfile',
     
 
         for dockerfile in dockerfiles:
-        assert dockerfile.exists(), "formatted_string"
+        assert dockerfile.exists(), ""
         content = dockerfile.read_text()
-        assert len(content) > 100, "formatted_string"
-        assert 'NEXT_PUBLIC_' in content, "formatted_string"
+        assert len(content) > 100, ""
+        assert 'NEXT_PUBLIC_' in content, ""
         pass

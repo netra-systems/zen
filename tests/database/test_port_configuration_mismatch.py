@@ -44,7 +44,7 @@ class DatabasePortConfigurationTester:
 
     def create_test_environment(self, port: str) -> Dict[str, str]:
         """Create a test environment with specific port configuration."""
-        return { )
+        return { }
         'ENVIRONMENT': 'development',
         'POSTGRES_HOST': 'localhost',
         'POSTGRES_PORT': port,
@@ -88,7 +88,7 @@ class DatabasePortConfigurationTester:
         sync_port = self.extract_port_from_url(sync_url)
         expected_port = env_vars.get('POSTGRES_PORT', '5432')
 
-        result = { )
+        result = { }
         'environment': env_vars.get('ENVIRONMENT', 'unknown'),
         'configured_port': expected_port,
         'async_url': DatabaseURLBuilder.mask_url_for_logging(async_url),
@@ -104,13 +104,13 @@ class DatabasePortConfigurationTester:
 
     # Identify issues
         if not result['ports_match']:
-        result['issues'].append("formatted_string")
+        result['issues'].append("")
 
         if not result['async_port_correct']:
-        result['issues'].append("formatted_string")
+        result['issues'].append("")
 
         if not result['sync_port_correct']:
-        result['issues'].append("formatted_string")
+        result['issues'].append("")
 
         return result
 
@@ -141,28 +141,28 @@ class TestDatabasePortConfigurationMismatch:
             # Print detailed results for debugging
         print(f" )
         === PORT 5433 CONFIGURATION TEST ===")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
+        print("")
+        print("")
+        print("")
+        print("")
+        print("")
 
         if result['issues']:
         print(f"Issues Found:")
         for issue in result['issues']:
-        print("formatted_string")
+        print("")
 
                     # This assertion should FAIL initially, exposing the mismatch
         assert result['overall_consistent'], ( )
         f"DATABASE PORT CONFIGURATION MISMATCH DETECTED:
         "
-        "formatted_string"
-        "formatted_string"
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
+        ""
+        ""
         f"This demonstrates the critical port configuration issue where sync URLs
         "
         f"ignore environment configuration and default to port 5432."
@@ -186,14 +186,14 @@ class TestDatabasePortConfigurationMismatch:
 
         print(f" )
         === PORT 5432 BASELINE TEST ===")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
+        print("")
 
         # This should pass since 5432 is the default
         assert result['overall_consistent'], ( )
-        "formatted_string"
+        ""
         
 
     def test_multiple_port_configurations(self):
@@ -221,10 +221,10 @@ class TestDatabasePortConfigurationMismatch:
         all_consistent = True
         for port, result in results.items():
         status = "[OK] CONSISTENT" if result['overall_consistent'] else "[FAIL] INCONSISTENT"
-        print("formatted_string")
+        print("")
         if result['issues']:
         for issue in result['issues']:
-        print("formatted_string")
+        print("")
 
         if not result['overall_consistent']:
         all_consistent = False
@@ -244,7 +244,7 @@ This test shows the real-world impact of the port configuration issue.
 '''
 pass
                                 # Test environment with port 5433 (where database is running)
-env_vars = { )
+env_vars = { }
 'ENVIRONMENT': 'development',
 'POSTGRES_HOST': 'localhost',
 'POSTGRES_PORT': '5433',  # Database runs on 5433
@@ -261,8 +261,8 @@ sync_url = builder.get_url_for_environment(sync=True)
 
 print(f" )
 === CONNECTIVITY TEST ===")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 
                                     # Try to connect using both URLs
 try:
@@ -270,7 +270,7 @@ import asyncpg
 
                                         # Test async URL (should work - connects to 5433)
 async_connection_url = DatabaseURLBuilder.format_for_asyncpg_driver(async_url)
-print("formatted_string")
+print("")
 
 try:
 conn = await asyncpg.connect(async_connection_url, timeout=2)
@@ -279,11 +279,11 @@ async_works = True
 print("[OK] Async connection successful")
 except Exception as e:
 async_works = False
-print("formatted_string")
+print("")
 
                                                 # Test sync URL (might fail - tries to connect to 5432)
 sync_connection_url = DatabaseURLBuilder.format_for_asyncpg_driver(sync_url)
-print("formatted_string")
+print("")
 
 try:
 conn = await asyncpg.connect(sync_connection_url, timeout=2)
@@ -292,7 +292,7 @@ sync_works = True
 print("[OK] Sync URL connection successful")
 except Exception as e:
 sync_works = False
-print("formatted_string")
+print("")
 
                                                         # If async works but sync doesn't, we've proven the port mismatch issue
 if async_works and not sync_works:
@@ -308,7 +308,7 @@ f"- Sync URL (wrong port) fails to connect
 elif not async_works and not sync_works:
 pytest.skip("Database not available for connectivity test")
 else:
-print("Both connections work - database may be running on both ports")
+    print("Both connections work - database may be running on both ports")
 
 except ImportError:
 pytest.skip("asyncpg not available for connectivity test")
@@ -326,7 +326,7 @@ class TestDatabaseURLBuilderPortLogic:
         '''
         pass
     # Environment with non-standard port
-        env_vars = { )
+        env_vars = { }
         'ENVIRONMENT': 'development',
         'POSTGRES_HOST': 'localhost',
         'POSTGRES_PORT': '5433',
@@ -340,22 +340,22 @@ class TestDatabaseURLBuilderPortLogic:
         print(f" )
         === DEVELOPMENT BUILDER ANALYSIS ===")
         print(f"Environment variables:")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
 
     # Test TCP builder (should use environment variables)
         print(f" )
         TCP Builder:")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
 
     # Test development builder
         print(f" )
         Development Builder:")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
 
     # Test environment-based URL selection
         async_url = builder.get_url_for_environment(sync=False)
@@ -363,8 +363,8 @@ class TestDatabaseURLBuilderPortLogic:
 
         print(f" )
         Environment URL Selection:")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
 
     # Extract ports to verify the issue
         tester = DatabasePortConfigurationTester()
@@ -373,22 +373,22 @@ class TestDatabaseURLBuilderPortLogic:
 
         print(f" )
         Port Analysis:")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
 
     # The bug: sync URL should use the same port as async URL
         assert async_port == env_vars['POSTGRES_PORT'], ( )
-        "formatted_string"
+        ""
     
 
     # This assertion should FAIL, exposing the bug
         assert sync_port == env_vars['POSTGRES_PORT'], ( )
         f"SYNC URL PORT MISMATCH BUG:
         "
-        "formatted_string"
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
+        ""
         f"The sync URL is using hardcoded default port instead of environment configuration.
         "
         f"This happens in the DevelopmentBuilder.default_sync_url property."
@@ -413,30 +413,30 @@ class TestDatabaseURLBuilderPortLogic:
         Environment Variables:")
         for key in ['ENVIRONMENT', 'POSTGRES_HOST', 'POSTGRES_PORT', 'POSTGRES_USER', 'POSTGRES_DB']:
         value = env_vars.get(key, 'NOT SET')
-        print("formatted_string")
+        print("")
 
         builder = DatabaseURLBuilder(env_vars)
 
         print(f" )
         Generated URLs:")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
 
         tester = DatabasePortConfigurationTester()
         result = tester.test_port_consistency(env_vars)
 
         print(f" )
         Port Consistency Analysis:")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
+        print("")
 
         if result['issues']:
         print(f" )
         Issues Found:")
         for issue in result['issues']:
-        print("formatted_string")
+        print("")
 
 
         if __name__ == "__main__":

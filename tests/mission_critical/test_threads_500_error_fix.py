@@ -99,7 +99,7 @@ class TestThreads500ErrorFix:
     async def test_find_by_user_with_normal_data(self, thread_repo, mock_db):
 ""Test find_by_user with normal, well-formed data."
         # Setup mock response
-mock_result = Magic        mock_scalars = Magic        mock_scalars.all.return_value = [
+mock_result = MagicMock(); mock_scalars = MagicMock(); mock_scalars.all.return_value = [
 MagicMock(id="thread_1, metadata_={user_id": "user123}
         
 mock_result.scalars.return_value = mock_scalars
@@ -188,7 +188,7 @@ mock_logger.critical.assert_called_with( )
     async def test_find_by_user_with_whitespace_user_id(self, thread_repo, mock_db):
 ""Test user_id normalization with whitespace."
                                         # Setup mock with user_id containing whitespace
-mock_result = Magic        mock_scalars = Magic        mock_scalars.all.return_value = [
+mock_result = MagicMock(); mock_scalars = MagicMock(); mock_scalars.all.return_value = [
 MagicMock(id="thread_1, metadata_={user_id": "  user123  }
                                         
 mock_result.scalars.return_value = mock_scalars

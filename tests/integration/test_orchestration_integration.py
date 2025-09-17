@@ -77,7 +77,7 @@ class TestWebSocketConnection:
         ORCHESTRATION_AVAILABLE = True
         except ImportError as e:
         ORCHESTRATION_AVAILABLE = False
-        pytest.skip("formatted_string", allow_module_level=True)
+        pytest.skip("", allow_module_level=True)
 
                 # Import CLI integration
         try:
@@ -184,10 +184,10 @@ controller = MasterOrchestrationController(mock_config)
 
                                     # Mock the layer executor to avoid real test execution
 with patch.object(controller, 'layer_executor') as mock_layer_executor:
-    mock_layer_executor.execute_layer = AsyncMock(return_value={ ))
+    mock_layer_executor.execute_layer = AsyncMock(return_value={ })
 "success": True,
 "duration": 45.2,
-"summary": { )
+"summary": { }
 "test_counts": {"total": 10, "passed": 10, "failed": 0},
 "categories": ["smoke", "unit"]
                                         
@@ -195,7 +195,7 @@ with patch.object(controller, 'layer_executor') as mock_layer_executor:
 
 with patch.object(controller, 'initialize_agents', return_value=True):
     try:
-        execution_args = { )
+        execution_args = { }
 "env": "test",
 "real_llm": False,
 "real_services": False,
@@ -327,9 +327,9 @@ class MockArgs:
         # Mock the controller creation and execution
 with patch('scripts.unified_test_runner.create_fast_feedback_controller') as mock_create_controller:
     websocket = TestWebSocketConnection()  # Real WebSocket implementation
-mock_controller.execute_orchestration = AsyncMock(return_value={ ))
+mock_controller.execute_orchestration = AsyncMock(return_value={ })
 "success": True,
-"summary": { )
+"summary": { }
 "test_counts": {"total": 5, "passed": 5, "failed": 0},
 "total_duration": 30.5
             
@@ -357,7 +357,7 @@ return success
 def test_cli_argument_parsing(self):
     """Test that new CLI arguments are properly parsed"""
     # Test with orchestration arguments
-test_args = [ )
+test_args = [ ]
 "--use-layers",
 "--layers", "fast_feedback", "core_integration",
 "--execution-mode", "nightly",
@@ -545,7 +545,7 @@ assert controller._monitoring_active is False
 def run_integration_tests():
     """Run integration tests with proper configuration"""
     # Configure pytest with appropriate settings
-pytest_args = [ )
+pytest_args = [ ]
 __file__,
 "-v",
 "--tb=short",

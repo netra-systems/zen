@@ -84,7 +84,7 @@ class TestSyntaxFix:
     def test_configuration_loading(self):
         """Test configuration loading and validation."""
     # Test with minimal environment
-        essential_env = { )
+        essential_env = { }
         'DATABASE_URL': 'postgresql://test:test@localhost:5433/test',
         'JWT_SECRET_KEY': 'test-secret-key-for-testing-purposes',
         'SECRET_KEY': 'test-app-secret-key-for-testing',

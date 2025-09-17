@@ -53,7 +53,7 @@ class StagingEndpointTester:
         if response.status_code == 200:
         try:
         health_data = response.json()
-        print("formatted_string")
+        print("")
         except:
         print(formatted_string)
 
@@ -61,7 +61,7 @@ class StagingEndpointTester:
         return response.status_code == 200
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         return False
 
     async def test_backend_service_health(self):
@@ -105,7 +105,7 @@ class StagingEndpointTester:
         for endpoint in test_endpoints:
         try:
         url = formatted_string
-        print("formatted_string")
+        print("")
 
         async with httpx.AsyncClient(timeout=30.0) as client:
                                                                             # Try different approaches
@@ -115,7 +115,7 @@ class StagingEndpointTester:
         print(formatted_string)
 
         if response.status_code not in [404, 405]:  # Not found or method not allowed
-        print("formatted_string")
+        print("")
 
                                                                             # 2. POST request with test data
         test_data = {
@@ -127,7 +127,7 @@ class StagingEndpointTester:
         print(formatted_string)
 
         if response.status_code not in [404, 405]:
-        print("formatted_string")
+        print("")
 
                                                                                 # If we got a token, extract it
         if response.status_code == 200:
@@ -141,7 +141,7 @@ class StagingEndpointTester:
         pass
 
         except Exception as e:
-        print("formatted_string")
+        print("")
 
         print([INFO] No token obtained from standard endpoints)
         return None

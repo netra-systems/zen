@@ -53,7 +53,7 @@ class TestDevLoginDockerCompose:
         time.sleep(10)
 
         except subprocess.CalledProcessError as e:
-        pytest.skip("formatted_string")
+        pytest.skip("")
 
     def wait_for_service(self, url: str, timeout: int = 30) -> bool:
         """Wait for a service to be available."""
@@ -83,7 +83,7 @@ class TestDevLoginDockerCompose:
         """Test dev login endpoint is available."""
         pass
         response = requests.post( )
-        "formatted_string",
+        "",
         json={"email": "test@example.com", "password": "test"}
     
 
@@ -93,7 +93,7 @@ class TestDevLoginDockerCompose:
     def test_dev_login_returns_tokens(self):
         """Test dev login returns valid JWT tokens."""
         response = requests.post( )
-        "formatted_string",
+        "",
         json={"email": "dev@test.com", "password": "devpass"}
     
 
@@ -119,7 +119,7 @@ class TestDevLoginDockerCompose:
         pass
     # Get token
         login_response = requests.post( )
-        "formatted_string",
+        "",
         json={"email": "test@test.com", "password": "test"}
     
 
@@ -127,9 +127,9 @@ class TestDevLoginDockerCompose:
         token = login_response.json()["access_token"]
 
     # Validate token
-        headers = {"Authorization": "formatted_string"}
+        headers = {"Authorization": ""}
         validate_response = requests.get( )
-        "formatted_string",
+        "",
         headers=headers
     
 
@@ -140,7 +140,7 @@ class TestDevLoginDockerCompose:
         """Test that dev login properly connects to database in Docker."""
     # This test specifically checks for the regression we fixed
         response = requests.post( )
-        "formatted_string",
+        "",
         json={"email": "db_test@test.com", "password": "test"}
     
 
@@ -207,8 +207,8 @@ class TestDevLoginDockerCompose:
         responses = []
         for i in range(5):
         response = requests.post( )
-        "formatted_string",
-        json={"email": "formatted_string", "password": "test"}
+        "",
+        json={"email": "", "password": "test"}
         
         responses.append(response)
 
@@ -227,7 +227,7 @@ class TestDevLoginDockerCompose:
 
     # Try login
         response = requests.post( )
-        "formatted_string",
+        "",
         json={"email": "restart_test@test.com", "password": "test"}
     
 
@@ -247,7 +247,7 @@ class TestDevLoginDockerCompose:
 
         env = get_env()
         url_from_config = AuthConfig.get_database_url()
-        print("formatted_string")
+        print("")
 
     # Check it's async format
         assert "postgresql+asyncpg://" in url_from_config
@@ -258,7 +258,7 @@ class TestDevLoginDockerCompose:
         text=True
     
 
-        assert result.returncode == 0, "formatted_string"
+        assert result.returncode == 0, ""
         assert "[U+2713] Database URL correctly formatted" in result.stdout
 
 
@@ -294,7 +294,7 @@ class TestDockerComposeConfiguration:
         import socket
         s = socket.socket()
         result = s.connect_ex(('dev-postgres', 5432))
-        print("formatted_string")
+        print("")
         '''],
         capture_output=True,
         text=True
@@ -309,7 +309,7 @@ class TestDockerComposeConfiguration:
         import socket
         s = socket.socket()
         result = s.connect_ex(('dev-redis', 6379))
-        print("formatted_string")
+        print("")
         '''],
         capture_output=True,
         text=True

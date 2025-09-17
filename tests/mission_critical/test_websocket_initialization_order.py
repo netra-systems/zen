@@ -120,7 +120,7 @@ class TestWebSocketInitializationOrder(SSotAsyncTestCase):
         # Check if agent has websocket_manager attribute
         if hasattr(agent, 'websocket_manager'):
         self.assertIsNotNone(agent.websocket_manager,
-        "formatted_string")
+        "")
         self.assertEqual(agent.websocket_manager, self.websocket_manager,
         formatted_string)
     def test_websocket_manager_not_set_before_registration(self):
@@ -234,7 +234,7 @@ class TestWebSocketInitializationOrder(SSotAsyncTestCase):
         self.assertGreaterEqual(agent_count, 8,
         formatted_string)
     # Log the actual agents for debugging
-        print("formatted_string")
+        print("")
         print(formatted_string)
     def test_websocket_manager_propagation_to_agents(self):
         '''
@@ -345,7 +345,7 @@ class TestInitializationRaceConditions(SSotAsyncTestCase):
         print(WEBSOCKET INITIALIZATION ORDER TEST RESULTS)
         print("="*70)
         print(formatted_string)
-        print("formatted_string")
+        print("")
         print(formatted_string)
         if result.wasSuccessful():
         print("")

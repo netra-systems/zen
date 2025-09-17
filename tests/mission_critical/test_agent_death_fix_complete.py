@@ -106,18 +106,18 @@ user_id='user_456',
 timeout_seconds=30
         
 tracker.start_execution(exec_id)
-print("formatted_string")
+print("")
         # Send initial heartbeats (agent is alive)
 for i in range(3):
     await asyncio.sleep(1)
 assert tracker.heartbeat(exec_id), Heartbeat should succeed
-print("formatted_string")
+print("")
             # Check health while agent is alive
 health_result = await health_integration.check_agent_execution_health()
 assert health_result['status'] == HealthStatus.HEALTHY.value
 print( PASS:  Health check shows HEALTHY while agent alive)
             # Simulate agent death (stop heartbeats)
-print("")
+    print("")
 [U+1F534] SIMULATING AGENT DEATH - stopping heartbeats...)
 await asyncio.sleep(12)  # Wait for death detection
             # Check if death was detected
@@ -153,7 +153,7 @@ user_id='user_123',
 timeout_seconds=5
                 
 tracker.start_execution(exec_id)
-print("formatted_string")
+print("")
                 # Keep sending heartbeats but exceed timeout
 for i in range(7):
     await asyncio.sleep(1)
@@ -229,7 +229,7 @@ print(formatted_string)
 for i in range(2):
     await asyncio.sleep(1)
 await tracker.heartbeat(exec_id)
-print("formatted_string")
+print("")
         # Stop heartbeats to simulate death
 print()
 [U+1F534] Simulating agent death...")
@@ -265,7 +265,7 @@ timeout_seconds=10
                 
 tracker.start_execution(exec_id)
 exec_ids.append(exec_id)
-print("formatted_string")
+print("")
                 # Send initial heartbeats
 for exec_id in exec_ids:
     tracker.heartbeat(exec_id)
@@ -273,7 +273,7 @@ print(formatted_string)
                     # Kill 3 agents (stop their heartbeats)
 dead_agents = exec_ids[:3]
 alive_agents = exec_ids[3:]
-print("formatted_string")
+print("")
                     # Keep alive agents beating, let others die
 for _ in range(12):
     await asyncio.sleep(1)
@@ -291,7 +291,7 @@ if record and record.is_dead():
 elif record and not record.is_terminal:
     alive_count += 1
 assert dead_count == 3, formatted_string
-assert alive_count == 2, "formatted_string"
+assert alive_count == 2, ""
 print(formatted_string)
                                         # Verify health shows unhealthy
 assert health_result['status'] == HealthStatus.UNHEALTHY.value
@@ -1113,7 +1113,7 @@ class ResourceExhaustionAgent(BaseAgent):
                                 # Check memory didn't grow excessively
         final_memory = len(gc.get_objects())
         memory_growth = final_memory - initial_memory
-        assert memory_growth < 1000, "formatted_string"
+        assert memory_growth < 1000, ""
         print( PASS:  Memory properly cleaned up after agent death)
     async def test_agent_death_websocket_cleanup(self):
         ""Test 19: Verify WebSocket connections are cleaned up after death.""
@@ -1247,7 +1247,7 @@ class ResourceExhaustionAgent(BaseAgent):
         results[scenario_name] = handled
                                 # All scenarios should be handled
         assert all(r == "handled" or r == recovered for r in results.values()), \
-        "formatted_string"
+        ""
         print( PASS:  FINAL VALIDATION: All death scenarios properly handled)
         print(" CELEBRATION:  AGENT DEATH FIX COMPLETE AND VERIFIED!")
         if __name__ == __main__:

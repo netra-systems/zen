@@ -43,18 +43,18 @@ logger = central_logger.get_logger(__name__)
 HEALTH_SLA_THRESHOLD_MS = 1000
 
         # Service discovery configuration
-SERVICE_DISCOVERY_CONFIG = { )
-"auth_service": { )
+SERVICE_DISCOVERY_CONFIG = { }
+"auth_service": { }
 "default_port": 8081,
 "health_endpoint": "/health",
 "expected_response_fields": ["status", "service", "version", "timestamp"]
 },
-"backend_service": { )
+"backend_service": { }
 "default_port": 8000,
 "health_endpoint": "/health/ready",
 "expected_response_fields": ["status", "service", "details"]
 },
-"frontend_service": { )
+"frontend_service": { }
 "default_port": 3000,
 "health_endpoint": "/",
 "check_type": "build_verification"
@@ -62,7 +62,7 @@ SERVICE_DISCOVERY_CONFIG = { )
         
 
         # Dependency chain mapping for cascade testing
-DEPENDENCY_CHAINS = { )
+DEPENDENCY_CHAINS = { }
 "frontend": ["backend"],
 "backend": ["auth", "postgres", "clickhouse"],
 "auth": ["postgres"]
@@ -96,9 +96,9 @@ class ServiceHealthMonitor:
         """Discover individual service availability and configuration."""
         port = config["default_port"]
         health_endpoint = config["health_endpoint"]
-        url = "formatted_string"
+        url = ""
 
-        discovery_info = { )
+        discovery_info = { }
         "service_name": service_name,
         "port": port,
         "endpoint": url,
@@ -114,7 +114,7 @@ class ServiceHealthMonitor:
         response_time_ms = (time.time() - start_time) * 1000
 
         if response.status_code == 200:
-        discovery_info.update({ ))
+        discovery_info.update({ })
         "discovered": True,
         "response_time_ms": response_time_ms,
         "status_code": response.status_code
@@ -130,13 +130,13 @@ class ServiceHealthMonitor:
         response_data, expected_fields
                         
         except Exception as e:
-        discovery_info["response_validation"] = { )
+        discovery_info["response_validation"] = { }
         "valid": False,
-        "error": "formatted_string"
+        "error": ""
                             
         else:
-        discovery_info.update({ ))
-        "error": "formatted_string",
+        discovery_info.update({ })
+        "error": "",
         "response_time_ms": response_time_ms
                                 
 
@@ -147,7 +147,7 @@ class ServiceHealthMonitor:
 
     def _validate_response_structure(self, response_data: Dict, expected_fields: List[str]) -> Dict[str, Any]:
         """Validate health response structure against expected fields."""
-        validation_result = { )
+        validation_result = { }
         "valid": True,
         "missing_fields": [],
         "extra_fields": [],
@@ -180,7 +180,7 @@ class ServiceHealthMonitor:
 
         overall_cascade_health = self._evaluate_cascade_health(cascade_results)
 
-        return { )
+        return { }
         "cascade_results": cascade_results,
         "overall_cascade_health": overall_cascade_health,
         "timestamp": datetime.now(UTC).isoformat()
@@ -207,7 +207,7 @@ class ServiceHealthMonitor:
 
         cascade_status = self._determine_cascade_status(healthy_dependencies, total_dependencies)
 
-        return { )
+        return { }
         "service": service,
         "dependencies": dependency_checks,
         "healthy_dependencies": healthy_dependencies,
@@ -246,7 +246,7 @@ class ServiceHealthMonitor:
 
         except Exception as e:
         response_time_ms = (time.time() - start_time) * 1000
-        return create_service_error_result("postgres", "formatted_string", response_time_ms)
+        return create_service_error_result("postgres", "", response_time_ms)
 
     async def _check_clickhouse_dependency(self, start_time: float) -> HealthCheckResult:
         """Check ClickHouse database dependency."""
@@ -262,8 +262,8 @@ class ServiceHealthMonitor:
         except Exception as e:
         response_time_ms = (time.time() - start_time) * 1000
                 # ClickHouse may not be available in test environments
-        logger.warning("formatted_string")
-        return create_service_error_result("clickhouse", "formatted_string", response_time_ms)
+        logger.warning("")
+        return create_service_error_result("clickhouse", "", response_time_ms)
 
     async def _check_redis_dependency(self, start_time: float) -> HealthCheckResult:
         """Check Redis dependency if configured."""
@@ -274,7 +274,7 @@ class ServiceHealthMonitor:
 
         except Exception as e:
         response_time_ms = (time.time() - start_time) * 1000
-        return create_service_error_result("redis", "formatted_string", response_time_ms)
+        return create_service_error_result("redis", "", response_time_ms)
 
     def _determine_cascade_status(self, healthy_count: int, total_count: int) -> str:
         """Determine cascade status based on dependency health."""
@@ -312,7 +312,7 @@ class ServiceHealthMonitor:
         elif degraded_services > 0:
         overall_status = "partial_degradation"
 
-        return { )
+        return { }
         "overall_status": overall_status,
         "total_services": total_services,
         "healthy_services": healthy_services,
@@ -345,26 +345,26 @@ discovery_results = await health_monitor.discover_service_ports()
 
         # Verify service discovery worked
 discovered_services = [item for item in []]]
-assert len(discovered_services) >= 1, "formatted_string"
+assert len(discovered_services) >= 1, ""
 
         # Check health endpoints for discovered services
 health_results = await health_monitor.health_checker.check_all_services()
 
         # Validate health response structure
 for result in health_results:
-assert isinstance(result, HealthCheckResult), "formatted_string"
-assert result.service is not None, "formatted_string"
-assert result.status in HEALTH_STATUS.values(), "formatted_string"
-assert result.response_time_ms >= 0, "formatted_string"
+assert isinstance(result, HealthCheckResult), ""
+assert result.service is not None, ""
+assert result.status in HEALTH_STATUS.values(), ""
+assert result.response_time_ms >= 0, ""
 
             # Log health status for monitoring
-logger.info("formatted_string")
+logger.info("")
 
             # Calculate overall system health
 overall_health_score = calculate_overall_health_score(health_results)
 assert overall_health_score > 0.0, "System health score should be positive"
 
-logger.info("formatted_string")
+logger.info("")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -386,20 +386,20 @@ assert 0.0 <= overall_health["cascade_health_score"] <= 1.0, "Invalid cascade he
 
                 # Check each service's dependency cascade
 for service_name, cascade_info in cascade_results["cascade_results"].items():
-assert "service" in cascade_info, "formatted_string"
-assert "dependencies" in cascade_info, "formatted_string"
-assert "cascade_status" in cascade_info, "formatted_string"
+assert "service" in cascade_info, ""
+assert "dependencies" in cascade_info, ""
+assert "cascade_status" in cascade_info, ""
 
                     # Validate dependency health checks
 for dependency in cascade_info["dependencies"]:
-assert isinstance(dependency, HealthCheckResult), "formatted_string"
+assert isinstance(dependency, HealthCheckResult), ""
 
-logger.info("formatted_string" )
-"formatted_string")
+logger.info("" )
+"")
 
                         # Log overall cascade status
-logger.info("formatted_string" )
-"formatted_string")
+logger.info("" )
+"")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -416,35 +416,35 @@ assert len(discovery_results) > 0, "Should discover at least one service"
 
                             # Validate each discovered service
 for service_name, discovery_info in discovery_results.items():
-assert "service_name" in discovery_info, "formatted_string"
-assert "port" in discovery_info, "formatted_string"
-assert "endpoint" in discovery_info, "formatted_string"
-assert "discovered" in discovery_info, "formatted_string"
+assert "service_name" in discovery_info, ""
+assert "port" in discovery_info, ""
+assert "endpoint" in discovery_info, ""
+assert "discovered" in discovery_info, ""
 
 if discovery_info["discovered"]:
-assert discovery_info["response_time_ms"] is not None, "formatted_string"
-assert discovery_info["response_time_ms"] > 0, "formatted_string"
+assert discovery_info["response_time_ms"] is not None, ""
+assert discovery_info["response_time_ms"] > 0, ""
 
                                     # Validate response structure if available
 if "response_validation" in discovery_info:
 validation = discovery_info["response_validation"]
-assert "valid" in validation, "formatted_string"
+assert "valid" in validation, ""
 
 if validation["valid"]:
-logger.info("formatted_string" )
-"formatted_string")
+logger.info("" )
+"")
 else:
-logger.warning("formatted_string" )
-"formatted_string")
+logger.warning("" )
+"")
 else:
-logger.info("formatted_string")
+logger.info("")
 
                                                     # Test cache functionality
 cached_results = await health_monitor.discover_service_ports()
                                                     # Removed problematic line: assert discovery_results.keys() == cached_results.keys(), "Cached discovery should await asyncio.sleep(0)
 return same services"
 
-logger.info("formatted_string")
+logger.info("")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -462,7 +462,7 @@ sla_compliant = []
 
 for result in health_results:
 if result.response_time_ms > HEALTH_SLA_THRESHOLD_MS:
-sla_violations.append({ ))
+sla_violations.append({ })
 "service": result.service,
 "response_time_ms": result.response_time_ms,
 "threshold_ms": HEALTH_SLA_THRESHOLD_MS
@@ -470,8 +470,8 @@ sla_violations.append({ ))
 else:
 sla_compliant.append(result.service)
 
-logger.info("formatted_string" )
-"formatted_string")
+logger.info("" )
+"")
 
                                                                     # Validate SLA compliance
 total_services = len(health_results)
@@ -480,15 +480,15 @@ compliance_ratio = compliant_services / max(1, total_services)
 
                                                                     # Allow some flexibility in test environments but log violations
 if sla_violations:
-logger.warning("formatted_string")
+logger.warning("")
 for violation in sla_violations:
-logger.warning("formatted_string")
+logger.warning("")
 
                                                                             # Ensure overall health check completes within reasonable time (5 seconds for all services)
-assert total_check_time <= 5000, "formatted_string"
+assert total_check_time <= 5000, ""
 
-logger.info("formatted_string" )
-"formatted_string")
+logger.info("" )
+"")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -498,7 +498,7 @@ pass
 logger.info("Starting health check error handling validation...")
 
                                                                                 # Test with non-existent service endpoint
-fake_config = { )
+fake_config = { }
 "url": "http://localhost:9999/health",
 "timeout": 2.0,
 "expected_service": "fake-service",
@@ -510,12 +510,12 @@ error_result = await health_monitor.health_checker.check_service_endpoint("fake_
                                                                                 # Validate error handling
 assert not error_result.is_healthy(), "Fake service should not be healthy"
 assert error_result.status in [HEALTH_STATUS["ERROR"], HEALTH_STATUS["TIMEOUT"]], \
-"formatted_string"
+""
 assert error_result.error is not None, "Error message should be present"
 assert error_result.response_time_ms >= 0, "Response time should be recorded even for errors"
 
-logger.info("formatted_string" )
-"formatted_string")
+logger.info("" )
+"")
 
                                                                                 # Test inter-service communication error handling
 inter_service_result = await health_monitor.health_checker.check_inter_service_communication()
@@ -527,22 +527,22 @@ assert inter_service_result.service == "inter_service", "Service name should be 
 if inter_service_result.is_healthy():
 logger.info("Inter-service communication test passed")
 else:
-logger.info("formatted_string" )
-"formatted_string")
+logger.info("" )
+"")
 
                                                                                         # Test critical services identification
 critical_services = get_critical_services()
 assert len(critical_services) > 0, "Should identify at least one critical service"
 
-logger.info("formatted_string")
+logger.info("")
 
                                                                                         # Test critical services health
 critical_results = await health_monitor.health_checker.check_critical_services_only()
 
 for result in critical_results:
-assert result.service in critical_services, "formatted_string"
-logger.info("formatted_string" )
-"formatted_string")
+assert result.service in critical_services, ""
+logger.info("" )
+"")
 
 logger.info("Health check error handling validation completed")
 
@@ -557,35 +557,35 @@ print("=== Service Health Monitoring Tests === )
 ")
 
     # Test 1: Service Discovery
-print("1. Testing Service Discovery...")
+    print("1. Testing Service Discovery...")
 discovery_results = await monitor.discover_service_ports()
 for service, info in discovery_results.items():
 status = "[U+2713] DISCOVERED" if info["discovered"] else "[U+2717] NOT FOUND"
-print("formatted_string")
+print("")
 
         # Test 2: Health Endpoints
-print(" )
+    print("")
 2. Testing Health Endpoints...")
 health_results = await monitor.health_checker.check_all_services()
 for result in health_results:
 status_symbol = "[U+2713]" if result.is_healthy() else "[U+2717]"
-print("formatted_string")
+print("")
 
             # Test 3: Dependency Cascade
-print(" )
+    print("")
 3. Testing Dependency Cascade...")
 cascade_results = await monitor.check_dependency_health_cascade()
 overall_health = cascade_results["overall_cascade_health"]
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 
 for service, cascade_info in cascade_results["cascade_results"].items():
 deps_healthy = cascade_info['healthy_dependencies']
 deps_total = cascade_info['total_dependencies']
 status_symbol = "[U+2713]" if cascade_info['cascade_status'] == 'healthy' else " WARNING: " if cascade_info['cascade_status'] == 'degraded' else "[U+2717]"
-print("formatted_string")
+print("")
 
-print(" )
+print("")
 === Health Monitoring Tests Complete ===")
 
                 # Run tests

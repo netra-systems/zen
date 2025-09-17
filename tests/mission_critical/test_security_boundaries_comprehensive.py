@@ -241,7 +241,7 @@ class TestWebSocketChannelSecurity:
         for i in range(6):  # One more than limit
         allowed, rate_info = websocket_authenticator.rate_limiter.is_allowed(client_ip)
         if i < 5:
-        assert allowed, "formatted_string"
+        assert allowed, ""
         assert rate_info[remaining_requests] == (4 - i)
         else:
                                 # 6th request should be denied
@@ -552,7 +552,7 @@ class TestSecurityBoundariesIntegration:
         db_sessions = {}
         # Test 1: Redis isolation
     async def set_redis_key(user_id: str, key: str, value: str):
-        namespaced_key = "formatted_string"
+        namespaced_key = ""
         redis_keys[namespaced_key] = value
     async def get_redis_key(user_id: str, key: str):
         namespaced_key = formatted_string
@@ -560,7 +560,7 @@ class TestSecurityBoundariesIntegration:
         return redis_keys.get(namespaced_key)
     # Test 2: Cache isolation
     def set_cache_key(user_id: str, key: str, value: str):
-        namespaced_key = "formatted_string"
+        namespaced_key = ""
         cache_keys[namespaced_key] = value
     def get_cache_key(user_id: str, key: str):
         namespaced_key = formatted_string
@@ -734,7 +734,7 @@ class TestSecurityVulnerabilityScenarios:
         safe_user_id = user_id.replace(":", _).replace("*", _).replace("?", _)
         safe_key = key.replace(":", _).replace("*", _).replace("?", _)
         await asyncio.sleep(0)
-        return "formatted_string"
+        return ""
     # Test various injection attempts
         injection_attempts = [
         {user_id: "user1", key: "key:admin:secret", expected: "user:user1:key_admin_secret"},
@@ -744,7 +744,7 @@ class TestSecurityVulnerabilityScenarios:
     
         for attempt in injection_attempts:
         safe_key = safe_redis_key(attempt[user_id], attempt["key"]
-        assert safe_key == attempt[expected], "formatted_string"
+        assert safe_key == attempt[expected], ""
         # Verify no Redis command injection possible
         assert not safe_key.startswith(EVAL)
         assert not safe_key.startswith("FLUSHDB")

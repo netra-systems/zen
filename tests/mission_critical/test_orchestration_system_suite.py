@@ -685,7 +685,7 @@ __file__,
 "-x,  # Stop on first failure for mission critical tests
 --maxfail=3"  # Allow up to 3 failures before stopping
     
-print("Running Mission Critical Orchestration Infrastructure Tests...)
+    print("Running Mission Critical Orchestration Infrastructure Tests...)
 print(=" * 80)
 print("[U+1F3D7][U+FE0F] INFRASTRUCTURE MODE: Testing 100+ container orchestration)
 print([U+1F310] Multi-service coordination, service discovery, load balancing")

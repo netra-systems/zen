@@ -937,7 +937,7 @@ class ASCIIAuthenticationTestSuite:
         result = test_func()
         results[test_name] = result
         status = "[PASSED]" if result else [FAILED]
-        suite._ascii_safe_print("formatted_string")
+        suite._ascii_safe_print("")
         except Exception as e:
         results[test_name] = False
         suite._ascii_safe_print(formatted_string)

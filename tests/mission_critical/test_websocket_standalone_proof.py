@@ -76,7 +76,7 @@ class MockWebSocket:
         try:
         serialized = ws_manager._serialize_message_safely(msg)
         assert isinstance(serialized, dict), formatted_string
-        print("formatted_string")
+        print("")
         except Exception as e:
         print(formatted_string)
         return False
@@ -144,7 +144,7 @@ class MockWebSocket:
 
                     # Test activity recording
         for i in range(10):
-        await heartbeat_mgr.record_activity("formatted_string")
+        await heartbeat_mgr.record_activity("")
 
                         # Check health
         healthy_count = 0
@@ -210,19 +210,19 @@ class MockWebSocket:
         for cycle in range(3):
                                                     # Add connections
         for i in range(10):
-        conn_id = "formatted_string"
+        conn_id = ""
         mock_ws = MockWebSocket()
         ws_manager.connections[conn_id] = {
         connection_id: conn_id,
         "user_id": formatted_string,
         "websocket": mock_ws,
-        thread_id: "formatted_string",
+        thread_id: "",
         is_healthy: True
                                                         
 
                                                         # Remove connections
         for i in range(10):
-        conn_id = "formatted_string"
+        conn_id = ""
         if conn_id in ws_manager.connections:
         del ws_manager.connections[conn_id]
 

@@ -40,7 +40,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
     MISSION CRITICAL FAILING TESTS: Prove ANY mock response can reach users
     
     This is our most critical test suite - it validates that under NO circumstances
-    can users receive mock, fallback, fabricated, or inauthentic responses from
+#     can users receive mock, fallback, fabricated, or inauthentic responses from # Incomplete import statement
     our AI platform. Every test failure represents direct business damage.
     "
 

@@ -151,7 +151,7 @@ class TestWebSocketThreadAssociation:
         mock_thread_service.websocket = TestWebSocketConnection()
 
     # Create a proper Run mock
-        mock_run = Magic        mock_run.id = test_run_id"
+        mock_run = MagicMock(); mock_run.id = test_run_id"
         mock_thread_service.create_run = AsyncMock(return_value=mock_run)
 
     # Mock all the other methods we'll need

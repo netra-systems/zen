@@ -315,7 +315,7 @@ pass
                                                                                                                                                                                                                                                                                                                                                         # This test verifies the principle that critical services must work or fail
 orchestrator = StartupOrchestrator(app)
 
-critical_methods = [ )
+critical_methods = [ ]
 '_initialize_database',
 '_initialize_redis',
 '_initialize_key_manager',
@@ -336,7 +336,7 @@ with patch.object(orchestrator, '_phase1_foundation'):
                 with patch.object(orchestrator, '_phase5_validation'):
                                                                                                                                                                                                                                                                                                                                                                                 # Make the specific method fail
 with patch.object(orchestrator, method_name) as mock_method:
-    mock_method.side_effect = Exception("formatted_string")
+    mock_method.side_effect = Exception("")
 
                                                                                                                                                                                                                                                                                                                                                                                     # Should raise, not degrade gracefully
 with pytest.raises(DeterministicStartupError):

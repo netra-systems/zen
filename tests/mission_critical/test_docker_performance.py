@@ -1406,7 +1406,7 @@ class TestDockerInfrastructureBenchmarks:
         logger.info(formatted_string")
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
         raise
         finally:
         profiler.cleanup()

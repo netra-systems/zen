@@ -420,7 +420,7 @@ logger.info(" PASS:  Tool dispatcher WebSocket integration verified)
 if __name__ == __main__":
         # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
         # Issue #1024: Unauthorized test runners blocking Golden Path
-print("MIGRATION NOTICE: This file previously used direct pytest execution.)
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.)
 print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")
 print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 

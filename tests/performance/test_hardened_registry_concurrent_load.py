@@ -108,7 +108,7 @@ class PerformanceMetrics:
         else:
         memory_delta = final_memory = 0
 
-        return { )
+        return { }
         'total_time_seconds': total_time,
         'operations_count': len(self.operation_times),
         'avg_operation_time_ms': avg_op_time * 1000,
@@ -146,7 +146,7 @@ class TestConcurrentUserLoad:
     async def test_concurrent_user_creation_10_users(self, registry, performance_metrics):
         """Test concurrent creation of 10 user registries."""
 num_users = 10
-user_ids = ["formatted_string" for i in range(num_users)]
+user_ids = ["" for i in range(num_users)]
 
 performance_metrics.record_memory()
 
@@ -174,11 +174,11 @@ assert len(successful_registries) == num_users
 
             # Performance assertions
 summary = performance_metrics.get_summary()
-assert summary['success_rate'] == 1.0, "formatted_string"
-assert summary['avg_operation_time_ms'] < 100, "formatted_string"
-assert summary['max_operation_time_ms'] < 500, "formatted_string"
+assert summary['success_rate'] == 1.0, ""
+assert summary['avg_operation_time_ms'] < 100, ""
+assert summary['max_operation_time_ms'] < 500, ""
 
-print("formatted_string")
+print("")
 
 @pytest.mark.asyncio
 @pytest.mark.performance
@@ -212,8 +212,8 @@ for i in range(agents_per_user):
 try:
     user_context = UserExecutionContext.from_request( )
 user_id=user_id,
-thread_id="formatted_string",
-run_id="formatted_string"
+thread_id="",
+run_id=""
             
 agent = await registry.create_agent_for_user( )
 user_id, "load_test_agent", user_context
@@ -227,7 +227,7 @@ await asyncio.sleep(0)
 return agents
 
                 # Create agents for all users concurrently
-user_ids = ["formatted_string" for i in range(num_users)]
+user_ids = ["" for i in range(num_users)]
 tasks = [create_user_agents(user_id) for user_id in user_ids]
 results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -242,10 +242,10 @@ assert total_agents_created == total_agents
 
                 # Performance assertions
 summary = performance_metrics.get_summary()
-assert summary['success_rate'] >= 0.95, "formatted_string"
-assert summary['avg_operation_time_ms'] < 200, "formatted_string"
+assert summary['success_rate'] >= 0.95, ""
+assert summary['avg_operation_time_ms'] < 200, ""
 
-print("formatted_string")
+print("")
 
 @pytest.mark.asyncio
 @pytest.mark.performance
@@ -264,7 +264,7 @@ performance_metrics.record_memory()
 baseline_memory = performance_metrics.memory_samples[-1]
 
                         # Create users with agents
-user_ids = ["formatted_string" for i in range(user_count)]
+user_ids = ["" for i in range(user_count)]
 
                         # Mock factory for agents
 async def mock_factory(context, llm_manager=None, websocket_bridge=None):
@@ -291,17 +291,17 @@ final_memory = performance_metrics.memory_samples[-1]
 memory_per_user = (final_memory - baseline_memory) / user_count
 memory_per_user_samples.append(memory_per_user)
 
-print("formatted_string")
+print("")
 
         # Verify memory scaling is reasonable
 avg_memory_per_user = mean(memory_per_user_samples)
 max_memory_per_user = max(memory_per_user_samples)
 
         # Each user should use less than 10MB on average
-assert avg_memory_per_user < 10.0, "formatted_string"
-assert max_memory_per_user < 20.0, "formatted_string"
+assert avg_memory_per_user < 10.0, ""
+assert max_memory_per_user < 20.0, ""
 
-print("formatted_string")
+print("")
 
 @pytest.mark.asyncio
 @pytest.mark.performance
@@ -312,7 +312,7 @@ num_users = 20
             # Create users with agents
 user_ids = []
 for i in range(num_users):
-    user_id = "formatted_string"
+    user_id = ""
 user_ids.append(user_id)
 
                 # Create user registry (this will create agents)
@@ -321,7 +321,7 @@ user_registry = await registry.get_user_registry(user_id)
                 # Add mock agents
 for j in range(5):  # 5 agents per user
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
-await user_registry.register_agent("formatted_string", mock_agent)
+await user_registry.register_agent("", mock_agent)
 
 performance_metrics.record_memory()
 
@@ -339,13 +339,13 @@ assert len(successful_cleanups) == num_users
 
                 # Performance assertions
 avg_cleanup_time = total_cleanup_time / num_users
-assert avg_cleanup_time < 0.1, "formatted_string"
-assert total_cleanup_time < 2.0, "formatted_string"
+assert avg_cleanup_time < 0.1, ""
+assert total_cleanup_time < 2.0, ""
 
                 # Verify no users remain
 assert len(registry._user_registries) == 0
 
-print("formatted_string")
+print("")
 
 
 class TestThreadSafety:
@@ -369,11 +369,11 @@ async def stress_operation(op_id: int):
     """Perform a stress operation."""
 pass
 try:
-    user_id = "formatted_string"  # 10 users, multiple ops per user
+    user_id = ""  # 10 users, multiple ops per user
 user_context = UserExecutionContext.from_request( )
 user_id=user_id,
-thread_id="formatted_string",
-run_id="formatted_string"
+thread_id="",
+run_id=""
         
 
         # Get user registry
@@ -391,10 +391,10 @@ await asyncio.sleep(0.001)  # 1ms
 retrieved_agent = await user_registry.get_agent("stress_test_agent")
 
 if retrieved_agent != agent:
-    errors.append("formatted_string")
+    errors.append("")
 
 except Exception as e:
-    errors.append("formatted_string")
+    errors.append("")
 
                 # Run all operations concurrently
 start_time = time.time()
@@ -403,13 +403,13 @@ await asyncio.gather(*tasks)
 total_time = time.time() - start_time
 
                 # Verify thread safety
-assert len(errors) == 0, "formatted_string"  # Show first 5 errors
+assert len(errors) == 0, ""  # Show first 5 errors
 
                 # Performance check
 ops_per_second = operations_count / total_time
-assert ops_per_second > 50, "formatted_string"
+assert ops_per_second > 50, ""
 
-print("formatted_string")
+print("")
 
                 # Cleanup
 await registry.emergency_cleanup_all()
@@ -441,11 +441,11 @@ memory_samples = [baseline_memory]
     # Perform 1000 create/destroy cycles
 cycles = 1000
 for i in range(cycles):
-    user_id = "formatted_string"
+    user_id = ""
 user_context = UserExecutionContext.from_request( )
 user_id=user_id,
-thread_id="formatted_string",
-run_id="formatted_string"
+thread_id="",
+run_id=""
         
 
         # Create agent
@@ -458,7 +458,7 @@ await registry.cleanup_user_session(user_id)
 if i % 100 == 0:
     current_memory = process.memory_info().rss / 1024 / 1024
 memory_samples.append(current_memory)
-print("formatted_string")
+print("")
 
             # Final memory check
 final_memory = process.memory_info().rss / 1024 / 1024
@@ -470,15 +470,15 @@ memory_growth_percent = (memory_growth / baseline_memory) * 100
 
 print(f"\
 Memory Usage:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
             # Allow some memory growth but detect significant leaks
-assert memory_growth < 50, "formatted_string"
-assert memory_growth_percent < 20, "formatted_string"
+assert memory_growth < 50, ""
+assert memory_growth_percent < 20, ""
 
-print("formatted_string")
+print("")
 
 
 @pytest.mark.performance
@@ -512,14 +512,14 @@ assert len(set(id(r) for r in registries)) == num_concurrent_accesses
 
     # Performance check
 avg_creation_time = (total_time / num_concurrent_accesses) * 1000  # ms
-assert avg_creation_time < 50, "formatted_string"
+assert avg_creation_time < 50, ""
 
-print("formatted_string")
+print("")
 
 
 if __name__ == "__main__":
         # Run performance tests
-pytest.main([ ))
+pytest.main([ ])
 __file__,
 "-v",
 "-m", "performance",

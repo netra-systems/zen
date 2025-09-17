@@ -88,7 +88,7 @@ if critical_violations:
 CRITICAL VIOLATIONS (TOP 10):)
 for i, violation in enumerate(critical_violations[:10], 1):
     print(formatted_string")
-print("formatted_string)
+    print("formatted_string)
 print(formatted_string")
 
 print(f" )

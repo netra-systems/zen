@@ -114,7 +114,7 @@ pass
             # Track events
 events_sent = []
             # Create mock WebSocket
-mock_ws = Magic
+mock_ws = MagicMock()
 async def capture(message):
 pass
 events_sent.append(message)

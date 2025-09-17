@@ -51,11 +51,11 @@ class TestBackendAuthServiceCommunication:
 
         # Simulate backend HTTP call to auth service
         response = test_client.post("/auth/login",
-        json={ )
+        json=}
         "email": "backend-user@example.com",
         "password": "backend-password123"
         },
-        headers={ )
+        headers=}
         "Content-Type": "application/json",
         "User-Agent": "netra-backend/1.0.0",
         "X-Service-ID": "backend-service"
@@ -63,7 +63,7 @@ class TestBackendAuthServiceCommunication:
         
 
         # Verify auth service responds correctly to backend
-        assert response.status_code == 200, "formatted_string"
+        assert response.status_code == 200, ""
 
         data = response.json()
         assert "access_token" in data
@@ -95,18 +95,18 @@ class TestBackendAuthServiceCommunication:
 
             # Simulate backend service token request
         response = test_client.post("/auth/service-token",
-        json={ )
+        json=}
         "service_id": "netra-backend",
         "service_secret": "backend-service-secret-123"
         },
-        headers={ )
+        headers=}
         "Content-Type": "application/json",
         "User-Agent": "netra-backend/1.0.0",
         "X-Service-Name": "backend"
             
             
 
-        assert response.status_code == 200, "formatted_string"
+        assert response.status_code == 200, ""
 
         data = response.json()
         assert "access_token" in data
@@ -131,7 +131,7 @@ class TestBackendAuthServiceCommunication:
         mock_auth.refresh_tokens = AsyncMock(return_value=("new-backend-access", "new-backend-refresh"))
 
         # Test different field name formats backend might use
-        test_cases = [ )
+        test_cases = ]
         {"refresh_token": "old-refresh-token-123"},  # Standard format
         {"refreshToken": "old-refresh-token-123"},   # camelCase format
         {"token": "old-refresh-token-123"}           # Simplified format
@@ -140,14 +140,14 @@ class TestBackendAuthServiceCommunication:
         for request_body in test_cases:
         response = test_client.post("/auth/refresh",
         json=request_body,
-        headers={ )
+        headers=}
         "Content-Type": "application/json",
         "User-Agent": "netra-backend/1.0.0",
         "X-Request-ID": "backend-refresh-123"
             
             
 
-        assert response.status_code == 200, "formatted_string"
+        assert response.status_code == 200, ""
 
         data = response.json()
         assert "access_token" in data
@@ -173,7 +173,7 @@ class TestBackendAuthServiceCommunication:
         # Test password hashing for user registration
         hash_response = test_client.post("/auth/hash-password",
         json={"password": "new-user-password-123"},
-        headers={ )
+        headers=}
         "Content-Type": "application/json",
         "User-Agent": "netra-backend/1.0.0",
         "X-Operation": "user-registration"
@@ -187,11 +187,11 @@ class TestBackendAuthServiceCommunication:
 
         # Test password verification for authentication
         verify_response = test_client.post("/auth/verify-password",
-        json={ )
+        json=}
         "password": "user-password-123",
         "hash": "stored-hash-value"
         },
-        headers={ )
+        headers=}
         "Content-Type": "application/json",
         "User-Agent": "netra-backend/1.0.0",
         "X-Operation": "user-authentication"
@@ -214,11 +214,11 @@ class TestBackendAuthServiceCommunication:
         '''
         pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
-        mock_auth.blacklist_token = AsyncNone  # TODO: Use real service instance
+        mock_auth.blacklist_token = MagicMock()  # TODO: Use real service instance
 
         # Simulate backend logout call with user's access token
         response = test_client.post("/auth/logout",
-        headers={ )
+        headers=}
         "Authorization": "Bearer user-access-token-789",
         "Content-Type": "application/json",
         "User-Agent": "netra-backend/1.0.0",
@@ -227,7 +227,7 @@ class TestBackendAuthServiceCommunication:
         
         
 
-        assert response.status_code == 200, "formatted_string"
+        assert response.status_code == 200, ""
 
         data = response.json()
         assert "status" in data
@@ -255,7 +255,7 @@ class TestBackendAuthServiceCommunication:
             # Simulate backend dev login call
         response = test_client.post("/auth/dev/login",
         json={},  # Dev login requires no credentials
-        headers={ )
+        headers=}
         "Content-Type": "application/json",
         "User-Agent": "netra-backend-dev/1.0.0",
         "X-Environment": "development",
@@ -263,7 +263,7 @@ class TestBackendAuthServiceCommunication:
             
             
 
-        assert response.status_code == 200, "formatted_string"
+        assert response.status_code == 200, ""
 
         data = response.json()
         assert "access_token" in data
@@ -292,11 +292,11 @@ class TestBackendAuthServiceCommunication:
 
         # Simulate backend creating custom token
         response = test_client.post("/auth/create-token",
-        json={ )
+        json=}
         "user_id": "system-user-001",
         "email": "system@netra.internal"
         },
-        headers={ )
+        headers=}
         "Content-Type": "application/json",
         "User-Agent": "netra-backend/1.0.0",
         "X-Token-Purpose": "system-operation",
@@ -304,7 +304,7 @@ class TestBackendAuthServiceCommunication:
         
         
 
-        assert response.status_code == 200, "formatted_string"
+        assert response.status_code == 200, ""
 
         data = response.json()
         assert "access_token" in data
@@ -341,7 +341,7 @@ class TestBackendAuthServiceErrorScenarios:
         '''
         pass
     # Test various malformed requests backend might send
-        error_scenarios = [ )
+        error_scenarios = ]
     # Missing email in login
         ("/auth/login", {"password": "test"}, 422),
     # Missing password in login
@@ -359,7 +359,7 @@ class TestBackendAuthServiceErrorScenarios:
         for endpoint, request_data, expected_status in error_scenarios:
         response = test_client.post(endpoint,
         json=request_data,
-        headers={ )
+        headers=}
         "Content-Type": "application/json",
         "User-Agent": "netra-backend/1.0.0"
         
@@ -367,7 +367,7 @@ class TestBackendAuthServiceErrorScenarios:
 
         # Should get validation error, not 404
         assert response.status_code == expected_status, \
-        "formatted_string"
+        ""
 
         # Should have error details
         data = response.json()
@@ -389,18 +389,18 @@ class TestBackendAuthServiceErrorScenarios:
 
         # Backend sends invalid login
         response = test_client.post("/auth/login",
-        json={ )
+        json=}
         "email": "invalid@example.com",
         "password": "wrongpassword"
         },
-        headers={ )
+        headers=}
         "Content-Type": "application/json",
         "User-Agent": "netra-backend/1.0.0"
         
         
 
         # Should get 401, not 404
-        assert response.status_code == 401, "formatted_string"
+        assert response.status_code == 401, ""
 
         data = response.json()
         assert "detail" in data
@@ -411,18 +411,18 @@ class TestBackendAuthServiceErrorScenarios:
         mock_env.get.return_value = "correct-secret"
 
         response = test_client.post("/auth/service-token",
-        json={ )
+        json=}
         "service_id": "backend-service",
         "service_secret": "wrong-secret"
         },
-        headers={ )
+        headers=}
         "Content-Type": "application/json",
         "User-Agent": "netra-backend/1.0.0"
             
             
 
             # Should get 401, not 404
-        assert response.status_code == 401, "formatted_string"
+        assert response.status_code == 401, ""
 
     def test_backend_handles_auth_service_environment_restrictions(self, test_client):
         '''Test backend properly handles environment-restricted endpoints.
@@ -439,7 +439,7 @@ class TestBackendAuthServiceErrorScenarios:
         # Backend tries dev login in production
         response = test_client.post("/auth/dev/login",
         json={},
-        headers={ )
+        headers=}
         "Content-Type": "application/json",
         "User-Agent": "netra-backend/1.0.0",
         "X-Environment": "production"
@@ -447,7 +447,7 @@ class TestBackendAuthServiceErrorScenarios:
         
 
         # Should get 403, not 404
-        assert response.status_code == 403, "formatted_string"
+        assert response.status_code == 403, ""
 
         data = response.json()
         assert "detail" in data
@@ -463,17 +463,17 @@ class TestBackendAuthServiceErrorScenarios:
     # Test truly non-existent endpoint
         response = test_client.post("/auth/definitely-does-not-exist",
         json={"test": "data"},
-        headers={ )
+        headers=}
         "Content-Type": "application/json",
         "User-Agent": "netra-backend/1.0.0"
     
     
 
     # This should be 404
-        assert response.status_code == 404, "formatted_string"
+        assert response.status_code == 404, ""
 
     # Verify existing endpoints don't return 404
-        existing_endpoints = [ )
+        existing_endpoints = ]
         "/auth/login",
         "/auth/logout",
         "/auth/register",
@@ -488,4 +488,4 @@ class TestBackendAuthServiceErrorScenarios:
         for endpoint in existing_endpoints:
         response = test_client.post(endpoint, json={})
         # Should not be 404 - might be 422, 401, 403, etc., but not 404
-        assert response.status_code != 404, "formatted_string"
+        assert response.status_code != 404, ""

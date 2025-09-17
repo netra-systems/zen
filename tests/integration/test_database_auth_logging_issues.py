@@ -57,7 +57,7 @@ class TestDatabaseAuthLogging:
         redis_url=redis_url
         
         except Exception as e:
-        pytest.skip("formatted_string")
+        pytest.skip("")
 
         yield
 
@@ -91,7 +91,7 @@ try:
 from auth_service.auth_core.database.connection import AuthDatabase
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 except ImportError as import_error:
-pytest.skip("formatted_string")
+pytest.skip("")
 
                             # Create database instance with explicit configuration
 auth_db = AuthDatabase()
@@ -102,13 +102,13 @@ await asyncio.wait_for(auth_db.initialize(), timeout=30.0)
 except asyncio.TimeoutError:
 pytest.fail("Database initialization timed out - check service availability")
 except Exception as init_error:
-pytest.fail("formatted_string")
+pytest.fail("")
 
                                         # Get the captured logs
 log_output = log_capture.getvalue()
 
                                         # Check for auth-related error messages that shouldn't be there
-unwanted_patterns = [ )
+unwanted_patterns = [ ]
 "authentication failed",
 "password authentication failed",
 "FATAL",
@@ -128,7 +128,7 @@ if pattern.lower() in log_output.lower():
 for line in log_output.split(" )
 "):
 if pattern.lower() in line.lower():
-found_issues.append("formatted_string")
+found_issues.append("")
 
                                                         # Assert no unwanted auth error messages
 assert not found_issues, f'Found authentication/connection error logs that shouldn't appear:
@@ -143,20 +143,20 @@ async with auth_db.get_session() as session:
 from sqlalchemy import text
 result = await session.execute(text("SELECT 1 as test_value"))
 test_result = result.scalar()
-assert test_result == 1, "formatted_string"
+assert test_result == 1, ""
 elif hasattr(auth_db, 'engine') and auth_db.engine:
                                                                             # Alternative method if get_session not available
 async with auth_db.engine.begin() as conn:
 from sqlalchemy import text
 result = await conn.execute(text("SELECT 1 as test_value"))
 test_result = result.scalar()
-assert test_result == 1, "formatted_string"
+assert test_result == 1, ""
 else:
                                                                                     # Log warning if we can't test connectivity
 import logging
 logging.getLogger(__name__).warning("Could not verify database connectivity - no session method available")
 except Exception as connectivity_error:
-pytest.fail("formatted_string")
+pytest.fail("")
 
 finally:
                                                                                             # Restore original handlers
@@ -175,7 +175,7 @@ await auth_db.close()
 except Exception as cleanup_error:
                                                                                                                     # Log cleanup errors but don't fail the test
 import logging
-logging.getLogger(__name__).warning("formatted_string")
+logging.getLogger(__name__).warning("")
 
 @pytest.mark.asyncio
     async def test_database_manager_url_building_no_auth_logs(self):
@@ -187,7 +187,7 @@ handler = logging.StreamHandler(log_capture)
 handler.setLevel(logging.DEBUG)
 
                                                                                                                         # Get relevant loggers
-loggers_to_check = [ )
+loggers_to_check = [ ]
 logging.getLogger('auth_service.auth_core.database'),
 logging.getLogger('dev_launcher'),
 logging.getLogger('netra_backend'),
@@ -205,10 +205,10 @@ try:
 try:
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 except ImportError as import_error:
-pytest.skip("formatted_string")
+pytest.skip("")
 
                                                                                                                                         # Test various URL transformations with different credential patterns
-test_urls = [ )
+test_urls = [ ]
 "postgresql://user:password@localhost/dbname",
 "postgresql+asyncpg://user:secret@host/db?sslmode=require",
 "postgres://admin:pass123@cloudsql/database",
@@ -218,7 +218,7 @@ test_urls = [ )
 try:
 manager = AuthDatabaseManager()
 except Exception as manager_error:
-pytest.skip("formatted_string")
+pytest.skip("")
 
 for url in test_urls:
                                                                                                                                                     # Set environment variable using isolated environment
@@ -236,7 +236,7 @@ auth_url = manager.get_auth_database_url_async()
 except Exception as url_error:
                                                                                                                                                                         # Log but don't fail - this might be expected in some configurations
 import logging
-logging.getLogger(__name__).debug("formatted_string")
+logging.getLogger(__name__).debug("")
 finally:
                                                                                                                                                                             # Restore original URL
 if original_url:
@@ -257,7 +257,7 @@ if credential in log_output:
 for line in log_output.split(" )
 "):
 if credential in line:
-found_credentials.append("formatted_string")
+found_credentials.append("")
 
                                                                                                                                                                                                     # Assert no credentials in logs
 assert not found_credentials, f"Found credentials in logs (security issue):
@@ -277,7 +277,7 @@ def test_migration_runner_auth_works(self):
 try:
 from dev_launcher.migration_runner import MigrationRunner
 except ImportError as import_error:
-pytest.skip("formatted_string")
+pytest.skip("")
 
             # Capture logs with proper setup
 log_capture = StringIO()
@@ -296,7 +296,7 @@ project_root = Path(__file__).parent.parent.parent
 try:
 runner = MigrationRunner(project_root)
 except Exception as runner_error:
-pytest.skip("formatted_string")
+pytest.skip("")
 
                         # Just initialize, don't actually run migrations in test
                         # We're checking for auth error logs during initialization
@@ -304,7 +304,7 @@ pytest.skip("formatted_string")
 log_output = log_capture.getvalue()
 
                         # Check for auth errors that shouldn't be there
-auth_errors = [ )
+auth_errors = [ ]
 "authentication failed",
 "FATAL",
 "permission denied",
@@ -318,9 +318,9 @@ found_errors.append(error)
 if found_errors:
                                     # Provide detailed error information for debugging
 error_details = "
-".join(["formatted_string" for error in found_errors])
+".join(["" for error in found_errors])
 pytest.fail( )
-"formatted_string"
+""
 f"This indicates database authentication issues that could affect system stability."
                                         
 

@@ -659,7 +659,7 @@ test_class.test_comprehensive_chaos_resilience
 results = []
 for test_method in test_methods:
     try:
-print("formatted_string)
+    print("formatted_string)
 await test_method()
 results.append(formatted_string")
 except Exception as e:

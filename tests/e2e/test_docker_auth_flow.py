@@ -29,17 +29,17 @@ class Colors:
 
     def print_test_header(test_name: str):
         """Print a formatted test header"""
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
 
     def print_result(passed: bool, message: str):
         """Print test result with color"""
         pass
         if passed:
-        print("formatted_string")
+        print("")
         else:
-        print("formatted_string")
+        print("")
 
     def check_service_health(service_name: str, url: str, endpoint: str = "/health") -> bool:
         """Check if a service is healthy"""
@@ -47,14 +47,14 @@ class Colors:
         response = requests.get("formatted_string", timeout=5)
         return response.status_code == 200
         except Exception as e:
-        print("formatted_string")
+        print("")
         return False
 
     def test_services_running() -> bool:
         """Test 1: Verify all Docker services are running"""
         print_test_header("Docker Services Health Check")
 
-        services = { )
+        services = { }
         "Auth Service": (BASE_URL_AUTH, "/health"),
         "Frontend": (BASE_URL_FRONTEND, "/api/health"),
         "Backend": (BASE_URL_BACKEND, "/health"),
@@ -63,7 +63,7 @@ class Colors:
         all_healthy = True
         for service_name, (url, endpoint) in services.items():
         healthy = check_service_health(service_name, url, endpoint)
-        print_result(healthy, "formatted_string")
+        print_result(healthy, "")
         if not healthy:
         all_healthy = False
 
@@ -76,7 +76,7 @@ class Colors:
         try:
         response = requests.get("formatted_string", timeout=5)
         if response.status_code != 200:
-        print_result(False, "formatted_string")
+        print_result(False, "")
         return False, None
 
         config = response.json()
@@ -85,12 +85,12 @@ class Colors:
         required_fields = ["development_mode", "endpoints", "google_client_id"]
         for field in required_fields:
         if field not in config:
-        print_result(False, "formatted_string")
+        print_result(False, "")
         return False, None
 
                     # Check development mode
         dev_mode = config.get("development_mode", False)
-        print_result(dev_mode, "formatted_string")
+        print_result(dev_mode, "")
 
                     # Check endpoints
         endpoints = config.get("endpoints", {})
@@ -98,14 +98,14 @@ class Colors:
         for endpoint in required_endpoints:
         has_endpoint = endpoint in endpoints
         if has_endpoint:
-        print_result(True, "formatted_string")
+        print_result(True, "")
         else:
-        print_result(False, "formatted_string")
+        print_result(False, "")
 
         return dev_mode, config
 
         except Exception as e:
-        print_result(False, "formatted_string")
+        print_result(False, "")
         return False, None
 
     def test_dev_login(auth_config: Dict) -> Tuple[bool, Optional[str]]:
@@ -123,17 +123,17 @@ class Colors:
 
         try:
                 # Attempt dev login
-        login_data = { )
+        login_data = { }
         "email": "dev@example.com",
         "password": "dev"
                 
 
-        print("formatted_string")
+        print("")
         response = requests.post(dev_login_url, json=login_data, timeout=10)
 
         if response.status_code != 200:
-        print_result(False, "formatted_string")
-        print("formatted_string")
+        print_result(False, "")
+        print("")
         return False, None
 
         data = response.json()
@@ -142,19 +142,19 @@ class Colors:
         required_fields = ["access_token", "refresh_token", "user"]
         for field in required_fields:
         if field not in data:
-        print_result(False, "formatted_string")
+        print_result(False, "")
         return False, None
 
         token = data["access_token"]
         user = data["user"]
 
-        print_result(True, "formatted_string")
-        print_result(True, "formatted_string")
+        print_result(True, "")
+        print_result(True, "")
 
         return True, token
 
         except Exception as e:
-        print_result(False, "formatted_string")
+        print_result(False, "")
         return False, None
 
     def test_token_verification(auth_config: Dict, token: str) -> bool:
@@ -168,19 +168,19 @@ class Colors:
         verify_url = auth_config["endpoints"].get("user", "formatted_string")
 
         try:
-        headers = {"Authorization": "formatted_string"}
+        headers = {"Authorization": ""}
         response = requests.get(verify_url, headers=headers, timeout=5)
 
         if response.status_code == 200:
         user_data = response.json()
-        print_result(True, "formatted_string")
+        print_result(True, "")
         return True
         else:
-        print_result(False, "formatted_string")
+        print_result(False, "")
         return False
 
         except Exception as e:
-        print_result(False, "formatted_string")
+        print_result(False, "")
         return False
 
     def test_frontend_redirect_logic() -> bool:
@@ -202,14 +202,14 @@ class Colors:
         print_result(True, "Login page accessible")
         return True
         else:
-        print_result(False, "formatted_string")
+        print_result(False, "")
         return False
         else:
-        print_result(False, "formatted_string")
+        print_result(False, "")
         return False
 
         except Exception as e:
-        print_result(False, "formatted_string")
+        print_result(False, "")
         return False
 
     def test_cors_headers() -> bool:
@@ -218,19 +218,19 @@ class Colors:
 
         try:
         # Test preflight request
-        headers = { )
+        headers = { }
         "Origin": BASE_URL_FRONTEND,
         "Access-Control-Request-Method": "POST",
         "Access-Control-Request-Headers": "Content-Type"
         
 
         response = requests.options( )
-        "formatted_string",
+        "",
         headers=headers,
         timeout=5
         
 
-        cors_headers = { )
+        cors_headers = { }
         "Access-Control-Allow-Origin": response.headers.get("Access-Control-Allow-Origin"),
         "Access-Control-Allow-Methods": response.headers.get("Access-Control-Allow-Methods"),
         "Access-Control-Allow-Headers": response.headers.get("Access-Control-Allow-Headers"),
@@ -238,7 +238,7 @@ class Colors:
         
 
         # Check CORS headers
-        has_cors = all([ ))
+        has_cors = all([ ])
         cors_headers["Access-Control-Allow-Origin"],
         cors_headers["Access-Control-Allow-Methods"],
         cors_headers["Access-Control-Allow-Headers"]
@@ -248,14 +248,14 @@ class Colors:
         print_result(True, "CORS headers present")
         for header, value in cors_headers.items():
         if value:
-        print("formatted_string")
+        print("")
         return True
         else:
         print_result(False, "Missing CORS headers")
         return False
 
         except Exception as e:
-        print_result(False, "formatted_string")
+        print_result(False, "")
         return False
 
     def test_complete_flow() -> bool:
@@ -291,7 +291,7 @@ class Colors:
 
                 # Step 3: Verify token
         print("  Step 3: Verifying token...")
-        headers = {"Authorization": "formatted_string"}
+        headers = {"Authorization": ""}
         verify_response = requests.get( )
         auth_config["endpoints"]["user"],
         headers=headers,
@@ -307,7 +307,7 @@ class Colors:
                     # Step 4: Test authenticated API call
         print("  Step 4: Testing authenticated API call...")
         api_response = requests.get( )
-        "formatted_string",
+        "",
         headers=headers,
         timeout=5
                     
@@ -317,12 +317,12 @@ class Colors:
         print_result(False, "Authentication not working with backend")
         return False
         else:
-        print_result(True, "formatted_string")
+        print_result(True, "")
 
         return True
 
         except Exception as e:
-        print_result(False, "formatted_string")
+        print_result(False, "")
         return False
 
     def check_docker_logs():
@@ -354,25 +354,25 @@ class Colors:
         break
 
         if errors_found:
-        print_result(False, "formatted_string")
+        print_result(False, "")
         for error in errors_found[:3]:  # Show first 3 errors
-        print("formatted_string")
+        print("")
         else:
-        print_result(True, "formatted_string")
+        print_result(True, "")
 
         except Exception as e:
-        print("formatted_string")
+        print("")
 
     def main():
         """Run all tests"""
         pass
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
 
     # Check if services are running
         if not test_services_running():
-        print("formatted_string")
+        print("")
         print("  docker-compose -f docker-compose.dev.yml up -d")
         return 1
 
@@ -409,24 +409,24 @@ class Colors:
         check_docker_logs()
 
                 # Print summary
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
 
         passed = sum(1 for _, result in test_results if result)
         total = len(test_results)
 
         for test_name, result in test_results:
-        status = "formatted_string" if result else "formatted_string"
-        print("formatted_string")
+        status = "" if result else ""
+        print("")
 
-        print("formatted_string")
+        print("")
 
         if passed == total:
-        print("formatted_string")
+        print("")
         return 0
         else:
-        print("formatted_string")
+        print("")
         return 1
 
         if __name__ == "__main__":

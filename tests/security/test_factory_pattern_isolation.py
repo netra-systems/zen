@@ -322,13 +322,13 @@ class TestFactoryPatternIsolation:
         pass
         await asyncio.sleep(0.1)  # Simulate async operation
         await asyncio.sleep(0)
-        return "formatted_string"
+        return ""
 
     async def mock_request_2(prompt, config):
         pass
         await asyncio.sleep(0.1)  # Simulate async operation
         await asyncio.sleep(0)
-        return "formatted_string"
+        return ""
 
         manager_1._make_llm_request = mock_request_1
         manager_2._make_llm_request = mock_request_2
@@ -345,8 +345,8 @@ class TestFactoryPatternIsolation:
 
     # Verify results are user-specific
         for i, prompt in enumerate(prompts):
-        assert results_1[i] == "formatted_string"
-        assert results_2[i] == "formatted_string"
+        assert results_1[i] == ""
+        assert results_2[i] == ""
 
         # Verify caches are isolated
         assert len(manager_1._cache) == 3

@@ -332,5 +332,5 @@ class TestDeprecationPath:
         print()
         PASS:  All startup validations passed!")
         except Exception as e:
-        print("formatted_string")
+        print("")
         sys.exit(1)

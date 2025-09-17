@@ -50,7 +50,7 @@ class TestWebSocketRunIdFix:
 "Test that sub-agents created through factory get valid run_id.""
         # Setup
 websocket_bridge = MagicMock(spec=AgentWebSocketBridge)
-websocket_manager = Magic
+websocket_manager = MagicMock()
         # Create factory
 factory = AgentInstanceFactory()
 factory.configure( )
@@ -97,7 +97,7 @@ pass
 llm_manager = Magic        tool_dispatcher = Magic        websocket_bridge = MagicMock(spec=AgentWebSocketBridge)
 registry = AgentRegistry()
                                 # Mock agent with set_websocket_bridge method
-mock_agent = Magic        mock_agent.set_websocket_bridge = Magic
+mock_agent = MagicMock(); mock_agent.set_websocket_bridge = Magic
                                 # Register agent
 registry.register("test_agent, mock_agent)
                                 # Set WebSocket bridge on registry

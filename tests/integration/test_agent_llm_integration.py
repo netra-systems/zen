@@ -99,17 +99,17 @@ class TestWebSocketConnection:
 
     def test_run_agent(mock_supervisor):
         pass
-        request_payload = { )
+        request_payload = { }
         "id": "test_run_id",
         "user_id": "test_user",
         "query": "test query",
-        "workloads": [{ ))
+        "workloads": [{ })
         "run_id": "test_workload_run",
         "query": "test workload query",
-        "data_source": { )
+        "data_source": { }
         "source_table": "test_table"
         },
-        "time_range": { )
+        "time_range": { }
         "start_time": "2023-01-01T00:00:00Z",
         "end_time": "2023-01-02T00:00:00Z"
     

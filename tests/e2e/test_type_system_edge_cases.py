@@ -66,10 +66,10 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         complex_cycles = [item for item in []]
 
         assert len(complex_cycles) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for i, chain in enumerate(complex_cycles)
         ]) +
         f"
@@ -94,16 +94,16 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         self.type_conflicts.extend(type_origin_conflicts)
 
     Edge case: Same type name from multiple sources
-        multi_source_types = { )
+        multi_source_types = { }
         name: sources for name, sources in type_origin_conflicts.items()
         if len(sources) > 1
     
 
         assert len(multi_source_types) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for type_name, sources in multi_source_types.items()
         ]) +
         f"
@@ -129,16 +129,16 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
 
     # Edge case: Critical enums duplicated across domains
         critical_enums = ['MessageType', 'AgentStatus', 'ThreadStatus', 'UserRole']
-        critical_duplicates = [ )
+        critical_duplicates = [ ]
         duplicate for duplicate in enum_duplicates
         if duplicate['enum_name'] in critical_enums
     
 
         assert len(critical_duplicates) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for dup in critical_duplicates
         ]) +
         f"
@@ -163,16 +163,16 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         self.export_inconsistencies.extend(registry_inconsistencies)
 
     # Edge case: Registry exports types that don't exist
-        missing_type_exports = [ )
+        missing_type_exports = [ ]
         inc for inc in registry_inconsistencies
         if inc['issue_type'] == 'missing_export_target'
     
 
         assert len(missing_type_exports) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for exp in missing_type_exports
         ]) +
         f"
@@ -194,16 +194,16 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         mixed_export_conflicts = self._scan_for_mixed_export_conflicts()
 
     # Edge case: Same name used for default and named export
-        name_conflicts = [ )
+        name_conflicts = [ ]
         conflict for conflict in mixed_export_conflicts
         if conflict['default_name'] == conflict['named_name']
     
 
         assert len(name_conflicts) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for conf in name_conflicts
         ]) +
         f"
@@ -225,22 +225,22 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         inheritance_issues = self._analyze_inheritance_chains()
 
     # Edge case: Inheritance chains longer than 5 levels (performance concern)
-        deep_chains = [ )
+        deep_chains = [ ]
         chain for chain in inheritance_issues
         if chain.get('depth', 0) > 5
     
 
     # Edge case: Inheritance cycles
-        cyclic_inheritance = [ )
+        cyclic_inheritance = [ ]
         chain for chain in inheritance_issues
         if chain.get('is_cyclic', False)
     
 
         assert len(deep_chains) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for chain in deep_chains
         ]) +
         f"
@@ -249,10 +249,10 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         
 
         assert len(cyclic_inheritance) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for chain in cyclic_inheritance
         ]) +
         f"
@@ -274,22 +274,22 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         type_guard_mismatches = self._compare_runtime_compile_time_types()
 
     # Edge case: Type guards more restrictive than TS types
-        overly_restrictive = [ )
+        overly_restrictive = [ ]
         mismatch for mismatch in type_guard_mismatches
         if mismatch['severity'] == 'restrictive'
     
 
     # Edge case: Type guards less restrictive than TS types
-        overly_permissive = [ )
+        overly_permissive = [ ]
         mismatch for mismatch in type_guard_mismatches
         if mismatch['severity'] == 'permissive'
     
 
         assert len(overly_restrictive) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for mis in overly_restrictive
         ]) +
         f"
@@ -298,10 +298,10 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         
 
         assert len(overly_permissive) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for mis in overly_permissive
         ]) +
         f"
@@ -324,22 +324,22 @@ pass
 async_type_issues = await self._analyze_async_type_resolution()
 
                 # Edge case: Deeply nested Promise types
-nested_promise_issues = [ )
+nested_promise_issues = [ ]
 issue for issue in async_type_issues
 if issue.get('nesting_level', 0) > 3
                 
 
                 # Edge case: Promise types with circular references
-circular_async_types = [ )
+circular_async_types = [ ]
 issue for issue in async_type_issues
 if issue.get('has_circular_reference', False)
                 
 
 assert len(nested_promise_issues) == 0, ( )
-"formatted_string" +
+"" +
 "
-".join([ ))
-"formatted_string"
+".join([ ])
+""
 for issue in nested_promise_issues
 ]) +
 f"
@@ -348,10 +348,10 @@ Deeply nested Promise types can cause type inference issues."
                     
 
 assert len(circular_async_types) == 0, ( )
-"formatted_string" +
+"" +
 "
-".join([ ))
-"formatted_string"
+".join([ ])
+""
 for issue in circular_async_types
 ]) +
 f"
@@ -374,7 +374,7 @@ import re
 imports = re.findall(r'import.*?from\s+['']([^'']+)['']', content)
 
             # Filter for local type imports
-local_imports = [ )
+local_imports = [ ]
 imp for imp in imports
 if imp.startswith('.') or not imp.startswith('@')
             
@@ -444,13 +444,13 @@ types = re.findall(r'(?:export\s+)?type\s+(\w+)', content)
 for type_name in interfaces + types:
 if type_name not in type_origins:
 type_origins[type_name] = []
-type_origins[type_name].append("formatted_string")
+type_origins[type_name].append("")
 
 except Exception:
 continue
 
                                     # Return only conflicts (multiple origins)
-return { )
+return { }
 name: origins for name, origins in type_origins.items()
 if len(set(origin.split(':')[0] for origin in origins)) > 1
                                     
@@ -477,8 +477,8 @@ except Exception:
 continue
 
                         # Return duplicates
-return [ )
-{ )
+return [ ]
+{ }
 'enum_name': name,
 'locations': locations
                         
@@ -517,14 +517,14 @@ continue
 
 try:
 source_content = source_file.read_text(encoding='utf-8')
-if "formatted_string" in source_content or "formatted_string" in source_content:
+if "" in source_content or "" in source_content:
 source_found = True
 break
 except Exception:
 continue
 
 if not source_found:
-inconsistencies.append({ ))
+inconsistencies.append({ })
 'issue_type': 'missing_export_target',
 'registry': str(index_file.relative_to(self.types_path)),
 'type_name': export_name
@@ -557,7 +557,7 @@ named_export_list.extend([name.strip() for name in exports.split(',')])
                 # Check for conflicts
 for default_name in default_exports:
 if default_name in named_export_list:
-conflicts.append({ ))
+conflicts.append({ })
 'file': file_path,
 'default_name': default_name,
 'named_name': default_name
@@ -601,7 +601,7 @@ path = []
 if interface_name in visited:
                 # Found cycle
 cycle_start = path.index(interface_name)
-return { )
+return { }
 'root_type': path[0] if path else interface_name,
 'is_cyclic': True,
 'cycle': path[cycle_start:] + [interface_name],
@@ -620,7 +620,7 @@ if result and result.get('is_cyclic'):
 return result
 max_depth = max(max_depth, result.get('depth', 0) if result else 0)
 
-return { )
+return { }
 'root_type': path[0] if path else interface_name,
 'is_cyclic': False,
 'depth': max_depth
@@ -668,7 +668,7 @@ interface_body = matching_interface[1]
 
                     # Check for common mismatches (simplified)
 if 'optional' in guard_name.lower() and '?' not in interface_body:
-mismatches.append({ ))
+mismatches.append({ })
 'type_name': guard_type,
 'severity': 'restrictive',
 'issue': 'formatted_string'
@@ -699,7 +699,7 @@ for promise_type in promise_types:
 nesting_level = promise_type.count('Promise<')
 
 if nesting_level > 3:
-issues.append({ ))
+issues.append({ })
 'type_name': 'formatted_string',
 'nesting_level': nesting_level,
 'file': str(ts_file.relative_to(self.types_path))
@@ -708,7 +708,7 @@ issues.append({ ))
                     # Check for potential circular references (simplified)
 type_parts = promise_type.split('<')[0].strip()
 if type_parts in content and 'formatted_string' in promise_type:
-issues.append({ ))
+issues.append({ })
 'type_name': 'formatted_string',
 'has_circular_reference': True,
 'circular_path': 'formatted_string',
@@ -729,19 +729,19 @@ if self.circular_dependencies:
 print(f" )
 === Circular Type Dependencies ===")
 for i, cycle in enumerate(self.circular_dependencies):
-print("formatted_string")
+    print("")
 
 if self.type_conflicts:
 print(f" )
 === Type Origin Conflicts ===")
 for type_name, sources in self.type_conflicts.items():
-print("formatted_string")
+    print("")
 
 if self.enum_duplicates:
 print(f" )
 === Enum Duplicates ===")
 for dup in self.enum_duplicates:
-print("formatted_string")
+    print("")
 
 
 if __name__ == "__main__":

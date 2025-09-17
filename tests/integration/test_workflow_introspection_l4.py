@@ -95,7 +95,7 @@ class TestWorkflowDataClasses:
 
     def test_workflow_job_creation(self):
         """Test creating WorkflowJob instance."""
-        steps = [ )
+        steps = [ ]
         WorkflowStep("Setup", "success", "2024-01-20T10:00:00Z", "2024-01-20T10:01:00Z"),
         WorkflowStep("Build", "success", "2024-01-20T10:01:00Z", "2024-01-20T10:03:00Z"),
         WorkflowStep("Test", "failure", "2024-01-20T10:03:00Z", "2024-01-20T10:05:00Z")
@@ -118,7 +118,7 @@ class TestWorkflowDataClasses:
     def test_workflow_run_creation(self):
         """Test creating WorkflowRun instance."""
         pass
-        jobs = [ )
+        jobs = [ ]
         WorkflowJob( )
         name="Test Job",
         status="success",
@@ -252,8 +252,8 @@ class TestWorkflowIntrospector:
     def test_get_recent_runs(self, introspector):
         """Test getting recent workflow runs."""
         pass
-        mock_data = [ )
-        { )
+        mock_data = [ ]
+        { }
         "databaseId": 111,
         "name": "CI Run 1",
         "workflowName": "CI",
@@ -266,7 +266,7 @@ class TestWorkflowIntrospector:
         "updatedAt": "2024-01-20T10:05:00Z",
         "url": "https://github.com/test/repo/actions/runs/111"
         },
-        { )
+        { }
         "databaseId": 222,
         "name": "CI Run 2",
         "workflowName": "CI",
@@ -303,7 +303,7 @@ class TestWorkflowIntrospector:
 
     def test_get_run_details(self, introspector):
         """Test getting detailed run information."""
-        mock_data = { )
+        mock_data = { }
         "databaseId": 333,
         "name": "Full Pipeline",
         "workflowName": "pipeline.yml",
@@ -315,21 +315,21 @@ class TestWorkflowIntrospector:
         "startedAt": "2024-01-20T12:00:00Z",
         "updatedAt": "2024-01-20T12:10:00Z",
         "url": "https://github.com/test/repo/actions/runs/333",
-        "jobs": [ )
-        { )
+        "jobs": [ ]
+        { }
         "name": "Build",
         "status": "completed",
         "conclusion": "success",
         "startedAt": "2024-01-20T12:00:00Z",
         "completedAt": "2024-01-20T12:03:00Z",
-        "steps": [ )
-        { )
+        "steps": [ ]
+        { }
         "name": "Checkout",
         "conclusion": "success",
         "startedAt": "2024-01-20T12:00:00Z",
         "completedAt": "2024-01-20T12:00:30Z"
         },
-        { )
+        { }
         "name": "Build application",
         "conclusion": "success",
         "startedAt": "2024-01-20T12:00:30Z",
@@ -337,20 +337,20 @@ class TestWorkflowIntrospector:
     
     
         },
-        { )
+        { }
         "name": "Test",
         "status": "completed",
         "conclusion": "success",
         "startedAt": "2024-01-20T12:03:00Z",
         "completedAt": "2024-01-20T12:08:00Z",
-        "steps": [ )
-        { )
+        "steps": [ ]
+        { }
         "name": "Run unit tests",
         "conclusion": "success",
         "startedAt": "2024-01-20T12:03:00Z",
         "completedAt": "2024-01-20T12:05:00Z"
         },
-        { )
+        { }
         "name": "Run integration tests",
         "conclusion": "success",
         "startedAt": "2024-01-20T12:05:00Z",
@@ -426,7 +426,7 @@ class TestWorkflowIntrospector:
 
     def test_get_workflow_outputs(self, introspector):
         """Test getting workflow outputs."""
-        mock_data = { )
+        mock_data = { }
         "outputs": {"version": "1.2.3", "artifact_url": "https://artifacts.url"},
         "artifacts_url": "https://api.github.com/repos/test/repo/actions/runs/666/artifacts",
         "logs_url": "https://api.github.com/repos/test/repo/actions/runs/666/logs",
@@ -478,7 +478,7 @@ class TestOutputFormatter:
     def test_display_workflows_table(self, formatter, capsys):
         """Test displaying workflows table."""
         pass
-        workflows = [ )
+        workflows = [ ]
         {"name": "CI", "state": "active", "id": "111"},
         {"name": "Deploy", "state": "disabled", "id": "222"},
         {"name": "Tests", "state": "active", "id": "333"}
@@ -495,7 +495,7 @@ class TestOutputFormatter:
 
     def test_display_runs_table(self, formatter, capsys):
         """Test displaying runs table."""
-        runs = [ )
+        runs = [ ]
         WorkflowRun( )
         id=100,
         name="CI Run",
@@ -533,13 +533,13 @@ class TestOutputFormatter:
     def test_display_run_details(self, formatter, capsys):
         """Test displaying detailed run information."""
         pass
-        jobs = [ )
+        jobs = [ ]
         WorkflowJob( )
         name="Build Job",
         status="success",
         started_at="2024-01-20T12:00:00Z",
         completed_at="2024-01-20T12:05:00Z",
-        steps=[ )
+        steps=[ ]
         WorkflowStep("Setup", "success", None, None),
         WorkflowStep("Build", "success", None, None),
         WorkflowStep("Package", "success", None, None)
@@ -550,7 +550,7 @@ class TestOutputFormatter:
         status="failure",
         started_at="2024-01-20T12:05:00Z",
         completed_at="2024-01-20T12:10:00Z",
-        steps=[ )
+        steps=[ ]
         WorkflowStep("Setup", "success", None, None),
         WorkflowStep("Unit Tests", "success", None, None),
         WorkflowStep("Integration Tests", "failure", None, None)
@@ -583,7 +583,7 @@ class TestOutputFormatter:
 
     def test_display_outputs(self, formatter, capsys):
         """Test displaying workflow outputs."""
-        outputs = { )
+        outputs = { }
         "outputs": {"version": "1.2.3", "status": "deployed"},
         "artifacts_url": "https://artifacts.url",
         "logs_url": "https://logs.url"
@@ -621,7 +621,7 @@ class TestComplexWorkflowScenarios:
 
     def test_parallel_job_execution(self, introspector):
         """Test handling parallel job execution."""
-        mock_data = { )
+        mock_data = { }
         "databaseId": 1000,
         "name": "Parallel Pipeline",
         "workflowName": "parallel.yml",
@@ -633,8 +633,8 @@ class TestComplexWorkflowScenarios:
         "startedAt": "2024-01-20T13:00:00Z",
         "updatedAt": "2024-01-20T13:05:00Z",
         "url": "https://test.url",
-        "jobs": [ )
-        { )
+        "jobs": [ ]
+        { }
         "name": "Linux Build",
         "status": "completed",
         "conclusion": "success",
@@ -642,7 +642,7 @@ class TestComplexWorkflowScenarios:
         "completedAt": "2024-01-20T13:03:00Z",
         "steps": []
         },
-        { )
+        { }
         "name": "Windows Build",
         "status": "in_progress",
         "conclusion": None,
@@ -650,7 +650,7 @@ class TestComplexWorkflowScenarios:
         "completedAt": None,
         "steps": []
         },
-        { )
+        { }
         "name": "macOS Build",
         "status": "completed",
         "conclusion": "failure",
@@ -682,7 +682,7 @@ class TestComplexWorkflowScenarios:
     def test_matrix_strategy_jobs(self, introspector):
         """Test handling matrix strategy jobs."""
         pass
-        mock_data = { )
+        mock_data = { }
         "databaseId": 2000,
         "name": "Matrix Build",
         "workflowName": "matrix.yml",
@@ -694,8 +694,8 @@ class TestComplexWorkflowScenarios:
         "startedAt": "2024-01-20T14:00:00Z",
         "updatedAt": "2024-01-20T14:15:00Z",
         "url": "https://test.url",
-        "jobs": [ )
-        { )
+        "jobs": [ ]
+        { }
         "name": "test (ubuntu-latest, 3.8)",
         "status": "completed",
         "conclusion": "success",
@@ -703,7 +703,7 @@ class TestComplexWorkflowScenarios:
         "completedAt": "2024-01-20T14:05:00Z",
         "steps": []
         },
-        { )
+        { }
         "name": "test (ubuntu-latest, 3.9)",
         "status": "completed",
         "conclusion": "success",
@@ -711,7 +711,7 @@ class TestComplexWorkflowScenarios:
         "completedAt": "2024-01-20T14:06:00Z",
         "steps": []
         },
-        { )
+        { }
         "name": "test (windows-latest, 3.8)",
         "status": "completed",
         "conclusion": "success",
@@ -719,7 +719,7 @@ class TestComplexWorkflowScenarios:
         "completedAt": "2024-01-20T14:07:00Z",
         "steps": []
         },
-        { )
+        { }
         "name": "test (windows-latest, 3.9)",
         "status": "completed",
         "conclusion": "success",
@@ -746,7 +746,7 @@ class TestComplexWorkflowScenarios:
 
     def test_workflow_with_retries(self, introspector):
         """Test handling workflow with job retries."""
-        mock_data = { )
+        mock_data = { }
         "databaseId": 3000,
         "name": "Flaky Tests",
         "workflowName": "tests.yml",
@@ -758,15 +758,15 @@ class TestComplexWorkflowScenarios:
         "startedAt": "2024-01-20T15:00:00Z",
         "updatedAt": "2024-01-20T15:20:00Z",
         "url": "https://test.url",
-        "jobs": [ )
-        { )
+        "jobs": [ ]
+        { }
         "name": "integration-tests",
         "status": "completed",
         "conclusion": "success",
         "startedAt": "2024-01-20T15:10:00Z",  # Later start time indicates retry
         "completedAt": "2024-01-20T15:15:00Z",
-        "steps": [ )
-        { )
+        "steps": [ ]
+        { }
         "name": "Run tests",
         "conclusion": "success",
         "startedAt": "2024-01-20T15:10:00Z",
@@ -796,14 +796,14 @@ class TestComplexWorkflowScenarios:
     # Create job with many steps
         steps = []
         for i in range(50):
-        steps.append({ ))
-        "name": "formatted_string",
+        steps.append({ })
+        "name": "",
         "conclusion": "success" if i < 49 else "failure",
-        "startedAt": "formatted_string",
-        "completedAt": "formatted_string"
+        "startedAt": "",
+        "completedAt": ""
         
 
-        mock_data = { )
+        mock_data = { }
         "databaseId": 4000,
         "name": "Large Pipeline",
         "workflowName": "large.yml",
@@ -815,8 +815,8 @@ class TestComplexWorkflowScenarios:
         "startedAt": "2024-01-20T16:00:00Z",
         "updatedAt": "2024-01-20T16:50:00Z",
         "url": "https://test.url",
-        "jobs": [ )
-        { )
+        "jobs": [ ]
+        { }
         "name": "Complex Job",
         "status": "completed",
         "conclusion": "failure",
@@ -850,8 +850,8 @@ class TestErrorHandlingAndEdgeCases:
 
     def test_handle_malformed_workflow_data(self, introspector):
         """Test handling malformed workflow data."""
-        mock_data = [ )
-        { )
+        mock_data = [ ]
+        { }
         "databaseId": 5000,
         "name": "Malformed",
     # Missing required fields
@@ -869,7 +869,7 @@ class TestErrorHandlingAndEdgeCases:
     def test_handle_empty_job_list(self, introspector):
         """Test handling workflow with no jobs."""
         pass
-        mock_data = { )
+        mock_data = { }
         "databaseId": 6000,
         "name": "No Jobs",
         "workflowName": "empty.yml",

@@ -132,7 +132,7 @@ class TestWebSocketSessionRegression:
 
             # Launch multiple concurrent agent requests
         tasks = ]
-        simulate_agent_request(formatted_string, "formatted_string")
+        simulate_agent_request(formatted_string, "")
         for i in range(5)
             
 
@@ -141,7 +141,7 @@ class TestWebSocketSessionRegression:
             # Verify no session conflicts occurred
         for result in results:
         if isinstance(result, dict):
-        assert result[success], "formatted_string"
+        assert result[success], ""
         else:
         pytest.fail(formatted_string)
 
@@ -314,9 +314,9 @@ class TestAgentPerformanceRegression:
     for i in range(3):
     message = WebSocketMessage( )
     type=MessageType.START_AGENT,
-    payload={user_request: "formatted_string"},
+    payload={user_request: ""},
     user_id=formatted_string,
-    thread_id="formatted_string"
+    thread_id=""
                         
 
     start_time = time.time()
@@ -328,7 +328,7 @@ class TestAgentPerformanceRegression:
     elapsed = time.time() - start_time
     response_times.append(elapsed)
     except asyncio.TimeoutError:
-    pytest.fail("formatted_string")
+    pytest.fail("")
 
                                 # Verify no significant degradation
     if len(response_times) >= 2:
@@ -369,10 +369,10 @@ class TestSessionCleanup:
         message = WebSocketMessage( )
         type=MessageType.START_AGENT,
         payload={"user_request": formatted_string},
-        user_id="formatted_string",
+        user_id="",
         thread_id=formatted_string
             
-        await handler.handle_message("formatted_string", None, message)
+        await handler.handle_message("", None, message)
 
             # Verify all sessions were closed
         for session in active_sessions:

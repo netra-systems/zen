@@ -105,7 +105,7 @@ class TestProcessSupervisionGaps(SSotAsyncTestCase):
         for child in child_processes:
         child.poll.return_value = None  # Still running
         self.assertIsNone(child.poll(),
-        "formatted_string")
+        "")
 
             # FAILING ASSERTION: Processes should not be terminated
         child.terminate.assert_not_called()
@@ -157,7 +157,7 @@ class TestProcessSupervisionGaps(SSotAsyncTestCase):
         start_time = time.time()
 
     # Mock services that are healthy but slow to initialize
-        services = { )
+        services = { }
         'backend': {'status': 'starting', 'pid': 1001},
         'auth': {'status': 'starting', 'pid': 1002},
         'frontend': {'status': 'starting', 'pid': 1003}
@@ -195,7 +195,7 @@ class TestHealthCheckTimingIssues(SSotAsyncTestCase):
         '''
         pass
     # Mock different service bootstrap times
-        service_bootstrap_times = { )
+        service_bootstrap_times = { }
         'redis': 5,      # Fast startup
         'postgres': 15,  # Moderate startup
         'backend': 45,   # Slow startup (DB optimization)
@@ -214,7 +214,7 @@ class TestHealthCheckTimingIssues(SSotAsyncTestCase):
         health_timeout = 10  # Current fixed timeout is too short
 
         self.assertGreaterEqual(health_timeout, expected_time,
-        "formatted_string")
+        "")
 
         @pytest.mark.e2e
     def test_health_check_retry_strategy(self):
@@ -226,7 +226,7 @@ class TestHealthCheckTimingIssues(SSotAsyncTestCase):
         '''
         pass
     # Mock intermittent health check failures
-        health_responses = [ )
+        health_responses = [ ]
         Mock(status_code=503),  # First attempt fails
         Mock(status_code=503),  # Second attempt fails
         Mock(status_code=200)   # Third attempt succeeds
@@ -263,7 +263,7 @@ class TestHealthCheckTimingIssues(SSotAsyncTestCase):
         '''
         pass
     # Mock dependency chain: frontend -> backend -> database
-        services = { )
+        services = { }
         'database': Mock(status_code=503),  # Database unhealthy
         'backend': Mock(status_code=200),   # Backend healthy
         'frontend': Mock(status_code=200)   # Frontend healthy
@@ -333,7 +333,7 @@ class TestErrorDiagnosticsGaps(SSotAsyncTestCase):
         "Process exit should trigger diagnostic capture")
 
             # FAILING ASSERTION: Diagnostics should include resource usage
-        expected_diagnostics = { )
+        expected_diagnostics = { }
         'memory_usage_mb': 100,
         'open_file_handles': 50,
         'network_connections': 0,
@@ -354,7 +354,7 @@ class TestErrorDiagnosticsGaps(SSotAsyncTestCase):
         '''
         pass
     # Mock health check failure scenarios
-        failure_scenarios = [ )
+        failure_scenarios = [ ]
         {'error': 'Connection refused', 'port': 8000},
         {'error': 'Timeout', 'duration': 30},
         {'error': 'SSL handshake failed', 'cert': 'expired'},
@@ -388,7 +388,7 @@ class TestErrorDiagnosticsGaps(SSotAsyncTestCase):
         '''
         pass
     # Mock correlated failures across services
-        correlated_errors = { )
+        correlated_errors = { }
         'backend': 'Database connection failed: postgres://localhost:5432/netra_dev',
         'auth': 'Database connection failed: postgres://localhost:5432/netra_dev',
         'frontend': 'API unreachable: http://localhost:8000'  # Consequence of backend failure
@@ -454,7 +454,7 @@ class TestRecoveryMechanismGaps(SSotAsyncTestCase):
 
         if health_response.status_code == 503:
             # FAILING ASSERTION: Should trigger recovery sequence
-        recovery_actions_available = [ )
+        recovery_actions_available = [ ]
         'restart_service',
         'clear_cache',
         'reset_connections',
@@ -476,7 +476,7 @@ class TestRecoveryMechanismGaps(SSotAsyncTestCase):
         '''
         pass
     # Mock partial system failure
-        component_status = { )
+        component_status = { }
         'core_api': 'healthy',
         'auth_service': 'healthy',
         'database': 'healthy',

@@ -1188,14 +1188,14 @@ class AuthenticationTestSuite:
         results = {}
         for test_name, test_func in auth_tests.items():
         try:
-        print("formatted_string")
+        print("")
         result = test_func()
         results[test_name] = result
         status = [U+2713] PASSED if result else "[U+2717] FAILED"
         print(formatted_string)
         except Exception as e:
         results[test_name] = False
-        print("formatted_string")
+        print("")
 
         return results
 
@@ -1256,7 +1256,7 @@ class AuthenticationTestSuite:
         duration = time.time() - start_time
         results[test_name] = result
         status = "[U+2713] PASSED" if result else [U+2717] FAILED
-        print("formatted_string")
+        print("")
         except Exception as e:
         results[test_name] = False
         print(formatted_string)

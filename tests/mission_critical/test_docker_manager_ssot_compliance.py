@@ -471,4 +471,4 @@ if __name__ == '__main__':
         verbosity=2,
         failfast=False,  # Run all tests to show full violation scope
         warnings='default'
-    )
+    ))

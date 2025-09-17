@@ -75,7 +75,7 @@ try:
 raise AssertionError("Expected ValueError for missing JWT_SECRET_PRODUCTION)
 except ValueError as e:
     assert JWT_SECRET_PRODUCTION required in production environment" in str(e)
-print("   PASS:  Backend service properly uses central validator hard requirements)
+    print("   PASS:  Backend service properly uses central validator hard requirements)
 finally:
                 # Restore environment
 if original_env:
@@ -138,7 +138,7 @@ try:
 raise AssertionError(Expected ValueError for missing Redis configuration")
 except ValueError as e:
     assert ("REDIS_HOST in str(e) or REDIS_PASSWORD" in str(e))
-print("   PASS:  Backend service properly uses central validator for Redis credentials)
+    print("   PASS:  Backend service properly uses central validator for Redis credentials)
 finally:
                 # Restore environment
 if original_env:
@@ -172,7 +172,7 @@ try:
 raise AssertionError(Expected ValueError for missing LLM API keys")
 except ValueError as e:
     assert "LLM API key required in str(e) or API_KEY" in str(e)
-print("   PASS:  Backend service properly uses central validator for LLM credentials)
+    print("   PASS:  Backend service properly uses central validator for LLM credentials)
 finally:
                 # Restore environment
 if original_env:
@@ -217,7 +217,7 @@ finally:
 
 def test_development_environment_allows_defaults():
     ""Test that development environment still allows reasonable defaults."
-print(" PASS:  Testing development environment allows reasonable defaults...)
+    print(" PASS:  Testing development environment allows reasonable defaults...)
 
 from shared.configuration import get_central_validator
 
@@ -261,7 +261,7 @@ print("   PASS:  Central validator is properly used as singleton SSOT)
 
 def run_all_tests():
     ""Run all central validator integration tests."
-print(" ALERT:  Central Configuration Validator Integration Test Suite)
+    print(" ALERT:  Central Configuration Validator Integration Test Suite)
 print(=" * 70)
 
 tests = [

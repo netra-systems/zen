@@ -1235,7 +1235,7 @@ class TestPrePostDeploymentJWTVerification:
         passed_tests = 0
 
         for environment, results in overall_results:
-        print("formatted_string")
+        print("")
         env_passed = 0
         env_total = 0
 
@@ -1247,7 +1247,7 @@ class TestPrePostDeploymentJWTVerification:
         passed_tests += 1
         print(formatted_string)
         else:
-        print("formatted_string")
+        print("")
 
         env_success_rate = env_passed / env_total if env_total > 0 else 0
         print(formatted_string)
@@ -1257,7 +1257,7 @@ class TestPrePostDeploymentJWTVerification:
         print(f" )
         OVERALL RESULTS:")
         print(formatted_string)
-        print("formatted_string")
+        print("")
 
                         # Revenue impact summary
         if suite.metrics:
@@ -1267,9 +1267,9 @@ class TestPrePostDeploymentJWTVerification:
 
         print(f )
         BUSINESS IMPACT METRICS:)
-        print("formatted_string")
+        print("")
         print(formatted_string)
-        print("formatted_string")
+        print("")
 
         if overall_success_rate >= 0.8:
         print(f )

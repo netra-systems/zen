@@ -46,7 +46,7 @@ class TestOAuthGoogleLogin500Error:
         try:
         response = await client.get("formatted_string")
         if response.status_code == 200:
-        logger.info("formatted_string")
+        logger.info("")
         return True
         except httpx.RequestError:
         pass
@@ -54,7 +54,7 @@ class TestOAuthGoogleLogin500Error:
         if i < max_retries - 1:
         await asyncio.sleep(1)
 
-        logger.error("formatted_string")
+        logger.error("")
         return False
 
 @pytest.mark.asyncio
@@ -68,7 +68,7 @@ GET http://localhost:8081/auth/login?provider=google 500 (Internal Server Error)
 pass
                                     # Check if auth service is running, skip test if not
                                     # Removed problematic line: if not await self.wait_for_auth_service(auth_service_url):
-pytest.skip("formatted_string")
+pytest.skip("")
 
                                         # Clear any OAuth credentials to ensure we test the error case
                                         # Save original values to restore later
@@ -85,18 +85,18 @@ try:
                                                     # Attempt to initiate Google OAuth login
 async with httpx.AsyncClient(follow_redirects=False) as client:
 response = await client.get( )
-"formatted_string",
+"",
 params={"provider": "google"}
                                                         
 
                                                         # Verify we get a 500 error as seen in the browser
-assert response.status_code == 500, "formatted_string"
+assert response.status_code == 500, ""
 
                                                         # The auth service may await asyncio.sleep(0)
 return different error formats
 try:
 response_data = response.json()
-logger.info("formatted_string")
+logger.info("")
 
                                                             # Check if it has the detailed error format
 if isinstance(response_data, dict):
@@ -107,12 +107,12 @@ if isinstance(detail, dict) and "error" in detail:
 assert detail["error"] == "OAUTH_CONFIGURATION_BROKEN"
 else:
                                                                             # Simple error message format
-logger.info("formatted_string")
+logger.info("")
 elif "error" in response_data:
                                                                                 # Direct error format
 assert response_data["error"] == "OAUTH_CONFIGURATION_BROKEN"
 except Exception as e:
-logger.warning("formatted_string")
+logger.warning("")
                                                                                     # That's okay, we got the 500 error which is what we're testing
 
 logger.info(f"[SUCCESS] Successfully reproduced 500 error when OAuth credentials are missing")
@@ -134,7 +134,7 @@ The auth service validates that credentials are not placeholder values.
 pass
                                                                                                     # Check if auth service is running, skip test if not
                                                                                                     # Removed problematic line: if not await self.wait_for_auth_service(auth_service_url):
-pytest.skip("formatted_string")
+pytest.skip("")
 
                                                                                                         # Save original values
 original_client_id = os.environ.get("GOOGLE_CLIENT_ID")
@@ -147,16 +147,16 @@ os.environ["GOOGLE_CLIENT_SECRET"] = "your-google-client-secret-here"
 try:
 async with httpx.AsyncClient(follow_redirects=False) as client:
 response = await client.get( )
-"formatted_string",
+"",
 params={"provider": "google"}
                                                                                                                 
 
                                                                                                                 # Should get 500 error for placeholder credentials
-assert response.status_code == 500, "formatted_string"
+assert response.status_code == 500, ""
 
 try:
 response_data = response.json()
-logger.info("formatted_string")
+logger.info("")
 
                                                                                                                     # Check various error formats
 if isinstance(response_data, dict):
@@ -169,7 +169,7 @@ assert any("placeholder" in str(error).lower() for error in detail["errors"])
 elif "error" in response_data:
 assert response_data["error"] == "OAUTH_CONFIGURATION_BROKEN"
 except Exception as e:
-logger.warning("formatted_string")
+logger.warning("")
 
 logger.info(f"[SUCCESS] Placeholder credentials correctly rejected with 500 error")
 
@@ -194,7 +194,7 @@ This test uses development OAuth credentials to verify the happy path.
 pass
                                                                                                                                                                     # Check if auth service is running, skip test if not
                                                                                                                                                                     # Removed problematic line: if not await self.wait_for_auth_service(auth_service_url):
-pytest.skip("formatted_string")
+pytest.skip("")
 
                                                                                                                                                                         # Save original values
 original_client_id = os.environ.get("GOOGLE_CLIENT_ID")
@@ -208,19 +208,19 @@ os.environ["GOOGLE_CLIENT_SECRET"] = "GOCSPX-1234567890abcdefghijk"
 
 async with httpx.AsyncClient(follow_redirects=False) as client:
 response = await client.get( )
-"formatted_string",
+"",
 params={"provider": "google"}
                                                                                                                                                                                 
 
                                                                                                                                                                                 # Should get 302 redirect to Google OAuth, not a 500 error
-assert response.status_code == 302, "formatted_string"
+assert response.status_code == 302, ""
 
                                                                                                                                                                                 # Verify redirect is to Google OAuth
 location = response.headers.get("location", "")
-assert "accounts.google.com" in location, "formatted_string"
+assert "accounts.google.com" in location, ""
 assert "oauth2" in location
 
-logger.info("formatted_string")
+logger.info("")
 
 finally:
                                                                                                                                                                                     # Restore original environment variables
@@ -250,9 +250,9 @@ test_instance = TestOAuthGoogleLogin500Error()
                                                                                                                                                                                                         # Run test without credentials (reproduces the 500 error)
 asyncio.run(test_instance.test_google_oauth_login_without_credentials_returns_500("http://localhost:8081"))
 
-print(" )
+print("")
 [SUCCESS] Successfully reproduced the 500 error when OAuth credentials are missing!")
-print(" )
+print("")
 To fix this issue in development:")
 print("1. Run: python scripts/setup_dev_oauth.py")
 print("2. Or set these environment variables:")

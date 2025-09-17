@@ -146,16 +146,16 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         missing_vars.append(var_name)
         print(formatted_string)
         else:
-        print("formatted_string")
+        print("")
 
         self.assertEqual( )
         len(missing_vars), 0,
         f
         [U+1F534] CRITICAL REGRESSION DETECTED!
         
-        "formatted_string" +
+        "" +
         
-        .join("formatted_string" )
+        .join("" )
         for var in missing_vars) +
         
 
@@ -226,7 +226,7 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         if var_info.get("critical", False):
         if formatted_string not in env_content:
         missing_in_env.append(var_name)
-        print("formatted_string")
+        print("")
         else:
         print(formatted_string)
 
@@ -236,7 +236,7 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         [U+1F534] .env.staging is missing critical variables:
         " +
         
-        .join("formatted_string" for var in missing_in_env)
+        .join("" for var in missing_in_env)
                                 
 
     def test_production_env_file_consistency(self):
@@ -301,11 +301,11 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
                 # Both should be WebSocket URLs
         self.assertTrue( )
         ws_url.startswith("wss://") or ws_url.startswith(ws://),
-        "formatted_string"
+        ""
                 
 
         print(f   PASS:  WebSocket URLs configured correctly)
-        print("formatted_string")
+        print("")
         print(formatted_string)
 
     def test_auth_url_consistency(self):
@@ -499,7 +499,7 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         print("The deployment configuration contains all critical variables.")
         else:
         print([U+1F534] FAILURE: Frontend deployment environment regression detected!)
-        print("formatted_string")
+        print("")
         print()
         WARNING: [U+FE0F]  CRITICAL: Do NOT deploy without fixing these issues!")
         print("Missing variables will cause complete frontend failure!)

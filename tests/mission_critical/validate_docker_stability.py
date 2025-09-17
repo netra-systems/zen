@@ -1338,14 +1338,14 @@ class DockerStabilityValidationTestSuite(unittest.TestCase):
         print(DOCKER STABILITY VALIDATION RESULTS)
         print("="*60)
         print(formatted_string)
-        print("formatted_string")
+        print("")
         print(formatted_string)
-        print("formatted_string")
+        print("")
     # Save report
         output_file = args.output_file or formatted_string
         with open(output_file, 'w') as f:
         json.dump(report, f, indent=2)
-        print("formatted_string")
+        print("")
         return 0 if report['validation_summary']['overall_success'] else 1
         if __name__ == '__main__':
         import sys

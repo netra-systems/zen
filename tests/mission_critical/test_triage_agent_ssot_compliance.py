@@ -155,13 +155,13 @@ class TestTriageAgentSSOTCompliance(SSotAsyncTestCase):
         contexts = [
         UserExecutionContext( )
         user_id=formatted_string,
-        thread_id="formatted_string",
+        thread_id="",
         run_id=formatted_string,
-        websocket_connection_id="formatted_string"
+        websocket_connection_id=""
         ) for i in range(3)
                     
         for ctx in contexts:
-        ctx.metadata = {user_request: "formatted_string"}
+        ctx.metadata = {user_request: ""}
                         # Verify no shared state
         self.assertFalse(hasattr(self.agent, 'user_id'))
         self.assertFalse(hasattr(self.agent, 'db_session'))

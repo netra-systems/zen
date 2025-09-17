@@ -325,14 +325,14 @@ class TestSecurityValidator:
     def test_security_required_decorator(self, test_user_context):
         """Test that security_required decorator works correctly."""
 
-        @pytest.fixture
+        # @pytest.fixture
     async def test_task(user_context:
         await asyncio.sleep(0)
-        return "formatted_string"
+        return ""
 
         # Should work with context
         result = asyncio.run(test_task(user_context=test_user_context))
-        assert result == "formatted_string"
+        assert result == ""
 
         # Should fail without context (strict mode is on by default)
         with pytest.raises(InvalidContextError):
@@ -375,8 +375,8 @@ user_data = {}
 async def user_specific_task(data_key: str, user_context: Optional[UserExecutionContext] = None):
 if user_context:
         # Store data with user prefix to simulate isolation
-storage_key = "formatted_string"
-user_data[storage_key] = "formatted_string"
+storage_key = ""
+user_data[storage_key] = ""
 await asyncio.sleep(0)
 return storage_key
 return None
@@ -407,13 +407,13 @@ result1 = await manager.wait_for_task("data_task_1", user_context=test_user_cont
 result2 = await manager.wait_for_task("data_task_2", user_context=test_user_context_2)
 
     # Verify data isolation
-assert result1 == "formatted_string"
-assert result2 == "formatted_string"
+assert result1 == ""
+assert result2 == ""
 assert result1 != result2
 
     # Verify stored data is isolated
-assert user_data[result1] == "formatted_string"
-assert user_data[result2] == "formatted_string"
+assert user_data[result1] == ""
+assert user_data[result2] == ""
 
 @pytest.mark.asyncio
     async def test_concurrent_user_task_isolation(self, test_user_context, test_user_context_2):
@@ -430,9 +430,9 @@ await asyncio.sleep(0.01)
 
     # Store result with user validation
 if user_context and user_context.user_id == user_id:
-results[user_context.user_id] = "formatted_string"
+results[user_context.user_id] = ""
 await asyncio.sleep(0)
-return "formatted_string"
+return ""
 else:
 return "failed_validation"
 
@@ -466,10 +466,10 @@ manager.wait_for_task("concurrent_2", user_context=test_user_context_2)
     
 
     # Verify isolation
-assert result1 == "formatted_string"
-assert result2 == "formatted_string"
-assert results[test_user_context.user_id] == "formatted_string"
-assert results[test_user_context_2.user_id] == "formatted_string"
+assert result1 == ""
+assert result2 == ""
+assert results[test_user_context.user_id] == ""
+assert results[test_user_context_2.user_id] == ""
 
 
 class TestIntegrationSecurity:
@@ -490,26 +490,26 @@ workflow_results = []
 @pytest.fixture
 async def analytics_task(event_data: Dict[str, Any], user_context: Optional[UserExecutionContext] = None):
     # Process analytics
-workflow_results.append({ ))
+workflow_results.append({ })
 'step': 'analytics',
 'user_id': user_context.user_id,
 'event_data': event_data
     
 
 await asyncio.sleep(0)
-return "formatted_string"
+return ""
 
 @pytest.fixture
 async def report_task(analytics_result: str, user_context: Optional[UserExecutionContext] = None):
     # Generate report
-workflow_results.append({ ))
+workflow_results.append({ })
 'step': 'report',
 'user_id': user_context.user_id,
 'analytics_result': analytics_result
     
 
 await asyncio.sleep(0)
-return "formatted_string"
+return ""
 
     # Execute workflow
 event_data = {"prompt": "test message", "model": "gpt-4"}
@@ -524,8 +524,8 @@ report_result = await report_task(analytics_result, user_context=test_user_conte
 assert len(workflow_results) == 2
 assert workflow_results[0]['user_id'] == test_user_context.user_id
 assert workflow_results[1]['user_id'] == test_user_context.user_id
-assert analytics_result == "formatted_string"
-assert report_result == "formatted_string"
+assert analytics_result == ""
+assert report_result == ""
 
     # Verify no violations
 assert len(validator.violations) == 0

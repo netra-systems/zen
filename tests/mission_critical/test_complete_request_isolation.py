@@ -128,7 +128,7 @@ async def execute_request(user_id: str, should_fail: bool = False):
 context = UserExecutionContext( )
 user_id=user_id,
 thread_id=formatted_string,
-run_id="formatted_string"
+run_id=""
     
 
 try:
@@ -139,7 +139,7 @@ agent = await factory.create_agent_instance(triage, context)
 
 if should_fail:
                 # Force this request to fail
-raise Exception("formatted_string")
+raise Exception("")
 
                 # Simulate successful execution
 await asyncio.sleep(0)

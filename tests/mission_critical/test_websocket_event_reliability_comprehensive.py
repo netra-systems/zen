@@ -634,7 +634,7 @@ class FactoryPatternReliabilityTestHarness:
         return True
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         return False
 
     async def cleanup_all_emitters(self):
@@ -681,7 +681,7 @@ class TestComprehensiveWebSocketEventReliability:
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_enhanced_event_content_quality_per_user(self):
 "Test event content quality with per-user validation."
 pass
@@ -714,13 +714,13 @@ assert user_quality >= 3.5, formatted_string
 
                         # Check overall quality
 overall_quality = reliability_results["validation_results"][overall_quality]
-assert overall_quality >= 3.5, "formatted_string"
+assert overall_quality >= 3.5, ""
 
 print(formatted_string)
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_timing_analysis_with_user_isolation(self):
 ""Test timing analysis with user isolation and silence detection.""
 print([U+23F1][U+FE0F] Testing timing analysis with user isolation)
@@ -751,7 +751,7 @@ assert timing_analysis.event_count >= 5, formatted_string
 if scenario["include_timing_issues"]:
                                         # Should detect silence periods
 assert len(timing_analysis.silent_periods) > 0, formatted_string
-assert timing_analysis.max_silent_period >= 5.0, "formatted_string"
+assert timing_analysis.max_silent_period >= 5.0, ""
 else:
                                             # Should have good timing quality
 assert timing_analysis.timing_quality_score >= 0.7, formatted_string
@@ -760,11 +760,11 @@ assert timing_analysis.timing_quality_score >= 0.7, formatted_string
 reliability_results = self.test_harness.get_reliability_results()
 overall_timing = reliability_results["validation_results"][overall_timing_quality]
 
-print("formatted_string")
+print("")
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_concurrent_user_reliability_isolation(self):
 "Test reliability under concurrent load with complete user isolation."
 pass
@@ -793,7 +793,7 @@ successful_flows = sum(1 for r in results if r is True)
 
                                                         # Should maintain high success rate despite some reliability issues
 success_rate = successful_flows / len(results)
-assert success_rate >= 0.8, "formatted_string"
+assert success_rate >= 0.8, ""
 
                                                         # Validate individual user isolation
 reliability_results = self.test_harness.get_reliability_results()
@@ -810,11 +810,11 @@ assert len(good_user_failures) <= 2, "Too many good users affected by reliabilit
 factory_metrics = reliability_results[factory_metrics]
 assert factory_metrics["emitters_created"] >= concurrent_users, Factory should create all emitters
 
-print("formatted_string")
+print("")
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_edge_case_recovery_with_user_isolation(self):
 "Test edge case recovery with user isolation."
 print(" ALERT:  Testing edge case recovery with user isolation")
@@ -868,18 +868,18 @@ assert normal_user[success], "Normal user should succeed despite edge cases in o
 
                                                                                     # At least some edge case scenarios should succeed (showing recovery)
 successful_edge_cases = sum(1 for r in edge_results if r[success]
-assert successful_edge_cases >= 2, "formatted_string"
+assert successful_edge_cases >= 2, ""
 
                                                                                     # Validate user isolation wasn't broken by edge cases
 reliability_results = self.test_harness.get_reliability_results()
 isolation_valid = reliability_results[validation_results]["isolation_valid"]
 assert isolation_valid, User isolation broken during edge case scenarios
 
-print("formatted_string")
+print("")
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_user_experience_reliability_validation(self):
 "Test user experience reliability with factory pattern."
 pass
@@ -910,7 +910,7 @@ include_timing_issues=(quality_level == "degraded")
 
                                                                                                 # Even degraded scenarios should complete (with potential retries)
 if not success and quality_level != degraded:
-    assert False, "formatted_string"
+    assert False, ""
 
                                                                                                     # Validate UX quality per user
 for scenario in ux_scenarios:
@@ -918,7 +918,7 @@ for scenario in ux_scenarios:
 user_quality = self.test_harness.validator.get_user_content_quality(user_id)
 
 if scenario["quality_level"] == excellent:
-    assert user_quality >= 4.0, "formatted_string"
+    assert user_quality >= 4.0, ""
 elif scenario[quality_level] == "good":
     assert user_quality >= 3.5, formatted_string
                                                                                                                 # Degraded users allowed to be lower but should still be functional
@@ -938,7 +938,7 @@ print(" PASS:  User experience reliability test passed")
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_comprehensive_reliability_suite_factory_pattern(self):
 "Run the complete comprehensive reliability suite for factory pattern."
 print("")

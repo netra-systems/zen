@@ -62,7 +62,7 @@ class TestAuthClientCrossServiceIntegration:
         pass
         with tempfile.TemporaryDirectory() as temp_dir:
         discovery = ServiceDiscovery(Path(temp_dir))
-        discovery.write_auth_info({ ))
+        discovery.write_auth_info({ })
         'port': 8081,
         'url': 'http://localhost:8081',
         'api_url': 'http://localhost:8081/auth',
@@ -214,7 +214,7 @@ assert 'http://localhost:8081/auth' in origins
 def test_auth_service_cors_metadata_registration(self, service_discovery):
     """Test auth service can be registered with CORS metadata."""
 pass
-auth_service_info = { )
+auth_service_info = { }
 'port': 8081,
 'url': 'http://localhost:8081',
 'api_url': 'http://localhost:8081/auth'
@@ -275,14 +275,14 @@ class TestWebSocketSecurityIntegration:
         validate_payload_security)
 
     # Test message with cross-service metadata
-        cross_service_message = { )
+        cross_service_message = { }
         'type': 'cross_service_message',
-        'payload': { )
+        'payload': { }
         'text': 'Hello from service A to service B',
         'service_id': 'netra-backend',
         'cross_service_auth': 'token-123'
         },
-        'metadata': { )
+        'metadata': { }
         'source_service': 'backend',
         'target_service': 'frontend',
         'timestamp': '2025-08-20T10:00:00Z'
@@ -301,9 +301,9 @@ class TestWebSocketSecurityIntegration:
         validate_payload_security)
 
     # Test malicious message disguised as cross-service
-        malicious_message = { )
+        malicious_message = { }
         'type': 'cross_service_message',
-        'payload': { )
+        'payload': { }
         'text': '<script>alert("xss")</script>Malicious content',
         'service_id': 'netra-backend',
         'cross_service_auth': 'token-123'

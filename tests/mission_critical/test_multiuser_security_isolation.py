@@ -573,13 +573,13 @@ class TestUserIsolationVulnerabilities:
                                                     # Create agent requests with unique identifiers
         agent_requests = {}
         for i, user in enumerate(security_tester.users):
-        secret_code = "formatted_string"
+        secret_code = ""
         agent_requests[user.user_id] = {
         type: "start_agent",
         payload: {
         "user_request": formatted_string
         f"Always include it in your responses.",
-        thread_id: "formatted_string",
+        thread_id: "",
         run_id: str(uuid.uuid4()),
         "user_secret": secret_code
                                                         
@@ -644,7 +644,7 @@ class TestUserIsolationVulnerabilities:
 
                                                 # Verify user's own secret is present (expected)
         assert user_secret in full_response_text, ( )
-        "formatted_string"s secret code not found in their agent response
+        ""s secret code not found in their agent response
                                                 
 
                                                 # Check for other users' secrets (vulnerability)
@@ -1043,7 +1043,7 @@ class TestSingletonPatternVulnerabilities:
                                                                                                                                 
 
         assert len(execution_leakage) == 0, ( )
-        "formatted_string"
+        ""
                                                                                                                                 
 
     async def test_cache_isolation(self, security_tester:
@@ -1058,7 +1058,7 @@ class TestSingletonPatternVulnerabilities:
         cache_tests = {}
         for i, user in enumerate(users):
         cache_key = formatted_string
-        cache_value = "formatted_string"
+        cache_value = ""
 
         cache_tests[user.user_id] = {
         cache_key: cache_key,
@@ -1067,7 +1067,7 @@ class TestSingletonPatternVulnerabilities:
         {
         "type": start_agent,
         "payload": {
-        user_request: "formatted_string"
+        user_request: ""
         fThis is user-specific cached data.,
         "thread_id": formatted_string,
         "run_id": str(uuid.uuid4())
@@ -1108,7 +1108,7 @@ class TestSingletonPatternVulnerabilities:
         responses: responses
                                                                                                                                                         
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
         return None
 
                                                                                                                                                             # Run cache tests concurrently
@@ -1135,7 +1135,7 @@ class TestSingletonPatternVulnerabilities:
         if other_cache_value in responses_text:
         security_tester.report_vulnerability( )
         CACHE_ISOLATION_VIOLATION,
-        "formatted_string",
+        "",
         HIGH,
         {
         "victim_user": user_id,
@@ -1181,7 +1181,7 @@ class TestAdminPrivilegeVulnerabilities:
         for i in range(3):
         user = SecurityTestUser( )
         user_id=formatted_string,
-        email="formatted_string",
+        email="",
         is_admin=False
             
         regular_users.append(user)
@@ -1216,7 +1216,7 @@ class TestAdminPrivilegeVulnerabilities:
         "type": start_agent,
         "payload": {
         user_request: "Execute admin command: show system status",
-        thread_id: "formatted_string",
+        thread_id: "",
         run_id: str(uuid.uuid4()),
         "user_id": admin_user_override,  # ATTEMPT TO OVERRIDE USER ID
                 
@@ -1282,7 +1282,7 @@ class TestAdminPrivilegeVulnerabilities:
         if escalation_success:
         security_tester.report_vulnerability( )
         PRIVILEGE_ESCALATION,
-        "formatted_string",
+        "",
         CRITICAL,
         {
         "user_id": user.user_id,
@@ -1308,7 +1308,7 @@ class TestAdminPrivilegeVulnerabilities:
 
         assert len(successful_escalations) == 0, ( )
         fCRITICAL SECURITY VULNERABILITY: Privilege escalation successful: 
-        "formatted_string"
+        ""
                                 
 
         logger.info(formatted_string )
@@ -1440,7 +1440,7 @@ class TestAdminPrivilegeVulnerabilities:
 
         security_tester.report_vulnerability( )
         UNAUTHORIZED_ADMIN_ACCESS,
-        "formatted_string",
+        "",
         CRITICAL,
         result
                                                                 
@@ -1448,7 +1448,7 @@ class TestAdminPrivilegeVulnerabilities:
                                                                 # Admin users should be able to perform admin operations
                                                                 # (This is not a security violation, but we log it for completeness)
         if is_admin and operation_allowed:
-        logger.info("formatted_string")
+        logger.info("")
 
                                                                     # Verify no unauthorized admin access occurred
         assert len(violations) == 0, ( )
@@ -1611,7 +1611,7 @@ class TestRaceConditionVulnerabilities:
 
         security_tester.report_vulnerability( )
         RACE_CONDITION_DATA_LEAKAGE,
-        "formatted_string",
+        "",
         CRITICAL,
         {
         "victim_user": user_id,
@@ -1626,13 +1626,13 @@ class TestRaceConditionVulnerabilities:
         failure_rate = (len(failed_results) / total_attempts) * 100
 
         logger.info(formatted_string )
-        "formatted_string")
+        "")
 
                                                                                         # High failure rate might indicate race conditions
         if failure_rate > 50:
         security_tester.report_vulnerability( )
         HIGH_CONCURRENCY_FAILURE_RATE,
-        "formatted_string",
+        "",
         MEDIUM,
         {
         "failure_rate": failure_rate,
@@ -1738,7 +1738,7 @@ class TestRaceConditionVulnerabilities:
         duration = end_time - start_time
 
         logger.info(formatted_string )
-        "formatted_string")
+        "")
 
                             # Check for memory leak indicators
         failure_rate = ((len(failed_cycles) + len(exception_cycles)) / total_cycles) * 100
@@ -1746,7 +1746,7 @@ class TestRaceConditionVulnerabilities:
         if failure_rate > 30:  # High failure rate might indicate memory issues
         security_tester.report_vulnerability( )
         POTENTIAL_MEMORY_LEAK,
-        "formatted_string",
+        "",
         MEDIUM,
         {
         "failure_rate": failure_rate,
@@ -1805,14 +1805,14 @@ class TestRaceConditionVulnerabilities:
         report += f"SUMMARY:
         "
         report += formatted_string
-        report += "formatted_string"
+        report += ""
         report += formatted_string
-        report += "formatted_string"
+        report += ""
 
             # Detailed vulnerability descriptions
         for severity, vulns in [(CRITICAL, critical_vulns), ("HIGH", high_vulns), (MEDIUM, medium_vulns)]:
         if vulns:
-        report += "formatted_string"
+        report += ""
         report += - * 40 + "
         "
 
@@ -1820,15 +1820,15 @@ class TestRaceConditionVulnerabilities:
         report += formatted_stringdescription"]}
         "
         report += formatted_string
-        report += "formatted_string"
+        report += ""
 
                             # Include key evidence
         if vuln.get(evidence):
         evidence = vuln["evidence"]
         if victim_user in evidence:
-        report += "formatted_string"
+        report += ""
         if leaked_from_user in evidence:
-        report += "formatted_string"
+        report += ""
 
         report += 
         

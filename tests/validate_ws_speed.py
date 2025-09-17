@@ -34,7 +34,7 @@ print("=" * 60)
 print("WEBSOCKET RECONNECTION SPEED COMPARISON")
 print("=" * 60)
 
-print(" )
+print("")
 Scenario: Page Refresh Reconnection")
 print("-" * 40)
 
@@ -44,7 +44,7 @@ attempts = 5
 old_cumulative = 0
 new_cumulative = 0
 
-print(" )
+print("")
 Attempt | Old Delay (ms) | New Delay (ms) | Improvement")
 print("-" * 60)
 
@@ -56,21 +56,21 @@ old_cumulative += old_delay
 new_cumulative += new_delay
 
 if old_delay > 0:
-improvement = "formatted_string"
+improvement = ""
 else:
 improvement = "Same"
 
-print("formatted_string")
+print("")
 
 print("-" * 60)
-print("formatted_string")
+print("")
 
-print(" )
-" + "=" * 60)
+print("")
+ + =" * 60)
 print("KEY IMPROVEMENTS:")
 print("=" * 60)
 
-improvements = [ )
+improvements = [ ]
 "1. IMMEDIATE first reconnect (0ms vs 1000ms)",
 "2. 10x faster base delay (100ms vs 1000ms)",
 "3. 3x lower max delay (10s vs 30s)",
@@ -79,27 +79,27 @@ improvements = [ )
                 
 
 for improvement in improvements:
-print("formatted_string")
+    print("")
 
-print(" )
-" + "=" * 60)
+print("")
+ + =" * 60)
 print("REAL-WORLD IMPACT:")
 print("=" * 60)
 
-print(" )
+print("")
 Page Refresh Recovery Time:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
-print(" )
+print("")
 Typical Page Refresh (successful on first attempt):")
 print(f"  Old System: 1.0 seconds")
 print(f"  New System: 0.0 seconds (immediate)")
 print(f"  User Experience: INSTANT reconnection")
 
-print(" )
-" + "=" * 60)
+print("")
+ + =" * 60)
 print("STRESS TEST RESULTS:")
 print("=" * 60)
 
@@ -108,14 +108,14 @@ rapid_refreshes = 10
 old_total = sum(calculate_reconnect_delay(0, True) for _ in range(rapid_refreshes))
 new_total = sum(calculate_reconnect_delay(0, False) for _ in range(rapid_refreshes))
 
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
+print("")
 
-print(" )
-" + "=" * 60)
+print("")
+ + =" * 60)
 print("CONCLUSION: WebSocket connection is now 10x+ faster!")
 print("=" * 60)
 

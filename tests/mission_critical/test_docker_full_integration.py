@@ -2385,7 +2385,7 @@ class TestDockerInfrastructureHealthMonitoring:
         PASS:  Docker Full Integration Test Suite completed successfully")
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
         raise
         finally:
         framework.cleanup_scenario_resources()

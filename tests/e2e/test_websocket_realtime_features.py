@@ -78,7 +78,7 @@ connection_failures = []
         # Step 1: Get authentication token
 auth_token = None
 async with aiohttp.ClientSession() as session:
-print("[Auth] Getting authentication token for WebSocket connection...)
+    print("[Auth] Getting authentication token for WebSocket connection...)
 try:
                 # Try to get a test token using dev login endpoint
 async with session.post(formatted_string") as response:
@@ -95,7 +95,7 @@ except Exception as e:
 
 
                                 # Step 2: Test WebSocket Connection
-print("[WebSocket] Testing WebSocket connection establishment...)
+    print("[WebSocket] Testing WebSocket connection establishment...)
 
 try:
                                     # Attempt WebSocket connection with authentication
@@ -263,7 +263,7 @@ elif not any(chunk.get(type") == "agent_response_complete for chunk in response_
 
 
                                                                                                                                         # Test 3: Agent Status Updates
-print("[Agent] Testing agent status updates...)
+    print("[Agent] Testing agent status updates...)
 
 status_request = {
 type": "agent_status_request,
@@ -410,7 +410,7 @@ elif broadcast_received_count < len(clients) - 1:
 
 
                                                                                                                                                                                                                                     # Test selective messaging
-print("[Broadcast] Testing selective client messaging...)
+    print("[Broadcast] Testing selective client messaging...)
 
 selective_message = {
 type": "direct_message,

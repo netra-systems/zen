@@ -61,7 +61,7 @@ class TestUnifiedWebSocketManagerRaceConditions:
 @pytest.mark.asyncio
     async def test_concurrent_connection_management(self, websocket_manager, mock_websocket):
         """Test concurrent connection add/remove operations are thread-safe."""
-users = ["formatted_string" for i in range(5)]
+users = ["" for i in range(5)]
 connections_per_user = 3
 
 async def add_user_connections(user_id: str, count: int):
@@ -69,7 +69,7 @@ async def add_user_connections(user_id: str, count: int):
 pass
 connections = []
 for i in range(count):
-    connection_id = "formatted_string"
+    connection_id = ""
 connection = WebSocketConnection( )
 connection_id=connection_id,
 user_id=user_id,
@@ -103,14 +103,14 @@ assert len(user_connections) == connections_per_user
 @pytest.mark.asyncio
     async def test_concurrent_message_sending_safety(self, websocket_manager, mock_websocket):
         """Test concurrent message sending to users is thread-safe."""
-users = ["formatted_string" for i in range(3)]
+users = ["" for i in range(3)]
 connections_per_user = 2
 messages_per_user = 5
 
                     # Add connections for all users
 for user in users:
     for i in range(connections_per_user):
-        connection_id = "formatted_string"
+        connection_id = ""
 connection = WebSocketConnection( )
 connection_id=connection_id,
 user_id=user,
@@ -124,9 +124,9 @@ async def send_messages_to_user(user_id: str, message_count: int):
 pass
 sent_messages = []
 for i in range(message_count):
-    message = { )
+    message = { }
 "type": "test_message",
-"data": "formatted_string",
+"data": "",
 "timestamp": datetime.utcnow().isoformat()
         
 await websocket_manager.send_to_user(user_id, message)
@@ -149,7 +149,7 @@ assert mock_websocket.send_json.call_count == expected_total_calls
 @pytest.mark.asyncio
     async def test_user_connection_lock_isolation(self, websocket_manager):
         """Test that user-specific connection locks provide proper isolation."""
-users = ["formatted_string" for i in range(5)]
+users = ["" for i in range(5)]
 
                 # Test that each user gets their own lock
 locks = {}
@@ -157,7 +157,7 @@ for user in users:
     lock1 = await websocket_manager._get_user_connection_lock(user)
 lock2 = await websocket_manager._get_user_connection_lock(user)
                     # Same user should get same lock instance
-assert lock1 is lock2, "formatted_string"
+assert lock1 is lock2, ""
 locks[user] = lock1
 
                     # Different users should get different locks
@@ -173,7 +173,7 @@ operation_count = 20
 
 async def add_remove_cycle(cycle_id: int):
     """Add and remove a connection in sequence."""
-connection_id = "formatted_string"
+connection_id = ""
 
     # Add connection
 connection = WebSocketConnection( )
@@ -200,7 +200,7 @@ assert len(completed_cycles) == operation_count
     # Verify final state is clean (no leftover connections)
 stats = websocket_manager.get_stats()
 user_connections = websocket_manager.get_user_connections(user_id)
-assert len(user_connections) == 0, "formatted_string"
+assert len(user_connections) == 0, ""
 
 @pytest.mark.asyncio
     async def test_legacy_interface_compatibility(self, websocket_manager, mock_websocket):

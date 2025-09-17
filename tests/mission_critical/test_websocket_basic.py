@@ -299,7 +299,7 @@ class MockLLM:
 
         print(")
         " + = * 60)
-        print("formatted_string")
+        print("")
 
         if failed == 0:
         print(SUCCESS All basic WebSocket integration tests PASSED!)

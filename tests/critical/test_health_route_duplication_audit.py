@@ -52,7 +52,7 @@ class HealthEndpointAuditor:
         for pattern in health_patterns:
         if pattern in endpoint:
         if pattern in found_patterns:
-        self.issues.append({ ))
+        self.issues.append({ })
         'type': 'duplicate_endpoint',
         'service': service_name,
         'pattern': pattern,
@@ -67,7 +67,7 @@ class HealthEndpointAuditor:
         actual_fields = set(response.keys())
 
         if not expected_fields.issubset(actual_fields):
-        self.issues.append({ ))
+        self.issues.append({ })
         'type': 'inconsistent_format',
         'service': service_name,
         'endpoint': endpoint,
@@ -78,7 +78,7 @@ class HealthEndpointAuditor:
     def audit_legacy_imports(self, file_path: Path):
         """Check for legacy import patterns."""
         content = file_path.read_text()
-        legacy_patterns = [ )
+        legacy_patterns = [ ]
         'from netra_backend.app.services.health_checker import',
         'import health_checker',
         'HealthChecker as HealthChecker',  # Alias pattern
@@ -87,7 +87,7 @@ class HealthEndpointAuditor:
 
         for pattern in legacy_patterns:
         if pattern in content:
-        self.legacy_imports.append({ ))
+        self.legacy_imports.append({ })
         'file': str(file_path),
         'pattern': pattern
             
@@ -105,7 +105,7 @@ class TestHealthRouteDuplicationAudit:
     def backend_app(self):
         """Create backend FastAPI app."""
         pass
-        with patch.dict('os.environ', { ))
+        with patch.dict('os.environ', { })
         'SKIP_STARTUP_TASKS': 'true',
         'DATABASE_URL': 'postgresql://test:test@localhost/test'
         }):
@@ -114,7 +114,7 @@ class TestHealthRouteDuplicationAudit:
         @pytest.fixture
     def auth_test_app(self):
         """Create auth service test app."""
-        with patch.dict('os.environ', { ))
+        with patch.dict('os.environ', { })
         'AUTH_FAST_TEST_MODE': 'true',
         'DATABASE_URL': 'postgresql://test:test@localhost/test'
         }):
@@ -137,7 +137,7 @@ class TestHealthRouteDuplicationAudit:
         auditor.audit_endpoint_duplication('backend', health_endpoints)
 
                         # This should FAIL - we expect duplicates
-        assert len(auditor.issues) == 0, "formatted_string"
+        assert len(auditor.issues) == 0, ""
 
     async def test_duplicate_health_endpoints_in_auth(self, auth_test_app, auditor):
         """Test that auth service has duplicate health endpoints - SHOULD FAIL."""
@@ -157,7 +157,7 @@ class TestHealthRouteDuplicationAudit:
 
                                         # This should FAIL - duplicate health patterns
         auditor.audit_endpoint_duplication('auth', health_endpoints)
-        assert len(auditor.issues) == 0, "formatted_string"
+        assert len(auditor.issues) == 0, ""
 
     async def test_inconsistent_endpoint_naming(self, backend_app, auth_test_app):
         """Test that endpoint naming is consistent across services - SHOULD FAIL."""
@@ -189,7 +189,7 @@ class TestHealthRouteDuplicationAudit:
         inconsistencies.append('Auth has both /ready and /health/ready')
 
                                                                     # This should FAIL - we expect inconsistencies
-        assert len(inconsistencies) == 0, "formatted_string"
+        assert len(inconsistencies) == 0, ""
 
     async def test_response_format_consistency(self, backend_app, auth_test_app, auditor):
         """Test that health responses have consistent format - SHOULD FAIL."""
@@ -210,7 +210,7 @@ class TestHealthRouteDuplicationAudit:
         auditor.audit_response_format('auth', '/health', auth_health.json())
 
                                                                                 # This should FAIL - inconsistent formats
-        assert len(auditor.issues) == 0, "formatted_string"
+        assert len(auditor.issues) == 0, ""
 
     async def test_legacy_import_patterns(self, auditor):
         """Test for legacy import patterns - SHOULD FAIL."""
@@ -218,7 +218,7 @@ class TestHealthRouteDuplicationAudit:
         project_root = Path(__file__).parent.parent.parent
 
                                                                                     # Check for legacy imports in known files
-        files_to_check = [ )
+        files_to_check = [
         project_root / 'netra_backend/app/services/health_checker.py',
         project_root / 'netra_backend/app/core/health_checkers.py',
                                                                                     
@@ -228,7 +228,7 @@ class TestHealthRouteDuplicationAudit:
         auditor.audit_legacy_imports(file_path)
 
                                                                                             # This should FAIL - we have legacy imports
-        assert len(auditor.legacy_imports) == 0, "formatted_string"
+        assert len(auditor.legacy_imports) == 0, ""
 
     async def test_multiple_health_systems(self):
         """Test that we don't have multiple health check systems - SHOULD FAIL."""
@@ -237,7 +237,7 @@ class TestHealthRouteDuplicationAudit:
         health_systems = []
 
                                                                                                 # Check for different health system implementations
-        health_files = [ )
+        health_files = [ ]
         'netra_backend/app/core/health_checkers.py',
         'netra_backend/app/services/health_check_service.py',
         'netra_backend/app/core/health/interface.py',
@@ -251,7 +251,7 @@ class TestHealthRouteDuplicationAudit:
         health_systems.append(health_file)
 
                                                                                                         # This should FAIL - we have multiple health systems
-        assert len(health_systems) <= 1, "formatted_string"
+        assert len(health_systems) <= 1, ""
 
     async def test_health_route_collision(self, backend_app):
         """Test that there are no route collisions for health endpoints - SHOULD FAIL."""
@@ -264,14 +264,14 @@ class TestHealthRouteDuplicationAudit:
         path = route.path
         if 'health' in path or 'ready' in path:
         if path in routes_by_path:
-        collisions.append({ ))
+        collisions.append({ })
         'path': path,
         'routes': [routes_by_path[path], route]
                                                                                                                             
         routes_by_path[path] = route
 
                                                                                                                             # This should FAIL if there are route collisions
-        assert len(collisions) == 0, "formatted_string"
+        assert len(collisions) == 0, ""
 
     async def test_health_endpoint_discovery_consistency(self):
         """Test that health endpoints are consistently discoverable - SHOULD FAIL."""
@@ -301,7 +301,7 @@ class TestHealthRouteDuplicationAudit:
 
                                                                                                                                         Build import graph for health modules
         project_root = Path(__file__).parent.parent.parent
-        health_modules = [ )
+        health_modules = [ ]
         'netra_backend/app/core/health_checkers.py',
         'netra_backend/app/services/health_check_service.py',
         'netra_backend/app/core/health/interface.py',
@@ -369,7 +369,7 @@ class TestWebSocketConnection:
         has_circular_dep(module)
 
                                 # This should FAIL if circular dependencies exist
-        assert len(circular_deps) == 0, "formatted_string"
+        assert len(circular_deps) == 0, ""
 
 
 class TestHealthEndpointPerformance:
@@ -391,7 +391,7 @@ class TestHealthEndpointPerformance:
 
                 # Look for timeout values
         import re
-        timeout_patterns = [ )
+        timeout_patterns = [ ]
         r'timeout\s*=\s*(\d+\.?\d*)',
         r'wait_for\([^,]+,\s*timeout=(\d+\.?\d*)',
         r'HEALTH_CHECK_TIMEOUT\s*=\s*(\d+\.?\d*)'
@@ -413,7 +413,7 @@ class TestHealthEndpointPerformance:
 
                                 # This should FAIL - inconsistent timeouts
         assert max_timeout - min_timeout <= 1.0, \
-        "formatted_string"
+        ""
 
     async def test_health_check_database_connections(self):
         """Test that health checks don't leak database connections - SHOULD FAIL."""
@@ -438,7 +438,7 @@ class TestHealthEndpointPerformance:
         missing_cleanup.append(str(file_path.name))
 
                                                 # This should FAIL if cleanup is missing
-        assert len(missing_cleanup) == 0, "formatted_string"
+        assert len(missing_cleanup) == 0, ""
 
 
         if __name__ == "__main__":

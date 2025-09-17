@@ -241,7 +241,7 @@ class TestUserExecutionContextValidation:
         websocket_connection_id="conn_345"
     
 
-        expected_dict = { )
+        expected_dict = { }
         "user_id": "user_123",
         "thread_id": "thread_456",
         "run_id": "run_789",
@@ -282,7 +282,7 @@ class TestAgent(BaseAgent):
 
     async def execute_with_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:
         """New context-based execution method."""
-        self.execution_calls.append({ ))
+        self.execution_calls.append({ })
         'method': 'execute_with_context',
         'context': context,
         'stream_updates': stream_updates,
@@ -292,7 +292,7 @@ class TestAgent(BaseAgent):
 
     async def execute_core_logic(self, execution_context) -> Dict[str, Any]:
         """Legacy core logic method."""
-        self.execution_calls.append({ ))
+        self.execution_calls.append({ })
         'method': 'execute_core_logic',
         'execution_context': execution_context,
         'timestamp': datetime.now(timezone.utc)
@@ -384,8 +384,8 @@ class ParentAgent(BaseAgent):
         subagent_context = UserExecutionContext( )
         user_id=context.user_id,  # Must propagate user context
         thread_id=context.thread_id,
-        run_id="formatted_string",
-        request_id="formatted_string"
+        run_id="",
+        request_id=""
     
         self.subagent_contexts.append(subagent_context)
         await asyncio.sleep(0)
@@ -464,7 +464,7 @@ sessions_created = []
 for i in range(5):
 async with get_request_scoped_db_session() as session:
 sessions_created.append(id(session))
-validate_session_is_request_scoped(session, "formatted_string")
+validate_session_is_request_scoped(session, "")
 
                         # Verify each session was unique
 unique_sessions = set(sessions_created)
@@ -502,14 +502,14 @@ async def create_isolated_session(user_id: str) -> Dict[str, Any]:
 pass
 context = UserExecutionContext( )
 user_id=user_id,
-thread_id="formatted_string",
-run_id="formatted_string",
-request_id="formatted_string"
+thread_id="",
+run_id="",
+request_id=""
     
 
 session_mgr = DatabaseSessionManager(context)
 await asyncio.sleep(0)
-return { )
+return { }
 "user_id": user_id,
 "context_id": id(context),
 "session_mgr_id": id(session_mgr),
@@ -517,8 +517,8 @@ return { )
     
 
     # Create concurrent sessions for different users
-tasks = [ )
-create_isolated_session("formatted_string")
+tasks = [ ]
+create_isolated_session("")
 for i in range(10)
     
 
@@ -588,7 +588,7 @@ class IsolationTestAgent(BaseAgent):
 
     async def execute_with_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:
     # Store user-specific data (should not leak between users)
-        user_secret = "formatted_string"
+        user_secret = ""
         self.user_data[context.run_id] = user_secret
 
     # Simulate processing time
@@ -596,13 +596,13 @@ class IsolationTestAgent(BaseAgent):
 
     # Verify our data is still there and not contaminated
         if context.run_id not in self.user_data:
-        raise SecurityViolation("formatted_string")
+        raise SecurityViolation("")
 
         if self.user_data[context.run_id] != user_secret:
-        raise SecurityViolation("formatted_string")
+        raise SecurityViolation("")
 
         await asyncio.sleep(0)
-        return { )
+        return { }
         "user_id": context.user_id,
         "secret": user_secret,
         "data_integrity": "verified"
@@ -613,17 +613,17 @@ class IsolationTestAgent(BaseAgent):
         agent = IsolationTestAgent()  # Each user gets fresh agent instance
         context = UserExecutionContext( )
         user_id=user_id,
-        thread_id="formatted_string",
-        run_id="formatted_string",
-        request_id="formatted_string"
+        thread_id="",
+        run_id="",
+        request_id=""
     
 
         return await agent.execute(context)
 
     # Execute concurrently for 20 users
         user_count = 20
-        tasks = [ )
-        execute_for_user("formatted_string")
+        tasks = [ ]
+        execute_for_user("")
         for i in range(user_count)
     
 
@@ -637,7 +637,7 @@ class IsolationTestAgent(BaseAgent):
         assert result["data_integrity"] == "verified"
         assert result["user_id"] not in user_ids_seen, "User ID collision detected"
         user_ids_seen.add(result["user_id"])
-        assert result["secret"].startswith("formatted_string")
+        assert result["secret"].startswith("")
 
 @pytest.mark.asyncio
     async def test_concurrent_context_creation(self):
@@ -648,15 +648,15 @@ def create_context_for_user(user_id: str) -> UserExecutionContext:
 await asyncio.sleep(0)
 return UserExecutionContext( )
 user_id=user_id,
-thread_id="formatted_string",
-run_id="formatted_string",
-request_id="formatted_string"
+thread_id="",
+run_id="",
+request_id=""
     
 
     # Create contexts concurrently using thread pool (simulating FastAPI request handling)
 with ThreadPoolExecutor(max_workers=10) as executor:
-futures = [ )
-executor.submit(create_context_for_user, "formatted_string")
+futures = [ ]
+executor.submit(create_context_for_user, "")
 for i in range(50)
         
 
@@ -689,7 +689,7 @@ class MemoryTestAgent(BaseAgent):
         await asyncio.sleep(0.05)
 
         await asyncio.sleep(0)
-        return { )
+        return { }
         "user_id": context.user_id,
         "memory_block_size": len(user_memory_block),
         "memory_allocated": True
@@ -704,15 +704,15 @@ class MemoryTestAgent(BaseAgent):
         agent = MemoryTestAgent()
         context = UserExecutionContext( )
         user_id=user_id,
-        thread_id="formatted_string",
-        run_id="formatted_string",
-        request_id="formatted_string"
+        thread_id="",
+        run_id="",
+        request_id=""
     
         await asyncio.sleep(0)
         return await agent.execute(context)
 
     # Run 30 concurrent users (30MB total if no leaks)
-        tasks = [execute_with_memory("formatted_string") for i in range(30)]
+        tasks = [execute_with_memory("") for i in range(30)]
         results = await asyncio.gather(*tasks)
 
     # Force garbage collection
@@ -727,7 +727,7 @@ class MemoryTestAgent(BaseAgent):
         assert all(r["memory_allocated"] for r in results)
 
     # Memory should not have increased excessively (indicates proper cleanup)
-        assert memory_increase < 15.0, "formatted_string"
+        assert memory_increase < 15.0, ""
 
 
 class TestErrorHandlingWithInvalidContexts:
@@ -737,7 +737,7 @@ class TestErrorHandlingWithInvalidContexts:
     async def test_sql_injection_attempt_in_context(self):
 """Test system handles SQL injection attempts in context fields."""
 
-malicious_contexts = [ )
+malicious_contexts = [ ]
         # SQL injection attempts
 (""; DROP TABLE users; --", "thread_1", "run_1", "req_1"),
 ("user_1", ""; DELETE FROM sessions; --", "run_1", "req_1"),
@@ -805,7 +805,7 @@ assert len(context.request_id) > 10000
     async def test_unicode_and_special_characters_in_context(self):
 """Test context handles Unicode and special characters properly."""
 
-unicode_contexts = [ )
+unicode_contexts = [ ]
 ("[U+7528][U+6237]123", "[U+7EBF][U+7A0B]456", "[U+8FD0][U+884C]789", "[U+8BF7][U+6C42]012"),  # Chinese
 ("[U+0645][U+0633][U+062A][U+062E][U+062F][U+0645]123", "[U+0645][U+0648][U+0636][U+0648][U+0639]456", "[U+062A][U+0634][U+063A][U+064A][U+0644]789", "[U+0637][U+0644][U+0628]012"),  # Arabic
 ("[U+043F]o[U+043B][U+044C][U+0437]ovate[U+043B][U+044C]123", "[U+043F]otok456", "[U+0437]a[U+043F]uck789", "[U+0437]a[U+043F]poc012"),  # Russian
@@ -840,7 +840,7 @@ pass
     async def test_context_with_extreme_values(self):
 """Test context handles extreme edge case values."""
 
-extreme_contexts = [ )
+extreme_contexts = [ ]
                                             # Very long strings
 ("a" * 1000000, "b" * 1000000, "c" * 1000000, "d" * 1000000),
 
@@ -849,7 +849,7 @@ extreme_contexts = [ )
 
                                             # Boolean-like strings (should be treated as strings)
 ("true", "false", "True", "False"),
-("yes", "no", "on", "of"formatted_string"thread": true}', '{"run": 123}', '{"req": null}'),
+("yes", "no", "on", "of""thread": true}', '{"run": 123}', '{"req": null}'),
 
                                             # XML-like strings (should be treated as literal strings)
 ("<user>test</user>", "<thread>456</thread>", "<run>789</run>", "<req>012</req>"),
@@ -939,7 +939,7 @@ class PartiallyMigratedAgent(BaseAgent):
         legacy_indicators = []
 
     # Check for legacy method names
-        legacy_methods = [ )
+        legacy_methods = [ ]
         'execute_legacy',
         'run_legacy',
         'process_legacy',
@@ -948,10 +948,10 @@ class PartiallyMigratedAgent(BaseAgent):
 
         for method_name in legacy_methods:
         if hasattr(agent_class, method_name):
-        legacy_indicators.append("formatted_string")
+        legacy_indicators.append("")
 
             # Check for legacy attributes
-        legacy_attributes = [ )
+        legacy_attributes = [ ]
         'has_legacy_methods',
         'legacy_mode',
         'use_legacy_execution'
@@ -960,13 +960,13 @@ class PartiallyMigratedAgent(BaseAgent):
         instance = agent_class()
         for attr_name in legacy_attributes:
         if hasattr(instance, attr_name):
-        legacy_indicators.append("formatted_string")
+        legacy_indicators.append("")
 
         return legacy_indicators
 
                     # Test fully migrated agent
         fully_migrated_indicators = scan_agent_for_legacy_patterns(self.FullyMigratedAgent)
-        assert len(fully_migrated_indicators) == 0, "formatted_string"
+        assert len(fully_migrated_indicators) == 0, ""
 
                     # Test partially migrated agent
         partially_migrated_indicators = scan_agent_for_legacy_patterns(self.PartiallyMigratedAgent)
@@ -1010,9 +1010,9 @@ pass
 await asyncio.sleep(0)
 return UserExecutionContext( )
 user_id=user_id,
-thread_id=thread_id or "formatted_string",
-run_id=run_id or "formatted_string",
-request_id="formatted_string"
+thread_id=thread_id or "",
+run_id=run_id or "",
+request_id=""
     
 
     # Test context creation with minimal parameters
@@ -1043,8 +1043,8 @@ try:
 await asyncio.sleep(0)
 return create_user_execution_context( )
 user_id=user_id,
-thread_id=thread_id or "formatted_string",
-run_id=run_id or "formatted_string"
+thread_id=thread_id or "",
+run_id=run_id or ""
         
 except ValueError as e:
 return {"error": str(e), "status": "invalid_context"}
@@ -1088,7 +1088,7 @@ class IntegrationTestAgent(BaseAgent):
         """Full integration execution with context."""
 
     # Log execution start
-        self.execution_log.append({ ))
+        self.execution_log.append({ })
         "phase": "start",
         "user_id": context.user_id,
         "run_id": context.run_id,
@@ -1108,12 +1108,12 @@ class IntegrationTestAgent(BaseAgent):
         sub_context = UserExecutionContext( )
         user_id=context.user_id,
         thread_id=context.thread_id,
-        run_id="formatted_string",
-        request_id="formatted_string"
+        run_id="",
+        request_id=""
             
 
             # Log successful execution
-        self.execution_log.append({ ))
+        self.execution_log.append({ })
         "phase": "success",
         "user_id": context.user_id,
         "run_id": context.run_id,
@@ -1125,7 +1125,7 @@ class IntegrationTestAgent(BaseAgent):
         await self.emit_progress("Execution completed successfully", is_complete=True)
 
         await asyncio.sleep(0)
-        return { )
+        return { }
         "status": "success",
         "user_id": context.user_id,
         "run_id": context.run_id,
@@ -1134,7 +1134,7 @@ class IntegrationTestAgent(BaseAgent):
                 
 
         except Exception as e:
-        self.execution_log.append({ ))
+        self.execution_log.append({ })
         "phase": "error",
         "user_id": context.user_id,
         "run_id": context.run_id,
@@ -1143,7 +1143,7 @@ class IntegrationTestAgent(BaseAgent):
                     
 
         if stream_updates:
-        await self.emit_error("formatted_string")
+        await self.emit_error("")
 
         raise
 
@@ -1186,9 +1186,9 @@ async def run_integration_flow(user_id: str) -> Dict[str, Any]:
 """Run complete integration flow for a user."""
 context = UserExecutionContext( )
 user_id=user_id,
-thread_id="formatted_string",
-run_id="formatted_string",
-request_id="formatted_string"
+thread_id="",
+run_id="",
+request_id=""
     
 
 agent = self.IntegrationTestAgent()
@@ -1199,8 +1199,8 @@ return result
 
     # Run concurrent integration flows
 concurrent_users = 15
-tasks = [ )
-run_integration_flow("formatted_string")
+tasks = [ ]
+run_integration_flow("")
 for i in range(concurrent_users)
     
 
@@ -1237,10 +1237,10 @@ start_time = time.time()
 contexts = []
 for i in range(1000):
 context = UserExecutionContext( )
-user_id="formatted_string",
-thread_id="formatted_string",
-run_id="formatted_string",
-request_id="formatted_string"
+user_id="",
+thread_id="",
+run_id="",
+request_id=""
             
 contexts.append(context)
 
@@ -1250,7 +1250,7 @@ total_time = end_time - start_time
 avg_time_per_context = (total_time / 1000) * 1000  # milliseconds
 
             # Performance assertion: should create contexts quickly
-assert avg_time_per_context < 0.1, "formatted_string"
+assert avg_time_per_context < 0.1, ""
 assert len(contexts) == 1000
 
             # Verify all contexts are valid
@@ -1272,7 +1272,7 @@ class PerformanceTestAgent(BaseAgent):
     async def execute_with_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:
     # Minimal processing to measure overhead
         await asyncio.sleep(0)
-        return { )
+        return { }
         "user_id": context.user_id,
         "execution_time": time.time()
     
@@ -1283,10 +1283,10 @@ class PerformanceTestAgent(BaseAgent):
     # Measure execution time for multiple calls
         for i in range(100):
         context = UserExecutionContext( )
-        user_id="formatted_string",
-        thread_id="formatted_string",
-        run_id="formatted_string",
-        request_id="formatted_string"
+        user_id="",
+        thread_id="",
+        run_id="",
+        request_id=""
         
 
         start_time = time.time()
@@ -1294,15 +1294,15 @@ class PerformanceTestAgent(BaseAgent):
         end_time = time.time()
 
         execution_times.append(end_time - start_time)
-        assert result["user_id"] == "formatted_string"
+        assert result["user_id"] == ""
 
         # Performance analysis
         avg_execution_time = sum(execution_times) / len(execution_times)
         max_execution_time = max(execution_times)
 
         # Performance assertions
-        assert avg_execution_time < 0.001, "formatted_string"
-        assert max_execution_time < 0.005, "formatted_string"
+        assert avg_execution_time < 0.001, ""
+        assert max_execution_time < 0.005, ""
 
 @pytest.mark.asyncio
     async def test_memory_usage_performance(self):
@@ -1318,10 +1318,10 @@ agents = []
 
 for i in range(500):
 context = UserExecutionContext( )
-user_id="formatted_string",
-thread_id="formatted_string",
-run_id="formatted_string",
-request_id="formatted_string"
+user_id="",
+thread_id="",
+run_id="",
+request_id=""
                 
 contexts.append(context)
 
@@ -1337,8 +1337,8 @@ final_memory = process.memory_info().rss / 1024 / 1024
 memory_recovered = after_contexts_memory - final_memory
 
                 # Performance assertions
-assert context_memory_usage < 50.0, "formatted_string"
-assert memory_recovered > (context_memory_usage * 0.8), "formatted_string"
+assert context_memory_usage < 50.0, ""
+assert memory_recovered > (context_memory_usage * 0.8), ""
 
 @pytest.mark.asyncio
     async def test_concurrent_performance_scalability(self):
@@ -1362,16 +1362,16 @@ class ScalabilityTestAgent(BaseAgent):
         pass
         context = UserExecutionContext( )
         user_id=user_id,
-        thread_id="formatted_string",
-        run_id="formatted_string",
-        request_id="formatted_string"
+        thread_id="",
+        run_id="",
+        request_id=""
     
         agent = ScalabilityTestAgent()
         await asyncio.sleep(0)
         return await agent.execute(context)
 
         start_time = time.time()
-        tasks = [single_execution("formatted_string") for i in range(batch_size)]
+        tasks = [single_execution("") for i in range(batch_size)]
         results = await asyncio.gather(*tasks)
         end_time = time.time()
 
@@ -1388,7 +1388,7 @@ class ScalabilityTestAgent(BaseAgent):
         total_time, all_successful = await execute_concurrent_batch(batch_size)
         avg_time_per_execution = total_time / batch_size
 
-        performance_results.append({ ))
+        performance_results.append({ })
         "batch_size": batch_size,
         "total_time": total_time,
         "avg_time_per_execution": avg_time_per_execution,
@@ -1396,8 +1396,8 @@ class ScalabilityTestAgent(BaseAgent):
         
 
         # Performance assertions for each batch size
-        assert all_successful, "formatted_string"
-        assert avg_time_per_execution < 0.1, "formatted_string"
+        assert all_successful, ""
+        assert avg_time_per_execution < 0.1, ""
 
         # Verify scalability (performance shouldn't degrade significantly with larger batches)
         small_batch_avg = performance_results[0]["avg_time_per_execution"]
@@ -1405,13 +1405,13 @@ class ScalabilityTestAgent(BaseAgent):
 
         # Allow some degradation but not excessive
         performance_degradation = large_batch_avg / small_batch_avg
-        assert performance_degradation < 3.0, "formatted_string"
+        assert performance_degradation < 3.0, ""
 
 
         # Test execution configuration
         if __name__ == "__main__":
             # Configure test execution
-        pytest.main([ ))
+        pytest.main([ ])
         __file__,
         "-v",
         "--tb=short",

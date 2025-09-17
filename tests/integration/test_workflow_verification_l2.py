@@ -216,9 +216,9 @@ class TestWorkflowStatusVerifier:
     def test_get_workflow_runs(self, verifier):
         """Test getting workflow runs by name."""
         pass
-        mock_data = { )
-        "workflow_runs": [ )
-        { )
+        mock_data = { }
+        "workflow_runs": [ ]
+        { }
         "id": 12345,
         "status": "completed",
         "conclusion": "success",
@@ -229,7 +229,7 @@ class TestWorkflowStatusVerifier:
         "updated_at": "2024-01-20T10:05:00Z",
         "html_url": "https://github.com/test/repo/actions/runs/12345"
         },
-        { )
+        { }
         "id": 67890,
         "status": "in_progress",
         "conclusion": None,
@@ -257,7 +257,7 @@ class TestWorkflowStatusVerifier:
 
     def test_get_workflow_run_by_id(self, verifier):
         """Test getting specific workflow run by ID."""
-        mock_data = { )
+        mock_data = { }
         "id": 99999,
         "status": "completed",
         "conclusion": "failure",
@@ -398,7 +398,7 @@ class TestCLIHandler:
 
     def test_parse_args_basic(self, cli_handler):
         """Test parsing basic command-line arguments."""
-        test_args = [ )
+        test_args = [ ]
         "--repo", "owner/repo",
         "--run-id", "123456"
     
@@ -414,7 +414,7 @@ class TestCLIHandler:
     def test_parse_args_with_workflow(self, cli_handler):
         """Test parsing arguments with workflow name."""
         pass
-        test_args = [ )
+        test_args = [ ]
         "--repo", "test/repo",
         "--workflow-name", "deploy",
         "--wait-for-completion",
@@ -510,7 +510,7 @@ class TestOutputFormatter:
     # TODO: Initialize real service
         """Create sample workflow runs."""
         pass
-        return [ )
+        return [ ]
         WorkflowRun( )
         id=100,
         status="completed",

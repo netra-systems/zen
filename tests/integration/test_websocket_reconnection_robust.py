@@ -358,14 +358,14 @@ class WebSocketReconnectionTests:
 
                                                                                                                                                     # Should receive pong or auth confirmation
         if data.get('type') not in ['pong', 'auth_success', 'auth']:
-        raise AssertionError("formatted_string")
+        raise AssertionError("")
 
         print(formatted_string)
         self.test_results['passed'] += 1
         return True
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         self.test_results['failed'] += 1
         return False
         finally:
@@ -377,7 +377,7 @@ class WebSocketReconnectionTests:
         Prevents infinite reconnection loops.
         '''
         test_name = max_reconnection_attempts
-        print("formatted_string")
+        print("")
 
         try:
         max_attempts = 10
@@ -415,14 +415,14 @@ class WebSocketReconnectionTests:
 
                             # Verify attempts stopped at or near max
         if final_attempts > max_attempts + 1:  # Allow 1 extra for edge cases
-        raise AssertionError("formatted_string")
+        raise AssertionError("")
 
         print(formatted_string)
         self.test_results['passed'] += 1
         return True
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         self.test_results['failed'] += 1
         return False
         finally:
@@ -434,7 +434,7 @@ class WebSocketReconnectionTests:
         Ensures no message loss during temporary disconnections.
         '''
         test_name = reconnection_with_queued_messages
-        print("formatted_string")
+        print("")
 
         try:
         token = self.generate_test_token()
@@ -481,7 +481,7 @@ class WebSocketReconnectionTests:
         if received_count < len(messages_to_queue) - 1:
         print(formatted_string)
 
-        print("formatted_string")
+        print("")
         self.test_results['passed'] += 1
         return True
 
@@ -543,18 +543,18 @@ class WebSocketReconnectionTests:
 
                                                                                                 # Performance thresholds
         if avg_time > 2.0:
-        print("formatted_string")
+        print("")
 
         if max_time > 5.0:
         raise AssertionError(formatted_string)
 
-        print("formatted_string")
+        print("")
         print(formatted_string)
         self.test_results['passed'] += 1
         return True
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         self.test_results['failed'] += 1
         return False
         finally:
@@ -590,9 +590,9 @@ class WebSocketReconnectionTests:
         " + = * 60)
         print(" CHART:  TEST RESULTS SUMMARY")
         print(= * 60)
-        print("formatted_string")
+        print("")
         print(formatted_string)
-        print("formatted_string")
+        print("")
 
         if self.test_results.get('reconnection_times'):
         print()
@@ -628,7 +628,7 @@ assert results['failed'] == 0, formatted_string
 if results.get('reconnection_times'):
     avg_time = results['reconnection_times']['average']
 
-assert avg_time < 3.0, "formatted_string"
+assert avg_time < 3.0, ""
 
 
 if __name__ == "__main__":

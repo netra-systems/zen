@@ -15,21 +15,21 @@ from shared.isolated_environment import IsolatedEnvironment
 class CloudRunSecretValidator:
     """Validates Cloud Run service secret configurations."""
 
-    REQUIRED_BACKEND_SECRETS = [ )
+    REQUIRED_BACKEND_SECRETS = [ ]
     "POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DB",
     "POSTGRES_USER", "POSTGRES_PASSWORD",
     "JWT_SECRET_KEY", "SECRET_KEY", "OPENAI_API_KEY",
     "FERNET_KEY", "REDIS_URL"
     
 
-    REQUIRED_AUTH_SECRETS = [ )
+    REQUIRED_AUTH_SECRETS = [ ]
     "POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DB",
     "POSTGRES_USER", "POSTGRES_PASSWORD",
     "JWT_SECRET_KEY", "JWT_SECRET",
     "SERVICE_SECRET", "SERVICE_ID"
     
 
-    SERVICE_MAPPINGS = { )
+    SERVICE_MAPPINGS = { }
     "backend": "netra-backend-staging",
     "auth": "netra-auth-service",
     "frontend": "netra-frontend-staging"
@@ -45,8 +45,8 @@ class CloudRunSecretValidator:
         """Fetch Cloud Run service configuration."""
         try:
         result = subprocess.run( )
-        "formatted_string"
-        "formatted_string",
+        ""
+        "",
         capture_output=True,
         text=True,
         check=True,
@@ -54,7 +54,7 @@ class CloudRunSecretValidator:
         
         return json.loads(result.stdout)
         except subprocess.CalledProcessError as e:
-        self.errors.append("formatted_string")
+        self.errors.append("")
         return {}
 
     def validate_secret_refs(self, config: Dict, service_type: str) -> List[str]:
@@ -65,7 +65,7 @@ class CloudRunSecretValidator:
         try:
         containers = config["spec"]["template"]["spec"]["containers"]
         if not containers:
-        issues.append("formatted_string")
+        issues.append("")
         return issues
 
         env_vars = containers[0].get("env", [])
@@ -85,20 +85,20 @@ class CloudRunSecretValidator:
                         # Check if it has secretKeyRef
         if "valueFrom" in env_var:
         secret_ref = env_var["valueFrom"].get("secretKeyRe"formatted_string"name"):
-        expected_name = "formatted_string"
+        expected_name = ""
         issues.append( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
                                 
         elif not secret_ref.get("key"):
-        issues.append("formatted_string")
+        issues.append("")
         break
 
         if not found:
-        issues.append("formatted_string")
+        issues.append("")
 
         except KeyError as e:
-        issues.append("formatted_string")
+        issues.append("")
 
         return issues
 
@@ -107,7 +107,7 @@ class CloudRunSecretValidator:
         all_issues = {}
 
         for service_type, cloud_run_name in self.SERVICE_MAPPINGS.items():
-        print("formatted_string")
+        print("")
 
         config = self.get_service_config(cloud_run_name)
         if not config:
@@ -118,7 +118,7 @@ class CloudRunSecretValidator:
         if issues:
         all_issues[service_type] = issues
         else:
-        print("formatted_string")
+        print("")
 
         return len(all_issues) == 0, all_issues
 
@@ -137,14 +137,14 @@ class CloudRunSecretValidator:
         if "Missing 'name' field" in issue:
                     Extract the secret name from the issue
         secret_var = issue.split(":")[0]
-        secret_name = "formatted_string"
-        secrets_to_fix.append("formatted_string")
+        secret_name = ""
+        secrets_to_fix.append("")
 
         if secrets_to_fix:
         cmd = ( )
-        "formatted_string"
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
+        ""
                         
         fix_commands.append(cmd)
 
@@ -162,25 +162,25 @@ class CloudRunSecretValidator:
         is_valid, issues = validator.validate_all_services()
 
         if not is_valid:
-        print(" )
+        print("")
         [X] VALIDATION FAILED - Issues found:")
         for service, service_issues in issues.items():
-        print("formatted_string")
+        print("")
         for issue in service_issues:
-        print("formatted_string")
+        print("")
 
                 # Generate fix commands
         fix_commands = validator.generate_fix_commands(issues)
         if fix_commands:
-        print(" )
+        print("")
         [FIX] COMMANDS:")
         for cmd in fix_commands:
-        print("formatted_string")
+        print("")
 
                         # Fail the test
-        assert False, "formatted_string"
+        assert False, ""
         else:
-        print(" )
+        print("")
         [OK] All services have properly configured secrets")
         return True
 
@@ -189,12 +189,12 @@ class CloudRunSecretValidator:
                                 # Run the validation
         try:
         test_cloud_run_secret_configuration()
-        print(" )
+        print("")
         [OK] All validations passed!")
         except AssertionError as e:
-        print("formatted_string")
+        print("")
         exit(1)
         except Exception as e:
-        print("formatted_string")
+        print("")
         exit(1)
         pass

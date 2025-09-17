@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
 "
 E2E Migration Validation Suite - Mission Critical Test Suite
 
@@ -285,7 +289,7 @@ class E2EMigrationValidationTests(SSotBaseTestCase):
             
             failure_message = (
                 f"MIGRATION INCOMPLETE: {total_violations} BaseE2ETest inheritance violations detected in {len(inheritance_violations)} files.\n\n
-                fFiles requiring SSOT migration:\n" + "\n.join(violation_details) + \n\n"
+                fFiles requiring SSOT migration:\n + \n.join(violation_details) + \n\n"
                 f"SOLUTION: Migrate these files from BaseE2ETest to SSotBaseTestCase or SSotAsyncTestCase\n
                 fSee SSOT_MIGRATION_GUIDE.md for migration instructions."
             )
@@ -370,7 +374,7 @@ class E2EMigrationValidationTests(SSotBaseTestCase):
             
             failure_message = (
                 f"SSOT COMPLIANCE FAILURE: {len(non_ssot_classes)} E2E test classes not using SSOT base classes.\n\n
-                fNon-compliant classes:\n" + "\n.join(violation_details) + \n\n"
+                fNon-compliant classes:\n + \n.join(violation_details) + \n\n"
                 f"SOLUTION: Ensure all test classes inherit from SSotBaseTestCase or SSotAsyncTestCase
             )
             
@@ -418,7 +422,7 @@ class E2EMigrationValidationTests(SSotBaseTestCase):
             # Log warning but don't fail the test
             logger.warning(
                 f"ENVIRONMENT ISOLATION WARNING: {len(environment_violations)} files use direct os.environ access.\n
-                fFiles with environment issues:\n" + "\n.join(violation_details) + \n"
+                fFiles with environment issues:\n + \n.join(violation_details) + \n"
                 f"RECOMMENDATION: Use IsolatedEnvironment.get() instead of os.environ for better isolation
             )
         
@@ -461,7 +465,7 @@ class E2EMigrationValidationTests(SSotBaseTestCase):
             
             failure_message = (
                 f"IMPORT VIOLATION: {len(import_violations)} files still import BaseE2ETest.\n\n
-                fFiles with import violations:\n" + "\n.join(violation_details) + \n\n"
+                fFiles with import violations:\n + \n.join(violation_details) + \n\n"
                 f"SOLUTION: Remove BaseE2ETest imports and use SSOT base classes
             )
             

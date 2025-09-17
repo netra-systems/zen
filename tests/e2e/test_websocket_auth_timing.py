@@ -383,7 +383,7 @@ class TestWebSocketAuthTiminger:
         permissions=["read", write, "websocket"],
         token_type=access
         
-        return "formatted_string"
+        return ""
         except (ImportError, ValueError):
             # Fallback to mock token if real JWT creation fails
         return Bearer mock-jwt-token-for-recovery-testing
@@ -430,7 +430,7 @@ formatted_string
 if result.error_code:
     assert result.error_code in [401, 403, 1008], \
 
-"formatted_string"
+""
 
                         # Performance requirement
 assert result.response_time_ms < 10000, \
@@ -469,7 +469,7 @@ formatted_string
 if result.error_code:
     assert result.error_code in [401, 403, 1008], \
 
-"formatted_string"
+""
 
                                 # Performance requirement
 assert result.response_time_ms < 10000, \
@@ -514,7 +514,7 @@ else:
 
                                             # Performance requirement for race condition handling
 assert result.response_time_ms < 15000, \
-"formatted_string"
+""
 
 print(formatted_string)
 
@@ -546,13 +546,13 @@ if result.error_code:
                                                     # Should be auth error, not CORS error for null Origin
 expected_codes = [401, 403, 1008]
 assert result.error_code in expected_codes, \
-"formatted_string"
+""
 
                                                     # Performance requirement
 assert result.response_time_ms < 10000, \
 formatted_string
 
-print("formatted_string")
+print("")
 
 
 @pytest.mark.asyncio
@@ -573,7 +573,7 @@ result = await tester.test_websocket_auth_recovery()
                                                         # Verify initial auth failure occurred
 assert result.connection_attempted, Recovery test should attempt initial connection
 assert result.auth_failure_detected, \
-"formatted_string"
+""
 
                                                         # Check recovery capability
 if result.recovery_successful:
@@ -586,13 +586,13 @@ print(formatted_string)
 
                                                                 # Performance requirement for recovery flow
 assert result.response_time_ms < 20000, \
-"formatted_string"
+""
 
                                                                 # At minimum, initial failure should be detected correctly
 assert result.error_code in [401, 403, 1008] if result.error_code else True, \
 formatted_string
 
-print("formatted_string")
+print("")
 
 
 @pytest.mark.asyncio
@@ -651,15 +651,15 @@ critical_vulnerabilities = [v for v in suite_result.vulnerabilities_found )
 if "without token" in v or null token in v]
 
 if critical_vulnerabilities:
-    print("formatted_string")
+    print("")
 
 
                                                                                             # Generate comprehensive report
 print(f )
 [WEBSOCKET AUTH TIMING TEST SUITE REPORT])
-print("formatted_string")
+print("")
 print(fTests Completed: 5/5)
-print("formatted_string")
+print("")
 
 if suite_result.vulnerabilities_found:
     for vuln in suite_result.vulnerabilities_found:
@@ -677,6 +677,6 @@ suite_result.recovery_test.auth_failure_detected  # Initial failure expected
 
 expected_failures_detected = sum(tests_with_expected_failures)
 assert expected_failures_detected >= 3, \
-"formatted_string"
+""
 
 print(f"[SUCCESS] WebSocket auth timing issues properly reproduced and tested")

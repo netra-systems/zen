@@ -183,7 +183,7 @@ class TestAuthLoginL3Integration:
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "access_token": "valid_token_123",
 "refresh_token": "refresh_token_456",
 "expires_in": 3600,
@@ -223,7 +223,7 @@ await auth_client.login("user@example.com", "wrong_password")
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "valid": True,
 "user_id": "user_123",
 "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
@@ -243,7 +243,7 @@ pass
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "valid": False,
 "error": "token_expired",
 "message": "Token has expired"
@@ -261,7 +261,7 @@ assert result["error"] == "token_expired"
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "access_token": "new_access_token",
 "expires_in": 3600
                                                 
@@ -281,8 +281,8 @@ auth_client = AuthClient(base_url="http://localhost:8081")
 async def login_attempt():
 pass
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
-"access_token": "formatted_string",
+mock_request.return_value = { }
+"access_token": "",
 "user_id": "user_123"
         
 await asyncio.sleep(0)
@@ -305,7 +305,7 @@ auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
                 # First login
-mock_request.return_value = { )
+mock_request.return_value = { }
 "access_token": "session_token",
 "session_id": "session_123"
                 
@@ -366,7 +366,7 @@ pass
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "authorization_url": "https://provider.com/oauth/authorize",
 "state": "state_token_123"
                                             
@@ -383,7 +383,7 @@ assert result["state"] == "state_token_123"
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "access_token": "oauth_access_token",
 "user_id": "oauth_user_123"
                                                     
@@ -405,7 +405,7 @@ auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
                                                             # Initial login returns MFA requirement
-mock_request.return_value = { )
+mock_request.return_value = { }
 "mfa_required": True,
 "mfa_token": "mfa_temp_token",
 "methods": ["totp", "sms"]
@@ -415,7 +415,7 @@ login_result = await auth_client.login("user@example.com", "password")
 assert login_result["mfa_required"] is True
 
                                                             # Submit MFA code
-mock_request.return_value = { )
+mock_request.return_value = { }
 "access_token": "final_token",
 "user_id": "user_123"
                                                             
@@ -474,7 +474,7 @@ assert exc_info.value.response.status_code == 423
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "valid": False,
 "error": "session_timeout",
 "message": "Session has timed out due to inactivity"
@@ -493,7 +493,7 @@ pass
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "access_token": "cors_token",
 "cors_allowed": True
                                                                                                 
@@ -514,9 +514,9 @@ assert result["access_token"] == "cors_token"
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "access_token": "custom_token",
-"claims": { )
+"claims": { }
 "role": "admin",
 "permissions": ["read", "write", "delete"],
 "org_id": "org_123"
@@ -536,7 +536,7 @@ pass
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "access_token": "long_lived_token",
 "expires_in": 2592000,  # 30 days
 "refresh_token": "long_refresh_token"
@@ -557,7 +557,7 @@ assert result["expires_in"] == 2592000
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "valid": True,
 "api_key_id": "key_123",
 "scopes": ["api:read", "api:write"]
@@ -576,7 +576,7 @@ pass
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "access_token": "service_token",
 "service_account": "service_account_123",
 "expires_in": 3600
@@ -596,7 +596,7 @@ assert result["service_account"] == "service_account_123"
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "active": True,
 "scope": "read write",
 "client_id": "client_123",
@@ -618,7 +618,7 @@ auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
                                                                                                                                                 # Initiate device flow
-mock_request.return_value = { )
+mock_request.return_value = { }
 "device_code": "device_123",
 "user_code": "ABCD-1234",
 "verification_uri": "https://example.com/device"
@@ -628,7 +628,7 @@ device_result = await auth_client.initiate_device_flow()
 assert device_result["user_code"] == "ABCD-1234"
 
                                                                                                                                                 # Poll for token
-mock_request.return_value = { )
+mock_request.return_value = { }
 "access_token": "device_token",
 "token_type": "Bearer"
                                                                                                                                                 
@@ -643,7 +643,7 @@ assert token_result["access_token"] == "device_token"
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "sso_url": "https://sso.example.com/login",
 "sso_token": "sso_temp_token",
 "provider": "corporate_sso"
@@ -662,14 +662,14 @@ pass
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "challenge": "biometric_challenge_123",
 "supported_methods": ["fingerprint", "face_id"]
                                                                                                                                                                 
 
 challenge = await auth_client.initiate_biometric_auth("user_123")
 
-mock_request.return_value = { )
+mock_request.return_value = { }
 "access_token": "biometric_token",
 "authenticated_via": "fingerprint"
                                                                                                                                                                 
@@ -688,7 +688,7 @@ assert result["authenticated_via"] == "fingerprint"
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "guest_token": "guest_token_123",
 "guest_id": "guest_456",
 "expires_in": 86400,
@@ -708,7 +708,7 @@ pass
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "delegated_token": "delegated_123",
 "scope": "resource:read",
 "expires_in": 1800
@@ -730,7 +730,7 @@ assert result["scope"] == "resource:read"
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "access_token": "verified_token",
 "captcha_verified": True
                                                                                                                                                                                         
@@ -751,7 +751,7 @@ pass
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "emergency_token": "emergency_123",
 "access_level": "emergency",
 "audit_logged": True,
@@ -774,7 +774,7 @@ auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
                                                                                                                                                                                                         # First refresh
-mock_request.return_value = { )
+mock_request.return_value = { }
 "access_token": "new_access_1",
 "refresh_token": "new_refresh_1",
 "old_refresh_invalidated": True
@@ -803,7 +803,7 @@ pass
 auth_client = AuthClient(base_url="http://localhost:8081")
 
 with patch.object(auth_client, '_make_request') as mock_request:
-mock_request.return_value = { )
+mock_request.return_value = { }
 "impersonation_token": "impersonate_123",
 "original_user": "admin_user",
 "impersonated_user": "target_user",

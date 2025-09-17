@@ -334,7 +334,7 @@ class E2ETestPathIntegrityTests(SSotBaseTestCase):
         "
         Verify both WebSocketTestManager implementations can coexist.
 
-        This test verifies that having WebSocketTestManager available from
+#         This test verifies that having WebSocketTestManager available from # Incomplete import statement
         both paths doesn't create import conflicts or namespace issues.
         """
         from test_framework.ssot.websocket_test_utility import WebSocketTestManager as SSOTManager

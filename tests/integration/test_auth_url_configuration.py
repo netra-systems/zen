@@ -58,7 +58,7 @@ backend_auth_url = backend_config.service_url
 
                 # They should match
 assert auth_service_url == backend_auth_url, \
-"formatted_string"
+""
 
 @pytest.mark.asyncio
     async def test_oauth_configuration_consistency(self):
@@ -86,9 +86,9 @@ backend_domain = backend_redirect.split('/auth/')[0]
                             # In production/staging they should use same base domain
 if env in ['staging', 'production']:
 assert 'netrasystems.ai' in auth_domain, \
-"formatted_string"
+""
 assert 'netrasystems.ai' in backend_domain, \
-"formatted_string"
+""
 
 @pytest.mark.asyncio
     async def test_health_check_url_construction(self):
@@ -102,17 +102,17 @@ config = load_auth_client_config()
 health_url = config.health_url
 
                                             # Health URL should be service URL + /health
-expected = "formatted_string"
+expected = ""
 assert health_url == expected, \
-"formatted_string"
+""
 
                                             # Verify protocol consistency
 if env in ['staging', 'production']:
 assert health_url.startswith('https://'), \
-"formatted_string"
+""
 else:
 assert health_url.startswith('http://'), \
-"formatted_string"
+""
 
 @pytest.mark.asyncio
     async def test_api_endpoint_construction(self):
@@ -126,11 +126,11 @@ base_url = config.base_url
 
                                                                 # Base URL should include API version
 assert '/api/v1' in base_url, \
-"formatted_string"
+""
 
                                                                 # Should start with service URL
 assert base_url.startswith(config.service_url), \
-"formatted_string"t start with service URL"
+""t start with service URL"
 
 def test_frontend_backend_auth_triangle(self):
 """Test the frontend-backend-auth service URL triangle."""
@@ -149,11 +149,11 @@ auth = auth_env.get_auth_service_url()
             # All should use consistent protocol
 if env in ['staging', 'production']:
 assert all(url.startswith('https://') for url in [frontend, backend, auth]), \
-"formatted_string"
+""
 
                 # All should use same base domain
 assert all('netrasystems.ai' in url for url in [frontend, backend, auth]), \
-"formatted_string"
+""
 
                 # Check subdomain pattern
 if env == 'staging':
@@ -161,7 +161,7 @@ assert all('staging' in url for url in [frontend, backend, auth]), \
 f"Staging: All services should have 'staging' in URL"
 else:
 assert all(url.startswith('http://') for url in [frontend, backend, auth]), \
-"formatted_string"
+""
 
 def test_cors_origins_match_frontend_urls(self):
 """Test that CORS origins include the frontend URL."""
@@ -179,7 +179,7 @@ frontend_base = frontend_url.rstrip('/')
 
             # Frontend URL should be in CORS origins
 assert any(origin.rstrip('/') == frontend_base for origin in cors_origins), \
-"formatted_string"
+""
 
 
 class TestAuthConfigDelegation:
@@ -197,18 +197,18 @@ class TestAuthConfigDelegation:
 
             # Test all URL methods
         assert config.get_frontend_url() == auth_env.get_frontend_url(), \
-        "formatted_string"
+        ""
 
         assert config.get_auth_service_url() == auth_env.get_auth_service_url(), \
-        "formatted_string"
+        ""
 
         assert config.get_environment() == auth_env.get_environment(), \
-        "formatted_string"
+        ""
 
     def test_jwt_configuration_delegation(self):
         """Test JWT configuration methods delegate properly."""
         pass
-        with patch.dict(os.environ, { ))
+        with patch.dict(os.environ, { })
         'ENVIRONMENT': 'staging',
         'JWT_SECRET_KEY': 'test-secret',
         'JWT_ALGORITHM': 'HS256',
@@ -292,7 +292,7 @@ class TestURLOverrideScenarios:
 
     def test_partial_override_maintains_consistency(self):
         """Test that partial overrides maintain consistency."""
-        with patch.dict(os.environ, { ))
+        with patch.dict(os.environ, { })
         'ENVIRONMENT': 'staging',
         'FRONTEND_URL': 'https://custom.staging.com'
     # Let backend and auth use defaults
@@ -312,7 +312,7 @@ class TestURLOverrideScenarios:
     def test_complete_override_scenario(self):
         """Test complete URL override scenario."""
         pass
-        with patch.dict(os.environ, { ))
+        with patch.dict(os.environ, { })
         'ENVIRONMENT': 'staging',
         'FRONTEND_URL': 'https://app.custom.com',
         'BACKEND_URL': 'https://api.custom.com',

@@ -64,7 +64,7 @@ class TestDevModeer:
 
     async def run_all_tests(self) -> Dict[str, Any]:
         """Run complete test suite"""
-        print(" )
+        print("")
         [TEST] Starting Comprehensive DEV MODE Test Suite")
         print("=" * 60)
 
@@ -87,7 +87,7 @@ class TestDevModeer:
 
     async def _test_system_startup(self) -> DevModeTestResult:
         """Test 1: Verify all services start correctly"""
-        print(" )
+        print("")
         [1] Test 1: System Startup")
         start_time = time.time()
 
@@ -110,7 +110,7 @@ class TestDevModeer:
         test_name="System Startup",
         success=success,
         duration=time.time() - start_time,
-        details={ )
+        details={ }
         "backend_healthy": backend_healthy,
         "backend_response": backend_data,
         "database_checks": db_checks,
@@ -135,13 +135,13 @@ class TestDevModeer:
 
     async def _test_websocket_connection(self) -> DevModeTestResult:
         """Test 2: Verify WebSocket connection works"""
-        print(" )
+        print("")
         [2] Test 2: WebSocket Connection")
         start_time = time.time()
 
         try:
         # Attempt WebSocket connection
-        ws_url = "formatted_string"
+        ws_url = ""
 
         async with websockets.connect(ws_url) as websocket:
             # Send test message
@@ -158,7 +158,7 @@ class TestDevModeer:
         test_name="WebSocket Connection",
         success=success,
         duration=time.time() - start_time,
-        details={ )
+        details={ }
         "ws_url": ws_url,
         "test_message": test_msg,
         "response": response_data
@@ -182,21 +182,21 @@ class TestDevModeer:
 
     async def _test_example_message_flow(self) -> DevModeTestResult:
         """Test 3: Test example message processing"""
-        print(" )
+        print("")
         [3] Test 3: Example Message Flow")
         start_time = time.time()
 
         try:
         # Send example message via API
         async with httpx.AsyncClient(follow_redirects=True) as client:
-        test_message = { )
+        test_message = { }
         "message": "I need to reduce costs but keep quality the same.",
         "thread_id": "test_thread_001",
         "user_id": "test_user_001"
             
 
         response = await client.post( )
-        "formatted_string",
+        "",
         json=test_message,
         timeout=10.0
             
@@ -208,7 +208,7 @@ class TestDevModeer:
         test_name="Example Message Flow",
         success=success,
         duration=time.time() - start_time,
-        details={ )
+        details={ }
         "test_message": test_message,
         "status_code": response.status_code if 'response' in locals() else None,
         "response": response_data
@@ -232,7 +232,7 @@ class TestDevModeer:
 
     async def _test_agent_response_flow(self) -> DevModeTestResult:
         """Test 4: Verify agent response flow"""
-        print(" )
+        print("")
         [4] Test 4: Agent Response Flow")
         start_time = time.time()
 
@@ -240,19 +240,19 @@ class TestDevModeer:
         # Check supervisor agent health
         async with httpx.AsyncClient(follow_redirects=True) as client:
         response = await client.get( )
-        "formatted_string"
+        ""
             
 
         agent_healthy = response.status_code in [200, 404]  # 404 if not yet created
 
             # Test agent endpoint
-        agent_test = { )
+        agent_test = { }
         "prompt": "Test prompt for supervisor",
         "context": {"test": True}
             
 
         agent_response = await client.post( )
-        "formatted_string",
+        "",
         json=agent_test,
         timeout=15.0
             
@@ -265,7 +265,7 @@ class TestDevModeer:
         test_name="Agent Response Flow",
         success=success,
         duration=time.time() - start_time,
-        details={ )
+        details={ }
         "agent_healthy": agent_healthy,
         "agent_test_status": agent_response.status_code if 'agent_response' in locals() else None,
         "agent_response": agent_response.json() if agent_works and 'agent_response' in locals() else None
@@ -289,7 +289,7 @@ class TestDevModeer:
 
     async def _test_cors_configuration(self) -> DevModeTestResult:
         """Test 5: Verify CORS and service configuration"""
-        print(" )
+        print("")
         [5] Test 5: CORS & Service Configuration")
         start_time = time.time()
 
@@ -297,8 +297,8 @@ class TestDevModeer:
         # Test CORS headers
         async with httpx.AsyncClient(follow_redirects=True) as client:
         response = await client.options( )
-        "formatted_string",
-        headers={ )
+        "",
+        headers={ }
         "Origin": "http://localhost:3000",
         "Access-Control-Request-Method": "POST"
             
@@ -309,7 +309,7 @@ class TestDevModeer:
 
             # Test cross-service auth
         auth_response = await client.get( )
-        "formatted_string"
+        ""
             
 
         auth_configured = auth_response.status_code in [200, 404]  # 404 if auth service separate
@@ -320,7 +320,7 @@ class TestDevModeer:
         test_name="CORS & Service Configuration",
         success=success,
         duration=time.time() - start_time,
-        details={ )
+        details={ }
         "cors_enabled": cors_enabled,
         "cors_origin": cors_origin,
         "auth_configured": auth_configured,
@@ -348,12 +348,12 @@ class TestDevModeer:
         try:
         async with httpx.AsyncClient(follow_redirects=True) as client:
         response = await client.get( )
-        "formatted_string"
+        ""
             
 
         if response.status_code == 200:
         data = response.json()
-        return { )
+        return { }
         "success": data.get("validation", {}).get("valid", False),
         "environment": data.get("environment"),
         "database_name": data.get("database_name")
@@ -369,7 +369,7 @@ class TestDevModeer:
         # Check if services are discoverable
         async with httpx.AsyncClient(follow_redirects=True) as client:
         response = await client.get( )
-        "formatted_string"
+        ""
             
         return response.status_code in [200, 404]  # 404 if endpoint doesn"t exist yet
         except:
@@ -380,13 +380,13 @@ class TestDevModeer:
         icon = "[PASS]" if result.success else "[FAIL]"
         status = "PASSED" if result.success else "FAILED"
 
-        print("formatted_string")
+        print("")
 
         if result.error:
-        print("formatted_string")
+        print("")
 
         if result.details and not result.success:
-        print("formatted_string")
+        print("")
 
     def _generate_test_report(self) -> Dict[str, Any]:
         """Generate comprehensive test report"""
@@ -396,31 +396,31 @@ class TestDevModeer:
         failed_tests = total_tests - passed_tests
         total_duration = sum(r.duration for r in self.test_results)
 
-        print(" )
-        " + "=" * 60)
+        print("")
+         + =" * 60)
         print("[SUMMARY] TEST RESULTS")
         print("=" * 60)
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
+        print("")
+        print("")
 
         if failed_tests > 0:
-        print(" )
+        print("")
         [WARNING] Failed Tests:")
         for result in self.test_results:
         if not result.success:
-        print("formatted_string")
+        print("")
 
-        return { )
+        return { }
         "total_tests": total_tests,
         "passed": passed_tests,
         "failed": failed_tests,
         "success_rate": passed_tests / total_tests,
         "duration": total_duration,
-        "test_results": [ )
-        { )
+        "test_results": [ ]
+        { }
         "name": r.test_name,
         "success": r.success,
         "duration": r.duration,
@@ -440,8 +440,8 @@ tester = DevModeTester()
 report = await tester.run_all_tests()
 
                     # Assert all tests passed
-assert report["failed"] == 0, "formatted_string"
-assert report["success_rate"] == 1.0, "formatted_string"
+assert report["failed"] == 0, ""
+assert report["success_rate"] == 1.0, ""
 
 
 async def main():

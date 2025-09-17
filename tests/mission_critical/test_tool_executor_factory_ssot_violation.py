@@ -609,3 +609,4 @@ This test SHOULD FAIL until GitHub Issue #219 routing consolidation is complete.
         gc.collect()
         
         super().teardown_method(method)
+)

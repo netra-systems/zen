@@ -232,7 +232,7 @@ failed_attempts = 0
 for i in range(50):
 result = await auth_client.login( )
 "brute_test@example.com",
-"formatted_string"
+""
                                     
 if not result or "error" in str(result):
 failed_attempts += 1
@@ -248,9 +248,9 @@ response_time = time.time() - start_time
 
                                         # If response is slow or failed, might indicate rate limiting
 if not result:
-print("Account might be locked or rate-limited - good security!")
+    print("Account might be locked or rate-limited - good security!")
 elif response_time > 1.0:
-print("formatted_string")
+    print("")
 
 
 class TestL4CriticalWebSocketIntegration:
@@ -268,7 +268,7 @@ connections = []
 for i in range(100):
             # Mock: Generic component isolation for controlled unit testing
 websocket = TestWebSocketConnection()
-mock_ws.client_id = "formatted_string"
+mock_ws.client_id = ""
 mock_ws.remote_address = ("127.0.0.1", 5000 + i)
 connections.append(mock_ws)
 
@@ -304,7 +304,7 @@ attacker_ws.client_id = "attacker_client"
 await ws_service.handle_connection(attacker_ws)
 
                     # Attacker tries to send message as legitimate user
-malicious_message = { )
+malicious_message = { }
 "type": "message",
 "user_id": "user1",  # Spoofing user1
 "client_id": "legit_client",  # Spoofing client
@@ -336,7 +336,7 @@ await ws_service.handle_connection(ws1)
                         # Send some messages to build state
 for i in range(5):
 await ws1.send( )
-json.dumps({"seq": i, "data": "formatted_string"})
+json.dumps({"seq": i, "data": ""})
                             
 
                             # Disconnect abruptly
@@ -351,7 +351,7 @@ ws2.websocket = TestWebSocketConnection()
 await ws_service.handle_connection(ws2)
 
                             # Try to resume with corrupted sequence
-resume_msg = { )
+resume_msg = { }
 "type": "resume",
 "last_seq": 999,  # Invalid sequence
 "client_id": "reconnect_client"  # Old client ID
@@ -381,7 +381,7 @@ await ws_service.handle_connection(ws)
                                 # Send increasingly large messages
 for size_mb in [1, 5, 10, 50]:
 large_data = "x" * (size_mb * 1024 * 1024)
-message = { )
+message = { }
 "type": "data",
 "payload": large_data
                                     
@@ -416,7 +416,7 @@ ws.websocket = TestWebSocketConnection()
 await ws_service.handle_connection(ws)
 
                                                             # Send malformed protocol messages
-attacks = [ )
+attacks = [ ]
 '{"type": "../../etc/passwd"}',  # Path traversal
 '{"type": "exec", "cmd": "rm -rf /"}',  # Command injection
 '{"type": null}',  # Null type
@@ -446,11 +446,11 @@ class TestL4CriticalAPIIntegration:
     async def test_11_api_pagination_boundary_errors(self):
 """Test: API pagination edge cases"""
 
-api_url = "formatted_string"
+api_url = ""
 
 async with ClientSession() as session:
             # Test various pagination boundaries
-test_cases = [ )
+test_cases = [ ]
 {"page": -1, "limit": 10},  # Negative page
 {"page": 0, "limit": 0},  # Zero limit
 {"page": 999999, "limit": 10},  # Huge page
@@ -461,7 +461,7 @@ test_cases = [ )
 for params in test_cases:
 try:
 async with session.get( )
-"formatted_string",
+"",
 params=params,
 timeout=ClientTimeout(total=5)
 ) as response:
@@ -479,11 +479,11 @@ pass
     async def test_12_api_header_injection(self):
 """Test: HTTP header injection vulnerabilities"""
 
-api_url = "formatted_string"
+api_url = ""
 
 async with ClientSession() as session:
                                         # Test malicious headers
-headers = { )
+headers = { }
 "X-Forwarded-For": "127.0.0.1\r
 X-Admin: true",
 "User-Agent": "Mozilla/5.0\r
@@ -494,7 +494,7 @@ X-Privilege: root",
 
 try:
 async with session.get( )
-"formatted_string",
+"",
 headers=headers,
 timeout=ClientTimeout(total=5)
 ) as response:
@@ -511,11 +511,11 @@ pass
     async def test_13_api_method_override_attacks(self):
 """Test: HTTP method override vulnerabilities"""
 
-api_url = "formatted_string"
+api_url = ""
 
 async with ClientSession() as session:
                                                             # Try to override methods
-override_headers = [ )
+override_headers = [ ]
 {"X-HTTP-Method-Override": "DELETE"},
 {"X-Method-Override": "PUT"},
 {"_method": "DELETE"},
@@ -525,7 +525,7 @@ for headers in override_headers:
 try:
                                                                     # Send GET request with override headers
 async with session.get( )
-"formatted_string",
+"",
 headers=headers,
 timeout=ClientTimeout(total=5)
 ) as response:
@@ -534,7 +534,7 @@ assert response.status != 204
 
                                                                         # Verify user still exists
 async with session.get( )
-"formatted_string",
+"",
 timeout=ClientTimeout(total=5)
 ) as check_response:
                                                                             # User should still be there or 404 if never existed
@@ -547,13 +547,13 @@ pass
     async def test_14_api_content_type_confusion(self):
 """Test: Content-Type confusion attacks"""
 
-api_url = "formatted_string"
+api_url = ""
 
 async with ClientSession() as session:
                                                                                         # Send JSON with wrong content type
 json_data = {"key": "value"}
 
-test_cases = [ )
+test_cases = [ ]
 ("text/plain", json.dumps(json_data)),
 ("application/xml", json.dumps(json_data)),
 ("multipart/form-data", json.dumps(json_data)),
@@ -563,7 +563,7 @@ test_cases = [ )
 for content_type, data in test_cases:
 try:
 async with session.post( )
-"formatted_string",
+"",
 headers={"Content-Type": content_type},
 data=data,
 timeout=ClientTimeout(total=5)
@@ -579,7 +579,7 @@ pass
     async def test_15_api_race_condition_in_transactions(self):
 """Test: Race conditions in API transactions"""
 
-api_url = "formatted_string"
+api_url = ""
 
 async with ClientSession() as session:
 thread_id = str(uuid.uuid4())
@@ -587,7 +587,7 @@ thread_id = str(uuid.uuid4())
 try:
                                                                                                                         # Create thread
 async with session.post( )
-"formatted_string",
+"",
 json={"id": thread_id, "name": "Race Test"},
 timeout=ClientTimeout(total=5)
 ) as response:
@@ -598,10 +598,10 @@ return  # Skip if API not available
                                                                                                                                 # Concurrent updates
 update_tasks = []
 for i in range(10):
-update_data = {"status": "formatted_string"}
+update_data = {"status": ""}
                                                                                                                                     # Mock: Component isolation for testing without external dependencies
 task = session.patch( )
-"formatted_string",
+"",
 json=update_data,
 timeout=ClientTimeout(total=5)
                                                                                                                                     
@@ -611,7 +611,7 @@ responses = await asyncio.gather(*update_tasks, return_exceptions=True)
 
                                                                                                                                     # Check final state
 async with session.get( )
-"formatted_string",
+"",
 timeout=ClientTimeout(total=5)
 ) as response:
 if response.status == 200:
@@ -696,7 +696,7 @@ ch_client = Magic        # Mock: Async component isolation for testing without r
 ch_client.execute = AsyncMock(return_value=[])
 
                             # Test injection attempts
-malicious_inputs = [ )
+malicious_inputs = [ ]
 ""; DROP TABLE events; --",
 "1 OR 1=1",
 "admin"--",
@@ -727,7 +727,7 @@ try:
                                                 # Fill Redis with large amounts of data
 for i in range(1000):
 large_value = "x" * 1024 * 100  # 100KB per key
-await redis_client.set("formatted_string", large_value)
+await redis_client.set("", large_value)
 
                                                     # Check memory usage
 info = await redis_client.info("memory")
@@ -739,7 +739,7 @@ assert used_memory < 1024 * 1024 * 1024  # Less than 1GB
 finally:
                                                         # Cleanup
 for i in range(1000):
-await redis_client.delete("formatted_string")
+await redis_client.delete("")
 await redis_client.close()
 
 @pytest.mark.asyncio

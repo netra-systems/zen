@@ -222,7 +222,7 @@ class TestServiceSecretIntegration:
         "Test complete authentication flow depends on SERVICE_SECRET""
         test_secret = integration_test_secret_12345"
     # Mock auth service response
-        mock_response = Magic        mock_response.status_code = 200
+        mock_response = MagicMock(); mock_response.status_code = 200
         mock_response.json.return_value = {
         "valid: True,
         user_id": "test_user_123,

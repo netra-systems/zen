@@ -86,7 +86,7 @@ class TestFrontendBuildErrorReporting(SSotAsyncTestCase):
         '''
         pass
     # Mock a frontend build failure scenario
-        mock_build_output = { )
+        mock_build_output = { }
         "stdout": "Building...
         ",
         'stderr': 'Failed to compile.',  # Insufficient detail
@@ -287,7 +287,7 @@ class TestReadinessCheckReliability(SSotAsyncTestCase):
         '''
         pass
     # Mock a healthy backend service
-        mock_backend_health = { )
+        mock_backend_health = { }
         'status': 'healthy',
         'database': 'connected',
         'uptime': 30
@@ -295,7 +295,7 @@ class TestReadinessCheckReliability(SSotAsyncTestCase):
 
         with patch('requests.get') as mock_get:
         # Mock successful health endpoint but timeout on readiness check
-        mock_get.side_effect = [ )
+        mock_get.side_effect = [ ]
         Mock(status_code=200, json=lambda x: None mock_backend_health),  # Health check succeeds
         requests.exceptions.ConnectTimeout()  # Readiness check times out
         
@@ -325,7 +325,7 @@ class TestReadinessCheckReliability(SSotAsyncTestCase):
     # Mock auth service that's healthy but readiness check fails
         with patch('requests.get') as mock_get:
         # Mock auth service responses
-        mock_get.side_effect = [ )
+        mock_get.side_effect = [ ]
         Mock(status_code=200, json=lambda x: None {'status': 'running'}),  # Service is up
         Mock(status_code=503, json=lambda x: None {'status': 'not ready'})  # But not ready
         
@@ -349,7 +349,7 @@ class TestReadinessCheckReliability(SSotAsyncTestCase):
         '''
         pass
     # Mock service in bootstrap phase
-        bootstrap_phases = [ )
+        bootstrap_phases = [ ]
         {'phase': 'starting', 'ready': False},
         {'phase': 'loading_config', 'ready': False},
         {'phase': 'connecting_db', 'ready': False},
@@ -455,7 +455,7 @@ class TestWebSocketValidationWarnings(SSotAsyncTestCase):
         '''
         pass
     # Mock WebSocket validation warning scenario
-        validation_warnings = [ )
+        validation_warnings = [ ]
         "WebSocket endpoint not immediately available",
         "WebSocket library version mismatch",
         "WebSocket connection timeout during validation"
@@ -471,7 +471,7 @@ class TestWebSocketValidationWarnings(SSotAsyncTestCase):
         warnings_logged = True   # Warnings are logged but ignored
 
         if warnings_logged and startup_complete:
-        self.fail("formatted_string")
+        self.fail("")
 
 
         if __name__ == '__main__':

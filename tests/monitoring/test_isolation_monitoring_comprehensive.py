@@ -239,7 +239,7 @@ users = ["user1", "user2", "user3"]
 
     # Start requests for different users
 for i, user in enumerate(users):
-    self.collector.start_request(user, "formatted_string")
+    self.collector.start_request(user, "")
 
         # Verify concurrent users
 assert self.collector.get_concurrent_users() == 3
@@ -374,7 +374,7 @@ assert result.alert_required is True
 pass
                         # Mock metrics collector
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
-mock_collector.get_violation_counts.return_value = { )
+mock_collector.get_violation_counts.return_value = { }
 "websocket_contamination": 0,
 "cross_user_events": 0
                         
@@ -414,7 +414,7 @@ health_status = await self.health_checker.perform_comprehensive_health_check()
 
                                 # Verify result
 assert isinstance(health_status, IsolationHealthStatus)
-assert health_status.overall_health in [ )
+assert health_status.overall_health in [ ]
 HealthCheckSeverity.HEALTHY,
 HealthCheckSeverity.WARNING,
 HealthCheckSeverity.ERROR,
@@ -628,8 +628,8 @@ assert completed_request.isolation_score < 100.0
     async def test_concurrent_request_isolation(self):
         """Test isolation monitoring under concurrent requests."""
 pass
-users = ["formatted_string" for i in range(10)]
-requests = ["formatted_string" for i in range(10)]
+users = ["" for i in range(10)]
+requests = ["" for i in range(10)]
 
                     # Start multiple concurrent requests
 for user, request in zip(users, requests):
@@ -646,7 +646,7 @@ await self.metrics_collector.record_isolation_violation( )
 IsolationViolationSeverity.CRITICAL,
 requests[i],
 users[i],
-"formatted_string"
+""
                         
 
                         # Complete all requests
@@ -675,7 +675,7 @@ self.health_checker._metrics_collector = self.metrics_collector
 
                                         # Start some activity
 for i in range(3):
-    self.metrics_collector.start_request("formatted_string", "formatted_string")
+    self.metrics_collector.start_request("", "")
 
                                             # Record some violations
 await self.metrics_collector.record_isolation_violation( )
@@ -813,7 +813,7 @@ description="Test description",
 sections=[]
                             
 mock_manager.get_config_for_user.return_value = mock_config
-mock_manager.export_config.return_value = { )
+mock_manager.export_config.return_value = { }
 "dashboard_id": "test_dashboard",
 "title": "Test Dashboard",
 "sections": []
@@ -854,7 +854,7 @@ start_time = time.time()
 
             # Start many requests
 for i in range(num_requests):
-    self.collector.start_request("formatted_string", "formatted_string")
+    self.collector.start_request("", "")
 
 tracking_time = time.time() - start_time
 
@@ -865,7 +865,7 @@ assert len(self.collector._active_requests) == num_requests
                 # Complete requests
 completion_start = time.time()
 for i in range(num_requests):
-    self.collector.complete_request("formatted_string")
+    self.collector.complete_request("")
 
 completion_time = time.time() - completion_start
 assert completion_time < 2.0  # Less than 2 seconds
@@ -882,9 +882,9 @@ for i in range(num_violations):
     await self.collector.record_isolation_violation( )
 "performance_test",
 IsolationViolationSeverity.WARNING,
-"formatted_string",
-"formatted_string",
-"formatted_string"
+"",
+"",
+""
                             
 
 recording_time = time.time() - start_time
@@ -901,8 +901,8 @@ tracemalloc.start()
 
     # Generate significant activity
 for i in range(100):
-    self.collector.start_request("formatted_string", "formatted_string")
-self.collector.record_instance_creation_time("formatted_string", float(i))
+    self.collector.start_request("", "")
+self.collector.record_instance_creation_time("", float(i))
 
 current, peak = tracemalloc.get_traced_memory()
 tracemalloc.stop()
@@ -929,7 +929,7 @@ violation_type=violation_type,
 severity=severity,
 user_id=user_id,
 request_id=request_id,
-description="formatted_string"
+description=""
     
 
 def create_mock_health_result( )
@@ -941,7 +941,7 @@ return HealthCheckResult( )
 check_name=check_name,
 severity=severity,
 status="test_status",
-message="formatted_string",
+message="",
 timestamp=datetime.now(timezone.utc)
     
 

@@ -213,7 +213,7 @@ class WebSocketFailureTestRunner:
         severity=TestSeverity.CRITICAL,
         error_message="WebSocket bridge is None, causing silent notification failures",
         business_impact="Users receive NO feedback during AI execution - complete breakdown of core feature",
-        reproduction_steps=[ )
+        reproduction_steps=[ ]
         "1. Agent execution starts with None bridge",
         "2. Attempt to send agent_started notification",
         "3. Notification fails silently - no error raised",
@@ -225,7 +225,7 @@ class WebSocketFailureTestRunner:
         
         test_results.append({"test": "bridge_none_failure", "expected_failure": True})
         except Exception as e:
-        logger.info("formatted_string")
+        logger.info("")
 
             # Test cross-user isolation violations
         try:
@@ -238,7 +238,7 @@ class WebSocketFailureTestRunner:
         severity=TestSeverity.CRITICAL,
         error_message="User context mixing causes notifications to go to wrong users",
         business_impact="CRITICAL SECURITY VIOLATION - User A sees User B"s sensitive data",
-        reproduction_steps=[ )
+        reproduction_steps=[ ]
         "1. User A starts tool execution with private data",
         "2. User B connects simultaneously",
         "3. Shared context gets corrupted",
@@ -250,7 +250,7 @@ class WebSocketFailureTestRunner:
                 
         test_results.append({"test": "cross_user_violation", "expected_failure": True})
         except Exception as e:
-        logger.info("formatted_string")
+        logger.info("")
 
                     # Test notification delivery failures
         try:
@@ -263,7 +263,7 @@ class WebSocketFailureTestRunner:
         severity=TestSeverity.HIGH,
         error_message="WebSocket connection lost during tool execution - notifications never delivered",
         business_impact="User left hanging with no feedback - appears system is broken",
-        reproduction_steps=[ )
+        reproduction_steps=[ ]
         "1. User starts tool execution",
         "2. tool_started notification sent successfully",
         "3. Network interruption occurs",
@@ -276,7 +276,7 @@ class WebSocketFailureTestRunner:
                         
         test_results.append({"test": "connection_loss_failure", "expected_failure": True})
         except Exception as e:
-        logger.info("formatted_string")
+        logger.info("")
 
         return test_results
 
@@ -296,7 +296,7 @@ class WebSocketFailureTestRunner:
         severity=TestSeverity.CRITICAL,
         error_message="Multiple threads compete for bridge initialization causing state corruption",
         business_impact="Random initialization failures - system appears unreliable",
-        reproduction_steps=[ )
+        reproduction_steps=[ ]
         "1. Multiple users connect simultaneously",
         "2. Bridge initialization race condition occurs",
         "3. Some users get corrupted bridge instances",
@@ -308,7 +308,7 @@ class WebSocketFailureTestRunner:
         
         test_results.append({"test": "bridge_race_condition", "expected_failure": True})
         except Exception as e:
-        logger.info("formatted_string")
+        logger.info("")
 
             # Test bridge timeout under load
         try:
@@ -320,7 +320,7 @@ class WebSocketFailureTestRunner:
         severity=TestSeverity.HIGH,
         error_message="Bridge initialization times out under high load",
         business_impact="Users cannot connect during peak usage - system appears down",
-        reproduction_steps=[ )
+        reproduction_steps=[ ]
         "1. High concurrent user load",
         "2. Bridge initialization becomes slow",
         "3. Initialization timeout exceeded",
@@ -332,7 +332,7 @@ class WebSocketFailureTestRunner:
                 
         test_results.append({"test": "bridge_timeout", "expected_failure": True})
         except Exception as e:
-        logger.info("formatted_string")
+        logger.info("")
 
         return test_results
 
@@ -352,7 +352,7 @@ class WebSocketFailureTestRunner:
         severity=TestSeverity.CRITICAL,
         error_message="Shared WebSocket manager state causes user data to leak to other users",
         business_impact="CRITICAL SECURITY BREACH - Users see each other"s sensitive data including API keys",
-        reproduction_steps=[ )
+        reproduction_steps=[ ]
         "1. User A executes tool with sensitive data",
         "2. User B connects while A"s tool is running",
         "3. Shared WebSocket state gets corrupted",
@@ -364,7 +364,7 @@ class WebSocketFailureTestRunner:
         
         test_results.append({"test": "websocket_data_leak", "expected_failure": True})
         except Exception as e:
-        logger.info("formatted_string")
+        logger.info("")
 
             # Test connection hijacking
         try:
@@ -376,7 +376,7 @@ class WebSocketFailureTestRunner:
         severity=TestSeverity.CRITICAL,
         error_message="WebSocket connections can be hijacked by other users",
         business_impact="Attacker receives victim"s tool results and sensitive data",
-        reproduction_steps=[ )
+        reproduction_steps=[ ]
         "1. Victim establishes WebSocket connection",
         "2. Attacker triggers connection ID collision",
         "3. Victim's notifications route to attacker's connection",
@@ -388,7 +388,7 @@ class WebSocketFailureTestRunner:
                 
         test_results.append({"test": "connection_hijacking", "expected_failure": True})
         except Exception as e:
-        logger.info("formatted_string")
+        logger.info("")
 
         return test_results
 
@@ -408,7 +408,7 @@ class WebSocketFailureTestRunner:
         severity=TestSeverity.HIGH,
         error_message="Notification delivery latency increases dramatically with load",
         business_impact="Poor user experience - system feels slow and unresponsive",
-        reproduction_steps=[ )
+        reproduction_steps=[ ]
         "1. System under normal load - notifications fast",
         "2. Concurrent users increase",
         "3. Notification queue builds up",
@@ -420,7 +420,7 @@ class WebSocketFailureTestRunner:
         
         test_results.append({"test": "latency_degradation", "expected_failure": True})
         except Exception as e:
-        logger.info("formatted_string")
+        logger.info("")
 
             # Test memory leaks
         try:
@@ -432,7 +432,7 @@ class WebSocketFailureTestRunner:
         severity=TestSeverity.HIGH,
         error_message="Notification system leaks memory under sustained load",
         business_impact="System becomes unstable, crashes during peak usage",
-        reproduction_steps=[ )
+        reproduction_steps=[ ]
         "1. System starts with normal memory usage",
         "2. Sustained notification load over time",
         "3. Memory usage grows unbounded",
@@ -444,7 +444,7 @@ class WebSocketFailureTestRunner:
                 
         test_results.append({"test": "memory_leak", "expected_failure": True})
         except Exception as e:
-        logger.info("formatted_string")
+        logger.info("")
 
         return test_results
 
@@ -464,7 +464,7 @@ class WebSocketFailureTestRunner:
         severity=TestSeverity.CRITICAL,
         error_message="Critical notifications lost during reconnection window",
         business_impact="Users miss important updates during connection interruptions",
-        reproduction_steps=[ )
+        reproduction_steps=[ ]
         "1. User tool execution in progress",
         "2. Network interruption causes disconnection",
         "3. Critical notifications (tool_progress, tool_completed) lost",
@@ -476,7 +476,7 @@ class WebSocketFailureTestRunner:
         
         test_results.append({"test": "reconnection_loss", "expected_failure": True})
         except Exception as e:
-        logger.info("formatted_string")
+        logger.info("")
 
             # Test message ordering corruption
         try:
@@ -488,7 +488,7 @@ class WebSocketFailureTestRunner:
         severity=TestSeverity.HIGH,
         error_message="Message ordering corrupted during reconnection recovery",
         business_impact="Users receive updates out of order - confusing and unreliable experience",
-        reproduction_steps=[ )
+        reproduction_steps=[ ]
         "1. Sequential notifications sent during disconnection",
         "2. Messages buffered in wrong order",
         "3. Reconnection delivers messages out of sequence",
@@ -500,7 +500,7 @@ class WebSocketFailureTestRunner:
                 
         test_results.append({"test": "ordering_corruption", "expected_failure": True})
         except Exception as e:
-        logger.info("formatted_string")
+        logger.info("")
 
         return test_results
 
@@ -523,7 +523,7 @@ class WebSocketFailureTestRunner:
         revenue_impact += 25000  # $25K per user experience issue
         user_experience_issues += 1
 
-        self.business_impact_metrics = { )
+        self.business_impact_metrics = { }
         "total_estimated_revenue_impact": revenue_impact,
         "critical_security_violations": security_violations,
         "user_experience_degradations": user_experience_issues,
@@ -540,27 +540,27 @@ class WebSocketFailureTestRunner:
         logger.error("=" * 80)
 
         logger.error(f" CHART:  SUMMARY:")
-        logger.error("formatted_string")
-        logger.error("formatted_string")
-        logger.error("formatted_string")
-        logger.error("formatted_string")
-        logger.error("formatted_string")
+        logger.error("")
+        logger.error("")
+        logger.error("")
+        logger.error("")
+        logger.error("")
 
         logger.error(f" )
         [U+1F4B0] BUSINESS IMPACT:")
         impact = results.business_impact_summary
-        logger.error("formatted_string")
-        logger.error("formatted_string")
-        logger.error("formatted_string")
-        logger.error("formatted_string")
+        logger.error("")
+        logger.error("")
+        logger.error("")
+        logger.error("")
 
         logger.error(f" )
         FIRE:  CRITICAL FAILURES (MUST FIX IMMEDIATELY):")
         for i, failure in enumerate(results.critical_failures[:10], 1):  # Top 10
-        logger.error("formatted_string")
-        logger.error("formatted_string")
-        logger.error("formatted_string")
-        logger.error("formatted_string")
+        logger.error("")
+        logger.error("")
+        logger.error("")
+        logger.error("")
 
         logger.error(f" )
         [U+1F4CB] NEXT STEPS:")
@@ -592,27 +592,27 @@ class TestWebSocketComprehensiveFailureSuite:
 
     # Assert that we found critical failures (tests designed to fail!)
         assert len(results.critical_failures) > 0, "Expected to find critical WebSocket notification failures"
-        assert len(results.all_failures) > 20, "formatted_string"
+        assert len(results.all_failures) > 20, ""
 
     # Verify specific failure types were detected
         failure_types = [f.failure_type for f in results.all_failures]
-        expected_failures = [ )
+        expected_failures = [ ]
         "SILENT_FAILURE", "DATA_LEAKAGE", "CONNECTION_HIJACKING",
         "PERFORMANCE_DEGRADATION", "RECONNECTION_LOSS", "RACE_CONDITION"
     
 
         for expected_failure in expected_failures:
-        assert expected_failure in failure_types, "formatted_string"
+        assert expected_failure in failure_types, ""
 
         # Business impact should be significant
         revenue_impact = results.business_impact_summary.get("total_estimated_revenue_impact", 0)
-        assert revenue_impact > 100000, "formatted_string"
+        assert revenue_impact > 100000, ""
 
         # Security violations should be detected
         security_violations = results.business_impact_summary.get("critical_security_violations", 0)
         assert security_violations > 0, "Expected to detect security violations"
 
-        logger.error("formatted_string")
+        logger.error("")
         logger.error("[U+1F527] Now fix these issues and re-run tests until they all pass!")
 
 

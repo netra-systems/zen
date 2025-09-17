@@ -101,7 +101,7 @@ class AgentDeathDetector:
 class TestAgentDeathAfterTriage:
         ""Test suite for critical agent death after triage bug"
 @pytest.mark.asyncio
-@pytest.fixture
+# @pytest.fixture
     async def test_agent_dies_after_triage_without_error(self):
 '''
 CRITICAL: Reproduce agent death after triage with no error handling
@@ -174,13 +174,13 @@ for failure in report['health_check_failures']:
     assert failure['reported_status']['status'] == 'healthy', \
 fHealth service correctly detected failure (this shouldnt happen with the bug!)"
             # Print detailed failure report
-print(")
+    print(")
  + "="*80)
 print(CRITICAL BUG REPRODUCTION - AGENT DEATH AFTER TRIAGE)
 print("="*80)
 print(formatted_string)
-print("formatted_string" if report['time_since_death'] else N/A)
-print("formatted_string")
+print("" if report['time_since_death'] else N/A)
+print("")
 print(formatted_string)
 print("="*80)
 @pytest.mark.asyncio
@@ -342,7 +342,7 @@ class FakeErrorRecovery:
         print(ERROR RECOVERY FAILURE)
         print("="*80)
         print(formatted_string)
-        print("formatted_string")
+        print("")
         print(Critical bug: Silent failures bypass all error recovery!)
         print("="*80)
     async def _simulate_triage_death(self, *args, **kwargs):
@@ -375,7 +375,7 @@ failed_requirements = [
 check for check, implemented in required_checks.items()
 if not implemented
         
-print("")
+    print("")
  + ="*80)
 print("MISSING DEATH DETECTION MECHANISMS)
 print(="*80)

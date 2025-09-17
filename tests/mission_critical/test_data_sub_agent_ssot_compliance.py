@@ -702,7 +702,7 @@ for pattern in required_patterns:
             # Check forbidden patterns
 for pattern in forbidden_patterns:
     assert pattern not in module_source, formatted_string"
-print(" PASS:  All SSOT compliance tests passed!)
+    print(" PASS:  All SSOT compliance tests passed!)
                 # Additional edge case tests
 class TestDataSubAgentEdgeCases:
     ""Edge case tests for DataSubAgent."

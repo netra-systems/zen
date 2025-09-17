@@ -376,7 +376,7 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
     async def test_memory_usage_optimization(self):
         ""Test memory usage optimization with Redis SSOT consolidation.
 
-        This test validates the 75% memory reduction target from
+#         This test validates the 75% memory reduction target from # Incomplete import statement
         consolidating 12 competing Redis managers into 1 SSOT instance.
         "
         self.logger.info("Testing memory usage optimization)

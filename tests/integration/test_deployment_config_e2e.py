@@ -65,7 +65,7 @@ class TestDeploymentConfigurationE2E(SSotAsyncTestCase):
 
     def setUp(self):
         """Set up test environment."""
-        self.test_env_vars = { )
+        self.test_env_vars = { }
         'ENV': 'test',
         'DATABASE_URL': 'postgresql://test:test@localhost/test',
         'POSTGRES_HOST': 'localhost',
@@ -108,7 +108,7 @@ class TestDeploymentConfigurationE2E(SSotAsyncTestCase):
     def test_staging_config_requires_cloud_sql_format(self):
         """Test that staging config enforces Cloud SQL connection format."""
         pass
-        with patch.dict(os.environ, { ))
+        with patch.dict(os.environ, { })
         'ENV': 'staging',
         'DATABASE_URL': 'postgresql://user:pass@10.0.0.1:5432/db',  # Wrong format
         **self.test_env_vars
@@ -122,7 +122,7 @@ class TestDeploymentConfigurationE2E(SSotAsyncTestCase):
 
     def test_staging_config_rejects_localhost_urls(self):
         """Test that staging configuration rejects localhost URLs."""
-        with patch.dict(os.environ, { ))
+        with patch.dict(os.environ, { })
         'ENV': 'staging',
         'BACKEND_URL': 'http://localhost:8000',  # Invalid for staging
         'FRONTEND_URL': 'http://localhost:3000',  # Invalid for staging
@@ -141,7 +141,7 @@ class TestDeploymentConfigurationE2E(SSotAsyncTestCase):
     # First call: list secrets (missing some)
         mock_run.return_value = Mock( )
         returncode=0,
-        stdout=json.dumps([ ))
+        stdout=json.dumps([ ])
         {'name': 'projects/netra-staging/secrets/jwt-secret-staging'}
     # Missing other required secrets
     
@@ -149,7 +149,7 @@ class TestDeploymentConfigurationE2E(SSotAsyncTestCase):
 
         from scripts.validate_secrets import check_gsm_secrets
 
-        missing = check_gsm_secrets('netra-staging', [ ))
+        missing = check_gsm_secrets('netra-staging', [ ])
         'jwt-secret-staging',
         'secret-key-staging',
         'postgres-password-staging'
@@ -173,7 +173,7 @@ class TestDeploymentConfigurationE2E(SSotAsyncTestCase):
 
         env_vars = get_cloud_run_env_vars('netra-backend', 'netra-staging', 'us-central1')
 
-        required_vars = [ )
+        required_vars = [ ]
         'JWT_SECRET_KEY', 'SECRET_KEY', 'POSTGRES_HOST',
         'POSTGRES_PORT', 'POSTGRES_DB', 'POSTGRES_USER'
     
@@ -242,7 +242,7 @@ class TestAsyncDeploymentValidation(unittest.IsolatedAsyncioTestCase):
         """Test parallel validation of multiple secrets."""
         from scripts.validate_secrets import validate_secrets_parallel
 
-        secrets_to_check = [ )
+        secrets_to_check = [ ]
         'jwt-secret-staging',
         'secret-key-staging',
         'postgres-password-staging',
@@ -285,7 +285,7 @@ class TestDeploymentConfigCrossReferences(SSotAsyncTestCase):
 
     def test_incident_documentation_exists(self):
         """Test that incident documentation files exist and are linked."""
-        required_docs = [ )
+        required_docs = [ ]
         'FIVE_WHYS_STAGING_CONFIG_FAILURE_20250905.md',
         'STAGING_CONFIG_REMEDIATION_PLAN.md',
         'SPEC/learnings/cloud_run_config_failure_20250905.xml'
@@ -293,7 +293,7 @@ class TestDeploymentConfigCrossReferences(SSotAsyncTestCase):
 
         for doc in required_docs:
         doc_path = project_root / doc
-        self.assertTrue(doc_path.exists(), "formatted_string")
+        self.assertTrue(doc_path.exists(), "")
 
     def test_test_files_reference_incidents(self):
         """Test that test files properly reference incident documentation."""
@@ -315,7 +315,7 @@ class TestDeploymentConfigCrossReferences(SSotAsyncTestCase):
         required_vars = TestDeploymentConfigValidation.REQUIRED_ENV_VARS
 
     # These are the 19 critical vars identified in the incident
-        critical_vars = [ )
+        critical_vars = [ ]
         'DATABASE_URL', 'JWT_SECRET_KEY', 'SECRET_KEY',
         'POSTGRES_HOST', 'POSTGRES_PORT', 'POSTGRES_DB',
         'POSTGRES_USER', 'POSTGRES_PASSWORD', 'ENV',
@@ -325,7 +325,7 @@ class TestDeploymentConfigCrossReferences(SSotAsyncTestCase):
 
         for var in critical_vars:
         self.assertIn(var, required_vars,
-        "formatted_string")
+        "")
 
 
 class TestCloudRunProbeSimulation(SSotAsyncTestCase):

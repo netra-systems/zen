@@ -236,6 +236,50 @@ def fix_invalid_syntax(content: str) -> str:
         if '"formatted_string"' in line and not ('get(' in line or 'format(' in line):
             line = line.replace('"formatted_string"', '""')
 
+        # Fix unterminated string concatenations
+        if '" + "' in line and line.count('"') % 2 != 0:
+            line = line.replace('" + "', ' + ')
+
+        # Fix malformed print statements with broken concatenation
+        if 'print("")' in line and 'print("' in lines[i-1] if i > 0 else False:
+            prev_line = lines[i-1] if i > 0 else ""
+            if 'print("' in prev_line and not prev_line.strip().endswith(')'):
+                # Merge broken print statement
+                merged_print = prev_line.strip().rstrip('"') + '")'
+                fixed_lines[-1] = merged_print  # Replace previous line
+                continue  # Skip current line
+
+        # Fix broken list/dict definitions
+        if line.strip() == '}' and i > 0:
+            prev_line = lines[i-1] if i > 0 else ""
+            if prev_line.strip().endswith(','):
+                # This might be a continuation
+                pass
+
+        # Fix indentation for print statements
+        if line.startswith('print("') and not line.startswith('    '):
+            # Check if this should be indented based on context
+            if i > 0:
+                prev_line = lines[i-1] if i > 0 else ""
+                if (prev_line.strip().endswith(':') or
+                    prev_line.startswith('    ') or
+                    'try:' in prev_line or 'except' in prev_line):
+                    line = '    ' + line
+
+        # Fix malformed list definitions
+        if 'files_to_check = [ ]' in line:
+            line = line.replace('files_to_check = [ ]', 'files_to_check = [')
+        if 'test_files = [ ]' in line:
+            line = line.replace('test_files = [ ]', 'test_files = [')
+        if 'coverage_areas = { }' in line:
+            line = line.replace('coverage_areas = { }', 'coverage_areas = {')
+
+        # Fix malformed string concatenation in print statements
+        if '[Test' in line and ']:' in line and line.count('"') == 1:
+            line = line.replace('[Test', '"[Test').replace(']:', ']:"')
+        if '[RUNNING' in line and line.count('"') == 0:
+            line = '"' + line + '")'
+
         # Comment out misplaced pytest fixture decorators
         if '@pytest.fixture' in line and i + 1 < len(lines):
             next_line = lines[i + 1] if i + 1 < len(lines) else ""

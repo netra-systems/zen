@@ -63,10 +63,10 @@ class TestAgentContextIsolation:
 
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         supervisor.websocket_manager = websocket_manager
-        supervisor.user_id = "formatted_string"
+        supervisor.user_id = ""
 
         await asyncio.sleep(0)
-        return { )
+        return { }
         "supervisor": supervisor,
         "llm_manager": llm_manager,
         "websocket_manager": websocket_manager,
@@ -84,18 +84,18 @@ class TestAgentContextIsolation:
         for i in range(3):
         agent = TestContextAgent( )
         llm_manager=context_setup["llm_manager"],
-        name="formatted_string",
-        description="formatted_string"
+        name="",
+        description=""
             
         agents.append(agent)
 
             # Set unique contexts
         contexts = []
         for i, agent in enumerate(agents):
-        context_data = { )
-        "agent_id": "formatted_string",
-        "task_context": "formatted_string",
-        "session_data": "formatted_string",
+        context_data = { }
+        "agent_id": "",
+        "task_context": "",
+        "session_data": "",
         "memory_state": {"initialized": True, "agent_number": i}
                 
         agent.context = context_data
@@ -121,7 +121,7 @@ class TestAgentContextIsolation:
                     
 
                     # Set context with cleanup tracking
-        original_context = { )
+        original_context = { }
         "session_id": str(uuid.uuid4()),
         "memory_allocated": True,
         "cleanup_marker": "test_cleanup"
@@ -145,12 +145,12 @@ class TestAgentContextIsolation:
         for i in range(5):
         agent = TestContextAgent( )
         llm_manager=context_setup["llm_manager"],
-        name="formatted_string",
-        description="formatted_string"
+        name="",
+        description=""
                             
-        agent.context = { )
+        agent.context = { }
         "concurrent_id": i,
-        "task_data": "formatted_string",
+        "task_data": "",
         "isolation_marker": str(uuid.uuid4())
                             
         concurrent_agents.append(agent)
@@ -177,7 +177,7 @@ class TestAgentContextIsolation:
                                 
 
                                 # Create context approaching limits
-        large_context = { )
+        large_context = { }
         "large_data": "x" * 10000,  # 10KB of data
         "memory_intensive": list(range(1000)),
         "context_id": str(uuid.uuid4())
@@ -204,7 +204,7 @@ class TestAgentContextIsolation:
                                     
 
                                     # Set initial context
-        initial_context = { )
+        initial_context = { }
         "persistent_id": str(uuid.uuid4()),
         "task_counter": 0,
         "accumulated_data": []
@@ -236,7 +236,7 @@ class TestAgentContextIsolation:
         fresh_count = len([item for item in []])
 
         await asyncio.sleep(0)
-        return { )
+        return { }
         "all_contexts_unique": all_unique,
         "no_context_bleeding": no_bleeding,
         "fresh_window_count": fresh_count
@@ -251,7 +251,7 @@ class TestAgentContextIsolation:
         original_context = agent.context.copy()
         agent.context.clear()
 
-        return { )
+        return { }
         "context_cleared": len(agent.context) == 0,
         "memory_released": agent.context != original_context
     
@@ -279,7 +279,7 @@ class TestAgentContextIsolation:
         if i != j and agent.context.get("isolation_marker") == other_agent.context.get("isolation_marker"):
         no_contamination = False
 
-        return { )
+        return { }
         "all_isolated": all_isolated,
         "no_cross_contamination": no_contamination
                     
@@ -293,7 +293,7 @@ class TestAgentContextIsolation:
         within_limits = context_size < 1024 * 1024
         memory_efficient = memory_usage < 2 * 1024 * 1024
 
-        return { )
+        return { }
         "within_limits": within_limits,
         "memory_efficient": memory_efficient,
         "context_size": context_size
@@ -306,14 +306,14 @@ class TestAgentContextIsolation:
     # Execute multiple tasks
         for i in range(3):
         agent.context["task_counter"] = i
-        agent.context["accumulated_data"].append("formatted_string")
+        agent.context["accumulated_data"].append("")
         await agent.execute()
 
         # Validate persistence
         context_maintained = agent.context.get("persistent_id") == initial_id
         data_accumulated = len(agent.context.get("accumulated_data", [])) == 3
 
-        return { )
+        return { }
         "context_maintained": context_maintained,
         "data_accumulated": data_accumulated
         

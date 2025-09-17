@@ -639,7 +639,7 @@ class AgentResiliencePatternsTests:
     async def test_error_recovery_mechanism_violations(self):
         ""CRITICAL: Must detect inadequate error recovery mechanisms.
         
-        This test MUST FAIL if agents don't recover properly from
+#         This test MUST FAIL if agents don't recover properly from # Incomplete import statement
         various error conditions and edge cases.
         "
         # Test recovery from different error types

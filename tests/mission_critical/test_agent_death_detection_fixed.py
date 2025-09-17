@@ -363,7 +363,7 @@ class TestAgentDeathDetectionFixed:
     from netra_backend.app.core.registry.universal_registry import AgentRegistry
 
                                                                         # Create mock dependencies
-    mock_llm = Magic        mock_dispatcher = Magic
+    mock_llm = MagicMock(); mock_dispatcher = Magic
                                                                         # Create registry
     registry = AgentRegistry()
 
@@ -479,7 +479,7 @@ class TestAgentDeathDetectionFixed:
         print( PASS:  AGENT DEATH DETECTION SYSTEM WORKING CORRECTLY)
         print("="*80)
         print(formatted_string)
-        print("formatted_string")
+        print("")
         print(formatted_string)
         print("="*80)
 

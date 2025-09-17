@@ -98,7 +98,7 @@ class HealthResponseValidationDetector:
 
     def add_format_inconsistency(self, endpoint: str, service: str, inconsistency: Dict[str, Any]):
         """Add a response format inconsistency."""
-        self.format_inconsistencies.append({ ))
+        self.format_inconsistencies.append({ })
         'endpoint': endpoint,
         'service': service,
         'inconsistency': inconsistency,
@@ -108,7 +108,7 @@ class HealthResponseValidationDetector:
     def add_field_mismatch(self, service1: str, service2: str, mismatch: Dict[str, Any]):
         """Add a field mismatch between services."""
         pass
-        self.field_mismatches.append({ ))
+        self.field_mismatches.append({ })
         'service1': service1,
         'service2': service2,
         'mismatch': mismatch,
@@ -117,7 +117,7 @@ class HealthResponseValidationDetector:
 
     def add_timestamp_issue(self, endpoint: str, issue: Dict[str, Any]):
         """Add a timestamp format issue."""
-        self.timestamp_issues.append({ ))
+        self.timestamp_issues.append({ })
         'endpoint': endpoint,
         'issue': issue,
         'timestamp': datetime.now(timezone.utc).isoformat()
@@ -126,7 +126,7 @@ class HealthResponseValidationDetector:
     def add_status_value_issue(self, service: str, endpoint: str, issue: Dict[str, Any]):
         """Add a status value inconsistency."""
         pass
-        self.status_value_issues.append({ ))
+        self.status_value_issues.append({ })
         'service': service,
         'endpoint': endpoint,
         'issue': issue,
@@ -151,7 +151,7 @@ class TestHealthRouteResponseValidation:
     # TODO: Initialize real service
         """Create backend FastAPI app with all startup tasks disabled."""
         pass
-        with patch.dict('os.environ', { ))
+        with patch.dict('os.environ', { })
         'SKIP_STARTUP_TASKS': 'true',
         'SKIP_REDIS_INITIALIZATION': 'true',
         'SKIP_LLM_INITIALIZATION': 'true',
@@ -195,15 +195,15 @@ class TestHealthRouteResponseValidation:
         error_format_inconsistencies = []
 
         # Test error responses by simulating various failure conditions
-        test_scenarios = [ )
-        { )
+        test_scenarios = [ ]
+        { }
         'name': 'database_unavailable',
         # Mock: Database isolation for unit testing without external database connections
         'backend_patches': {'netra_backend.app.dependencies.get_db_dependency': MagicMock(side_effect=Exception("Database unavailable"))},
         # Mock: Database isolation for unit testing without external database connections
         'auth_patches': {'auth_service.auth_core.database.connection.auth_db': MagicMock(side_effect=Exception("Database unavailable"))}
         },
-        { )
+        { }
         'name': 'timeout_error',
         # Mock: Service component isolation for predictable testing behavior
         'backend_patches': {'asyncio.wait_for': MagicMock(side_effect=asyncio.TimeoutError("Health check timeout"))},
@@ -221,13 +221,13 @@ class TestHealthRouteResponseValidation:
         backend_health = backend_client.get('/health')
         backend_ready = backend_client.get('/ready')
 
-        scenario_errors['backend'] = { )
-        'health': { )
+        scenario_errors['backend'] = { }
+        'health': { }
         'status': backend_health.status_code,
         'response': backend_health.json() if backend_health.status_code != 500 else backend_health.text,
         'headers': dict(backend_health.headers)
         },
-        'ready': { )
+        'ready': { }
         'status': backend_ready.status_code,
         'response': backend_ready.json() if backend_ready.status_code != 500 else backend_ready.text,
         'headers': dict(backend_ready.headers)
@@ -242,13 +242,13 @@ class TestHealthRouteResponseValidation:
         auth_health = auth_client.get('/health')
         auth_ready = auth_client.get('/health/ready')
 
-        scenario_errors['auth'] = { )
-        'health': { )
+        scenario_errors['auth'] = { }
+        'health': { }
         'status': auth_health.status_code,
         'response': auth_health.json() if auth_health.status_code != 500 else auth_health.text,
         'headers': dict(auth_health.headers)
         },
-        'ready': { )
+        'ready': { }
         'status': auth_ready.status_code,
         'response': auth_ready.json() if auth_ready.status_code != 500 else auth_ready.text,
         'headers': dict(auth_ready.headers)
@@ -265,7 +265,7 @@ class TestHealthRouteResponseValidation:
 
                                             # Compare error response formats
         if backend_response['status'] != auth_response['status']:
-        error_format_inconsistencies.append({ ))
+        error_format_inconsistencies.append({ })
         'scenario': scenario['name'],
         'endpoint': endpoint,
         'type': 'different_error_status_codes',
@@ -282,7 +282,7 @@ class TestHealthRouteResponseValidation:
         auth_keys = set(auth_resp.keys())
 
         if backend_keys != auth_keys:
-        error_format_inconsistencies.append({ ))
+        error_format_inconsistencies.append({ })
         'scenario': scenario['name'],
         'endpoint': endpoint,
         'type': 'different_error_response_fields',
@@ -293,7 +293,7 @@ class TestHealthRouteResponseValidation:
                                                         
 
         elif type(backend_resp) != type(auth_resp):
-        error_format_inconsistencies.append({ ))
+        error_format_inconsistencies.append({ })
         'scenario': scenario['name'],
         'endpoint': endpoint,
         'type': 'different_error_response_types',
@@ -304,13 +304,13 @@ class TestHealthRouteResponseValidation:
         for inconsistency in error_format_inconsistencies:
         validation_detector.add_format_inconsistency( )
         inconsistency['endpoint'],
-        "formatted_string",
+        "",
         inconsistency
                                                                 
 
                                                                 # This should FAIL - we expect error format inconsistencies
         assert len(error_format_inconsistencies) == 0, \
-        "formatted_string"
+        ""
 
     async def test_missing_or_extra_fields_in_health_responses(self, backend_app, auth_test_app, validation_detector):
         """Test that health responses have missing or extra fields between services - SHOULD FAIL."""
@@ -321,14 +321,14 @@ class TestHealthRouteResponseValidation:
         field_mismatches = []
 
                                                                     # Define expected standard health response fields
-        standard_health_fields = { )
+        standard_health_fields = { }
         'status',      # health status (healthy/ready/unhealthy)
         'service',     # service name
         'version',     # service version
         'timestamp',   # response timestamp
                                                                     
 
-        optional_fields = { )
+        optional_fields = { }
         'uptime',      # service uptime
         'checks',      # detailed health checks
         'dependencies', # dependency status
@@ -345,7 +345,7 @@ class TestHealthRouteResponseValidation:
         backend_health = backend_client.get('/health')
         backend_ready = backend_client.get('/ready')
 
-        service_responses['backend'] = { )
+        service_responses['backend'] = { }
         'health': backend_health.json() if backend_health.status_code == 200 else None,
         'ready': backend_ready.json() if backend_ready.status_code == 200 else None
                                                                         
@@ -358,7 +358,7 @@ class TestHealthRouteResponseValidation:
         auth_health = auth_client.get('/health')
         auth_ready = auth_client.get('/health/ready')
 
-        service_responses['auth'] = { )
+        service_responses['auth'] = { }
         'health': auth_health.json() if auth_health.status_code == 200 else None,
         'ready': auth_ready.json() if auth_ready.status_code == 200 else None
                                                                                 
@@ -379,7 +379,7 @@ class TestHealthRouteResponseValidation:
         auth_missing_standard = standard_health_fields - auth_fields
 
         if backend_missing_standard:
-        field_mismatches.append({ ))
+        field_mismatches.append({ })
         'type': 'missing_standard_fields',
         'service': 'backend',
         'endpoint': endpoint,
@@ -388,7 +388,7 @@ class TestHealthRouteResponseValidation:
                                                                                                 
 
         if auth_missing_standard:
-        field_mismatches.append({ ))
+        field_mismatches.append({ })
         'type': 'missing_standard_fields',
         'service': 'auth',
         'endpoint': endpoint,
@@ -401,7 +401,7 @@ class TestHealthRouteResponseValidation:
         only_in_auth = auth_fields - backend_fields
 
         if only_in_backend:
-        field_mismatches.append({ ))
+        field_mismatches.append({ })
         'type': 'fields_only_in_backend',
         'endpoint': endpoint,
         'fields': list(only_in_backend),
@@ -410,7 +410,7 @@ class TestHealthRouteResponseValidation:
                                                                                                         
 
         if only_in_auth:
-        field_mismatches.append({ ))
+        field_mismatches.append({ })
         'type': 'fields_only_in_auth',
         'endpoint': endpoint,
         'fields': list(only_in_auth),
@@ -430,7 +430,7 @@ class TestHealthRouteResponseValidation:
         auth_nested_keys = set(auth_value.keys())
 
         if backend_nested_keys != auth_nested_keys:
-        field_mismatches.append({ ))
+        field_mismatches.append({ })
         'type': 'nested_field_structure_mismatch',
         'endpoint': endpoint,
         'field': field,
@@ -442,7 +442,7 @@ class TestHealthRouteResponseValidation:
 
                                                                                                                         # Check if one is dict and other is simple value
         elif type(backend_value) != type(auth_value):
-        field_mismatches.append({ ))
+        field_mismatches.append({ })
         'type': 'field_type_mismatch',
         'endpoint': endpoint,
         'field': field,
@@ -459,7 +459,7 @@ class TestHealthRouteResponseValidation:
         validation_detector.add_field_mismatch(service1, service2, mismatch)
 
                                                                                                                                     # This should FAIL - we expect field mismatches
-        assert len(field_mismatches) == 0, "formatted_string"
+        assert len(field_mismatches) == 0, ""
 
     async def test_timestamp_format_inconsistencies(self, backend_app, auth_test_app, validation_detector):
         """Test that timestamp formats are inconsistent across health endpoints - SHOULD FAIL."""
@@ -477,7 +477,7 @@ class TestHealthRouteResponseValidation:
         backend_health = backend_client.get('/health')
         backend_ready = backend_client.get('/ready')
 
-        backend_responses = { )
+        backend_responses = { }
         'health': backend_health.json() if backend_health.status_code == 200 else None,
         'ready': backend_ready.json() if backend_ready.status_code == 200 else None
                                                                                                                                             
@@ -494,7 +494,7 @@ class TestHealthRouteResponseValidation:
         auth_health = auth_client.get('/health')
         auth_ready = auth_client.get('/health/ready')
 
-        auth_responses = { )
+        auth_responses = { }
         'health': auth_health.json() if auth_health.status_code == 200 else None,
         'ready': auth_ready.json() if auth_ready.status_code == 200 else None
                                                                                                                                                             
@@ -540,7 +540,7 @@ class TestHealthRouteResponseValidation:
         ts_format = self._determine_timestamp_format(ts_info['value'])
         if ts_format not in timestamp_formats:
         timestamp_formats[ts_format] = []
-        timestamp_formats[ts_format].append({ ))
+        timestamp_formats[ts_format].append({ })
         'endpoint': endpoint,
         'field': ts_info['field'],
         'value': ts_info['value']
@@ -548,7 +548,7 @@ class TestHealthRouteResponseValidation:
 
                                                                                                                                                                                                                         # Check for multiple timestamp formats
         if len(timestamp_formats) > 1:
-        timestamp_issues.append({ ))
+        timestamp_issues.append({ })
         'type': 'multiple_timestamp_formats',
         'formats': list(timestamp_formats.keys()),
         'format_usage': {fmt: len(usages) for fmt, usages in timestamp_formats.items()},
@@ -558,7 +558,7 @@ class TestHealthRouteResponseValidation:
                                                                                                                                                                                                                             # Check for invalid timestamp formats
         for ts_format, usages in timestamp_formats.items():
         if ts_format == 'unknown':
-        timestamp_issues.append({ ))
+        timestamp_issues.append({ })
         'type': 'invalid_timestamp_format',
         'invalid_timestamps': usages
                                                                                                                                                                                                                                     
@@ -572,7 +572,7 @@ class TestHealthRouteResponseValidation:
         if isinstance(ts_value, str):
                                                                                                                                                                                                                                                     # Check for timezone info
         has_timezone = any(tz_indicator in ts_value for tz_indicator in ['+', '-', 'Z', 'UTC'])
-        timezone_issues.append({ ))
+        timezone_issues.append({ })
         'endpoint': endpoint,
         'field': ts_info['field'],
         'has_timezone': has_timezone,
@@ -584,7 +584,7 @@ class TestHealthRouteResponseValidation:
         endpoints_without_tz = [item for item in []]]
 
         if endpoints_with_tz and endpoints_without_tz:
-        timestamp_issues.append({ ))
+        timestamp_issues.append({ })
         'type': 'inconsistent_timezone_usage',
         'with_timezone': len(endpoints_with_tz),
         'without_timezone': len(endpoints_without_tz),
@@ -596,7 +596,7 @@ class TestHealthRouteResponseValidation:
         validation_detector.add_timestamp_issue('multiple_endpoints', issue)
 
                                                                                                                                                                                                                                                             # This should FAIL - we expect timestamp inconsistencies
-        assert len(timestamp_issues) == 0, "formatted_string"
+        assert len(timestamp_issues) == 0, ""
 
     def _extract_timestamps(self, data: Dict[str, Any], parent_key: str = '') -> List[Dict[str, Any]]:
         """Extract timestamp values from response data."""
@@ -605,11 +605,11 @@ class TestHealthRouteResponseValidation:
 
         if isinstance(data, dict):
         for key, value in data.items():
-        full_key = "formatted_string" if parent_key else key
+        full_key = "" if parent_key else key
 
             # Check if this looks like a timestamp field
         if any(ts_field in key.lower() for ts_field in ['timestamp', 'time', 'created', 'updated', 'last_', 'date']):
-        timestamps.append({ ))
+        timestamps.append({ })
         'field': full_key,
         'value': value
                 
@@ -620,7 +620,7 @@ class TestHealthRouteResponseValidation:
         elif isinstance(value, list):
         for i, item in enumerate(value):
         if isinstance(item, dict):
-        timestamps.extend(self._extract_timestamps(item, "formatted_string"))
+        timestamps.extend(self._extract_timestamps(item, ""))
 
         await asyncio.sleep(0)
         return timestamps
@@ -665,13 +665,13 @@ class TestHealthRouteResponseValidation:
         status_data = {}
 
                                                 # Test different health states to see status value variations
-        test_scenarios = [ )
-        { )
+        test_scenarios = [ ]
+        { }
         'name': 'healthy_state',
         'backend_patches': {},
         'auth_patches': {}
         },
-        { )
+        { }
         'name': 'database_error',
                                                 # Mock: Service component isolation for predictable testing behavior
         'backend_patches': {'netra_backend.app.dependencies.get_db_dependency': MagicMock(side_effect=Exception("DB Error"))},
@@ -693,7 +693,7 @@ class TestHealthRouteResponseValidation:
         if response.status_code in [200, 503]:
         data = response.json()
         status_values = self._extract_status_values(data)
-        scenario_statuses['formatted_string'] = { )
+        scenario_statuses['formatted_string'] = { }
         'http_status': response.status_code,
         'status_values': status_values
                                                                         
@@ -712,7 +712,7 @@ class TestHealthRouteResponseValidation:
         if response.status_code in [200, 503]:
         data = response.json()
         status_values = self._extract_status_values(data)
-        scenario_statuses['formatted_string'] = { )
+        scenario_statuses['formatted_string'] = { }
         'http_status': response.status_code,
         'status_values': status_values
                                                                                                     
@@ -744,7 +744,7 @@ class TestHealthRouteResponseValidation:
         unexpected_statuses = all_status_values - expected_healthy_statuses - expected_unhealthy_statuses
 
         if unexpected_statuses:
-        status_issues.append({ ))
+        status_issues.append({ })
         'type': 'unexpected_status_values',
         'unexpected_values': list(unexpected_statuses),
         'expected_healthy': list(expected_healthy_statuses),
@@ -770,7 +770,7 @@ class TestHealthRouteResponseValidation:
 
         if backend_health_statuses and auth_health_statuses:
         if backend_health_statuses != auth_health_statuses:
-        status_issues.append({ ))
+        status_issues.append({ })
         'type': 'cross_service_status_inconsistency',
         'scenario': scenario,
         'backend_statuses': list(backend_health_statuses),
@@ -791,7 +791,7 @@ class TestHealthRouteResponseValidation:
         inconsistent_casing = {}
 
         if inconsistent_casing:
-        status_issues.append({ ))
+        status_issues.append({ })
         'type': 'inconsistent_status_casing',
         'inconsistent_cases': inconsistent_casing
                                                                                                                                                                             
@@ -800,7 +800,7 @@ class TestHealthRouteResponseValidation:
         validation_detector.add_status_value_issue('multi_service', 'multiple_endpoints', issue)
 
                                                                                                                                                                                 # This should FAIL - we expect status value inconsistencies
-        assert len(status_issues) == 0, "formatted_string"
+        assert len(status_issues) == 0, ""
 
     def _extract_status_values(self, data: Dict[str, Any], parent_key: str = '') -> List[str]:
         """Extract status values from response data."""
@@ -809,7 +809,7 @@ class TestHealthRouteResponseValidation:
 
         if isinstance(data, dict):
         for key, value in data.items():
-        full_key = "formatted_string" if parent_key else key
+        full_key = "" if parent_key else key
 
             # Check if this looks like a status field
         if key.lower() in ['status', 'state', 'health', 'condition']:
@@ -834,7 +834,7 @@ class TestHealthRouteResponseValidation:
         nested_format_issues = []
 
                                         # Test comprehensive health endpoints that should have nested structures
-        comprehensive_endpoints = [ )
+        comprehensive_endpoints = [ ]
         '/health/system/comprehensive',
         '/health/agents',
         '/health/agents/metrics',
@@ -854,7 +854,7 @@ class TestHealthRouteResponseValidation:
         nested_format_issues.extend(nested_issues)
 
         except Exception as e:
-        nested_format_issues.append({ ))
+        nested_format_issues.append({ })
         'endpoint': endpoint,
         'type': 'endpoint_access_error',
         'error': str(e)
@@ -868,7 +868,7 @@ class TestHealthRouteResponseValidation:
         depth_analysis[issue['endpoint']] = issue['max_depth']
 
         if depth_analysis and len(set(depth_analysis.values())) > 1:
-        nested_format_issues.append({ ))
+        nested_format_issues.append({ })
         'type': 'inconsistent_nesting_depths',
         'depth_by_endpoint': depth_analysis,
         'min_depth': min(depth_analysis.values()),
@@ -879,7 +879,7 @@ class TestHealthRouteResponseValidation:
         validation_detector.nested_format_issues.append(issue)
 
                                                                         # This should FAIL - we expect nested format issues
-        assert len(nested_format_issues) == 0, "formatted_string"
+        assert len(nested_format_issues) == 0, ""
 
     def _analyze_nested_structure(self, data: Any, endpoint: str, current_depth: int = 0) -> List[Dict[str, Any]]:
         """Analyze nested structure for issues."""
@@ -897,7 +897,7 @@ class TestHealthRouteResponseValidation:
 
                 # Issue if same-level fields have very different types
         if len(value_types) > 3:  # More than 3 different types at same level
-        issues.append({ ))
+        issues.append({ })
         'type': 'mixed_types_at_same_level',
         'endpoint': endpoint,
         'depth': current_depth,
@@ -910,7 +910,7 @@ class TestHealthRouteResponseValidation:
         camel_case = [item for item in []]+[A-Z]', name)]
 
         if snake_case and camel_case:
-        issues.append({ ))
+        issues.append({ })
         'type': 'mixed_naming_conventions',
         'endpoint': endpoint,
         'depth': current_depth,
@@ -931,7 +931,7 @@ class TestHealthRouteResponseValidation:
 
                             # Add depth analysis
         if current_depth == 0:  # Only add for root level
-        issues.append({ ))
+        issues.append({ })
         'type': 'nested_analysis',
         'endpoint': endpoint,
         'max_depth': max_child_depth
@@ -942,7 +942,7 @@ class TestHealthRouteResponseValidation:
         if data:
         item_types = set(type(item).__name__ for item in data)
         if len(item_types) > 1:
-        issues.append({ ))
+        issues.append({ })
         'type': 'mixed_array_item_types',
         'endpoint': endpoint,
         'depth': current_depth,
@@ -1002,13 +1002,13 @@ class TestHealthRouteResponseValidation:
 
                                                     # Analyze header inconsistencies
                                                     # Check for missing standard headers
-        expected_headers = { )
+        expected_headers = { }
         'content-type',
         'content-length',
         'server'
                                                     
 
-        health_specific_headers = { )
+        health_specific_headers = { }
         'cache-control',     # Health endpoints should not be cached
         'x-health-status',   # Custom health status header
         'x-service-version'  # Service version header
@@ -1020,7 +1020,7 @@ class TestHealthRouteResponseValidation:
                                                         # Check for missing expected headers
         missing_expected = expected_headers - header_keys
         if missing_expected:
-        header_inconsistencies.append({ ))
+        header_inconsistencies.append({ })
         'type': 'missing_expected_headers',
         'endpoint': endpoint_name,
         'missing_headers': list(missing_expected),
@@ -1031,14 +1031,14 @@ class TestHealthRouteResponseValidation:
         if 'cache-control' in header_keys:
         cache_control = headers.get('cache-control', '').lower()
         if 'no-cache' not in cache_control and 'no-store' not in cache_control:
-        header_inconsistencies.append({ ))
+        header_inconsistencies.append({ })
         'type': 'health_endpoint_allows_caching',
         'endpoint': endpoint_name,
         'cache_control': cache_control,
         'issue': 'Health endpoint should not be cached'
                                                                     
         else:
-        header_inconsistencies.append({ ))
+        header_inconsistencies.append({ })
         'type': 'missing_cache_control',
         'endpoint': endpoint_name,
         'issue': 'Health endpoint missing cache-control header'
@@ -1057,7 +1057,7 @@ class TestHealthRouteResponseValidation:
         only_in_auth = auth_keys - backend_keys
 
         if only_in_backend or only_in_auth:
-        header_inconsistencies.append({ ))
+        header_inconsistencies.append({ })
         'type': 'cross_service_header_differences',
         'backend_only': list(only_in_backend),
         'auth_only': list(only_in_auth),
@@ -1073,7 +1073,7 @@ class TestHealthRouteResponseValidation:
                                                                                     # Skip headers that are expected to differ
         if header.lower() not in ['date', 'server', 'content-length']:
         if backend_value != auth_value:
-        header_inconsistencies.append({ ))
+        header_inconsistencies.append({ })
         'type': 'different_header_values',
         'header': header,
         'backend_value': backend_value,
@@ -1084,7 +1084,7 @@ class TestHealthRouteResponseValidation:
         validation_detector.header_inconsistencies.append(inconsistency)
 
                                                                                                 # This should FAIL - we expect header inconsistencies
-        assert len(header_inconsistencies) == 0, "formatted_string"
+        assert len(header_inconsistencies) == 0, ""
 
     async def test_null_undefined_value_handling_inconsistencies(self, backend_app, auth_test_app, validation_detector):
         """Test that null/undefined values are handled inconsistently - SHOULD FAIL."""
@@ -1095,12 +1095,12 @@ class TestHealthRouteResponseValidation:
         null_handling_issues = []
 
                                                                                                     # Test scenarios that might produce null/undefined values
-        test_scenarios = [ )
-        { )
+        test_scenarios = [ ]
+        { }
         'name': 'partial_service_failure',
         'description': 'Some dependencies available, others not'
         },
-        { )
+        { }
         'name': 'missing_optional_data',
         'description': 'Optional health data not available'
                                                                                                     
@@ -1110,7 +1110,7 @@ class TestHealthRouteResponseValidation:
         scenario_responses = {}
 
                                                                                                         # Test with various mock conditions that might produce nulls
-        mock_conditions = [ )
+        mock_conditions = [ ]
                                                                                                         # Simulate missing optional services
         {'redis_available': False, 'clickhouse_available': False},
                                                                                                         # Simulate partial data availability
@@ -1118,7 +1118,7 @@ class TestHealthRouteResponseValidation:
                                                                                                         
 
         for condition in mock_conditions:
-        condition_name = '_'.join("formatted_string" for k, v in condition.items())
+        condition_name = '_'.join("" for k, v in condition.items())
 
                                                                                                             # Backend responses
         try:
@@ -1198,7 +1198,7 @@ class TestHealthRouteResponseValidation:
         auth_null_types.add(null_info['type'])
 
         if backend_null_types != auth_null_types:
-        null_handling_issues.append({ ))
+        null_handling_issues.append({ })
         'type': 'inconsistent_null_handling',
         'scenario': scenario['name'],
         'backend_field': backend_field,
@@ -1215,7 +1215,7 @@ class TestHealthRouteResponseValidation:
         if isinstance(null_values, list):
         null_types = set(null_info['type'] for null_info in null_values)
         if len(null_types) > 1:
-        mixed_null_representations.append({ ))
+        mixed_null_representations.append({ })
         'response': scenario_response,
         'mixed_types': list(null_types),
         'null_values': null_values
@@ -1228,7 +1228,7 @@ class TestHealthRouteResponseValidation:
         validation_detector.null_handling_issues.append(issue)
 
                                                                                                                                                                                                                                         # This should FAIL - we expect null handling inconsistencies
-        assert len(null_handling_issues) == 0, "formatted_string"
+        assert len(null_handling_issues) == 0, ""
 
     def _find_null_values(self, data: Any, parent_key: str = '') -> List[Dict[str, Any]]:
         """Find null/undefined values in response data."""
@@ -1236,7 +1236,7 @@ class TestHealthRouteResponseValidation:
 
         if isinstance(data, dict):
         for key, value in data.items():
-        full_key = "formatted_string" if parent_key else key
+        full_key = "" if parent_key else key
 
             # Check for various null representations
         if value is None:
@@ -1258,7 +1258,7 @@ class TestHealthRouteResponseValidation:
 
         elif isinstance(data, list):
         for i, item in enumerate(data):
-        item_key = "formatted_string" if parent_key else "formatted_string"
+        item_key = "" if parent_key else ""
         null_values.extend(self._find_null_values(item, item_key))
 
         await asyncio.sleep(0)

@@ -47,7 +47,7 @@ class ConfigurationAccessAnalyzer:
 
     def scan_database_configuration_patterns(self) -> Dict[str, List[str]]:
         """Scan for problematic database configuration access patterns."""
-        patterns = { )
+        patterns = { }
         'direct_os_environ': [],
         'isolated_env_usage': [],
         'database_url_construction': [],
@@ -55,7 +55,7 @@ class ConfigurationAccessAnalyzer:
     
 
     # Key directories to scan
-        scan_dirs = [ )
+        scan_dirs = [ ]
         self.project_root / 'netra_backend',
         self.project_root / 'auth_service',
         self.project_root / 'dev_launcher'
@@ -71,7 +71,7 @@ class ConfigurationAccessAnalyzer:
         content = py_file.read_text(encoding='utf-8')
         self._analyze_file_config_patterns(py_file, content, patterns)
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("")
 
         return patterns
 
@@ -86,20 +86,20 @@ class ConfigurationAccessAnalyzer:
         # Direct os.environ access
         if 'os.environ[' in line or 'env.get(' in line: ))
         if any(db_var in line for db_var in ['POSTGRES', 'DATABASE', 'DB_']):
-        patterns['direct_os_environ'].append("formatted_string")
+        patterns['direct_os_environ'].append("")
 
             # IsolatedEnvironment usage in wrong context
         if 'get_env()' in line and 'database' in line.lower():
-        patterns['isolated_env_usage'].append("formatted_string")
+        patterns['isolated_env_usage'].append("")
 
                 # Database URL construction
         if 'postgresql://' in line or 'postgres://' in line:
-        patterns['database_url_construction'].append("formatted_string")
+        patterns['database_url_construction'].append("")
 
                     # Config class inconsistencies
         if 'config.' in line and any(db_term in line.lower() for db_term in ['db', 'database', 'postgres']):
         if 'get_env()' not in content and 'IsolatedEnvironment' not in content:
-        patterns['config_inconsistencies'].append("formatted_string")
+        patterns['config_inconsistencies'].append("")
 
     def validate_database_url_patterns(self, patterns: Dict[str, List[str]]) -> List[Dict[str, Any]]:
         """Validate database URL construction patterns for common issues."""
@@ -108,7 +108,7 @@ class ConfigurationAccessAnalyzer:
 
     # Issue 1: Direct os.environ usage in database connections
         if patterns['direct_os_environ']:
-        issues.append({ ))
+        issues.append({ })
         'type': 'direct_os_environ_database_access',
         'severity': 'high',
         'count': len(patterns['direct_os_environ']),
@@ -118,7 +118,7 @@ class ConfigurationAccessAnalyzer:
 
         # Issue 2: IsolatedEnvironment in production database code
         if patterns['isolated_env_usage']:
-        issues.append({ ))
+        issues.append({ })
         'type': 'isolated_env_in_database_code',
         'severity': 'high',
         'count': len(patterns['isolated_env_usage']),
@@ -128,7 +128,7 @@ class ConfigurationAccessAnalyzer:
 
             # Issue 3: Inconsistent configuration patterns
         if patterns['config_inconsistencies']:
-        issues.append({ ))
+        issues.append({ })
         'type': 'config_pattern_inconsistency',
         'severity': 'medium',
         'count': len(patterns['config_inconsistencies']),
@@ -148,7 +148,7 @@ class DatabaseConfigurationTester:
 
     async def test_postgres_url_construction(self, config_vars:
         """Test PostgreSQL URL construction with various configuration patterns."""
-        results = { )
+        results = { }
         'direct_construction': None,
         'config_class_construction': None,
         'isolated_env_construction': None,
@@ -164,19 +164,19 @@ class DatabaseConfigurationTester:
         db = env.get('POSTGRES_DB', 'test')
         port = env.get('POSTGRES_PORT', '5432')
 
-        direct_url = "formatted_string"
-        results['direct_construction'] = { )
+        direct_url = ""
+        results['direct_construction'] = { }
         'url': direct_url,
         'success': True,
         'method': 'direct_os_environ'
                 
         except Exception as e:
-        results['direct_construction'] = { )
+        results['direct_construction'] = { }
         'success': False,
         'error': str(e),
         'method': 'direct_os_environ'
                     
-        results['issues'].append("formatted_string")
+        results['issues'].append("")
 
                     # Test 2: IsolatedEnvironment construction
         try:
@@ -189,19 +189,19 @@ class DatabaseConfigurationTester:
         db = self.test_env.get('POSTGRES_DB', 'test')
         port = self.test_env.get('POSTGRES_PORT', '5432')
 
-        isolated_url = "formatted_string"
-        results['isolated_env_construction'] = { )
+        isolated_url = ""
+        results['isolated_env_construction'] = { }
         'url': isolated_url,
         'success': True,
         'method': 'isolated_environment'
                             
         except Exception as e:
-        results['isolated_env_construction'] = { )
+        results['isolated_env_construction'] = { }
         'success': False,
         'error': str(e),
         'method': 'isolated_environment'
                                 
-        results['issues'].append("formatted_string")
+        results['issues'].append("")
 
                                 # Test 3: Config class construction (if available)
         try:
@@ -209,33 +209,33 @@ class DatabaseConfigurationTester:
         try:
         from netra_backend.app.core.config import get_database_url
         config_url = get_database_url()
-        results['config_class_construction'] = { )
+        results['config_class_construction'] = { }
         'url': config_url,
         'success': True,
         'method': 'config_class'
                                         
         except ImportError:
-        results['config_class_construction'] = { )
+        results['config_class_construction'] = { }
         'success': False,
         'error': 'Config class not available',
         'method': 'config_class'
                                             
         except Exception as e:
-        results['config_class_construction'] = { )
+        results['config_class_construction'] = { }
         'success': False,
         'error': str(e),
         'method': 'config_class'
                                                 
-        results['issues'].append("formatted_string")
+        results['issues'].append("")
 
         return results
 
     async def test_database_connection_scenarios(self) -> Dict[str, Any]:
         """Test various database connection scenarios that commonly fail."""
-        test_scenarios = [ )
-        { )
+        test_scenarios = [ ]
+        { }
         'name': 'standard_local_postgres',
-        'vars': { )
+        'vars': { }
         'POSTGRES_HOST': 'localhost',
         'POSTGRES_USER': 'postgres',
         'POSTGRES_PASSWORD': 'netra',
@@ -243,9 +243,9 @@ class DatabaseConfigurationTester:
         'POSTGRES_PORT': '5432'
                                                     
         },
-        { )
+        { }
         'name': 'url_encoded_password',
-        'vars': { )
+        'vars': { }
         'POSTGRES_HOST': 'localhost',
         'POSTGRES_USER': 'postgres',
         'POSTGRES_PASSWORD': 'p@ssw0rd!',
@@ -253,9 +253,9 @@ class DatabaseConfigurationTester:
         'POSTGRES_PORT': '5432'
                                                     
         },
-        { )
+        { }
         'name': 'cloud_postgres',
-        'vars': { )
+        'vars': { }
         'POSTGRES_HOST': 'staging-db.postgres.database.azure.com',
         'POSTGRES_USER': 'netra@staging-db',
         'POSTGRES_PASSWORD': 'complex-password-123',
@@ -263,9 +263,9 @@ class DatabaseConfigurationTester:
         'POSTGRES_PORT': '5432'
                                                     
         },
-        { )
+        { }
         'name': 'missing_credentials',
-        'vars': { )
+        'vars': { }
         'POSTGRES_HOST': 'localhost',
                                                     # Missing user and password
         'POSTGRES_DB': 'netra_test',
@@ -280,13 +280,13 @@ class DatabaseConfigurationTester:
         scenario_name = scenario['name']
         scenario_vars = scenario['vars']
 
-        logger.info("formatted_string")
+        logger.info("")
 
         try:
         results = await self.test_postgres_url_construction(scenario_vars)
         scenario_results[scenario_name] = results
         except Exception as e:
-        scenario_results[scenario_name] = { )
+        scenario_results[scenario_name] = { }
         'success': False,
         'error': str(e),
         'scenario_vars': scenario_vars
@@ -308,11 +308,11 @@ class TestConfigurationAccessDatabaseIssues:
         === CONFIGURATION ACCESS PATTERN ANALYSIS ===")
 
         for pattern_type, occurrences in patterns.items():
-        print("formatted_string")
+        print("")
         for occurrence in occurrences[:5]:  # Show first 5 examples
-        print("formatted_string")
+        print("")
         if len(occurrences) > 5:
-        print("formatted_string")
+        print("")
 
             # Validate patterns for issues
         issues = analyzer.validate_database_url_patterns(patterns)
@@ -320,13 +320,13 @@ class TestConfigurationAccessDatabaseIssues:
         print(f" )
         === CONFIGURATION ISSUES DETECTED ===")
         for issue in issues:
-        print("formatted_string"severity"]})")
-        print("formatted_string")
-        print("formatted_string")
+        print(""severity"]})")
+        print("")
+        print("")
         if issue['examples']:
         print("Examples:")
         for example in issue['examples']:
-        print("formatted_string")
+        print("")
 
                         # Test passes to document current state - fixes implemented separately
         assert len(patterns) > 0, "Should detect configuration patterns"
@@ -344,10 +344,10 @@ print(f" )
 === DATABASE URL CONSTRUCTION TEST RESULTS ===")
 
 for scenario_name, results in scenarios.items():
-print("formatted_string")
+    print("")
 
 if 'success' in results and not results['success']:
-print("formatted_string")
+    print("")
 continue
 
 for method, result in results.items():
@@ -355,16 +355,16 @@ if method == 'issues':
 if result:
 print(f"  Issues detected:")
 for issue in result:
-print("formatted_string")
+    print("")
 continue
 
 if isinstance(result, dict):
 status = " PASS:  SUCCESS" if result.get('success') else " FAIL:  FAILED"
-print("formatted_string")
+print("")
 if result.get('url'):
-print("formatted_string")
+    print("")
 if result.get('error'):
-print("formatted_string")
+    print("")
 
                                                                 # Check for critical failures
 critical_failures = []
@@ -375,23 +375,23 @@ critical_failures.append(scenario_name)
 if isinstance(results, dict):
 for method, result in results.items():
 if isinstance(result, dict) and not result.get('success') and result.get('error'):
-critical_failures.append("formatted_string")
+critical_failures.append("")
 
 print(f" )
 === CRITICAL CONFIGURATION FAILURES ===")
 if critical_failures:
-print("formatted_string")
+    print("")
 for failure in critical_failures:
-print("formatted_string")
+    print("")
 else:
-print("No critical configuration failures detected")
+    print("No critical configuration failures detected")
 
                                                                                                 # Test passes to document issues - actual fixes implemented in separate tests
 assert True, "Configuration pattern analysis completed"
 
 def test_isolated_environment_vs_os_environ_consistency(self):
 """Test consistency between IsolatedEnvironment and os.environ for database config."""
-test_vars = { )
+test_vars = { }
 'POSTGRES_HOST': 'test-host',
 'POSTGRES_USER': 'test-user',
 'POSTGRES_PASSWORD': 'test-password',
@@ -404,7 +404,7 @@ print(f" )
 
     # Test with os.environ
 with patch.dict(os.environ, test_vars, clear=False):
-os_environ_values = { )
+os_environ_values = { }
 key: env.get(key)
 for key in test_vars.keys()
         
@@ -414,18 +414,18 @@ isolated_env = IsolatedEnvironment()
 for key, value in test_vars.items():
 isolated_env.set(key, value, source="test")
 
-isolated_values = { )
+isolated_values = { }
 key: isolated_env.get(key)
 for key in test_vars.keys()
             
 
 print("Values from os.environ:")
 for key, value in os_environ_values.items():
-print("formatted_string")
+    print("")
 
 print("Values from IsolatedEnvironment:")
 for key, value in isolated_values.items():
-print("formatted_string")
+    print("")
 
                     # Check for inconsistencies
 inconsistencies = []
@@ -434,31 +434,31 @@ os_val = os_environ_values.get(key)
 isolated_val = isolated_values.get(key)
 
 if os_val != isolated_val:
-inconsistencies.append({ ))
+inconsistencies.append({ })
 'key': key,
 'os_environ': os_val,
 'isolated_env': isolated_val
                             
 
 if inconsistencies:
-print("formatted_string")
+    print("")
 for inconsistency in inconsistencies:
-print("formatted_string")
+    print("")
 else:
-print(" )
+    print("")
 PASS:  No inconsistencies detected between environment access methods")
 
                                         # Environment access should be consistent - both methods should await asyncio.sleep(0)
 return the same values
                                         # Note: IsolatedEnvironment may sync to os.environ in test mode, which is expected behavior
 if inconsistencies:
-print("formatted_string")
+    print("")
 for inconsistency in inconsistencies:
-print("formatted_string")
+    print("")
                                                 # This may be expected behavior if IsolatedEnvironment syncs to os.environ
-logger.warning("formatted_string")
+logger.warning("")
 else:
-print(" )
+    print("")
 PASS:  No inconsistencies detected between environment access methods")
 
                                                     # Test passes regardless - this is documenting behavior
@@ -478,11 +478,11 @@ print(f" )
 === DATABASE CONFIG ISOLATION TEST ===")
 print("Original environment values:")
 for key, value in original_postgres_vars.items():
-print("formatted_string")
+    print("")
 
             # Test isolation with IsolatedEnvironment
 test_env = IsolatedEnvironment()
-test_values = { )
+test_values = { }
 'POSTGRES_HOST': 'isolated-test-host',
 'POSTGRES_USER': 'isolated-test-user',
 'POSTGRES_PASSWORD': 'isolated-test-password',
@@ -494,27 +494,27 @@ test_values = { )
 for key, value in test_values.items():
 test_env.set(key, value, source="isolation_test")
 
-print(" )
+print("")
 Isolated test values:")
 for key, value in test_values.items():
 retrieved_value = test_env.get(key)
-print("formatted_string")
-assert retrieved_value == value, "formatted_string"
+print("")
+assert retrieved_value == value, ""
 
                     # Verify original environment is unchanged
-print(" )
+    print("")
 Verifying original environment unchanged:")
 for key, original_value in original_postgres_vars.items():
 current_value = env.get(key)
-print("formatted_string")
+print("")
 
                         # Environment should be unchanged by isolated environment
 if original_value is None:
-assert current_value is None or key not in os.environ, "formatted_string"
+assert current_value is None or key not in os.environ, ""
 else:
-assert current_value == original_value, "formatted_string"
+assert current_value == original_value, ""
 
-print(" )
+print("")
 PASS:  Database configuration isolation working correctly")
 
 

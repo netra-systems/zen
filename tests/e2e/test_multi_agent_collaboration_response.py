@@ -66,7 +66,7 @@ class MockSubAgent(BaseAgent):
 
     def __init__(self, name: str, response_content: str, should_fail: bool = False):
         pass
-        super().__init__(None, name=name, description="formatted_string")
+        super().__init__(None, name=name, description="")
         self.response_content = response_content
         self.should_fail = should_fail
         self.execution_count = 0
@@ -79,7 +79,7 @@ class MockSubAgent(BaseAgent):
         return ExecutionResult( )
         success=False,
         status="failed",
-        error="formatted_string",
+        error="",
         agent_name=self.name
         
 
@@ -111,11 +111,11 @@ class TestMultiAgentCollaborationResponse:
         """Create mocked WebSocket manager for testing"""
         pass
     # Mock: Generic component isolation for controlled unit testing
-        ws_mock = AsyncNone  # TODO: Use real service instead of Mock
+        ws_mock = MagicMock()  # TODO: Use real service instead of Mock
     # Mock: Agent service isolation for testing without LLM agent execution
-        ws_mock.send_agent_update = AsyncNone  # TODO: Use real service instead of Mock
+        ws_mock.send_agent_update = MagicMock()  # TODO: Use real service instead of Mock
     # Mock: Generic component isolation for controlled unit testing
-        ws_mock.send_status_update = AsyncNone  # TODO: Use real service instead of Mock
+        ws_mock.send_status_update = MagicMock()  # TODO: Use real service instead of Mock
         await asyncio.sleep(0)
         return ws_mock
 
@@ -144,7 +144,7 @@ class TestMultiAgentCollaborationResponse:
         """Create test thread for collaboration testing"""
         pass
         thread = Thread( )
-        id="formatted_string",
+        id="",
         created_at=int(datetime.now(UTC).timestamp())
         
         postgres_session.add(thread)
@@ -193,8 +193,8 @@ supervisor_agent.agent_registry.register_agent("reporting", reporting_agent)
 context = ExecutionContext( )
 user_message="Optimize our GPU memory usage and database queries, then provide a comprehensive report.",
 thread_id=test_thread.id,
-request_id="formatted_string",
-metadata={ )
+request_id="",
+metadata={ }
 "test_type": "multi_agent_coordination",
 "required_agents": ["optimization", "analysis", "reporting"],
 "coordination_strategy": "sequential"
@@ -206,7 +206,7 @@ start_time = datetime.now(UTC)
 coordination_results = []
 
         # Simulate supervisor orchestrating agents sequentially
-agent_sequence = [ )
+agent_sequence = [ ]
 ("optimization", optimization_agent),
 ("analysis", analysis_agent),
 ("reporting", reporting_agent)
@@ -214,7 +214,7 @@ agent_sequence = [ )
 
 for agent_type, agent in agent_sequence:
 result = await agent.execute_internal(context)
-coordination_results.append({ ))
+coordination_results.append({ })
 "agent_type": agent_type,
 "agent_name": result.agent_name,
 "success": result.success,
@@ -242,25 +242,25 @@ responses = [result["result"]["response"] for result in coordination_results]
 assert len(set(responses)) == 3  # All unique responses
 
 coordination_time = (end_time - start_time).total_seconds()
-logger.info("formatted_string")
+logger.info("")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_response_merging_and_conflict_resolution(self, supervisor_agent, quality_service):
 """Test supervisor merges responses and resolves conflicts between agents"""
                 # Create agents with potentially conflicting information
-agent_responses = [ )
-{ )
+agent_responses = [ ]
+{ }
 "agent": MockSubAgent("AgentA", "GPU optimization: 30% memory reduction, 25% cost savings."),
 "type": "optimization",
 "priority": "high"
 },
-{ )
+{ }
 "agent": MockSubAgent("AgentB", "GPU optimization: 35% memory reduction, 20% cost savings."),
 "type": "optimization",
 "priority": "medium"
 },
-{ )
+{ }
 "agent": MockSubAgent("AgentC", "Database optimization: 70% query speed improvement."),
 "type": "analysis",
 "priority": "high"
@@ -270,15 +270,15 @@ agent_responses = [ )
                 # Execute all agents
 context = ExecutionContext( )
 user_message="Get optimization recommendations from multiple sources.",
-thread_id="formatted_string",
-request_id="formatted_string",
+thread_id="",
+request_id="",
 metadata={"test_type": "response_merging"}
                 
 
 agent_results = []
 for agent_data in agent_responses:
 result = await agent_data["agent"].execute_internal(context)
-agent_results.append({ ))
+agent_results.append({ })
 "agent_type": agent_data["type"],
 "priority": agent_data["priority"],
 "result": result,
@@ -301,7 +301,7 @@ response_groups[agent_type].append(result)
 for group_type, group_results in response_groups.items():
 if len(group_results) > 1:
                                     # Conflict detected - use priority-based resolution
-conflicts_detected.append({ ))
+conflicts_detected.append({ })
 "type": group_type,
 "conflicting_responses": len(group_results),
 "resolution_strategy": "priority_based"
@@ -335,7 +335,7 @@ context={"test_type": "merged_response_validation"}
                                             
 assert quality_result.passed or quality_result.metrics.quality_level.value in ["acceptable", "good"]
 
-logger.info("formatted_string")
+logger.info("")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -343,23 +343,23 @@ logger.info("formatted_string")
 """Test supervisor handles agent failures and implements graceful degradation"""
 pass
                                                 # Create mixed scenario: some working, some failing agents
-agents_scenario = [ )
-{ )
+agents_scenario = [ ]
+{ }
 "agent": MockSubAgent("WorkingAgent1", "GPU optimization: 33% memory reduction.", should_fail=False),
 "type": "optimization",
 "criticality": "high"
 },
-{ )
+{ }
 "agent": MockSubAgent("FailingAgent", "This should fail", should_fail=True),
 "type": "analysis",
 "criticality": "medium"
 },
-{ )
+{ }
 "agent": MockSubAgent("WorkingAgent2", "Database queries: 75% speed improvement.", should_fail=False),
 "type": "reporting",
 "criticality": "low"
 },
-{ )
+{ }
 "agent": MockSubAgent("CriticalFailingAgent", "Critical failure", should_fail=True),
 "type": "optimization",
 "criticality": "high"
@@ -368,8 +368,8 @@ agents_scenario = [ )
 
 context = ExecutionContext( )
 user_message="Execute comprehensive optimization analysis with failure tolerance.",
-thread_id="formatted_string",
-request_id="formatted_string",
+thread_id="",
+request_id="",
 metadata={"test_type": "failure_handling", "degradation_mode": "graceful"}
                                                 
 
@@ -382,7 +382,7 @@ try:
 result = await agent_data["agent"].execute_internal(context)
 
 if result.success:
-execution_results.append({ ))
+execution_results.append({ })
 "agent_type": agent_data["type"],
 "criticality": agent_data["criticality"],
 "status": "success",
@@ -390,7 +390,7 @@ execution_results.append({ ))
                                                             
 else:
                                                                 # Agent reported failure
-failure_handling_results.append({ ))
+failure_handling_results.append({ })
 "agent_type": agent_data["type"],
 "criticality": agent_data["criticality"],
 "status": "agent_failure",
@@ -400,7 +400,7 @@ failure_handling_results.append({ ))
 
 except Exception as e:
                                                                     # Unexpected failure
-failure_handling_results.append({ ))
+failure_handling_results.append({ })
 "agent_type": agent_data["type"],
 "criticality": agent_data["criticality"],
 "status": "exception_failure",
@@ -442,29 +442,29 @@ degradation_strategies.append("continue_without_service")
 assert "retry_with_fallback" in degradation_strategies
 assert "continue_without_service" in degradation_strategies
 
-logger.info("formatted_string")
+logger.info("")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_concurrent_agent_execution_coordination(self, supervisor_agent):
 """Test supervisor coordinates concurrent agent execution efficiently"""
                                                                                     # Create agents for concurrent execution
-concurrent_agents = [ )
-MockSubAgent("formatted_string", "formatted_string")
+concurrent_agents = [ ]
+MockSubAgent("", "")
 for i in range(8)  # 8 concurrent agents
                                                                                     
 
 context = ExecutionContext( )
 user_message="Execute parallel optimization analysis across multiple domains.",
-thread_id="formatted_string",
-request_id="formatted_string",
+thread_id="",
+request_id="",
 metadata={"test_type": "concurrent_execution", "execution_mode": "parallel"}
                                                                                     
 
                                                                                     # Execute agents concurrently
 start_time = datetime.now(UTC)
 
-concurrent_tasks = [ )
+concurrent_tasks = [ ]
 agent.execute_internal(context)
 for agent in concurrent_agents
                                                                                     
@@ -491,7 +491,7 @@ assert agent.execution_count == 1
                                                                                         Test result aggregation from concurrent execution
 aggregated_results = []
 for i, result in enumerate(concurrent_results):
-aggregated_results.append({ ))
+aggregated_results.append({ })
 "agent_index": i,
 "response": result.result["response"],
 "execution_order": "concurrent",
@@ -502,7 +502,7 @@ assert len(aggregated_results) == 8
 assert all(r["success"] for r in aggregated_results)
 
 throughput = len(concurrent_agents) / execution_time
-logger.info("formatted_string")
+logger.info("")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -510,18 +510,18 @@ logger.info("formatted_string")
 """Test agents coordinate state and share information appropriately"""
 pass
                                                                                                 # Create agents that need to share state
-state_sharing_agents = [ )
-{ )
+state_sharing_agents = [ ]
+{ }
 "agent": MockSubAgent("StateProducer", "Initial optimization: GPU memory baseline 24GB."),
 "role": "producer",
 "produces": ["gpu_baseline"]
 },
-{ )
+{ }
 "agent": MockSubAgent("StateConsumer", "Optimization result: 24GB -> 16GB (33% reduction) based on baseline."),
 "role": "consumer",
 "consumes": ["gpu_baseline"]
 },
-{ )
+{ }
 "agent": MockSubAgent("StateAggregator", "Final report: GPU optimization achieved 33% memory reduction."),
 "role": "aggregator",
 "consumes": ["gpu_baseline", "optimization_result"]
@@ -532,7 +532,7 @@ state_sharing_agents = [ )
 shared_state = DeepAgentState( )
 thread_id=test_thread.id,
 user_id="test_user",
-request_id="formatted_string"
+request_id=""
                                                                                                 
 
 context = ExecutionContext( )
@@ -568,12 +568,12 @@ opt_result = shared_state.get_context("optimization_result")
 assert baseline == "24GB"
 assert opt_result == "33_percent_reduction"
 
-state_coordination_results.append({ ))
+state_coordination_results.append({ })
 "agent": agent_data["agent"].name,
 "role": agent_data["role"],
 "success": result.success,
 "response": result.result["response"],
-"state_access": { )
+"state_access": { }
 "produces": agent_data.get("produces", []),
 "consumes": agent_data.get("consumes", [])
                                                                                                                 
@@ -599,23 +599,23 @@ assert "optimization_result" in final_state
 assert final_state["gpu_baseline"] == "24GB"
 assert final_state["optimization_result"] == "33_percent_reduction"
 
-logger.info("formatted_string")
+logger.info("")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_response_quality_validation_in_collaboration(self, supervisor_agent, quality_service):
 """Test quality validation integrated into multi-agent collaboration"""
                                                                                                                     # Create agents with varying response quality
-quality_test_agents = [ )
-{ )
+quality_test_agents = [ ]
+{ }
 "agent": MockSubAgent("HighQualityAgent", "GPU optimization: 24GB -> 16GB (33% reduction). Latency: 200ms -> 125ms (37.5% improvement). Cost: $2,400/month savings."),
 "expected_quality": "high"
 },
-{ )
+{ }
 "agent": MockSubAgent("MediumQualityAgent", "Database queries optimized using indexing. Response time improved significantly."),
 "expected_quality": "medium"
 },
-{ )
+{ }
 "agent": MockSubAgent("LowQualityAgent", "Performance was improved through various optimization techniques."),
 "expected_quality": "low"
                                                                                                                     
@@ -623,8 +623,8 @@ quality_test_agents = [ )
 
 context = ExecutionContext( )
 user_message="Execute multi-agent optimization with quality validation.",
-thread_id="formatted_string",
-request_id="formatted_string",
+thread_id="",
+request_id="",
 metadata={"test_type": "quality_validation_collaboration", "quality_threshold": "acceptable"}
                                                                                                                     
 
@@ -642,7 +642,7 @@ content_type=ContentType.OPTIMIZATION,
 context={"test_type": "collaboration_quality"}
                                                                                                                         
 
-collaboration_quality_results.append({ ))
+collaboration_quality_results.append({ })
 "agent": agent_data["agent"].name,
 "expected_quality": agent_data["expected_quality"],
 "actual_quality_level": quality_result.metrics.quality_level.value,
@@ -668,7 +668,7 @@ assert low_quality_results[0]["quality_passed"] == False
 assert low_quality_results[0]["actual_quality_level"] in ["poor", "unacceptable"]
 
                                                                                                                         # Test collaboration filtering based on quality
-acceptable_responses = [ )
+acceptable_responses = [ ]
 r for r in collaboration_quality_results
 if r["quality_passed"] or r["actual_quality_level"] in ["acceptable", "good", "excellent"]
                                                                                                                         
@@ -677,7 +677,7 @@ if r["quality_passed"] or r["actual_quality_level"] in ["acceptable", "good", "e
 assert len(acceptable_responses) >= 2  # High and potentially medium quality
 
                                                                                                                         # Verify quality-based collaboration decisions
-collaboration_decision = { )
+collaboration_decision = { }
 "total_agents": len(collaboration_quality_results),
 "quality_passed": len([item for item in []]]),
 "acceptable_for_collaboration": len(acceptable_responses),
@@ -687,7 +687,7 @@ collaboration_decision = { )
 assert collaboration_decision["quality_passed"] >= 1
 assert collaboration_decision["acceptable_for_collaboration"] >= 1
 
-logger.info("formatted_string")
+logger.info("")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -695,7 +695,7 @@ logger.info("formatted_string")
 """Test enterprise-grade multi-agent workflow with comprehensive validation"""
 pass
                                                                                                                             # Create enterprise workflow scenario
-enterprise_workflow_agents = [ )
+enterprise_workflow_agents = [ ]
 MockSubAgent("CostAnalysisAgent", "Cost analysis: GPU cluster $12,000/month  ->  $7,200/month (40% reduction). ROI: 3.2 months payback."),
 MockSubAgent("PerformanceAgent", "Performance metrics: Latency 200ms -> 95ms (52.5% improvement). Throughput: 1,200 -> 3,400 QPS (183% increase)."),
 MockSubAgent("SecurityAgent", "Security validation: All optimizations maintain SOC2 compliance. Zero security vulnerabilities introduced."),
@@ -705,8 +705,8 @@ MockSubAgent("ComplianceAgent", "Compliance check: GDPR, HIPAA, SOX requirements
 context = ExecutionContext( )
 user_message="Execute enterprise optimization workflow with comprehensive validation.",
 thread_id=test_thread.id,
-request_id="formatted_string",
-metadata={ )
+request_id="",
+metadata={ }
 "test_type": "enterprise_workflow",
 "compliance_required": True,
 "quality_threshold": "enterprise",
@@ -729,7 +729,7 @@ strict_mode=True,  # Enterprise validation
 context={"test_type": "enterprise_validation"}
                                                                                                                                 
 
-enterprise_results.append({ ))
+enterprise_results.append({ })
 "agent_name": agent.name,
 "agent_domain": agent.name.replace("Agent", "").lower(),
 "response_quality": quality_result.metrics.quality_level.value,
@@ -764,7 +764,7 @@ high_quality_count = len([item for item in []]])
 assert high_quality_count >= total_agents * 0.5  # At least 50% high quality
 
                                                                                                                                 # Enterprise audit trail
-audit_summary = { )
+audit_summary = { }
 "workflow_id": context.request_id,
 "total_agents": total_agents,
 "compliance_rate": compliance_rate,
@@ -773,8 +773,8 @@ audit_summary = { )
 "quality_distribution": {level: quality_levels.count(level) for level in set(quality_levels)}
                                                                                                                                 
 
-logger.info("formatted_string")
-logger.info("formatted_string")
+logger.info("")
+logger.info("")
 
                                                                                                                                 # Final enterprise validation
 assert audit_summary["compliance_rate"] >= 0.75

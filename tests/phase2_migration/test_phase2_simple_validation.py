@@ -62,7 +62,7 @@ class TestPhase2AgentsBasicValidation:
         run_id=str(uuid.uuid4()),
         request_id=str(uuid.uuid4()),
         db_session=mock_session,
-        metadata={ )
+        metadata={ }
         "user_request": "Test request",
         "data_result": {"test": "data"},
         "triage_result": {"priority": "high"},

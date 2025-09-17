@@ -46,7 +46,7 @@ RealTimeUpdateValidator)
 class MissionCriticalWebSocketValidator:
     """Validates WebSocket events per CLAUDE.md requirements."""
 
-    REQUIRED_EVENTS = { )
+    REQUIRED_EVENTS = { }
     "agent_started",
     "agent_thinking",
     "tool_executing",
@@ -64,12 +64,12 @@ class MissionCriticalWebSocketValidator:
     def record_event(self, event: Dict) -> None:
         """Record a WebSocket event."""
         event_type = event.get("type", "unknown")
-        self.received_events.append({ ))
+        self.received_events.append({ })
         **event,
         "received_at": time.time() - self.start_time
     
         self.event_counts[event_type] = self.event_counts.get(event_type, 0) + 1
-        logger.info("formatted_string")
+        logger.info("")
 
     def validate_mission_critical_events(self) -> tuple[bool, List[str]]:
         """Validate all mission critical events were received."""
@@ -78,23 +78,23 @@ class MissionCriticalWebSocketValidator:
     # Check for missing required events
         missing = self.REQUIRED_EVENTS - set(self.event_counts.keys())
         if missing:
-        failures.append("formatted_string")
+        failures.append("")
 
         # Validate event ordering
         if self.received_events:
         first_event = self.received_events[0].get("type")
         if first_event != "agent_started":
-        failures.append("formatted_string")
+        failures.append("")
 
         last_event = self.received_events[-1].get("type")
         if last_event not in ["agent_completed", "final_report"]:
-        failures.append("formatted_string")
+        failures.append("")
 
                     # Validate tool event pairing
         tool_starts = self.event_counts.get("tool_executing", 0)
         tool_ends = self.event_counts.get("tool_completed", 0)
         if tool_starts != tool_ends:
-        failures.append("formatted_string")
+        failures.append("")
 
         return len(failures) == 0, failures
 
@@ -102,14 +102,14 @@ class MissionCriticalWebSocketValidator:
         """Generate comprehensive validation report."""
         is_valid, failures = self.validate_mission_critical_events()
 
-        report = [ )
+        report = [ ]
         "
-        " + "=" * 80,
+         + =" * 80,
         "MISSION CRITICAL WEBSOCKET EVENT VALIDATION",
         "=" * 80,
-        "formatted_string",
-        "formatted_string",
-        "formatted_string",
+        "",
+        "",
+        "",
         "
         Required Events Coverage:"
     
@@ -117,11 +117,11 @@ class MissionCriticalWebSocketValidator:
         for event in self.REQUIRED_EVENTS:
         count = self.event_counts.get(event, 0)
         status = " PASS: " if count > 0 else " FAIL: "
-        report.append("formatted_string")
+        report.append("")
 
         if failures:
         report.extend([" ))
-        FAILURES:"] + ["formatted_string" for f in failures])
+        FAILURES:"] + ["" for f in failures])
 
         report.append("=" * 80)
         return "
@@ -195,7 +195,7 @@ is_valid, failures = websocket_event_validator.validate_mission_critical_events(
 
 if not is_valid:
 logger.error(websocket_event_validator.generate_validation_report())
-pytest.fail("formatted_string")
+pytest.fail("")
 
 logger.info(websocket_event_validator.generate_validation_report())
 
@@ -242,7 +242,7 @@ is_valid, failures = websocket_event_validator.validate_mission_critical_events(
 if not is_valid:
 logger.error(websocket_event_validator.generate_validation_report())
                                                         # Don't fail multi-agent test if some events missing - log warning
-logger.warning("formatted_string")
+logger.warning("")
 
 finally:
 if event_capture_task:
@@ -264,7 +264,7 @@ flow_validator = ConversationFlowValidator()
 
 try:
                                                                                     # Execute multi-turn conversation
-conversation_flow = [ )
+conversation_flow = [ ]
 "Analyze my current AI infrastructure costs",
 "What specific optimizations do you recommend?",
 "Implement the top 3 cost reduction strategies"
@@ -305,9 +305,9 @@ execution_time = time.time() - start_time
 
                                                                                                     # Validate performance SLA - allow reasonable time for real backend calls
 if use_real_llm:
-assert execution_time < 10.0, "formatted_string"
+assert execution_time < 10.0, ""
 else:
-assert execution_time < 3.0, "formatted_string"
+assert execution_time < 3.0, ""
 
 assert response["status"] in ["success", "error"], "Agent execution had unexpected status"
 
@@ -322,7 +322,7 @@ session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRIS
 
 try:
                                                                                                                         # Define agent chain
-chain = [ )
+chain = [ ]
 {"agent": "triage", "task": "Identify optimization opportunities"},
 {"agent": "data", "task": "Analyze current usage patterns"},
 {"agent": "optimization", "task": "Generate cost reduction plan"},
@@ -341,7 +341,7 @@ previous_output
 response = await self._execute_agent_with_llm( )
 session_data, request, step["agent"], use_real_llm, llm_timeout
                                                                                                                             
-chain_results.append({ ))
+chain_results.append({ })
 "agent": step["agent"],
 "response": response,
 "execution_time": response.get("execution_time", 0)
@@ -372,7 +372,7 @@ tasks = []
 for i, session_data in enumerate(sessions):
 request = self._create_concurrent_request( )
 session_data["user_data"].id,
-"formatted_string"
+""
                                                                                                                                                 
 task = self._execute_agent_with_llm( )
 session_data, request, "optimization", use_real_llm, 30
@@ -389,9 +389,9 @@ successful = [item for item in []]
 assert len(successful) >= 2, "Too many concurrent failures"
 
 if use_real_llm:
-assert total_time < 15.0, "formatted_string"
+assert total_time < 15.0, ""
 else:
-assert total_time < 5.0, "formatted_string"
+assert total_time < 5.0, ""
 
 finally:
 for session_data in sessions:
@@ -405,7 +405,7 @@ session_data = await test_core.establish_conversation_session(PlanTier.PRO)
 
 try:
                                                                                                                                                                         # Test malformed request handling
-malformed_request = { )
+malformed_request = { }
 "type": "agent_request",
 "user_id": session_data["user_data"].id,
                                                                                                                                                                         # Missing required fields
@@ -453,21 +453,21 @@ except asyncio.TimeoutError:
                                     # No message received, continue listening
 continue
 except Exception as e:
-logger.debug("formatted_string")
+logger.debug("")
 continue
 
 except Exception as e:
-logger.error("formatted_string")
+logger.error("")
 
 def _create_optimization_request(self, user_id: str) -> Dict[str, Any]:
 """Create optimization request."""
 await asyncio.sleep(0)
-return { )
+return { }
 "type": "agent_request",
 "user_id": user_id,
 "message": "Analyze and optimize my AI infrastructure costs",
 "agent_type": "optimization",
-"context": { )
+"context": { }
 "current_spend": 50000,
 "target_reduction": 0.3
     
@@ -476,7 +476,7 @@ return { )
 def _create_contextual_request(self, user_id: str, message: str,
 context: List[Dict]) -> Dict[str, Any]:
 """Create request with context."""
-return { )
+return { }
 "type": "agent_request",
 "user_id": user_id,
 "message": message,
@@ -486,7 +486,7 @@ return { )
 
 def _create_performance_test_request(self, user_id: str) -> Dict[str, Any]:
 """Create performance test request."""
-return { )
+return { }
 "type": "agent_request",
 "user_id": user_id,
 "message": "Quick performance analysis",
@@ -497,7 +497,7 @@ return { )
 def _create_chain_request(self, user_id: str, task: str,
 previous_output: str = None) -> Dict[str, Any]:
 """Create chain execution request."""
-return { )
+return { }
 "type": "agent_request",
 "user_id": user_id,
 "message": task,
@@ -507,7 +507,7 @@ return { )
 
 def _create_concurrent_request(self, user_id: str, task: str) -> Dict[str, Any]:
 """Create concurrent execution request."""
-return { )
+return { }
 "type": "agent_request",
 "user_id": user_id,
 "message": task,
@@ -530,10 +530,10 @@ start_time = time.time()
 try:
         # Get backend service URL
 backend_url = get_backend_service_url()
-endpoint_url = "formatted_string"
+endpoint_url = ""
 
         # Create agent execute request payload
-agent_request = { )
+agent_request = { }
 "type": agent_type,
 "message": request["message"],
 "context": request.get("context", {}),
@@ -560,7 +560,7 @@ env.set("TEST_USE_REAL_LLM", "true", source="test_agent_orchestration")
                     # Add authorization if available
 auth_token = env.get("TEST_AUTH_TOKEN")
 if auth_token:
-headers["Authorization"] = "formatted_string"
+headers["Authorization"] = ""
 
                         # Make HTTP request to backend agent execution endpoint with error handling
 timeout_config = aiohttp.ClientTimeout(total=timeout, connect=10)
@@ -572,7 +572,7 @@ if response.status == 200:
 response_data = await response.json()
 execution_time = time.time() - start_time
 
-return { )
+return { }
 "status": response_data.get("status", "success"),
 "content": response_data.get("response", ""),
 "agent_type": response_data.get("agent", agent_type),
@@ -587,7 +587,7 @@ else:
 error_data = await response.json() if response.content_type == "application/json" else {}
 execution_time = time.time() - start_time
 
-return { )
+return { }
 "status": "error",
 "error": error_data.get("detail", "formatted_string"),
 "agent_type": agent_type,
@@ -599,10 +599,10 @@ return { )
 except (aiohttp.ClientError, ConnectionError) as e:
                                                 # Service connection issues - handle gracefully
 execution_time = time.time() - start_time
-logger.warning("formatted_string")
-return { )
+logger.warning("")
+return { }
 "status": "error",
-"error": "formatted_string",
+"error": "",
 "agent_type": agent_type,
 "execution_time": execution_time,
 "real_llm": use_real_llm,
@@ -611,7 +611,7 @@ return { )
 
 except asyncio.TimeoutError:
 execution_time = time.time() - start_time
-return { )
+return { }
 "status": "timeout",
 "agent_type": agent_type,
 "execution_time": execution_time,
@@ -620,10 +620,10 @@ return { )
 
 except aiohttp.ClientConnectionError as e:
 execution_time = time.time() - start_time
-logger.warning("formatted_string")
-return { )
+logger.warning("")
+return { }
 "status": "error",
-"error": "formatted_string",
+"error": "",
 "agent_type": agent_type,
 "execution_time": execution_time,
 "real_llm": use_real_llm,
@@ -631,8 +631,8 @@ return { )
                                                         
 except Exception as e:
 execution_time = time.time() - start_time
-logger.error("formatted_string")
-return { )
+logger.error("")
+return { }
 "status": "error",
 "error": str(e),
 "agent_type": agent_type,
@@ -648,10 +648,10 @@ timeout: int) -> Dict[str, Any]:
 results = {}
 
 for agent in agents:
-request = { )
+request = { }
 "type": "agent_request",
 "user_id": session_data["user_data"].id,
-"message": "formatted_string",
+"message": "",
 "agent_type": agent
         
 
@@ -670,7 +670,7 @@ return await self._execute_agent_with_llm( )
 session_data, request, "error_test", use_real_llm, 10
         
 except Exception as e:
-return { )
+return { }
 "status": "error",
 "error": str(e),
 "recovered": False
@@ -679,7 +679,7 @@ return { )
 def _validate_agent_response(self, response: Dict[str, Any], use_real_llm: bool, websocket_validator: Optional[MissionCriticalWebSocketValidator] = None):
 """Validate agent response with optional WebSocket validation."""
     # Basic response validation
-assert response["status"] in ["success", "timeout", "error"], "formatted_string"
+assert response["status"] in ["success", "timeout", "error"], ""
 assert response.get("agent_type") is not None, "Agent type missing"
 assert response.get("execution_time", 0) >= 0, "Invalid execution time (must be >= 0)"
 
@@ -711,7 +711,7 @@ assert error_info, "Error response should have error information"
 if websocket_validator:
                             # Check if we received at least some events
 if len(websocket_validator.received_events) > 0:
-logger.info("formatted_string")
+logger.info("")
 else:
 logger.warning("No WebSocket events captured - may indicate connection issue")
 
@@ -720,7 +720,7 @@ agents: List[str], use_real_llm: bool):
 """Validate multi-agent results."""
 pass
 for agent in agents:
-assert agent in results, "formatted_string"
+assert agent in results, ""
 self._validate_agent_response(results[agent], use_real_llm)
 
 def _validate_chain_results(self, chain_results: List[Dict], use_real_llm: bool, websocket_validator: Optional[MissionCriticalWebSocketValidator] = None):
@@ -730,27 +730,27 @@ assert len(chain_results) > 0, "No chain results"
     # Individual step validation
 for result in chain_results:
 response_status = result.get("response", {}).get("status")
-assert response_status in ["success", "error", "timeout"], "formatted_string"
+assert response_status in ["success", "error", "timeout"], ""
 assert result.get("execution_time", 0) > 0, "Invalid execution time"
 
         # Chain timing validation with more lenient timeouts for real services
 total_time = sum(r.get("execution_time", 0) for r in chain_results)
 if use_real_llm:
             # More generous timeout for real LLM calls
-assert total_time < 60.0, "formatted_string"
+assert total_time < 60.0, ""
 else:
                 # Faster expected time for fallback/mock responses
-assert total_time < 10.0, "formatted_string"
+assert total_time < 10.0, ""
 
                 # Optional WebSocket validation for chain execution
 if websocket_validator and len(websocket_validator.received_events) > 0:
                     # For chain execution, we expect multiple completion events
-completion_events = [ )
+completion_events = [ ]
 event for event in websocket_validator.received_events
 if event.get("type") in ["agent_completed", "tool_completed"]
                     
 assert len(completion_events) >= len(chain_results), \
-"formatted_string"
+""
 
 
 @pytest.mark.real_llm
@@ -783,10 +783,10 @@ start_time = time.time()
 
 tasks = []
 for i in range(num_requests):
-request = { )
+request = { }
 "type": "agent_request",
 "user_id": session_data["user_data"].id,
-"message": "formatted_string",
+"message": "",
 "agent_type": "performance"
                     
                     # Simplified execution for throughput test
@@ -796,7 +796,7 @@ await asyncio.gather(*tasks)
 total_time = time.time() - start_time
 
 throughput = num_requests / total_time
-assert throughput > 1.0, "formatted_string"
+assert throughput > 1.0, ""
 
 await session_data["client"].close()
 

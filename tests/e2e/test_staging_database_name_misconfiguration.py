@@ -34,7 +34,7 @@ class TestStagingDatabaseMisconfiguration:
         '.env.staging'
     
 
-        assert os.path.exists(staging_env_path), "formatted_string"
+        assert os.path.exists(staging_env_path), ""
 
     # Parse the staging environment file
         staging_vars = {}
@@ -52,7 +52,7 @@ class TestStagingDatabaseMisconfiguration:
                 # CRITICAL CHECK: Staging should NOT use netra_dev database
         postgres_db = staging_vars.get('POSTGRES_DB', '')
         assert postgres_db != 'netra_dev', \
-        "formatted_string" \
+        "" \
         f"in .env.staging. Staging should use 'netra_staging' or 'postgres' database, " \
         f"NOT 'netra_dev' which is for development environment only."
 
@@ -60,7 +60,7 @@ class TestStagingDatabaseMisconfiguration:
     def test_staging_database_url_should_not_contain_netra_dev(self):
         """Staging #removed-legacyshould not reference netra_dev database"""
     Simulate CORRECT staging environment - Fixed from previous misconfiguration
-        staging_env = { )
+        staging_env = { }
         'ENVIRONMENT': 'staging',
         'POSTGRES_HOST': '/cloudsql/netra-staging:us-central1:staging-shared-postgres',
         'POSTGRES_PORT': '5432',
@@ -111,7 +111,7 @@ class TestStagingDatabaseMisconfiguration:
         expected_schema = "public"
 
         assert expected_schema == "public", \
-        "formatted_string"
+        ""
 
                     # But the POSTGRES_DB in .env.staging is still wrong!
                     # It's set to 'netra_dev' when it should be something else
@@ -128,7 +128,7 @@ class TestStagingDatabaseMisconfiguration:
         test.test_staging_should_not_use_dev_database_name()
         print(" FAIL:  Test unexpectedly passed - staging configuration may have been fixed")
         except AssertionError as e:
-        print("formatted_string")
+        print("")
 
         print("-" * 60)
 
@@ -136,4 +136,4 @@ class TestStagingDatabaseMisconfiguration:
         test.test_staging_database_url_should_not_contain_netra_dev()
         print(" FAIL:  Test unexpectedly passed - staging configuration may have been fixed")
         except AssertionError as e:
-        print("formatted_string")
+        print("")

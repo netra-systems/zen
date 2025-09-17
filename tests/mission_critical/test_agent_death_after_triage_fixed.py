@@ -91,7 +91,7 @@ class TestAgentDeathAfterTriageFixed:
         "Test suite verifying the agent death bug is FIXED""
 
 @pytest.mark.asyncio
-@pytest.fixture
+# @pytest.fixture
     async def test_execution_tracker_detects_agent_death(self):
 '''
 CRITICAL: Test that ExecutionTracker detects agent death
@@ -128,7 +128,7 @@ agent_name=context.agent_name,
 context=context
         
 
-print("formatted_string")
+print("")
 
         # Verify execution started
 status = await tracker.get_execution_status(execution_id)
@@ -144,7 +144,7 @@ percentage=10.0,
 message=Starting triage analysis...
         
         
-print(" CHART:  Progress update 1: Triage starting")
+    print(" CHART:  Progress update 1: Triage starting")
 
 await asyncio.sleep(1)
 
@@ -162,11 +162,11 @@ await asyncio.sleep(1)
 
         # Verify agent is working
 status = await tracker.get_execution_status(execution_id)
-print("formatted_string")
+print("")
 print(formatted_string)
 
         # Now simulate AGENT DEATH - no more heartbeats or progress updates!
-print("")
+    print("")
 [U+1F480] SIMULATING AGENT DEATH - No more heartbeats...)
 
         # The old system would miss this completely
@@ -193,7 +193,7 @@ if status.execution_record.state == NewExecutionState.FAILED:
     error_msg = status.execution_record.metadata.get(error", ")
 if heartbeat failure" in error_msg.lower():
     death_detected = True
-print("formatted_string)
+    print("formatted_string)
 verifier.record_event({}
 'type': 'agent_death',
 'data': {'method': 'heartbeat_failure', 'execution_id': execution_id}
@@ -218,12 +218,12 @@ print(")
 " + =*80)
 print("EXECUTION TRACKER DEATH DETECTION RESULTS")
 print(=*80)
-print("formatted_string")
+print("")
 print(formatted_string)
 if final_status:
-    print("formatted_string")
+    print("")
 print(formatted_string)
-print("formatted_string")
+print("")
 print(=*80)
 
                                     # The NEW system MUST detect agent death or timeout

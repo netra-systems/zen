@@ -48,7 +48,7 @@ class TestOAuthRedirectURIConfiguration:
     def test_oauth_redirect_uri_must_point_to_auth_service(self):
         """Test that OAuth redirect URI points to auth service, not frontend"""
     # Setup environment for staging
-        with patch.dict(get_env().get_all(), { ))
+        with patch.dict(get_env().get_all(), { })
         'ENVIRONMENT': 'staging',
         'AUTH_SERVICE_URL': 'https://auth.staging.netrasystems.ai',
         'FRONTEND_URL': 'https://app.staging.netrasystems.ai'
@@ -57,15 +57,15 @@ class TestOAuthRedirectURIConfiguration:
 
         # CRITICAL: The redirect URI must point to the AUTH SERVICE
         # so it can exchange the OAuth code for tokens
-        expected_redirect_uri = "formatted_string"
+        expected_redirect_uri = ""
 
         # This is what's currently happening (WRONG)
-        actual_redirect_uri = "formatted_string"
+        actual_redirect_uri = ""
 
         # This test MUST FAIL in current implementation
         assert expected_redirect_uri != actual_redirect_uri, \
         f"CRITICAL BUG CONFIRMED: Auth service is using frontend URL for OAuth callback. " \
-        "formatted_string"
+        ""
 
         @pytest.mark.e2e
     def test_oauth_login_generates_correct_redirect_uri(self):
@@ -76,7 +76,7 @@ class TestOAuthRedirectURIConfiguration:
 
         client = TestClient(app)
 
-        with patch.dict(get_env().get_all(), { ))
+        with patch.dict(get_env().get_all(), { })
         'ENVIRONMENT': 'staging',
         'AUTH_SERVICE_URL': 'https://auth.staging.netrasystems.ai',
         'FRONTEND_URL': 'https://app.staging.netrasystems.ai',
@@ -99,9 +99,9 @@ class TestOAuthRedirectURIConfiguration:
 
                 # CRITICAL: Must use auth service URL
         assert redirect_uri.startswith('https://auth.staging.netrasystems.ai'), \
-        "formatted_string"
+        ""
         assert redirect_uri == 'https://auth.staging.netrasystems.ai/auth/callback', \
-        "formatted_string"
+        ""
 
         @pytest.mark.e2e
     def test_google_oauth_console_configuration_matches(self):
@@ -111,7 +111,7 @@ class TestOAuthRedirectURIConfiguration:
         production_auth_callback = "https://auth.netrasystems.ai/auth/callback"
 
     # These should be the ONLY authorized redirect URIs in Google Console
-        authorized_redirect_uris = [ )
+        authorized_redirect_uris = [ ]
         staging_auth_callback,
         production_auth_callback,
         "http://localhost:8000/auth/callback",  # Local development
@@ -121,22 +121,22 @@ class TestOAuthRedirectURIConfiguration:
         f"Staging auth callback must be authorized in Google OAuth Console"
 
     # Verify frontend callbacks should NOT be authorized
-        incorrect_uris = [ )
+        incorrect_uris = [ ]
         "https://app.staging.netrasystems.ai/auth/callback",  # WRONG
         "https://app.netrasystems.ai/auth/callback",  # WRONG
     
 
         for uri in incorrect_uris:
         assert uri not in authorized_redirect_uris, \
-        "formatted_string"
+        ""
 
 
         if __name__ == "__main__":
             # Run the test to demonstrate the failure
         test = TestOAuthRedirectURIConfiguration()
 
-        print(" )
-        " + "="*80)
+        print("")
+         + ="*80)
         print("CRITICAL OAUTH CONFIGURATION BUG TEST")
         print("="*80)
 
@@ -144,11 +144,11 @@ class TestOAuthRedirectURIConfiguration:
         test.test_oauth_redirect_uri_must_point_to_auth_service()
         print("ERROR: Test unexpectedly passed - bug might be fixed")
         except AssertionError as e:
-        print("formatted_string")
-        print(" )
+        print("")
+        print("")
         This confirms the OAuth redirect URI bug exists!")
 
-        print(" )
+        print("")
         REQUIRED FIX:")
         print("1. Change auth_routes.py lines 242, 676, 906 to use AUTH SERVICE URL")
         print("2. Update Google OAuth Console to authorize auth service URLs")

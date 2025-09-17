@@ -164,11 +164,11 @@ if failed_messages:
     print(")
 
 === WebSocket Message Alignment Issues Found ===)
-print("formatted_string")
+print("")
 for failure in failed_messages:
     print(formatted_string)
 
-print("formatted_string")
+print("")
 print(formatted_string)
 
                                                             # These are expected to fail before the fix

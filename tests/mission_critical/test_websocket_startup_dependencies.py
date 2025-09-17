@@ -138,7 +138,7 @@ from netra_backend.app.routes.websocket import websocket_endpoint
 
                                             # Create mock WebSocket
 websocket = TestWebSocketConnection()
-mock_websocket.app.state = Magic        mock_websocket.headers = {sec-websocket-protocol": "}
+mock_websocket.app.state = MagicMock(); mock_websocket.headers = {sec-websocket-protocol": "}
 
                                             # Don't set supervisor
 mock_websocket.app.state.agent_supervisor = None

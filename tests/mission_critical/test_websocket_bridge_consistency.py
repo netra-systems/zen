@@ -434,6 +434,6 @@ class TestWebSocketMigrationPath:
         assert hasattr(adapter, method), formatted_string
         # Verify it's callable
         method_obj = getattr(adapter, method)
-        assert callable(method_obj), "formatted_string"
+        assert callable(method_obj), ""
         if __name__ == "__main__":
             # Run tests with detailed output

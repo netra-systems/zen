@@ -609,7 +609,7 @@ connection_id=test_user_context['connection_id']
                                                                             # Create large tool result
 large_result = {
 "analysis: x" * 10000,  # 10KB of data
-"detailed_recommendations: [rec_" + "y * 1000 for _ in range(50)],  # 50KB more
+"detailed_recommendations: [rec_ + y * 1000 for _ in range(50)],  # 50KB more
 metadata": {
 "size: large",
 "processing_time: 5000.0,

@@ -541,7 +541,7 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
             f"CRITICAL SSOT VIOLATION: {total_violations} orchestration bypasses found!\n\n
             fTry-except import patterns bypass SSOT orchestration controls.\n"
             f"All orchestration must use test_framework.ssot.orchestration modules.\n\n
-            fOrchestration bypasses found:\n" + "\n.join(violation_details) + \n\n"
+            fOrchestration bypasses found:\n + \n.join(violation_details) + \n\n"
             f"REMEDIATION:\n
             f1. Replace try-except imports with SSOT orchestration imports\n"
             f"2. Use from test_framework.ssot.orchestration import OrchestrationConfig\n
@@ -563,7 +563,7 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
         return (
             fCRITICAL SSOT VIOLATION: {len(violations)} invalid legacy wrappers found!\n\n"
             f"Legacy wrapper files must be proper deprecation wrappers that redirect to SSOT.\n\n
-            fInvalid wrappers:\n" + "\n.join(violation_list) + \n\n"
+            fInvalid wrappers:\n + \n.join(violation_list) + \n\n"
             f"REQUIREMENTS FOR VALID LEGACY WRAPPERS:\n
             f1. Must show DEPRECATION WARNING to users\n"
             f"2. Must redirect to tests/unified_test_runner.py\n

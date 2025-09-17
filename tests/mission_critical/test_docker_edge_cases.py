@@ -499,7 +499,7 @@ class TestInterruptedOperations:
         if result.returncode != 0:
         pull_interrupted = True
         except Exception as e:
-        logger.info("formatted_string")
+        logger.info("")
         pull_interrupted = True
 
                         # Now try recovery (normal pull)
@@ -517,7 +517,7 @@ class TestInterruptedOperations:
                                 # The important thing is that Docker doesn't crash
 
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("")
 
     def test_interrupted_network_operations(self, edge_case_framework):
         "Test recovery from interrupted network operations."
@@ -601,7 +601,7 @@ class TestPortConflictResolution:
         else:
         container1_created = False
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("")
         container1_created = False
 
         if not container1_created:
@@ -624,7 +624,7 @@ class TestPortConflictResolution:
         edge_case_framework.test_containers.append(container2_name)
         except Exception as e:
         port_conflict_detected = True
-        logger.info("formatted_string")
+        logger.info("")
 
         assert port_conflict_detected, Port conflict should be detected
         logger.info(" PASS:  Port conflict correctly detected")
@@ -650,7 +650,7 @@ class TestPortConflictResolution:
         else:
         resolution_successful = False
 
-        logger.info("formatted_string")
+        logger.info("")
         assert resolution_successful, Should be able to resolve port conflicts with alternative ports
 
     def test_dynamic_port_allocation_conflicts(self, edge_case_framework):
@@ -684,13 +684,13 @@ class TestPortConflictResolution:
         time.sleep(0.5)  # Brief pause between allocations
 
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("")
 
         allocation_rate = successful_allocations / 10 * 100
         logger.info(formatted_string)
 
                         # Should achieve high success rate with dynamic allocation
-        assert allocation_rate >= 80, "formatted_string"
+        assert allocation_rate >= 80, ""
 
                         # Verify no duplicate ports were allocated
         allocated_ports = set()
@@ -707,7 +707,7 @@ class TestPortConflictResolution:
         port = host_part.split(':')[1]
         if port in allocated_ports:
         duplicates += 1
-        logger.warning("formatted_string")
+        logger.warning("")
         allocated_ports.add(port)
 
         logger.info(formatted_string)
@@ -733,7 +733,7 @@ class TestContainerNameConflicts:
         if first_container_created:
         edge_case_framework.test_containers.append(base_name)
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
         pytest.skip(Cannot create first container for name conflict test)
 
                 # Try to create second container with same name (should fail)
@@ -749,7 +749,7 @@ class TestContainerNameConflicts:
         execute_docker_command(['docker', 'container', 'rm', base_name]
         except Exception as e:
         name_conflict_detected = True
-        logger.info("formatted_string")
+        logger.info("")
 
         assert name_conflict_detected, Container name conflict should be detected
         logger.info(" PASS:  Container name conflict correctly detected")
@@ -781,7 +781,7 @@ class TestContainerNameConflicts:
         logger.warning(formatted_string)
 
         resolution_rate = successful_resolutions / len(resolution_strategies) * 100
-        logger.info("formatted_string")
+        logger.info("")
 
         assert resolution_rate >= 100, formatted_string
 
@@ -821,20 +821,20 @@ class TestContainerNameConflicts:
         if success:
         edge_case_framework.test_containers.append(container_name)
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
         results.append((False, unknown))
 
         successful_creates = sum(1 for success, _ in results if success)
         success_rate = successful_creates / 15 * 100
 
-        logger.info("formatted_string")
+        logger.info("")
         assert success_rate >= 90, formatted_string
 
                                 # Verify all names are unique
         created_names = [item for item in []]
         unique_names = set(created_names)
 
-        logger.info("formatted_string")
+        logger.info("")
         assert len(unique_names) == len(created_names), All generated names should be unique
 
 
@@ -864,7 +864,7 @@ class TestDockerDaemonRestart:
         logger.info(formatted_string)
 
         connectivity_rate = successful_connections / connectivity_tests * 100 if connectivity_tests > 0 else 0
-        logger.info("formatted_string")
+        logger.info("")
 
                     # Should have some successful connections
         assert connectivity_rate >= 60, formatted_string
@@ -896,7 +896,7 @@ class TestDockerDaemonRestart:
         operation_successful = True
         break
         else:
-        logger.info("formatted_string")
+        logger.info("")
         time.sleep(1)
 
         except Exception as e:
@@ -908,7 +908,7 @@ class TestDockerDaemonRestart:
         successful_retries += 1
 
         retry_success_rate = successful_retries / total_operations * 100 if total_operations > 0 else 0
-        logger.info("formatted_string")
+        logger.info("")
 
                                     # Should achieve decent success rate with retries
         assert retry_success_rate >= 70, formatted_string
@@ -962,7 +962,7 @@ class TestResourceLimitBoundaries:
         logger.warning(formatted_string)
         except ValueError:
         memory_violations += 1
-        logger.warning("formatted_string")
+        logger.warning("")
 
                                 # Try to start container to test actual resource application
         start_result = execute_docker_command(['docker', 'start', container_name]
@@ -974,12 +974,12 @@ class TestResourceLimitBoundaries:
         logger.warning(formatted_string)
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
 
         success_rate = successful_deployments / len(boundary_tests) * 100
         logger.info(formatted_string)
 
-        assert success_rate >= 75, "formatted_string"
+        assert success_rate >= 75, ""
         assert memory_violations == 0, formatted_string
 
     def test_cpu_limit_boundary_conditions(self, edge_case_framework):
@@ -1029,20 +1029,20 @@ class TestResourceLimitBoundaries:
                             # CPU usage should be reasonable for the limits set
         if cpu_percent > float(cpu_limit) * 150:  # Allow 50% overhead
         cpu_verification_failures += 1
-        logger.warning("formatted_string")
+        logger.warning("")
         except ValueError:
         logger.warning(formatted_string)
 
                                 # Stop container
         execute_docker_command(['docker', 'stop', container_name]
         else:
-        logger.warning("formatted_string")
+        logger.warning("")
 
         except Exception as e:
         logger.error(formatted_string)
 
         success_rate = successful_cpu_limits / len(cpu_tests) * 100
-        logger.info("formatted_string")
+        logger.info("")
 
         assert success_rate >= 80, formatted_string
 
@@ -1084,14 +1084,14 @@ class TestResourceLimitBoundaries:
         logger.info(formatted_string)
         else:
         storage_failures += 1
-        logger.warning("formatted_string")
+        logger.warning("")
 
         except Exception as e:
         storage_failures += 1
         logger.error(formatted_string)
 
         success_rate = successful_storage_tests / len(storage_tests) * 100
-        logger.info("formatted_string")
+        logger.info("")
 
         assert success_rate >= 70, formatted_string
 
@@ -1167,7 +1167,7 @@ class TestNetworkEdgeCases:
         execute_docker_command(['docker', 'stop', container_name]
 
         logger.info(formatted_string)
-        logger.info("formatted_string")
+        logger.info("")
 
         assert len(isolated_networks) >= 2, Should create at least 2 isolated networks
         assert isolation_verified, "Network isolation should prevent cross-network communication"
@@ -1223,12 +1223,12 @@ class TestNetworkEdgeCases:
         successful_resolutions += 1
         edge_case_framework.edge_case_metrics['name_conflicts_resolved'] += 1
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("")
 
         resolution_rate = successful_resolutions / len(resolution_strategies) * 100
         logger.info(formatted_string)
 
-        assert resolution_rate >= 100, "formatted_string"
+        assert resolution_rate >= 100, ""
 
     def test_bridge_network_edge_cases(self, edge_case_framework):
         "Test bridge network configuration edge cases."
@@ -1282,14 +1282,14 @@ class TestNetworkEdgeCases:
         logger.warning(formatted_string)
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
 
         bridge_success_rate = successful_bridges / len(bridge_configs) * 100
         functionality_rate = bridge_functionality_tests / successful_bridges * 100 if successful_bridges > 0 else 0
 
         logger.info(formatted_string)
 
-        assert bridge_success_rate >= 80, "formatted_string"
+        assert bridge_success_rate >= 80, ""
 
 
 class TestVolumeEdgeCases:
@@ -1342,26 +1342,26 @@ class TestVolumeEdgeCases:
         permission_tests_passed += 1  # Failure expected for readonly
         logger.info(formatted_string)
         else:
-        logger.warning("formatted_string")
+        logger.warning("")
         else:
                                     # Should succeed for readwrite mounts
         if start_result.returncode == 0:
         permission_tests_passed += 1
         logger.info(formatted_string)
         else:
-        logger.warning("formatted_string")
+        logger.warning("")
         else:
         logger.warning(formatted_string)
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
 
         mount_success_rate = successful_mounts / len(mount_scenarios) * 100
         permission_success_rate = permission_tests_passed / len(mount_scenarios) * 100
 
         logger.info(formatted_string)
 
-        assert mount_success_rate >= 80, "formatted_string"
+        assert mount_success_rate >= 80, ""
 
     def test_volume_cleanup_with_dependency_chains(self, edge_case_framework):
         "Test volume cleanup with complex dependency chains."
@@ -1416,7 +1416,7 @@ class TestVolumeEdgeCases:
         try:
         result = execute_docker_command(['docker', 'volume', 'rm', volume]
         if result.returncode != 0:
-        logger.info("formatted_string")
+        logger.info("")
         else:
         cleanup_successes += 1
         edge_case_framework.test_volumes.remove(volume)
@@ -1436,19 +1436,19 @@ class TestVolumeEdgeCases:
         final_cleanup_successes += 1
         edge_case_framework.test_volumes.remove(volume)
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("")
 
         dependency_protection_rate = ((cleanup_attempts - cleanup_successes) / cleanup_attempts * 100 )
         if cleanup_attempts > 0 else 0)
         final_cleanup_rate = final_cleanup_successes / len([item for item in []] * 100
 
         logger.info(formatted_string )
-        "formatted_string")
+        "")
 
         assert dependency_protection_rate >= 50, formatted_string
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
         raise
 
 
@@ -1520,7 +1520,7 @@ class TestContainerLifecycleEdgeCases:
         if transitions_completed == len(transitions):
         successful_transitions += 1
 
-        logger.info("formatted_string")
+        logger.info("")
 
         except Exception as e:
         logger.error(formatted_string)
@@ -1528,7 +1528,7 @@ class TestContainerLifecycleEdgeCases:
         transition_success_rate = successful_transitions / len(state_transition_tests) * 100
         overall_transition_rate = (total_transitions - (total_transitions - sum(len(t[1] for t in state_transition_tests if successful_transitions > 0))) / total_transitions * 100
 
-        logger.info("formatted_string")
+        logger.info("")
 
         assert transition_success_rate >= 80, formatted_string
 
@@ -1571,11 +1571,11 @@ class TestContainerLifecycleEdgeCases:
         actual_exit_code = int(inspect_result.stdout.strip())
         if actual_exit_code == expected_code:
         correct_exit_codes += 1
-        logger.info("formatted_string")
+        logger.info("")
         else:
         logger.warning(formatted_string)
         except ValueError:
-        logger.error("formatted_string")
+        logger.error("")
         else:
         logger.error(formatted_string)
 
@@ -1583,12 +1583,12 @@ class TestContainerLifecycleEdgeCases:
         execute_docker_command(['docker', 'container', 'rm', container_name]
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
 
         exit_code_accuracy = correct_exit_codes / containers_tested * 100 if containers_tested > 0 else 0
         logger.info(formatted_string)
 
-        assert exit_code_accuracy >= 90, "formatted_string"
+        assert exit_code_accuracy >= 90, ""
 
 
         if __name__ == __main__:
@@ -1607,7 +1607,7 @@ class TestContainerLifecycleEdgeCases:
         logger.info( PASS:  Direct execution edge case tests completed successfully)
 
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
         raise
         finally:
         framework.cleanup()

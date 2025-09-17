@@ -108,7 +108,7 @@ mock_ch_service.return_value = mock_instance
 await _check_clickhouse_connection()
 
                                     # The test passes if no exception was raised
-print("OK Test passed: ClickHouse failure is handled gracefully when optional in staging)
+    print("OK Test passed: ClickHouse failure is handled gracefully when optional in staging)
 
 @pytest.mark.asyncio
     async def test_redis_optional_in_staging_is_skipped(self):
@@ -132,7 +132,7 @@ mock_redis.ping = AsyncMock(side_effect=Exception(Connection failed"))
 await _check_redis_connection()
 
                                                     # The test passes if no exception was raised
-print("OK Test passed: Redis failure is handled gracefully when optional in staging)
+    print("OK Test passed: Redis failure is handled gracefully when optional in staging)
 
 @pytest.mark.asyncio
     async def test_current_bug_clickhouse_incorrectly_skipped(self):
@@ -190,13 +190,13 @@ test.test_redis_optional_in_staging_is_skipped
 
 for test_func in tests:
     print(formatted_string)
-print("-" * 40)
+    print("-" * 40)
 try:
     asyncio.run(test_func())
 except AssertionError as e:
     print(formatted_string)
 except Exception as e:
-    print("formatted_string")
+    print("")
 
 print()
 " + "=*70)

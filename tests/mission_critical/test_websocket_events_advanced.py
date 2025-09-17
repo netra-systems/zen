@@ -279,7 +279,7 @@ ws_manager = WebSocketManager()
 order_validator = EventOrderValidator()
 
 conn_id = parallel-tools"
-mock_ws = Magic
+mock_ws = MagicMock()
 async def capture(message):
 data = json.loads(message) if isinstance(message, str) else message
 order_validator.record_event(data)
@@ -352,7 +352,7 @@ ws_manager = WebSocketManager()
 order_validator = EventOrderValidator()
 
 conn_id = nested-agents"
-mock_ws = Magic
+mock_ws = MagicMock()
 async def capture(message):
 pass
 data = json.loads(message) if isinstance(message, str) else message
@@ -412,7 +412,7 @@ events_after = []
 conn_id = disconnect-test"
 
         # First connection
-mock_ws1 = Magic
+mock_ws1 = MagicMock()
 async def capture1(message):
 data = json.loads(message) if isinstance(message, str) else message
 events_before.append(data)
@@ -435,7 +435,7 @@ await notifier.send_tool_executing(conn_id, request_id, tool", {}
 await notifier.send_tool_completed(conn_id, request_id, "tool, {result": "done}
 
     # Reconnect
-mock_ws2 = Magic
+mock_ws2 = MagicMock()
 async def capture2(message):
 data = json.loads(message) if isinstance(message, str) else message
 events_after.append(data)
@@ -461,7 +461,7 @@ ws_manager = WebSocketManager()
 timing_analyzer = EventTimingAnalyzer(max_latency_ms=500)
 
 conn_id = chaos-test"
-mock_ws = Magic
+mock_ws = MagicMock()
 failure_count = 0
 
 async def capture_with_failures(message):
@@ -520,7 +520,7 @@ class TestPerformanceBenchmarks:
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_high_frequency_event_throughput(self):
 "Test WebSocket can handle high-frequency event streams.""
 ws_manager = WebSocketManager()
@@ -531,7 +531,7 @@ events_received = 0
 latencies = []
 
 conn_id = throughput-test"
-mock_ws = Magic
+mock_ws = MagicMock()
 async def capture(message):
 nonlocal events_received
 events_received += 1
@@ -631,7 +631,7 @@ ws_manager = WebSocketManager()
 content_validator = EventContentValidator()
 
 conn_id = "large-payload
-mock_ws = Magic
+mock_ws = MagicMock()
 async def capture(message):
 data = json.loads(message) if isinstance(message, str) else message
 content_validator.validate_event(data)
@@ -678,7 +678,7 @@ events_by_connection = defaultdict(list)
                 # Rapidly cycle connections
 for cycle in range(10):
     conn_id = "formatted_string
-mock_ws = Magic
+mock_ws = MagicMock()
 async def capture(message, conn=conn_id):
 pass
 data = json.loads(message) if isinstance(message, str) else message
@@ -714,7 +714,7 @@ ws_manager = WebSocketManager()
 received_events = []
 
 conn_id = unicode-test"
-mock_ws = Magic
+mock_ws = MagicMock()
 async def capture(message):
 data = json.loads(message) if isinstance(message, str) else message
 received_events.append(data)
@@ -738,7 +738,7 @@ test_strings = [
     
 
 for i, test_str in enumerate(test_strings):
-    await notifier.send_agent_thinking(conn_id, "formatted_string", test_str)
+    await notifier.send_agent_thinking(conn_id, "", test_str)
 
 await asyncio.sleep(0.2)
 
@@ -815,7 +815,7 @@ ws_manager = WebSocketManager()
 events_by_request = defaultdict(list)
 
 conn_id = request-isolation
-mock_ws = Magic
+mock_ws = MagicMock()
 async def capture(message):
 pass
 data = json.loads(message) if isinstance(message, str) else message
@@ -830,7 +830,7 @@ notifier = SimpleWebSocketNotifier.create_for_user(ws_manager)
     # Execute multiple requests in parallel
 async def execute_request(req_id):
 pass
-await notifier.send_agent_started(conn_id, req_id, "formatted_string")
+await notifier.send_agent_started(conn_id, req_id, "")
 await asyncio.sleep(random.uniform(0.01, 0.03))
 await notifier.send_agent_thinking(conn_id, req_id, formatted_string)
 await asyncio.sleep(random.uniform(0.01, 0.03))
@@ -843,7 +843,7 @@ await asyncio.gather(*tasks)
 await asyncio.sleep(0.2)
 
     # Verify each request has its own events
-for req_id in ["formatted_string" for i in range(10)]:
+for req_id in ["" for i in range(10)]:
     events = events_by_request.get(req_id, []
 assert len(events) >= 3, formatted_string
 
@@ -862,14 +862,14 @@ class TestMultiAgentCoordination:
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_supervisor_with_multiple_subagents(self):
 "Test supervisor coordinating multiple sub-agents."
 ws_manager = WebSocketManager()
 order_validator = EventOrderValidator()
 
 conn_id = "multi-agent"
-mock_ws = Magic
+mock_ws = MagicMock()
 async def capture(message):
 data = json.loads(message) if isinstance(message, str) else message
 order_validator.record_event(data)
@@ -911,7 +911,7 @@ class MockLLM:
         for i in range(3):
     async def execute_subagent(agent_id=i):
         sub_ctx = AgentExecutionContext( )
-        agent_name="formatted_string",
+        agent_name="",
         request_id=formatted_string,
         connection_id=conn_id,
         start_time=time.time(),
@@ -921,7 +921,7 @@ class MockLLM:
 
         await engine.websocket_notifier.send_agent_started(sub_ctx)
         await asyncio.sleep(random.uniform(0.01, 0.05))
-        await engine.send_agent_thinking(sub_ctx, "formatted_string", 1)
+        await engine.send_agent_thinking(sub_ctx, "", 1)
         await asyncio.sleep(random.uniform(0.01, 0.05))
         await engine.websocket_notifier.send_agent_completed(sub_ctx)
 
@@ -933,7 +933,7 @@ class MockLLM:
         results = await asyncio.gather(*sub_agent_tasks)
 
     # Supervisor completes
-        await engine.send_partial_result(supervisor_ctx, "formatted_string", True)
+        await engine.send_partial_result(supervisor_ctx, "", True)
         await engine.websocket_notifier.send_agent_completed(supervisor_ctx)
 
         await run_multi_agent_flow()
@@ -946,7 +946,7 @@ class MockLLM:
 
         # Verify no ordering violations
         assert len(order_validator.violations) == 0, \
-        "formatted_string"
+        ""
 
 
         if __name__ == "__main__":

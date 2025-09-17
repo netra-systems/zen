@@ -621,7 +621,7 @@ class TestSecurityCompliance:
 
     # Security metrics should include key measurements
         security_metrics = dashboard_data["security_metrics"]
-        required_metrics = [ )
+        required_metrics = [ ]
         "violations_detected", "validations_performed",
         "blocked_operations", "violation_rate"
     

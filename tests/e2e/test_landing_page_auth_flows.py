@@ -57,17 +57,17 @@ class TestLandingPageAuthFlows:
     # Mock: OAuth external provider isolation for network-independent testing
         service.get_google_oauth_url = Mock(return_value="https://accounts.google.com/o/oauth2/v2/auth?client_id=test&redirect_uri=test&response_type=code")
     # Mock: Generic component isolation for controlled unit testing
-        service.exchange_code_for_token = AsyncNone  # TODO: Use real service instead of Mock
+        service.exchange_code_for_token = MagicMock()  # TODO: Use real service instead of Mock
     # Mock: Generic component isolation for controlled unit testing
-        service.handle_oauth_callback = AsyncNone  # TODO: Use real service instead of Mock
+        service.handle_oauth_callback = MagicMock()  # TODO: Use real service instead of Mock
     # Mock: Generic component isolation for controlled unit testing
         service.create_jwt_token = AuthManager() instead of Mock
     # Mock: Generic component isolation for controlled unit testing
         service.validate_jwt_token = AuthManager() instead of Mock
     # Mock: Generic component isolation for controlled unit testing
-        service.check_authentication = AsyncNone  # TODO: Use real service instead of Mock
+        service.check_authentication = MagicMock()  # TODO: Use real service instead of Mock
     # Mock: Session isolation for controlled testing without external state
-        service.validate_session_token = AsyncNone  # TODO: Use real service instead of Mock
+        service.validate_session_token = MagicMock()  # TODO: Use real service instead of Mock
     # Mock: Generic component isolation for controlled unit testing
         service.get_oauth_url = AuthManager() instead of Mock
     # Mock: Generic component isolation for controlled unit testing
@@ -75,21 +75,21 @@ class TestLandingPageAuthFlows:
     # Mock: Generic component isolation for controlled unit testing
         service.refresh_access_token = AuthManager() instead of Mock
     # Mock: Session isolation for controlled testing without external state
-        service.create_session = AsyncNone  # TODO: Use real service instead of Mock
+        service.create_session = MagicMock()  # TODO: Use real service instead of Mock
     # Mock: Generic component isolation for controlled unit testing
-        service.handle_new_user_oauth = AsyncNone  # TODO: Use real service instead of Mock
+        service.handle_new_user_oauth = MagicMock()  # TODO: Use real service instead of Mock
     # Mock: Generic component isolation for controlled unit testing
-        service.authenticate_user = AsyncNone  # TODO: Use real service instead of Mock
+        service.authenticate_user = MagicMock()  # TODO: Use real service instead of Mock
     # Mock: Generic component isolation for controlled unit testing
         service.validate_jwt_token_safe = AuthManager() instead of Mock
     # Mock: Generic component isolation for controlled unit testing
-        service.create_jwt_token_async = AsyncNone  # TODO: Use real service instead of Mock
+        service.create_jwt_token_async = MagicMock()  # TODO: Use real service instead of Mock
     # Mock: Session isolation for controlled testing without external state
-        service.validate_session_with_context = AsyncNone  # TODO: Use real service instead of Mock
+        service.validate_session_with_context = MagicMock()  # TODO: Use real service instead of Mock
     # Mock: Generic component isolation for controlled unit testing
-        service.get_user_by_email_safe = AsyncNone  # TODO: Use real service instead of Mock
+        service.get_user_by_email_safe = MagicMock()  # TODO: Use real service instead of Mock
     # Mock: Generic component isolation for controlled unit testing
-        service.get_user_by_email = AsyncNone  # TODO: Use real service instead of Mock
+        service.get_user_by_email = MagicMock()  # TODO: Use real service instead of Mock
         await asyncio.sleep(0)
         return service
 
@@ -100,13 +100,13 @@ class TestLandingPageAuthFlows:
     # Mock: Generic component isolation for controlled unit testing
         service = service_instance  # Initialize appropriate service instead of Mock
     # Mock: Session isolation for controlled testing without external state
-        service.create_user_session = AsyncNone  # TODO: Use real service instead of Mock
+        service.create_user_session = MagicMock()  # TODO: Use real service instead of Mock
     # Mock: Generic component isolation for controlled unit testing
-        service.logout_user = AsyncNone  # TODO: Use real service instead of Mock
+        service.logout_user = MagicMock()  # TODO: Use real service instead of Mock
     # Mock: Generic component isolation for controlled unit testing
-        service.get_user_by_email = AsyncNone  # TODO: Use real service instead of Mock
+        service.get_user_by_email = MagicMock()  # TODO: Use real service instead of Mock
     # Mock: Generic component isolation for controlled unit testing
-        service.create_user = AsyncNone  # TODO: Use real service instead of Mock
+        service.create_user = MagicMock()  # TODO: Use real service instead of Mock
         await asyncio.sleep(0)
         return service
 
@@ -124,7 +124,7 @@ class TestLandingPageAuthFlows:
     # TODO: Initialize real service
         """Mock OAuth provider response."""
         pass
-        return { )
+        return { }
         "id": "google_123456",
         "email": "test@example.com",
         "name": "Test User",
@@ -147,7 +147,7 @@ assert "response_type=code" in oauth_url
 
         # 2. Simulate OAuth callback with authorization code
 auth_service.exchange_code_for_token.return_value = mock_oauth_response
-auth_service.handle_oauth_callback.return_value = { )
+auth_service.handle_oauth_callback.return_value = { }
 **mock_oauth_response,
 "provider": "google",
 "access_token": "test_access_token",
@@ -170,7 +170,7 @@ assert "refresh_token" in user_data
         """Test JWT creation and validation for landing page auth."""
 pass
             # Create test user data
-user_data = { )
+user_data = { }
 "user_id": "123456",
 "email": "test@example.com",
 "name": "Test User",
@@ -198,7 +198,7 @@ is_authenticated = await auth_service.check_authentication(token=None)
 assert is_authenticated is False
 
                 # 2. User completes OAuth flow
-user_data = { )
+user_data = { }
 "user_id": "google_123456",
 "email": "test@example.com",
 "name": "Test User",
@@ -212,7 +212,7 @@ assert "session_token" in session
 assert "expires_at" in session
 
                 # 4. Redirect to dashboard with session token
-dashboard_url = "formatted_string"
+dashboard_url = ""
 
                 # 5. Validate dashboard access
 is_authorized = await auth_service.validate_session_token( )
@@ -231,7 +231,7 @@ for provider in providers:
                         # Get provider-specific OAuth URL
 oauth_url = auth_service.get_oauth_url( )
 provider=provider,
-redirect_uri="formatted_string"
+redirect_uri=""
                         
 
                         # Verify correct provider URL
@@ -252,14 +252,14 @@ assert "scope=" in oauth_url
     async def test_landing_page_refresh_token_flow(self, auth_service, jwt_secret):
         """Test refresh token flow for expired sessions."""
                                         # Create initial token with short expiry
-user_data = { )
+user_data = { }
 "user_id": "123456",
 "email": "test@example.com"
                                         
 
                                         # Generate token that expires in 1 second
 short_token = jwt.encode( )
-{ )
+{ }
 **user_data,
 "exp": datetime.now(timezone.utc) + timedelta(seconds=1),
 "iat": datetime.now(timezone.utc)
@@ -289,7 +289,7 @@ assert decoded["user_id"] == user_data["user_id"]
         """Test logout flow from authenticated state."""
 pass
                                                 # Create authenticated session
-user_data = { )
+user_data = { }
 "user_id": "123456",
 "email": "test@example.com"
                                                 
@@ -310,7 +310,7 @@ assert is_active is False
 @pytest.mark.e2e
     async def test_landing_page_remember_me_flow(self, auth_service):
         """Test 'Remember Me' functionality for persistent sessions."""
-user_data = { )
+user_data = { }
 "user_id": "123456",
 "email": "test@example.com"
                                                     
@@ -343,7 +343,7 @@ assert expiry_diff >= 29  # At least 29 days difference
         """Test first-time user registration and onboarding flow."""
 pass
                                                         # New user OAuth data
-new_user_data = { )
+new_user_data = { }
 "provider_id": "google_new_user_123",
 "email": "newuser@example.com",
 "name": "New User",
@@ -373,7 +373,7 @@ assert user["redirect_to"] == "/onboarding"
     async def test_landing_page_returning_user_flow(self, auth_service, user_service):
         """Test returning user authentication flow."""
                                                             # Existing user data
-existing_user_data = { )
+existing_user_data = { }
 "user_id": "existing_user_123",
 "email": "existing@example.com",
 "name": "Existing User",

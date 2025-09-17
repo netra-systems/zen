@@ -192,7 +192,7 @@ class PerformanceMonitor:
 
         await asyncio.sleep(0.1)  # Sample every 100ms
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("")
 
         def get_load_test_result(self, test_name: str, start_time: float, end_time: float,
         total_users: int, notifications_sent: int,
@@ -213,13 +213,13 @@ class PerformanceMonitor:
     # Identify performance violations
         violations = []
         if avg_delivery > 500:  # 500ms threshold
-        violations.append("formatted_string")
+        violations.append("")
         if p95_delivery > 1000:  # 1s threshold for P95
-        violations.append("formatted_string")
+        violations.append("")
         if memory_leaked > 100:  # 100MB leak threshold
-        violations.append("formatted_string")
+        violations.append("")
         if notifications_lost > 0:
-        violations.append("formatted_string")
+        violations.append("")
 
         await asyncio.sleep(0)
         return LoadTestResult( )
@@ -325,13 +325,13 @@ start_time = time.time()
 
 tasks = []
 for user_num in range(num_users):
-    user_id = "formatted_string"
+    user_id = ""
 
 for notification_num in range(notifications_per_user):
-    notification_data = { )
+    notification_data = { }
 "type": "tool_progress",
 "progress": notification_num * 5,
-"tool_name": "formatted_string",
+"tool_name": "",
 "timestamp": time.time()
                         
 
@@ -348,8 +348,8 @@ test_name, start_time, end_time, num_users, sent_notifications, delivered_notifi
                         
 
                         # Verify performance degradation occurred
-assert load_test_result.avg_delivery_time_ms > 50, "formatted_string"
-assert load_test_result.p95_delivery_time_ms > 100, "formatted_string"
+assert load_test_result.avg_delivery_time_ms > 50, ""
+assert load_test_result.p95_delivery_time_ms > 100, ""
 
                         # Check for performance violations
 assert len(load_test_result.performance_violations) > 0, "Expected performance violations"
@@ -362,7 +362,7 @@ low_load_deliveries = [item for item in []]
 if high_load_deliveries and low_load_deliveries:
     avg_high_load = statistics.mean(m.value for m in high_load_deliveries)
 avg_low_load = statistics.mean(m.value for m in low_load_deliveries)
-assert avg_high_load > avg_low_load * 1.5, "formatted_string"
+assert avg_high_load > avg_low_load * 1.5, ""
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -388,21 +388,21 @@ async def leaky_notification_system(user_id: str, notification_data: Dict[str, A
 pass
 nonlocal sent_notifications, delivered_notifications
 
-notification_id = "formatted_string"
+notification_id = ""
 sent_notifications += 1
 
     # Store notification in memory (MEMORY LEAK!)
-notification_history[notification_id] = { )
+notification_history[notification_id] = { }
 "user_id": user_id,
 "data": notification_data,
 "timestamp": time.time(),
 "delivery_attempts": [],
-"metadata": { )
+"metadata": { }
 "created_at": datetime.now(),
 "user_agent": "test_client",
-"ip_address": "formatted_string",
-"session_context": { )
-"session_id": "formatted_string",
+"ip_address": "",
+"session_context": { }
+"session_id": "",
 "user_preferences": {"theme": "dark", "lang": "en"},
 "cached_data": ["x"] * 100  # More memory usage
     
@@ -411,10 +411,10 @@ notification_history[notification_id] = { )
 
     # Store user context (MEMORY LEAK!)
 if user_id not in user_contexts:
-    user_contexts[user_id] = { )
+    user_contexts[user_id] = { }
 "user_id": user_id,
 "notification_history": [],
-"connection_metadata": { )
+"connection_metadata": { }
 "connected_at": time.time(),
 "user_agent": "WebSocket Client",
 "cached_responses": {}
@@ -425,7 +425,7 @@ user_contexts[user_id]["notification_history"].append(notification_id)
 user_contexts[user_id]["connection_metadata"]["cached_responses"][notification_id] = notification_data
 
         # Add to pending deliveries (MEMORY LEAK!)
-pending_deliveries[notification_id] = { )
+pending_deliveries[notification_id] = { }
 "notification": notification_data,
 "user_context": user_contexts[user_id],
 "retry_count": 0,
@@ -449,11 +449,11 @@ tasks = []
 
 while time.time() - start_time < duration_seconds:
             # Generate notifications for random users
-user_id = "formatted_string"
+user_id = ""
 
-notification_data = { )
+notification_data = { }
 "type": "tool_update",
-"content": "formatted_string",
+"content": "",
 "timestamp": time.time(),
 "large_data": ["x"] * 1000  # Add bulk data
             
@@ -475,7 +475,7 @@ test_name, start_time, end_time, 10, sent_notifications, delivered_notifications
             
 
             # Verify memory leak occurred
-assert load_test_result.memory_leaked_mb > 10, "formatted_string"
+assert load_test_result.memory_leaked_mb > 10, ""
 
             # Check memory growth pattern
 memory_metrics = [item for item in []]
@@ -484,15 +484,15 @@ if len(memory_metrics) > 10:
 late_memory = statistics.mean(m.value for m in memory_metrics[-5:])
 memory_growth = late_memory - early_memory
 
-assert memory_growth > 5, "formatted_string"
+assert memory_growth > 5, ""
 
                 # Verify data structures are leaking
 notification_count = len(notification_history)
 user_context_count = len(user_contexts)
 pending_count = len(pending_deliveries)
 
-assert notification_count > 100, "formatted_string"
-assert pending_count > 50, "formatted_string"
+assert notification_count > 100, ""
+assert pending_count > 50, ""
 
                 # Check for memory violation
 memory_violations = [item for item in []]
@@ -527,7 +527,7 @@ nonlocal dropped_connections, reconnection_attempts
 
     # Create connection with random stability
 connection_stability = random.uniform(0.7, 1.0)  # 70-100% stability
-connection_pool[connection_id] = { )
+connection_pool[connection_id] = { }
 "user_id": user_id,
 "created_at": time.time(),
 "stability": connection_stability,
@@ -572,7 +572,7 @@ nonlocal sent_notifications, delivered_notifications, failed_deliveries
 sent_notifications += 1
 
     # Find user's connection
-user_connections = [ )
+user_connections = [ ]
 conn_id for conn_id, conn_data in connection_pool.items()
 if conn_data["user_id"] == user_id
     
@@ -632,8 +632,8 @@ start_time = time.time()
                         # Create initial connections
 connection_tasks = []
 for i in range(max_concurrent_connections):
-    user_id = "formatted_string"  # 20 users with multiple connections each
-connection_id = "formatted_string"
+    user_id = ""  # 20 users with multiple connections each
+connection_id = ""
 
 connection_task = asyncio.create_task( )
 unstable_websocket_connection(user_id, connection_id)
@@ -654,9 +654,9 @@ conn_data["user_id"] for conn_data in connection_pool.values()
 
 if active_users:
     target_user = random.choice(active_users)
-notification = { )
+notification = { }
 "type": "tool_progress",
-"content": "formatted_string",
+"content": "",
 "timestamp": time.time()
                                     
 
@@ -683,12 +683,12 @@ test_name, start_time, end_time, 20, sent_notifications, delivered_notifications
                                             
 
                                             # Verify connection instability caused issues
-assert dropped_connections > 5, "formatted_string"
-assert failed_deliveries > 10, "formatted_string"
+assert dropped_connections > 5, ""
+assert failed_deliveries > 10, ""
 
                                             # Check delivery success rate
 success_rate = delivered_notifications / sent_notifications if sent_notifications > 0 else 0
-assert success_rate < 0.9, "formatted_string"
+assert success_rate < 0.9, ""
 
                                             # Verify performance violations
 notification_loss_violations = [item for item in []]
@@ -696,7 +696,7 @@ assert len(notification_loss_violations) > 0, "Expected notification loss violat
 
                                             # Check error metrics
 total_errors = sum(performance_monitor.error_counts.values())
-assert total_errors > 20, "formatted_string"
+assert total_errors > 20, ""
 
 
 class TestConcurrentUserPerformance:
@@ -731,7 +731,7 @@ start_time = time.time()
     # Simulate CPU-intensive work (blocking operation)
 result_data = []
 for i in range(10000):  # CPU work that can"t be awaited
-result_data.append("formatted_string")
+result_data.append("")
 
     # Simulate I/O delay
 time.sleep(random.uniform(0.01, 0.05))
@@ -791,8 +791,8 @@ for burst_num in range(5):  # 5 bursts
 burst_start = time.time()
 
 for i in range(burst_size):
-    user_id = "formatted_string"
-notification_data = { )
+    user_id = ""
+notification_data = { }
 "type": "tool_result",
 "burst_num": burst_num,
 "item_num": i,
@@ -830,7 +830,7 @@ test_name, start_time, end_time, total_users, sent_notifications, delivered_noti
                         
 
                         # Verify thread exhaustion occurred
-assert thread_exhaustion_errors > 0, "formatted_string"
+assert thread_exhaustion_errors > 0, ""
 
                         # Check processing time degradation
 processing_metrics = [item for item in []]
@@ -839,15 +839,15 @@ if len(processing_metrics) > 10:
 late_processing = statistics.mean(m.value for m in processing_metrics[-10:])
 
                             # Processing should slow down due to thread contention
-assert late_processing > early_processing * 1.5, "formatted_string"
+assert late_processing > early_processing * 1.5, ""
 
                             # Check delivery success rate
 success_rate = delivered_notifications / sent_notifications if sent_notifications > 0 else 0
-assert success_rate < 0.8, "formatted_string"
+assert success_rate < 0.8, ""
 
                             # Verify timeout errors
 timeout_errors = performance_monitor.error_counts.get("thread_exhaustion_timeout", 0)
-assert timeout_errors > 10, "formatted_string"
+assert timeout_errors > 10, ""
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -944,8 +944,8 @@ enqueue_tasks = []
 notification_interval = 1.0 / notification_rate
 
 while time.time() - start_time < test_duration_seconds:
-    user_id = "formatted_string"
-notification_data = { )
+    user_id = ""
+notification_data = { }
 "type": "high_volume_update",
 "sequence": sent_notifications,
 "timestamp": time.time(),
@@ -975,24 +975,24 @@ test_name, start_time, end_time, total_users, sent_notifications, delivered_noti
                     
 
                     # Verify queue overflow occurred
-assert queue_overflow_errors > 0, "formatted_string"
+assert queue_overflow_errors > 0, ""
 
                     # Check that queue reached capacity
 max_queue_size_observed = max( )
 (m.value for m in performance_monitor.metrics if m.metric_name == "notification_queue_size"),
 default=0
                     
-assert max_queue_size_observed >= max_queue_size * 0.8, "formatted_string"
+assert max_queue_size_observed >= max_queue_size * 0.8, ""
 
                     # Verify processing couldn't keep up with input rate
 expected_deliveries = slow_processing_rate * test_duration_seconds
-assert delivered_notifications <= expected_deliveries * 1.2, "formatted_string"
+assert delivered_notifications <= expected_deliveries * 1.2, ""
 
                     # Check for significant notification loss
 notifications_lost = sent_notifications - delivered_notifications
 loss_percentage = notifications_lost / sent_notifications if sent_notifications > 0 else 0
 
-assert loss_percentage > 0.3, "formatted_string"
+assert loss_percentage > 0.3, ""
 
                     # Verify overflow violations
 overflow_violations = [item for item in []]

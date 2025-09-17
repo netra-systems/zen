@@ -56,7 +56,7 @@ class DatabaseConnectionTimeoutDiagnostic:
 
     def get_current_config(self) -> Dict[str, Any]:
         """Get current database configuration from all sources."""
-        config = { )
+        config = { }
         'environment_vars': {},
         'direct_env': {},
         'auth_config': {},
@@ -92,7 +92,7 @@ class DatabaseConnectionTimeoutDiagnostic:
 
     async def test_connection_with_timeout(self, url:
         """Test database connection with specific timeout."""
-        result = { )
+        result = { }
         'description': description,
         'url_masked': DatabaseURLBuilder.mask_url_for_logging(url),
         'timeout': timeout,
@@ -122,19 +122,19 @@ class DatabaseConnectionTimeoutDiagnostic:
         await conn.close()
 
         connection_time = time.time() - start_time
-        result.update({ ))
+        result.update({ })
         'success': True,
         'connection_time': connection_time
                                 
 
         except asyncio.TimeoutError:
-        result.update({ ))
+        result.update({ })
         'timeout_exceeded': True,
         'connection_time': time.time() - start_time,
         'error': 'formatted_string'
                                     
         except Exception as e:
-        result.update({ ))
+        result.update({ })
         'connection_time': time.time() - start_time,
         'error': str(e)
                                         
@@ -143,7 +143,7 @@ class DatabaseConnectionTimeoutDiagnostic:
 
     async def test_auth_database_connection_initialization(self) -> Dict[str, Any]:
         """Test auth database connection initialization flow."""
-        result = { )
+        result = { }
         'test': 'auth_database_initialization',
         'success': False,
         'stages': {},
@@ -157,7 +157,7 @@ class DatabaseConnectionTimeoutDiagnostic:
                                                 # Stage 1: Create connection object
         stage_start = time.time()
         auth_conn = AuthDatabaseConnection()
-        result['stages']['create_object'] = { )
+        result['stages']['create_object'] = { }
         'time': time.time() - stage_start,
         'success': True
                                                 
@@ -165,7 +165,7 @@ class DatabaseConnectionTimeoutDiagnostic:
                                                 # Stage 2: Initialize connection
         stage_start = time.time()
         await asyncio.wait_for(auth_conn.initialize(), timeout=15.0)
-        result['stages']['initialize'] = { )
+        result['stages']['initialize'] = { }
         'time': time.time() - stage_start,
         'success': True
                                                 
@@ -173,7 +173,7 @@ class DatabaseConnectionTimeoutDiagnostic:
                                                 # Stage 3: Test readiness
         stage_start = time.time()
         is_ready = await asyncio.wait_for(auth_conn.is_ready(), timeout=10.0)
-        result['stages']['is_ready'] = { )
+        result['stages']['is_ready'] = { }
         'time': time.time() - stage_start,
         'success': is_ready,
         'ready': is_ready
@@ -182,7 +182,7 @@ class DatabaseConnectionTimeoutDiagnostic:
                                                 # Stage 4: Test connection
         stage_start = time.time()
         test_success = await asyncio.wait_for(auth_conn.test_connection(), timeout=10.0)
-        result['stages']['test_connection'] = { )
+        result['stages']['test_connection'] = { }
         'time': time.time() - stage_start,
         'success': test_success
                                                 
@@ -200,7 +200,7 @@ class DatabaseConnectionTimeoutDiagnostic:
 
     async def test_concurrent_connections(self, url:
         """Test concurrent database connections to identify blocking issues."""
-        result = { )
+        result = { }
         'test': 'concurrent_connections',
         'concurrent_count': concurrent_count,
         'url_masked': DatabaseURLBuilder.mask_url_for_logging(url),
@@ -225,14 +225,14 @@ class DatabaseConnectionTimeoutDiagnostic:
         await asyncio.wait_for(conn.fetchval("SELECT 1"), timeout=5.0)
         await conn.close()
         await asyncio.sleep(0)
-        return { )
+        return { }
         'id': conn_id,
         'success': True,
         'time': time.time() - conn_start,
         'error': None
         
         except Exception as e:
-        return { )
+        return { }
         'id': conn_id,
         'success': False,
         'time': time.time() - conn_start,
@@ -262,7 +262,7 @@ class DatabaseConnectionTimeoutDiagnostic:
         config = self.get_current_config()
 
     # Test different timeout values
-        timeout_tests = [ )
+        timeout_tests = [ ]
         (1.0, "very_short"),
         (5.0, "short"),
         (10.0, "normal"),
@@ -286,7 +286,7 @@ class DatabaseConnectionTimeoutDiagnostic:
             # Test concurrent connections
         concurrent_result = await self.test_concurrent_connections(auth_url, 3)
 
-        diagnosis = { )
+        diagnosis = { }
         'config': config,
         'timeout_tests': timeout_results,
         'initialization_test': init_result,
@@ -298,7 +298,7 @@ class DatabaseConnectionTimeoutDiagnostic:
 
     def _analyze_results(self, timeout_results: List[Dict], init_result: Dict, concurrent_result: Dict) -> Dict[str, Any]:
         """Analyze test results to identify root causes."""
-        analysis = { )
+        analysis = { }
         'root_causes': [],
         'recommendations': [],
         'severity': 'unknown'
@@ -313,14 +313,14 @@ class DatabaseConnectionTimeoutDiagnostic:
         analysis['severity'] = 'critical'
         elif len(failed_timeouts) > 0:
         min_success_timeout = min(r['timeout'] for r in successful_timeouts)
-        analysis['root_causes'].append("formatted_string")
+        analysis['root_causes'].append("")
         analysis['severity'] = 'high'
 
             # Analyze initialization
         if not init_result['success']:
         analysis['root_causes'].append("Auth database initialization failing")
         if init_result.get('error'):
-        analysis['root_causes'].append("formatted_string")
+        analysis['root_causes'].append("")
 
                     # Analyze concurrent connections
         if not concurrent_result['success']:
@@ -328,7 +328,7 @@ class DatabaseConnectionTimeoutDiagnostic:
 
                         # Generate recommendations
         if analysis['severity'] in ['critical', 'high']:
-        analysis['recommendations'].extend([ ))
+        analysis['recommendations'].extend([ ])
         "Increase database connection timeouts to minimum working value",
         "Implement connection pooling with proper timeout configuration",
         "Add retry logic with exponential backoff",
@@ -361,16 +361,16 @@ logger.info("=== COMPREHENSIVE DATABASE TIMEOUT DIAGNOSIS ===")
 diagnosis = await diagnostic.diagnose_timeout_patterns()
 
         # Print detailed results
-print("formatted_string")
+    print("")
 print("DATABASE CONNECTION TIMEOUT DIAGNOSIS RESULTS")
-print("formatted_string")
+print("")
 
         # Configuration
 config = diagnosis.get('config', {})
 print(f" )
 Configuration:")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 
         # Timeout test results
 timeout_tests = diagnosis.get('timeout_tests', [])
@@ -378,45 +378,45 @@ print(f" )
 Timeout Test Results:")
 for result in timeout_tests:
 status = " PASS:  SUCCESS" if result['success'] else " FAIL:  FAILED"
-time_str = "formatted_string" if result['connection_time'] else "N/A"
-print("formatted_string")
+time_str = "" if result['connection_time'] else "N/A"
+print("")
 if result.get('error'):
-print("formatted_string")
+    print("")
 
                 # Initialization test
 init_result = diagnosis.get('initialization_test', {})
 print(f" )
 Initialization Test:")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 
 for stage_name, stage_result in init_result.get('stages', {}).items():
 status = " PASS: " if stage_result['success'] else " FAIL: "
-print("formatted_string")
+print("")
 
 if init_result.get('error'):
-print("formatted_string")
+    print("")
 
                         # Concurrent test
 concurrent_result = diagnosis.get('concurrent_test', {})
 print(f" )
 Concurrent Connection Test:")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 
                         # Analysis
 analysis = diagnosis.get('analysis', {})
 print(f" )
 Root Cause Analysis:")
-print("formatted_string")
+print("")
 
 for cause in analysis.get('root_causes', []):
-print("formatted_string")
+    print("")
 
 print(f" )
 Recommendations:")
 for rec in analysis.get('recommendations', []):
-print("formatted_string")
+    print("")
 
                                 # Determine if this is a blocking issue
 has_critical_issues = ( )
@@ -427,21 +427,21 @@ not any(r['success'] for r in timeout_tests)
 
 if has_critical_issues:
                                     # This test should document the issue but not fail - we need to implement fixes
-print("formatted_string")
+    print("")
 print(" FAIL:  CRITICAL BLOCKING ISSUE IDENTIFIED")
 print("This test documents the database connection timeout issue.")
 print("Fixes are being implemented in subsequent tests.")
-print("formatted_string")
+print("")
 
                                     # Always assert - this test should pass after fixes are implemented
 working_timeouts = [item for item in []]]
 assert len(working_timeouts) > 0, ( )
-"formatted_string"
+""
                                     
 
                                     # Verify auth database initialization works (should work after fixes)
 assert init_result.get('success'), ( )
-"formatted_string"
+""
                                     
 
 @pytest.mark.asyncio
@@ -459,7 +459,7 @@ logger.info("=== DATABASE CONNECTION TIMEOUT CONFIGURATION TEST ===")
 env = get_env()
 
                                         # Test timeout configurations
-timeout_configs = [ )
+timeout_configs = [ ]
 {'connect': 10.0, 'query': 5.0, 'description': 'Standard'},
 {'connect': 15.0, 'query': 10.0, 'description': 'Extended'},
 {'connect': 30.0, 'query': 15.0, 'description': 'Long'}
@@ -490,7 +490,7 @@ await conn.close()
 
 connection_time = time.time() - start_time
 
-config_result = { )
+config_result = { }
 'config': config,
 'success': True,
 'connection_time': connection_time,
@@ -499,10 +499,10 @@ config_result = { )
 
 successful_configs.append(config_result)
 
-print("formatted_string")
+print("")
 
 except Exception as e:
-print("formatted_string")
+    print("")
 
                                                     # Verify at least one configuration works
 assert len(successful_configs) > 0, ( )
@@ -514,15 +514,15 @@ optimal_config = min(successful_configs, key=lambda x: None x['connection_time']
 
 print(f" )
 Optimal timeout configuration:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
                                                     # Recommend configuration updates
 print(f" )
 Recommended fixes:")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 print(f"  3. Implement retry logic with exponential backoff")
 
 def test_database_url_formation_diagnosis(self):
@@ -542,7 +542,7 @@ env_vars = env.get_all()
     # Test DatabaseURLBuilder
 builder = DatabaseURLBuilder(env_vars)
 
-urls = { )
+urls = { }
 'builder_async': builder.get_url_for_environment(sync=False),
 'builder_sync': builder.get_url_for_environment(sync=True),
 'auth_async': AuthDatabaseManager.get_auth_database_url_async(),
@@ -558,30 +558,30 @@ url_issues = []
 for name, url in urls.items():
 if url:
 masked_url = DatabaseURLBuilder.mask_url_for_logging(url)
-print("formatted_string")
+print("")
 
             # Check for common issues
 if "postgresql+asyncpg://" in url and name.endswith('_sync'):
-url_issues.append("formatted_string")
+url_issues.append("")
 
 if "sslmode=" in url and "asyncpg" in url:
-url_issues.append("formatted_string"t support sslmode parameter")
+url_issues.append(""t support sslmode parameter")
 
 if "ssl=" in url and "psycopg2" in url:
-url_issues.append("formatted_string")
+url_issues.append("")
 
 if ":5432/" in url and env_vars.get('POSTGRES_PORT') != '5432':
-url_issues.append("formatted_string")
+url_issues.append("")
 
 else:
-print("formatted_string")
-url_issues.append("formatted_string")
+    print("")
+url_issues.append("")
 
 print(f" )
 URL Issues Found:")
 if url_issues:
 for issue in url_issues:
-print("formatted_string")
+    print("")
 else:
 print(f"   PASS:  No URL formation issues detected")
 
@@ -592,7 +592,7 @@ if critical_issues:
 print(f" )
 Critical URL issues that need fixing:")
 for issue in critical_issues:
-print("formatted_string")
+    print("")
 
                                                     # Assert URLs are formed correctly
 assert urls['auth_config'], "Auth service database URL must be generated"
@@ -603,7 +603,7 @@ auth_url = urls['auth_config']
 if "asyncpg" in auth_url:
 assert "sslmode=" not in auth_url, ( )
 f"AsyncPG URL contains unsupported sslmode parameter. "
-"formatted_string"
+""
                                                         
 
 
@@ -628,15 +628,15 @@ class DatabaseConnectionTimeoutFixes:
         yield conn
 
         except asyncio.TimeoutError:
-        raise RuntimeError("formatted_string")
+        raise RuntimeError("")
         except Exception as e:
-        raise RuntimeError("formatted_string") from e
+        raise RuntimeError("") from e
         finally:
         if conn:
         try:
         await asyncio.wait_for(conn.close(), timeout=5.0)
         except Exception as close_error:
-        logger.warning("formatted_string")
+        logger.warning("")
 
         @classmethod
     async def test_database_readiness_with_timeout(cls, database_url:
@@ -651,7 +651,7 @@ class DatabaseConnectionTimeoutFixes:
         await asyncio.sleep(0)
         return result == 1
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
         return False
 
         @classmethod
@@ -667,11 +667,11 @@ class DatabaseConnectionTimeoutFixes:
         except Exception as e:
         last_exception = e
         if attempt < max_retries - 1:
-        logger.warning("formatted_string")
+        logger.warning("")
         await asyncio.sleep(delay)
         delay = min(delay * 2, max_delay)
         else:
-        logger.error("formatted_string")
+        logger.error("")
 
         raise last_exception
 
@@ -730,7 +730,7 @@ print(" PASS:  Database operation retry logic working")
 if __name__ == "__main__":
                                 # Run diagnostic when executed directly
 async def main():
-print("=== DATABASE CONNECTION TIMEOUT DIAGNOSIS ===")
+    print("=== DATABASE CONNECTION TIMEOUT DIAGNOSIS ===")
 diagnostic = DatabaseConnectionTimeoutDiagnostic()
 results = await diagnostic.diagnose_timeout_patterns()
 
@@ -738,13 +738,13 @@ results = await diagnostic.diagnose_timeout_patterns()
 print(f" )
 Diagnosis Summary:")
 analysis = results.get('analysis', {})
-print("formatted_string")
+print("")
 
 for cause in analysis.get('root_causes', []):
-print("formatted_string")
+    print("")
 
 for rec in analysis.get('recommendations', []):
-print("formatted_string")
+    print("")
 
 asyncio.run(main())
 pass

@@ -113,7 +113,7 @@ class TestWebSocketJSONPerformance:
         large_messages = [
         {
         role": "user if i % 2 == 0 else assistant",
-        "content: formatted_string" + "Content  * 100,  # Each message ~700 chars
+        "content: formatted_string + Content  * 100,  # Each message ~700 chars
         timestamp": datetime.now(timezone.utc).isoformat(),
         "metadata: {
         message_id": i,
@@ -400,7 +400,7 @@ class ErrorProneObject:
         ""Test overall WebSocket send performance including serialization."
 
                 # Mock WebSocket for sending
-mock_websocket = Magic        mock_# websocket setup complete
+mock_websocket = MagicMock(); mock_# websocket setup complete
 
 conn_info = {
 "websocket: mock_websocket,

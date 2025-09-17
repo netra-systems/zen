@@ -64,7 +64,7 @@ class LoadTestMetrics:
     def record_user_creation(self, user_id: str, auth_token: str, creation_time: float):
         """Record user creation metrics"""
         with self._lock:
-        self.users[user_id] = { )
+        self.users[user_id] = { }
         'auth_token': auth_token,
         'created_at': creation_time,
         'messages_sent': 0,
@@ -77,7 +77,7 @@ class LoadTestMetrics:
         """Record WebSocket connection metrics"""
         pass
         with self._lock:
-        self.websocket_connections[user_id] = { )
+        self.websocket_connections[user_id] = { }
         'connected_at': connection_time,
         'connection_success': success,
         'events_received': 0,
@@ -90,7 +90,7 @@ class LoadTestMetrics:
         with self._lock:
         response_time = end_time - start_time
 
-        message_record = { )
+        message_record = { }
         'user_id': user_id,
         'message_id': message_id,
         'message_type': message_type,
@@ -123,7 +123,7 @@ class LoadTestMetrics:
         """Record error occurrence"""
         pass
         with self._lock:
-        error_record = { )
+        error_record = { }
         'user_id': user_id,
         'error_type': error_type,
         'error_message': error_message,
@@ -138,7 +138,7 @@ class LoadTestMetrics:
         memory = psutil.virtual_memory()
 
         with self._lock:
-        metrics = { )
+        metrics = { }
         'timestamp': timestamp,
         'cpu_percent': cpu_percent,
         'memory_percent': memory.percent,
@@ -147,7 +147,7 @@ class LoadTestMetrics:
             
         self.system_metrics.append(metrics)
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("")
 
     def get_performance_analysis(self) -> Dict[str, Any]:
         """Generate comprehensive performance analysis"""
@@ -177,7 +177,7 @@ class LoadTestMetrics:
                 # Calculate throughput
         throughput_messages_per_second = successful_messages / test_duration if test_duration > 0 else 0.0
 
-        return { )
+        return { }
         'test_duration_seconds': test_duration,
         'total_users': len(self.users),
         'total_messages': total_messages,
@@ -188,7 +188,7 @@ class LoadTestMetrics:
         'websocket_connections': total_connections,
         'websocket_success_rate_percent': connection_success_rate,
         'throughput_messages_per_second': throughput_messages_per_second,
-        'response_time_stats': { )
+        'response_time_stats': { }
         'average_seconds': avg_response_time,
         'median_seconds': median_response_time,
         'p95_seconds': p95_response_time,
@@ -196,7 +196,7 @@ class LoadTestMetrics:
         'min_seconds': min(self.response_times) if self.response_times else 0.0,
         'max_seconds': max(self.response_times) if self.response_times else 0.0
         },
-        'system_metrics': { )
+        'system_metrics': { }
         'max_cpu_percent': max([m['cpu_percent'] for m in self.system_metrics]) if self.system_metrics else 0.0,
         'max_memory_percent': max([m['memory_percent'] for m in self.system_metrics]) if self.system_metrics else 0.0,
         'peak_memory_used_gb': max([m['memory_used_gb'] for m in self.system_metrics]) if self.system_metrics else 0.0
@@ -213,11 +213,11 @@ class SimulatedUser:
         self.metrics = metrics
         self.backend_url = backend_url
         self.auth_url = auth_url
-        self.websocket_url = "formatted_string"
+        self.websocket_url = ""
         self.auth_token: Optional[str] = None
         self.websocket: Optional[websockets.ServerConnection] = None
         self.thread_id: Optional[str] = None
-        self.message_queries = [ )
+        self.message_queries = [ ]
         "Analyze current system performance and provide optimization recommendations",
         "Review database query performance and suggest indexing improvements",
         "Evaluate API response times and identify bottlenecks",
@@ -231,7 +231,7 @@ class SimulatedUser:
         start_time = time.time()
 
         # Register user
-        register_payload = { )
+        register_payload = { }
         'email': 'formatted_string',
         'password': 'LoadTest123!',
         'full_name': 'formatted_string'
@@ -251,7 +251,7 @@ class SimulatedUser:
         return False
 
             # Login to get token
-        login_payload = { )
+        login_payload = { }
         'email': register_payload['email'],
         'password': register_payload['password']
             
@@ -275,7 +275,7 @@ class SimulatedUser:
         creation_time = time.time()
         self.metrics.record_user_creation(self.user_id, self.auth_token, creation_time)
 
-        logger.debug("formatted_string")
+        logger.debug("")
         return True
 
         except Exception as e:
@@ -287,7 +287,7 @@ class SimulatedUser:
         try:
         start_time = time.time()
 
-        headers = { )
+        headers = { }
         'Authorization': 'formatted_string',
         'User-Agent': 'formatted_string'
         
@@ -303,7 +303,7 @@ class SimulatedUser:
         connection_time = time.time()
         self.metrics.record_websocket_connection(self.user_id, connection_time, True)
 
-        logger.debug("formatted_string")
+        logger.debug("")
         return True
 
         except Exception as e:
@@ -340,18 +340,18 @@ class SimulatedUser:
         """Send a message and wait for response"""
         pass
         try:
-        message_id = "formatted_string"
-        query = "formatted_string"
+        message_id = ""
+        query = ""
 
         start_time = time.time()
 
         # Create agent execution request
-        agent_payload = { )
+        agent_payload = { }
         'user_id': self.user_id,
         'thread_id': self.thread_id or str(uuid.uuid4()),
         'agent_type': 'supervisor',
         'query': query,
-        'context': { )
+        'context': { }
         'load_test': True,
         'message_index': message_index,
         'user_identifier': self.user_id[-8:]
@@ -362,7 +362,7 @@ class SimulatedUser:
         if not self.thread_id:
         self.thread_id = agent_payload['thread_id']
 
-        headers = { )
+        headers = { }
         'Authorization': 'formatted_string',
         'Content-Type': 'application/json'
             
@@ -410,7 +410,7 @@ class SimulatedUser:
         time.time()
                                             
 
-        logger.debug("formatted_string")
+        logger.debug("")
         return success
 
         except Exception as e:
@@ -447,7 +447,7 @@ class SimulatedUser:
         if self.websocket:
         await self.websocket.close()
 
-        return { )
+        return { }
         'user_id': self.user_id,
         'success': True,
         'messages_sent': messages_count,
@@ -477,8 +477,8 @@ class TestRealisticLoadSimulation(DockerTestBase):
     # Service configuration
         backend_port = get_env().get('BACKEND_PORT', '8000')
         auth_port = get_env().get('AUTH_PORT', '8081')
-        self.backend_url = "formatted_string"
-        self.auth_url = "formatted_string"
+        self.backend_url = ""
+        self.auth_url = ""
 
     # Metrics collection
         self.metrics = LoadTestMetrics()
@@ -499,7 +499,7 @@ class TestRealisticLoadSimulation(DockerTestBase):
         pass
         users = []
         for i in range(self.num_users):
-        user_id = "formatted_string"
+        user_id = ""
         user = SimulatedUser(user_id, self.metrics, self.backend_url, self.auth_url)
         users.append(user)
         return users
@@ -515,7 +515,7 @@ class TestRealisticLoadSimulation(DockerTestBase):
     async def _run_concurrent_user_simulations(self, users: List[SimulatedUser]) -> List[Dict[str, Any]]:
         """Run user simulations concurrently"""
         pass
-        logger.info("formatted_string")
+        logger.info("")
 
     # Start system monitoring
         monitor_task = asyncio.create_task( )
@@ -531,8 +531,8 @@ class TestRealisticLoadSimulation(DockerTestBase):
         processed_results = []
         for i, result in enumerate(results):
         if isinstance(result, Exception):
-        logger.error("formatted_string")
-        processed_results.append({ ))
+        logger.error("")
+        processed_results.append({ })
         'user_id': users[i].user_id,
         'success': False,
         'error': str(result)
@@ -558,28 +558,28 @@ class TestRealisticLoadSimulation(DockerTestBase):
         user_success_rate = len(successful_users) / len(user_results) * 100
 
         assert user_success_rate >= 70.0, \
-        "formatted_string"
+        ""
 
     # Validate message success rate
         assert analysis['success_rate_percent'] >= self.min_success_rate_percent, \
-        "formatted_string"
+        ""
 
     # Validate response times
         assert analysis['response_time_stats']['average_seconds'] <= self.max_response_time_seconds, \
-        "formatted_string"
+        ""
 
         assert analysis['response_time_stats']['p95_seconds'] <= self.max_response_time_seconds * 1.5, \
-        "formatted_string"
+        ""
 
     # Validate error rate
         error_rate = (analysis['total_errors'] / max(1, analysis['total_messages'])) * 100
         assert error_rate <= self.max_error_rate_percent, \
-        "formatted_string"
+        ""
 
     # Validate throughput (minimum acceptable)
         min_throughput = 0.5  # messages per second
         assert analysis['throughput_messages_per_second'] >= min_throughput, \
-        "formatted_string"
+        ""
 
     def _log_performance_analysis(self, analysis: Dict[str, Any]):
         """Log comprehensive performance analysis"""
@@ -588,39 +588,39 @@ class TestRealisticLoadSimulation(DockerTestBase):
         logger.info("LOAD TEST PERFORMANCE ANALYSIS")
         logger.info("=" * 60)
 
-        logger.info("formatted_string")
-        logger.info("formatted_string")
-        logger.info("formatted_string")
-        logger.info("formatted_string")
-        logger.info("formatted_string")
-        logger.info("formatted_string")
-        logger.info("formatted_string")
+        logger.info("")
+        logger.info("")
+        logger.info("")
+        logger.info("")
+        logger.info("")
+        logger.info("")
+        logger.info("")
 
         logger.info(" )
         WebSocket Performance:")
-        logger.info("formatted_string")
-        logger.info("formatted_string")
+        logger.info("")
+        logger.info("")
 
         logger.info(" )
         Throughput:")
-        logger.info("formatted_string")
+        logger.info("")
 
         logger.info(" )
         Response Time Statistics:")
         stats = analysis['response_time_stats']
-        logger.info("formatted_string")
-        logger.info("formatted_string")
-        logger.info("formatted_string")
-        logger.info("formatted_string")
-        logger.info("formatted_string")
-        logger.info("formatted_string")
+        logger.info("")
+        logger.info("")
+        logger.info("")
+        logger.info("")
+        logger.info("")
+        logger.info("")
 
         logger.info(" )
         System Resource Usage:")
         sys_metrics = analysis['system_metrics']
-        logger.info("formatted_string")
-        logger.info("formatted_string")
-        logger.info("formatted_string")
+        logger.info("")
+        logger.info("")
+        logger.info("")
 
         logger.info("=" * 60)
 
@@ -643,7 +643,7 @@ logger.info("=== INTEGRATION TEST 10: Realistic Load Simulation (10 Users  x  5 
 
             # Create simulated users
 users = self._create_simulated_users()
-logger.info("formatted_string")
+logger.info("")
 
             # Run concurrent simulations
 logger.info("Starting concurrent user simulations...")
@@ -651,7 +651,7 @@ start_time = time.time()
 user_results = await self._run_concurrent_user_simulations(users)
 end_time = time.time()
 
-logger.info("formatted_string")
+logger.info("")
 
             # Generate performance analysis
 analysis = self.metrics.get_performance_analysis()
@@ -661,11 +661,11 @@ self._validate_load_test_results(user_results, analysis)
 
             # Additional validations
 assert len(user_results) == self.num_users, \
-"formatted_string"
+""
 
             # Validate minimum message volume
 assert analysis['total_messages'] >= self.total_expected_messages * 0.8, \
-"formatted_string"
+""
 
 logger.info(" PASS:  INTEGRATION TEST 10 PASSED: Realistic load simulation successful")
 
@@ -684,7 +684,7 @@ ramp_up_results = []
 
                 Gradually ramp up from 1 to 10 users
 for user_count in [1, 3, 5, 7, 10]:
-logger.info("formatted_string")
+logger.info("")
 
                     # Select subset of users
 current_users = all_users[:user_count]
@@ -698,7 +698,7 @@ user.metrics = iteration_metrics
 user_results = await self._run_concurrent_user_simulations(current_users)
 analysis = iteration_metrics.get_performance_analysis()
 
-ramp_up_results.append({ ))
+ramp_up_results.append({ })
 'user_count': user_count,
 'analysis': analysis,
 'user_results': user_results
@@ -714,7 +714,7 @@ analysis = result['analysis']
 
                             # Success rate should remain reasonable
 assert analysis['success_rate_percent'] >= 70.0, \
-"formatted_string"
+""
 
                             # Response times should not degrade drastically
 if i > 0:
@@ -724,7 +724,7 @@ curr_avg_time = analysis['response_time_stats']['average_seconds']
                                 # Allow for some degradation but not excessive
 max_allowed_time = prev_avg_time * 2.0  # 100% increase max
 assert curr_avg_time <= max_allowed_time, \
-"formatted_string"
+""
 
 logger.info(" PASS:  INTEGRATION TEST 10b PASSED: Gradual load ramp-up successful")
 
@@ -762,19 +762,19 @@ burst_analysis = self.metrics.get_performance_analysis()
 
                                         # Validate burst handling
 assert burst_analysis['success_rate_percent'] >= 60.0, \
-"formatted_string"
+""
 
                                         # System should recover (not crash)
 successful_users = len([item for item in []])
 assert successful_users >= len(burst_users) * 0.6, \
-"formatted_string"
+""
 
 logger.info(" PASS:  INTEGRATION TEST 10c PASSED: Burst load resilience validated")
 
 
 if __name__ == "__main__":
                                             # Run the test directly
-pytest.main([ ))
+pytest.main([ ])
 __file__,
 "-v",
 "--tb=short",

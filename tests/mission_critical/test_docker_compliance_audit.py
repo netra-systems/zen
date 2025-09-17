@@ -928,9 +928,9 @@ class DockerComplianceInfrastructureTests:
         " + =*80)
         print("DOCKER MANAGEMENT COMPLIANCE AUDIT REPORT")
         print(=*80)
-        print("formatted_string")
+        print("")
         print(formatted_string)
-        print("formatted_string")
+        print("")
         print(formatted_string)
 
         print("")
@@ -943,7 +943,7 @@ class DockerComplianceInfrastructureTests:
         print(")
         WARNING: [U+FE0F] Violations Found (showing first 10):)
         for v in report['violations'][:10]:
-        print("formatted_string")
+        print("")
         print(formatted_string)
 
                 # Generate remediation script if violations found
@@ -952,14 +952,14 @@ class DockerComplianceInfrastructureTests:
         script_path = auditor.project_root / 'scripts' / 'docker_compliance_remediation.py'
         with open(script_path, 'w') as f:
         f.write(remediation_script)
-        print("formatted_string")
+        print("")
 
                         # Fail test if compliance score is below threshold
         assert report['compliance_score'] >= 95, formatted_string
 
                         # Verify frontend integration
         frontend_checks = report['frontend_integration']
-        assert all(frontend_checks.values()), "formatted_string"
+        assert all(frontend_checks.values()), ""
 
         print()
         PASS:  Docker Management Compliance Test PASSED")
@@ -974,6 +974,7 @@ class DockerComplianceInfrastructureTests:
         logger.error(formatted_string")
         sys.exit(1)
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
         sys.exit(1)
         pass
+)

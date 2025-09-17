@@ -12,9 +12,9 @@ from shared.isolated_environment import IsolatedEnvironment
 
 def run_test(command, description):
 """Run a test command and report results."""
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 print('='*60)
 
 result = subprocess.run(command, shell=True, capture_output=True, text=True)
@@ -22,7 +22,7 @@ result = subprocess.run(command, shell=True, capture_output=True, text=True)
     # Print only key lines that show Docker behavior
 for line in result.stdout.split(" )
 "):
-if any(keyword in line for keyword in [ ))
+if any(keyword in line for keyword in [ ])
 'Docker', 'docker', 'DOCKER',
 'Skipping', 'required', 'optional',
 'Starting comprehensive', 'cleanup'
@@ -30,25 +30,25 @@ if any(keyword in line for keyword in [ ))
 print(line)
 
 if result.returncode == 0:
-print("[PASS] Test execution started successfully")
+    print("[PASS] Test execution started successfully")
 else:
-print("formatted_string")
+    print("")
 if 'Docker' in result.stderr or 'docker' in result.stderr:
-print("Docker-related error found in stderr")
+    print("Docker-related error found in stderr")
 
 return result.returncode
 
 def main():
 """Run demonstration of Docker-optional testing."""
 pass
-print(" )
-" + "="*80)
+print("")
+ + ="*80)
 print("DOCKER-OPTIONAL TEST EXECUTION DEMONSTRATION")
 print("="*80)
-print(" )
+print("")
 This demonstrates the improved ability to run tests without Docker when it's not needed.')
 
-tests = [ )
+tests = [ ]
     # Tests that DON'T need Docker
 ( )
 "python tests/unified_test_runner.py --category unit --no-docker --no-coverage --fast-fail",
@@ -76,11 +76,11 @@ tests = [ )
 ),
     
 
-print(" )
-" + "="*80)
+print("")
+ + ="*80)
 print("TEST CATEGORIES THAT DON"T REQUIRE DOCKER:")
 print("="*80)
-no_docker_categories = [ )
+no_docker_categories = [ ]
 "smoke - Quick validation tests",
 "unit - Unit tests (isolated components)",
 "frontend - Frontend component tests",
@@ -90,13 +90,13 @@ no_docker_categories = [ )
 "startup - Service startup tests"
     
 for category in no_docker_categories:
-print("formatted_string")
+    print("")
 
-print(" )
-" + "="*80)
+print("")
+ + ="*80)
 print("TEST CATEGORIES THAT REQUIRE DOCKER:")
 print("="*80)
-docker_categories = [ )
+docker_categories = [ ]
 "e2e - End-to-end tests",
 "e2e_critical - Critical E2E tests",
 "cypress - Cypress E2E tests",
@@ -107,32 +107,32 @@ docker_categories = [ )
 "post_deployment - Post-deployment validation"
         
 for category in docker_categories:
-print("formatted_string")
+    print("")
 
-print(" )
-" + "="*80)
+print("")
+ + ="*80)
 print("USAGE EXAMPLES:")
 print("="*80)
-print(" )
+print("")
 1. Run unit tests without Docker (fast, no external dependencies):")
 print("   python tests/unified_test_runner.py --category unit --no-docker")
 
-print(" )
+print("")
 2. Run smoke tests without Docker (pre-commit validation):")
 print("   python tests/unified_test_runner.py --category smoke --no-docker")
 
-print(" )
+print("")
 3. Let the runner auto-detect if Docker is needed:")
 print("   python tests/unified_test_runner.py --category unit  # Auto-detects no Docker needed")
 print("   python tests/unified_test_runner.py --category e2e   # Auto-detects Docker required")
 
-print(" )
+print("")
 4. Force Docker to be skipped (useful for CI/CD with limited resources):")
 print("   export TEST_NO_DOCKER=true")
 print("   python tests/unified_test_runner.py --category unit")
 
-print(" )
-" + "="*80)
+print("")
+ + ="*80)
 print("KEY IMPROVEMENTS:")
 print("="*80)
 print("[OK] Faster test execution for unit/smoke tests (no Docker overhead)")

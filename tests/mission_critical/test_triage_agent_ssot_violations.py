@@ -286,13 +286,13 @@ class TestTriageAgentSSOTViolations(SSotAsyncTestCase):
         contexts = [
         UserExecutionContext( )
         user_id=formatted_string,
-        thread_id="formatted_string",
+        thread_id="",
         run_id=formatted_string,
-        websocket_connection_id="formatted_string"
+        websocket_connection_id=""
         ) for i in range(5)
         
         for ctx in contexts:
-        ctx.metadata = {user_request: "formatted_string"}
+        ctx.metadata = {user_request: ""}
             # Execute concurrently
         tasks = [self.agent.execute(ctx) for ctx in contexts]
         results = await asyncio.gather(*tasks)
@@ -344,7 +344,7 @@ class TestTriageAgentSSOTViolations(SSotAsyncTestCase):
         print("TRIAGE AGENT SSOT VIOLATIONS FOUND:")
         print(=*80)
         for v in violations:
-        print("formatted_string")
+        print("")
         print(=*80)
         print("All these violations must be fixed for tests to pass.")
         print(=*80 + " )

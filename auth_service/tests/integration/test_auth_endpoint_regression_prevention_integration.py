@@ -47,7 +47,7 @@ class TestAuthEndpointIntegration:
         mock_auth.create_access_token = AsyncMock(return_value="access-token-123")
         mock_auth.create_refresh_token = AsyncMock(return_value="refresh-token-123")
         mock_auth.refresh_tokens = AsyncMock(return_value=("new-access-token", "new-refresh-token"))
-        mock_auth.blacklist_token = AsyncNone  # TODO: Use real service instance
+        mock_auth.blacklist_token = MagicMock()  # TODO: Use real service instance
 
         # Step 1: Login
         login_response = test_client.post("/auth/login", json={
@@ -56,7 +56,7 @@ class TestAuthEndpointIntegration:
         })
         
 
-        assert login_response.status_code == 200, "formatted_string"
+        assert login_response.status_code == 200, ""
         login_data = login_response.json()
 
         assert "access_token" in login_data
@@ -70,7 +70,7 @@ class TestAuthEndpointIntegration:
         })
         
 
-        assert refresh_response.status_code == 200, "formatted_string"
+        assert refresh_response.status_code == 200, ""
         refresh_data = refresh_response.json()
 
         assert "access_token" in refresh_data
@@ -79,9 +79,9 @@ class TestAuthEndpointIntegration:
 
         # Step 3: Logout with new access token
         logout_response = test_client.post("/auth/logout",
-        headers={"Authorization": "formatted_string"})
+        headers={"Authorization": ""})
 
-        assert logout_response.status_code == 200, "formatted_string"
+        assert logout_response.status_code == 200, ""
         logout_data = logout_response.json()
 
         assert logout_data["status"] == "success"
@@ -108,16 +108,16 @@ class TestAuthEndpointIntegration:
         mock_auth.create_user = AsyncMock(return_value="new-user-456")
         mock_auth.create_access_token = AsyncMock(return_value="new-access-token")
         mock_auth.create_refresh_token = AsyncMock(return_value="new-refresh-token")
-        mock_auth.blacklist_token = AsyncNone  # TODO: Use real service instance
+        mock_auth.blacklist_token = MagicMock()  # TODO: Use real service instance
 
         # Step 1: Register new user
-        register_response = test_client.post("/auth/register", json={ ))
+        register_response = test_client.post("/auth/register", json=})
         "email": "newuser@example.com",
         "password": "newpassword123",
         "name": "New User"
         
 
-        assert register_response.status_code == 200, "formatted_string"
+        assert register_response.status_code == 200, ""
         register_data = register_response.json()
 
         assert "access_token" in register_data
@@ -130,9 +130,9 @@ class TestAuthEndpointIntegration:
 
         # Step 2: Immediate logout (user should be able to logout after registration)
         logout_response = test_client.post("/auth/logout",
-        headers={"Authorization": "formatted_string"})
+        headers={"Authorization": ""})
 
-        assert logout_response.status_code == 200, "formatted_string"
+        assert logout_response.status_code == 200, ""
 
         # Verify auth service was called correctly
         mock_auth.create_user.assert_called_once_with("newuser@example.com", "newpassword123", "New User")
@@ -156,12 +156,12 @@ class TestAuthEndpointIntegration:
         mock_auth.create_service_token = AsyncMock(return_value="service-token-789")
 
             # Service authentication
-        service_auth_response = test_client.post("/auth/service-token", json={ ))
+        service_auth_response = test_client.post("/auth/service-token", json=})
         "service_id": "backend-service",
         "service_secret": "correct-service-secret"
             
 
-        assert service_auth_response.status_code == 200, "formatted_string"
+        assert service_auth_response.status_code == 200, ""
         service_data = service_auth_response.json()
 
         assert "access_token" in service_data
@@ -186,12 +186,12 @@ class TestAuthEndpointIntegration:
         mock_auth.create_access_token = AsyncMock(return_value="dev-access-token")
         mock_auth.create_refresh_token = AsyncMock(return_value="dev-refresh-token")
         mock_auth.refresh_tokens = AsyncMock(return_value=("new-dev-access", "new-dev-refresh"))
-        mock_auth.blacklist_token = AsyncNone  # TODO: Use real service instance
+        mock_auth.blacklist_token = MagicMock()  # TODO: Use real service instance
 
             # Step 1: Dev login (no credentials required)
         dev_login_response = test_client.post("/auth/dev/login", json={})
 
-        assert dev_login_response.status_code == 200, "formatted_string"
+        assert dev_login_response.status_code == 200, ""
         dev_data = dev_login_response.json()
 
         assert "access_token" in dev_data
@@ -201,17 +201,17 @@ class TestAuthEndpointIntegration:
         refresh_token = dev_data["refresh_token"]
 
             # Step 2: Test token refresh works with dev tokens
-        refresh_response = test_client.post("/auth/refresh", json={ ))
+        refresh_response = test_client.post("/auth/refresh", json=})
         "refresh_token": refresh_token
             
 
-        assert refresh_response.status_code == 200, "formatted_string"
+        assert refresh_response.status_code == 200, ""
 
             # Step 3: Test logout works with dev tokens
         logout_response = test_client.post("/auth/logout",
-        headers={"Authorization": "formatted_string"})
+        headers={"Authorization": ""})
 
-        assert logout_response.status_code == 200, "formatted_string"
+        assert logout_response.status_code == 200, ""
 
             # Verify dev-specific tokens were created
         mock_auth.create_access_token.assert_called_with( )
@@ -238,22 +238,22 @@ class TestAuthEndpointIntegration:
         mock_auth.verify_password = AsyncMock(return_value=True)
 
         # Step 1: Hash a password
-        hash_response = test_client.post("/auth/hash-password", json={ ))
+        hash_response = test_client.post("/auth/hash-password", json=})
         "password": test_password
         
 
-        assert hash_response.status_code == 200, "formatted_string"
+        assert hash_response.status_code == 200, ""
         hash_data = hash_response.json()
         assert "hash" in hash_data
         assert hash_data["hash"] == hashed_value
 
         # Step 2: Verify the password against the hash
-        verify_response = test_client.post("/auth/verify-password", json={ ))
+        verify_response = test_client.post("/auth/verify-password", json=})
         "password": test_password,
         "hash": hashed_value
         
 
-        assert verify_response.status_code == 200, "formatted_string"
+        assert verify_response.status_code == 200, ""
         verify_data = verify_response.json()
         assert "valid" in verify_data
         assert verify_data["valid"] is True
@@ -274,15 +274,15 @@ class TestAuthEndpointIntegration:
         pass
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
         mock_auth.create_access_token = AsyncMock(return_value="custom-token-abc")
-        mock_auth.blacklist_token = AsyncNone  # TODO: Use real service instance
+        mock_auth.blacklist_token = MagicMock()  # TODO: Use real service instance
 
         # Create custom token
-        token_response = test_client.post("/auth/create-token", json={ ))
+        token_response = test_client.post("/auth/create-token", json=})
         "user_id": "custom-user-789",
         "email": "custom@example.com"
         
 
-        assert token_response.status_code == 200, "formatted_string"
+        assert token_response.status_code == 200, ""
         token_data = token_response.json()
 
         assert "access_token" in token_data
@@ -290,9 +290,9 @@ class TestAuthEndpointIntegration:
 
         # Verify the custom token can be used for logout
         logout_response = test_client.post("/auth/logout",
-        headers={"Authorization": "formatted_string"})
+        headers={"Authorization": ""})
 
-        assert logout_response.status_code == 200, "formatted_string"
+        assert logout_response.status_code == 200, ""
 
         # Verify token creation was called with correct parameters
         mock_auth.create_access_token.assert_called_once_with( )
@@ -328,12 +328,12 @@ class TestAuthEndpointErrorHandlingIntegration:
         mock_auth.authenticate_user = AsyncMock(return_value=None)
 
         # Failed login should return 401, not 404
-        login_response = test_client.post("/auth/login", json={ ))
+        login_response = test_client.post("/auth/login", json=})
         "email": "invalid@example.com",
         "password": "wrongpassword"
         
 
-        assert login_response.status_code == 401, "formatted_string"
+        assert login_response.status_code == 401, ""
 
         login_data = login_response.json()
         assert "detail" in login_data
@@ -357,11 +357,11 @@ class TestAuthEndpointErrorHandlingIntegration:
         mock_auth.refresh_tokens = AsyncMock(return_value=None)
 
         # Invalid refresh token should return 401, not 404
-        refresh_response = test_client.post("/auth/refresh", json={ ))
+        refresh_response = test_client.post("/auth/refresh", json=})
         "refresh_token": "invalid-refresh-token"
         
 
-        assert refresh_response.status_code == 401, "formatted_string"
+        assert refresh_response.status_code == 401, ""
 
         refresh_data = refresh_response.json()
         assert "detail" in refresh_data
@@ -381,12 +381,12 @@ class TestAuthEndpointErrorHandlingIntegration:
         mock_env.get.return_value = "correct-secret"
 
         # Wrong service secret should return 401, not 404
-        service_response = test_client.post("/auth/service-token", json={ ))
+        service_response = test_client.post("/auth/service-token", json=})
         "service_id": "backend-service",
         "service_secret": "wrong-secret"
         
 
-        assert service_response.status_code == 401, "formatted_string"
+        assert service_response.status_code == 401, ""
 
         service_data = service_response.json()
         assert "detail" in service_data
@@ -407,7 +407,7 @@ class TestAuthEndpointErrorHandlingIntegration:
         # Dev login in production should return 403, not 404
         dev_response = test_client.post("/auth/dev/login", json={})
 
-        assert dev_response.status_code == 403, "formatted_string"
+        assert dev_response.status_code == 403, ""
 
         dev_data = dev_response.json()
         assert "detail" in dev_data

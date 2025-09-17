@@ -144,12 +144,12 @@ class TestMessageTypeCompleteness:
         print(")
         === Message Type Discovery Report ===
         )
-        print("formatted_string")
+        print("")
         print(formatted_string)
-        print("formatted_string")
+        print("")
         print(formatted_string)
         if missing:
-        print("formatted_string")
+        print("")
         for msg_type in sorted(missing):
         print(formatted_string)
             # Generate suggested mappings
@@ -163,7 +163,7 @@ class TestMessageTypeCompleteness:
         print(")
         SUCCESS: All common message types appear to be supported!)
                         # List current mappings for reference
-        print("formatted_string")
+        print("")
     def _suggest_enum_mapping(self, msg_type: str, enum_values: Set[str] -> str:
         "Suggest an appropriate MessageType enum value for a message type."
         pass
@@ -229,7 +229,7 @@ for msg_type in test_types:
     message = {
 type: msg_type,
 "payload": {test: "data"},
-id: "formatted_string"
+id: ""
                                                 
 try:
     result = await router.route_message(test_user, mock_websocket, message)
@@ -273,7 +273,7 @@ if unmapped:
     print(")
 WARNING: Critical frontend message types not mapped:)
 for msg_type, desc in unmapped:
-    print("formatted_string")
+    print("")
                             # These are critical for business value, so fail the test
 assert False, formatted_string
 else:
@@ -300,9 +300,9 @@ for attr, value in sorted(enum_values):
 print(formatted_string")
 for key in sorted(LEGACY_MESSAGE_TYPE_MAP.keys()):
     mapped_to = LEGACY_MESSAGE_TYPE_MAP[key]
-print("formatted_string)
+    print("formatted_string)
                         # Check for duplicates
-print(")
+    print(")
 [Checking for duplicate mappings]")
 reverse_map = {}
 for key, value in LEGACY_MESSAGE_TYPE_MAP.items():
@@ -313,10 +313,10 @@ duplicates = {}
 if duplicates:
     print(  Found types mapping to same enum:)
 for enum_val, keys in duplicates.items():
-    print("formatted_string")
+    print("")
 else:
     print(  SUCCESS: No duplicate mappings found)
-print("")
+    print("")
  + ="*60)
 if __name__ == "__main__:
                                                 # Run discovery

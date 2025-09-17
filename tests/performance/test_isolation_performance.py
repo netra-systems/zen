@@ -86,7 +86,7 @@ class TestPerformanceTargets:
         """Test suite for performance regression detection."""
 
     # Performance targets in milliseconds
-        TARGETS = { )
+        TARGETS = { }
         'context_creation_p95': 10.0,
         'agent_creation_p95': 10.0,
         'cleanup_p95': 5.0,
@@ -165,9 +165,9 @@ class TestPerformanceTargets:
 
 async def create_context():
 context = await factory.create_user_execution_context( )
-user_id="formatted_string",
-thread_id="formatted_string",
-run_id="formatted_string"
+user_id="",
+thread_id="",
+run_id=""
     
 await factory.cleanup_user_context(context)
 
@@ -182,15 +182,15 @@ mean = statistics.mean(times)
     # Log results
 print(f" )
 Context Creation Performance:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
+print("")
 
     # Assert performance target
 assert p95 < self.TARGETS['context_creation_p95'], \
-"formatted_string"
+""
 
 @pytest.mark.asyncio
     async def test_agent_creation_performance(self, factory):
@@ -227,15 +227,15 @@ mean = statistics.mean(times)
         # Log results
 print(f" )
 Agent Creation Performance:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
+print("")
 
         # Assert performance target
 assert p95 < self.TARGETS['agent_creation_p95'], \
-"formatted_string"
+""
 
 finally:
 await factory.cleanup_user_context(context)
@@ -248,9 +248,9 @@ await factory.cleanup_user_context(context)
 contexts = []
 for i in range(self.ITERATIONS):
 context = await factory.create_user_execution_context( )
-user_id="formatted_string",
-thread_id="formatted_string",
-run_id="formatted_string"
+user_id="",
+thread_id="",
+run_id=""
                     
 contexts.append(context)
 
@@ -270,15 +270,15 @@ mean = statistics.mean(times)
                         # Log results
 print(f" )
 Cleanup Performance:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
+print("")
 
                         # Assert performance target
 assert p95 < self.TARGETS['cleanup_p95'], \
-"formatted_string"
+""
 
 @pytest.mark.asyncio
     async def test_websocket_handler_performance(self):
@@ -293,7 +293,7 @@ async def create_handler():
 pass
 handler = ConnectionHandler( )
 websocket=mock_ws,
-user_id="formatted_string"
+user_id=""
     
 await asyncio.sleep(0)
 return handler
@@ -316,15 +316,15 @@ mean = statistics.mean(times)
         # Log results
 print(f" )
 WebSocket Handler Init Performance:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
+print("")
 
         # Assert performance target
 assert p95 < self.TARGETS['websocket_init_p95'], \
-"formatted_string"
+""
 
 @pytest.mark.asyncio
     async def test_concurrent_user_performance(self, factory):
@@ -338,8 +338,8 @@ start = time.perf_counter()
     # Create context
 context = await factory.create_user_execution_context( )
 user_id=user_id,
-thread_id="formatted_string",
-run_id="formatted_string"
+thread_id="",
+run_id=""
     
 
     # Create agent
@@ -363,8 +363,8 @@ return (time.perf_counter() - start) * 1000
 all_times = []
 
 for batch in range(10):  # 10 batches of concurrent users
-tasks = [ )
-simulate_user_request("formatted_string")
+tasks = [ ]
+simulate_user_request("")
 for i in range(self.CONCURRENT_USERS)
     
 
@@ -377,16 +377,16 @@ p99 = self.calculate_percentile(all_times, 99)
 mean = statistics.mean(all_times)
 
     # Log results
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+    print("")
+print("")
+print("")
+print("")
+print("")
+print("")
 
     # Assert performance target
 assert p95 < self.TARGETS['total_request_p95'], \
-"formatted_string"
+""
 
 @pytest.mark.asyncio
     async def test_performance_under_load(self, factory):
@@ -399,7 +399,7 @@ start = time.perf_counter()
 context = await factory.create_user_execution_context( )
 user_id="baseline_user",
 thread_id="baseline_thread",
-run_id="formatted_string"
+run_id=""
             
 await factory.cleanup_user_context(context)
 baseline_times.append((time.perf_counter() - start) * 1000)
@@ -409,9 +409,9 @@ baseline_mean = statistics.mean(baseline_times)
             # High load measurement (100 concurrent operations)
 async def load_operation():
 context = await factory.create_user_execution_context( )
-user_id="formatted_string",
-thread_id="formatted_string",
-run_id="formatted_string"
+user_id="",
+thread_id="",
+run_id=""
     
 await factory.cleanup_user_context(context)
 
@@ -430,7 +430,7 @@ sample_start = time.perf_counter()
 context = await factory.create_user_execution_context( )
 user_id="sample_user",
 thread_id="sample_thread",
-run_id="formatted_string"
+run_id=""
             
 await factory.cleanup_user_context(context)
 load_times.append((time.perf_counter() - sample_start) * 1000)
@@ -446,13 +446,13 @@ degradation_factor = load_mean / baseline_mean if baseline_mean > 0 else 1
             # Log results
 print(f" )
 Performance Under Load:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
             # Assert acceptable degradation (max 2x slowdown)
 assert degradation_factor < 2.0, \
-"formatted_string"
+""
 
 @pytest.mark.asyncio
     async def test_memory_efficiency(self, factory):
@@ -472,9 +472,9 @@ baseline = tracemalloc.get_traced_memory()[0]
 contexts = []
 for i in range(100):
 context = await factory.create_user_execution_context( )
-user_id="formatted_string",
-thread_id="formatted_string",
-run_id="formatted_string"
+user_id="",
+thread_id="",
+run_id=""
                     
 contexts.append(context)
 
@@ -501,15 +501,15 @@ memory_leaked = (after_cleanup - baseline) / 1024  # KB leaked
                         # Log results
 print(f" )
 Memory Efficiency:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
                         # Assert memory efficiency
 assert memory_per_context < 10, \
-"formatted_string"
+""
 assert memory_leaked < 100, \
-"formatted_string"
+""
 
 @pytest.mark.asyncio
     async def test_performance_metrics_integration(self, factory, monitor):
@@ -519,9 +519,9 @@ assert memory_leaked < 100, \
 for i in range(10):
 async with monitor.timer('test.context_creation'):
 context = await factory.create_user_execution_context( )
-user_id="formatted_string",
-thread_id="formatted_string",
-run_id="formatted_string"
+user_id="",
+thread_id="",
+run_id=""
                                     
 
 async with monitor.timer('test.agent_creation'):
@@ -552,9 +552,9 @@ assert 'cleanup' in perf_stats
                                             # Log integrated metrics
 print(f" )
 Integrated Performance Metrics:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
 
 if __name__ == "__main__":

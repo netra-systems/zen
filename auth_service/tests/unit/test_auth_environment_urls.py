@@ -95,7 +95,7 @@ class TestAuthEnvironmentURLs:
 
     def test_url_overrides(self):
         """Test that explicit environment variables override defaults."""
-        custom_env = { )
+        custom_env = }
         'ENVIRONMENT': 'staging',
         'FRONTEND_URL': 'https://custom-frontend.com',
         'BACKEND_URL': 'https://custom-backend.com',
@@ -114,7 +114,7 @@ class TestAuthEnvironmentURLs:
     def test_partial_overrides(self):
         """Test that partial overrides work correctly."""
         pass
-        custom_env = { )
+        custom_env = }
         'ENVIRONMENT': 'staging',
         'FRONTEND_URL': 'https://override.staging.com'
     # Backend and auth should use defaults
@@ -134,7 +134,7 @@ class TestAuthEnvironmentURLs:
 
     def test_auth_service_host_for_environments(self):
         """Test auth service host returns correct values per environment."""
-        test_cases = [ )
+        test_cases = ]
         ('development', '0.0.0.0'),
         ('test', '127.0.0.1'),
         ('staging', 'auth.staging.netrasystems.ai'),
@@ -146,12 +146,12 @@ class TestAuthEnvironmentURLs:
         auth_env = AuthEnvironment()
         actual_host = auth_env.get_auth_service_host()
         assert actual_host == expected_host, \
-        "formatted_string"
+        ""
 
     def test_auth_service_port_for_environments(self):
         """Test auth service port returns correct values per environment."""
         pass
-        test_cases = [ )
+        test_cases = ]
         ('development', 8081),
         ('test', 8082),
         ('staging', 8080),
@@ -163,11 +163,11 @@ class TestAuthEnvironmentURLs:
         auth_env = AuthEnvironment()
         actual_port = auth_env.get_auth_service_port()
         assert actual_port == expected_port, \
-        "formatted_string"
+        ""
 
     def test_oauth_redirect_follows_frontend(self):
         """Test that OAuth redirect URI always follows frontend URL."""
-        test_cases = [ )
+        test_cases = ]
         ('development', 'http://localhost:3000/auth/callback'),
         ('staging', 'https://app.staging.netrasystems.ai/auth/callback'),
         ('production', 'https://app.netrasystems.ai/auth/callback')
@@ -178,7 +178,7 @@ class TestAuthEnvironmentURLs:
         auth_env = AuthEnvironment()
         actual_redirect = auth_env.get_oauth_redirect_uri()
         assert actual_redirect == expected_redirect, \
-        "formatted_string"
+        ""
 
     def test_unknown_environment_defaults(self):
         """Test that unknown environments fall back to safe defaults."""
@@ -195,7 +195,7 @@ class TestAuthEnvironmentURLs:
 
     def test_cors_origins_for_environments(self):
         """Test CORS origins are correctly set per environment."""
-        test_cases = [ )
+        test_cases = ]
         ('development', ['http://localhost:3000', 'http://localhost:8000',
         'http://127.0.0.1:3000', 'http://127.0.0.1:8000']),
         ('staging', ['https://app.staging.netrasystems.ai', 'https://staging.netrasystems.ai']),
@@ -207,7 +207,7 @@ class TestAuthEnvironmentURLs:
         auth_env = AuthEnvironment()
         actual_origins = auth_env.get_cors_origins()
         assert set(actual_origins) == set(expected_origins), \
-        "formatted_string"
+        ""
 
         @pytest.fixture)
         ('production', True),
@@ -226,13 +226,13 @@ class TestAuthEnvironmentURLs:
         auth = auth_env.get_auth_service_url()
 
         if expected_https:
-        assert frontend.startswith('https://'), "formatted_string"
-        assert backend.startswith('https://'), "formatted_string"
-        assert auth.startswith('https://'), "formatted_string"
+        assert frontend.startswith('https://'), ""
+        assert backend.startswith('https://'), ""
+        assert auth.startswith('https://'), ""
         else:
-        assert frontend.startswith('http://'), "formatted_string"
-        assert backend.startswith('http://'), "formatted_string"
-        assert auth.startswith('http://'), "formatted_string"
+        assert frontend.startswith('http://'), ""
+        assert backend.startswith('http://'), ""
+        assert auth.startswith('http://'), ""
 
 
 class TestAuthEnvironmentURLRegression:
@@ -296,11 +296,11 @@ class TestAuthEnvironmentURLRegression:
 
             # Redirect should start with frontend URL
         assert redirect.startswith(frontend), \
-        "formatted_string"t match frontend {frontend}"
+        ""t match frontend {frontend}"
 
             # Redirect should end with /auth/callback
         assert redirect.endswith('/auth/callback'), \
-        "formatted_string"t end with /auth/callback"
+        ""t end with /auth/callback"
 
 
         if __name__ == '__main__':

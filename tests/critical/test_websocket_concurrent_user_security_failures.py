@@ -116,13 +116,13 @@ class SecurityViolationTracker:
         """Create user context with sensitive data."""
         context = UserContext( )
         user_id=user_id,
-        session_id="formatted_string",
-        api_key="formatted_string",
-        private_data={ )
-        "user_profile": "formatted_string",
+        session_id="",
+        api_key="",
+        private_data={ }
+        "user_profile": "",
         "preferences": {"theme": "dark", "notifications": True},
         "billing_info": {"plan": "premium", "usage": random.randint(100, 1000)},
-        "sensitive_tokens": ["formatted_string" for i in range(3)]
+        "sensitive_tokens": ["" for i in range(3)]
     
     
 
@@ -150,7 +150,7 @@ class SecurityViolationTracker:
         def record_shared_state_access(self, accessing_user: str, shared_state_key: str,
         state_owner: str = None):
         """Record access to shared state."""
-        access_record = { )
+        access_record = { }
         "timestamp": time.time(),
         "accessing_user": accessing_user,
         "shared_state_key": shared_state_key,
@@ -164,7 +164,7 @@ class SecurityViolationTracker:
         def record_cross_user_data_flow(self, sender_user: str, recipient_user: str,
         data_type: str, data_content: Any):
         """Record data flow between users."""
-        flow_record = { )
+        flow_record = { }
         "timestamp": time.time(),
         "sender_user": sender_user,
         "recipient_user": recipient_user,
@@ -209,12 +209,12 @@ num_users = 5
         # Create user contexts with sensitive data
 user_contexts = {}
 for i in range(num_users):
-    user_id = "formatted_string"
+    user_id = ""
 context = security_tracker.create_user_context(user_id)
 user_contexts[user_id] = context
 
             # Simulate shared WebSocket manager state (the vulnerability!)
-shared_websocket_state = { )
+shared_websocket_state = { }
 "current_user_context": None,
 "last_notification_payload": None,
 "user_session_cache": {},
@@ -231,13 +231,13 @@ shared_websocket_state["current_user_context"] = user_context
 shared_websocket_state["user_session_cache"][user_id] = user_context
 
     # Create notification with sensitive data
-notification_payload = { )
+notification_payload = { }
 "type": "tool_result",
 "tool_name": "data_processor",
 "result": tool_result,
 "user_api_key": user_context.api_key,  # SENSITIVE!
 "user_private_data": user_context.private_data,  # SENSITIVE!
-"session_info": { )
+"session_info": { }
 "session_id": user_context.session_id,
 "user_preferences": user_context.private_data["preferences"]
     
@@ -272,22 +272,22 @@ if actual_recipient != user_id:
     security_tracker.record_violation( )
 violation_type="CROSS_USER_DATA_LEAK",
 affected_users=[user_id, actual_recipient],
-leaked_data={ )
+leaked_data={ }
 "api_key": current_payload.get("user_api_key"),
 "private_data": current_payload.get("user_private_data"),
 "session_info": current_payload.get("session_info")
 },
 severity="CRITICAL",
-description="formatted_string"s sensitive data"
+description=""s sensitive data"
             
 
             # Send concurrent notifications with sensitive data
 tasks = []
 for user_id in user_contexts.keys():
-    tool_result = { )
-"processed_data": "formatted_string",
-"analysis": "formatted_string",
-"recommendations": ["formatted_string" for i in range(3)]
+    tool_result = { }
+"processed_data": "",
+"analysis": "",
+"recommendations": ["" for i in range(3)]
                 
 tasks.append(send_tool_result_notification(user_id, tool_result))
 
@@ -310,7 +310,7 @@ expected_api_key = context.api_key
 
 if received_api_key and received_api_key != expected_api_key:
                             # User received someone else's API key!
-assert True, "formatted_string"
+assert True, ""
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -321,13 +321,13 @@ assert True, "formatted_string"
 users = ["user_001", "user_002", "user_003"]
 
                                 # Create user contexts
-user_contexts = { )
+user_contexts = { }
 user_id: security_tracker.create_user_context(user_id)
 for user_id in users
                                 
 
                                 # Simulate shared tool execution state (vulnerability!)
-shared_tool_state = { )
+shared_tool_state = { }
 "current_execution": None,
 "execution_results": {},
 "user_tool_cache": {},
@@ -340,8 +340,8 @@ pass
 user_context = user_contexts[user_id]
 
     # Update shared state with user's execution
-execution_id = "formatted_string"
-shared_tool_state["current_execution"] = { )
+execution_id = ""
+shared_tool_state["current_execution"] = { }
 "execution_id": execution_id,
 "user_id": user_id,
 "tool_name": tool_name,
@@ -357,11 +357,11 @@ await asyncio.sleep(random.uniform(0.01, 0.03))
 processing_context = shared_tool_state["current_execution"]
 if processing_context:
         # Create result with sensitive processing context
-tool_result = { )
-"output": "formatted_string",
+tool_result = { }
+"output": "",
 "processed_with_api_key": processing_context.get("api_key"),  # LEAKED!
 "user_specific_analysis": processing_context.get("user_data"),  # LEAKED!
-"execution_metadata": { )
+"execution_metadata": { }
 "user_id": processing_context.get("user_id"),
 "tool_name": processing_context.get("tool_name"),
 "processing_timestamp": time.time()
@@ -394,18 +394,18 @@ if result_user_id != user_id:
 security_tracker.record_violation( )
 violation_type="TOOL_RESULT_CONTAMINATION",
 affected_users=[user_id, result_user_id],
-leaked_data={ )
+leaked_data={ }
 "contaminated_api_key": current_result.get("processed_with_api_key"),
 "contaminated_user_data": current_result.get("user_specific_analysis"),
 "original_user": user_id,
 "contaminated_with": result_user_id
 },
 severity="CRITICAL",
-description="formatted_string"s context"
+description=""s context"
             
 
             # Add result to user's received notifications
-user_context.received_notifications.append({ ))
+user_context.received_notifications.append({ })
 "type": "tool_result",
 "result": current_result,
 "contaminated": result_user_id != user_id
@@ -420,15 +420,15 @@ return None
 tasks = []
 for user_id in users:
     for tool_num in range(5):
-        sensitive_input = "formatted_string"
-tool_name = "formatted_string"
+        sensitive_input = ""
+tool_name = ""
 tasks.append(execute_tool_with_user_data(user_id, tool_name, sensitive_input))
 
                     # Execute all concurrently to maximize contamination risk
 results = await asyncio.gather(*tasks, return_exceptions=True)
 
                     # Verify contamination violations occurred
-contamination_violations = [ )
+contamination_violations = [ ]
 v for v in security_tracker.violations
 if v.violation_type == "TOOL_RESULT_CONTAMINATION"
                     
@@ -437,14 +437,14 @@ assert len(contamination_violations) > 0, "Expected tool result contamination vi
 
                     # Check that users received contaminated data
 for user_id, context in user_contexts.items():
-    contaminated_notifications = [ )
+    contaminated_notifications = [ ]
 n for n in context.received_notifications
 if n.get("contaminated", False)
                         
 
 if contaminated_notifications:
                             # User received contaminated tool results!
-assert len(contaminated_notifications) > 0, "formatted_string"
+assert len(contaminated_notifications) > 0, ""
 
                             # Verify sensitive data was leaked
 for violation in contamination_violations:
@@ -453,7 +453,7 @@ if leaked_api_key:
                                     # Check if API key belongs to different user
 for check_user_id, check_context in user_contexts.items():
     if check_context.api_key == leaked_api_key and check_user_id != violation.affected_users[0]:
-        assert True, "formatted_string"
+        assert True, ""
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -469,7 +469,7 @@ victim_context = security_tracker.create_user_context(victim_user)
 attacker_context = security_tracker.create_user_context(attacker_user)
 
                                                 # Simulate shared connection management (vulnerability!)
-connection_pool = { )
+connection_pool = { }
 "connections": {},
 "user_mapping": {},
 "last_accessed_user": None,
@@ -480,13 +480,13 @@ connection_pool = { )
 victim_websocket = Magic        victim_websocket.user_id = victim_user
 victim_# websocket setup complete
 
-connection_id = "formatted_string"
+connection_id = ""
 connection_pool["connections"][connection_id] = victim_websocket
 connection_pool["user_mapping"][victim_user] = connection_id
 connection_pool["last_accessed_user"] = victim_user
 
                                                 # Victim starts tool execution with sensitive data
-victim_tool_execution = { )
+victim_tool_execution = { }
 "tool_name": "sensitive_data_processor",
 "input": "confidential business data",
 "api_context": victim_context.api_key,
@@ -516,10 +516,10 @@ if victim_connection_id in connection_pool["connections"]:
     target_websocket = connection_pool["connections"][victim_connection_id]
 
         # Create notification with victim's sensitive data
-sensitive_result = { )
+sensitive_result = { }
 "type": "tool_completed",
 "tool_name": victim_tool_execution["tool_name"],
-"result": { )
+"result": { }
 "processed_data": "CONFIDENTIAL BUSINESS RESULTS",
 "api_key_used": victim_tool_execution["api_context"],  # VICTIM"S API KEY!
 "user_data": victim_tool_execution["processing_context"]  # VICTIM"S DATA!
@@ -545,20 +545,20 @@ if actual_recipient != victim_user:
     security_tracker.record_violation( )
 violation_type="CONNECTION_HIJACKING",
 affected_users=[victim_user, actual_recipient],
-leaked_data={ )
+leaked_data={ }
 "victim_api_key": sensitive_result["result"]["api_key_used"],
 "victim_private_data": sensitive_result["result"]["user_data"],
 "hijacker_user": actual_recipient,
 "hijacked_connection": victim_connection_id
 },
 severity="CRITICAL",
-description="formatted_string"s data sent to attacker {actual_recipient}"
+description=""s data sent to attacker {actual_recipient}"
             
 
 await send_tool_result_to_victim()
 
             # Verify hijacking violation occurred
-hijacking_violations = [ )
+hijacking_violations = [ ]
 v for v in security_tracker.violations
 if v.violation_type == "CONNECTION_HIJACKING"
             
@@ -572,7 +572,7 @@ assert attacker_user in violation.affected_users
 assert violation.leaked_data["victim_api_key"] == victim_context.api_key
 
             # Check cross-user data flow
-cross_user_flows = [ )
+cross_user_flows = [ ]
 flow for flow in security_tracker.cross_user_data_flow
 if flow["is_violation"] and flow["sender_user"] == victim_user
             
@@ -590,18 +590,18 @@ num_users = 8
                 # Create users with different sensitivity levels
 user_contexts = {}
 for i in range(num_users):
-    user_id = "formatted_string"
+    user_id = ""
 context = security_tracker.create_user_context(user_id)
 
                     # Add different types of sensitive data per user
-context.private_data.update({ ))
-"security_clearance": "formatted_string",
-"department_access": "formatted_string",
-"confidential_projects": ["formatted_string" for j in range(3)],
-"personal_info": { )
-"ssn_last_4": "formatted_string",
-"credit_card_last_4": "formatted_string",
-"home_address": "formatted_string"
+context.private_data.update({ })
+"security_clearance": "",
+"department_access": "",
+"confidential_projects": ["" for j in range(3)],
+"personal_info": { }
+"ssn_last_4": "",
+"credit_card_last_4": "",
+"home_address": ""
                     
                     
 
@@ -612,7 +612,7 @@ async def send_system_wide_broadcast():
     """Send broadcast that accidentally includes sensitive user data."""
 
     # Collect "system status" that accidentally includes user data
-system_status = { )
+system_status = { }
 "timestamp": time.time(),
 "server_status": "healthy",
 "active_users": [],
@@ -625,7 +625,7 @@ for user_id, context in user_contexts.items():
     system_status["active_users"].append(user_id)
 
         # CRITICAL BUG: Include full user context in broadcast
-system_status["user_sessions"][user_id] = { )
+system_status["user_sessions"][user_id] = { }
 "session_id": context.session_id,
 "api_key": context.api_key,  # LEAKED TO ALL USERS!
 "private_data": context.private_data,  # LEAKED TO ALL USERS!
@@ -634,7 +634,7 @@ system_status["user_sessions"][user_id] = { )
 
         # Add current tool execution data
 if context.current_tool_execution:
-    system_status["active_tool_executions"][user_id] = { )
+    system_status["active_tool_executions"][user_id] = { }
 "tool_name": context.current_tool_execution,
 "user_context": context.private_data,  # MORE LEAKED DATA!
 "processing_with_key": context.api_key  # MORE LEAKED DATA!
@@ -643,7 +643,7 @@ if context.current_tool_execution:
             # Send broadcast to ALL users (security violation!)
 for recipient_user_id in user_contexts.keys():
                 # Each user receives EVERYONE'S sensitive data
-user_contexts[recipient_user_id].received_notifications.append({ ))
+user_contexts[recipient_user_id].received_notifications.append({ })
 "type": "system_broadcast",
 "system_status": system_status,
 "contains_all_user_data": True
@@ -663,7 +663,7 @@ data_content=system_status["user_sessions"][leaked_user_id]
 all_leaked_data = {}
 for leaked_user_id, leaked_context in user_contexts.items():
     if leaked_user_id != recipient_user_id:
-        all_leaked_data[leaked_user_id] = { )
+        all_leaked_data[leaked_user_id] = { }
 "api_key": leaked_context.api_key,
 "private_data": leaked_context.private_data
                                 
@@ -674,13 +674,13 @@ violation_type="BROADCAST_DATA_EXPOSURE",
 affected_users=list(user_contexts.keys()),
 leaked_data=all_leaked_data,
 severity="CRITICAL",
-description="formatted_string" sensitive data in broadcast"
+description="" sensitive data in broadcast"
                                     
 
 await send_system_wide_broadcast()
 
                                     # Verify massive data exposure occurred
-broadcast_violations = [ )
+broadcast_violations = [ ]
 v for v in security_tracker.violations
 if v.violation_type == "BROADCAST_DATA_EXPOSURE"
                                     
@@ -692,16 +692,16 @@ expected_violations = num_users * (num_users - 1)  # Each user sees others" data
 actual_violations = len(broadcast_violations)
 
                                     # Should have many violations due to broadcast exposure
-assert actual_violations > 0, "formatted_string"
+assert actual_violations > 0, ""
 
                                     # Verify each user received other users' sensitive data
 for user_id, context in user_contexts.items():
-    system_broadcasts = [ )
+    system_broadcasts = [ ]
 n for n in context.received_notifications
 if n.get("type") == "system_broadcast"
                                         
 
-assert len(system_broadcasts) > 0, "formatted_string"
+assert len(system_broadcasts) > 0, ""
 
                                         # Check if broadcast contains other users' data
 for broadcast in system_broadcasts:
@@ -715,7 +715,7 @@ other_api_key = other_session_data.get("api_key")
 other_private_data = other_session_data.get("private_data")
 
 if other_api_key or other_private_data:
-    assert True, "formatted_string"s sensitive data"
+    assert True, ""s sensitive data"
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -731,7 +731,7 @@ victim_context = security_tracker.create_user_context(victim_user)
 attacker_context = security_tracker.create_user_context(attacker_user)
 
                                                             # Simulate session management with fixation vulnerability
-session_store = { )
+session_store = { }
 "sessions": {},
 "websocket_sessions": {},
 "last_session_data": None
@@ -739,10 +739,10 @@ session_store = { )
 
                                                             # Attacker creates malicious session
 malicious_session_id = "attacker_controlled_session_123"
-session_store["sessions"][malicious_session_id] = { )
+session_store["sessions"][malicious_session_id] = { }
 "user_id": attacker_user,  # Initially attacker"s session
 "created_by": attacker_user,
-"websocket_state": { )
+"websocket_state": { }
 "connection_id": "attacker_connection",
 "privileges": ["read_all_users", "admin_access"]  # Elevated privileges!
                                                             
@@ -770,7 +770,7 @@ session_store["last_session_data"] = existing_session
 victim_websocket_state = existing_session["websocket_state"]
 
         # Victim's tool execution uses compromised session
-tool_execution = { )
+tool_execution = { }
 "user_id": victim_user,
 "tool_name": "data_export",
 "sensitive_input": "victim"s confidential data",
@@ -779,7 +779,7 @@ tool_execution = { )
         
 
         # Send tool result using compromised session
-tool_result = { )
+tool_result = { }
 "type": "tool_result",
 "result": "Exported victim"s data with elevated privileges",
 "execution_context": tool_execution,
@@ -794,7 +794,7 @@ await victim_websocket.send_json(tool_result)
 security_tracker.record_violation( )
 violation_type="SESSION_FIXATION",
 affected_users=[victim_user, attacker_user],
-leaked_data={ )
+leaked_data={ }
 "victim_api_key": tool_execution["api_key"],
 "victim_data": tool_execution["sensitive_input"],
 "attacker_privileges": victim_websocket_state["privileges"],
@@ -802,7 +802,7 @@ leaked_data={ )
 "session_created_by": existing_session["created_by"]
 },
 severity="CRITICAL",
-description="formatted_string"
+description=""
         
 
 await asyncio.sleep(0)
@@ -813,7 +813,7 @@ return None
 result = await victim_connects_with_fixed_session()
 
         # Verify session fixation violation occurred
-fixation_violations = [ )
+fixation_violations = [ ]
 v for v in security_tracker.violations
 if v.violation_type == "SESSION_FIXATION"
         
@@ -850,7 +850,7 @@ auth_context = security_tracker.create_user_context(authenticated_user)
 unauth_context = security_tracker.create_user_context(unauthenticated_user)
 
         # Simulate notification system with authentication bypass bug
-notification_system = { )
+notification_system = { }
 "authenticated_connections": {authenticated_user: Magic            "pending_notifications": {},
 "bypass_check_enabled": True,  # The vulnerability!
 "last_authenticated_user": authenticated_user
@@ -865,7 +865,7 @@ if notification_system["bypass_check_enabled"]:
 auth_user = notification_system["last_authenticated_user"]
 
         # Send notification even if target_user is not authenticated
-notification = { )
+notification = { }
 "type": "authenticated_tool_result",
 "target_user": target_user,
 "authenticated_as": auth_user,  # Wrong user!
@@ -894,7 +894,7 @@ violation_type="AUTHENTICATION_BYPASS",
 affected_users=[authenticated_user, unauthenticated_user],
 leaked_data=sensitive_data,
 severity="CRITICAL",
-description="formatted_string"
+description=""
                 
 
 await asyncio.sleep(0)
@@ -903,7 +903,7 @@ return True
 return False
 
                 # Send sensitive data to unauthenticated user (should be blocked but isn't!)
-sensitive_business_data = { )
+sensitive_business_data = { }
 "customer_data": "confidential customer information",
 "financial_reports": "Q4 financial data",
 "api_keys": {"service_a": auth_context.api_key},
@@ -914,7 +914,7 @@ sensitive_business_data = { )
 result = await send_authenticated_notification(unauthenticated_user, sensitive_business_data)
 
                 # Verify authentication bypass occurred
-bypass_violations = [ )
+bypass_violations = [ ]
 v for v in security_tracker.violations
 if v.violation_type == "AUTHENTICATION_BYPASS"
                 
@@ -923,7 +923,7 @@ assert len(bypass_violations) > 0, "Expected authentication bypass violation"
 
                 # Verify unauthenticated user received sensitive data
 unauth_notifications = unauth_context.received_notifications
-authenticated_notifications = [ )
+authenticated_notifications = [ ]
 n for n in unauth_notifications
 if n.get("requires_auth") and n.get("bypassed_auth")
                 
@@ -962,7 +962,7 @@ admin_context.private_data["privileges"] = ["read_all_data", "admin_access", "de
 admin_context.private_data["role"] = "admin"
 
                     # Simulate notification system with privilege confusion
-privilege_context = { )
+privilege_context = { }
 "current_user_privileges": None,
 "last_admin_context": None,
 "notification_context": None
@@ -972,11 +972,11 @@ async def send_admin_notification():
     """Send admin notification that sets privileged context."""
 
     # Admin receives notification about system operation
-admin_notification = { )
+admin_notification = { }
 "type": "admin_operation_complete",
 "operation": "user_data_export",
 "privileges_required": admin_context.private_data["privileges"],
-"admin_context": { )
+"admin_context": { }
 "user_id": high_privilege_user,
 "api_key": admin_context.api_key,
 "admin_privileges": admin_context.private_data["privileges"]
@@ -1000,7 +1000,7 @@ current_privileges = privilege_context["current_user_privileges"]
 admin_context_data = privilege_context["last_admin_context"]
 
     # Create notification for basic user but with admin privileges
-basic_notification = { )
+basic_notification = { }
 "type": "tool_result",
 "user_id": low_privilege_user,
 "result": "basic operation result",
@@ -1016,14 +1016,14 @@ basic_context.received_notifications.append(basic_notification)
 security_tracker.record_violation( )
 violation_type="PRIVILEGE_ESCALATION",
 affected_users=[low_privilege_user, high_privilege_user],
-leaked_data={ )
+leaked_data={ }
 "escalated_user": low_privilege_user,
 "original_privileges": ["read_own_data"],
 "escalated_privileges": current_privileges,
 "leaked_admin_context": admin_context_data
 },
 severity="CRITICAL",
-description="formatted_string"
+description=""
     
 
 await asyncio.sleep(0)
@@ -1036,7 +1036,7 @@ await send_admin_notification()
 await send_basic_user_notification()
 
     # Verify privilege escalation occurred
-escalation_violations = [ )
+escalation_violations = [ ]
 v for v in security_tracker.violations
 if v.violation_type == "PRIVILEGE_ESCALATION"
     
@@ -1053,7 +1053,7 @@ assert leaked_data["leaked_admin_context"]["user_id"] == high_privilege_user
 
     # Check basic user's notifications
 basic_notifications = basic_context.received_notifications
-privileged_notifications = [ )
+privileged_notifications = [ ]
 n for n in basic_notifications
 if "admin_context_leaked" in n and n["admin_context_leaked"] is not None
     

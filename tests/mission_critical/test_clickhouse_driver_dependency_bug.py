@@ -22,7 +22,7 @@ print("[OK] clickhouse_driver is installed and importable)
 return True
 except ImportError as e:
     print(formatted_string")
-print("  The code requires clickhouse-driver but it's not installed)
+    print("  The code requires clickhouse-driver but it's not installed)
 return False
 
 
@@ -58,7 +58,7 @@ code_uses_driver = True  # Code tries to import it but its missing
 print(f" )
 Code import analysis:")
 print(formatted_string)
-print("formatted_string")
+print("")
 
                     # Check for mismatch
 if code_uses_driver and not has_clickhouse_driver:
@@ -94,12 +94,12 @@ has_connect = 'clickhouse-connect' in package_dict
 
 print(fInstalled packages:)
 if has_driver:
-    print("formatted_string")
+    print("")
 else:
     print(f  [X] clickhouse-driver NOT installed)
 
 if has_connect:
-    print("formatted_string")
+    print("")
 else:
     print(f  [X] clickhouse-connect NOT installed)
 
@@ -122,12 +122,12 @@ print(="*60)
 results = []
 
     # Test 1: Check if clickhouse_driver is installed
-print(")
+    print(")
 Test 1: Checking if clickhouse_driver module is available...)
 results.append(test_clickhouse_driver_is_installed())
 
     # Test 2: Check requirements vs imports mismatch
-print("")
+    print("")
  + -"*60)
 print("Test 2: Checking requirements.txt vs actual code imports...)
 results.append(test_requirements_match_imports())
@@ -136,7 +136,7 @@ results.append(test_requirements_match_imports())
 results.append(test_both_libraries_not_same())
 
     # Summary
-print(")
+    print(")
 " + =*60)
 print("TEST SUMMARY")
 print(=*60)
@@ -145,7 +145,7 @@ if all(results):
     print("[OK] All tests passed - no dependency issues detected")
 else:
     print([X] DEPENDENCY BUG CONFIRMED)
-print("")
+    print("")
 Root Cause:)
 print(  1. Code imports 'clickhouse_driver' (native driver")")
 print(  2. Requirements specifies 'clickhouse-connect' (different library)")

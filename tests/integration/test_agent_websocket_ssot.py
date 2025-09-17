@@ -459,7 +459,7 @@ class TestAgent(AgentCommunicationMixin):
     # Should retry and eventually succeed
         await agent.emit_thinking(test thought)
 
-        assert retry_count == 3, "formatted_string"
+        assert retry_count == 3, ""
 
 @pytest.mark.asyncio
     async def test_websocket_failure_handling(self, mock_bridge):

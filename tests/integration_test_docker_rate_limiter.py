@@ -211,7 +211,7 @@ class TestWebSocketConnection:
         success &= test_docker_manager_integration()
 
         print("")
-        " + "=" * 60)
+         + =" * 60)
         if success:
         print("[SUCCESS] ALL TESTS PASSED - Rate limiter is working correctly!")
         print("[OK] Docker API storms should now be prevented")

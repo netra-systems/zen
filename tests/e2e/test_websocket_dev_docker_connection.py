@@ -145,7 +145,7 @@ class TestWebSocketConnection:
         endpoint = options.get("endpoint", self.ws_url)
             # If endpoint is relative, make it absolute
         if endpoint.startswith(/):
-        endpoint = "formatted_string"
+        endpoint = ""
 
         try:
                     # Create WebSocket connection without explicit origin to avoid duplicates
@@ -157,7 +157,7 @@ class TestWebSocketConnection:
         print(formatted_string)
 
         except Exception as e:
-        error_msg = "formatted_string"
+        error_msg = ""
         print(formatted_string)
         cors_issues.append({}
         "test": description,
@@ -325,7 +325,7 @@ class TestWebSocketCORSValidation:
 
         errors = []
         for description, ws_url, should_work, details in test_cases:
-        print("formatted_string")
+        print("")
         print(formatted_string)
 
         try:
@@ -340,14 +340,14 @@ class TestWebSocketCORSValidation:
         print(f"[SUCCESS] Connection successful (as expected)")
         else:
         error_msg = formatted_string
-        print("formatted_string")
+        print("")
         errors.append(error_msg)
 
         except Exception as e:
         if not should_work:
         print(formatted_string)
         else:
-        error_msg = "formatted_string"
+        error_msg = ""
         print(formatted_string)
         errors.append(error_msg)
 
@@ -402,7 +402,7 @@ class TestWebSocketCORSValidation:
         print(formatted_string)
 
         if attempt < max_retries - 1:
-        print("formatted_string")
+        print("")
         await asyncio.sleep(retry_delay)
 
                                                         # Check if all attempts failed
@@ -410,9 +410,9 @@ class TestWebSocketCORSValidation:
 
                                                         # This assertion is expected to FAIL if WebSocket is not working
         assert not all_failed, ( )
-        "formatted_string" +
+        "" +
         
-        .join(["formatted_string"error, Unknown error")}" ))
+        .join([""error, Unknown error")}" ))
         for a in connection_attempts if not a[success]]
                                                             
 
@@ -427,13 +427,13 @@ class TestWebSocketCORSValidation:
 
                                                                 # Run all tests
         backend_status = test.test_backend_availability()
-        print("formatted_string")
+        print("")
 
         connection_result = test.test_basic_connection()
         print(formatted_string)
 
         cors_result = test.test_cors_headers()
-        print("formatted_string")
+        print("")
 
                                                                             # Run async test
         import asyncio

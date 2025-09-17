@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 """Verify that staging auth config does not expose dev login endpoint"""
 
     # Simulate staging environment
-staging_env = { )
+staging_env = { }
 "ENVIRONMENT": "staging",
 "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
 "FRONTEND_URL": "https://staging.netrasystems.ai"
@@ -29,18 +29,18 @@ from auth_service.auth_core.config import AuthConfig
 
         # Verify environment detection
 env = _detect_environment()
-assert env == "staging", "formatted_string"
+assert env == "staging", ""
 
         # Verify AuthConfig detects staging
 config_env = AuthConfig.get_environment()
-assert config_env == "staging", "formatted_string"
+assert config_env == "staging", ""
 
         # Verify URLs are staging URLs
 auth_url = AuthConfig.get_auth_service_url()
 frontend_url = AuthConfig.get_frontend_url()
 
-assert auth_url == "https://auth.staging.netrasystems.ai", "formatted_string"
-assert frontend_url == "https://app.staging.netrasystems.ai", "formatted_string"
+assert auth_url == "https://auth.staging.netrasystems.ai", ""
+assert frontend_url == "https://app.staging.netrasystems.ai", ""
 
         # Import the auth routes
 from auth_service.auth_core.routes.auth_routes import get_auth_config
@@ -65,23 +65,23 @@ class MockRequest:
 
         # Verify other endpoints are correct for staging
         assert "staging" in config_response.endpoints.login, \
-        "formatted_string"
+        ""
         assert "staging" in config_response.endpoints.callback, \
-        "formatted_string"
+        ""
 
         logger.info(f"[U+2713] Staging auth config correctly configured - no dev login exposed")
 
         except Exception as e:
             # Config might fail due to missing OAuth credentials, but that's ok
             # The important thing is that dev_mode is False
-        logger.warning("formatted_string")
+        logger.warning("")
 
 @pytest.mark.asyncio
     async def test_dev_login_blocked_in_staging():
 """Verify that dev login endpoint returns 403 in staging"""
 
                 # Simulate staging environment
-staging_env = { )
+staging_env = { }
 "ENVIRONMENT": "staging"
                 
 
@@ -98,7 +98,7 @@ class MockRequest:
         self.cookies = {}
 
         mock_request = MockRequest()
-        client_info = { )
+        client_info = { }
         "ip": "127.0.0.1",
         "user_agent": "test",
         "session_id": None
@@ -119,7 +119,7 @@ class MockRequest:
 """Verify that production auth config does not expose dev login endpoint"""
 
             # Simulate production environment
-production_env = { )
+production_env = { }
 "ENVIRONMENT": "production"
             
 
@@ -130,14 +130,14 @@ from auth_service.auth_core.config import AuthConfig
 
                 # Verify environment detection
 env = _detect_environment()
-assert env == "production", "formatted_string"
+assert env == "production", ""
 
                 # Verify URLs are production URLs
 auth_url = AuthConfig.get_auth_service_url()
 frontend_url = AuthConfig.get_frontend_url()
 
-assert auth_url == "https://auth.netrasystems.ai", "formatted_string"
-assert frontend_url == "https://netrasystems.ai", "formatted_string"
+assert auth_url == "https://auth.netrasystems.ai", ""
+assert frontend_url == "https://netrasystems.ai", ""
 
 logger.info("[U+2713] Production environment correctly detected")
 
@@ -148,7 +148,7 @@ async def run_tests():
 await test_staging_auth_config_no_dev_login()
 await test_dev_login_blocked_in_staging()
 await test_production_auth_config_no_dev_login()
-print(" )
+print("")
 All tests passed [U+2713]")
 
 asyncio.run(run_tests())

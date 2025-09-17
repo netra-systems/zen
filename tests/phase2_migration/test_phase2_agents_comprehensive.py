@@ -88,7 +88,7 @@ class TestPhase2AgentsMigration:
         run_id=str(uuid.uuid4()),
         request_id=str(uuid.uuid4()),
         db_session=mock_db_session,
-        metadata={ )
+        metadata={ }
         "user_request": "Analyze performance and suggest improvements",
         "data_result": {"metrics": {"latency": 150, "throughput": 1000}},
         "triage_result": {"priority": "high", "category": "performance"},
@@ -123,7 +123,7 @@ thread_id="thread_999",
 run_id=str(uuid.uuid4()),
 request_id=str(uuid.uuid4()),
 db_session=user_context.db_session,
-metadata={ )
+metadata={ }
 "user_request": "Different request",
 "data_result": {"metrics": {"latency": 500}},
 "triage_result": {"priority": "low"},
@@ -187,8 +187,8 @@ agent = ReportingSubAgent(websocket_manager=mock_websocket_manager)
 contexts = []
 for i in range(10):
     ctx = UserExecutionContext( )
-user_id="formatted_string",
-thread_id="formatted_string",
+user_id="",
+thread_id="",
 run_id=str(uuid.uuid4()),
 request_id=str(uuid.uuid4()),
 db_session=user_context.db_session,
@@ -197,7 +197,7 @@ metadata=user_context.metadata.copy()
 contexts.append(ctx)
 
 with patch.object(agent, '_generate_report_with_llm', return_value={"report": "test"}):
-                                        # Removed problematic line: results = await asyncio.gather(*[ ))
+                                        # Removed problematic line: results = await asyncio.gather(*[ ])
 agent.execute(ctx, stream_updates=False) for ctx in contexts
                                         
 
@@ -280,16 +280,16 @@ mock_workflow.return_value = mock_workflow_instance
 contexts = []
 for i in range(5):
     ctx = UserExecutionContext( )
-user_id="formatted_string",
-thread_id="formatted_string",
+user_id="",
+thread_id="",
 run_id=str(uuid.uuid4()),
 request_id=str(uuid.uuid4()),
 db_session=user_context.db_session,
-metadata={"user_request": "formatted_string"}
+metadata={"user_request": ""}
                 
 contexts.append(ctx)
 
-                # Removed problematic line: results = await asyncio.gather(*[ ))
+                # Removed problematic line: results = await asyncio.gather(*[ ])
 agent.execute(ctx, stream_updates=False) for ctx in contexts
                 
 
@@ -328,7 +328,7 @@ agent = SyntheticDataSubAgent()
 
                                 # Set up batch request
 user_context.metadata["batch_size"] = 100
-user_context.metadata["workload_profile"] = { )
+user_context.metadata["workload_profile"] = { }
 "num_users": 10,
 "num_sessions": 100,
 "events_per_session": 50
@@ -384,7 +384,7 @@ metadata={"user_request": "Maybe someday optimize this"}
                     
 
 with patch.object(agent, '_extract_and_analyze_goals') as mock_analyze:
-    mock_analyze.side_effect = [ )
+    mock_analyze.side_effect = [ ]
 {"goals": ["fix_production"], "priority": "critical"},
 {"goals": ["optimize"], "priority": "low"}
                         
@@ -424,32 +424,32 @@ agent = ActionsToMeetGoalsSubAgent(websocket_manager=mock_websocket_manager)
 contexts = []
 for i in range(3):
     ctx = UserExecutionContext( )
-user_id="formatted_string",
-thread_id="formatted_string",
+user_id="",
+thread_id="",
 run_id=str(uuid.uuid4()),
 request_id=str(uuid.uuid4()),
 db_session=user_context.db_session,
-metadata={ )
-"user_request": "formatted_string",
-"optimizations_result": {"suggestions": ["formatted_string"]},
+metadata={ }
+"user_request": "",
+"optimizations_result": {"suggestions": [""]},
 "data_result": {"metrics": {"id": i}}
             
             
 contexts.append(ctx)
 
 with patch.object(agent, '_generate_action_plan') as mock_plan:
-    mock_plan.side_effect = [ )
-{"plan": "formatted_string"} for i in range(3)
+    mock_plan.side_effect = [ ]
+{"plan": ""} for i in range(3)
                 
 
-                # Removed problematic line: results = await asyncio.gather(*[ ))
+                # Removed problematic line: results = await asyncio.gather(*[ ])
 agent.execute(ctx, stream_updates=False) for ctx in contexts
                 
 
                 # Verify each user got their own plan
 assert len(results) == 3
 for i, result in enumerate(results):
-    assert "formatted_string" in str(result)
+    assert "" in str(result)
 
 @pytest.mark.asyncio
     async def test_actions_metadata_immutability(self, user_context, mock_websocket_manager):
@@ -540,7 +540,7 @@ class TestConcurrentUserIsolation(TestPhase2AgentsMigration):
     async def test_all_agents_concurrent_isolation(self, mock_db_session, mock_websocket_manager):
         """Test all Phase 2 agents handle concurrent users correctly."""
         # Create agents
-agents = [ )
+agents = [ ]
 ReportingSubAgent(websocket_manager=mock_websocket_manager),
 OptimizationsCoreSubAgent( )
 tool_dispatcher=Magic                websocket_manager=mock_websocket_manager
@@ -555,13 +555,13 @@ EnhancedExecutionAgent(websocket_manager=mock_websocket_manager)
 contexts = []
 for i in range(5):
     ctx = UserExecutionContext( )
-user_id="formatted_string",
-thread_id="formatted_string",
+user_id="",
+thread_id="",
 run_id=str(uuid.uuid4()),
 request_id=str(uuid.uuid4()),
 db_session=mock_db_session,
-metadata={ )
-"user_request": "formatted_string",
+metadata={ }
+"user_request": "",
 "data_result": {"user_specific": i},
 "triage_result": {"priority": "medium"},
 "optimizations_result": {"id": i}
@@ -601,7 +601,7 @@ assert len(successful_results) > 0  # At least some should succeed
                                             # Log any exceptions for debugging
 exceptions = [item for item in []]
 for exc in exceptions:
-    print("formatted_string")
+    print("")
 
 @pytest.mark.asyncio
     async def test_thread_safety_with_shared_resources(self, mock_db_session, mock_websocket_manager):
@@ -632,7 +632,7 @@ class ThreadSafeAgent(ReportingSubAgent):
         assert self.resource["counter"] >= current
 
         await asyncio.sleep(0)
-        return {"result": "formatted_string"}
+        return {"result": ""}
 
         agent = ThreadSafeAgent( )
         resource=shared_resource,
@@ -644,17 +644,17 @@ class ThreadSafeAgent(ReportingSubAgent):
         contexts = []
         for i in range(50):
         ctx = UserExecutionContext( )
-        user_id="formatted_string",
-        thread_id="formatted_string",
+        user_id="",
+        thread_id="",
         run_id=str(uuid.uuid4()),
         request_id=str(uuid.uuid4()),
         db_session=mock_db_session,
-        metadata={"user_request": "formatted_string"}
+        metadata={"user_request": ""}
                 
         contexts.append(ctx)
 
                 # Execute concurrently
-                # Removed problematic line: results = await asyncio.gather(*[ ))
+                # Removed problematic line: results = await asyncio.gather(*[ ])
         agent.execute(ctx, stream_updates=False) for ctx in contexts
                 
 
@@ -682,7 +682,7 @@ thread_id="sensitive_thread",
 run_id=str(uuid.uuid4()),
 request_id=str(uuid.uuid4()),
 db_session=mock_db_session,
-metadata={ )
+metadata={ }
 "user_request": "Process my SSN: 123-45-6789",
 "data_result": {"secret": "TOP_SECRET_DATA"},
 "triage_result": {"classification": "confidential"}
@@ -696,7 +696,7 @@ thread_id="normal_thread",
 run_id=str(uuid.uuid4()),
 request_id=str(uuid.uuid4()),
 db_session=mock_db_session,
-metadata={ )
+metadata={ }
 "user_request": "Show me all data",
 "data_result": {"public": "public_info"},
 "triage_result": {"classification": "public"}
@@ -710,7 +710,7 @@ captured_data = []
 def capture_and_return(prompt, *args, **kwargs):
     captured_data.append(prompt)
 await asyncio.sleep(0)
-return {"report": "formatted_string"}
+return {"report": ""}
 
 mock_generate.side_effect = capture_and_return
 
@@ -783,18 +783,18 @@ agent = GoalsTriageSubAgent(websocket_manager=mock_websocket_manager)
 contexts = []
 for i in range(100):
     ctx = UserExecutionContext( )
-user_id="formatted_string",
-thread_id="formatted_string",
+user_id="",
+thread_id="",
 run_id=str(uuid.uuid4()),
 request_id=str(uuid.uuid4()),
 db_session=mock_db_session,
-metadata={"user_request": "formatted_string"}
+metadata={"user_request": ""}
             
 contexts.append(ctx)
 
 with patch.object(agent, '_extract_and_analyze_goals', return_value={"goals": ["test"]}):
     start_time = datetime.now()
-                # Removed problematic line: results = await asyncio.gather(*[ ))
+                # Removed problematic line: results = await asyncio.gather(*[ ])
 agent.execute(ctx, stream_updates=False) for ctx in contexts
                 
 end_time = datetime.now()
@@ -805,7 +805,7 @@ assert all(r is not None for r in results)
 
                 # Should complete in reasonable time (< 10 seconds for 100 requests)
 duration = (end_time - start_time).total_seconds()
-assert duration < 10, "formatted_string"
+assert duration < 10, ""
 
 @pytest.mark.asyncio
     async def test_memory_leak_prevention(self, mock_db_session, mock_websocket_manager):
@@ -816,22 +816,22 @@ agent = ActionsToMeetGoalsSubAgent(websocket_manager=mock_websocket_manager)
                     # Execute many times with same agent instance
 for i in range(100):
     ctx = UserExecutionContext( )
-user_id="formatted_string",
-thread_id="formatted_string",
+user_id="",
+thread_id="",
 run_id=str(uuid.uuid4()),
 request_id=str(uuid.uuid4()),
 db_session=mock_db_session,
-metadata={ )
-"user_request": "formatted_string",
+metadata={ }
+"user_request": "",
 "optimizations_result": {"test": i}
                         
                         
 
-with patch.object(agent, '_generate_action_plan', return_value={"plan": "formatted_string"}):
+with patch.object(agent, '_generate_action_plan', return_value={"plan": ""}):
     result = await agent.execute(ctx, stream_updates=False)
 
                             # Result should be independent
-assert "formatted_string" in str(result)
+assert "" in str(result)
 
                             # Agent should not accumulate state
 assert not hasattr(agent, 'accumulated_state')

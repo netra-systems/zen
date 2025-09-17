@@ -16,24 +16,24 @@ from pathlib import Path
 
 def run_command(cmd: str, description: str) -> bool:
 """Run a command and return success status."""
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 print('='*60)
 
 result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
 
 if result.returncode == 0:
-print("formatted_string")
+    print("")
 if result.stdout:
 print(result.stdout)
 return True
 else:
-print("formatted_string")
+    print("")
 if result.stderr:
-print("Error:", result.stderr)
+    print("Error:", result.stderr)
 if result.stdout:
-print("Output:", result.stdout)
+    print("Output:", result.stdout)
 return False
 
 
@@ -42,7 +42,7 @@ def main():
 print("[U+1F680] NACIS Test Suite Runner")
 print("="*60)
 
-tests = [ )
+tests = [ ]
 ("python3 tests/chat_system/test_imports.py 2>/dev/null",
 "Import Tests"),
 
@@ -68,8 +68,8 @@ success = run_command(cmd, description)
 results.append((description, success))
 
         # Summary
-print(" )
-" + "="*60)
+    print("")
+ + ="*60)
 print(" CHART:  TEST SUMMARY")
 print("="*60)
 
@@ -78,23 +78,23 @@ failed = 0
 
 for test_name, success in results:
 status = " PASS:  PASSED" if success else " FAIL:  FAILED"
-print("formatted_string")
+print("")
 if success:
 passed += 1
 else:
 failed += 1
 
 print("="*60)
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
 if failed == 0:
-print(" )
+    print("")
 CELEBRATION:  All tests passed! NACIS system is ready.")
 return 0
 else:
-print("formatted_string")
+    print("")
 return 1
 
 

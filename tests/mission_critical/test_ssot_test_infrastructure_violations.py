@@ -119,7 +119,7 @@ class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
             pytest.fail(
                 fDETECTED {violation_count} duplicate conftest.py SSOT violations.\n"
                 f"ONLY SSOT conftest files in test_framework/ssot/ are authorized.\n\n
-                fUnauthorized conftest.py files:\n" + "\n.join(violation_details) + \n\n"
+                fUnauthorized conftest.py files:\n + \n.join(violation_details) + \n\n"
                 f"AUTHORIZED SSOT CONFTEST FILES:\n + 
                 \n".join(f"  ✓ {auth} for auth in self.authorized_conftest_files) + \n\n"
                 f"REMEDIATION:\n
@@ -150,7 +150,7 @@ class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
             pytest.fail(
                 fDETECTED {violation_count} fixture definition SSOT violations.\n"
                 f"All fixtures MUST be centralized in SSOT conftest files.\n\n
-                fConflicting fixtures:\n" + "\n.join(conflict_details) + \n\n"
+                fConflicting fixtures:\n + \n.join(conflict_details) + \n\n"
                 f"REMEDIATION:\n
                 f1. Consolidate duplicate fixtures into single SSOT definition\n"
                 f"2. Move fixtures to appropriate test_framework/ssot/conftest_*.py\n

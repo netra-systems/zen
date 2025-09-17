@@ -92,7 +92,7 @@ class AgentStateValidator:
         metrics.memory_usage_mb = memory_mb
         return memory_mb < self._get_memory_limit(agent_name)
         except Exception as e:
-        metrics.validation_errors.append("formatted_string")
+        metrics.validation_errors.append("")
         return False
 
 
@@ -243,13 +243,13 @@ class AgentStateValidatorTestSuite:
         value = getattr(state, field_name, None)
         valid = bool(value and value.strip()) if field_name == 'user_request' else value is not None
         if not valid:
-        metrics.validation_errors.append("formatted_string")
+        metrics.validation_errors.append("")
         return False
         return validation_passed
 
     def _get_base_transitions():
         """Get base state transitions"""
-        return { )
+        return { }
         ExecutionStatus.PENDING: [ExecutionStatus.INITIALIZING, ExecutionStatus.FAILED],
         ExecutionStatus.INITIALIZING: [ExecutionStatus.EXECUTING, ExecutionStatus.FAILED],
         ExecutionStatus.EXECUTING: [ExecutionStatus.COMPLETED, ExecutionStatus.FAILED, ExecutionStatus.RETRYING],
@@ -257,7 +257,7 @@ class AgentStateValidatorTestSuite:
         ExecutionStatus.FALLBACK: [ExecutionStatus.COMPLETED, ExecutionStatus.DEGRADED]}
 
     def _get_classification_keywords():
-        return { )
+        return { }
         'data': ['analyze', 'data', 'query', 'report'],
         'optimization': ['optimize', 'improve', 'reduce', 'costs'],
         'action': ['implement', 'execute', 'deploy', 'action']
@@ -297,7 +297,7 @@ class AgentStateValidatorTestSuite:
 
 
     # Test collection for pytest discovery
-        __all__ = [ )
+        __all__ = [ ]
         'AgentStateValidator',
         'ContextValidator',
         'ResourceTracker',

@@ -74,12 +74,12 @@ cmd = ["python", "-m", "pytest"]
 
     # Add test file/function
 if args.test:
-cmd.append("formatted_string")
+cmd.append("")
 else:
 cmd.append("tests/load/")
 
             # Add pytest options
-cmd.extend([ ))
+cmd.extend([ ])
 "-m", "load",  # Only run load tests
 "--asyncio-mode=auto",  # Enable asyncio support
 "-x",  # Stop on first failure
@@ -102,8 +102,8 @@ env["LOAD_TEST_QUICK_MODE"] = "1"
 print("[U+1F3C3] Running in quick mode (reduced load)")
 
 print(f"[U+1F680] Starting production load tests...")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 print()
 
                         # Run the tests
@@ -116,22 +116,22 @@ end_time = time.time()
 duration = end_time - start_time
 
 print()
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 
 if result.returncode == 0:
-print(" PASS:  All load tests passed!")
+    print(" PASS:  All load tests passed!")
 else:
-print(" FAIL:  Some load tests failed!")
+    print(" FAIL:  Some load tests failed!")
 
 return result.returncode
 
 except KeyboardInterrupt:
-print(" )
+    print("")
 [U+1F6D1] Load tests interrupted by user")
 return 1
 except Exception as e:
-print("formatted_string")
+    print("")
 return 1
 
 

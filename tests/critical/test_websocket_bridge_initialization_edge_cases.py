@@ -131,7 +131,7 @@ class BridgeInitializationTracker:
         self.bridge_states[user_id] = bridge_state
 
         if not success and not error_message:
-        self.silent_failures.append({ ))
+        self.silent_failures.append({ })
         "user_id": user_id,
         "thread_id": thread_id,
         "timestamp": time.time(),
@@ -141,11 +141,11 @@ class BridgeInitializationTracker:
     def detect_race_condition(self, user_id: str, competing_threads: List[str]):
         """Detect race conditions in bridge initialization."""
         if len(competing_threads) > 1:
-        self.race_conditions.append({ ))
+        self.race_conditions.append({ })
         "user_id": user_id,
         "competing_threads": competing_threads,
         "timestamp": time.time(),
-        "description": "formatted_string"
+        "description": ""
         
 
     def get_failed_initializations(self) -> List[BridgeInitializationAttempt]:
@@ -181,7 +181,7 @@ user_id = "user_001"
 num_concurrent_threads = 10
 
         # Shared bridge state that gets corrupted
-shared_bridge_state = { )
+shared_bridge_state = { }
 "initialized": False,
 "bridge_instance": None,
 "initialization_count": 0,
@@ -236,7 +236,7 @@ return None
 
                 # Start concurrent initializations
 tasks = []
-thread_ids = ["formatted_string" for i in range(num_concurrent_threads)]
+thread_ids = ["" for i in range(num_concurrent_threads)]
 
 for thread_id in thread_ids:
     tasks.append(initialize_bridge_with_race_condition(thread_id))
@@ -252,7 +252,7 @@ assert len(bridge_tracker.race_conditions) > 0, "Expected race condition detecti
 
                     # Check initialization count corruption
 initialization_count = shared_bridge_state["initialization_count"]
-assert initialization_count > 1, "formatted_string"
+assert initialization_count > 1, ""
 
                     # Verify some threads may have failed or gotten corrupted state
 successful_results = [item for item in []]
@@ -283,7 +283,7 @@ initialization_delay_base = 0.1  # Base delay
 async def slow_bridge_initialization(user_id: str):
     """Simulate slow bridge initialization."""
 pass
-thread_id = "formatted_string"
+thread_id = ""
 bridge_tracker.record_initialization_start(user_id, thread_id)
 
 try:
@@ -312,7 +312,7 @@ except asyncio.TimeoutError:
             # Initialization timed out!
 bridge_tracker.record_initialization_end( )
 user_id, thread_id, False,
-"formatted_string"
+""
             
 return None
 except Exception as e:
@@ -322,7 +322,7 @@ user_id, thread_id, False, str(e)
 return None
 
                 # Initialize bridges for multiple users concurrently
-users = ["formatted_string" for i in range(num_users)]
+users = ["" for i in range(num_users)]
 tasks = [slow_bridge_initialization(user_id) for user_id in users]
 
 start_time = time.time()
@@ -331,7 +331,7 @@ total_time = time.time() - start_time
 
                 # Verify timeouts occurred
 failed_initializations = bridge_tracker.get_failed_initializations()
-timeout_failures = [ )
+timeout_failures = [ ]
 attempt for attempt in failed_initializations
 if "timed out" in (attempt.error_message or "")
                 
@@ -346,7 +346,7 @@ assert len(slow_initializations) > 0, "Expected slow initializations under load"
 successful_results = [item for item in []]
 failed_count = len(results) - len(successful_results)
 
-assert failed_count > 0, "formatted_string"
+assert failed_count > 0, ""
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -357,7 +357,7 @@ assert failed_count > 0, "formatted_string"
 user_ids = ["user_001", "user_002", "user_003"]
 
                     # Global bridge registry with shared state (the bug!)
-global_bridge_registry = { )
+global_bridge_registry = { }
 "bridges": {},
 "initializing": set(),
 "last_user_id": None,
@@ -367,7 +367,7 @@ global_bridge_registry = { )
 async def initialize_bridge_with_state_corruption(user_id: str):
     """Initialize bridge with potential state corruption."""
 pass
-thread_id = "formatted_string"
+thread_id = ""
 bridge_tracker.record_initialization_start(user_id, thread_id)
 
 try:
@@ -394,7 +394,7 @@ if current_user != user_id:
                 # State was corrupted by another thread!
 bridge_tracker.record_initialization_end( )
 user_id, thread_id, False,
-"formatted_string"
+""
                 
 global_bridge_registry["initializing"].discard(user_id)
 return None
@@ -434,7 +434,7 @@ results = await asyncio.gather(*tasks, return_exceptions=True)
 
                             # Verify state corruption occurred
 failed_initializations = bridge_tracker.get_failed_initializations()
-corruption_failures = [ )
+corruption_failures = [ ]
 attempt for attempt in failed_initializations
 if "corruption" in (attempt.error_message or "").lower()
                             
@@ -453,7 +453,7 @@ bridge_count = len(global_bridge_registry["bridges"])
 
                             # More initializations than expected due to race conditions
 expected_max_inits = len(user_ids) * 3
-assert init_count <= expected_max_inits, "formatted_string"
+assert init_count <= expected_max_inits, ""
 
 
 class TestBridgeLifecycleFailures:
@@ -483,7 +483,7 @@ user_id, thread_id, True, None, working_bridge
         
 
         # Simulate agent execution steps
-execution_steps = [ )
+execution_steps = [ ]
 ("agent_started", {"agent_name": "TestAgent"}),
 ("tool_started", {"tool_name": "test_tool"}),
 ("tool_progress", {"progress": 25}),
@@ -512,7 +512,7 @@ else:
 notifications_sent.append((event_type, payload))
 else:
                                     # Silent failure - no error raised but notification lost!
-notifications_failed.append({ ))
+notifications_failed.append({ })
 "event_type": event_type,
 "payload": payload,
 "error": "Bridge is None - notification lost",
@@ -521,7 +521,7 @@ notifications_failed.append({ ))
 
 except AttributeError as e:
                                         # Bridge access failed
-notifications_failed.append({ ))
+notifications_failed.append({ })
 "event_type": event_type,
 "payload": payload,
 "error": str(e),
@@ -552,7 +552,7 @@ pass
 user_id = "user_001"
 
                                             # Simulate missing dependencies
-missing_dependencies = { )
+missing_dependencies = { }
 "websocket_manager": None,
 "execution_registry": None,
 "thread_run_registry": None
@@ -560,7 +560,7 @@ missing_dependencies = { )
 
 async def attempt_bridge_initialization_with_missing_deps(dependency_name: str):
     """Attempt bridge initialization with missing dependency."""
-thread_id = "formatted_string"
+thread_id = ""
 bridge_tracker.record_initialization_start(user_id, thread_id)
 
 try:
@@ -572,7 +572,7 @@ if missing_dependencies["websocket_manager"] is None:
             # Silent failure - no exception raised!
 bridge_tracker.record_initialization_end( )
 user_id, thread_id, False,
-"formatted_string"
+""
             
 await asyncio.sleep(0)
 return None
@@ -583,7 +583,7 @@ bridge.missing_dependency = dependency_name
 
 bridge_tracker.record_initialization_end( )
 user_id, thread_id, False,
-"formatted_string"
+""
             
 return bridge
 
@@ -596,7 +596,7 @@ return None
 
                 # Try to initialize bridge with each missing dependency
 dependency_names = list(missing_dependencies.keys())
-tasks = [ )
+tasks = [ ]
 attempt_bridge_initialization_with_missing_deps(dep_name)
 for dep_name in dependency_names
                 
@@ -605,7 +605,7 @@ results = await asyncio.gather(*tasks, return_exceptions=True)
 
                 # Verify silent failures occurred
 failed_initializations = bridge_tracker.get_failed_initializations()
-silent_failure_attempts = [ )
+silent_failure_attempts = [ ]
 attempt for attempt in failed_initializations
 if "silent failure" in (attempt.error_message or "")
                 
@@ -613,7 +613,7 @@ if "silent failure" in (attempt.error_message or "")
 assert len(silent_failure_attempts) > 0, "Expected silent failures with missing dependencies"
 
                 # Verify no proper error handling
-dependency_failures = [ )
+dependency_failures = [ ]
 attempt for attempt in failed_initializations
 if "Missing dependency" in (attempt.error_message or "")
                 
@@ -641,7 +641,7 @@ recovery_attempts = []
 
 async def attempt_bridge_recovery(attempt_num: int):
     """Attempt to recover failed bridge."""
-thread_id = "formatted_string"
+thread_id = ""
 bridge_tracker.record_initialization_start(user_id, thread_id)
 
 try:
@@ -668,10 +668,10 @@ else:
                     # Recovery failed silently - no exception!
 bridge_tracker.record_initialization_end( )
 user_id, thread_id, False,
-"formatted_string"
+""
                     
 
-recovery_attempts.append({ ))
+recovery_attempts.append({ })
 "attempt": attempt_num,
 "success": False,
 "silent_failure": True,
@@ -682,10 +682,10 @@ return None
 except Exception as e:
                         # Explicit error in recovery (better than silent)
 bridge_tracker.record_initialization_end( )
-user_id, thread_id, False, "formatted_string"
+user_id, thread_id, False, ""
                         
 
-recovery_attempts.append({ ))
+recovery_attempts.append({ })
 "attempt": attempt_num,
 "success": False,
 "silent_failure": False,
@@ -702,7 +702,7 @@ results = await asyncio.gather(*tasks, return_exceptions=True)
 
                         # Verify recovery failures occurred
 failed_recoveries = bridge_tracker.get_failed_initializations()
-recovery_failures = [ )
+recovery_failures = [ ]
 attempt for attempt in failed_recoveries
 if "recovery" in (attempt.error_message or "").lower()
                         
@@ -710,7 +710,7 @@ if "recovery" in (attempt.error_message or "").lower()
 assert len(recovery_failures) > 0, "Expected recovery failures"
 
                         # Check for silent failures
-silent_recovery_failures = [ )
+silent_recovery_failures = [ ]
 attempt for attempt in recovery_failures
 if "silently" in (attempt.error_message or "")
                         

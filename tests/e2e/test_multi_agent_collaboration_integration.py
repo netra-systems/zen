@@ -64,9 +64,9 @@ class MockCollaborationSubAgent(BaseAgent):
         """Test execute method for collaboration."""
         self.state = SubAgentLifecycle.RUNNING
         await asyncio.sleep(0.05)
-        state.messages.append({ ))
+        state.messages.append({ })
         "role": "assistant",
-        "content": "formatted_string"
+        "content": ""
     
         self.state = SubAgentLifecycle.COMPLETED
 
@@ -87,13 +87,13 @@ class TestMultiAgentCollaboration:
 
     # Create required dependencies
         websocket = TestWebSocketConnection()  # TODO: Use real service instead of Mock
-        tool_dispatcher = Magic
+        tool_dispatcher = MagicMock()
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         supervisor.websocket_manager = websocket_manager
         supervisor.user_id = "test_collaboration_user"
 
         await asyncio.sleep(0)
-        return { )
+        return { }
         "supervisor": supervisor,
         "llm_manager": llm_manager,
         "websocket_manager": websocket_manager,
@@ -134,11 +134,11 @@ class TestMultiAgentCollaboration:
         supervisor = collaboration_setup["supervisor"]
 
                 # Create multiple mock agents
-        agents = [ )
+        agents = [ ]
         BaseAgent( )
         llm_manager=collaboration_setup["llm_manager"],
-        name="formatted_string",
-        description="formatted_string"
+        name="",
+        description=""
         ) for i in range(3)
                 
 
@@ -216,7 +216,7 @@ class TestMultiAgentCollaboration:
         aggregated_result = await supervisor.aggregate_results([execution_result])
 
         await asyncio.sleep(0)
-        return { )
+        return { }
         "status": "completed",
         "delegation_result": delegation_result,
         "sub_agent_execution": {"success": True},
@@ -235,8 +235,8 @@ class TestMultiAgentCollaboration:
     # Simulate result aggregation
         aggregated = await supervisor.aggregate_results(results)
 
-        return [ )
-        { )
+        return [ ]
+        { }
         "success": not isinstance(r, Exception),
         "result": r if not isinstance(r, Exception) else None,
         "aggregated_result": aggregated
@@ -254,7 +254,7 @@ class TestMultiAgentCollaboration:
         except Exception:
             # Test error recovery
         recovery_result = await supervisor.handle_agent_failure(failing_agent)
-        return { )
+        return { }
         "error_handled": True,
         "recovery_successful": recovery_result is not None
             
@@ -277,7 +277,7 @@ class TestMultiAgentCollaboration:
         context2_preserved = agent2.context == original_context2
         no_bleeding = agent1.context != agent2.context
 
-        return { )
+        return { }
         "agent1_context_preserved": context1_preserved,
         "agent2_context_preserved": context2_preserved,
         "no_context_bleeding": no_bleeding
@@ -314,8 +314,8 @@ class TestMultiAgentCollaboration:
 
 
                 # Create required dependencies
-        db_session = AsyncNone  # TODO: Use real service instead of Mock
-        websocket_manager = AsyncNone  # TODO: Use real service instead of Mock
+        db_session = MagicMock()  # TODO: Use real service instead of Mock
+        websocket_manager = MagicMock()  # TODO: Use real service instead of Mock
         tool_dispatcher = MagicNone  # TODO: Use real service instead of Mock
 
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)

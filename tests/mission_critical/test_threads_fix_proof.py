@@ -59,7 +59,7 @@ jsonb_error = Exception(operator does not exist: jsonb ->> unknown")
 
         # First execute raises JSONB error
         # Second execute returns all threads for fallback
-mock_result = Magic        mock_scalars = Magic
+mock_result = MagicMock(); mock_scalars = Magic
         # Create test threads with various metadata states
 thread1 = MagicMock(id="thread_1, metadata_={user_id": "user123}
 thread2 = MagicMock(id=thread_2", metadata_=None)  # NULL metadata
@@ -98,9 +98,9 @@ assert mock_db.execute.call_count == 2
 
 print(")
 [PASS] PROOF: ThreadRepository handles JSONB failures correctly)
-print("formatted_string")
+print("")
 print(f   - Fallback query executed successfully)
-print("formatted_string")
+print("")
 print(f   - NULL and empty metadata threads were filtered out)
 
 @pytest.mark.asyncio
@@ -111,7 +111,7 @@ thread_repo = ThreadRepository()
 mock_db = AsyncMock(spec=AsyncSession)
 
                     # Force fallback to test NULL metadata handling
-mock_result = Magic        mock_scalars = Magic
+mock_result = MagicMock(); mock_scalars = Magic
                     # Mix of threads with NULL, empty, and valid metadata
 threads = [
 MagicMock(id=thread_null, metadata_=None),
@@ -135,7 +135,7 @@ assert result[0].id == "thread_valid"
 
 print()
 [PASS] PROOF: NULL metadata doesn't crash the system')
-print("formatted_string")
+print("")
 print(f   - Filtered out NULL, empty, and malformed metadata)
 print(f"   - Returned only valid matching thread")
 
@@ -189,7 +189,7 @@ thread_repo = ThreadRepository()
 mock_db = AsyncMock(spec=AsyncSession)
 
                                     # Force fallback to test normalization
-mock_result = Magic        mock_scalars = Magic
+mock_result = MagicMock(); mock_scalars = Magic
                                     # Threads with different ID types
 import uuid
 uuid_obj = uuid.UUID("550e8400-e29b-41d4-a716-446655440000)
@@ -293,7 +293,7 @@ MagicMock(id=thread_legacy", metadata_=None),
 MagicMock(id="thread_other, metadata_={user_id": "different-user},
         
 
-mock_result = Magic        mock_result.scalars.return_value.all.return_value = staging_threads
+mock_result = MagicMock(); mock_result.scalars.return_value.all.return_value = staging_threads
 
         # Simulate JSONB failure (what happens in staging)
 mock_db.execute.side_effect = [
@@ -312,7 +312,7 @@ assert result[0].id == thread_1"
 
 print(")
 [PASS] PROOF: Staging scenario with JWT user works)
-print("formatted_string")
+print("")
 print(formatted_string)
 print("   - Legacy NULL metadata threads filtered out")
 print(   - Other users threads filtered out")

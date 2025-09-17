@@ -63,7 +63,7 @@ cur.execute("SELECT 1")
 result = cur.fetchone()
 assert result[0] == 1, "Database connectivity test failed"
 except Exception as e:
-pytest.skip("formatted_string")
+pytest.skip("")
 
                         # Capture all log output
 log_capture = StringIO()
@@ -92,7 +92,7 @@ try:
 from auth_service.auth_core.database.connection import AuthDatabase
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 except ImportError as import_error:
-pytest.skip("formatted_string")
+pytest.skip("")
 
                                     # Create database instance with explicit configuration
 auth_db = AuthDatabase()
@@ -105,7 +105,7 @@ pytest.fail("Database initialization timed out - check service availability")
 except Exception as init_error:
                                                 # Check if this is an expected test environment issue
 if "test" not in str(init_error).lower():
-pytest.fail("formatted_string")
+pytest.fail("")
 else:
                                                         # In test mode, some failures are expected - log them but check for auth errors
 pass
@@ -114,7 +114,7 @@ pass
 log_output = log_capture.getvalue()
 
                                                         # Check for auth-related error messages that shouldn't be there
-unwanted_auth_patterns = [ )
+unwanted_auth_patterns = [ ]
 "authentication failed",
 "password authentication failed",
 "SCRAM authentication",
@@ -130,7 +130,7 @@ if pattern.lower() in log_output.lower():
 for line in log_output.split(" )
 "):
 if pattern.lower() in line.lower():
-found_auth_issues.append("formatted_string")
+found_auth_issues.append("")
 
                                                                         # Assert no unwanted auth error messages
 if found_auth_issues:
@@ -139,7 +139,7 @@ f"Found authentication error logs that indicate database auth issues:\
 " +
 "\
 ".join(found_auth_issues) +
-"formatted_string"
+""
                                                                             
 
                                                                             # Try to perform a basic database operation if possible
@@ -149,13 +149,13 @@ async with auth_db.get_session() as session:
 from sqlalchemy import text
 result = await session.execute(text("SELECT 1 as test_value"))
 test_result = result.scalar()
-assert test_result == 1, "formatted_string"
+assert test_result == 1, ""
 else:
                                                                                             # Alternative connection test
 pass
 except Exception as op_error:
                                                                                                 # Log but don't fail on operational errors in test environment
-logging.getLogger(__name__).info("formatted_string")
+logging.getLogger(__name__).info("")
 
 finally:
                                                                                                     # Restore original handlers
@@ -171,7 +171,7 @@ elif hasattr(auth_db, 'engine') and auth_db.engine:
 await auth_db.engine.dispose()
 except Exception as cleanup_error:
                                                                                                                         # Log cleanup errors but don't fail the test
-logging.getLogger(__name__).warning("formatted_string")
+logging.getLogger(__name__).warning("")
 
 def test_database_manager_no_credential_logging(self):
 """Test that DatabaseManager URL building doesn't log credentials."""
@@ -182,7 +182,7 @@ handler = logging.StreamHandler(log_capture)
 handler.setLevel(logging.DEBUG)
 
     # Get relevant loggers
-loggers_to_check = [ )
+loggers_to_check = [ ]
 logging.getLogger('auth_service.auth_core.database'),
 logging.getLogger('auth_service'),
 logging.getLogger(__name__),
@@ -200,10 +200,10 @@ try:
 try:
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 except ImportError as import_error:
-pytest.skip("formatted_string")
+pytest.skip("")
 
                     # Test various URL transformations with different credential patterns
-test_urls = [ )
+test_urls = [ ]
 "postgresql://user:password123@localhost/dbname",
 "postgresql+asyncpg://user:secret456@host/db?sslmode=require",
 "postgres://admin:pass789@cloudsql/database",
@@ -213,7 +213,7 @@ test_urls = [ )
 try:
 manager = AuthDatabaseManager()
 except Exception as manager_error:
-pytest.skip("formatted_string")
+pytest.skip("")
 
 for url in test_urls:
                                 # Set environment variable using isolated environment
@@ -230,7 +230,7 @@ if hasattr(manager, 'get_auth_database_url_async'):
 auth_url = manager.get_auth_database_url_async()
 except Exception as url_error:
                                                     # Log but don't fail - this might be expected in some configurations
-logging.getLogger(__name__).debug("formatted_string")
+logging.getLogger(__name__).debug("")
 finally:
                                                         # Restore original URL
 if original_url:
@@ -251,7 +251,7 @@ if credential in log_output:
 for line in log_output.split(" )
 "):
 if credential in line:
-found_credentials.append("formatted_string")
+found_credentials.append("")
 
                                                                                 # Assert no credentials in logs
 if found_credentials:
@@ -259,7 +259,7 @@ pytest.fail( )
 f"Found credentials in logs (security issue):\
 " + "\
 ".join(found_credentials) +
-"formatted_string"
+""
                                                                                     
 
 finally:

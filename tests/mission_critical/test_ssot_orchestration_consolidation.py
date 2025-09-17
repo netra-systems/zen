@@ -622,14 +622,14 @@ class TestSSOTOrchestrationIsolation:
         config = get_orchestration_config()
             # Store user's sensitive orchestration data
         orchestration_sensitive_data = {
-        'orchestration_api_key': "formatted_string",
+        'orchestration_api_key': "",
         'config_secret': formatted_string,
-        'orchestration_session_token': "formatted_string",
+        'orchestration_session_token': "",
         'availability_secret': formatted_string,
         'orchestration_resources': {
         'config_instance': config,
         'config_id': id(config),
-        'user_availability_cache': "formatted_string",
+        'user_availability_cache': "",
         'user_validation_state': formatted_string
             
             
@@ -672,20 +672,20 @@ class TestSSOTOrchestrationIsolation:
                                                         # This is expected for singleton, but check user data isolation
         other_cache = other_resources.get('user_availability_cache')
         if other_cache and formatted_string in other_cache:
-        attack_attempts.append("formatted_string")
+        attack_attempts.append("")
         except Exception:
                                                                 # Expected - cross-user resource access should fail
         pass
         if attack_attempts:
         security_violations.extend([formatted_string for attempt in attack_attempts]
-        return "formatted_string", len(attack_attempts)
+        return "", len(attack_attempts)
         finally:
         user_simulator.cleanup_orchestration_context()
         loop.close()
         except Exception as e:
         error_msg = formatted_string
         logger.error(error_msg)
-        return "formatted_string", 0
+        return "", 0
                                                                             # Execute concurrent orchestration security tests
         with ThreadPoolExecutor(max_workers=num_users) as executor:
         futures = [executor.submit(test_user_orchestration_security_boundaries, i) for i in range(num_users)]
@@ -694,7 +694,7 @@ class TestSSOTOrchestrationIsolation:
         assert len(security_violations) == 0, formatted_string
                                                                                 # Validate all users completed security tests
         successful_results = [item for item in []]]
-        assert len(successful_results) == num_users, "formatted_string"
+        assert len(successful_results) == num_users, ""
                                                                                 # Validate orchestration resources are properly isolated
         if len(user_orchestration_resources) > 1:
         orchestration_api_keys = [data['orchestration_api_key'] for data in user_orchestration_resources.values()]
@@ -709,11 +709,11 @@ class TestSSOTOrchestrationIsolation:
                                                                                     # Config instances should be the same singleton, but user data isolated
         config_ids = [data['orchestration_resources']['config_id'] for data in user_orchestration_resources.values()]
         unique_config_ids = set(config_ids)
-        assert len(unique_config_ids) == 1, "formatted_string"
+        assert len(unique_config_ids) == 1, ""
                                                                                     # But user-specific cache data should be unique
         user_caches = [data['orchestration_resources']['user_availability_cache'] for data in user_orchestration_resources.values()]
         assert len(set(user_caches)) == len(user_orchestration_resources), SECURITY: User availability caches shared between users
-        logger.info("formatted_string")
+        logger.info("")
     def test_performance_monitoring_orchestration_concurrent_load(self):
         '''
         pass

@@ -645,9 +645,9 @@ executors = []
 
 for i in range(5):
     context = UserExecutionContext.from_request( )
-user_id="formatted_string",
-thread_id="formatted_string",
-run_id="formatted_string"
+user_id="",
+thread_id="",
+run_id=""
                 
 
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
@@ -672,10 +672,10 @@ async def simulate_user_operation(executor, user_id):
 await asyncio.sleep(0.1)  # Simulate work
 metrics = executor.get_metrics()
 await asyncio.sleep(0)
-return "formatted_string", metrics['context_id']
+return "", metrics['context_id']
 
     # Run operations concurrently
-tasks = [ )
+tasks = [ ]
 simulate_user_operation(executors[i], i)
 for i in range(len(executors))
     

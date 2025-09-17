@@ -71,8 +71,8 @@ user_id = "user-123
 session_id = session-456"
 
         # Create WebSocket connection
-mock_ws = Magic        mock_ws.websocket = TestWebSocketConnection()
-mock_ws.state = Magic        mock_ws.state.name = "OPEN
+mock_ws = MagicMock(); mock_ws.websocket = TestWebSocketConnection()
+mock_ws.state = MagicMock(); mock_ws.state.name = "OPEN
 
         # Create emitter
 emitter = await ws_factory.create_user_emitter( )
@@ -119,7 +119,7 @@ session_id=session-1"
 mock_agent_registry.set_websocket_manager(emitter)
 
             # Create mock tool dispatcher
-mock_dispatcher = Magic        mock_dispatcher.execute_tool = AsyncMock(return_value={"status: success"}
+mock_dispatcher = MagicMock(); mock_dispatcher.execute_tool = AsyncMock(return_value={"status: success"}
 
             # Enhance dispatcher
 mock_agent_registry.enhance_tool_dispatcher.return_value = mock_dispatcher
@@ -139,8 +139,8 @@ user_id = "user-123
 session_id = session-456"
 
                 # Create WebSocket
-mock_ws = Magic        mock_ws.websocket = TestWebSocketConnection()
-mock_ws.state = Magic        mock_ws.state.name = "OPEN
+mock_ws = MagicMock(); mock_ws.websocket = TestWebSocketConnection()
+mock_ws.state = MagicMock(); mock_ws.state.name = "OPEN
 
                 # Create emitter with WebSocket
 emitter = await ws_factory.create_user_emitter( )
@@ -246,8 +246,8 @@ assert contexts[i].user_id in str(call_data)
 
 user_id = "user-123
 
-mock_ws = Magic        mock_ws.websocket = TestWebSocketConnection()
-mock_ws.state = Magic        mock_ws.state.name = OPEN"
+mock_ws = MagicMock(); mock_ws.websocket = TestWebSocketConnection()
+mock_ws.state = MagicMock(); mock_ws.state.name = OPEN"
 
 emitter = await ws_factory.create_user_emitter( )
 user_id=user_id,
@@ -301,8 +301,8 @@ class TestWebSocketToolDispatcher:
 user_id = user-123"
 
         # Create WebSocket setup
-mock_ws = Magic        mock_ws.websocket = TestWebSocketConnection()
-mock_ws.state = Magic        mock_ws.state.name = "OPEN
+mock_ws = MagicMock(); mock_ws.websocket = TestWebSocketConnection()
+mock_ws.state = MagicMock(); mock_ws.state.name = "OPEN
 
 emitter = await ws_factory.create_user_emitter( )
 user_id=user_id,
@@ -353,8 +353,8 @@ pass
 user_id = "user-123
 
             # Create emitter
-mock_ws = Magic        mock_ws.websocket = TestWebSocketConnection()
-mock_ws.state = Magic        mock_ws.state.name = OPEN"
+mock_ws = MagicMock(); mock_ws.websocket = TestWebSocketConnection()
+mock_ws.state = MagicMock(); mock_ws.state.name = OPEN"
 
 emitter = await ws_factory.create_user_emitter( )
 user_id=user_id,

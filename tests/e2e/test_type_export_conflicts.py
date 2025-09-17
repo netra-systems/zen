@@ -63,7 +63,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         for i, line in enumerate(lines, 1):
                     # Look for interface definitions
         if 'interface BaseWebSocketPayload' in line:
-        base_websocket_definitions.append({ ))
+        base_websocket_definitions.append({ })
         'file': str(ts_file.relative_to(self.frontend_path)),
         'line': i,
         'type': 'interface_definition',
@@ -72,7 +72,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
 
                         # Look for type exports
         if 'export type { BaseWebSocketPayload }' in line:
-        base_websocket_definitions.append({ ))
+        base_websocket_definitions.append({ })
         'file': str(ts_file.relative_to(self.frontend_path)),
         'line': i,
         'type': 'type_export',
@@ -81,7 +81,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
 
                             # Look for runtime exports
         if 'export { BaseWebSocketPayload }' in line:
-        base_websocket_definitions.append({ ))
+        base_websocket_definitions.append({ })
         'file': str(ts_file.relative_to(self.frontend_path)),
         'line': i,
         'type': 'runtime_export',
@@ -90,7 +90,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
 
         except Exception as e:
                                     # Log but don't fail on read errors
-        print("formatted_string")
+        print("")
         continue
 
                                     # Store for reporting
@@ -98,14 +98,14 @@ class TestTypeExportConflicts(BaseIntegrationTest):
 
                                     # This assertion SHOULD FAIL - we expect multiple definitions
         assert len(base_websocket_definitions) <= 1, ( )
-        "formatted_string"
+        ""
         f"of BaseWebSocketPayload. Expected exactly 1 canonical definition.
         "
         f"Conflicting definitions found in:
         " +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for defn in base_websocket_definitions
         ]) +
         f"
@@ -146,8 +146,8 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         assert result.returncode == 0 and not has_duplicate_errors, ( )
         f"TypeScript compilation failed with duplicate type errors.
         "
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
         f"This indicates duplicate type definitions are causing conflicts."
             
 
@@ -169,10 +169,10 @@ class TestTypeExportConflicts(BaseIntegrationTest):
 
     # This assertion SHOULD FAIL - we expect many duplicates
         assert len(duplicate_types) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for type_name, locations in duplicate_types.items()
         ]) +
         f"
@@ -195,12 +195,12 @@ class TestTypeExportConflicts(BaseIntegrationTest):
 
         # This assertion SHOULD FAIL due to inconsistent export patterns
         assert len(mixed_exports) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string" +
+        ".join([ ])
+        "" +
         "
-        ".join(["formatted_string" for style, file in styles])
+        ".join(["" for style, file in styles])
         for type_name, styles in mixed_exports.items()
         ]) +
         f"
@@ -221,12 +221,12 @@ class TestTypeExportConflicts(BaseIntegrationTest):
 
     # This assertion SHOULD FAIL due to naming conflicts
         assert len(similar_interfaces) == 0, ( )
-        "formatted_string"
+        ""
         f"that could cause confusion:
         " +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for group in similar_interfaces
         ]) +
         f"
@@ -285,7 +285,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         continue
 
                                 # Return only mixed exports
-        return { )
+        return { }
         name: styles for name, styles in export_styles.items()
         if len(set(style for style, _ in styles)) > 1
                                 
@@ -334,9 +334,9 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         if self.conflicting_types:
         print(f" )
         === Type Conflict Analysis ===")
-        print("formatted_string")
+        print("")
         for conflict in self.conflicting_types:
-        print("formatted_string")
+        print("")
 
 
         if __name__ == "__main__":

@@ -27,13 +27,13 @@ class StandaloneHealthChecker:
 
     def __init__(self):
         pass
-        self.services = { )
-        "backend": { )
+        self.services = { }
+        "backend": { }
         "url": "http://localhost:8000",
         "health_path": "/health",
         "timeout": 5.0
         },
-        "auth": { )
+        "auth": { }
         "url": "http://localhost:8080",
         "health_path": "/health",
         "timeout": 5.0
@@ -48,9 +48,9 @@ class StandaloneHealthChecker:
         health_path = service_config["health_path"]
         timeout = service_config.get("timeout", 5.0)
 
-        health_url = "formatted_string"
+        health_url = ""
 
-        result = { )
+        result = { }
         "service": service_name,
         "url": health_url,
         "accessible": False,
@@ -93,17 +93,17 @@ class StandaloneHealthChecker:
         result["health_data"] = health_data
         result["healthy"] = True
         except Exception as parse_error:
-        result["error"] = "formatted_string"
+        result["error"] = ""
         result["healthy"] = False
         else:
-        result["error"] = "formatted_string"
+        result["error"] = ""
 
         except asyncio.TimeoutError:
-        result["error"] = "formatted_string"
+        result["error"] = ""
         except aiohttp.ClientConnectionError as e:
-        result["error"] = "formatted_string"
+        result["error"] = ""
         except Exception as e:
-        result["error"] = "formatted_string"
+        result["error"] = ""
 
         return result
 
@@ -116,11 +116,11 @@ class StandaloneHealthChecker:
         result = await self.check_service(service_name)
         results[service_name] = result
         except Exception as e:
-        results[service_name] = { )
+        results[service_name] = { }
         "service": service_name,
         "accessible": False,
         "healthy": False,
-        "error": "formatted_string"
+        "error": ""
                 
 
         return results
@@ -131,7 +131,7 @@ class StandaloneHealthChecker:
         accessible_services = sum(1 for r in results.values() if r.get("accessible", False))
         healthy_services = sum(1 for r in results.values() if r.get("healthy", False))
 
-        return { )
+        return { }
         "total_services": total_services,
         "accessible_services": accessible_services,
         "healthy_services": healthy_services,
@@ -183,24 +183,24 @@ summary = checker.get_summary(results)
                 # Log results for debugging
 print(f" )
 === Service Connectivity Summary ===")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
+print("")
 
                 # Detailed results
 for service_name, result in results.items():
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+    print("")
+print("")
+print("")
+print("")
 if result.get('error'):
-print("formatted_string")
+    print("")
 if result.get('response_time'):
-print("formatted_string")
+    print("")
 if result.get('health_data'):
-print("formatted_string")
+    print("")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -218,18 +218,18 @@ assert "status" in health_data, "Health response should include status"
 
 print(f" )
 [PASS] Auth service validation passed:")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 
                                         # Additional validation if service identifies itself
 if "service" in health_data:
-print("formatted_string")
+    print("")
 if "version" in health_data:
-print("formatted_string")
+    print("")
 else:
 print(f" )
 [WARN] Auth service not accessible or unhealthy:")
-print("formatted_string")
+print("")
 print(f"   This is OK - service might not be running")
 
 @pytest.mark.asyncio
@@ -249,17 +249,17 @@ assert "status" in health_data, "Health response should include status"
 
 print(f" )
 [PASS] Backend service validation passed:")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 
                                                             # Additional fields that backend might provide
 for field in ["timestamp", "version", "environment", "uptime"]:
 if field in health_data:
-print("formatted_string")
+    print("")
 else:
 print(f" )
 [WARN] Backend service not accessible or unhealthy:")
-print("formatted_string")
+print("")
 print(f"   This is OK - service might not be running")
 
 @pytest.mark.asyncio
@@ -284,7 +284,7 @@ print(f" )
 
 except Exception as e:
                                                                                         # Even if external calls fail, the infrastructure should work
-print("formatted_string")
+    print("")
 print("This is OK if network connectivity is limited")
 
                                                                                         # Test should pass regardless - we're testing the infrastructure
@@ -299,15 +299,15 @@ checker = StandaloneHealthChecker()
 results = await checker.check_all_services()
 summary = checker.get_summary(results)
 
-print(" )
+print("")
 === STANDALONE HEALTH CHECK RESULTS ===")
-print(json.dumps({ )))
+print(json.dumps({ }))
 "summary": summary,
 "results": results
 }, indent=2, default=str))
 
 await asyncio.sleep(0)
-return { )
+return { }
 "results": results,
 "summary": summary,
 "success": True  # Always succeed - this is infrastructure testing

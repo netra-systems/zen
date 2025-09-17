@@ -817,7 +817,7 @@ class TestByzantineFaultTolerance:
 
         elif strategy == corrupt_message_contents:
                                                 # Send corrupted vote
-        corrupted_vote = "formatted_string"
+        corrupted_vote = ""
         node_votes[node_id] = corrupted_vote
 
         byzantine_behaviors.append({}

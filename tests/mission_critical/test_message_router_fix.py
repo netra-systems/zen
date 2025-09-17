@@ -90,7 +90,7 @@ class TestWebSocketConnection:
 
     # Create mock dependencies
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
-        mock_websocket = Magic
+        mock_websocket = MagicMock()
         try:
         # Create the services (this is what websocket.py does)
         message_handler_service = MessageHandlerService( )

@@ -149,7 +149,7 @@ class TestAgentRestartAfterFailure:
     async def mock_execute(context, stream_updates=False):
         pass
         user_id = context.user_id
-        execution_log.append("formatted_string")
+        execution_log.append("")
         await asyncio.sleep(0.1)  # Simulate processing
         execution_log.append(formatted_string)
         await asyncio.sleep(0)
@@ -160,7 +160,7 @@ class TestAgentRestartAfterFailure:
         for i in range(3):
         context = UserExecutionContext( )
         user_id=formatted_string,
-        thread_id="formatted_string",
+        thread_id="",
         run_id=formatted_string,
         metadata={"user_request": formatted_string}
         
@@ -178,7 +178,7 @@ class TestAgentRestartAfterFailure:
 
             # All requests used the SAME agent instance
             # This can cause state interference
-        logger.info("formatted_string")
+        logger.info("")
 
             # With singleton pattern, executions may interfere
             # Proper pattern would have independent instances
@@ -260,7 +260,7 @@ class TestAgentRestartAfterFailure:
                     This means WebSocket events from both users go through same channel
                     # causing potential cross-user event leakage
 
-        @pytest.fixture
+        # @pytest.fixture
     async def test_factory_pattern_creates_fresh_instances(self):
         ""Test desired behavior: factory pattern creates fresh instances per request.""
 

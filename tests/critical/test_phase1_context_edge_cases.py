@@ -136,7 +136,7 @@ class TestContextNullUndefinedEdgeCases:
         This can happen with form input or string processing edge cases.
         '''
         pass
-        whitespace_patterns = [ )
+        whitespace_patterns = [ ]
         " ",           # Single space
         "\t",          # Tab
         "
@@ -178,7 +178,7 @@ class TestContextNullUndefinedEdgeCases:
         This can cause encoding/decoding issues or database storage problems.
         '''
         pass
-        unicode_edge_cases = [ )
+        unicode_edge_cases = [ ]
         "user_\u0000null",        # Null character
         "user_\uFFFDreplacement", # Unicode replacement character
         "user_\U0010FFFFmax",     # Maximum Unicode code point
@@ -331,9 +331,9 @@ class TestMemoryLeakEdgeCases:
         pass
         for i in range(count):
         context = UserExecutionContext( )
-        user_id="formatted_string",
-        thread_id="formatted_string",
-        run_id="formatted_string",
+        user_id="",
+        thread_id="",
+        run_id="",
         metadata={"index": i, "data": list(range(100))}  # Some data
         
         weak_refs.append(weakref.ref(context))
@@ -355,7 +355,7 @@ class TestMemoryLeakEdgeCases:
         collected_contexts = len(weak_refs) - alive_contexts
 
             # Most contexts should be collected (allowing for some GC variance)
-        assert collected_contexts >= len(weak_refs) * 0.8, "formatted_string"
+        assert collected_contexts >= len(weak_refs) * 0.8, ""
 
     def test_child_context_chain_memory_usage(self):
         '''
@@ -382,7 +382,7 @@ class TestMemoryLeakEdgeCases:
     # Create chain of 100 child contexts
         for i in range(100):
         current_context = current_context.create_child_context( )
-        operation_name="formatted_string",
+        operation_name="",
         additional_metadata={"step": i, "data": list(range(10))}
         
         contexts.append(current_context)
@@ -391,7 +391,7 @@ class TestMemoryLeakEdgeCases:
         memory_increase = final_memory - initial_memory
 
         # Memory increase should be reasonable (less than 10MB for 100 contexts)
-        assert memory_increase < 10 * 1024 * 1024, "formatted_string"
+        assert memory_increase < 10 * 1024 * 1024, ""
 
         # Clean up contexts
         del contexts
@@ -417,13 +417,13 @@ class TestMemoryLeakEdgeCases:
     # Create child contexts that might accumulate metadata
         for i in range(10):
         context = context.create_child_context( )
-        operation_name="formatted_string",
-        additional_metadata={"formatted_string": list(range(50))}
+        operation_name="",
+        additional_metadata={"": list(range(50))}
         
 
         # Verify metadata size is reasonable
         metadata_size = len(str(context.metadata))
-        assert metadata_size < 100000, "formatted_string"
+        assert metadata_size < 100000, ""
 
 
 class TestConcurrencyRaceConditions:
@@ -441,9 +441,9 @@ async def create_context(index):
     pass
 await asyncio.sleep(0)
 return UserExecutionContext( )
-user_id="formatted_string",
-thread_id="formatted_string",
-run_id="formatted_string",
+user_id="",
+thread_id="",
+run_id="",
 metadata={"index": index, "timestamp": time.time()}
     
 
@@ -483,7 +483,7 @@ async def create_child_context(index):
     pass
 await asyncio.sleep(0)
 return parent_context.create_child_context( )
-operation_name="formatted_string",
+operation_name="",
 additional_metadata={"child_index": index}
     
 
@@ -514,9 +514,9 @@ def create_and_serialize_context(thread_id):
     pass
 try:
     context = UserExecutionContext( )
-user_id="formatted_string",
-thread_id="formatted_string",
-run_id="formatted_string",
+user_id="",
+thread_id="",
+run_id="",
 metadata={"thread_id": thread_id, "data": list(range(10))}
         
 
@@ -526,10 +526,10 @@ correlation_id = context.get_correlation_id()
 
         # Create child context
 child = context.create_child_context( )
-operation_name="formatted_string"
+operation_name=""
         
 
-return { )
+return { }
 "success": True,
 "context_id": context.user_id,
 "dict_size": len(context_dict),
@@ -583,7 +583,7 @@ class TestDatabaseConnectionEdgeCases:
         This could happen during dependency injection failures.
         '''
         pass
-        invalid_sessions = [ )
+        invalid_sessions = [ ]
         "not_a_session",
         123,
         {"fake": "session"},
@@ -664,7 +664,7 @@ class TestWebSocketEventEdgeCases:
         This could happen with type conversion errors.
         '''
         pass
-        invalid_connections = [ )
+        invalid_connections = [ ]
         123,           # Number instead of string
         ["conn_1"],    # List instead of string
         {"id": "1"},   # Dict instead of string
@@ -695,7 +695,7 @@ class TestWebSocketEventEdgeCases:
         run_id="run_ws_switch"
     
 
-        connection_ids = ["formatted_string" for i in range(20)]
+        connection_ids = ["" for i in range(20)]
 
         contexts_with_ws = []
         for conn_id in connection_ids:
@@ -727,16 +727,16 @@ class TestSystemLimitEdgeCases:
         try:
         for i in range(max_contexts):
         context = UserExecutionContext( )
-        user_id="formatted_string",
-        thread_id="formatted_string",
-        run_id="formatted_string",
+        user_id="",
+        thread_id="",
+        run_id="",
         metadata={"index": i}
             
         contexts.append(context)
 
             # Verify context is properly formed
         if i % 100 == 0:  # Check every 100th context
-        assert context.user_id == "formatted_string"
+        assert context.user_id == ""
         context_dict = context.to_dict()
         assert isinstance(context_dict, dict)
 
@@ -801,7 +801,7 @@ class TestSystemLimitEdgeCases:
         for depth in range(1, max_depth + 1):
         try:
         current_context = current_context.create_child_context( )
-        operation_name="formatted_string",
+        operation_name="",
         additional_metadata={"depth": depth}
             
         contexts.append(current_context)

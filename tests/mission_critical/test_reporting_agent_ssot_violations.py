@@ -395,9 +395,9 @@ class TestReportingAgentComplexScenarios:
         initial_objects = len(gc.get_objects())
         for i in range(100):
         context = MagicMock(spec=UserExecutionContext)
-        context.user_id = "formatted_string"
+        context.user_id = ""
         context.thread_id = formatted_string
-        context.run_id = "formatted_string"
+        context.run_id = ""
         context.db_session = Magic            # Large payload
         large_data = x * 1000000  # 1MB string
         context.metadata = {
@@ -464,6 +464,6 @@ class TestReportingAgentComplexScenarios:
         results = asyncio.run(rapid_calls())
             # All should complete without race condition errors
         errors = [item for item in []]
-        assert len(errors) == 0, "formatted_string"
+        assert len(errors) == 0, ""
         if __name__ == "__main__":
                 # Run tests with verbose output

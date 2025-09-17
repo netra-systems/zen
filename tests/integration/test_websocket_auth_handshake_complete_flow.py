@@ -31,7 +31,7 @@ Business Value Justification (BVJ):
 - Value Impact: Prevents auth failures that cause customer churn
 - Revenue Impact: $18K MRR - Protects real-time features and multi-user collaboration
 
-This test validates the complete WebSocket authentication handshake flow from
+# This test validates the complete WebSocket authentication handshake flow from # Incomplete import statement
 initial connection through JWT validation, session binding, and state persistence.
 
 CRITICAL: Real integration testing with minimal mocking.

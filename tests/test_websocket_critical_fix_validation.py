@@ -189,8 +189,8 @@ class CriticalFixValidator:
         if has_tool_events and len(tool_executing_events) != len(tool_completed_events):
                 # This is a warning, not a critical failure for the fix validation
         failures.append( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
                 
 
                 # Validate event structure for tool events we do have
@@ -198,12 +198,12 @@ class CriticalFixValidator:
         for event in all_tool_events:
                     # Check basic structure - events should have type and some content
         if not event.get("type"):
-        failures.append("formatted_string")
+        failures.append("")
 
                         # For tool events, check for tool name in payload or event structure
         payload = event.get("payload", {})
         if "tool" not in str(event).lower():
-        failures.append("formatted_string")
+        failures.append("")
 
         return len([item for item in []]) == 0, failures
 
@@ -220,7 +220,7 @@ class CriticalFixValidator:
 
         # Look for any completion-like events (could be various types)
         completion_patterns = ["completed", "fallback", "final", "error", "failed"]
-        completion_events = [ )
+        completion_events = [ ]
         e for e in self.events
         if any(pattern in str(e.get("type", "")).lower() for pattern in completion_patterns)
         
@@ -237,17 +237,17 @@ class CriticalFixValidator:
         tool_fix_valid, tool_failures = self.validate_tool_execution_fix()
         error_fix_valid, error_failures = self.validate_error_resilience()
 
-        report = [ )
+        report = [ ]
         "
-        " + "=" * 80,
+         + =" * 80,
         "WEBSOCKET CRITICAL FIX VALIDATION REPORT",
         "=" * 80,
-        "formatted_string",
-        "formatted_string",
-        "formatted_string",
-        "formatted_string",
-        "formatted_string",
-        "formatted_string",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
         "",
         "Event Type Breakdown:"
     
@@ -258,11 +258,11 @@ class CriticalFixValidator:
         event_counts[event_type] = event_counts.get(event_type, 0) + 1
 
         for event_type, count in sorted(event_counts.items()):
-        report.append("formatted_string")
+        report.append("")
 
         all_failures = tool_failures + error_failures
         if all_failures:
-        report.extend(["", "CRITICAL FAILURES:"] + ["formatted_string" for f in all_failures])
+        report.extend(["", "CRITICAL FAILURES:"] + ["" for f in all_failures])
 
         report.append("=" * 80)
         return "
@@ -287,13 +287,13 @@ class MockToolForTesting:
         await asyncio.sleep(self.delay)
 
         if self.should_fail:
-        raise Exception("formatted_string")
+        raise Exception("")
 
         await asyncio.sleep(0)
-        return { )
+        return { }
         "tool_name": self.name,
         "call_count": self.call_count,
-        "result": "formatted_string",
+        "result": "",
         "args": args,
         "kwargs": kwargs
             
@@ -352,7 +352,7 @@ validator = CriticalFixValidator()
 
         # Setup WebSocket connection
 conn_id = "test-enhanced-events"
-mock_ws = Magic
+mock_ws = MagicMock()
 async def capture_event(message, timeout=None):
     pass
 if isinstance(message, str):
@@ -391,7 +391,7 @@ fix_valid, failures = validator.validate_tool_execution_fix()
 if not fix_valid:
     logger.error(validator.generate_fix_validation_report())
 
-assert fix_valid, "formatted_string"
+assert fix_valid, ""
 assert test_tool.call_count == 1, "Tool was not actually executed"
 assert result is not None, "Tool execution returned no result"
 
@@ -405,7 +405,7 @@ validator = CriticalFixValidator()
 
                     # Setup WebSocket connection
 conn_id = "test-tool-error-events"
-mock_ws = Magic
+mock_ws = MagicMock()
 async def capture_event(message, timeout=None):
     if isinstance(message, str):
         data = json.loads(message)
@@ -445,8 +445,8 @@ error_valid, error_failures = validator.validate_error_resilience()
 if not (fix_valid and error_valid):
     logger.error(validator.generate_fix_validation_report())
 
-assert fix_valid, "formatted_string"
-assert error_valid, "formatted_string"
+assert fix_valid, ""
+assert error_valid, ""
 assert failing_tool.call_count == 1, "Failing tool was not executed"
 
                     # Verify error information in tool_completed event
@@ -474,7 +474,7 @@ validator = CriticalFixValidator()
 
                                 # Setup WebSocket connection
 conn_id = "test-agent-error-completion"
-mock_ws = Magic
+mock_ws = MagicMock()
 async def capture_event(message, timeout=None):
     pass
 if isinstance(message, str):
@@ -532,11 +532,11 @@ class FailingLLM:
         if not error_valid:
         logger.error(validator.generate_fix_validation_report())
 
-        assert error_valid, "formatted_string"
+        assert error_valid, ""
 
         # Specifically check for start and completion
         start_events = [item for item in []]
-        completion_events = [ )
+        completion_events = [ ]
         e for e in validator.events
         if e.get("type") in ["agent_completed", "agent_fallback", "final_report"]
         
@@ -554,7 +554,7 @@ validator = CriticalFixValidator()
 
             # Setup WebSocket connection
 conn_id = "test-e2e-complete-flow"
-mock_ws = Magic
+mock_ws = MagicMock()
 async def capture_event(message, timeout=None):
     if isinstance(message, str):
         data = json.loads(message)
@@ -570,7 +570,7 @@ class WorkingLLM:
     async def generate(self, *args, **kwargs):
         await asyncio.sleep(0.05)  # Simulate processing
         await asyncio.sleep(0)
-        return { )
+        return { }
         "content": "Task completed successfully",
         "reasoning": "Processed user request and executed tools",
         "confidence": 0.95
@@ -585,7 +585,7 @@ class WorkingLLM:
         tool3 = MockToolForTesting("optimization_tool", should_fail=False, delay=0.01)
 
     # Register tools (mock the registration process)
-        tools = { )
+        tools = { }
         "data_analysis_tool": tool1,
         "reporting_tool": tool2,
         "optimization_tool": tool3
@@ -619,7 +619,7 @@ class MultiToolAgent:
         results.append({"tool": tool_name, "error": str(e)})
 
                 # Set final report
-        state.final_report = "formatted_string"
+        state.final_report = ""
         await asyncio.sleep(0)
         return state
 
@@ -661,24 +661,24 @@ class MultiToolAgent:
         if not (fix_valid and error_valid):
         logger.error(validator.generate_fix_validation_report())
 
-        assert fix_valid, "formatted_string"
-        assert error_valid, "formatted_string"
+        assert fix_valid, ""
+        assert error_valid, ""
 
                     # Verify all tools were executed
         for tool in tools.values():
-        assert tool.call_count == 1, "formatted_string"
+        assert tool.call_count == 1, ""
 
                         # Verify we got events for all tool executions
         tool_executing_events = [item for item in []]
         tool_completed_events = [item for item in []]
 
         assert len(tool_executing_events) >= len(tools), \
-        "formatted_string"
+        ""
         assert len(tool_completed_events) >= len(tools), \
-        "formatted_string"
+        ""
 
                         # Verify agent completion
-        completion_events = [ )
+        completion_events = [ ]
         e for e in validator.events
         if e.get("type") in ["agent_completed", "final_report"]
                         
@@ -697,11 +697,11 @@ validators = {}
 connections = []
 
 for i in range(connection_count):
-    conn_id = "formatted_string"
+    conn_id = ""
 validator = CriticalFixValidator()
 validators[conn_id] = validator
 
-mock_ws = Magic
+mock_ws = MagicMock()
 async def capture_event(message, timeout=None, v=validator):
     pass
 if isinstance(message, str):
@@ -725,22 +725,22 @@ async def execute_tools_on_connection(conn_id, executor):
 state = DeepAgentState( )
 chat_thread_id=conn_id,
 user_id=conn_id,
-run_id="formatted_string"
+run_id=""
     
 
     # Execute multiple tools rapidly
 for i in range(5):  # 5 tools per connection
-tool = MockToolForTesting("formatted_string", should_fail=False, delay=0.01)
+tool = MockToolForTesting("", should_fail=False, delay=0.01)
 
 try:
     await executor.execute_with_state( )
-tool, "formatted_string", {}, state, "formatted_string"
+tool, "", {}, state, ""
         
 except Exception as e:
-    logger.error("formatted_string")
+    logger.error("")
 
             # Run all executions concurrently
-tasks = [ )
+tasks = [ ]
 execute_tools_on_connection(conn_id, executors[conn_id])
 for conn_id, _ in connections
             
@@ -761,16 +761,16 @@ for conn_id, validator in validators.items():
     fix_valid, fix_failures = validator.validate_tool_execution_fix()
 if not fix_valid:
     all_valid = False
-failures.extend(["formatted_string" for f in fix_failures])
+failures.extend(["" for f in fix_failures])
 total_events += len(validator.events)
 
 events_per_second = total_events / duration if duration > 0 else 0
 
-logger.info("formatted_string")
-logger.info("formatted_string")
+logger.info("")
+logger.info("")
 
-assert all_valid, "formatted_string"
-assert events_per_second > 50, "formatted_string"
+assert all_valid, ""
+assert events_per_second > 50, ""
 
                     # Cleanup
 for conn_id, mock_ws in connections:
@@ -812,7 +812,7 @@ class MockLLM:
         """Generate comprehensive report on fix validation."""
 
 logger.info(" )
-" + "=" * 80)
+ + =" * 80)
 logger.info("WEBSOCKET CRITICAL FIX COMPREHENSIVE VALIDATION")
 logger.info("=" * 80)
 
@@ -832,7 +832,7 @@ try:
     
     except Exception as e:
     test_results["enhancement_integration"] = False
-    logger.error("formatted_string")
+    logger.error("")
 
         # 2. Event Sending
     try:
@@ -851,7 +851,7 @@ try:
     test_results["event_sending"] = mock_ws.send_json.called
     except Exception as e:
     test_results["event_sending"] = False
-    logger.error("formatted_string")
+    logger.error("")
 
                 # 3. Error Resilience
     try:
@@ -877,18 +877,18 @@ try:
     test_results["error_resilience"] = mock_ws.send_json.called
     except Exception as e:
     test_results["error_resilience"] = False
-    logger.error("formatted_string")
+    logger.error("")
 
                                 # Generate summary
     all_passed = all(test_results.values())
 
     logger.info(f" )
     FIX VALIDATION SUMMARY:")
-    logger.info("formatted_string")
+    logger.info("")
 
     for test_name, result in test_results.items():
     status = " PASS:  PASS" if result else " FAIL:  FAIL"
-    logger.info("formatted_string")
+    logger.info("")
 
     if all_passed:
     logger.info(" )
@@ -901,7 +901,7 @@ try:
 
     logger.info("=" * 80)
 
-    assert all_passed, "formatted_string"
+    assert all_passed, ""
 
 
                                             # ============================================================================
@@ -915,7 +915,7 @@ try:
     logger.info("Starting WebSocket Critical Fix Validation Tests...")
 
                                                 # Run with maximum verbosity for debugging
-    exit_code = pytest.main([ ))
+    exit_code = pytest.main([ ])
     __file__,
     "-v",
     "--tb=long",

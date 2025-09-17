@@ -44,13 +44,13 @@ class TestAuthEndpointRouting:
         mock_auth.create_access_token = AsyncMock(return_value="access-token")
         mock_auth.create_refresh_token = AsyncMock(return_value="refresh-token")
 
-        response = test_client.post("/auth/login", json={ ))
+        response = test_client.post("/auth/login", json=})
         "email": "test@example.com",
         "password": "password123"
         
 
         # Verify endpoint exists (not 404)
-        assert response.status_code == 200, "formatted_string"
+        assert response.status_code == 200, ""
 
         # Verify proper response structure
         data = response.json()
@@ -76,7 +76,7 @@ class TestAuthEndpointRouting:
         response = test_client.post("/auth/dev/login", json={})
 
             # Verify endpoint exists (not 404)
-        assert response.status_code == 200, "formatted_string"
+        assert response.status_code == 200, ""
 
             # Verify proper response structure
         data = response.json()
@@ -97,13 +97,13 @@ class TestAuthEndpointRouting:
         with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth:
         mock_auth.create_service_token = AsyncMock(return_value="service-token-123")
 
-        response = test_client.post("/auth/service-token", json={ ))
+        response = test_client.post("/auth/service-token", json=})
         "service_id": "backend-service",
         "service_secret": "test-secret"
             
 
             # Verify endpoint exists (not 404)
-        assert response.status_code == 200, "formatted_string"
+        assert response.status_code == 200, ""
 
             # Verify proper response structure
         data = response.json()
@@ -137,7 +137,7 @@ class TestAuthEndpointRegistration:
         route_methods[route.path] = list(route.methods)
 
                 # Critical endpoints that must be registered
-        critical_endpoints = { )
+        critical_endpoints = }
         '/auth/login': ['POST'],
         '/auth/logout': ['POST'],
         '/auth/register': ['POST'],
@@ -153,13 +153,13 @@ class TestAuthEndpointRegistration:
 
                 # Verify each critical endpoint is registered
         for endpoint_path, expected_methods in critical_endpoints.items():
-        assert endpoint_path in route_paths, "formatted_string"
+        assert endpoint_path in route_paths, ""
 
                     # Verify HTTP methods are correct
         if endpoint_path in route_methods:
         registered_methods = route_methods[endpoint_path]
         for method in expected_methods:
-        assert method in registered_methods, "formatted_string"
+        assert method in registered_methods, ""
 
     def test_router_includes_oauth_endpoints(self):
         '''Test that OAuth endpoints are properly registered.
@@ -171,13 +171,13 @@ class TestAuthEndpointRegistration:
         oauth_paths = [item for item in []]
 
     # OAuth endpoints that should be present
-        oauth_endpoints = [ )
+        oauth_endpoints = ]
         '/auth/callback',
         '/auth/oauth/callback'
     
 
         for endpoint in oauth_endpoints:
-        assert endpoint in oauth_paths, "formatted_string"
+        assert endpoint in oauth_paths, ""
 
 
 class TestAuthEndpointErrorHandling:
@@ -202,15 +202,15 @@ class TestAuthEndpointErrorHandling:
         pass
     # Test login with missing data - should be 422, not 404
         response = test_client.post("/auth/login", json={})
-        assert response.status_code == 422, "formatted_string"
+        assert response.status_code == 422, ""
 
     # Test register with missing data - should be 422, not 404
         response = test_client.post("/auth/register", json={})
-        assert response.status_code == 422, "formatted_string"
+        assert response.status_code == 422, ""
 
     # Test service-token with missing data - should be 422, not 404
         response = test_client.post("/auth/service-token", json={})
-        assert response.status_code == 422, "formatted_string"
+        assert response.status_code == 422, ""
 
     def test_nonexistent_endpoints_return_404(self, test_client):
         '''Test that truly non-existent endpoints return 404.
@@ -221,10 +221,10 @@ class TestAuthEndpointErrorHandling:
         pass
     # Test endpoints that should NOT exist
         response = test_client.post("/auth/nonexistent-endpoint")
-        assert response.status_code == 404, "formatted_string"
+        assert response.status_code == 404, ""
 
         response = test_client.get("/auth/fake-endpoint")
-        assert response.status_code == 404, "formatted_string"
+        assert response.status_code == 404, ""
 
     def test_dev_login_blocks_production_properly(self, test_client):
         '''Test that dev login endpoint exists but blocks production access.
@@ -237,7 +237,7 @@ class TestAuthEndpointErrorHandling:
         response = test_client.post("/auth/dev/login", json={})
 
         # Should be 403 (forbidden), not 404 (not found)
-        assert response.status_code == 403, "formatted_string"
+        assert response.status_code == 403, ""
 
         data = response.json()
         assert "only available in development" in data["detail"]

@@ -85,8 +85,8 @@ users = []
             # Create concurrent user connections
 tasks = []
 for i in range(num_users):
-    user_id = "formatted_string"
-session_id = "formatted_string"
+    user_id = ""
+session_id = ""
 
 ws = Magic            ws.websocket = TestWebSocketConnection()
 ws.state = Magic            ws.state.name = "OPEN"
@@ -147,8 +147,8 @@ websocket=ws
                             
 
                             # Send many events
-events = [ )
-{"type": "formatted_string", "data": {"index": i}}
+events = [ ]
+{"type": "", "data": {"index": i}}
 for i in range(num_events)
                             
 
@@ -167,7 +167,7 @@ assert throughput > 100
                                 # Verify all events sent
 assert ws.send.call_count == num_events
 
-print("formatted_string")
+print("")
 
 @pytest.mark.asyncio
     async def test_connection_pool_scaling(self, factory):
@@ -184,7 +184,7 @@ for i in range(num_users):
     ws = Magic                ws.websocket = TestWebSocketConnection()
 ws.state = Magic                ws.state.name = "OPEN"
 
-conn_id = await pool.add_connection("formatted_string", ws)
+conn_id = await pool.add_connection("", ws)
 connections.append(conn_id)
 
 add_time = time.time() - start_time
@@ -193,11 +193,11 @@ add_time = time.time() - start_time
 start_time = time.time()
 
 for i in range(num_users):
-    await pool.broadcast_to_user("formatted_string", {"type": "test"})
+    await pool.broadcast_to_user("", {"type": "test"})
 
 broadcast_time = time.time() - start_time
 
-measurements.append({ ))
+measurements.append({ })
 "users": num_users,
 "add_time": add_time,
 "broadcast_time": broadcast_time,
@@ -235,8 +235,8 @@ for i in range(num_users):
 ws.state = Magic            ws.state.name = "OPEN"
 
 emitter = await factory.create_user_emitter( )
-user_id="formatted_string",
-session_id="formatted_string",
+user_id="",
+session_id="",
 websocket=ws
                                                                 
 emitters.append(emitter)
@@ -244,7 +244,7 @@ emitters.append(emitter)
                                                                 # Send many events
 for emitter in emitters:
     for j in range(events_per_user):
-        await emitter.emit({"type": "formatted_string", "data": {"index": j}})
+        await emitter.emit({"type": "", "data": {"index": j}})
 
                                                                         # Check memory after load
 gc.collect()  # Force garbage collection
@@ -256,7 +256,7 @@ assert memory_increase < 100  # Less than 100MB increase
 
                                                                         # Cleanup
 for i in range(num_users):
-    await factory.remove_user_emitter("formatted_string")
+    await factory.remove_user_emitter("")
 
                                                                             # Memory should be released
 gc.collect()
@@ -273,7 +273,7 @@ num_samples = 100
 latencies = []
 
                                                                                 # Create emitter
-ws = Magic
+ws = MagicMock()
                                                                                 # Track send times
 send_times = []
 async def mock_send(data):
@@ -290,7 +290,7 @@ websocket=ws
 
     # Measure latency for each event
 for i in range(num_samples):
-    event = {"type": "formatted_string", "data": {"index": i}}
+    event = {"type": "", "data": {"index": i}}
 
 start_time = time.time()
 await emitter.emit(event)
@@ -310,7 +310,7 @@ assert avg_latency < 10  # Average < 10ms
 assert median_latency < 5  # Median < 5ms
 assert p95_latency < 50  # 95th percentile < 50ms
 
-print("formatted_string")
+print("")
 
 @pytest.mark.asyncio
     async def test_queue_performance(self, factory):
@@ -332,7 +332,7 @@ emitter.max_queue_size = queue_size * 2  # Ensure no overflow
 start_time = time.time()
 
 for i in range(queue_size):
-    emitter.queue_event({"type": "formatted_string", "data": {"index": i}})
+    emitter.queue_event({"type": "", "data": {"index": i}})
 
 queue_time = time.time() - start_time
 
@@ -372,20 +372,20 @@ for i in range(num_users):
 ws.state = Magic            ws.state.name = "OPEN"
 
 emitter = await factory.create_user_emitter( )
-user_id="formatted_string",
-session_id="formatted_string",
+user_id="",
+session_id="",
 websocket=ws
                                     
-users.append(("formatted_string", emitter, ws))
+users.append(("", emitter, ws))
 
                                     # Broadcast concurrently
 start_time = time.time()
 
 async def broadcast_to_user(user_id, emitter, count):
     for i in range(count):
-        await emitter.emit({"type": "formatted_string", "data": {"user": user_id}})
+        await emitter.emit({"type": "", "data": {"user": user_id}})
 
-tasks = [ )
+tasks = [ ]
 broadcast_to_user(user_id, emitter, broadcasts_per_user)
 for user_id, emitter, _ in users
         
@@ -416,7 +416,7 @@ for i in range(num_connections):
     ws = Magic            ws.websocket = TestWebSocketConnection()
 ws.state = Magic            ws.state.name = "OPEN" if i % 2 == 0 else "CLOSED"
 
-conn_id = await pool.add_connection("formatted_string", ws)
+conn_id = await pool.add_connection("", ws)
 connections.append((conn_id, ws))
 
                     # Mark half as inactive
@@ -457,8 +457,8 @@ ws.state = Magic            ws.state.name = "OPEN"
 websockets.append(ws)
 
 emitter = await factory.create_user_emitter( )
-user_id="formatted_string",
-session_id="formatted_string",
+user_id="",
+session_id="",
 websocket=ws
                                                 
 emitters.append(emitter)
@@ -472,9 +472,9 @@ while time.time() - start_time < duration_seconds:
                                                     # Send events to all users
 tasks = []
 for emitter in emitters:
-    event = { )
+    event = { }
 "type": "stress_test",
-"data": { )
+"data": { }
 "timestamp": time.time(),
 "count": event_count
                                                         
@@ -502,5 +502,5 @@ assert error_rate < 0.01  # Less than 1% error rate
 for ws in websockets:
     assert ws.send.call_count > 0
 
-print("formatted_string")
+print("")
 pass

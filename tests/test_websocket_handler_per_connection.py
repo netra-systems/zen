@@ -66,7 +66,7 @@ class TestWebSocketHandlerPerConnection:
     ws3 = MagicMock(spec=WebSocket)
 
         # Create mock services
-    mock_supervisor = Magic        mock_thread_service = Magic        mock_ws_manager = Magic
+    mock_supervisor = MagicMock(); mock_thread_service = MagicMock(); mock_ws_manager = Magic
         # Create handlers for each connection
     service1 = MessageHandlerService(mock_supervisor, mock_thread_service, mock_ws_manager)
     handler1 = AgentMessageHandler(service1, ws1)
@@ -109,7 +109,7 @@ class TestWebSocketHandlerPerConnection:
     ws3 = MagicMock(spec=WebSocket)
 
             # Create mock services
-    mock_supervisor = Magic        mock_thread_service = Magic        mock_ws_manager = Magic
+    mock_supervisor = MagicMock(); mock_thread_service = MagicMock(); mock_ws_manager = Magic
             # Add handlers
     service1 = MessageHandlerService(mock_supervisor, mock_thread_service, mock_ws_manager)
     handler1 = AgentMessageHandler(service1, ws1)
@@ -137,7 +137,7 @@ class TestWebSocketHandlerPerConnection:
                         # Verify correct handler was removed
     assert len(message_router.handlers) == 2
 
-    remaining_websockets = [ )
+    remaining_websockets = [ ]
     h.websocket for h in message_router.handlers
     if isinstance(h, AgentMessageHandler)
                         

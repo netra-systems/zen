@@ -69,7 +69,7 @@ class TestStreamingEndpointSingleton:
         service = MagicNone  # TODO: Use real service instead of Mock
         service.supervisor = MagicNone  # TODO: Use real service instead of Mock
         service.supervisor.agent_registry = MagicNone  # TODO: Use real service instead of Mock
-        service.supervisor.agent_registry.agents = { )
+        service.supervisor.agent_registry.agents = { }
         'triage': MagicNone,  # TODO: Use real service instead of Mock
         'data': MagicNone,  # TODO: Use real service instead of Mock
         'optimization': MagicNone,  # TODO: Use real service instead of Mock
@@ -86,7 +86,7 @@ class TestStreamingEndpointSingleton:
     def auth_headers(self):
         """Create auth headers for requests."""
         pass
-        return { )
+        return { }
         "Authorization": "Bearer test_token",
         "Content-Type": "application/json"
     
@@ -102,7 +102,7 @@ mock_get_service.return_value = mock_agent_service
 mock_create_response.return_value = MagicNone  # TODO: Use real service instead of Mock
 
     # Make request
-request_data = { )
+request_data = { }
 "query": "test query",
 "id": "test_id"
     
@@ -137,7 +137,7 @@ return service
 
 mock_get_service.side_effect = track_service
 
-request_data = { )
+request_data = { }
 "query": "test query",
 "id": "test_id"
     
@@ -160,7 +160,7 @@ assert len(service_instances) == 3
 self, mock_logger, async_client, auth_headers
 ):
 """Test that agent registration doesn't occur multiple times."""
-request_data = { )
+request_data = { }
 "query": "test query",
 "id": "test_id"
             
@@ -183,7 +183,7 @@ assert len(info_calls) <= 7
 @pytest.mark.asyncio
     async def test_concurrent_stream_requests(self, async_client, auth_headers):
         """Test that concurrent streaming requests don't cause registration issues."""
-request_data = { )
+request_data = { }
 "query": "test query",
 "id": "test_id"
                     
@@ -222,7 +222,7 @@ assert registration_count['count'] <= 10
 def test_stream_endpoint_response_structure(self, test_client, auth_headers):
     """Test that streaming endpoint returns proper response."""
 pass
-request_data = { )
+request_data = { }
 "query": "test query",
 "id": "test_id"
     
@@ -250,7 +250,7 @@ mock_instance._agents_registered = False
 mock_instance.agents = {}
 mock_registry_class.return_value = mock_instance
 
-request_data = { )
+request_data = { }
 "query": "test query",
 "id": "test_id"
     
@@ -268,7 +268,7 @@ assert hasattr(mock_instance, '_agents_registered')
 def test_message_endpoint_also_uses_injection(self, test_client, auth_headers):
     """Test that /message endpoint also uses dependency injection."""
 pass
-request_data = { )
+request_data = { }
 "message": "test message",
 "thread_id": "test_thread"
     

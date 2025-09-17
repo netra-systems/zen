@@ -121,7 +121,7 @@ class TestMiddlewareAsyncIntegration:
         request.url.path = "/health"
 
             # Create a simple mock response
-        mock_response = Magic        mock_response.status_code = 200
+        mock_response = MagicMock(); mock_response.status_code = 200
 
     async def mock_call_next(request):
         await asyncio.sleep(0)
@@ -142,7 +142,7 @@ class TestMiddlewareAsyncIntegration:
         # Track any errors
         errors_seen = []
 
-        @pytest.fixture
+        # @pytest.fixture
     async def test_middleware(request:
         pass
         try:
@@ -188,7 +188,7 @@ class TestMiddlewareAsyncIntegration:
 
     async def process_request(request_id: int):
         request = MagicMock(spec=Request)
-        request.url.path = "formatted_string"
+        request.url.path = ""
         request.state = Magic            request.state.authenticated = True  # Authenticated, so won"t convert
 
     async def mock_call_next(request):

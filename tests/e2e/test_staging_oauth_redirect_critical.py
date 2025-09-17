@@ -29,7 +29,7 @@ class TestStagingOAuthRedirectCritical:
 
     async with httpx.AsyncClient(follow_redirects=False) as client:
     response = await client.get( )
-    "formatted_string",
+    "",
     params={"return_url": "https://app.staging.netrasystems.ai/dashboard"}
             
 
@@ -45,10 +45,10 @@ class TestStagingOAuthRedirectCritical:
 
             # CRITICAL ASSERTION - Currently failing
     assert "app.staging.netrasystems.ai" in redirect_uri, \
-    "formatted_string"
+    ""
 
     assert "auth.staging.netrasystems.ai" not in redirect_uri, \
-    "formatted_string"
+    ""
 
     @pytest.fixture
     @pytest.mark.critical
@@ -74,11 +74,11 @@ class TestStagingOAuthRedirectCritical:
     assert len(redirect_uris) > 0, "OAuth config must have redirect URIs"
 
     assert any("app.staging.netrasystems.ai/auth/callback" in uri for uri in redirect_uris), \
-    "formatted_string"
+    ""
 
                     # Should NOT have localhost in staging
     assert not any("localhost" in uri for uri in redirect_uris), \
-    "formatted_string"
+    ""
 
     @pytest.fixture
     @pytest.mark.critical
@@ -112,8 +112,8 @@ class TestStagingOAuthRedirectCritical:
 
     async with httpx.AsyncClient() as client:
     response = await client.options( )
-    "formatted_string",
-    headers={ )
+    "",
+    headers={ }
     "Origin": origin,
     "Access-Control-Request-Method": "POST",
     "Access-Control-Request-Headers": "content-type"
@@ -122,7 +122,7 @@ class TestStagingOAuthRedirectCritical:
 
     allow_origin = response.headers.get("access-control-allow-origin")
     assert allow_origin == origin or allow_origin == "*", \
-    "formatted_string"
+    ""
 
     allow_credentials = response.headers.get("access-control-allow-credentials")
     assert allow_credentials == "true", \
@@ -152,9 +152,9 @@ class TestStagingAuthenticationE2E:
     async with httpx.AsyncClient(follow_redirects=False) as client:
             # 1. Frontend initiates OAuth
     response = await client.get( )
-    "formatted_string",
-    params={"return_url": "formatted_string"},
-    headers={"Referer": "formatted_string"}
+    "",
+    params={"return_url": ""},
+    headers={"Referer": ""}
             
 
     assert response.status_code in [302, 303]
@@ -184,7 +184,7 @@ class TestStagingAuthenticationE2E:
     async with httpx.AsyncClient() as client:
                     # Try with a dummy token to see error type
     response = await client.get( )
-    "formatted_string",
+    "",
     headers={"Authorization": "Bearer dummy_token"}
                     
 
@@ -206,7 +206,7 @@ class TestStagingEnvironmentConfiguration:
         '''
         pass
     # These would be checked via GCP Secret Manager
-        required_secrets = [ )
+        required_secrets = [ ]
         "google-oauth-client-id-staging",
         "google-oauth-client-secret-staging",
         "oauth-hmac-secret-staging"
@@ -229,12 +229,12 @@ class TestStagingEnvironmentConfiguration:
 
         async with httpx.AsyncClient() as client:
         response = await client.post( )
-        "formatted_string",
+        "",
         json={"email": "dev@example.com", "password": "dev123"}
             
 
         assert response.status_code == 403, \
-        "formatted_string"
+        ""
 
         assert "forbidden" in response.text.lower(), \
         "Should explicitly state dev login is forbidden"
@@ -273,10 +273,10 @@ class TestStagingEnvironmentConfiguration:
 
         print(result.stdout)
         if result.returncode != 0:
-        print(" )
+        print("")
         [CRITICAL] Tests are failing - authentication is broken in staging!")
         print("The test suite correctly identifies these issues.")
         else:
-        print(" )
+        print("")
         [OK] All critical tests passing")
         pass

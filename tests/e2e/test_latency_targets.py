@@ -81,7 +81,7 @@ class TestWebSocketConnection:
         jwt_helper = JWTTestHelper()
         token = jwt_helper.create_access_token( )
         user_id=user_id,
-        email="formatted_string",
+        email="",
         permissions=["read", "write"]
     
         return token
@@ -96,7 +96,7 @@ class LatencyMeasurer:
 
     def _get_targets(self) -> Dict[str, float]:
         """Get latency targets in milliseconds."""
-        return { )
+        return { }
         "first_byte": 100.0, "websocket": 50.0,
         "auth_response": 500.0, "api_p99": 200.0
     
@@ -130,7 +130,7 @@ class LatencyStats:
         @staticmethod
     def _build_percentile_dict(sorted_vals: List[float]) -> Dict[str, float]:
         """Build percentile dictionary from sorted values."""
-        return { )
+        return { }
         "p50": LatencyStats._percentile(sorted_vals, 50),
         "p95": LatencyStats._percentile(sorted_vals, 95),
         "p99": LatencyStats._percentile(sorted_vals, 99),
@@ -205,7 +205,7 @@ class TestFirstByteTime:
         """Validate first byte time statistics against targets."""
         stats = LatencyStats.calc_percentiles(measurer.measurements["first_byte"])
         target = measurer.targets["first_byte"]
-        assert stats["p95"] < target, "formatted_string"
+        assert stats["p95"] < target, ""
         assert stats["avg"] < target * 0.7, f"Average should be well below target"
 
     async def _sim_first_byte(self, http_client) -> Dict[str, Any]:
@@ -237,7 +237,7 @@ class TestWebSocketLatency:
         """Run WebSocket latency measurements."""
         for i in range(15):
         result, _ = await measurer.measure_latency( )
-        "websocket", self._sim_ws_exchange, websocket, "formatted_string"
+        "websocket", self._sim_ws_exchange, websocket, ""
         
         assert result is not None
 
@@ -246,7 +246,7 @@ class TestWebSocketLatency:
         pass
         stats = LatencyStats.calc_percentiles(measurer.measurements["websocket"])
         target = measurer.targets["websocket"]
-        assert stats["p95"] < target, "formatted_string"
+        assert stats["p95"] < target, ""
 
     async def _sim_ws_exchange(self, websocket: MockWebSocket, message: str) -> Dict[str, Any]:
         """Simulate WebSocket message exchange."""
@@ -280,7 +280,7 @@ class TestAuthResponseTime:
         """Validate auth latency statistics."""
         stats = LatencyStats.calc_percentiles(measurer.measurements["auth_response"])
         target = measurer.targets["auth_response"]
-        assert stats["p95"] < target, "formatted_string"
+        assert stats["p95"] < target, ""
         assert stats["avg"] < target * 0.6, f"Auth average should be well below target"
 
     async def _sim_auth_validation(self, user: TestUser) -> Dict[str, Any]:
@@ -306,7 +306,7 @@ class TestApiP99Latency:
         pass
         for i in range(50):  # Need larger sample for P99
         result, _ = await measurer.measure_latency( )
-        "api_p99", self._sim_api_call, client, "formatted_string"
+        "api_p99", self._sim_api_call, client, ""
     
         assert result is not None
 
@@ -314,7 +314,7 @@ class TestApiP99Latency:
         """Validate API P99 latency statistics."""
         stats = LatencyStats.calc_percentiles(measurer.measurements["api_p99"])
         target = measurer.targets["api_p99"]
-        assert stats["p99"] < target, "formatted_string"
+        assert stats["p99"] < target, ""
         assert stats["p95"] < target * 0.75, f"P95 should be well below P99 target"
 
     async def _sim_api_call(self, http_client, endpoint: str) -> Dict[str, Any]:
@@ -335,14 +335,14 @@ class TestApiP99Latency:
         pass
         for i in range(30):
         result, _ = await measurer.measure_latency( )
-        "db_query", self._sim_database_query, "formatted_string"
+        "db_query", self._sim_database_query, ""
         
         assert result["rows"] > 0
 
     def _validate_db_stats(self, measurer: LatencyMeasurer) -> None:
         """Validate database query statistics."""
         stats = LatencyStats.calc_percentiles(measurer.measurements["db_query"])
-        assert stats["p99"] < 150, "formatted_string"
+        assert stats["p99"] < 150, ""
 
     async def _sim_database_query(self, query: str) -> Dict[str, Any]:
         """Simulate database query with variable execution time."""
@@ -359,7 +359,7 @@ class TestApiP99Latency:
     async def test_latency_target_summary(latency_measurer):
         """Summary test validating all latency targets are met."""
 failed_targets = _check_all_targets(latency_measurer)
-assert not failed_targets, "formatted_string"
+assert not failed_targets, ""
 
 
 def _check_all_targets(measurer):
@@ -377,13 +377,13 @@ def _check_single_target(measurer, operation, target):
     """Check single target and return failure if exceeded."""
 stats = LatencyStats.calc_percentiles(measurer.measurements[operation])
 metric = stats["p95"] if operation != "api_p99" else stats["p99"]
-return ["formatted_string"] if metric > target else []
+return [""] if metric > target else []
 
 
 if __name__ == "__main__":
         # Execute latency validation when run directly
 import subprocess
-subprocess.run([ ))
+subprocess.run([ ])
 "python", "-m", "pytest", __file__,
 "-v", "--tb=short", "-x"
         

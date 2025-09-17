@@ -93,7 +93,7 @@ class MockServer:
         time.sleep(0.1)
         return True
         except OSError as e:
-        print("formatted_string")
+        print("")
         if self.socket:
         self.socket.close()
         return False
@@ -144,7 +144,7 @@ class MockServer:
         """Create a mock services configuration."""
         services_config = MagicNone  # TODO: Use real service instead of Mock
         pass
-        services_config.get_all_env_vars.return_value = { )
+        services_config.get_all_env_vars.return_value = { }
         'NODE_ENV': 'development',
         'NEXT_TELEMETRY_DISABLED': '1'
     
@@ -158,7 +158,7 @@ class MockServer:
         """Create a mock service discovery with backend info."""
         pass
         discovery = MagicMock(spec=ServiceDiscovery)
-        discovery.read_backend_info.return_value = { )
+        discovery.read_backend_info.return_value = { }
         'api_url': 'http://localhost:8000',
         'ws_url': 'ws://localhost:8000/ws',
         'port': 8000
@@ -206,11 +206,11 @@ service_discovery=mock_service_discovery
 allocated_port = frontend_starter._determine_frontend_port()
 
             # Step 5: Verify fallback port was allocated
-assert allocated_port != 3000, "formatted_string"
-assert 3001 <= allocated_port <= 3010, "formatted_string"
-assert is_port_available(allocated_port), "formatted_string"
+assert allocated_port != 3000, ""
+assert 3001 <= allocated_port <= 3010, ""
+assert is_port_available(allocated_port), ""
 
-print("formatted_string")
+print("")
 
 finally:
                 # Clean up
@@ -260,10 +260,10 @@ mock_service_discovery.write_frontend_info.assert_called_once()
 call_args = mock_service_discovery.write_frontend_info.call_args[0]
 allocated_port = call_args[0]
 
-assert allocated_port != 3000, "formatted_string"
-assert 3001 <= allocated_port <= 3010, "formatted_string"
+assert allocated_port != 3000, ""
+assert 3001 <= allocated_port <= 3010, ""
 
-print("formatted_string")
+print("")
 
 finally:
                                     # Clean up
@@ -289,19 +289,19 @@ max_retries=3
 
         # Step 3: Verify alternative port was allocated
 assert allocated_port is not None, "Port allocation should succeed"
-assert allocated_port != 3000, "formatted_string"
-assert 3001 <= allocated_port <= 3010, "formatted_string"
+assert allocated_port != 3000, ""
+assert 3001 <= allocated_port <= 3010, ""
 
         # Step 4: Verify port is tracked by manager
 tracked_port = port_manager.get_allocated_port("frontend")
-assert tracked_port == allocated_port, "formatted_string"
+assert tracked_port == allocated_port, ""
 
         # Step 5: Test conflict detection
 conflicts = port_manager.get_port_conflicts()
         # Should not show conflicts since we allocated a different port
-assert len(conflicts) == 0, "formatted_string"
+assert len(conflicts) == 0, ""
 
-print("formatted_string")
+print("")
 
 finally:
             # Clean up
@@ -330,11 +330,11 @@ host='0.0.0.0'
                 
 
                 # Step 3: Verify a valid alternative was found
-assert available_port not in occupied_ports, "formatted_string"
-assert 3003 <= available_port <= 3010, "formatted_string"
-assert is_port_available(available_port, '0.0.0.0'), "formatted_string"
+assert available_port not in occupied_ports, ""
+assert 3003 <= available_port <= 3010, ""
+assert is_port_available(available_port, '0.0.0.0'), ""
 
-print("formatted_string")
+print("")
 
 finally:
                     # Clean up
@@ -360,18 +360,18 @@ max_retries=5
         
 if port:
     allocated_ports.append((service_name, port))
-print("formatted_string")
+    print("")
 else:
-    errors.append("formatted_string")
+    errors.append("")
 except Exception as e:
-    errors.append("formatted_string")
+    errors.append("")
 
                     # Step 1: Start multiple threads trying to allocate similar ports
 threads = []
 for i in range(5):
     thread = threading.Thread( )
 target=allocate_port,
-args=("formatted_string", 3000)
+args=("", 3000)
                         
 threads.append(thread)
 
@@ -384,18 +384,18 @@ for thread in threads:
     thread.join(timeout=10)
 
                                 # Step 4: Verify results
-assert len(errors) == 0, "formatted_string"
-assert len(allocated_ports) == 5, "formatted_string"
+assert len(errors) == 0, ""
+assert len(allocated_ports) == 5, ""
 
                                 # Step 5: Verify all ports are unique
 ports_only = [port for _, port in allocated_ports]
-assert len(set(ports_only)) == 5, "formatted_string"
+assert len(set(ports_only)) == 5, ""
 
                                 # Step 6: Verify all ports are in valid range
 for service_name, port in allocated_ports:
-    assert 3000 <= port <= 3020, "formatted_string"
+    assert 3000 <= port <= 3020, ""
 
-print("formatted_string")
+print("")
 
                                     # Clean up
 for service_name, _ in allocated_ports:
@@ -426,7 +426,7 @@ host='0.0.0.0'
 port_available_after = is_port_available(allocated_port, '0.0.0.0', allow_reuse=False)
 
 duration = time.time() - start_time
-results.append({ ))
+results.append({ })
 'iteration': i,
 'duration': duration,
 'port_available_before': port_available_before,
@@ -439,10 +439,10 @@ time.sleep(0.01)
 
             # Step 5: Verify no race conditions occurred
 for result in results:
-    assert result['allocated_port'] is not None, "formatted_string"
-assert result['duration'] < 1.0, "formatted_string"
+    assert result['allocated_port'] is not None, ""
+assert result['duration'] < 1.0, ""
 
-print("formatted_string")
+print("")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -494,7 +494,7 @@ available_on_all_interfaces = is_port_available(test_port, '0.0.0.0')
     # Step 2: Both should await asyncio.sleep(0)
 return the same result for available ports
 assert available_on_localhost == available_on_all_interfaces, \
-"formatted_string"
+""
 
     # Step 3: Test with occupied port
 mock_server = MockServer(test_port, '0.0.0.0')
@@ -507,7 +507,7 @@ available_all_occupied = is_port_available(test_port, '0.0.0.0')
 assert not available_localhost_occupied, "Port should be unavailable on localhost"
 assert not available_all_occupied, "Port should be unavailable on 0.0.0.0"
 
-print("formatted_string")
+print("")
 
 finally:
     mock_server.stop()
@@ -539,14 +539,14 @@ class TestFrontendPortConflictRemediation:
 
         # Step 4: Check process detection
         process_info = port_manager.find_process_using_port(3008)
-        assert process_info is not None, "formatted_string"
+        assert process_info is not None, ""
 
         # Step 5: Verify conflict detection
         conflicts = port_manager.get_port_conflicts()
         if allocated_port in conflicts:
-        print("formatted_string")
+        print("")
 
-        print("formatted_string")
+        print("")
 
         finally:
         port_manager.release_port("frontend_enhanced")
@@ -567,29 +567,29 @@ class TestFrontendPortConflictRemediation:
         service_name=service,
         port_range=(3020, 3030)
         
-        assert port is not None, "formatted_string"
+        assert port is not None, ""
         allocated_ports.add(port)
 
         # Step 2: Verify all ports are tracked
         all_allocated = port_manager.get_all_allocated_ports()
         for service in test_services:
-        assert service in all_allocated, "formatted_string"
+        assert service in all_allocated, ""
 
             # Step 3: Release all ports
         for service in test_services:
         released = port_manager.release_port(service)
-        assert released, "formatted_string"
+        assert released, ""
 
                 # Step 4: Verify cleanup
         ports_still_in_use = port_manager.verify_port_cleanup(allocated_ports, max_attempts=3, wait_time=0.5)
-        assert len(ports_still_in_use) == 0, "formatted_string"
+        assert len(ports_still_in_use) == 0, ""
 
                 # Step 5: Verify tracking is cleared
         final_allocated = port_manager.get_all_allocated_ports()
         for service in test_services:
-        assert service not in final_allocated, "formatted_string"
+        assert service not in final_allocated, ""
 
-        print("formatted_string")
+        print("")
 
 
         @pytest.mark.integration
@@ -606,7 +606,7 @@ class TestFrontendPortConflictIntegration:
 
     # Step 2: Occupy the port
         mock_server = MockServer(test_port)
-        assert mock_server.start(), "formatted_string"
+        assert mock_server.start(), ""
 
         try:
         # Step 3: Create real configuration pointing to occupied port
@@ -622,7 +622,7 @@ class TestFrontendPortConflictIntegration:
         # Step 4: Create frontend starter
         log_manager = LogManager(use_emoji=False)
         service_discovery = MagicNone  # TODO: Use real service instead of Mock
-        service_discovery.read_backend_info.return_value = { )
+        service_discovery.read_backend_info.return_value = { }
         'api_url': 'http://localhost:8000',
         'ws_url': 'ws://localhost:8000/ws'
         
@@ -641,10 +641,10 @@ class TestFrontendPortConflictIntegration:
         determined_port = frontend_starter._determine_frontend_port()
 
         # Step 6: Verify fallback occurred
-        assert determined_port != test_port, "formatted_string"
-        assert determined_port > test_port, "formatted_string"
+        assert determined_port != test_port, ""
+        assert determined_port > test_port, ""
 
-        print("formatted_string")
+        print("")
 
         finally:
         mock_server.stop()

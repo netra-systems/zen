@@ -62,7 +62,7 @@ message_router = get_message_router()
 
         # Record initial handler count
 initial_count = len(message_router.handlers)
-print("formatted_string")
+print("")
 
         # Simulate multiple WebSocket connections
 for i in range(5):
@@ -77,8 +77,8 @@ mock_# websocket setup complete
 mock_# websocket setup complete
 mock_# websocket setup complete
 mock_websocket.receive_text = AsyncMock(side_effect=Exception(Connection closed))
-mock_websocket.client_state = Magic        mock_websocket.client_state.value = 1  # CONNECTED
-mock_websocket.application_state = Magic        mock_websocket.application_state.value = 1  # CONNECTED
+mock_websocket.client_state = MagicMock(); mock_websocket.client_state.value = 1  # CONNECTED
+mock_websocket.application_state = MagicMock(); mock_websocket.application_state.value = 1  # CONNECTED
 
             # Mock authentication
 with patch('netra_backend.app.routes.websocket.verify_auth_header') as mock_auth:
@@ -99,7 +99,7 @@ except:
 
                                 # Check handler count after each connection
 current_count = len(message_router.handlers)
-print("formatted_string")
+print("")
 
                                 # Final handler count should not have grown significantly
 final_count = len(message_router.handlers)
@@ -109,7 +109,7 @@ final_count = len(message_router.handlers)
 assert final_count - initial_count <= 1, \
 formatted_string
 
-print("formatted_string")
+print("")
 
 
 @pytest.mark.asyncio
@@ -187,7 +187,7 @@ agent_handler_count += 1
 
                                                                                                     # There should only be ONE AgentMessageHandler
 assert agent_handler_count <= 1, \
-"formatted_string"
+""
 
                                                                                                     # If we had an initial handler, it should be the same object (reused)
 if initial_agent_handler and first_agent_handler:

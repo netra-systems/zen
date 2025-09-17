@@ -191,7 +191,7 @@ class TestWebSocketConnection:
         violations_by_service[service_name] = violations
         total_violations += len(violations)
 
-        print("formatted_string")
+        print("")
 
         return {
         'total_violations': total_violations,
@@ -221,7 +221,7 @@ class TestWebSocketConnection:
         compliance_rate = len(compliant_files) / (len(compliant_files) + len(violations)) if (len(compliant_files) + len(violations)) > 0 else 1.0
 
         print(formatted_string)
-        print("formatted_string")
+        print("")
 
         return {
         'violations': violations,
@@ -248,7 +248,7 @@ class TestWebSocketConnection:
         total_violations = compliance_data.get('total_violations', 0)
 
         print(formatted_string)
-        print("formatted_string")
+        print("")
 
         return {
         'compliance_score': compliance_score,
@@ -267,7 +267,7 @@ class TestWebSocketConnection:
                 
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         return {
         'compliance_score': 0.0,
         'total_violations': 9999,
@@ -331,7 +331,7 @@ class TestWebSocketConnection:
         if event in output and 'PASSED' in output:
         events_working.append(event)
 
-        print("formatted_string")
+        print("")
         print(formatted_string)
 
         return {
@@ -343,7 +343,7 @@ class TestWebSocketConnection:
                 
 
         except Exception as e:
-        print("formatted_string")
+        print("")
         return {
         'all_events_working': False,
         'events_working': [],
@@ -412,7 +412,7 @@ class TestWebSocketConnection:
                                                 
 
         print(formatted_string)
-        print("formatted_string")
+        print("")
 
         return quality_metrics
 
@@ -446,11 +446,11 @@ class TestWebSocketConnection:
     # Collect critical issues
         critical_issues = []
         if mock_data['total_violations'] > 0:
-        critical_issues.append("formatted_string")
+        critical_issues.append("")
         if len(env_data['violations'] > 0:
         critical_issues.append(formatted_string)
         if arch_data['compliance_score'] < 0.9:
-        critical_issues.append("formatted_string")
+        critical_issues.append("")
         if not service_data['compliant']:
         critical_issues.append(Real service connections failing)
         if not websocket_data['compliant']:
@@ -538,7 +538,7 @@ class TestWebSocketConnection:
 
         except Exception as e:
         return {
-        'violations': ["formatted_string"],
+        'violations': [""],
         'compliant': False,
         'has_isolated_env': False
                 
@@ -663,7 +663,7 @@ class TestComprehensiveCompliance:
         with open(report_path, 'w') as f:
         f.write(report)
 
-        print("formatted_string")
+        print("")
 
             # Determine if system passes compliance
         compliance_threshold = 90.0  # 90% compliance required
@@ -671,9 +671,9 @@ class TestComprehensiveCompliance:
         if metrics.overall_compliance_percentage >= compliance_threshold:
         print(f )
         PASS:  COMPLIANCE VALIDATION PASSED)
-        print("formatted_string")
+        print("")
         print(formatted_string)
-        print("formatted_string")
+        print("")
         print(formatted_string)
         else:
                     # Generate failure report
@@ -685,13 +685,13 @@ class TestComprehensiveCompliance:
         failure_report += "=" * 80 + 
 
         
-        failure_report += "formatted_string"
+        failure_report += ""
 
         if metrics.critical_issues:
         failure_report += CRITICAL ISSUES:
         
         for issue in metrics.critical_issues:
-        failure_report += "formatted_string"
+        failure_report += ""
         failure_report += 
         
 
@@ -705,11 +705,11 @@ class TestComprehensiveCompliance:
 
         failure_report += DETAILED METRICS:
         
-        failure_report += "formatted_string"
+        failure_report += ""
         failure_report += formatted_string
-        failure_report += "formatted_string"
+        failure_report += ""
         failure_report += formatted_string
-        failure_report += "formatted_string"
+        failure_report += ""
         failure_report += formatted_string
 
         failure_report += "
@@ -1092,7 +1092,7 @@ class TestComprehensiveCompliance:
 
         if metrics.critical_issues:
         for issue in metrics.critical_issues:
-        report += "formatted_string"
+        report += ""
         else:
         report += -  PASS:  No critical issues detected
         

@@ -70,11 +70,11 @@ class TestWebSocketConnection:
         print( FAIL:  FAILED: Should have raised WebSocketContextValidationError)
         return False
         except WebSocketContextValidationError as e:
-        print("formatted_string")
+        print("")
         assert Missing execution context in str(e)
         return True
         except Exception as e:
-        print("formatted_string")
+        print("")
         return False
 
 
@@ -132,7 +132,7 @@ class TestWebSocketConnection:
         print( FAIL:  FAILED: Should have raised WebSocketSendFailureError)
         return False
         except WebSocketSendFailureError as e:
-        print("formatted_string")
+        print("")
         assert WebSocket bridge returned failure in str(e)
         assert e.user_id == "user-123"
         return True

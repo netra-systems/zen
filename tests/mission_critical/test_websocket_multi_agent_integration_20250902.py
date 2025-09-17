@@ -548,7 +548,7 @@ class TestMultiAgentWebSocketFactoryIntegration:
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_multiple_agents_per_user_sharing_factory(self):
         ""Test 1: Multiple agents per user sharing the same factory with isolation."
 pass
@@ -617,7 +617,7 @@ print(formatted_string")
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_agent_hierarchy_per_user_with_factory_isolation(self):
         "Test 2: Agent hierarchy per user with factory pattern isolation.""
 print([U+1F9EA] TEST 2: Agent hierarchy per user with factory isolation")
@@ -669,7 +669,7 @@ print("formatted_string)
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_concurrent_multi_agent_event_ordering_per_user(self):
         ""Test 3: Event ordering across concurrent agents with user isolation."
 pass
@@ -756,10 +756,10 @@ print("formatted_string)
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_factory_state_consistency_under_multi_user_load(self):
         ""Test 4: Factory state consistency with concurrent multi-user operations."
-print("[U+1F9EA] TEST 4: Factory state consistency under multi-user load)
+    print("[U+1F9EA] TEST 4: Factory state consistency under multi-user load)
 
                     # Create high concurrency scenario with many users and agents
 num_concurrent_users = 8
@@ -828,7 +828,7 @@ print("formatted_string)
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_cleanup_with_mixed_success_failure_per_user(self):
         ""Test 5: Cleanup when agents complete or fail per user."
 pass
@@ -898,10 +898,10 @@ print(" PASS:  TEST 5 PASSED: Mixed success/failure scenarios handled with prope
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_event_collision_handling_with_user_isolation(self):
         ""Test 6: Event collision handling with user isolation."
-print("[U+1F9EA] TEST 6: Event collision handling with user isolation)
+    print("[U+1F9EA] TEST 6: Event collision handling with user isolation)
 
                                                                     # Create collision scenarios - agents that emit at same time
 collision_users = []
@@ -959,7 +959,7 @@ print("formatted_string)
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_extreme_stress_multi_user_resource_contention(self):
         ""Test 7: Extreme stress test with multi-user resource contention."
 pass
@@ -1033,10 +1033,10 @@ print(f   User isolation: MAINTAINED under extreme load")
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_comprehensive_multi_agent_factory_integration(self):
         "Test 8: Comprehensive multi-agent factory integration suite.""
-print(")
+    print(")
 " + = * 100)
 print("[U+1F680] COMPREHENSIVE MULTI-AGENT FACTORY INTEGRATION SUITE")
 print(= * 100)
@@ -1065,7 +1065,7 @@ agents: [
 {
 "user_id": ultimate_user_3,
 "agents": [
-{name: "formatted_string", pattern: "fast"} for i in range(5)
+{name: "", pattern: "fast"} for i in range(5)
 ][0]  # Flatten first agent for testing
 },
                                                                                                                     # Mixed success/failure user
@@ -1080,7 +1080,7 @@ agents: [
                                                                                                                     
 
                                                                                                                     # Add more rapid agents for user 3
-ultimate_scenarios[2]["agents"] = [{name: "formatted_string", pattern: "fast"} for i in range(5)]
+ultimate_scenarios[2]["agents"] = [{name: "", pattern: "fast"} for i in range(5)]
 
                                                                                                                     # Execute ultimate test
 start_time = time.time()
@@ -1112,11 +1112,11 @@ formatted_string
 
                                                                                                                         # Performance assertions
 assert total_duration < 60, \
-"formatted_string"
+""
 
 total_events = final_results[total_events]
 assert total_events >= 50, \
-"formatted_string"
+""
 
 events_per_second = total_events / total_duration
 assert events_per_second > 10, \
@@ -1133,11 +1133,11 @@ assert factory_metrics[emitters_active] >= 5, \
                                                                                                                         # Generate comprehensive report
 print(f )
 CELEBRATION:  COMPREHENSIVE MULTI-AGENT FACTORY INTEGRATION COMPLETED)
-print("formatted_string")
+print("")
 print(formatted_string)
-print("formatted_string")
+print("")
 print(formatted_string)
-print("formatted_string")
+print("")
 print(f PASS:  User Isolation: PERFECT - No violations detected)
 print("=" * 100)
 

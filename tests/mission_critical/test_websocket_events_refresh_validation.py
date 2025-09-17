@@ -801,7 +801,7 @@ class TestWebSocketConnection:
         try:
         await test_func()
         except Exception as e:
-        print("formatted_string")
+        print("")
         self.test_results['failed'] += 1
         self.test_results['total'] += 1
 
@@ -833,9 +833,9 @@ class TestWebSocketConnection:
         " + = * 70)
         print(" CHART:  VALIDATION RESULTS SUMMARY")
         print(= * 70)
-        print("formatted_string")
+        print("")
         print(formatted_string)
-        print("formatted_string")
+        print("")
 
                                 # Factory test results
         if self.test_results['factory_tests']:
@@ -850,7 +850,7 @@ class TestWebSocketConnection:
         print(")
         WARNING: [U+FE0F] MISSING REQUIRED EVENTS:)
         for missing in self.test_results['missing_events']:
-        print("formatted_string")
+        print("")
 
                                                     # Check overall compliance
         all_captured_events = set()
@@ -865,7 +865,7 @@ class TestWebSocketConnection:
 
         print(f )
         [U+1F4CB] REQUIRED EVENT COMPLIANCE:)
-        print("formatted_string")
+        print("")
         if missing_required:
         print(formatted_string)
         else:
@@ -882,7 +882,7 @@ class TestWebSocketConnection:
         factory_missing = self.REQUIRED_EVENTS - factory_captured
         print(f )
         [U+1F3ED] FACTORY PATTERN COMPLIANCE:)
-        print("formatted_string")
+        print("")
         if factory_missing:
         print(formatted_string)
         else:

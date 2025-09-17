@@ -144,7 +144,7 @@ class TestDockerRateLimiter:
         """Test retry mechanism with exponential backoff."""
         pass
     # First two calls fail, third succeeds
-        mock_run.side_effect = [ )
+        mock_run.side_effect = [ ]
         Exception("Connection failed"),
         Exception("Connection failed"),
         MagicMock(returncode=0, stdout="success", stderr="")

@@ -102,7 +102,7 @@ class TestWebSocketRoutingConflict:
         if "jsonrpc" not in data:
                 # Removed problematic line: await websocket.send_json({)
         "jsonrpc": "2.0",
-        "error": { )
+        "error": { }
         "code": -32600,
         "message": "Invalid Request - missing jsonrpc field"
         },
@@ -169,11 +169,11 @@ try:
 response = websocket.receive_json()
 response_received = True
 except Exception as e:
-logger.error("formatted_string")
+logger.error("")
 
 assert response_received, "WebSocket /ws endpoint not responding correctly"
 except Exception as e:
-pytest.fail("formatted_string")
+pytest.fail("")
 
 @pytest.mark.asyncio
     async def test_mcp_websocket_json_rpc_requirement(self):
@@ -202,7 +202,7 @@ except Exception:
 pass
 except Exception as e:
                                                                                         # MCP endpoint might not be registered
-logger.info("formatted_string")
+logger.info("")
 
 @pytest.mark.asyncio
     async def test_websocket_validator_simulation(self):
@@ -263,12 +263,12 @@ response = websocket.receive_json()
 if response:
 endpoints_working.append("/ws")
 except Exception as e:
-logger.error("formatted_string")
+logger.error("")
 
                                                                                                                     # Test MCP WebSocket
 try:
 with client.websocket_connect("/api/mcp/ws") as websocket:
-test_message = { )
+test_message = { }
 "jsonrpc": "2.0",
 "method": "ping",
 "params": {},
@@ -279,13 +279,13 @@ response = websocket.receive_json()
 if response:
 endpoints_working.append("/api/mcp/ws")
 except Exception as e:
-logger.error("formatted_string")
+logger.error("")
 
                                                                                                                                     # Both endpoints should work independently
                                                                                                                                     # NOTE: Current system may have dependency injection issues for MCP endpoint
                                                                                                                                     # The critical test is that /ws endpoint works and doesn't conflict with MCP
-assert "/ws" in endpoints_working, "formatted_string"
-logger.info("formatted_string")
+assert "/ws" in endpoints_working, ""
+logger.info("")
 
                                                                                                                                     If MCP endpoint has dependency issues, that's a separate concern from routing conflicts
 if len(endpoints_working) < 2:
@@ -297,7 +297,7 @@ logger.warning("MCP WebSocket endpoint has dependency injection issues - this in
 app = create_app()
 client = TestClient(app)
 
-test_results = { )
+test_results = { }
 "regular_json_to_ws": None,
 "json_rpc_to_ws": None,
 "regular_json_to_mcp": None,
@@ -311,12 +311,12 @@ websocket.send_json({"type": "ping", "timestamp": time.time()})
 response = websocket.receive_json()
 test_results["regular_json_to_ws"] = "success" if response else "timeout"
 except Exception as e:
-test_results["regular_json_to_ws"] = "formatted_string"
+test_results["regular_json_to_ws"] = ""
 
                                                                                                                                                         # Test 2: JSON-RPC to /ws
 try:
 with client.websocket_connect("/ws") as websocket:
-websocket.send_json({ ))
+websocket.send_json({ })
 "jsonrpc": "2.0",
 "method": "ping",
 "params": {},
@@ -325,7 +325,7 @@ websocket.send_json({ ))
 response = websocket.receive_json()
 test_results["json_rpc_to_ws"] = "success" if response else "timeout"
 except Exception as e:
-test_results["json_rpc_to_ws"] = "formatted_string"
+test_results["json_rpc_to_ws"] = ""
 
                                                                                                                                                                     # Test 3: Regular JSON to /api/mcp/ws
 try:
@@ -334,12 +334,12 @@ websocket.send_json({"type": "ping", "timestamp": time.time()})
 response = websocket.receive_json()
 test_results["regular_json_to_mcp"] = "success" if response else "timeout"
 except Exception as e:
-test_results["regular_json_to_mcp"] = "formatted_string"
+test_results["regular_json_to_mcp"] = ""
 
                                                                                                                                                                                 # Test 4: JSON-RPC to /api/mcp/ws
 try:
 with client.websocket_connect("/api/mcp/ws") as websocket:
-websocket.send_json({ ))
+websocket.send_json({ })
 "jsonrpc": "2.0",
 "method": "ping",
 "params": {},
@@ -348,10 +348,10 @@ websocket.send_json({ ))
 response = websocket.receive_json()
 test_results["json_rpc_to_mcp"] = "success" if response else "timeout"
 except Exception as e:
-test_results["json_rpc_to_mcp"] = "formatted_string"
+test_results["json_rpc_to_mcp"] = ""
 
                                                                                                                                                                                             # Log results for debugging
-logger.info("formatted_string")
+logger.info("")
 
                                                                                                                                                                                             # The issue is when regular JSON fails on /ws due to MCP interference
 assert test_results["regular_json_to_ws"] == "success", \
@@ -372,9 +372,9 @@ try:
 response = client.get("/health/ready")
 health_check_passed = response.status_code == 200
 if not health_check_passed:
-logger.warning("formatted_string")
+logger.warning("")
 except Exception as e:
-logger.warning("formatted_string")
+logger.warning("")
 health_check_passed = False
 
                                                                                                                                                                                                             # Step 3: WebSocket validation (this fails)
@@ -394,18 +394,18 @@ response = websocket.receive_json()
 if isinstance(response, dict) and "type" in response:
 websocket_test_passed = True
 else:
-error_message = "formatted_string"
+error_message = ""
 except Exception as e:
-error_message = "formatted_string"
+error_message = ""
 except Exception as e:
-error_message = "formatted_string"
+error_message = ""
 
                                                                                                                                                                                                                                         # The main test is to validate the startup sequence and identify issues
                                                                                                                                                                                                                                         # Focus on detecting the specific failure patterns rather than requiring perfect success
-logger.info("formatted_string")
+logger.info("")
 
 if error_message:
-logger.error("formatted_string")
+logger.error("")
 
                                                                                                                                                                                                                                             # Adjusted expectation: the test should detect issues, not necessarily pass perfectly
                                                                                                                                                                                                                                             # If database isn't configured, that's a legitimate startup issue this test should catch
@@ -414,7 +414,7 @@ logger.error("Database configuration issue detected during startup - this is exp
 
                                                                                                                                                                                                                                                 # Main assertion: WebSocket endpoint should be reachable and respond
 assert websocket_test_passed or "Database not configured" in str(error_message), \
-"formatted_string"
+""
 
 @pytest.mark.asyncio
     async def test_websocket_health_check_vs_actual_connection(self):
@@ -428,9 +428,9 @@ from netra_backend.app.core.health_checkers import check_websocket_health
 try:
 health_result = await check_websocket_health()
 health_check_status = health_result.status
-logger.info("formatted_string")
+logger.info("")
 except Exception as e:
-logger.error("formatted_string")
+logger.error("")
 health_check_status = "error"
 
                                                                                                                                                                                                                                                             # But actual connection might fail
@@ -445,7 +445,7 @@ except Exception:
 pass
 
                                                                                                                                                                                                                                                                             # Analyze the discrepancy between health check and actual connectivity
-logger.info("formatted_string")
+logger.info("")
 
                                                                                                                                                                                                                                                                             # The test purpose is to detect discrepancies, not necessarily require perfect alignment
 if health_check_status == "healthy" and not connection_works:
@@ -459,7 +459,7 @@ is_consistent = (health_check_status == "healthy" and connection_works) or \
 (health_check_status in ["unhealthy", "error"] and not connection_works)
 
 if not is_consistent:
-logger.error("formatted_string")
+logger.error("")
 
                                                                                                                                                                                                                                                                                         # Accept current system state as long as we can detect and log discrepancies
 assert True, "Test completed - discrepancies logged for investigation"
@@ -551,20 +551,20 @@ class TestRootCauseAnalysis:
         for route in app.routes:
         if hasattr(route, 'endpoint') and hasattr(route.endpoint, '__name__'):
         if 'websocket' in route.endpoint.__name__.lower():
-        websocket_routes.append({ ))
+        websocket_routes.append({ })
         'path': route.path,
         'endpoint': route.endpoint.__name__,
         'methods': getattr(route, 'methods', [])
                 
 
                 # Log all WebSocket routes for analysis
-        logger.info("formatted_string")
+        logger.info("")
 
                 # Check for potential conflicts
         paths = [r['path'] for r in websocket_routes]
 
                 # These paths might conflict or cause confusion
-        potential_conflicts = [ )
+        potential_conflicts = [ ]
         ('/ws', '/api/mcp/ws'),  # Different message formats
         ('/ws', '/ws'),    # Security differences
         ('/ws/{user_id}', '/ws/{user_id}')  # Parameter handling
@@ -572,13 +572,13 @@ class TestRootCauseAnalysis:
 
         for path1, path2 in potential_conflicts:
         if path1 in paths and path2 in paths:
-        logger.warning("formatted_string")
+        logger.warning("")
 
     def test_mcp_json_rpc_expectation(self):
         """Test that MCP expects JSON-RPC format which conflicts with regular WebSocket."""
         pass
     # MCP expects messages like:
-        mcp_format = { )
+        mcp_format = { }
         "jsonrpc": "2.0",
         "method": "someMethod",
         "params": {},
@@ -586,7 +586,7 @@ class TestRootCauseAnalysis:
         
 
         # But WebSocket validator sends:
-        validator_format = { )
+        validator_format = { }
         "type": "ping",
         "timestamp": time.time()
             

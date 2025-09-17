@@ -547,7 +547,7 @@ assert frequency.get('agent_completed', 0) >= 1
 print(")
 PASS:  MISSION CRITICAL: All WebSocket events validated successfully!")
 print(formatted_string)
-print("formatted_string")
+print("")
 if __name__ == __main__:
             # Run mission-critical tests
 __file__,

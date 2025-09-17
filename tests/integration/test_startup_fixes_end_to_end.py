@@ -68,7 +68,7 @@ startup_fixes.fix_results.clear()
 with patch.multiple( )
 'netra_backend.app.services.startup_fixes_integration',
 get_env=Mock(return_value=Mock( ))
-get=Mock(side_effect=lambda x: None { ))
+get=Mock(side_effect=lambda x: None { })
 'REDIS_MODE': 'shared',
 'DATABASE_URL': 'postgresql://test',
 'ENVIRONMENT': 'test'
@@ -89,12 +89,12 @@ Mock(websocket = TestWebSocketConnection()  # Real WebSocket implementation)
 result = await startup_fixes.run_comprehensive_verification()
 
             # Verify all fixes were applied successfully
-assert result['total_fixes'] == 5, "formatted_string"
-assert len(result['successful_fixes']) == 5, "formatted_string"
-assert len(result['failed_fixes']) == 0, "formatted_string"
+assert result['total_fixes'] == 5, ""
+assert len(result['successful_fixes']) == 5, ""
+assert len(result['failed_fixes']) == 0, ""
 
             # Verify specific fixes
-expected_fixes = { )
+expected_fixes = { }
 'environment_fixes',
 'port_conflict_resolution',
 'background_task_timeout',
@@ -124,7 +124,7 @@ startup_fixes.fix_results.clear()
 with patch.multiple( )
 'netra_backend.app.services.startup_fixes_integration',
 get_env=Mock(return_value=Mock( ))
-get=Mock(side_effect=lambda x: None { ))
+get=Mock(side_effect=lambda x: None { })
 'REDIS_MODE': 'shared',
 'DATABASE_URL': 'postgresql://test',
 'ENVIRONMENT': 'test'
@@ -188,7 +188,7 @@ return Mock(websocket = TestWebSocketConnection()  # Real WebSocket implementati
 with patch.multiple( )
 'netra_backend.app.services.startup_fixes_integration',
 get_env=Mock(return_value=Mock( ))
-get=Mock(side_effect=lambda x: None { ))
+get=Mock(side_effect=lambda x: None { })
 'REDIS_MODE': 'shared',
 'DATABASE_URL': 'postgresql://test',
 'ENVIRONMENT': 'test'
@@ -217,7 +217,7 @@ startup_fixes.fix_results.clear()
 with patch.multiple( )
 'netra_backend.app.services.startup_fixes_integration',
 get_env=Mock(return_value=Mock( ))
-get=Mock(side_effect=lambda x: None { ))
+get=Mock(side_effect=lambda x: None { })
 'REDIS_MODE': 'shared',
 'DATABASE_URL': 'postgresql://test',
 'ENVIRONMENT': 'test'
@@ -257,7 +257,7 @@ startup_fixes.fix_results.clear()
 with patch.multiple( )
 'netra_backend.app.services.startup_fixes_integration',
 get_env=Mock(return_value=Mock( ))
-get=Mock(side_effect=lambda x: None { ))
+get=Mock(side_effect=lambda x: None { })
 'REDIS_MODE': 'shared',
 'DATABASE_URL': 'postgresql://test',
 'ENVIRONMENT': 'test'
@@ -294,7 +294,7 @@ startup_fixes.fix_results.clear()
 with patch.multiple( )
 'netra_backend.app.services.startup_fixes_integration',
 get_env=Mock(return_value=Mock( ))
-get=Mock(side_effect=lambda x: None { ))
+get=Mock(side_effect=lambda x: None { })
 'REDIS_MODE': None,  # This will trigger a fix
 'DATABASE_URL': 'postgresql://test',
 'ENVIRONMENT': 'test'
@@ -363,7 +363,7 @@ successful_fixes=completion_call_count['count'] + 1,
 failed_fixes=0,
 skipped_fixes=4 - completion_call_count['count'],
 critical_failures=[],
-warnings=["formatted_string"],
+warnings=[""],
 details={},
 duration=0.1
             
@@ -372,7 +372,7 @@ duration=0.1
 with patch.multiple( )
 'netra_backend.app.services.startup_fixes_integration',
 get_env=Mock(return_value=Mock( ))
-get=Mock(side_effect=lambda x: None { ))
+get=Mock(side_effect=lambda x: None { })
 'REDIS_MODE': 'shared',
 'DATABASE_URL': 'postgresql://test',
 'ENVIRONMENT': 'test'
@@ -410,7 +410,7 @@ pass
 with patch.multiple( )
 'netra_backend.app.services.startup_fixes_integration',
 get_env=Mock(return_value=Mock( ))
-get=Mock(side_effect=lambda x: None { ))
+get=Mock(side_effect=lambda x: None { })
 'REDIS_MODE': 'shared',
 'DATABASE_URL': 'postgresql://test',
 'ENVIRONMENT': 'test'
@@ -451,7 +451,7 @@ startup_fixes.fix_results.clear()
 with patch.multiple( )
 'netra_backend.app.services.startup_fixes_integration',
 get_env=Mock(return_value=Mock( ))
-get=Mock(side_effect=lambda x: None { ))
+get=Mock(side_effect=lambda x: None { })
 'REDIS_MODE': 'shared',
 'DATABASE_URL': 'postgresql://test',
 'ENVIRONMENT': 'test'
@@ -476,10 +476,10 @@ result = await startup_fixes.run_comprehensive_verification()
 duration = time.time() - start_time
 
                                     # Should complete within reasonable time (under 10 seconds)
-assert duration < 10.0, "formatted_string"
+assert duration < 10.0, ""
 
                                     # Should complete within expected time (under 5 seconds for fast scenario)
-assert duration < 5.0, "formatted_string"
+assert duration < 5.0, ""
 
                                     # All fixes should succeed in this fast scenario
 assert result['total_fixes'] == 5

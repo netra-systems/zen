@@ -150,14 +150,14 @@ class MockConnectionPool:
                 # Verify emitter creation
         assert emitter is not None, "Emitter should be created"
         assert emitter.user_context.user_id == user_id, formatted_string
-        assert emitter.user_context.thread_id == thread_id, "formatted_string"
+        assert emitter.user_context.thread_id == thread_id, ""
         print(formatted_string)
                 # Clean up
         await emitter.cleanup()
         await asyncio.sleep(0)
         return True
         except Exception as e:
-        print("formatted_string")
+        print("")
         import traceback
         traceback.print_exc()
         return False

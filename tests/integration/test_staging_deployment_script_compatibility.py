@@ -72,7 +72,7 @@ class MockDeploymentScript:
         """Initialize mock deployment script."""
         self.project_id = "netra-staging"
         self.region = "us-central1"
-        self.services = { )
+        self.services = { }
         "backend": "netra-backend-staging",
         "auth": "netra-auth-service"
     
@@ -80,11 +80,11 @@ class MockDeploymentScript:
     def deploy_service(self, service_name: str, secrets_string: str) -> Dict[str, Any]:
         """Mock service deployment."""
         pass
-        return { )
+        return { }
         "success": True,
         "service_name": service_name,
         "secrets_count": len(secrets_string.split(",")),
-        "url": "formatted_string"
+        "url": ""
     
 
 
@@ -136,7 +136,7 @@ class TestStagingDeploymentScriptCompatibility:
         auth_secrets = SecretConfig.generate_secrets_string("auth", "staging")
 
     # Simulate gcloud run deploy command
-        cmd = [ )
+        cmd = [ ]
         "gcloud", "run", "deploy", "netra-auth-service",
         "--project", "netra-staging",
         "--region", "us-central1",
@@ -179,7 +179,7 @@ class TestStagingDeploymentScriptCompatibility:
         auth_secrets = SecretConfig.generate_secrets_string("auth", "staging")
 
     # Simulate deployment command that would fail
-        cmd = [ )
+        cmd = [ ]
         "gcloud", "run", "deploy", "netra-auth-service",
         "--set-secrets", auth_secrets
     
@@ -192,8 +192,8 @@ class TestStagingDeploymentScriptCompatibility:
     # Validate that our secrets string is well-formed
         secrets_list = secrets_param.split(",")
         for secret_mapping in secrets_list:
-        assert "=" in secret_mapping, "formatted_string"
-        assert ":latest" in secret_mapping, "formatted_string"
+        assert "=" in secret_mapping, ""
+        assert ":latest" in secret_mapping, ""
 
     def test_environment_specific_deployment_configuration(self):
         '''Test that deployment configuration is correct for staging environment.
@@ -216,7 +216,7 @@ class TestStagingDeploymentScriptCompatibility:
 
             # Validate staging patterns
         assert version == "latest", ( )
-        "formatted_string"
+        ""
             
 
             # Most staging secrets should contain 'staging' in GSM name
@@ -235,7 +235,7 @@ class TestStagingDeploymentScriptCompatibility:
 
         for service_name in ["auth", "backend"]:
         # Simulate deployment readiness checks
-        readiness_checks = { )
+        readiness_checks = { }
         "service_name": service_name,
         "secrets_generation": False,
         "command_generation": False,
@@ -253,8 +253,8 @@ class TestStagingDeploymentScriptCompatibility:
                 # Check 2: Command can be generated
         if readiness_checks["secrets_generation"]:
         try:
-        cmd = [ )
-        "gcloud", "run", "deploy", "formatted_string",
+        cmd = [ ]
+        "gcloud", "run", "deploy", "",
         "--set-secrets", secrets_string
                         
         readiness_checks["command_generation"] = len(cmd) == 6
@@ -286,7 +286,7 @@ class TestStagingDeploymentScriptCompatibility:
         else:  # backend
         oauth_check = "GOOGLE_CLIENT_ID=" in secrets_param
 
-        readiness_checks["regression_prevention"] = all([ ))
+        readiness_checks["regression_prevention"] = all([ ])
         secret_key_check, redis_url_check, oauth_check
                                                 
 
@@ -296,7 +296,7 @@ class TestStagingDeploymentScriptCompatibility:
         for service_name, checks in deployment_readiness.items():
         for check_name, check_result in checks.items():
         assert check_result, ( )
-        "formatted_string"
+        ""
                                                         
 
     def test_deployment_script_cloud_sql_integration(self, mock_subprocess):
@@ -316,7 +316,7 @@ class TestStagingDeploymentScriptCompatibility:
         secrets_string = SecretConfig.generate_secrets_string(service_name, "staging")
 
         # Validate that database secrets are present
-        database_secrets = [ )
+        database_secrets = [ ]
         "POSTGRES_HOST=postgres-host-staging:latest",
         "POSTGRES_PORT=postgres-port-staging:latest",
         "POSTGRES_DB=postgres-db-staging:latest",
@@ -326,12 +326,12 @@ class TestStagingDeploymentScriptCompatibility:
 
         for db_secret in database_secrets:
         assert db_secret in secrets_string, ( )
-        "formatted_string"
+        ""
             
 
             # Simulate deployment with Cloud SQL instances
-        cmd = [ )
-        "gcloud", "run", "deploy", "formatted_string",
+        cmd = [ ]
+        "gcloud", "run", "deploy", "",
         "--add-cloudsql-instances", "netra-staging:us-central1:staging-shared-postgres",
         "--set-secrets", secrets_string
             
@@ -351,19 +351,19 @@ class TestStagingDeploymentScriptCompatibility:
         secrets_string = SecretConfig.generate_secrets_string(service_name, "staging")
 
         # Services that need VPC connector should have Redis secrets
-        redis_secrets = [ )
+        redis_secrets = [ ]
         "REDIS_HOST=redis-host-staging:latest",
         "REDIS_URL=redis-url-staging:latest"
         
 
         for redis_secret in redis_secrets:
         assert redis_secret in secrets_string, ( )
-        "formatted_string"
+        ""
             
 
             # Simulate deployment command with VPC connector
-        cmd = [ )
-        "gcloud", "run", "deploy", "formatted_string",
+        cmd = [ ]
+        "gcloud", "run", "deploy", "",
         "--vpc-connector", "staging-connector",
         "--set-secrets", secrets_string
             
@@ -384,7 +384,7 @@ class TestStagingDeploymentScriptCompatibility:
         auth_secrets = SecretConfig.generate_secrets_string("auth", "staging")
 
     # Auth service should have service-specific secrets
-        auth_specific_secrets = [ )
+        auth_specific_secrets = [ ]
         "SERVICE_ID=service-id-staging:latest",  # Only auth has SERVICE_ID
         "OAUTH_HMAC_SECRET=oauth-hmac-secret-staging:latest",  # Only auth has OAuth HMAC
         "GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest"  # Environment-specific OAuth
@@ -392,14 +392,14 @@ class TestStagingDeploymentScriptCompatibility:
 
         for secret in auth_specific_secrets:
         assert secret in auth_secrets, ( )
-        "formatted_string"
+        ""
         
 
         # Test backend service specific requirements
         backend_secrets = SecretConfig.generate_secrets_string("backend", "staging")
 
         # Backend service should have AI service secrets (auth doesn't need these)
-        backend_specific_secrets = [ )
+        backend_specific_secrets = [ ]
         "OPENAI_API_KEY=openai-api-key-staging:latest",
         "ANTHROPIC_API_KEY=anthropic-api-key-staging:latest",
         "GEMINI_API_KEY=gemini-api-key-staging:latest",
@@ -409,21 +409,21 @@ class TestStagingDeploymentScriptCompatibility:
 
         for secret in backend_specific_secrets:
         assert secret in backend_secrets, ( )
-        "formatted_string"
+        ""
             
 
             # Validate that auth service doesn't have backend AI secrets
         for backend_specific in backend_specific_secrets:
         secret_name = backend_specific.split("=")[0]
         assert secret_name not in auth_secrets, ( )
-        "formatted_string"
+        ""
                 
 
                 # Validate that backend doesn't have auth-only secrets
         auth_only_secrets = ["SERVICE_ID", "OAUTH_HMAC_SECRET", "GOOGLE_OAUTH_CLIENT_ID_STAGING"]
         for secret_name in auth_only_secrets:
         assert secret_name not in backend_secrets, ( )
-        "formatted_string"
+        ""
                     
 
 
@@ -443,22 +443,22 @@ class TestDeploymentScriptRegressionPrevention:
 
         # Validate SECRET_KEY is present (regression prevention)
         assert "SECRET_KEY=secret-key-staging:latest" in secrets_string, ( )
-        "formatted_string"
+        ""
         
 
         # Simulate deployment command generation
-        cmd = [ )
-        "gcloud", "run", "deploy", "formatted_string",
+        cmd = [ ]
+        "gcloud", "run", "deploy", "",
         "--project", "netra-staging",
         "--region", "us-central1",
         "--set-secrets", secrets_string
         
 
         # Validate command structure (should be 10 elements)
-        expected_cmd = ["gcloud", "run", "deploy", "formatted_string",
+        expected_cmd = ["gcloud", "run", "deploy", "",
         "--project", "netra-staging", "--region", "us-central1",
         "--set-secrets", secrets_string]
-        assert len(cmd) == 10, "formatted_string"
+        assert len(cmd) == 10, ""
         assert cmd[-2] == "--set-secrets", "Should have --set-secrets parameter"
         assert "SECRET_KEY=" in cmd[-1], "Secrets parameter should contain SECRET_KEY"
 
@@ -480,7 +480,7 @@ class TestDeploymentScriptRegressionPrevention:
         auth_secrets = SecretConfig.generate_secrets_string("auth", "staging")
 
     # Simulate deployment attempt
-        cmd = [ )
+        cmd = [ ]
         "gcloud", "run", "deploy", "netra-auth-service",
         "--set-secrets", auth_secrets
     
@@ -505,28 +505,28 @@ class TestDeploymentScriptRegressionPrevention:
         auth_secrets = SecretConfig.generate_secrets_string("auth", "staging")
 
     # Should contain environment-specific OAuth secrets
-        auth_oauth_secrets = [ )
+        auth_oauth_secrets = [ ]
         "GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest",
         "GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest"
     
 
         for oauth_secret in auth_oauth_secrets:
         assert oauth_secret in auth_secrets, ( )
-        "formatted_string"
+        ""
         
 
         # Test backend service OAuth configuration
         backend_secrets = SecretConfig.generate_secrets_string("backend", "staging")
 
         # Should contain simplified OAuth secrets
-        backend_oauth_secrets = [ )
+        backend_oauth_secrets = [ ]
         "GOOGLE_CLIENT_ID=google-oauth-client-id-staging:latest",
         "GOOGLE_CLIENT_SECRET=google-oauth-client-secret-staging:latest"
         
 
         for oauth_secret in backend_oauth_secrets:
         assert oauth_secret in backend_secrets, ( )
-        "formatted_string"
+        ""
             
 
             # Validate that OAuth changes don't affect SECRET_KEY
@@ -545,7 +545,7 @@ class TestDeploymentScriptRegressionPrevention:
 
         # Both REDIS_URL and REDIS_HOST/PORT should be available
         # for backward compatibility (as mentioned in the commit)
-        redis_secrets = [ )
+        redis_secrets = [ ]
         "REDIS_URL=redis-url-staging:latest",
         "REDIS_HOST=redis-host-staging:latest",
         "REDIS_PORT=redis-port-staging:latest",
@@ -554,18 +554,18 @@ class TestDeploymentScriptRegressionPrevention:
 
         for redis_secret in redis_secrets:
         assert redis_secret in secrets_string, ( )
-        "formatted_string"
+        ""
             
 
             # Validate deployment command includes VPC connector for Redis access
-        cmd = [ )
-        "gcloud", "run", "deploy", "formatted_string",
+        cmd = [ ]
+        "gcloud", "run", "deploy", "",
         "--vpc-connector", "staging-connector",
         "--set-secrets", secrets_string
             
 
         assert "--vpc-connector" in cmd, ( )
-        "formatted_string"
+        ""
             
 
     def test_critical_secrets_deployment_validation(self):
@@ -585,10 +585,10 @@ class TestDeploymentScriptRegressionPrevention:
         # Validate all critical secrets are present in deployment string
         for critical_secret in critical_secrets:
         gsm_mapping = SecretConfig.get_gsm_mapping(critical_secret)
-        expected_mapping = "formatted_string"
+        expected_mapping = ""
 
         assert expected_mapping in secrets_string, ( )
-        "formatted_string"
+        ""
             
 
             # Simulate pre-deployment validation
@@ -600,5 +600,5 @@ class TestDeploymentScriptRegressionPrevention:
                 # All critical secrets should be in deployment
         missing_critical = critical_secrets - secrets_in_deployment
         assert len(missing_critical) == 0, ( )
-        "formatted_string"
+        ""
                 

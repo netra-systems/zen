@@ -734,7 +734,7 @@ class TestWebSocketConnection:
         f.write(- [ ] Architecture compliance > 90% )
         ")
 
-        print("formatted_string")
+        print("")
 
 
         if __name__ == '__main__':

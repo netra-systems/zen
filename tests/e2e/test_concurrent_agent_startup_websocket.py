@@ -60,7 +60,7 @@ class TestWebSocketConnection:
         logger = logging.getLogger(__name__)
 
     # Test configuration
-        CONCURRENT_TEST_CONFIG = { )
+        CONCURRENT_TEST_CONFIG = { }
         "user_count": 5,
         "max_concurrent_connections": 100,
         "routing_accuracy_threshold": 0.99
@@ -76,13 +76,13 @@ class MockConcurrentTestOrchestrator:
 
     async def establish_websocket_connections(self, users):
         """Mock websocket connections for testing."""
-        logger.info("formatted_string")
+        logger.info("")
         successful_connections = 0
         for user in users:
         # Mock websocket connection
         user.websocket_client = Magic            user.startup_metrics = {'websocket_connection_time': 0.1}
         successful_connections += 1
-        logger.info("formatted_string")
+        logger.info("")
         await asyncio.sleep(0)
         return successful_connections
 
@@ -90,18 +90,18 @@ class MockConcurrentTestOrchestrator:
     async def validate_connection_stability(users):
         """Mock validation of connection stability."""
         pass
-        logger.info("formatted_string")
+        logger.info("")
         stable_count = len(users)  # Mock all connections as stable
-        logger.info("formatted_string")
+        logger.info("")
         await asyncio.sleep(0)
         return stable_count
 
 
     async def validate_message_routing_accuracy(users):
         """Mock testing of message routing accuracy."""
-        logger.info("formatted_string")
+        logger.info("")
         routing_accuracy = 100.0  # Mock 100% accuracy
-        logger.info("formatted_string")
+        logger.info("")
         await asyncio.sleep(0)
         return routing_accuracy
 
@@ -109,7 +109,7 @@ class MockConcurrentTestOrchestrator:
     async def cleanup_websocket_connections(users):
         """Mock cleanup of websocket connections."""
         pass
-        logger.info("formatted_string")
+        logger.info("")
         for user in users:
         if hasattr(user, 'websocket_client'):
         user.websocket_client = None
@@ -149,11 +149,11 @@ class MockConcurrentTestOrchestrator:
 
                     # Assertions
         assert connection_count >= CONCURRENT_TEST_CONFIG["user_count"], \
-        "formatted_string"
+        ""
         assert stable_connections == connection_count, \
-        "formatted_string"
+        ""
         assert routing_accuracy >= 0.99, \
-        "formatted_string"
+        ""
         assert cleanup_success, "WebSocket cleanup failed"
 
-        logger.info("formatted_string")
+        logger.info("")

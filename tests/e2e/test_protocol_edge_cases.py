@@ -79,20 +79,20 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         self.redirect_problems = []
 
     # Test configurations for different environments
-        self.test_environments = { )
-        'development': { )
+        self.test_environments = { }
+        'development': { }
         'frontend_protocol': 'http',
         'api_protocol': 'http',
         'ws_protocol': 'ws',
         'domain': 'localhost:3000'
         },
-        'staging': { )
+        'staging': { }
         'frontend_protocol': 'https',
         'api_protocol': 'https',
         'ws_protocol': 'wss',
         'domain': 'app.staging.netrasystems.ai'
         },
-        'production': { )
+        'production': { }
         'frontend_protocol': 'https',
         'api_protocol': 'https',
         'ws_protocol': 'wss',
@@ -112,33 +112,33 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         Similar Pattern: User on HTTP page -> page redirects to HTTPS -> WebSocket fails to reconnect
         '''
     # Simulate initial WS connection
-        initial_ws_config = { )
+        initial_ws_config = { }
         'url': 'ws://localhost:8000/ws',
         'protocol': 'ws',
         'connection_state': 'connected'
     
 
     # Simulate protocol upgrade scenarios
-        upgrade_scenarios = [ )
-        { )
+        upgrade_scenarios = [ ]
+        { }
         'name': 'Development to Staging Upgrade',
         'from_env': 'development',
         'to_env': 'staging',
         'should_upgrade': True
         },
-        { )
+        { }
         'name': 'HTTP to HTTPS Page Redirect',
         'from_protocol': 'ws://localhost:8000/ws',
         'to_protocol': 'wss://localhost:8000/ws',
         'should_upgrade': True
         },
-        { )
+        { }
         'name': 'Load Balancer SSL Termination',
         'from_protocol': 'ws://internal-lb:8000/ws',
         'to_protocol': 'wss://app.staging.netrasystems.ai/ws',
         'should_upgrade': True
         },
-        { )
+        { }
         'name': 'Mixed Content Prevention',
         'page_protocol': 'https',
         'ws_protocol': 'ws',
@@ -158,7 +158,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
 
         if scenario.get('should_upgrade', False):
         if reconnect_result['status'] != 'upgraded':
-        websocket_upgrade_failures.append({ ))
+        websocket_upgrade_failures.append({ })
         'scenario': scenario['name'],
         'issue': 'Protocol upgrade failed',
         'expected': 'upgraded',
@@ -166,7 +166,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         'error': reconnect_result.get('error', 'No error details')
                     
         elif not reconnect_result.get('new_url', '').startswith('wss://'):
-        websocket_upgrade_failures.append({ ))
+        websocket_upgrade_failures.append({ })
         'scenario': scenario['name'],
         'issue': 'Upgraded URL not using WSS',
         'new_url': reconnect_result.get('new_url', 'No URL')
@@ -174,7 +174,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
 
         elif scenario.get('should_fail_gracefully', False):
         if reconnect_result['status'] != 'graceful_failure':
-        websocket_upgrade_failures.append({ ))
+        websocket_upgrade_failures.append({ })
         'scenario': scenario['name'],
         'issue': 'Mixed content not handled gracefully',
         'expected': 'graceful_failure',
@@ -182,7 +182,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                                 
 
         except Exception as e:
-        websocket_upgrade_failures.append({ ))
+        websocket_upgrade_failures.append({ })
         'scenario': scenario['name'],
         'issue': 'formatted_string'
                                     
@@ -190,10 +190,10 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         self.websocket_issues.extend(websocket_upgrade_failures)
 
         assert len(websocket_upgrade_failures) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for failure in websocket_upgrade_failures
         ]) +
         f"
@@ -213,26 +213,26 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         '''
         pass
     # OAuth provider configurations with potential mismatches
-        oauth_configs = [ )
-        { )
+        oauth_configs = [ ]
+        { }
         'provider': 'google',
         'registered_redirect': 'http://app.staging.netrasystems.ai/auth/callback',
         'actual_redirect': 'https://app.staging.netrasystems.ai/auth/callback',
         'should_fail': True
         },
-        { )
+        { }
         'provider': 'github',
         'registered_redirect': 'https://localhost:3000/auth/callback',
         'actual_redirect': 'http://localhost:3000/auth/callback',
         'should_fail': True
         },
-        { )
+        { }
         'provider': 'azure',
         'registered_redirect': 'https://app.netrasystems.ai/auth/callback',
         'actual_redirect': 'https://app.netrasystems.ai/auth/callback',
         'should_fail': False  # Exact match
         },
-        { )
+        { }
         'provider': 'custom',
         'registered_redirect': 'https://staging.example.com/callback',
         'actual_redirect': 'https://app.staging.netrasystems.ai/auth/callback',
@@ -249,7 +249,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
 
         if config['should_fail']:
         if oauth_result['status'] == 'success':
-        oauth_redirect_failures.append({ ))
+        oauth_redirect_failures.append({ })
         'provider': config['provider'],
         'issue': 'OAuth succeeded despite redirect URI mismatch',
         'registered': config['registered_redirect'],
@@ -257,7 +257,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                     
         else:
         if oauth_result['status'] != 'success':
-        oauth_redirect_failures.append({ ))
+        oauth_redirect_failures.append({ })
         'provider': config['provider'],
         'issue': 'OAuth failed for valid redirect URI',
         'error': oauth_result.get('error', 'Unknown error'),
@@ -266,16 +266,16 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                             
 
         except Exception as e:
-        oauth_redirect_failures.append({ ))
+        oauth_redirect_failures.append({ })
         'provider': config['provider'],
         'issue': 'formatted_string'
                                 
 
         assert len(oauth_redirect_failures) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for failure in oauth_redirect_failures
         ]) +
         f"
@@ -295,32 +295,32 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         '''
         pass
     # CORS test scenarios with protocol variations
-        cors_scenarios = [ )
-        { )
+        cors_scenarios = [ ]
+        { }
         'name': 'HTTP to HTTPS Origin Mismatch',
         'frontend_origin': 'https://app.staging.netrasystems.ai',
         'cors_origins': ['http://app.staging.netrasystems.ai', 'https://localhost:3000'],
         'should_allow': False
         },
-        { )
+        { }
         'name': 'Port Variation Edge Case',
         'frontend_origin': 'https://app.staging.netrasystems.ai:443',
         'cors_origins': ['https://app.staging.netrasystems.ai'],
         'should_allow': True  # 443 is implicit for HTTPS
         },
-        { )
+        { }
         'name': 'Subdomain Wildcard with Protocol',
         'frontend_origin': 'https://feature-branch.staging.netrasystems.ai',
         'cors_origins': ['https://*.staging.netrasystems.ai'],
         'should_allow': True
         },
-        { )
+        { }
         'name': 'Mixed Protocol Wildcard',
         'frontend_origin': 'https://app.staging.netrasystems.ai',
         'cors_origins': ['*://app.staging.netrasystems.ai'],
         'should_allow': True  # If wildcard protocol is supported
         },
-        { )
+        { }
         'name': 'Load Balancer Internal vs External',
         'frontend_origin': 'https://app.staging.netrasystems.ai',
         'cors_origins': ['http://internal-lb.staging.netrasystems.ai'],
@@ -340,7 +340,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
 
         if scenario['should_allow']:
         if not cors_result['allowed']:
-        cors_configuration_failures.append({ ))
+        cors_configuration_failures.append({ })
         'scenario': scenario['name'],
         'issue': 'CORS blocked legitimate request',
         'origin': scenario['frontend_origin'],
@@ -349,7 +349,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                     
         else:
         if cors_result['allowed']:
-        cors_configuration_failures.append({ ))
+        cors_configuration_failures.append({ })
         'scenario': scenario['name'],
         'issue': 'CORS allowed unauthorized request',
         'origin': scenario['frontend_origin'],
@@ -357,7 +357,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                             
 
         except Exception as e:
-        cors_configuration_failures.append({ ))
+        cors_configuration_failures.append({ })
         'scenario': scenario['name'],
         'issue': 'formatted_string'
                                 
@@ -365,10 +365,10 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         self.cors_violations.extend(cors_configuration_failures)
 
         assert len(cors_configuration_failures) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for failure in cors_configuration_failures
         ]) +
         f"
@@ -388,51 +388,51 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         '''
         pass
     # Asset loading scenarios with mixed content potential
-        asset_scenarios = [ )
-        { )
+        asset_scenarios = [ ]
+        { }
         'name': 'Images from HTTP CDN on HTTPS Page',
         'page_protocol': 'https',
-        'asset_urls': [ )
+        'asset_urls': [ ]
         'http://cdn.example.com/logo.png',
         'http://images.unsplash.com/photo.jpg'
         ],
         'asset_type': 'images',
         'should_block': True
         },
-        { )
+        { }
         'name': 'Fonts from Mixed Protocol Sources',
         'page_protocol': 'https',
-        'asset_urls': [ )
+        'asset_urls': [ ]
         'https://fonts.googleapis.com/css?family=Inter',
         'http://localhost:3000/fonts/custom.woff2'
         ],
         'asset_type': 'fonts',
         'should_block': True
         },
-        { )
+        { }
         'name': 'API Calls with Protocol Mismatch',
         'page_protocol': 'https',
-        'asset_urls': [ )
+        'asset_urls': [ ]
         'http://api.staging.netrasystems.ai/health',
         'http://localhost:8000/api/status'
         ],
         'asset_type': 'api_calls',
         'should_block': True
         },
-        { )
+        { }
         'name': 'WebSocket from HTTP on HTTPS Page',
         'page_protocol': 'https',
-        'asset_urls': [ )
+        'asset_urls': [ ]
         'ws://localhost:8000/ws',
         'ws://api.staging.netrasystems.ai/websocket'
         ],
         'asset_type': 'websockets',
         'should_block': True
         },
-        { )
+        { }
         'name': 'Localhost Exception in Development',
         'page_protocol': 'https',
-        'asset_urls': [ )
+        'asset_urls': [ ]
         'http://localhost:3001/api/dev',
         'http://127.0.0.1:8000/health'
         ],
@@ -457,14 +457,14 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
 
         if scenario['should_block']:
         if not mixed_content_detected:
-        asset_loading_issues.append({ ))
+        asset_loading_issues.append({ })
         'scenario': scenario['name'],
         'issue': 'Mixed content not detected',
         'asset_type': scenario['asset_type'],
         'urls': scenario['asset_urls']
                     
         if len(assets_blocked) == 0:
-        asset_loading_issues.append({ ))
+        asset_loading_issues.append({ })
         'scenario': scenario['name'],
         'issue': 'Mixed content assets not blocked',
         'asset_type': scenario['asset_type'],
@@ -472,14 +472,14 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                         
         else:
         if len(assets_blocked) > 0:
-        asset_loading_issues.append({ ))
+        asset_loading_issues.append({ })
         'scenario': scenario['name'],
         'issue': 'Legitimate assets incorrectly blocked',
         'blocked_urls': assets_blocked
                                 
 
         except Exception as e:
-        asset_loading_issues.append({ ))
+        asset_loading_issues.append({ })
         'scenario': scenario['name'],
         'issue': 'formatted_string'
                                     
@@ -487,10 +487,10 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         self.asset_loading_failures.extend(asset_loading_issues)
 
         assert len(asset_loading_issues) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for failure in asset_loading_issues
         ]) +
         f"
@@ -510,36 +510,36 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         '''
         pass
     # Service worker scenarios with protocol requirements
-        sw_scenarios = [ )
-        { )
+        sw_scenarios = [ ]
+        { }
         'name': 'Service Worker on HTTP (Development)',
         'page_protocol': 'http',
         'page_origin': 'http://localhost:3000',
         'sw_url': '/sw.js',
         'should_register': True  # Localhost exception
         },
-        { )
+        { }
         'name': 'Service Worker on HTTP (Production)',
         'page_protocol': 'http',
         'page_origin': 'http://app.netrasystems.ai',
         'sw_url': '/sw.js',
         'should_register': False  # HTTPS required for production
         },
-        { )
+        { }
         'name': 'Service Worker on HTTPS',
         'page_protocol': 'https',
         'page_origin': 'https://app.staging.netrasystems.ai',
         'sw_url': '/sw.js',
         'should_register': True
         },
-        { )
+        { }
         'name': 'Cross-Origin Service Worker',
         'page_protocol': 'https',
         'page_origin': 'https://app.staging.netrasystems.ai',
         'sw_url': 'https://cdn.netrasystems.ai/sw.js',
         'should_register': False  # Must be same origin
         },
-        { )
+        { }
         'name': 'Protocol Upgrade Scenario',
         'page_protocol': 'https',
         'page_origin': 'https://app.staging.netrasystems.ai',
@@ -561,7 +561,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
 
         if scenario['should_register']:
         if not registration_result['registered']:
-        service_worker_failures.append({ ))
+        service_worker_failures.append({ })
         'scenario': scenario['name'],
         'issue': 'Service worker registration failed unexpectedly',
         'error': registration_result.get('error', 'Unknown error'),
@@ -570,7 +570,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                     
         else:
         if registration_result['registered']:
-        service_worker_failures.append({ ))
+        service_worker_failures.append({ })
         'scenario': scenario['name'],
         'issue': 'Service worker registered when it should have been blocked',
         'page_origin': scenario['page_origin'],
@@ -578,16 +578,16 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                             
 
         except Exception as e:
-        service_worker_failures.append({ ))
+        service_worker_failures.append({ })
         'scenario': scenario['name'],
         'issue': 'formatted_string'
                                 
 
         assert len(service_worker_failures) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for failure in service_worker_failures
         ]) +
         f"
@@ -607,8 +607,8 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         '''
         pass
     # Redirect scenarios affecting WebSocket connections
-        redirect_scenarios = [ )
-        { )
+        redirect_scenarios = [ ]
+        { }
         'name': 'Permanent Redirect (301) HTTP to HTTPS',
         'initial_url': 'http://app.staging.netrasystems.ai',
         'redirect_url': 'https://app.staging.netrasystems.ai',
@@ -616,7 +616,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         'ws_initial': 'ws://app.staging.netrasystems.ai/ws',
         'ws_expected': 'wss://app.staging.netrasystems.ai/ws'
         },
-        { )
+        { }
         'name': 'Temporary Redirect (302) with Protocol Change',
         'initial_url': 'http://maintenance.netrasystems.ai',
         'redirect_url': 'https://app.netrasystems.ai/maintenance',
@@ -624,7 +624,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         'ws_initial': 'ws://maintenance.netrasystems.ai/ws',
         'ws_expected': 'wss://app.netrasystems.ai/ws'
         },
-        { )
+        { }
         'name': 'Force HTTPS Redirect with Port Change',
         'initial_url': 'http://app.staging.netrasystems.ai:80',
         'redirect_url': 'https://app.staging.netrasystems.ai:443',
@@ -632,7 +632,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         'ws_initial': 'ws://app.staging.netrasystems.ai:80/ws',
         'ws_expected': 'wss://app.staging.netrasystems.ai:443/ws'
         },
-        { )
+        { }
         'name': 'Load Balancer HTTPS Enforcement',
         'initial_url': 'http://lb-internal.staging.netrasystems.ai',
         'redirect_url': 'https://app.staging.netrasystems.ai',
@@ -651,7 +651,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
 
             # Validate WebSocket URL was properly updated
         if redirect_result['ws_final_url'] != scenario['ws_expected']:
-        redirect_websocket_issues.append({ ))
+        redirect_websocket_issues.append({ })
         'scenario': scenario['name'],
         'issue': 'WebSocket URL not updated after redirect',
         'expected_ws_url': scenario['ws_expected'],
@@ -660,7 +660,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
 
                 # Validate WebSocket connection success after redirect
         if not redirect_result['ws_connection_successful']:
-        redirect_websocket_issues.append({ ))
+        redirect_websocket_issues.append({ })
         'scenario': scenario['name'],
         'issue': 'WebSocket failed to connect after redirect',
         'error': redirect_result.get('ws_error', 'Unknown error')
@@ -672,7 +672,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
 
         expected_ws_protocol = 'wss' if page_protocol == 'https' else 'ws'
         if ws_protocol != expected_ws_protocol:
-        redirect_websocket_issues.append({ ))
+        redirect_websocket_issues.append({ })
         'scenario': scenario['name'],
         'issue': 'WebSocket protocol not consistent with page protocol',
         'page_protocol': page_protocol,
@@ -680,7 +680,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                         
 
         except Exception as e:
-        redirect_websocket_issues.append({ ))
+        redirect_websocket_issues.append({ })
         'scenario': scenario['name'],
         'issue': 'formatted_string'
                             
@@ -688,10 +688,10 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         self.redirect_problems.extend(redirect_websocket_issues)
 
         assert len(redirect_websocket_issues) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for failure in redirect_websocket_issues
         ]) +
         f"
@@ -711,8 +711,8 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         '''
         pass
     # Certificate scenarios for different environments
-        cert_scenarios = [ )
-        { )
+        cert_scenarios = [ ]
+        { }
         'name': 'Self-Signed Certificate (Development)',
         'environment': 'development',
         'cert_type': 'self_signed',
@@ -720,7 +720,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         'should_accept': True,  # Usually accepted in dev
         'strict_mode': False
         },
-        { )
+        { }
         'name': 'Valid Wildcard Certificate',
         'environment': 'staging',
         'cert_type': 'wildcard',
@@ -728,7 +728,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         'cert_domain': '*.staging.netrasystems.ai',
         'should_accept': True
         },
-        { )
+        { }
         'name': 'Certificate Hostname Mismatch',
         'environment': 'production',
         'cert_type': 'valid',
@@ -736,14 +736,14 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         'cert_domain': 'staging.netrasystems.ai',
         'should_accept': False
         },
-        { )
+        { }
         'name': 'Expired Certificate',
         'environment': 'staging',
         'cert_type': 'expired',
         'hostname': 'app.staging.netrasystems.ai',
         'should_accept': False
         },
-        { )
+        { }
         'name': 'SNI with Multiple Certificates',
         'environment': 'production',
         'cert_type': 'sni_multi',
@@ -762,7 +762,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
 
         if scenario['should_accept']:
         if not cert_validation_result['valid']:
-        certificate_validation_failures.append({ ))
+        certificate_validation_failures.append({ })
         'scenario': scenario['name'],
         'issue': 'Valid certificate rejected',
         'cert_type': scenario['cert_type'],
@@ -771,7 +771,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                     
         else:
         if cert_validation_result['valid']:
-        certificate_validation_failures.append({ ))
+        certificate_validation_failures.append({ })
         'scenario': scenario['name'],
         'issue': 'Invalid certificate accepted',
         'cert_type': scenario['cert_type'],
@@ -779,16 +779,16 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                             
 
         except Exception as e:
-        certificate_validation_failures.append({ ))
+        certificate_validation_failures.append({ })
         'scenario': scenario['name'],
         'issue': 'formatted_string'
                                 
 
         assert len(certificate_validation_failures) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for failure in certificate_validation_failures
         ]) +
         f"
@@ -808,8 +808,8 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         '''
         pass
     # Load balancer SSL termination scenarios
-        lb_scenarios = [ )
-        { )
+        lb_scenarios = [ ]
+        { }
         'name': 'SSL Termination with X-Forwarded-Proto',
         'client_protocol': 'https',
         'lb_to_backend_protocol': 'http',
@@ -817,7 +817,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         'x_forwarded_port': '443',
         'backend_should_detect': 'https'
         },
-        { )
+        { }
         'name': 'Missing X-Forwarded-Proto Header',
         'client_protocol': 'https',
         'lb_to_backend_protocol': 'http',
@@ -825,7 +825,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         'backend_should_detect': 'http',  # Fallback to actual protocol
         'should_warn': True
         },
-        { )
+        { }
         'name': 'Conflicting Protocol Headers',
         'client_protocol': 'https',
         'lb_to_backend_protocol': 'http',
@@ -833,7 +833,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         'x_forwarded_ssl': 'on',
         'backend_should_detect': 'https'  # SSL header takes precedence
         },
-        { )
+        { }
         'name': 'Internal Health Check (HTTP)',
         'client_protocol': 'http',
         'lb_to_backend_protocol': 'http',
@@ -841,7 +841,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         'is_internal': True,
         'backend_should_detect': 'http'  # Internal requests can be HTTP
         },
-        { )
+        { }
         'name': 'WebSocket Upgrade with SSL Termination',
         'client_protocol': 'https',
         'lb_to_backend_protocol': 'http',
@@ -862,7 +862,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         expected_protocol = scenario['backend_should_detect']
 
         if detected_protocol != expected_protocol:
-        lb_ssl_failures.append({ ))
+        lb_ssl_failures.append({ })
         'scenario': scenario['name'],
         'issue': 'Backend protocol detection incorrect',
         'expected': expected_protocol,
@@ -873,7 +873,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                 # Check for warnings when headers are missing
         if scenario.get('should_warn', False):
         if not lb_result.get('warning_logged', False):
-        lb_ssl_failures.append({ ))
+        lb_ssl_failures.append({ })
         'scenario': scenario['name'],
         'issue': 'Missing protocol header warning not logged'
                         
@@ -881,22 +881,22 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                         # Validate WebSocket upgrade handling
         if 'upgrade_header' in scenario:
         if not lb_result.get('websocket_upgrade_handled', False):
-        lb_ssl_failures.append({ ))
+        lb_ssl_failures.append({ })
         'scenario': scenario['name'],
         'issue': 'WebSocket upgrade not handled with SSL termination'
                                 
 
         except Exception as e:
-        lb_ssl_failures.append({ ))
+        lb_ssl_failures.append({ })
         'scenario': scenario['name'],
         'issue': 'formatted_string'
                                     
 
         assert len(lb_ssl_failures) == 0, ( )
-        "formatted_string" +
+        "" +
         "
-        ".join([ ))
-        "formatted_string"
+        ".join([ ])
+        ""
         for failure in lb_ssl_failures
         ]) +
         f"
@@ -914,10 +914,10 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         from_env = self.test_environments[scenario['from_env']]
         to_env = self.test_environments[scenario['to_env']]
 
-        old_url = "formatted_string"
-        new_url = "formatted_string"
+        old_url = ""
+        new_url = ""
 
-        return { )
+        return { }
         'status': 'upgraded',
         'old_url': old_url,
         'new_url': new_url,
@@ -926,7 +926,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
 
         elif 'from_protocol' in scenario:
                 # Direct protocol upgrade
-        return { )
+        return { }
         'status': 'upgraded',
         'old_url': scenario['from_protocol'],
         'new_url': scenario['to_protocol']
@@ -934,7 +934,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
 
         elif scenario.get('should_fail_gracefully'):
                     # Mixed content prevention
-        return { )
+        return { }
         'status': 'graceful_failure',
         'reason': 'Mixed content prevented WebSocket connection'
                     
@@ -1047,11 +1047,11 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                 # Build normalized netloc
         if port and ((parsed_url.scheme == 'https' and port != 443) or )
         (parsed_url.scheme == 'http' and port != 80)):
-        netloc = "formatted_string"
+        netloc = ""
         else:
         netloc = hostname
 
-        return "formatted_string".rstrip('/')
+        return "".rstrip('/')
 
     def _origins_match_ignoring_scheme(self, origin1: str, origin2: str) -> bool:
         """Check if two normalized origins match, ignoring the scheme."""
@@ -1081,7 +1081,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         mixed_content_detected = True
         assets_blocked.append(url)
 
-        return { )
+        return { }
         'mixed_content_detected': mixed_content_detected,
         'assets_blocked': assets_blocked,
         'page_protocol': page_protocol
@@ -1094,7 +1094,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
 
         # HTTPS requirement check (localhost exception)
         if page_protocol == 'http' and page_parsed.hostname not in ['localhost', '127.0.0.1']:
-        return { )
+        return { }
         'registered': False,
         'error': 'Service workers require HTTPS (except localhost)'
             
@@ -1103,14 +1103,14 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         if sw_url.startswith('http'):
         sw_parsed = urllib.parse.urlparse(sw_url)
         if sw_parsed.netloc != page_parsed.netloc:
-        return { )
+        return { }
         'registered': False,
         'error': 'Service worker must be same-origin'
                     
 
                     # Mixed content check
         if page_protocol == 'https' and sw_url.startswith('http://'):
-        return { )
+        return { }
         'registered': False,
         'error': 'Mixed content: cannot load HTTP service worker from HTTPS page'
                         
@@ -1139,7 +1139,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         new_ws_netloc = redirect_parsed.netloc
         ws_path = ws_initial_parsed.path
 
-        new_ws_url = "formatted_string"
+        new_ws_url = ""
 
                 # Simulate connection test
         connection_successful = True
@@ -1147,7 +1147,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                     # Port mismatch might cause issues
         connection_successful = False
 
-        return { )
+        return { }
         'final_page_url': scenario['redirect_url'],
         'ws_final_url': new_ws_url,
         'ws_connection_successful': connection_successful,
@@ -1155,7 +1155,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
                     
 
         except Exception as e:
-        return { )
+        return { }
         'final_page_url': scenario['redirect_url'],
         'ws_final_url': scenario['ws_initial'],
         'ws_connection_successful': False,
@@ -1240,7 +1240,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         if scenario.get('upgrade_header') == 'websocket':
         websocket_upgrade_handled = detected_protocol == 'https'
 
-        return { )
+        return { }
         'detected_protocol': detected_protocol,
         'headers': headers,
         'warning_logged': warning_logged,
@@ -1259,31 +1259,31 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         print(f" )
         === Protocol Failures ===")
         for failure in self.protocol_failures:
-        print("formatted_string")
+        print("")
 
         if self.websocket_issues:
         print(f" )
         === WebSocket Issues ===")
         for issue in self.websocket_issues:
-        print("formatted_string")
+        print("")
 
         if self.cors_violations:
         print(f" )
         === CORS Violations ===")
         for violation in self.cors_violations:
-        print("formatted_string")
+        print("")
 
         if self.asset_loading_failures:
         print(f" )
         === Asset Loading Failures ===")
         for failure in self.asset_loading_failures:
-        print("formatted_string")
+        print("")
 
         if self.redirect_problems:
         print(f" )
         === Redirect Problems ===")
         for problem in self.redirect_problems:
-        print("formatted_string")
+        print("")
 
 
         if __name__ == "__main__":

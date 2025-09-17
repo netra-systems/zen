@@ -148,7 +148,7 @@ assert stored_messages[0]['failure_reason'] == failure_reason
 
                                                 # Test queue size limiting
 for i in range(55):  # Exceed max queue size of 50
-await self.manager._store_failed_message(self.user_id, message, "formatted_string")
+await self.manager._store_failed_message(self.user_id, message, "")
 
                                                 # Verify queue was trimmed
 assert len(self.manager._message_recovery_queue[self.user_id]) == 50
@@ -364,7 +364,7 @@ async def intermittent_task():
 nonlocal call_count
 call_count += 1
 if call_count <= 2:
-    raise RuntimeError("formatted_string")
+    raise RuntimeError("")
         # Success on third try
 
 task_name = "test_recovery_task"

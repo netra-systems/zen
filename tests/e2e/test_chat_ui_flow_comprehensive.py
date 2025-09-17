@@ -82,7 +82,7 @@ class MissionCriticalChatEventValidator:
     '''
 
         # Required events per CLAUDE.md Section 6.1 - MUST ALL BE SENT
-    REQUIRED_EVENTS = { )
+    REQUIRED_EVENTS = { }
     "agent_started",
     "agent_thinking",
     "tool_executing",
@@ -91,7 +91,7 @@ class MissionCriticalChatEventValidator:
         
 
         # Additional events that enhance user experience
-    OPTIONAL_EVENTS = { )
+    OPTIONAL_EVENTS = { }
     "partial_result",
     "final_report",
     "agent_fallback",
@@ -117,7 +117,7 @@ class MissionCriticalChatEventValidator:
         self.event_timeline.append((timestamp, event_type, event))
         self.event_counts[event_type] = self.event_counts.get(event_type, 0) + 1
 
-        logger.debug("formatted_string")
+        logger.debug("")
 
     def validate_mission_critical_events(self) -> tuple[bool, List[str]]:
         '''Validate that ALL mission-critical events were sent.
@@ -131,7 +131,7 @@ class MissionCriticalChatEventValidator:
         # Check required events
         missing_events = self.REQUIRED_EVENTS - received_events
         if missing_events:
-        errors.append("formatted_string")
+        errors.append("")
 
             # Validate event ordering (agent_started should come first, agent_completed last)
         if self.events:
@@ -139,10 +139,10 @@ class MissionCriticalChatEventValidator:
         last_event = self.events[-1].get("type")
 
         if first_event != "agent_started":
-        errors.append("formatted_string")
+        errors.append("")
 
         if last_event != "agent_completed" and "agent_completed" in received_events:
-        errors.append("formatted_string")
+        errors.append("")
 
                         # Validate minimum event sequence
         required_sequence = ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
@@ -152,7 +152,7 @@ class MissionCriticalChatEventValidator:
         if required_event not in event_types:
         continue
         if event_types.count(required_event) == 0:
-        errors.append("formatted_string")
+        errors.append("")
 
         return len(errors) == 0, errors
 
@@ -160,7 +160,7 @@ class MissionCriticalChatEventValidator:
         """Generate comprehensive validation report."""
         success, errors = self.validate_mission_critical_events()
 
-        return { )
+        return { }
         "success": success,
         "errors": errors,
         "warnings": self.warnings,
@@ -256,7 +256,7 @@ class ChatUIFlowTester:
         logger.info(" PASS:  Real services initialized successfully")
 
         except Exception as e:
-        error_msg = "formatted_string"
+        error_msg = ""
         self.test_failures.append(error_msg)
         raise RuntimeError(error_msg)
 
@@ -304,7 +304,7 @@ class ChatUIFlowTester:
         logger.info(" PASS:  Agent workflow executed successfully")
 
         except Exception as e:
-        error_msg = "formatted_string"
+        error_msg = ""
         self.test_failures.append(error_msg)
         logger.error(error_msg)
         raise
@@ -384,7 +384,7 @@ assert mock_conn.closed
 
 logger.info(" PASS:  Structure compliance test PASSED - all CLAUDE.md requirements met")
 
-print(" )
+print("")
 [U+1F4CB] CLAUDE.md Compliance Verification:")
 print("    PASS:  Absolute imports only (no relative imports)")
 print("    PASS:  IsolatedEnvironment for configuration access")
@@ -394,7 +394,7 @@ print("    PASS:  Proper typing and error handling")
 print("    PASS:  No mocks in production paths (only for event capture)")
 
 @pytest.mark.asyncio
-@pytest.fixture
+# @pytest.fixture
     async def test_websocket_agent_events_complete_flow(self):
 '''Test complete chat flow with all required WebSocket events.
 
@@ -425,26 +425,26 @@ report = tester.event_validator.get_validation_report()
 
 print(f" )
 CHART:  WebSocket Event Validation Report:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
+print("")
 
 if not success:
 print(f" )
 FAIL:  CRITICAL ERRORS:")
 for error in errors:
-print("formatted_string")
+    print("")
 
                                 # Assert all tests pass
-assert success, "formatted_string"
-assert len(tester.test_failures) == 0, "formatted_string"
+assert success, ""
+assert len(tester.test_failures) == 0, ""
 
 logger.info(" PASS:  Complete WebSocket agent events flow test PASSED")
 
 except Exception as e:
-logger.error("formatted_string")
+logger.error("")
 raise
 finally:
 await tester.cleanup()
@@ -474,7 +474,7 @@ assert connection.closed
 logger.info(" PASS:  WebSocket connection management test PASSED")
 
 except Exception as e:
-logger.error("formatted_string")
+logger.error("")
 raise
 finally:
 await tester.cleanup()
@@ -500,7 +500,7 @@ assert hasattr(tester.agent_registry, '_websocket_manager')
 logger.info(" PASS:  Real services integration test PASSED")
 
 except Exception as e:
-logger.error("formatted_string")
+logger.error("")
 raise
 finally:
 await tester.cleanup()
@@ -511,7 +511,7 @@ await tester.cleanup()
 validator = MissionCriticalChatEventValidator()
 
                                                                             # Test with all required events
-required_events = [ )
+required_events = [ ]
 {"type": "agent_started", "data": "test"},
 {"type": "agent_thinking", "data": "test"},
 {"type": "tool_executing", "data": "test"},
@@ -523,7 +523,7 @@ for event in required_events:
 validator.record_event(event)
 
 success, errors = validator.validate_mission_critical_events()
-assert success, "formatted_string"
+assert success, ""
 
                                                                                 # Test with missing events
 validator2 = MissionCriticalChatEventValidator()
@@ -540,7 +540,7 @@ logger.info(" PASS:  Event validator accuracy test PASSED")
 if __name__ == "__main__":
                                                                                     # This file is designed to be run with pytest and the unified test runner
                                                                                     # Example: python unified_test_runner.py --category e2e --filter test_chat_ui_flow_comprehensive
-print("[U+1F9EA] Run with: python unified_test_runner.py --category e2e --filter test_chat_ui_flow_comprehensive")
+    print("[U+1F9EA] Run with: python unified_test_runner.py --category e2e --filter test_chat_ui_flow_comprehensive")
 print("[U+1F4E1] Tests mission-critical WebSocket events with real services")
 print(" WARNING: [U+FE0F]  Requires real services to be running (PostgreSQL, Redis, etc.)")
 pass

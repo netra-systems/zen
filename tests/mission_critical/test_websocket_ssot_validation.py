@@ -201,7 +201,7 @@ for conn_id in user_conns:
     conn_info = manager.connections[conn_id]
 websocket = conn_info['websocket']
 assert len(websocket.sent_messages) == 0, \
-"formatted_string"
+""
 logger.info( PASS:  User isolation with 25+ concurrent sessions PASSED)
 @pytest.mark.asyncio
     async def test_no_data_leakage_between_users(self):
@@ -286,7 +286,7 @@ assert len(thread_1_b_ws.sent_messages) == 0
 for user_id in ['user_2', 'user_3']:
     for thread_id, websocket in websockets[user_id].items():
         assert len(websocket.sent_messages) == 0, \
-"formatted_string"
+""
 logger.info( PASS:  Message routing accuracy PASSED)
 @pytest.mark.asyncio
     async def test_connection_limits_enforcement(self):
@@ -303,7 +303,7 @@ for i in range(manager.MAX_CONNECTIONS_PER_USER):
 conn_id = await manager.connect_user( )
 user_id=user_id,
 websocket=websocket,
-thread_id="formatted_string"
+thread_id=""
                                                                         
 connections.append(conn_id)
                                                                         # Verify all connections are tracked
@@ -324,7 +324,7 @@ concurrent_users = 10
 user_data = []
 for i in range(concurrent_users):
     user_id = formatted_string
-websocket = MockWebSocket(user_id, "formatted_string")
+websocket = MockWebSocket(user_id, "")
 conn_id = await manager.connect_user( )
 user_id=user_id,
 websocket=websocket,
@@ -343,7 +343,7 @@ for user_info in user_data:
     message = {
 'type': 'performance_test',
 'user_id': user_info['user_id'],
-'content': "formatted_string",
+'content': "",
 'timestamp': datetime.now(timezone.utc).isoformat()
                                                                                     
 task = manager.send_to_user(user_info['user_id'], message)
@@ -357,7 +357,7 @@ assert total_time < 2.0, formatted_string
 for user_info in user_data:
     websocket = user_info['websocket']
 assert len(websocket.sent_messages) == 1, \
-"formatted_string"
+""
 logger.info(formatted_string)
 @pytest.mark.asyncio
     async def test_websocket_event_flow_validation(self):
@@ -399,7 +399,7 @@ user_context = emitter.user_context
                                                                                             # Check that events were processed (would be in sent_events after processing)
                                                                                             # Since we're using mock connections, events might be in the queue or failed_events
 total_events = len(user_context.sent_events) + user_context.event_queue.qsize()
-assert total_events >= 5, "formatted_string"
+assert total_events >= 5, ""
 logger.info( PASS:  WebSocket event flow validation PASSED)
 @pytest.mark.asyncio
     async def test_cleanup_stale_connections(self):
@@ -436,9 +436,9 @@ for cycle in range(cycles):
                                                                                                         # Create connections
 connections = []
 for i in range(connections_per_cycle):
-    user_id = "formatted_string"
+    user_id = ""
 websocket = MockWebSocket(user_id, formatted_string)
-conn_id = await manager.connect_user(user_id, websocket, "formatted_string")
+conn_id = await manager.connect_user(user_id, websocket, "")
 connections.append((user_id, conn_id, websocket))
                                                                                                             # Send messages to generate activity
 for user_id, conn_id, websocket in connections:
@@ -463,9 +463,9 @@ manager = self.create_test_manager()
                                                                                                                         # Create multiple connections to test heartbeat
 users = []
 for i in range(5):
-    user_id = "formatted_string"
+    user_id = ""
 websocket = MockWebSocket(user_id, formatted_string)
-conn_id = await manager.connect_user(user_id, websocket, "formatted_string")
+conn_id = await manager.connect_user(user_id, websocket, "")
 users.append((user_id, conn_id, websocket))
                                                                                                                             # Test enhanced ping functionality
 start_time = time.time()
@@ -479,7 +479,7 @@ ping_time = time.time() - start_time
 assert ping_time < 1.0, formatted_string
                                                                                                                                 # Verify ping results (most should succeed with mock connections)
 successful_pings = sum(1 for result in results if result is True)
-logger.info("formatted_string")
+logger.info("")
                                                                                                                                 # Get health stats
 stats = await manager.get_stats()
 health_stats = stats.get('health_monitoring', {}
@@ -524,7 +524,7 @@ factory = self.create_test_factory()
                                                                                                                                         # Mock components
 websocket = TestWebSocketConnection()
                                                                                                                                         # Mock connection info
-mock_connection_info = Magic        mock_connection_info.websocket = MockWebSocket("test_user", test_conn)
+mock_connection_info = MagicMock(); mock_connection_info.websocket = MockWebSocket("test_user", test_conn)
 mock_pool.get_connection.return_value = mock_connection_info
 factory.configure( )
 connection_pool=mock_pool,
@@ -619,7 +619,7 @@ user_message_counts[user_id] += message_count
 for user_id in [s["user_id"] for s in test_scenarios]:
     assert user_message_counts.get(user_id, 0) > 0, \
 formatted_string
-logger.info("formatted_string")
+logger.info("")
 def test_websocket_manager_singleton_isolation(self):
     "Test WebSocket manager singleton doesn't cause isolation issues."
 logger.info("[U+1F9EA] Testing WebSocket manager singleton isolation")

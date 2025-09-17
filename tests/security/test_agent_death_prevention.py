@@ -171,9 +171,9 @@ user_id = "tracking_user"
 tool_name = "tracked_tool"
 
             # Create mock tool input and context
-mock_tool_input = Magic        mock_tool_input.model_dump.return_value = {"test": "data"}
+mock_tool_input = MagicMock(); mock_tool_input.model_dump.return_value = {"test": "data"}
 
-mock_context = Magic        mock_context.user_id = user_id
+mock_context = MagicMock(); mock_context.user_id = user_id
 
             # Create a tool that will hang
 class HangingTool:
@@ -208,7 +208,7 @@ class HangingTool:
         """Test that health checks verify processing capability, not just WebSocket health."""
 pass
                 # Mock a WebSocket that appears healthy but processing is broken
-mock_websocket_bridge = Magic        mock_websocket_bridge.is_connected.return_value = True
+mock_websocket_bridge = MagicMock(); mock_websocket_bridge.is_connected.return_value = True
 mock_websocket_bridge.notify_tool_executing = AsyncMock(return_value=True)
 mock_websocket_bridge.notify_tool_completed = AsyncMock(return_value=True)
 
@@ -267,7 +267,7 @@ user_id = "circuit_test_user"
 
                                     # Cause multiple agent death failures
 for attempt in range(4):  # Exceed failure threshold
-request = ExecutionRequest(agent_name=agent_name, user_id="formatted_string")
+request = ExecutionRequest(agent_name=agent_name, user_id="")
 
 permission = await security_manager.validate_execution_request(request)
 
@@ -323,7 +323,7 @@ pass
 execution_engine = UnifiedToolExecutionEngine()
 
                                                     # Mock WebSocket for notification testing
-mock_websocket = Magic        mock_websocket.notify_tool_executing = AsyncMock(return_value=True)
+mock_websocket = MagicMock(); mock_websocket.notify_tool_executing = AsyncMock(return_value=True)
 mock_websocket.notify_tool_completed = AsyncMock(return_value=True)
 
 execution_engine.websocket_bridge = mock_websocket
@@ -337,7 +337,7 @@ class DeadTool:
         return "never_reached"
 
     # Mock tool input and context
-        mock_tool_input = Magic        mock_context = Magic        mock_context.user_id = "feedback_user"
+        mock_tool_input = MagicMock(); mock_context = MagicMock(); mock_context.user_id = "feedback_user"
 
     # Execute tool that will die
         result = await execution_engine.execute_tool_with_input( )
@@ -349,7 +349,7 @@ class DeadTool:
         if hasattr(result, 'message') and result.message:
         # Should contain helpful error message
         error_msg = result.message.lower()
-        assert any(word in error_msg for word in [ ))
+        assert any(word in error_msg for word in [ ])
         'timeout', 'failed', 'error', 'unavailable', 'try again'
         
 
@@ -374,7 +374,7 @@ class TestDeathDetectionMechanisms:
 execution_engine = UnifiedToolExecutionEngine()
 
         Test various failure patterns from the bug report
-failure_patterns = [ )
+failure_patterns = [ ]
 None,           # No result
 "",             # Empty result
 "...",          # Status mentioned in bug report
@@ -394,7 +394,7 @@ for pattern in failure_patterns:
         await execution_engine._run_tool_by_interface_safe(FailurePatternTool(), {})
 
         error_msg = str(exc_info.value).lower()
-        assert any(phrase in error_msg for phrase in [ ))
+        assert any(phrase in error_msg for phrase in [ ])
         "no result", "failed silently", "placeholder", "empty"
         
 
@@ -408,7 +408,7 @@ execution_engine = UnifiedToolExecutionEngine()
 user_id = "state_tracking_user"
 execution_id = "test_execution_123"
 
-execution_engine._active_executions[execution_id] = { )
+execution_engine._active_executions[execution_id] = { }
 'tool_name': 'state_test_tool',
 'start_time': time.time(),
 'user_id': user_id,
@@ -453,7 +453,7 @@ assert isinstance(health["processing_capability_verified"], bool)
 
 
                     # Pytest configuration
-pytestmark = [ )
+pytestmark = [ ]
 pytest.mark.security,
 pytest.mark.asyncio,
 pytest.mark.critical  # These tests address critical bug

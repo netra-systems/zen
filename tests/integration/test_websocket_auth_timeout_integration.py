@@ -188,7 +188,7 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
         "
         REPRODUCTION TEST: Chat functionality blocked by authentication timeouts.
         
-        This test simulates how auth timeout failures prevent users from 
+#         This test simulates how auth timeout failures prevent users from  # Incomplete import statement
         accessing chat functionality (90% of platform value).
         
         EXPECTED RESULT: Should FAIL, showing chat blocked by auth issues.

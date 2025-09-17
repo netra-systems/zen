@@ -71,9 +71,9 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         ""Set up test environment with factory components.""
         self.captured_events = []
         self.run_id = formatted_string
-        self.thread_id = "formatted_string"
+        self.thread_id = ""
         self.user_id = formatted_string
-        self.connection_id = "formatted_string"
+        self.connection_id = ""
     # Create factory components
         self.mock_connection_pool = self._create_mock_connection_pool()
         self.websocket_factory = WebSocketBridgeFactory()
@@ -89,11 +89,11 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
     # ===== STEP 1: User Request with Factory Context =====
         user_context = UserExecutionContext( )
         user_id=self.user_id,
-        request_id="formatted_string",
+        request_id="",
         thread_id=self.thread_id,
         session_id=formatted_string
     
-        print("formatted_string")
+        print("")
     # ===== STEP 2: Factory Creates User Emitter =====
         emitter = await self.websocket_factory.create_user_emitter( )
         user_id=self.user_id,
@@ -176,7 +176,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         [U+1F4E1] CRITICAL EVENTS VALIDATED:")
         required_events = [agent_started, "agent_thinking", tool_executing, "tool_completed", agent_completed]
         for i, event_type in enumerate(required_events, 1):
-        print("formatted_string")
+        print("")
         print()
         [U+1F510] USER ISOLATION VERIFIED:")
         print("   PASS:  Per-user execution context)
@@ -296,7 +296,7 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         WARNING: [U+FE0F] MISSING FACTORY COMPONENTS DETECTED:")
         for issue in missing_components:
         print(formatted_string)
-        self.fail("formatted_string")
+        self.fail("")
         else:
         print()
         PASS:  ALL FACTORY COMPONENTS VERIFIED - Complete factory pattern available!")
@@ -421,7 +421,7 @@ class MockConnectionPool:
     async def get_connection(self, connection_id: str, user_id: str):
         "Get or create mock connection."
         pass
-        key = "formatted_string"
+        key = ""
         if key not in self.connections:
         self.connections[key] = MockWebSocketConnection(user_id, connection_id)
         # Return connection info structure
@@ -430,7 +430,7 @@ class MockConnectionPool:
         return connection_info
     def get_mock_connection(self, user_id: str, connection_id: str):
         "Get mock connection for testing."
-        key = "formatted_string"
+        key = ""
         return self.connections.get(key)
         return MockConnectionPool()
         if __name__ == "__main__":

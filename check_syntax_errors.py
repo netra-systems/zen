@@ -72,7 +72,10 @@ def check_syntax_errors(root_dir):
         if error['lineno']:
             print(f"   Line {error['lineno']}: {error['error']}")
             if error['text']:
-                print(f"   Text: {error['text']}")
+                try:
+                    print(f"   Text: {error['text']}")
+                except UnicodeEncodeError:
+                    print(f"   Text: {repr(error['text'])}")
         else:
             print(f"   Error: {error['error']}")
         print("-" * 40)

@@ -74,16 +74,16 @@ class TestStagingDeploymentSecretValidation:
     def _mock_describe(service_name: str, project: str = "netra-staging"):
         """Mock gcloud run services describe output."""
         pass
-        return { )
+        return { }
         "metadata": {"name": service_name},
-        "spec": { )
-        "template": { )
-        "spec": { )
-        "template": { )
-        "spec": { )
-        "containers": [{ ))
-        "env": [ )
-        {"name": "SECRET_KEY", "valueFrom": {"secretKeyRe"formatted_string"name": "JWT_SECRET_KEY", "valueFrom": {"secretKeyRe"formatted_string"auth"
+        "spec": { }
+        "template": { }
+        "spec": { }
+        "template": { }
+        "spec": { }
+        "containers": [{ })
+        "env": [ ]
+        {"name": "SECRET_KEY", "valueFrom": {"secretKeyRe""name": "JWT_SECRET_KEY", "valueFrom": {"secretKeyRe""auth"
 
         # Step 1: Get all required secrets
         all_secrets = SecretConfig.get_all_service_secrets(service_name)
@@ -97,7 +97,7 @@ class TestStagingDeploymentSecretValidation:
         missing_mappings.append(secret)
 
         assert len(missing_mappings) == 0, ( )
-        "formatted_string"
+        ""
                 
 
                 # Step 3: Generate deployment string
@@ -107,9 +107,9 @@ class TestStagingDeploymentSecretValidation:
                 # Step 4: Validate critical secrets are included
         critical_secrets = SecretConfig.CRITICAL_SECRETS.get(service_name, [])
         for critical_secret in critical_secrets:
-        expected_mapping = "formatted_string"
+        expected_mapping = ""
         assert expected_mapping in deployment_string, ( )
-        "formatted_string"
+        ""
                     
 
                     # Step 5: Verify SECRET_KEY specifically (regression prevention)
@@ -133,7 +133,7 @@ class TestStagingDeploymentSecretValidation:
         missing_mappings.append(secret)
 
         assert len(missing_mappings) == 0, ( )
-        "formatted_string"
+        ""
             
 
             # Step 3: Generate deployment string
@@ -143,9 +143,9 @@ class TestStagingDeploymentSecretValidation:
             # Step 4: Validate critical secrets are included
         critical_secrets = SecretConfig.CRITICAL_SECRETS.get(service_name, [])
         for critical_secret in critical_secrets:
-        expected_mapping = "formatted_string"
+        expected_mapping = ""
         assert expected_mapping in deployment_string, ( )
-        "formatted_string"
+        ""
                 
 
                 # Step 5: Verify SECRET_KEY specifically (regression prevention)
@@ -172,8 +172,8 @@ class TestStagingDeploymentSecretValidation:
         backend_mapping = SecretConfig.get_gsm_mapping(secret)
 
         assert auth_mapping == backend_mapping, ( )
-        "formatted_string"
-        "formatted_string"
+        ""
+        ""
         
 
     def test_deployment_script_integration(self, mock_subprocess):
@@ -192,7 +192,7 @@ class TestStagingDeploymentSecretValidation:
         auth_secrets_string = SecretConfig.generate_secrets_string("auth", "staging")
 
     # Simulate deployment script usage
-        deployment_command = [ )
+        deployment_command = [ ]
         "gcloud", "run", "deploy", "netra-auth-service",
         "--set-secrets", auth_secrets_string
     
@@ -221,7 +221,7 @@ class TestStagingDeploymentSecretValidation:
         mappings = staging_secrets.split(",")
         for mapping in mappings:
         assert ":latest" in mapping, ( )
-        "formatted_string"
+        ""
             
 
             # Should include environment-specific secrets
@@ -233,9 +233,9 @@ class TestStagingDeploymentSecretValidation:
                 # Should include all critical secrets for staging
         critical_secrets = SecretConfig.CRITICAL_SECRETS.get(service_name, [])
         for critical_secret in critical_secrets:
-        secret_prefix = "formatted_string"
+        secret_prefix = ""
         assert secret_prefix in staging_secrets, ( )
-        "formatted_string"
+        ""
                     
 
     def test_secret_config_service_requirements_completeness(self):
@@ -245,7 +245,7 @@ class TestStagingDeploymentSecretValidation:
         are defined and properly mapped for staging deployments.
         '''
         pass
-        required_categories = { )
+        required_categories = { }
         "auth": ["database", "authentication", "oauth", "redis"],
         "backend": ["database", "authentication", "oauth", "redis", "ai_services"]
     
@@ -256,20 +256,20 @@ class TestStagingDeploymentSecretValidation:
         # Check all required categories are present
         for category in expected_categories:
         assert category in service_secrets, ( )
-        "formatted_string"
+        ""
             
 
             # Check category is not empty
         category_secrets = service_secrets[category]
         assert len(category_secrets) > 0, ( )
-        "formatted_string"
+        ""
             
 
             # Check all secrets in category have GSM mappings
         for secret in category_secrets:
         gsm_mapping = SecretConfig.get_gsm_mapping(secret)
         assert gsm_mapping is not None, ( )
-        "formatted_string"
+        ""
                 
 
     def test_deployment_readiness_validation(self):
@@ -282,7 +282,7 @@ class TestStagingDeploymentSecretValidation:
         deployment_readiness = {}
 
         for service_name in ["auth", "backend"]:
-        readiness = { )
+        readiness = { }
         "service_name": service_name,
         "secrets_defined": False,
         "critical_secrets_present": False,
@@ -301,7 +301,7 @@ class TestStagingDeploymentSecretValidation:
         readiness["critical_secrets_present"] = critical_secrets.issubset(all_secrets_set)
 
         # Check GSM mappings are complete
-        missing_mappings = [ )
+        missing_mappings = [ ]
         secret for secret in all_secrets
         if SecretConfig.get_gsm_mapping(secret) is None
         
@@ -315,7 +315,7 @@ class TestStagingDeploymentSecretValidation:
         readiness["deployment_string_generated"] = False
 
                 # Check regression-specific requirements
-        regression_checks = { )
+        regression_checks = { }
         "secret_key_present": "SECRET_KEY" in all_secrets,
         "secret_key_critical": "SECRET_KEY" in critical_secrets,
         "secret_key_mapped": SecretConfig.get_gsm_mapping("SECRET_KEY") == "secret-key-staging"
@@ -328,7 +328,7 @@ class TestStagingDeploymentSecretValidation:
         for service_name, readiness in deployment_readiness.items():
         for check_name, check_result in readiness.items():
         assert check_result, ( )
-        "formatted_string"
+        ""
                         
 
     def test_environment_configuration_integration(self):
@@ -349,7 +349,7 @@ class TestStagingDeploymentSecretValidation:
         if env == "staging":
                 # Should use :latest versions
         assert ":latest" in secrets_string, ( )
-        "formatted_string"
+        ""
                 
 
                 # Should include staging-specific GSM secret names
@@ -366,7 +366,7 @@ class TestStagingDeploymentSecretValidation:
 
                                 # Validate configuration completeness
         assert len(secrets_string) > 0, ( )
-        "formatted_string"
+        ""
                                 
 
 
@@ -384,20 +384,20 @@ class TestStagingDeploymentRegressionPrevention:
         for service_name in ["auth", "backend"]:
         all_secrets = SecretConfig.get_all_service_secrets(service_name)
         assert "SECRET_KEY" in all_secrets, ( )
-        "formatted_string"
+        ""
         
 
         # Step 2: Validate SECRET_KEY is marked critical
         for service_name in ["auth", "backend"]:
         critical_secrets = SecretConfig.CRITICAL_SECRETS.get(service_name, [])
         assert "SECRET_KEY" in critical_secrets, ( )
-        "formatted_string"
+        ""
             
 
             # Step 3: Validate SECRET_KEY has GSM mapping
         gsm_mapping = SecretConfig.get_gsm_mapping("SECRET_KEY")
         assert gsm_mapping == "secret-key-staging", ( )
-        "formatted_string"
+        ""
             
 
             # Step 4: Validate SECRET_KEY appears in deployment strings
@@ -405,7 +405,7 @@ class TestStagingDeploymentRegressionPrevention:
         deployment_string = SecretConfig.generate_secrets_string(service_name, "staging")
         expected_mapping = "SECRET_KEY=secret-key-staging:latest"
         assert expected_mapping in deployment_string, ( )
-        "formatted_string"
+        ""
                 
 
                 # Step 5: Validate critical secret validation would catch missing SECRET_KEY
@@ -463,10 +463,10 @@ class TestStagingDeploymentRegressionPrevention:
         categories = SecretConfig.get_secret_categories("auth", oauth_secret)
         if categories:  # If secret exists in auth service
         assert "oauth" in categories, ( )
-        "formatted_string"
+        ""
                 
         assert "authentication" not in categories or oauth_secret.startswith("OAUTH"), ( )
-        "formatted_string"
+        ""
                 
 
     def test_redis_configuration_regression_prevention(self):
@@ -484,18 +484,18 @@ class TestStagingDeploymentRegressionPrevention:
         # Check Redis secrets are present
         for redis_secret in redis_secrets:
         assert redis_secret in all_secrets, ( )
-        "formatted_string"
+        ""
             
 
             # Check GSM mapping exists
         gsm_mapping = SecretConfig.get_gsm_mapping(redis_secret)
         assert gsm_mapping is not None, ( )
-        "formatted_string"
+        ""
             
 
             # Check appears in deployment string
         deployment_string = SecretConfig.generate_secrets_string(service_name, "staging")
-        expected_mapping = "formatted_string"
+        expected_mapping = ""
         assert expected_mapping in deployment_string, ( )
-        "formatted_string"
+        ""
             

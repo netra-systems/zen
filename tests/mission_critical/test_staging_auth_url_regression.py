@@ -263,7 +263,7 @@ class TestStagingDeploymentReadiness:
 
                 # Should point to staging auth service
         assert 'staging' in config.service_url or config.service_url.startswith('https://'), \
-        "formatted_string"
+        ""
 
     def test_oauth_redirect_consistency_staging(self):
         "Test OAuth redirect URI consistency in staging."
@@ -278,7 +278,7 @@ class TestStagingDeploymentReadiness:
 
         # Redirect should use frontend URL as base
         assert redirect_uri.startswith(frontend_url), \
-        "formatted_string"t match frontend {frontend_url}
+        ""t match frontend {frontend_url}
 
         # Should end with standard callback path
         assert redirect_uri.endswith('/auth/callback'), \
@@ -349,7 +349,7 @@ class TestCriticalURLValidation:
 
                     # Production should not contain 'staging'
         assert 'staging' not in prod_url, \
-        "formatted_string"
+        ""
 
                     # Staging should contain 'staging'
         assert 'staging' in staging_url, \
@@ -394,7 +394,7 @@ class TestCriticalURLValidation:
 
                 # Check environment
         if critical_config['Environment'] != 'staging':
-        validations.append("formatted_string")
+        validations.append("")
 
                     # Check URLs contain staging
         for key in ['Frontend URL', 'Backend URL', 'Auth Service URL']:
@@ -404,7 +404,7 @@ class TestCriticalURLValidation:
                             # Check HTTPS
         for key in ['Frontend URL', 'Backend URL', 'Auth Service URL']:
         if not str(critical_config[key].startswith('https://'):
-        validations.append("formatted_string")
+        validations.append("")
 
                                     # Check no localhost
         for key, value in critical_config.items():
@@ -418,7 +418,7 @@ class TestCriticalURLValidation:
         VALIDATION FAILURES:")
         for validation in validations:
         logger.error(formatted_string)
-        raise AssertionError("formatted_string")
+        raise AssertionError("")
         else:
         logger.info( )
         [U+2713] All staging configuration validations passed!)

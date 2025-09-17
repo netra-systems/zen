@@ -62,7 +62,7 @@ class AuthServiceVerificationTester:
         """Discover real running service URLs using environment and service discovery."""
     # Check for running services using real environment configuration
     # CRITICAL FIX: Use correct ports based on actual docker-compose configuration
-        raw_urls = { )
+        raw_urls = { }
         'auth_service': self.env.get('AUTH_SERVICE_URL', 'http://localhost:8081'),  # Fixed: was 8083
         'backend': self.env.get('BACKEND_URL', 'http://localhost:8000'),
         'frontend': self.env.get('FRONTEND_URL', 'http://localhost:3000')
@@ -97,9 +97,9 @@ class AuthServiceVerificationTester:
         if 'frontend' in discovery_data and 'url' in discovery_data['frontend']:
         service_urls['frontend'] = discovery_data['frontend']['url']
         except Exception as e:
-        logger.debug("formatted_string")
+        logger.debug("")
 
-        logger.info("formatted_string")
+        logger.info("")
         return service_urls
 
     async def verify_service_health(self, service_name: str, timeout: float = 10.0) -> ServiceVerificationResult:
@@ -111,7 +111,7 @@ class AuthServiceVerificationTester:
         health_endpoints = ['/health', '/health/ready', '/health/live', '/api/health', '/status']
 
         for endpoint in health_endpoints:
-        url = "formatted_string"
+        url = ""
 
         try:
         async with httpx.AsyncClient(timeout=timeout) as client:
@@ -131,7 +131,7 @@ class AuthServiceVerificationTester:
         success=True,
         response_time=response_time,
         status_code=response.status_code,
-        details={ )
+        details={ }
         'endpoint': endpoint,
         'url': url,
         'health_data': health_data
@@ -146,7 +146,7 @@ class AuthServiceVerificationTester:
         continue
         except Exception as e:
                                         # Other errors
-        logger.warning("formatted_string")
+        logger.warning("")
         continue
 
                                         # All endpoints failed
@@ -156,7 +156,7 @@ class AuthServiceVerificationTester:
         verification_type='health_check',
         success=False,
         response_time=response_time,
-        error="formatted_string",
+        error="",
         details={'attempted_endpoints': health_endpoints, 'base_url': base_url}
                                         
 
@@ -166,7 +166,7 @@ class AuthServiceVerificationTester:
         auth_base_url = self.service_urls['auth_service']
 
     # Test endpoints that should be available on a functional auth service
-        test_endpoints = [ )
+        test_endpoints = [ ]
         {'path': '/health', 'method': 'GET', 'expected_status': 200, 'description': 'Basic health check'},
         {'path': '/auth/google', 'method': 'GET', 'expected_status': [200, 302, 400], 'description': 'OAuth Google endpoint'},
         {'path': '/auth/verify', 'method': 'POST', 'expected_status': [400, 401], 'description': 'Token verification endpoint', 'require_auth': True},
@@ -175,7 +175,7 @@ class AuthServiceVerificationTester:
 
         for endpoint_config in test_endpoints:
         start_time = time.time()
-        url = "formatted_string"
+        url = ""
 
         try:
         async with httpx.AsyncClient(timeout=10.0) as client:
@@ -194,11 +194,11 @@ class AuthServiceVerificationTester:
 
         result = ServiceVerificationResult( )
         service_name='auth_service',
-        verification_type="formatted_string",
+        verification_type="",
         success=success,
         response_time=response_time,
         status_code=response.status_code,
-        details={ )
+        details={ }
         'endpoint': endpoint_config['path'],
         'method': endpoint_config['method'],
         'expected_statuses': expected_statuses,
@@ -208,7 +208,7 @@ class AuthServiceVerificationTester:
                             
 
         if not success:
-        result.error = "formatted_string"
+        result.error = ""
 
         results.append(result)
 
@@ -216,7 +216,7 @@ class AuthServiceVerificationTester:
         response_time = time.time() - start_time
         results.append(ServiceVerificationResult( ))
         service_name='auth_service',
-        verification_type="formatted_string",
+        verification_type="",
         success=False,
         response_time=response_time,
         error=str(e),
@@ -229,10 +229,10 @@ class AuthServiceVerificationTester:
         """Verify JWT token verification functionality without requiring real tokens."""
         start_time = time.time()
         auth_base_url = self.service_urls['auth_service']
-        verify_url = "formatted_string"
+        verify_url = ""
 
     # Test token verification endpoint with various invalid tokens to verify endpoint functionality
-        test_cases = [ )
+        test_cases = [ ]
         {'token': None, 'expected_status': [400, 401], 'description': 'Missing token'},
         {'token': 'invalid_token', 'expected_status': [401, 422], 'description': 'Invalid token format'},
         {'token': 'Bearer invalid_token', 'expected_status': [401, 422], 'description': 'Invalid bearer token'},
@@ -255,10 +255,10 @@ class AuthServiceVerificationTester:
         verification_working = True
         break
         else:
-        error_details.append("formatted_string")
+        error_details.append("")
 
         except Exception as e:
-        error_details.append("formatted_string")
+        error_details.append("")
 
         response_time = time.time() - start_time
 
@@ -276,14 +276,14 @@ class AuthServiceVerificationTester:
         results = []
         auth_base_url = self.service_urls['auth_service']
 
-        oauth_endpoints = [ )
-        { )
+        oauth_endpoints = [ ]
+        { }
         'path': '/auth/google',
         'description': 'Google OAuth initiation',
         'expected_statuses': [200, 302, 400],  # 302 for redirect, 400 for missing params
         'test_params': {}
         },
-        { )
+        { }
         'path': '/auth/google/callback',
         'description': 'Google OAuth callback',
         'expected_statuses': [400, 422, 404],  # Fixed: Added 404 as valid response for missing OAuth state
@@ -293,7 +293,7 @@ class AuthServiceVerificationTester:
 
         for endpoint_config in oauth_endpoints:
         start_time = time.time()
-        url = "formatted_string"
+        url = ""
 
         try:
         async with httpx.AsyncClient(timeout=10.0, follow_redirects=False) as client:
@@ -305,11 +305,11 @@ class AuthServiceVerificationTester:
 
         result = ServiceVerificationResult( )
         service_name='auth_service',
-        verification_type="formatted_string",
+        verification_type="",
         success=success,
         response_time=response_time,
         status_code=response.status_code,
-        details={ )
+        details={ }
         'endpoint': endpoint_config['path'],
         'expected_statuses': expected_statuses,
         'description': endpoint_config['description'],
@@ -318,7 +318,7 @@ class AuthServiceVerificationTester:
                 
 
         if not success:
-        result.error = "formatted_string"
+        result.error = ""
 
         results.append(result)
 
@@ -326,7 +326,7 @@ class AuthServiceVerificationTester:
         response_time = time.time() - start_time
         results.append(ServiceVerificationResult( ))
         service_name='auth_service',
-        verification_type="formatted_string",
+        verification_type="",
         success=False,
         response_time=response_time,
         error=str(e),
@@ -344,7 +344,7 @@ class AuthServiceVerificationTester:
 
         try:
         parsed_url = urlparse(base_url)
-        expected_ports = { )
+        expected_ports = { }
         'auth_service': [8081, 8001, 8080],  # Fixed: Added 8081 as primary expected port
         'backend': [8000, 8080],  # Common backend ports
         'frontend': [3000, 8080, 80]  # Common frontend ports
@@ -375,7 +375,7 @@ class AuthServiceVerificationTester:
         success=success,
         response_time=response_time,
         status_code=port_response_code,
-        details={ )
+        details={ }
         'configured_url': base_url,
         'actual_port': actual_port,
         'expected_ports': expected_port_list,
@@ -387,9 +387,9 @@ class AuthServiceVerificationTester:
         if not success:
         issues = []
         if not port_valid:
-        issues.append("formatted_string")
+        issues.append("")
         if not port_accessible:
-        issues.append("formatted_string")
+        issues.append("")
         result.error = "; ".join(issues)
 
         results.append(result)
@@ -415,18 +415,18 @@ class AuthServiceVerificationTester:
         all_results = []
 
     # Test 1: Basic health checks for all services
-        print(" )
+        print("")
         1. Testing service health endpoints...")
         for service_name in self.service_urls.keys():
         result = await self.verify_service_health(service_name)
         all_results.append(result)
         status = " PASS:  PASS" if result.success else " FAIL:  FAIL"
-        print("formatted_string")
+        print("")
         if result.error:
-        print("formatted_string")
+        print("")
 
             # Test 2: Auth service specific endpoints
-        print(" )
+        print("")
         2. Testing auth service specific endpoints...")
         auth_endpoint_results = await self.verify_auth_service_specific_endpoints()
         all_results.extend(auth_endpoint_results)
@@ -434,23 +434,23 @@ class AuthServiceVerificationTester:
         for result in auth_endpoint_results:
         status = " PASS:  PASS" if result.success else " FAIL:  FAIL"
         endpoint = result.details.get('endpoint', 'unknown') if result.details else 'unknown'
-        print("formatted_string")
+        print("")
         if result.error:
-        print("formatted_string")
+        print("")
 
                     # Test 3: JWT verification functionality
-        print(" )
+        print("")
         3. Testing JWT verification functionality...")
         jwt_result = await self.verify_jwt_token_functionality()
         all_results.append(jwt_result)
 
         status = " PASS:  PASS" if jwt_result.success else " FAIL:  FAIL"
-        print("formatted_string")
+        print("")
         if jwt_result.error:
-        print("formatted_string")
+        print("")
 
                         # Test 4: OAuth endpoints functionality
-        print(" )
+        print("")
         4. Testing OAuth endpoints functionality...")
         oauth_results = await self.verify_oauth_flow_endpoints()
         all_results.extend(oauth_results)
@@ -458,12 +458,12 @@ class AuthServiceVerificationTester:
         for result in oauth_results:
         status = " PASS:  PASS" if result.success else " FAIL:  FAIL"
         endpoint = result.details.get('endpoint', 'unknown') if result.details else 'unknown'
-        print("formatted_string")
+        print("")
         if result.error:
-        print("formatted_string")
+        print("")
 
                                 # Test 5: Port configuration verification
-        print(" )
+        print("")
         5. Testing service port configurations...")
         port_results = await self.verify_service_port_configuration()
         all_results.extend(port_results)
@@ -471,16 +471,16 @@ class AuthServiceVerificationTester:
         for result in port_results:
         status = " PASS:  PASS" if result.success else " FAIL:  FAIL"
         port = result.details.get('actual_port', 'unknown') if result.details else 'unknown'
-        print("formatted_string")
+        print("")
         if result.error:
-        print("formatted_string")
+        print("")
 
                                         # Analyze results
         total_tests = len(all_results)
         passed_tests = sum(1 for result in all_results if result.success)
         failed_tests = total_tests - passed_tests
 
-        verification_summary = { )
+        verification_summary = { }
         'total_tests': total_tests,
         'passed_tests': passed_tests,
         'failed_tests': failed_tests,
@@ -490,10 +490,10 @@ class AuthServiceVerificationTester:
 
         print(f" )
         === VERIFICATION SUMMARY ===")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
-        print("formatted_string")
+        print("")
+        print("")
+        print("")
+        print("")
 
         return verification_summary
 
@@ -509,7 +509,7 @@ class AuthServiceVerificationFixer:
         """Improved health check with multiple fallback strategies."""
 
     # Strategy 1: Try standard health endpoints with graduated timeouts
-        health_strategies = [ )
+        health_strategies = [ ]
         {'endpoints': ['/health'], 'timeout': 2.0, 'description': 'Fast health check'},
         {'endpoints': ['/health/ready', '/health/live'], 'timeout': 5.0, 'description': 'Kubernetes-style probes'},
         {'endpoints': ['/api/health', '/status', '/ping'], 'timeout': timeout, 'description': 'Alternative health endpoints'},
@@ -518,7 +518,7 @@ class AuthServiceVerificationFixer:
         for strategy in health_strategies:
         for endpoint in strategy['endpoints']:
         try:
-        url = "formatted_string"
+        url = ""
         async with httpx.AsyncClient(timeout=strategy['timeout']) as client:
         response = await client.get(url)
 
@@ -528,7 +528,7 @@ class AuthServiceVerificationFixer:
         except:
         health_data = {'status': 'healthy', 'source': 'text_response'}
 
-        return { )
+        return { }
         'healthy': True,
         'endpoint': endpoint,
         'strategy': strategy['description'],
@@ -545,7 +545,7 @@ class AuthServiceVerificationFixer:
 
                                             # If we get any response (even 404), service is at least running
         if response.status_code < 500:
-        return { )
+        return { }
         'healthy': True,
         'endpoint': '/',
         'strategy': 'Basic connectivity check',
@@ -555,7 +555,7 @@ class AuthServiceVerificationFixer:
         except:
         pass
 
-        return { )
+        return { }
         'healthy': False,
         'error': 'All health check strategies failed',
         'strategies_attempted': len(health_strategies)
@@ -576,13 +576,13 @@ class AuthServiceVerificationFixer:
         try:
         health_check = AuthServiceVerificationFixer.create_improved_health_check('auth_service')
         health_result = await health_check(auth_service_url)
-        verification_methods.append({ ))
+        verification_methods.append({ })
         'method': 'health_check',
         'success': health_result.get('healthy', False),
         'details': health_result
         
         except Exception as e:
-        verification_methods.append({ ))
+        verification_methods.append({ })
         'method': 'health_check',
         'success': False,
         'error': str(e)
@@ -595,13 +595,13 @@ class AuthServiceVerificationFixer:
                     # OAuth endpoint working if it returns redirect or bad request (missing params)
         oauth_working = response.status_code in [200, 302, 400]
 
-        verification_methods.append({ ))
+        verification_methods.append({ })
         'method': 'oauth_endpoint_test',
         'success': oauth_working,
         'details': {'status_code': response.status_code}
                     
         except Exception as e:
-        verification_methods.append({ ))
+        verification_methods.append({ })
         'method': 'oauth_endpoint_test',
         'success': False,
         'error': str(e)
@@ -611,16 +611,16 @@ class AuthServiceVerificationFixer:
         try:
         async with httpx.AsyncClient(timeout=5.0) as client:
                                 # POST to verify endpoint without token should return 400/401
-        response = await client.post("formatted_string")
+        response = await client.post("")
         token_endpoint_working = response.status_code in [400, 401, 422]
 
-        verification_methods.append({ ))
+        verification_methods.append({ })
         'method': 'token_verify_endpoint_test',
         'success': token_endpoint_working,
         'details': {'status_code': response.status_code}
                                 
         except Exception as e:
-        verification_methods.append({ ))
+        verification_methods.append({ })
         'method': 'token_verify_endpoint_test',
         'success': False,
         'error': str(e)
@@ -633,7 +633,7 @@ class AuthServiceVerificationFixer:
                                     # Service is verified if at least 2/3 of methods succeed
         auth_verified = len(successful_methods) >= max(1, total_methods * 2 // 3)
 
-        return { )
+        return { }
         'auth_verified': auth_verified,
         'successful_methods': len(successful_methods),
         'total_methods': total_methods,
@@ -686,35 +686,35 @@ service_unavailable_count += 1
 
 print(f" )
 === FALSE FAILURE ANALYSIS ===")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
 if false_failures:
-print("formatted_string")
+    print("")
 for failure in false_failures:
-print("formatted_string")
-print("formatted_string")
+    print("")
+print("")
 else:
-print("No obvious false failures detected in verification logic")
+    print("No obvious false failures detected in verification logic")
 
                                     # Test validation: Test framework should work even if services are down
 assert results['total_tests'] > 0, "Should have run verification tests"
 
                                     # Adaptive assertion: If most services are unavailable, that's expected
 if service_unavailable_count >= results['total_tests'] * 0.8:
-print(" PASS:  Most services unavailable - test framework working correctly")
+    print(" PASS:  Most services unavailable - test framework working correctly")
 assert True, "Test framework correctly identifies unavailable services"
 else:
                                             # If services are available, expect reasonable success rate
 min_expected_success_rate = 20.0  # At least some basic connectivity
 if results['success_rate'] >= min_expected_success_rate:
-print("formatted_string")
+    print("")
 else:
-print("formatted_string")
+    print("")
 
                                                     # Log success rate for monitoring regardless of result
-logger.info("formatted_string")
+logger.info("")
 
 @pytest.mark.asyncio
     async def test_improved_health_check_reduces_false_failures(self):
@@ -732,9 +732,9 @@ try:
 async with httpx.AsyncClient(timeout=2.0) as client:
 response = await client.get("formatted_string")
 if response.status_code != 200:
-pytest.skip("formatted_string")
+pytest.skip("")
 except Exception as e:
-pytest.skip("formatted_string")
+pytest.skip("")
 
                                                                         # Test standard health check
 print(f" )
@@ -751,7 +751,7 @@ except Exception as e:
 standard_error = str(e)
 standard_time = time.time() - standard_start
 
-print("formatted_string")
+print("")
 
                                                                                     # Improved health check
 improved_start = time.time()
@@ -760,12 +760,12 @@ improved_result = await improved_health_check(auth_service_url)
 improved_time = time.time() - improved_start
 
 improved_success = improved_result.get('healthy', False)
-print("formatted_string")
+print("")
 
 if improved_result.get('strategy'):
-print("formatted_string")
+    print("")
 if improved_result.get('endpoint'):
-print("formatted_string")
+    print("")
 
                                                                                             # Compare results
 improvement_detected = improved_success and not standard_success
@@ -779,7 +779,7 @@ PASS:  BOTH METHODS SUCCESSFUL: No false failure in this case")
 elif not improved_success and not standard_success:
 print(f" )
 WARNING: [U+FE0F]  BOTH METHODS FAILED: Service may actually be unavailable")
-print("formatted_string")
+print("")
 else:
 print(f" )
 WARNING: [U+FE0F]  UNEXPECTED RESULT: Standard succeeded but improved failed")
@@ -803,9 +803,9 @@ try:
 async with httpx.AsyncClient(timeout=2.0) as client:
 response = await client.get("formatted_string")
 if response.status_code != 200:
-pytest.skip("formatted_string")
+pytest.skip("")
 except Exception as e:
-pytest.skip("formatted_string")
+pytest.skip("")
 
 print(f" )
 === IMPROVED AUTH VERIFICATION TEST ===")
@@ -813,18 +813,18 @@ print(f" )
 improved_auth_verification = AuthServiceVerificationFixer.create_improved_auth_verification(auth_service_url)
 result = await improved_auth_verification()
 
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
 
 print(f" )
 Verification method details:")
 for method in result['verification_methods']:
 status = " PASS:  PASS" if method['success'] else " FAIL:  FAIL"
-print("formatted_string")
+print("")
 if method.get('error'):
-print("formatted_string")
+    print("")
 if method.get('details'):
-print("formatted_string")
+    print("")
 
                                                                                                                                             # The improved verification should be more resilient
                                                                                                                                             # Even if individual methods fail, overall verification should succeed if service is functional
@@ -853,23 +853,23 @@ print(f" )
 === PORT CONFIGURATION MISMATCH DETECTION ===")
 
     # Test various port configuration scenarios
-test_configurations = [ )
-{ )
+test_configurations = [ ]
+{ }
 'name': 'standard_auth_8001',
 'AUTH_SERVICE_URL': 'http://localhost:8001',
 'expected_working': True
 },
-{ )
+{ }
 'name': 'alternative_auth_8080',
 'AUTH_SERVICE_URL': 'http://localhost:8080',
 'expected_working': False  # Likely not configured
 },
-{ )
+{ }
 'name': 'wrong_protocol',
 'AUTH_SERVICE_URL': 'https://localhost:8001',
 'expected_working': False  # HTTPS on wrong port
 },
-{ )
+{ }
 'name': 'wrong_host',
 'AUTH_SERVICE_URL': 'http://127.0.0.1:8001',
 'expected_working': True  # Should work same as localhost
@@ -879,9 +879,9 @@ test_configurations = [ )
 mismatches_detected = []
 
 for config in test_configurations:
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+    print("")
+print("")
+print("")
 
         # Parse URL to analyze potential issues
 from urllib.parse import urlparse
@@ -894,17 +894,17 @@ if parsed.scheme == 'https' and parsed.port in [8001, 8000, 8080]:
 issues.append("HTTPS on development port - likely incorrect")
 
 if parsed.port and parsed.port not in [80, 443, 3000, 8000, 8001, 8080]:
-issues.append("formatted_string")
+issues.append("")
 
 if parsed.hostname not in ['localhost', '127.0.0.1', '0.0.0.0']:
 if not parsed.hostname.endswith('.local') and not parsed.hostname.startswith('staging'):
-issues.append("formatted_string")
+issues.append("")
 
 if issues:
 print(f"   WARNING: [U+FE0F]  Potential configuration issues detected:")
 for issue in issues:
-print("formatted_string")
-mismatches_detected.append({ ))
+    print("")
+mismatches_detected.append({ })
 'config_name': config['name'],
 'url': config['AUTH_SERVICE_URL'],
 'issues': issues
@@ -915,11 +915,11 @@ print(f"   PASS:  Configuration appears valid")
 print(f" )
 === CONFIGURATION ANALYSIS SUMMARY ===")
 if mismatches_detected:
-print("formatted_string")
+    print("")
 for mismatch in mismatches_detected:
-print("formatted_string")
+    print("")
 else:
-print("No obvious configuration issues detected")
+    print("No obvious configuration issues detected")
 
                                                 # Test passes to document configuration analysis
 assert len(test_configurations) > 0, "Should test multiple configurations"

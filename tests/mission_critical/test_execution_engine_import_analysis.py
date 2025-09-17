@@ -598,4 +598,4 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     
     # Run the test
-    unittest.main()
+    unittest.main())

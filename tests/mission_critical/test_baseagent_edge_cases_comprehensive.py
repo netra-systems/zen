@@ -493,7 +493,7 @@ class TestableBaseAgent(BaseAgent):
         "Concurrent execution tester fixture.""
         pass
         return ConcurrentExecutionTester()
-        @pytest.fixture
+        # @pytest.fixture
     async def test_agents():
         ""Create multiple test agents for concurrent testing."
         agents = []
@@ -524,7 +524,7 @@ class TestableBaseAgent(BaseAgent):
     # ============================================================================
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_baseagent_handles_llm_edge_cases(test_agents, edge_case_simulator):
         "CRITICAL: Test BaseAgent handling of various LLM edge cases.""
 edge_cases = [
@@ -577,7 +577,7 @@ logger.info(formatted_string" )
 "formatted_string)
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_baseagent_state_corruption_resilience(test_agents, edge_case_simulator):
         ""CRITICAL: Test BaseAgent resilience to state corruption."
 corruption_types = [
@@ -639,7 +639,7 @@ logger.info(formatted_string" )
 formatted_string")
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
                                     # Removed problematic line: async def test_concurrent_baseagent_execution_race_conditions( )
 test_agents,
 shared_agent_state,
@@ -677,7 +677,7 @@ logger.info(formatted_string" )
 formatted_string")
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_baseagent_memory_leak_prevention(test_agents, memory_leak_detector):
         "CRITICAL: Test BaseAgent for memory leaks and proper resource cleanup.""
                                                 # Track agent objects
@@ -738,7 +738,7 @@ formatted_string"
 "formatted_string)
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_baseagent_resource_exhaustion_handling(test_agents, edge_case_simulator):
         ""CRITICAL: Test BaseAgent behavior under resource exhaustion conditions."
 resource_types = ["memory_pressure, file_descriptor_exhaustion", "thread_exhaustion]
@@ -821,7 +821,7 @@ logger.info(formatted_string" )
 f"tests completed successfully)
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.fixture
+# @pytest.fixture
     async def test_baseagent_error_handling_and_recovery(test_agents):
         ""CRITICAL: Test BaseAgent error handling and recovery mechanisms."
 agent = test_agents[0]
