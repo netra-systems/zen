@@ -141,7 +141,10 @@ deployment/monitoring/
 **/migration_log.txt
 
 # Infrastructure Files Not Needed in Containers
-**/infrastructure/
+# EXCEPTION: Allow netra_backend/app/infrastructure for staging deployment
+infrastructure/
+deployment/infrastructure/
+!netra_backend/app/infrastructure/
 **/deployment/
 **/gcp/
 **/cloud*
