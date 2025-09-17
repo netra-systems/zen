@@ -23,6 +23,7 @@ ARCHITECTURE:
 See: CRITICAL_AUTH_ARCHITECTURE.md for full details
 """
 # Create auth-specific logger
+import logging
 import time
 from collections import defaultdict
 from datetime import timedelta
