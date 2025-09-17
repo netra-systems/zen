@@ -93,7 +93,7 @@ class GoldenPathJWTAuthFlowTests(E2EAuthenticatedTestCase):
     Tests the complete authentication flow that enables all other business value.
     """
     
-    @pytest.fixture(scope="class", autouse=True)
+    @pytest.fixture(autouse=True)
     async def setup_test_infrastructure(self):
         """Ensure real services are running for E2E auth tests."""
         try:

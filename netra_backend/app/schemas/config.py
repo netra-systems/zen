@@ -452,7 +452,7 @@ class AppConfig(BaseModel):
     db_echo_pool: bool = Field(default=False, description="Echo connection pool events")
     db_max_connections: int = Field(default=100, description="Hard limit on total connections")
     db_connection_timeout: int = Field(default=10, description="Connection establishment timeout")
-    db_statement_timeout: int = Field(default=30000, description="Max statement execution time in ms")
+    db_statement_timeout: int = Field(default=120000, description="Issue #1278: Max statement execution time in ms (120s for Cloud Run)")
     db_enable_read_write_split: bool = Field(default=False, description="Enable read/write splitting")
     db_read_url: Optional[str] = Field(default=None, description="Read database URL")
     db_write_url: Optional[str] = Field(default=None, description="Write database URL")

@@ -78,7 +78,7 @@ class TestEmergencyModeCompatibility(SSotAsyncTestCase):
         """Restore original environment after tests"""
         for key, value in self.original_env_values.items():
             if value is None:
-                self.env.unset_env(key)
+                self.clear_env_var(key)
             else:
                 self.set_env_var(key, value)
         super().tearDown()
@@ -314,7 +314,7 @@ class TestEmergencyModeCompatibility(SSotAsyncTestCase):
         """Restore normal configuration"""
         for key, original_value in self.original_env_values.items():
             if original_value is None:
-                self.env.unset_env(key)
+                self.clear_env_var(key)
             else:
                 self.env.set_env(key, original_value)
         self.original_env_values.clear()

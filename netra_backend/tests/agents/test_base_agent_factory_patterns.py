@@ -125,8 +125,8 @@ class BaseAgentFactoryPatternsTests(SSotAsyncTestCase):
         assert hasattr(agent, '_user_context')
         assert agent._user_context is self.test_context
 
-        # Note: user_context property is None until set_user_context is called
-        # This is expected behavior for create_with_context vs create_agent_with_context
+        # Verify: user_context property is properly set by factory method
+        assert agent.user_context is self.test_context
 
         # Verify: Configuration was applied for existing attributes only
         # The factory method only applies config to existing attributes
