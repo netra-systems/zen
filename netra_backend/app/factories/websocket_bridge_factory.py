@@ -117,6 +117,16 @@ class WebSocketBridgeFactory:
     Factory class for creating WebSocket bridge components with proper dependency injection.
     """
 
+    def configure(self) -> None:
+        """
+        Configure the WebSocket bridge factory.
+
+        This method provides compatibility with test infrastructure that expects
+        a configure() method on factory instances. The actual configuration
+        is handled during individual bridge creation.
+        """
+        logger.info("WebSocketBridgeFactory.configure() called - factory ready")
+
     @staticmethod
     def create_standard_bridge(
         websocket_manager: Optional["WebSocketManager"] = None,
