@@ -17,12 +17,12 @@ Protects $500K+ ARR by maintaining Golden Path functionality during consolidatio
 from typing import Any, Optional
 
 # Import the SSOT unified configuration manager and functions
-from netra_backend.app.core.configuration.base import (
+from netra_backend.app.config import (
     config_manager as unified_config_manager,
-    get_unified_config,
+    get_config as get_unified_config,
     get_config,  # Golden Path SSOT function
-    reload_unified_config,
-    validate_config_integrity,
+    reload_config as reload_unified_config,
+    validate_configuration as validate_config_integrity,
     UnifiedConfigManager,
 )
 

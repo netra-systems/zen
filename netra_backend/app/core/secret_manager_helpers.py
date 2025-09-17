@@ -5,14 +5,14 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from google.cloud import secretmanager
 
-from netra_backend.app.core.configuration.base import config_manager
+from netra_backend.app.config import get_config
 from netra_backend.app.logging_config import central_logger as logger
 from shared.secret_mappings import get_secret_mappings, get_secret_name_for_env_var
 
 
 def detect_environment_config() -> Tuple[str, bool]:
     """Detect environment and staging configuration."""
-    config = config_manager.get_config()
+    config = get_config()
     environment = getattr(config, 'environment', 'development').lower()
     k_service = getattr(config, 'k_service', None)
     is_staging = environment == "staging" or (k_service and "staging" in k_service.lower())
@@ -21,7 +21,7 @@ def detect_environment_config() -> Tuple[str, bool]:
 
 def get_secret_names_list() -> List[str]:
     """Get complete list of secret names to fetch based on current environment."""
-    config = config_manager.get_config()
+    config = get_config()
     environment = getattr(config, 'environment', 'development').lower()
     
     # Use shared secret mappings to get the proper secret names for the environment
@@ -46,7 +46,7 @@ def get_secret_names_list() -> List[str]:
 def determine_actual_secret_name(secret_name: str, is_staging: bool) -> str:
     """Determine actual secret name with environment-specific handling."""
     # Use shared mappings to determine if the secret name already has environment suffix
-    config = config_manager.get_config()
+    config = get_config()
     environment = getattr(config, 'environment', 'development').lower()
     secret_mappings = get_secret_mappings(environment)
     
