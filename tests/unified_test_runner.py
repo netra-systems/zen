@@ -4357,6 +4357,12 @@ def main():
         action="store_true",
         help="Skip Docker initialization for tests that don't need it (e.g., unit tests)"
     )
+
+    parser.add_argument(
+        "--docker-bypass",
+        action="store_true",
+        help="Bypass Docker requirements and use staging environment for testing (Issue #1082 fallback)"
+    )
     
     parser.add_argument(
         "--max-workers",

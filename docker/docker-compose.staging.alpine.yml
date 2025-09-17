@@ -4,10 +4,12 @@
 #
 # Performance Improvements:
 # - Backend: 2GB → 512MB memory (75% reduction)
-# - Auth: 512MB → 256MB memory (50% reduction)  
+# - Auth: 512MB → 256MB memory (50% reduction)
 # - Frontend: 1GB → 512MB memory (50% reduction)
 # - Total: 3.5GB → 1.28GB (63% reduction)
 #
+
+version: '3.8'
 # Usage:
 #   docker-compose -f docker-compose.staging.alpine.yml up -d
 #   docker-compose -f docker-compose.staging.alpine.yml down
@@ -22,7 +24,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: dockerfiles/backend.staging.Dockerfile
+      dockerfile: dockerfiles/backend.staging.alpine.Dockerfile
       args:
         - ENVIRONMENT=staging
         - BUILD_ENV=staging
@@ -125,7 +127,7 @@ services:
   auth:
     build:
       context: .
-      dockerfile: dockerfiles/auth.staging.Dockerfile
+      dockerfile: dockerfiles/auth.staging.alpine.Dockerfile
       args:
         - ENVIRONMENT=staging
         - BUILD_ENV=staging
@@ -205,7 +207,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: dockerfiles/frontend.staging.Dockerfile
+      dockerfile: dockerfiles/frontend.staging.alpine.Dockerfile
       args:
         - NODE_ENV=production
         - BUILD_ENV=staging

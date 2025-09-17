@@ -1,6 +1,8 @@
 # Alpine-based Test Environment with Fresh Builds
 # Optimized for isolation and minimal resource usage
 
+version: '3.8'
+
 services:
   # ============================================
   # ALPINE TEST INFRASTRUCTURE
