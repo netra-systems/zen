@@ -101,12 +101,12 @@ class UserContextIsolationComprehensiveTests(SSotAsyncTestCase):
         for i, context in enumerate(contexts):
             test_key = 'user_specific_data'
             test_value = f'sensitive_data_for_user_{i}'
-            context.set_context_data(test_key, test_value)
-            retrieved_value = context.get_context_data(test_key)
+            context.agent_context[test_key] = test_value
+            retrieved_value = context.agent_context.get(test_key)
             assert retrieved_value == test_value, f'Context {i} should have its own data'
             for j, other_context in enumerate(contexts):
                 if i != j:
-                    other_value = other_context.get_context_data(test_key)
+                    other_value = other_context.agent_context.get(test_key)
                     assert other_value != test_value, f'Context {j} should not have data from context {i}'
                     assert other_value is None or other_value.startswith(f'sensitive_data_for_user_{j}'), f'Data leak detected between contexts {i} and {j}'
         context_memory_addresses = [id(context) for context in contexts]
@@ -166,9 +166,9 @@ class UserContextIsolationComprehensiveTests(SSotAsyncTestCase):
             thread_id = str(uuid.uuid4())
             run_id = str(uuid.uuid4())
             context = await self.context_manager.create_isolated_execution_context(user_id=user_id, thread_id=thread_id, run_id=run_id)
-            context.set_context_data('user_index', user_index)
-            context.set_context_data('sensitive_data', f'secret_for_user_{user_index}')
-            context.set_context_data('operations_count', 0)
+            context.agent_context['user_index'] = user_index
+            context.agent_context['sensitive_data'] = f'secret_for_user_{user_index}'
+            context.agent_context['operations_count'] = 0
             return context
         context_creation_tasks = [create_user_context(i) for i in range(num_concurrent_users)]
         concurrent_contexts = await asyncio.gather(*context_creation_tasks)
@@ -176,33 +176,33 @@ class UserContextIsolationComprehensiveTests(SSotAsyncTestCase):
 
         async def perform_user_operations(context: UserExecutionContext, user_index: int):
             for operation_num in range(operations_per_user):
-                current_count = context.get_context_data('operations_count') or 0
-                context.set_context_data('operations_count', current_count + 1)
+                current_count = context.agent_context.get('operations_count') or 0
+                context.agent_context['operations_count'] = current_count + 1
                 operation_key = f'operation_{operation_num}'
                 operation_data = {'timestamp': datetime.utcnow().isoformat(), 'user_index': user_index, 'operation_num': operation_num, 'data': f'result_for_user_{user_index}_operation_{operation_num}'}
-                context.set_context_data(operation_key, operation_data)
+                context.agent_context[operation_key] = operation_data
                 await asyncio.sleep(0.001)
         operation_tasks = [perform_user_operations(context, i) for i, context in enumerate(concurrent_contexts)]
         await asyncio.gather(*operation_tasks)
         for i, context in enumerate(concurrent_contexts):
-            user_index = context.get_context_data('user_index')
+            user_index = context.agent_context.get('user_index')
             assert user_index == i, f'User index corrupted for context {i}: expected {i}, got {user_index}'
-            sensitive_data = context.get_context_data('sensitive_data')
+            sensitive_data = context.agent_context.get('sensitive_data')
             expected_sensitive = f'secret_for_user_{i}'
             assert sensitive_data == expected_sensitive, f'Sensitive data corrupted for user {i}'
-            operations_count = context.get_context_data('operations_count')
+            operations_count = context.agent_context.get('operations_count')
             assert operations_count == operations_per_user, f'Operations count incorrect for user {i}: expected {operations_per_user}, got {operations_count}'
             for operation_num in range(operations_per_user):
                 operation_key = f'operation_{operation_num}'
-                operation_data = context.get_context_data(operation_key)
+                operation_data = context.agent_context.get(operation_key)
                 assert operation_data is not None, f'Missing operation data for user {i}, operation {operation_num}'
                 assert operation_data['user_index'] == i, f'Operation data user_index corrupted for user {i}, operation {operation_num}'
                 assert operation_data['operation_num'] == operation_num, f'Operation data operation_num corrupted for user {i}, operation {operation_num}'
         for i, context_i in enumerate(concurrent_contexts):
             for j, context_j in enumerate(concurrent_contexts):
                 if i != j:
-                    user_i_data = context_i.get_context_data('sensitive_data')
-                    user_j_data = context_j.get_context_data('sensitive_data')
+                    user_i_data = context_i.agent_context.get('sensitive_data')
+                    user_j_data = context_j.agent_context.get('sensitive_data')
                     assert user_i_data != user_j_data, f'Sensitive data leak between users {i} and {j}'
                     assert f'user_{i}' in user_i_data, f'User {i} data should contain user_{i}'
                     assert f'user_{j}' in user_j_data, f'User {j} data should contain user_{j}'
@@ -223,7 +223,7 @@ class UserContextIsolationComprehensiveTests(SSotAsyncTestCase):
         for i in range(contexts_to_create):
             context = await self.context_manager.create_isolated_execution_context(user_id=str(uuid.uuid4()), thread_id=str(uuid.uuid4()), run_id=str(uuid.uuid4()))
             large_data = {f'key_{j}': f'value_{j}_' * 100 for j in range(50)}
-            context.set_context_data('large_dataset', large_data)
+            context.agent_context['large_dataset'] = large_data
             created_contexts.append(context)
             weak_references.append(weakref.ref(context))
             self.context_references.append(weakref.ref(context))
@@ -234,12 +234,12 @@ class UserContextIsolationComprehensiveTests(SSotAsyncTestCase):
         unique_addresses = set(memory_addresses)
         assert len(unique_addresses) == len(created_contexts), 'All contexts should have unique memory addresses'
         for i, context in enumerate(created_contexts):
-            large_data = context.get_context_data('large_dataset')
+            large_data = context.agent_context.get('large_dataset')
             assert large_data is not None, f'Context {i} should have large dataset'
             assert len(large_data) == 50, f'Context {i} should have 50 data items'
             for j, other_context in enumerate(created_contexts):
                 if i != j:
-                    other_data = other_context.get_context_data('large_dataset')
+                    other_data = other_context.agent_context.get('large_dataset')
                     assert large_data is not other_data, f'Contexts {i} and {j} should not share memory for data'
         user_ids_to_cleanup = [context.user_id for context in created_contexts]
         created_contexts.clear()
@@ -284,8 +284,8 @@ class UserContextIsolationComprehensiveTests(SSotAsyncTestCase):
                         current_count = operation_counter['count']
                     key = f'thread_{thread_id}_operation_{operation_num}'
                     value = {'thread_id': thread_id, 'operation_num': operation_num, 'timestamp': time.time(), 'count': current_count}
-                    shared_context.set_context_data(key, value)
-                    retrieved_value = shared_context.get_context_data(key)
+                    shared_context.agent_context[key] = value
+                    retrieved_value = shared_context.agent_context.get(key)
                     if retrieved_value != value:
                         race_conditions_detected.append({'thread_id': thread_id, 'operation_num': operation_num, 'expected': value, 'actual': retrieved_value})
                     results['operations'].append({'key': key, 'success': retrieved_value == value, 'timestamp': time.time()})
@@ -338,7 +338,7 @@ class UserContextIsolationComprehensiveTests(SSotAsyncTestCase):
         assert context.is_active, 'Context should be active upon creation'
         initial_access_time = context.last_access_time
         await asyncio.sleep(0.01)
-        context.get_context_data('test_key')
+        context.agent_context.get('test_key')
         assert context.last_access_time > initial_access_time, 'Last access time should update'
         original_ttl = context.ttl_seconds
         context.ttl_seconds = 0.1
@@ -348,8 +348,8 @@ class UserContextIsolationComprehensiveTests(SSotAsyncTestCase):
         is_valid_after_expiry = await self.context_manager.validate_user_context(context)
         assert not is_valid_after_expiry, 'Expired context should fail validation'
         user_id = context.user_id
-        context.set_context_data('pre_cleanup_data', 'this_should_be_cleaned')
-        context.set_context_data('sensitive_info', {'password': 'secret123', 'api_key': 'key456'})
+        context.agent_context['pre_cleanup_data'] = 'this_should_be_cleaned'
+        context.agent_context['sensitive_info'] = {'password': 'secret123', 'api_key': 'key456'}
         cleanup_successful = await self.context_manager.cleanup_user_context(user_id)
         assert cleanup_successful, 'Context cleanup should succeed'
         try:
@@ -357,9 +357,9 @@ class UserContextIsolationComprehensiveTests(SSotAsyncTestCase):
             assert False, 'Context should not be valid after cleanup'
         except (InvalidContextError, Exception):
             pass
-        remaining_data = context.get_context_data('pre_cleanup_data')
+        remaining_data = context.agent_context.get('pre_cleanup_data')
         assert remaining_data is None, 'Data should be cleared after cleanup'
-        sensitive_data = context.get_context_data('sensitive_info')
+        sensitive_data = context.agent_context.get('sensitive_info')
         assert sensitive_data is None, 'Sensitive data should be cleared after cleanup'
         audit_events = self.context_manager.get_security_audit_trail(user_id)
         cleanup_events = [event for event in audit_events if event.get('action') == 'context_cleanup']

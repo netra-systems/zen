@@ -22,9 +22,9 @@ from netra_backend.app.agents.data_helper_agent import DataHelperAgent
 class DataHelperErrorScenariosTests(SSotAsyncTestCase):
     """Test suite for Data Helper Agent error scenarios and resilience."""
     
-    async def setUp(self):
+    def setup_method(self, method):
         """Set up test fixtures for error scenario testing."""
-        await super().setUp()
+        super().setup_method(method)
         
         # Create agent with mocked dependencies
         self.mock_llm_manager = MagicMock()
