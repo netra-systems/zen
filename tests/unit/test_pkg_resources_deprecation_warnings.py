@@ -248,7 +248,7 @@ class PkgResourcesFutureCompatibilityTests:
                 import importlib.metadata
                 print("importlib.metadata available (Python 3.8+ built-in)")
             else:
-                import importlib_metadata as importlib.metadata
+                import importlib_metadata as importlib_metadata
                 print("importlib_metadata backport available for Python < 3.8")
 
             # Test basic functionality
