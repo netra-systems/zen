@@ -398,7 +398,11 @@ class GCPDeployer:
             print("  This will cause CORS and authentication failures in staging!")
             print("  Run: python scripts/validate_staging_urls.py --environment staging --fix")
             return False
-        
+
+        # CRITICAL: Validate service account permissions before deployment (Issue #1294 Fix)
+        if not self.validate_service_account_permissions():
+            return False
+
         print("   PASS:  Deployment configuration valid")
         return True
     
