@@ -38,7 +38,7 @@ class DemoModeConfigurationTests(SSotAsyncTestCase):
         """Setup for demo mode configuration tests."""
         super().setup_method(method)
         self.env = IsolatedEnvironment()
-        self.original_demo_mode = self.env.get_env().get("DEMO_MODE", "false")
+        self.original_demo_mode = self.get_env_var("DEMO_MODE", "false")
 
     def teardown_method(self, method):
         """Cleanup after demo mode configuration tests."""
@@ -73,7 +73,7 @@ class DemoModeConfigurationTests(SSotAsyncTestCase):
             
             # These assertions will fail initially
             assert result is True
-            assert self.env.get_env("DEMO_MODE") == "true"
+            assert self.get_env_var("DEMO_MODE") == "true"
 
     @pytest.mark.asyncio 
     async def test_demo_mode_configuration_changes(self):

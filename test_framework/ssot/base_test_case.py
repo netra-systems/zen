@@ -657,7 +657,7 @@ class SSotBaseTestCase:
     
     # === ENVIRONMENT UTILITIES ===
     
-    def set_env_var(self, key: str, value: str) -> None:
+    def set_env_var(self, key: str, value: str, source: Optional[str] = None) -> None:
         """
         Set an environment variable for this test.
         
@@ -666,8 +666,23 @@ class SSotBaseTestCase:
         Args:
             key: Environment variable name
             value: Environment variable value
+            source: Optional source identifier for the environment variable.
+                   If not provided, defaults to test-specific source.
+                   This parameter provides backward compatibility with existing tests.
         """
-        self._env.set(key, value, f"test_{self._test_context.test_id if self._test_context else 'unknown'}")
+        # If source is provided, add deprecation warning but continue to work
+        if source is not None:
+            import warnings
+            warnings.warn(
+                f"The 'source' parameter in set_env_var is deprecated and will be ignored. "
+                f"Provided source: '{source}' for key: '{key}'",
+                DeprecationWarning,
+                stacklevel=2
+            )
+        
+        # Always use the test-specific source for consistency
+        effective_source = f"test_{self._test_context.test_id if self._test_context else 'unknown'}"
+        self._env.set(key, value, effective_source)
     
     def get_env_var(self, key: str, default: Optional[str] = None) -> Optional[str]:
         """

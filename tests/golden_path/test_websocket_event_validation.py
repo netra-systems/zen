@@ -170,10 +170,10 @@ class TestWebSocketEventValidation(SSotAsyncTestCase):
         Even in emergency bypass mode, users must receive core event updates.
         """
         # Enable emergency mode
-        original_emergency = self.env.get_env('EMERGENCY_ALLOW_NO_DATABASE', 'false')
+        original_emergency = self.get_env_var('EMERGENCY_ALLOW_NO_DATABASE', 'false')
 
         try:
-            self.env.set_env('EMERGENCY_ALLOW_NO_DATABASE', 'true')
+            self.set_env_var('EMERGENCY_ALLOW_NO_DATABASE', 'true')
 
             await self._capture_events_during_execution()
 
