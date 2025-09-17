@@ -154,8 +154,8 @@ class UnifiedAuthService {
    */
   async handleLogout(): Promise<void> {
     try {
-      // Clear ticket cache before logout
-      this.clearTicketCache();
+      // Clear ticket cache before logout using dedicated service
+      websocketTicketService.clearTicketCache();
       
       const config = await authService.getAuthConfig();
       await authService.handleLogout(config);
@@ -168,7 +168,7 @@ class UnifiedAuthService {
       });
       
       // Fallback: clear local state even if server logout fails
-      this.clearTicketCache();
+      websocketTicketService.clearTicketCache();
       authService.removeToken();
       authService.setDevLogoutFlag();
       
