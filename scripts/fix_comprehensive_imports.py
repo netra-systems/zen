@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
 # Add project root to path
+PROJECT_ROOT = Path(__file__).parent.parent
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -188,27 +189,29 @@ class ComprehensiveImportFixerV2:
             
             # Fix SupplyResearcherAgent import - use correct path
             if 'SupplyResearcherAgent' in content:
-                # Fix incorrect import path from corpus_admin to supply_researcher
+                # Fix incorrect import path from corpus_admin to supply_researcher (preserve aliases)
                 content = re.sub(
-                    r'^from netra_backend\.app\.agents\.corpus_admin\.agent import SupplyResearcherAgent.*$',
-                    r'from netra_backend.app.agents.supply_researcher import SupplyResearcherAgent',
+                    r'^from netra_backend\.app\.agents\.corpus_admin\.agent import SupplyResearcherAgent(\s+as\s+\w+)?.*$',
+                    r'from netra_backend.app.agents.supply_researcher import SupplyResearcherAgent\1',
                     content,
                     flags=re.MULTILINE
                 )
-                # Fix incorrect import from supply_researcher_sub_agent to supply_researcher
+                # Fix incorrect import from supply_researcher_sub_agent to supply_researcher (preserve aliases)
                 content = re.sub(
-                    r'^from netra_backend\.app\.agents\.supply_researcher_sub_agent import SupplyResearcherAgent.*$',
-                    r'from netra_backend.app.agents.supply_researcher import SupplyResearcherAgent',
+                    r'^from netra_backend\.app\.agents\.supply_researcher_sub_agent import SupplyResearcherAgent(\s+as\s+\w+)?.*$',
+                    r'from netra_backend.app.agents.supply_researcher import SupplyResearcherAgent\1',
                     content,
                     flags=re.MULTILINE
                 )
-                # If there's a direct agent.py import, also fix it to module level
-                content = re.sub(
-                    r'^from netra_backend\.app\.agents\.supply_researcher\.agent import SupplyResearcherAgent.*$',
-                    r'from netra_backend.app.agents.supply_researcher import SupplyResearcherAgent',
-                    content,
-                    flags=re.MULTILINE
-                )
+                # If there's a direct agent.py import, also fix it to module level (preserve aliases)
+                # BUT skip this fix if we're in the supply_researcher/__init__.py file itself
+                if not filepath.name == '__init__.py' or 'supply_researcher' not in str(filepath.parent):
+                    content = re.sub(
+                        r'^from netra_backend\.app\.agents\.supply_researcher\.agent import SupplyResearcherAgent(\s+as\s+\w+)?.*$',
+                        r'from netra_backend.app.agents.supply_researcher import SupplyResearcherAgent\1',
+                        content,
+                        flags=re.MULTILINE
+                    )
                 modified = True
             
             if modified and content != original_content:
