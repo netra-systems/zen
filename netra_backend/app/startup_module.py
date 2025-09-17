@@ -1,4 +1,4 @@
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 """
 Application startup management module.
 Handles initialization of logging, database connections, services, and health checks.

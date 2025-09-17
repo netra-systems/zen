@@ -27,7 +27,7 @@ import os
 import sys
 from pathlib import Path
 from unittest.mock import patch, Mock
-from test_framework.base_integration_test import BaseIntegrationTest
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # Add project root to path for imports
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -35,7 +35,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from tests.unified_test_runner import UnifiedTestRunner
 
-class Issue1270PatternFilterBugTests(BaseIntegrationTest):
+class Issue1270PatternFilterBugTests(SSotBaseTestCase):
     """Test suite for Issue #1270 - Pattern filter applied globally."""
 
     def setup_method(self):
@@ -220,7 +220,7 @@ class Issue1270PatternFilterBugTests(BaseIntegrationTest):
                 print(f"Skipping {category} - not in category mapping")
                 continue
 
-class Issue1270IntegrationValidationTests(BaseIntegrationTest):
+class Issue1270IntegrationValidationTests(SSotBaseTestCase):
     """Integration tests that validate the complete test runner behavior."""
 
     @pytest.mark.integration
