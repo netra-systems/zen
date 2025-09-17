@@ -78,7 +78,10 @@ from netra_backend.app.schemas.agent_state import CheckpointType, StatePersisten
 
 # CRITICAL: Always use real WebSocket connections - NO MOCKS per CLAUDE.md
 # Tests will fail if Docker services are not available (expected behavior)
-from tests.mission_critical.websocket_real_test_base import RealWebSocketTestBase
+from tests.mission_critical.websocket_real_test_base import (
+    RealWebSocketTestBase,
+    RealWebSocketTestConfig
+)
 WebSocketTestBase = RealWebSocketTestBase
 from test_framework.test_context import WebSocketContext, create_test_context
 from test_framework.websocket_helpers import WebSocketTestHelpers
@@ -1059,7 +1062,8 @@ class AgentWebSocketIntegrationEnhancedTests:
         """
         config = RealWebSocketTestConfig()
         context = create_test_context()
-        event_capture = RealWebSocketEventCapture()
+        # TODO: Replace with appropriate event capture mechanism
+        # event_capture = RealWebSocketEventCapture()
         
         # Setup enhanced tool execution engine
         user_context = UserExecutionContext.from_request(
