@@ -57,7 +57,7 @@ class WebSocket1011ErrorReproductionTests:
         "Test that UserExecutionContext with missing attributes fails validation."
 
         class PartialContext:
-
+            pass
             def __init__(self):
                 self.user_id = 'unique_test_user_123'
                 self.thread_id = 'test_thread'
@@ -71,7 +71,7 @@ class WebSocket1011ErrorReproductionTests:
         Test that empty user_id causes validation failure.""
 
         class EmptyUserContext:
-
+            pass
             def __init__(self):
                 self.user_id = ''
                 self.thread_id = 'test_thread'
@@ -132,7 +132,7 @@ class WebSocket1011ErrorFixValidationTests:
 
     async def test_authentication_service_creates_valid_context(self):
         Test that unified authentication service creates valid UserExecutionContext.""
-        mock_auth_result = AuthResult(success=True, user_id='unique_auth_test_user_101112', email='test@example.com', permissions=['read', 'write']
+        mock_auth_result = AuthResult(success=True, user_id='unique_auth_test_user_101112', email='test@example.com', permissions=['read', 'write')
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.client = Mock()
         mock_websocket.client.host = '127.0.0.1'
@@ -183,7 +183,7 @@ class WebSocketValidationDefensiveMeasuresTests:
         Test that SSOT validation handles attribute access errors defensively.""
 
         class ProblematicContext:
-
+            pass
             def __init__(self):
                 self.user_id = 'unique_problematic_test_user_192021'
 
@@ -241,7 +241,7 @@ class WebSocketErrorDiagnosticsTests:
         Test that validation errors include sufficient context for debugging.""
 
         class BadContext:
-
+            pass
             def __init__(self):
                 self.user_id = ''
                 self.thread_id = 123
@@ -283,7 +283,7 @@ class WebSocketConnectionFlowIntegrationTests:
         mock_websocket.client_state = WebSocketState.CONNECTED
         with patch('netra_backend.app.services.unified_authentication_service.get_unified_auth_service') as mock_get_service:
             mock_service = AsyncMock()
-            mock_auth_result = AuthResult(success=True, user_id='unique_integration_test_user_252627', email='integration@example.com', permissions=['read', 'write']
+            mock_auth_result = AuthResult(success=True, user_id='unique_integration_test_user_252627', email='integration@example.com', permissions=['read', 'write')
             mock_user_context = create_defensive_user_execution_context(user_id='unique_integration_test_user_252627', websocket_client_id='integration_client')
             mock_service.authenticate_websocket.return_value = (mock_auth_result, mock_user_context)
             mock_get_service.return_value = mock_service
@@ -302,3 +302,5 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+"""
+))

@@ -1,8 +1,10 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 '''
+'''
 Deployment test for OAuth flow in staging environment.
 This test verifies the complete OAuth flow works correctly when deployed.
+'''
 '''
 
 import asyncio
@@ -103,6 +105,7 @@ class OAuthStagingTester:
         if response.status_code != 302:
         print( )
         f'[FAIL] OAuth initiation didn't redirect: { }
+        response.status_code}"
         response.status_code}"
                                                                                 
         return False
@@ -220,14 +223,14 @@ class OAuthStagingTester:
     async def run_all_tests(self):
         """Run all OAuth staging tests"""
         print("")
-         + =" * 60)
+         + =" * 60)"
         print("OAuth Staging Environment Tests")
         print("=" * 60)
         print("")
         print("")
         print("")
-        print("=" * 60 + " )
-        ")
+        print("=" * 60 + " )"
+        ")"
 
         tests = [ ]
         ("Auth Service Health", self.test_auth_service_health),
@@ -248,7 +251,7 @@ class OAuthStagingTester:
 
         # Summary
         print("")
-         + =" * 60)
+         + =" * 60)"
         print("Test Summary")
         print("=" * 60)
 
@@ -263,7 +266,7 @@ class OAuthStagingTester:
 
         if passed == total:
         print("")
-        [SUCCESS] All OAuth staging tests passed!")
+        [SUCCESS] All OAuth staging tests passed!")"
         await asyncio.sleep(0)
         return True
         else:

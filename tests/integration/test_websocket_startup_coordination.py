@@ -47,7 +47,7 @@ class StartupPhaseMonitor:
         component_phases = self.get_phases_by_component(component)
         if not component_phases:
             return False
-        latest_phase = max(component_phases, key=lambda p: p['timestamp']
+        latest_phase = max(component_phases, key=lambda p: p['timestamp')
         return latest_phase['status'] == 'ready'
 
     def get_coordination_gaps(self) -> List[str]:
@@ -83,7 +83,7 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
         TEST FAILURE EXPECTED: No coordination between startup manager and WebSocket readiness.
         
         This test should FAIL to expose the architectural gap where the startup manager
-        doesn't coordinate with WebSocket manager readiness, causing 1011 errors.
+        doesn't coordinate with WebSocket manager readiness, causing 1011 errors.'
 ""
         logger.info('🧪 Testing startup manager ↔ WebSocket coordination gap')
         monitor = StartupPhaseMonitor()
@@ -102,7 +102,7 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
     async def test_websocket_readiness_validation_integration(self):
         TEST FAILURE EXPECTED: WebSocket readiness not validated before accepting connections.""
         
-        This test should FAIL to expose that there's no validation mechanism to ensure
+        This test should FAIL to expose that there's no validation mechanism to ensure'
         WebSocket is ready before the service starts accepting connection requests.
         
         logger.info('🧪 Testing WebSocket readiness validation integration')
@@ -138,7 +138,7 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
         self.assertEqual(len(order_violations), 0, f'EXPECTED FAILURE: Dependencies not initialized in correct order. Found {len(order_violations)} violations: {order_violations}. This causes WebSocket initialization failures and 1011 errors.')
 
     async def test_health_check_websocket_integration(self):
-        TEST FAILURE EXPECTED: Health checks don't validate WebSocket readiness.""
+        TEST FAILURE EXPECTED: Health checks don't validate WebSocket readiness.""'
         
         This test should FAIL to expose that health checks pass before WebSocket
         is ready, allowing load balancers to route traffic to unready instances.
@@ -162,7 +162,7 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
     async def test_concurrent_startup_websocket_race_condition(self):
         ""TEST: WebSocket startup race condition with concurrent service initialization.
         
-        This test validates that WebSocket initialization doesn't have race conditions
+        This test validates that WebSocket initialization doesn't have race conditions'
         when multiple services are starting concurrently.
 
         logger.info('🧪 Testing concurrent startup race conditions')
@@ -182,7 +182,7 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
         websocket_phases = monitor.get_phases_by_component('websocket_manager')
         websocket_errors = [p for p in websocket_phases if p['status'] == 'error']
         if websocket_errors:
-            race_conditions.extend([f"WebSocket error: {error['metadata']} for error in websocket_errors]"
+            race_conditions.extend([f"WebSocket error: {error['metadata']) for error in websocket_errors]"
         logger.info(f'Concurrent startup completed in {total_time:.3f}s')
         logger.info(f'Failed services: {len(failed_services)}')
         logger.info(f'Race conditions detected: {len(race_conditions)}')
@@ -194,23 +194,23 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
         await monitor.record_phase('init', 'configuration', 'started')
         await asyncio.sleep(0.1)
         await monitor.record_phase('init', 'configuration', 'ready')
-        await asyncio.sleep(0.05)
+        await asyncio.sleep(0.5)
         await monitor.record_phase('connect', 'database', 'started')
-        await asyncio.sleep(0.08)
+        await asyncio.sleep(0.8)
         await monitor.record_phase('init', 'websocket_manager', 'started')
         await asyncio.sleep(0.12)
         await monitor.record_phase('connect', 'database', 'ready')
-        await asyncio.sleep(0.05)
+        await asyncio.sleep(0.5)
         await monitor.record_phase('connect', 'redis', 'started')
         await asyncio.sleep(0.1)
         await monitor.record_phase('connect', 'redis', 'ready')
-        await asyncio.sleep(0.05)
-        await monitor.record_phase('init', 'websocket_manager', 'error', {'error': 'Redis connection not ready'}
+        await asyncio.sleep(0.5)
+        await monitor.record_phase('init', 'websocket_manager', 'error', {'error': 'Redis connection not ready')
         await asyncio.sleep(0.1)
         await monitor.record_phase('init', 'agent_registry', 'started')
         await asyncio.sleep(0.15)
         await monitor.record_phase('init', 'agent_registry', 'ready')
-        await asyncio.sleep(0.08)
+        await asyncio.sleep(0.8)
         await monitor.record_phase('init', 'websocket_manager', 'retry')
         await asyncio.sleep(0.1)
         await monitor.record_phase('init', 'websocket_manager', 'ready')
@@ -226,7 +226,7 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
         await asyncio.sleep(0.1)
         websocket_state['initialized'] = True
         await monitor.record_phase('init', 'websocket_manager', 'initialized')
-        await asyncio.sleep(0.05)
+        await asyncio.sleep(0.5)
         websocket_state['listening'] = True
         await monitor.record_phase('listen', 'websocket_manager', 'listening')
         await asyncio.sleep(0.2)
@@ -237,16 +237,16 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
         await monitor.record_phase('ready', 'websocket_manager', 'ready')
         return websocket_state
 
-    async def _check_websocket_readiness_validation(self, websocket_state: Dict[str, Any] -> bool:
+    async def _check_websocket_readiness_validation(self, websocket_state: Dict[str, Any) -> bool:
         Check if WebSocket readiness validation mechanism exists.""
         return False
 
-    async def _simulate_early_connection_attempts(self, monitor: StartupPhaseMonitor, websocket_state: Dict[str, Any] -> List[Dict[str, Any]]:
+    async def _simulate_early_connection_attempts(self, monitor: StartupPhaseMonitor, websocket_state: Dict[str, Any) -> List[Dict[str, Any)):
         Simulate connection attempts before WebSocket is ready.""
         connection_attempts = []
-        phases = [{'time': 0.05, 'phase': 'early_init'}, {'time': 0.15, 'phase': 'listening'}, {'time': 0.25, 'phase': 'dependencies_ready'}, {'time': 0.35, 'phase': 'fully_ready'}]
+        phases = [{'time': 0.5, 'phase': 'early_init'}, {'time': 0.15, 'phase': 'listening'}, {'time': 0.25, 'phase': 'dependencies_ready'}, {'time': 0.35, 'phase': 'fully_ready'}]
         for phase_info in phases:
-            await asyncio.sleep(0.05)
+            await asyncio.sleep(0.5)
             websocket_ready = phase_info['phase'] == 'fully_ready'
             connection_success = True
             attempt = {'phase': phase_info['phase'], 'websocket_ready': websocket_ready, 'success': connection_success, 'time': phase_info['time']}
@@ -256,15 +256,15 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
 
     async def _simulate_dependency_startup_sequence(self, monitor: StartupPhaseMonitor) -> List[str]:
         "Simulate dependency startup sequence with ordering issues."""
-        startup_sequence = [('configuration', 0.05), ('websocket_manager', 0.1), ('database', 0.15), ('agent_registry', 0.2), ('redis', 0.25), ('http_server', 0.3)]
+        startup_sequence = [('configuration', 0.5), ('websocket_manager', 0.1), ('database', 0.15), ('agent_registry', 0.2), ('redis', 0.25), ('http_server', 0.3)]
         actual_order = []
         for service, delay in startup_sequence:
             await asyncio.sleep(delay)
             await monitor.record_phase('startup', service, 'started')
             actual_order.append(service)
             if service == 'websocket_manager':
-                await asyncio.sleep(0.05)
-                await monitor.record_phase('startup', service, 'error', {'error': 'Database connection not available'}
+                await asyncio.sleep(0.5)
+                await monitor.record_phase('startup', service, 'error', {'error': 'Database connection not available')
             else:
                 await asyncio.sleep(0.1)
                 await monitor.record_phase('startup', service, 'ready')
@@ -291,16 +291,16 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
         health_checks = []
         phases = [{'time': 0.1, 'phase': 'early', 'websocket_ready': False}, {'time': 0.2, 'phase': 'mid', 'websocket_ready': False}, {'time': 0.3, 'phase': 'late', 'websocket_ready': True}]
         for phase_info in phases:
-            await asyncio.sleep(0.08)
+            await asyncio.sleep(0.8)
             health_result = {'phase': phase_info['phase'], 'overall_status': 'healthy', 'websocket_ready': phase_info['websocket_ready'], 'components': {'database': 'healthy', 'redis': 'healthy', 'http': 'healthy'}}
             health_checks.append(health_result)
             await monitor.record_phase('health_check', 'system', 'healthy', health_result)
         return health_checks
 
-    def _check_websocket_health_integration(self, health_results: List[Dict[str, Any]] -> bool:
+    def _check_websocket_health_integration(self, health_results: List[Dict[str, Any)) -> bool:
         Check if WebSocket is integrated into health checks.""
         for result in health_results:
-            components = result.get('components', {}
+            components = result.get('components', {)
             if 'websocket' in components or 'websocket_manager' in components:
                 return True
         return False
@@ -313,7 +313,7 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
             await asyncio.sleep(actual_delay)
             if service_name == 'websocket_manager':
                 if not monitor.is_component_ready('database'):
-                    await monitor.record_phase('startup', service_name, 'error', {'error': 'Database dependency not ready'}
+                    await monitor.record_phase('startup', service_name, 'error', {'error': 'Database dependency not ready')
                     return False
             await monitor.record_phase('startup', service_name, 'ready')
             return True
@@ -324,3 +324,5 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+"""
+))))))))))

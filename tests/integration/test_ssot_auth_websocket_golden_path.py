@@ -88,7 +88,7 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             assert connection_metadata[authenticated] is True
             assert connection_metadata[user_id"] == test_user_id"
             assert connection_metadata[auth_method] == ssot-unified
-            assert jwt-auth in str(connection_metadata[subprotocols_sent"]"
+            assert jwt-auth in str(connection_metadata[subprotocols_sent")"
             
             # Test connection is functional
             ping_message = {
@@ -163,7 +163,7 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             
         except Exception as e:
             logger.warning(f⚠️ SSOT Authorization header authentication failed (may be stripped): {str(e)}")"
-            # Don't fail test - this is expected in GCP environments
+            # Don't fail test - this is expected in GCP environments'
     
     async def test_ssot_auth_query_parameter_gcp_workaround(self):
 
@@ -263,7 +263,7 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             
         except Exception as e:
             logger.warning(f"⚠️ SSOT E2E bypass failed (may be disabled): {str(e)})"
-            # Don't fail test - E2E bypass may be disabled in some environments
+            # Don't fail test - E2E bypass may be disabled in some environments'
     
     async def test_complete_golden_path_with_ssot_auth(self):
         
@@ -400,7 +400,7 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
                 use_query_fallback=False  # Disable fallback to test auth failure
             )
             
-            # If this succeeds, there's a problem with validation
+            # If this succeeds, there's a problem with validation'
             await websocket.close()
             pytest.fail(❌ Invalid token was accepted - authentication validation not working)
             
@@ -425,6 +425,7 @@ class TestSSotAuthMethodPriority(SSotAsyncTestCase):
     "Test SSOT authentication method priority ordering"
     
     def test_auth_method_priority_order(self):
+        pass
 """Empty docstring."""
         Test that SSOT authentication tries methods in correct priority order.
         
@@ -467,4 +468,6 @@ class TestSSotAuthMethodPriority(SSotAsyncTestCase):
 
 
 if __name__ == __main__":"
-    pytest.main([__file__, "-v"]
+    pytest.main([__file__, "-v")
+"""
+)))))))))

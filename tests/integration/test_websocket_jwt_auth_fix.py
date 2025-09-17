@@ -83,7 +83,7 @@ class WebSocketJWTAuthFixTests:
                 # Try to debug the mismatch
                 try:
                     # Attempt to decode with test secret to verify token is valid
-                    test_payload = jwt.decode(test_jwt_token, staging_secret, algorithms=["HS256]"
+                    test_payload = jwt.decode(test_jwt_token, staging_secret, algorithms=["HS256)"
                     print(f   Token is valid with test secret: {test_payload.get('sub')})
                     
                     # This means the backend is using a different secret
@@ -256,7 +256,7 @@ class WebSocketJWTAuthFixTests:
         try:
             payload = await extractor.validate_and_decode_jwt(test_token) if test_token else None  # CRITICAL FIX: Added await
             if payload:
-                print(f"    FAIL:  UNEXPECTED: Token validation succeeded - this shouldn't happen in bug scenario)"
+                print(f"    FAIL:  UNEXPECTED: Token validation succeeded - this shouldn't happen in bug scenario)"'
             else:
                 print(f    PASS:  REPRODUCED: Token validation failed as expected in bug scenario)""
         except Exception as e:
@@ -291,3 +291,6 @@ if __name__ == "__main__:"
     
     print("\n + = * 60)"
     print(Bug reproduction complete. Implement fix and re-run tests."")
+
+"""
+)

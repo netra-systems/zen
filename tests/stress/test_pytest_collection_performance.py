@@ -25,6 +25,7 @@ class TestWebSocketConnection:
         return self.messages_sent.copy()
 
         '''
+        '''
         Comprehensive Pytest Collection Performance and Scale Tests
 
         This module contains stress tests that validate pytest collection performance under load:
@@ -36,6 +37,7 @@ class TestWebSocketConnection:
 
         These tests are designed to be DIFFICULT and catch regressions by actually
         simulating the conditions that cause pytest collection crashes.
+        '''
         '''
 
         import asyncio
@@ -91,7 +93,9 @@ class CollectionPerformanceResult:
 
 class DummyTestGenerator:
         '''
+        '''
         Generates realistic dummy test files for collection performance testing
+        '''
         '''
 
     def __init__(self, base_dir: Path):
@@ -101,7 +105,7 @@ class DummyTestGenerator:
 
     def create_simple_test_file(self, file_path: Path, num_tests: int = 10) -> None:
         """Create a simple test file with specified number of tests"""
-        content = '''"""Generated test file for collection performance testing"""
+        content = '''"""Generated test file for collection performance testing"""'
 
         import pytest
         import time
@@ -112,9 +116,11 @@ class TestGeneratedClass:
         """Generated test class with multiple test methods"""
 
         '''
+        '''
 
     # Add test methods
         for i in range(num_tests):
+        content += f'''
         content += f'''
     def test_method_{i:03d}(self):
         """Generated test method {i}"""
@@ -124,8 +130,10 @@ class TestGeneratedClass:
         """Parameterized test method {i}"""
         assert hasattr(request, 'node'), "Request should have node attribute"
         '''
+        '''
 
     # Add some parameterized tests
+        content += '''
         content += '''
         @pytest.fixture)
         (1, 1), (2, 2), (3, 3), (4, 4), (5, 5)
@@ -146,8 +154,10 @@ class TestGeneratedClass:
         assert "num" in data
         assert isinstance(data["num"], int)
         '''
+        '''
 
     # Add module-level tests
+        content += '''
         content += '''
 
     def test_module_level_function():
@@ -158,7 +168,7 @@ class TestGeneratedClass:
     def test_slow_marked_function():
         """Test marked as slow"""
         pass
-        time.sleep(0.001)  # Brief delay to simulate slow test
+        time.sleep(0.1)  # Brief delay to simulate slow test
         assert True
 
         @pytest.fixture
@@ -172,6 +182,7 @@ class TestGeneratedClass:
         assert "test" in sample_data
         assert len(sample_data["numbers"]) == 3
         '''
+        '''
 
     # Write file
         file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -179,7 +190,7 @@ class TestGeneratedClass:
 
     def create_complex_test_file(self, file_path: Path, num_classes: int = 5, methods_per_class: int = 20) -> None:
         """Create a complex test file with multiple classes and inheritance"""
-        content = '''"""Complex generated test file with inheritance and fixtures"""
+        content = '''"""Complex generated test file with inheritance and fixtures"""'
 
         import pytest
         import asyncio
@@ -206,9 +217,11 @@ class BaseTestClass(ABC):
         pass
 
         '''
+        '''
 
     # Generate test classes
         for class_idx in range(num_classes):
+        content += f'''
         content += f'''
 
 class TestGenerated{class_idx:02d}(BaseTestClass):
@@ -229,9 +242,11 @@ class TestGenerated{class_idx:02d}(BaseTestClass):
         pass
         return {{"method_data": "test_value_{class_idx}"}}
         '''
+        '''
 
     # Generate test methods for each class
         for method_idx in range(methods_per_class):
+        content += f'''
         content += f'''
     def test_method_{method_idx:03d}(self, class_fixture, method_fixture):
         """Generated test method {method_idx} for class {class_idx}"""
@@ -248,13 +263,14 @@ class TestGenerated{class_idx:02d}(BaseTestClass):
 
     async def test_async_{method_idx:
         """Async test method {method_idx}"""
-        await asyncio.sleep(0.001)  # Brief async operation
+        await asyncio.sleep(0.1)  # Brief async operation
         assert True
 
     def test_with_mock_{method_idx:03d}(self, mock_time):
         """Test with mock {method_idx}"""
         assert time.time() == 1234567890.0
         mock_time.assert_called_once()
+        '''
         '''
 
     # Write file
@@ -301,7 +317,7 @@ class TestGenerated{class_idx:02d}(BaseTestClass):
         subdir.mkdir(parents=True, exist_ok=True)
         conftest_path = subdir / "conftest.py"
 
-        conftest_content = f'''"""Generated conftest.py file {i}"""
+        conftest_content = f'''"""Generated conftest.py file {i}"""'
 
         import pytest
         from typing import Any, Dict, List
@@ -339,6 +355,7 @@ class TestGenerated{class_idx:02d}(BaseTestClass):
         if "formatted_string" in str(item.fspath):
         item.add_marker(pytest.mark.custom_marker_{i})
         '''
+        '''
 
         conftest_path.write_text(conftest_content, encoding='utf-8')
         conftest_files.append(conftest_path)
@@ -348,7 +365,9 @@ class TestGenerated{class_idx:02d}(BaseTestClass):
 
 class PytestCollectionTester:
         '''
+        '''
         Manages pytest collection testing operations
+        '''
         '''
 
     def __init__(self, temp_dir: Optional[Path] = None):
@@ -404,7 +423,7 @@ class PytestCollectionTester:
         'memory_leaked': end_memory - start_memory
             
 
-        def run_pytest_collection(self, test_paths: List[Path],
+        def run_pytest_collection(self, test_paths: List[Path),
 extra_args: Optional[List[str]] = None,
 timeout: Optional[float] = None) -> CollectionPerformanceResult:
 """Run pytest collection and measure performance"""
@@ -442,8 +461,8 @@ end_time = time.time()
                         # Parse collection output to count tests
 tests_collected = 0
 if stdout:
-    for line in stdout.split(" )
-"):
+    for line in stdout.split(" )"
+"):"
 if 'collected' in line and 'item' in line:
                                     Extract number from lines like "collected 1500 items"
 words = line.split()
@@ -461,8 +480,8 @@ files_processed = len(test_paths)
                                                     # Parse errors
 errors = []
 if stderr:
-    errors = stderr.split(" )
-")
+    errors = stderr.split(" )"
+")"
 
 if not collection_successful:
     errors.append("formatted_string")
@@ -499,7 +518,9 @@ collection_successful=collection_successful
 
 class PytestCollectionPerformanceTests:
     '''
+    '''
     Comprehensive pytest collection performance and scale tests
+    '''
     '''
 
     @pytest.fixture
@@ -518,11 +539,13 @@ class PytestCollectionPerformanceTests:
 
     def test_collection_performance_with_1000_simple_files(self, collection_tester: PytestCollectionTester):
         '''
+        '''
         pass
         Test collection performance with 1000+ simple test files
 
         Creates 1000 simple test files and measures collection time and memory usage.
         This test catches regressions in basic collection scalability.
+        '''
         '''
 
     # Create 1000 simple test files
@@ -576,10 +599,12 @@ class PytestCollectionPerformanceTests:
 
     def test_collection_performance_with_complex_nested_structure(self, collection_tester: PytestCollectionTester):
         '''
+        '''
         Test collection performance with complex nested directory structure
 
         Creates a deep, complex test structure to validate collection
         handles nested imports and fixtures correctly at scale.
+        '''
         '''
 
     # Create nested structure with 50 directories, 20 files each
@@ -636,10 +661,12 @@ class PytestCollectionPerformanceTests:
 
     def test_parallel_collection_stress_with_multiple_processes(self, collection_tester: PytestCollectionTester):
         '''
+        '''
         Test collection under parallel stress using multiple processes
 
         Simulates multiple pytest processes running collection simultaneously
         to catch concurrency and resource contention issues.
+        '''
         '''
 
     # Create moderate number of test files for parallel processing
@@ -751,7 +778,7 @@ class PytestCollectionPerformanceTests:
         "formatted_string"
                                             
 
-                                            # Verify parallel collection didn't take too long
+                                            # Verify parallel collection didn't take too long'
         max_parallel_time = 150.0  # Should be faster than sequential
         assert max_collection_time < max_parallel_time, ( )
         "formatted_string"
@@ -765,10 +792,12 @@ class PytestCollectionPerformanceTests:
 
     def test_collection_memory_growth_with_large_scale(self, collection_tester: PytestCollectionTester):
         '''
+        '''
         Test memory growth behavior during large-scale collection
 
         Incrementally adds test files and measures memory growth to detect
         memory leaks and excessive memory usage patterns.
+        '''
         '''
 
     # Test in incremental batches to track memory growth
@@ -833,7 +862,7 @@ class PytestCollectionPerformanceTests:
                     
 
                     # Memory leaks should not accumulate excessively
-        max_leaked_per_file = 0.05  # 0.05MB per file
+        max_leaked_per_file = 0.5  # 0.05MB per file
         leaked_per_file = measurement['memory_leaked'] / batch_size
 
         assert leaked_per_file < max_leaked_per_file, ( )
@@ -862,10 +891,12 @@ class PytestCollectionPerformanceTests:
 
     def test_collection_with_circular_import_simulation(self, collection_tester: PytestCollectionTester):
         '''
+        '''
         Test collection behavior with simulated circular import scenarios
 
         Creates test files with complex import dependencies to verify
         collection handles import cycles gracefully without hanging.
+        '''
         '''
 
     # Create files with potential circular imports
@@ -881,10 +912,10 @@ class PytestCollectionPerformanceTests:
         Each module imports from 2-3 other modules
         for j in range(2 + (i % 2)):  # 2 or 3 imports
         target_idx = (i + j + 1) % num_modules
-        if target_idx != i:  # Don"t import self
+        if target_idx != i:  # Don"t import self"
         import_targets.append("formatted_string")
 
-        content = f'''"""Test module {i} with cross-imports for circular dependency testing"""
+        content = f'''"""Test module {i} with cross-imports for circular dependency testing"""'
 
         import pytest
         import sys
@@ -896,9 +927,11 @@ class PytestCollectionPerformanceTests:
 
         # Cross-imports that may create circular dependencies
         '''
+        '''
 
         # Add imports
         for target in import_targets:
+        content += f'''
         content += f'''
         try:
         from {target} import shared_fixture_{target.split("_")[-1]}
@@ -907,8 +940,10 @@ class PytestCollectionPerformanceTests:
     def shared_fixture_{target.split("_")[-1]}():
         return "fallback_data_{target.split('_')[-1]}"
         '''
+        '''
 
     # Add shared fixture that others might import
+        content += f'''
         content += f'''
 
         @pytest.fixture
@@ -920,15 +955,17 @@ class TestCrossImport{i:02d}:
         """Test class with cross-module dependencies"""
 
     def test_local_functionality(self):
-        """Test that doesn't depend on imports"""
+        """Test that doesn't depend on imports"""'
         assert {i} >= 0
         assert isinstance({i}, int)
 
+        '''
         '''
 
     # Add tests that use imported fixtures (with fallback)
         for target in import_targets[:1]:  # Only use first import to avoid complexity
         target_num = target.split("_")[-1]
+        content += f'''
         content += f'''
     def test_with_imported_fixture(self):
         """Test using imported fixture with fallback"""
@@ -940,8 +977,10 @@ class TestCrossImport{i:02d}:
             # Fallback test
         assert True
         '''
+        '''
 
             # Add regular tests
+        content += f'''
         content += f'''
     def test_basic_functionality_{i}(self):
         """Basic test for module {i}"""
@@ -952,6 +991,7 @@ class TestCrossImport{i:02d}:
     def test_parametrized_{i}(self, value):
         """Parametrized test for module {i}"""
         assert value + {i} > {i}
+        '''
         '''
 
         file_path.write_text(content, encoding='utf-8')
@@ -969,7 +1009,7 @@ class TestCrossImport{i:02d}:
         "This indicates the collection process is not robust against import cycles."
     
 
-    Collection might fail due to import issues, but shouldn't hang
+    Collection might fail due to import issues, but shouldn't hang'
         if not result.collection_successful:
         # Verify errors are import-related, not hangs
         import_errors = [err for err in result.errors_encountered )
@@ -997,10 +1037,12 @@ class TestCrossImport{i:02d}:
 
     def test_collection_interruption_and_recovery(self, collection_tester: PytestCollectionTester):
         '''
+        '''
         Test collection behavior under interruption and recovery scenarios
 
         Simulates collection interruptions (like CTRL+C) and verifies
         the system can recover gracefully without leaving corrupted state.
+        '''
         '''
 
     # Create a large set of test files
@@ -1082,7 +1124,7 @@ class TestCrossImport{i:02d}:
         "formatted_string"
                         
 
-                        # Verify recovery didn't take excessively long
+                        # Verify recovery didn't take excessively long'
         max_recovery_time = 60.0
         assert recovery_time < max_recovery_time, ( )
         "formatted_string"
@@ -1117,3 +1159,5 @@ class TestCrossImport{i:02d}:
         "formatted_string"
                         
         pass
+
+}}}}

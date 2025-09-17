@@ -6,7 +6,7 @@ This module tests the WebSocket bridge notification failures identified in Issue
 1. WebSocket bridge timeout notifications during factory initialization
 2. Service dependency failures causing bridge disconnection
 3. Auth service configuration breakdown affecting WebSocket establishment
-4. Message routing failures when bridge interfaces don't match
+4. Message routing failures when bridge interfaces don't match'
 
 These tests use real services (PostgreSQL, Redis) without Docker dependency.
 Tests are designed to FAIL when problems exist, not show false success.
@@ -126,7 +126,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
             ]
 
             for scenario in auth_config_scenarios:
-                with self.subTest(scenario=scenario[description]:
+                with self.subTest(scenario=scenario[description):
                     # Set problematic configuration
                     original_config = {}
                     for key, value in scenario.items():
@@ -150,7 +150,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
 
                         auth_result = await ws_authenticator.authenticate_websocket(mock_websocket)
 
-                        # If authentication succeeds with broken config, there's no validation
+                        # If authentication succeeds with broken config, there's no validation'
                         if auth_result.get(success, False):
                             self.fail(f"WebSocket authentication succeeded with broken config: {scenario['description']})"
 
@@ -177,7 +177,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
         This test reproduces dependency failures that cause bridge disconnection
         in realistic scenarios with real databases.
 
-        Expected: Test fails if bridge doesn't handle dependency failures gracefully.
+        Expected: Test fails if bridge doesn't handle dependency failures gracefully.'
         
         db = real_db_fixture
         redis = real_redis_fixture
@@ -221,7 +221,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
                                     agent_name=test-agent","
                                     context={}
 
-                                # If notification succeeds despite database failure, there's no graceful handling
+                                # If notification succeeds despite database failure, there's no graceful handling'
                                 self.fail(WebSocket bridge should handle database disconnection gracefully)
 
                             except Exception as e:
@@ -242,7 +242,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
                                     tool_name="test-tool,"
                                     context={}
 
-                                # If notification succeeds despite Redis timeout, there's no timeout handling
+                                # If notification succeeds despite Redis timeout, there's no timeout handling'
                                 self.fail(WebSocket bridge should handle Redis timeout gracefully)
 
                             except asyncio.TimeoutError:
@@ -258,7 +258,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
             pytest.skip(WebSocket bridge dependencies not available)
 
     async def test_message_routing_failures_with_interface_mismatches(self, real_services_fixture):
-        "Test message routing failures when bridge interfaces don't match."""
+        "Test message routing failures when bridge interfaces don't match."""'
 
         This test reproduces message routing failures identified in Issue #1176
         where interface mismatches cause routing breakdowns.
@@ -440,4 +440,6 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
 
 
 if __name__ == __main__:
-    pytest.main([__file__, -v, --tb=short"]"
+    pytest.main([__file__, -v, --tb=short")"
+"""
+))))))

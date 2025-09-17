@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 '''
+'''
 Manual E2E Testing for Staging Environment
 =========================================
 Comprehensive test suite to validate staging backend service functionality.
 
 This script tests critical user flows without requiring complex test infrastructure.
+'''
 '''
 
 import asyncio
@@ -70,7 +72,7 @@ class StagingE2ETester:
     async def test_health_endpoints(self):
         """Test all health-related endpoints."""
         print("")
-        === HEALTH ENDPOINTS ===")
+        === HEALTH ENDPOINTS ===")"
 
                             # Basic health
         status, data = await self.make_request("GET", "/health")
@@ -112,7 +114,7 @@ class StagingE2ETester:
     async def test_api_endpoints(self):
         """Test critical API endpoints."""
         print("")
-        === API ENDPOINTS ===")
+        === API ENDPOINTS ===")"
 
                                 # Test API root
         status, data = await self.make_request("GET", "/api/")
@@ -144,7 +146,7 @@ class StagingE2ETester:
     async def test_auth_endpoints(self):
         """Test authentication-related endpoints."""
         print("")
-        === AUTHENTICATION ENDPOINTS ===")
+        === AUTHENTICATION ENDPOINTS ===")"
 
                                     # Test auth health (if available)
         status, data = await self.make_request("GET", "/auth/health")
@@ -177,7 +179,7 @@ class StagingE2ETester:
     async def test_websocket_info(self):
         """Test WebSocket-related information endpoints."""
         print("")
-        === WEBSOCKET INFO ===")
+        === WEBSOCKET INFO ===")"
 
                                             # Test WebSocket info endpoint if available
         status, data = await self.make_request("GET", "/ws/info")
@@ -194,7 +196,7 @@ class StagingE2ETester:
     async def test_cors_configuration(self):
         """Test CORS configuration."""
         print("")
-        === CORS CONFIGURATION ===")
+        === CORS CONFIGURATION ===")"
 
                                                         # Test CORS preflight
         headers = { }
@@ -213,7 +215,7 @@ class StagingE2ETester:
     async def test_database_operations(self):
         """Test database-related operations indirectly."""
         print("")
-        === DATABASE OPERATIONS ===")
+        === DATABASE OPERATIONS ===")"
 
                                                             # Test schema validation endpoint
         status, data = await self.make_request("GET", "/health/schema-validation")
@@ -228,7 +230,7 @@ class StagingE2ETester:
     async def test_error_handling(self):
         """Test error handling for non-existent endpoints."""
         print("")
-        === ERROR HANDLING ===")
+        === ERROR HANDLING ===")"
 
                                                                 # Test 404 handling
         status, data = await self.make_request("GET", "/nonexistent-endpoint")
@@ -281,14 +283,14 @@ class StagingE2ETester:
         print("")
 
         if failed_tests > 0:
-        print(f" )
-        FAILED TESTS:")
+        print(f" )"
+        FAILED TESTS:")"
         for result in self.test_results:
         if not result["success"]:
         print("")
 
-        print(f" )
-        CRITICAL SERVICES STATUS:")
+        print(f" )"
+        CRITICAL SERVICES STATUS:")"
         health_tests = [item for item in []]]
         health_passed = sum(1 for r in health_tests if r["success"])
         print("")

@@ -7,6 +7,8 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
 """
+"""
+        """Send JSON message.""""""
         """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
@@ -17,8 +19,10 @@ class TestWebSocketConnection:
         self._closed = True
         self.is_connected = False
 """
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
+        return self.messages_sent.copy()"""
         return self.messages_sent.copy()"""
         """Unit tests for WebSocket notification functionality."""
 
@@ -41,6 +45,7 @@ from shared.isolated_environment import get_env
 
 
 @pytest.mark.asyncio"""
+@pytest.mark.asyncio"""
 """Test that WebSocketNotifier sends all required event types."""
         # Create mock WebSocket manager
 mock_ws_manager = Magic    mock_ws_manager.websocket = TestWebSocketConnection()
@@ -48,6 +53,7 @@ mock_ws_manager = Magic    mock_ws_manager.websocket = TestWebSocketConnection()
         # Create notifier
 notifier = WebSocketNotifier.create_for_user(mock_ws_manager)
 
+        # Create test context"""
         # Create test context"""
 agent_name="TestAgent",  run_id="test_run_001",
 thread_id="test_thread_001",
@@ -113,6 +119,7 @@ pass
             # Create notifier without manager
 notifier = WebSocketNotifier.create_for_user(None)
 """
+"""
 agent_name="TestAgent",  run_id="test_run",
 thread_id="test_thread",
 user_id="test_user"
@@ -148,6 +155,7 @@ engine = ExecutionEngine._init_from_factory(mock_registry, mock_ws_manager)
 mock_agent = Magic    mock_agent.websocket = TestWebSocketConnection()
 mock_registry.get.return_value = mock_agent
 
+                # Create test context and state"""
                 # Create test context and state"""
 agent_name="TestAgent",
 run_id="test_run",
@@ -204,6 +212,7 @@ print("WebSocket notifications verified successfully!")
 
 
 if __name__ == "__main__":
+    pass
 asyncio.run(test_websocket_notifier_sends_all_events())
 print("All WebSocket notification tests passed!")
 pass

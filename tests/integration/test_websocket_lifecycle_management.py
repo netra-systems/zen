@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 class WebSocketLifecycleManagementTests(BaseIntegrationTest):
+    pass
 """Empty docstring."""
     Integration tests for WebSocket lifecycle management with real services.
     
@@ -129,7 +130,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                             # Race condition detected
                             print(f WARNING: [U+FE0F]  Redis race condition detected in attempt {attempt}, update {i})
                     
-                    await asyncio.sleep(0.01)  # 10ms between updates to trigger race
+                    await asyncio.sleep(0.1)  # 10ms between updates to trigger race
                 
                 # Final state update
                 websocket_state[status] = "connected"
@@ -285,7 +286,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     # Mock JWT validation (normally would decode and verify)
                     try:
                         # Simulate validation work
-                        await asyncio.sleep(0.01)  # 10ms JWT validation time
+                        await asyncio.sleep(0.1)  # 10ms JWT validation time
                         jwt_valid = stored_data.get(token) == jwt_token
                         jwt_validation_time = time.time() - jwt_validation_start
                     except Exception:
@@ -434,7 +435,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                         session_update[activity_type"] = message_sent"
                         
                         await redis_client.setex(session_key, 3600, json.dumps(session_update))
-                        await asyncio.sleep(0.01)  # 10ms between updates
+                        await asyncio.sleep(0.1)  # 10ms between updates
                     
                     success = True
                     error = None
@@ -513,7 +514,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                             session_update[update_time] = datetime.now(timezone.utc).isoformat()""
                             
                             await redis_client.setex(session_key, 3600, json.dumps(session_update))
-                            await asyncio.sleep(0.001)  # 1ms between updates
+                            await asyncio.sleep(0.1)  # 1ms between updates
                     
                     # Run 3 concurrent update tasks
                     await asyncio.gather(
@@ -647,7 +648,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                 # Perform rapid operations to test isolation
                 for operation in range(5):
                     # Update user state
-                    user_state["messages].append({"
+                    user_state["messages).append({"
                         operation: operation,
                         "message: fUser {user_index} operation {operation}",
                         timestamp: datetime.now(timezone.utc).isoformat()
@@ -659,7 +660,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     await redis_client.setex(websocket_key, 3600, json.dumps(user_state))
                     
                     # Small delay to allow concurrent operations
-                    await asyncio.sleep(0.01)
+                    await asyncio.sleep(0.1)
                 
                 # Verify final state integrity
                 final_user_state = await redis_client.get(user_key)
@@ -750,12 +751,12 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
             if not result_a.get(success):
                 continue
                 
-            user_data_a = result_a.get("final_user_data, {}"
+            user_data_a = result_a.get("final_user_data, {)"
             for j, result_b in enumerate(isolation_test_results):
                 if i == j or not result_b.get(success):
                     continue
                     
-                user_data_b = result_b.get(final_user_data, {}""
+                user_data_b = result_b.get(final_user_data, {)""
                 
                 # Check if user A's data contains user B's information
                 if user_data_a.get(user_index") != i:"
@@ -787,3 +788,6 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
             print(f\n PASS:  USER ISOLATION APPEARS ROBUST:)
             print(f   All users maintained proper state isolation")"
             print(f"   No cross-user contamination detected"")"
+
+"""
+)))))))))))))

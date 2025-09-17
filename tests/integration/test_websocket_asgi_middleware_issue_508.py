@@ -74,7 +74,7 @@ class WebSocketASGIMiddlewareTests:
 
     @pytest.mark.asyncio
     async def test_websocket_middleware_ordering_preserves_scope(self):
-        Test that middleware processing order doesn't corrupt ASGI scopes - MAY FAIL.""
+        Test that middleware processing order doesn't corrupt ASGI scopes - MAY FAIL.""'
         app = FastAPI()
         app.add_middleware(WebSocketExclusionMiddleware)
 
@@ -190,3 +190,4 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+"""

@@ -46,7 +46,7 @@ try:
     from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
     from netra_backend.app.services.user_execution_context import UserExecutionContext
 except ImportError as e:
-    # Expected in some test environments - we'll test for this gap
+    # Expected in some test environments - we'll test for this gap'
     print(f[EXPECTED IMPORT ERROR] Agent Registry components not available: {e}")"
     AgentRegistry = None
     UnifiedToolDispatcher = None
@@ -111,7 +111,7 @@ class MockWebSocketManager:
         
         return MockWebSocketBridge(user_context)
     
-    async def send_to_user(self, user_id: str, message: Dict[str, Any]:
+    async def send_to_user(self, user_id: str, message: Dict[str, Any):
         "Send message to user - may fail to test integration gaps."
         if self.should_fail and self.failure_mode == send:""
             raise Exception("WebSocket message sending failed - no active connections)"
@@ -160,7 +160,7 @@ class MockWebSocketBridge:
         }
         self.events_emitted.append(event)
         
-    async def emit_tool_completed(self, tool_name: str, result: Dict[str, Any]:
+    async def emit_tool_completed(self, tool_name: str, result: Dict[str, Any):
         Emit tool completed event.""
         event = {
             type": tool_completed,"
@@ -577,12 +577,12 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                                     try:
                                         await websocket_bridge.emit_agent_started(agent_type=data, message=Testing event emission")"
                                         await websocket_bridge.emit_agent_thinking(reasoning="Testing WebSocket integration)"
-                                        await websocket_bridge.emit_tool_executing(tool_name=test_tool, parameters={test: True}
-                                        await websocket_bridge.emit_tool_completed(tool_name=test_tool", result={"success: True}
+                                        await websocket_bridge.emit_tool_executing(tool_name=test_tool, parameters={test: True)
+                                        await websocket_bridge.emit_tool_completed(tool_name=test_tool", result={"success: True)
                                         await websocket_bridge.emit_agent_completed(result={test: completed}, agent_type=data)""
                                         
                                         # Check if events were properly emitted
-                                        events_emitted = getattr(websocket_bridge, 'events_emitted', []
+                                        events_emitted = getattr(websocket_bridge, 'events_emitted', [)
                                         
                                         if len(events_emitted) < 5:
                                             self.capture_integration_gap(
@@ -803,12 +803,12 @@ class AgentRegistryWebSocketBridgeTests(BaseIntegrationTest):
                                     
                                     # Test event isolation by emitting events for each user
                                     try:
-                                        await alice_bridge.emit_agent_started(agent_type=triage, message=Alice's agent started)
-                                        await bob_bridge.emit_agent_started(agent_type="triage, message=Bob's agent started")
+                                        await alice_bridge.emit_agent_started(agent_type=triage, message=Alice's agent started)'
+                                        await bob_bridge.emit_agent_started(agent_type="triage, message=Bob's agent started")'
                                         
                                         # Check event isolation
-                                        alice_events = getattr(alice_bridge, 'events_emitted', []
-                                        bob_events = getattr(bob_bridge, 'events_emitted', []
+                                        alice_events = getattr(alice_bridge, 'events_emitted', [)
+                                        bob_events = getattr(bob_bridge, 'events_emitted', [)
                                         
                                         # Verify events are properly isolated
                                         alice_user_ids = set(e.get(user_id) for e in alice_events)
@@ -1086,7 +1086,7 @@ class MockToolDispatcher:
         # Simulate WebSocket events during tool execution
         if self.websocket_bridge:
             await self.websocket_bridge.emit_tool_executing(tool_name, parameters)
-            await self.websocket_bridge.emit_tool_completed(tool_name, {success": True}"
+            await self.websocket_bridge.emit_tool_completed(tool_name, {success": True)"
         
         return {success: True, result: mock_execution}""
 
@@ -1123,3 +1123,5 @@ if __name__ == __main__":"
     
     # Run tests if executed directly
     asyncio.run(run_direct_tests()")"
+
+)))))))))))))))))))))))))))))))))))))

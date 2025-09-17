@@ -7,6 +7,8 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
 """
+"""
+        """Send JSON message.""""""
         """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
@@ -17,8 +19,10 @@ class TestWebSocketConnection:
         self._closed = True
         self.is_connected = False
 """
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
+        return self.messages_sent.copy()"""
         return self.messages_sent.copy()"""
         """Test to verify health monitoring fixes are working correctly."""
 
@@ -37,7 +41,9 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from shared.isolated_environment import IsolatedEnvironment
 
 """
+"""
         """Verify the health monitoring fixes work correctly."""
+"""
 """
         """Test that we can correctly import backend_health_checker."""
     # This should work after the fix
@@ -48,7 +54,8 @@ from netra_backend.app.core.health.unified_health_checker import backend_health_
         assert hasattr(backend_health_checker, '__class__')
 
 @pytest.mark.asyncio"""
-"""Test that monitoring integration doesn't have import or undefined variable errors."""
+@pytest.mark.asyncio"""
+"""Test that monitoring integration doesn't have import or undefined variable errors."""'
 pass
         # Create a mock environment for the function
 mock_logger = Magic        mock_logger.info = Magic        mock_logger.debug = Magic        mock_logger.warning = Magic        mock_logger.error = Magic
@@ -73,6 +80,7 @@ assert result == True
 
         # Verify no errors about undefined 'bridge' variable
 error_calls = [str(call) for call in mock_logger.warning.call_args_list]"""
+error_calls = [str(call) for call in mock_logger.warning.call_args_list]"""
 assert len(bridge_errors) == 0, "formatted_string"
 
         Verify no import errors for health_interface
@@ -80,6 +88,7 @@ import_errors = [item for item in []]
 assert len(import_errors) == 0, "formatted_string"
 
 def test_no_legacy_bridge_registration(self):
+    pass
 """Verify that the legacy bridge registration code has been removed."""
     # Read the startup_module code
 with open('netra_backend/app/startup_module.py', 'r', encoding='utf-8') as f:
@@ -93,6 +102,8 @@ assert 'bridge' not in content or 'websocket_bridge' in content.lower()  # Only 
 assert 'CRITICAL FIX: Removed legacy bridge registration code' in content
 assert 'per-request bridges work independently' in content
 """
+"""
 if __name__ == "__main__":
+    pass
 pytest.main([__file__, "-v"])
 pass

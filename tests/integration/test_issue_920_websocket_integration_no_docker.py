@@ -86,7 +86,7 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     def test_execution_engine_factory_websocket_integration_with_valid_bridge(self):
-
+        pass
         ISSUE #920 INTEGRATION: ExecutionEngineFactory + WebSocket bridge integration.
         
         This test validates the complete integration flow works correctly
@@ -208,7 +208,7 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
 """Empty docstring."""
         ISSUE #920 INTEGRATION: Multi-user WebSocket integration with proper isolation.
         
-        This validates that Issue #920 fixes don't break multi-user isolation
+        This validates that Issue #920 fixes don't break multi-user isolation'
         in integrated scenarios.
 """Empty docstring."""
         # Given: Multiple user contexts and ExecutionEngineFactory
@@ -321,6 +321,7 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     def test_integration_resource_cleanup(self):
+        pass
 """Empty docstring."""
         ISSUE #920 INTEGRATION: Validate proper resource cleanup in integration scenarios.
         
@@ -375,3 +376,5 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
         )
         
         super().teardown_method(method)
+"""
+)))))))

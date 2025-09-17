@@ -12,7 +12,7 @@ when AgentWebSocketBridge was migrated from singleton to per-request pattern.
 
 Based on Five Whys Root Cause Analysis:
 - Root Cause: Missing dependency orchestration between factory components
-- Impact: Users don't receive the 5 critical WebSocket events during agent execution
+- Impact: Users don't receive the 5 critical WebSocket events during agent execution'
 - Evidence: ExecutionEngine -> AgentWebSocketBridge -> UserWebSocketEmitter chain failure
 
 This test SHOULD FAIL initially because it reproduces the current broken integration.
@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
+    pass
 """Empty docstring."""
     Test the integration gap between ExecutionEngine and AgentWebSocketBridge.
     
@@ -45,13 +46,13 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
 """Empty docstring."""
         Test ExecutionEngine -> AgentWebSocketBridge -> UserWebSocketEmitter chain failure.
         
-        EXPECTED: This test SHOULD FAIL because ExecutionEngine doesn't properly
+        EXPECTED: This test SHOULD FAIL because ExecutionEngine doesn't properly'
         delegate to the new per-request factory pattern.
         
         Five Whys Root Cause:
         - ExecutionEngine was not updated when AgentWebSocketBridge migrated
         - Factory delegation is broken at the handoff point
-        - Users don't receive WebSocket events during agent execution
+        - Users don't receive WebSocket events during agent execution'
 """Empty docstring."""
         # Setup authenticated user context using SSOT E2E auth helper
         auth_helper = E2EAuthHelper(environment=test")"
@@ -163,7 +164,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
                                     # This is the expected failure - capture it for analysis
                                     logger.error(fINTEGRATION GAP CONFIRMED: Agent execution failed: {e})
                                     
-                                    # Verify this is the specific integration failure we're testing
+                                    # Verify this is the specific integration failure we're testing'
                                     error_message = str(e).lower()
                                     integration_gap_indicators = [
                                         websocket","
@@ -275,7 +276,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
                 )
             
             # CRITICAL TEST: ExecutionEngine should have WebSocket bridge reference
-            # This is the key integration point that's broken
+            # This is the key integration point that's broken'
             try:
                 # Check if ExecutionEngine was configured with WebSocket bridge
                 assert hasattr(execution_engine, '_websocket_bridge') or hasattr(execution_engine, 'websocket_bridge'), (
@@ -283,7 +284,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
                     Factory delegation not establishing proper component connections.""
                 )
                 
-                # If bridge exists, verify it's properly configured
+                # If bridge exists, verify it's properly configured'
                 websocket_bridge = getattr(execution_engine, '_websocket_bridge', None) or getattr(execution_engine, 'websocket_bridge', None)
                 if websocket_bridge:
                     # Verify bridge has user emitter
@@ -465,7 +466,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
             execution_engine = execution_factory.create_execution_engine(user_context)
             
             # CRITICAL TEST: Monitor for silent failures in event delivery
-            # Patch all WebSocket event methods to detect if they're called
+            # Patch all WebSocket event methods to detect if they're called'
             websocket_methods = [
                 'emit_agent_started',
                 'emit_agent_thinking', 
@@ -533,7 +534,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
                     )
                 
             except Exception as e:
-                # Agent execution failure is expected - check if it's due to integration issues
+                # Agent execution failure is expected - check if it's due to integration issues'
                 error_message = str(e).lower()
                 integration_keywords = ['websocket', 'emitter', 'bridge', 'factory', 'delegation']
                 integration_failure = any(keyword in error_message for keyword in integration_keywords)
@@ -561,3 +562,5 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
                 fReceived events: {len(received_events)}/{len(expected_events)}. 
                 fThis indicates broader integration issues in the WebSocket chain.""
             )
+
+)

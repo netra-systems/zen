@@ -7,6 +7,8 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
 """
+"""
+        """Send JSON message.""""""
         """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
@@ -17,16 +19,20 @@ class TestWebSocketConnection:
         self._closed = True
         self.is_connected = False
 """
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
         return self.messages_sent.copy()"""
-        """Test suite for UniversalRegistry - SSOT registry pattern.
+        return self.messages_sent.copy()"""
+        """Test suite for UniversalRegistry - SSOT registry pattern."
 
         This test suite validates:
         - Thread-safe registration and retrieval
         - Factory pattern support
         - Singleton pattern support
         - Freeze/immutability"""
+        - Freeze/immutability"""
+        - Specialized registry implementations"""
         - Specialized registry implementations"""
 
 import pytest
@@ -59,13 +65,16 @@ import asyncio
         
 
 """
+"""
         """Test item for registry."""
     def __init__(self, name: str):
         pass
         self.name = name
 
 """
+"""
         """Test UniversalRegistry base functionality."""
+"""
 """
         """Test basic registry creation."""
         registry = UniversalRegistry[TestItem]("TestRegistry")
@@ -76,6 +85,7 @@ import asyncio
         assert registry.get_metrics()['total_items'] == 0
 
     def test_singleton_registration(self):
+        """Test singleton item registration.""""""
         """Test singleton item registration.""""""
         registry = UniversalRegistry[TestItem]("TestRegistry")
         item = TestItem("test_item")
@@ -101,6 +111,7 @@ import asyncio
         registry.register("test", item2)
 
     def test_override_allowed(self):
+        """Test override when explicitly allowed.""""""
         """Test override when explicitly allowed.""""""
         registry = UniversalRegistry[TestItem]("TestRegistry", allow_override=True)
         item1 = TestItem("item1")
@@ -137,6 +148,7 @@ import asyncio
         assert metrics['metrics']['factory_creations'] == 1
 
     def test_get_with_context_prefers_factory(self):
+        """Test that get() uses factory when context provided.""""""
         """Test that get() uses factory when context provided.""""""
         registry = UniversalRegistry[TestItem]("TestRegistry")
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
@@ -189,6 +201,7 @@ import asyncio
 
     def test_tags_and_categories(self):
         """Test tag-based categorization.""""""
+        """Test tag-based categorization.""""""
         registry = UniversalRegistry[TestItem]("TestRegistry")
 
     # Register items with tags
@@ -225,6 +238,7 @@ import asyncio
 
     def test_remove_item(self):
         """Test item removal.""""""
+        """Test item removal.""""""
         registry = UniversalRegistry[TestItem]("TestRegistry")
 
         registry.register("test", TestItem("item"), tags=["category"])
@@ -256,6 +270,7 @@ import asyncio
         assert registry.list_keys() == []
 
     def test_metrics_tracking(self):
+        """Test metrics collection.""""""
         """Test metrics collection.""""""
         registry = UniversalRegistry[TestItem]("TestRegistry", enable_metrics=True)
 
@@ -302,10 +317,11 @@ import asyncio
         registry.get("formatted_string")
 
         health = registry.validate_health()
-            # Still may warn if >80% unused, but shouldn't be degraded
+            # Still may warn if >80% unused, but shouldn't be degraded'
         assert health['status'] != 'degraded'
 
     def test_thread_safety(self):
+        """Test thread-safe operations.""""""
         """Test thread-safe operations.""""""
         registry = UniversalRegistry[TestItem]("TestRegistry")
         errors = []
@@ -341,7 +357,9 @@ import asyncio
 class TestSpecializedRegistries:
         """Test specialized registry implementations."""
 """
+"""
         """Test AgentRegistry with WebSocket integration."""
+        registry = AgentRegistry()"""
         registry = AgentRegistry()"""
         assert registry.name == "AgentRegistry"
 
@@ -363,11 +381,13 @@ class TestSpecializedRegistries:
         """Test ToolRegistry initialization."""
         pass
         registry = ToolRegistry()"""
+        registry = ToolRegistry()"""
         assert registry.name == "ToolRegistry"
     # Default tools should be registered (mocked in implementation)
 
     def test_service_registry(self):
         """Test ServiceRegistry with service registration."""
+        registry = ServiceRegistry()"""
         registry = ServiceRegistry()"""
         assert registry.name == "ServiceRegistry"
 
@@ -389,6 +409,7 @@ class TestSpecializedRegistries:
         """Test StrategyRegistry."""
         pass
         registry = StrategyRegistry()"""
+        registry = StrategyRegistry()"""
         assert registry.name == "StrategyRegistry"
 
     # Register a strategy
@@ -401,6 +422,8 @@ class TestSpecializedRegistries:
 class TestGlobalRegistries:
         """Test global registry management."""
 """
+"""
+        """Test global registry singleton pattern.""""""
         """Test global registry singleton pattern.""""""
         registry1 = get_global_registry("agent")
         registry2 = get_global_registry("agent")
@@ -414,10 +437,12 @@ class TestGlobalRegistries:
 
     def test_unknown_registry_type(self):
         """Test error for unknown registry type.""""""
+        """Test error for unknown registry type.""""""
         with pytest.raises(ValueError, match="Unknown registry type"):
         get_global_registry("invalid_type")
 
     def test_create_scoped_registry(self):
+        """Test creating request-scoped registries.""""""
         """Test creating request-scoped registries.""""""
         registry1 = create_scoped_registry("agent", "request_123")
         registry2 = create_scoped_registry("agent", "request_456")
@@ -436,6 +461,7 @@ class TestGlobalRegistries:
 
 class TestConcurrentFactoryCreation:
         """Test concurrent factory usage for user isolation."""
+"""
 """
         """Test that factories create isolated instances concurrently."""
         registry = UniversalRegistry[TestItem]("TestRegistry")
@@ -473,3 +499,5 @@ class TestConcurrentFactoryCreation:
         if __name__ == "__main__":
         pytest.main([__file__, "-v"])
         pass
+
+"""

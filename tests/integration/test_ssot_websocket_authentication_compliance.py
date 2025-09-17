@@ -240,6 +240,7 @@ class SSOTWebSocketAuthenticationEndToEndTests:
     @pytest.mark.asyncio
     async def test_ssot_authentication_prevents_chaos_regression(self):
         Test that SSOT implementation prevents regression to authentication chaos."""
+        Test that SSOT implementation prevents regression to authentication chaos."""
         auth_service = get_unified_auth_service()
         test_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXItc3NvdCIsImVtYWlsIjoidGVzdEBzc290LmNvbSIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjo5OTk5OTk5OTk5fQ.test_signature'
         with patch('netra_backend.app.clients.auth_client_core.AuthServiceClient.validate_token') as mock_validate:

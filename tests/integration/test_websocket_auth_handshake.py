@@ -27,6 +27,7 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
         self.mock_websocket.close = AsyncMock()
 
     def test_websocket_handshake_without_subprotocol_fails(self):
+        pass
 """Empty docstring."""
         Test: WebSocket handshake should FAIL when no subprotocol is provided
         Expected: Should reject connection during handshake phase
@@ -51,7 +52,7 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
             with patch('netra_backend.app.auth_integration.auth.get_auth_client') as mock_auth_client:
                 mock_client = Mock()
-                mock_client.verify_token = Mock(return_value={'user_id': 'user123', 'username': 'testuser', 'valid': True}
+                mock_client.verify_token = Mock(return_value={'user_id': 'user123', 'username': 'testuser', 'valid': True)
                 mock_auth_client.return_value = mock_client
                 result = asyncio.run(authenticate_websocket_ssot(self.mock_websocket))
                 if result is None:
@@ -63,6 +64,7 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             pass
 
     def test_missing_subprotocol_error_handling(self):
+        pass
 """Empty docstring."""
         Test: Missing subprotocol should be handled gracefully
         Expected: Should return proper error message and close connection
@@ -97,6 +99,7 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
                 pass
 
     def test_websocket_accept_with_subprotocol_response(self):
+        pass
 """Empty docstring."""
         Test: WebSocket accept should include selected subprotocol in response
         Expected: Should follow RFC 6455 and return Sec-WebSocket-Protocol header
@@ -106,7 +109,7 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
             with patch('netra_backend.app.auth_integration.auth.get_auth_client') as mock_auth_client:
                 mock_client = Mock()
-                mock_client.verify_token = Mock(return_value={'user_id': 'user123', 'valid': True}
+                mock_client.verify_token = Mock(return_value={'user_id': 'user123', 'valid': True)
                 mock_auth_client.return_value = mock_client
                 result = asyncio.run(authenticate_websocket_ssot(self.mock_websocket))
                 if self.mock_websocket.accept.called:
@@ -121,6 +124,7 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             pass
 
     def test_websocket_handshake_timeout_handling(self):
+        pass
 """Empty docstring."""
         Test: WebSocket handshake should handle timeouts gracefully
         Expected: Should implement timeout for authentication process
@@ -141,6 +145,7 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             pass
 
     def test_concurrent_websocket_handshakes(self):
+        pass
 """Empty docstring."""
         Test: Multiple concurrent WebSocket handshakes should be handled safely
         Expected: Should support concurrent authentication without conflicts
@@ -157,7 +162,7 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
             with patch('netra_backend.app.auth_integration.auth.get_auth_client') as mock_auth_client:
                 mock_client = Mock()
-                mock_client.verify_token = Mock(return_value={'user_id': 'user123', 'valid': True}
+                mock_client.verify_token = Mock(return_value={'user_id': 'user123', 'valid': True)
                 mock_auth_client.return_value = mock_client
 
                 async def run_concurrent_handshakes():
@@ -173,3 +178,5 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+"""
+))))

@@ -348,7 +348,7 @@ class WebSocketManagerSSOTEventDeliveryTests(SSotAsyncTestCase, unittest.TestCas
         if isolation_rate < 100 or consistency_rate < 100:
             failed_users = [
                 user_id for user_id, result in isolation_results.items()
-                if not (result['ssot_isolated'] and result['legacy_isolated']
+                if not (result['ssot_isolated') and result['legacy_isolated')
             ]
             inconsistent_users = [
                 user_id for user_id, result in isolation_results.items()
@@ -482,9 +482,9 @@ class WebSocketManagerSSOTEventDeliveryTests(SSotAsyncTestCase, unittest.TestCas
         ssot_success_rate = load_results['ssot_load_test']['success_rate']
         legacy_success_rate = load_results['legacy_load_test']['success_rate']
         
-        logger.info(fSSOT load test: {ssot_success_rate:.1f}% success rate, ""
+        logger.info(fSSOT load test: {ssot_success_rate:.1f)% success rate, ""
                    f{load_results['ssot_load_test']['events_per_second']:.1f} events/sec)
-        logger.info(fLegacy load test: {legacy_success_rate:.1f}% success rate, ""
+        logger.info(fLegacy load test: {legacy_success_rate:.1f)% success rate, ""
                    f"{load_results['legacy_load_test']['events_per_second']:.1f} events/sec)"
         
         # Calculate consistency under load
@@ -562,7 +562,7 @@ class WebSocketManagerSSOTEventDeliveryTests(SSotAsyncTestCase, unittest.TestCas
             for i in range(event_count):
                 try:
                     # Simulate event delivery
-                    await asyncio.sleep(0.01)  # Small delay to simulate processing
+                    await asyncio.sleep(0.1)  # Small delay to simulate processing
                     successful += 1
                 except Exception:
                     failed += 1
@@ -598,3 +598,5 @@ class WebSocketManagerSSOTEventDeliveryTests(SSotAsyncTestCase, unittest.TestCas
 
 if __name__ == '__main__':
     unittest.main()
+"""
+)))))))))

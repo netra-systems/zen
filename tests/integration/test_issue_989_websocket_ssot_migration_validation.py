@@ -178,11 +178,11 @@ class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
                                 ssot_matches.append(pattern)
                         file_rel_path = str(py_file.relative_to(project_root))
                         if has_deprecated_imports and has_ssot_imports:
-                            mixed_pattern_files.append({'file': file_rel_path, 'deprecated_patterns': deprecated_matches, 'ssot_patterns': ssot_matches}
+                            mixed_pattern_files.append({'file': file_rel_path, 'deprecated_patterns': deprecated_matches, 'ssot_patterns': ssot_matches)
                             import_analysis.mixed_pattern_files += 1
                             logger.warning(f'⚠️ MIXED PATTERNS: {file_rel_path}')
                         elif has_deprecated_imports:
-                            deprecated_import_files.append({'file': file_rel_path, 'deprecated_patterns': deprecated_matches}
+                            deprecated_import_files.append({'file': file_rel_path, 'deprecated_patterns': deprecated_matches)
                             import_analysis.deprecated_pattern_files += 1
                             logger.error(f'❌ DEPRECATED PATTERNS: {file_rel_path}')
                         elif has_ssot_imports:
@@ -221,7 +221,7 @@ class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
         initialization_patterns = defaultdict(list)
         pattern_violations = []
         import re
-        init_patterns = {'ssot_get_websocket_manager': 'get_websocket_manager\\(', 'direct_websocket_manager': 'WebSocketManager\\(', 'deprecated_factory_func': 'get_websocket_manager_factory\\(', 'deprecated_factory_class': 'WebSocketManagerFactory\\(', 'compatibility_create': 'create_websocket_manager\\('}
+        init_patterns = {'ssot_get_websocket_manager': 'get_websocket_manager\\(', 'direct_websocket_manager': 'WebSocketManager\\(', 'deprecated_factory_func': 'get_websocket_manager_factory\\(', 'deprecated_factory_class': 'WebSocketManagerFactory\\(', 'compatibility_create': 'create_websocket_manager\\(')
         for search_path in self.search_paths:
             if search_path.exists():
                 for py_file in search_path.rglob('*.py'):
@@ -238,7 +238,7 @@ class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
                                 file_patterns.append(pattern_name)
                                 initialization_patterns[pattern_name].append(file_rel_path)
                         if len(file_patterns) > 1:
-                            pattern_violations.append({'file': file_rel_path, 'patterns': file_patterns}
+                            pattern_violations.append({'file': file_rel_path, 'patterns': file_patterns)
                             logger.warning(f'⚠️ MULTIPLE PATTERNS: {file_rel_path} uses {file_patterns}')
                     except (UnicodeDecodeError, PermissionError):
                         continue
@@ -246,7 +246,7 @@ class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
         deprecated_patterns_in_use = []
         for pattern_name in ['deprecated_factory_func', 'deprecated_factory_class']:
             if initialization_patterns[pattern_name]:
-                deprecated_patterns_in_use.extend(initialization_patterns[pattern_name]
+                deprecated_patterns_in_use.extend(initialization_patterns[pattern_name)
         if deprecated_patterns_in_use:
             validation_result.post_migration_violations += len(deprecated_patterns_in_use)
         validation_result.migration_success = validation_result.post_migration_violations == 0
@@ -257,7 +257,7 @@ class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
                 total_files_with_patterns += len(files)
                 logger.info(f'  {pattern_name}: {len(files)} files')
         if total_files_with_patterns > 0:
-            ssot_files = len(initialization_patterns['ssot_get_websocket_manager']
+            ssot_files = len(initialization_patterns['ssot_get_websocket_manager')
             validation_result.compliance_percentage = ssot_files / total_files_with_patterns * 100
         for violation in pattern_violations[:5]:
             validation_result.remaining_issues.append(fMultiple patterns in {violation['file']}: {violation['patterns']})
@@ -350,3 +350,4 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+))))))))))))))

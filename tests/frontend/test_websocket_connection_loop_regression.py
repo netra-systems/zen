@@ -25,11 +25,13 @@ class TestWebSocketConnection:
         return self.messages_sent.copy()
 
         '''
+        '''
         Regression test for WebSocket connection loop bug in GCP staging.
         This test reproduces the race condition between auth initialization and WebSocket connection
         that causes continuous connection/disconnection loops.
 
         Bug Report: /reports/websocket_connection_loop_bug_report.md
+        '''
         '''
 
         import asyncio
@@ -85,8 +87,10 @@ class MockWebSocket:
 
 class WebSocketConnectionLoopTest:
         '''
+        '''
         Test harness that simulates the WebSocket connection loop bug.
         This reproduces the exact conditions that cause the issue in staging.
+        '''
         '''
 
     def __init__(self):
@@ -103,9 +107,11 @@ class WebSocketConnectionLoopTest:
 
     def simulate_websocket_provider_effects(self, auth_state):
         '''
+        '''
         pass
         Simulate multiple React effects firing in WebSocketProvider.
         This reproduces the race condition where multiple effects trigger connections.
+        '''
         '''
         effects_triggered = []
 
@@ -150,9 +156,11 @@ class WebSocketConnectionLoopTest:
 
     def measure_connection_loop_rate(self, duration_seconds: int = 5) -> Dict[str, Any]:
         '''
+        '''
         pass
         Measure the rate of connection attempts over a period.
         This helps detect the connection loop issue.
+        '''
         '''
         start_time = time.time()
         attempts_in_window = []
@@ -175,9 +183,11 @@ class WebSocketConnectionLoopTest:
 @pytest.mark.asyncio
     async def test_websocket_connection_loop_bug():
         '''
+        '''
 Test that reproduces the WebSocket connection loop bug.
 This test SHOULD FAIL with the current implementation,
 demonstrating the bug exists.
+'''
 '''
 pass
 test_harness = WebSocketConnectionLoopTest()
@@ -226,8 +236,10 @@ len(test_harness.reconnection_attempts) < len(test_harness.auth_failures), \
 @pytest.mark.asyncio
     async def test_websocket_connection_deduplication():
         '''
+        '''
 Test that WebSocket service properly deduplicates rapid connection attempts.
 This test SHOULD FAIL with current implementation.
+'''
 '''
 
                     # Mock the WebSocket service
@@ -240,7 +252,7 @@ ws_service.state = 'disconnected'
                         # Simulate rapid successive connection attempts (the bug scenario)
 connection_tasks = []
 for i in range(5):
-                            # These should be deduplicated but currently aren't
+                            # These should be deduplicated but currently aren't'
 task = asyncio.create_task(ws_service.connect("", {}))
 connection_tasks.append(task)
                             # No delay - simulating race condition
@@ -256,8 +268,10 @@ assert actual_calls == 1, \
 @pytest.mark.asyncio
     async def test_websocket_auth_failure_backoff():
         '''
+        '''
 Test that auth failures trigger proper exponential backoff.
 This test SHOULD FAIL with current implementation.
+'''
 '''
 pass
 test_harness = WebSocketConnectionLoopTest()
@@ -270,7 +284,7 @@ if not result["success"] and result["code"] == 1008:
                                         # Measure time until next reconnect attempt
 reconnect_delay = 0.1 * (2 ** attempt)  # Expected exponential backoff
 reconnect_delays.append(reconnect_delay)
-await asyncio.sleep(0.01)  # Minimal delay in test
+await asyncio.sleep(0.1)  # Minimal delay in test
 
                                         # Verify exponential backoff is applied
 for i in range(1, len(reconnect_delays)):
@@ -282,8 +296,10 @@ assert expected_increase, \
 @pytest.mark.asyncio
     async def test_websocket_provider_effect_coordination():
         '''
+        '''
 Test that WebSocketProvider properly coordinates multiple effects.
 This test SHOULD FAIL with current implementation.
+'''
 '''
 
                                                 # Track effect executions
@@ -320,8 +336,10 @@ assert len(connection_effects) <= len(auth_states) - 2, \
 
 def test_websocket_connection_race_condition():
     '''
+    '''
 Synchronous test for the race condition between auth and connection.
 This test SHOULD FAIL, proving the bug exists.
+'''
 '''
 pass
 import threading
@@ -361,7 +379,7 @@ for t in threads:
 for t in threads:
     t.join()
 
-                # Should have connection coordination, but doesn't
+                # Should have connection coordination, but doesn't'
 assert len(connection_log) == 1, \
 ""
 
@@ -385,4 +403,4 @@ asyncio.run(test_websocket_provider_effect_coordination())
 test_websocket_connection_race_condition()
 
 print("")
-PASS:  All tests passed! The SSOT fix successfully prevents connection loops.")
+PASS:  All tests passed! The SSOT fix successfully prevents connection loops.")"

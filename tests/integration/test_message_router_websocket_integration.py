@@ -254,7 +254,7 @@ class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
             final_response = create_standard_message(
                 message_type=MessageType.AGENT_RESPONSE,
                 content={
-                    response": "Here's your AI optimization plan...,
+                    response": "Here's your AI optimization plan...,'
                     user_id: user_id
                 },
                 user_id=user_id
@@ -347,7 +347,7 @@ class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
             
             # Execute concurrent message sending
             tasks = [
-                send_user_message(user_id, user_connections[user_id]
+                send_user_message(user_id, user_connections[user_id)
                 for user_id in user_ids
             ]
             
@@ -376,3 +376,6 @@ if __name__ == __main__":"
     # Run async tests
     import unittest
     unittest.main(verbosity=2)
+
+"""
+))))))))))

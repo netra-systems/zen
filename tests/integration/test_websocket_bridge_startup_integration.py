@@ -50,7 +50,7 @@ class MockApp:
 
 
 class MockAppState:
-    "Mock app state that simulates FastAPI's app.state"
+    "Mock app state that simulates FastAPI's app.state"'
     
     def __init__(self):
         self.agent_websocket_bridge: Optional[AgentWebSocketBridge] = None
@@ -60,6 +60,7 @@ class MockAppState:
 
 
 class WebSocketBridgeStartupIntegrationTestSuite:
+    pass
 """Empty docstring."""
     Integration test suite validating complete WebSocket bridge startup flow
     
@@ -286,7 +287,7 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         user_id = await self.auth_helper.get_test_user_id()
         mock_connection = MockWebSocketConnection()
         
-        # Add connection to bridge's connection pool
+        # Add connection to bridge's connection pool'
         bridge = self.app.state.agent_websocket_bridge
         if not hasattr(bridge._connection_pool, '_test_connections'):
             bridge._connection_pool._test_connections = {}
@@ -317,11 +318,11 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         
         # Test sending all 5 critical WebSocket events
         critical_events = [
-            (agent_started", {message: Agent began processing your request},"
-            ("agent_thinking, {message": Agent is analyzing the problem},
-            (tool_executing, {"tool: analysis_tool", message: Running analysis},
-            ("tool_completed, {tool": analysis_tool, result: Analysis complete},""
-            (agent_completed", {message: Agent has completed processing}"
+            (agent_started", {message: Agent began processing your request),"
+            ("agent_thinking, {message": Agent is analyzing the problem),
+            (tool_executing, {"tool: analysis_tool", message: Running analysis),
+            ("tool_completed, {tool": analysis_tool, result: Analysis complete),""
+            (agent_completed", {message: Agent has completed processing)"
         ]
         
         try:
@@ -377,7 +378,7 @@ class WebSocketBridgeStartupIntegrationTestSuite:
                 elif not isinstance(component, expected_type):
                     contract_violations.append(fWrong type for {component_name}: expected {expected_type}, got {type(component)})
         
-        # This test should pass (no violations) because we've set up all components properly
+        # This test should pass (no violations) because we've set up all components properly'
         if contract_violations:
             pytest.fail(f" FAIL:  App state contract violations: {contract_violations})"
         
@@ -445,7 +446,7 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         await self.teardown_test_environment()
         
         # Generate summary
-        success_rate = (test_results["passed_tests] / test_results[total_tests"] * 100
+        success_rate = (test_results["passed_tests) / test_results[total_tests") * 100
         test_results[success_rate] = success_rate
         test_results[overall_status] = "PASSED if success_rate == 100 else FAILED"
         
@@ -473,7 +474,7 @@ async def test_websocket_bridge_startup_integration_suite():
     results = await suite.run_all_tests()
     
     # Assert overall success
-    assert results["overall_status] == PASSED", (
+    assert results["overall_status) == PASSED", (
         fWebSocket bridge startup integration failed: 
         f{results['failed_tests']}/{results['total_tests']} tests failed
     )
@@ -486,6 +487,7 @@ async def test_websocket_bridge_startup_integration_suite():
 
 
 if __name__ == __main__:
+    pass
 """Empty docstring."""
     Run integration test suite directly for development and debugging
 """Empty docstring."""
@@ -508,3 +510,6 @@ if __name__ == __main__:
     
     success = asyncio.run(main())
     exit(0 if success else 1)
+
+"""
+))))))

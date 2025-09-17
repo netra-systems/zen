@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 '''
+'''
 Comprehensive test suite for Alpine container functionality in UnifiedDockerManager.
 
 This test suite is designed to expose bugs in Alpine container selection and ensure
@@ -12,6 +13,7 @@ Business Value Justification (BVJ):
 4. Revenue Impact: Reduces CI/CD costs by $500+/month, prevents test timeouts
 
 CURRENT STATUS: These tests WILL FAIL until Alpine support is properly implemented.
+'''
 '''
 
 import asyncio
@@ -126,6 +128,7 @@ class TestComposeFileSelection:
         prefix = ""
 
         return f'''
+        return f'''
         version: '3.8'
         services:
         {prefix}postgres:
@@ -138,6 +141,7 @@ class TestComposeFileSelection:
         build:
         context: .
         dockerfile: docker/backend{'.alpine' if alpine else ''}.Dockerfile
+        '''
         '''
 
     def _create_mock_alpine_compose_content(self, test=False):
@@ -202,13 +206,13 @@ class TestComposeFileSelection:
         use_alpine=True
             
         compose_file = manager._get_compose_file()
-            # Should fall back to regular test compose if Alpine test doesn't exist
+            # Should fall back to regular test compose if Alpine test doesn't exist'
         assert "test.yml" in compose_file, ""
         except (TypeError, AttributeError):
         pytest.skip("use_alpine parameter not yet implemented")
 
     def test_missing_alpine_compose_fallback(self, temp_project_dir):
-        """Test fallback behavior when Alpine compose files don't exist."""
+        """Test fallback behavior when Alpine compose files don't exist."""'
         pass
     # Remove Alpine compose files
         for alpine_file in ["docker-compose.alpine.yml", "docker-compose.alpine-test.yml"]:
@@ -538,7 +542,7 @@ class TestAlpinePerformanceBenchmarks:
         ""
 
         print(f"")
-        [BENCHMARK] Startup Time Comparison:")
+        [BENCHMARK] Startup Time Comparison:")"
         print("")
         print("")
         print("")
@@ -613,7 +617,7 @@ class TestAlpinePerformanceBenchmarks:
         sizes[image] = float(size_str.replace('KB', '')) / 1000
 
         except Exception:
-        continue  # Skip images that can"t be measured
+        continue  # Skip images that can"t be measured"
 
         return sizes
 

@@ -21,6 +21,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 class WebSocketCoroutineFocusedTests(BaseIntegrationTest):
+    pass
 """Empty docstring."""
     Focused integration test for WebSocket coroutine regression.
     
@@ -49,7 +50,7 @@ class WebSocketCoroutineFocusedTests(BaseIntegrationTest):
 
     @pytest.mark.integration
     def test_websocket_environment_detection_calls(self):
-        
+        pass
         Test the exact environment detection calls that were failing.
         
         This tests the specific calls from websocket.py that were causing
@@ -75,7 +76,7 @@ class WebSocketCoroutineFocusedTests(BaseIntegrationTest):
 
     @pytest.mark.integration
     def test_websocket_conditional_logic_pattern(self):
-
+        pass
         Test the conditional logic pattern that was causing the regression.
         
         This tests the exact pattern from websocket.py around line 555 that
@@ -90,7 +91,7 @@ class WebSocketCoroutineFocusedTests(BaseIntegrationTest):
 
     @pytest.mark.integration
     def test_websocket_singleton_consistency(self):
-        
+        pass
         Test that get_env() singleton is consistent.
         
         The regression may have been caused by singleton inconsistency
@@ -112,3 +113,4 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+"""

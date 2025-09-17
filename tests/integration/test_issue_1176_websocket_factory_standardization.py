@@ -27,6 +27,7 @@ from netra_backend.app.websocket_core.types import WebSocketManagerMode
 
 
 class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
+    pass
 """Empty docstring."""
     Integration tests for Issue #1176 WebSocket Manager Factory Standardization.
 
@@ -123,7 +124,7 @@ class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
 
         self.assertIn(User context required, str(cm.exception))
 
-        # Test factory that doesn't require user context
+        # Test factory that doesn't require user context'
         factory_not_requiring_context = StandardizedWebSocketManagerFactory(require_user_context=False)
 
         # Should work with mock get_websocket_manager
@@ -263,6 +264,7 @@ class TestIssue1176WebSocketFactoryStandardization(SSotAsyncTestCase):
 
 
 class TestIssue1176IntegrationPointValidation(SSotAsyncTestCase):
+    pass
 """Empty docstring."""
     Test integration points to ensure they use standardized factory patterns.
 
@@ -324,3 +326,4 @@ class TestIssue1176IntegrationPointValidation(SSotAsyncTestCase):
 if __name__ == '__main__':
     import unittest
     unittest.main()
+)

@@ -125,7 +125,7 @@ class WebSocketMessageHandlerContextRegressionTests:
         }
         
         # Process message - handler should preserve existing context
-        with pytest.raises(Exception):  # Expected since we're using mocks for database
+        with pytest.raises(Exception):  # Expected since we're using mocks for database'
             await handler.handle(user_id, payload)
         
         # CRITICAL VALIDATION: Verify no new thread/run IDs were created
@@ -168,7 +168,7 @@ class WebSocketMessageHandlerContextRegressionTests:
             type": user_message, "
             thread_id: conversation_thread_id,
             "run_id: baseline_run_id,"
-            text: What's the current status of my infrastructure?,
+            text: What's the current status of my infrastructure?,'
             references: []""
         }
         
@@ -182,10 +182,10 @@ class WebSocketMessageHandlerContextRegressionTests:
         }
         
         # Process both messages
-        with pytest.raises(Exception):  # Expected since we're using mocks for database
+        with pytest.raises(Exception):  # Expected since we're using mocks for database'
             await handler.handle(user_id, message_1_payload)
             
-        with pytest.raises(Exception):  # Expected since we're using mocks for database
+        with pytest.raises(Exception):  # Expected since we're using mocks for database'
             await handler.handle(user_id, message_2_payload)
         
         # CRITICAL VALIDATION: Same conversation should maintain thread continuity
@@ -232,7 +232,7 @@ class WebSocketMessageHandlerContextRegressionTests:
         }
         
         # Process history request
-        with pytest.raises(Exception):  # Expected since we're using mocks for database
+        with pytest.raises(Exception):  # Expected since we're using mocks for database'
             await handler.handle(user_id, history_payload)
         
         # CRITICAL VALIDATION: History request should preserve thread context
@@ -251,7 +251,7 @@ class WebSocketMessageHandlerContextRegressionTests:
     @pytest.mark.integration
     @pytest.mark.critical
     async def test_message_validation_preserves_session_context(self):
-        Test that message validation doesn't create unnecessary contexts.
+        Test that message validation doesn't create unnecessary contexts.'
         
         Validates fix for audit report lines 433-437, 447-451, 463-467:
         Message validation and processing should reuse existing session context.
@@ -286,7 +286,7 @@ class WebSocketMessageHandlerContextRegressionTests:
         
         # Process multiple messages that require validation
         for i, message in enumerate(test_messages):
-            with pytest.raises(Exception):  # Expected since we're using mocks
+            with pytest.raises(Exception):  # Expected since we're using mocks'
                 await handler.handle(user_id, message)
             
             # After each message, verify context consistency
@@ -350,7 +350,7 @@ class WebSocketMessageHandlerContextRegressionTests:
             Error handling must preserve user context""
         
         # Track error handling for regression analysis
-        self.context_tracking[session_violations].append({
+        self.context_tracking[session_violations).append({
             scenario: "error_handling,"
             preserved_context": True,"
             thread_id: post_error_context.thread_id
@@ -390,7 +390,7 @@ class WebSocketMessageHandlerContextRegressionTests:
             
             start_msg_time = time.time()
             
-            with pytest.raises(Exception):  # Expected since we're using mocks
+            with pytest.raises(Exception):  # Expected since we're using mocks'
                 await handler.handle(user_id, message_payload)
             
             msg_processing_time = time.time() - start_msg_time
@@ -472,15 +472,15 @@ class WebSocketMessageHandlerContextRegressionTests:
         assert wrong_context_1.thread_id == wrong_context_2.thread_id == regression_thread_id, \
             "Thread ID preserved even with wrong pattern"
         
-        # The wrong pattern may create different run_ids (that's the problem!)
+        # The wrong pattern may create different run_ids (that's the problem!)'
         if wrong_context_1.run_id != wrong_context_2.run_id:
-            self.context_tracking[session_violations].append({
+            self.context_tracking[session_violations).append({
                 "scenario: create_vs_get_pattern",
                 issue: Different run_ids for same thread breaks conversation continuity
             }
         
         # Track regression metrics
-        self.context_tracking[contexts_created].extend([""
+        self.context_tracking[contexts_created).extend([""
             correct_context_1, correct_context_2, wrong_context_1, wrong_context_2
         ]
         
@@ -492,7 +492,7 @@ class WebSocketMessageHandlerContextRegressionTests:
     async def test_multi_user_context_isolation_with_message_handlers(self):
         Test that message handlers maintain proper user isolation.""
         
-        Ensures context regression fixes don't break multi-user system isolation.
+        Ensures context regression fixes don't break multi-user system isolation.'
         
         user_1 = self.test_users[0]
         user_2 = self.test_users[1] 
@@ -527,3 +527,6 @@ class WebSocketMessageHandlerContextRegressionTests:
         print(fUser 1: {user1_context.user_id}, Thread: {user1_context.thread_id}"")
         print(fUser 2: {user2_context.user_id}, Thread: {user2_context.thread_id})
         print(fRun ID isolation: {user1_context.run_id != user2_context.run_id}"")""
+
+"""
+)))))))

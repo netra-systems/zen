@@ -48,6 +48,7 @@ from shared.isolated_environment import get_env
 
 @pytest.mark.integration
 class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
+    pass
 """Empty docstring."""
     Integration tests for WebSocket message routing pipeline.
     
@@ -159,7 +160,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
             raise SecurityError(f"User isolation violation: event user {event.user_id} != connection user {connection['user_id']})"
         
         # Simulate routing delay
-        await asyncio.sleep(0.001)  # 1ms simulated network latency
+        await asyncio.sleep(0.1)  # 1ms simulated network latency
         
         # Route event
         routed_event = {
@@ -191,7 +192,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
             "data: {"
                 message: fTest {event_type} event for routing validation,
                 agent_name: test_routing_agent,
-                **kwargs.get(data", {}"
+                **kwargs.get(data", {)"
             }
         }
         return WebSocketEventMessage.from_dict(event_data)
@@ -219,10 +220,10 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         # Create test events for routing
         test_events = [
             self._create_test_agent_event("agent_started, user_context),"
-            self._create_test_agent_event(agent_thinking, user_context, data={thinking_stage: analysis"},"
-            self._create_test_agent_event(tool_executing, user_context, data={tool_name: test_tool},""
-            self._create_test_agent_event(tool_completed", user_context, data={results: {test: success}},"
-            self._create_test_agent_event(agent_completed", user_context, data={"final_response: Test complete}
+            self._create_test_agent_event(agent_thinking, user_context, data={thinking_stage: analysis"),"
+            self._create_test_agent_event(tool_executing, user_context, data={tool_name: test_tool),""
+            self._create_test_agent_event(tool_completed", user_context, data={results: {test: success)),"
+            self._create_test_agent_event(agent_completed", user_context, data={"final_response: Test complete)
         ]
         
         # Route events through pipeline
@@ -244,7 +245,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
             
             print(f  📨 Routed: {event.event_type} ({routing_time * 1000:.1f}ms))
             
-            await asyncio.sleep(0.01)  # Small delay between events
+            await asyncio.sleep(0.1)  # Small delay between events
         
         # Validate connection received all events
         connection_events = connection[received_events"]"
@@ -300,9 +301,9 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         
         for i, user_context in enumerate(users):
             events = [
-                self._create_test_agent_event(agent_started", user_context, data={"user_marker: fuser_{i+1}},
-                self._create_test_agent_event(agent_thinking, user_context, data={user_marker": f"user_{i+1}},
-                self._create_test_agent_event(agent_completed, user_context, data={user_marker: fuser_{i+1}}""
+                self._create_test_agent_event(agent_started", user_context, data={"user_marker: fuser_{i+1)),
+                self._create_test_agent_event(agent_thinking, user_context, data={user_marker": f"user_{i+1)),
+                self._create_test_agent_event(agent_completed, user_context, data={user_marker: fuser_{i+1))""
             ]
             user_events[user_context.user_id] = events
             all_events.extend([(event, user_context) for event in events]
@@ -341,7 +342,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
             connection_events = connection[received_events"]"
             
             # Check event count
-            expected_count = len(user_events[user_id]
+            expected_count = len(user_events[user_id)
             assert len(connection_events) == expected_count, fUser {user_id} event count mismatch: expected {expected_count}, got {len(connection_events)}
             
             # Check user isolation
@@ -402,16 +403,16 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         base_time = datetime.now(timezone.utc)
         
         event_sequence = [
-            (agent_started, {"sequence_id: 1, phase": initialization},
-            (agent_thinking, {sequence_id: 2, phase": "analysis},
-            (agent_thinking, {sequence_id: 3, phase: "planning},"
-            (tool_executing", {sequence_id: 4, phase: execution, tool_name": "analyzer},"
-            (agent_thinking, {sequence_id: 5, phase: "processing},"
-            (tool_completed", {sequence_id: 6, phase: execution, tool_name": "analyzer},"
-            (tool_executing, {sequence_id: 7, phase: "execution, tool_name": optimizer},
-            (tool_completed, {sequence_id: 8, phase": "execution, tool_name: optimizer},
-            (agent_thinking, {"sequence_id: 9, phase": finalization},
-            (agent_completed, {sequence_id: 10, phase": "completion}
+            (agent_started, {"sequence_id: 1, phase": initialization),
+            (agent_thinking, {sequence_id: 2, phase": "analysis),
+            (agent_thinking, {sequence_id: 3, phase: "planning),"
+            (tool_executing", {sequence_id: 4, phase: execution, tool_name": "analyzer),"
+            (agent_thinking, {sequence_id: 5, phase: "processing),"
+            (tool_completed", {sequence_id: 6, phase: execution, tool_name": "analyzer),"
+            (tool_executing, {sequence_id: 7, phase: "execution, tool_name": optimizer),
+            (tool_completed, {sequence_id: 8, phase": "execution, tool_name: optimizer),
+            (agent_thinking, {"sequence_id: 9, phase": finalization),
+            (agent_completed, {sequence_id: 10, phase": "completion)
         ]
         
         for i, (event_type, event_data) in enumerate(event_sequence):
@@ -425,7 +426,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
             ordered_events.append(event)
         
         # Route events with intentional timing variations
-        routing_delays = [0.001, 0.005, 0.002, 0.008, 0.001, 0.003, 0.006, 0.002, 0.004, 0.001]  # Varying delays
+        routing_delays = [0.1, 0.5, 0.2, 0.8, 0.1, 0.3, 0.6, 0.2, 0.4, 0.1]  # Varying delays
         
         async def route_with_delay(event, delay):
             Route event with specified delay to test ordering.""
@@ -452,7 +453,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         # Sort by original timestamp to validate ordering preservation
         received_events_sorted = sorted(
             connection_events,
-            key=lambda x: datetime.fromisoformat(x[event"][timestamp].replace('Z', '+00:00'))"
+            key=lambda x: datetime.fromisoformat(x[event"][timestamp].replace('Z', '+0:0'))"
         )
         
         # Validate sequence preservation
@@ -497,7 +498,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
             
             assert executing_pos is not None, fTool {tool_name} missing executing event""
             assert completed_pos is not None, fTool {tool_name} missing completed event
-            assert executing_pos < completed_pos, fTool {tool_name} completed event ({completed_pos} before executing event ({executing_pos}
+            assert executing_pos < completed_pos, fTool {tool_name) completed event ({completed_pos) before executing event ({executing_pos)
         
         # Record metrics
         self.record_metric("ordered_events_count, len(ordered_events))"
@@ -617,8 +618,8 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
                 print(f  ❌ Recovery routing failed: {e}"")
         
         # Validate failover behavior
-        primary_total_events = len(primary_connection[received_events]
-        backup_total_events = len(backup_connection[received_events"]"
+        primary_total_events = len(primary_connection[received_events)
+        backup_total_events = len(backup_connection[received_events")"
         
         assert primary_events_routed > 0, Primary connection should have received initial events
         assert backup_events_routed > 0, Backup connection should have received failover events""
@@ -631,8 +632,8 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         
         # Validate no event loss during failover
         all_routed_event_types = []
-        all_routed_event_types.extend([event["event][type"] for event in primary_connection[received_events]]
-        all_routed_event_types.extend([event[event]["type] for event in backup_connection[received_events"]]
+        all_routed_event_types.extend([event["event)[type") for event in primary_connection[received_events))
+        all_routed_event_types.extend([event[event)["type) for event in backup_connection[received_events"))
         
         expected_event_types = [event.event_type for event in test_events + recovery_events]
         assert len(all_routed_event_types) == len(expected_event_types), Event loss detected during failover
@@ -798,3 +799,5 @@ if __name__ == __main__:""
     "MIGRATED: Use SSOT unified test runner"
     print(MIGRATION NOTICE: Please use SSOT unified test runner"")
     print(Command: python tests/unified_test_runner.py --category integration")"
+"""
+))))))))))))))))))))))))))))))))))

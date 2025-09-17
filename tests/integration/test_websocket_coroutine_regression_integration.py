@@ -36,6 +36,7 @@ from tests.e2e.staging_config import StagingTestConfig, staging_urls
 
 @pytest.mark.integration
 class WebSocketCoroutineRegressionIntegrationTests(BaseIntegrationTest):
+    pass
 """Empty docstring."""
     Integration tests for WebSocket coroutine regression prevention.
     
@@ -173,6 +174,7 @@ class WebSocketCoroutineRegressionIntegrationTests(BaseIntegrationTest):
             assert isinstance(is_e2e_testing, bool), fis_e2e_testing should be bool, got {type(is_e2e_testing)}
 
     def test_websocket_environment_conditional_logic(self):
+        pass
 """Empty docstring."""
         Test WebSocket environment conditional logic that caused regression.
         
@@ -214,7 +216,7 @@ class WebSocketCoroutineRegressionIntegrationTests(BaseIntegrationTest):
         CRITICAL: Test WebSocket authentication integrated with environment detection.
         
         This test combines real authentication with environment detection to ensure
-        the coroutine regression doesn't occur in the full integration flow.
+        the coroutine regression doesn't occur in the full integration flow.'
         
         # CRITICAL: Create authenticated user
         user = await self.auth_helper.create_authenticated_user(
@@ -237,13 +239,13 @@ class WebSocketCoroutineRegressionIntegrationTests(BaseIntegrationTest):
         self.assertIsInstance(user_context.user_id, UserID)
         self.assertEqual(user_context.environment, environment)
         
-        # CRITICAL: Test that environment access in context doesn't return coroutines
+        # CRITICAL: Test that environment access in context doesn't return coroutines'
         context_env = user_context.environment
         self.assertIsInstance(context_env, str)
         self.assertFalse(inspect.iscoroutine(context_env))
 
     def test_websocket_get_env_consistency_integration(self):
-
+        pass
         Test get_env() consistency in integration context.
         
         Ensures that get_env() returns consistent IsolatedEnvironment instances
@@ -280,3 +282,5 @@ if __name__ == __main__:""
     
     if __name__ == __main__":"
         run_async_tests()
+
+)

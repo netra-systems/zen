@@ -50,6 +50,7 @@ class WebSocketReadinessMiddlewareIntegrationTests:
     "Integration tests for WebSocket readiness middleware behavior."
 
     def test_issue_919_gcp_staging_environment_bypass(self, mock_app_with_middleware):
+        pass
 """Empty docstring."""
         ISSUE #919 FIX: Test WebSocket connections work in GCP staging with bypass.
         
@@ -71,7 +72,7 @@ class WebSocketReadinessMiddlewareIntegrationTests:
 
     def test_issue_919_gcp_staging_graceful_degradation(self, mock_app_with_middleware):
     ""
-        ISSUE #919 FIX: Test graceful degradation in staging when services aren't ready.
+        ISSUE #919 FIX: Test graceful degradation in staging when services aren't ready.'
         
         SCENARIO: GCP staging environment without bypass but graceful degradation
         EXPECTED: WebSocket connections should be allowed despite service failures
@@ -83,7 +84,7 @@ class WebSocketReadinessMiddlewareIntegrationTests:
                 mock_env.return_value = mock_env_manager
                 with patch('netra_backend.app.logging_config.central_logger.get_logger'):
                     with patch('netra_backend.app.websocket_core.gcp_initialization_validator.gcp_websocket_readiness_check') as mock_validator:
-                        mock_validator.return_value = (False, {'state': 'failed', 'failed_services': ['agent_supervisor'], 'warnings': ['Service not ready']}
+                        mock_validator.return_value = (False, {'state': 'failed', 'failed_services': ['agent_supervisor'], 'warnings': ['Service not ready'])
                         from netra_backend.app.middleware.gcp_websocket_readiness_middleware import setup_gcp_websocket_protection
                         setup_gcp_websocket_protection(mock_app_with_middleware, timeout_seconds=5.0)
                         client = TestClient(mock_app_with_middleware)
@@ -92,11 +93,12 @@ class WebSocketReadinessMiddlewareIntegrationTests:
                             assert data == 'connection_established'
 
     def test_issue_919_production_strict_validation(self, mock_app_with_middleware):
+        pass
 """Empty docstring."""
         ISSUE #919 FIX: Test production environment enforces strict validation.
         
         SCENARIO: GCP production environment with startup_phase='unknown' 
-        EXPECTED: WebSocket connections should be rejected if services aren't ready
+        EXPECTED: WebSocket connections should be rejected if services aren't ready'
 """Empty docstring."""
         with patch.dict(os.environ, {'ENVIRONMENT': 'production', 'GOOGLE_CLOUD_PROJECT': 'netra-production', 'K_SERVICE': 'netra-backend'}, clear=False):
             with patch('shared.isolated_environment.get_env') as mock_env:
@@ -105,7 +107,7 @@ class WebSocketReadinessMiddlewareIntegrationTests:
                 mock_env.return_value = mock_env_manager
                 with patch('netra_backend.app.logging_config.central_logger.get_logger'):
                     with patch('netra_backend.app.websocket_core.gcp_initialization_validator.gcp_websocket_readiness_check') as mock_validator:
-                        mock_validator.return_value = (False, {'state': 'failed', 'failed_services': ['agent_supervisor'], 'warnings': ['Service not ready']}
+                        mock_validator.return_value = (False, {'state': 'failed', 'failed_services': ['agent_supervisor'], 'warnings': ['Service not ready'])
                         from netra_backend.app.middleware.gcp_websocket_readiness_middleware import setup_gcp_websocket_protection
                         setup_gcp_websocket_protection(mock_app_with_middleware, timeout_seconds=5.0)
                         client = TestClient(mock_app_with_middleware)
@@ -134,6 +136,7 @@ class WebSocketReadinessMiddlewareIntegrationTests:
                         assert data == 'connection_established'
 
     def test_issue_919_unknown_startup_phase_gcp_cloud_run_fix(self, mock_app_with_middleware):
+        pass
 """Empty docstring."""
         ISSUE #919 CORE FIX: Test startup_phase='unknown' bypass in GCP Cloud Run.
         
@@ -149,7 +152,7 @@ class WebSocketReadinessMiddlewareIntegrationTests:
                 mock_env.return_value = mock_env_manager
                 with patch('netra_backend.app.logging_config.central_logger.get_logger'):
                     with patch('netra_backend.app.websocket_core.gcp_initialization_validator.gcp_websocket_readiness_check') as mock_validator:
-                        mock_validator.return_value = (True, {'state': 'websocket_ready', 'failed_services': [], 'warnings': []}
+                        mock_validator.return_value = (True, {'state': 'websocket_ready', 'failed_services': [], 'warnings': [])
                         from netra_backend.app.middleware.gcp_websocket_readiness_middleware import setup_gcp_websocket_protection
                         setup_gcp_websocket_protection(mock_app_with_middleware, timeout_seconds=5.0)
                         client = TestClient(mock_app_with_middleware)
@@ -172,7 +175,7 @@ class AppStateStartupIntegrationTests:
                 mock_env.return_value = mock_env_manager
                 with patch('netra_backend.app.logging_config.central_logger.get_logger'):
                     with patch('netra_backend.app.websocket_core.gcp_initialization_validator.gcp_websocket_readiness_check') as mock_validator:
-                        mock_validator.return_value = (True, {'state': 'websocket_ready', 'failed_services': [], 'warnings': []}
+                        mock_validator.return_value = (True, {'state': 'websocket_ready', 'failed_services': [], 'warnings': [])
                         from netra_backend.app.middleware.gcp_websocket_readiness_middleware import setup_gcp_websocket_protection
                         setup_gcp_websocket_protection(mock_app_with_middleware, timeout_seconds=5.0)
                         client = TestClient(mock_app_with_middleware)
@@ -246,7 +249,7 @@ class SecurityMeasuresIntactTests:
                 mock_env.return_value = mock_env_manager
                 with patch('netra_backend.app.logging_config.central_logger.get_logger'):
                     with patch('netra_backend.app.websocket_core.gcp_initialization_validator.gcp_websocket_readiness_check') as mock_validator:
-                        mock_validator.return_value = (False, {'state': 'failed', 'failed_services': ['database', 'agent_supervisor'], 'warnings': ['Services not ready']}
+                        mock_validator.return_value = (False, {'state': 'failed', 'failed_services': ['database', 'agent_supervisor'], 'warnings': ['Services not ready'])
                         from netra_backend.app.middleware.gcp_websocket_readiness_middleware import setup_gcp_websocket_protection
                         setup_gcp_websocket_protection(mock_app_with_middleware, timeout_seconds=1.0)
                         client = TestClient(mock_app_with_middleware)
@@ -257,3 +260,4 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+)))))

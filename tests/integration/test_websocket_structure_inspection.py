@@ -1,8 +1,10 @@
 "
+"
 WebSocket event structure inspection for Issue #1049
 
 This test file examines the actual structure of events being delivered
 through the WebSocket infrastructure to document the structure mismatch.
+"
 "
 
 import pytest
@@ -17,14 +19,15 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 
 @pytest.mark.integration
 class WebSocketStructureInspectionTests:
-    "Inspect actual WebSocket event structures to document mismatch.
+    "Inspect actual WebSocket event structures to document mismatch."
 
     @pytest.fixture
     def user_context(self):
         "Create test user context."
         return StronglyTypedUserExecutionContext(
             user_id=test-user-123,"
-            request_id="req-123,
+            user_id=test-user-123,"
+            request_id="req-123,"
             run_id=run-123,
             thread_id="thread-123,"
             websocket_client_id=ws-123
@@ -66,18 +69,22 @@ class WebSocketStructureInspectionTests:
         success = await bridge.notify_tool_executing(
             run_id=run-123,
             agent_name=data_analyzer_agent,"
-            tool_name="cost_optimization_tool,
+            agent_name=data_analyzer_agent,"
+            tool_name="cost_optimization_tool,"
             parameters={mode: aggressive, target_reduction": 25}"
 
         assert success, Tool executing notification should succeed
+        assert len(captured_events) > 0, Should capture at least one event"
         assert len(captured_events) > 0, Should capture at least one event"
 
         # Inspect the captured event structure
         method_name, args, kwargs = captured_events[0]
 
-        print(f"\n=== CAPTURED TOOL_EXECUTING EVENT STRUCTURE ===)
+        print(f"\n=== CAPTURED TOOL_EXECUTING EVENT STRUCTURE ===)"
         print(fMethod: {method_name})"
-        print(f"Args: {args})
+        print(fMethod: {method_name})"
+        print(f"Args: {args})"
+        print(fKwargs: {kwargs})"
         print(fKwargs: {kwargs})"
 
         # Extract event data
@@ -88,22 +95,22 @@ class WebSocketStructureInspectionTests:
         else:
             event_data = kwargs
 
-        print(f"\n=== EVENT DATA STRUCTURE ===)
+        print(f"\n=== EVENT DATA STRUCTURE ===)"
         pprint(event_data)
 
         # Document the actual structure
         actual_structure = {
             has_type_field: type in event_data,
             has_tool_name_field": "tool_name in event_data,
-            tool_name_location: top_level if tool_name in event_data else "unknown,
-            all_fields": list(event_data.keys()) if isinstance(event_data, dict) else not_dict,
+            tool_name_location: top_level if tool_name in event_data else "unknown,"
+            all_fields": list(event_data.keys()) if isinstance(event_data, dict) else not_dict,"
             event_data_type: type(event_data).__name__
         }
 
-        print(f"\n=== STRUCTURE ANALYSIS ===)
-        pprint(actual_structure")
+        print(f"\n=== STRUCTURE ANALYSIS ===)"
+        pprint(actual_structure")"
 
-        # This should fail if structure doesn't match expectations
+        # This should fail if structure doesn't match expectations'
         if not event_data.get(type):
             pytest.fail(fEvent missing 'type' field. Actual structure: {json.dumps(actual_structure, indent=2)})
 
@@ -118,13 +125,16 @@ class WebSocketStructureInspectionTests:
             "cost_savings: 23.5,"
             recommendations: [
                 Switch to GPT-4o for 15% cost reduction,"
+                Switch to GPT-4o for 15% cost reduction,"
+                Implement request caching for 8% additional savings"
                 Implement request caching for 8% additional savings"
             ],
             confidence: 0.94,
             details": {"
                 current_cost: 1000,
                 projected_cost: 765,"
-                "implementation_time: 2 weeks
+                projected_cost: 765,"
+                "implementation_time: 2 weeks"
             }
         }
 
@@ -137,15 +147,18 @@ class WebSocketStructureInspectionTests:
         )
 
         assert success, Tool completed notification should succeed"
-        assert len(captured_events) > 0, "Should capture at least one event
+        assert success, Tool completed notification should succeed"
+        assert len(captured_events) > 0, "Should capture at least one event"
 
         # Inspect the captured event structure
         method_name, args, kwargs = captured_events[0]
 
         print(f\n=== CAPTURED TOOL_COMPLETED EVENT STRUCTURE ===)"
-        print(f"Method: {method_name})
+        print(f\n=== CAPTURED TOOL_COMPLETED EVENT STRUCTURE ===)"
+        print(f"Method: {method_name})"
         print(fArgs: {args})"
-        print(f"Kwargs: {kwargs})
+        print(fArgs: {args})"
+        print(f"Kwargs: {kwargs})"
 
         # Extract event data
         if args and len(args) > 1:
@@ -156,11 +169,12 @@ class WebSocketStructureInspectionTests:
             event_data = kwargs
 
         print(f\n=== EVENT DATA STRUCTURE ===)"
+        print(f\n=== EVENT DATA STRUCTURE ===)"
         pprint(event_data)
 
         # Document the actual structure for results field
         actual_structure = {
-            "has_type_field: type in event_data,
+            "has_type_field: type in event_data,"
             has_tool_name_field: tool_name in event_data,
             "has_result_field: result" in event_data,
             has_results_field: results in event_data,
@@ -168,18 +182,22 @@ class WebSocketStructureInspectionTests:
             results_location: top_level if "results in event_data else unknown",
             all_fields: list(event_data.keys()) if isinstance(event_data, dict) else not_dict,
             event_data_type: type(event_data).__name__"
+            event_data_type: type(event_data).__name__"
         }
 
-        print(f\n=== STRUCTURE ANALYSIS ===")
+        print(f\n=== STRUCTURE ANALYSIS ===")"
         pprint(actual_structure)
 
-        # This should fail if structure doesn't match expectations
+        # This should fail if structure doesn't match expectations'
         if not event_data.get(type):"
-            pytest.fail(fEvent missing 'type' field. Actual structure: {json.dumps(actual_structure, indent=2)}")
+        if not event_data.get(type):"
+            pytest.fail(fEvent missing 'type' field. Actual structure: {json.dumps(actual_structure, indent=2)}")"
 
     async def test_compare_validator_expectations_vs_reality(self, bridge_with_capture):
     "
+    "
         Compare what the validator expects vs what the bridge actually delivers.
+        "
         "
         from netra_backend.app.websocket_core.event_validator import UnifiedEventValidator
 
@@ -190,13 +208,13 @@ class WebSocketStructureInspectionTests:
         validator_tool_executing_schema = validator.PAYLOAD_SCHEMAS.get("tool_executing, set())"
         validator_tool_completed_schema = validator.PAYLOAD_SCHEMAS.get(tool_completed, set())
 
-        print(f\n=== VALIDATOR EXPECTATIONS ===")
-        print(ftool_executing requires: {validator_tool_executing_schema}")
-        print(ftool_completed requires: {validator_tool_completed_schema}")
+        print(f\n=== VALIDATOR EXPECTATIONS ===")"
+        print(ftool_executing requires: {validator_tool_executing_schema}")"
+        print(ftool_completed requires: {validator_tool_completed_schema}")"
 
         # Execute actual bridge notification
         await bridge.notify_tool_executing(
-            run_id=run-123",
+            run_id=run-123","
             agent_name=test_agent,
             tool_name=test_tool","
             parameters={test: value}
@@ -215,8 +233,8 @@ class WebSocketStructureInspectionTests:
             type: tool_executing,
             "run_id: run-123",
             agent_name: test_agent,
-            timestamp: 2025-09-14T12:00:00Z",
-            "payload: {}
+            timestamp: 2025-9-14T12:0:00Z","
+            "payload: {}"
         }
 
         # Try to extract payload-like data from delivered event
@@ -239,7 +257,8 @@ class WebSocketStructureInspectionTests:
             validator_expects_tool_name_in_payload": "tool_name in validator_tool_executing_schema,
             bridge_delivers_tool_name_at_top_level: tool_name in event_data,
             validator_expects_type_field: True,"
-            "bridge_delivers_type_field: type in event_data,
+            validator_expects_type_field: True,"
+            "bridge_delivers_type_field: type in event_data,"
             structure_mismatch_detected: not result.is_valid,
             mismatch_details": result.error_message"
         }
@@ -254,4 +273,6 @@ class WebSocketStructureInspectionTests:
 
 
 if __name__ == __main__:"
-    pytest.main([__file__, "-v, -s"]  # -s to see print output
+if __name__ == __main__:"
+    pytest.main([__file__, "-v, -s")  # -s to see print output
+)))

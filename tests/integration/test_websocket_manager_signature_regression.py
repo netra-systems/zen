@@ -20,7 +20,7 @@ class WebSocketManagerSignatureTests:
     Test suite to prevent regression of WebSocket manager signature issues.""
 
     def test_create_websocket_manager_accepts_positional_argument(self):
-        
+        pass
         Regression test: Ensure create_websocket_manager accepts positional argument.
         
         This prevents the error:
@@ -36,6 +36,7 @@ class WebSocketManagerSignatureTests:
             pytest.fail(f'Failed with positional argument: {e}')
 
     def test_create_websocket_manager_accepts_keyword_argument(self):
+        pass
 """Empty docstring."""
         Ensure create_websocket_manager also accepts keyword argument.
         
@@ -51,7 +52,7 @@ class WebSocketManagerSignatureTests:
             pytest.fail(f'Failed with keyword argument: {e}')
 
     def test_create_websocket_manager_validates_argument_type(self):
-        
+        pass
         Ensure proper type validation for user_context argument.
         
         This helps catch incorrect usage early with clear error messages.
@@ -62,6 +63,7 @@ class WebSocketManagerSignatureTests:
                 create_websocket_manager(invalid_context)
 
     def test_create_websocket_manager_preserves_context_isolation(self):
+        pass
 """Empty docstring."""
         Ensure each call creates an isolated manager instance.
         
@@ -78,7 +80,7 @@ class WebSocketManagerSignatureTests:
         assert manager1.user_context.user_id != manager2.user_context.user_id
 
     def test_all_call_patterns_in_codebase_are_valid(self):
-        
+        pass
         Meta-test: Verify common call patterns found in codebase work.
         
         This catches any patterns we might have missed.
@@ -91,9 +93,10 @@ class WebSocketManagerSignatureTests:
         assert manager2 is not None
         manager3 = create_websocket_manager(user_context=context)
         assert manager3 is not None
-        assert all([manager1, manager2, manager3]
+        assert all([manager1, manager2, manager3)
         assert len({id(manager1), id(manager2), id(manager3)} == 3
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+))

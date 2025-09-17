@@ -23,10 +23,12 @@ class TestWebSocketConnection:
 
     #!/usr/bin/env python3
         '''
+        '''
         Integration test demonstrating Docker rate limiting to prevent API storms.
 
         This test shows the rate limiter in action by running multiple Docker commands
         concurrently and verifying they are properly rate-limited.
+        '''
         '''
 
         import sys
@@ -50,10 +52,12 @@ class TestWebSocketConnection:
 
     def simulate_concurrent_docker_operations():
         '''
+        '''
         Simulate concurrent Docker operations that would normally cause API storms.
 
         Returns:
         Tuple of (total_duration, operations_completed, rate_limited_count)
+        '''
         '''
         print("[ROCKET] Testing Docker rate limiter with concurrent operations...")
 
@@ -112,20 +116,22 @@ class TestWebSocketConnection:
 
     def demonstrate_rate_limiting_effectiveness():
         '''
+        '''
         Demonstrate that rate limiting prevents API storms by comparing
         with and without rate limiting.
         '''
+        '''
         print("")
-        [DEMO] Demonstrating rate limiting effectiveness...")
+        [DEMO] Demonstrating rate limiting effectiveness...")"
 
     # Test WITH rate limiting
         print("")
-        1. Testing WITH rate limiting (should be slower but safer):")
+        1. Testing WITH rate limiting (should be slower but safer):")"
         duration_with_limits, ops_with_limits, rate_limited = simulate_concurrent_docker_operations()
 
     # Test WITHOUT rate limiting (simulated)
         print("")
-        2. Simulating WITHOUT rate limiting (would be faster but dangerous):")
+        2. Simulating WITHOUT rate limiting (would be faster but dangerous):")"
 
         start_time = time.time()
         with patch('subprocess.run') as mock_run:
@@ -166,7 +172,7 @@ class TestWebSocketConnection:
     def test_docker_manager_integration():
         """Test that Docker managers properly use the rate limiter."""
         print("")
-        [LINK] Testing Docker manager integration...")
+        [LINK] Testing Docker manager integration...")"
 
         try:
         from test_framework.unified_docker_manager import UnifiedDockerManager
@@ -175,7 +181,7 @@ class TestWebSocketConnection:
         if hasattr(manager, 'docker_rate_limiter'):
         print("[OK] UnifiedDockerManager properly integrates rate limiter")
 
-            # Test that it's the same singleton instance
+            # Test that it's the same singleton instance'
         global_limiter = get_docker_rate_limiter()
         if manager.docker_rate_limiter is global_limiter:
         print("[OK] Using singleton rate limiter instance")
@@ -211,7 +217,7 @@ class TestWebSocketConnection:
         success &= test_docker_manager_integration()
 
         print("")
-         + =" * 60)
+         + =" * 60)"
         if success:
         print("[SUCCESS] ALL TESTS PASSED - Rate limiter is working correctly!")
         print("[OK] Docker API storms should now be prevented")
@@ -228,3 +234,5 @@ class TestWebSocketConnection:
 
         if __name__ == "__main__":
         main()
+
+"""

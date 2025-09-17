@@ -79,6 +79,7 @@ except ImportError:
 @pytest.mark.websocket_flow
 @pytest.mark.business_critical
 class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
+    pass
 """Empty docstring."""
     Phase 1: WebSocket Message Flow Integration Test Suite
 
@@ -184,7 +185,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
         # Create multiple authenticated test users for isolation testing
         user_1_id = str(uuid.uuid4())
         user_2_id = str(uuid.uuid4())
-        self.test_user_ids.extend([user_1_id, user_2_id]
+        self.test_user_ids.extend([user_1_id, user_2_id)
 
         # Create auth tokens and connections
         auth_token_1 = await self.auth_helper.create_test_user_with_token(user_1_id)
@@ -193,7 +194,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
         websocket_url = await self.websocket_utility.get_staging_websocket_url()
         connection_1 = await self.websocket_utility.connect_with_auth(websocket_url, auth_token_1)
         connection_2 = await self.websocket_utility.connect_with_auth(websocket_url, auth_token_2)
-        self.websocket_connections.extend([connection_1, connection_2]
+        self.websocket_connections.extend([connection_1, connection_2)
 
         # Create WebSocket bridges for both users
         bridge_1 = create_agent_websocket_bridge(connection_1, user_1_id)
@@ -237,7 +238,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
         Test complete WebSocket event flow for all 5 business-critical events
         COVERS: Complete WebSocket message flow end-to-end
 """Empty docstring."""
-        if not all([WEBSOCKET_AVAILABLE, AGENT_SYSTEM_AVAILABLE, USER_CONTEXT_AVAILABLE]:
+        if not all([WEBSOCKET_AVAILABLE, AGENT_SYSTEM_AVAILABLE, USER_CONTEXT_AVAILABLE):
             pytest.skip(Required systems not available)
 
         # Create authenticated test user
@@ -304,7 +305,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
         for _ in range(5):
             message = await asyncio.wait_for(connection.recv(), timeout=8.0)
             event_data = json.loads(message)
-            received_events.append(event_data['type']
+            received_events.append(event_data['type')
 
         # Assert all expected events received in correct sequence
         assert len(received_events) == 5
@@ -322,7 +323,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
         Test WebSocket integration with Agent Execution Engine
         COVERS: User Execution Engine (13.69% coverage - 555/643 lines missing)
         
-        if not all([WEBSOCKET_AVAILABLE, AGENT_SYSTEM_AVAILABLE, USER_CONTEXT_AVAILABLE]:
+        if not all([WEBSOCKET_AVAILABLE, AGENT_SYSTEM_AVAILABLE, USER_CONTEXT_AVAILABLE):
             pytest.skip(Required systems not available")"
 
         # Create authenticated test user
@@ -360,7 +361,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
                 while len(received_events) < 3:  # Expect at least 3 events
                     message = await asyncio.wait_for(connection.recv(), timeout=5.0)
                     event_data = json.loads(message)
-                    received_events.append(event_data['type']
+                    received_events.append(event_data['type')
             except asyncio.TimeoutError:
                 # Some events received, continue with validation
                 pass
@@ -376,7 +377,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
         Test WebSocket message isolation with concurrent users
         COVERS: Multi-user WebSocket message isolation and concurrency
         ""
-        if not all([WEBSOCKET_AVAILABLE, USER_CONTEXT_AVAILABLE]:
+        if not all([WEBSOCKET_AVAILABLE, USER_CONTEXT_AVAILABLE):
             pytest.skip(Required systems not available)
 
         # Create 3 concurrent authenticated test users
@@ -400,7 +401,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 
         # Create WebSocket bridges for all users
         bridges = [
-            create_agent_websocket_bridge(connections[i], user_ids[i]
+            create_agent_websocket_bridge(connections[i), user_ids[i)
             for i in range(3)
         ]
 
@@ -490,7 +491,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
         Test WebSocket integration with Agent Instance Factory
         COVERS: Agent Instance Factory (9.60% coverage - 452/500 lines missing)
 """Empty docstring."""
-        if not all([WEBSOCKET_AVAILABLE, AGENT_SYSTEM_AVAILABLE, USER_CONTEXT_AVAILABLE]:
+        if not all([WEBSOCKET_AVAILABLE, AGENT_SYSTEM_AVAILABLE, USER_CONTEXT_AVAILABLE):
             pytest.skip(Required systems not available)
 
         # Create authenticated test user
@@ -662,3 +663,5 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
             # Verify reasonable ordering (not strict due to async nature)
             assert min(ordered_sequences) >= 0
             assert max(ordered_sequences) < message_count
+"""
+)))))))))))))))

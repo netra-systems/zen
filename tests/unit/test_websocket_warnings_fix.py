@@ -7,6 +7,8 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
 """
+"""
+        """Send JSON message.""""""
         """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
@@ -17,10 +19,13 @@ class TestWebSocketConnection:
         self._closed = True
         self.is_connected = False
 """
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
         return self.messages_sent.copy()"""
+        return self.messages_sent.copy()"""
         """"""
+        This test validates that the legacy pattern warnings no longer appear as warnings."""
         This test validates that the legacy pattern warnings no longer appear as warnings."""
 
 import asyncio
@@ -35,8 +40,10 @@ from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 
 """
+"""
         """Test that legacy WebSocket warnings are now INFO level."""
 
+@pytest.mark.asyncio"""
 @pytest.mark.asyncio"""
 """Test that zero WebSocket handlers logs as INFO, not WARNING."""
 validator = StartupValidator()
@@ -50,6 +57,7 @@ mock_app.state.websocket_manager = mock_ws_manager
 with patch.object(validator.logger, 'info') as mock_info:
 with patch.object(validator.logger, 'warning') as mock_warning:
 await validator._validate_websocket(mock_app)
+"""
 """
 mock_info.assert_any_call("[U+2139][U+FE0F] WebSocket handlers will be created per-user (factory pattern)")
 
@@ -70,6 +78,7 @@ results = StartupValidationFixer.fix_agent_websocket_initialization(mock_app_sta
 
                         # Should succeed even without registry
 assert results['success'] == True"""
+assert results['success'] == True"""
 assert "Agent registry not found" not in str(results)
 
 @pytest.mark.asyncio
@@ -86,6 +95,7 @@ mock_app.state.agent_supervisor = mock_supervisor
 with patch.object(validator.logger, 'info') as mock_info:
 with patch.object(validator.logger, 'warning') as mock_warning:
 await validator._validate_agents(mock_app)
+"""
 """
 mock_info.assert_any_call("[U+2139][U+FE0F] Legacy registry empty - agents will be created per-request (factory pattern)")
 

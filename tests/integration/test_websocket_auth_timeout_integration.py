@@ -27,6 +27,7 @@ import httpx
 
 @pytest.mark.integration
 class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
+    pass
 """Empty docstring."""
     Integration tests to reproduce WebSocket authentication timeout failures.
     
@@ -333,7 +334,7 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
         websocket_timeout_calls = []
         
         async def mock_websocket_timeout_check(*args, **kwargs):
-            # Simulate WebSocket timeout check that's more sensitive
+            # Simulate WebSocket timeout check that's more sensitive'
             timeout_threshold = 0.3  # WebSocket has even tighter timeout
             await asyncio.sleep(0.195)  # Auth service response time
             
@@ -430,3 +431,6 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
             self.assertGreater(len(circuit_breaker_failures), 0,
                              Expected circuit breaker to block WebSocket connections after 
                              repeated auth service timeout failures")"
+
+"""
+)

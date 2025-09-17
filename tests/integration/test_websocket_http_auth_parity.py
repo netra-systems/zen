@@ -31,6 +31,7 @@ from netra_backend.app.services.unified_authentication_service import (
 
 @pytest.mark.integration
 class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
+    pass
 """Empty docstring."""
     Test suite to compare HTTP vs WebSocket authentication configurations.
     
@@ -42,7 +43,7 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
         super().setUp()
         self.websocket_authenticator = UnifiedWebSocketAuthenticator()
         
-    def create_mock_websocket(self, headers: Dict[str, str] -> Mock:
+    def create_mock_websocket(self, headers: Dict[str, str) -> Mock:
         ""Create mock WebSocket with specific headers.
         websocket = Mock()
         websocket.headers = headers
@@ -53,7 +54,7 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
         websocket.client_state.name = CONNECTED""
         return websocket
     
-    def create_mock_http_request(self, headers: Dict[str, str] -> Mock:
+    def create_mock_http_request(self, headers: Dict[str, str) -> Mock:
         Create mock HTTP request with specific headers.""
         request = Mock()
         request.headers = headers
@@ -253,7 +254,7 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
             inconsistencies.append(fService type mismatch: HTTP uses {http_service_type}, WebSocket uses {websocket_service_type})
         
         # Check critical environment variables
-        env_config = config_comparison.get(environment_config, {}""
+        env_config = config_comparison.get(environment_config, {)""
         critical_missing = []
         
         for var in ["JWT_SECRET, JWT_SECRET_KEY]:"
@@ -274,7 +275,7 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
 """Empty docstring."""
         Test subprotocol negotiation differences that might cause issues.
         
-        HTTP doesn't have subprotocol negotiation, but WebSocket does.
+        HTTP doesn't have subprotocol negotiation, but WebSocket does.'
         This test checks if the negotiation process causes auth issues.
 """Empty docstring."""
         # Test different subprotocol formats and their negotiation success
@@ -385,7 +386,7 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
             
             try:
                 # HTTP method call
-                http_method = getattr(auth_service, method_comparison["http_auth_method]"
+                http_method = getattr(auth_service, method_comparison["http_auth_method)"
                 
                 if asyncio.iscoroutinefunction(http_method):
                     if method_comparison[http_auth_method] == authenticate_token:
@@ -399,7 +400,7 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
                         http_result = http_method(jwt_token)
                 
                 # WebSocket method call
-                websocket_method = getattr(auth_service, method_comparison[websocket_auth_method]
+                websocket_method = getattr(auth_service, method_comparison[websocket_auth_method)
                 
                 if asyncio.iscoroutinefunction(websocket_method):
                     websocket_result = await websocket_method(mock_websocket)
@@ -431,3 +432,6 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+"""
+))))))))))))))

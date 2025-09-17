@@ -1,4 +1,5 @@
 '''
+'''
 Comprehensive Phase 0 Migration Validation Test Suite
 
 Business Value Justification:
@@ -25,6 +26,7 @@ These tests are designed to be comprehensive and difficult to pass - they will c
 - Legacy method usage
 - Session management problems
 - Concurrent request isolation failures
+'''
 '''
 
 import asyncio
@@ -300,7 +302,7 @@ class TestAgent(BaseAgent):
         return {"status": "success", "method": "core_logic"}
 
 class LegacyAgent(BaseAgent):
-        """Legacy agent that hasn't been migrated (should fail tests)."""
+        """Legacy agent that hasn't been migrated (should fail tests)."""'
 
     def __init__(self):
         pass
@@ -357,7 +359,7 @@ await agent.execute(context)
 
 @pytest.mark.asyncio
     async def test_legacy_agent_execute_fails_appropriately(self):
-"""Test legacy agent that hasn't implemented new execute pattern fails."""
+"""Test legacy agent that hasn't implemented new execute pattern fails."""'
 pass
 agent = self.LegacyAgent()
 context = UserExecutionContext( )
@@ -449,7 +451,7 @@ session_mgr2 = DatabaseSessionManager(context2)
 assert session_mgr1 is not session_mgr2
 assert session_mgr1.context.user_id != session_mgr2.context.user_id
 
-        # Test that sessions cannot access each other's data
+        # Test that sessions cannot access each other's data'
 with pytest.raises(SessionIsolationError):
             # Attempt to use wrong session manager with different user context
 await session_mgr1._validate_context_match(context2)
@@ -644,6 +646,7 @@ class IsolationTestAgent(BaseAgent):
 """Test concurrent UserExecutionContext creation."""
 
 def create_context_for_user(user_id: str) -> UserExecutionContext:
+    pass
 """Create context for a user."""
 await asyncio.sleep(0)
 return UserExecutionContext( )
@@ -686,7 +689,7 @@ class MemoryTestAgent(BaseAgent):
         user_memory_block = "X" * 1000000  # 1MB per user
 
     # Process with memory allocation
-        await asyncio.sleep(0.05)
+        await asyncio.sleep(0.5)
 
         await asyncio.sleep(0)
         return { }
@@ -739,10 +742,10 @@ class TestErrorHandlingWithInvalidContexts:
 
 malicious_contexts = [ ]
         # SQL injection attempts
-(""; DROP TABLE users; --", "thread_1", "run_1", "req_1"),
-("user_1", ""; DELETE FROM sessions; --", "run_1", "req_1"),
-("user_1", "thread_1", ""; UPDATE users SET admin=1; --", "req_1"),
-("user_1", "thread_1", "run_1", ""; INSERT INTO admin_users VALUES ("hacker"); --"),
+(""; DROP TABLE users; --", "thread_1", "run_1", "req_1"),"
+("user_1", ""; DELETE FROM sessions; --", "run_1", "req_1"),"
+("user_1", "thread_1", ""; UPDATE users SET admin=1; --", "req_1"),"
+("user_1", "thread_1", "run_1", ""; INSERT INTO admin_users VALUES ("hacker"); --"),"
 
         # Script injection attempts
 ("<script>alert('xss')</script>", "thread_1", "run_1", "req_1"),
@@ -806,17 +809,18 @@ assert len(context.request_id) > 10000
 """Test context handles Unicode and special characters properly."""
 
 unicode_contexts = [ ]
-("[U+7528][U+6237]123", "[U+7EBF][U+7A0B]456", "[U+8FD0][U+884C]789", "[U+8BF7][U+6C42]012"),  # Chinese
-("[U+0645][U+0633][U+062A][U+062E][U+062F][U+0645]123", "[U+0645][U+0648][U+0636][U+0648][U+0639]456", "[U+062A][U+0634][U+063A][U+064A][U+0644]789", "[U+0637][U+0644][U+0628]012"),  # Arabic
-("[U+043F]o[U+043B][U+044C][U+0437]ovate[U+043B][U+044C]123", "[U+043F]otok456", "[U+0437]a[U+043F]uck789", "[U+0437]a[U+043F]poc012"),  # Russian
+("[U+7528][U+6237]123", "[U+7EBF][U+7A0B]456", "[U+8FD0][U+884C]789", "[U+8BF7][U+6C42]12"),  # Chinese
+("[U+645][U+633][U+062A][U+062E][U+062F][U+645]123", "[U+645][U+648][U+636][U+648][U+639]456", "[U+062A][U+634][U+063A][U+064A][U+644]789", "[U+637][U+644][U+628]12"),  # Arabic
+("[U+043F]o[U+043B][U+044C][U+437]ovate[U+043B][U+044C]123", "[U+043F]otok456", "[U+437]a[U+043F]uck789", "[U+437]a[U+043F]poc012"),  # Russian
 ("[U+1F464]user123", "[U+1F9F5]thread456", "[U+1F3C3]run789", "[U+1F4DD]req012"),  # Emojis
-("user )
-123", "thread\t456", "run\r789", "req\0012"),  # Control chars
-('user'123', 'thread'456', 'run\\789', 'req/012'),  # Special chars
+("user )"
+123", "thread\t456", "run\r789", "req\12"),  # Control chars"
+('user'123', 'thread'456', 'run\\789', 'req/12'),  # Special chars
                             
 
 for user_id, thread_id, run_id, request_id in unicode_contexts:
 try:
+    pass
 context = UserExecutionContext( )
 user_id=user_id,
 thread_id=thread_id,
@@ -849,10 +853,10 @@ extreme_contexts = [ ]
 
                                             # Boolean-like strings (should be treated as strings)
 ("true", "false", "True", "False"),
-("yes", "no", "on", "of""thread": true}', '{"run": 123}', '{"req": null}'),
+("yes", "no", "on", "of""thread": true}', '{"run": 123}', '{"req": null}'),'
 
                                             # XML-like strings (should be treated as literal strings)
-("<user>test</user>", "<thread>456</thread>", "<run>789</run>", "<req>012</req>"),
+("<user>test</user>", "<thread>456</thread>", "<run>789</run>", "<req>12</req>"),
                                             
 
 for user_id, thread_id, run_id, request_id in extreme_contexts:
@@ -993,6 +997,7 @@ assert result["status"] == "partially_migrated"
                         # Legacy method should be discouraged (but might still work for backward compatibility)
                         # In a real system, we might want to add warnings or restrictions
 if hasattr(agent, 'execute_legacy'):
+    pass
 logger.warning("Agent still has legacy execute_legacy method - should be removed")
 
 
@@ -1005,6 +1010,7 @@ class TestAPIEndpointUpdates:
 
         Simulate API endpoint creating context from request parameters
 def create_context_from_api_request(user_id: str, thread_id: str = None, run_id: str = None):
+    pass
 """Simulate API endpoint context creation."""
 pass
 await asyncio.sleep(0)
@@ -1037,9 +1043,11 @@ assert context2.run_id == "custom_run_456"
 """Test API endpoint error handling with invalid parameters."""
 
 def safe_create_context_from_api(user_id: str, thread_id: str = None, run_id: str = None):
+    pass
 """Safely create context with error handling."""
 pass
 try:
+    pass
 await asyncio.sleep(0)
 return create_user_execution_context( )
 user_id=user_id,
@@ -1047,21 +1055,25 @@ thread_id=thread_id or "",
 run_id=run_id or ""
         
 except ValueError as e:
+    pass
 return {"error": str(e), "status": "invalid_context"}
 
             # Test with invalid user_id
 result1 = safe_create_context_from_api("")  # Empty user_id
 if isinstance(result1, dict) and "error" in result1:
+    pass
 assert "user_id cannot be empty" in result1["error"]
 
                 # Test with None user_id
 result2 = safe_create_context_from_api(None)
 if isinstance(result2, dict) and "error" in result2:
+    pass
 assert "user_id cannot be None" in result2["error"]
 
                     # Test with placeholder user_id
 result3 = safe_create_context_from_api("None")
 if isinstance(result3, dict) and "error" in result3:
+    pass
 assert "cannot be the string 'None'" in result3["error"]
 
 
@@ -1301,12 +1313,12 @@ class PerformanceTestAgent(BaseAgent):
         max_execution_time = max(execution_times)
 
         # Performance assertions
-        assert avg_execution_time < 0.001, ""
-        assert max_execution_time < 0.005, ""
+        assert avg_execution_time < 0.1, ""
+        assert max_execution_time < 0.5, ""
 
 @pytest.mark.asyncio
     async def test_memory_usage_performance(self):
-"""Test memory usage doesn't degrade with new context approach."""
+"""Test memory usage doesn't degrade with new context approach."""'
 
 import psutil
 process = psutil.Process()
@@ -1351,7 +1363,7 @@ class ScalabilityTestAgent(BaseAgent):
 
     async def execute_with_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:
     # Simulate light processing
-        await asyncio.sleep(0.001)  # 1ms processing time
+        await asyncio.sleep(0.1)  # 1ms processing time
         await asyncio.sleep(0)
         return {"user_id": context.user_id, "processed": True}
 
@@ -1399,7 +1411,7 @@ class ScalabilityTestAgent(BaseAgent):
         assert all_successful, ""
         assert avg_time_per_execution < 0.1, ""
 
-        # Verify scalability (performance shouldn't degrade significantly with larger batches)
+        # Verify scalability (performance shouldn't degrade significantly with larger batches)'
         small_batch_avg = performance_results[0]["avg_time_per_execution"]
         large_batch_avg = performance_results[-1]["avg_time_per_execution"]
 

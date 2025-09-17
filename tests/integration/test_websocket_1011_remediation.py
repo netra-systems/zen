@@ -282,7 +282,7 @@ class WebSocket1011RemediationTests:
             assert result.success is True
             assert result.level == AuthPermissivenessLevel.DEMO
             assert result.user_context is not None
-            assert result.user_context.user_id == demo-user-001""
+            assert result.user_context.user_id == demo-user-1""
             
             # Verify demo user can access chat functionality
             assert execute_agents" in result.user_context.agent_context[permissions]"
@@ -400,7 +400,7 @@ class WebSocket1011RemediationTests:
                 mock_get_env.return_value = mock_env
                 
                 try:
-                    result = await authenticate_with_permissiveness(scenario['websocket']
+                    result = await authenticate_with_permissiveness(scenario['websocket')
                     
                     if result.success:
                         success_count += 1
@@ -509,3 +509,6 @@ if __name__ == "__main__:"
     
     # Run the test
     asyncio.run(run_comprehensive_test())
+
+"""
+))))

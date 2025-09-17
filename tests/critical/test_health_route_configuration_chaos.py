@@ -1,6 +1,7 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 '''
+'''
 Test suite to expose health route configuration and environment chaos.
 
 This test suite is designed to FAIL and expose the following configuration issues:
@@ -12,6 +13,7 @@ This test suite is designed to FAIL and expose the following configuration issue
 6. Environment variable conflicts affecting health checks
 7. Database connection pool conflicts in health endpoints
 8. Logging configuration inconsistencies in health routes
+'''
 '''
 
 import asyncio
@@ -195,7 +197,7 @@ class TestHealthRouteConfigurationChaos:
 
                                                     # Look for environment-specific conditionals
         env_conditionals = []
-        lines = content.split(" )
+        lines = content.split(" )"
 
 class TestWebSocketConnection:
         """Real WebSocket connection for testing instead of mocks."""
@@ -223,7 +225,7 @@ class TestWebSocketConnection:
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
-        ")
+        ")"
         for i, line in enumerate(lines):
         if 'environment' in line.lower() and any(word in line for word in ['if', 'config', 'development', 'staging', 'production']):
         env_conditionals.append({ })
@@ -491,8 +493,8 @@ class TestWebSocketConnection:
         r'backend.*ready'
                                                                                                                                                                                                                         
 
-        for i, line in enumerate(content.split(" ))
-        ")):
+        for i, line in enumerate(content.split(" ))"
+        ")):"
         for pattern in startup_patterns:
         if re.search(pattern, line, re.IGNORECASE):
         startup_order.append({ })
@@ -513,8 +515,8 @@ class TestWebSocketConnection:
         r'health.*dependency'
                                                                                                                                                                                                                                         
 
-        for i, line in enumerate(content.split(" ))
-        ")):
+        for i, line in enumerate(content.split(" ))"
+        ")):"
         for pattern in dependency_patterns:
         if re.search(pattern, line, re.IGNORECASE):
         health_dependencies.append({ })
@@ -544,8 +546,8 @@ class TestWebSocketConnection:
 
                                                                                                                                                                                                                                                             # Look for health check ordering or priorities
         health_check_order = []
-        lines = content.split(" )
-        ")
+        lines = content.split(" )"
+        ")"
 
         for i, line in enumerate(lines):
         if any(db in line.lower() for db in ['postgres', 'redis', 'clickhouse']) and 'check' in line.lower():
@@ -1111,3 +1113,5 @@ class TestHealthRouteConfigurationConsistency:
 
         if __name__ == "__main__":
         pytest.main([__file__, "-v", "--tb=short"])
+
+)))

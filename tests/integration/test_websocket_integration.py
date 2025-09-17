@@ -156,7 +156,7 @@ async def test_websocket_heartbeat_functionality(authenticated_websocket_client)
         
         # Test that connection is stable (basic heartbeat functionality)
         # Send a ping to ensure connection is still active
-        websocket.send_json({"type: ping}"
+        websocket.send_json({"type: ping)"
         response = websocket.receive_json()
         assert response[type] == pong
 
@@ -244,14 +244,14 @@ async def test_websocket_multiple_connections_isolation():
             user1_response = ws1.receive_json()
             assert user1_response["type] == pong"
             
-            # User 2 should NOT receive user 1's message/response
+            # User 2 should NOT receive user 1's message/response'
             # (This tests isolation - user 2 should only get heartbeat or nothing)
             try:
                 user2_unexpected = ws2.receive_json()
-                # If we get anything, it should NOT be user 1's pong
+                # If we get anything, it should NOT be user 1's pong'
                 assert user2_unexpected.get(type) != pong or user2_unexpected.get(message) != from user 1""
             except Exception:
-                # Timeout is expected - user 2 should not receive user 1's messages
+                # Timeout is expected - user 2 should not receive user 1's messages'
                 pass
 
 
@@ -274,6 +274,9 @@ async def test_websocket_error_handling(authenticated_websocket_client):
         assert FORMAT_ERROR in error_response.get(error_code, ")"
         
         # Connection should still be alive after error
-        websocket.send_json({type: ping}
+        websocket.send_json({type: ping)
         ping_response = websocket.receive_json()
         assert ping_response[type] == pong""
+
+)))
+}

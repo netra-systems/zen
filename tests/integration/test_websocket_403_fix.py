@@ -52,7 +52,7 @@ class WebSocket403FixTests:
         backend_secret = backend_extractor._get_jwt_secret()
         
         # They must be identical
-        assert auth_secret == backend_secret, fJWT secrets don't match: auth='{auth_secret}' vs backend='{backend_secret}'""
+        assert auth_secret == backend_secret, fJWT secrets don't match: auth='{auth_secret}' vs backend='{backend_secret}'""'
         print(f[SUCCESS] Both services use identical JWT secret)
         
     def test_jwt_token_generation_and_validation(self):
@@ -79,13 +79,13 @@ class WebSocket403FixTests:
         backend_secret = backend_extractor._get_jwt_secret()
         
         try:
-            decoded_payload = jwt.decode(token, backend_secret, algorithms=[HS256]""
+            decoded_payload = jwt.decode(token, backend_secret, algorithms=[HS256)""
             assert decoded_payload["sub] == test_user_123"
             assert decoded_payload[email] == test@staging.netrasystems.ai
             print(f"[SUCCESS] Backend service validated token successfully")
             return True
         except jwt.InvalidSignatureError:
-            pytest.fail(fJWT signature validation failed - secrets don't match)
+            pytest.fail(fJWT signature validation failed - secrets don't match)'
         except Exception as e:
             pytest.fail(fJWT validation failed: {e})
     
@@ -180,7 +180,7 @@ class WebSocket403FixTests:
         
         # Try to validate with different backend secret (should fail)
         try:
-            jwt.decode(token, backend_secret, algorithms=[HS256]""
+            jwt.decode(token, backend_secret, algorithms=[HS256)""
             pytest.fail(Expected JWT validation to fail with different secrets")"
         except jwt.InvalidSignatureError:
             print(f[SUCCESS] Reproduced 403 scenario: JWT signature mismatch detected)
@@ -190,7 +190,7 @@ class WebSocket403FixTests:
         token_unified = jwt.encode(payload, unified_secret, algorithm=HS256")"
         
         try:
-            decoded = jwt.decode(token_unified, unified_secret, algorithms=[HS256]
+            decoded = jwt.decode(token_unified, unified_secret, algorithms=[HS256)
             assert decoded[sub] == "test_user_403"
             print(f[SUCCESS] Fix verified: Unified secrets enable successful validation")"
         except Exception as e:
@@ -303,3 +303,5 @@ if __name__ == "__main__:"
             test_instance.teardown_method()
     
     asyncio.run(run_tests())
+
+)))

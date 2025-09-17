@@ -51,6 +51,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.websocket_race_conditions  
 @pytest.mark.real_services
 class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
+    pass
 """Empty docstring."""
     Test WebSocket handshake race condition prevention with real service components.
     
@@ -112,7 +113,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
             # Step 3: Only allow message handling after validation
             if handshake_valid:
                 sequence_log.append(message_handling_started)
-                await mock_websocket.send_json({type: "connection_established}"
+                await mock_websocket.send_json({type: "connection_established)"
         
         # CRITICAL: Verify proper sequence was followed
         expected_sequence = [
@@ -158,7 +159,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
             # CRITICAL: Should perform actual send test
             assert send_called, (
                 Handshake validation failed to perform bidirectional communication test. ""
-                "This can cause race conditions where transport appears ready but isn't."
+                "This can cause race conditions where transport appears ready but isn't."'
             )
             
             # Should send a validation message
@@ -168,12 +169,12 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
             
             # Should contain validation fields
             assert "type in test_message_received, Validation message missing type field"
-            assert test_message_received[type] == handshake_validation, (
+            assert test_message_received[type) == handshake_validation, (
                 fWrong validation message type: {test_message_received.get('type')}
             )
             
             # Should take some time to perform validation
-            assert duration >= 0.001, (
+            assert duration >= 0.1, (
                 fHandshake validation too fast: {duration:.3f}s. ""
                 fMay be skipping actual bidirectional test.
             )
@@ -261,19 +262,19 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
                 while True:
                     is_ready = is_websocket_connected_and_ready(mock_websocket, connection_id)
                     if is_ready:
-                        await mock_message_handler({type": "user_message}
+                        await mock_message_handler({type": "user_message)
                         break
                     
                     # Prevent infinite loop in test
                     if time.time() - start_time > 1.0:
                         break
                     
-                    await asyncio.sleep(0.01)
+                    await asyncio.sleep(0.1)
                 
                 processing_delay = time.time() - start_time
                 
                 # CRITICAL: Should have waited for application readiness
-                assert processing_delay >= 0.09, (
+                assert processing_delay >= 0.9, (
                     fMessage processing started too early: {processing_delay:.3f}s delay. 
                     fShould wait for application state readiness (>=0.09s). 
                     Race condition: messages processed before application ready.""
@@ -330,7 +331,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
             # Test the readiness validation
             try:
                 # This should reject the connection due to service not ready
-                with patch.dict('os.environ', {'ENVIRONMENT': 'staging'}:
+                with patch.dict('os.environ', {'ENVIRONMENT': 'staging'):
                     from netra_backend.app.websocket_core.gcp_initialization_validator import gcp_websocket_readiness_guard
                     
                     async with gcp_websocket_readiness_guard(mock_app_state, timeout=1.0) as readiness_result:
@@ -362,7 +363,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
         
         EXPECTED TO FAIL INITIALLY: Timeout misalignment causes premature WebSocket failures.
 ""
-        with patch.dict('os.environ', {'ENVIRONMENT': 'staging'}:
+        with patch.dict('os.environ', {'ENVIRONMENT': 'staging'):
             websocket_timeout = get_websocket_recv_timeout()
             agent_timeout = get_agent_execution_timeout()
             
@@ -435,7 +436,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
     @pytest.mark.asyncio
     async def test_concurrent_handshake_race_condition_prevention(self):
 
-        Test that concurrent WebSocket handshakes don't interfere with each other.
+        Test that concurrent WebSocket handshakes don't interfere with each other.'
         
         EXPECTED TO FAIL INITIALLY: Concurrent handshakes may have race conditions.
         ""
@@ -519,3 +520,6 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
             f"Connection timestamps spread too wide: {timestamp_spread:.2f}s. "
             Should execute concurrently, not serially.""
         )
+
+"""
+)))))

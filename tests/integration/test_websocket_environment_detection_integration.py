@@ -39,6 +39,7 @@ pytestmark = [
 
 @pytest.mark.integration
 class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
+    pass
 """Empty docstring."""
     Integration tests for WebSocket E2E environment detection system.
     
@@ -129,10 +130,10 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             "ENVIRONMENT: staging,"
             GOOGLE_CLOUD_PROJECT: netra-staging-123,
             "K_SERVICE: netra-backend-staging",
-            K_REVISION: netra-backend-staging-00001,
+            K_REVISION: netra-backend-staging-1,
             # CRITICAL: E2E variables NOT set (simulating the bug)
-            # E2E_TESTING: 1",      # Missing - this causes the bug
-            # "STAGING_E2E_TEST: 1, # Missing - this causes the bug
+            # E2E_TESTING: 1",      # Missing - this causes the bug"
+            # "STAGING_E2E_TEST: 1, # Missing - this causes the bug"
         }
         
         # Clear environment and set staging simulation
@@ -255,7 +256,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             # This might be expected if factory requires full context
 
     def test_websocket_auth_integration_with_factory_validation(self):
-        
+        pass
         Test the complete integration from WebSocket auth to factory validation.
         
         This tests the full flow that causes 1011 errors:
@@ -303,7 +304,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             e2e_from_headers = headers.get("X-E2E-Test) == true"
             e2e_from_env = env.get(E2E_TESTING, 0) == 1""
             
-            # The bug: headers have E2E indicators but environment doesn't
+            # The bug: headers have E2E indicators but environment doesn't'
             e2e_detected = e2e_from_headers and e2e_from_env  # Both must be true
             
             logger.info(f CHART:  E2E from headers: {e2e_from_headers}")"
@@ -462,7 +463,7 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             ENVIRONMENT: staging,
             GOOGLE_CLOUD_PROJECT: "netra-staging-123456,"
             K_SERVICE": netra-backend-staging,"
-            K_REVISION: netra-backend-staging-00001-abc,
+            K_REVISION: netra-backend-staging-1-abc,
             K_CONFIGURATION": "netra-backend-staging,
             PORT: 8080,
             
@@ -475,8 +476,8 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             # These would be needed for E2E detection but are not set in staging:
             # E2E_TESTING": "1,
             # STAGING_E2E_TEST: 1, 
-            # E2E_TEST_ENV: "staging,
-            # E2E_OAUTH_SIMULATION_KEY": ...,
+            # E2E_TEST_ENV: "staging,"
+            # E2E_OAUTH_SIMULATION_KEY": ...,"
         }
         
         # Set up complete staging environment simulation
@@ -564,3 +565,6 @@ if __name__ == "__main__:"
         
     finally:
         test_instance.teardown_method()
+
+"""
+)))

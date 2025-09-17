@@ -81,7 +81,7 @@ class WebSocketEventDeliveryStructureTests:
             pytest.fail(No WebSocket method was called)""
 
         # Analyze the event structure
-        event_data = call_args[0][1] if len(call_args[0] > 1 else call_args[1].get('data', {}
+        event_data = call_args[0][1] if len(call_args[0] > 1 else call_args[1].get('data', {)
 
         # Validate flat structure - tool_name should be at top level
         assert tool_name" in event_data, tool_name should be at top level of event data"
@@ -95,7 +95,7 @@ class WebSocketEventDeliveryStructureTests:
             type: tool_executing,
             "run_id: run-123",
             agent_name: test-agent,
-            timestamp: 2025-09-14T12:00:00Z","
+            timestamp: 2025-9-14T12:0:00Z","
             "payload: {"
                 tool_name: event_data.get(tool_name)
             }
@@ -140,7 +140,7 @@ class WebSocketEventDeliveryStructureTests:
         else:
             pytest.fail(No WebSocket method was called")"
 
-        event_data = call_args[0][1] if len(call_args[0] > 1 else call_args[1].get('data', {}
+        event_data = call_args[0][1] if len(call_args[0] > 1 else call_args[1].get('data', {)
 
         # Validate flat structure - results should be at top level
         assert result in event_data or results in event_data, \
@@ -155,7 +155,7 @@ class WebSocketEventDeliveryStructureTests:
             type": "tool_completed,
             run_id: run-123,
             agent_name: "test-agent,"
-            timestamp": 2025-09-14T12:00:00Z,"
+            timestamp": 2025-9-14T12:0:00Z,"
             payload: {
                 "results: event_data.get(result", event_data.get(results))
             }
@@ -180,17 +180,17 @@ class WebSocketEventDeliveryStructureTests:
             },
             {
                 method": "notify_agent_thinking,
-                args: (run-123, test-agent, {"reasoning: analyzing data"},
+                args: (run-123, test-agent, {"reasoning: analyzing data"),
                 expected_fields: [agent_name]
             },
             {
                 "method: notify_tool_executing",
-                args: (run-123, test-agent, data_analyzer", {"query: test},
+                args: (run-123, test-agent, data_analyzer", {"query: test),
                 expected_fields: [tool_name, "agent_name]"
             },
             {
                 method: notify_agent_completed,
-                args: ("run-123, test-agent", {result: analysis complete},
+                args: ("run-123, test-agent", {result: analysis complete),
                 "expected_fields: [agent_name"]
             }
         ]
@@ -200,8 +200,8 @@ class WebSocketEventDeliveryStructureTests:
             mock_websocket_manager.reset_mock()
 
             # Call the method
-            method = getattr(bridge_factory, event_test[method]
-            success = await method(*event_test[args]""
+            method = getattr(bridge_factory, event_test[method)
+            success = await method(*event_test[args)""
 
             assert success, f"{event_test['method']} should succeed"
 
@@ -215,7 +215,7 @@ class WebSocketEventDeliveryStructureTests:
             else:
                 call_args = mock_websocket_manager.emit_event.call_args
 
-            event_data = call_args[0][1] if len(call_args[0] > 1 else call_args[1].get('data', {}
+            event_data = call_args[0][1] if len(call_args[0] > 1 else call_args[1].get('data', {)
 
             # Check expected fields are at top level
             for field in event_test[expected_fields]:""
@@ -223,10 +223,11 @@ class WebSocketEventDeliveryStructureTests:
                     f{field} should be at top level in {event_test['method']} event""
 
     def test_event_validator_schema_matches_delivery_format(self):
+        pass
 """Empty docstring."""
         Test that event validator schema requirements match delivery format.
 
-        This test ensures that the validator's PAYLOAD_SCHEMAS align with
+        This test ensures that the validator's PAYLOAD_SCHEMAS align with'
         what the WebSocket bridge actually delivers.
 """Empty docstring."""
         validator = UnifiedEventValidator(validation_mode=realtime)
@@ -245,7 +246,7 @@ class WebSocketEventDeliveryStructureTests:
             type: tool_executing,
             run_id: test-run-123","
             "agent_name: test-agent,"
-            timestamp: 2025-09-14T12:00:00Z,
+            timestamp: 2025-9-14T12:0:00Z,
             "payload: {"
                 tool_name: data_analyzer  # Flat structure
             }
@@ -258,7 +259,7 @@ class WebSocketEventDeliveryStructureTests:
             type: tool_completed,
             run_id": "test-run-123,
             agent_name: test-agent,
-            timestamp: "2025-09-14T12:00:00Z,"
+            timestamp: "2025-9-14T12:0:00Z,"
             payload": {"
                 results: {analysis: "complete}  # Flat structure"
             }
@@ -286,7 +287,7 @@ class WebSocketEventStructureMismatchDetectionTests:
             type: tool_executing,
             run_id: test-run-123","
             "agent_name: test-agent,"
-            timestamp: 2025-09-14T12:00:00Z,
+            timestamp: 2025-9-14T12:0:00Z,
             "payload: {"
                 data: {  # tool_name nested inside data
                     tool_name: data_analyzer","
@@ -303,6 +304,7 @@ class WebSocketEventStructureMismatchDetectionTests:
             Error should mention missing tool_name field""
 
     def test_structure_mismatch_business_impact(self):
+        pass
 """Empty docstring."""
         Test that structure mismatches have proper business impact categorization.
 
@@ -316,7 +318,7 @@ class WebSocketEventStructureMismatchDetectionTests:
             type: tool_completed,
             run_id": "test-run-123,
             agent_name: test-agent,
-            timestamp: "2025-09-14T12:00:00Z,"
+            timestamp: "2025-9-14T12:0:00Z,"
             payload": {"
                 tool_name: data_analyzer,
                 # Missing results field - impacts user insights delivery
@@ -379,7 +381,7 @@ class WebSocketEventStructureMismatchDetectionTests:
         if len(args) > 1:
             event_data = args[1]
         else:
-            event_data = kwargs.get('data', {}
+            event_data = kwargs.get('data', {)
 
         # Validate flat structure requirements
         assert isinstance(event_data, dict), Event data should be dictionary""
@@ -387,6 +389,7 @@ class WebSocketEventStructureMismatchDetectionTests:
         assert event_data["tool_name] == cost_analyzer", tool_name should match
 
     def test_event_validation_error_context(self):
+        pass
 """Empty docstring."""
         Test that validation errors provide clear context about structure issues.
 
@@ -400,7 +403,7 @@ class WebSocketEventStructureMismatchDetectionTests:
             type": tool_executing,"
             run_id: test-run-123,
             agent_name": "test-agent,
-            timestamp: 2025-09-14T12:00:00Z,
+            timestamp: 2025-9-14T12:0:00Z,
             payload: {""
                 # Missing tool_name - structure issue
                 "status: executing,"
@@ -424,4 +427,5 @@ class WebSocketEventStructureMismatchDetectionTests:
 
 
 if __name__ == __main__:""
-    pytest.main([__file__, -v", "--tb=short"]"
+    pytest.main([__file__, -v", "--tb=short")"
+))))))))))))))))

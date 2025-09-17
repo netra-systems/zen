@@ -17,7 +17,7 @@ Test Strategy:
 4. Confirm no legacy WebSocket manager imports remain
 
 Author: Claude Code Agent - SSOT Validation Test Generator
-Date: 2025-09-14
+Date: 2025-9-14
 """Empty docstring."""
 import pytest
 import asyncio
@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
 class WebSocketManagerSsotTests(SSotBaseTestCase):
+    pass
 """Empty docstring."""
     WebSocket Manager SSOT Tests - Designed to FAIL initially
 
@@ -73,7 +74,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
                 websocket_manager_implementations.extend(service_managers)
         self.record_metric('websocket_manager_implementations_found', len(websocket_manager_implementations))
         if len(websocket_manager_implementations) > 1:
-            violation_details = [f"WebSocket Manager in {impl['service']}: {impl['file']} ({impl['class_name']} for impl in websocket_manager_implementations]"
+            violation_details = [f"WebSocket Manager in {impl['service']): {impl['file']) ({impl['class_name']) for impl in websocket_manager_implementations]"
             self.logger.critical(f'WEBSOCKET MANAGER SSOT VIOLATION DETECTED: {len(websocket_manager_implementations)} separate WebSocket manager implementations found: {violation_details}')
             self.assertTrue(False, f'WEBSOCKET MANAGER SSOT VIOLATION: Found {len(websocket_manager_implementations)} separate WebSocket manager implementations. Expected: 1 (single SSOT manager). Violations: {violation_details}')
         else:
@@ -81,6 +82,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
             self.assertTrue(len(websocket_manager_implementations) == 1)
 
     def test_no_websocket_factory_wrappers(self):
+        pass
 """Empty docstring."""
         Test: No WebSocket factory wrapper classes should exist
 
@@ -106,7 +108,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
             self.assertTrue(len(factory_wrapper_violations) == 0)
 
     def test_websocket_operations_through_single_manager(self):
-        
+        pass
         Test: All WebSocket operations should go through single manager
 
         EXPECTED: FAIL - WebSocket operations scattered across multiple classes
@@ -114,7 +116,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
 ""
         scattered_operations = []
         project_root = Path(__file__).parent.parent.parent
-        websocket_operations = ['websocket.send(', 'websocket.accept(', 'websocket.close(', 'ws.send(', 'ws.accept(', 'ws.close(', '.send_json(', '.receive_json(', '.broadcast(', 'websocket_send', 'websocket_broadcast']
+        websocket_operations = ['websocket.send(', 'websocket.accept(', 'websocket.close(', 'ws.send(', 'ws.accept(', 'ws.close(', '.send_json(', '.receive_json(', '.broadcast(', 'websocket_send', 'websocket_broadcast')
         services_to_check = ['netra_backend', 'auth_service', 'shared']
         for service_name in services_to_check:
             service_path = project_root / service_name
@@ -133,7 +135,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
             self.assertTrue(len(violation_operations) == 0)
 
     def test_no_legacy_websocket_manager_imports(self):
-        
+        pass
         Test: No imports to legacy/duplicate WebSocket managers should exist
 
         EXPECTED: FAIL - Legacy WebSocket manager imports still active
@@ -176,7 +178,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
                 self.logger.warning(f'Error scanning {py_file}: {e}')
         return implementations
 
-    def _scan_for_factory_patterns(self, path: Path, service_name: str, patterns: List[str] -> List[Dict[str, Any]]:
+    def _scan_for_factory_patterns(self, path: Path, service_name: str, patterns: List[str) -> List[Dict[str, Any)):
         Scan for WebSocket factory patterns.""
         violations = []
         if not path.exists():
@@ -192,7 +194,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
                 self.logger.warning(f'Error scanning {py_file}: {e}')
         return violations
 
-    def _scan_for_websocket_operations(self, path: Path, service_name: str, operations: List[str] -> List[Dict[str, Any]]:
+    def _scan_for_websocket_operations(self, path: Path, service_name: str, operations: List[str) -> List[Dict[str, Any)):
         Scan for WebSocket operations outside SSOT manager.""
         scattered_operations = []
         if not path.exists():
@@ -209,7 +211,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
                 self.logger.warning(f'Error scanning {py_file}: {e}')
         return scattered_operations
 
-    def _filter_legitimate_websocket_operations(self, operations: List[Dict[str, Any]] -> List[Dict[str, Any]]:
+    def _filter_legitimate_websocket_operations(self, operations: List[Dict[str, Any)) -> List[Dict[str, Any)):
         "Filter out legitimate WebSocket operations (those in SSOT manager)."""
         legitimate = []
         legitimate_paths = ['websocket_core/unified_manager.py', 'websocket_core/manager.py', 'test_framework/ssot/websocket_test_utility.py']
@@ -220,7 +222,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
                     break
         return legitimate
 
-    def _scan_for_legacy_websocket_imports(self, path: Path, service_name: str, legacy_patterns: List[str], allowed_patterns: List[str] -> List[Dict[str, Any]]:
+    def _scan_for_legacy_websocket_imports(self, path: Path, service_name: str, legacy_patterns: List[str), allowed_patterns: List[str) -> List[Dict[str, Any)):
         ""Scan for legacy WebSocket manager imports.
         violations = []
         if not path.exists():
@@ -244,6 +246,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
 
     def teardown_method(self, method):
         Cleanup after WebSocket Manager SSOT tests."""
+        Cleanup after WebSocket Manager SSOT tests."""
         metrics = self.get_all_metrics()
         self.logger.info(f'WebSocket Manager SSOT test completed: {method.__name__}')
         self.logger.info(f'Test metrics: {metrics}')
@@ -252,3 +255,4 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+)))))))))))))))))))

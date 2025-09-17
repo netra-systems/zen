@@ -23,6 +23,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
 class WebSocketAuthSSOTIntegrationTests(SSotBaseTestCase):
+    pass
 """Empty docstring."""
     Integration tests that validate SSOT delegation in WebSocket authentication flows.
     These tests should FAIL initially to prove integration-level violations exist.
@@ -271,3 +272,4 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+"""

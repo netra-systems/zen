@@ -28,6 +28,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.websocket, pytest.mark.websoc
 
 @pytest.mark.integration
 class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
+    pass
 """Empty docstring."""
     Integration test suite for WebSocket authentication handshake flow.
     
@@ -60,11 +61,11 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
         else:
             websocket.client_state = Mock()
             websocket.client_state.name = state
-        websocket.headers = kwargs.get('headers', {}
+        websocket.headers = kwargs.get('headers', {)
         websocket.client = Mock()
         websocket.client.host = kwargs.get('host', '127.0.0.1')
         websocket.client.port = kwargs.get('port', 8000)
-        websocket.subprotocols = kwargs.get('subprotocols', []
+        websocket.subprotocols = kwargs.get('subprotocols', [)
         websocket.send_json = Mock()
         websocket.receive_json = Mock()
         websocket.close = Mock()
@@ -169,7 +170,7 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
         This test should FAIL initially if retry logic is broken.
 """Empty docstring."""
         logger.info('[U+1F9EA] INTEGRATION TEST: Authentication retry mechanism')
-        websocket = self.create_mock_websocket_with_state(headers={'authorization': 'Bearer test-token'}
+        websocket = self.create_mock_websocket_with_state(headers={'authorization': 'Bearer test-token')
         e2e_context = {'is_e2e_testing': True, 'bypass_enabled': True, 'environment': 'test'}
         start_time = time.time()
         result = await authenticate_websocket_ssot(websocket, e2e_context=e2e_context)
@@ -238,6 +239,7 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
         logger.info(f'Concurrent authentication of {len(websockets)} connections completed in {elapsed_time:.2f} seconds')
 
     def test_websocket_validation_edge_cases(self):
+        pass
 """Empty docstring."""
         INTEGRATION TEST: WebSocket validation edge cases.
         
@@ -259,3 +261,5 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+"""
+)))))

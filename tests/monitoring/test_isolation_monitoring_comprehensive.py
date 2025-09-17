@@ -31,6 +31,7 @@ class TestWebSocketConnection:
         return self.messages_sent.copy()
 
         '''
+        '''
         Comprehensive Test Suite for Request Isolation Monitoring
 
         Business Value Justification (BVJ):
@@ -56,6 +57,7 @@ class TestWebSocketConnection:
         - Failure: Violation detection and containment
         - Performance: Metrics collection performance
         - API: Monitoring endpoint testing
+        '''
         '''
 
         import asyncio

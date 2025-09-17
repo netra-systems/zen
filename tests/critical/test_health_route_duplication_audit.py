@@ -1,6 +1,7 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 '''
+'''
 Test suite to expose health route duplication and legacy issues.
 
 This test suite is designed to FAIL and expose the following issues:
@@ -9,6 +10,7 @@ This test suite is designed to FAIL and expose the following issues:
 3. Legacy import patterns and compatibility wrappers
 4. Multiple health check systems with overlapping functionality
 5. Inconsistent response formats across services
+'''
 '''
 
 import asyncio
@@ -231,7 +233,7 @@ class TestHealthRouteDuplicationAudit:
         assert len(auditor.legacy_imports) == 0, ""
 
     async def test_multiple_health_systems(self):
-        """Test that we don't have multiple health check systems - SHOULD FAIL."""
+        """Test that we don't have multiple health check systems - SHOULD FAIL."""'
         project_root = Path(__file__).parent.parent.parent
 
         health_systems = []
@@ -286,11 +288,12 @@ class TestHealthRouteDuplicationAudit:
                                                                                                                                     # Check if discovery has its own health endpoint
         has_discovery_health = '/health' in content and '@router.get' in content
 
-                                                                                                                                    # Check if it reports other services' health endpoints
+                                                                                                                                    # Check if it reports other services' health endpoints'
         reports_health = 'health_url' in content or 'health_endpoint' in content
 
-                                                                                                                                    # This should FAIL - discovery has its own health endpoint but doesn't report others
+                                                                                                                                    # This should FAIL - discovery has its own health endpoint but doesn't report others'
         assert not has_discovery_health or reports_health, \
+        "Discovery service has health endpoint but doesn"t report health URLs"
         "Discovery service has health endpoint but doesn"t report health URLs"
 
     async def test_health_dependency_circular_imports(self):
@@ -315,7 +318,7 @@ class TestHealthRouteDuplicationAudit:
         imports = []
 
                                                                                                                                                 # Extract imports
-        for line in content.split(" )
+        for line in content.split(" )"
 
 class TestWebSocketConnection:
         """Real WebSocket connection for testing instead of mocks."""
@@ -343,7 +346,7 @@ class TestWebSocketConnection:
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
-        "):
+        "):"
         if 'from netra_backend' in line and 'health' in line:
         imports.append(line.strip())
 
@@ -416,7 +419,7 @@ class TestHealthEndpointPerformance:
         ""
 
     async def test_health_check_database_connections(self):
-        """Test that health checks don't leak database connections - SHOULD FAIL."""
+        """Test that health checks don't leak database connections - SHOULD FAIL."""'
         pass
                                     # This test would need actual database setup to properly test
                                     # For now, we check for proper connection cleanup patterns
@@ -443,3 +446,6 @@ class TestHealthEndpointPerformance:
 
         if __name__ == "__main__":
         pytest.main([__file__, "-v", "--tb=short"])
+
+)
+]

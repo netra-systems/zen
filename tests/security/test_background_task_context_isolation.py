@@ -24,7 +24,7 @@ class TestWebSocketConnection:
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
-        '''Comprehensive Test Suite for Background Task User Context Isolation
+        '''Comprehensive Test Suite for Background Task User Context Isolation'
 
         SECURITY CRITICAL: These tests validate that all background tasks maintain proper
         UserExecutionContext isolation and prevent data leakage between users.
@@ -36,6 +36,7 @@ class TestWebSocketConnection:
         - WebSocket background task isolation
         - Security validator functionality
         - Cross-user data access prevention
+        '''
         '''
 
         import asyncio
@@ -201,6 +202,7 @@ await asyncio.sleep(0.1)
 assert processor._processed_count > 0
 
 finally:
+    pass
 await processor.stop()
 
 
@@ -247,7 +249,7 @@ assert received_context.user_id == test_user_context.user_id
 
 @pytest.mark.asyncio
     async def test_task_manager_user_isolation(self, test_user_context, test_user_context_2):
-"""Test that users cannot access each other's tasks."""
+"""Test that users cannot access each other's tasks."""'
 manager = SecureBackgroundTaskManager(enforce_user_context=True)
 
     async def test_task():
@@ -257,7 +259,7 @@ return "test_result"
                                 # Start task for user 1
 task1 = await manager.start_task("user1_task", "User 1 Task", test_task, user_context=test_user_context)
 
-                                # User 2 should not be able to access user 1's task
+                                # User 2 should not be able to access user 1's task'
 task_access = manager.get_task("user1_task", user_context=test_user_context_2)
 assert task_access is None
 
@@ -266,6 +268,7 @@ task_access = manager.get_task("user1_task", user_context=test_user_context)
 assert task_access is not None
 
 def test_task_manager_list_tasks_isolation(self, test_user_context, test_user_context_2):
+    pass
 """Test that task listing is properly isolated by user."""
 pass
 manager = SecureBackgroundTaskManager(enforce_user_context=True)
@@ -444,7 +447,7 @@ result2 = await processor.process_event(event2, user_context=test_user_context_2
 assert result1 is True
 assert result2 is True
 
-        # Try to process event1 with user2's context (should fail)
+        # Try to process event1 with user2's context (should fail)'
 result_cross = await processor.process_event(event1, user_context=test_user_context_2)
 assert result_cross is False
 
@@ -570,5 +573,9 @@ assert len(validator.violations) == 0
 
 
 if __name__ == "__main__":
+    pass
 pytest.main([__file__, "-v", "-s"])
 pass
+
+'''
+))

@@ -26,8 +26,10 @@ class TestWebSocketConnection:
 
     #!/usr/bin/env python3
         '''
+        '''
         Integration Test: GCP Staging Configuration Validation
         Tests the complete configuration validation process for GCP staging
+        '''
         '''
 
         import pytest
@@ -268,7 +270,7 @@ class MockConfigMonitor:
         self.alerts.append({ })
         "severity": "CRITICAL",
         "message": "SERVICE_SECRET missing",
-        "timestamp": "2025-09-05T16:43:25Z"
+        "timestamp": "2025-9-05T16:43:25Z"
         
         return False
         return True
@@ -281,7 +283,7 @@ class MockConfigMonitor:
         self.alerts.append({ })
         "severity": "CRITICAL",
         "message": "Circuit breaker open due to config",
-        "timestamp": "2025-09-05T16:43:25Z"
+        "timestamp": "2025-9-05T16:43:25Z"
         
         return "OPEN"
         return "CLOSED"

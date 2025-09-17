@@ -69,6 +69,7 @@ from tests.e2e.staging_config import StagingTestConfig
 
 
 class WebSocketAgentHandlerErrorContextRegressionTests:
+    pass
 """Empty docstring."""
     Integration tests for WebSocket agent handler error path context regression prevention.
     
@@ -146,9 +147,9 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
         
         # Business impact assessment
         total_violations = (
-            len(self.error_tracking['context_creation_violations'] +
-            len(self.error_tracking['conversation_continuity_breaks'] + 
-            len(self.error_tracking['user_isolation_violations']
+            len(self.error_tracking['context_creation_violations') +
+            len(self.error_tracking['conversation_continuity_breaks') + 
+            len(self.error_tracking['user_isolation_violations')
         )
         
         if total_violations == 0:
@@ -166,7 +167,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
         Validates fix for audit report lines 389-410: Error handling in _handle_message_v3()
         Agent execution failures must preserve thread_id/run_id from websocket_context.
         
-        Business Impact: Enterprise customer's optimization session must survive agent errors.
+        Business Impact: Enterprise customer's optimization session must survive agent errors.'
 """Empty docstring."""
         user = self.test_users[0]  # Enterprise user
         context_info = self.error_test_contexts[critical_optimization]
@@ -264,7 +265,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
             "Enterprise optimization session must be resumable after agent error"
         
         # Track successful error handling for business metrics
-        self.error_tracking[contexts_preserved_during_errors].append({
+        self.error_tracking[contexts_preserved_during_errors).append({
             scenario: agent_execution_error","
             "user_tier: user[tier],"
             thread_preserved: True,
@@ -376,7 +377,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
             Customer support conversation must be resumable after connection error""
         
         # Track connection error handling for business metrics
-        self.error_tracking["contexts_preserved_during_errors].append({"
+        self.error_tracking["contexts_preserved_during_errors).append({"
             scenario: websocket_connection_error,
             user_tier": user["tier], 
             thread_preserved: True,
@@ -444,7 +445,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
         onboarding_message = WebSocketMessage(
             type=MessageType.USER_MESSAGE,
             payload={
-                message: I'm new to Netra. Can you help me set up my first optimization?","
+                message: I'm new to Netra. Can you help me set up my first optimization?","'
                 "thread_id: original_thread_id,  # CRITICAL: Onboarding conversation thread"
                 run_id: original_run_id,        # CRITICAL: Onboarding session  
                 "user_type: free_tier",
@@ -495,7 +496,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
             Free user onboarding must be resumable after database error (critical for conversion)
         
         # Track database error handling for conversion impact analysis
-        self.error_tracking[contexts_preserved_during_errors].append({""
+        self.error_tracking[contexts_preserved_during_errors).append({""
             "scenario: database_error_during_onboarding,"
             user_tier: user[tier],
             "conversion_risk: HIGH",
@@ -615,7 +616,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
             Enterprise analysis must be retryable after timeout (business critical)""
         
         # Track timeout handling for enterprise user experience metrics
-        self.error_tracking["contexts_preserved_during_errors].append({"
+        self.error_tracking["contexts_preserved_during_errors).append({"
             scenario: agent_timeout_error,
             user_tier": user["tier],
             timeout_duration: timeout_duration,
@@ -750,7 +751,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
             thread_id=user2_original_thread
         )
         
-        # REGRESSION PREVENTION: Each user's context must be preserved and isolated
+        # REGRESSION PREVENTION: Each user's context must be preserved and isolated'
         assert post_error_user1_context.thread_id == user1_original_thread, \
             fCRITICAL: Import error broke User 1 thread isolation! Expected {user1_original_thread}, got {post_error_user1_context.thread_id}
         
@@ -774,7 +775,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
             CRITICAL: Import error broke run isolation - users have same run_id""
         
         # Track multi-user isolation during system errors
-        self.error_tracking[contexts_preserved_during_errors"].append({"
+        self.error_tracking[contexts_preserved_during_errors").append({"
             scenario: import_error_multi_user_isolation,
             "users_tested: 2,"
             isolation_preserved: True,
@@ -893,10 +894,10 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
             
             # CRITICAL: Context must be preserved through each error
             assert post_error_context.thread_id == scenario_thread_id, \
-                fError {i+1} ({error_scenario['error_type']} broke thread continuity!
+                fError {i+1) ({error_scenario['error_type']) broke thread continuity!
             
             assert post_error_context.user_id == user["user_id], \"
-                fError {i+1} ({error_scenario['error_type']} broke user context!
+                fError {i+1) ({error_scenario['error_type']) broke user context!
             
             error_contexts.append({
                 error_type: error_scenario[error_type"],"
@@ -931,7 +932,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
         # Track complex error scenario handling for business impact assessment
         all_contexts_preserved = all(ctx[thread_preserved"] and ctx[user_preserved] for ctx in error_contexts)"
         
-        self.error_tracking[contexts_preserved_during_errors].append({
+        self.error_tracking[contexts_preserved_during_errors).append({
             "scenario: complex_multi_error_sequence",
             error_types: [ctx[error_type] for ctx in error_contexts],
             errors_processed: len(error_contexts),""
@@ -949,7 +950,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
     @pytest.mark.performance
     async def test_error_handling_performance_impact_on_context_management(self"):"
         
-        Performance test: Validate that error handling doesn't degrade context management performance.
+        Performance test: Validate that error handling doesn't degrade context management performance.'
         
         Error scenarios should not create performance bottlenecks in context lookup/creation.
         This validates that proper context reuse patterns are maintained during errors.
@@ -978,7 +979,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
         
         # Configure to raise errors for performance testing
         async def performance_error(*args, **kwargs):
-            await asyncio.sleep(0.01)  # Small delay to simulate processing
+            await asyncio.sleep(0.1)  # Small delay to simulate processing
             raise Exception("Performance test error)"
         
         mock_message_handler.handle_user_message = performance_error
@@ -1058,7 +1059,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
             f"Slowest error processing too slow: {max_error_processing:.3f}s (max acceptable: 1.0s)"
         
         # Track performance metrics for business impact
-        self.error_tracking[performance_during_errors"].append({"
+        self.error_tracking[performance_during_errors").append({"
             scenario: error_handling_performance,
             "iterations_tested: num_performance_iterations,"
             avg_error_processing_ms: avg_error_processing * 1000,
@@ -1188,7 +1189,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
             
             # Verify correct context pattern usage
             correct_thread_preservation = (post_error_context.thread_id == baseline_thread_id)
-            correct_user_preservation = (post_error_context.user_id == user[user_id]
+            correct_user_preservation = (post_error_context.user_id == user[user_id)
             
             # CRITICAL REGRESSION PREVENTION: Error paths must preserve context correctly
             assert correct_thread_preservation, \
@@ -1200,7 +1201,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
             # Track context pattern compliance for regression analysis
             error_context_patterns.append({
                 error_scenario: scenario[name],
-                error_type": type(scenario["error].__name__,
+                error_type": type(scenario["error).__name__,
                 thread_preserved: correct_thread_preservation,
                 user_preserved: correct_user_preservation,""
                 context_pattern_correct": correct_thread_preservation and correct_user_preservation"
@@ -1227,7 +1228,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
             REGRESSION: Final context check failed - user context not preserved""
         
         # Track regression test results for compliance metrics
-        self.error_tracking[contexts_preserved_during_errors"].append({"
+        self.error_tracking[contexts_preserved_during_errors").append({"
             scenario: error_context_regression_validation,
             "error_scenarios_tested: len(error_scenarios),"
             all_patterns_correct: all_patterns_correct,
@@ -1239,3 +1240,5 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
         print(f CHART:  Error scenarios tested: {len(error_scenarios)}")"
         print(f CHART:  Context preservation rate: {sum(1 for p in error_context_patterns if p['context_pattern_correct']}/{len(error_context_patterns)} (100%))
         print(f TARGET:  Regression prevention: SUCCESSFUL")"
+
+))))))))))))))))))))))))))))))))))))))))))))))

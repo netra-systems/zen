@@ -7,6 +7,8 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
 """
+"""
+        """Send JSON message.""""""
         """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
@@ -17,8 +19,10 @@ class TestWebSocketConnection:
         self._closed = True
         self.is_connected = False
 """
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
+        return self.messages_sent.copy()"""
         return self.messages_sent.copy()"""
         """Performance Tests - Split from test_startup_system.py"""
 
@@ -48,10 +52,13 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
         ServicePorts)
 
 """
+"""
         """Test class for orphaned methods"""
         pass
 """
+"""
         """Set up test environment."""
+        self.temp_dir = tempfile.mkdtemp()"""
         self.temp_dir = tempfile.mkdtemp()"""
         backend_dir = Path(self.temp_dir) / "netra_backend" / "app"
         backend_dir.mkdir(parents=True, exist_ok=True)
@@ -74,6 +81,7 @@ import shutil
         if hasattr(self, 'temp_dir') and os.path.exists(self.temp_dir):
         shutil.rmtree(self.temp_dir)
 """
+"""
         """Test configuration loading and validation."""
     # Test with minimal environment
 essential_env = {'DATABASE_URL': 'postgresql://test:test@localhost:5433/test',, 'JWT_SECRET_KEY': 'test-secret-key-for-testing-purposes',, 'SECRET_KEY': 'test-app-secret-key-for-testing',, 'ENVIRONMENT': 'development'}
@@ -83,4 +91,5 @@ essential_env = {'DATABASE_URL': 'postgresql://test:test@localhost:5433/test',, 
         result = launcher.check_environment()
         assert isinstance(result, bool)
 
+        pass"""
         pass"""

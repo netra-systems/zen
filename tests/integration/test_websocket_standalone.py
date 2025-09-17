@@ -218,7 +218,7 @@ class WebSocketStandaloneTest:
             }
         }
         
-        return event_data_map.get(event_type, {"generic: True}"
+        return event_data_map.get(event_type, {"generic: True)"
 
     def _validate_event_structure(self, event: Dict, event_type: str) -> List[str]:
         Validate WebSocket event structure has required fields.""
@@ -239,7 +239,7 @@ class WebSocketStandaloneTest:
         
         # Validate timestamp format
         try:
-            datetime.fromisoformat(event["timestamp].replace(Z", +00:00))
+            datetime.fromisoformat(event["timestamp].replace(Z", +0:0))
         except (ValueError, AttributeError, KeyError):
             errors.append(Invalid timestamp format)""
         
@@ -371,9 +371,9 @@ class WebSocketStandaloneTest:
             
             # Validate each event structure
             for event in event_sequence:
-                event_errors = self._validate_event_structure(event, event[type]""
+                event_errors = self._validate_event_structure(event, event[type)""
                 if event_errors:
-                    sequence_errors.extend([f{event['type']}: {err}" for err in event_errors]"
+                    sequence_errors.extend([f{event['type']): {err)" for err in event_errors]"
             
             if sequence_errors:
                 error_msg = fAgent event flow validation failed: {'; '.join(sequence_errors)}
@@ -396,7 +396,7 @@ class WebSocketStandaloneTest:
         
         # Test 1: Basic WebSocket Connection
         connection_result = await self.test_websocket_connection_basic()
-        self.results[connection_tests"].append({"
+        self.results[connection_tests").append({"
             test: Basic WebSocket Connection,
             result: connection_result[0],""
             message": connection_result[1]"
@@ -411,7 +411,7 @@ class WebSocketStandaloneTest:
         
         # Test 2: Event Structure Validation
         structure_result = self.test_critical_websocket_event_structure()
-        self.results[event_structure_tests].append({""
+        self.results[event_structure_tests).append({""
             test": Critical Event Structure,"
             result: structure_result[0], 
             "message: structure_result[1]"
@@ -425,7 +425,7 @@ class WebSocketStandaloneTest:
         
         # Test 3: Agent Event Flow Sequence
         flow_result = await self.test_agent_event_flow_sequence()
-        self.results[agent_event_flow_tests].append({
+        self.results[agent_event_flow_tests).append({
             "test: Agent Event Flow Sequence",
             result: flow_result[0],
             message: flow_result[1]""
@@ -525,3 +525,5 @@ if __name__ == __main__:
     
     exit_code = asyncio.run(main())
     sys.exit(exit_code")"
+
+)))))))

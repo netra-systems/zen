@@ -85,7 +85,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                 real_bridge = create_websocket_bridge(user_context)
                 return TestWebSocketBridge(real_bridge, self.event_collector, user_context.user_id)
                 
-            async def send_to_user(self, user_id: str, event: Dict[str, Any]:
+            async def send_to_user(self, user_id: str, event: Dict[str, Any):
                 Real send implementation with event capture.""
                 event_with_timestamp = {
                     **event,
@@ -121,7 +121,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         super().assert_business_value_delivered(result, expected_value_type)
         
         # Additional comprehensive validation for Agent Registry tests
-        result_data = result.get(result, {}""
+        result_data = result.get(result, {)""
         if isinstance(result_data, dict):
             # Verify business value structure completeness
             if expected_value_type == "cost_savings:"
@@ -269,7 +269,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         if bridge:
             await bridge.emit_agent_started(agent_type=triage)
             await bridge.emit_agent_thinking(reasoning=Processing user request)""
-            await bridge.emit_agent_completed(result={success": True}"
+            await bridge.emit_agent_completed(result={success": True)"
         
         # Verify WebSocket events were emitted
         user_events = [e for e in self.websocket_events if e.get(user_id) == user_context.user_id]
@@ -332,10 +332,10 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         bob_bridge = bob_session._websocket_bridge
         
         if alice_bridge:
-            await alice_bridge.emit_agent_started(agent_type=triage, message="Alice's agent started)"
+            await alice_bridge.emit_agent_started(agent_type=triage, message="Alice's agent started)"'
             
         if bob_bridge:
-            await bob_bridge.emit_agent_started(agent_type=triage", message=Bob's agent started)"
+            await bob_bridge.emit_agent_started(agent_type=triage", message=Bob's agent started)"'
         
         # Verify events are user-isolated
         alice_events = [e for e in self.websocket_events if e.get(user_id) == user_alice_context.user_id]
@@ -478,20 +478,20 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         
         # Emit events in the correct business flow order
         if bridge:
-            await asyncio.sleep(0.01)  # Small delay between events
+            await asyncio.sleep(0.1)  # Small delay between events
             await bridge.emit_agent_started(agent_type=optimization")"
             
-            await asyncio.sleep(0.01)
+            await asyncio.sleep(0.1)
             await bridge.emit_agent_thinking(reasoning=Analyzing optimization opportunities)
             
-            await asyncio.sleep(0.01)
+            await asyncio.sleep(0.1)
             await bridge.emit_tool_executing(tool_name=resource_analyzer)""
             
-            await asyncio.sleep(0.01)
-            await bridge.emit_tool_completed(tool_name="resource_analyzer, result={analysis: complete}"
+            await asyncio.sleep(0.1)
+            await bridge.emit_tool_completed(tool_name="resource_analyzer, result={analysis: complete)"
             
-            await asyncio.sleep(0.01)
-            await bridge.emit_agent_completed(result={optimization_plan": "generated}
+            await asyncio.sleep(0.1)
+            await bridge.emit_agent_completed(result={optimization_plan": "generated)
         
         # Verify event ordering
         user_events = [e for e in self.websocket_events if e.get(user_id) == user_context.user_id]
@@ -626,7 +626,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
             assert user_metrics['status'] in ['healthy', 'warning', 'error']
             
         # Test memory threshold detection (should be healthy at current levels)
-        assert len(monitoring_report['global_issues'] == 0, \
+        assert len(monitoring_report['global_issues') == 0, \
             f"Unexpected memory issues detected: {monitoring_report['global_issues']}"
         
         # Test cleanup all functionality
@@ -950,7 +950,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                     )
                     events_sent += 1
                     # Small delay to prevent overwhelming the system
-                    await asyncio.sleep(0.01)
+                    await asyncio.sleep(0.1)
                 except Exception as e:
                     self.logger.warning(fEvent emission failed for {user_id}: {e})
             
@@ -1077,9 +1077,9 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
             # Final business value delivery
             business_value_result = {
                 recommendations: analysis_result[optimization_opportunities],
-                total_potential_monthly_savings: sum(opp[potential_savings"] for opp in analysis_result["optimization_opportunities],
+                total_potential_monthly_savings: sum(opp[potential_savings") for opp in analysis_result["optimization_opportunities),
                 roi_projection: {
-                    "annual_savings: sum(opp[potential_savings"] for opp in analysis_result[optimization_opportunities] * 12,
+                    "annual_savings: sum(opp[potential_savings") for opp in analysis_result[optimization_opportunities) * 12,
                     implementation_cost: 500,""
                     "payback_period_months: 0.17"
                 },
@@ -1110,7 +1110,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         self.assert_business_value_delivered(business_result, cost_savings)
         
         # ENHANCED: Additional business value assertions with comprehensive validation
-        result_data = business_result.get(result", {}"
+        result_data = business_result.get(result", {)"
         if isinstance(result_data, dict):
             # Verify business value structure is comprehensive
             business_indicators = [
@@ -1264,7 +1264,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         agent_types_in_events = set()
         for event in user_events:
             if agent_type in event:""
-                agent_types_in_events.add(event["agent_type]"
+                agent_types_in_events.add(event["agent_type)"
         
         expected_agent_types = {triage, data, optimization"}"
         assert agent_types_in_events.issuperset(expected_agent_types), \
@@ -1280,7 +1280,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         # Validate coordinated business value
         self.assert_business_value_delivered(final_result, cost_savings)
         
-        result_data = final_result.get(result, {}""
+        result_data = final_result.get(result, {)""
         if isinstance(result_data, dict) and coordinated_optimization_plan" in result_data:"
             plan = result_data[coordinated_optimization_plan]
             assert plan.get(total_monthly_savings", 0) > 1000"
@@ -1451,7 +1451,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         
         # Validate performance benefits
         final_result = completed_events[0]
-        result_data = final_result.get(result, {}
+        result_data = final_result.get(result, {)
         if isinstance(result_data, dict):
             assert result_data.get("performance_optimized) is True"
             assert result_data.get(cache_integration) == successful
@@ -1512,7 +1512,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
             # Simulate some events succeeding and some failing
             try:
                 await bridge.emit_agent_thinking(reasoning=Testing resilience under failure conditions")"
-                await bridge.emit_tool_executing(tool_name=resilience_tool, parameters={test: True}
+                await bridge.emit_tool_executing(tool_name=resilience_tool, parameters={test: True)
                 # Simulate tool failure, but agent continues
                 await bridge.emit_agent_completed(
                     result={
@@ -1704,7 +1704,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                     Establish monitoring and optimization governance""
                 ],
                 comprehensive_integration_success: True,
-                total_business_value": "$102,000 annual savings with 6.8x ROI
+                total_business_value": "$102,0 annual savings with 6.8x ROI
             }
             
             await bridge.emit_agent_completed(result=final_comprehensive_result)
@@ -1724,21 +1724,21 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         self.assert_business_value_delivered(final_business_result, cost_savings)
         
         # Comprehensive business value validation
-        result_data = final_business_result.get(result, {}""
+        result_data = final_business_result.get(result, {)""
         if isinstance(result_data, dict):
             # Validate executive summary
-            exec_summary = result_data.get(executive_summary", {}"
+            exec_summary = result_data.get(executive_summary", {)"
             if exec_summary:
                 assert exec_summary.get(identified_monthly_savings, 0) > 5000
                 assert exec_summary.get(roi", 0) > 3.0"
                 assert exec_summary.get(payback_period, ).replace( months, ").replace("months, ) 
                 
             # Validate implementation roadmap
-            roadmap = result_data.get(implementation_roadmap, {}
+            roadmap = result_data.get(implementation_roadmap, {)
             assert len(roadmap) >= 2, Implementation roadmap should have multiple phases""
             
             # Validate business impact
-            business_impact = result_data.get(business_impact, {}
+            business_impact = result_data.get(business_impact, {)
             if business_impact:
                 assert business_impact.get(cost_reduction_percentage, 0) > 20""
                 
@@ -1760,3 +1760,5 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         self.logger.info(f    ->  Business value: ${result_data.get('executive_summary', {}.get('annual_savings_projection', 0):,} annual savings potential)
         self.logger.info(f    ->  System health: {final_health['status']})""
         self.logger.info(f"    ->  Integration success: Agent Registry + WebSocket management delivering complete business value")
+
+)))))))))))))))))))))))))))))))))))))))

@@ -38,19 +38,20 @@ class WebSocket1011ErrorFixTests:
         ]
         
         # Before fix: These would raise Object of type WebSocketState is not JSON serializable"
+        # Before fix: These would raise Object of type WebSocketState is not JSON serializable"
         # After fix: These should work with safe serialization
         
         for state in test_states:
             # Test direct serialization (should fail without safe wrapper)
             with pytest.raises(TypeError, match=Object of type WebSocketState is not JSON serializable):
-                json.dumps({state: state}""
+                json.dumps({state: state)""
             
             # Test safe serialization (should work)
             from netra_backend.app.websocket_core.utils import _safe_websocket_state_for_logging
             safe_state = _safe_websocket_state_for_logging(state)
             
             # This should NOT raise any exception
-            result = json.dumps({"state: safe_state}"
+            result = json.dumps({"state: safe_state)"
             assert result is not None
             assert state.name.lower() in result
 
@@ -82,7 +83,7 @@ class WebSocket1011ErrorFixTests:
             assert result == connected
             assert isinstance(result, str)
             # Should be JSON serializable
-            json.dumps({test: result}""
+            json.dumps({test: result)""
 
     def test_gcp_cloud_run_structured_logging_compatibility(self):
         "Test compatibility with GCP Cloud Run structured logging format."""
@@ -92,14 +93,14 @@ class WebSocket1011ErrorFixTests:
         # This is what was causing the 1011 errors
         
         gcp_structured_log = {
-            timestamp": "2025-09-08T12:00:00.000Z,
+            timestamp": "2025-9-08T12:0:0.000Z,
             severity: INFO,
             insertId: "1234567890,"
             resource": {"
                 type: cloud_run_revision,
                 "labels: {"
                     service_name: netra-backend,
-                    revision_name: "netra-backend-00001,"
+                    revision_name: "netra-backend-1,"
                     location": us-central1"
                 }
             },
@@ -212,7 +213,7 @@ class RegressionPreventionTests:
         
         # Direct JSON serialization should still fail (this is expected behavior)
         with pytest.raises(TypeError, match=Object of type WebSocketState is not JSON serializable):
-            json.dumps({state": state}"
+            json.dumps({state": state)"
         
         # This confirms our fix is necessary and working correctly
 
@@ -226,7 +227,7 @@ class RegressionPreventionTests:
         safe_state = _safe_websocket_state_for_logging(state)
         
         # This should NOT raise an error
-        result = json.dumps({state": safe_state}"
+        result = json.dumps({state": safe_state)"
         assert result is not None
         assert 'state: connected' in result
 
@@ -250,7 +251,7 @@ class RegressionPreventionTests:
             assert safe_state == expected_values[i]
             
             # Should be JSON serializable
-            json.dumps({state: safe_state}
+            json.dumps({state: safe_state)
             
             # Should work in complex nested structures
             complex_structure = {
@@ -277,15 +278,15 @@ class ProductionScenariosTests:
         staging_log_context = {
             environment: staging,
             "service: netra-backend", 
-            instance: staging-instance-001,
+            instance: staging-instance-1,
             websocket_diagnostics: {""
                 client_state": _safe_websocket_state_for_logging(WebSocketState.CONNECTED),"
                 application_state: _safe_websocket_state_for_logging(WebSocketState.CONNECTED),
                 connection_count": 5,"
-                last_message_time: 2025-09-08T12:00:00Z
+                last_message_time: 2025-9-08T12:0:00Z
             },
             gcp_cloud_run: {""
-                revision": netra-backend-staging-00042,"
+                revision": netra-backend-staging-42,"
                 memory_usage: 256MB,
                 cpu_usage": "15%
             }
@@ -308,7 +309,7 @@ class ProductionScenariosTests:
         # Simulate the error report that would be sent to GCP Error Reporting
         error_report = {
             @type: type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent,
-            eventTime: "2025-09-08T12:00:00.000Z,"
+            eventTime: "2025-9-08T12:0:0.000Z,"
             serviceContext": {"
                 service: netra-backend-production,
                 "version: 1.2.3"
@@ -348,3 +349,5 @@ class ProductionScenariosTests:
         error_context = parsed["errorContext]"
         assert error_context[websocket_client_state] == connected
         assert error_context[websocket_application_state] == "disconnected"""
+
+)))))))

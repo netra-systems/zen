@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 '''
+'''
 Frontend Integration Tests with Auth Service
 Test the complete authentication flow from frontend perspective
+'''
 '''
 
 import asyncio
@@ -305,15 +307,15 @@ class FrontendIntegrationTester:
         # Output detailed results
         with open("frontend_integration_results.json", "w") as f:
         json.dump({ })
-        "timestamp": "2025-08-26T04:35:00Z",
+        "timestamp": "2025-8-26T04:35:00Z",
         "auth_service_url": AUTH_SERVICE_URL,
         "frontend_url": FRONTEND_URL,
         "overall_success": success,
         "results": tester.results
         }, f, indent=2)
 
-        print(f" )
-        Detailed results saved to: frontend_integration_results.json")
+        print(f" )"
+        Detailed results saved to: frontend_integration_results.json")"
         return 0 if success else 1
 
         if __name__ == "__main__":

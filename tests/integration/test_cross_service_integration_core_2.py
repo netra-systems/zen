@@ -199,7 +199,7 @@ class TestSyntaxFix:
         assert token is not None
         assert len(token) > 10  # Should be a meaningful token
 
-            # Verify it's stored in service discovery too
+            # Verify it's stored in service discovery too'
         stored_token = launcher.service_discovery.get_cross_service_auth_token()
         assert stored_token == token
         finally:

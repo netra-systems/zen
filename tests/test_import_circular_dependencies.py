@@ -1,8 +1,10 @@
 '''
+'''
 Tests to verify no circular imports exist in critical modules.
 
 These tests ensure that the circular import fixes prevent pytest collection crashes
 and Docker container startup failures.
+'''
 '''
 import pytest
 import sys
@@ -13,9 +15,11 @@ from shared.isolated_environment import IsolatedEnvironment
 
 # Set up Python path for imports
 def _setup_test_paths():
+    pass
 """Set up Python path for test execution."""
 project_root = Path(__file__).parent.parent
 if str(project_root) not in sys.path:
+    pass
 sys.path.insert(0, str(project_root))
 
 _setup_test_paths()
@@ -59,19 +63,21 @@ class TestCircularImports:
                                 # Assert no circular imports detected
         if circular_import_errors:
         pytest.fail( )
-        f"Circular imports detected:
-        " +
+        f"Circular imports detected:"
+        " +"
         "
-        ".join("" for error in circular_import_errors)
+        "
+        ".join("" for error in circular_import_errors)"
                                         
 
                                         Assert no other import failures
         if failed_imports:
         pytest.fail( )
-        f"Module import failures:
-        " +
+        f"Module import failures:"
+        " +"
         "
-        ".join("" for error in failed_imports)
+        "
+        ".join("" for error in failed_imports)"
                                                 
 
     def test_startup_module_import_order(self):
@@ -207,7 +213,7 @@ class TestCircularImports:
 
     def test_import_guards_effectiveness(self):
         """Test that import guards prevent runtime circular import issues."""
-    # Test that TYPE_CHECKING imports don't affect runtime
+    # Test that TYPE_CHECKING imports don't affect runtime'
         try:
         from netra_backend.app.database.session_manager import DatabaseSessionManager
         from netra_backend.app.dependencies import get_db_dependency
@@ -260,7 +266,7 @@ class TestImportHierarchy:
 
     def test_shared_isolated_environment_is_foundation(self):
         """Test that shared.isolated_environment can be imported first."""
-    # This should always work as it's the foundation
+    # This should always work as it's the foundation'
         import shared.isolated_environment
         assert hasattr(shared.isolated_environment, 'get_env')
 
@@ -291,7 +297,7 @@ class TestImportHierarchy:
         assert managed_fn is not None
 
     def test_type_checking_imports_isolation(self):
-        """Test that TYPE_CHECKING imports don't cause runtime issues."""
+        """Test that TYPE_CHECKING imports don't cause runtime issues."""'
         pass
     # Import modules that use TYPE_CHECKING
         import netra_backend.app.database.session_manager
@@ -327,7 +333,7 @@ class TestImportHierarchy:
         print("")
 
         print("\
-        Testing import hierarchy...")
+        Testing import hierarchy...")"
 
         hierarchy_test = TestImportHierarchy()
 
@@ -344,4 +350,4 @@ class TestImportHierarchy:
         print("")
 
         print("\
-        Circular import testing complete!")
+        Circular import testing complete!")"

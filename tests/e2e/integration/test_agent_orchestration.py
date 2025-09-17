@@ -25,7 +25,7 @@ class TestWebSocketConnection:
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
-        '''Agent Orchestration E2E Tests - INTEGRATION MODE
+        '''Agent Orchestration E2E Tests - INTEGRATION MODE'
 
         Tests supervisor agent orchestration, sub-agent coordination, and response flow
         in integration environment with real service dependencies.
@@ -37,6 +37,7 @@ class TestWebSocketConnection:
         4. Strategic Impact: Prevents orchestration failures affecting all tiers
 
         COMPLIANCE: File size <300 lines, Functions <8 lines, Real agent testing
+        '''
         '''
 
         import asyncio
@@ -371,3 +372,7 @@ metrics = tester.orchestration_metrics.get("EnterpriseSupervisor001", {})
 assert metrics.get("execution_time", 999) < 20.0  # Enterprise SLA
 assert metrics.get("agents_coordinated", 0) == 10
 pass
+
+'''
+]]]]
+}}}}}}}}}}}

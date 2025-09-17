@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 '''
+'''
 Comprehensive Integration Tests for Alpine vs Regular Container Switching
 
 Business Value Justification (BVJ):
@@ -18,6 +19,7 @@ This test suite validates:
 
 CRITICAL: These tests use REAL Docker containers and services (no mocks).
 They validate production scenarios for container switching functionality.
+'''
 '''
 
 import asyncio
@@ -129,8 +131,8 @@ class AlpineRegularSwitchingTestSuite:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
 
         if result.returncode == 0 and result.stdout.strip():
-        container_names = result.stdout.strip().split(" )
-        ")
+        container_names = result.stdout.strip().split(" )"
+        ")"
         for name in container_names:
         if name.strip():
         subprocess.run(["docker", "rm", "-f", name.strip()],
@@ -311,7 +313,7 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
         pass
         container_info = manager.get_enhanced_container_status(services)
         for service, info in container_info.items():
-        # Check if image name contains 'alpine' or if it's an Alpine-based image
+        # Check if image name contains 'alpine' or if it's an Alpine-based image'
         assert any(keyword in info.image.lower() for keyword in ['alpine', 'minimal']), \
         ""
 
@@ -389,7 +391,7 @@ class TestSequentialSwitching(AlpineRegularSwitchingTestSuite):
         project_name = manager._get_project_name()
 
         if 'postgres' in test_data:
-            # First create table if it doesn't exist
+            # First create table if it doesn't exist'
         create_cmd = [ ]
         "docker", "exec", "",
         "psql", "-U", "netra", "-d", "netra", "-c",
@@ -799,18 +801,18 @@ class TestErrorRecovery(AlpineRegularSwitchingTestSuite):
 
         # Create invalid Alpine compose file
         invalid_alpine_compose = temp_path / "docker-compose.alpine-test.yml"
-        invalid_alpine_compose.write_text(''' )
+        invalid_alpine_compose.write_text(''' )'
         version: '3.8'
         services:
         test-postgres:
         image: nonexistent-alpine-image:latest
         ports:
         - "5434:5432"
-        ''')
+        ''')'
 
                     # Create valid regular compose file as fallback
         regular_compose = temp_path / "docker-compose.test.yml"
-        regular_compose.write_text(''' )
+        regular_compose.write_text(''' )'
         version: '3.8'
         services:
         test-postgres:
@@ -821,7 +823,7 @@ class TestErrorRecovery(AlpineRegularSwitchingTestSuite):
         POSTGRES_PASSWORD: test_password
         ports:
         - "5434:5432"
-        ''')
+        ''')'
 
         with patch.dict(os.environ, {"PROJECT_ROOT": str(temp_path)}):
                                         # Try Alpine first (should fail)
@@ -873,8 +875,8 @@ class TestErrorRecovery(AlpineRegularSwitchingTestSuite):
         cmd = ["docker", "ps", "-a", "--filter", "", "--format", "{{.Names}}"]
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
 
-        remaining_containers = result.stdout.strip().split(" )
-        ") if result.stdout.strip() else []
+        remaining_containers = result.stdout.strip().split(" )"
+        ") if result.stdout.strip() else []"
         remaining_containers = [item for item in []]
 
         assert not remaining_containers, ""

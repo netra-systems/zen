@@ -3,6 +3,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 env = get_env()
 '''
+'''
 Authentication Cross-System Critical Failure Tests
 
 These tests are designed to FAIL initially to expose real authentication integration
@@ -20,6 +21,7 @@ Test Philosophy: Expose Real Failure Modes
 - Each test designed to expose specific integration gaps
 - Focus on race conditions, state sync, and cross-service consistency
 - Target real-world attack vectors and edge cases
+'''
 '''
 
 import asyncio
@@ -58,6 +60,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
     # Import modules but defer app creation until test execution
 try:
+    pass
 import netra_backend.app.main
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.clients.auth_client import auth_client
@@ -68,6 +71,7 @@ except ImportError as e:
 backend_available = False
 
 try:
+    pass
 import auth_service.main
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.services.auth_service import AuthService
@@ -80,10 +84,12 @@ auth_service_available = False
 
 class TestAuthCrossSystemFailures:
     '''
+    '''
     Authentication Cross-System Critical Failure Test Suite
 
     These tests are designed to FAIL to expose real integration issues
     between the auth service and main backend service.
+    '''
     '''
     pass
 
@@ -91,14 +97,15 @@ class TestAuthCrossSystemFailures:
 @pytest.mark.critical
 # @pytest.fixture
     async def test_concurrent_login_race_condition(self):
-'''Test 1: Concurrent Login Race Condition
+'''Test 1: Concurrent Login Race Condition'
 
 This test WILL FAIL because the auth service and main backend
-don"t properly handle concurrent login attempts for the same user.
+don"t properly handle concurrent login attempts for the same user."
 The race condition occurs when:
 1. Multiple login requests hit different service instances
-2. Token generation and session creation aren"t atomic
+2. Token generation and session creation aren"t atomic"
 3. Database updates can overwrite each other
+'''
 '''
 pass
 user_email = ""
@@ -132,14 +139,17 @@ results = await asyncio.gather(*tasks, return_exceptions=True)
 successful_tokens = []
 for result in results:
 if hasattr(result, 'status_code') and result.status_code == 200:
+    pass
 token_data = result.json()
 if 'access_token' in token_data:
+    pass
 successful_tokens.append(token_data['access_token'])
 
                     # THIS ASSERTION WILL FAIL - multiple valid tokens should not exist
                     # The system should ensure only one valid session per user
 assert len(successful_tokens) <= 1, ( )
 ""
+f"This indicates the auth system doesn"t properly handle concurrent logins."
 f"This indicates the auth system doesn"t properly handle concurrent logins."
                     
 
@@ -154,11 +164,12 @@ assert len(unique_tokens) == len(successful_tokens), ( )
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available")
     async def test_token_invalidation_propagation(self):
-'''Test 2: Token Invalidation Propagation
+'''Test 2: Token Invalidation Propagation'
 
 This test WILL FAIL because token invalidation in auth_service
-doesn"t properly propagate to netra_backend, causing stale tokens
+doesn"t properly propagate to netra_backend, causing stale tokens"
 to remain valid in the backend service.
+'''
 '''
 pass
 user_email = ""
@@ -198,11 +209,11 @@ headers={"Authorization": ""}
                         
 assert logout_response.status_code == 200
 
-                        # Wait a moment for propagation (this won't help - the bug is systemic)
+                        # Wait a moment for propagation (this won't help - the bug is systemic)'
 await asyncio.sleep(0.1)
 
                         # THIS ASSERTION WILL FAIL - invalidated token should be rejected by backend
-                        # But the backend service doesn't know the token was invalidated
+                        # But the backend service doesn't know the token was invalidated'
 backend_health_response = backend_client_test.get( )
 "/api/demo/",
 headers={"Authorization": ""}
@@ -211,17 +222,19 @@ assert backend_health_response.status_code == 401, ( )
 f"TOKEN INVALIDATION FAILURE: Invalidated token still accepted by backend. "
 ""
 f"This indicates token blacklisting isn"t synchronized across services."
+f"This indicates token blacklisting isn"t synchronized across services."
                         
 
 @pytest.mark.asyncio
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available")
     async def test_session_state_desync(self):
-'''Test 3: Session State Desync
+'''Test 3: Session State Desync'
 
 This test WILL FAIL because session state between auth_service
 and netra_backend can become desynchronized, leading to
 inconsistent user states across services.
+'''
 '''
 pass
 user_email = ""
@@ -294,11 +307,12 @@ f"This indicates session state is not synchronized between services."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available")
     async def test_jwt_secret_rotation_during_request(self):
-'''Test 4: JWT Secret Rotation During Request
+'''Test 4: JWT Secret Rotation During Request'
 
-This test WILL FAIL because the system doesn"t handle JWT secret
+This test WILL FAIL because the system doesn"t handle JWT secret"
 rotation gracefully. Active requests fail when secrets rotate,
-and there"s no grace period for old tokens.
+and there"s no grace period for old tokens."
+'''
 '''
 pass
 user_email = ""
@@ -360,11 +374,12 @@ f"System should handle secret rotation gracefully."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available")
     async def test_cross_service_permission_escalation(self):
-'''Test 5: Cross-Service Permission Escalation
+'''Test 5: Cross-Service Permission Escalation'
 
 This test WILL FAIL because permissions granted in auth_service
 may not be properly validated in netra_backend, allowing
 privilege escalation through service boundary manipulation.
+'''
 '''
 pass
                                             # Create low-privilege user
@@ -427,11 +442,12 @@ f"Backend should validate token integrity and reject tampering."
 @pytest.mark.critical
 # @pytest.fixture
     async def test_oauth_state_replay_attack(self):
-'''Test 6: OAuth State Replay Attack
+'''Test 6: OAuth State Replay Attack'
 
-This test WILL FAIL because OAuth state parameters aren"t properly
+This test WILL FAIL because OAuth state parameters aren"t properly"
 validated against replay attacks, allowing attackers to reuse
 state tokens for unauthorized access.
+'''
 '''
 pass
                                                 # Simulate OAuth flow initiation
@@ -455,6 +471,7 @@ first_callback_response = auth_client_test.post("/auth/oauth/google/callback", j
 
                                                 # First use should succeed (if OAuth is implemented)
 if first_callback_response.status_code == 200:
+    pass
 first_token = first_callback_response.json().get("access_token")
 
                                                     # Wait a moment
@@ -474,11 +491,12 @@ f"OAuth implementation should prevent state parameter replay attacks."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available")
     async def test_refresh_token_cross_service_leak(self):
-'''Test 7: Refresh Token Cross-Service Leak
+'''Test 7: Refresh Token Cross-Service Leak'
 
 This test WILL FAIL because refresh tokens may leak between
 services or be accessible from unintended endpoints,
 creating security vulnerabilities.
+'''
 '''
 pass
 user_email = ""
@@ -521,6 +539,7 @@ headers={"Authorization": ""}
                                                             
 
 if user_profile_response.status_code == 200:
+    pass
 profile_data = user_profile_response.json()
 
                                                                 # THIS ASSERTION WILL FAIL - refresh tokens should not be exposed
@@ -541,11 +560,12 @@ f"Only auth service should handle refresh tokens."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available")
     async def test_multi_tab_session_collision(self):
-'''Test 8: Multi-Tab Session Collision
+'''Test 8: Multi-Tab Session Collision'
 
-This test WILL FAIL because the system doesn"t properly handle
+This test WILL FAIL because the system doesn"t properly handle"
 multiple browser tabs with different sessions for the same user,
 leading to session collision and state corruption.
+'''
 '''
 pass
 user_email = ""
@@ -569,7 +589,7 @@ response = auth_client_test.post("/auth/login", json={ })
                                                                         
 assert response.status_code == 200
 login_responses.append(response.json())
-await asyncio.sleep(0.05)  # Small delay between logins
+await asyncio.sleep(0.5)  # Small delay between logins
 
                                                                         Extract tokens from different "tabs"
 tokens = [resp["access_token"] for resp in login_responses]
@@ -611,11 +631,12 @@ f"Multi-tab sessions are interfering with each other."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available")
     async def test_service_restart_auth_persistence(self):
-'''Test 9: Service Restart Auth Persistence
+'''Test 9: Service Restart Auth Persistence'
 
-This test WILL FAIL because authentication state doesn"t persist
+This test WILL FAIL because authentication state doesn"t persist"
 properly across service restarts, causing all users to be logged out
 when services restart.
+'''
 '''
 pass
 user_email = ""
@@ -669,11 +690,12 @@ f"Authentication should persist across service restarts."
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available")
     async def test_cross_origin_token_injection(self):
-'''Test 10: Cross-Origin Token Injection
+'''Test 10: Cross-Origin Token Injection'
 
-This test WILL FAIL because the system doesn"t properly validate
+This test WILL FAIL because the system doesn"t properly validate"
 token origins, allowing tokens from unauthorized domains to be
 accepted by the backend service.
+'''
 '''
 pass
 user_email = ""
@@ -739,8 +761,10 @@ assert legitimate_response.status_code == 200, ( )
 
 @pytest.fixture
 def auth_service_client(self):
+    pass
 """Fixture to provide auth service test client"""
 if not auth_service_available:
+    pass
 pytest.skip("Auth service not available")
         # Create auth app at test execution time to avoid hanging
 await asyncio.sleep(0)
@@ -748,16 +772,19 @@ return TestClient(auth_service.main.app)
 
 @pytest.fixture
 def backend_service_client(self):
+    pass
 """Fixture to provide backend service test client"""
 pass
 if not backend_available:
+    pass
 pytest.skip("Backend service not available")
         # Create backend app at test execution time to avoid hanging
 return TestClient(netra_backend.app.main.app)
 
 # @pytest.fixture
     async def test_user_credentials(self, auth_service_client):
-            # Removed problematic line: '''Fixture to create test user and await asyncio.sleep(0)
+            # Removed problematic line: '''Fixture to create test user and await asyncio.sleep(0)'
+return credentials'''
 return credentials'''
 user_email = ""
 password = "testpass123"
@@ -808,3 +835,5 @@ class TestWebSocketConnection:
         """Get all sent messages."""
         await asyncio.sleep(0)
         return self.messages_sent.copy()
+
+'''

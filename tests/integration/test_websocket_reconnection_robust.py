@@ -1,6 +1,7 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 '''
+'''
 MISSION CRITICAL: WebSocket Reconnection Integration Tests
 
 This test suite ensures WebSocket connections handle reconnection scenarios robustly,
@@ -10,6 +11,7 @@ CRITICAL: WebSocket reliability is essential for real-time chat functionality.
 
 @compliance SPEC/learnings/websocket_agent_integration_critical.xml
 @compliance CLAUDE.md - Chat is King
+'''
 '''
 
 import asyncio
@@ -70,8 +72,10 @@ class WebSocketReconnectionTests:
 
     async def test_exponential_backoff_reconnection(self) -> bool:
         '''
+        '''
         Test exponential backoff during reconnection attempts.
         Verifies delay increases appropriately with each failed attempt.
+        '''
         '''
         test_name = exponential_backoff_reconnection
         print(formatted_string"")
@@ -101,7 +105,7 @@ class WebSocketReconnectionTests:
         self.ws_url,
         extra_headers=headers,
         subprotocols=['formatted_string'] as ws:
-                # Removed problematic line: await ws.send(json.dumps({}
+                # Removed problematic line: await ws.send(json.dumps({)
         'type': 'ping',
         'timestamp': time.time()
                 
@@ -149,8 +153,10 @@ class WebSocketReconnectionTests:
 
     async def test_session_state_restoration(self) -> bool:
         '''
+        '''
         Test that session state is properly restored after reconnection.
         Verifies thread context and message history preservation.
+        '''
         '''
         test_name = session_state_restoration
         print("")
@@ -165,7 +171,7 @@ class WebSocketReconnectionTests:
         self.ws_url,
         subprotocols=['formatted_string'] as ws:
                                                             # Send initial messages to establish state
-                                                            # Removed problematic line: await ws.send(json.dumps({}
+                                                            # Removed problematic line: await ws.send(json.dumps({)
         'type': 'thread_create',
         'payload': }
         'thread_id': thread_id,
@@ -181,7 +187,7 @@ class WebSocketReconnectionTests:
         connection_id = data.get('payload', {}.get('connection_id')
 
                                                                 # Send a message in the thread
-                                                                # Removed problematic line: await ws.send(json.dumps({}
+                                                                # Removed problematic line: await ws.send(json.dumps({)
         'type': 'user_message',
         'payload': }
         'thread_id': thread_id,
@@ -196,7 +202,7 @@ class WebSocketReconnectionTests:
         self.ws_url,
         subprotocols=['formatted_string'] as ws:
                                                                     # Send session restore request
-                                                                    # Removed problematic line: await ws.send(json.dumps({}
+                                                                    # Removed problematic line: await ws.send(json.dumps({)
         'type': 'session_restore',
         'payload': }
         'thread_id': thread_id,
@@ -239,8 +245,10 @@ class WebSocketReconnectionTests:
 
     async def test_graceful_disconnect_handling(self) -> bool:
         '''
+        '''
         Test graceful disconnect with proper cleanup.
         Ensures resources are freed and state is saved.
+        '''
         '''
         test_name = graceful_disconnect_handling
         print(formatted_string"")
@@ -253,7 +261,7 @@ class WebSocketReconnectionTests:
         self.ws_url,
         subprotocols=['formatted_string'] as ws:
                                                                                                                 # Send identification
-                                                                                                                # Removed problematic line: await ws.send(json.dumps({}
+                                                                                                                # Removed problematic line: await ws.send(json.dumps({)
         'type': 'identify',
         'payload': }
         'connection_id': connection_id
@@ -261,7 +269,7 @@ class WebSocketReconnectionTests:
                                                                                                                 
 
                                                                                                                 # Send graceful disconnect
-                                                                                                                # Removed problematic line: await ws.send(json.dumps({}
+                                                                                                                # Removed problematic line: await ws.send(json.dumps({)
         'type': 'disconnect',
         'payload': }
         'connection_id': connection_id,
@@ -288,7 +296,7 @@ class WebSocketReconnectionTests:
         self.ws_url,
         subprotocols=['formatted_string'] as ws:
                                                                                                                                 # Should be able to use same connection_id (old one was cleaned up)
-                                                                                                                                # Removed problematic line: await ws.send(json.dumps({}
+                                                                                                                                # Removed problematic line: await ws.send(json.dumps({)
         'type': 'identify',
         'payload': }
         'connection_id': connection_id
@@ -311,8 +319,10 @@ class WebSocketReconnectionTests:
 
     async def test_token_refresh_during_connection(self) -> bool:
         '''
+        '''
         Test token refresh while connection is active.
         Ensures authentication updates dont break the connection.
+        '''
         '''
         test_name = token_refresh_during_connection
         print(formatted_string)
@@ -325,7 +335,7 @@ class WebSocketReconnectionTests:
         self.ws_url,
         subprotocols=['formatted_string'] as ws:
                                                                                                                                                     # Send initial message
-                                                                                                                                                    # Removed problematic line: await ws.send(json.dumps({}
+                                                                                                                                                    # Removed problematic line: await ws.send(json.dumps({)
         'type': 'ping',
         'timestamp': time.time()
                                                                                                                                                     
@@ -339,7 +349,7 @@ class WebSocketReconnectionTests:
         new_token = self.generate_test_token(expires_in=3600)
 
                                                                                                                                                     # Send token update
-                                                                                                                                                    # Removed problematic line: await ws.send(json.dumps({}
+                                                                                                                                                    # Removed problematic line: await ws.send(json.dumps({)
         'type': 'auth',
         'payload': }
         'token': new_token,
@@ -348,7 +358,7 @@ class WebSocketReconnectionTests:
                                                                                                                                                     
 
                                                                                                                                                     # Verify connection still works with new token
-                                                                                                                                                    # Removed problematic line: await ws.send(json.dumps({}
+                                                                                                                                                    # Removed problematic line: await ws.send(json.dumps({)
         'type': 'ping',
         'timestamp': time.time()
                                                                                                                                                     
@@ -373,8 +383,10 @@ class WebSocketReconnectionTests:
 
     async def test_max_reconnection_attempts(self) -> bool:
         '''
+        '''
         Test that reconnection stops after maximum attempts.
         Prevents infinite reconnection loops.
+        '''
         '''
         test_name = max_reconnection_attempts
         print(")"
@@ -430,8 +442,10 @@ class WebSocketReconnectionTests:
 
     async def test_reconnection_with_queued_messages(self") -> bool:"
         '''
+        '''
         Test that queued messages are sent after reconnection.
         Ensures no message loss during temporary disconnections.
+        '''
         '''
         test_name = reconnection_with_queued_messages
         print()
@@ -449,7 +463,7 @@ class WebSocketReconnectionTests:
         self.ws_url,
         subprotocols=['formatted_string'] as ws:
                                                 # Send first message
-        await ws.send(json.dumps(messages_to_queue[0]
+        await ws.send(json.dumps(messages_to_queue[0)
         await asyncio.sleep(0.5)
 
                                                 # Simulate messages queued during disconnection
@@ -494,8 +508,10 @@ class WebSocketReconnectionTests:
 
     async def test_reconnection_performance(self) -> bool:
         '''
+        '''
         Measure reconnection performance metrics.
         Ensures reconnection happens within acceptable time limits.
+        '''
         '''
         test_name = reconnection_performance
         print(formatted_string)
@@ -512,7 +528,7 @@ class WebSocketReconnectionTests:
         self.ws_url,
         subprotocols=['formatted_string'] as ws:
                                                                                                 # Send ping to verify connection
-                                                                                                # Removed problematic line: await ws.send(json.dumps({}
+                                                                                                # Removed problematic line: await ws.send(json.dumps({)
         'type': 'ping',
         'timestamp': time.time()
                                                                                                 
@@ -646,3 +662,7 @@ sys.exit(0 if results['failed'] == 0 else 1)
 asyncio.run(main())
 
 pass
+
+"""
+))))))))))))))))))))))
+}

@@ -66,58 +66,72 @@ config.project_root = project_root
 return config
 
 def _setup_error_monitoring(self):
+    pass
 """Setup monitoring for console errors and startup logs."""
     # Monitor launcher logs
 if self.launcher and hasattr(self.launcher, 'log_manager'):
+    pass
 log_manager = self.launcher.log_manager
         # Hook into log outputs to capture errors
 original_log = logger.error
 
 def capture_error(msg, *args, **kwargs):
+    pass
 self.console_errors.append(str(msg))
 return original_log(msg, *args, **kwargs)
 
 logger.error = capture_error
 
 def detect_console_errors(self) -> List[str]:
+    pass
 """Detect console errors from service outputs."""
 pass
 return self.console_errors.copy()
 
 def verify_port_allocation(self) -> Tuple[bool, List[str]]:
+    pass
 """Verify services are running on correct ports."""
 issues = []
 
     # Check backend port
 backend_port = self.config.backend_port or 8000
 if not self._is_port_in_use(backend_port):
+    pass
 issues.append("")
 
         # Check auth port
 if not self._is_port_in_use(8081):
+    pass
 issues.append("Auth port 8081 not in use")
 
             # Check frontend port (if enabled)
 if self.config.frontend_port:
+    pass
 if not self._is_port_in_use(self.config.frontend_port):
+    pass
 issues.append("")
 
 return len(issues) == 0, issues
 
 def _is_port_in_use(self, port: int) -> bool:
+    pass
 """Check if a port is in use."""
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 try:
+    pass
 s.bind(('localhost', port))
 return False
 except OSError:
+    pass
 return True
 
 def verify_grace_periods(self) -> Tuple[bool, List[str]]:
+    pass
 """Verify grace periods are respected in startup."""
 issues = []
 
 if not self.start_time:
+    pass
 issues.append("Start time not recorded")
 return False, issues
 
@@ -136,28 +150,36 @@ issues.append("")
 return len(issues) == 0, issues
 
 def _force_free_test_ports(self):
+    pass
 """Force free test ports."""
 test_ports = [8000, 8081, 3000]
 for port in test_ports:
 self._force_free_port(port)
 
 def _force_free_port(self, port: int):
+    pass
 """Force free a specific port."""
 pass
 if sys.platform == "win32":
+    pass
 try:
+    pass
 result = subprocess.run( )
 "",
 shell=True, capture_output=True, text=True
             
 if result.stdout:
-lines = result.stdout.strip().split(" )
-")
+    pass
+lines = result.stdout.strip().split(" )"
+")"
 for line in lines:
 parts = line.split()
 if len(parts) >= 5:
+    pass
 pid = parts[-1]
 if pid.isdigit():
+    pass
 subprocess.run("", shell=True)
 except Exception:
+    pass
 pass

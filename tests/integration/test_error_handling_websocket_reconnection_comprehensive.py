@@ -69,7 +69,7 @@ class WebSocketMessage:
         data = json.loads(json_str)
         msg = cls(data['type'], data['data'], data.get('user_id'))
         msg.id = data['id']
-        msg.timestamp = datetime.fromisoformat(data['timestamp'].replace('Z', '+00:00'))
+        msg.timestamp = datetime.fromisoformat(data['timestamp'].replace('Z', '+0:0'))
         return msg
 
 class ReconnectingWebSocketClient:
@@ -137,7 +137,7 @@ class ReconnectingWebSocketClient:
             logger.warning(f'WebSocket connection failed: {e}')
             return False
 
-    async def send_message(self, message_type: str, data: Dict[str, Any] -> bool:
+    async def send_message(self, message_type: str, data: Dict[str, Any) -> bool:
         Send message with delivery confirmation and queuing.""
         message = WebSocketMessage(message_type, data, self.user_id)
         if self.state == WebSocketState.CONNECTED and self.websocket:
@@ -310,7 +310,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
             assert client.state == WebSocketState.CONNECTED
             assert client.connection_id is not None
             assert client.successful_connections == 1
-            test_message_sent = await client.send_message('test_message', {'content': 'Hello WebSocket', 'test_type': 'authentication_test'}
+            test_message_sent = await client.send_message('test_message', {'content': 'Hello WebSocket', 'test_type': 'authentication_test')
             assert test_message_sent is True
             assert client.messages_sent == 1
             await asyncio.sleep(0.1)
@@ -337,23 +337,23 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
             event = {'event_type': event_type, 'timestamp': datetime.now(timezone.utc).isoformat(), 'data': data or {}}
             reconnection_events.append(event)
             await redis.set_json(f'reconnection_event:{len(reconnection_events)}', event, ex=300)
-        client.on_connected = lambda conn_id: track_reconnection_event('connected', {'connection_id': conn_id}
-        client.on_disconnected = lambda reason: track_reconnection_event('disconnected', {'reason': reason}
-        client.on_reconnect_attempt = lambda attempt: track_reconnection_event('reconnect_attempt', {'attempt': attempt}
+        client.on_connected = lambda conn_id: track_reconnection_event('connected', {'connection_id': conn_id)
+        client.on_disconnected = lambda reason: track_reconnection_event('disconnected', {'reason': reason)
+        client.on_reconnect_attempt = lambda attempt: track_reconnection_event('reconnect_attempt', {'attempt': attempt)
         initial_connection = await client.connect()
         assert initial_connection is True
         initial_connection_id = client.connection_id
         initial_stats = client.get_connection_stats()
         pre_disconnect_messages = []
         for i in range(3):
-            message_sent = await client.send_message('pre_disconnect_message', {'message_index': i, 'content': f'Message before disconnect {i}'}
+            message_sent = await client.send_message('pre_disconnect_message', {'message_index': i, 'content': f'Message before disconnect {i)')
             assert message_sent is True
             pre_disconnect_messages.append(f'pre_disconnect_message_{i}')
         await client.force_disconnect()
         assert client.state in [WebSocketState.DISCONNECTED, WebSocketState.RECONNECTING]
         disconnected_messages = []
         for i in range(2):
-            message_queued = await client.send_message('disconnected_message', {'message_index': i, 'content': f'Message while disconnected {i}'}
+            message_queued = await client.send_message('disconnected_message', {'message_index': i, 'content': f'Message while disconnected {i)')
             assert message_queued is False
             disconnected_messages.append(f'disconnected_message_{i}')
         assert len(client.message_queue) >= 2
@@ -372,7 +372,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
         assert 'disconnected' in event_types
         assert 'reconnect_attempt' in event_types
         assert event_types.count('connected') >= 2
-        post_reconnect_message = await client.send_message('post_reconnect_test', {'content': 'Message after reconnection', 'test_validation': True}
+        post_reconnect_message = await client.send_message('post_reconnect_test', {'content': 'Message after reconnection', 'test_validation': True)
         assert post_reconnect_message is True
         final_stats = client.get_connection_stats()
         await redis.set_json('reconnection_test_stats', final_stats, ex=300)
@@ -401,7 +401,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
                 message = WebSocketMessage(msg_data['type'], msg_data['data'], str(user_context.user_id))
                 await log_message_to_db(message)
                 sent_message_ids.append(message.id)
-                success = await client.send_message(msg_data['type'], msg_data['data']
+                success = await client.send_message(msg_data['type'), msg_data['data')
                 assert success is True
                 await postgres.execute('\n                    UPDATE websocket_message_log \n                    SET delivery_attempts = delivery_attempts + 1 \n                    WHERE message_id = $1\n                ', message.id)
             assert client.messages_sent >= len(critical_messages)
@@ -412,7 +412,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
                 message = WebSocketMessage(msg_data['type'], msg_data['data'], str(user_context.user_id))
                 await log_message_to_db(message)
                 queued_message_ids.append(message.id)
-                await client.send_message(msg_data['type'], msg_data['data']
+                await client.send_message(msg_data['type'), msg_data['data')
             assert len(client.message_queue) >= len(queued_messages)
             reconnection_timeout = 10
             start_wait = time.time()
@@ -473,7 +473,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
                     if success:
                         sent_messages.append(message_data)
                     await redis.set_json(f'user_message:{user_index}:{i}', message_data, ex=300)
-                    await asyncio.sleep(0.01)
+                    await asyncio.sleep(0.1)
                 return sent_messages
             message_tasks = [send_user_messages(client, i, 5) for i, client in enumerate(websocket_clients) if client.state == WebSocketState.CONNECTED]
             user_message_results = await asyncio.gather(*message_tasks, return_exceptions=True)
@@ -523,7 +523,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
             original_token = client.auth_token
             original_token_hash = hash(original_token)
             for i in range(3):
-                await client.send_message('pre_renewal_message', {'index': i, 'auth_generation': 'original'}
+                await client.send_message('pre_renewal_message', {'index': i, 'auth_generation': 'original')
             original_messages_sent = client.messages_sent
             new_user_context = await create_authenticated_user_context(user_email=user_context.agent_context['user_email'], user_id=str(user_context.user_id), environment='test')
             new_token = new_user_context.agent_context.get('jwt_token')
@@ -539,14 +539,14 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
                 await postgres.execute('\n                    UPDATE auth_renewal_log \n                    SET success = true \n                    WHERE user_id = $1 AND new_token_hash = $2\n                ', str(user_context.user_id), str(new_token_hash))
                 post_renewal_messages = []
                 for i in range(3):
-                    success = await client.send_message('post_renewal_message', {'index': i, 'auth_generation': 'renewed', 'renewal_verified': True}
+                    success = await client.send_message('post_renewal_message', {'index': i, 'auth_generation': 'renewed', 'renewal_verified': True)
                     if success:
                         post_renewal_messages.append(i)
                 assert len(post_renewal_messages) >= 2
                 assert client.messages_sent > original_messages_sent
                 stable_connection_test = True
                 for i in range(5):
-                    test_message = await client.send_message('stability_test', {'test_index': i, 'stability_check': True}
+                    test_message = await client.send_message('stability_test', {'test_index': i, 'stability_check': True)
                     if not test_message:
                         stable_connection_test = False
                         break
@@ -562,7 +562,7 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
                 await postgres.execute('\n                    INSERT INTO auth_renewal_log (user_id, old_token_hash, new_token_hash, renewal_reason)\n                    VALUES ($1, $2, $3, $4)\n                ', str(user_context.user_id), str(new_token_hash), str(another_hash), f'periodic_renewal_round_{renewal_round}')
                 client.auth_token = another_token
                 new_token_hash = another_hash
-                renewal_test = await client.send_message('renewal_test', {'renewal_round': renewal_round, 'token_generation': f'renewal_{renewal_round}'}
+                renewal_test = await client.send_message('renewal_test', {'renewal_round': renewal_round, 'token_generation': f'renewal_{renewal_round)')
                 await asyncio.sleep(0.2)
             renewal_summary = await postgres.fetchrow('\n                SELECT \n                    COUNT(*) as total_renewals,\n                    COUNT(CASE WHEN success = true THEN 1 END) as successful_renewals,\n                    COUNT(DISTINCT new_token_hash) as unique_tokens\n                FROM auth_renewal_log \n                WHERE user_id = $1\n            ', str(user_context.user_id))
             renewal_success_rate = renewal_summary['successful_renewals'] / renewal_summary['total_renewals']
@@ -579,3 +579,5 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
+"""
+)))))))))))))))))))

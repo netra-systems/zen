@@ -1,4 +1,5 @@
 '''
+'''
 Cross-service URL alignment tests.
 
 Ensures that backend, auth, and frontend services all agree on URLs
@@ -9,6 +10,7 @@ Business Value Justification (BVJ):
 - Business Goal: Enable reliable service-to-service communication
 - Value Impact: Prevents authentication and service discovery failures
 - Strategic Impact: Foundation for microservices architecture reliability
+'''
 '''
 
 import pytest
@@ -59,12 +61,12 @@ class TestServiceURLAlignment:
         with patch.dict(os.environ, {'ENVIRONMENT': env}, clear=True):
         self._clear_module_cache()
 
-            # Get auth service's own URL
+            # Get auth service's own URL'
         from auth_service.auth_core.auth_environment import AuthEnvironment
         auth_env = AuthEnvironment()
         auth_url = auth_env.get_auth_service_url()
 
-            # Get backend's view of auth URL
+            # Get backend's view of auth URL'
         from netra_backend.app.clients.auth_client_config import load_auth_client_config
         backend_config = load_auth_client_config()
         backend_auth_url = backend_config.service_url
@@ -323,7 +325,7 @@ class TestEnvironmentIsolation:
         """Test that environments are properly isolated."""
 
     def test_no_production_urls_in_staging(self):
-        """Test that staging doesn't accidentally use production URLs."""
+        """Test that staging doesn't accidentally use production URLs."""'
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=True):
         # Clear module cache
         modules = [ ]
@@ -360,7 +362,7 @@ class TestEnvironmentIsolation:
         ], ""
 
     def test_no_staging_urls_in_production(self):
-        """Test that production doesn't accidentally use staging URLs."""
+        """Test that production doesn't accidentally use staging URLs."""'
         pass
         with patch.dict(os.environ, {'ENVIRONMENT': 'production'}, clear=True):
         # Clear module cache
@@ -386,8 +388,8 @@ class TestEnvironmentIsolation:
 
     def test_comprehensive_url_alignment_report():
         """Generate comprehensive URL alignment report."""
-        logger.info(" )
-         + ="*60)
+        logger.info(" )"
+         + ="*60)"
         logger.info("COMPREHENSIVE URL ALIGNMENT REPORT")
         logger.info("="*60)
 
@@ -444,8 +446,8 @@ class TestEnvironmentIsolation:
         logger.info("")
 
                                 # Validate alignment
-        logger.info(" )
-         + -"*60)
+        logger.info(" )"
+         + -"*60)"
         logger.info("VALIDATION RESULTS:")
 
         all_valid = True

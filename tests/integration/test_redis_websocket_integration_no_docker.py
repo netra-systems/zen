@@ -254,7 +254,7 @@ class TestRedisWebSocketIntegration(SSotAsyncTestCase):
         self.assertEqual(retrieved_data["user_id], self.test_user_id)"
     
     async def test_concurrent_websocket_redis_operations(self):
-        Test concurrent WebSocket operations don't conflict in Redis.""
+        Test concurrent WebSocket operations don't conflict in Redis.""'
         if not redis_manager.is_connected:
             self.skipTest(Redis not connected - skipping concurrent operations test)
         
@@ -289,7 +289,7 @@ class TestRedisWebSocketIntegration(SSotAsyncTestCase):
                 )
                 
                 # Small delay to allow interleaving
-                await asyncio.sleep(0.01)
+                await asyncio.sleep(0.1)
         
         # Run 3 concurrent sessions
         sessions = [
@@ -392,7 +392,7 @@ class TestRedisWebSocketErrorRecovery(SSotAsyncTestCase):
             recovered_state = json.loads(recovered_state_json)
             self.assertEqual(recovered_state[user_id"], self.test_user_id)"
             self.assertEqual(recovered_state[run_id], self.test_run_id)
-            self.assertTrue(recovered_state[recovery_test]""
+            self.assertTrue(recovered_state[recovery_test)""
         else:
             logger.info("Redis reconnection failed in test environment - this is expected)"
     
@@ -401,11 +401,11 @@ class TestRedisWebSocketErrorRecovery(SSotAsyncTestCase):
         # Simulate Redis being unavailable by checking circuit breaker
         circuit_status = redis_manager._circuit_breaker.get_status()
         
-        # Test that operations don't crash when Redis is unavailable
+        # Test that operations don't crash when Redis is unavailable'
         # (Redis manager should return None/False gracefully)
         result = await redis_manager.get(non_existent_key)
         # Should return None gracefully, not crash
-        self.assertIsNone(result, Should gracefully return None when key doesn't exist)""
+        self.assertIsNone(result, Should gracefully return None when key doesn't exist)""'
         
         # Test set operation graceful handling
         set_result = await redis_manager.set("test:graceful, value)"
@@ -448,4 +448,5 @@ class TestRedisWebSocketErrorRecovery(SSotAsyncTestCase):
 
 
 if __name__ == "__main__:"
-    pytest.main([__file__, -v, --tb=short]""
+    pytest.main([__file__, -v, --tb=short)""
+)))

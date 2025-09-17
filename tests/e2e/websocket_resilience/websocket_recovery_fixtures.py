@@ -21,10 +21,12 @@ class TestWebSocketConnection:
         """Get all sent messages."""
         return self.messages_sent.copy()
         \n'''
+        \n'''
         Shared fixtures for WebSocket resilience tests.
 
         Common test fixtures, utilities, and mock classes used across all WebSocket resilience tests.
         Extracted from original test files to reduce duplication and maintain consistency.
+        '''
         '''
 
         import asyncio
@@ -623,3 +625,6 @@ class NetworkSimulator:
         "multipart": {"type": ResponseType.MULTIPART, "chunk_size": 150, "total_chunks": 25},
         "binary": {"type": ResponseType.BINARY, "chunk_size": 512, "total_chunks": 10}
     
+
+]]
+}}}}}}}}}}}}}}}}

@@ -21,10 +21,12 @@ class TestWebSocketConnection:
         """Get all sent messages."""
         return self.messages_sent.copy()
         \n'''
+        \n'''
         OAuth Journey Helper Functions
 
         Helper functions for OAuth authentication flow testing and validation.
         Extracted from test_complete_oauth_chat_journey.py for modularity.
+        '''
         '''
 
         import asyncio
@@ -321,3 +323,5 @@ class OAuthReturningUserHelper:
     "error": str(e),
     "returning_time": time.time() - returning_start
                     
+
+}}}}}}}}}}}}}}}}}

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 '''
+'''
 Comprehensive Auth Service Staging Tests
 Manual testing script for staging environment validation
+'''
 '''
 
 import asyncio
@@ -357,14 +359,14 @@ class StagingAuthTester:
         # Output detailed results as JSON for further analysis
         with open("staging_auth_test_results.json", "w") as f:
         json.dump({ })
-        "timestamp": "2025-08-26T04:30:00Z",
+        "timestamp": "2025-8-26T04:30:00Z",
         "service_url": AUTH_SERVICE_URL,
         "overall_success": success,
         "results": tester.results
         }, f, indent=2)
 
-        print(f" )
-        Detailed results saved to: staging_auth_test_results.json")
+        print(f" )"
+        Detailed results saved to: staging_auth_test_results.json")"
 
         return 0 if success else 1
 
