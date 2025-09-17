@@ -48,7 +48,7 @@ env = get_env()
 
             # Set test environment
 env.set("TESTING, 1)"
-env.set(DATABASE_URL", sqlite+aiosqlite:///:memory:, test_websocket_comprehensive)
+env.set(DATABASE_URL", sqlite+aiosqlite:///:memory:, test_websocket_comprehensive)"
 
             # Import websockets only if available (not required for all tests)
 try:
@@ -63,7 +63,7 @@ except ImportError:
                     # Test constants
 WEBSOCKET_ENDPOINT = "/ws"
 WEBSOCKET_CONFIG_ENDPOINT = /ws/config
-WEBSOCKET_HEALTH_ENDPOINT = /ws/health"
+WEBSOCKET_HEALTH_ENDPOINT = /ws/health""
 
                     # Test timeout settings
 CONNECTION_TIMEOUT = 10
@@ -72,14 +72,14 @@ HEARTBEAT_INTERVAL = 45
 
 
 def create_test_user() -> Dict:
-    "Create a test user with basic data.
+    "Create a test user with basic data."""
 
 user_id = str(uuid.uuid4())
 return }
 "id: user_id,"
 email: formatted_string,
-password: "test_password_123,
-name": formatted_string
+password: "test_password_123,"
+name": formatted_string"
     
 
 
@@ -92,14 +92,14 @@ try:
             # Try the correct auth service endpoints based on the auth routes
 auth_endpoints = ]
 http://localhost:8001/auth/dev/login,  # Development login endpoint
-http://localhost:8001/auth/login,     # Standard login endpoint"
+http://localhost:8001/auth/login,     # Standard login endpoint""
             
 
 for endpoint in auth_endpoints:
     try:
 
                     # For dev login, use a simple POST request without credentials
-if "dev/login in endpoint:
+if "dev/login in endpoint:"
     response = await client.post( )
 
 endpoint,
@@ -124,20 +124,20 @@ data = response.json()
 return data.get(access_token) or data.get(token)
 
 except Exception as e:
-    print(")
+    print(")"
 
 continue
 
 return None
 
 except Exception as e:
-    print(formatted_string")
+    print(formatted_string")"
 
 return None
 
 
 class WebSocketTestClient:
-        Enhanced WebSocket test client with realistic connection patterns."
+        Enhanced WebSocket test client with realistic connection patterns.""
 
     def __init__(self, base_url: str, token: str, user_id: str):
         pass
@@ -151,14 +151,14 @@ class WebSocketTestClient:
         self.is_authenticated = False
 
     async def connect(self, subprotocol: Optional[str] = None) -> bool:
-        "Connect to WebSocket with JWT authentication - EXPECTED TO FAIL.
+        "Connect to WebSocket with JWT authentication - EXPECTED TO FAIL."""
         if not WEBSOCKETS_AVAILABLE:
         print(WebSocket library not available - simulating connection failure)
-        self.connection_events.append((websockets_unavailable, time.time())")
+        self.connection_events.append((websockets_unavailable, time.time())")"
         return False
 
         try:
-        ws_url = self.base_url.replace("http://, ws://).replace(https://, wss://) + WEBSOCKET_ENDPOINT
+        ws_url = self.base_url.replace("http://, ws://).replace(https://, wss://) + WEBSOCKET_ENDPOINT"
 
             # Method 1: Authorization header (should work but might fail)
         headers = {
@@ -170,7 +170,7 @@ class WebSocketTestClient:
         try:
         if subprotocol:
         import base64
-        encoded_token = base64.b64encode(".encode()).decode()
+        encoded_token = base64.b64encode(".encode()).decode()"
                     # Use subprotocols parameter for WebSocket protocol negotiation
         self.websocket = await asyncio.wait_for( )
         websockets.connect( )
@@ -189,7 +189,7 @@ class WebSocketTestClient:
         timeout=CONNECTION_TIMEOUT
                         
         except asyncio.TimeoutError:
-        self.connection_events.append(("connection_timeout, time.time()))
+        self.connection_events.append(("connection_timeout, time.time()))"
         return False
 
                             # Wait for welcome message - LIKELY TO TIMEOUT
@@ -210,10 +210,10 @@ class WebSocketTestClient:
         self.is_authenticated = True
         self.connection_events.append((connected, time.time()))
         return True
-        elif msg_type == system_message":
+        elif msg_type == system_message":"
                                         # Check if it's a connection established system message
         data = welcome_data.get(data, {}
-        if data.get("event) == connection_established:
+        if data.get("event) == connection_established:"
         self.connection_id = data.get(connection_id) or data.get(user_id)
         self.is_authenticated = True
         self.connection_events.append(("connected", time.time()))
@@ -226,7 +226,7 @@ class WebSocketTestClient:
         return False
 
                                                     # If we didn't get a connection_established message after 3 attempts
-        self.connection_events.append((auth_failed", time.time()))
+        self.connection_events.append((auth_failed", time.time()))"
         return False
 
         except asyncio.TimeoutError:
@@ -234,7 +234,7 @@ class WebSocketTestClient:
         return False
 
         except Exception as e:
-        self.connection_events.append(("connection_error, time.time(), str(e)))
+        self.connection_events.append(("connection_error, time.time(), str(e)))"
         return False
 
     async def send_message(self, message_type: str, payload: Dict) -> bool:
@@ -254,11 +254,11 @@ class WebSocketTestClient:
         return True
 
         except Exception as e:
-        self.connection_events.append((send_error", time.time(), str(e)))
+        self.connection_events.append((send_error", time.time(), str(e)))"
         return False
 
     async def receive_message(self, timeout: float = MESSAGE_TIMEOUT) -> Optional[Dict]:
-        "Receive message with timeout - MIGHT FAIL DUE TO MESSAGE LOSS.
+        "Receive message with timeout - MIGHT FAIL DUE TO MESSAGE LOSS."""
         if not self.websocket:
         return None
 
@@ -294,14 +294,14 @@ class WebSocketTestClient:
             # Attempt reconnection - THIS IS WHERE ISSUES LIKELY OCCUR
         reconnect_success = await self.connect()
         if reconnect_success:
-        self.connection_events.append((reconnected", time.time()))
+        self.connection_events.append((reconnected", time.time()))"
         return True
         else:
         self.connection_events.append((reconnection_failed, time.time()))
         return False
 
         except Exception as e:
-        self.connection_events.append(("interruption_error, time.time(), str(e)))
+        self.connection_events.append(("interruption_error, time.time(), str(e)))"
         return False
 
     async def close(self):
@@ -322,12 +322,12 @@ class WebSocketTestClient:
         user_data = create_test_user()
 
                     # Get authentication token - THIS MIGHT FAIL if auth service is down
-        token = await get_auth_token(user_data[email"], user_data[password]
+        token = await get_auth_token(user_data[email"], user_data[password]"
 
         if token:
         await asyncio.sleep(0)
         return }
-        "user_id: str(user_data[id],
+        "user_id: str(user_data[id],"""
         email: user_data[email],
         "token": token
                         
@@ -335,21 +335,21 @@ class WebSocketTestClient:
                             # Provide more detailed error information for debugging
         print()
          + =*60)
-        print(AUTHENTICATION FAILURE DETAILS:)"
-        print("=*60)
+        print(AUTHENTICATION FAILURE DETAILS:)""
+        print("=*60)"
         print(formatted_string")"
         print(- Tried endpoints:)
         print(  * http://localhost:8001/auth/dev/login (POST""))
         print(  * http://localhost:8001/auth/login (POST))
         print("- Auth service might not be running on localhost:8001")
-        print(- Check that services are started with: python scripts/dev_launcher.py)"
-        print("=*60)
-        pytest.fail(Failed to authenticate test user - auth service may be down or not properly configured)"
+        print(- Check that services are started with: python scripts/dev_launcher.py)""
+        print("=*60)"
+        pytest.fail(Failed to authenticate test user - auth service may be down or not properly configured)""
 
 
         @pytest.fixture
     async def websocket_config():
-        "Get WebSocket configuration - MIGHT FAIL if service discovery broken.
+        "Get WebSocket configuration - MIGHT FAIL if service discovery broken."""
         try:
         async with httpx.AsyncClient(follow_redirects=True) as client:
         response = await client.get(http://localhost:8000" + "WEBSOCKET_CONFIG_ENDPOINT)
@@ -358,10 +358,10 @@ class WebSocketTestClient:
         await asyncio.sleep(0)
         return response.json()
         else:
-        pytest.fail("
+        pytest.fail(""
 
         except Exception as e:
-        pytest.fail(formatted_string")
+        pytest.fail(formatted_string")"
 
 
         @pytest.mark.e2e
@@ -371,12 +371,12 @@ class TestWebSocketConnectionEstablishment:
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_websocket_config_discovery_service_availability(self):
-        Test WebSocket config discovery - EXPOSES SERVICE AVAILABILITY ISSUES."
+        Test WebSocket config discovery - EXPOSES SERVICE AVAILABILITY ISSUES.""
 
 try:
     async with httpx.AsyncClient(follow_redirects=True) as client:
 
-response = await client.get("http://localhost:8000 + WEBSOCKET_CONFIG_ENDPOINT, timeout=5)
+response = await client.get("http://localhost:8000 + WEBSOCKET_CONFIG_ENDPOINT, timeout=5)"
 
 if response.status_code == 200:
     config = response.json()
@@ -385,10 +385,10 @@ if response.status_code == 200:
                     # EXPECTED TO PASS: Config endpoint should work
 assert websocket in config
 assert "endpoint in config[websocket"]
-assert config[websocket][endpoint] == /ws"
+assert config[websocket][endpoint] == /ws""
 
                     # Verify security features are enabled
-features = config[websocket"][features]
+features = config[websocket"][features]"
 assert features[heartbeat] is True
 assert features["message_routing] is True"
 
@@ -409,13 +409,13 @@ pytest.fail(formatted_string)
 pass
                                 # Mock a successful config response to test the logic
 mock_config = {
-websocket_config: }"
-"version: 3.0,
+websocket_config: }""
+"version: 3.0,"""
 unified_endpoint: /ws,
 "features: }"
 jwt_authentication: True,
-cors_validation: True,"
-message_routing": True
+cors_validation: True,""
+message_routing": True"
                                 
 },
 status: healthy
@@ -423,9 +423,9 @@ status: healthy
 
                                 # Test that our parsing logic works correctly
 assert "websocket_config in mock_config"
-assert mock_config[websocket_config][unified_endpoint] == /ws"
+assert mock_config[websocket_config][unified_endpoint] == /ws""
 
-features = mock_config["websocket_config][features]
+features = mock_config["websocket_config][features]"
 assert features[jwt_authentication] is True
 assert features[cors_validation"] is True"
 
@@ -437,8 +437,8 @@ print([SUCCESS] WebSocket config parsing logic works correctly)
         ""Test discovery of backend services - EXPOSES SERVICE STARTUP ISSUES.
 
 services_to_test = {
-main_backend: http://localhost:8000/health",
-"auth_service: http://localhost:8001/health,
+main_backend: http://localhost:8000/health","
+"auth_service: http://localhost:8001/health,"""
 websocket_config: http://localhost:8000/ws/config,
 "websocket_health: http://localhost:8000/ws/health"
                                     
@@ -451,8 +451,8 @@ for service_name, url in services_to_test.items():
 async with httpx.AsyncClient(follow_redirects=True) as client:
 response = await client.get(url, timeout=3)
 service_status[service_name] = {
-status: available if response.status_code == 200 else formatted_string,"
-response_time": response.elapsed.total_seconds()
+status: available if response.status_code == 200 else formatted_string,""
+response_time": response.elapsed.total_seconds()"
                                                 
 
 except Exception as e:
@@ -472,7 +472,7 @@ for service_name, status in service_status.items():
 
 print(formatted_string)
 else:
-    print(")
+    print(")"
 
 all_available = False
 
@@ -483,13 +483,13 @@ if not all_available:
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-    async def test_websocket_automatic_connection_after_login(self, test_user_with_token"):
-        Test that WebSocket connects automatically after user login - LIKELY TO FAIL."
+    async def test_websocket_automatic_connection_after_login(self, test_user_with_token"):"
+        Test that WebSocket connects automatically after user login - LIKELY TO FAIL.""
 
 pass
 client = WebSocketTestClient( )
 http://localhost:8000,
-test_user_with_token["token],
+test_user_with_token["token],"
 test_user_with_token[user_id]
                                                                         
 
@@ -542,9 +542,9 @@ await client.close()
 
 pass
 client = WebSocketTestClient( )
-http://localhost:8000",
+http://localhost:8000","
 test_user_with_token[token],
-test_user_with_token["user_id]
+test_user_with_token["user_id]"
                                                                                                 
 
 try:
@@ -565,7 +565,7 @@ await client.close()
 client = WebSocketTestClient( )
 http://localhost:8000,
 invalid_token_12345,
-fake_user_id"
+fake_user_id""
                                                                                                             
 
 try:
@@ -576,7 +576,7 @@ connected = await client.connect()
 assert not connected, formatted_string
 
                                                                                                                 # Check that proper error was logged
-auth_failed_events = [item for item in []] == "auth_failed]
+auth_failed_events = [item for item in []] == "auth_failed]"
 connection_errors = [item for item in []] == connection_error]
 
 assert len(auth_failed_events) > 0 or len(connection_errors) > 0, \
@@ -593,11 +593,11 @@ class TestWebSocketMessageRouting:
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_basic_message_echo(self, test_user_with_token):
-        Test basic message sending and receiving - MIGHT FAIL due to message loss."
+        Test basic message sending and receiving - MIGHT FAIL due to message loss.""
 
 client = WebSocketTestClient( )
 http://localhost:8000,
-test_user_with_token["token],
+test_user_with_token["token],"
 test_user_with_token[user_id]
         
 
@@ -618,9 +618,9 @@ assert message_sent, Message should be sent successfully
 response = await client.receive_message(timeout=10)
 
                 # ASSERTION LIKELY TO FAIL: No message response/echo
-assert response is not None, Should receive response to chat message"
+assert response is not None, Should receive response to chat message""
 
-                # Verify message structure (server uses data field, not "payload)
+                # Verify message structure (server uses data field, not "payload)"
 assert type in response
 assert data in response or payload in response
 
@@ -635,7 +635,7 @@ await client.close()
 pass
 client = WebSocketTestClient( )
 http://localhost:8000,
-test_user_with_token[token"],
+test_user_with_token[token"],"
 test_user_with_token[user_id]
                         
 
@@ -643,7 +643,7 @@ try:
     connected = await client.connect()
 
 if not connected:
-    pytest.skip("Connection failed, skipping delivery test)
+    pytest.skip("Connection failed, skipping delivery test)"
 
 
                                 # Send multiple messages rapidly
@@ -706,12 +706,12 @@ if not user2_token:
 
 client1 = WebSocketTestClient( )
 http://localhost:8000,
-user1_data[token"],
+user1_data[token"],"
 user1_data[user_id]
             
 
 client2 = WebSocketTestClient( )
-"http://localhost:8000,
+"http://localhost:8000,"""
 user2_token,
 str(user2_data[id]
             
@@ -732,7 +732,7 @@ thread_id: str(uuid.uuid4()),
 sender_id: user1_data[user_id]
                     
 
-sent = await client1.send_message(thread_message", broadcast_payload)
+sent = await client1.send_message(thread_message", broadcast_payload)"
 assert sent, Broadcast message should be sent
 
                     # user2 should receive the broadcasted message - LIKELY TO FAIL
@@ -740,7 +740,7 @@ received_by_user2 = await client2.receive_message(timeout=5)
 
                     # ASSERTION LIKELY TO FAIL: Broadcasting not working
 assert received_by_user2 is not None, \
-"User2 should receive broadcasted message from User1
+"User2 should receive broadcasted message from User1"""
 
 assert received_by_user2.get(type) == thread_message, \
 Should receive correct message type
@@ -783,12 +783,12 @@ clients.append(client)
                                     # Test that message sent to one connection is received by others
 test_message = {
 user_id: test_user_with_token[user_id],
-content: Multi-tab sync test",
+content: Multi-tab sync test","
 timestamp: time.time()
                                     
 
                                     Send from first connection
-sent = await clients[0].send_message("user_message, test_message)
+sent = await clients[0].send_message("user_message, test_message)"
 assert sent, Message should be sent from first connection
 
                                     # Other connections should receive it - LIKELY TO FAIL
@@ -815,11 +815,11 @@ class TestWebSocketReconnectionResilience:
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_automatic_reconnection_after_network_interruption(self, test_user_with_token):
-        Test automatic reconnection after network issues - EXPECTED TO FAIL."
+        Test automatic reconnection after network issues - EXPECTED TO FAIL.""
 
 client = WebSocketTestClient( )
 http://localhost:8000,
-test_user_with_token["token],
+test_user_with_token["token],"
 test_user_with_token[user_id]
         
 
@@ -846,7 +846,7 @@ test_message = {content: Post-reconnection test}
 sent = await client.send_message(test_message, test_message)
 
                 # ASSERTION LIKELY TO FAIL: Connection not fully restored
-assert sent, Should be able to send messages after reconnection"
+assert sent, Should be able to send messages after reconnection""
 
 finally:
 await client.close()
@@ -854,7 +854,7 @@ await client.close()
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_state_recovery_after_reconnection(self, test_user_with_token):
-        "Test that connection state is recovered after reconnection - EXPECTED TO FAIL.
+        "Test that connection state is recovered after reconnection - EXPECTED TO FAIL."""
 
 pass
 client = WebSocketTestClient( )
@@ -872,13 +872,13 @@ if not connected:
 
                                 # Send messages to establish connection state
 state_messages = ]
-{type: join_thread, thread_id": thread_123},
-{"type: set_status, status: active},
+{type: join_thread, thread_id": thread_123},"
+{"type: set_status, status: active},"
 {"type": subscribe, channel: notifications}
                                 
 
 for msg in state_messages:
-    await client.send_message(msg[type"], msg)
+    await client.send_message(msg[type"], msg)"
 
 await asyncio.sleep(0.1)
 
@@ -892,7 +892,7 @@ if not reconnected:
                                         # Test that previous state is restored - EXPECTED TO FAIL
                                         # Send a message that depends on previous state
 state_dependent_message = {
-"thread_id: thread_123,
+"thread_id: thread_123,"""
 message: This should work if state was restored
                                         
 
@@ -911,13 +911,13 @@ await client.close()
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_message_queue_persistence_during_disconnection(self, test_user_with_token):
-        Test that messages sent during disconnection are queued - EXPECTED TO FAIL."
+        Test that messages sent during disconnection are queued - EXPECTED TO FAIL.""
 
                                                 # This test requires a complex setup with message queuing
                                                 # It's designed to expose the lack of message persistence
 
 client = WebSocketTestClient( )
-"http://localhost:8000,
+"http://localhost:8000,"""
 test_user_with_token[token],
 test_user_with_token[user_id]
                                                 
@@ -972,12 +972,12 @@ await client.close()
 
 @pytest.mark.e2e
 class TestWebSocketErrorHandling:
-    Test error handling and recovery mechanisms - EXPECTED TO REVEAL ERROR HANDLING GAPS."
+    Test error handling and recovery mechanisms - EXPECTED TO REVEAL ERROR HANDLING GAPS.""
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_malformed_message_handling(self, test_user_with_token):
-        "Test handling of malformed JSON messages - MIGHT CRASH CONNECTION.
+        "Test handling of malformed JSON messages - MIGHT CRASH CONNECTION."""
 
 client = WebSocketTestClient( )
 http://localhost:8000,
@@ -1003,13 +1003,13 @@ response = await client.receive_message(timeout=3)
 
                         # ASSERTION MIGHT FAIL: Error handling might crash connection
 if response:
-    assert response.get(type) == error", \
+    assert response.get(type) == error", \"
 
 Should receive error response for malformed JSON
 else:
                                 # Connection might have been closed due to error
 assert not client.websocket or client.websocket.closed, \
-"Connection should be closed after malformed message
+"Connection should be closed after malformed message"""
 
 except Exception as e:
                                     # Connection handling might raise exception
@@ -1034,7 +1034,7 @@ try:
     connected = await client.connect()
 
 if not connected:
-    pytest.skip(Connection failed")
+    pytest.skip(Connection failed")"
 
 
                                                     # Send messages rapidly to trigger rate limiting
@@ -1043,7 +1043,7 @@ rate_limit_hit = False
 
 for i in range(50):  # Try to send way more than rate limit
 try:
-    payload = {rapid_message: i, "timestamp: time.time()}
+    payload = {rapid_message: i, "timestamp: time.time()}"
 
 sent = await client.send_message(spam_test, payload)
 
@@ -1109,12 +1109,12 @@ if connected:
                                                                                                     # Force various error conditions
 if i == 0:
                                                                                                         # Send oversized message
-huge_payload = {data: x" * 10000}  # 10KB payload
+huge_payload = {data: x" * 10000}  # 10KB payload"
 await client.send_message(oversized_test, huge_payload)
 elif i == 1:
                                                                                                             # Send message with invalid structure
 if client.websocket:
-    await client.websocket.send('{"type: null, payload: undefined}')
+    await client.websocket.send('{"type: null, payload: undefined}')"
 
                                                                                                                 # Third client just stays normal for comparison
 
@@ -1144,14 +1144,14 @@ assert surviving_clients >= 1, At least one normal connection should survive err
 
 finally:
 await asyncio.gather( )
-*[client.close(") for client in clients],
+*[client.close(") for client in clients],"
 return_exceptions=True
                                                                                                                                     
 
 
 @pytest.mark.e2e
 class TestWebSocketHeartbeatMonitoring:
-    "Test heartbeat and connection monitoring - EXPECTED TO REVEAL MONITORING GAPS.
+    "Test heartbeat and connection monitoring - EXPECTED TO REVEAL MONITORING GAPS."""
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -1161,7 +1161,7 @@ class TestWebSocketHeartbeatMonitoring:
 client = WebSocketTestClient( )
 http://localhost:8000,
 test_user_with_token[token],
-test_user_with_token[user_id"]
+test_user_with_token[user_id"]"
         
 
 try:
@@ -1184,7 +1184,7 @@ while time.time() - start_time < timeout_duration:
 
 
 if message:
-    if message.get("type) == heartbeat:
+    if message.get("type) == heartbeat:"
 
 heartbeat_received = True
 heartbeat_messages.append(message)
@@ -1200,7 +1200,7 @@ break
 
                                     # ASSERTION MIGHT FAIL: Heartbeat not implemented or not working
 print(formatted_string)
-print(")
+print(")"
 
 if not heartbeat_received:
     print(WARNING: No heartbeat messages received - heartbeat might not be implemented)
@@ -1211,13 +1211,13 @@ await client.close()
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-    async def test_zombie_connection_detection(self, test_user_with_token"):
-        Test detection of zombie connections - LIKELY TO FAIL."
+    async def test_zombie_connection_detection(self, test_user_with_token"):"
+        Test detection of zombie connections - LIKELY TO FAIL.""
 
 pass
 client = WebSocketTestClient( )
 http://localhost:8000,
-test_user_with_token["token],
+test_user_with_token["token],"
 test_user_with_token[user_id]
                                                 
 
@@ -1274,10 +1274,10 @@ elapsed = time.time() - zombie_start_time
 print()
 
 if client.websocket and not client.websocket.closed:
-    print(WARNING: Zombie connection not detected - connection still alive")
+    print(WARNING: Zombie connection not detected - connection still alive")"
 
 else:
-    print("SUCCESS: Zombie connection was detected and closed)
+    print("SUCCESS: Zombie connection was detected and closed)"
 
 
 finally:
@@ -1287,10 +1287,10 @@ await client.close()
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_websocket_memory_leak_detection(test_user_with_token):
-        Test for memory leaks with rapid connection cycles - MIGHT EXPOSE MEMORY LEAKS."
+        Test for memory leaks with rapid connection cycles - MIGHT EXPOSE MEMORY LEAKS.""
 
 connection_stats = {
-"successful_connections: 0,
+"successful_connections: 0,"""
 failed_connections: 0,
 connection_errors: []
                                                                                                                 
@@ -1314,9 +1314,9 @@ if connected:
                                                                                                                             # Send a few messages
 for i in range(3):
                                                                                                                                 # Removed problematic line: await client.send_message(cycle_test, {}
-cycle": cycle,
+cycle": cycle,"
 message: i,
-"data: x * 100  # Some data
+"data: x * 100  # Some data"""
                                                                                                                                 
 
                                                                                                                                 # Wait briefly
@@ -1336,8 +1336,8 @@ except Exception as e:
 
 
                                                                                                                                         # INFORMATIONAL: Report connection cycling results
-print(f"Connection cycle results:)
-print(formatted_string")
+print(f"Connection cycle results:)"
+print(formatted_string")"
 print()
 print(formatted_string)
 
@@ -1362,19 +1362,19 @@ class TestWebSocketIssuesSummary:
 print("")
  + =*80)
 print("WEBSOCKET COMPREHENSIVE TEST SUITE - ISSUES EXPOSED")
-print(=*80)"
+print(=*80)""
 
 issues_discovered = []
 
         # 1. Service Availability Issues
-    print(")
+    print(")"
 1. SERVICE AVAILABILITY ISSUES:)
 try:
     async with httpx.AsyncClient(follow_redirects=True) as client:
 
 services = {
-Backend": http://localhost:8000/health,
-"Auth Service: http://localhost:8001/health,
+Backend": http://localhost:8000/health,"
+"Auth Service: http://localhost:8001/health,"""
 WebSocket Config: http://localhost:8000/ws/config
                 
 
@@ -1405,35 +1405,35 @@ if WEBSOCKETS_AVAILABLE:
     print(   [OK] websockets library available for testing"")
 
 else:
-    print(   [ISSUE] websockets library not available - cannot test actual WebSocket connections)"
+    print(   [ISSUE] websockets library not available - cannot test actual WebSocket connections)""
 
-issues_discovered.append(websockets library not available for real connection testing")
+issues_discovered.append(websockets library not available for real connection testing")"
 
                                                 # 3. Authentication Flow Issues
-    print()"
+    print()""
 3. AUTHENTICATION FLOW ISSUES:)
 user_data = create_test_user()
-token = await get_auth_token(user_data["email], user_data[password]
+token = await get_auth_token(user_data["email], user_data[password]"
 
 if token:
     print(   [OK] Mock authentication token generation works)
 
 else:
-    print(   [ISSUE] Cannot obtain authentication tokens - auth service down")
+    print(   [ISSUE] Cannot obtain authentication tokens - auth service down")"
 
-issues_discovered.append("Authentication service unavailable - cannot test authenticated WebSocket connections)
+issues_discovered.append("Authentication service unavailable - cannot test authenticated WebSocket connections)"
 
                                                         # 4. Expected WebSocket Connection Issues (when services are available)
 print()
 4. EXPECTED WEBSOCKET CONNECTION ISSUES (when services are running):)
 print("   [EXPECTED] WebSocket not automatically connecting after login")
-print(   [EXPECTED] WebSocket authentication handshake failures)"
-print("   [EXPECTED] Message routing and delivery issues)
+print(   [EXPECTED] WebSocket authentication handshake failures)""
+print("   [EXPECTED] Message routing and delivery issues)"
 print(   [EXPECTED] Broadcasting between multiple connections fails")"
 print(   [EXPECTED] Connection state not recovered after reconnection)
 print(   [EXPECTED] Error handling causes connection drops"")
-print(   [EXPECTED] Memory leaks with concurrent connections)"
-print(   [EXPECTED] Heartbeat/zombie connection detection not working")
+print(   [EXPECTED] Memory leaks with concurrent connections)""
+print(   [EXPECTED] Heartbeat/zombie connection detection not working")"
 
                                                         # 5. Test Infrastructure Issues
     print(")"
@@ -1448,10 +1448,10 @@ if WEBSOCKETS_AVAILABLE:
 else:
     print(   [ISSUE] Missing websockets library - install with: pip install websockets)
 
-issues_discovered.append(websockets library missing for real connection tests")
+issues_discovered.append(websockets library missing for real connection tests")"
 
                                                                 # Summary
-print(f" )
+print(f" )"
 6. SUMMARY:)
 print(formatted_string)
 
@@ -1460,31 +1460,31 @@ if issues_discovered:
 
 CRITICAL ISSUES TO FIX:)
 for i, issue in enumerate(issues_discovered, 1):
-    print(formatted_string)"
+    print(formatted_string)""
 
 
-print(f" )
+print(f" )"
 NEXT STEPS:)
-print(f     1. Start backend services: python scripts/dev_launcher.py)"
-print(f"     2. Install missing dependencies: pip install websockets)
-print(f     3. Re-run WebSocket tests to expose connection/auth issues)"
-print(f"     4. Fix WebSocket connection and authentication bugs)
+print(f     1. Start backend services: python scripts/dev_launcher.py)""
+print(f"     2. Install missing dependencies: pip install websockets)"
+print(f     3. Re-run WebSocket tests to expose connection/auth issues)""
+print(f"     4. Fix WebSocket connection and authentication bugs)"
 print(f     5. Implement missing features (reconnection, broadcasting, etc.))
 else:
     print("   [UNEXPECTED] No critical infrastructure issues found")
 
-print(   Ready to test actual WebSocket functionality)"
+print(   Ready to test actual WebSocket functionality)""
 
-print(")
- + ="*80)
+print(")"
+ + ="*80)"
 print(END OF WEBSOCKET ISSUES SUMMARY)
-print("=*80)
+print("=*80)"
 
                                                                             # This test PASSES but shows all the issues that need to be fixed
 assert True, Summary test completed - see output above for issues to fix
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
                                                                                 # Run specific test for development
 pytest.main([__file__ + ::TestWebSocketIssuesSummary::test_websocket_issues_summary, "-v", "-s"]
 pass

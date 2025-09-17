@@ -1,4 +1,4 @@
-"E2E Tests for WebSocket Agent Events with Authentication
+"E2E Tests for WebSocket Agent Events with Authentication"""
 
 Business Value Justification:
 - Segment: All (Free, Early, Mid, Enterprise)
@@ -29,24 +29,24 @@ from test_framework.ssot.real_services_test_fixtures import *
 
 @pytest.mark.e2e
 class WebSocketAgentEventsAuthenticatedE2ETests:
-    E2E tests for WebSocket agent events with authentication."
+    E2E tests for WebSocket agent events with authentication.""
     
     def setup_method(self):
-        "Set up E2E test environment.
+        "Set up E2E test environment."""
         self.auth_helper = E2EAuthHelper(environment=staging")"
     
     @pytest.mark.asyncio
     async def test_websocket_agent_events_authenticated_flow(self, real_services_fixture):
-        Test complete WebSocket event flow with authentication."
+        Test complete WebSocket event flow with authentication.""
         # Arrange - Create authenticated user
         user_credentials = {
-            email": fws-events-{uuid.uuid4()}@netra.test,
+            email": fws-events-{uuid.uuid4()}@netra.test,"
             password: WebSocketTest123!,
-            name: "WebSocket Events Test User
+            name: "WebSocket Events Test User"
         }
         
         auth_result = await self.auth_helper.create_authenticated_user_session(user_credentials)
-        user_id = auth_result[user_id"]
+        user_id = auth_result[user_id"]"
         access_token = auth_result[access_token]
         thread_id = fws-events-{uuid.uuid4()}""
         
@@ -63,8 +63,8 @@ class WebSocketAgentEventsAuthenticatedE2ETests:
             # Start agent execution
             agent_request = {
                 agent_name: websocket_test_agent,
-                task: test_websocket_events",
-                "thread_id: thread_id,
+                task: test_websocket_events","
+                "thread_id: thread_id,"""
                 user_context: {user_id: user_id}
             }
             
@@ -85,7 +85,7 @@ class WebSocketAgentEventsAuthenticatedE2ETests:
                     collected_events.extend(events)
                     
                     # Check for completion
-                    if any(e.get(type) == "agent_completed for e in events):
+                    if any(e.get(type) == "agent_completed for e in events):"
                         break
                 except asyncio.TimeoutError:
                     continue
@@ -94,7 +94,7 @@ class WebSocketAgentEventsAuthenticatedE2ETests:
             assert len(collected_events) >= 3
             
             # Verify core events present
-            event_types = [e.get(type") for e in collected_events]
+            event_types = [e.get(type") for e in collected_events]"
             required_events = [agent_started, agent_thinking, "agent_completed]"
             
             for required_event in required_events:
@@ -103,8 +103,8 @@ class WebSocketAgentEventsAuthenticatedE2ETests:
             # Verify authentication context in events
             for event in collected_events:
                 assert timestamp in event
-                if user_id in event.get(payload", {}:
-                    assert event["payload][user_id] == user_id
+                if user_id in event.get(payload", {}:"
+                    assert event["payload][user_id] == user_id"
         
         finally:
             await websocket_client.disconnect()
@@ -131,13 +131,13 @@ class WebSocketAgentEventsAuthenticatedE2ETests:
         
         client1 = RealWebSocketTestClient(
             thread_id=fuser1-{uuid.uuid4()},
-            user_id=auth1[user_id],"
-            auth_token=auth1[access_token"]
+            user_id=auth1[user_id],""
+            auth_token=auth1[access_token"]"
         
         client2 = RealWebSocketTestClient(
             thread_id=fuser2-{uuid.uuid4()},
-            user_id=auth2[user_id],"
-            auth_token=auth2["access_token]
+            user_id=auth2[user_id],""
+            auth_token=auth2["access_token]"
         
         try:
             # Connect both clients
@@ -161,7 +161,7 @@ class WebSocketAgentEventsAuthenticatedE2ETests:
             user2_event_data = str(user2_events)
             
             assert auth2[user_id] not in user1_event_data
-            assert auth1[user_id] not in user2_event_data"
+            assert auth1[user_id] not in user2_event_data""
         
         finally:
             await client1.disconnect()
@@ -170,12 +170,12 @@ class WebSocketAgentEventsAuthenticatedE2ETests:
             await self.auth_helper.cleanup_user_session(auth2)
     
     async def _execute_agent_and_collect_events(self, client, auth_result, agent_name, backend_url):
-        "Execute agent and collect WebSocket events.
+        "Execute agent and collect WebSocket events."""
         agent_request = {
             "agent_name: agent_name,"
             task: isolation_test,
-            thread_id: client.thread_id,"
-            "user_context: {user_id: auth_result[user_id]}
+            thread_id: client.thread_id,""
+            "user_context: {user_id: auth_result[user_id]}"""
         }
         
         # Start agent
@@ -206,12 +206,12 @@ class WebSocketAgentEventsAuthenticatedE2ETests:
         
         headers = {
             Authorization: fBearer {auth_token},
-            Content-Type: "application/json
+            Content-Type: "application/json"
         }
         
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                f{backend_url}/api/v1/agents/execute",
+                f{backend_url}/api/v1/agents/execute","
                 json=agent_request,
                 headers=headers,
                 timeout=aiohttp.ClientTimeout(total=10)

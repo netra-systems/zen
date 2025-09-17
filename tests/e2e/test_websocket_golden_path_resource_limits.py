@@ -1,4 +1,4 @@
-"
+""""""
 E2E Test: WebSocket Golden Path Resource Limits on GCP Staging
 
 This test validates the WebSocket Manager Emergency Cleanup Failure in the
@@ -21,7 +21,7 @@ BUSINESS IMPACT:
 - Prevents customer-facing failures during peak usage
 
 This test requires GCP staging environment and real service connectivity.
-"
+""
 
 import pytest
 import asyncio
@@ -66,7 +66,7 @@ except ImportError:
 
 
 class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
-    "
+""""""
     E2E tests for WebSocket resource limits in Golden Path user flow on GCP Staging.
 
     These tests validate the complete user experience under resource pressure:
@@ -74,10 +74,10 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
     - Real WebSocket connections to staging infrastructure
     - Real agent execution and AI interactions
     - Resource limit enforcement in production-like conditions
-"
+""
 
     def setup_method(self, method):
-        "Setup E2E test environment with GCP staging connectivity.
+        "Setup E2E test environment with GCP staging connectivity."""
         super().setup_method(method)
 
         # Skip if staging environment not available
@@ -89,8 +89,8 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
         # Create test users for E2E scenarios
         self.test_users = {
             'golden_path_user': ensure_user_id(self.id_manager.generate_id(IDType.USER, prefix=e2e_golden)),
-            'concurrent_user_1': ensure_user_id(self.id_manager.generate_id(IDType.USER, prefix=e2e_concurrent1)),"
-            'concurrent_user_2': ensure_user_id(self.id_manager.generate_id(IDType.USER, prefix="e2e_concurrent2))
+            'concurrent_user_1': ensure_user_id(self.id_manager.generate_id(IDType.USER, prefix=e2e_concurrent1)),""
+            'concurrent_user_2': ensure_user_id(self.id_manager.generate_id(IDType.USER, prefix="e2e_concurrent2))"
         }
 
         # Track real connections and sessions for cleanup
@@ -122,14 +122,14 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
             try:
                 await websocket.close()
             except Exception as e:
-                self.logger.warning(fFailed to close WebSocket connection: {e})"
+                self.logger.warning(fFailed to close WebSocket connection: {e})""
 
         # Invalidate all staging sessions
         for user_id, session_token in self.active_sessions.items():
             try:
                 await self._invalidate_staging_session(session_token)
             except Exception as e:
-                self.logger.warning(f"Failed to invalidate session for {user_id}: {e})
+                self.logger.warning(f"Failed to invalidate session for {user_id}: {e})"
 
         cleanup_time = time.time() - cleanup_start
         self.logger.info(fE2E cleanup completed in {cleanup_time:.3f}s)
@@ -140,20 +140,20 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
     def _get_staging_websocket_url(self) -> str:
         ""Get the staging WebSocket URL from configuration.
         # Use the corrected staging domain per Issue #1278 fix
-        return wss://api.staging.netrasystems.ai/ws"
+        return wss://api.staging.netrasystems.ai/ws""
 
     def _get_staging_api_url(self) -> str:
-        "Get the staging API URL from configuration.
+        "Get the staging API URL from configuration."""
         # Use the corrected staging domain per Issue #1278 fix
         return "https://staging.netrasystems.ai/api"
 
     async def _authenticate_staging_user(self, user_id: str) -> str:
-        Authenticate a test user with staging auth service and return session token."
+        Authenticate a test user with staging auth service and return session token.""
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 # Use staging-appropriate test authentication
                 auth_payload = {
-                    "user_id: user_id,
+                    "user_id: user_id,"""
                     test_mode: True,
                     "e2e_test: True"
                 }
@@ -161,11 +161,11 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
                 response = await client.post(
                     f{self.staging_api_url}/auth/test-login,
                     json=auth_payload,
-                    headers={Content-Type: application/json"}
+                    headers={Content-Type: application/json"}"
 
                 if response.status_code == 200:
                     auth_data = response.json()
-                    session_token = auth_data.get("session_token) or auth_data.get(access_token)
+                    session_token = auth_data.get("session_token) or auth_data.get(access_token)"
 
                     if session_token:
                         self.active_sessions[user_id] = session_token
@@ -193,10 +193,10 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
                     f{self.staging_api_url}/auth/logout,
                     headers={Authorization: fBearer {session_token}}
         except Exception as e:
-            self.logger.warning(fFailed to invalidate staging session: {e})"
+            self.logger.warning(fFailed to invalidate staging session: {e})""
 
     async def _create_staging_websocket_connection(self, user_id: str, session_token: str) -> Any:
-        "Create a real WebSocket connection to GCP staging infrastructure.
+        "Create a real WebSocket connection to GCP staging infrastructure."""
         try:
             self.staging_metrics['connection_attempts'] += 1
 
@@ -235,23 +235,23 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
         try:
             # Send initial Golden Path message (agent execution request)
             golden_path_message = {
-                type: "agent_execution_request,
-                user_id": user_id,
+                type: "agent_execution_request,"
+                user_id": user_id,"
                 request_id: self.id_manager.generate_id(IDType.REQUEST, prefix=golden_path),
                 "message: Optimize my AI infrastructure for cost and performance",
                 test_mode: True,
-                e2e_test: True"
+                e2e_test: True""
             }
 
             await websocket.send(json.dumps(golden_path_message))
 
             # Wait for Golden Path response sequence
             expected_events = [
-                "agent_started,
+                "agent_started,"""
                 agent_thinking,
                 "tool_executing,"
                 tool_completed,
-                agent_completed"
+                agent_completed""
             ]
 
             received_events = []
@@ -264,16 +264,16 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
                     response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                     response_data = json.loads(response)
 
-                    event_type = response_data.get(type")
+                    event_type = response_data.get(type")"
                     if event_type in expected_events:
                         received_events.append(event_type)
                         self.logger.info(fGolden Path event received: {event_type})
 
                 except asyncio.TimeoutError:
-                    self.logger.warning(Timeout waiting for Golden Path event)"
+                    self.logger.warning(Timeout waiting for Golden Path event)""
                     break
                 except ConnectionClosed:
-                    self.logger.error("WebSocket connection closed during Golden Path execution)
+                    self.logger.error("WebSocket connection closed during Golden Path execution)"
                     break
 
             golden_path_time = time.time() - golden_path_start
@@ -326,8 +326,8 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
         baseline_result = await self._execute_golden_path_with_websocket(baseline_websocket, primary_user)
 
         self.assertTrue(baseline_result['completed'],
-                       fBaseline Golden Path should complete successfully. "
-                       f"Events: {baseline_result['events_received']})
+                       fBaseline Golden Path should complete successfully. ""
+                       f"Events: {baseline_result['events_received']})"
 
         self.assertLess(baseline_result['execution_time'], 45.0,
                        fBaseline Golden Path should complete within 45 seconds, 
@@ -389,7 +389,7 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
                 self.active_websockets.remove(connection)
             except Exception as e:
                 self.staging_metrics['cleanup_failures'] += 1
-                self.logger.warning(f"Cleanup failure during recovery: {e})
+                self.logger.warning(f"Cleanup failure during recovery: {e})"
 
         recovery_time = time.time() - recovery_start_time
 
@@ -398,12 +398,12 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
         recovery_result = await self._execute_golden_path_with_websocket(recovery_websocket, primary_user)
 
         self.assertTrue(recovery_result['completed'],
-                       fGolden Path should recover after resource cleanup. "
+                       fGolden Path should recover after resource cleanup. ""
                        fEvents: {recovery_result['events_received']})
 
         self.assertLess(recovery_result['execution_time'], 60.0,
-                       fGolden Path recovery should complete within 60 seconds, "
-                       f"got {recovery_result['execution_time']:.1f}s)
+                       fGolden Path recovery should complete within 60 seconds, ""
+                       f"got {recovery_result['execution_time']:.1f}s)"
 
         self.logger.info(fGolden Path resource limit test completed. 
                         fConnections created: {len(resource_test_connections)}, 
@@ -431,7 +431,7 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
             user_sessions[user_key] = session_token
 
         async def execute_user_golden_path(user_key: str, user_id: str, session_token: str) -> Dict[str, Any]:
-            Execute Golden Path for a single user with resource competition."
+            Execute Golden Path for a single user with resource competition.""
             user_results = {
                 'user_key': user_key,
                 'connections_created': 0,
@@ -459,7 +459,7 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
                                 user_results['golden_path_successes'] += 1
 
                     except Exception as e:
-                        if limit" in str(e).lower():
+                        if limit" in str(e).lower():"
                             user_results['resource_limits_hit'] += 1
                         else:
                             user_results['errors'].append(str(e))
@@ -489,7 +489,7 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
 
         for result in concurrent_results:
             if isinstance(result, Exception):
-                self.logger.error(fConcurrent user execution failed: {result})"
+                self.logger.error(fConcurrent user execution failed: {result})""
                 continue
 
             user_key = result['user_key']
@@ -497,7 +497,7 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
             total_connections_created += result['connections_created']
             total_resource_limits_hit += result['resource_limits_hit']
 
-            self.logger.info(f"User {user_key}: {result['golden_path_successes']}/{result['golden_path_attempts']} 
+            self.logger.info(f"User {user_key}: {result['golden_path_successes']}/{result['golden_path_attempts']} "
                            fGolden Path successes, {result['connections_created']} connections, 
                            f{result['resource_limits_hit']} resource limits hit)
 
@@ -567,8 +567,8 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
                             'infrastructure_stress_level': i / 12  # 0.0 to 1.0
                         }
 
-                        self.logger.info(fGolden Path at stress level {i/12:.1%}: "
-                                       f"completed={golden_path_result['completed']}, 
+                        self.logger.info(fGolden Path at stress level {i/12:.1%}: ""
+                                       f"completed={golden_path_result['completed']}, "
                                        fevents={len(golden_path_result['events_received']}, 
                                        ftime={golden_path_time:.1f}s)
 
@@ -595,17 +595,17 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
                     max_execution_time = max(execution_times)
 
                     self.assertLess(avg_execution_time, 90.0,
-                                   f"Average Golden Path execution time should remain under 90s under stress, 
-                                   fgot {avg_execution_time:.1f}s")
+                                   f"Average Golden Path execution time should remain under 90s under stress, "
+                                   fgot {avg_execution_time:.1f}s")"
 
                     self.assertLess(max_execution_time, 120.0,
                                    fMaximum Golden Path execution time should remain under 120s under stress, 
-                                   fgot {max_execution_time:.1f}s)"
+                                   fgot {max_execution_time:.1f}s)""
 
                 # Validate events received (partial success acceptable under stress)
                 avg_events = sum(r['events_received'] for r in golden_path_results) / len(golden_path_results)
                 self.assertGreater(avg_events, 2.0,
-                                  f"Should receive at least 2 Golden Path events on average under stress, 
+                                  f"Should receive at least 2 Golden Path events on average under stress, "
                                   fgot {avg_events:.1f})
 
             # PHASE 3: Validate infrastructure recovery
@@ -635,8 +635,8 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
                            fGolden Path recovery should be faster than stressed execution, 
                            fgot {recovery_result['execution_time']:.1f}s)
 
-            self.logger.info(f"Infrastructure stress test completed in {stress_execution_time:.1f}s. 
-                           fGolden Path results: {len(golden_path_results)} attempts, "
+            self.logger.info(f"Infrastructure stress test completed in {stress_execution_time:.1f}s. "
+                           fGolden Path results: {len(golden_path_results)} attempts, ""
                            fRecovery time: {recovery_time:.1f}s)
 
         finally:
@@ -650,5 +650,5 @@ class TestWebSocketGoldenPathResourceLimits(SSotAsyncTestCase):
                     pass
 
 
-if __name__ == __main__:"
+if __name__ == __main__:""
     pytest.main([__file__, "-v, --tb=short", "-s"]

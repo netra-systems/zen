@@ -1,4 +1,4 @@
-"
+""""""
 WebSocket Agent Health Fragmentation Reproduction Test
 
 PURPOSE: Expose fragmented WebSocket and agent health monitoring systems that don't coordinate.
@@ -19,7 +19,7 @@ After SSOT consolidation, this test should demonstrate:
 - Unified WebSocket + agent health monitoring
 - Coordinated connection management based on agent status
 - Integrated health assessment for complete chat experience
-"
+""""""
 import asyncio
 import json
 import time
@@ -45,13 +45,13 @@ except ImportError:
 
 @pytest.mark.e2e
 class WebSocketAgentHealthFragmentationTests(SSotAsyncTestCase):
-    "
+""""""
     Reproduction tests for WebSocket and agent health monitoring fragmentation.
     These tests SHOULD FAIL with current disconnected implementation.
-"
+""
 
     async def asyncSetUp(self):
-        "Set up test fixtures for WebSocket health fragmentation testing.
+        "Set up test fixtures for WebSocket health fragmentation testing."""
         await super().asyncSetUp()
         self.test_agent_name = 'fragmentation_test_agent'
         self.test_user_id = 'user_frag_123'
@@ -93,15 +93,15 @@ class WebSocketAgentHealthFragmentationTests(SSotAsyncTestCase):
         websocket_healthy = self.websocket_manager.is_connection_healthy.return_value
         fragmentation_analysis = {'agent_death_detected': agent_is_dead, 'agent_health_status': health_status.status, 'agent_overall_health': health_status.overall_health, 'websocket_status': websocket_status, 'websocket_healthy': websocket_healthy, 'coordination_failure': agent_is_dead and websocket_healthy, 'status_mismatch': health_status.status == 'dead' and websocket_status == 'connected'}
         if fragmentation_analysis['coordination_failure'] or fragmentation_analysis['status_mismatch']:
-            self.fail(f"SSOT VIOLATION: WebSocket and agent health monitoring fragmentation detected. Agent death detected: {fragmentation_analysis['agent_death_detected']}, Agent status: '{fragmentation_analysis['agent_health_status']}', WebSocket status: '{fragmentation_analysis['websocket_status']}', WebSocket healthy: {fragmentation_analysis['websocket_healthy']}. Coordination failure: {fragmentation_analysis['coordination_failure']})
+            self.fail(f"SSOT VIOLATION: WebSocket and agent health monitoring fragmentation detected. Agent death detected: {fragmentation_analysis['agent_death_detected']}, Agent status: '{fragmentation_analysis['agent_health_status']}', WebSocket status: '{fragmentation_analysis['websocket_status']}', WebSocket healthy: {fragmentation_analysis['websocket_healthy']}. Coordination failure: {fragmentation_analysis['coordination_failure']})"
 
     async def test_websocket_events_not_coordinated_with_agent_health(self):
-        "
+""""""
         REPRODUCTION TEST: Show WebSocket events not coordinated with agent health transitions.
         
         Expected to FAIL: Agent health changes don't trigger appropriate WebSocket events,
         breaking real-time user experience.
-"
+""""""
         websocket_events_sent = []
         agent_health_events = []
 
@@ -140,7 +140,7 @@ class WebSocketAgentHealthFragmentationTests(SSotAsyncTestCase):
                 if not death_events:
                     critical_events_missing.append('agent_death')
         if coordination_analysis['coordination_ratio'] < 0.5 or critical_events_missing or coordination_analysis['websocket_events_sent'] == 0:
-            self.fail(f"SSOT VIOLATION: WebSocket events not coordinated with agent health transitions. Agent health events: {coordination_analysis['agent_health_events']}, WebSocket events sent: {coordination_analysis['websocket_events_sent']}, Coordination ratio: {coordination_analysis['coordination_ratio']:.2f}, Missing critical events: {critical_events_missing})
+            self.fail(f"SSOT VIOLATION: WebSocket events not coordinated with agent health transitions. Agent health events: {coordination_analysis['agent_health_events']}, WebSocket events sent: {coordination_analysis['websocket_events_sent']}, Coordination ratio: {coordination_analysis['coordination_ratio']:.2f}, Missing critical events: {critical_events_missing})"
 
     async def test_websocket_connection_health_separate_from_agent_health(self):
         
@@ -202,10 +202,10 @@ class WebSocketAgentHealthFragmentationTests(SSotAsyncTestCase):
 
 @pytest.mark.skipif(not WEBSOCKET_MANAGER_AVAILABLE, reason='WebSocket manager not available')
 class WebSocketHealthIntegrationRequirementsTests(SSotAsyncTestCase):
-    "
+""""""
     Additional tests that require WebSocket components to be available.
     These tests validate specific integration points.
-"
+""
 
     async def test_websocket_manager_agent_health_integration_missing(self):
     ""
@@ -223,7 +223,7 @@ class WebSocketHealthIntegrationRequirementsTests(SSotAsyncTestCase):
         for attr_name in dir(health_monitor):
             if 'websocket' in attr_name.lower() and (not attr_name.startswith('_')):
                 integration_analysis['integration_methods_count'] += 1
-        self.fail(fSSOT VIOLATION: WebSocket manager and agent health monitor not integrated. WebSocket has health monitor: {integration_analysis['websocket_has_health_monitor']}, Health has WebSocket ref: {integration_analysis['health_has_websocket_ref']}, Integration methods found: {integration_analysis['integration_methods_count']})"
+        self.fail(fSSOT VIOLATION: WebSocket manager and agent health monitor not integrated. WebSocket has health monitor: {integration_analysis['websocket_has_health_monitor']}, Health has WebSocket ref: {integration_analysis['health_has_websocket_ref']}, Integration methods found: {integration_analysis['integration_methods_count']})""
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

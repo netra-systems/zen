@@ -9,15 +9,16 @@ import pytest
 import os
 
 # Force disable real services for this test directory
-env.set('SKIP_REAL_SERVICES', 'true', test")"
-env.set('USE_REAL_SERVICES', 'false', test)
-env.set('RUN_E2E_TESTS', 'false', test)"
+env.set('SKIP_REAL_SERVICES', 'true', test=True)
+env.set('USE_REAL_SERVICES', 'false', test=True)
+env.set('RUN_E2E_TESTS', 'false', test=True)
+"""
 
 # Override service availability checks
 env = get_env()
 @pytest.fixture(autouse=True)
 def disable_service_checks():
-    "Disable all service availability checks for isolated tests.
+    """Disable all service availability checks for isolated tests."""
     with pytest.MonkeyPatch().context() as m:
         m.setenv(SKIP_REAL_SERVICES", "true)
         m.setenv(USE_REAL_SERVICES, false)

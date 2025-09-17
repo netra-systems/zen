@@ -1,4 +1,4 @@
-"
+""""""
 E2E TESTS: WebSocket Event Delivery During Chat - Real-Time UX Validation
 
 CRITICAL BUSINESS MISSION: These tests validate REAL-TIME WebSocket event delivery 
@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Protects $500K+ ARR by ensuring chat feels responsive and transparent
 
 CRITICAL REQUIREMENTS per CLAUDE.md:
-1. MUST use REAL WebSocket connections - NO mocks per MOCKS = Abomination"
+1. MUST use REAL WebSocket connections - NO mocks per MOCKS = Abomination""
 2. MUST use REAL authentication (JWT/OAuth) for WebSocket connections
 3. MUST validate ALL 5 REQUIRED WebSocket events: agent_started, agent_thinking, 
    tool_executing, tool_completed, agent_completed
@@ -20,7 +20,7 @@ CRITICAL REQUIREMENTS per CLAUDE.md:
 
 TEST FOCUS: E2E tests with REAL WebSocket connections to validate the complete
 real-time event delivery pipeline that enables substantive chat value.
-"
+""""""
 import asyncio
 import json
 import pytest
@@ -55,11 +55,11 @@ class WebSocketEventCollector:
         self.event_counts[event.get('type', 'unknown')] += 1
 
     def get_events_by_type(self, event_type: str) -> List[Dict[str, Any]]:
-        Get all events of specific type."
+        Get all events of specific type.""
         return [event for event in self.events if event.get('type') == event_type]
 
     def get_event_sequence(self) -> List[str]:
-        "Get sequence of event types in order received.
+        "Get sequence of event types in order received."""
         return [event.get('type', 'unknown') for event in self.events]
 
     def validate_required_events(self, required_events: List[str] -> Dict[str, Any]:
@@ -84,12 +84,12 @@ class WebSocketEventCollector:
 @pytest.mark.e2e
 @pytest.mark.requires_docker
 class WebSocketEventDeliveryDuringChatTests(SSotAsyncTestCase):
-    "
+""""""
     CRITICAL: E2E tests for real-time WebSocket event delivery during chat interactions.
     
     These tests validate the complete WebSocket event pipeline that enables users to see
     AI agents working in real-time, building trust through transparency.
-    "
+""
 
     def setup_method(self, method=None):
         Setup with business context and Docker services.""
@@ -103,7 +103,7 @@ class WebSocketEventDeliveryDuringChatTests(SSotAsyncTestCase):
         self._event_collector = None
 
     async def async_setup_method(self, method=None):
-        Async setup for E2E WebSocket testing with Docker services."
+        Async setup for E2E WebSocket testing with Docker services.""
         await super().async_setup_method(method)
         self._docker_manager = UnifiedDockerManager(environment_type=EnvironmentType.TEST)
         if self._docker_manager.is_docker_available():
@@ -115,14 +115,14 @@ class WebSocketEventDeliveryDuringChatTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_complete_websocket_event_sequence_during_ai_chat_processing(self):
-        "
+""""""
         Test complete WebSocket event sequence during AI chat processing with REAL services.
         
         CRITICAL: This validates the CORE business value delivery mechanism:
         User Message  ->  WebSocket Events Show AI Working  ->  User Trusts System  ->  Business Value
         
         Business Value: Validates real-time transparency that builds user trust in AI system.
-"
+""""""
         user_context = await create_authenticated_user_context(user_email='websocket_test_user@example.com', environment='test', permissions=['read', 'write', 'execute_agents', 'websocket_access'], websocket_enabled=True)
         websocket_url = self.get_env_var('WEBSOCKET_URL', 'ws://localhost:8000/ws')
         headers = self._websocket_helper.get_websocket_headers()
@@ -138,7 +138,7 @@ class WebSocketEventDeliveryDuringChatTests(SSotAsyncTestCase):
                     event_data = await asyncio.wait_for(websocket.recv(), timeout=2.0)
                     event = json.loads(event_data)
                     self._event_collector.add_event(event)
-                    self.logger.info(f"[U+1F4E8] Received: {event.get('type', 'unknown')} event)
+                    self.logger.info(f"[U+1F4E8] Received: {event.get('type', 'unknown')} event)"
                     if event.get('type') == 'agent_completed' and event.get('final', False):
                         self.logger.info(f' PASS:  Received final completion event')
                         break
@@ -223,7 +223,7 @@ class WebSocketEventDeliveryDuringChatTests(SSotAsyncTestCase):
             user_validation = collector.validate_required_events(required_events)
             self.assertTrue(user_validation['all_required_present'], fUser {i} missing required events: {user_validation['missing_events']}. Concurrent load must not break individual user event delivery.)
             timing_analysis = collector.get_timing_analysis()
-            self.assertLess(timing_analysis['first_event_delay'], 5.0, fUser {i} first event delay: {timing_analysis['first_event_delay']:.2f}s - too slow under load)"
+            self.assertLess(timing_analysis['first_event_delay'], 5.0, fUser {i} first event delay: {timing_analysis['first_event_delay']:.2f}s - too slow under load)""
         total_events = sum((len(collector.events) for collector in event_collectors))
         successful_users = sum((1 for collector in event_collectors if collector.validate_required_events(required_events)['all_required_present'])
         self.assertEqual(successful_users, concurrent_users, f'All {concurrent_users} users must receive events. Only {successful_users} successful.')
@@ -235,7 +235,7 @@ class WebSocketEventDeliveryDuringChatTests(SSotAsyncTestCase):
         self.logger.info(f' PASS:  Concurrent WebSocket event delivery validated: {successful_users}/{concurrent_users} users successful, {total_events} total events')
 
     async def _collect_events_for_user(self, websocket, collector: WebSocketEventCollector, user_index: int, timeout: float) -> None:
-        "Collect WebSocket events for a specific user during concurrent testing.
+        "Collect WebSocket events for a specific user during concurrent testing."""
         collection_start = time.time()
         events_received = 0
         try:

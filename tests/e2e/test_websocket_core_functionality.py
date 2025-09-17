@@ -1,4 +1,4 @@
-"CORE WEBSOCKET FUNCTIONALITY TEST - Independent of external services.
+"CORE WEBSOCKET FUNCTIONALITY TEST - Independent of external services."""
 
 This test validates core WebSocket functionality per CLAUDE.md standards 
 without requiring external database services.
@@ -24,7 +24,7 @@ from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 class MissionCriticalWebSocketValidator:
-    Validates WebSocket events with mission-critical rigor per CLAUDE.md Section 6."
+    Validates WebSocket events with mission-critical rigor per CLAUDE.md Section 6.""
     REQUIRED_EVENTS = {'agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed'}
 
     def __init__(self, strict_mode: bool=True):
@@ -37,7 +37,7 @@ class MissionCriticalWebSocketValidator:
         self.start_time = time.time()
 
     def record_event(self, event: Dict) -> None:
-        "Record WebSocket event with detailed tracking.
+        "Record WebSocket event with detailed tracking."""
         timestamp = time.time() - self.start_time
         event_type = event.get('type', 'unknown')
         self.events.append(event)
@@ -81,9 +81,9 @@ class MissionCriticalWebSocketValidator:
         return True
 
     def generate_comprehensive_report(self) -> str:
-        Generate comprehensive validation report for mission-critical analysis."
+        Generate comprehensive validation report for mission-critical analysis.""
         is_valid, failures = self.validate_mission_critical_requirements()
-        report = ['' + '=' * 80, 'MISSION CRITICAL WEBSOCKET VALIDATION REPORT', '=' * 80, fStatus: {(' PASS:  PASSED - WebSocket functionality operational' if is_valid else ' FAIL:  FAILED - WebSocket functionality BROKEN')}", f'Total Events: {len(self.events)}', f'Event Types: {len(self.event_counts)}', f'Duration: {(self.event_timeline[-1][0] if self.event_timeline else 0):.2f}s', f'Event Rate: {(len(self.events) / max(self.event_timeline[-1][0], 0.001) if self.event_timeline else 0):.1f} events/sec', '', 'Required Event Coverage (per CLAUDE.md Section 6.1):']
+        report = ['' + '=' * 80, 'MISSION CRITICAL WEBSOCKET VALIDATION REPORT', '=' * 80, fStatus: {(' PASS:  PASSED - WebSocket functionality operational' if is_valid else ' FAIL:  FAILED - WebSocket functionality BROKEN')}", f'Total Events: {len(self.events)}', f'Event Types: {len(self.event_counts)}', f'Duration: {(self.event_timeline[-1][0] if self.event_timeline else 0):.2f}s', f'Event Rate: {(len(self.events) / max(self.event_timeline[-1][0], 0.001) if self.event_timeline else 0):.1f} events/sec', '', 'Required Event Coverage (per CLAUDE.md Section 6.1):']"
         for event in self.REQUIRED_EVENTS:
             count = self.event_counts.get(event, 0)
             status = ' PASS: ' if count > 0 else ' FAIL:  MISSING'
@@ -108,16 +108,16 @@ class InMemoryWebSocketConnection:
         self.send_count = 0
 
     async def send(self, message: str):
-        Send message - captures for validation."
+        Send message - captures for validation.""
         import json
         data = json.loads(message) if isinstance(message, str) else message
         self.sent_messages.append(message)
         self.received_events.append(data)
         self.send_count += 1
-        logger.info(f"WebSocket send #{self.send_count}: {data.get('type', 'unknown')})
+        logger.info(f"WebSocket send #{self.send_count}: {data.get('type', 'unknown')})"
 
     async def send_json(self, message: dict, timeout: float=None):
-        Send JSON message - required by WebSocket manager."
+        Send JSON message - required by WebSocket manager.""
         self.send_count += 1
         self.timeout_used = timeout
         try:
@@ -128,7 +128,7 @@ class InMemoryWebSocketConnection:
                 raise TypeError(f'Expected dict, got {type(message)}')
 
             def make_json_serializable(obj):
-                "Convert objects to JSON-serializable format.
+                "Convert objects to JSON-serializable format."""
                 if isinstance(obj, datetime):
                     return obj.isoformat()
                 elif isinstance(obj, dict):
@@ -148,13 +148,13 @@ class InMemoryWebSocketConnection:
             raise
 
     async def close(self, code: int=1000, reason: str='Normal closure'):
-        Close connection with WebSocket close codes."
+        Close connection with WebSocket close codes.""
         logger.info(f'WebSocket closing with code {code}: {reason}')
         self._connected = False
 
     @property
     def client_state(self):
-        "Mock WebSocket state property.
+        "Mock WebSocket state property."""
         return 'CONNECTED' if self._connected else 'DISCONNECTED'
 
 @pytest.mark.asyncio
@@ -170,7 +170,7 @@ async def test_websocket_core_event_flow():
     - Event ordering and pairing validation
     
     This ensures core chat functionality works independently of database services.
-    "
+""""""
     env = get_env()
     env.enable_isolation(backup_original=True)
     test_vars = {'TESTING': '1', 'NETRA_ENV': 'testing', 'ENVIRONMENT': 'testing', 'LOG_LEVEL': 'ERROR', 'USE_MEMORY_DB': 'true'}
@@ -211,15 +211,15 @@ async def test_websocket_core_event_flow():
         is_valid, failures = validator.validate_mission_critical_requirements()
         assert is_valid, f'CORE WEBSOCKET TEST FAILED:{report}Failures: {failures}'
         received_events = ws_conn.received_events
-        assert len(received_events) >= 6, fExpected at least 6 WebSocket events, got {len(received_events)}. Events: {[e.get('type') for e in received_events]}"
+        assert len(received_events) >= 6, fExpected at least 6 WebSocket events, got {len(received_events)}. Events: {[e.get('type') for e in received_events]}""
         event_types = [e.get('type') for e in received_events]
         required_events = validator.REQUIRED_EVENTS
         for required_event in required_events:
             assert required_event in event_types, f'Missing required event: {required_event}. Got: {event_types}'
         for event in received_events:
             assert 'type' in event, fEvent missing 'type' field: {event}
-            assert 'timestamp' in event, fEvent missing 'timestamp' field: {event}"
-            assert 'payload' in event, f"Event missing 'payload' field: {event}
+            assert 'timestamp' in event, fEvent missing 'timestamp' field: {event}""
+            assert 'payload' in event, f"Event missing 'payload' field: {event}"
         tool_executing_count = event_types.count('tool_executing')
         tool_completed_count = event_types.count('tool_completed')
         assert tool_executing_count == tool_completed_count, f'Unpaired tool events: {tool_executing_count} executing, {tool_completed_count} completed'
@@ -233,7 +233,7 @@ async def test_websocket_core_event_flow():
 @pytest.mark.critical
 @pytest.mark.timeout(10)
 async def test_websocket_manager_real_connection_handling():
-    Test WebSocket manager real connection handling."
+    Test WebSocket manager real connection handling.""
     env = get_env()
     env.enable_isolation(backup_original=True)
     test_vars = {'TESTING': '1', 'NETRA_ENV': 'testing'}

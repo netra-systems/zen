@@ -1,4 +1,4 @@
-"E2E WebSocket Connectivity Tests - CLAUDE.md Compliant
+"E2E WebSocket Connectivity Tests - CLAUDE.md Compliant"""
 
 CRITICAL E2E tests for WebSocket connectivity with real authentication and services.
 These tests validate core chat functionality without mocks or authentication bypassing.
@@ -30,7 +30,7 @@ from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 class InMemoryWebSocketConnection:
-    Real in-memory WebSocket connection for E2E testing without external WebSocket server."
+    Real in-memory WebSocket connection for E2E testing without external WebSocket server.""
 
     def __init__(self):
         self._connected = True
@@ -41,7 +41,7 @@ class InMemoryWebSocketConnection:
         logger.info('InMemoryWebSocketConnection initialized')
 
     async def send_json(self, message: dict, timeout: float=None):
-        "Send JSON message - real WebSocket manager compatible.
+        "Send JSON message - real WebSocket manager compatible."""
         self.send_count += 1
         self.timeout_used = timeout
         if not isinstance(message, dict):
@@ -63,13 +63,13 @@ class InMemoryWebSocketConnection:
         logger.info(fWebSocket send_json #{self.send_count}: {serializable_message.get('type', 'unknown')} (timeout={timeout}")"
 
     async def close(self, code: int=1000, reason: str='Normal closure'):
-        Close WebSocket connection."
+        Close WebSocket connection.""
         logger.info(f'WebSocket closing with code {code}: {reason}')
         self._connected = False
 
     @property
     def client_state(self):
-        "WebSocket state property.
+        "WebSocket state property."""
         return 'CONNECTED' if self._connected else 'DISCONNECTED'
 
 @pytest.mark.e2e
@@ -79,7 +79,7 @@ class WebSocketConnectivityAuthenticatedTests:
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_authenticated_websocket_core_connectivity(self):
-        "Test authenticated WebSocket connectivity with real services.
+        "Test authenticated WebSocket connectivity with real services."""
         
         CLAUDE.md COMPLIANCE:
          PASS:  Uses E2EAuthHelper for authentication
@@ -89,7 +89,7 @@ class WebSocketConnectivityAuthenticatedTests:
          PASS:  Multi-user isolation tested
         
         Business Impact: Core chat functionality - $500K+ ARR protection
-"
+""""""
         start_time = time.time()
         env = get_env()
         env.enable_isolation(backup_original=True)
@@ -238,8 +238,8 @@ class WebSocketConnectivityAuthenticatedTests:
                 assert executing_idx < completed_idx, f'Tool {i}: executing at {executing_idx} should come before completed at {completed_idx}'
             for i, event in enumerate(events):
                 assert 'type' in event, fEvent {i} missing 'type' field: {event}
-                assert 'timestamp' in event, fEvent {i} missing 'timestamp' field: {event}"
-                assert 'payload' in event, f"Event {i} missing 'payload' field: {event}
+                assert 'timestamp' in event, fEvent {i} missing 'timestamp' field: {event}""
+                assert 'payload' in event, f"Event {i} missing 'payload' field: {event}"
                 if 'user_id' in event.get('payload', {}:
                     assert event['payload']['user_id'] == user_data.user_id, fEvent {i} has wrong user_id: {event['payload']['user_id']} != {user_data.user_id}""
             tool_completed_events = [e for e in events if e.get('type') == 'tool_completed']

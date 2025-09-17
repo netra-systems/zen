@@ -1,4 +1,4 @@
-"
+""""""
 WebSocket Development Connectivity Test
 Tests WebSocket connectivity for dev launcher environment validation.
 
@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Business Goal: Development Velocity & System Stability
 - Value Impact: Ensures WebSocket connectivity works in dev environment
 - Strategic Impact: Prevents dev environment broken states, reduces developer friction
-"
+""
 
 import asyncio
 import json
@@ -22,7 +22,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.e2e
 class WebSocketDevConnectivityTests:
-    "Test suite for WebSocket connectivity in development environment.
+    "Test suite for WebSocket connectivity in development environment."""
 
     @pytest.mark.websocket
     async def test_dev_websocket_basic_connectivity(self):
@@ -59,8 +59,8 @@ class WebSocketDevConnectivityTests:
                     fInvalid welcome message: {welcome_data}
                 assert welcome_data.get(connection_id"), \"
                     No connection ID in welcome message
-                assert welcome_data.get(server_time), \"
-                    "No server time in welcome message
+                assert welcome_data.get(server_time), \""
+                    "No server time in welcome message"""
                 
                 connection_id = welcome_data[connection_id]
                 print(f"WebSocket connected with ID: {connection_id}")
@@ -94,8 +94,8 @@ class WebSocketDevConnectivityTests:
             
             # Test echo functionality
             test_payload = {
-                message: Hello WebSocket",
-                "timestamp: time.time(),
+                message: Hello WebSocket","
+                "timestamp: time.time(),"""
                 test_id: str(uuid.uuid4())
             }
             
@@ -112,15 +112,15 @@ class WebSocketDevConnectivityTests:
             response_data = json.loads(echo_response)
             
             # Validate echo response
-            assert response_data.get(type) == "echo_response, \
-                fWrong response type: {response_data.get('type')}"
+            assert response_data.get(type) == "echo_response, \"
+                fWrong response type: {response_data.get('type')}""
             assert response_data.get(original), \
                 No original message in echo response""
             
             # Verify content preservation
             original = response_data[original]
-            assert original.get(payload) == test_payload, \"
-                "Echo payload mismatch
+            assert original.get(payload) == test_payload, \""
+                "Echo payload mismatch"""
             
             # Verify server timestamp added
             assert response_data.get(timestamp), \
@@ -152,7 +152,7 @@ class WebSocketDevConnectivityTests:
             ping_time = time.time()
             ping_message = {
                 type: ping,
-                client_timestamp: ping_time"
+                client_timestamp: ping_time""
             }
             
             await websocket.send(json.dumps(ping_message))
@@ -163,7 +163,7 @@ class WebSocketDevConnectivityTests:
             pong_data = json.loads(pong_response)
             
             # Validate pong response
-            assert pong_data.get(type") == pong, \
+            assert pong_data.get(type") == pong, \"
                 fWrong response type: {pong_data.get('type')}
             assert pong_data.get("timestamp), \"
                 No server timestamp in pong
@@ -177,7 +177,7 @@ class WebSocketDevConnectivityTests:
 
     @pytest.mark.websocket
     async def test_dev_websocket_error_handling(self):
-    "
+""""""
         Test WebSocket error handling for malformed messages.
         
         Critical Assertions:
@@ -188,7 +188,7 @@ class WebSocketDevConnectivityTests:
         
         Expected Failure: Error handling not implemented
         Business Impact: Poor dev experience, hard to debug issues
-        "
+""""""
         ws_url = ws://localhost:8001/ws/test
         
         async with websockets.connect(ws_url) as websocket:
@@ -203,28 +203,28 @@ class WebSocketDevConnectivityTests:
             error_data = json.loads(error_response)
             
             assert error_data.get(type) == error, \
-                fExpected error message, got: {error_data.get('type')}"
-            assert "Invalid JSON in error_data.get(message, ), \
+                fExpected error message, got: {error_data.get('type')}""
+            assert "Invalid JSON in error_data.get(message, ), \"
                 fError message doesn't mention JSON: {error_data.get('message')}""
             
             # Verify connection is still active by sending valid message
             test_message = {
                 type: echo,
-                payload: Connection still active"
+                payload: Connection still active""
             }
             
             await websocket.send(json.dumps(test_message))
             response = await asyncio.wait_for(websocket.recv(), timeout=5)
             response_data = json.loads(response)
             
-            assert response_data.get("type) == echo_response, \
+            assert response_data.get("type) == echo_response, \"
                 Connection not stable after error
             
             print(Error handling works - connection stable after invalid JSON"")
 
     @pytest.mark.websocket
     async def test_dev_websocket_multiple_messages(self):
-    "
+""""""
         Test WebSocket handling of multiple rapid messages.
         
         Critical Assertions:
@@ -235,7 +235,7 @@ class WebSocketDevConnectivityTests:
         
         Expected Failure: Message queue overflow or ordering issues
         Business Impact: Unreliable real-time communication
-        "
+""""""
         ws_url = ws://localhost:8001/ws/test
         
         async with websockets.connect(ws_url) as websocket:
@@ -250,7 +250,7 @@ class WebSocketDevConnectivityTests:
                 message = {
                     "type: echo",
                     payload: fMessage {i},
-                    sequence: i"
+                    sequence: i""
                 }
                 sent_messages.append(message)
                 await websocket.send(json.dumps(message))
@@ -264,13 +264,13 @@ class WebSocketDevConnectivityTests:
             
             # Verify all messages processed
             assert len(received_responses) == message_count, \
-                fMessage count mismatch: sent {message_count}, received {len(received_responses)}"
+                fMessage count mismatch: sent {message_count}, received {len(received_responses)}""
             
             # Verify message order preservation
             for i, response in enumerate(received_responses):
                 assert response.get(type) == echo_response, \
-                    f"Wrong response type for message {i}
-                original = response.get(original", {}
+                    f"Wrong response type for message {i}"
+                original = response.get(original", {}"
                 assert original.get(sequence) == i, \
                     fMessage order not preserved: expected {i}, got {original.get('sequence')}""
                 assert original.get(payload) == fMessage {i}, \
@@ -280,7 +280,7 @@ class WebSocketDevConnectivityTests:
 
     @pytest.mark.websocket
     async def test_dev_websocket_connection_info(self):
-    "
+""""""
         Test WebSocket provides useful connection information for debugging.
         
         Critical Assertions:
@@ -291,7 +291,7 @@ class WebSocketDevConnectivityTests:
         
         Expected Failure: Missing debug information
         Business Impact: Harder to debug WebSocket issues in development
-        "
+""""""
         ws_url = ws://localhost:8001/ws/test
         
         # Test multiple connections get unique IDs
@@ -317,10 +317,10 @@ class WebSocketDevConnectivityTests:
                 try:
                     datetime.fromisoformat(server_time.replace('Z', '+00:00'))
                 except ValueError:
-                    raise AssertionError(fInvalid server time format: {server_time})"
+                    raise AssertionError(fInvalid server time format: {server_time})""
                 
                 # Verify message format useful for debugging
-                assert welcome_data.get("message), No welcome message provided
+                assert welcome_data.get("message), No welcome message provided"
                 
         print(fConnection info validated - {len(connection_ids)} unique connections)
 
@@ -346,27 +346,27 @@ class WebSocketDevConnectivityTests:
                     welcome_data = json.loads(welcome)
                     
                     assert welcome_data.get(type) == connection_established, \
-                        WebSocket not ready"
+                        WebSocket not ready""
                     
-                    print("WebSocket service available and responding)
+                    print("WebSocket service available and responding)"
                 
         except Exception as e:
-            raise AssertionError(fWebSocket service not available: {str(e)})"
+            raise AssertionError(fWebSocket service not available: {str(e)})""
 
 
-if __name__ == "__main__:
+if __name__ == "__main__:"
     # Allow running the test directly for quick validation
     async def run_quick_test():
         test_instance = WebSocketDevConnectivityTests()
         try:
             await test_instance.test_websocket_availability_check()
-            print(Quick WebSocket connectivity test passed)"
+            print(Quick WebSocket connectivity test passed)""
         except Exception as e:
-            print(f"FAILED Quick WebSocket connectivity test failed: {e})
+            print(f"FAILED Quick WebSocket connectivity test failed: {e})"
             return False
         return True
     
     if asyncio.run(run_quick_test()):
-        print(SUCCESS WebSocket connectivity validation successful)"
+        print(SUCCESS WebSocket connectivity validation successful)""
     else:
-        print("FAILED WebSocket connectivity validation failed"")
+        print("FAILED WebSocket connectivity validation failed"")"

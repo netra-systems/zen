@@ -28,7 +28,6 @@ def check_configuration_ssot_violations():
     return violations
 
 if __name__ == "__main__":
-    os.chdir("/c/netra-apex")
     violations = check_configuration_ssot_violations()
 
     print(f"Configuration SSOT violations found: {len(violations)}")

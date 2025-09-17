@@ -1,9 +1,9 @@
-"
+""""""
 WebSocket Event Reproduction E2E Test - Fixed from corrupted file.
 
 Test to reproduce WebSocket event emission failure in agent execution.
 This test validates that all required WebSocket events are emitted during agent lifecycle.
-"
+""
 
 import asyncio
 import pytest
@@ -20,7 +20,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestWebSocketConnection:
-    "Real WebSocket connection for testing instead of mocks.
+    "Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
         self.messages_sent: List[Dict[str, Any]] = []
@@ -30,21 +30,21 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         "Send JSON message."
         if self._closed:
-            raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)""
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         Close WebSocket connection.""
         self._closed = True
         self.is_connected = False
 
     def get_messages(self) -> list:
-        Get all sent messages."
+        Get all sent messages.""
         return self.messages_sent.copy()
 
 
 class TestWebSocketEventReproduction(SSotBaseTestCase):
-    "Reproduce missing WebSocket events during agent execution.
+    "Reproduce missing WebSocket events during agent execution."""
 
     REQUIRED_EVENTS = {
         'agent_started',
@@ -76,8 +76,8 @@ class TestWebSocketEventReproduction(SSotBaseTestCase):
         test_agent_config = {
             name": "test_agent,
             description: Test agent for WebSocket validation,
-            tools: ["calculator],
-            system_prompt": You are a test agent
+            tools: ["calculator],"
+            system_prompt": You are a test agent"
         }
 
         # Register the test agent
@@ -89,8 +89,8 @@ class TestWebSocketEventReproduction(SSotBaseTestCase):
         # Create execution context
         test_context = {
             user_id: test_user_123,
-            session_id: "test_session_456,
-            run_id": test_run_789
+            session_id: "test_session_456,"
+            run_id": test_run_789"
         }
 
         # Execute agent with a simple task
@@ -103,10 +103,10 @@ class TestWebSocketEventReproduction(SSotBaseTestCase):
             result = await agent.execute(test_message, context=test_context)
         except Exception as e:
             # Even if execution fails, we should have gotten some events
-            print(f"Agent execution failed: {e})
+            print(f"Agent execution failed: {e})"
 
         # Check which events were emitted
-        emitted_event_types = set(emitted_events")
+        emitted_event_types = set(emitted_events")"
         missing_events = self.REQUIRED_EVENTS - emitted_event_types
 
         # This assertion should FAIL, proving the issue exists
@@ -139,9 +139,9 @@ class TestWebSocketEventReproduction(SSotBaseTestCase):
 
         except ImportError:
             # Factory pattern not implemented
-            pytest.fail(ExecutionContextFactory not found - Factory pattern not implemented)"
+            pytest.fail(ExecutionContextFactory not found - Factory pattern not implemented)""
         except Exception as e:
-            pytest.fail(f"Error creating ExecutionEngine: {e})
+            pytest.fail(f"Error creating ExecutionEngine: {e})"
 
         assert websocket_initialized, ExecutionEngine doesn't have WebSocketNotifier initialized
 
@@ -161,6 +161,6 @@ class TestWebSocketEventReproduction(SSotBaseTestCase):
             pytest.fail(fFactory pattern not implemented: {e})
 
 
-if __name__ == __main__":
+if __name__ == __main__":"
     # Run the reproduction test
     asyncio.run(TestWebSocketEventReproduction().test_websocket_events_missing_reproduction())

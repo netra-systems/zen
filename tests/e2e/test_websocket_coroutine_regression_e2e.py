@@ -1,4 +1,4 @@
-"
+""""""
 WebSocket Coroutine Regression E2E Tests
 
 End-to-end tests for the critical WebSocket coroutine regression issue.
@@ -15,7 +15,7 @@ CLAUDE.MD COMPLIANCE:
 - Tests complete chat business value (connection  ->  agent response)
 - Tests designed to FAIL HARD when coroutine regression occurs
 - Must prevent 0.00s execution times (indicates test bypassing)
-"
+""
 
 import asyncio
 import inspect
@@ -41,15 +41,15 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
 class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
-    "
+""""""
     E2E tests for WebSocket coroutine regression prevention.
     
     Tests complete WebSocket flows with real authentication to ensure
     the coroutine regression issue is caught and business value is preserved.
-"
+""
 
     def setUp(self):
-        "Set up E2E test environment with real authentication and services.
+        "Set up E2E test environment with real authentication and services."""
         super().setUp()
         self.start_time = time.time()
         
@@ -68,8 +68,8 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
         
         # CRITICAL: Ensure we're using real services
         self.assertFalse(
-            self.env.get(USE_MOCKS, false).lower() == true,"
-            E2E tests MUST NOT use mocks - CLAUDE.MD violation"
+            self.env.get(USE_MOCKS, false).lower() == true,""
+            E2E tests MUST NOT use mocks - CLAUDE.MD violation""
         )
 
     def tearDown(self):
@@ -98,8 +98,8 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
         
         # CRITICAL: Create authenticated user with real JWT
         user = await self.auth_helper.create_authenticated_user(
-            email=chat.e2e.test@netrasystems.ai,"
-            environment="staging
+            email=chat.e2e.test@netrasystems.ai,""
+            environment="staging"
         )
         
         self.assertIsInstance(user, AuthenticatedUser)
@@ -118,8 +118,8 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                 
                 # CRITICAL: Send agent request to trigger full business logic
                 agent_request = {
-                    type: "agent_request,
-                    data": {
+                    type: "agent_request,"
+                    data": {"
                         message: Test coroutine regression in full chat flow,
                         "thread_id: fe2e-test-{int(time.time())}",
                         agent_type: general
@@ -127,7 +127,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                 }
                 
                 await websocket.send(json.dumps(agent_request))
-                logger.info(Sent agent request for E2E coroutine regression test)"
+                logger.info(Sent agent request for E2E coroutine regression test)""
                 
                 # CRITICAL: Collect responses to validate complete chat value
                 responses = []
@@ -140,7 +140,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                         response_data = json.loads(response)
                         responses.append(response_data)
                         
-                        logger.info(fReceived WebSocket response: {response_data.get('type', 'unknown')}")
+                        logger.info(fReceived WebSocket response: {response_data.get('type', 'unknown')}")"
                         
                         # Check for agent completion
                         if response_data.get(type) == agent_completed:
@@ -158,13 +158,13 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                 self.assertGreater(
                     len(responses), 
                     0, 
-                    E2E test must receive WebSocket responses for business value validation"
+                    E2E test must receive WebSocket responses for business value validation""
                 )
                 
                 # CRITICAL: Validate response structure indicates no coroutine errors
                 for response in responses:
                     self.assertIsInstance(response, dict)
-                    self.assertIn(type", response)
+                    self.assertIn(type", response)"
                     
                     # CRITICAL: Check response doesn't contain coroutine error indicators
                     response_str = json.dumps(response)
@@ -180,19 +180,19 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
             # CRITICAL: Any exception containing coroutine indicates regression
             error_str = str(e).lower()
             if coroutine in error_str:
-                self.fail(f"E2E WebSocket flow failed with coroutine regression: {e})
+                self.fail(f"E2E WebSocket flow failed with coroutine regression: {e})"
             raise
 
     async def test_websocket_environment_detection_e2e_flow(self):
-        "
+""""""
         Test WebSocket environment detection in complete E2E flow.
         
         This tests the E2E environment detection logic that caused the 
         coroutine issue in a real end-to-end scenario.
-"
+""""""
         # CRITICAL: Real authentication for E2E test
         user = await self.auth_helper.create_authenticated_user(
-            email="env.detection.e2e@netrasystems.ai,
+            email="env.detection.e2e@netrasystems.ai,"
             environment=staging
         )
         
@@ -207,7 +207,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                 # CRITICAL: Send message that triggers environment detection logic
                 env_test_message = {
                     type: system_info_request,
-                    data: {include_environment": True}
+                    data: {include_environment": True}"
                 }
                 
                 await websocket.send(json.dumps(env_test_message))
@@ -220,14 +220,14 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                 self.assertIsInstance(response_data, dict)
                 
                 # If environment info is included, validate it's proper type
-                if "environment in response_data.get(data, {}:
+                if "environment in response_data.get(data, {}:"
                     env_value = response_data[data][environment]
                     self.assertIsInstance(env_value, str)
                     self.assertIn(env_value, ["development, staging", production]
                 
         except Exception as e:
-            if coroutine in str(e).lower():"
-                self.fail(f"Environment detection E2E failed with coroutine error: {e})
+            if coroutine in str(e).lower():""
+                self.fail(f"Environment detection E2E failed with coroutine error: {e})"
 
     async def test_websocket_multi_user_isolation_without_coroutine_errors(self):
         
@@ -256,14 +256,14 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
             try:
                 async with websockets.connect(
                     websocket_url,
-                    extra_headers={Authorization: f"Bearer {user.token}} as websocket:
+                    extra_headers={Authorization: f"Bearer {user.token}} as websocket:"
                     
                     # Send user-specific message
                     message = {
-                        type: "agent_request,
+                        type: "agent_request,"
                         data: {
-                            message: fMulti-user test from user {user_index}",
-                            "thread_id: fmultiuser-e2e-{user_index}-{int(time.time())}
+                            message: fMulti-user test from user {user_index}","
+                            "thread_id: fmultiuser-e2e-{user_index}-{int(time.time())}"""
                         }
                     }
                     
@@ -296,26 +296,26 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
             for i, result in enumerate(results):
                 if isinstance(result, Exception):
                     if coroutine in str(result).lower():
-                        self.fail(f"User {i} failed with coroutine error: {result})
+                        self.fail(f"User {i} failed with coroutine error: {result})"
                     raise result
                 
                 self.assertIsInstance(result, dict)
                 
         except Exception as e:
-            if coroutine" in str(e).lower():
+            if coroutine" in str(e).lower():"
                 self.fail(fMulti-user E2E test failed with coroutine regression: {e})
 
     async def test_websocket_agent_events_without_coroutine_regression(self):
-        "
+""""""
         CRITICAL: Test WebSocket agent events without coroutine regression.
         
         This validates the mission-critical WebSocket agent events that enable
         substantive chat interactions work without coroutine errors.
-"
+""""""
         # CRITICAL: Real authentication for agent events test
         user = await self.auth_helper.create_authenticated_user(
-            email=agent.events.e2e@netrasystems.ai,"
-            environment=staging"
+            email=agent.events.e2e@netrasystems.ai,""
+            environment=staging""
         )
         
         websocket_url = self.staging_config.get_websocket_url()
@@ -329,8 +329,8 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                 agent_request = {
                     "type: agent_request", 
                     data: {
-                        message: "Test agent events without coroutine errors,
-                        thread_id": fagent-events-e2e-{int(time.time())},
+                        message: "Test agent events without coroutine errors,"
+                        thread_id": fagent-events-e2e-{int(time.time())},"
                         agent_type: general
                     }
                 }
@@ -339,8 +339,8 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                 
                 # CRITICAL: Collect agent event responses
                 expected_events = [
-                    agent_started,"
-                    "agent_thinking, 
+                    agent_started,""
+                    "agent_thinking, """
                     tool_executing,
                     "tool_completed,"
                     agent_completed
@@ -355,26 +355,26 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                         response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
                         response_data = json.loads(response)
                         
-                        event_type = response_data.get(type)"
+                        event_type = response_data.get(type)""
                         if event_type:
                             received_events.append(event_type)
                             
                             # CRITICAL: Validate no coroutine errors in agent events
                             response_str = json.dumps(response_data)
                             self.assertNotIn(
-                                coroutine",
+                                coroutine","
                                 response_str.lower(),
                                 fAgent event {event_type} contains coroutine error
                             )
                         
                         # Check if we have agent completion
-                        if event_type == agent_completed:"
+                        if event_type == agent_completed:""
                             break
                             
                     except asyncio.TimeoutError:
                         continue
                     except websockets.exceptions.ConnectionClosed as e:
-                        if "coroutine in str(e):
+                        if "coroutine in str(e):"
                             self.fail(fAgent events WebSocket closed with coroutine error: {e})
                         break
                 
@@ -388,16 +388,16 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                 logger.info(fReceived agent events: {received_events})
                 
         except Exception as e:
-            if coroutine in str(e).lower():"
-                self.fail(fAgent events E2E test failed with coroutine regression: {e}")
+            if coroutine in str(e).lower():""
+                self.fail(fAgent events E2E test failed with coroutine regression: {e}")"
 
     def test_websocket_e2e_environment_validation(self):
-    "
+""""""
         Test E2E environment validation without coroutine errors.
         
         This validates the environment detection logic works in E2E context
         without the coroutine regression issue.
-        "
+""""""
         # CRITICAL: Test environment detection in E2E context
         environment = self.env.get(ENVIRONMENT, development).lower()
         
@@ -407,7 +407,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
             self.env.get(PYTEST_RUNNING, 0") == "1 or
             self.env.get(STAGING_E2E_TEST, 0) == 1" or"
             self.env.get(E2E_OAUTH_SIMULATION_KEY) is not None or
-            self.env.get(E2E_TEST_ENV) == "staging
+            self.env.get(E2E_TEST_ENV) == "staging"
         )
         
         # CRITICAL: All environment values should be proper types
@@ -419,14 +419,14 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
         self.assertFalse(inspect.iscoroutine(is_e2e_testing))
         
         # Test environment conditional logic
-        if environment in [staging", production]:
+        if environment in [staging", production]:"
             # This is the logic that was failing with coroutine errors
             e2e_flags = {
                 E2E_TESTING: self.env.get(E2E_TESTING, 0") == "1,
-                PYTEST_RUNNING: self.env.get(PYTEST_RUNNING, 0) == "1, 
-                STAGING_E2E_TEST": self.env.get(STAGING_E2E_TEST, 0) == 1,
+                PYTEST_RUNNING: self.env.get(PYTEST_RUNNING, 0) == "1, "
+                STAGING_E2E_TEST": self.env.get(STAGING_E2E_TEST, 0) == 1,"
                 E2E_OAUTH_SIMULATION_KEY": self.env.get("E2E_OAUTH_SIMULATION_KEY) is not None,
-                E2E_TEST_ENV: self.env.get(E2E_TEST_ENV) == staging"
+                E2E_TEST_ENV: self.env.get(E2E_TEST_ENV) == staging""
             }
             
             # CRITICAL: All flags should be boolean, no coroutines
@@ -434,7 +434,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                 self.assertIsInstance(
                     flag_value, 
                     bool, 
-                    f"E2E flag {flag_name} should be boolean, got {type(flag_value)}
+                    f"E2E flag {flag_name} should be boolean, got {type(flag_value)}"
                 )
                 self.assertFalse(
                     inspect.iscoroutine(flag_value),
@@ -442,12 +442,12 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                 )
 
 
-if __name__ == __main__:"
+if __name__ == __main__:""
     # CRITICAL: Run E2E tests with proper async support
     import asyncio
     
     def run_e2e_tests():
-        "Run E2E tests with async support.
+        "Run E2E tests with async support."""
         unittest.main()
     
     if __name__ == "__main__":

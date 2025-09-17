@@ -1,4 +1,4 @@
-"E2E Staging tests for WebSocket await error impact on Golden Path.
+"E2E Staging tests for WebSocket await error impact on Golden Path."""
 
 This test suite validates the complete Golden Path user flow on staging GCP
 to ensure WebSocket await errors don't break the end-to-end user experience.
@@ -16,18 +16,18 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
-    E2E staging validation of WebSocket await errors on Golden Path."
+    E2E staging validation of WebSocket await errors on Golden Path.""
 
     def setUp(self):
-        "Set up E2E staging test environment.
+        "Set up E2E staging test environment."""
         super().setUp()
         # Use staging environment URLs
         self.staging_ws_url = wss://staging.netrasystems.ai/ws""
         self.staging_auth_url = https://auth.staging.netrasystems.ai
-        self.staging_backend_url = https://backend.staging.netrasystems.ai"
+        self.staging_backend_url = https://backend.staging.netrasystems.ai""
 
         self.user_context = UserExecutionContext(
-            user_id="e2e_staging_user,
+            user_id="e2e_staging_user,"
             thread_id=e2e_staging_thread,
             run_id="e2e_staging_run"
         )
@@ -53,8 +53,8 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
                 # Test basic message sending
                 test_message = {
                     type: connection_test,
-                    user_id: self.user_context.user_id,"
-                    data": E2E staging await error test
+                    user_id: self.user_context.user_id,""
+                    data": E2E staging await error test"
                 }
 
                 await websocket.send(json.dumps(test_message))
@@ -100,8 +100,8 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
                 agent_message = {
                     type": "agent_message,
                     user_id: self.user_context.user_id,
-                    content: Help me optimize my AI costs - E2E staging test",
-                    "agent_type: optimization
+                    content: Help me optimize my AI costs - E2E staging test","
+                    "agent_type: optimization"""
                 }
 
                 await websocket.send(json.dumps(agent_message))
@@ -135,7 +135,7 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
                         break
                     except Exception as e:
                         if await in str(e) or awaitable in str(e):
-                            self.fail(f"E2E CRITICAL: Await error in agent flow: {e})
+                            self.fail(f"E2E CRITICAL: Await error in agent flow: {e})"
 
                 # CRITICAL: Should receive at least agent_started and agent_completed
                 critical_events = ['agent_started', 'agent_completed']
@@ -143,24 +143,24 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
                     self.assertIn(
                         critical_event,
                         received_events,
-                        fE2E CRITICAL: Missing {critical_event} - possible await error impact"
+                        fE2E CRITICAL: Missing {critical_event} - possible await error impact""
                     )
 
         except Exception as e:
             if await in str(e) or awaitable in str(e):
-                self.fail(f"E2E CRITICAL: Await error breaking agent flow: {e})
+                self.fail(f"E2E CRITICAL: Await error breaking agent flow: {e})"
             else:
-                self.skipTest(fAgent flow test failed: {e}")
+                self.skipTest(fAgent flow test failed: {e}")"
 
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_golden_path_corpus_operations_staging(self):
-    "
+""""""
         E2E: Test corpus operations on staging.
 
         Validates that corpus operations (which have await errors at lines 134/174)
         still function properly in the staging environment.
-        "
+""""""
         import requests
 
         try:
@@ -223,7 +223,7 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
                 test_msg = {
                     "type: ping",
                     user_id: self.user_context.user_id,
-                    data: "resilience_test
+                    data: "resilience_test"
                 }
                 await ws.send(json.dumps(test_msg))
 
@@ -239,7 +239,7 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
         # Test backend responsiveness
         try:
             import requests
-            response = requests.get(f{self.staging_backend_url}/health", timeout=10)
+            response = requests.get(f{self.staging_backend_url}/health", timeout=10)"
             resilience_assessment['backend_responsiveness'] = response.status_code == 200
         except Exception:
             pass
@@ -287,8 +287,8 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
                 # Send message that might trigger await error
                 error_trigger = {
                     type: complex_agent_request,
-                    user_id: self.user_context.user_id,"
-                    content": Trigger await error test
+                    user_id: self.user_context.user_id,""
+                    content": Trigger await error test"
                 }
                 await ws.send(json.dumps(error_trigger))
 
@@ -307,9 +307,9 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
             import requests
             # Multiple rapid requests to test resilience
             for i in range(3):
-                response = requests.get(f"{self.staging_backend_url}/health, timeout=5)
+                response = requests.get(f"{self.staging_backend_url}/health, timeout=5)"
                 if response.status_code == 200:
-                    recovery_scenarios.append(fbackend_request_{i}")
+                    recovery_scenarios.append(fbackend_request_{i}")"
 
         except Exception:
             pass

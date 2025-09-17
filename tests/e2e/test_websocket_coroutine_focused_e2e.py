@@ -1,4 +1,4 @@
-"
+""""""
 Focused WebSocket Coroutine Regression E2E Test
 
 Simplified E2E test focused on validating the WebSocket coroutine regression fix
@@ -14,7 +14,7 @@ CLAUDE.MD COMPLIANCE:
 - Tests execution time to prevent 0.00s bypassing
 - Validates the fix in E2E context
 - No complex authentication flows for simplicity
-"
+""""""
 import inspect
 import time
 import pytest
@@ -22,15 +22,15 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 class WebSocketCoroutineFocusedE2ETests(SSotBaseTestCase):
-    "
+""""""
     Focused E2E test for WebSocket coroutine regression.
     
     Tests the environment detection logic in an E2E context to ensure
     the coroutine regression issue is resolved.
-"
+""
 
     def setUp(self):
-        "Set up E2E test environment.
+        "Set up E2E test environment."""
         super().setUp()
         self.start_time = time.time()
         self.env = get_env()
@@ -64,12 +64,12 @@ class WebSocketCoroutineFocusedE2ETests(SSotBaseTestCase):
 
     @pytest.mark.e2e
     def test_websocket_startup_detection_e2e(self):
-        "
+""""""
         Test WebSocket startup detection logic in E2E context.
         
         This tests the startup completion logic that was triggering
         the coroutine issue around line 555 in websocket.py.
-"
+""""""
         env = get_env()
         environment = env.get('ENVIRONMENT', 'development').lower()
         startup_complete = True
@@ -100,12 +100,12 @@ class WebSocketCoroutineFocusedE2ETests(SSotBaseTestCase):
 
     @pytest.mark.e2e
     def test_websocket_coroutine_detection_e2e(self):
-        "
+""""""
         CRITICAL: Test that detects coroutine objects in E2E context.
         
         This test validates that the fix prevents coroutine objects
         from being returned in E2E environment detection scenarios.
-"
+""""""
         env = get_env()
         environment_patterns = [env.get('ENVIRONMENT', 'development'), env.get('TESTING', '0'), env.get('E2E_TESTING', '0'), env.get('PYTEST_RUNNING', '0'), env.get('STAGING_E2E_TEST', '0'), env.get('E2E_OAUTH_SIMULATION_KEY'), env.get('E2E_TEST_ENV')]
         for i, value in enumerate(environment_patterns):
@@ -120,7 +120,7 @@ class WebSocketCoroutineFocusedE2ETests(SSotBaseTestCase):
         
         This tests the business logic pattern that was failing in the
         WebSocket endpoint due to coroutine returns.
-        """
+        """"""
         env = get_env()
         environment = env.get('ENVIRONMENT', 'development').lower()
         is_testing = env.get('TESTING', '0') == '1'

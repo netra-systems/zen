@@ -1,4 +1,4 @@
-"Comprehensive WebSocket E2E Test Suite for Netra Apex
+"Comprehensive WebSocket E2E Test Suite for Netra Apex"""
 
 CRITICAL CONTEXT: WebSocket Communication Coverage
 Comprehensive E2E tests for WebSocket workflows covering connection lifecycle,
@@ -43,12 +43,12 @@ from tests.e2e.harness_utils import (
 
 
 class WebSocketE2ETester:
-    CLAUDE.md Compliant WebSocket E2E Testing Helper."
+    CLAUDE.md Compliant WebSocket E2E Testing Helper.""
     
     def __init__(self):
         self.harness = TestHarness()
         # SSOT Authentication Helper - CLAUDE.md Compliant
-        self.auth_helper = E2EWebSocketAuthHelper(environment="test)
+        self.auth_helper = E2EWebSocketAuthHelper(environment="test)"
         self.test_client = None
         self.connections: Dict[str, websockets.ClientConnection] = {}
         self.received_messages: Dict[str, List] = {}
@@ -60,14 +60,14 @@ class WebSocketE2ETester:
         return self
     
     async def cleanup(self):
-        Clean up test environment."
+        Clean up test environment.""
         await self._close_all_connections()
         if self.test_client:
             await self.test_client.close()
         await self.harness.teardown()
     
     async def _close_all_connections(self):
-        "Close all open WebSocket connections - CLAUDE.md Compliant.
+        "Close all open WebSocket connections - CLAUDE.md Compliant."""
         for conn_id, ws in self.connections.items():
             # Check if websocket is open and close if necessary - NO HIDDEN EXCEPTIONS
             if hasattr(ws, 'closed') and not ws.closed:
@@ -120,7 +120,7 @@ class WebSocketE2ETester:
         await ws.send(json.dumps(message))
     
     async def wait_for_message(self, conn_id: str, timeout: float = 5.0):
-        Wait for next message on connection."
+        Wait for next message on connection.""
         start = asyncio.get_event_loop().time()
         while asyncio.get_event_loop().time() - start < timeout:
             if self.received_messages[conn_id]:
@@ -129,7 +129,7 @@ class WebSocketE2ETester:
         return None
     
     async def create_user(self, user_data: Dict) -> str:
-        "Create user via SSOT authentication - CLAUDE.md Compliant.
+        "Create user via SSOT authentication - CLAUDE.md Compliant."""
         # Use SSOT authentication helper - NO FALLBACK (CLAUDE.md Compliant)
         token, user_info = await create_authenticated_user(
             environment="test,"
@@ -140,7 +140,7 @@ class WebSocketE2ETester:
 
 @pytest_asyncio.fixture
 async def ws_tester():
-    Create WebSocket tester fixture."
+    Create WebSocket tester fixture.""
     tester = WebSocketE2ETester()
     await tester.setup()
     yield tester
@@ -148,7 +148,7 @@ async def ws_tester():
 
 
 class WebSocketComprehensiveE2ETests:
-    "Comprehensive E2E tests for WebSocket communication.
+    "Comprehensive E2E tests for WebSocket communication."""
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -158,8 +158,8 @@ class WebSocketComprehensiveE2ETests:
         
         # SSOT Authentication - CLAUDE.md Compliant
         token, user_data = await create_authenticated_user(
-            environment=test,"
-            email=ws_lifecycle@test.com"
+            environment=test,""
+            email=ws_lifecycle@test.com""
         )
         user_id = user_data['id']
         
@@ -181,21 +181,21 @@ class WebSocketComprehensiveE2ETests:
         # Check connection is closed - HARD ASSERTION
         ws = ws_tester.connections[conn_id]
         if hasattr(ws, 'closed'):
-            assert ws.closed, WebSocket should be closed after close() call"
+            assert ws.closed, WebSocket should be closed after close() call""
         
         # CLAUDE.md Compliance: Validate execution time (prevent 0-second execution)
         execution_time = time.time() - start_time
-        assert execution_time >= 0.1, f"E2E test executed too quickly: {execution_time:.3f}s - indicates mocked behavior
+        assert execution_time >= 0.1, f"E2E test executed too quickly: {execution_time:.3f}s - indicates mocked behavior"
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
     async def test_message_routing_to_agent_orchestration(self, ws_tester):
-        Test messages route correctly to agent orchestration - CLAUDE.md Compliant."
+        Test messages route correctly to agent orchestration - CLAUDE.md Compliant.""
         start_time = time.time()
         
         # SSOT Authentication - CLAUDE.md Compliant
         token, user_data = await create_authenticated_user(
-            environment="test,
+            environment="test,"
             email=ws_routing@test.com
         )
         user_id = user_data['id']
@@ -205,8 +205,8 @@ class WebSocketComprehensiveE2ETests:
         agent_request = {
             "type: agent_request",
             payload: {
-                agent_type: "optimization,
-                task": analyze_performance,
+                agent_type: "optimization,"
+                task": analyze_performance,"
                 data: {metric: latency"}"
             }
         }
@@ -217,11 +217,11 @@ class WebSocketComprehensiveE2ETests:
         assert response is not None, Agent orchestration should respond to requests
         
         # Validate actual agent response structure
-        assert type in response, "Response must include type field
+        assert type in response, "Response must include type field"
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
-        assert execution_time >= 0.1, fE2E test executed too quickly: {execution_time:.3f}s - indicates mocked behavior"
+        assert execution_time >= 0.1, fE2E test executed too quickly: {execution_time:.3f}s - indicates mocked behavior""
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -257,9 +257,9 @@ class WebSocketComprehensiveE2ETests:
             if hasattr(ws, 'closed'):
                 assert not ws.closed, fConnection for user {user_id} should remain open
             elif hasattr(ws, 'state'):
-                assert ws.state.name == 'OPEN', f"Connection for user {user_id} should be OPEN, got {ws.state.name}
+                assert ws.state.name == 'OPEN', f"Connection for user {user_id} should be OPEN, got {ws.state.name}"
             else:
-                assert ws is not None, fConnection for user {user_id} should exist"
+                assert ws is not None, fConnection for user {user_id} should exist""
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
@@ -310,13 +310,13 @@ class WebSocketComprehensiveE2ETests:
         # SSOT Authentication - CLAUDE.md Compliant
         token, user_data = await create_authenticated_user(
             environment=test,
-            email=error_test@test.com"
+            email=error_test@test.com""
         )
         user_id = user_data['id']
         conn_id = await ws_tester.create_authenticated_connection(user_id, token)
         
         # Send invalid request to test real error handling
-        invalid_request = {"type: invalid_type, data: None}
+        invalid_request = {"type: invalid_type, data: None}"
         await ws_tester.send_message(conn_id, invalid_request)
         
         # Should receive error response - HARD FAILURE IF NONE
@@ -385,12 +385,12 @@ class WebSocketComprehensiveE2ETests:
         
         # Send ping with timestamp for real health monitoring
         ping_timestamp = datetime.now(timezone.utc).isoformat()
-        ping = {type: ping, timestamp: ping_timestamp}"
+        ping = {type: ping, timestamp: ping_timestamp}""
         await ws_tester.send_message(conn_id, ping)
         
         # Should receive pong - HARD FAILURE IF NONE
         pong = await ws_tester.wait_for_message(conn_id, timeout=5.0)
-        assert pong is not None, "Ping should receive pong response for health monitoring
+        assert pong is not None, "Ping should receive pong response for health monitoring"
         
         # Validate health monitoring response
         pong_str = str(pong).lower()
@@ -409,7 +409,7 @@ class WebSocketComprehensiveE2ETests:
         # SSOT Authentication - CLAUDE.md Compliant
         token, user_data = await create_authenticated_user(
             environment=test,
-            email=message_order@test.com"
+            email=message_order@test.com""
         )
         user_id = user_data['id']
         conn_id = await ws_tester.create_authenticated_connection(user_id, token)
@@ -417,7 +417,7 @@ class WebSocketComprehensiveE2ETests:
         # Send numbered messages to test real ordering
         message_count = 5  # Reduced for reliability while testing ordering
         for i in range(message_count):
-            message = {"type: ordered, sequence: i, timestamp: time.time()}
+            message = {"type: ordered, sequence: i, timestamp: time.time()}"
             await ws_tester.send_message(conn_id, message)
             await asyncio.sleep(0.1)  # Small delay to ensure ordering
         
@@ -437,12 +437,12 @@ class WebSocketComprehensiveE2ETests:
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
-        assert execution_time >= 3.0, f"E2E test should allow message processing time: {execution_time:.3f}s
+        assert execution_time >= 3.0, f"E2E test should allow message processing time: {execution_time:.3f}s"
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
     async def test_websocket_rate_limiting(self, ws_tester):
-        "Test rate limiting on WebSocket connections - CLAUDE.md Compliant.
+        "Test rate limiting on WebSocket connections - CLAUDE.md Compliant."""
         start_time = time.time()
         
         # SSOT Authentication - CLAUDE.md Compliant
@@ -496,8 +496,8 @@ class WebSocketComprehensiveE2ETests:
         # Create SSOT authentication with short-lived token
         auth_helper = E2EWebSocketAuthHelper(environment=test)
         token = auth_helper.create_test_jwt_token(
-            user_id=expiry_test_user,"
-            email="auth_expiry@test.com,
+            user_id=expiry_test_user,""
+            email="auth_expiry@test.com,"
             exp_minutes=0.1  # 6 seconds expiry for testing
         )
         
@@ -523,7 +523,7 @@ class WebSocketComprehensiveE2ETests:
         else:
             auth_handled = connection_failed
             
-        assert auth_handled, WebSocket should handle token expiry by closing connection or raising error"
+        assert auth_handled, WebSocket should handle token expiry by closing connection or raising error""
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time

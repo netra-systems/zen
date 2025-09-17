@@ -14,13 +14,8 @@ import os
 from functools import lru_cache
 from typing import Any, Dict, Optional
 
-from netra_backend.app.core.configuration.base import (
-    config_manager as unified_config_manager,
-    reload_unified_config,
-)
-
-# Import from the actual unified configuration system
-from netra_backend.app.core.configuration.base import get_unified_config
+# Import from the unified SSOT configuration system
+from netra_backend.app.config import get_config as get_unified_config, reload_config as reload_unified_config
 from netra_backend.app.schemas.config import AppConfig
 
 

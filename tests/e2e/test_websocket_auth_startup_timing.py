@@ -22,29 +22,29 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestWebSocketAuthStartuper:
-    "Tests WebSocket authentication timing during startup.
+    "Tests WebSocket authentication timing during startup."""
 
     def __init__(self):
         pass
         self.auth_url = http://localhost:8081"  # Corrected port"
         self.backend_url = http://localhost:8001
-        self.websocket_url = ws://localhost:8001/ws"
+        self.websocket_url = ws://localhost:8001/ws""
         self.max_startup_wait = 30.0  # Maximum wait for services to be ready
         self.auth_timeout = 10.0      # Timeout for auth service responses
 
     async def wait_for_auth_service_ready(self) -> bool:
-        "Wait for auth service to be ready before testing WebSocket auth.
+        "Wait for auth service to be ready before testing WebSocket auth."""
         print(formatted_string"")
 
         start_time = time.time()
         while time.time() - start_time < self.max_startup_wait:
         try:
         async with httpx.AsyncClient(timeout=5.0) as client:
-        response = await client.get("
+        response = await client.get(""
 
         if response.status_code == 200:
         response_data = response.json()
-        if auth" in response_data.get(service, ).lower():
+        if auth" in response_data.get(service, ).lower():"
         print("")
         return True
 
@@ -57,8 +57,8 @@ class TestWebSocketAuthStartuper:
         return False
 
     async def wait_for_backend_service_ready(self) -> bool:
-        Wait for backend service to be ready before testing WebSocket."
-        print(formatted_string")
+        Wait for backend service to be ready before testing WebSocket.""
+        print(formatted_string")"
 
         start_time = time.time()
         while time.time() - start_time < self.max_startup_wait:
@@ -90,12 +90,12 @@ class TestWebSocketAuthStartuper:
             user_id: test_websocket_user,
             "email: test@websocket.com",
             exp: datetime.datetime.now(timezone.utc) + datetime.timedelta(minutes=30),
-            iat: datetime.datetime.now(timezone.utc)"
+            iat: datetime.datetime.now(timezone.utc)""
         }
         
 
         Use a test secret (in real usage this comes from config)
-        test_secret = "test_websocket_secret_key_for_development
+        test_secret = "test_websocket_secret_key_for_development"
         token = jwt.encode(payload, test_secret, algorithm=HS256)
 
         return token
@@ -114,8 +114,8 @@ class TestWebSocketAuthStartuper:
         connection_successful: False,
         auth_accepted": False,"
         connection_time_ms: None,
-        error: None,"
-        "websocket_response: None
+        error: None,""
+        "websocket_response: None"""
                     
 
         try:
@@ -135,8 +135,8 @@ class TestWebSocketAuthStartuper:
 
                             # Send a test message to verify the connection works
         test_message = {
-        type: "ping,
-        payload": {timestamp: time.time()}
+        type: "ping,"
+        payload": {timestamp: time.time()}"
                             
 
         await websocket.send(json.dumps(test_message))
@@ -154,8 +154,8 @@ class TestWebSocketAuthStartuper:
         result[auth_accepted] = True
 
         except websockets.exceptions.WebSocketException as e:
-        if 401 in str(e) or unauthorized" in str(e).lower():
-        result["error] = formatted_string
+        if 401 in str(e) or unauthorized" in str(e).lower():"
+        result["error] = formatted_string"
         else:
         result[error] = formatted_string
         except ConnectionError:
@@ -163,13 +163,13 @@ class TestWebSocketAuthStartuper:
         except asyncio.TimeoutError:
         result[error] = WebSocket connection timeout - service may be overloaded
         except Exception as e:
-        result[error] = formatted_string"
+        result[error] = formatted_string""
 
         return result
 
         @pytest.mark.e2e
     async def test_websocket_auth_without_token(self) -> Dict[str, Any]:
-        "Test WebSocket connection without authentication (should fail).
+        "Test WebSocket connection without authentication (should fail)."""
         result = {
         connection_rejected": False,"
         error: None
@@ -182,17 +182,17 @@ class TestWebSocketAuthStartuper:
         timeout=5.0
         ) as websocket:
                                                                         # If we get here, connection succeeded when it shouldn't have
-        result[error] = "Connection succeeded without authentication (security issue)
+        result[error] = "Connection succeeded without authentication (security issue)"
 
         except websockets.exceptions.WebSocketException as e:
-        if 401" in str(e) or unauthorized in str(e).lower():
+        if 401" in str(e) or unauthorized in str(e).lower():"
         result[connection_rejected] = True
         else:
         result["error] = formatted_string"
         except ConnectionError:
         result[connection_rejected] = True
         except Exception as e:
-        result[error] = "formatted_string
+        result[error] = "formatted_string"
 
         return result
 
@@ -211,7 +211,7 @@ tester = WebSocketAuthStartupTester()
 
                                                                                                 # Test auth service readiness
 auth_ready = await tester.wait_for_auth_service_ready()
-assert auth_ready, Auth service not ready - cannot test WebSocket authentication"
+assert auth_ready, Auth service not ready - cannot test WebSocket authentication""
 
                                                                                                 # Test backend service readiness
 backend_ready = await tester.wait_for_backend_service_ready()
@@ -252,28 +252,28 @@ result = await tester.test_websocket_connection_with_auth(token)
 print(f )
 === WEBSOCKET AUTH TEST RESULTS ===)
 print(formatted_string")"
-print()"
-print(formatted_string" if result['connection_time_ms'] else N/A)
+print()""
+print(formatted_string" if result['connection_time_ms'] else N/A)"
 
 if result['error']:
     print(formatted_string")"
 
 
 if result['websocket_response']:
-    print()"
+    print()""
 
 
                                                                                                                     # For now, we'll validate the connection attempt was made successfully
                                                                                                                     # Even if auth is not fully implemented, the connection should not be immediately refused
-if result['error'] and connection refused" in result['error'].lower():
-    pytest.fail("
+if result['error'] and connection refused" in result['error'].lower():"
+    pytest.fail(""
 
 
                                                                                                                         # If connection was successful, validate timing
 if result['connection_successful']:
     assert result['connection_time_ms'] < 10000, \
 
-formatted_string"
+formatted_string""
 
 
 @pytest.mark.asyncio
@@ -301,10 +301,10 @@ result = await tester.test_websocket_auth_without_token()
 
 print(f )
 === WEBSOCKET SECURITY TEST RESULTS ===")"
-print()"
+print()""
 
 if result['error']:
-    print(formatted_string")
+    print(formatted_string")"
 
 
                                                                                                                                         # Validate that connection was properly rejected
@@ -338,13 +338,13 @@ auth_ready = await tester.wait_for_auth_service_ready()
 backend_ready = await tester.wait_for_backend_service_ready()
 
 if not (auth_ready and backend_ready):
-    pytest.skip(Services not ready - skipping WebSocket timing test)"
+    pytest.skip(Services not ready - skipping WebSocket timing test)""
 
 
                                                                                                                                                         # Create test token
 token = await tester.create_test_jwt_token()
 if not token:
-    pytest.skip(Could not create test JWT token - skipping timing test")
+    pytest.skip(Could not create test JWT token - skipping timing test")"
 
 
                                                                                                                                                             # Test multiple connection attempts to get timing statistics
@@ -378,23 +378,23 @@ print(formatted_string)
 print("")
 
                                                                                                                                                                         # Validate timing requirements for real-time communication
-assert avg_time < 5000, formatted_string"
-assert max_time < 10000, "formatted_string
+assert avg_time < 5000, formatted_string""
+assert max_time < 10000, "formatted_string"
 
 else:
-    print(No successful connections for timing analysis)"
+    print(No successful connections for timing analysis)""
 
                                                                                                                                                                             # Don't fail if connections aren't working yet - just log the issue
-    print(" WARNING: [U+FE0F]  WebSocket connections not working - may indicate service configuration issues)
+    print(" WARNING: [U+FE0F]  WebSocket connections not working - may indicate service configuration issues)"
 
 
-if __name__ == __main__:"
+if __name__ == __main__:""
     async def main():
 
 pass
 tester = WebSocketAuthStartupTester()
 
-print("=== WEBSOCKET AUTH STARTUP TEST ===)
+print("=== WEBSOCKET AUTH STARTUP TEST ===)"
 
     # Test service readiness
 print(Testing auth service readiness...")"
@@ -419,4 +419,4 @@ else:
     print(" FAIL:  Services not ready for WebSocket testing")
 
 
-asyncio.run(main()")
+asyncio.run(main()")"

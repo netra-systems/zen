@@ -1,4 +1,4 @@
-"
+""""""
 Test WebSocket Events E2E
 
 Business Value Justification (BVJ):
@@ -6,7 +6,7 @@ Business Value Justification (BVJ):
 - Business Goal: Ensure real-time user feedback during AI agent execution
 - Value Impact: Delivers 90% of user value through real-time AI interaction
 - Strategic Impact: Core user experience for engagement and platform stickiness
-"
+""
 
 import pytest
 import uuid
@@ -15,7 +15,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
 class WebSocketEventsE2ETests(BaseE2ETest):
-    "Test WebSocket events end-to-end.
+    "Test WebSocket events end-to-end."""
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -25,8 +25,8 @@ class WebSocketEventsE2ETests(BaseE2ETest):
         e2e_auth = E2EAuthHelper()
         
         auth_result = await e2e_auth.authenticate_test_user(
-            email=websockettest@company.com,"
-            subscription_tier="premium
+            email=websockettest@company.com,""
+            subscription_tier="premium"
         )
         
         # When: User interacts via WebSocket

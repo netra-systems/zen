@@ -1,4 +1,4 @@
-"
+""""""
 E2E Tests for ConnectionHandler Issues in GCP Staging Environment.
 
 These tests are specifically designed to catch the ConnectionHandler issues identified
@@ -21,7 +21,7 @@ Test Strategy:
 Expected Test Behavior:
 - CURRENT STATE: Most tests FAIL due to identified issues
 - AFTER FIX: All tests PASS with proper ConnectionHandler behavior
-"
+""""""
 import asyncio
 import json
 import logging
@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 GCP_TEST_CONFIG = {'websocket_url': 'wss://netra-backend-staging-xyz.run.app/ws', 'connection_timeout': 15.0, 'test_user_id': '105945141827451681156', 'max_connections_test': 25, 'rapid_connect_delay': 0.1}
 
 class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
-    "
+""""""
     CRITICAL E2E Tests for ConnectionHandler issues in GCP Cloud environment.
     
     These tests target the specific failures identified in the Five WHYs analysis:
@@ -46,10 +46,10 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
     2. WebSocket state detection failures in GCP Cloud Run proxy environment
     3. Resource accumulation during connection churning
     4. Truncated error logging that hides root causes
-"
+""
 
     def setup_method(self):
-        "Set up each test with proper environment and auth helper.
+        "Set up each test with proper environment and auth helper."""
         super().setup_method()
         self.env = get_env()
         self.test_environment = self.env.get('TEST_ENV', 'staging')
@@ -105,7 +105,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_connectionhandler_fails_with_invalid_websocket_state_in_gcp(self):
-        "
+""""""
         CRITICAL TEST: ConnectionHandler Silent Failure Detection
         
         This test MUST fail in current state due to silent failure pattern.
@@ -116,7 +116,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
         Expected Behavior:
         - CURRENT STATE: FAIL - Handler returns True but doesn't send response
         - AFTER FIX: PASS - Handler returns False when connection check fails
-"
+""""""
         logger.info('[U+1F9EA] Testing ConnectionHandler silent failure detection in GCP staging')
         websocket = await self._connect_with_auth()
         try:
@@ -174,13 +174,13 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
         logger.info(f'WebSocket state detection results:')
         logger.info(f'  - Client can send/receive: {connection_works_from_client}')
         logger.info(f'  - is_websocket_connected(): {connection_detected}')
-        logger.info(f  - WebSocket state: {getattr(websocket, 'state', 'NO_STATE_ATTR')})"
+        logger.info(f  - WebSocket state: {getattr(websocket, 'state', 'NO_STATE_ATTR')})""
         logger.info(f'  - WebSocket closed: {websocket.closed}')
         if connection_works_from_client:
             assert connection_detected, f'CRITICAL BUG: is_websocket_connected() returns False but connection actually works. This causes ConnectionHandler to skip responses in GCP Cloud Run environment. Client connectivity: {connection_works_from_client}, State detection: {connection_detected}'
             logger.info(' PASS:  WebSocket state detection correctly identifies working connection')
         else:
-            assert not connection_detected, f"WebSocket state detection inconsistency: Connection doesn't work but detected as connected. Client connectivity: {connection_works_from_client}, State detection: {connection_detected}
+            assert not connection_detected, f"WebSocket state detection inconsistency: Connection doesn't work but detected as connected. Client connectivity: {connection_works_from_client}, State detection: {connection_detected}"
             logger.info(' PASS:  WebSocket state detection correctly identifies non-working connection')
         ws_attributes = {}
         for attr in ['state', 'client_state', '_receive', 'closed', 'close_code']:
@@ -232,7 +232,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
                 failed_connections += 1
                 cycle_time = time.time() - cycle_start
                 connection_results.append({'cycle': cycle, 'success': False, 'error': str(e), 'cycle_time': cycle_time}
-                logger.error(f"   FAIL:  Cycle {cycle + 1}/{GCP_TEST_CONFIG['max_connections_test']}: Failed - {e}, Time: {cycle_time:.2f}s)
+                logger.error(f"   FAIL:  Cycle {cycle + 1}/{GCP_TEST_CONFIG['max_connections_test']}: Failed - {e}, Time: {cycle_time:.2f}s)"
                 if 'maximum number of WebSocket managers' in str(e) or '20' in str(e):
                     logger.error(' ALERT:  CRITICAL BUG DETECTED: WebSocket manager resource limit reached')
                     logger.error('This indicates resource accumulation and improper cleanup')
@@ -256,7 +256,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_exception_logging_captures_full_details(self):
-        "
+""""""
         CRITICAL: Tests that exception logging captures complete error information.
         
         This test MUST fail in current state due to truncated error messages.
@@ -264,7 +264,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
         Expected Behavior:
         - CURRENT STATE: FAIL - Error messages truncated to empty string
         - AFTER FIX: PASS - Full exception type, message, and traceback captured
-"
+""""""
         logger.info('[U+1F9EA] Testing exception logging completeness in ConnectionHandler')
         websocket = await self._connect_with_auth()
         try:
@@ -294,7 +294,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
             assert len(relevant_logs) > 0, f'No error log found for {exception_name} exception. This indicates exception logging is not working.'
             latest_log = relevant_logs[-1]
             log_str = str(latest_log)
-            expected_empty_pattern = f"Error in ConnectionHandler for user {GCP_TEST_CONFIG['test_user_id']}: 
+            expected_empty_pattern = f"Error in ConnectionHandler for user {GCP_TEST_CONFIG['test_user_id']}: "
             assert log_str != expected_empty_pattern, fCRITICAL BUG: Exception logging truncated for {exception_name}. Log message: '{log_str}'. Expected more details than just user ID and empty string. Original exception: {test_exception}
             exception_type_name = type(test_exception).__name__
             assert exception_type_name in log_str, fException logging should include exception type '{exception_type_name}' but log is: '{log_str}'
@@ -315,7 +315,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
         - AFTER FIX: PASS - Complete chat flow works end-to-end
 
         logger.info('[U+1F9EA] Testing complete authenticated chat flow in GCP staging')
-        logger.info(f"User ID: {GCP_TEST_CONFIG['test_user_id']})
+        logger.info(f"User ID: {GCP_TEST_CONFIG['test_user_id']})"
         websocket = await self._connect_with_auth(timeout=20.0)
         agent_request = {'type': 'agent_execution', 'agent_name': 'data_analysis_agent', 'message': 'Analyze the current system status and provide recommendations', 'request_id': f'e2e-test-{int(time.time())}', 'user_id': GCP_TEST_CONFIG['test_user_id'], 'thread_id': f'thread-{int(time.time())}', 'metadata': {'test_mode': True, 'e2e_test': True, 'environment': 'staging'}}
         logger.info(fSending agent execution request: {agent_request['agent_name']}")"

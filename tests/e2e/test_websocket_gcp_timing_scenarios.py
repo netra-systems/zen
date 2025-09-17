@@ -1,4 +1,4 @@
-"
+""""""
 E2E tests for WebSocket GCP timing scenarios - DESIGNED TO FAIL
 
 Business Value:
@@ -9,9 +9,9 @@ Business Value:
 CRITICAL: ALL E2E TESTS REQUIRE AUTHENTICATION per CLAUDE.md mandate.
 These tests use test_framework/ssot/e2e_auth_helper.py for proper auth flows.
 
-DESIGNED TO FAIL: These tests reproduce name 'get_connection_state_machine' is not defined"
+DESIGNED TO FAIL: These tests reproduce name 'get_connection_state_machine' is not defined""
 under real GCP timing conditions and concurrent user scenarios.
-"
+""""""
 import pytest
 import asyncio
 import json
@@ -59,14 +59,14 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_authenticated_websocket_gcp_timeout_import_scope_failure(self):
-    "
+""""""
         DESIGNED TO FAIL: Test GCP timeout conditions trigger import scope errors with auth.
         
         This E2E test reproduces the import scope bug under GCP Cloud Run timeout
         constraints using real authenticated WebSocket connections.
         
         Expected Failure: GCP timing constraints expose function-scoped import issues
-        "
+""""""
         auth_headers = self.auth_helper.get_websocket_headers(self.primary_user.jwt_token)
         auth_subprotocols = self.auth_helper.get_websocket_subprotocols(self.primary_user.jwt_token)
         gcp_timeout_scenarios = []
@@ -78,7 +78,7 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
                 print(f[U+1F52C] Testing GCP scenario: {constraint['scenario']} (timeout: {constraint['timeout']}s))
                 connection_future = websockets.connect(self.websocket_url, additional_headers=auth_headers, subprotocols=auth_subprotocols, open_timeout=constraint['timeout'], close_timeout=2.0, ping_interval=None, ping_timeout=None)
                 websocket = await asyncio.wait_for(connection_future, timeout=constraint['timeout']
-                gcp_test_message = {'type': 'agent_request', 'user_id': self.primary_user.user_id, 'data': {'message': f"GCP timing test for {constraint['scenario']}, 'gcp_timeout_test': True, 'timestamp': datetime.now(timezone.utc).isoformat()}, 'auth': {'user_id': self.primary_user.user_id, 'jwt_token': self.primary_user.jwt_token[:32] + '...'}}
+                gcp_test_message = {'type': 'agent_request', 'user_id': self.primary_user.user_id, 'data': {'message': f"GCP timing test for {constraint['scenario']}, 'gcp_timeout_test': True, 'timestamp': datetime.now(timezone.utc).isoformat()}, 'auth': {'user_id': self.primary_user.user_id, 'jwt_token': self.primary_user.jwt_token[:32] + '...'}}"
                 await websocket.send(json.dumps(gcp_test_message))
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=constraint['timeout'] - 1.0)
@@ -116,14 +116,14 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_authenticated_concurrent_users_import_scope_race_conditions(self):
-        "
+""""""
         DESIGNED TO FAIL: Test concurrent authenticated users trigger import scope race conditions.
         
         This E2E test creates multiple authenticated users connecting simultaneously
         to reproduce import scope race conditions under realistic load.
         
         Expected Failure: Concurrent user connections expose function-scoped import timing bugs
-"
+""""""
         authenticated_users = [self.primary_user, self.secondary_user]
         for i in range(3):
             additional_user = await self.auth_helper.create_authenticated_user(email=f'e2e_concurrent_{i}@websocket.test', full_name=f'E2E Concurrent User {i}', permissions=['read', 'write', 'websocket_access']
@@ -132,7 +132,7 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
         race_condition_import_failures = []
 
         async def create_authenticated_concurrent_connection(user: AuthenticatedUser, conn_index: int) -> Dict[str, Any]:
-            "Create authenticated WebSocket connection for concurrent testing.
+            "Create authenticated WebSocket connection for concurrent testing."""
             connection_result = {'user_id': user.user_id, 'connection_index': conn_index, 'start_time': time.time(), 'authenticated': True}
             try:
                 auth_headers = self.auth_helper.get_websocket_headers(user.jwt_token)
@@ -198,8 +198,8 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
         for scenario in agent_execution_scenarios:
             scenario_result = {'scenario': scenario, 'user_id': self.primary_user.user_id, 'start_time': time.time()}
             try:
-                print(f"[U+1F916] Testing authenticated agent execution: {scenario['agent_type']})
-                websocket = await asyncio.wait_for(websockets.connect(self.websocket_url, additional_headers=auth_headers, subprotocols=auth_subprotocols, open_timeout=5.0), timeout=10.0")
+                print(f"[U+1F916] Testing authenticated agent execution: {scenario['agent_type']})"
+                websocket = await asyncio.wait_for(websockets.connect(self.websocket_url, additional_headers=auth_headers, subprotocols=auth_subprotocols, open_timeout=5.0), timeout=10.0")"
                 agent_request = {'type': 'agent_request', 'user_id': self.primary_user.user_id, 'agent_type': scenario['agent_type'], 'data': {'message': fExecute {scenario['agent_type']} agent with {scenario['complexity']} complexity, 'complexity': scenario['complexity'], 'import_scope_test': True, 'authenticated_execution': True}, 'auth': {'user_id': self.primary_user.user_id, 'permissions': self.primary_user.permissions}, 'timing': {'max_duration': scenario['expected_duration'], 'start_timestamp': datetime.now(timezone.utc).isoformat()}}
                 await websocket.send(json.dumps(agent_request))
                 agent_messages = []
@@ -258,7 +258,7 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
                 print(f[U+1F527] Testing authenticated error recovery: {scenario['error_type']}")"
                 websocket = await asyncio.wait_for(websockets.connect(self.websocket_url, additional_headers=auth_headers, open_timeout=5.0), timeout=10.0)
                 if scenario['trigger'] == 'malformed_json':
-                    await websocket.send('{type: invalid, malformed": json}')
+                    await websocket.send('{type: invalid, malformed": json}')"
                 elif scenario['trigger'] == 'expired_token':
                     expired_request = {'type': 'agent_request', 'auth': {'jwt_token': 'expired-token-simulation'}, 'data': {'message': 'Test with expired token'}}
                     await websocket.send(json.dumps(expired_request))

@@ -1,4 +1,4 @@
-"E2E tests for WebSocket events during execution.
+"E2E tests for WebSocket events during execution."""
 
 Business Value Justification:
 - Segment: ALL (Free  ->  Enterprise)
@@ -35,10 +35,10 @@ from shared.types.execution_types import StronglyTypedWebSocketEvent, WebSocketE
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
 
 class MockWebSocketConnection:
-    Mock WebSocket connection for E2E testing with real event tracking."
+    Mock WebSocket connection for E2E testing with real event tracking.""
 
     def __init__(self, user_id: str, connection_id: str):
-        "Initialize mock WebSocket connection.
+        "Initialize mock WebSocket connection."""
         self.user_id = user_id
         self.connection_id = connection_id
         self.connected = True
@@ -70,10 +70,10 @@ class MockWebSocketConnection:
         return {'total_business_events': len(self.business_value_events), 'event_types': list(set(event_types)), 'first_event_time': self.business_value_events[0]['timestamp'] if self.business_value_events else None, 'last_event_time': self.business_value_events[-1]['timestamp'] if self.business_value_events else None, 'user_id': self.user_id, 'connection_id': self.connection_id}
 
 class MockWebSocketBridge:
-    Mock WebSocket bridge that simulates real WebSocket infrastructure."
+    Mock WebSocket bridge that simulates real WebSocket infrastructure.""
 
     def __init__(self):
-        "Initialize mock WebSocket bridge.
+        "Initialize mock WebSocket bridge."""
         self.connections: Dict[str, MockWebSocketConnection] = {}
         self.user_connections: Dict[str, List[str]] = {}
         self.event_log = []
@@ -106,7 +106,7 @@ class MockWebSocketBridge:
         return success_count > 0
 
     async def emit_to_user(self, user_id: str, event_type: str, data: Dict[str, Any], **kwargs) -> bool:
-        Mock emit to specific user's connections."
+        Mock emit to specific user's connections.""
         if user_id not in self.user_connections:
             return False
         success_count = 0
@@ -121,7 +121,7 @@ class MockWebSocketBridge:
         return success_count > 0
 
     def _track_business_value_event(self, event_type: str, data: Dict[str, Any], user_id: Optional[str]=None):
-        "Track business value metrics.
+        "Track business value metrics."""
         self.business_value_metrics['total_events_sent'] += 1
         if user_id:
             self.business_value_metrics['users_served'].add(user_id)
@@ -145,14 +145,14 @@ class WebSocketEventsE2ETests(SSotBaseTestCase):
 
     @pytest.fixture
     async def authenticated_user_context(self, e2e_auth_helper: E2EAuthHelper) -> UserExecutionContext:
-        Create authenticated user context with WebSocket connection."
+        Create authenticated user context with WebSocket connection.""
         auth_result = await e2e_auth_helper.authenticate_test_user()
         websocket_id = f'e2e_ws_{uuid.uuid4().hex[:12]}'
         return UserExecutionContext(user_id=auth_result.user_id, thread_id=f'e2e_ws_thread_{uuid.uuid4().hex[:12]}', run_id=f'e2e_ws_run_{uuid.uuid4().hex[:12]}', request_id=f'e2e_ws_req_{uuid.uuid4().hex[:12]}', websocket_client_id=websocket_id, agent_context={'authenticated': True, 'websocket_events_enabled': True, 'business_value_test': True, 'chat_functionality': True}, audit_metadata={'auth_flow': 'e2e_jwt', 'websocket_id': websocket_id, 'test_type': 'websocket_events_e2e', 'business_critical': True}
 
     @pytest.fixture
     def mock_websocket_bridge(self) -> MockWebSocketBridge:
-        "Create mock WebSocket bridge with real event tracking.
+        "Create mock WebSocket bridge with real event tracking."""
         return MockWebSocketBridge()
 
     @pytest.mark.asyncio
@@ -273,7 +273,7 @@ class WebSocketEventsE2ETests(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_events_with_error_handling_e2e(self, e2e_auth_helper: E2EAuthHelper, authenticated_user_context: UserExecutionContext, mock_websocket_bridge: MockWebSocketBridge):
-        Test WebSocket events with error handling during execution."
+        Test WebSocket events with error handling during execution.""
         connection = mock_websocket_bridge.add_user_connection(authenticated_user_context.user_id, authenticated_user_context.websocket_client_id)
         connection.auth_validated = True
         factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)

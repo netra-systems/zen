@@ -1,4 +1,4 @@
-"
+""""""
 E2E Test: WebSocket Event Structure Validation (Staging GCP)
 
 PURPOSE: End-to-end validation of WebSocket event structure in staging environment
@@ -6,7 +6,7 @@ REPRODUCES: Issue #1021 - Business fields buried in 'data' wrapper
 
 EXPECTED FAILURE: These tests should FAIL until structural issue is resolved
 ENVIRONMENT: Staging GCP deployment only (no Docker)
-"
+""""""
 import pytest
 import asyncio
 import json
@@ -19,7 +19,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from auth_service.auth_core.test_utilities.auth_test_harness import AuthAgentFlowHarness
 
 class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
-    "E2E validation of WebSocket event structure in staging environment
+    "E2E validation of WebSocket event structure in staging environment"""
 
     async def asyncSetUp(self):
         "Set up E2E test environment"
@@ -51,7 +51,7 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
         return chat_data['conversation_id']
 
     async def capture_websocket_events(self, duration_seconds: int=10):
-        Capture WebSocket events for specified duration"
+        Capture WebSocket events for specified duration""
         self.captured_events.clear()
         end_time = datetime.now() + timedelta(seconds=duration_seconds)
         try:
@@ -71,10 +71,10 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_staging_agent_execution_event_structure(self):
-    "
+""""""
         Test complete agent execution event structure in staging
         EXPECTED FAILURE: Events should have business fields at top level
-        "
+""""""
         websocket = await self.setup_staging_websocket_connection()
         try:
             conversation_id = await self.start_agent_conversation('Analyze the current market trends for tech stocks')
@@ -98,16 +98,16 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
             await websocket.close()
 
     def validate_agent_started_structure(self, event: Dict[str, Any]:
-        "
+""""""
         Validate agent_started event structure
         EXPECTED FAILURE: Business fields should be at top level
-"
+""""""
         self.assertEqual(event.get('type'), 'agent_started')
         self.assertIn('agent_type', event, 'agent_type should be at top level of agent_started event')
         self.assertIn('run_id', event, 'run_id should be at top level of agent_started event')
         self.assertIn('user_id', event, 'user_id should be at top level of agent_started event')
         if 'data' in event and 'agent_type' in event['data']:
-            self.fail("agent_type should not be buried in 'data' wrapper)
+            self.fail("agent_type should not be buried in 'data' wrapper)"
 
     def validate_agent_thinking_structure(self, event: Dict[str, Any]:
         
@@ -143,26 +143,26 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
             self.fail(result should not be buried in 'data' wrapper)
 
     def validate_agent_completed_structure(self, event: Dict[str, Any]:
-        "
+""""""
         Validate agent_completed event structure
         EXPECTED FAILURE: Response content should be at top level
-"
+""""""
         self.assertEqual(event.get('type'), 'agent_completed')
         self.assertIn('response', event, 'response should be at top level of agent_completed event')
         self.assertIn('run_id', event, 'run_id should be at top level of agent_completed event')
         if 'data' in event and 'response' in event['data']:
-            self.fail(response should not be buried in 'data' wrapper)"
+            self.fail(response should not be buried in 'data' wrapper)""
 
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_frontend_event_parsing_compatibility(self):
-        "
+""""""
         Test WebSocket event structure compatibility with frontend parsing
         EXPECTED FAILURE: Current structure may break frontend event handling
-"
+""""""
         websocket = await self.setup_staging_websocket_connection()
         try:
-            conversation_id = await self.start_agent_conversation("What's the weather like?)
+            conversation_id = await self.start_agent_conversation("What's the weather like?)"
             events = await self.capture_websocket_events(duration_seconds=8)
             for event in events:
                 event_type = event.get('type')
@@ -217,15 +217,15 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
                     business_fields = ['agent_type', 'run_id', 'thinking_content', 'tool_name', 'response', 'result']
                     for field in business_fields:
                         if field in event['data']:
-                            self.fail(fBusiness field '{field}' buried in data wrapper affects real-time UX)"
+                            self.fail(fBusiness field '{field}' buried in data wrapper affects real-time UX)""
         finally:
             await websocket.close()
 
     def validate_streaming_event_structure(self, event: Dict[str, Any]:
-    "
+""""""
         Validate individual streaming event structure
         EXPECTED FAILURES: Business fields should be directly accessible
-        "
+""""""
         event_type = event.get('type')
         if event_type in ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']:
             self.assertIn('timestamp', event, f'{event_type} should have timestamp at top level')

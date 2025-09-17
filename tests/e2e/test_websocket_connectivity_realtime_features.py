@@ -1,4 +1,4 @@
-"
+""""""
 WebSocket Connectivity and Real-Time Features E2E Test
 
 Business Value Justification (BVJ):
@@ -30,7 +30,7 @@ This E2E test validates comprehensive real-time functionality including:
 8. Performance under load and stress conditions
 
 Maximum 1000 lines, comprehensive real-time validation.
-"
+""
 
 import asyncio
 import json
@@ -60,7 +60,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class WebSocketMetricsTests:
-    "Comprehensive metrics for WebSocket connectivity and real-time features testing.
+    "Comprehensive metrics for WebSocket connectivity and real-time features testing."""
     test_name: str
     start_time: float = field(default_factory=time.time)
     end_time: float = 0.0
@@ -222,8 +222,8 @@ class WebSocketConnectivityTester:
         raise RuntimeError(Could not detect project root")"
     
     async def run_comprehensive_websocket_test(self) -> WebSocketTestMetrics:
-        Run comprehensive WebSocket connectivity and real-time features test."
-        logger.info(=== STARTING WEBSOCKET CONNECTIVITY AND REAL-TIME TEST ===")
+        Run comprehensive WebSocket connectivity and real-time features test.""
+        logger.info(=== STARTING WEBSOCKET CONNECTIVITY AND REAL-TIME TEST ===")"
         self.metrics.start_time = time.time()
         
         try:
@@ -262,7 +262,7 @@ class WebSocketConnectivityTester:
             return self.metrics
             
         except Exception as e:
-            logger.error(fWebSocket connectivity test failed: {e})"
+            logger.error(fWebSocket connectivity test failed: {e})""
             self.metrics.errors.append(str(e))
             return self.metrics
         
@@ -271,7 +271,7 @@ class WebSocketConnectivityTester:
             await self._cleanup_websocket_test()
     
     async def _discover_websocket_endpoints(self):
-        "Phase 1: Discover WebSocket endpoints through service discovery.
+        "Phase 1: Discover WebSocket endpoints through service discovery."""
         logger.info(Phase 1: Discovering WebSocket endpoints")"
         
         if self.websocket_url:
@@ -287,31 +287,31 @@ class WebSocketConnectivityTester:
                 return
             
             # Fallback: Try to construct WebSocket URL from backend port
-            if backend_info and port in backend_info:"
-                backend_port = backend_info[port"]
+            if backend_info and port in backend_info:""
+                backend_port = backend_info[port"]"
                 self.websocket_url = fws://localhost:{backend_port}/ws
-                logger.info(fConstructed WebSocket URL: {self.websocket_url})"
+                logger.info(fConstructed WebSocket URL: {self.websocket_url})""
                 return
             
             # Final fallback: use default WebSocket endpoint
-            self.websocket_url = "ws://localhost:8001/ws
+            self.websocket_url = "ws://localhost:8001/ws"
             logger.warning(fUsing fallback WebSocket URL: {self.websocket_url})
             
         except Exception as e:
-            error_msg = f"WebSocket endpoint discovery failed: {e}
+            error_msg = f"WebSocket endpoint discovery failed: {e}"
             logger.error(error_msg)
             self.metrics.errors.append(error_msg)
             raise
     
     async def _test_basic_websocket_connectivity(self):
-        "Phase 2: Test basic WebSocket connectivity.
+        "Phase 2: Test basic WebSocket connectivity."""
         logger.info("Phase 2: Testing basic WebSocket connectivity)"
         
         if not self.websocket_url:
             raise RuntimeError(No WebSocket URL available for connectivity test)
         
         # Test single connection establishment
-        connection_id = basic_connectivity_test"
+        connection_id = basic_connectivity_test""
         connection = await self._establish_websocket_connection(connection_id)
         
         if connection and connection.websocket:
@@ -324,7 +324,7 @@ class WebSocketConnectivityTester:
             # Clean up connection
             await self._close_websocket_connection(connection_id)
             
-            logger.info(Basic WebSocket connectivity test passed")
+            logger.info(Basic WebSocket connectivity test passed")"
         else:
             raise RuntimeError(Failed to establish basic WebSocket connection)
     
@@ -393,13 +393,13 @@ class WebSocketConnectivityTester:
             
         except Exception as e:
             self.metrics.failed_connections += 1
-            error_msg = f"Unexpected WebSocket connection error for {connection_id}: {e}
+            error_msg = f"Unexpected WebSocket connection error for {connection_id}: {e}"
             logger.error(error_msg)
             self.metrics.errors.append(error_msg)
             return None
     
     async def _test_ping_pong(self, connection: WebSocketConnection):
-        "Test WebSocket ping-pong mechanism.
+        "Test WebSocket ping-pong mechanism."""
         if not connection.websocket:
             return
         
@@ -412,10 +412,10 @@ class WebSocketConnectivityTester:
             ping_time = time.time() - start_time
             connection.last_ping = ping_time
             
-            logger.debug(f"Ping-pong successful for {connection.connection_id}: {ping_time:.3f}s)
+            logger.debug(f"Ping-pong successful for {connection.connection_id}: {ping_time:.3f}s)"
             
         except asyncio.TimeoutError:
-            self.metrics.warnings.append(fPing timeout for {connection.connection_id}")
+            self.metrics.warnings.append(fPing timeout for {connection.connection_id}")"
         except Exception as e:
             self.metrics.warnings.append(fPing-pong failed for {connection.connection_id}: {e})
     
@@ -430,7 +430,7 @@ class WebSocketConnectivityTester:
                 type: test,
                 "data: fHello from {connection.connection_id}",
                 timestamp: time.time(),
-                sequence: 1"
+                sequence: 1""
             }
             
             start_time = time.time()
@@ -454,7 +454,7 @@ class WebSocketConnectivityTester:
                     connection.messages_received += 1
                     self.metrics.messages_received += 1
                     
-                    logger.debug(f"Message exchange successful for {connection.connection_id}: {latency:.3f}s)
+                    logger.debug(f"Message exchange successful for {connection.connection_id}: {latency:.3f}s)"
                     
                 except json.JSONDecodeError:
                     # Non-JSON response is acceptable
@@ -472,7 +472,7 @@ class WebSocketConnectivityTester:
     
     async def _test_websocket_authentication(self):
         ""Phase 3: Test WebSocket authentication flows.
-        logger.info(Phase 3: Testing WebSocket authentication)"
+        logger.info(Phase 3: Testing WebSocket authentication)""
         
         # Test unauthenticated connection
         await self._test_unauthenticated_connection()
@@ -484,7 +484,7 @@ class WebSocketConnectivityTester:
         await self._test_auth_failure_handling()
     
     async def _test_unauthenticated_connection(self):
-        "Test WebSocket connection without authentication.
+        "Test WebSocket connection without authentication."""
         connection_id = "unauthenticated_test"
         self.metrics.auth_attempts += 1
         
@@ -498,11 +498,11 @@ class WebSocketConnectivityTester:
                 await self._close_websocket_connection(connection_id)
             else:
                 # Connection failure for unauthenticated is also acceptable
-                logger.info(Unauthenticated WebSocket connection properly rejected)"
+                logger.info(Unauthenticated WebSocket connection properly rejected)""
                 
         except Exception as e:
             # Auth failure is expected and acceptable
-            logger.info(fUnauthenticated connection handled appropriately: {e}")
+            logger.info(fUnauthenticated connection handled appropriately: {e}")"
     
     async def _test_authenticated_connection(self):
         Test WebSocket connection with authentication.""
@@ -554,8 +554,8 @@ class WebSocketConnectivityTester:
                 # Send authentication message
                 auth_message = {
                     type: authenticate,
-                    token: auth_token,"
-                    timestamp": time.time()
+                    token: auth_token,""
+                    timestamp": time.time()"
                 }
                 
                 await connection.websocket.send(json.dumps(auth_message))
@@ -601,10 +601,10 @@ class WebSocketConnectivityTester:
         try:
             # Send authenticated message
             auth_message = {
-                type: "authenticated_test,
-                data": fAuthenticated message from {connection.connection_id},
+                type: "authenticated_test,"
+                data": fAuthenticated message from {connection.connection_id},"
                 timestamp: time.time(),
-                token: connection.auth_token"
+                token: connection.auth_token""
             }
             
             await connection.websocket.send(json.dumps(auth_message))
@@ -621,18 +621,18 @@ class WebSocketConnectivityTester:
                 connection.messages_received += 1
                 self.metrics.messages_received += 1
                 
-                logger.debug(fAuthenticated message exchange successful for {connection.connection_id}")
+                logger.debug(fAuthenticated message exchange successful for {connection.connection_id}")"
                 
             except asyncio.TimeoutError:
                 self.metrics.warnings.append(fAuthenticated message response timeout for {connection.connection_id})
                 
         except Exception as e:
-            error_msg = fAuthenticated message exchange failed for {connection.connection_id}: {e}"
+            error_msg = fAuthenticated message exchange failed for {connection.connection_id}: {e}""
             logger.warning(error_msg)
             self.metrics.warnings.append(error_msg)
     
     async def _test_auth_failure_handling(self):
-        "Test handling of authentication failures.
+        "Test handling of authentication failures."""
         connection_id = auth_failure_test""
         
         try:
@@ -643,9 +643,9 @@ class WebSocketConnectivityTester:
             if connection:
                 # Connection might still be established but not authenticated
                 if not connection.is_authenticated:
-                    logger.info(Authentication failure properly handled)"
+                    logger.info(Authentication failure properly handled)""
                 else:
-                    self.metrics.warnings.append("Invalid token was accepted (unexpected))
+                    self.metrics.warnings.append("Invalid token was accepted (unexpected))"
                 
                 await self._close_websocket_connection(connection_id)
             else:
@@ -653,10 +653,10 @@ class WebSocketConnectivityTester:
                 
         except Exception as e:
             # Exception during auth failure test is acceptable
-            logger.info(f"Auth failure handling test completed: {e})
+            logger.info(f"Auth failure handling test completed: {e})"
     
     async def _test_message_delivery_patterns(self):
-        "Phase 4: Test real-time message delivery patterns.
+        "Phase 4: Test real-time message delivery patterns."""
         logger.info("Phase 4: Testing message delivery patterns)"
         
         # Test reliable message delivery
@@ -669,8 +669,8 @@ class WebSocketConnectivityTester:
         await self._test_message_queuing()
     
     async def _test_reliable_message_delivery(self):
-        Test reliable message delivery."
-        connection_id = "reliable_delivery_test
+        Test reliable message delivery.""
+        connection_id = "reliable_delivery_test"
         connection = await self._establish_websocket_connection(connection_id)
         
         if not connection or not connection.websocket:
@@ -686,8 +686,8 @@ class WebSocketConnectivityTester:
                 message = {
                     "type: delivery_test",
                     sequence: i,
-                    data: f"Message {i},
-                    timestamp: time.time()"
+                    data: f"Message {i},"
+                    timestamp: time.time()""
                 }
                 
                 start_time = time.time()
@@ -722,13 +722,13 @@ class WebSocketConnectivityTester:
                         
                 except asyncio.TimeoutError:
                     self.metrics.messages_lost += 1
-                    logger.debug(f"Message {i} delivery timeout)
+                    logger.debug(f"Message {i} delivery timeout)"
                 
                 # Small delay between messages
                 await asyncio.sleep(0.1)
             
             delivery_rate = (delivered_messages / message_count) * 100
-            logger.info(fReliable delivery test: {delivery_rate:.1f}% delivery rate ({delivered_messages}/{message_count}")
+            logger.info(fReliable delivery test: {delivery_rate:.1f}% delivery rate ({delivered_messages}/{message_count}")"
             
             await self._close_websocket_connection(connection_id)
             
@@ -750,8 +750,8 @@ class WebSocketConnectivityTester:
             ack_message = {
                 type": "require_ack,
                 id: str(uuid.uuid4()),
-                data: This message requires acknowledgment",
-                "timestamp: time.time()
+                data: This message requires acknowledgment","
+                "timestamp: time.time()"""
             }
             
             await connection.websocket.send(json.dumps(ack_message))
@@ -771,9 +771,9 @@ class WebSocketConnectivityTester:
                     if response.get(type) == ack or ack" in response:"
                         logger.info(Message acknowledgment received)
                     else:
-                        logger.debug(Response received (acknowledgment pattern may vary))"
+                        logger.debug(Response received (acknowledgment pattern may vary))""
                 except json.JSONDecodeError:
-                    logger.debug("Non-JSON response received (acknowledgment pattern may vary))
+                    logger.debug("Non-JSON response received (acknowledgment pattern may vary))"
                     
             except asyncio.TimeoutError:
                 self.metrics.warnings.append(Message acknowledgment timeout)
@@ -781,10 +781,10 @@ class WebSocketConnectivityTester:
             await self._close_websocket_connection(connection_id)
             
         except Exception as e:
-            self.metrics.warnings.append(f"Message acknowledgment test failed: {e})
+            self.metrics.warnings.append(f"Message acknowledgment test failed: {e})"
     
     async def _test_message_queuing(self):
-        "Test message queuing during temporary disconnection.
+        "Test message queuing during temporary disconnection."""
         # This test simulates what happens when messages are sent during brief disconnections
         connection_id = "queuing_test"
         
@@ -797,8 +797,8 @@ class WebSocketConnectivityTester:
             # Send initial message
             initial_message = {
                 type: initial,
-                data: "Message before disconnection,
-                timestamp": time.time()
+                data: "Message before disconnection,"
+                timestamp": time.time()"
             }
             
             await connection.websocket.send(json.dumps(initial_message))
@@ -822,7 +822,7 @@ class WebSocketConnectivityTester:
                 post_reconnect_message = {
                     type": "post_reconnect,
                     data: Message after reconnection,
-                    timestamp: time.time()"
+                    timestamp: time.time()""
                 }
                 
                 await reconnection.websocket.send(json.dumps(post_reconnect_message))
@@ -835,7 +835,7 @@ class WebSocketConnectivityTester:
                         timeout=3.0
                     )
                     self.metrics.messages_received += 1
-                    logger.info("Message received after reconnection)
+                    logger.info("Message received after reconnection)"
                     
                 except asyncio.TimeoutError:
                     logger.debug(No immediate message after reconnection (expected))
@@ -865,8 +865,8 @@ class WebSocketConnectivityTester:
             for i in range(sequence_length):
                 message = {
                     type: sequence,
-                    sequence: i,"
-                    "data: fOrdered message {i},
+                    sequence: i,""
+                    "data: fOrdered message {i},"""
                     timestamp: time.time()
                 }
                 
@@ -900,7 +900,7 @@ class WebSocketConnectivityTester:
                         received_sequence.append(i)
                         
                 except asyncio.TimeoutError:
-                    logger.debug(fTimeout waiting for message {i})"
+                    logger.debug(fTimeout waiting for message {i})""
                     break
             
             # Check for out-of-order messages
@@ -912,19 +912,19 @@ class WebSocketConnectivityTester:
             self.metrics.out_of_order_messages = out_of_order
             
             if out_of_order == 0:
-                logger.info("Message ordering test passed: all messages in order)
+                logger.info("Message ordering test passed: all messages in order)"
             else:
                 logger.warning(fMessage ordering issues detected: {out_of_order} out-of-order messages)
             
             await self._close_websocket_connection(connection_id)
             
         except Exception as e:
-            error_msg = f"Message ordering test failed: {e}
+            error_msg = f"Message ordering test failed: {e}"
             logger.error(error_msg)
             self.metrics.errors.append(error_msg)
     
     async def _test_concurrent_connections(self):
-        "Phase 6: Test concurrent connections and scalability.
+        "Phase 6: Test concurrent connections and scalability."""
         logger.info("Phase 6: Testing concurrent connections)"
         
         if self.config.concurrent_connections <= 0:
@@ -958,15 +958,15 @@ class WebSocketConnectivityTester:
             
             # Resource usage tracking
             self.metrics.connection_resource_usage[concurrent_duration] = concurrent_duration
-            self.metrics.connection_resource_usage[peak_connections] = self.metrics.max_concurrent_connections"
+            self.metrics.connection_resource_usage[peak_connections] = self.metrics.max_concurrent_connections""
             
         except Exception as e:
-            error_msg = f"Concurrent connections test failed: {e}
+            error_msg = f"Concurrent connections test failed: {e}"
             logger.error(error_msg)
             self.metrics.errors.append(error_msg)
     
     async def _test_concurrent_connection(self, connection_id: str) -> bool:
-        Test individual concurrent connection."
+        Test individual concurrent connection.""
         try:
             connection = await self._establish_websocket_connection(connection_id)
             if not connection or not connection.websocket:
@@ -975,7 +975,7 @@ class WebSocketConnectivityTester:
             # Send multiple messages per connection
             for i in range(self.config.messages_per_connection):
                 message = {
-                    "type: concurrent,
+                    "type: concurrent,"""
                     connection_id: connection_id,
                     message_id": i,"
                     timestamp: time.time()
@@ -1002,11 +1002,11 @@ class WebSocketConnectivityTester:
             return True
             
         except Exception as e:
-            logger.debug(fConcurrent connection {connection_id} failed: {e})"
+            logger.debug(fConcurrent connection {connection_id} failed: {e})""
             return False
     
     async def _test_connection_resilience(self):
-        "Phase 7: Test connection resilience and reconnection.
+        "Phase 7: Test connection resilience and reconnection."""
         logger.info(Phase 7: Testing connection resilience")"
         
         # Test automatic reconnection
@@ -1019,8 +1019,8 @@ class WebSocketConnectivityTester:
         await self._test_graceful_degradation()
     
     async def _test_automatic_reconnection(self):
-        Test automatic reconnection capabilities."
-        connection_id = reconnection_test"
+        Test automatic reconnection capabilities.""
+        connection_id = reconnection_test""
         
         try:
             # Establish initial connection
@@ -1047,14 +1047,14 @@ class WebSocketConnectivityTester:
             await asyncio.sleep(1.0)  # Brief pause
             
             # Re-establish connection
-            reconnection = await self._establish_websocket_connection(connection_id + _auto)"
+            reconnection = await self._establish_websocket_connection(connection_id + _auto)""
             
             if reconnection and reconnection.websocket:
                 self.metrics.successful_reconnections += 1
                 
                 # Send message after reconnection
                 reconnect_message = {
-                    "type: after_reconnect,
+                    "type: after_reconnect,"""
                     data: Message after automatic reconnection,
                     "timestamp: time.time()"
                 }
@@ -1062,9 +1062,9 @@ class WebSocketConnectivityTester:
                 await reconnection.websocket.send(json.dumps(reconnect_message))
                 
                 logger.info(Automatic reconnection test successful)
-                await self._close_websocket_connection(connection_id + _auto)"
+                await self._close_websocket_connection(connection_id + _auto)""
             else:
-                logger.warning(Automatic reconnection failed")
+                logger.warning(Automatic reconnection failed")"
                 
         except Exception as e:
             error_msg = fAutomatic reconnection test failed: {e}
@@ -1101,7 +1101,7 @@ class WebSocketConnectivityTester:
                 # Request state verification
                 verify_message = {
                     type: verify_state,
-                    timestamp: time.time()"
+                    timestamp: time.time()""
                 }
                 
                 await reconnection.websocket.send(json.dumps(verify_message))
@@ -1115,7 +1115,7 @@ class WebSocketConnectivityTester:
                     
                     # If we get any response, assume state handling is working
                     self.metrics.state_preservation_success += 1
-                    logger.info(State preservation test completed")
+                    logger.info(State preservation test completed")"
                     
                 except asyncio.TimeoutError:
                     logger.debug(State verification response timeout (may be normal))
@@ -1133,12 +1133,12 @@ class WebSocketConnectivityTester:
             original_url = self.websocket_url
             self.websocket_url = ws://localhost:99999/invalid  # Invalid URL
             
-            connection_id = degradation_test"
+            connection_id = degradation_test""
             connection = await self._establish_websocket_connection(connection_id)
             
             # Connection should fail gracefully (no exceptions)
             if connection is None:
-                logger.info("Graceful degradation test: Invalid URL handled gracefully)
+                logger.info("Graceful degradation test: Invalid URL handled gracefully)"
             else:
                 await self._close_websocket_connection(connection_id)
             
@@ -1151,7 +1151,7 @@ class WebSocketConnectivityTester:
     
     async def _test_streaming_and_large_messages(self):
         "Phase 8: Test streaming responses and large message handling."
-        logger.info(Phase 8: Testing streaming and large messages)"
+        logger.info(Phase 8: Testing streaming and large messages)""
         
         # Test large message handling
         await self._test_large_message_handling()
@@ -1163,7 +1163,7 @@ class WebSocketConnectivityTester:
         await self._test_performance_under_load()
     
     async def _test_large_message_handling(self):
-        "Test handling of large messages.
+        "Test handling of large messages."""
         connection_id = large_message_test""
         connection = await self._establish_websocket_connection(connection_id)
         
@@ -1174,8 +1174,8 @@ class WebSocketConnectivityTester:
             # Create large message
             large_data = x * (self.config.large_message_size_kb * 1024)  # KB to bytes
             large_message = {
-                type: "large_message,
-                data": large_data,
+                type: "large_message,"
+                data": large_data,"
                 size: len(large_data),
                 timestamp": time.time()"
             }
@@ -1200,8 +1200,8 @@ class WebSocketConnectivityTester:
                 
                 # Record large message handling success
                 self.metrics.large_message_handling[send_success] = True
-                self.metrics.large_message_handling[receive_success] = True"
-                self.metrics.streaming_performance["large_message_time] = receive_time
+                self.metrics.large_message_handling[receive_success] = True""
+                self.metrics.streaming_performance["large_message_time] = receive_time"
                 
                 logger.info(fLarge message handling successful: {self.config.large_message_size_kb}KB in {receive_time:.3f}s)
                 
@@ -1229,8 +1229,8 @@ class WebSocketConnectivityTester:
         try:
             # Request streaming response
             streaming_request = {
-                type: "stream_request,
-                data": Request streaming response,
+                type: "stream_request,"
+                data": Request streaming response,"
                 timestamp: time.time()
             }
             
@@ -1264,22 +1264,22 @@ class WebSocketConnectivityTester:
                     break
             
             streaming_duration = time.time() - start_time
-            self.metrics.streaming_performance[stream_duration] = streaming_duration"
-            self.metrics.streaming_performance[stream_message_count"] = len(stream_messages)
+            self.metrics.streaming_performance[stream_duration] = streaming_duration""
+            self.metrics.streaming_performance[stream_message_count"] = len(stream_messages)"
             
             if stream_messages:
                 logger.info(fStreaming test: {len(stream_messages)} messages received in {streaming_duration:.1f}s)
             else:
-                logger.debug(Streaming test: No streaming messages received (may be normal))"
+                logger.debug(Streaming test: No streaming messages received (may be normal))""
             
             await self._close_websocket_connection(connection_id)
             
         except Exception as e:
-            self.metrics.warnings.append(f"Streaming response test failed: {e})
+            self.metrics.warnings.append(f"Streaming response test failed: {e})"
     
     async def _test_performance_under_load(self):
-        Test WebSocket performance under sustained load."
-        connection_id = "performance_test
+        Test WebSocket performance under sustained load.""
+        connection_id = "performance_test"
         connection = await self._establish_websocket_connection(connection_id)
         
         if not connection or not connection.websocket:
@@ -1327,18 +1327,18 @@ class WebSocketConnectivityTester:
             message_rate = message_count / total_duration
             response_rate = response_count / total_duration
             
-            self.metrics.streaming_performance[load_test_message_rate] = message_rate"
-            self.metrics.streaming_performance["load_test_response_rate] = response_rate
+            self.metrics.streaming_performance[load_test_message_rate] = message_rate""
+            self.metrics.streaming_performance["load_test_response_rate] = response_rate"
             
             logger.info(fPerformance test: {message_rate:.1f} msg/s sent, {response_rate:.1f} msg/s received)
             
             await self._close_websocket_connection(connection_id)
             
         except Exception as e:
-            self.metrics.warnings.append(f"Performance under load test failed: {e})
+            self.metrics.warnings.append(f"Performance under load test failed: {e})"
     
     async def _close_websocket_connection(self, connection_id: str):
-        "Close WebSocket connection gracefully.
+        "Close WebSocket connection gracefully."""
         if connection_id in self.active_connections:
             connection = self.active_connections[connection_id]
             
@@ -1355,7 +1355,7 @@ class WebSocketConnectivityTester:
     
     async def _cleanup_websocket_test(self):
         "Clean up after WebSocket connectivity test."
-        logger.info(Cleaning up WebSocket connectivity test)"
+        logger.info(Cleaning up WebSocket connectivity test)""
         
         # Close all active connections
         for connection_id in list(self.active_connections.keys()):
@@ -1369,7 +1369,7 @@ class WebSocketConnectivityTester:
                 else:
                     task()
             except Exception as e:
-                logger.error(f"Cleanup task failed: {e})
+                logger.error(f"Cleanup task failed: {e})"
         
         logger.info(WebSocket connectivity test cleanup completed)
 
@@ -1401,8 +1401,8 @@ class WebSocketConnectivityRealtimeFeaturesTests:
     
     @pytest.mark.websocket
     async def test_comprehensive_websocket_connectivity_and_realtime(self, websocket_config):
-        Test comprehensive WebSocket connectivity and real-time features."
-        logger.info(=== COMPREHENSIVE WEBSOCKET CONNECTIVITY AND REAL-TIME TEST ===")
+        Test comprehensive WebSocket connectivity and real-time features.""
+        logger.info(=== COMPREHENSIVE WEBSOCKET CONNECTIVITY AND REAL-TIME TEST ===")"
         
         tester = WebSocketConnectivityTester(websocket_config)
         metrics = await tester.run_comprehensive_websocket_test()
@@ -1412,12 +1412,12 @@ class WebSocketConnectivityRealtimeFeaturesTests:
         
         # Validate connection success rate
         connection_success_rate = metrics.connection_success_rate
-        assert connection_success_rate >= 80.0, fConnection success rate too low: {connection_success_rate:.1f}%"
+        assert connection_success_rate >= 80.0, fConnection success rate too low: {connection_success_rate:.1f}%""
         
         # Validate message delivery
         message_delivery_rate = metrics.message_delivery_rate
         # Allow for some message loss in testing scenarios
-        assert message_delivery_rate >= 70.0, f"Message delivery rate too low: {message_delivery_rate:.1f}%
+        assert message_delivery_rate >= 70.0, f"Message delivery rate too low: {message_delivery_rate:.1f}%"
         
         # Validate performance
         avg_latency = metrics.average_latency
@@ -1442,11 +1442,11 @@ class WebSocketConnectivityRealtimeFeaturesTests:
         
         # Log comprehensive results
         logger.info(=== WEBSOCKET CONNECTIVITY AND REAL-TIME TEST RESULTS ===)
-        logger.info(f"Total Duration: {metrics.total_duration:.1f}s)
-        logger.info(fConnection Success Rate: {connection_success_rate:.1f}%")
+        logger.info(f"Total Duration: {metrics.total_duration:.1f}s)"
+        logger.info(fConnection Success Rate: {connection_success_rate:.1f}%")"
         logger.info(fMessage Delivery Rate: {message_delivery_rate:.1f}%)
-        logger.info(fAverage Latency: {avg_latency:.3f}s)"
-        logger.info(f"Messages Sent/Received: {metrics.messages_sent}/{metrics.messages_received})
+        logger.info(fAverage Latency: {avg_latency:.3f}s)""
+        logger.info(f"Messages Sent/Received: {metrics.messages_sent}/{metrics.messages_received})"
         logger.info(fMax Concurrent Connections: {metrics.max_concurrent_connections})
         logger.info(fReconnection Success Rate: {metrics.reconnection_success_rate:.1f}%)
         logger.info(fState Preservation Events: {metrics.state_preservation_success}")"
@@ -1455,18 +1455,18 @@ class WebSocketConnectivityRealtimeFeaturesTests:
         if metrics.streaming_performance:
             logger.info(Streaming Performance:)
             for key, value in metrics.streaming_performance.items():
-                logger.info(f"  {key}: {value})
+                logger.info(f"  {key}: {value})"
         
         if metrics.warnings:
-            logger.warning(fWarnings: {len(metrics.warnings)}")
+            logger.warning(fWarnings: {len(metrics.warnings)}")"
             for warning in metrics.warnings[:3]:
                 logger.warning(f  - {warning})
         
-        logger.info(=== WEBSOCKET CONNECTIVITY AND REAL-TIME TEST PASSED ===)"
+        logger.info(=== WEBSOCKET CONNECTIVITY AND REAL-TIME TEST PASSED ===)""
 
 
 async def run_websocket_connectivity_test():
-    "Standalone function to run WebSocket connectivity test.
+    "Standalone function to run WebSocket connectivity test."""
     config = WebSocketTestConfig()
     tester = WebSocketConnectivityTester(config)
     return await tester.run_comprehensive_websocket_test()
@@ -1479,6 +1479,6 @@ if __name__ == __main__":"
     print(fMessage delivery rate: {result.message_delivery_rate:.1f}%")"
     print(fDuration: {result.total_duration:.1f}s)
     if result.errors:
-        print(fErrors: {len(result.errors)})"
+        print(fErrors: {len(result.errors)})""
         for error in result.errors:
-            print(f"  - {error}"")
+            print(f"  - {error}"")"

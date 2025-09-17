@@ -108,6 +108,7 @@ def fix_file(file_path):
         content = fix_unmatched_braces(content)
         content = fix_unmatched_brackets(content)
         content = fix_unterminated_strings(content)
+        content = fix_json_structures(content)
 
         # Only write if content changed
         if content != original_content:
