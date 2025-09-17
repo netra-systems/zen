@@ -1,4 +1,4 @@
-'''Comprehensive E2E Test Suite for DEV MODE
+"""Comprehensive E2E Test Suite for DEV MODE
 Tests all critical dev mode functionality per XML specs.
 
 Business Value Justification (BVJ):
@@ -10,10 +10,8 @@ Business Value Justification (BVJ):
 Test Coverage:
 1. System Startup - Backend/Frontend/Auth services start correctly
 2. WebSocket Connection - Frontend connects via WebSocket
-3. Example Message Flow - Messages processed end-to-end
-4. Agent Response Flow - Supervisor agent responds correctly
-5. CORS/Service Configuration - All services communicate properly
-'''
+3. Example Message Flow - Messages processed end-to-end"""
+5. CORS/Service Configuration - All services communicate properly"""
 
 import asyncio
 import json
@@ -37,8 +35,7 @@ from netra_backend.app.config import get_config
 from netra_backend.app.core.network_constants import ServicePorts, URLConstants
 
 
-@dataclass
-class TestDevModeResult:
+@dataclass"""
     """Result of a dev mode test"""
     test_name: str
     success: bool
@@ -50,8 +47,7 @@ class TestDevModeResult:
     # Alias for backward compatibility (fixing typo)
     DevModeTestResult = TestDevModeResult
 
-
-class TestDevModeer:
+"""
     """Comprehensive dev mode testing utility"""
 
     def __init__(self):
@@ -61,8 +57,7 @@ class TestDevModeer:
         self.frontend_port = 3000
         self.auth_port = 8083  # Dynamic auth port
         self.test_results: List[DevModeTestResult] = []
-
-    async def run_all_tests(self) -> Dict[str, Any]:
+"""
         """Run complete test suite"""
         print(" )
         [TEST] Starting Comprehensive DEV MODE Test Suite")
@@ -110,14 +105,7 @@ class TestDevModeer:
         test_name="System Startup",
         success=success,
         duration=time.time() - start_time,
-        details={ )
-        "backend_healthy": backend_healthy,
-        "backend_response": backend_data,
-        "database_checks": db_checks,
-        "services_registered": services_registered
-            
-            
-
+details={"backend_healthy": backend_healthy,, "backend_response": backend_data,, "database_checks": db_checks,, "services_registered": services_registered}
         self._print_test_result(result)
         self.test_results.append(result)
         return result
@@ -158,13 +146,7 @@ class TestDevModeer:
         test_name="WebSocket Connection",
         success=success,
         duration=time.time() - start_time,
-        details={ )
-        "ws_url": ws_url,
-        "test_message": test_msg,
-        "response": response_data
-            
-            
-
+details={"ws_url": ws_url,, "test_message": test_msg,, "response": response_data}
         self._print_test_result(result)
         self.test_results.append(result)
         return result
@@ -189,12 +171,7 @@ class TestDevModeer:
         try:
         # Send example message via API
         async with httpx.AsyncClient(follow_redirects=True) as client:
-        test_message = { )
-        "message": "I need to reduce costs but keep quality the same.",
-        "thread_id": "test_thread_001",
-        "user_id": "test_user_001"
-            
-
+test_message = {"message": "I need to reduce costs but keep quality the same.",, "thread_id": "test_thread_001",, "user_id": "test_user_001"}
         response = await client.post( )
         "formatted_string",
         json=test_message,
@@ -208,13 +185,7 @@ class TestDevModeer:
         test_name="Example Message Flow",
         success=success,
         duration=time.time() - start_time,
-        details={ )
-        "test_message": test_message,
-        "status_code": response.status_code if 'response' in locals() else None,
-        "response": response_data
-            
-            
-
+details={"test_message": test_message,, "status_code": response.status_code if 'response' in locals() else None,, "response": response_data}
         self._print_test_result(result)
         self.test_results.append(result)
         return result
@@ -246,11 +217,7 @@ class TestDevModeer:
         agent_healthy = response.status_code in [200, 404]  # 404 if not yet created
 
             # Test agent endpoint
-        agent_test = { )
-        "prompt": "Test prompt for supervisor",
-        "context": {"test": True}
-            
-
+agent_test = {"prompt": "Test prompt for supervisor",, "context": {"test": True}}
         agent_response = await client.post( )
         "formatted_string",
         json=agent_test,
@@ -265,13 +232,7 @@ class TestDevModeer:
         test_name="Agent Response Flow",
         success=success,
         duration=time.time() - start_time,
-        details={ )
-        "agent_healthy": agent_healthy,
-        "agent_test_status": agent_response.status_code if 'agent_response' in locals() else None,
-        "agent_response": agent_response.json() if agent_works and 'agent_response' in locals() else None
-            
-            
-
+details={"agent_healthy": agent_healthy,, "agent_test_status": agent_response.status_code if 'agent_response' in locals() else None,, "agent_response": agent_response.json() if agent_works and 'agent_response' in locals() else None}
         self._print_test_result(result)
         self.test_results.append(result)
         return result
@@ -298,8 +259,7 @@ class TestDevModeer:
         async with httpx.AsyncClient(follow_redirects=True) as client:
         response = await client.options( )
         "formatted_string",
-        headers={ )
-        "Origin": "http://localhost:3000",
+headers={"Origin": "http://localhost:3000",}
         "Access-Control-Request-Method": "POST"
             
             
@@ -320,14 +280,7 @@ class TestDevModeer:
         test_name="CORS & Service Configuration",
         success=success,
         duration=time.time() - start_time,
-        details={ )
-        "cors_enabled": cors_enabled,
-        "cors_origin": cors_origin,
-        "auth_configured": auth_configured,
-        "auth_status": auth_response.status_code if 'auth_response' in locals() else None
-            
-            
-
+details={"cors_enabled": cors_enabled,, "cors_origin": cors_origin,, "auth_configured": auth_configured,, "auth_status": auth_response.status_code if 'auth_response' in locals() else None}
         self._print_test_result(result)
         self.test_results.append(result)
         return result
@@ -346,8 +299,7 @@ class TestDevModeer:
     async def _verify_database_connections(self) -> Dict[str, Any]:
         """Verify all database connections are working"""
         try:
-        async with httpx.AsyncClient(follow_redirects=True) as client:
-        response = await client.get( )
+        async with httpx.AsyncClient(follow_redirects=True) as client:"""
         "formatted_string"
             
 
@@ -367,8 +319,7 @@ class TestDevModeer:
         """Verify service discovery is working"""
         try:
         # Check if services are discoverable
-        async with httpx.AsyncClient(follow_redirects=True) as client:
-        response = await client.get( )
+        async with httpx.AsyncClient(follow_redirects=True) as client:"""
         "formatted_string"
             
         return response.status_code in [200, 404]  # 404 if endpoint doesn"t exist yet
@@ -394,8 +345,7 @@ class TestDevModeer:
         total_tests = len(self.test_results)
         passed_tests = sum(1 for r in self.test_results if r.success)
         failed_tests = total_tests - passed_tests
-        total_duration = sum(r.duration for r in self.test_results)
-
+        total_duration = sum(r.duration for r in self.test_results)"""
         print(" )
         " + "=" * 60)
         print("[SUMMARY] TEST RESULTS")
@@ -438,8 +388,7 @@ class TestDevModeer:
 """Run comprehensive dev mode test suite"""
 tester = DevModeTester()
 report = await tester.run_all_tests()
-
-                    # Assert all tests passed
+"""
 assert report["failed"] == 0, "formatted_string"
 assert report["success_rate"] == 1.0, "formatted_string"
 
@@ -449,8 +398,7 @@ async def main():
 pass
 tester = DevModeTester()
 report = await tester.run_all_tests()
-
-    # Exit with appropriate code
+"""
 sys.exit(0 if report["failed"] == 0 else 1)
 
 

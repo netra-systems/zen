@@ -1,4 +1,4 @@
-'''
+"""
 CRITICAL Test: Import Integrity Validation
 
 Business Value Justification (BVJ):
@@ -13,10 +13,8 @@ This comprehensive test prevents test failures and production crashes from impor
 
 Test Coverage:
 - All .py files in app/, auth_service/, dev_launcher/, test_framework/, tests/
-- Circular dependency detection
-- Required package validation
-- Performance validation (completes in < 60 seconds)
-'''
+- Circular dependency detection"""
+- Performance validation (completes in < 60 seconds)"""
 
 import asyncio
 import importlib
@@ -31,8 +29,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
-
-class ImportIntegrityValidator:
+"""
     """Comprehensive import integrity validation system"""
 
     def __init__(self):
@@ -47,8 +44,7 @@ class ImportIntegrityValidator:
         self.import_graph: Dict[str, Set[str]] = {}
         self.start_time = 0.0
 
-    # Critical directories to test
-        self.target_directories = [ )
+    # Critical directories to test"""
         "app",
         "auth_service",
         "dev_launcher",
@@ -84,8 +80,7 @@ class ImportIntegrityValidator:
         for pattern in self.skip_patterns:
         if pattern in path_str:
         return True
-
-            # Skip non-Python files
+"""
         if not file_path.suffix == ".py":
         return True
 
@@ -104,8 +99,7 @@ class ImportIntegrityValidator:
 
         for directory in self.target_directories:
         dir_path = self.project_root / directory
-
-        if not dir_path.exists():
+"""
         self.warnings.setdefault("missing_directories", []).append( )
         "formatted_string"
             
@@ -126,8 +120,7 @@ class ImportIntegrityValidator:
     # Convert path to module name
         module_parts = list(relative_path.parts[:-1])  # Exclude filename
         module_name = relative_path.stem  # Filename without extension
-
-    # Handle __init__.py files
+"""
         if module_name == "__init__":
         module_name = ".".join(module_parts) if module_parts else ""
         else:
@@ -141,8 +134,7 @@ class ImportIntegrityValidator:
         for package in self.required_packages:
         try:
         importlib.import_module(package)
-        except ImportError as e:
-        self.missing_packages.add(package)
+        except ImportError as e:"""
         self.errors.setdefault("missing_packages", {})[package] = { )
         "error": str(e),
         "type": "ImportError",
@@ -151,8 +143,7 @@ class ImportIntegrityValidator:
 
     def detect_circular_imports(self, module_name: str, file_path: Path) -> None:
         """Detect potential circular import issues"""
-        try:
-        # Read file content to analyze imports
+        try:"""
         content = file_path.read_text(encoding="utf-8")
 
         Look for import statements
@@ -182,8 +173,7 @@ class ImportIntegrityValidator:
         """Attempt to import a single module"""
         module_name = self.get_module_name(file_path)
 
-        try:
-        # Handle special cases
+        try:"""
         if not module_name or module_name.startswith("."):
         return True, None, "Skipped empty or relative module name"
 
@@ -233,8 +223,7 @@ class ImportIntegrityValidator:
     def run_comprehensive_validation(self) -> Dict[str, Any]:
         """Run comprehensive import validation"""
         self.start_time = time.time()
-
-    # Step 1: Validate required packages
+"""
         print("Validating required packages...")
         self.validate_required_packages()
 
@@ -291,19 +280,16 @@ class ImportIntegrityValidator:
 class TestImportIntegrity:
         """Import integrity test suite"""
 
-        @pytest.fixture
-    def validator(self):
+        @pytest.fixture"""
         """Create import integrity validator"""
         return ImportIntegrityValidator()
 
-        @pytest.fixture
-    def validation_results(self, validator):
+        @pytest.fixture"""
         """Run validation and return results"""
         pass
         return validator.run_comprehensive_validation()
 
-        @pytest.mark.e2e
-    def test_no_missing_required_packages(self, validation_results):
+        @pytest.mark.e2e"""
         """Test that all required packages are available"""
         missing_packages = validation_results["missing_packages_list"]
 
@@ -316,8 +302,7 @@ class TestImportIntegrity:
 
         @pytest.mark.e2e
     def test_all_modules_importable(self, validation_results):
-        """Test that all Python modules can be imported without errors"""
-        pass
+        """Test that all Python modules can be imported without errors""""""
         failed_imports = validation_results["failed_imports"]
         total_files = validation_results["total_files"]
         success_rate = validation_results["success_rate"]
@@ -362,8 +347,7 @@ class TestImportIntegrity:
 
         @pytest.mark.e2e
     def test_performance_requirements(self, validation_results):
-        """Test that import validation completes within performance requirements"""
-        pass
+        """Test that import validation completes within performance requirements""""""
         elapsed_time = validation_results["elapsed_time_seconds"]
         max_allowed_time = 60.0  # 60 seconds maximum
 
@@ -390,8 +374,7 @@ class TestImportIntegrity:
         """Test that all critical directories are covered"""
         pass
     Ensure we tested files from all expected directories
-        tested_dirs = set()
-
+        tested_dirs = set()"""
         import_failures = validation_results["errors"].get("import_failures", {})
         for module_name, error_info in import_failures.items():
         file_path = Path(error_info["file_path"])
@@ -412,8 +395,7 @@ class TestImportIntegrity:
         @pytest.mark.e2e
     def test_validation_report_generation(self, validation_results):
         """Test that comprehensive validation report is generated"""
-    # Verify all expected keys are present in results
-        required_keys = { )
+    # Verify all expected keys are present in results"""
         "total_files", "successful_imports", "failed_imports",
         "success_rate", "elapsed_time_seconds", "errors", "warnings"
     
@@ -435,8 +417,7 @@ class TestImportIntegrity:
 
         @pytest.mark.e2e
     def test_import_integrity_summary(self, validation_results):
-        """Generate and validate comprehensive test summary"""
-        pass
+        """Generate and validate comprehensive test summary""""""
         print(" )
         " + "=" * 80)
         print("IMPORT INTEGRITY VALIDATION SUMMARY")

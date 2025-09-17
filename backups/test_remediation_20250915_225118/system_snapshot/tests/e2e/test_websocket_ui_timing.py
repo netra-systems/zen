@@ -1,4 +1,4 @@
-'''WebSocket UI Timing Layer Validation Tests.
+"""WebSocket UI Timing Layer Validation Tests.
 
 Tests UI layer timing requirements per SPEC/websocket_communication.xml:
 - Fast Layer: 0-100ms (immediate feedback)
@@ -7,10 +7,8 @@ Tests UI layer timing requirements per SPEC/websocket_communication.xml:
 
 Business Value: Ensures responsive user experience through proper event timing,
 preventing user perception of system slowness or unresponsiveness.
-
-BVJ: Enterprise/Early - User Experience - Timing compliance directly impacts
-user retention and perceived platform performance quality.
-'''
+"""
+user retention and perceived platform performance quality."""
 
 import asyncio
 import json
@@ -26,12 +24,10 @@ from tests.clients.websocket_client import WebSocketTestClient
 from tests.e2e.config import UnifiedTestConfig
 
 
-@pytest.mark.e2e
-class TestWebSocketUITiming:
+@pytest.mark.e2e"""
     """Test suite for WebSocket UI layer timing requirements."""
 
-    @pytest.fixture
-    async def backend_client(self):
+    @pytest.fixture"""
         """Get authenticated backend client."""
         client = BackendTestClient()
         await client.authenticate()
@@ -40,22 +36,18 @@ class TestWebSocketUITiming:
         finally:
         await client.close()
 
-        @pytest.fixture
-    async def websocket_client(self, backend_client):
+        @pytest.fixture"""
         """Get authenticated WebSocket client."""
         pass
         token = await backend_client.get_jwt_token()
-        ws_client = WebSocketTestClient()
         await ws_client.connect(token)
         try:
         yield ws_client
         finally:
         await ws_client.disconnect()
 
-        @pytest.mark.e2e
-    async def test_fast_layer_timing_compliance(self, websocket_client):
-        """Test Fast Layer events arrive within 0-100ms for immediate feedback."""
-                # Fast layer events per SPEC/websocket_communication.xml
+        @pytest.mark.e2e"""
+        """Test Fast Layer events arrive within 0-100ms for immediate feedback.""""""
         fast_layer_events = {"agent_started", "tool_executing"}
 
                 # Record send time and trigger action
@@ -114,8 +106,7 @@ class TestWebSocketUITiming:
         @pytest.mark.e2e
     async def test_medium_layer_timing_compliance(self, websocket_client):
         """Test Medium Layer events arrive within 100ms-1s for progressive updates."""
-        pass
-                                                # Medium layer events per spec
+        pass"""
         medium_layer_events = {"agent_thinking", "partial_result"}
 
                                                 # Trigger action that generates medium layer events
@@ -166,8 +157,7 @@ class TestWebSocketUITiming:
 
         @pytest.mark.e2e
     async def test_slow_layer_timing_compliance(self, websocket_client):
-        """Test Slow Layer events arrive after 1s for final results."""
-                                                                            # Slow layer events per spec
+        """Test Slow Layer events arrive after 1s for final results.""""""
         slow_layer_events = {"agent_completed", "final_report"}
 
                                                                             # Trigger comprehensive action for slow layer events
@@ -220,17 +210,8 @@ class TestWebSocketUITiming:
         @pytest.mark.e2e
     async def test_event_timing_layer_segregation(self, websocket_client):
         """Test events are properly segregated into correct timing layers."""
-        pass
-                                                                                                        # Expected layer assignments per SPEC/websocket_communication.xml
-        expected_layers = { )
-        "agent_started": "fast",      # 0-100ms
-        "tool_executing": "fast",     # 0-100ms
-        "agent_thinking": "medium",   # 100ms-1s
-        "partial_result": "medium",   # 100ms-1s
-        "agent_completed": "slow",    # 1s+
-        "final_report": "slow"        # 1s+
-                                                                                                        
-
+        pass"""
+expected_layers = {"agent_started": "fast",      # 0-100ms, "tool_executing": "fast",     # 0-100ms, "agent_thinking": "medium",   # 100ms-1s, "partial_result": "medium",   # 100ms-1s, "agent_completed": "slow",    # 1s+, "final_report": "slow"        # 1s+}
                                                                                                         # Trigger comprehensive workflow
         send_time = time.time()
                                                                                                         # Removed problematic line: await websocket_client.send_message({)
@@ -303,8 +284,7 @@ class TestWebSocketUITiming:
         @pytest.mark.e2e
     async def test_progressive_timing_sequence(self, websocket_client):
         """Test events follow progressive timing sequence (fast -> medium -> slow)."""
-                                                                                                                                                    # Trigger workflow with full timing spectrum
-                                                                                                                                                    # Removed problematic line: await websocket_client.send_message({)
+                                                                                                                                                    # Trigger workflow with full timing spectrum"""
         "type": "user_message",
         "payload": {"content": "Progressive timing sequence test with all layer events"}
                                                                                                                                                     
@@ -364,8 +344,7 @@ class TestWebSocketUITiming:
 
                                                                                                                                                                                     # Run multiple identical requests
         for i in range(3):
-        send_time = time.time()
-                                                                                                                                                                                        # Removed problematic line: await websocket_client.send_message({)
+        send_time = time.time()"""
         "type": "user_message",
         "payload": {"content": "formatted_string"}
                                                                                                                                                                                         
@@ -411,8 +390,7 @@ class TestWebSocketUITiming:
                                                                                                                                                                                                                 # Helper methods (each  <= 8 lines)
     def _classify_timing_layer(self, latency_ms: float) -> str:
         """Classify latency into timing layer per spec."""
-        if latency_ms <= 100.0:
-        await asyncio.sleep(0)
+        if latency_ms <= 100.0:"""
         return "fast"
         elif latency_ms <= 1000.0:
         return "medium"
@@ -422,8 +400,7 @@ class TestWebSocketUITiming:
     def _calculate_timing_stats(self, timings: List[float]) -> Dict[str, float]:
         """Calculate timing statistics for analysis."""
         if not timings:
-        return {}
-        return { )
+        return {}"""
         "min": min(timings),
         "max": max(timings),
         "avg": sum(timings) / len(timings),

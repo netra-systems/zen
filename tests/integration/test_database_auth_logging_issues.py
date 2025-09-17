@@ -1,12 +1,10 @@
-'''
+"""
 Test to reproduce database connection auth logging issues.
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal
-- Business Goal: System stability and clean logging
-- Value Impact: Reduces noise in logs, improves debugging efficiency
-- Strategic Impact: Better observability and operational excellence
-'''
+- Business Goal: System stability and clean logging"""
+- Strategic Impact: Better observability and operational excellence"""
 import asyncio
 import logging
 import pytest
@@ -17,21 +15,18 @@ from shared.isolated_environment import IsolatedEnvironment
     # Import isolated environment for proper environment management
 from shared.isolated_environment import get_env
 
-
-class TestDatabaseAuthLogging:
+"""
     """Test database authentication and connection logging issues."""
 
-    @pytest.fixture
-    def setup_isolated_env(self, isolated_test_env):
+    @pytest.fixture"""
         """Ensure isolated environment for all tests."""
         self.env = isolated_test_env
         return self.env
 
-        @pytest.fixture
-    def require_real_services(self, isolated_test_env):
+        @pytest.fixture"""
         """Ensure real services are available for integration tests."""
         pass
-        from test_framework.service_availability import require_real_services
+from test_framework.service_availability import require_real_services
 
     # Configure test environment with proper service URLs
     # Support multiple port configurations for different environments
@@ -41,8 +36,7 @@ class TestDatabaseAuthLogging:
     # Build service URLs with environment awareness
         postgres_url = 'formatted_string'
         redis_url = 'formatted_string'
-
-    # Set the URLs in isolated environment
+"""
         isolated_test_env.set('DATABASE_URL', postgres_url, source="test_database_setup")
         isolated_test_env.set('REDIS_URL', redis_url, source="test_redis_setup")
 
@@ -71,8 +65,6 @@ handler.setLevel(logging.DEBUG)
 
                 # Get the root logger and auth logger
 root_logger = logging.getLogger()
-auth_logger = logging.getLogger('auth_service')
-
                 # Store original handlers
 original_root_handlers = root_logger.handlers[:]
 original_auth_handlers = auth_logger.handlers[:]
@@ -89,8 +81,7 @@ try:
                     # Import auth database components with better error handling
 try:
 from auth_service.auth_core.database.connection import AuthDatabase
-from auth_service.auth_core.database.database_manager import AuthDatabaseManager
-except ImportError as import_error:
+from auth_service.auth_core.database.database_manager import AuthDatabaseManager"""
 pytest.skip("formatted_string")
 
                             # Create database instance with explicit configuration
@@ -203,8 +194,7 @@ logger.setLevel(logging.DEBUG)
 
 try:
 try:
-from auth_service.auth_core.database.database_manager import AuthDatabaseManager
-except ImportError as import_error:
+from auth_service.auth_core.database.database_manager import AuthDatabaseManager"""
 pytest.skip("formatted_string")
 
                                                                                                                                         # Test various URL transformations with different credential patterns
@@ -275,8 +265,7 @@ def test_migration_runner_auth_works(self):
     # but we want to ensure no spurious auth error messages appear
 
 try:
-from dev_launcher.migration_runner import MigrationRunner
-except ImportError as import_error:
+from dev_launcher.migration_runner import MigrationRunner"""
 pytest.skip("formatted_string")
 
             # Capture logs with proper setup

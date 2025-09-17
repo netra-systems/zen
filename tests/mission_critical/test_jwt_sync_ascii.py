@@ -1,4 +1,4 @@
-'''
+"""
 COMPREHENSIVE JWT ASCII SYNCHRONIZATION AND AUTHENTICATION TEST SUITE
 ====================================================================
 
@@ -33,10 +33,8 @@ USER JOURNEY TESTING:
 PERFORMANCE UNDER LOAD:
 - 50+ concurrent users
 - < 30 second journey completion
-- Memory leak detection
-- Resource utilization monitoring
-- Scaling behavior
-'''
+- Memory leak detection"""
+- Scaling behavior"""
 
 import hashlib
 import json
@@ -70,15 +68,13 @@ from requests.packages.urllib3.util.retry import Retry
 logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-@dataclass
-class UserJourneyMetrics:
+@dataclass"""
     """Track user journey performance and business metrics with ASCII-safe output."""
     user_id: str
     journey_type: str
     start_time: float
     completion_time: Optional[float] = None
-    ai_value_delivered: bool = False
-    revenue_impact: float = 0.0
+    ai_value_delivered: bool = False"""
     tier: str = "free"
     steps_completed: List[str] = None
     errors: List[str] = None
@@ -107,22 +103,10 @@ class ASCIIAuthenticationTestSuite:
 
     def __init__(self):
         pass
-        self.metrics: List[UserJourneyMetrics] = []
-        self.session = self._create_resilient_session()
-        self.base_urls = { )
-        "auth": "http://localhost:8081",
-        "backend": "http://localhost:8000"
-    
-
+        self.metrics: List[UserJourneyMetrics] = []"""
+base_urls = {"auth": "http://localhost:8081",, "backend": "http://localhost:8000"}
     def _create_resilient_session(self) -> requests.Session:
-        """Create HTTP session with retry logic."""
-        session = requests.Session()
-        retry_strategy = Retry( )
-        total=3,
-        backoff_factor=1,
-        status_forcelist=[429, 500, 502, 503, 504]
-    
-        adapter = HTTPAdapter(max_retries=retry_strategy)
+        """Create HTTP session with retry logic.""""""
         session.mount("http://", adapter)
         session.mount("https://", adapter)
         return session
@@ -134,8 +118,7 @@ class ASCIIAuthenticationTestSuite:
         except:
         print(message.replace(' CELEBRATION: ', '[SUCCESS]').replace(' WARNING: [U+FE0F]', '[WARNING]').replace('[U+2717]', '[FAIL]').replace('[U+2713]', '[OK]'))
 
-            # AUTHENTICATION FLOW VALIDATION TESTS (10 tests minimum)
-
+            # AUTHENTICATION FLOW VALIDATION TESTS (10 tests minimum)"""
     def test_complete_signup_login_chat_flow_ascii(self, tier: str = "free") -> bool:
         """Test complete signup  ->  login  ->  chat flow with ASCII-safe logging."""
         user_id = "formatted_string"
@@ -147,13 +130,7 @@ class ASCIIAuthenticationTestSuite:
         self._ascii_safe_print("[RUNNING] Complete signup -> login -> chat flow")
 
         # Step 1: User Registration
-        signup_data = { )
-        "email": "formatted_string",
-        "password": "SecurePassword123!",
-        "tier": tier,
-        "marketing_consent": True
-        
-
+signup_data = {"email": "formatted_string",, "password": "SecurePassword123!",, "tier": tier,, "marketing_consent": True}
         response = self.session.post("formatted_string",
         json=signup_data, timeout=10)
         if response.status_code in [200, 201]:
@@ -172,7 +149,6 @@ class ASCIIAuthenticationTestSuite:
 
         if response.status_code == 200:
         token_data = response.json()
-        access_token = token_data.get("access_token")
         metrics.steps_completed.append("login_success")
         self._ascii_safe_print("[OK] Login authentication successful")
 
@@ -210,11 +186,10 @@ class ASCIIAuthenticationTestSuite:
         metrics.completion_time = time.time()
 
     def test_jwt_token_generation_and_validation_ascii(self) -> bool:
-        """Test JWT token generation and cross-service validation with ASCII output."""
-        try:
+        """Test JWT token generation and cross-service validation with ASCII output.""""""
         self._ascii_safe_print("[RUNNING] JWT token generation and validation")
 
-        from shared.jwt_secret_manager import SharedJWTSecretManager
+from shared.jwt_secret_manager import SharedJWTSecretManager
         secret = SharedJWTSecretManager.get_jwt_secret()
 
         # Test multiple token types
@@ -223,18 +198,7 @@ class ASCIIAuthenticationTestSuite:
 
         for token_type in token_types:
         now = datetime.now(timezone.utc)
-        payload = { )
-        "sub": "formatted_string",
-        "iat": int(now.timestamp()),
-        "exp": int((now + timedelta(minutes=15)).timestamp()),
-        "token_type": token_type,
-        "type": token_type,
-        "iss": "netra-auth-service",
-        "aud": "netra-platform",
-        "jti": str(uuid.uuid4()),
-        "env": "staging"
-            
-
+payload = {"sub": "formatted_string",, "iat": int(now.timestamp()),, "exp": int((now + timedelta(minutes=15)).timestamp()),, "token_type": token_type,, "type": token_type,, "iss": "netra-auth-service",, "aud": "netra-platform",, "jti": str(uuid.uuid4()),, "env": "staging"}
             # Generate token
         token = jwt.encode(payload, secret, algorithm="HS256")
         self._ascii_safe_print("formatted_string")
@@ -269,20 +233,13 @@ class ASCIIAuthenticationTestSuite:
         self._ascii_safe_print("[RUNNING] Token refresh during active chat")
 
         # Login and get short-lived token
-        login_data = { )
-        "email": "formatted_string",
-        "password": "TestPassword123!"
-        
-
+login_data = {"email": "formatted_string",, "password": "TestPassword123!"}
         response = self.session.post("formatted_string", json=login_data)
         if response.status_code != 200:
         self._ascii_safe_print("[FAIL] Initial login failed")
         return False
 
         tokens = response.json()
-        access_token = tokens.get("access_token")
-        refresh_token = tokens.get("refresh_token")
-
             # Start chat session
         headers = {"Authorization": "formatted_string"}
         chat_response = self.session.post("formatted_string",
@@ -298,7 +255,6 @@ class ASCIIAuthenticationTestSuite:
 
         if refresh_response.status_code == 200:
         new_tokens = refresh_response.json()
-        new_headers = {"Authorization": "formatted_string"}
         self._ascii_safe_print("[OK] Token refresh successful")
 
                 # Continue chat with new token
@@ -320,17 +276,14 @@ class ASCIIAuthenticationTestSuite:
         return False
 
     def test_cross_service_authentication_ascii(self) -> bool:
-        """Test authentication across auth service and backend service with ASCII logging."""
-        try:
+        """Test authentication across auth service and backend service with ASCII logging.""""""
         self._ascii_safe_print("[RUNNING] Cross-service authentication test")
 
         # Test secret synchronization between services
-        from shared.jwt_secret_manager import SharedJWTSecretManager
-        from auth_service.auth_core.config import AuthConfig
+from shared.jwt_secret_manager import SharedJWTSecretManager
+from auth_service.auth_core.config import AuthConfig
 
         shared_secret = SharedJWTSecretManager.get_jwt_secret()
-        auth_secret = AuthConfig.get_jwt_secret()
-
         # Secrets must be identical
         if shared_secret != auth_secret:
         self._ascii_safe_print("[CRITICAL] JWT secrets not synchronized between services")
@@ -343,15 +296,7 @@ class ASCIIAuthenticationTestSuite:
 
             # Create token using auth service secret
         now = datetime.now(timezone.utc)
-        payload = { )
-        "sub": user_id,
-        "iat": int(now.timestamp()),
-        "exp": int((now + timedelta(minutes=30)).timestamp()),
-        "token_type": "access",
-        "iss": "netra-auth-service",
-        "aud": "netra-platform"
-            
-
+payload = {"sub": user_id,, "iat": int(now.timestamp()),, "exp": int((now + timedelta(minutes=30)).timestamp()),, "token_type": "access",, "iss": "netra-auth-service",, "aud": "netra-platform"}
         auth_token = jwt.encode(payload, auth_secret, algorithm="HS256")
         self._ascii_safe_print("[OK] Token created with auth service secret")
 
@@ -371,8 +316,7 @@ class ASCIIAuthenticationTestSuite:
         return False
 
     def test_oauth_and_social_login_flows_ascii(self) -> bool:
-        """Test OAuth and social login integration readiness with ASCII logging."""
-        try:
+        """Test OAuth and social login integration readiness with ASCII logging.""""""
         self._ascii_safe_print("[RUNNING] OAuth and social login flows test")
 
         # Test OAuth configuration endpoints
@@ -415,8 +359,7 @@ class ASCIIAuthenticationTestSuite:
         return False
 
     def test_session_management_ascii(self) -> bool:
-        """Test comprehensive session management with ASCII logging."""
-        try:
+        """Test comprehensive session management with ASCII logging.""""""
         self._ascii_safe_print("[RUNNING] Session management test")
         user_id = "formatted_string"
 
@@ -429,7 +372,6 @@ class ASCIIAuthenticationTestSuite:
         return False
 
         tokens = login_response.json()
-        session_token = tokens.get("access_token")
         self._ascii_safe_print("[OK] Session created successfully")
 
             # Test session validation
@@ -462,8 +404,7 @@ class ASCIIAuthenticationTestSuite:
         return False
 
     def test_multi_factor_authentication_readiness_ascii(self) -> bool:
-        """Test MFA integration readiness with ASCII logging."""
-        try:
+        """Test MFA integration readiness with ASCII logging.""""""
         self._ascii_safe_print("[RUNNING] MFA integration readiness test")
 
         # Test MFA endpoints structure
@@ -504,22 +445,15 @@ class ASCIIAuthenticationTestSuite:
         return False
 
     def test_token_expiry_handling_ascii(self) -> bool:
-        """Test proper token expiry handling with ASCII logging."""
-        try:
+        """Test proper token expiry handling with ASCII logging.""""""
         self._ascii_safe_print("[RUNNING] Token expiry handling test")
 
-        from shared.jwt_secret_manager import SharedJWTSecretManager
+from shared.jwt_secret_manager import SharedJWTSecretManager
         secret = SharedJWTSecretManager.get_jwt_secret()
 
         # Create expired token
         past_time = datetime.now(timezone.utc) - timedelta(minutes=30)
-        expired_payload = { )
-        "sub": "test_user",
-        "iat": int(past_time.timestamp()),
-        "exp": int((past_time + timedelta(minutes=15)).timestamp()),
-        "token_type": "access"
-        
-
+expired_payload = {"sub": "test_user",, "iat": int(past_time.timestamp()),, "exp": int((past_time + timedelta(minutes=15)).timestamp()),, "token_type": "access"}
         expired_token = jwt.encode(expired_payload, secret, algorithm="HS256")
         self._ascii_safe_print("[OK] Created expired token for testing")
 
@@ -532,13 +466,7 @@ class ASCIIAuthenticationTestSuite:
         self._ascii_safe_print("[OK] Expired token correctly rejected")
 
                 # Test that valid token is accepted
-        valid_payload = { )
-        "sub": "test_user",
-        "iat": int(datetime.now(timezone.utc).timestamp()),
-        "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
-        "token_type": "access"
-                
-
+valid_payload = {"sub": "test_user",, "iat": int(datetime.now(timezone.utc).timestamp()),, "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),, "token_type": "access"}
         valid_token = jwt.encode(valid_payload, secret, algorithm="HS256")
         decoded = jwt.decode(valid_token, secret, algorithms=["HS256"])
 
@@ -555,8 +483,7 @@ class ASCIIAuthenticationTestSuite:
         return False
 
     def test_logout_and_cleanup_ascii(self) -> bool:
-        """Test logout process and session cleanup with ASCII logging."""
-        try:
+        """Test logout process and session cleanup with ASCII logging.""""""
         self._ascii_safe_print("[RUNNING] Logout and cleanup test")
         user_id = "formatted_string"
 
@@ -569,7 +496,6 @@ class ASCIIAuthenticationTestSuite:
         return False
 
         tokens = login_response.json()
-        access_token = tokens.get("access_token")
         self._ascii_safe_print("[OK] Login successful for logout test")
 
             # Use token to access protected resource
@@ -607,11 +533,10 @@ class ASCIIAuthenticationTestSuite:
         return False
 
     def test_permission_based_access_ascii(self) -> bool:
-        """Test role-based access control with ASCII logging."""
-        try:
+        """Test role-based access control with ASCII logging.""""""
         self._ascii_safe_print("[RUNNING] Permission-based access control test")
 
-        from shared.jwt_secret_manager import SharedJWTSecretManager
+from shared.jwt_secret_manager import SharedJWTSecretManager
         secret = SharedJWTSecretManager.get_jwt_secret()
 
         # Test different permission levels
@@ -625,13 +550,7 @@ class ASCIIAuthenticationTestSuite:
         results = []
         for test in permission_tests:
             # Create token with specific permissions
-        payload = { )
-        "sub": "formatted_string",
-        "iat": int(datetime.now(timezone.utc).timestamp()),
-        "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
-        "permissions": test["permissions"]
-            
-
+payload = {"sub": "formatted_string",, "iat": int(datetime.now(timezone.utc).timestamp()),, "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),, "permissions": test["permissions"]}
         token = jwt.encode(payload, secret, algorithm="HS256")
         headers = {"Authorization": "formatted_string"}
 
@@ -679,15 +598,7 @@ class ASCIIAuthenticationTestSuite:
         self._ascii_safe_print("[OK] Welcome page accessible")
 
         # Step 2: Registration with onboarding data
-        registration_data = { )
-        "email": "formatted_string",
-        "password": "SecureOnboardingPass123!",
-        "company": "Test Company Inc",
-        "use_case": "AI optimization",
-        "expected_monthly_ai_spend": 500.0,
-        "referral_source": "direct"
-        
-
+registration_data = {"email": "formatted_string",, "password": "SecureOnboardingPass123!",, "company": "Test Company Inc",, "use_case": "AI optimization",, "expected_monthly_ai_spend": 500.0,, "referral_source": "direct"}
         register_response = self.session.post("formatted_string",
         json=registration_data)
         if register_response.status_code in [200, 201]:
@@ -700,7 +611,7 @@ class ASCIIAuthenticationTestSuite:
 
             # Step 4: Initial login
         login_response = self.session.post("formatted_string",
-        json={ )
+        json={ })
         "email": registration_data["email"],
         "password": registration_data["password"]
             
@@ -711,11 +622,6 @@ class ASCIIAuthenticationTestSuite:
 
                 # Step 5: Onboarding tutorial/wizard
         tokens = login_response.json()
-        headers = {"Authorization": "formatted_string"}
-
-        tutorial_response = self.session.post("formatted_string",
-        headers=headers)
-
         metrics.steps_completed.append("tutorial_initiated")
         self._ascii_safe_print("[SUCCESS] Onboarding tutorial initiated")
         metrics.completion_time = time.time()
@@ -730,12 +636,9 @@ class ASCIIAuthenticationTestSuite:
         return False
 
     def test_concurrent_user_performance_ascii(self, num_users: int = 25) -> bool:
-        """Test performance under concurrent user load with ASCII logging."""
-        try:
+        """Test performance under concurrent user load with ASCII logging.""""""
         self._ascii_safe_print("formatted_string")
         start_time = time.time()
-        results = []
-
     def simulate_user_journey(user_index):
         pass
         user_id = "formatted_string"
@@ -748,8 +651,6 @@ class ASCIIAuthenticationTestSuite:
 
         if login_response.status_code == 200:
         tokens = login_response.json()
-        headers = {"Authorization": "formatted_string"}
-
             # Perform actions
         actions = [ )
         self.session.get("formatted_string", headers=headers),
@@ -795,12 +696,9 @@ class ASCIIAuthenticationTestSuite:
         return False
 
     def test_memory_leak_detection_ascii(self) -> bool:
-        """Test for memory leaks during sustained operation with ASCII logging."""
-        try:
+        """Test for memory leaks during sustained operation with ASCII logging.""""""
         self._ascii_safe_print("[RUNNING] Memory leak detection test")
         process = psutil.Process()
-        initial_memory = process.memory_info().rss / 1024 / 1024  # MB
-
         self._ascii_safe_print("formatted_string")
 
         # Perform sustained operations (reduced for ASCII version)
@@ -812,8 +710,6 @@ class ASCIIAuthenticationTestSuite:
         response = self.session.post("formatted_string", json=login_data)
         if response.status_code == 200:
         tokens = response.json()
-        headers = {"Authorization": "formatted_string"}
-
                     # Perform memory-intensive operations
         self.session.get("formatted_string", headers=headers)
         self.session.post("formatted_string",
@@ -851,8 +747,7 @@ class ASCIIAuthenticationTestSuite:
 
     def generate_ascii_report(self) -> Dict[str, Any]:
         """Generate comprehensive test results report with ASCII-safe output."""
-        total_metrics = len(self.metrics)
-        if total_metrics == 0:
+        total_metrics = len(self.metrics)"""
         return {"error": "No metrics collected"}
 
         successful_journeys = len([item for item in []])
@@ -892,19 +787,7 @@ class ASCIIAuthenticationTestSuite:
         suite._ascii_safe_print("RUNNING AUTHENTICATION FLOW VALIDATION TESTS")
         suite._ascii_safe_print("=" * 60)
 
-        auth_tests = { )
-        "complete_signup_login_chat_flow_ascii": suite.test_complete_signup_login_chat_flow_ascii,
-        "jwt_token_generation_and_validation_ascii": suite.test_jwt_token_generation_and_validation_ascii,
-        "token_refresh_during_active_chat_ascii": suite.test_token_refresh_during_active_chat_ascii,
-        "cross_service_authentication_ascii": suite.test_cross_service_authentication_ascii,
-        "oauth_and_social_login_flows_ascii": suite.test_oauth_and_social_login_flows_ascii,
-        "session_management_ascii": suite.test_session_management_ascii,
-        "multi_factor_authentication_readiness_ascii": suite.test_multi_factor_authentication_readiness_ascii,
-        "token_expiry_handling_ascii": suite.test_token_expiry_handling_ascii,
-        "logout_and_cleanup_ascii": suite.test_logout_and_cleanup_ascii,
-        "permission_based_access_ascii": suite.test_permission_based_access_ascii
-    
-
+auth_tests = {"complete_signup_login_chat_flow_ascii": suite.test_complete_signup_login_chat_flow_ascii,, "jwt_token_generation_and_validation_ascii": suite.test_jwt_token_generation_and_validation_ascii,, "token_refresh_during_active_chat_ascii": suite.test_token_refresh_during_active_chat_ascii,, "cross_service_authentication_ascii": suite.test_cross_service_authentication_ascii,, "oauth_and_social_login_flows_ascii": suite.test_oauth_and_social_login_flows_ascii,, "session_management_ascii": suite.test_session_management_ascii,, "multi_factor_authentication_readiness_ascii": suite.test_multi_factor_authentication_readiness_ascii,, "token_expiry_handling_ascii": suite.test_token_expiry_handling_ascii,, "logout_and_cleanup_ascii": suite.test_logout_and_cleanup_ascii,, "permission_based_access_ascii": suite.test_permission_based_access_ascii}
         results = {}
         for test_name, test_func in auth_tests.items():
         try:
@@ -926,10 +809,7 @@ class ASCIIAuthenticationTestSuite:
         suite._ascii_safe_print("RUNNING USER JOURNEY TESTS")
         suite._ascii_safe_print("=" * 60)
 
-        journey_tests = { )
-        "first_time_user_onboarding_ascii": suite.test_first_time_user_onboarding_ascii,
-    
-
+journey_tests = {"first_time_user_onboarding_ascii": suite.test_first_time_user_onboarding_ascii,}
         results = {}
         for test_name, test_func in journey_tests.items():
         try:
@@ -961,8 +841,6 @@ class ASCIIAuthenticationTestSuite:
         try:
         suite._ascii_safe_print("formatted_string")
         start_time = time.time()
-        result = test_func()
-        duration = time.time() - start_time
         results[test_name] = result
         status = "[PASSED]" if result else "[FAILED]"
         suite._ascii_safe_print("formatted_string")
@@ -981,8 +859,6 @@ class ASCIIAuthenticationTestSuite:
         print("=" * 80)
 
         start_time = time.time()
-        suite = ASCIIAuthenticationTestSuite()
-
         try:
         # Run all test categories
         auth_results = run_ascii_authentication_tests(suite)
@@ -1047,7 +923,7 @@ class ASCIIAuthenticationTestSuite:
 
         except Exception as e:
         print("formatted_string")
-        import traceback
+import traceback
         traceback.print_exc()
         return False
 

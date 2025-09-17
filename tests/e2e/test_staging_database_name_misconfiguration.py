@@ -9,20 +9,17 @@ Business Value Justification (BVJ):
 - Business Goal: Stability - Ensure staging environment uses correct database
 - Value Impact: Prevents staging from accidentally using dev database data
 - Strategic Impact: Maintains proper environment isolation and data integrity
-'''
+"""
 
 import os
 import pytest
 from shared.isolated_environment import IsolatedEnvironment
 
 
-@pytest.mark.e2e
-class TestStagingDatabaseMisconfiguration:
+@pytest.mark.e2e"""
     """Tests that demonstrate staging database name misconfiguration"""
-
-    @pytest.mark.e2e
-    def test_staging_should_not_use_dev_database_name(self):
-        '''Staging environment MUST NOT use 'netra_dev' as database name.
+"""
+    def test_staging_should_not_use_dev_database_name(self):"""Staging environment MUST NOT use 'netra_dev' as database name.
 
         This test FAILS because .env.staging incorrectly sets POSTGRES_DB=netra_dev
         when it should be using a staging-specific database name.
@@ -32,8 +29,7 @@ class TestStagingDatabaseMisconfiguration:
         staging_env_path = os.path.join( )
         os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
         '.env.staging'
-    
-
+    """
         assert os.path.exists(staging_env_path), "formatted_string"
 
     # Parse the staging environment file
@@ -60,15 +56,7 @@ class TestStagingDatabaseMisconfiguration:
     def test_staging_database_url_should_not_contain_netra_dev(self):
         """Staging #removed-legacyshould not reference netra_dev database"""
     Simulate CORRECT staging environment - Fixed from previous misconfiguration
-        staging_env = { )
-        'ENVIRONMENT': 'staging',
-        'POSTGRES_HOST': '/cloudsql/netra-staging:us-central1:staging-shared-postgres',
-        'POSTGRES_PORT': '5432',
-        'POSTGRES_DB': 'postgres',  # FIXED: Use correct staging database
-        'POSTGRES_USER': 'postgres',
-        'POSTGRES_PASSWORD': 'test_password'
-    
-
+staging_env = {'ENVIRONMENT': 'staging',, 'POSTGRES_HOST': '/cloudsql/netra-staging:us-central1:staging-shared-postgres',, 'POSTGRES_PORT': '5432',, 'POSTGRES_DB': 'postgres',  # FIXED: Use correct staging database, 'POSTGRES_USER': 'postgres',, 'POSTGRES_PASSWORD': 'test_password'}
     # Removed problematic line: with mock.patch.dict(os.environ, staging_env, clear=True):
         env = IsolatedEnvironment()
 
@@ -78,8 +66,7 @@ class TestStagingDatabaseMisconfiguration:
         Build database URL from components
         postgres_db = env.get('POSTGRES_DB', '')
 
-        # This assertion should now pass - staging correctly configured
-        assert postgres_db != 'netra_dev', \
+        # This assertion should now pass - staging correctly configured"""
         f"Staging environment is configured to use 'netra_dev' database. " \
         f"This is incorrect! Staging should use a staging-specific database " \
         f"like 'netra_staging' or 'postgres', not the dev database."
@@ -92,7 +79,7 @@ class TestStagingDatabaseMisconfiguration:
     # Removed problematic line: with mock.patch('netra_backend.app.core.environment_constants.get_current_environment') as mock_env:
         mock_env.return_value = 'staging'
 
-        from netra_backend.app.core.environment_constants import get_current_environment
+from netra_backend.app.core.environment_constants import get_current_environment
         current_env = get_current_environment()
         assert current_env == 'staging'
 
@@ -101,8 +88,7 @@ class TestStagingDatabaseMisconfiguration:
         # Development uses 'netra_dev' schema
         # Testing uses 'netra_test' schema
         # Staging/Production should use 'public' schema
-
-        # Based on database_manager.py logic:
+"""
         if current_env == "development":
         expected_schema = "netra_dev"
         elif current_env in ["testing", "test"]:

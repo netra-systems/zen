@@ -7,10 +7,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -19,13 +17,11 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
-        '''
+        return self.messages_sent.copy()"""
+        """
         FAILING TESTS for NEW Issues Identified in Iteration 2
 
         This test suite replicates the NEW issues that emerged during iteration 2:
@@ -39,55 +35,45 @@ class TestWebSocketConnection:
 
         Business Value Justification (BVJ):
         - Segment: Platform/Internal
-        - Business Goal: Development Velocity, System Stability
-        - Value Impact: Eliminates development friction, enables reliable debugging
-        - Strategic Impact: Reduces operational overhead, prevents revenue loss from broken tooling
-        '''
+        - Business Goal: Development Velocity, System Stability"""
+        - Strategic Impact: Reduces operational overhead, prevents revenue loss from broken tooling"""
 
-        import asyncio
-        import json
-        import os
-        import subprocess
-        import sys
-        import time
-        import unittest
-        from pathlib import Path
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from auth_service.core.auth_manager import AuthManager
-        from shared.isolated_environment import IsolatedEnvironment
+import asyncio
+import json
+import os
+import subprocess
+import sys
+import time
+import unittest
+from pathlib import Path
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
-        import pytest
-        import requests
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
+import pytest
+import requests
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
             # Pytest imports for test markers - using standard pytest marks
 
-
-class TestFrontendBuildErrorReporting(SSotAsyncTestCase):
-        '''
+"""
+        """
         Tests for Issue 1: Frontend build failure without detailed error reporting
-
-        Root Cause: Frontend build process exits without comprehensive error details
-        making it difficult to diagnose and fix build-time issues.
-        '''
+"""
+        making it difficult to diagnose and fix build-time issues."""
         pass
 
-        @pytest.mark.e2e
-    def test_frontend_build_error_detail_insufficient(self):
-        '''
+        @pytest.mark.e2e"""
+        """
         FAILING TEST: Frontend build errors lack comprehensive reporting.
-
-        This test demonstrates that when frontend builds fail, the error reporting
-        is insufficient for debugging, matching the dev launcher iteration 7 findings.
-        '''
-        pass
-    # Mock a frontend build failure scenario
-        mock_build_output = { )
-        "stdout": "Building...
+"""
+        is insufficient for debugging, matching the dev launcher iteration 7 findings."""
+        pass"""
+mock_build_output = {"stdout": "Building...}
         ",
         'stderr': 'Failed to compile.',  # Insufficient detail
         'returncode': 1
@@ -114,14 +100,11 @@ class TestFrontendBuildErrorReporting(SSotAsyncTestCase):
 
         @pytest.mark.e2e
     def test_frontend_build_dependency_error_reporting(self):
-        '''
+        """
         FAILING TEST: Dependency-related build errors lack context.
-
-        When npm dependencies are missing or incompatible, the build process
-        should provide clear guidance on resolution steps.
-        '''
-        pass
-    # Mock a dependency error scenario
+"""
+        should provide clear guidance on resolution steps."""
+        pass"""
         mock_error_output = "Error: Cannot find module '@next/env'"
 
         with patch('subprocess.run') as mock_run:
@@ -147,14 +130,11 @@ class TestFrontendBuildErrorReporting(SSotAsyncTestCase):
 
         @pytest.mark.e2e
     def test_frontend_shell_security_vulnerability(self):
-        '''
+        """
         FAILING TEST: Frontend spawns processes with shell=True security vulnerability.
-
-        This test demonstrates the security vulnerability found at line 61 in
-        start_with_discovery.js where shell=True is used without proper escaping.
-        '''
-        pass
-    # Read the actual start script
+"""
+        start_with_discovery.js where shell=True is used without proper escaping."""
+        pass"""
         script_path = Path("frontend/scripts/start_with_discovery.js")
 
         if script_path.exists():
@@ -173,22 +153,17 @@ class TestFrontendBuildErrorReporting(SSotAsyncTestCase):
 
 
 class TestBackendProcessStability(SSotAsyncTestCase):
-        '''
+        """
         Tests for Issue 2: Backend process exit with code 1 during runtime
-
-        Root Cause: Backend processes terminate unexpectedly during operation,
-        particularly when launcher supervision times out.
-        '''
+"""
+        particularly when launcher supervision times out."""
         pass
 
-        @pytest.mark.e2e
-    def test_backend_process_supervision_timeout(self):
-        '''
+        @pytest.mark.e2e"""
+        """
         FAILING TEST: Backend process exits when launcher supervision times out.
-
-        This test replicates the issue where backend processes terminate
-        after 60-120 seconds when the dev launcher times out.
-        '''
+"""
+        after 60-120 seconds when the dev launcher times out."""
         pass
     # Mock a long-running backend process
         mock_process = mock_process_instance  # Initialize appropriate service instead of Mock
@@ -197,8 +172,6 @@ class TestBackendProcessStability(SSotAsyncTestCase):
 
     # Simulate launcher timeout scenario
         start_time = time.time()
-        timeout_duration = 2  # Simulate quick timeout for testing
-
     # Simulate the launcher timing out
         while (time.time() - start_time) < timeout_duration:
         if mock_process.poll() is not None:
@@ -208,18 +181,15 @@ class TestBackendProcessStability(SSotAsyncTestCase):
             # FAILING ASSERTION: Process should continue after launcher timeout
         mock_process.terminate.assert_not_called()
 
-            # FAILING ASSERTION: Process should maintain independent lifecycle
-        self.assertIsNone(mock_process.poll(),
+            # FAILING ASSERTION: Process should maintain independent lifecycle"""
         "Backend process should continue running after launcher timeout")
 
         @pytest.mark.e2e
     def test_backend_process_exit_code_1_diagnosis(self):
-        '''
+        """
         FAILING TEST: Backend exit code 1 lacks diagnostic information.
-
-        When backend processes exit with code 1, there should be comprehensive
-        logging to diagnose the root cause.
-        '''
+"""
+        logging to diagnose the root cause."""
         pass
     # Mock backend process exit with code 1
         mock_process = mock_process_instance  # Initialize appropriate service instead of Mock
@@ -229,8 +199,7 @@ class TestBackendProcessStability(SSotAsyncTestCase):
     # Simulate process monitoring
         exit_code = mock_process.poll()
 
-    # FAILING ASSERTION: Exit code 1 should be accompanied by diagnostics
-        self.assertEqual(exit_code, 0,
+    # FAILING ASSERTION: Exit code 1 should be accompanied by diagnostics"""
         "Backend should exit cleanly or provide diagnostic information")
 
         if exit_code == 1:
@@ -243,12 +212,10 @@ class TestBackendProcessStability(SSotAsyncTestCase):
 
         @pytest.mark.e2e
     def test_backend_process_recovery_mechanism(self):
-        '''
+        """
         FAILING TEST: No automatic recovery when backend processes fail.
-
-        The system should implement recovery mechanisms when backend processes
-        exit unexpectedly to maintain service availability.
-        '''
+"""
+        exit unexpectedly to maintain service availability."""
         pass
     # Mock failed backend process
         failed_process = failed_process_instance  # Initialize appropriate service instead of Mock
@@ -258,8 +225,7 @@ class TestBackendProcessStability(SSotAsyncTestCase):
     # Mock recovery mechanism (currently non-existent)
         with patch('subprocess.Popen', side_effect=[failed_process, None]):  # TODO: Use real service instead of Mock
     # Simulate process failure detection
-        if failed_process.poll() == 1:
-        # FAILING ASSERTION: Should attempt automatic recovery
+        if failed_process.poll() == 1:"""
         self.fail("System should implement automatic process recovery")
 
         # FAILING ASSERTION: Health checks should trigger recovery
@@ -269,30 +235,20 @@ class TestBackendProcessStability(SSotAsyncTestCase):
 
 
 class TestReadinessCheckReliability(SSotAsyncTestCase):
-        '''
+        """
         Tests for Issue 3: Backend/Auth readiness check failures despite successful startup
-
-        Root Cause: Readiness checks fail due to timing issues during service bootstrap,
-        even when services are actually healthy and operational.
-        '''
+"""
+        even when services are actually healthy and operational."""
         pass
 
-        @pytest.mark.e2e
-    def test_backend_readiness_check_timing_issue(self):
-        '''
-        FAILING TEST: Backend readiness check fails despite service being healthy.
-
+        @pytest.mark.e2e"""
+        """
+        FAILING TEST: Backend readiness check fails despite service being healthy."""
         This replicates the "Backend readiness check failed - continuing startup"
-        warning observed in dev launcher logs.
-        '''
+        warning observed in dev launcher logs."""
         pass
     # Mock a healthy backend service
-        mock_backend_health = { )
-        'status': 'healthy',
-        'database': 'connected',
-        'uptime': 30
-    
-
+mock_backend_health = {'status': 'healthy',, 'database': 'connected',, 'uptime': 30}
         with patch('requests.get') as mock_get:
         # Mock successful health endpoint but timeout on readiness check
         mock_get.side_effect = [ )
@@ -305,8 +261,7 @@ class TestReadinessCheckReliability(SSotAsyncTestCase):
         health_response = requests.get('http://localhost:8000/health', timeout=1)
         readiness_response = requests.get('http://localhost:8000/health/ready', timeout=1)
 
-            # FAILING ASSERTION: If health succeeds, readiness should too
-        self.assertEqual(readiness_response.status_code, 200,
+            # FAILING ASSERTION: If health succeeds, readiness should too"""
         "Readiness check should succeed when health check succeeds")
 
         except requests.exceptions.ConnectTimeout:
@@ -315,12 +270,10 @@ class TestReadinessCheckReliability(SSotAsyncTestCase):
 
         @pytest.mark.e2e
     def test_auth_service_readiness_verification_failure(self):
-        '''
-        FAILING TEST: Auth system verification fails during startup timing issues.
-
+        """
+        FAILING TEST: Auth system verification fails during startup timing issues."""
         This replicates the "Auth system verification failed - continuing startup"
-        scenario from the dev launcher analysis.
-        '''
+        scenario from the dev launcher analysis."""
         pass
     # Mock auth service that's healthy but readiness check fails
         with patch('requests.get') as mock_get:
@@ -335,18 +288,16 @@ class TestReadinessCheckReliability(SSotAsyncTestCase):
         readiness_status = requests.get('http://localhost:8081/health/ready')
 
         # FAILING ASSERTION: Auth service startup should be atomic
-        if service_status.status_code == 200:
-        self.assertEqual(readiness_status.status_code, 200,
+        if service_status.status_code == 200:"""
         "Auth readiness should succeed when service is healthy")
 
         @pytest.mark.e2e
     def test_readiness_check_bootstrap_timing(self):
-        '''
+        """
         FAILING TEST: Readiness checks don"t account for service bootstrap time.
 
         Services need time to initialize database connections, load configurations,
-        etc. Readiness checks should adapt to these bootstrap requirements.
-        '''
+        etc. Readiness checks should adapt to these bootstrap requirements."""
         pass
     # Mock service in bootstrap phase
         bootstrap_phases = [ )
@@ -365,8 +316,7 @@ class TestReadinessCheckReliability(SSotAsyncTestCase):
 
         readiness_response = requests.get('http://localhost:8000/health/ready')
 
-        # FAILING ASSERTION: Should retry until bootstrap completes
-        self.assertEqual(readiness_response.status_code, 200,
+        # FAILING ASSERTION: Should retry until bootstrap completes"""
         "Readiness check should wait for bootstrap completion")
 
         # FAILING ASSERTION: Should provide bootstrap progress information
@@ -377,30 +327,24 @@ class TestReadinessCheckReliability(SSotAsyncTestCase):
 
 
 class TestWebSocketValidationWarnings(SSotAsyncTestCase):
-        '''
+        """
         Tests for Issue 4: WebSocket validation warning (non-critical)
-
-        Root Cause: WebSocket validation produces warnings that, while non-critical,
-        indicate potential reliability issues in WebSocket connectivity.
-        '''
+"""
+        indicate potential reliability issues in WebSocket connectivity."""
         pass
 
-        @pytest.mark.e2e
-    def test_websocket_validation_library_availability(self):
-        '''
-        FAILING TEST: WebSocket validation warns about missing websockets library.
-
+        @pytest.mark.e2e"""
+        """
+        FAILING TEST: WebSocket validation warns about missing websockets library."""
         This test replicates the "websockets library not available for WebSocket validation"
-        warning observed in the logs.
-        '''
+        warning observed in the logs."""
         pass
-    # Mock missing websockets library
-        with patch('importlib.import_module') as mock_import:
+    # Mock missing websockets library"""
         mock_import.side_effect = ImportError("No module named 'websockets'")
 
         # Simulate WebSocket validation attempt
         try:
-        import importlib
+import importlib
         websockets = importlib.import_module('websockets')
         validation_available = True
         except ImportError:
@@ -412,12 +356,11 @@ class TestWebSocketValidationWarnings(SSotAsyncTestCase):
 
         @pytest.mark.e2e
     def test_websocket_validation_connection_reliability(self):
-        '''
+        """
         FAILING TEST: WebSocket validation doesn"t ensure connection reliability.
 
         Even when validation passes, WebSocket connections may fail during
-        actual usage due to insufficient validation depth.
-        '''
+        actual usage due to insufficient validation depth."""
         pass
     # Mock WebSocket validation that passes but connection fails
         mock_validation_result = {'valid': True, 'endpoint_reachable': True}
@@ -441,21 +384,18 @@ class TestWebSocketValidationWarnings(SSotAsyncTestCase):
         pass
 
                     # FAILING ASSERTION: Validation should predict actual connectivity
-        if validation_passed:
-        self.assertTrue(actual_connection_works,
+        if validation_passed:"""
         "WebSocket validation should ensure actual connectivity works")
 
         @pytest.mark.e2e
     def test_websocket_validation_startup_integration(self):
-        '''
+        """
         FAILING TEST: WebSocket validation warnings don"t prevent service startup.
 
         Non-critical WebSocket validation issues should be resolved during
-        startup rather than logged as warnings and ignored.
-        '''
+        startup rather than logged as warnings and ignored."""
         pass
-    # Mock WebSocket validation warning scenario
-        validation_warnings = [ )
+    # Mock WebSocket validation warning scenario"""
         "WebSocket endpoint not immediately available",
         "WebSocket library version mismatch",
         "WebSocket connection timeout during validation"

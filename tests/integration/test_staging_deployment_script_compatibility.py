@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,13 +16,11 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
-        '''
+        return self.messages_sent.copy()"""
+        """
         Integration Tests for Staging Deployment Script Compatibility
 
         These tests validate integration between SecretConfig and the actual deployment script,
@@ -40,47 +36,38 @@ class TestWebSocketConnection:
         - Strategic Impact: Maintains deployment reliability and development velocity
 
         Test Categories:
-        - Integration tests that validate deployment script and SecretConfig integration
-        - Mock GCP interactions to test deployment parameter generation
-        - Cross-environment deployment configuration validation
-        '''
+        - Integration tests that validate deployment script and SecretConfig integration"""
+        - Cross-environment deployment configuration validation"""
 
-        import pytest
-        import subprocess
-        import os
-        import sys
-        import json
-        from typing import Dict, List, Optional, Any
-        import tempfile
-        from shared.isolated_environment import IsolatedEnvironment
+import pytest
+import subprocess
+import os
+import sys
+import json
+from typing import Dict, List, Optional, Any
+import tempfile
+from shared.isolated_environment import IsolatedEnvironment
 
             # Add project root to path for imports
         sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-        from deployment.secrets_config import SecretConfig
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
-        import asyncio
+from deployment.secrets_config import SecretConfig
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+import asyncio
 
-
-class MockDeploymentScript:
+"""
         """Mock deployment script for testing integration."""
-
-    def __init__(self):
+"""
         """Initialize mock deployment script."""
         self.project_id = "netra-staging"
         self.region = "us-central1"
-        self.services = { )
-        "backend": "netra-backend-staging",
-        "auth": "netra-auth-service"
-    
-
+services = {"backend": "netra-backend-staging",, "auth": "netra-auth-service"}
     def deploy_service(self, service_name: str, secrets_string: str) -> Dict[str, Any]:
         """Mock service deployment."""
-        pass
-        return { )
+        pass"""
         "success": True,
         "service_name": service_name,
         "secrets_count": len(secrets_string.split(",")),
@@ -91,19 +78,14 @@ class MockDeploymentScript:
 class TestStagingDeploymentScriptCompatibility:
         """Integration tests for staging deployment script compatibility."""
 
-        @pytest.fixture
-    def mock_deployment_script(self):
+        @pytest.fixture"""
         """Provide mock deployment script."""
         return MockDeploymentScript()
-
-    def test_secrets_config_integration_with_deployment_script(self, mock_deployment_script):
-        '''Test that SecretConfig integrates correctly with deployment script patterns.
-
-        This test validates the complete integration flow from SecretConfig
-        to deployment script parameter generation.
-        '''
-        pass
-    # Test auth service integration
+"""
+        """Test that SecretConfig integrates correctly with deployment script patterns.
+"""
+        to deployment script parameter generation."""
+        pass"""
         auth_secrets = SecretConfig.generate_secrets_string("auth", "staging")
         auth_result = mock_deployment_script.deploy_service("auth", auth_secrets)
 
@@ -118,15 +100,12 @@ class TestStagingDeploymentScriptCompatibility:
         assert backend_result["secrets_count"] > 5, "Backend service should have multiple secrets"
 
     def test_gcloud_command_generation(self, mock_subprocess):
-        '''Test that gcloud commands are generated correctly with SecretConfig.
-
-        This test validates that the deployment script can generate proper
-        gcloud run deploy commands using SecretConfig output.
-        '''
+        """Test that gcloud commands are generated correctly with SecretConfig.
+"""
+        gcloud run deploy commands using SecretConfig output."""
         pass
     # Mock successful gcloud response
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
-        mock_result.returncode = 0
+        websocket = TestWebSocketConnection()  # Real WebSocket implementation"""
         mock_result.stdout = "Service URL: https://service-url.googleapis.com
         "
         mock_result.stderr = ""
@@ -162,15 +141,12 @@ class TestStagingDeploymentScriptCompatibility:
         assert not secrets_param.endswith(","), "Should not end with comma"
 
     def test_deployment_script_error_handling(self, mock_subprocess):
-        '''Test deployment script error handling with SecretConfig integration.
-
-        This test validates that deployment errors are properly handled when
-        using SecretConfig-generated parameters.
-        '''
+        """Test deployment script error handling with SecretConfig integration.
+"""
+        using SecretConfig-generated parameters."""
         pass
     # Mock gcloud failure
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
-        mock_result.returncode = 1
+        websocket = TestWebSocketConnection()  # Real WebSocket implementation"""
         mock_result.stdout = ""
         mock_result.stderr = "ERROR: Secret 'missing-secret' not found"
         mock_subprocess.return_value = mock_result
@@ -196,11 +172,8 @@ class TestStagingDeploymentScriptCompatibility:
         assert ":latest" in secret_mapping, "formatted_string"
 
     def test_environment_specific_deployment_configuration(self):
-        '''Test that deployment configuration is correct for staging environment.
-
-        This test validates staging-specific deployment patterns and configurations.
-        '''
-        pass
+        """Test that deployment configuration is correct for staging environment."""
+        This test validates staging-specific deployment patterns and configurations.""""""
         environment = "staging"
 
         for service_name in ["auth", "backend"]:
@@ -225,24 +198,14 @@ class TestStagingDeploymentScriptCompatibility:
         continue
 
     def test_deployment_readiness_validation_integration(self):
-        '''Test comprehensive deployment readiness validation.
-
-        This test simulates the complete pre-deployment validation that would
-        prevent regressions like the SECRET_KEY incident.
-        '''
+        """Test comprehensive deployment readiness validation.
+"""
+        prevent regressions like the SECRET_KEY incident."""
         pass
-        deployment_readiness = {}
-
+        deployment_readiness = {}"""
         for service_name in ["auth", "backend"]:
         # Simulate deployment readiness checks
-        readiness_checks = { )
-        "service_name": service_name,
-        "secrets_generation": False,
-        "command_generation": False,
-        "parameter_validation": False,
-        "regression_prevention": False
-        
-
+readiness_checks = {"service_name": service_name,, "secrets_generation": False,, "command_generation": False,, "parameter_validation": False,, "regression_prevention": False}
         # Check 1: Secrets can be generated
         try:
         secrets_string = SecretConfig.generate_secrets_string(service_name, "staging")
@@ -300,15 +263,12 @@ class TestStagingDeploymentScriptCompatibility:
                                                         
 
     def test_deployment_script_cloud_sql_integration(self, mock_subprocess):
-        '''Test that Cloud SQL instances are properly configured with secrets.
-
-        This test validates that database secrets work correctly with Cloud SQL
-        instance configuration in the deployment script.
-        '''
+        """Test that Cloud SQL instances are properly configured with secrets.
+"""
+        instance configuration in the deployment script."""
         pass
     # Mock successful deployment
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
-        mock_result.returncode = 0
+        websocket = TestWebSocketConnection()  # Real WebSocket implementation"""
         mock_result.stdout = "Service deployed successfully"
         mock_subprocess.return_value = mock_result
 
@@ -341,12 +301,9 @@ class TestStagingDeploymentScriptCompatibility:
         assert "--set-secrets" in cmd
 
     def test_deployment_script_vpc_connector_integration(self):
-        '''Test that VPC connector configuration works with secret configuration.
-
-        This test validates that services requiring VPC connectivity (for Redis, etc.)
-        have proper secret and network configuration.
-        '''
-        pass
+        """Test that VPC connector configuration works with secret configuration.
+"""
+        have proper secret and network configuration.""""""
         for service_name in ["auth", "backend"]:
         secrets_string = SecretConfig.generate_secrets_string(service_name, "staging")
 
@@ -374,13 +331,10 @@ class TestStagingDeploymentScriptCompatibility:
         assert "--set-secrets" in cmd
 
     def test_deployment_script_service_specific_configurations(self):
-        '''Test that service-specific configurations are handled correctly.
-
-        This test validates that different services get appropriate secret
-        configurations based on their specific requirements.
-        '''
-        pass
-    # Test auth service specific requirements
+        """Test that service-specific configurations are handled correctly.
+"""
+        configurations based on their specific requirements."""
+        pass"""
         auth_secrets = SecretConfig.generate_secrets_string("auth", "staging")
 
     # Auth service should have service-specific secrets
@@ -429,14 +383,10 @@ class TestStagingDeploymentScriptCompatibility:
 
 class TestDeploymentScriptRegressionPrevention:
         """Integration tests focused on preventing deployment script regressions."""
-
-    def test_secret_key_deployment_script_integration(self):
-        '''Test that SECRET_KEY regression is prevented at deployment script level.
-
-        This test validates the complete flow from SecretConfig to deployment
-        script command generation specifically for SECRET_KEY.
-        '''
-        pass
+"""
+        """Test that SECRET_KEY regression is prevented at deployment script level.
+"""
+        script command generation specifically for SECRET_KEY.""""""
         for service_name in ["auth", "backend"]:
         # Generate secrets string
         secrets_string = SecretConfig.generate_secrets_string(service_name, "staging")
@@ -463,15 +413,12 @@ class TestDeploymentScriptRegressionPrevention:
         assert "SECRET_KEY=" in cmd[-1], "Secrets parameter should contain SECRET_KEY"
 
     def test_deployment_failure_detection_integration(self, mock_subprocess):
-        '''Test that deployment failures are properly detected and handled.
-
-        This test validates that the integration can detect and handle deployment
-        failures that might be caused by missing or invalid secrets.
-        '''
+        """Test that deployment failures are properly detected and handled.
+"""
+        failures that might be caused by missing or invalid secrets."""
         pass
     # Mock deployment failure due to missing secret
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
-        mock_result.returncode = 1
+        websocket = TestWebSocketConnection()  # Real WebSocket implementation"""
         mock_result.stdout = ""
         mock_result.stderr = "ERROR: Failed to access secret 'secret-key-staging'"
         mock_subprocess.return_value = mock_result
@@ -534,12 +481,9 @@ class TestDeploymentScriptRegressionPrevention:
         assert "SECRET_KEY=secret-key-staging:latest" in backend_secrets
 
     def test_redis_configuration_deployment_integration(self):
-        '''Test that Redis configuration works correctly with deployment script.
-
-        This test validates that Redis configuration fixes work with the deployment
-        script integration.
-        '''
-        pass
+        """Test that Redis configuration works correctly with deployment script.
+"""
+        script integration.""""""
         for service_name in ["auth", "backend"]:
         secrets_string = SecretConfig.generate_secrets_string(service_name, "staging")
 
@@ -569,12 +513,9 @@ class TestDeploymentScriptRegressionPrevention:
             
 
     def test_critical_secrets_deployment_validation(self):
-        '''Test that critical secrets are validated before deployment.
-
-        This test simulates pre-deployment validation that would catch missing
-        critical secrets before attempting deployment.
-        '''
-        pass
+        """Test that critical secrets are validated before deployment.
+"""
+        critical secrets before attempting deployment.""""""
         for service_name in ["auth", "backend"]:
         # Get critical secrets for the service
         critical_secrets = set(SecretConfig.CRITICAL_SECRETS.get(service_name, []))

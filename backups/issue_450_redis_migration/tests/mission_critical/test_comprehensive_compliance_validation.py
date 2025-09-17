@@ -7,7 +7,7 @@ from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.core.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
-'''
+"""
 env = get_env()
 Comprehensive Compliance Validation Suite
 
@@ -15,12 +15,9 @@ CRITICAL MISSION: Validate all mock remediations and ensure 90%+ compliance.
 
 This is the authoritative validation suite that must pass before any deployment.
 Designed to be run in CI/CD to prevent regression of compliance issues.
-
-Business Value: Platform/Internal - System Stability & Compliance
-
-Author: Test Validation and Compliance Specialist
-Date: 2025-08-30
-'''
+"""
+"""
+Date: 2025-08-30"""
 
 import ast
 import json
@@ -42,10 +39,8 @@ import asyncio
 # Add project root to path
 project_root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(project_root))
-
-
-@dataclass
-class ComplianceMetrics:
+"""
+@dataclass"""
     """Comprehensive compliance metrics structure."""
     mock_violations: int
     isolated_environment_violations: int
@@ -57,10 +52,8 @@ class ComplianceMetrics:
     overall_compliance_percentage: float
     critical_issues: List[str]
     recommendations: List[str]
-
-
-    @dataclass
-class ServiceComplianceStatus:
+"""
+    @dataclass"""
     """Per-service compliance status."""
     service_name: str
     mock_violations: int
@@ -69,22 +62,16 @@ class ServiceComplianceStatus:
     real_service_usage: bool
     websocket_integration: bool
     compliance_score: float
-    critical_issues: List[str]
-
-
-class ComprehensiveComplianceValidator:
-    '''
+    critical_issues: List[str]"""
+"""
+    """
     Comprehensive validation of all compliance requirements.
 
     This class validates:
-    1. Zero mock usage across all services
-    2. IsolatedEnvironment usage compliance
-    3. Real service connections working
-    4. WebSocket agent events functioning
-    5. Architecture compliance > 90%
-    '''
-
-    def __init__(self):
+    1. Zero mock usage across all services"""
+    3. Real service connections working"""
+    5. Architecture compliance > 90%"""
+"""
         """Initialize comprehensive validator."""
         self.project_root = Path(__file__).resolve().parent.parent.parent
         self.services = ['auth_service', 'analytics_service', 'netra_backend', 'frontend']
@@ -95,17 +82,12 @@ class ComprehensiveComplianceValidator:
         self.project_root / 'tests',
         self.project_root / 'dev_launcher' / 'tests',
     
-        self.results = {}
-        self.start_time = time.time()
-
-    def run_full_compliance_validation(self) -> ComplianceMetrics:
-        '''
-        pass
-        Run complete compliance validation suite.
-
-        Returns:
-        ComplianceMetrics with comprehensive validation results
-        '''
+        self.results = {}"""
+"""
+        """
+        pass"""
+"""
+        ComplianceMetrics with comprehensive validation results"""
         print(" )
 
 class TestWebSocketConnection:
@@ -114,26 +96,19 @@ class TestWebSocketConnection:
     def __init__(self):
         pass
         self.messages_sent = []
-        self.is_connected = True
-        self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+        self.is_connected = True"""
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
     async def close(self, code: int = 1000, reason: str = "Normal closure"):
         """Close WebSocket connection."""
         pass
-        self._closed = True
-        self.is_connected = False
-
-    def get_messages(self) -> list:
-        """Get all sent messages."""
-        await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
+        self._closed = True"""
+"""
+        """Get all sent messages.""""""
+        return self.messages_sent.copy()"""
         SEARCH:  COMPREHENSIVE COMPLIANCE VALIDATION STARTING...")
         print("=" * 80)
 
@@ -357,15 +332,7 @@ class TestWebSocketConnection:
         """Assess overall test quality across the platform."""
         print("   Assessing test quality...")
 
-        quality_metrics = { )
-        'total_test_files': 0,
-        'mock_free_tests': 0,
-        'integration_tests': 0,
-        'e2e_tests': 0,
-        'real_service_tests': 0,
-        'quality_score': 0.0
-    
-
+quality_metrics = {'total_test_files': 0,, 'mock_free_tests': 0,, 'integration_tests': 0,, 'e2e_tests': 0,, 'real_service_tests': 0,, 'quality_score': 0.0}
         for test_dir in self.test_directories:
         if not test_dir.exists():
         continue
@@ -443,10 +410,8 @@ class TestWebSocketConnection:
         service_score * service_weight +
         websocket_score * websocket_weight
     
-
-    # Collect critical issues
-        critical_issues = []
-        if mock_data['total_violations'] > 0:
+"""
+        critical_issues = []"""
         critical_issues.append("formatted_string")
         if len(env_data['violations']) > 0:
         critical_issues.append("formatted_string")
@@ -504,24 +469,18 @@ class TestWebSocketConnection:
 
         except Exception:
         continue
-
-        return violations
-
-    def _has_mock_usage(self, content: str) -> bool:
+"""
+"""
         """Check if content has mock usage."""
-        mock_indicators = [ )
-        'Mock(', 'MagicMock(', 'AsyncMock(', 'patch(',
-
-    def _check_file_environment_compliance(self, file_path: Path) -> Dict[str, Any]:
+        mock_indicators = [ )"""
+"""
         """Check if file uses IsolatedEnvironment properly."""
         try:
         with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-        violations = []
-
-            # Check for direct os.environ usage
-        if 'os.environ[' in content or 'env.get(' in content: ))
+        violations = []"""
+            # Check for direct os.environ usage"""
         violations.append("formatted_string")
 
             # Check for IsolatedEnvironment usage
@@ -548,17 +507,13 @@ class TestWebSocketConnection:
         """Test database connection."""
         try:
         Try to import database connection and test it
-        from test_framework.environment_isolation import get_test_env_manager
+from test_framework.environment_isolation import get_test_env_manager
 
         manager = get_test_env_manager()
         env = manager.setup_test_environment()
 
         # Check if database configuration is set
-        db_config = { )
-        'DATABASE_URL': env.get('DATABASE_URL'),
-        'USE_MEMORY_DB': env.get('USE_MEMORY_DB')
-        
-
+db_config = {'DATABASE_URL': env.get('DATABASE_URL'),, 'USE_MEMORY_DB': env.get('USE_MEMORY_DB')}
         working = bool(db_config['USE_MEMORY_DB'] or db_config['DATABASE_URL'])
 
         return { )
@@ -571,13 +526,11 @@ class TestWebSocketConnection:
         return { )
         'working': False,
         'error': str(e),
-        'type': 'unknown'
-            
-
-    def _test_redis_connection(self) -> Dict[str, Any]:
+        'type': 'unknown'"""
+"""
         """Test Redis connection."""
         try:
-        from test_framework.environment_isolation import get_test_env_manager
+from test_framework.environment_isolation import get_test_env_manager
 
         manager = get_test_env_manager()
         env = manager.setup_test_environment()
@@ -595,10 +548,8 @@ class TestWebSocketConnection:
         return { )
         'working': False,
         'error': str(e),
-        'configured': False
-            
-
-    def _test_websocket_service(self) -> Dict[str, Any]:
+        'configured': False"""
+"""
         """Test WebSocket service configuration."""
         try:
         # Check if WebSocket service files exist and are configured
@@ -619,10 +570,8 @@ class TestWebSocketConnection:
         return { )
         'working': False,
         'error': str(e),
-        'configured': False
-            
-
-    def _get_service_name(self, file_path: str) -> str:
+        'configured': False"""
+"""
         """Get service name from file path."""
         if '/auth_service/' in file_path:
         return 'auth_service'
@@ -633,25 +582,19 @@ class TestWebSocketConnection:
         elif '/frontend/' in file_path:
         return 'frontend'
         else:
-        return 'tests'
-
-
-class TestComprehensiveCompliance:
+        return 'tests'"""
+"""
         """Test suite for comprehensive compliance validation."""
-
-    def test_comprehensive_compliance_validation(self):
-        '''
+"""
+        """
         CRITICAL: Comprehensive compliance validation.
 
         This test validates ALL aspects of system compliance:
         - Zero mock usage
         - IsolatedEnvironment usage
-        - Real service connections
-        - WebSocket agent events
-        - Architecture compliance
-
-        MUST PASS before deployment.
-        '''
+        - Real service connections"""
+        - Architecture compliance"""
+        MUST PASS before deployment."""
         pass
         validator = ComprehensiveComplianceValidator()
         metrics = validator.run_full_compliance_validation()
@@ -660,10 +603,8 @@ class TestComprehensiveCompliance:
         report = self._generate_compliance_report(metrics)
 
         # Save report to file
-        report_path = validator.project_root / 'COMPLIANCE_VALIDATION_REPORT.md'
-        with open(report_path, 'w') as f:
-        f.write(report)
-
+        report_path = validator.project_root / 'COMPLIANCE_VALIDATION_REPORT.md'"""
+        f.write(report)"""
         print("formatted_string")
 
             # Determine if system passes compliance
@@ -731,48 +672,38 @@ class TestComprehensiveCompliance:
         """Test strict mock usage policy enforcement across all services."""
         validator = ComprehensiveComplianceValidator()
 
-    # Check for any mock imports or usage
-        mock_violations = validator._scan_for_mock_usage()
-
-    # Critical: Zero mock tolerance
+    # Check for any mock imports or usage"""
+"""
         assert mock_violations == 0, "formatted_string"
 
     def test_isolated_environment_compliance(self):
         """Test IsolatedEnvironment usage compliance across services."""
         pass
         validator = ComprehensiveComplianceValidator()
-
-    # Check for direct os.environ usage
-        direct_env_violations = validator._scan_for_direct_env_usage()
-
+"""
+        direct_env_violations = validator._scan_for_direct_env_usage()"""
         assert direct_env_violations == 0, "formatted_string"
 
     def test_websocket_agent_events_integration(self):
         """Test WebSocket agent events integration compliance."""
         validator = ComprehensiveComplianceValidator()
-
-    # Test WebSocket event emission
-        websocket_status = validator._validate_websocket_agent_events()
-
+"""
+        websocket_status = validator._validate_websocket_agent_events()"""
         assert websocket_status == 'WORKING', "formatted_string"
 
     def test_real_service_connections(self):
         """Test real service connections without mocks."""
         pass
         validator = ComprehensiveComplianceValidator()
-
-    # Test actual service connections
-        service_status = validator._validate_real_service_connections()
-
+"""
+        service_status = validator._validate_real_service_connections()"""
         assert service_status == 'WORKING', "formatted_string"
 
     def test_authentication_flow_compliance(self):
         """Test complete authentication flow compliance."""
         validator = ComprehensiveComplianceValidator()
-
-    # Test end-to-end authentication without mocks
-        auth_compliance = self._test_authentication_e2e()
-
+"""
+        auth_compliance = self._test_authentication_e2e()"""
         assert auth_compliance['success'], "formatted_string"
 
     def test_user_journey_compliance_validation(self):
@@ -780,179 +711,137 @@ class TestComprehensiveCompliance:
         pass
         validator = ComprehensiveComplianceValidator()
 
-    # Test complete user journeys
-        journey_compliance = self._test_user_journeys_e2e()
-
-        assert journey_compliance['completion_rate'] >= 0.90, \
+    # Test complete user journeys"""
+"""
         "formatted_string"
 
     def test_database_integration_compliance(self):
-        """Test database integration compliance without mocks."""
-    # Test real database connections
-        db_compliance = self._test_database_operations()
-
+        """Test database integration compliance without mocks.""""""
+        db_compliance = self._test_database_operations()"""
         assert db_compliance['success'], "formatted_string"
 
     def test_api_endpoint_compliance_validation(self):
         """Test API endpoint compliance validation."""
         pass
-    # Test all API endpoints with real requests
-        api_compliance = self._test_api_endpoints_real()
-
-        assert api_compliance['success_rate'] >= 0.95, \
+    # Test all API endpoints with real requests"""
+"""
         "formatted_string"
 
     def test_error_handling_compliance(self):
         """Test error handling compliance across services."""
-    # Test error handling without mocks
-        error_compliance = self._test_error_handling_patterns()
-
-        assert error_compliance['proper_handling'], \
+    # Test error handling without mocks"""
+"""
         "formatted_string"
 
     def test_logging_compliance_validation(self):
         """Test logging compliance validation."""
         pass
-    # Test logging implementation
-        logging_compliance = self._test_logging_implementation()
-
-        assert logging_compliance['compliant'], \
+    # Test logging implementation"""
+"""
         "formatted_string"
 
     def test_security_compliance_validation(self):
         """Test security compliance validation."""
-    # Test security implementations
-        security_compliance = self._test_security_implementations()
-
-        assert security_compliance['secure'], \
+    # Test security implementations"""
+"""
         "formatted_string"
 
     def test_performance_compliance_validation(self):
         """Test performance compliance validation."""
         pass
-    # Test performance requirements
-        perf_compliance = self._test_performance_requirements()
-
-        assert perf_compliance['meets_sla'], \
+    # Test performance requirements"""
+"""
         "formatted_string"
 
     def test_configuration_compliance_validation(self):
         """Test configuration compliance validation."""
-    # Test configuration management
-        config_compliance = self._test_configuration_management()
-
-        assert config_compliance['valid'], \
+    # Test configuration management"""
+"""
         "formatted_string"
 
     def test_deployment_compliance_validation(self):
         """Test deployment compliance validation."""
         pass
-    # Test deployment readiness
-        deploy_compliance = self._test_deployment_readiness()
-
-        assert deploy_compliance['ready'], \
+    # Test deployment readiness"""
+"""
         "formatted_string"
 
     def test_monitoring_compliance_validation(self):
         """Test monitoring compliance validation."""
-    # Test monitoring setup
-        monitor_compliance = self._test_monitoring_setup()
-
-        assert monitor_compliance['complete'], \
+    # Test monitoring setup"""
+"""
         "formatted_string"
 
     def test_documentation_compliance_validation(self):
         """Test documentation compliance validation."""
         pass
-    # Test documentation completeness
-        doc_compliance = self._test_documentation_completeness()
-
-        assert doc_compliance['sufficient'], \
+    # Test documentation completeness"""
+"""
         "formatted_string"
 
     def test_test_coverage_compliance_validation(self):
         """Test test coverage compliance validation."""
-    # Test coverage metrics
-        coverage_compliance = self._test_coverage_metrics()
-
-        assert coverage_compliance['percentage'] >= 80, \
+    # Test coverage metrics"""
+"""
         "formatted_string"
 
     def test_dependency_compliance_validation(self):
         """Test dependency compliance validation."""
         pass
-    # Test dependency management
-        dep_compliance = self._test_dependency_management()
-
-        assert dep_compliance['secure'], \
+    # Test dependency management"""
+"""
         "formatted_string"
 
     def test_data_privacy_compliance_validation(self):
         """Test data privacy compliance validation."""
-    # Test data privacy implementations
-        privacy_compliance = self._test_data_privacy_implementations()
-
-        assert privacy_compliance['compliant'], \
+    # Test data privacy implementations"""
+"""
         "formatted_string"
 
     def test_audit_trail_compliance_validation(self):
         """Test audit trail compliance validation."""
         pass
-    # Test audit trail implementations
-        audit_compliance = self._test_audit_trail_implementations()
-
-        assert audit_compliance['complete'], \
+    # Test audit trail implementations"""
+"""
         "formatted_string"
 
     def test_business_continuity_compliance_validation(self):
         """Test business continuity compliance validation."""
-    # Test business continuity measures
-        bc_compliance = self._test_business_continuity_measures()
-
-        assert bc_compliance['resilient'], \
+    # Test business continuity measures"""
+"""
         "formatted_string"
 
     def test_scalability_compliance_validation(self):
         """Test scalability compliance validation."""
         pass
-    # Test scalability implementations
-        scale_compliance = self._test_scalability_implementations()
-
-        assert scale_compliance['scalable'], \
+    # Test scalability implementations"""
+"""
         "formatted_string"
 
     def test_integration_compliance_validation(self):
         """Test integration compliance validation."""
-    # Test all integrations
-        integration_compliance = self._test_all_integrations()
-
-        assert integration_compliance['success_rate'] >= 0.95, \
+    # Test all integrations"""
+"""
         "formatted_string"
 
     def test_mobile_compatibility_compliance_validation(self):
         """Test mobile compatibility compliance validation."""
         pass
-    # Test mobile compatibility
-        mobile_compliance = self._test_mobile_compatibility()
-
-        assert mobile_compliance['compatible'], \
+    # Test mobile compatibility"""
+"""
         "formatted_string"
 
     def test_accessibility_compliance_validation(self):
         """Test accessibility compliance validation."""
-    # Test accessibility requirements
-        access_compliance = self._test_accessibility_requirements()
-
-        assert access_compliance['accessible'], \
+    # Test accessibility requirements"""
+"""
         "formatted_string"
 
     def test_internationalization_compliance_validation(self):
         """Test internationalization compliance validation."""
         pass
-    # Test i18n implementations
-        i18n_compliance = self._test_internationalization_implementations()
-
-        assert i18n_compliance['ready'], \
+    # Test i18n implementations"""
+"""
         "formatted_string"
 
     # Helper methods for comprehensive compliance testing
@@ -961,106 +850,62 @@ class TestComprehensiveCompliance:
         try:
         # Simulate complete auth flow
         return {'success': True, 'errors': []}
-        except Exception as e:
-        return {'success': False, 'errors': [str(e)]}
-
-    def _test_user_journeys_e2e(self) -> Dict[str, Any]:
+        except Exception as e:"""
+"""
         """Test end-to-end user journeys."""
         try:
         # Simulate user journey completion
         return {'completion_rate': 0.95, 'issues': []}
-        except Exception as e:
-        return {'completion_rate': 0.0, 'issues': [str(e)]}
-
-    def _test_database_operations(self) -> Dict[str, Any]:
+        except Exception as e:"""
+"""
         """Test database operations compliance."""
         try:
         # Test real database operations
         return {'success': True, 'errors': []}
-        except Exception as e:
-        return {'success': False, 'errors': [str(e)]}
-
-    def _test_api_endpoints_real(self) -> Dict[str, Any]:
+        except Exception as e:"""
+"""
         """Test API endpoints with real requests."""
         try:
         # Test actual API endpoints
         return {'success_rate': 0.98, 'failures': []}
-        except Exception as e:
-        return {'success_rate': 0.0, 'failures': [str(e)]}
-
-    def _test_error_handling_patterns(self) -> Dict[str, Any]:
-        """Test error handling patterns."""
-        return {'proper_handling': True, 'issues': []}
-
-    def _test_logging_implementation(self) -> Dict[str, Any]:
-        """Test logging implementation compliance."""
-        return {'compliant': True, 'violations': []}
-
-    def _test_security_implementations(self) -> Dict[str, Any]:
-        """Test security implementations."""
-        return {'secure': True, 'vulnerabilities': []}
-
-    def _test_performance_requirements(self) -> Dict[str, Any]:
-        """Test performance requirements."""
-        return {'meets_sla': True, 'metrics': {}}
-
-    def _test_configuration_management(self) -> Dict[str, Any]:
-        """Test configuration management."""
-        return {'valid': True, 'issues': []}
-
-    def _test_deployment_readiness(self) -> Dict[str, Any]:
-        """Test deployment readiness."""
-        return {'ready': True, 'blockers': []}
-
-    def _test_monitoring_setup(self) -> Dict[str, Any]:
-        """Test monitoring setup."""
-        return {'complete': True, 'missing': []}
-
-    def _test_documentation_completeness(self) -> Dict[str, Any]:
-        """Test documentation completeness."""
-        return {'sufficient': True, 'gaps': []}
-
-    def _test_coverage_metrics(self) -> Dict[str, Any]:
-        """Test coverage metrics."""
-        return {'percentage': 85.0, 'details': {}}
-
-    def _test_dependency_management(self) -> Dict[str, Any]:
-        """Test dependency management."""
-        return {'secure': True, 'vulnerabilities': []}
-
-    def _test_data_privacy_implementations(self) -> Dict[str, Any]:
-        """Test data privacy implementations."""
-        return {'compliant': True, 'violations': []}
-
-    def _test_audit_trail_implementations(self) -> Dict[str, Any]:
-        """Test audit trail implementations."""
-        return {'complete': True, 'missing': []}
-
-    def _test_business_continuity_measures(self) -> Dict[str, Any]:
-        """Test business continuity measures."""
-        return {'resilient': True, 'risks': []}
-
-    def _test_scalability_implementations(self) -> Dict[str, Any]:
-        """Test scalability implementations."""
-        return {'scalable': True, 'bottlenecks': []}
-
-    def _test_all_integrations(self) -> Dict[str, Any]:
-        """Test all integrations."""
-        return {'success_rate': 0.97, 'failures': []}
-
-    def _test_mobile_compatibility(self) -> Dict[str, Any]:
-        """Test mobile compatibility."""
-        return {'compatible': True, 'issues': []}
-
-    def _test_accessibility_requirements(self) -> Dict[str, Any]:
-        """Test accessibility requirements."""
-        return {'accessible': True, 'violations': []}
-
-    def _test_internationalization_implementations(self) -> Dict[str, Any]:
-        """Test internationalization implementations."""
-        return {'ready': True, 'missing': []}
-
-    def _generate_compliance_report(self, metrics: ComplianceMetrics) -> str:
+        except Exception as e:"""
+"""
+        """Test error handling patterns.""""""
+"""
+        """Test logging implementation compliance.""""""
+"""
+        """Test security implementations.""""""
+"""
+        """Test performance requirements.""""""
+"""
+        """Test configuration management.""""""
+"""
+        """Test deployment readiness.""""""
+"""
+        """Test monitoring setup.""""""
+"""
+        """Test documentation completeness.""""""
+"""
+        """Test coverage metrics.""""""
+"""
+        """Test dependency management.""""""
+"""
+        """Test data privacy implementations.""""""
+"""
+        """Test audit trail implementations.""""""
+"""
+        """Test business continuity measures.""""""
+"""
+        """Test scalability implementations.""""""
+"""
+        """Test all integrations.""""""
+"""
+        """Test mobile compatibility.""""""
+"""
+        """Test accessibility requirements.""""""
+"""
+        """Test internationalization implementations.""""""
+"""
         """Generate comprehensive compliance report."""
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
 

@@ -1,4 +1,4 @@
-'''
+"""
 E2E Test: Auth-Backend Integration Core
 
 This test validates the core integration between the auth service and backend service,
@@ -10,12 +10,9 @@ Business Value Justification (BVJ):
 - Value Impact: Ensures users can authenticate and access backend features seamlessly
 - Strategic/Revenue Impact: Authentication failures block user engagement and revenue
 
-CRITICAL COMPLIANCE WITH CLAUDE.md:
-- No mocks are used (real services only as required by CLAUDE.md)
-- Absolute imports only (no relative imports)
-- Environment access through IsolatedEnvironment only
-- Real database connections and services tested end-to-end
-'''
+CRITICAL COMPLIANCE WITH CLAUDE.md:"""
+- Absolute imports only (no relative imports)"""
+- Real database connections and services tested end-to-end"""
 
         # Setup test path for absolute imports following CLAUDE.md standards
 import sys
@@ -38,20 +35,13 @@ from typing import Dict, Any, Optional, List
 from shared.isolated_environment import get_env as get_auth_env
 from shared.isolated_environment import get_env as get_backend_env
 
-logger = logging.getLogger(__name__)
-
-
-class AuthBackendIntegrationTester:
-    '''
-    Test harness for auth-backend integration testing.
-
-    Uses real services and real database connections as required by CLAUDE.md.
-    No mocks are used anywhere in this test suite.
-    '''
-
-    def __init__(self):
-        pass
-    # Service URLs for real running services
+logger = logging.getLogger(__name__)"""
+"""
+    """"""
+"""
+    No mocks are used anywhere in this test suite."""
+"""
+        pass"""
         self.auth_service_url = "http://localhost:8081"  # Standard auth service port
         self.backend_service_url = "http://localhost:8000"  # Standard backend service port
 
@@ -64,8 +54,7 @@ class AuthBackendIntegrationTester:
 
     async def check_service_availability(self, session: aiohttp.ClientSession, service_name: str, url: str) -> bool:
         """Check if a service is available by testing its health endpoint."""
-        try:
-        # Try health endpoint first
+        try:"""
         async with session.get("formatted_string", timeout=aiohttp.ClientTimeout(total=10)) as response:
         if response.status == 200:
         logger.info("formatted_string")
@@ -90,21 +79,11 @@ class AuthBackendIntegrationTester:
         logger.info("[AUTH-BACKEND-INTEGRATION] Testing user registration...")
 
                                     # Generate unique test user
-        test_user = { )
-        "email": "formatted_string",
-        "password": "TestPassword123!",
-        "full_name": "Auth Backend Integration Test User"
-                                    
+test_user = {"email": "formatted_string",, "password": "TestPassword123!",, "full_name": "Auth Backend Integration Test User"}
         self.test_user_email = test_user["email"]
 
         try:
-        registration_data = { )
-        "email": test_user["email"],
-        "password": test_user["password"],
-        "confirm_password": test_user["password"],
-        "full_name": test_user["full_name"]
-                                        
-
+registration_data = {"email": test_user["email"],, "password": test_user["password"],, "confirm_password": test_user["password"],, "full_name": test_user["full_name"]}
         async with session.post( )
         "formatted_string",
         json=registration_data,
@@ -130,11 +109,7 @@ class AuthBackendIntegrationTester:
         logger.info("[AUTH-BACKEND-INTEGRATION] Testing user login...")
 
         try:
-        login_data = { )
-        "email": test_user["email"],
-        "password": test_user["password"]
-                                                                
-
+login_data = {"email": test_user["email"],, "password": test_user["password"]}
         async with session.post( )
         "formatted_string",
         json=login_data,
@@ -339,8 +314,6 @@ class AuthBackendIntegrationTester:
         return True  # Not a failure if not implemented yet
         else:
         refresh_result = await response.json()
-        new_access_token = refresh_result.get("access_token")
-
         if not new_access_token:
         self.integration_failures.append("Token refresh response missing access_token")
         return False
@@ -410,24 +383,19 @@ class AuthBackendIntegrationTester:
         @pytest.mark.e2e
 @pytest.mark.asyncio
     async def test_auth_backend_integration_core():
-'''
+"""
 Comprehensive test of auth-backend integration with real services.
 
 This test validates the complete authentication flow between auth service
 and backend service using real database connections and no mocks.
 
-COMPLIANCE: Follows CLAUDE.md standards for e2e testing:
-- Uses real services only (no mocks)
-- Absolute imports only
-- Environment access through IsolatedEnvironment
-- Tests real database connectivity
-'''
+COMPLIANCE: Follows CLAUDE.md standards for e2e testing:"""
+- Absolute imports only"""
+- Tests real database connectivity"""
 
                                                                                                                                                                                                                                                                                                                                 # Setup environment using IsolatedEnvironment as required by CLAUDE.md
-auth_env = get_auth_env()
-backend_env = get_backend_env()
-
-                                                                                                                                                                                                                                                                                                                                # Set test environment configuration
+auth_env = get_auth_env()"""
+"""
 auth_env.set("ENVIRONMENT", "test", "auth_backend_integration_test")
 backend_env.set("ENVIRONMENT", "test", "auth_backend_integration_test")
 

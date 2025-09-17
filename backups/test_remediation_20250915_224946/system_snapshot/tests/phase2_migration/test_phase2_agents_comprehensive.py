@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,119 +16,90 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
-        '''
+        return self.messages_sent.copy()"""
+        """
         CRITICAL: Phase 2 Agent Migration Comprehensive Test Suite
         ============================================================
-        Tests all Phase 2 agents migrated to UserExecutionContext pattern.
-        These tests are intentionally difficult and comprehensive to ensure
-        proper isolation, security, and functionality.
-        '''
+        Tests all Phase 2 agents migrated to UserExecutionContext pattern."""
+        proper isolation, security, and functionality."""
 
-        import asyncio
-        import json
-        import pytest
-        import uuid
-        from datetime import datetime
-        from typing import Any, Dict, List, Optional
-        from concurrent.futures import ThreadPoolExecutor
-        import threading
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from netra_backend.app.redis_manager import redis_manager
-        from auth_service.core.auth_manager import AuthManager
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from shared.isolated_environment import IsolatedEnvironment
+import asyncio
+import json
+import pytest
+import uuid
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+from concurrent.futures import ThreadPoolExecutor
+import threading
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from netra_backend.app.redis_manager import redis_manager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
     # Core imports
-        from netra_backend.app.services.user_execution_context import UserExecutionContext
-        from netra_backend.app.database.session_manager import DatabaseSessionManager
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.database.session_manager import DatabaseSessionManager
 
     # Phase 2 Agent imports
-        from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-        from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-        from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
-        from netra_backend.app.agents.goals_triage_sub_agent import GoalsTriageSubAgent
-        from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-        from netra_backend.app.agents.enhanced_execution_agent import EnhancedExecutionAgent
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
+from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
+from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
+from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
+from netra_backend.app.agents.goals_triage_sub_agent import GoalsTriageSubAgent
+from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
+from netra_backend.app.agents.enhanced_execution_agent import EnhancedExecutionAgent
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
-
-class TestPhase2AgentsMigration:
+"""
         """Comprehensive test suite for Phase 2 agent migration."""
 
-        @pytest.fixture
-    def real_db_session():
-        """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Create a mock database session."""
         pass
         session = Magic        session.commit = Magic        session.rollback = Magic        session.close = Magic        return session
 
-        @pytest.fixture
-    def user_context(self, mock_db_session):
-        """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Create a test UserExecutionContext."""
-        pass
-        return UserExecutionContext( )
+        pass"""
         user_id="test_user_123",
         thread_id="thread_456",
         run_id=str(uuid.uuid4()),
         request_id=str(uuid.uuid4()),
         db_session=mock_db_session,
-        metadata={ )
-        "user_request": "Analyze performance and suggest improvements",
-        "data_result": {"metrics": {"latency": 150, "throughput": 1000}},
-        "triage_result": {"priority": "high", "category": "performance"},
-        "optimizations_result": {"suggestions": ["cache", "index"]},
-        "action_plan_result": {"steps": ["implement cache", "add indexes"]}
-    
-    
-
+metadata={"user_request": "Analyze performance and suggest improvements",, "data_result": {"metrics": {"latency": 150, "throughput": 1000}},, "triage_result": {"priority": "high", "category": "performance"},, "optimizations_result": {"suggestions": ["cache", "index"]},, "action_plan_result": {"steps": ["implement cache", "add indexes"]}}
         @pytest.fixture
     def real_websocket_manager():
-        """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance.""""""
         """Create a mock WebSocket manager."""
         pass
         manager = Magic        manager.websocket = TestWebSocketConnection()
         return manager
 
-
-class TestReportingSubAgent(TestPhase2AgentsMigration):
+"""
         """Comprehensive tests for ReportingSubAgent migration."""
 
-@pytest.mark.asyncio
-    async def test_reporting_agent_user_isolation(self, user_context, mock_websocket_manager):
+@pytest.mark.asyncio"""
 """Test that ReportingSubAgent properly isolates user data."""
 agent = ReportingSubAgent()
 
         # Create two different user contexts
-context1 = user_context
-context2 = UserExecutionContext( )
+context1 = user_context"""
 user_id="different_user_789",
 thread_id="thread_999",
 run_id=str(uuid.uuid4()),
 request_id=str(uuid.uuid4()),
 db_session=user_context.db_session,
-metadata={ )
-"user_request": "Different request",
-"data_result": {"metrics": {"latency": 500}},
-"triage_result": {"priority": "low"},
-"optimizations_result": {"suggestions": ["optimize queries"]}
-        
-        
-
+metadata={"user_request": "Different request",, "data_result": {"metrics": {"latency": 500}},, "triage_result": {"priority": "low"},, "optimizations_result": {"suggestions": ["optimize queries"]}}
         # Execute for both users concurrently
 with patch.object(agent, '_generate_report_with_llm', return_value={"report": "test"}):
 results = await asyncio.gather( )
@@ -149,8 +118,7 @@ assert "different_user_789" not in str(results[0])
 pass
 agent = ReportingSubAgent(websocket_manager=mock_websocket_manager)
 
-                # Test with invalid context type
-with pytest.raises(TypeError):
+                # Test with invalid context type"""
 await agent.execute("not_a_context", stream_updates=False)
 
                     # Test with None context
@@ -173,8 +141,7 @@ metadata={}  # Empty metadata
                             
 
                             # Should create fallback report
-result = await agent.execute(context, stream_updates=False)
-assert result is not None
+result = await agent.execute(context, stream_updates=False)"""
 assert "fallback" in str(result).lower() or "unavailable" in str(result).lower()
 
 @pytest.mark.asyncio
@@ -185,8 +152,7 @@ agent = ReportingSubAgent(websocket_manager=mock_websocket_manager)
 
                                 # Create 10 concurrent executions
 contexts = []
-for i in range(10):
-ctx = UserExecutionContext( )
+for i in range(10):"""
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id=str(uuid.uuid4()),
@@ -209,15 +175,13 @@ assert all(r is not None for r in results)
 class TestOptimizationsCoreSubAgent(TestPhase2AgentsMigration):
     """Comprehensive tests for OptimizationsCoreSubAgent migration."""
 
-@pytest.mark.asyncio
-    async def test_optimizations_context_isolation(self, user_context, mock_websocket_manager):
+@pytest.mark.asyncio"""
 """Test that OptimizationsCoreSubAgent maintains context isolation."""
 dispatcher = Magic        agent = OptimizationsCoreSubAgent( )
 tool_dispatcher=dispatcher,
 websocket_manager=mock_websocket_manager
         
-
-        # Mock LLM response
+"""
 with patch.object(agent, '_analyze_with_llm', return_value={"optimizations": ["cache", "index"]}):
 result = await agent.execute(user_context, stream_updates=False)
 
@@ -236,8 +200,7 @@ pass
 dispatcher = Magic        agent = OptimizationsCoreSubAgent( )
 tool_dispatcher=dispatcher,
 websocket_manager=mock_websocket_manager
-                
-
+                """
 with patch.object(agent, '_analyze_with_llm', side_effect=Exception("Test error")):
                     # Should handle error gracefully
 result = await agent.execute(user_context, stream_updates=False)
@@ -266,13 +229,11 @@ dispatcher.execute_tool.assert_called()
 class TestSyntheticDataSubAgent(TestPhase2AgentsMigration):
     """Comprehensive tests for SyntheticDataSubAgent migration."""
 
-@pytest.mark.asyncio
-    async def test_synthetic_data_user_isolation(self, user_context, mock_websocket_manager):
+@pytest.mark.asyncio"""
 """Test that synthetic data generation is isolated per user."""
 agent = SyntheticDataSubAgent()
 
-        # Mock generation components
-with patch('netra_backend.app.agents.synthetic_data_sub_agent.GenerationWorkflow') as mock_workflow:
+        # Mock generation components"""
 mock_workflow_instance = Magic            mock_workflow_instance.execute = AsyncMock(return_value={"synthetic_data": "test"})
 mock_workflow.return_value = mock_workflow_instance
 
@@ -302,8 +263,7 @@ assert all(r is not None for r in results)
 """Test approval workflow with UserExecutionContext."""
 pass
 agent = SyntheticDataSubAgent()
-
-                    # Set up approval requirement
+"""
 user_context.metadata["requires_approval"] = True
 
 with patch('netra_backend.app.agents.synthetic_data_sub_agent.ApprovalWorkflow') as mock_approval:
@@ -325,8 +285,7 @@ assert result is not None
     async def test_synthetic_data_batch_processing(self, user_context, mock_websocket_manager):
 """Test batch processing maintains context isolation."""
 agent = SyntheticDataSubAgent()
-
-                                # Set up batch request
+"""
 user_context.metadata["batch_size"] = 100
 user_context.metadata["workload_profile"] = { )
 "num_users": 10,
@@ -350,12 +309,10 @@ assert result is not None
 class TestGoalsTriageSubAgent(TestPhase2AgentsMigration):
     """Comprehensive tests for GoalsTriageSubAgent migration."""
 
-@pytest.mark.asyncio
-    async def test_goals_triage_context_validation(self, user_context, mock_websocket_manager):
+@pytest.mark.asyncio"""
 """Test context validation in GoalsTriageSubAgent."""
 agent = GoalsTriageSubAgent(websocket_manager=mock_websocket_manager)
-
-        # Test with valid context
+"""
 with patch.object(agent, '_extract_and_analyze_goals', return_value={"goals": ["goal1"]}):
 result = await agent.execute(user_context, stream_updates=False)
 assert result is not None
@@ -370,8 +327,7 @@ await agent.execute({"not": "a_context"}, stream_updates=False)
 pass
 agent = GoalsTriageSubAgent(websocket_manager=mock_websocket_manager)
 
-                    # Create contexts with different priorities
-high_priority_context = user_context
+                    # Create contexts with different priorities"""
 high_priority_context.metadata["user_request"] = "URGENT: Fix production issues"
 
 low_priority_context = UserExecutionContext( )
@@ -401,8 +357,7 @@ assert "low" in str(low_result) or "optimize" in str(low_result)
     async def test_goals_fallback_handling(self, user_context, mock_websocket_manager):
 """Test fallback goal generation when analysis fails."""
 agent = GoalsTriageSubAgent(websocket_manager=mock_websocket_manager)
-
-                            # Make analysis fail
+"""
 with patch.object(agent, '_extract_and_analyze_goals', side_effect=Exception("LLM failed")):
 result = await agent.execute(user_context, stream_updates=False)
 
@@ -415,26 +370,19 @@ assert "goals" in result or "fallback" in str(result).lower()
 class TestActionsToMeetGoalsSubAgent(TestPhase2AgentsMigration):
     """Comprehensive tests for ActionsToMeetGoalsSubAgent migration."""
 
-@pytest.mark.asyncio
-    async def test_actions_plan_user_isolation(self, user_context, mock_websocket_manager):
+@pytest.mark.asyncio"""
 """Test that action plans are isolated per user."""
 agent = ActionsToMeetGoalsSubAgent(websocket_manager=mock_websocket_manager)
 
         # Create multiple user contexts
 contexts = []
-for i in range(3):
-ctx = UserExecutionContext( )
+for i in range(3):"""
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id=str(uuid.uuid4()),
 request_id=str(uuid.uuid4()),
 db_session=user_context.db_session,
-metadata={ )
-"user_request": "formatted_string",
-"optimizations_result": {"suggestions": ["formatted_string"]},
-"data_result": {"metrics": {"id": i}}
-            
-            
+metadata={"user_request": "formatted_string",, "optimizations_result": {"suggestions": ["formatted_string"]},, "data_result": {"metrics": {"id": i}}}
 contexts.append(ctx)
 
 with patch.object(agent, '_generate_action_plan') as mock_plan:
@@ -457,8 +405,7 @@ assert "formatted_string" in str(result)
 pass
 agent = ActionsToMeetGoalsSubAgent(websocket_manager=mock_websocket_manager)
 
-original_metadata = user_context.metadata.copy()
-
+original_metadata = user_context.metadata.copy()"""
 with patch.object(agent, '_generate_action_plan', return_value={"plan": "test"}):
 result = await agent.execute(user_context, stream_updates=False)
 
@@ -470,14 +417,12 @@ assert result is not None
 class TestEnhancedExecutionAgent(TestPhase2AgentsMigration):
     """Comprehensive tests for EnhancedExecutionAgent migration."""
 
-@pytest.mark.asyncio
-    async def test_enhanced_execution_isolation(self, user_context, mock_websocket_manager):
+@pytest.mark.asyncio"""
 """Test enhanced execution maintains user isolation."""
 agent = EnhancedExecutionAgent(websocket_manager=mock_websocket_manager)
 
         # Mock supervisor
-with patch('netra_backend.app.agents.enhanced_execution_agent.EnhancedSupervisorWrapper') as mock_supervisor:
-mock_supervisor_instance = Magic            mock_supervisor_instance.execute_with_context = AsyncMock( )
+with patch('netra_backend.app.agents.enhanced_execution_agent.EnhancedSupervisorWrapper') as mock_supervisor:"""
 return_value={"execution_result": "success"}
             
 mock_supervisor.return_value = mock_supervisor_instance
@@ -492,8 +437,7 @@ mock_supervisor_instance.execute_with_context.assert_called()
     async def test_enhanced_websocket_notifications(self, user_context, mock_websocket_manager):
 """Test WebSocket notifications use new pattern."""
 pass
-agent = EnhancedExecutionAgent(websocket_manager=mock_websocket_manager)
-
+agent = EnhancedExecutionAgent(websocket_manager=mock_websocket_manager)"""
 with patch.object(agent, '_process_with_llm', return_value={"result": "test"}):
 await agent.execute(user_context, stream_updates=True)
 
@@ -505,8 +449,7 @@ mock_websocket_manager.emit_agent_completed.assert_called()
     async def test_enhanced_tool_execution(self, user_context, mock_websocket_manager):
 """Test tool execution with UserExecutionContext."""
 agent = EnhancedExecutionAgent(websocket_manager=mock_websocket_manager)
-
-                        # Set up tool requirement
+"""
 user_context.metadata["user_request"] = "Execute database query tool"
 
 with patch.object(agent, '_needs_tools', return_value=True):
@@ -522,8 +465,7 @@ assert "tools_executed" in result or "db_query" in str(result)
 """Test error handling and recovery."""
 pass
 agent = EnhancedExecutionAgent(websocket_manager=mock_websocket_manager)
-
-                                    # Simulate various errors
+"""
 with patch.object(agent, '_begin_execution', side_effect=Exception("Startup failed")):
 result = await agent.execute(user_context, stream_updates=False)
 
@@ -536,8 +478,7 @@ return error result
 class TestConcurrentUserIsolation(TestPhase2AgentsMigration):
     """Test concurrent execution across all agents for user isolation."""
 
-@pytest.mark.asyncio
-    async def test_all_agents_concurrent_isolation(self, mock_db_session, mock_websocket_manager):
+@pytest.mark.asyncio"""
 """Test all Phase 2 agents handle concurrent users correctly."""
         # Create agents
 agents = [ )
@@ -553,20 +494,13 @@ EnhancedExecutionAgent(websocket_manager=mock_websocket_manager)
 
         # Create 5 user contexts
 contexts = []
-for i in range(5):
-ctx = UserExecutionContext( )
+for i in range(5):"""
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id=str(uuid.uuid4()),
 request_id=str(uuid.uuid4()),
 db_session=mock_db_session,
-metadata={ )
-"user_request": "formatted_string",
-"data_result": {"user_specific": i},
-"triage_result": {"priority": "medium"},
-"optimizations_result": {"id": i}
-            
-            
+metadata={"user_request": "formatted_string",, "data_result": {"user_specific": i},, "triage_result": {"priority": "medium"},, "optimizations_result": {"id": i}}
 contexts.append(ctx)
 
             # Execute all agents for all users concurrently
@@ -605,8 +539,7 @@ print("formatted_string")
 
 @pytest.mark.asyncio
     async def test_thread_safety_with_shared_resources(self, mock_db_session, mock_websocket_manager):
-"""Test thread safety when agents share resources."""
-pass
+"""Test thread safety when agents share resources.""""""
 shared_resource = {"counter": 0}
 lock = threading.Lock()
 
@@ -670,25 +603,17 @@ class ThreadSafeAgent(ReportingSubAgent):
 class TestSecurityAndDataLeakage(TestPhase2AgentsMigration):
         """Test for security issues and data leakage between users."""
 
-@pytest.mark.asyncio
-    async def test_no_data_leakage_between_users(self, mock_db_session, mock_websocket_manager):
+@pytest.mark.asyncio"""
 """Ensure no data leaks between different user contexts."""
 agent = ReportingSubAgent(websocket_manager=mock_websocket_manager)
 
-        # User 1 with sensitive data
-sensitive_context = UserExecutionContext( )
+        # User 1 with sensitive data"""
 user_id="sensitive_user",
 thread_id="sensitive_thread",
 run_id=str(uuid.uuid4()),
 request_id=str(uuid.uuid4()),
 db_session=mock_db_session,
-metadata={ )
-"user_request": "Process my SSN: 123-45-6789",
-"data_result": {"secret": "TOP_SECRET_DATA"},
-"triage_result": {"classification": "confidential"}
-        
-        
-
+metadata={"user_request": "Process my SSN: 123-45-6789",, "data_result": {"secret": "TOP_SECRET_DATA"},, "triage_result": {"classification": "confidential"}}
         # User 2 - should not see User 1's data
 normal_context = UserExecutionContext( )
 user_id="normal_user",
@@ -696,13 +621,7 @@ thread_id="normal_thread",
 run_id=str(uuid.uuid4()),
 request_id=str(uuid.uuid4()),
 db_session=mock_db_session,
-metadata={ )
-"user_request": "Show me all data",
-"data_result": {"public": "public_info"},
-"triage_result": {"classification": "public"}
-        
-        
-
+metadata={"user_request": "Show me all data",, "data_result": {"public": "public_info"},, "triage_result": {"classification": "public"}}
 with patch.object(agent, '_generate_report_with_llm') as mock_generate:
             # Capture what data is passed to report generation
 captured_data = []
@@ -738,8 +657,7 @@ tool_dispatcher=Magic            websocket_manager=mock_websocket_manager
 
         # Create separate database sessions
 session1 = Magic        session1.query = Magic        session1.commit = Magic
-session2 = Magic        session2.query = Magic        session2.commit = Magic
-context1 = UserExecutionContext( )
+session2 = Magic        session2.query = Magic        session2.commit = Magic"""
 user_id="user1",
 thread_id="thread1",
 run_id=str(uuid.uuid4()),
@@ -774,15 +692,13 @@ assert session1 != session2
 class TestPerformanceAndStress(TestPhase2AgentsMigration):
     """Performance and stress tests for migrated agents."""
 
-@pytest.mark.asyncio
-    async def test_high_concurrency_performance(self, mock_db_session, mock_websocket_manager):
+@pytest.mark.asyncio"""
 """Test agents under high concurrent load."""
 agent = GoalsTriageSubAgent(websocket_manager=mock_websocket_manager)
 
         # Create 100 concurrent requests
 contexts = []
-for i in range(100):
-ctx = UserExecutionContext( )
+for i in range(100):"""
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id=str(uuid.uuid4()),
@@ -814,19 +730,13 @@ pass
 agent = ActionsToMeetGoalsSubAgent(websocket_manager=mock_websocket_manager)
 
                     # Execute many times with same agent instance
-for i in range(100):
-ctx = UserExecutionContext( )
+for i in range(100):"""
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id=str(uuid.uuid4()),
 request_id=str(uuid.uuid4()),
 db_session=mock_db_session,
-metadata={ )
-"user_request": "formatted_string",
-"optimizations_result": {"test": i}
-                        
-                        
-
+metadata={"user_request": "formatted_string",, "optimizations_result": {"test": i}}
 with patch.object(agent, '_generate_action_plan', return_value={"plan": "formatted_string"}):
 result = await agent.execute(ctx, stream_updates=False)
 

@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,50 +16,43 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
-        '''
+        return self.messages_sent.copy()"""
+        """
         Dev Launcher Utilities Validation Test
 
         This test validates that dev launcher utilities work correctly without
         starting actual services. Tests configuration, health checks, and basic
-        functionality to ensure the launcher infrastructure is sound.
+        functionality to ensure the launcher infrastructure is sound."""
+        Business Value: Ensures dev launcher utilities work correctly for all developers"""
 
-        Business Value: Ensures dev launcher utilities work correctly for all developers
-        '''
+import asyncio
+import socket
+import sys
+from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
-        import asyncio
-        import socket
-        import sys
-        from pathlib import Path
-        from shared.isolated_environment import IsolatedEnvironment
-
-        import pytest
+import pytest
 
     # Add project root to path for imports
 
-        from dev_launcher.config import LauncherConfig, find_project_root
-        from dev_launcher.launcher import DevLauncher
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
+from dev_launcher.config import LauncherConfig, find_project_root
+from dev_launcher.launcher import DevLauncher
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
     # Get project root for tests
         project_root = find_project_root()
 
-
-class TestDevLauncherUtilities:
+"""
         """Test dev launcher utility functions and configuration."""
-
-    def test_launcher_config_creation(self):
+"""
         """Test that LauncherConfig can be created with valid parameters."""
-        config = LauncherConfig( )
-        project_root=project_root,
+        config = LauncherConfig( )"""
         project_id="test-project",
         verbose=False,
         silent_mode=True,
@@ -99,11 +90,9 @@ class TestDevLauncherUtilities:
         backend_port=99999,  # Out of range
         frontend_port=3000
         
-
-    def test_launcher_creation(self):
+"""
         """Test that DevLauncher can be created with valid config."""
-        config = LauncherConfig( )
-        project_root=project_root,
+        config = LauncherConfig( )"""
         project_id="test-launcher",
         verbose=False,
         silent_mode=True,
@@ -122,8 +111,7 @@ class TestDevLauncherUtilities:
     def test_port_availability_check(self):
         """Test port availability checking utility."""
         pass
-    # Use a function that should exist or create a simple one
-    def is_port_available(port: int) -> bool:
+    # Use a function that should exist or create a simple one"""
         """Check if port is available for binding."""
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.settimeout(1)
@@ -140,11 +128,9 @@ class TestDevLauncherUtilities:
         # We don't assert this since it could be either way
         result = is_port_available(low_port)
         assert isinstance(result, bool)
-
-    def test_config_to_dict(self):
+"""
         """Test that config can be converted to dictionary."""
-        config = LauncherConfig( )
-        project_root=project_root,
+        config = LauncherConfig( )"""
         project_id="test-dict",
         backend_port=8000,
         frontend_port=3000,
@@ -161,8 +147,7 @@ class TestDevLauncherUtilities:
     def test_config_emoji_support(self):
         """Test emoji support configuration."""
         pass
-        config = LauncherConfig( )
-        project_root=project_root,
+        config = LauncherConfig( )"""
         project_id="emoji-test"
     
 
@@ -176,8 +161,7 @@ class TestDevLauncherUtilities:
     # Mock: Component isolation for testing without external dependencies
     def test_config_logging(self, mock_logger):
         """Test config logging functionality."""
-        config = LauncherConfig( )
-        project_root=project_root,
+        config = LauncherConfig( )"""
         project_id="logging-test",
         verbose=True
     
@@ -187,23 +171,20 @@ class TestDevLauncherUtilities:
 
     # Verify logger was called (at least for project root)
         mock_logger.info.assert_called()
-        calls = [call[0][0] for call in mock_logger.info.call_args_list]
         assert any("Project root" in call for call in calls)
 
     def test_project_root_detection(self):
         """Test project root detection functionality."""
         pass
-        from dev_launcher.config import find_project_root
+from dev_launcher.config import find_project_root
 
         detected_root = find_project_root()
         assert isinstance(detected_root, Path)
         assert detected_root.exists()
-
-    def test_path_resolution(self):
+"""
         """Test path resolution utility."""
-        from dev_launcher.config import resolve_path
-
-    # Test resolving an existing path
+from dev_launcher.config import resolve_path
+"""
         resolved = resolve_path("dev_launcher", root=project_root)
         assert isinstance(resolved, Path)
         assert resolved.name == "dev_launcher"
@@ -211,8 +192,7 @@ class TestDevLauncherUtilities:
     def test_config_show_methods(self):
         """Test config display methods don't crash."""
         pass
-        config = LauncherConfig( )
-        project_root=project_root,
+        config = LauncherConfig( )"""
         project_id="display-test",
         verbose=True
     
@@ -228,11 +208,9 @@ class TestDevLauncherUtilities:
 
 class TestDevLauncherIntegration:
         """Test dev launcher integration without starting services."""
-
-    def test_launcher_initialization_phase(self):
+"""
         """Test launcher initialization without actual startup."""
-        config = LauncherConfig( )
-        project_root=project_root,
+        config = LauncherConfig( )"""
         project_id="init-test",
         verbose=False,
         silent_mode=True,
@@ -257,8 +235,7 @@ class TestDevLauncherIntegration:
     def test_launcher_config_access(self):
         """Test launcher configuration access."""
         pass
-        config = LauncherConfig( )
-        project_root=project_root,
+        config = LauncherConfig( )"""
         project_id="config-access-test",
         backend_port=8001,  # Use different port to avoid conflicts
         frontend_port=3001,

@@ -1,8 +1,7 @@
 from shared.isolated_environment import get_env
-'''
+"""
 env = get_env()
-Mission Critical Test Suite: Mock Usage Policy Violations
-
+Mission Critical Test Suite: Mock Usage Policy Violations"""
 This test suite ensures compliance with CLAUDE.md policy: "MOCKS = Abomination", "MOCKS are FORBIDDEN"
 Tests will FAIL if any mock usage is detected in test files, enforcing real service testing.
 
@@ -10,8 +9,7 @@ Business Value: Platform/Internal - Test Reliability
 $500K+ ARR at risk from false test confidence and hidden integration failures
 
 Author: Principal Engineer AI
-Date: 2025-08-30
-'''
+Date: 2025-08-30"""
 
 import ast
 import os
@@ -32,8 +30,7 @@ project_root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 
-@dataclass
-class MockViolation:
+@dataclass"""
     """Represents a single mock usage violation."""
     file_path: str
     line_number: int
@@ -41,8 +38,7 @@ class MockViolation:
     code_snippet: str
     service: str
 
-    def __str__(self):
-        pass
+    def __str__(self):"""
         return "formatted_string"
 
 
@@ -76,8 +72,7 @@ class MockDetector(ast.NodeVisitor):
         if node.module and any(mock in node.module for mock in self.MOCK_MODULES):
         for alias in node.names:
         self.violations.append(MockViolation( ))
-        file_path=self.file_path,
-        line_number=node.lineno,
+        file_path=self.file_path,"""
         violation_type="Mock Import",
         code_snippet="formatted_string",
         service=self._get_service_name()
@@ -104,8 +99,7 @@ class MockDetector(ast.NodeVisitor):
         func_name = self._get_func_name(node.func)
         if func_name in self.MOCK_FUNCTIONS or func_name in self.imports:
         self.violations.append(MockViolation( ))
-        file_path=self.file_path,
-        line_number=node.lineno,
+        file_path=self.file_path,"""
         violation_type="Mock Usage",
         code_snippet="formatted_string",
         service=self._get_service_name()
@@ -131,8 +125,7 @@ class MockDetector(ast.NodeVisitor):
         attr_name = node.attr
         if attr_name in self.MOCK_FUNCTIONS:
         self.violations.append(MockViolation( ))
-        file_path=self.file_path,
-        line_number=node.lineno,
+        file_path=self.file_path,"""
         violation_type="Mock Attribute Access",
         code_snippet="formatted_string",
         service=self._get_service_name()
@@ -146,8 +139,7 @@ class MockDetector(ast.NodeVisitor):
         func_name = self._get_func_name(item.context_expr.func)
         if 'patch' in func_name or func_name in self.imports:
         self.violations.append(MockViolation( ))
-        file_path=self.file_path,
-        line_number=node.lineno,
+        file_path=self.file_path,"""
         violation_type="Mock Context Manager",
         code_snippet="formatted_string",
         service=self._get_service_name()
@@ -167,8 +159,7 @@ class MockDetector(ast.NodeVisitor):
         var_names.append(target.id)
 
         self.violations.append(MockViolation( ))
-        file_path=self.file_path,
-        line_number=node.lineno,
+        file_path=self.file_path,"""
         violation_type="Mock Assignment",
         code_snippet="formatted_string",
         service=self._get_service_name()
@@ -181,15 +172,13 @@ class MockDetector(ast.NodeVisitor):
         return node.id
         elif isinstance(node, ast.Attribute):
         return node.attr
-        elif isinstance(node, ast.Call):
-        return self._get_func_name(node.func)
+        elif isinstance(node, ast.Call):"""
         return ""
 
     def _get_decorator_name(self, node) -> str:
         """Extract decorator name from AST node."""
         if isinstance(node, ast.Name):
-        return node.id
-        elif isinstance(node, ast.Attribute):
+        return node.id"""
         return "formatted_string"
         elif isinstance(node, ast.Call):
         return self._get_decorator_name(node.func)
@@ -210,12 +199,10 @@ class MockDetector(ast.NodeVisitor):
         else:
         return 'tests'
 
-
-class TestMockPolicyCompliance:
+"""
         """Test suite to enforce mock usage policy across all services."""
 
-        @pytest.fixture
-    def setup(self):
+        @pytest.fixture"""
         """Setup test environment."""
         self.project_root = Path(__file__).resolve().parent.parent.parent
         self.test_directories = [ )
@@ -225,8 +212,7 @@ class TestMockPolicyCompliance:
         self.project_root / 'tests',
         self.project_root / 'dev_launcher' / 'tests',
     
-
-    def scan_for_mock_usage(self, directory: Path) -> List[MockViolation]:
+"""
         """Scan directory for mock usage violations."""
         pass
         violations = []
@@ -249,16 +235,14 @@ class TestMockPolicyCompliance:
         detector.visit(tree)
         violations.extend(detector.violations)
 
-        except (SyntaxError, UnicodeDecodeError) as e:
-                        # Skip files with syntax errors or encoding issues
+        except (SyntaxError, UnicodeDecodeError) as e:"""
         print("formatted_string")
         continue
 
         return violations
 
     def _regex_mock_detection(self, py_file: Path, content: str) -> List[MockViolation]:
-        """Use regex to catch mock patterns that AST might miss."""
-        violations = []
+        """Use regex to catch mock patterns that AST might miss.""""""
         lines = content.split(" )
 
 class TestWebSocketConnection:
@@ -269,10 +253,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -281,12 +263,10 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
+        return self.messages_sent.copy()"""
         ")
 
     # Patterns to detect various mock usage
@@ -336,20 +316,16 @@ class TestWebSocketConnection:
         return 'dev_launcher'
         else:
         return 'tests'
-
-    def test_no_mock_imports_in_auth_service(self):
-        '''
+"""
+        """
         CRITICAL: auth_service tests must not use mocks.
 
-        Policy: Real service testing only
-        Violation: 23 test files currently using mocks
-        Impact: False authentication test confidence
-        '''
+        Policy: Real service testing only"""
+        Impact: False authentication test confidence"""
         pass
         auth_tests = self.project_root / 'auth_service' / 'tests'
         violations = self.scan_for_mock_usage(auth_tests)
-
-        if violations:
+"""
         report = "
 
         Mock Policy Violations in auth_service:
@@ -369,18 +345,15 @@ class TestWebSocketConnection:
         pytest.fail("formatted_string")
 
     def test_no_mock_imports_in_analytics_service(self):
-        '''
+        """
         CRITICAL: analytics_service tests must not use mocks.
 
-        Policy: Real service testing only
-        Violation: 136 mock instances across 6 files
-        Impact: Hidden analytics integration failures
-        '''
+        Policy: Real service testing only"""
+        Impact: Hidden analytics integration failures"""
         pass
         analytics_tests = self.project_root / 'analytics_service' / 'tests'
         violations = self.scan_for_mock_usage(analytics_tests)
-
-        if violations:
+"""
         report = "
 
         Mock Policy Violations in analytics_service:
@@ -398,18 +371,15 @@ class TestWebSocketConnection:
         pytest.fail("formatted_string")
 
     def test_no_mock_imports_in_netra_backend(self):
-        '''
+        """
         CRITICAL: netra_backend tests must not use mocks.
 
-        Policy: Real service testing only
-        Violation: 20+ test files using mocks
-        Impact: WebSocket and agent failures not detected
-        '''
+        Policy: Real service testing only"""
+        Impact: WebSocket and agent failures not detected"""
         pass
         backend_tests = self.project_root / 'netra_backend' / 'tests'
         violations = self.scan_for_mock_usage(backend_tests)
-
-        if violations:
+"""
         report = "
 
         Mock Policy Violations in netra_backend:
@@ -427,12 +397,10 @@ class TestWebSocketConnection:
         pytest.fail("formatted_string")
 
     def test_comprehensive_mock_audit(self):
-        '''
+        """
         COMPREHENSIVE: Full platform mock usage audit.
-
-        This test scans ALL test directories and provides a complete
-        violation report across all services.
-        '''
+"""
+        violation report across all services."""
         pass
         all_violations = []
         service_violations = defaultdict(list)
@@ -443,8 +411,7 @@ class TestWebSocketConnection:
         all_violations.extend(violations)
         for v in violations:
         service_violations[v.service].append(v)
-
-        if all_violations:
+"""
         report = "
         " + "=" * 80 + "
         "
@@ -492,12 +459,10 @@ class TestWebSocketConnection:
         pytest.fail(report)
 
     def test_isolated_environment_usage(self):
-        '''
+        """
         Verify tests use IsolatedEnvironment instead of direct os.environ.
-
-        Policy: All environment access through IsolatedEnvironment
-        Impact: Test pollution and flaky tests
-        '''
+"""
+        Impact: Test pollution and flaky tests"""
         pass
         violations = []
 
@@ -518,8 +483,7 @@ class TestWebSocketConnection:
                             # Count occurrences
         count = content.count('os.environ[') + content.count('env.get(') ))
         violations.append((str(py_file), count))
-
-        except Exception as e:
+"""
         print("formatted_string")
 
         if violations:
@@ -541,15 +505,12 @@ class TestWebSocketConnection:
         pytest.fail(report)
 
     def test_real_service_configuration(self):
-        '''
+        """
         Verify tests are configured to use real services.
-
-        Policy: Real databases, real Redis, real services
-        Impact: Integration issues not caught by tests
-        '''
+"""
+        Impact: Integration issues not caught by tests"""
         pass
-        required_patterns = { )
-        'IsolatedEnvironment': 'Using IsolatedEnvironment for test isolation',
+required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test isolation',}
         'docker-compose': 'Using docker-compose for service dependencies',
         'USE_MEMORY_DB': 'Using real SQLite for database tests',
         'TESTING.*=.*1': 'Setting TESTING environment flag',
@@ -572,8 +533,7 @@ class TestWebSocketConnection:
         for pattern, description in required_patterns.items():
         if not re.search(pattern, content):
         missing_patterns[service_name].append(description)
-
-        if missing_patterns:
+"""
         report = "
 
         Real Service Configuration Missing:
@@ -607,12 +567,10 @@ class TestWebSocketConnection:
         print(report)
 
     def test_generate_remediation_report(self):
-        '''
+        """
         Generate detailed remediation report for mock removal.
-
-        This test always passes but generates a report file
-        with specific remediation steps for each service.
-        '''
+"""
+        with specific remediation steps for each service."""
         pass
         report_path = self.project_root / 'MOCK_REMEDIATION_PLAN.md'
 
@@ -626,8 +584,7 @@ class TestWebSocketConnection:
         for v in violations:
         service_violations[v.service].append(v)
 
-                # Generate remediation plan
-        with open(report_path, 'w') as f:
+                # Generate remediation plan"""
         f.write("# Mock Usage Remediation Plan )
 
         ")

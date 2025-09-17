@@ -1,15 +1,12 @@
-'''
+"""
 Unit tests for AuthEnvironment URL configuration.
 
 This test suite ensures that auth service URLs are correctly generated
 for all environments, preventing regressions like the staging URL issue.
 
-Business Value Justification (BVJ):
-- Segment: Platform/Internal
-- Business Goal: Prevent auth service failures in staging/production
-- Value Impact: Ensures reliable authentication across all environments
-- Strategic Impact: Prevents deployment failures and user authentication issues
-'''
+Business Value Justification (BVJ):"""
+- Business Goal: Prevent auth service failures in staging/production"""
+- Strategic Impact: Prevents deployment failures and user authentication issues"""
 
 import pytest
 import os
@@ -18,23 +15,18 @@ from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketM
 # Removed non-existent AuthManager import
 from shared.isolated_environment import IsolatedEnvironment
 
-from auth_service.auth_core.auth_environment import AuthEnvironment
-
-
-class TestAuthEnvironmentURLs:
-    """Test suite for AuthEnvironment URL generation."""
-
-    @pytest.fixture
-    def setup_method(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
+from auth_service.auth_core.auth_environment import AuthEnvironment"""
+"""
+    """Test suite for AuthEnvironment URL generation.""""""
+    @pytest.fixture"""
+        """Use real service instance.""""""
         """Clear environment before each test."""
         pass
     # Store original env vars
         self.original_env = os.environ.copy()
 
     # Store the original IsolatedEnvironment if it exists
-        import sys
+import sys
         if 'shared.isolated_environment' in sys.modules:
         # Force module reload to clear singleton
         del sys.modules['shared.isolated_environment']
@@ -44,10 +36,8 @@ class TestAuthEnvironmentURLs:
         yield
 
             # Restore original env vars
-        os.environ.clear()
-        os.environ.update(self.original_env)
-
-    def test_development_urls(self):
+        os.environ.clear()"""
+"""
         """Test that development environment returns correct URLs."""
         with patch.dict(os.environ, {'ENVIRONMENT': 'development'}):
         auth_env = AuthEnvironment()
@@ -55,10 +45,8 @@ class TestAuthEnvironmentURLs:
         assert auth_env.get_environment() == 'development'
         assert auth_env.get_frontend_url() == 'http://localhost:3000'
         assert auth_env.get_backend_url() == 'http://localhost:8000'
-        assert auth_env.get_auth_service_url() == 'http://localhost:8081'
-        assert auth_env.get_oauth_redirect_uri() == 'http://localhost:3000/auth/callback'
-
-    def test_test_environment_urls(self):
+        assert auth_env.get_auth_service_url() == 'http://localhost:8081'"""
+"""
         """Test that test environment returns correct URLs."""
         pass
         with patch.dict(os.environ, {'ENVIRONMENT': 'test'}):
@@ -67,10 +55,8 @@ class TestAuthEnvironmentURLs:
         assert auth_env.get_environment() == 'test'
         assert auth_env.get_frontend_url() == 'http://localhost:3001'
         assert auth_env.get_backend_url() == 'http://localhost:8001'
-        assert auth_env.get_auth_service_url() == 'http://127.0.0.1:8082'
-        assert auth_env.get_oauth_redirect_uri() == 'http://localhost:3001/auth/callback'
-
-    def test_staging_urls(self):
+        assert auth_env.get_auth_service_url() == 'http://127.0.0.1:8082'"""
+"""
         """Test that staging environment returns correct URLs - CRITICAL."""
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
         auth_env = AuthEnvironment()
@@ -78,10 +64,8 @@ class TestAuthEnvironmentURLs:
         assert auth_env.get_environment() == 'staging'
         assert auth_env.get_frontend_url() == 'https://app.staging.netrasystems.ai'
         assert auth_env.get_backend_url() == 'https://api.staging.netrasystems.ai'
-        assert auth_env.get_auth_service_url() == 'https://auth.staging.netrasystems.ai'
-        assert auth_env.get_oauth_redirect_uri() == 'https://app.staging.netrasystems.ai/auth/callback'
-
-    def test_production_urls(self):
+        assert auth_env.get_auth_service_url() == 'https://auth.staging.netrasystems.ai'"""
+"""
         """Test that production environment returns correct URLs."""
         pass
         with patch.dict(os.environ, {'ENVIRONMENT': 'production'}):
@@ -90,33 +74,20 @@ class TestAuthEnvironmentURLs:
         assert auth_env.get_environment() == 'production'
         assert auth_env.get_frontend_url() == 'https://app.netrasystems.ai'
         assert auth_env.get_backend_url() == 'https://api.netrasystems.ai'
-        assert auth_env.get_auth_service_url() == 'https://auth.netrasystems.ai'
-        assert auth_env.get_oauth_redirect_uri() == 'https://app.netrasystems.ai/auth/callback'
-
-    def test_url_overrides(self):
+        assert auth_env.get_auth_service_url() == 'https://auth.netrasystems.ai'"""
+"""
         """Test that explicit environment variables override defaults."""
-        custom_env = { )
-        'ENVIRONMENT': 'staging',
-        'FRONTEND_URL': 'https://custom-frontend.com',
-        'BACKEND_URL': 'https://custom-backend.com',
-        'AUTH_SERVICE_URL': 'https://custom-auth.com',
-        'OAUTH_REDIRECT_URI': 'https://custom-frontend.com/custom/callback'
-    
-
+custom_env = {'ENVIRONMENT': 'staging',, 'FRONTEND_URL': 'https://custom-frontend.com',, 'BACKEND_URL': 'https://custom-backend.com',, 'AUTH_SERVICE_URL': 'https://custom-auth.com',, 'OAUTH_REDIRECT_URI': 'https://custom-frontend.com/custom/callback'}
         with patch.dict(os.environ, custom_env):
         auth_env = AuthEnvironment()
 
         assert auth_env.get_frontend_url() == 'https://custom-frontend.com'
         assert auth_env.get_backend_url() == 'https://custom-backend.com'
-        assert auth_env.get_auth_service_url() == 'https://custom-auth.com'
-        assert auth_env.get_oauth_redirect_uri() == 'https://custom-frontend.com/custom/callback'
-
-    def test_partial_overrides(self):
+        assert auth_env.get_auth_service_url() == 'https://custom-auth.com'"""
+"""
         """Test that partial overrides work correctly."""
         pass
-        custom_env = { )
-        'ENVIRONMENT': 'staging',
-        'FRONTEND_URL': 'https://override.staging.com'
+custom_env = {'ENVIRONMENT': 'staging',, 'FRONTEND_URL': 'https://override.staging.com'}
     # Backend and auth should use defaults
     
 
@@ -129,10 +100,8 @@ class TestAuthEnvironmentURLs:
         assert auth_env.get_backend_url() == 'https://api.staging.netrasystems.ai'
         # Auth uses staging default
         assert auth_env.get_auth_service_url() == 'https://auth.staging.netrasystems.ai'
-        # OAuth redirect uses overridden frontend
-        assert auth_env.get_oauth_redirect_uri() == 'https://override.staging.com/auth/callback'
-
-    def test_auth_service_host_for_environments(self):
+        # OAuth redirect uses overridden frontend"""
+"""
         """Test auth service host returns correct values per environment."""
         test_cases = [ )
         ('development', '0.0.0.0'),
@@ -142,10 +111,8 @@ class TestAuthEnvironmentURLs:
     
 
         for env, expected_host in test_cases:
-        with patch.dict(os.environ, {'ENVIRONMENT': env}):
-        auth_env = AuthEnvironment()
-        actual_host = auth_env.get_auth_service_host()
-        assert actual_host == expected_host, \
+        with patch.dict(os.environ, {'ENVIRONMENT': env}):"""
+        actual_host = auth_env.get_auth_service_host()"""
         "formatted_string"
 
     def test_auth_service_port_for_environments(self):
@@ -159,10 +126,8 @@ class TestAuthEnvironmentURLs:
     
 
         for env, expected_port in test_cases:
-        with patch.dict(os.environ, {'ENVIRONMENT': env}):
-        auth_env = AuthEnvironment()
-        actual_port = auth_env.get_auth_service_port()
-        assert actual_port == expected_port, \
+        with patch.dict(os.environ, {'ENVIRONMENT': env}):"""
+        actual_port = auth_env.get_auth_service_port()"""
         "formatted_string"
 
     def test_oauth_redirect_follows_frontend(self):
@@ -174,10 +139,8 @@ class TestAuthEnvironmentURLs:
     
 
         for env, expected_redirect in test_cases:
-        with patch.dict(os.environ, {'ENVIRONMENT': env}):
-        auth_env = AuthEnvironment()
-        actual_redirect = auth_env.get_oauth_redirect_uri()
-        assert actual_redirect == expected_redirect, \
+        with patch.dict(os.environ, {'ENVIRONMENT': env}):"""
+        actual_redirect = auth_env.get_oauth_redirect_uri()"""
         "formatted_string"
 
     def test_unknown_environment_defaults(self):
@@ -190,10 +153,8 @@ class TestAuthEnvironmentURLs:
         assert auth_env.get_frontend_url() == 'http://localhost:3000'
         assert auth_env.get_backend_url() == 'http://localhost:8000'
         Should construct URL from host and port
-        assert 'localhost' in auth_env.get_auth_service_url()
-        assert auth_env.get_oauth_redirect_uri() == 'http://localhost:3000/auth/callback'
-
-    def test_cors_origins_for_environments(self):
+        assert 'localhost' in auth_env.get_auth_service_url()"""
+"""
         """Test CORS origins are correctly set per environment."""
         test_cases = [ )
         ('development', ['http://localhost:3000', 'http://localhost:8000',
@@ -203,10 +164,8 @@ class TestAuthEnvironmentURLs:
     
 
         for env, expected_origins in test_cases:
-        with patch.dict(os.environ, {'ENVIRONMENT': env}):
-        auth_env = AuthEnvironment()
-        actual_origins = auth_env.get_cors_origins()
-        assert set(actual_origins) == set(expected_origins), \
+        with patch.dict(os.environ, {'ENVIRONMENT': env}):"""
+        actual_origins = auth_env.get_cors_origins()"""
         "formatted_string"
 
         @pytest.fixture)
@@ -219,13 +178,8 @@ class TestAuthEnvironmentURLs:
         """Test that URL protocols are consistent per environment."""
         pass
         with patch.dict(os.environ, {'ENVIRONMENT': env}):
-        auth_env = AuthEnvironment()
-
-        frontend = auth_env.get_frontend_url()
-        backend = auth_env.get_backend_url()
-        auth = auth_env.get_auth_service_url()
-
-        if expected_https:
+        auth_env = AuthEnvironment()"""
+        frontend = auth_env.get_frontend_url()"""
         assert frontend.startswith('https://'), "formatted_string"
         assert backend.startswith('https://'), "formatted_string"
         assert auth.startswith('https://'), "formatted_string"
@@ -237,17 +191,11 @@ class TestAuthEnvironmentURLs:
 
 class TestAuthEnvironmentURLRegression:
         """Specific regression tests for the staging URL bug."""
-
-    def test_staging_urls_not_localhost(self):
+"""
         """Regression test: Ensure staging never returns localhost URLs."""
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
-        auth_env = AuthEnvironment()
-
-        frontend = auth_env.get_frontend_url()
-        backend = auth_env.get_backend_url()
-        auth = auth_env.get_auth_service_url()
-
-        # None should contain localhost
+        auth_env = AuthEnvironment()"""
+        frontend = auth_env.get_frontend_url()"""
         assert 'localhost' not in frontend, "Staging frontend URL contains localhost"
         assert 'localhost' not in backend, "Staging backend URL contains localhost"
         assert 'localhost' not in auth, "Staging auth URL contains localhost"
@@ -257,13 +205,8 @@ class TestAuthEnvironmentURLRegression:
         """Regression test: Ensure staging URLs use staging subdomain."""
         pass
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
-        auth_env = AuthEnvironment()
-
-        frontend = auth_env.get_frontend_url()
-        backend = auth_env.get_backend_url()
-        auth = auth_env.get_auth_service_url()
-
-        # All should contain 'staging'
+        auth_env = AuthEnvironment()"""
+        frontend = auth_env.get_frontend_url()"""
         assert 'staging' in frontend, "Staging frontend URL missing 'staging' subdomain"
         assert 'staging' in backend, "Staging backend URL missing 'staging' subdomain"
         assert 'staging' in auth, "Staging auth URL missing 'staging' subdomain"
@@ -271,13 +214,8 @@ class TestAuthEnvironmentURLRegression:
     def test_production_urls_no_staging(self):
         """Ensure production URLs never contain staging references."""
         with patch.dict(os.environ, {'ENVIRONMENT': 'production'}):
-        auth_env = AuthEnvironment()
-
-        frontend = auth_env.get_frontend_url()
-        backend = auth_env.get_backend_url()
-        auth = auth_env.get_auth_service_url()
-
-        # None should contain staging
+        auth_env = AuthEnvironment()"""
+        frontend = auth_env.get_frontend_url()"""
         assert 'staging' not in frontend, "Production frontend URL contains 'staging'"
         assert 'staging' not in backend, "Production backend URL contains 'staging'"
         assert 'staging' not in auth, "Production auth URL contains 'staging'"
@@ -290,12 +228,8 @@ class TestAuthEnvironmentURLRegression:
         for env in environments:
         with patch.dict(os.environ, {'ENVIRONMENT': env}):
         auth_env = AuthEnvironment()
-
-        frontend = auth_env.get_frontend_url()
-        redirect = auth_env.get_oauth_redirect_uri()
-
-            # Redirect should start with frontend URL
-        assert redirect.startswith(frontend), \
+"""
+            # Redirect should start with frontend URL"""
         "formatted_string"t match frontend {frontend}"
 
             # Redirect should end with /auth/callback

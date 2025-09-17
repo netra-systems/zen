@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,43 +16,36 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
+        return self.messages_sent.copy()"""
+        """
+from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment"""
+        Tests OAuth, JWT validation, and complete user journey from landing to dashboard."""
 
-        '''
-        from shared.isolated_environment import get_env
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from auth_service.core.auth_manager import AuthManager
-        from shared.isolated_environment import IsolatedEnvironment
-        Comprehensive E2E tests for landing page authentication flows.
-        Tests OAuth, JWT validation, and complete user journey from landing to dashboard.
-        '''
-
-        import asyncio
-        import json
-        import pytest
-        from datetime import datetime, timedelta, timezone
-        import jwt
-        import os
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
+import asyncio
+import json
+import pytest
+from datetime import datetime, timedelta, timezone
+import jwt
+import os
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
-        @pytest.mark.e2e
-class TestLandingPageAuthFlows:
+        @pytest.mark.e2e"""
         """Test suite for landing page authentication flows."""
 
-        @pytest.fixture
-    async def auth_service(self):
+        @pytest.fixture"""
         """Create mock auth service instance for testing."""
     # Mock: Generic component isolation for controlled unit testing
-        service = service_instance  # Initialize appropriate service instead of Mock
-    # Mock: OAuth external provider isolation for network-independent testing
+        service = service_instance  # Initialize appropriate service instead of Mock"""
         service.get_google_oauth_url = Mock(return_value="https://accounts.google.com/o/oauth2/v2/auth?client_id=test&redirect_uri=test&response_type=code")
     # Mock: Generic component isolation for controlled unit testing
         service.exchange_code_for_token = AsyncNone  # TODO: Use real service instead of Mock
@@ -110,21 +101,16 @@ class TestLandingPageAuthFlows:
         await asyncio.sleep(0)
         return service
 
-        @pytest.fixture
-    def jwt_secret(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
-        """Get test JWT secret."""
-        pass
+        @pytest.fixture"""
+        """Use real service instance.""""""
+        """Get test JWT secret.""""""
         return get_env().get("JWT_SECRET_KEY", "test_jwt_secret_key_for_testing_only")
 
         @pytest.fixture
     def real_oauth_response():
-        """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance.""""""
         """Mock OAuth provider response."""
-        pass
-        return { )
+        pass"""
         "id": "google_123456",
         "email": "test@example.com",
         "name": "Test User",
@@ -137,9 +123,7 @@ class TestLandingPageAuthFlows:
     async def test_landing_page_google_oauth_flow(self, auth_service, mock_oauth_response):
 """Test complete Google OAuth flow from landing page."""
         # 1. User clicks "Sign in with Google" on landing page
-oauth_url = auth_service.get_google_oauth_url( )
-redirect_uri="https://staging.netrasystems.ai/auth/callback"
-        
+oauth_url = auth_service.get_google_oauth_url(redirect_uri="https://staging.netrasystems.ai/auth/callback")
 assert "accounts.google.com/o/oauth2/v2/auth" in oauth_url
 assert "client_id=" in oauth_url
 assert "redirect_uri=" in oauth_url
@@ -154,11 +138,7 @@ auth_service.handle_oauth_callback.return_value = { )
 "refresh_token": "test_refresh_token"
         
 
-user_data = await auth_service.handle_oauth_callback( )
-code="test_auth_code_123",
-provider="google"
-        
-
+user_data = await auth_service.handle_oauth_callback(code="test_auth_code_123",, provider="google")
 assert user_data["email"] == "test@example.com"
 assert user_data["provider"] == "google"
 assert "access_token" in user_data
@@ -168,15 +148,8 @@ assert "refresh_token" in user_data
 @pytest.mark.e2e
     async def test_landing_page_jwt_validation_flow(self, auth_service, jwt_secret):
 """Test JWT creation and validation for landing page auth."""
-pass
-            # Create test user data
-user_data = { )
-"user_id": "123456",
-"email": "test@example.com",
-"name": "Test User",
-"provider": "google"
-            
-
+pass"""
+user_data = {"user_id": "123456",, "email": "test@example.com",, "name": "Test User",, "provider": "google"}
             # Generate JWT token
 token = auth_service.create_jwt_token(user_data, jwt_secret)
 assert token is not None
@@ -196,15 +169,8 @@ assert "iat" in decoded
                 # 1. User arrives at landing page (unauthenticated)
 is_authenticated = await auth_service.check_authentication(token=None)
 assert is_authenticated is False
-
-                # 2. User completes OAuth flow
-user_data = { )
-"user_id": "google_123456",
-"email": "test@example.com",
-"name": "Test User",
-"provider": "google"
-                
-
+"""
+user_data = {"user_id": "google_123456",, "email": "test@example.com",, "name": "Test User",, "provider": "google"}
                 # 3. Create user session
 session = await user_service.create_user_session(user_data)
 assert session["user_id"] == user_data["user_id"]
@@ -223,17 +189,12 @@ assert is_authorized is True
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_landing_page_multi_provider_flow(self, auth_service):
-"""Test authentication with multiple OAuth providers."""
-pass
+"""Test authentication with multiple OAuth providers.""""""
 providers = ["google", "github", "microsoft"]
 
 for provider in providers:
                         # Get provider-specific OAuth URL
-oauth_url = auth_service.get_oauth_url( )
-provider=provider,
-redirect_uri="formatted_string"
-                        
-
+oauth_url = auth_service.get_oauth_url(provider=provider,, redirect_uri="formatted_string")
                         # Verify correct provider URL
 if provider == "google":
 assert "accounts.google.com" in oauth_url
@@ -250,13 +211,8 @@ assert "scope=" in oauth_url
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_landing_page_refresh_token_flow(self, auth_service, jwt_secret):
-"""Test refresh token flow for expired sessions."""
-                                        # Create initial token with short expiry
-user_data = { )
-"user_id": "123456",
-"email": "test@example.com"
-                                        
-
+"""Test refresh token flow for expired sessions.""""""
+user_data = {"user_id": "123456",, "email": "test@example.com"}
                                         # Generate token that expires in 1 second
 short_token = jwt.encode( )
 { )
@@ -287,12 +243,8 @@ assert decoded["user_id"] == user_data["user_id"]
 @pytest.mark.e2e
     async def test_landing_page_logout_flow(self, auth_service, user_service):
 """Test logout flow from authenticated state."""
-pass
-                                                # Create authenticated session
-user_data = { )
-"user_id": "123456",
-"email": "test@example.com"
-                                                
+pass"""
+user_data = {"user_id": "123456",, "email": "test@example.com"}
 session = await user_service.create_user_session(user_data)
 
                                                 # Verify session is active
@@ -310,23 +262,11 @@ assert is_active is False
 @pytest.mark.e2e
     async def test_landing_page_remember_me_flow(self, auth_service):
 """Test 'Remember Me' functionality for persistent sessions."""
-user_data = { )
-"user_id": "123456",
-"email": "test@example.com"
-                                                    
-
+user_data = {"user_id": "123456",, "email": "test@example.com"}
                                                     # Create session with remember_me=True
-persistent_session = await auth_service.create_session( )
-user_data=user_data,
-remember_me=True
-                                                    
-
+persistent_session = await auth_service.create_session(user_data=user_data,, remember_me=True)
                                                     # Create session with remember_me=False
-temporary_session = await auth_service.create_session( )
-user_data=user_data,
-remember_me=False
-                                                    
-
+temporary_session = await auth_service.create_session(user_data=user_data,, remember_me=False)
                                                     # Persistent session should have longer expiry
 assert persistent_session["expires_at"] > temporary_session["expires_at"]
 
@@ -341,15 +281,8 @@ assert expiry_diff >= 29  # At least 29 days difference
 @pytest.mark.e2e
     async def test_landing_page_first_time_user_flow(self, auth_service, user_service):
 """Test first-time user registration and onboarding flow."""
-pass
-                                                        # New user OAuth data
-new_user_data = { )
-"provider_id": "google_new_user_123",
-"email": "newuser@example.com",
-"name": "New User",
-"provider": "google"
-                                                        
-
+pass"""
+new_user_data = {"provider_id": "google_new_user_123",, "email": "newuser@example.com",, "name": "New User",, "provider": "google"}
                                                         # Check if user exists (should not)
 existing_user = await user_service.get_user_by_email(new_user_data["email"])
 assert existing_user is None
@@ -371,24 +304,13 @@ assert user["redirect_to"] == "/onboarding"
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_landing_page_returning_user_flow(self, auth_service, user_service):
-"""Test returning user authentication flow."""
-                                                            # Existing user data
-existing_user_data = { )
-"user_id": "existing_user_123",
-"email": "existing@example.com",
-"name": "Existing User",
-"created_at": datetime.now(timezone.utc) - timedelta(days=30)
-                                                            
-
+"""Test returning user authentication flow.""""""
+existing_user_data = {"user_id": "existing_user_123",, "email": "existing@example.com",, "name": "Existing User",, "created_at": datetime.now(timezone.utc) - timedelta(days=30)}
                                                             # Create user in database
 await user_service.create_user(existing_user_data)
 
                                                             # Authenticate returning user
-auth_result = await auth_service.authenticate_user( )
-email=existing_user_data["email"],
-provider="google"
-                                                            
-
+auth_result = await auth_service.authenticate_user(email=existing_user_data["email"],, provider="google")
 assert auth_result["is_new_user"] is False
 assert auth_result["redirect_to"] == "/dashboard"
 assert "last_login" in auth_result

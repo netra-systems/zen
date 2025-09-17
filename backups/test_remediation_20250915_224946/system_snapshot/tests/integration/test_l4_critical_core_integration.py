@@ -13,8 +13,7 @@ def lazy_import(module_path: str, component: str = None):
             if component:
                 _lazy_imports[module_path] = getattr(module, component)
             else:
-                _lazy_imports[module_path] = module
-        except ImportError as e:
+                _lazy_imports[module_path] = module"""
             print(f"Warning: Failed to lazy load {module_path}: {e}")
             _lazy_imports[module_path] = None
     
@@ -30,8 +29,7 @@ def lazy_import(module_path: str, component: str = None):
             if component:
                 _lazy_imports[module_path] = getattr(module, component)
             else:
-                _lazy_imports[module_path] = module
-        except ImportError as e:
+                _lazy_imports[module_path] = module"""
             print(f"Warning: Failed to lazy load {module_path}: {e}")
             _lazy_imports[module_path] = None
     
@@ -44,10 +42,8 @@ pass
 self.messages_sent = []
 self.is_connected = True
 self._closed = False
-
-async def send_json(self, message: dict):
-"""Send JSON message."""
-if self._closed:
+"""
+"""Send JSON message.""""""
 raise RuntimeError("WebSocket is closed")
 self.messages_sent.append(message)
 
@@ -56,19 +52,15 @@ async def close(self, code: int = 1000, reason: str = "Normal closure"):
 pass
 self._closed = True
 self.is_connected = False
-
-def get_messages(self) -> list:
+"""
 """Get all sent messages."""
 await asyncio.sleep(0)
-return self.messages_sent.copy()
-
-'''
+return self.messages_sent.copy()"""
+"""
 L4 Critical Core Integration Tests
 ====================================
-These tests are designed to expose real flaws in core system functionality.
-Focus: Auth, Login, WebSockets, Core APIs - testing from different angles
-to reveal edge cases and integration issues.
-'''
+These tests are designed to expose real flaws in core system functionality."""
+to reveal edge cases and integration issues."""
 
 import asyncio
 import json
@@ -93,25 +85,18 @@ from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from shared.isolated_environment import get_env
 
-
-class TestL4CriticalAuthIntegration:
+"""
         """Test authentication edge cases and vulnerabilities"""
 
-@pytest.mark.asyncio
-    async def test_01_concurrent_login_race_condition(self):
+@pytest.mark.asyncio"""
 """Test: Multiple simultaneous login attempts from same user"""
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.core.config import settings
-
-auth_client = AuthServiceClient(settings.AUTH_SERVICE_URL)
+"""
 user_email = "race_test@example.com"
 
         # Create user
-user_result = await auth_client.register( )
-email=user_email,
-password="TestPass123!"
-        
-
+user_result = await auth_client.register(email=user_email,, password="TestPass123!")
         # Attempt 10 concurrent logins
 login_tasks = []
 for _ in range(10):
@@ -139,13 +124,8 @@ assert decoded.get("sub") or decoded.get("user_id")
 """Test: Attempt to reuse expired tokens"""
 
 auth_client = AuthServiceClient(settings.AUTH_SERVICE_URL)
-
-                    # Create user and get token
-user_result = await auth_client.register( )
-email="expired_test@example.com",
-password="TestPass123!"
-                    
-
+"""
+user_result = await auth_client.register(email="expired_test@example.com",, password="TestPass123!")
                     # Create expired token
 from tests.helpers.auth_test_utils import TestAuthHelper
 auth_helper = TestAuthHelper()
@@ -164,26 +144,13 @@ assert refresh_result is None or "error" in refresh_result
 """Test: Password reset token security"""
 
 auth_client = AuthServiceClient(settings.AUTH_SERVICE_URL)
-
-                        # Create two users
-user1 = await auth_client.register( )
-email="user1@example.com",
-password="Pass123!"
-                        
-user2 = await auth_client.register( )
-email="user2@example.com",
-password="Pass456!"
-                        
-
+"""
+user1 = await auth_client.register(email="user1@example.com",, password="Pass123!", user2 = await auth_client.register( ), email="user2@example.com",, password="Pass456!")
                         # Generate reset token for user1 (mock since API might not expose this)
 reset_token = "fake_reset_token_for_user1"
 
                         # Try to use user1's reset token for user2 (should fail)
-reset_result = await auth_client.reset_password( )
-email="user2@example.com",
-token=reset_token,
-new_password="NewPass789!"
-                        
+reset_result = await auth_client.reset_password(email="user2@example.com",, token=reset_token,, new_password="NewPass789!")
 assert not reset_result or "error" in reset_result
 
                         # Verify user2's password unchanged
@@ -195,13 +162,8 @@ assert auth_result is not None
 """Test: Session fixation vulnerability"""
 
 auth_client = AuthServiceClient(settings.AUTH_SERVICE_URL)
-
-                            # Create user
-user = await auth_client.register( )
-email="session_test@example.com",
-password="TestPass123!"
-                            
-
+"""
+user = await auth_client.register(email="session_test@example.com",, password="TestPass123!")
                             # Get initial session
 token1 = await auth_client.login("session_test@example.com", "TestPass123!")
 
@@ -220,13 +182,8 @@ old_token_check = await auth_client.verify_token(token1)
 """Test: Brute force attack detection"""
 
 auth_client = AuthServiceClient(settings.AUTH_SERVICE_URL)
-
-                                # Create user
-user = await auth_client.register( )
-email="brute_test@example.com",
-password="RealPass123!"
-                                
-
+"""
+user = await auth_client.register(email="brute_test@example.com",, password="RealPass123!")
                                 # Attempt 50 failed logins rapidly
 failed_attempts = 0
 for i in range(50):
@@ -256,8 +213,7 @@ print("formatted_string")
 class TestL4CriticalWebSocketIntegration:
     """Test WebSocket connection lifecycle and edge cases"""
 
-@pytest.mark.asyncio
-    async def test_06_websocket_connection_flood(self):
+@pytest.mark.asyncio"""
 """Test: Rapid WebSocket connection attempts"""
 from netra_backend.app.services.websocket_service import WebSocketService
 
@@ -266,8 +222,7 @@ ws_service = WebSocketService()
         # Create mock websockets
 connections = []
 for i in range(100):
-            # Mock: Generic component isolation for controlled unit testing
-websocket = TestWebSocketConnection()
+            # Mock: Generic component isolation for controlled unit testing"""
 mock_ws.client_id = "formatted_string"
 mock_ws.remote_address = ("127.0.0.1", 5000 + i)
 connections.append(mock_ws)
@@ -292,8 +247,7 @@ assert successful <= 50, "Should have connection limits per user"
 ws_service = WebSocketService()
 
                     # Setup legitimate connection
-                    # Mock: Generic component isolation for controlled unit testing
-websocket = TestWebSocketConnection()
+                    # Mock: Generic component isolation for controlled unit testing"""
 legit_ws.client_id = "legit_client"
 await ws_service.handle_connection(legit_ws)
 
@@ -304,13 +258,7 @@ attacker_ws.client_id = "attacker_client"
 await ws_service.handle_connection(attacker_ws)
 
                     # Attacker tries to send message as legitimate user
-malicious_message = { )
-"type": "message",
-"user_id": "user1",  # Spoofing user1
-"client_id": "legit_client",  # Spoofing client
-"data": "malicious_content"
-                    
-
+malicious_message = {"type": "message",, "user_id": "user1",  # Spoofing user1, "client_id": "legit_client",  # Spoofing client, "data": "malicious_content"}
                     # This should be rejected or sanitized
 result = await ws_service.handle_message( )
 attacker_ws,
@@ -326,8 +274,7 @@ assert result is None or "error" in str(result)
 ws_service = WebSocketService()
 
                         # Initial connection
-                        # Mock: Generic component isolation for controlled unit testing
-websocket = TestWebSocketConnection()
+                        # Mock: Generic component isolation for controlled unit testing"""
 ws1.client_id = "reconnect_client"
                         # Mock: Generic component isolation for controlled unit testing
 ws1.websocket = TestWebSocketConnection()
@@ -351,12 +298,7 @@ ws2.websocket = TestWebSocketConnection()
 await ws_service.handle_connection(ws2)
 
                             # Try to resume with corrupted sequence
-resume_msg = { )
-"type": "resume",
-"last_seq": 999,  # Invalid sequence
-"client_id": "reconnect_client"  # Old client ID
-                            
-
+resume_msg = {"type": "resume",, "last_seq": 999,  # Invalid sequence, "client_id": "reconnect_client"  # Old client ID}
                             # Should handle gracefully
 result = await ws_service.handle_message( )
 ws2,
@@ -371,8 +313,7 @@ assert result is None or "error" not in str(result).lower()
 
 ws_service = WebSocketService()
 
-                                # Mock: Generic component isolation for controlled unit testing
-websocket = TestWebSocketConnection()
+                                # Mock: Generic component isolation for controlled unit testing"""
 ws.client_id = "memory_test"
                                 # Mock: Generic component isolation for controlled unit testing
 ws.websocket = TestWebSocketConnection()
@@ -381,11 +322,7 @@ await ws_service.handle_connection(ws)
                                 # Send increasingly large messages
 for size_mb in [1, 5, 10, 50]:
 large_data = "x" * (size_mb * 1024 * 1024)
-message = { )
-"type": "data",
-"payload": large_data
-                                    
-
+message = {"type": "data",, "payload": large_data}
                                     # Should have size limits
 try:
 result = await ws_service.handle_message( )
@@ -408,8 +345,7 @@ raise
 
 ws_service = WebSocketService()
 
-                                                            # Mock: Generic component isolation for controlled unit testing
-websocket = TestWebSocketConnection()
+                                                            # Mock: Generic component isolation for controlled unit testing"""
 ws.client_id = "protocol_test"
                                                             # Mock: Generic component isolation for controlled unit testing
 ws.websocket = TestWebSocketConnection()
@@ -442,10 +378,8 @@ assert "invalid" in str(e).lower() or "malformed" in str(e).lower()
 class TestL4CriticalAPIIntegration:
     """Test core API functionality from different angles"""
 
-@pytest.mark.asyncio
-    async def test_11_api_pagination_boundary_errors(self):
-"""Test: API pagination edge cases"""
-
+@pytest.mark.asyncio"""
+"""Test: API pagination edge cases""""""
 api_url = "formatted_string"
 
 async with ClientSession() as session:
@@ -477,8 +411,7 @@ pass
 
 @pytest.mark.asyncio
     async def test_12_api_header_injection(self):
-"""Test: HTTP header injection vulnerabilities"""
-
+"""Test: HTTP header injection vulnerabilities""""""
 api_url = "formatted_string"
 
 async with ClientSession() as session:
@@ -509,8 +442,7 @@ pass
 
 @pytest.mark.asyncio
     async def test_13_api_method_override_attacks(self):
-"""Test: HTTP method override vulnerabilities"""
-
+"""Test: HTTP method override vulnerabilities""""""
 api_url = "formatted_string"
 
 async with ClientSession() as session:
@@ -545,8 +477,7 @@ pass
 
 @pytest.mark.asyncio
     async def test_14_api_content_type_confusion(self):
-"""Test: Content-Type confusion attacks"""
-
+"""Test: Content-Type confusion attacks""""""
 api_url = "formatted_string"
 
 async with ClientSession() as session:
@@ -577,8 +508,7 @@ pass
 
 @pytest.mark.asyncio
     async def test_15_api_race_condition_in_transactions(self):
-"""Test: Race conditions in API transactions"""
-
+"""Test: Race conditions in API transactions""""""
 api_url = "formatted_string"
 
 async with ClientSession() as session:
@@ -626,8 +556,7 @@ pass
 class TestL4CriticalDatabaseIntegration:
     """Test database interaction edge cases"""
 
-@pytest.mark.asyncio
-    async def test_16_connection_pool_exhaustion(self):
+@pytest.mark.asyncio"""
 """Test: Database connection pool exhaustion"""
 from netra_backend.app.db.session import get_db_connection
 
@@ -638,8 +567,7 @@ try:
 for i in range(200):  # Way more than typical pool size
 conn = await get_db_connection()
 connections.append(conn)
-except Exception as e:
-                # Should hit pool limit
+except Exception as e:"""
 assert "pool" in str(e).lower() or "connection" in str(e).lower() or "limit" in str(e).lower()
 finally:
                     # Close connections
@@ -682,8 +610,7 @@ results = await asyncio.gather(transaction1(), transaction2(), return_exceptions
 
                 # Check for any errors indicating isolation issues
 for result in results:
-if isinstance(result, Exception):
-                        # Some errors are expected in isolation testing
+if isinstance(result, Exception):"""
 assert "deadlock" in str(result).lower() or "conflict" in str(result).lower() or True
 
 @pytest.mark.asyncio
@@ -695,8 +622,7 @@ assert "deadlock" in str(result).lower() or "conflict" in str(result).lower() or
 ch_client = Magic        # Mock: Async component isolation for testing without real async operations
 ch_client.execute = AsyncMock(return_value=[])
 
-                            # Test injection attempts
-malicious_inputs = [ )
+                            # Test injection attempts"""
 ""; DROP TABLE events; --",
 "1 OR 1=1",
 "admin"--",
@@ -719,8 +645,7 @@ assert result is not None or result == []
 
 try:
 redis_client = await redis.from_url(settings.REDIS_URL, decode_responses=True)
-except Exception:
-                                            # Redis might not be available in test env
+except Exception:"""
 pytest.skip("Redis not available")
 
 try:
@@ -776,8 +701,7 @@ return_exceptions=True
                 # Check for deadlock handling
 deadlocks = [item for item in []]
 
-                # System should detect and handle deadlocks
-if deadlocks:
+                # System should detect and handle deadlocks"""
 assert len(deadlocks) <= 1, "Only one transaction should be victim"
 
 

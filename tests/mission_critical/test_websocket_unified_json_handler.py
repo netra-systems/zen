@@ -4,29 +4,21 @@ class TestWebSocketConnection:
     def __init__(self):
         pass
         self.messages_sent = []
-        self.is_connected = True
-        self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+        self.is_connected = True"""
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
     async def close(self, code: int = 1000, reason: str = "Normal closure"):
         """Close WebSocket connection."""
         pass
-        self._closed = True
-        self.is_connected = False
-
-    def get_messages(self) -> list:
-        """Get all sent messages."""
-        await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
-        '''
-        MISSION CRITICAL: WebSocket Unified JSON Handler Test Suite
-
+        self._closed = True"""
+"""
+        """Get all sent messages.""""""
+        return self.messages_sent.copy()"""
+        """
+        MISSION CRITICAL: WebSocket Unified JSON Handler Test Suite"""
         This test suite specifically validates the WebSocket manager"s JSON serialization
         methods that will be used by the unified JSON handler. It focuses on edge cases
         and performance requirements that are critical for chat functionality.
@@ -42,59 +34,48 @@ class TestWebSocketConnection:
         - Segment: Platform/Internal
         - Business Goal: System Stability (unified JSON handling)
         - Value Impact: Eliminates JSON serialization inconsistencies across WebSocket events
-        - Strategic Impact: Single point of JSON handling reduces maintenance and bugs
-        '''
+        - Strategic Impact: Single point of JSON handling reduces maintenance and bugs"""
 
-        import asyncio
-        import json
-        import pytest
-        import time
-        from datetime import datetime, timezone
-        from typing import Any, Dict, List
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from auth_service.core.auth_manager import AuthManager
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from shared.isolated_environment import IsolatedEnvironment
+import asyncio
+import json
+import pytest
+import time
+from datetime import datetime, timezone
+from typing import Any, Dict, List
+from test_framework.database.test_database_manager import DatabaseTestManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
-        from netra_backend.app.agents.state import ( )
+from netra_backend.app.agents.state import ( )
         DeepAgentState, OptimizationsResult, ActionPlanResult,
         ReportResult, SyntheticDataResult, SupplyResearchResult
             
-        from netra_backend.app.schemas.registry import WebSocketMessage, AgentStarted, ServerMessage
-        from netra_backend.app.schemas.websocket_models import ( )
+from netra_backend.app.schemas.registry import WebSocketMessage, AgentStarted, ServerMessage
+from netra_backend.app.schemas.websocket_models import ( )
         BaseWebSocketPayload, AgentUpdatePayload, ToolCall, ToolResult,
         AgentCompleted, StreamChunk, StreamComplete, WebSocketError
             
-        from netra_backend.app.schemas.agent_models import AgentMetadata
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
-        from netra_backend.app.websocket_core.types import get_frontend_message_type
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
-
-
-class TestWebSocketUnifiedJSONHandler:
+from netra_backend.app.schemas.agent_models import AgentMetadata
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.types import get_frontend_message_type
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env"""
+"""
         """Test unified JSON handling in WebSocket manager."""
-        pass
-
-        @pytest.fixture
-    def websocket_manager(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
+        pass"""
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Create WebSocket manager for testing."""
         pass
-        return WebSocketManager()
-
-        @pytest.fixture
-    def complex_deep_agent_state(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
-        """Create maximally complex DeepAgentState for stress testing."""
-        pass
-    # Create all possible result types
-        optimizations = OptimizationsResult( )
+        return WebSocketManager()"""
+        @pytest.fixture"""
+        """Use real service instance.""""""
+        """Create maximally complex DeepAgentState for stress testing.""""""
+    # Create all possible result types"""
         optimization_type="comprehensive_optimization",
         recommendations=[ )
         "Implement auto-scaling for EC2 instances",
@@ -176,21 +157,9 @@ class TestWebSocketUnifiedJSONHandler:
         "impact": "20% cost reduction, improved availability"
     
         ],
-        post_implementation={ )
-        "monitoring_setup": "CloudWatch dashboards with custom metrics",
-        "maintenance_schedule": "Monthly optimization reviews",
-        "success_metrics": ["Cost per transaction", "Response time", "System availability"],
-        "rollback_plan": "Automated rollback using Infrastructure as Code"
+post_implementation={"monitoring_setup": "CloudWatch dashboards with custom metrics",, "maintenance_schedule": "Monthly optimization reviews",, "success_metrics": ["Cost per transaction", "Response time", "System availability"],, "rollback_plan": "Automated rollback using Infrastructure as Code"}
         },
-        cost_benefit_analysis={ )
-        "implementation_cost": 45000,
-        "annual_savings": 63372,
-        "roi_percentage": 140.8,
-        "payback_period_months": 8.5,
-        "risk_factors": ["Temporary performance impact", "Team training requirements"]
-    
-    
-
+cost_benefit_analysis={"implementation_cost": 45000,, "annual_savings": 63372,, "roi_percentage": 140.8,, "payback_period_months": 8.5,, "risk_factors": ["Temporary performance impact", "Team training requirements"]}
         report = ReportResult( )
         report_type="comprehensive_optimization_analysis",
         content="This comprehensive analysis identified significant opportunities for cloud infrastructure optimization...",
@@ -249,11 +218,7 @@ class TestWebSocketUnifiedJSONHandler:
         chat_thread_id="thread-comprehensive-analysis",
         user_id="user-enterprise-customer",
         run_id="run-comprehensive-12345",
-        agent_input={ )
-        "analysis_scope": "full_infrastructure",
-        "optimization_goals": ["cost_reduction", "performance_improvement", "scalability"],
-        "constraints": ["minimal_downtime", "compliance_requirements"],
-        "budget_limit": 50000
+agent_input={"analysis_scope": "full_infrastructure",, "optimization_goals": ["cost_reduction", "performance_improvement", "scalability"],, "constraints": ["minimal_downtime", "compliance_requirements"],, "budget_limit": 50000}
         },
         optimizations_result=optimizations,
         action_plan_result=action_plan,
@@ -283,41 +248,19 @@ class TestWebSocketUnifiedJSONHandler:
     
         ],
         metadata=AgentMetadata( )
-        execution_context={ )
-        "environment": "production",
-        "region": "us-east-1",
-        "instance_type": "enterprise",
-        "analysis_depth": "comprehensive"
+execution_context={"environment": "production",, "region": "us-east-1",, "instance_type": "enterprise",, "analysis_depth": "comprehensive"}
         },
-        custom_fields={ )
-        "customer_tier": "enterprise",
-        "sla_level": "premium",
-        "compliance_requirements": "SOC2,HIPAA,PCI",
-        "business_unit": "cloud_optimization"
-    
+custom_fields={"customer_tier": "enterprise",, "sla_level": "premium",, "compliance_requirements": "SOC2,HIPAA,PCI",, "business_unit": "cloud_optimization"}
         ),
-        quality_metrics={ )
-        "analysis_completeness": 0.95,
-        "confidence_score": 0.92,
-        "data_quality": 0.89,
-        "recommendation_relevance": 0.94
+quality_metrics={"analysis_completeness": 0.95,, "confidence_score": 0.92,, "data_quality": 0.89,, "recommendation_relevance": 0.94}
         },
-        context_tracking={ )
-        "conversation_depth": 5,
-        "topic_coherence": 0.91,
-        "user_satisfaction_predicted": 0.88,
-        "business_value_score": 0.96
-    
-    
-
+context_tracking={"conversation_depth": 5,, "topic_coherence": 0.91,, "user_satisfaction_predicted": 0.88,, "business_value_score": 0.96}
     def test_serialize_message_safely_basic_types(self, websocket_manager):
         """Test basic type serialization."""
 
     # Test None
-        result = websocket_manager._serialize_message_safely(None)
-        assert result == {}
-
-    # Test dict (already serializable)
+        result = websocket_manager._serialize_message_safely(None)"""
+"""
         test_dict = {"type": "test", "data": "value"}
         result = websocket_manager._serialize_message_safely(test_dict)
         assert result == test_dict
@@ -331,10 +274,8 @@ class TestWebSocketUnifiedJSONHandler:
         assert result == 42
 
     def test_serialize_message_safely_pydantic_models(self, websocket_manager):
-        """Test Pydantic model serialization."""
-
-    # Test WebSocketMessage
-        ws_message = WebSocketMessage( )
+        """Test Pydantic model serialization.""""""
+    # Test WebSocketMessage"""
         type="agent_update",
         payload={"agent_name": "test", "status": "active"},
         sender="test-sender"
@@ -362,10 +303,8 @@ class TestWebSocketUnifiedJSONHandler:
         assert isinstance(result, dict)
 
     # Test JSON serialization
-        json_str = json.dumps(result)
-        deserialized = json.loads(json_str)
-
-    # Verify core fields
+        json_str = json.dumps(result)"""
+"""
         assert deserialized["user_request"] == complex_deep_agent_state.user_request
         assert deserialized["run_id"] == complex_deep_agent_state.run_id
         assert deserialized["step_count"] == 15
@@ -395,18 +334,13 @@ class TestWebSocketUnifiedJSONHandler:
 
         # Test with complex state
 start_time = time.time()
-result = await websocket_manager._serialize_message_safely_async(complex_deep_agent_state)
-end_time = time.time()
-
         # Should complete quickly (under 2 seconds even for complex data)
 assert (end_time - start_time) < 2.0
 
         # Result should be JSON serializable
 json_str = json.dumps(result)
-assert len(json_str) > 1000  # Should be substantial content
-
-        # Verify accuracy
-deserialized = json.loads(json_str)
+assert len(json_str) > 1000  # Should be substantial content"""
+        # Verify accuracy"""
 assert deserialized["optimizations_result"]["cost_savings"] == 5280.95
 
 @pytest.mark.asyncio
@@ -414,10 +348,8 @@ assert deserialized["optimizations_result"]["cost_savings"] == 5280.95
 """Test async serialization timeout handling."""
 
             # Create a mock that simulates slow serialization
-with patch.object(websocket_manager, '_serialize_message_safely') as mock_sync:
-def slow_serialize(msg):
-time.sleep(6)  # Longer than 5-second timeout
-await asyncio.sleep(0)
+with patch.object(websocket_manager, '_serialize_message_safely') as mock_sync:"""
+time.sleep(6)  # Longer than 5-second timeout"""
 return {"type": "slow"}
 
 mock_sync.side_effect = slow_serialize
@@ -432,10 +364,8 @@ assert "timed out" in result["serialization_error"]
 def test_serialize_message_safely_error_recovery(self, websocket_manager):
 """Test error recovery in serialization."""
 
-    # Create a problematic object that fails model_dump
-class ProblematicObject:
-    def model_dump(self, **kwargs):
-        pass
+    # Create a problematic object that fails model_dump"""
+    def model_dump(self, **kwargs):"""
         raise ValueError("Serialization failed")
 
     def to_dict(self):
@@ -460,10 +390,8 @@ class ProblematicObject:
         assert "serialization_error" in result
 
     def test_serialize_message_safely_with_frontend_type_conversion(self, websocket_manager):
-        """Test message type conversion for frontend compatibility."""
-
-    # Test various backend message types
-        backend_types = [ )
+        """Test message type conversion for frontend compatibility.""""""
+    # Test various backend message types"""
         "agent_status_update",
         "tool_execution_started",
         "sub_agent_completed",
@@ -480,16 +408,8 @@ class ProblematicObject:
 
     def test_serialize_message_safely_special_characters(self, websocket_manager):
         """Test serialization with special characters and unicode."""
-
-    # Create message with various special characters
-        special_message = { )
-        "type": "agent_message",
-        "payload": { )
-        "unicode_text": "Hello [U+4E16][U+754C]! [U+1F30D] [U+00D1]o[U+00F1]o caf[U+00E9] r[U+00E9]sum[U+00E9]",
-        "special_chars": ["@", "#", "$", "%", "^", "&", "*"],
-        "emojis": ["[U+1F600]", "[U+1F680]", " IDEA: ", " LIGHTNING: ", "[U+1F31F]"],
-        "quotes": ["'single'", '"double"', "`backtick`"],
-        "newlines_and_tabs": "Line 1
+"""
+special_message = {"type": "agent_message",, "payload": { ), "unicode_text": "Hello [U+4E16][U+754C]! [U+1F30D] [U+00D1]o[U+00F1]o caf[U+00E9] r[U+00E9]sum[U+00E9]",, "special_chars": ["@", "#", "$", "%", "^", "&", "*"],, "emojis": ["[U+1F600]", "[U+1F680]", " IDEA: ", " LIGHTNING: ", "[U+1F31F]"],, "quotes": ["'single'", '"double"', "`backtick`"],, "newlines_and_tabs": "Line 1}
         Line 2\tTabbed",
         "null_and_empty": [None, "", "   "],
         "control_chars": "\u0000\u0001\u0002"
@@ -509,10 +429,8 @@ class ProblematicObject:
 
     def test_serialize_message_safely_deeply_nested_structures(self, websocket_manager):
         """Test serialization of deeply nested structures."""
-
-    # Create deeply nested structure (10 levels deep)
-    def create_nested_dict(depth):
-        if depth == 0:
+"""
+    def create_nested_dict(depth):"""
         return {"value": f"leaf_value", "numbers": [1, 2, 3]}
         return { )
         "level": depth,
@@ -521,11 +439,7 @@ class ProblematicObject:
         "metadata": {"depth": depth, "type": "nested"}
         
 
-        deeply_nested = { )
-        "type": "deeply_nested",
-        "payload": create_nested_dict(10)
-        
-
+deeply_nested = {"type": "deeply_nested",, "payload": create_nested_dict(10)}
         result = websocket_manager._serialize_message_safely(deeply_nested)
 
         # Should serialize successfully
@@ -546,19 +460,13 @@ class ProblematicObject:
     async def test_serialize_message_safely_async_concurrent_calls(self, websocket_manager, complex_deep_agent_state):
 """Test concurrent async serialization calls."""
 
-                        # Create multiple complex messages for concurrent serialization
-messages = []
-for i in range(20):
-                            # Create variations of the complex state
-state = complex_deep_agent_state.copy_with_updates( )
-run_id="formatted_string",
-step_count=i + 1
-                            
+                        # Create multiple complex messages for concurrent serialization"""
+for i in range(20):"""
+state = complex_deep_agent_state.copy_with_updates(run_id="formatted_string",, step_count=i + 1)
 messages.append(state)
 
                             # Serialize all concurrently
 start_time = time.time()
-tasks = [ )
 websocket_manager._serialize_message_safely_async(msg)
 for msg in messages
                             
@@ -580,8 +488,7 @@ assert deserialized["step_count"] == i + 1
 
 def test_serialize_message_safely_circular_reference_protection(self, websocket_manager):
 """Test protection against circular references."""
-
-    # Create circular reference (this would cause infinite recursion in naive serialization)
+"""
 circular_dict = {"type": "circular", "payload": {}}
 circular_dict["payload"]["self_reference"] = circular_dict  # Circular reference
 
@@ -596,17 +503,9 @@ pytest.fail("Circular reference caused uncontrolled error")
 
 def test_serialize_message_safely_very_large_messages(self, websocket_manager):
 """Test handling of very large messages."""
-
-    # Create a large message (1MB of data)
+"""
 large_array = ["x" * 1000 for _ in range(1000)]  # 1MB of data
-large_message = { )
-"type": "large_message",
-"payload": { )
-"large_array": large_array,
-"metadata": {"size": len(large_array), "item_size": 1000}
-    
-    
-
+large_message = {"type": "large_message",, "payload": { ), "large_array": large_array,, "metadata": {"size": len(large_array), "item_size": 1000}}
     # Should serialize (WebSocket manager doesn't enforce size limits during serialization)
 result = websocket_manager._serialize_message_safely(large_message)
 
@@ -620,21 +519,8 @@ assert len(deserialized["payload"]["large_array"]) == 1000
 
 def test_serialize_message_safely_datetime_handling(self, websocket_manager):
 """Test proper datetime serialization."""
-
-now = datetime.now(timezone.utc)
-message_with_datetimes = { )
-"type": "datetime_test",
-"payload": { )
-"timestamp": now,
-"created_at": now.isoformat(),
-"dates_array": [now, datetime(2024, 1, 1, tzinfo=timezone.utc)],
-"nested_datetime": { )
-"event_time": now,
-"processed_at": now.timestamp()
-    
-    
-    
-
+"""
+message_with_datetimes = {"type": "datetime_test",, "payload": { ), "timestamp": now,, "created_at": now.isoformat(),, "dates_array": [now, datetime(2024, 1, 1, tzinfo=timezone.utc)],, "nested_datetime": { ), "event_time": now,, "processed_at": now.timestamp()}
 result = websocket_manager._serialize_message_safely(message_with_datetimes)
 
     # Should serialize successfully
@@ -647,19 +533,13 @@ assert isinstance(deserialized["payload"]["created_at"], str)
 assert isinstance(deserialized["payload"]["nested_datetime"]["processed_at"], (int, float))
 
 def test_serialize_message_safely_websocket_error_objects(self, websocket_manager):
-"""Test serialization of WebSocket error objects."""
-
-    # Test WebSocketError model
-ws_error = WebSocketError( )
+"""Test serialization of WebSocket error objects.""""""
+    # Test WebSocketError model"""
 message="Connection lost unexpectedly",
 error_type="connection_error",
 code="WS_CONN_LOST",
 severity="high",
-details={ )
-"connection_id": "conn_123",
-"duration_ms": 1500,
-"retry_attempts": 3,
-"last_ping": datetime.now(timezone.utc).isoformat()
+details={"connection_id": "conn_123",, "duration_ms": 1500,, "retry_attempts": 3,, "last_ping": datetime.now(timezone.utc).isoformat()}
 },
 trace_id="trace-abc-123"
     
@@ -678,10 +558,8 @@ assert "connection_id" in deserialized["details"]
 
 @pytest.mark.asyncio
     async def test_websocket_manager_integration_with_serialization(self, websocket_manager):
-"""Test integration between WebSocket manager methods and serialization."""
-
-        # Test send_to_thread method uses serialization properly
-complex_message = DeepAgentState( )
+"""Test integration between WebSocket manager methods and serialization.""""""
+        # Test send_to_thread method uses serialization properly"""
 user_request="Test integration",
 run_id="integration-test",
 optimizations_result=OptimizationsResult( )

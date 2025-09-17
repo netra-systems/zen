@@ -74,11 +74,45 @@ Multiple message router implementations violate SSOT principles. CanonicalMessag
 3. **Migration Test:** ❌ Correctly failing - Shows migration work needed
 
 ## Remediation Plan
-- [ ] Phase 1: Complete WebSocketEventRouter migration to CanonicalMessageRouter adapters
-- [ ] Phase 2: Migrate UserScopedWebSocketEventRouter to use CanonicalMessageRouter
-- [ ] Phase 3: Consolidate handler registration patterns
-- [ ] Phase 4: Remove legacy compatibility layers
-- [ ] Phase 5: Update all imports and tests
+
+### Phase 1: Clean Legacy Fallback Code (Low Risk) 
+**Goal:** Remove legacy implementation code from adapters
+- [ ] Remove full legacy implementations from WebSocketEventRouter (lines 50-200)
+- [ ] Remove duplicate code from UserScopedWebSocketEventRouter (lines 40-150)
+- [ ] Keep only delegation calls to parent CanonicalMessageRouter
+- [ ] Run unit tests to verify delegation works
+- **Files:** 2 files, ~300 lines removal
+- **Risk:** Low - removing unused code
+- **Validation:** `python tests/unified_test_runner.py --pattern "*websocket*event*router*"`
+
+### Phase 2: Add Missing Methods to CanonicalMessageRouter (Medium Risk)
+**Goal:** Complete CanonicalMessageRouter interface
+- [ ] Add `broadcast_message()` method
+- [ ] Add `send_to_user()` method  
+- [ ] Add `_send_to_websocket()` internal method
+- [ ] Ensure all routing strategies work
+- **Files:** 1 file, ~100 lines addition
+- **Risk:** Medium - adding new functionality
+- **Validation:** `python tests/ssot/test_canonical_message_router_sole_authority.py`
+
+### Phase 3: Update Import Paths (Medium Risk)
+**Goal:** Consolidate to single import path
+- [ ] Update all imports from legacy routers to CanonicalMessageRouter
+- [ ] Update factory function calls
+- [ ] Fix test imports
+- **Files:** ~50-100 files
+- **Risk:** Medium - wide impact but mechanical changes
+- **Validation:** `python tests/unified_test_runner.py --real-services`
+
+### Phase 4: Remove Legacy Files (Low Risk)
+**Goal:** Complete SSOT consolidation
+- [ ] Archive WebSocketEventRouter.py
+- [ ] Archive UserScopedWebSocketEventRouter.py
+- [ ] Archive compatibility aliases
+- [ ] Update documentation
+- **Files:** 3-5 files removal
+- **Risk:** Low - if Phase 3 successful
+- **Validation:** `python tests/ssot/test_message_routing_ssot_violation.py` (should show only 1 router)
 
 ## Progress Log
 
@@ -103,4 +137,13 @@ Multiple message router implementations violate SSOT principles. CanonicalMessag
   - CanonicalMessageRouter missing broadcast_message and send_to_user methods
   - Migration adapter methods not fully implemented
 
-### Step 3: Remediation Planning (Next)
+### Step 3: Remediation Planning ✅
+- Analyzed current implementations of all routers
+- Created 4-phase low-risk migration plan
+- Phase 1: Clean legacy fallback code (low risk)
+- Phase 2: Add missing methods to CanonicalMessageRouter (medium risk)
+- Phase 3: Update import paths across codebase (medium risk)
+- Phase 4: Remove legacy files (low risk)
+- Each phase has clear validation and rollback strategy
+
+### Step 4: Execute Remediation Plan (Next)

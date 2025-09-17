@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,47 +16,40 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
-        '''Unit tests for NACIS Chat Orchestrator.
+        return self.messages_sent.copy()"""
+        """Unit tests for NACIS Chat Orchestrator.
 
         Date Created: 2025-01-22
-        Last Updated: 2025-01-22
+        Last Updated: 2025-01-22"""
+        Business Value: Ensures orchestration logic correctness."""
 
-        Business Value: Ensures orchestration logic correctness.
-        '''
+import pytest
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from netra_backend.app.redis_manager import redis_manager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
-        import pytest
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from netra_backend.app.redis_manager import redis_manager
-        from auth_service.core.auth_manager import AuthManager
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from shared.isolated_environment import IsolatedEnvironment
-
-        from netra_backend.app.agents.chat_orchestrator_main import ChatOrchestrator
-        from netra_backend.app.agents.chat_orchestrator.intent_classifier import IntentType
-        from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
-        import asyncio
+from netra_backend.app.agents.chat_orchestrator_main import ChatOrchestrator
+from netra_backend.app.agents.chat_orchestrator.intent_classifier import IntentType
+from netra_backend.app.agents.base.interface import ExecutionContext
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+import asyncio
 
 
-        @pytest.fixture
-    def real_dependencies():
-        """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Create mock dependencies for testing."""
         pass
-        return { )
-    # Mock: Session isolation for controlled testing without external state
+        return { )"""
         "db_session": Async        # Mock: LLM provider isolation to prevent external API usage and costs
         "llm_manager": Magic        # Mock: WebSocket connection isolation for testing without network overhead
         "websocket_manager": Async        # Mock: Tool execution isolation for predictable agent testing
@@ -68,21 +59,17 @@ class TestWebSocketConnection:
 
         @pytest.fixture
     def orchestrator(mock_dependencies):
-        """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance.""""""
         """Create orchestrator instance for testing."""
         pass
         return ChatOrchestrator(**mock_dependencies)
 
 
-        @pytest.fixture
-    def execution_context():
-        """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Create mock execution context."""
         pass
-    # Mock: Service component isolation for predictable testing behavior
-        context = MagicMock(spec=ExecutionContext)
+    # Mock: Service component isolation for predictable testing behavior"""
         context.request_id = "test_123"
     # Mock: Generic component isolation for controlled unit testing
         context.state = Magic    context.state.user_request = "What is the TCO for GPT-4?"
@@ -114,8 +101,7 @@ assert confidence == 0.95
 orchestrator.intent_classifier.classify.assert_called_once()
 
 
-@pytest.mark.asyncio
-    async def test_cache_check_high_confidence(orchestrator, execution_context):
+@pytest.mark.asyncio"""
 """Test cache check with high confidence."""
                 # Mock: Service component isolation for predictable testing behavior
 orchestrator.confidence_manager.get_threshold = MagicMock(return_value=0.9)
@@ -125,8 +111,7 @@ should_use = orchestrator._should_use_cache(IntentType.TCO_ANALYSIS, 0.95)
 assert should_use == True
 
 
-@pytest.mark.asyncio
-    async def test_cache_check_low_confidence(orchestrator, execution_context):
+@pytest.mark.asyncio"""
 """Test cache check with low confidence."""
 pass
                     # Mock: Service component isolation for predictable testing behavior
@@ -137,8 +122,7 @@ should_use = orchestrator._should_use_cache(IntentType.TCO_ANALYSIS, 0.7)
 assert should_use == False
 
 
-@pytest.mark.asyncio
-    async def test_execution_pipeline(orchestrator, execution_context):
+@pytest.mark.asyncio"""
 """Test execution pipeline flow."""
 plan = [{"agent": "researcher", "action": "research", "params": {}}]
                         # Mock: Async component isolation for testing without real async operations
@@ -158,8 +142,7 @@ orchestrator.pipeline_executor.execute.assert_called_once()
 
 @pytest.mark.asyncio
     async def test_trace_logging(orchestrator):
-"""Test trace logging functionality."""
-pass
+"""Test trace logging functionality.""""""
 await orchestrator.trace_logger.log("Test action", {"detail": "test"})
 
 traces = orchestrator.trace_logger.get_compressed_trace()
@@ -171,8 +154,7 @@ assert "Test action" in traces[0]
 @pytest.mark.asyncio
     async def test_error_handling(orchestrator, execution_context):
 """Test error handling in orchestration."""
-                                # Mock: Async component isolation for testing without real async operations
-orchestrator.intent_classifier.classify = AsyncMock( )
+                                # Mock: Async component isolation for testing without real async operations"""
 side_effect=Exception("Classification failed")
                                 
 

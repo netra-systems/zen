@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-'''
-Complete test runner for all page refresh tests.
-Runs tests in simulation mode when services aren"t available.
-'''
+""""""
+Runs tests in simulation mode when services aren"t available."""
 
 import asyncio
 import sys
@@ -14,27 +12,17 @@ from typing import Dict, List, Any
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-
-class TestSimulator:
+"""
     """Simulates test execution when services aren't available."""
 
     def __init__(self):
-        self.results = { )
-        'total': 0,
-        'passed': 0,
-        'failed': 0,
-        'skipped': 0,
-        'execution_time': 0
-    
-
-    async def simulate_test(self, test_name: str, duration: float = 0.1) -> bool:
+results = {'total': 0,, 'passed': 0,, 'failed': 0,, 'skipped': 0,, 'execution_time': 0}"""
         """Simulate a test execution."""
         await asyncio.sleep(duration)
     # Simulate 90% pass rate
-        import random
+import random
         return random.random() > 0.1
-
-    async def run_e2e_tests(self) -> Dict[str, Any]:
+"""
         """Simulate E2E test execution."""
         print(" )
         [E2E TESTS] Page Refresh Comprehensive")
@@ -145,7 +133,7 @@ class TestSimulator:
     async def check_services() -> bool:
         """Check if required services are running."""
         try:
-        import aiohttp
+import aiohttp
         async with aiohttp.ClientSession() as session:
             # Check frontend
         try:
@@ -158,11 +146,9 @@ class TestSimulator:
         except:
         return False
 
-
-    async def run_actual_tests():
+"""
         """Run actual tests using pytest."""
-        import subprocess
-
+import subprocess"""
         print(" )
         [INFO] Running actual tests with pytest...")
 
@@ -254,25 +240,13 @@ class TestSimulator:
         start_time = time.time()
 
         e2e_results = await simulator.run_e2e_tests()
-        integration_results = await simulator.run_integration_tests()
-        stress_results = await simulator.run_stress_tests()
-        validation_results = await simulator.run_validation_tests()
-
-        execution_time = time.time() - start_time
-
             # Aggregate results
         total_passed = (e2e_results['passed'] + integration_results['passed'] + )
         stress_results['passed'] + validation_results['passed'])
         total_failed = (e2e_results['failed'] + integration_results['failed'] + )
         stress_results['failed'] + validation_results['failed'])
 
-        results = { )
-        'total': total_passed + total_failed,
-        'passed': total_passed,
-        'failed': total_failed,
-        'execution_time': execution_time
-            
-
+results = {'total': total_passed + total_failed,, 'passed': total_passed,, 'failed': total_failed,, 'execution_time': execution_time}
             # Check WebSocket performance improvements
         await check_websocket_performance()
 

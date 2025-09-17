@@ -6,7 +6,7 @@ This test reproduces the staging error:
 RuntimeError: Database engine creation failed: name 'DatabaseConfig' is not defined
 
 Root cause: Incomplete migration from DatabaseConfig static attributes to get_unified_config().
-'''
+"""
 
 import os
 import sys
@@ -21,20 +21,17 @@ setup_test_path()
 from netra_backend.app.core.configuration.base import get_unified_config
 
 
-@pytest.mark.e2e
-class TestDatabaseConfigMigration:
+@pytest.mark.e2e"""
     """Test suite to verify DatabaseConfig migration and prevent staging deployment failures."""
-
-    @pytest.mark.e2e
-    def test_postgres_core_uses_unified_config(self):
-        '''Verify postgres_core.py uses get_unified_config instead of DatabaseConfig attributes.
+"""
+    def test_postgres_core_uses_unified_config(self):"""Verify postgres_core.py uses get_unified_config instead of DatabaseConfig attributes.
 
         This test catches the staging error where DatabaseConfig was not properly imported
         or referenced, causing deployment failures.
         '''
         pass
     # Read the postgres_core.py file to check for DatabaseConfig references
-        import netra_backend.app.db.postgres_core as postgres_core
+import netra_backend.app.db.postgres_core as postgres_core
 
     # Check that the module imports get_unified_config
         assert hasattr(postgres_core, 'get_unified_config') or 'get_unified_config' in dir(postgres_core)
@@ -54,14 +51,13 @@ class TestDatabaseConfigMigration:
         'DatabaseConfig.POOL_RECYCLE',
         'DatabaseConfig.POOL_PRE_PING'
         
-
-        for pattern in problematic_patterns:
+"""
         assert pattern not in content, "formatted_string"
 
         @pytest.mark.e2e
     def test_postgres_core_imports_required_dependencies(self):
         """Test that postgres_core has all required imports for database initialization."""
-        import netra_backend.app.db.postgres_core as postgres_core
+import netra_backend.app.db.postgres_core as postgres_core
 
     # Verify critical imports exist
         required_functions = [ )
@@ -71,23 +67,19 @@ class TestDatabaseConfigMigration:
         '_get_base_engine_args',
         '_get_pool_specific_args'
     
-
-        for func_name in required_functions:
+"""
         assert hasattr(postgres_core, func_name), "formatted_string"
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_database_initialization_with_unified_config(self):
-'''Test database initialization uses unified config properly.
-
-This simulates the staging environment initialization that was failing.
-'''
+"""Test database initialization uses unified config properly."""
+This simulates the staging environment initialization that was failing."""
 pass
 from netra_backend.app.db.postgres_core import initialize_postgres
 from netra_backend.app.core.configuration.base import get_unified_config
 
-            # Mock the database URL to prevent actual connection
-with patch('netra_backend.app.db.postgres_core.DatabaseManager') as mock_db_manager:
+            # Mock the database URL to prevent actual connection"""
 mock_db_manager.get_application_url_async.return_value = "postgresql+asyncpg://test:test@localhost/test"
 
                 # Mock the create_async_engine to prevent actual engine creation
@@ -123,8 +115,7 @@ with open(file_path, 'r') as f:
 content = f.read()
 
                 # Check for problematic patterns
-if 'DatabaseConfig.' in content:
-                    # Extract lines with DatabaseConfig references
+if 'DatabaseConfig.' in content:"""
 lines = content.split(" )
 ")
 problematic_lines = [ )
@@ -149,17 +140,7 @@ pass
 config = get_unified_config()
 
     # Map old DatabaseConfig attributes to new unified config attributes
-required_mappings = { )
-'POOL_SIZE': 'db_pool_size',
-'MAX_OVERFLOW': 'db_max_overflow',
-'POOL_TIMEOUT': 'db_pool_timeout',
-'POOL_RECYCLE': 'db_pool_recycle',
-'POOL_PRE_PING': 'db_pool_pre_ping',
-'ECHO': 'db_echo',
-'ECHO_POOL': 'db_echo_pool'
-    
-
-for old_attr, new_attr in required_mappings.items():
+required_mappings = {'POOL_SIZE': 'db_pool_size',, 'MAX_OVERFLOW': 'db_max_overflow',, 'POOL_TIMEOUT': 'db_pool_timeout',, 'POOL_RECYCLE': 'db_pool_recycle',, 'POOL_PRE_PING': 'db_pool_pre_ping',, 'ECHO': 'db_echo',, 'ECHO_POOL': 'db_echo_pool'}"""
 assert hasattr(config, new_attr), "formatted_string"
 
         # Verify the attribute has a reasonable value
@@ -172,28 +153,23 @@ class TestStagingDeploymentValidation:
         """Tests to validate staging deployment configuration."""
 
 @pytest.mark.asyncio
-@pytest.mark.e2e
-    async def test_staging_environment_database_config(self):
-'''Test database configuration in staging environment.
-
-This test ensures staging deployment has proper configuration.
-'''
+@pytest.mark.e2e"""
+"""Test database configuration in staging environment."""
+This test ensures staging deployment has proper configuration."""
 pass
 with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
 config = get_unified_config()
 
             # Verify staging-specific settings
 assert config.environment in ['staging', 'testing']
-
-            # Verify database pool settings are appropriate for Cloud Run
+"""
 assert config.db_pool_size >= 5, "Pool size too small for staging"
 assert config.db_pool_size <= 50, "Pool size too large for Cloud Run limits"
 assert config.db_max_overflow >= 10, "Max overflow too small for staging load"
 
 @pytest.mark.e2e
 def test_import_resolution_in_deployment(self):
-"""Test that all critical imports resolve correctly as they would in deployment."""
-critical_imports = [ )
+"""Test that all critical imports resolve correctly as they would in deployment.""""""
 "from netra_backend.app.core.configuration.base import get_unified_config",
 "from netra_backend.app.db.database_manager import DatabaseManager",
 "from sqlalchemy.ext.asyncio import create_async_engine"
@@ -208,15 +184,12 @@ pytest.fail("formatted_string")
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_database_engine_creation_flow(self):
-'''Test the complete flow of database engine creation as it happens in staging.
-
-This reproduces the exact sequence that was failing in staging deployment.
-'''
+"""Test the complete flow of database engine creation as it happens in staging."""
+This reproduces the exact sequence that was failing in staging deployment."""
 pass
 from netra_backend.app.db import postgres_core
 
-                    # Mock dependencies to isolate the test
-with patch.object(postgres_core, 'DatabaseManager') as mock_db_manager:
+                    # Mock dependencies to isolate the test"""
 mock_db_manager.get_application_url_async.return_value = "postgresql+asyncpg://test:test@localhost/test"
 
 with patch.object(postgres_core, 'create_async_engine') as mock_create_engine:

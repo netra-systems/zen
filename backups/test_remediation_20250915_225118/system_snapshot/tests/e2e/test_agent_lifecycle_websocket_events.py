@@ -4,27 +4,20 @@ class TestWebSocketConnection:
     def __init__(self):
         pass
         self.messages_sent = []
-        self.is_connected = True
-        self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+        self.is_connected = True"""
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
     async def close(self, code: int = 1000, reason: str = "Normal closure"):
         """Close WebSocket connection."""
         pass
-        self._closed = True
-        self.is_connected = False
-
-    def get_messages(self) -> list:
-        """Get all sent messages."""
-        await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
-        '''Agent Lifecycle WebSocket Events Test - Test #2 from CRITICAL_INTEGRATION_TEST_PLAN.md
+        self._closed = True"""
+"""
+        """Get all sent messages.""""""
+        return self.messages_sent.copy()"""
+        """Agent Lifecycle WebSocket Events Test - Test #2 from CRITICAL_INTEGRATION_TEST_PLAN.md
 
         Comprehensive test for all Agent Lifecycle WebSocket Events including missing events:
         agent_thinking, partial_result, tool_executing, final_report.
@@ -37,54 +30,49 @@ class TestWebSocketConnection:
         3. Value Impact: Validates core product functionality - agent lifecycle tracking
         4. Revenue Impact: Prevents churn from poor real-time experience
 
-        ARCHITECTURAL COMPLIANCE:
-        - File size: <500 lines (comprehensive test design)
-        - Function size: <25 lines each
-        - Real agent execution flow, not mocks
-        - Deterministic and runs in < 30 seconds
-        '''
+        ARCHITECTURAL COMPLIANCE:"""
+        - Function size: <25 lines each"""
+        - Deterministic and runs in < 30 seconds"""
 
-        import asyncio
-        import json
-        import time
-        from dataclasses import dataclass, field
-        from datetime import datetime, timezone
-        from enum import Enum
-        from typing import Any, Dict, List, Optional, Set
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from auth_service.core.auth_manager import AuthManager
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from shared.isolated_environment import IsolatedEnvironment
+import asyncio
+import json
+import time
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Any, Dict, List, Optional, Set
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
-        import pytest
+import pytest
 
                 # Configure pytest-asyncio
         pytestmark = pytest.mark.asyncio
 
-        from netra_backend.app.logging_config import central_logger
-        from tests.e2e.config import ( )
+from netra_backend.app.logging_config import central_logger
+from tests.e2e.config import ( )
         TEST_CONFIG,
         TEST_ENDPOINTS,
         TEST_USERS,
         TestDataFactory)
-        from tests.e2e.agent_conversation_helpers import AgentConversationTestCore
-        from tests.e2e.websocket_resilience_core import WebSocketResilienceTestCore
-        from tests.e2e.real_services_manager import RealServicesManager
-        from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
+from tests.e2e.agent_conversation_helpers import AgentConversationTestCore
+from tests.e2e.websocket_resilience_core import WebSocketResilienceTestCore
+from tests.e2e.real_services_manager import RealServicesManager
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
         logger = central_logger.get_logger(__name__)
 
                 # Import asyncio fixture decorator
-        import pytest_asyncio
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
-
-
-class UILayer(Enum):
+import pytest_asyncio
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env"""
+"""
         """UI layer categorization for event timing validation."""
         FAST = "fast"      # 0-100ms: agent_started, tool_executing
         MEDIUM = "medium"  # 100ms-1s: agent_thinking, partial_result
@@ -99,40 +87,19 @@ class EventTiming:
         payload: Dict[str, Any]
         ui_layer: UILayer
         order_index: int = 0
-
-
-        @dataclass
-class EventValidation:
+"""
+        @dataclass"""
         """Event validation result."""
         event_type: str
         payload_valid: bool
         timing_valid: bool
         order_valid: bool
         required_fields_present: bool
-        validation_errors: List[str] = field(default_factory=list)
-
-
-class AgentLifecycleEventValidator:
-        """Validates agent lifecycle WebSocket events."""
-
-        REQUIRED_EVENT_FIELDS = { )
-        "agent_started": {"run_id", "agent_name", "timestamp"},
-        "agent_thinking": {"thought", "agent_name", "step_number", "total_steps"},
-        "partial_result": {"content", "agent_name", "is_complete"},
-        "tool_executing": {"tool_name", "agent_name", "timestamp"},
-        "agent_completed": {"agent_name", "duration_ms", "result", "metrics"},
-        "final_report": {"report", "total_duration_ms", "agent_metrics", "recommendations", "action_plan"}
-    
-
-        EVENT_UI_LAYERS = { )
-        "agent_started": UILayer.FAST,
-        "tool_executing": UILayer.FAST,
-        "agent_thinking": UILayer.MEDIUM,
-        "partial_result": UILayer.MEDIUM,
-        "agent_completed": UILayer.SLOW,
-        "final_report": UILayer.SLOW
-    
-
+        validation_errors: List[str] = field(default_factory=list)"""
+"""
+        """Validates agent lifecycle WebSocket events.""""""
+REQUIRED_EVENT_FIELDS = {"agent_started": {"run_id", "agent_name", "timestamp"},, "agent_thinking": {"thought", "agent_name", "step_number", "total_steps"},, "partial_result": {"content", "agent_name", "is_complete"},, "tool_executing": {"tool_name", "agent_name", "timestamp"},, "agent_completed": {"agent_name", "duration_ms", "result", "metrics"},, "final_report": {"report", "total_duration_ms", "agent_metrics", "recommendations", "action_plan"}}
+EVENT_UI_LAYERS = {"agent_started": UILayer.FAST,, "tool_executing": UILayer.FAST,, "agent_thinking": UILayer.MEDIUM,, "partial_result": UILayer.MEDIUM,, "agent_completed": UILayer.SLOW,, "final_report": UILayer.SLOW}
         EXPECTED_EVENT_ORDER = [ )
         "agent_started", "agent_thinking", "partial_result",
         "tool_executing", "agent_completed", "final_report"
@@ -147,14 +114,10 @@ class AgentLifecycleEventValidator:
     def start_validation(self) -> None:
         """Start event validation session."""
         self.received_events.clear()
-        self.validation_results.clear()
-        self.start_time = time.time()
-
-    def record_event(self, event_data: Dict[str, Any]) -> None:
-        """Record received WebSocket event."""
-        if not self.start_time:
-        return
-
+        self.validation_results.clear()"""
+"""
+        """Record received WebSocket event.""""""
+        return"""
         event_type = event_data.get("type", "unknown")
         ui_layer = self.EVENT_UI_LAYERS.get(event_type, UILayer.SLOW)
 
@@ -176,10 +139,8 @@ class AgentLifecycleEventValidator:
         for event_timing in self.received_events:
         validation = self._validate_single_event(event_timing)
         self.validation_results.append(validation)
-
-        return self._compile_validation_summary()
-
-    def _validate_single_event(self, timing: EventTiming) -> EventValidation:
+"""
+"""
         """Validate a single event."""
         validation = EventValidation( )
         event_type=timing.event_type,
@@ -209,12 +170,9 @@ class AgentLifecycleEventValidator:
         timing, validation.validation_errors
     
 
-        return validation
-
-        def _validate_payload_structure(self, event_type: str, payload: Dict[str, Any],
-        errors: List[str]) -> bool:
-        """Validate event payload structure."""
-        if not isinstance(payload, dict):
+        return validation"""
+        def _validate_payload_structure(self, event_type: str, payload: Dict[str, Any],"""
+        """Validate event payload structure.""""""
         errors.append("formatted_string")
         return False
 
@@ -231,10 +189,8 @@ class AgentLifecycleEventValidator:
 
         missing_fields = []
         for field in required_fields:
-        if field not in payload:
-        missing_fields.append(field)
-
-        if missing_fields:
+        if field not in payload:"""
+"""
         errors.append("formatted_string")
         return False
 
@@ -254,10 +210,8 @@ class AgentLifecycleEventValidator:
         UILayer.SLOW: (1000, 30000)  # 1s-30s (test timeout)
         
 
-        min_time, max_time = timing_constraints.get(timing.ui_layer, (0, 30000))
-
-        if not (min_time <= elapsed_time <= max_time):
-        errors.append( )
+        min_time, max_time = timing_constraints.get(timing.ui_layer, (0, 30000))"""
+        if not (min_time <= elapsed_time <= max_time):"""
         "formatted_string"
         "formatted_string"
             
@@ -273,10 +227,8 @@ class AgentLifecycleEventValidator:
         expected_index = self.EXPECTED_EVENT_ORDER.index(timing.event_type)
 
         # Check if events before this one have been received
-        for i in range(expected_index):
-        expected_event = self.EXPECTED_EVENT_ORDER[i]
-        if not any(e.event_type == expected_event for e in self.received_events[:timing.order_index]):
-        errors.append( )
+        for i in range(expected_index):"""
+        if not any(e.event_type == expected_event for e in self.received_events[:timing.order_index]):"""
         "formatted_string"
                 
         return False
@@ -290,10 +242,8 @@ class AgentLifecycleEventValidator:
         if v.payload_valid and v.timing_valid and v.required_fields_present)
 
         event_types_received = set(v.event_type for v in self.validation_results)
-        expected_events = set(self.EXPECTED_EVENT_ORDER)
-        missing_events = expected_events - event_types_received
-
-        return { )
+        expected_events = set(self.EXPECTED_EVENT_ORDER)"""
+"""
         "total_events_received": total_events,
         "valid_events": valid_events,
         "validation_success_rate": valid_events / max(total_events, 1),
@@ -318,44 +268,30 @@ class TestAgentLifecycleEventCore:
         pass
         self.conversation_core = AgentConversationTestCore()
         self.websocket_core = WebSocketResilienceTestCore()
-        from pathlib import Path
+from pathlib import Path
         project_root = Path(__file__).parent.parent.parent
         self.services_manager = RealServicesManager(project_root=project_root)
-        self.validator = AgentLifecycleEventValidator()
-        self.test_session_data: Dict[str, Any] = {}
-
-    async def setup_test_environment(self) -> None:
+        self.validator = AgentLifecycleEventValidator()"""
+"""
         """Setup comprehensive test environment."""
         await self.conversation_core.setup_test_environment()
-    # Check if services are available, but don't start them automatically for this test
-        try:
-        await self.services_manager.health_status()
-        except Exception as e:
+    # Check if services are available, but don't start them automatically for this test"""
+        await self.services_manager.health_status()"""
         logger.debug("formatted_string")
         self.test_session_data.clear()
 
     async def teardown_test_environment(self) -> None:
-        """Cleanup test environment."""
-        await self.conversation_core.teardown_test_environment()
-        self.test_session_data.clear()
-
+        """Cleanup test environment.""""""
+        self.test_session_data.clear()"""
     async def establish_agent_execution_session(self, user_tier: str = "free") -> Dict[str, Any]:
         """Establish session for agent execution with event monitoring."""
         user_data = TEST_USERS[user_tier]
 
     # Create authenticated WebSocket connection
         ws_client = await self._create_authenticated_websocket_client(user_data.id)
-
-    # Setup event monitoring
-        self.validator.start_validation()
-
-        session_data = { )
-        "client": ws_client,
-        "user_data": user_data,
-        "start_time": time.time(),
-        "events_received": []
-    
-
+"""
+        self.validator.start_validation()"""
+session_data = {"client": ws_client,, "user_data": user_data,, "start_time": time.time(),, "events_received": []}
         self.test_session_data = session_data
         return session_data
 
@@ -369,10 +305,8 @@ class TestAgentLifecycleEventCore:
 
     # Create and connect client
         client = RealWebSocketClient(ws_url)
-        try:
-        connection_success = await client.connect(headers)
-
-        if not connection_success:
+        try:"""
+"""
         raise RuntimeError("Failed to establish WebSocket connection")
 
         return client
@@ -386,10 +320,8 @@ class TestAgentLifecycleEventCore:
 
         mock_client = Magic        mock_client.websocket = TestWebSocketConnection()
         mock_client.connect = AsyncMock(return_value=True)
-
-    # Configure mock to return sample agent lifecycle events
-        mock_events = [ )
-        { )
+"""
+        mock_events = [ )"""
         "type": "agent_started",
         "payload": { )
         "run_id": "test-run-123",
@@ -449,10 +381,8 @@ class TestAgentLifecycleEventCore:
         return mock_client
 
     async def _create_test_token(self, user_id: str) -> str:
-        """Create test JWT token."""
-        try:
-        from tests.e2e.jwt_token_helpers import JWTTestHelper
-        jwt_helper = JWTTestHelper()
+        """Create test JWT token.""""""
+from tests.e2e.jwt_token_helpers import JWTTestHelper"""
         return jwt_helper.create_access_token(user_id, "formatted_string")
         except ImportError:
         return "formatted_string"
@@ -468,16 +398,12 @@ class TestAgentLifecycleEventCore:
 
     # Monitor events until completion or timeout
         start_time = time.time()
-        agent_completed = False
-
         while time.time() - start_time < timeout and not agent_completed:
         try:
         event_data = await client.receive(timeout=2.0)
         if event_data:
-        events_received.append(event_data)
-        self.validator.record_event(event_data)
-
-                # Check if agent execution is complete
+        events_received.append(event_data)"""
+"""
         if event_data.get("type") in ["agent_completed", "final_report"]:
         agent_completed = True
                     # Give a small buffer for any final events
@@ -507,31 +433,18 @@ class TestAgentLifecycleEventCore:
         yield core
         finally:
         await core.teardown_test_environment()
-
-
-        @pytest.mark.e2e
-class TestAgentLifecycleWebSocketEvents:
-        """Test all agent lifecycle WebSocket events with comprehensive validation."""
-
-        @pytest.mark.e2e
-    async def test_complete_agent_lifecycle_event_flow(self, agent_lifecycle_test_core):
-        """Test complete agent lifecycle with all expected events."""
-        core = agent_lifecycle_test_core
-
-        # Establish session for event monitoring
+"""
+        @pytest.mark.e2e"""
+        """Test all agent lifecycle WebSocket events with comprehensive validation.""""""
+        @pytest.mark.e2e"""
+        """Test complete agent lifecycle with all expected events.""""""
+"""
         session = await core.establish_agent_execution_session("free")
         client = session["client"]
         user_data = session["user_data"]
 
         # Create comprehensive agent request
-        agent_request = { )
-        "type": "agent_request",
-        "user_id": user_data.id,
-        "message": "Analyze my AI usage patterns and provide optimization recommendations",
-        "thread_id": "formatted_string",
-        "timestamp": datetime.now(timezone.utc).isoformat()
-        
-
+agent_request = {"type": "agent_request",, "user_id": user_data.id,, "message": "Analyze my AI usage patterns and provide optimization recommendations",, "thread_id": "formatted_string",, "timestamp": datetime.now(timezone.utc).isoformat()}
         # Execute agent with event monitoring
         events_received = await core.execute_agent_with_event_monitoring( )
         client, agent_request, timeout=25.0
@@ -563,18 +476,11 @@ class TestAgentLifecycleWebSocketEvents:
         @pytest.mark.e2e
     async def test_agent_started_event_payload_validation(self, agent_lifecycle_test_core):
         """Test agent_started event has correct payload structure."""
-        pass
-        core = agent_lifecycle_test_core
+        pass"""
         session = await core.establish_agent_execution_session("early")
         client = session["client"]
 
-        agent_request = { )
-        "type": "agent_request",
-        "user_id": session["user_data"].id,
-        "message": "Quick status check",
-        "thread_id": "formatted_string"
-                
-
+agent_request = {"type": "agent_request",, "user_id": session["user_data"].id,, "message": "Quick status check",, "thread_id": "formatted_string"}
         events = await core.execute_agent_with_event_monitoring(client, agent_request)
 
                 # Find agent_started event
@@ -596,18 +502,11 @@ class TestAgentLifecycleWebSocketEvents:
 
         @pytest.mark.e2e
     async def test_ui_layer_timing_validation(self, agent_lifecycle_test_core):
-        """Test events arrive within correct UI layer timing windows."""
-        core = agent_lifecycle_test_core
+        """Test events arrive within correct UI layer timing windows.""""""
         session = await core.establish_agent_execution_session("mid")
         client = session["client"]
 
-        agent_request = { )
-        "type": "agent_request",
-        "user_id": session["user_data"].id,
-        "message": "Run optimization analysis with tool usage",
-        "thread_id": "formatted_string"
-                        
-
+agent_request = {"type": "agent_request",, "user_id": session["user_data"].id,, "message": "Run optimization analysis with tool usage",, "thread_id": "formatted_string"}
         events = await core.execute_agent_with_event_monitoring(client, agent_request)
         validation_results = core.validator.validate_all_events()
 
@@ -639,18 +538,11 @@ class TestAgentLifecycleWebSocketEvents:
         @pytest.mark.e2e
     async def test_event_payload_field_consistency(self, agent_lifecycle_test_core):
         """Test event payload fields are consistent and properly formatted."""
-        pass
-        core = agent_lifecycle_test_core
+        pass"""
         session = await core.establish_agent_execution_session("enterprise")
         client = session["client"]
 
-        agent_request = { )
-        "type": "agent_request",
-        "user_id": session["user_data"].id,
-        "message": "Comprehensive analysis with multiple agent interactions",
-        "thread_id": "formatted_string"
-                                        
-
+agent_request = {"type": "agent_request",, "user_id": session["user_data"].id,, "message": "Comprehensive analysis with multiple agent interactions",, "thread_id": "formatted_string"}
         events = await core.execute_agent_with_event_monitoring(client, agent_request)
 
                                         # Validate consistency across events
@@ -686,19 +578,12 @@ class TestAgentLifecycleWebSocketEvents:
 
         @pytest.mark.e2e
     async def test_missing_events_detection(self, agent_lifecycle_test_core):
-        """Test that missing critical events are properly detected."""
-        core = agent_lifecycle_test_core
+        """Test that missing critical events are properly detected.""""""
         session = await core.establish_agent_execution_session("free")
         client = session["client"]
 
                                                             # Use a simpler request that might not trigger all events
-        agent_request = { )
-        "type": "agent_request",
-        "user_id": session["user_data"].id,
-        "message": "Hello",
-        "thread_id": "formatted_string"
-                                                            
-
+agent_request = {"type": "agent_request",, "user_id": session["user_data"].id,, "message": "Hello",, "thread_id": "formatted_string"}
         events = await core.execute_agent_with_event_monitoring(client, agent_request)
         validation_results = core.validator.validate_all_events()
 
@@ -721,18 +606,11 @@ class TestAgentLifecycleWebSocketEvents:
         @pytest.mark.e2e
     async def test_frontend_event_processing_simulation(self, agent_lifecycle_test_core):
         """Test that frontend can successfully process all event types."""
-        pass
-        core = agent_lifecycle_test_core
+        pass"""
         session = await core.establish_agent_execution_session("mid")
         client = session["client"]
 
-        agent_request = { )
-        "type": "agent_request",
-        "user_id": session["user_data"].id,
-        "message": "Multi-step analysis with tool usage and partial results",
-        "thread_id": "formatted_string"
-                                                                    
-
+agent_request = {"type": "agent_request",, "user_id": session["user_data"].id,, "message": "Multi-step analysis with tool usage and partial results",, "thread_id": "formatted_string"}
         events = await core.execute_agent_with_event_monitoring(client, agent_request)
 
                                                                     # Simulate frontend processing

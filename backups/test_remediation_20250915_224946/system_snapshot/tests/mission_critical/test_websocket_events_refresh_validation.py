@@ -1,6 +1,6 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
-'''
+"""
 MISSION CRITICAL: WebSocket Event Validation During Page Refresh
 
 This test validates that all required WebSocket events are properly sent
@@ -18,12 +18,9 @@ The following events MUST be sent:
 
 NEW: Factory-Based Pattern Validation:
 - WebSocketBridgeFactory creates per-user emitters
-- UserWebSocketEmitter ensures event isolation
-- UserExecutionContext provides per-request state
-- JSON serialization validation for all events
-
-@pytest.fixture
-'''
+- UserWebSocketEmitter ensures event isolation"""
+- JSON serialization validation for all events"""
+@pytest.fixture"""
 
 import asyncio
 import json
@@ -56,10 +53,8 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 ExecutionEngineFactory,
 UserExecutionContext,
 ExecutionStatus
-        
-
-
-class WebSocketEventValidation:
+        """
+"""
     """Validates WebSocket events during refresh scenarios."""
 
     # Required events per spec
@@ -102,20 +97,11 @@ class WebSocketEventValidation:
     
 
     # Initialize factory components for testing
-        self.websocket_factory = WebSocketBridgeFactory()
-        self.mock_connection_pool = self._create_mock_connection_pool()
-
-    def generate_test_token(self) -> str:
+        self.websocket_factory = WebSocketBridgeFactory()"""
+"""
         """Generate a valid JWT token for testing."""
-        payload = { )
-        'sub': 'event_test_user',
-        'email': 'events@test.com',
-        'exp': int(time.time()) + 3600,
-        'iat': int(time.time())
-    
-        return jwt.encode(payload, self.jwt_secret, algorithm='HS256')
-
-    def _create_mock_connection_pool(self):
+payload = {'sub': 'event_test_user',, 'email': 'events@test.com',, 'exp': int(time.time()) + 3600,, 'iat': int(time.time())}"""
+"""
         """Create mock connection pool for factory testing."""
 
 class MockWebSocketConnection:
@@ -123,10 +109,8 @@ class MockWebSocketConnection:
         self.user_id = user_id
         self.connection_id = connection_id
         self.sent_events = []
-        self.is_connected = True
-
-    async def send_json(self, data: Dict[str, Any]) -> None:
-        if not self.is_connected:
+        self.is_connected = True"""
+    async def send_json(self, data: Dict[str, Any]) -> None:"""
         raise ConnectionError("WebSocket disconnected")
         self.sent_events.append(data)
 
@@ -158,8 +142,7 @@ class MockConnectionPool:
         return self.connections.get(key)
 
     def simulate_disconnect(self, user_id: str, connection_id: str):
-        """Simulate connection disconnect for refresh testing."""
-        pass
+        """Simulate connection disconnect for refresh testing.""""""
         key = "formatted_string"
         if key in self.connections:
         self.connections[key].is_connected = False
@@ -174,10 +157,8 @@ class MockConnectionPool:
         return MockConnectionPool()
 
     async def test_events_preserved_after_refresh(self, page:
-        '''
-        pass
-        Test that WebSocket events continue to be sent after page refresh.
-        '''
+        """"""
+        Test that WebSocket events continue to be sent after page refresh."""
         test_name = "events_preserved_after_refresh"
         print(f" )
 
@@ -187,26 +168,19 @@ class TestWebSocketConnection:
     def __init__(self):
         pass
         self.messages_sent = []
-        self.is_connected = True
-        self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+        self.is_connected = True"""
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
     async def close(self, code: int = 1000, reason: str = "Normal closure"):
         """Close WebSocket connection."""
         pass
-        self._closed = True
-        self.is_connected = False
-
-    def get_messages(self) -> list:
-        """Get all sent messages."""
-        await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
+        self._closed = True"""
+"""
+        """Get all sent messages.""""""
+        return self.messages_sent.copy()"""
         SEARCH:  Testing: {test_name}")
 
         try:
@@ -309,9 +283,8 @@ class TestWebSocketConnection:
         page.remove_listener('websocket', handle_websocket)
 
     async def test_reconnection_event_sequence(self, page:
-        '''
-        Test that WebSocket reconnection follows proper event sequence.
-        '''
+        """
+        Test that WebSocket reconnection follows proper event sequence."""
         test_name = "reconnection_event_sequence"
         print("formatted_string")
 
@@ -404,9 +377,8 @@ class TestWebSocketConnection:
         page.remove_listener('websocket', handle_websocket)
 
     async def test_no_duplicate_events_after_refresh(self, page:
-        '''
-        Test that events are not duplicated after page refresh.
-        '''
+        """
+        Test that events are not duplicated after page refresh."""
         test_name = "no_duplicate_events_after_refresh"
         print("formatted_string")
 
@@ -484,9 +456,8 @@ class TestWebSocketConnection:
         page.remove_listener('websocket', handle_websocket)
 
     async def test_event_timing_after_refresh(self, page:
-        '''
-        Test that events are sent with appropriate timing after refresh.
-        '''
+        """
+        Test that events are sent with appropriate timing after refresh."""
         test_name = "event_timing_after_refresh"
         print("formatted_string")
 
@@ -584,23 +555,9 @@ class TestWebSocketConnection:
 
         try:
                                                     # Configure factory
-        self.websocket_factory.configure( )
-        connection_pool=self.mock_connection_pool,
-        agent_registry=None,
-        health_monitor=None
-                                                    
-
-        user_id = "formatted_string"
-        thread_id = "formatted_string"
-        connection_id = "formatted_string"
-
+        self.websocket_factory.configure(connection_pool=self.mock_connection_pool,, agent_registry=None,, health_monitor=None, user_id = "formatted_string", thread_id = "formatted_string", connection_id = "formatted_string")
                                                     # Create initial emitter
-        emitter1 = await self.websocket_factory.create_user_emitter( )
-        user_id=user_id,
-        thread_id=thread_id,
-        connection_id=connection_id
-                                                    
-
+        emitter1 = await self.websocket_factory.create_user_emitter(user_id=user_id,, thread_id=thread_id,, connection_id=connection_id)
                                                     # Send events before "refresh"
         await emitter1.notify_agent_started("TestAgent", "run_1")
         await emitter1.notify_agent_thinking("TestAgent", "run_1", "Processing...")
@@ -621,12 +578,7 @@ class TestWebSocketConnection:
 
                                                     # Reconnect and create new emitter (simulates page reload)
         self.mock_connection_pool.simulate_reconnect(user_id, connection_id)
-        emitter2 = await self.websocket_factory.create_user_emitter( )
-        user_id=user_id,
-        thread_id=thread_id,
-        connection_id=connection_id
-                                                    
-
+        emitter2 = await self.websocket_factory.create_user_emitter(user_id=user_id,, thread_id=thread_id,, connection_id=connection_id)
                                                     # Send events after "refresh"
         await emitter2.notify_tool_completed("TestAgent", "run_1", "search_tool", {"results": ["found"]})
         await emitter2.notify_agent_completed("TestAgent", "run_1", {"status": "success"})
@@ -682,16 +634,7 @@ class TestWebSocketConnection:
 
         try:
                                                                                 # Configure factory
-        self.websocket_factory.configure( )
-        connection_pool=self.mock_connection_pool,
-        agent_registry=None,
-        health_monitor=None
-                                                                                
-
-        user_id = "formatted_string"
-        thread_id = "formatted_string"
-        connection_id = "formatted_string"
-
+        self.websocket_factory.configure(connection_pool=self.mock_connection_pool,, agent_registry=None,, health_monitor=None, user_id = "formatted_string", thread_id = "formatted_string", connection_id = "formatted_string")
                                                                                 # Test events with complex data for JSON serialization
         test_events_data = [ )
         ('agent_started', {'agent_name': 'TestAgent', 'status': 'started', 'complex_data': {'nested': {'value': 123}}}),
@@ -703,12 +646,7 @@ class TestWebSocketConnection:
 
         for event_type, event_data in test_events_data:
                                                                                     # Create emitter for each test
-        emitter = await self.websocket_factory.create_user_emitter( )
-        user_id=user_id,
-        thread_id="formatted_string",
-        connection_id="formatted_string"
-                                                                                    
-
+        emitter = await self.websocket_factory.create_user_emitter(user_id=user_id,, thread_id="formatted_string",, connection_id="formatted_string")
                                                                                     # Send event based on type
         if event_type == 'agent_started':
         await emitter.notify_agent_started(event_data['agent_name'], 'test_run')
@@ -817,8 +755,6 @@ class TestWebSocketConnection:
         [U+1F310] Running Browser-Based Tests...")
         for test_func in browser_tests:
         context = await browser.new_context()
-        page = await context.new_page()
-
         try:
         await test_func(page)
         except Exception as e:
@@ -941,10 +877,8 @@ factory_events = set()
 for test_data in results['factory_tests'].values():
 if 'all_event_types' in test_data:
 factory_events.update(test_data['all_event_types'])
-
-                                                                                                                                                    # Combined validation
-all_events = browser_events | factory_events
-missing = WebSocketEventValidation.REQUIRED_EVENTS - all_events
+"""
+all_events = browser_events | factory_events"""
 assert len(missing) <= 2, "formatted_string"
 
                                                                                                                                                     # Assert factory tests passed

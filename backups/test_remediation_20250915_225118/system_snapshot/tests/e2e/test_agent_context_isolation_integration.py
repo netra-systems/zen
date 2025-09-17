@@ -1,14 +1,11 @@
 from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
-'''Agent Context Window Management Integration Test
+"""Agent Context Window Management Integration Test
 
 Business Value Justification (BVJ):
 1. Segment: Platform/Internal (Development velocity)
-2. Business Goal: Verify fresh context windows for each spawned agent task
-3. Value Impact: Prevents context bleeding and ensures AI-P3 principle compliance
-4. Strategic Impact: $20K MRR protection via context isolation reliability
-
-COMPLIANCE: File size <300 lines, Functions <8 lines, Real agent testing
-'''
+2. Business Goal: Verify fresh context windows for each spawned agent task"""
+4. Strategic Impact: $20K MRR protection via context isolation reliability"""
+COMPLIANCE: File size <300 lines, Functions <8 lines, Real agent testing"""
 
 import asyncio
 import time
@@ -26,30 +23,24 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from tests.e2e.agent_response_test_utilities import ( )
-AgentResponseSimulator)
-
-
-class TestContextAgent(BaseAgent):
-    """Simple test agent for context isolation testing."""
-
+AgentResponseSimulator)"""
+"""
+    """Simple test agent for context isolation testing.""""""
     def __init__(self, llm_manager, name="TestAgent", description="Test agent", **kwargs):
         pass
         super().__init__(llm_manager, name, description, **kwargs)
         self.context = {}
 
     async def execute(self, input_data=None):
-        """Execute the test agent."""
-        await asyncio.sleep(0)
+        """Execute the test agent.""""""
         return {"success": True, "name": self.name, "context_id": id(self.context)}
 
 
         @pytest.mark.integration
         @pytest.mark.e2e
 class TestAgentContextIsolation:
-        """Test agent context window isolation and management."""
-
-        @pytest.fixture
-    async def context_setup(self):
+        """Test agent context window isolation and management.""""""
+        @pytest.fixture"""
         """Setup context isolation test environment."""
         config = get_config()
         llm_manager = LLMManager(config)
@@ -59,10 +50,8 @@ class TestAgentContextIsolation:
 
     # Create required dependencies
         db_session = DatabaseTestManager().get_session() instead of Mock
-        tool_dispatcher = tool_dispatcher_instance  # Initialize appropriate service instead of Mock
-
-        supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
-        supervisor.websocket_manager = websocket_manager
+        tool_dispatcher = tool_dispatcher_instance  # Initialize appropriate service instead of Mock"""
+        supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)"""
         supervisor.user_id = "formatted_string"
 
         await asyncio.sleep(0)
@@ -75,8 +64,7 @@ class TestAgentContextIsolation:
 
         @pytest.mark.e2e
     async def test_fresh_context_window_creation(self, context_setup):
-        """Test that each spawned agent gets a fresh context window."""
-        pass
+        """Test that each spawned agent gets a fresh context window.""""""
         supervisor = context_setup["supervisor"]
 
         # Create multiple agents
@@ -92,12 +80,7 @@ class TestAgentContextIsolation:
             # Set unique contexts
         contexts = []
         for i, agent in enumerate(agents):
-        context_data = { )
-        "agent_id": "formatted_string",
-        "task_context": "formatted_string",
-        "session_data": "formatted_string",
-        "memory_state": {"initialized": True, "agent_number": i}
-                
+context_data = {"agent_id": "formatted_string",, "task_context": "formatted_string",, "session_data": "formatted_string",, "memory_state": {"initialized": True, "agent_number": i}}
         agent.context = context_data
         contexts.append(context_data)
 
@@ -121,11 +104,7 @@ class TestAgentContextIsolation:
                     
 
                     # Set context with cleanup tracking
-        original_context = { )
-        "session_id": str(uuid.uuid4()),
-        "memory_allocated": True,
-        "cleanup_marker": "test_cleanup"
-                    
+original_context = {"session_id": str(uuid.uuid4()),, "memory_allocated": True,, "cleanup_marker": "test_cleanup"}
         agent.context = original_context
 
                     # Execute and cleanup
@@ -136,8 +115,7 @@ class TestAgentContextIsolation:
 
         @pytest.mark.e2e
     async def test_concurrent_context_isolation(self, context_setup):
-        """Test context isolation under concurrent execution."""
-        pass
+        """Test context isolation under concurrent execution.""""""
         supervisor = context_setup["supervisor"]
 
                         # Create concurrent agents with different contexts
@@ -148,18 +126,11 @@ class TestAgentContextIsolation:
         name="formatted_string",
         description="formatted_string"
                             
-        agent.context = { )
-        "concurrent_id": i,
-        "task_data": "formatted_string",
-        "isolation_marker": str(uuid.uuid4())
-                            
+context = {"concurrent_id": i,, "task_data": "formatted_string",, "isolation_marker": str(uuid.uuid4())}
         concurrent_agents.append(agent)
 
                             # Execute concurrently
         start_time = time.time()
-        concurrent_result = await self._execute_concurrent_context_test(concurrent_agents)
-        execution_time = time.time() - start_time
-
         assert concurrent_result["all_isolated"] is True
         assert concurrent_result["no_cross_contamination"] is True
         assert execution_time < 10.0  # Performance requirement
@@ -177,11 +148,7 @@ class TestAgentContextIsolation:
                                 
 
                                 # Create context approaching limits
-        large_context = { )
-        "large_data": "x" * 10000,  # 10KB of data
-        "memory_intensive": list(range(1000)),
-        "context_id": str(uuid.uuid4())
-                                
+large_context = {"large_data": "x" * 10000,  # 10KB of data, "memory_intensive": list(range(1000)),, "context_id": str(uuid.uuid4())}
         agent.context = large_context
 
                                 # Test context size handling
@@ -192,8 +159,7 @@ class TestAgentContextIsolation:
 
         @pytest.mark.e2e
     async def test_context_persistence_across_tasks(self, context_setup):
-        """Test context persistence for agent task continuity."""
-        pass
+        """Test context persistence for agent task continuity.""""""
         supervisor = context_setup["supervisor"]
 
                                     # Create agent with persistent context
@@ -204,11 +170,7 @@ class TestAgentContextIsolation:
                                     
 
                                     # Set initial context
-        initial_context = { )
-        "persistent_id": str(uuid.uuid4()),
-        "task_counter": 0,
-        "accumulated_data": []
-                                    
+initial_context = {"persistent_id": str(uuid.uuid4()),, "task_counter": 0,, "accumulated_data": []}
         agent.context = initial_context
 
                                     # Execute multiple tasks
@@ -219,8 +181,7 @@ class TestAgentContextIsolation:
 
         async def _validate_context_isolation(self, agents: List[TestContextAgent],
         contexts: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Validate context isolation between agents."""
-    # Check uniqueness
+        """Validate context isolation between agents.""""""
         context_ids = [ctx.get("agent_id") for ctx in contexts]
         all_unique = len(set(context_ids)) == len(context_ids)
 
@@ -248,10 +209,8 @@ class TestAgentContextIsolation:
         await agent.execute()
 
     # Simulate cleanup
-        original_context = agent.context.copy()
-        agent.context.clear()
-
-        return { )
+        original_context = agent.context.copy()"""
+"""
         "context_cleared": len(agent.context) == 0,
         "memory_released": agent.context != original_context
     
@@ -267,10 +226,8 @@ class TestAgentContextIsolation:
 
     # Validate isolation after execution
         all_isolated = True
-        no_contamination = True
-
-        for i, agent in enumerate(agents):
-        # Check if context preserved its identity
+        no_contamination = True"""
+        for i, agent in enumerate(agents):"""
         if agent.context.get("concurrent_id") != original_contexts[i].get("concurrent_id"):
         all_isolated = False
 
@@ -290,10 +247,8 @@ class TestAgentContextIsolation:
         memory_usage = context_size * 2  # Estimate memory usage
 
     # Check if within reasonable limits (1MB)
-        within_limits = context_size < 1024 * 1024
-        memory_efficient = memory_usage < 2 * 1024 * 1024
-
-        return { )
+        within_limits = context_size < 1024 * 1024"""
+"""
         "within_limits": within_limits,
         "memory_efficient": memory_efficient,
         "context_size": context_size
@@ -323,10 +278,8 @@ class TestAgentContextIsolation:
         @pytest.mark.e2e
     async def test_memory_isolation_validation():
         """Test memory isolation between agent contexts."""
-        config = get_config()
-        llm_manager = LLMManager(config)
-
-            # Create two agents with separate memory spaces
+        config = get_config()"""
+"""
         agent1 = TestContextAgent(llm_manager=llm_manager, name="MemoryAgent1")
         agent2 = TestContextAgent(llm_manager=llm_manager, name="MemoryAgent2")
 
@@ -343,10 +296,8 @@ class TestAgentContextIsolation:
         @pytest.mark.e2e
     async def test_context_window_refresh():
         """Test context window refresh mechanism."""
-        pass
-        config = get_config()
-        llm_manager = LLMManager(config)
-
+        pass"""
+        llm_manager = LLMManager(config)"""
         agent = TestContextAgent(llm_manager=llm_manager, name="RefreshAgent")
         original_context = {"refresh_id": str(uuid.uuid4()), "state": "original"}
         agent.context = original_context

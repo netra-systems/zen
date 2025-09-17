@@ -2,104 +2,70 @@ class TestWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
-        pass
-        self.messages_sent = []
-        self.is_connected = True
-        self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+        pass"""
+        self.is_connected = True"""
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
     async def close(self, code: int = 1000, reason: str = "Normal closure"):
-        """Close WebSocket connection."""
-        pass
-        self._closed = True
-        self.is_connected = False
-
-    def get_messages(self) -> list:
-        """Get all sent messages."""
-        await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
-        '''
+        """Close WebSocket connection.""""""
+        self._closed = True"""
+"""
+        """Get all sent messages.""""""
+        return self.messages_sent.copy()"""
+        """
         Mission Critical: WebSocket Bridge Consistency Test Suite
         ========================================================
         Tests to ensure SSOT compliance for WebSocket communication patterns.
         All agents MUST use the unified WebSocket bridge pattern.
+"""
+        1. All agents use WebSocket bridge exclusively"""
+        3. Consistent event emission paths are used"""
+        5. Full SSOT compliance is maintained"""
 
-        CRITICAL: This test suite validates that:
-        1. All agents use WebSocket bridge exclusively
-        2. No duplicate WebSocket event methods exist
-        3. Consistent event emission paths are used
-        4. WebSocket manager is not used directly
-        5. Full SSOT compliance is maintained
-        '''
-
-        import asyncio
-        import inspect
-        import sys
-        import os
-        from pathlib import Path
-        from typing import List, Dict, Any, Set, Tuple
-        import ast
-        import pytest
-        from shared.isolated_environment import IsolatedEnvironment
+import asyncio
+import inspect
+import sys
+import os
+from pathlib import Path
+from typing import List, Dict, Any, Set, Tuple
+import ast
+import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
         # Add project root to path
         sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-        from netra_backend.app.agents.base_agent import BaseAgent
+from netra_backend.app.agents.base_agent import BaseAgent
         # Using protocol-based approach for agent execution
-        from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
-        from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
-        from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
-        from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
-        from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
-        from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
-
-
-class WebSocketPatternAnalyzer:
+from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
+from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
+from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
+from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
+from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
+from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager"""
+from shared.isolated_environment import get_env"""
+"""
         """Analyzes code for WebSocket pattern usage."""
 
     def __init__(self):
         pass
         self.violations = []
-        self.bridge_usage = []
-        self.manager_usage = []
-        self.mixed_usage = []
-        self.duplicate_methods = {}
-
-    def analyze_file(self, filepath: Path) -> Dict[str, Any]:
+        self.bridge_usage = []"""
+        self.mixed_usage = []"""
+"""
         """Analyze a Python file for WebSocket patterns."""
         try:
         with open(filepath, 'r', encoding='utf-8') as f:
-        content = f.read()
-        tree = ast.parse(content)
-
-        return self._analyze_ast(tree, filepath, content)
-        except Exception as e:
-        return {'error': str(e), 'file': str(filepath)}
-
-    def _analyze_ast(self, tree: ast.AST, filepath: Path, content: str) -> Dict[str, Any]:
+        content = f.read()"""
+        except Exception as e:"""
+"""
         """Analyze AST for WebSocket patterns."""
-        results = { )
-        'file': str(filepath),
-        'uses_bridge': False,
-        'uses_manager': False,
-        'is_mixed': False,
-        'websocket_methods': [],
-        'manager_refs': [],
-        'bridge_refs': [],
-        'violations': []
-    
-
+results = {'file': str(filepath),, 'uses_bridge': False,, 'uses_manager': False,, 'is_mixed': False,, 'websocket_methods': [],, 'manager_refs': [],, 'bridge_refs': [],, 'violations': []}
         for node in ast.walk(tree):
         # Check for WebSocket manager usage
         if isinstance(node, ast.Attribute):
@@ -134,23 +100,15 @@ class WebSocketPatternAnalyzer:
                                 # Determine if mixed usage
         if results['uses_bridge'] and results['uses_manager']:
         results['is_mixed'] = True
-        results['violations'].append('Mixed WebSocket pattern usage detected')
-
-        return results
-
-
-class TestWebSocketBridgeConsistency:
-        """Test suite for WebSocket bridge consistency and SSOT compliance."""
-
-        @pytest.fixture
-    def setup(self):
+        results['violations'].append('Mixed WebSocket pattern usage detected')"""
+        return results"""
+"""
+        """Test suite for WebSocket bridge consistency and SSOT compliance.""""""
+        @pytest.fixture"""
         """Setup test environment."""
-        self.analyzer = WebSocketPatternAnalyzer()
-        self.agent_files = self._get_agent_files()
-
-    def _get_agent_files(self) -> List[Path]:
-        """Get all agent Python files."""
-        pass
+        self.analyzer = WebSocketPatternAnalyzer()"""
+"""
+        """Get all agent Python files.""""""
         base_path = Path(__file__).parent.parent.parent / "netra_backend" / "app" / "agents"
         agent_files = []
 
@@ -165,12 +123,9 @@ class TestWebSocketBridgeConsistency:
         """Test that WebSocket event methods are not duplicated across files."""
         method_locations = {}
         duplicates = []
-
-        for filepath in self.agent_files:
-        results = self.analyzer.analyze_file(filepath)
-
-        for method in results.get('websocket_methods', []):
-        method_name = method['name']
+"""
+        results = self.analyzer.analyze_file(filepath)"""
+        for method in results.get('websocket_methods', []):"""
         location = "formatted_string"
 
         if method_name not in method_locations:
@@ -200,12 +155,9 @@ class TestWebSocketBridgeConsistency:
         pass
     # Allow emit_* methods in BaseAgent and its adapters
         if method_name.startswith('emit_'):
-        base_files = ['base_agent.py', 'websocket_bridge_adapter.py']
-        if any(base in loc for base in base_files for loc in locations):
-        return True
-        return False
-
-    def test_no_mixed_websocket_patterns(self):
+        base_files = ['base_agent.py', 'websocket_bridge_adapter.py']"""
+        return True"""
+"""
         """Test that files don't mix WebSocket manager and bridge patterns."""
         mixed_files = []
 
@@ -215,12 +167,9 @@ class TestWebSocketBridgeConsistency:
         if results.get('is_mixed'):
         mixed_files.append({ ))
         'file': filepath.name,
-        'manager_refs': len(results.get('manager_refs', [])),
-        'bridge_refs': len(results.get('bridge_refs', [])),
-        'violations': results.get('violations', [])
-            
-
-        assert len(mixed_files) == 0, ( )
+        'manager_refs': len(results.get('manager_refs', [])),"""
+        'violations': results.get('violations', [])"""
+"""
         "formatted_string" +
         "
         ".join(["formatted_string"manager_refs"]} manager refs, {f["bridge_refs"]} bridge refs" ))
@@ -242,12 +191,9 @@ class TestWebSocketBridgeConsistency:
         results = self.analyzer.analyze_file(filepath)
 
         if results.get('uses_manager') and results.get('manager_refs'):
-        manager_usage.append({ ))
-        'file': filepath.name,
-        'lines': results['manager_refs']
-                
-
-        assert len(manager_usage) == 0, ( )
+        manager_usage.append({ ))"""
+        'lines': results['manager_refs']"""
+"""
         "formatted_string" +
         "
         ".join(["formatted_string"lines"]}" for f in manager_usage])
@@ -274,12 +220,9 @@ class TestWebSocketBridgeConsistency:
             # Check if using non-standard emission methods
         non_standard = ws_methods - expected_methods
         if non_standard and 'send_' in str(non_standard):
-        inconsistent_patterns.append({ ))
-        'file': filepath.name,
-        'non_standard_methods': list(non_standard)
-                
-
-        assert len(inconsistent_patterns) == 0, ( )
+        inconsistent_patterns.append({ ))"""
+        'non_standard_methods': list(non_standard)"""
+"""
         "formatted_string" +
         "
         ".join(["formatted_string"non_standard_methods"]}" ))
@@ -289,12 +232,9 @@ class TestWebSocketBridgeConsistency:
 @pytest.mark.asyncio
     async def test_bridge_singleton_usage(self):
 """Test that all agents use the singleton bridge instance correctly."""
-pass
-                        # Get bridge instance
-bridge1 = await get_agent_websocket_bridge()
-bridge2 = await get_agent_websocket_bridge()
-
-                        # Verify singleton
+pass"""
+bridge1 = await get_agent_websocket_bridge()"""
+"""
 assert bridge1 is bridge2, "Bridge should be a singleton"
 
                         # Test that agents can set and use bridge
@@ -315,12 +255,9 @@ assert agent.websocket_bridge == bridge1
 """Test that WebSocket events flow through the bridge correctly."""
 bridge = await get_agent_websocket_bridge()
 
-                            # Mock WebSocket manager
-websocket = TestWebSocketConnection()
-bridge.websocket_manager = mock_manager
-
-                            # Create agent and set bridge
-agent = DataSubAgent()
+                            # Mock WebSocket manager"""
+bridge.websocket_manager = mock_manager"""
+                            # Create agent and set bridge"""
 agent.set_websocket_bridge(bridge, "test-run-id")
 
                             # Test event emission
@@ -337,12 +274,9 @@ try:
 from netra_backend.app.agents import base_agent
 from netra_backend.app.agents.mixins import websocket_bridge_adapter
 from netra_backend.app.services import agent_websocket_bridge
-from netra_backend.app.agents import agent_communication
-from netra_backend.app.agents import agent_lifecycle
-
-        # If we get here, no circular imports
-assert True
-except ImportError as e:
+from netra_backend.app.agents import agent_communication"""
+"""
+assert True"""
 pytest.fail("formatted_string")
 
 def test_bridge_methods_are_consistent(self):
@@ -352,12 +286,9 @@ bridge_adapter = WebSocketBridgeAdapter()
     # Get all emit methods
 emit_methods = [item for item in []]
 
-    # Verify each has consistent signature
-for method_name in emit_methods:
-method = getattr(bridge_adapter, method_name)
-sig = inspect.signature(method)
-
-        # All emit methods should be async
+    # Verify each has consistent signature"""
+method = getattr(bridge_adapter, method_name)"""
+"""
 assert inspect.iscoroutinefunction(method), "formatted_string"
 
         # Check common parameters
@@ -386,12 +317,9 @@ not results.get('is_mixed')
             
 
 if is_compliant:
-compliant_files += 1
-else:
-violations.append(filepath.name)
-
-compliance_score = (compliant_files / total_files) * 100 if total_files > 0 else 0
-
+compliant_files += 1"""
+violations.append(filepath.name)"""
+compliance_score = (compliant_files / total_files) * 100 if total_files > 0 else 0"""
 print("formatted_string")
 print("formatted_string")
 
@@ -408,17 +336,12 @@ assert compliance_score >= 80, ( )
 
 
 class TestWebSocketBridgeIntegration:
-        """Integration tests for unified WebSocket bridge."""
-
-@pytest.mark.asyncio
-    async def test_agent_lifecycle_with_bridge(self):
+        """Integration tests for unified WebSocket bridge.""""""
+@pytest.mark.asyncio"""
 """Test complete agent lifecycle using bridge pattern."""
-bridge = await get_agent_websocket_bridge()
-websocket = TestWebSocketConnection()
-bridge.websocket_manager = mock_manager
-
-        # Create agent
-agent = ValidationSubAgent()
+bridge = await get_agent_websocket_bridge()"""
+bridge.websocket_manager = mock_manager"""
+        # Create agent"""
 agent.set_websocket_bridge(bridge, "test-run-123")
 
         # Simulate lifecycle
@@ -434,12 +357,9 @@ mock_manager.notify_agent_started.called
 
 @pytest.mark.asyncio
     async def test_error_handling_through_bridge(self):
-"""Test error handling flows through bridge correctly."""
-pass
-bridge = await get_agent_websocket_bridge()
-websocket = TestWebSocketConnection()
-bridge.websocket_manager = mock_manager
-
+"""Test error handling flows through bridge correctly.""""""
+bridge = await get_agent_websocket_bridge()"""
+bridge.websocket_manager = mock_manager"""
 agent = BaseAgent(agent_id="test", name="Test")
 agent.set_websocket_bridge(bridge, "error-run")
 
@@ -458,12 +378,9 @@ websocket = TestWebSocketConnection()
 bridge.websocket_manager = mock_manager
 
                 # Create multiple agents
-agents = [ )
-DataSubAgent(),
-ValidationSubAgent()
-                
-                # Add more base agents
-for i in range(3):
+agents = [ )"""
+ValidationSubAgent()"""
+                # Add more base agents"""
 agents.append(BaseAgent(agent_id="formatted_string", name="formatted_string"))
 
                     # Set bridge for all
@@ -485,10 +402,8 @@ mock_manager.notify_agent_thinking.call_count >= len(agents)
 
 class TestWebSocketMigrationPath:
     """Tests to verify migration from manager to bridge pattern."""
-
-    def test_identify_files_needing_migration(self):
-        """Identify all files that need migration to bridge pattern."""
-        analyzer = WebSocketPatternAnalyzer()
+"""
+        """Identify all files that need migration to bridge pattern.""""""
         base_path = Path(__file__).parent.parent.parent / "netra_backend" / "app" / "agents"
 
         files_to_migrate = []
@@ -528,12 +443,9 @@ class TestWebSocketMigrationPath:
         'emit_tool_executing',
         'emit_tool_completed',
         'emit_error',
-        'emit_progress',
-        'has_websocket_bridge',
-        'set_websocket_bridge'
-    
-
-        for method in required_methods:
+        'emit_progress',"""
+        'set_websocket_bridge'"""
+"""
         assert hasattr(adapter, method), "formatted_string"
 
         # Verify it's callable

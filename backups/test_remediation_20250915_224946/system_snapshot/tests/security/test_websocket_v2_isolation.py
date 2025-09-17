@@ -12,10 +12,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -24,8 +22,7 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
         return self.messages_sent.copy()
@@ -60,16 +57,16 @@ class TestWebSocketConnection:
         - Background cleanup prevents memory leaks
         '''
 
-        import asyncio
-        import pytest
-        import uuid
-        import warnings
-        from datetime import datetime, timedelta
-        from typing import Dict, List, Any
-        from shared.isolated_environment import IsolatedEnvironment
+import asyncio
+import pytest
+import uuid
+import warnings
+from datetime import datetime, timedelta
+from typing import Dict, List, Any
+from shared.isolated_environment import IsolatedEnvironment
 
                 # Import WebSocket V2 components
-        from netra_backend.app.websocket_core import ( )
+from netra_backend.app.websocket_core import ( )
         create_websocket_manager,
         get_websocket_manager_factory,
         WebSocketManagerFactory,
@@ -77,21 +74,18 @@ class TestWebSocketConnection:
         get_legacy_websocket_manager,
         migrate_singleton_usage
                 
-        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
-        from netra_backend.app.services.user_execution_context import UserExecutionContext
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from shared.isolated_environment import get_env
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from shared.isolated_environment import get_env
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
-
-class TestWebSocketV2UserIsolation:
+"""
         """Test user isolation for WebSocket managers - each user gets their own instance."""
-
-    def test_factory_creates_isolated_managers_per_user(self):
+"""
         """Test that factory creates separate manager instances for different users."""
-    # Create contexts for two different users
-        user1_context = UserExecutionContext( )
+    # Create contexts for two different users"""
         user_id="user_123",
         thread_id="thread_456",
         run_id="run_789",
@@ -126,8 +120,7 @@ class TestWebSocketV2UserIsolation:
         assert manager1._connection_ids is not manager2._connection_ids, "Connection ID sets must be isolated"
 
     def test_same_user_different_connections_get_different_managers(self):
-        """Test that same user with different connection IDs gets different managers (strongest isolation)."""
-        pass
+        """Test that same user with different connection IDs gets different managers (strongest isolation).""""""
         user_id = "user_123"
 
     # Create contexts for same user but different connection IDs
@@ -162,8 +155,7 @@ class TestWebSocketV2UserIsolation:
         assert manager2.user_context.websocket_connection_id == "conn_002"
 
     def test_user_context_validation_prevents_invalid_contexts(self):
-        """Test that invalid user contexts are rejected to prevent security issues."""
-    # Test None user_id
+        """Test that invalid user contexts are rejected to prevent security issues.""""""
         with pytest.raises(ValueError, match="user_id cannot be None"):
         UserExecutionContext( )
         user_id=None,
@@ -201,8 +193,7 @@ class TestWebSocketV2UserIsolation:
 
     def test_manager_enforces_user_context_validation(self):
         """Test that WebSocket manager enforces strict user context validation."""
-        pass
-        valid_context = UserExecutionContext( )
+        pass"""
         user_id="user_123",
         thread_id="thread_456",
         run_id="run_789",
@@ -224,11 +215,9 @@ class TestWebSocketV2UserIsolation:
 class TestWebSocketV2MessageIsolation:
         """Test no cross-user message leakage - User A can't see User B's messages."""
 
-@pytest.mark.asyncio
-    async def test_no_cross_user_message_leakage(self):
+@pytest.mark.asyncio"""
 """Test that messages sent to one user don't leak to other users."""
-        # Create isolated managers for two users
-user1_context = UserExecutionContext( )
+        # Create isolated managers for two users"""
 user_id="user_111",
 thread_id="thread_111",
 run_id="run_111",
@@ -269,19 +258,11 @@ await manager1.add_connection(user1_connection)
 await manager2.add_connection(user2_connection)
 
         # Send message to user1
-user1_message = { )
-"type": "agent_started",
-"data": {"sensitive_user1_data": "secret_123"}
-        
-
+user1_message = {"type": "agent_started",, "data": {"sensitive_user1_data": "secret_123"}}
 await manager1.send_to_user(user1_message)
 
         # Send message to user2
-user2_message = { )
-"type": "tool_executing",
-"data": {"sensitive_user2_data": "secret_456"}
-        
-
+user2_message = {"type": "tool_executing",, "data": {"sensitive_user2_data": "secret_456"}}
 await manager2.send_to_user(user2_message)
 
         # CRITICAL: Verify isolation - user1 only gets user1 messages
@@ -302,8 +283,7 @@ assert user1_message not in user2_calls, "User2 should never receive user1"s mes
 @pytest.mark.asyncio
     async def test_connection_security_validation(self):
 """Test that connections are validated to belong to the correct user."""
-pass
-user1_context = UserExecutionContext( )
+pass"""
 user_id="user_111",
 thread_id="thread_111",
 run_id="run_111",
@@ -342,8 +322,7 @@ assert len(manager2.get_user_connections()) == 1
 @pytest.mark.asyncio
     async def test_critical_event_isolation(self):
 """Test that critical events are isolated between users."""
-                    # Create managers for two users
-user1_context = UserExecutionContext( )
+                    # Create managers for two users"""
 user_id="user_aaa",
 thread_id="thread_aaa",
 run_id="run_aaa",
@@ -405,14 +384,12 @@ assert user2_event["user_context"]["user_id"] == "user_bbb"
 
 class TestWebSocketV2FactoryPattern:
     """Test factory pattern creates isolated instances per request."""
-
-    def test_factory_singleton_behavior(self):
+"""
         """Test that factory itself is singleton but creates isolated managers."""
     # Get factory instances
         factory1 = get_websocket_manager_factory()
         factory2 = get_websocket_manager_factory()
-
-    # CRITICAL: Factory should be singleton
+"""
         assert factory1 is factory2, "Factory should be singleton for configuration consistency"
 
     # But managers created by factory should be isolated
@@ -443,8 +420,7 @@ class TestWebSocketV2FactoryPattern:
     def test_factory_resource_limits_enforcement(self):
         """Test that factory enforces resource limits per user."""
         pass
-        factory = WebSocketManagerFactory(max_managers_per_user=2)  # Limit to 2 managers per user
-
+        factory = WebSocketManagerFactory(max_managers_per_user=2)  # Limit to 2 managers per user"""
         user_id = "user_123"
 
     # Create contexts for same user (different connection IDs)
@@ -477,8 +453,7 @@ class TestWebSocketV2FactoryPattern:
     async def test_factory_cleanup_mechanisms(self):
 """Test that factory properly cleans up managers."""
 factory = WebSocketManagerFactory()
-
-user_context = UserExecutionContext( )
+"""
 user_id="user_cleanup",
 thread_id="thread_cleanup",
 run_id="run_cleanup",
@@ -511,8 +486,7 @@ def test_factory_metrics_tracking(self):
 pass
 factory = WebSocketManagerFactory()
 
-    # Initial metrics
-initial_stats = factory.get_factory_stats()
+    # Initial metrics"""
 assert initial_stats["factory_metrics"]["managers_created"] == 0
 assert initial_stats["factory_metrics"]["managers_active"] == 0
 
@@ -537,11 +511,9 @@ assert len(final_stats["current_state"]["isolation_keys"]) == 3
 
 class TestWebSocketV2DeprecationHandling:
         """Test deprecated singleton warnings are properly shown."""
-
-    def test_legacy_websocket_manager_deprecation_warning(self):
+"""
         """Test that legacy singleton usage triggers deprecation warnings."""
-    # This should trigger a deprecation warning
-        with warnings.catch_warnings(record=True) as warning_list:
+    # This should trigger a deprecation warning"""
         warnings.simplefilter("always")  # Ensure all warnings are captured
 
         # Call actual legacy function
@@ -559,8 +531,7 @@ class TestWebSocketV2DeprecationHandling:
 
     def test_singleton_migration_guidance(self):
         """Test that migration utilities provide proper guidance."""
-        pass
-    # Test migration utility function exists
+        pass"""
         assert hasattr(migrate_singleton_usage, '__call__'), "Migration utility should be callable"
 
     # Test actual migration utility usage
@@ -580,8 +551,7 @@ class TestWebSocketV2DeprecationHandling:
 
     def test_factory_pattern_usage_enforcement(self):
         """Test that factory pattern is properly enforced."""
-    # Direct instantiation should require proper context
-        user_context = UserExecutionContext( )
+    # Direct instantiation should require proper context"""
         user_id="user_enforcement",
         thread_id="thread_enforcement",
         run_id="run_enforcement",
@@ -600,11 +570,9 @@ class TestWebSocketV2DeprecationHandling:
 class TestWebSocketV2SecurityIntegration:
         """Integration tests for comprehensive security validation."""
 
-@pytest.mark.asyncio
-    async def test_end_to_end_user_isolation(self):
+@pytest.mark.asyncio"""
 """End-to-end test of complete user isolation."""
-        # Create contexts for 3 different users
-users_data = [ )
+        # Create contexts for 3 different users"""
 ("user_alpha", "secret_alpha_data", "task_alpha"),
 ("user_beta", "secret_beta_data", "task_beta"),
 ("user_gamma", "secret_gamma_data", "task_gamma")
@@ -665,8 +633,7 @@ assert other_task not in str(event), "formatted_string"s task"
 @pytest.mark.asyncio
     async def test_connection_lifecycle_security(self):
 """Test that connection lifecycle maintains security throughout."""
-pass
-user_context = UserExecutionContext( )
+pass"""
 user_id="user_lifecycle",
 thread_id="thread_lifecycle",
 run_id="run_lifecycle",
@@ -704,8 +671,7 @@ websocket.send_json.assert_not_called()
 
 def test_resource_exhaustion_prevention(self):
 """Test that factory prevents resource exhaustion attacks."""
-factory = WebSocketManagerFactory(max_managers_per_user=3)
-
+factory = WebSocketManagerFactory(max_managers_per_user=3)"""
 attacker_user_id = "attacker_user"
 
     # Create maximum allowed managers

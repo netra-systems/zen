@@ -1,4 +1,4 @@
-'''
+"""
 Focused test for database connection auth logging issues.
 
 Business Value Justification (BVJ):
@@ -6,10 +6,8 @@ Business Value Justification (BVJ):
 - Business Goal: System stability and clean logging
 - Value Impact: Reduces noise in logs, improves debugging efficiency
 - Strategic Impact: Better observability and operational excellence
-
-This test focuses specifically on database authentication logging issues
-without requiring the full service stack to be available.
-'''
+"""
+without requiring the full service stack to be available."""
 import asyncio
 import logging
 import pytest
@@ -20,25 +18,21 @@ from shared.isolated_environment import IsolatedEnvironment
     # Import isolated environment for proper environment management
 from shared.isolated_environment import get_env
 
-
-class TestDatabaseAuthLoggingFocused:
+"""
     """Focused test for database authentication and connection logging issues."""
 
-    @pytest.fixture
-    def setup_isolated_env(self, isolated_test_env):
+    @pytest.fixture"""
         """Ensure isolated environment for all tests."""
         self.env = isolated_test_env
         return self.env
 
-        @pytest.fixture
-    def setup_test_db_config(self, isolated_test_env):
+        @pytest.fixture"""
         """Set up test database configuration."""
         pass
     # Configure test environment with proper service URLs
         postgres_url = 'postgresql://test_user:test_pass@localhost:5433/netra_test'
         redis_url = 'redis://localhost:6381'
-
-    # Set the URLs in isolated environment
+"""
         isolated_test_env.set('DATABASE_URL', postgres_url, source="test_database_setup")
         isolated_test_env.set('REDIS_URL', redis_url, source="test_redis_setup")
         isolated_test_env.set('USE_REAL_SERVICES', 'true', source="test_real_services_flag")
@@ -57,8 +51,7 @@ import psycopg
 postgres_url = 'postgresql://test_user:test_pass@localhost:5433/netra_test'
 
 try:
-with psycopg.connect(postgres_url, connect_timeout=5) as conn:
-with conn.cursor() as cur:
+with psycopg.connect(postgres_url, connect_timeout=5) as conn:"""
 cur.execute("SELECT 1")
 result = cur.fetchone()
 assert result[0] == 1, "Database connectivity test failed"
@@ -72,8 +65,6 @@ handler.setLevel(logging.DEBUG)
 
                         # Get the root logger and auth logger
 root_logger = logging.getLogger()
-auth_logger = logging.getLogger('auth_service')
-
                         # Store original handlers
 original_root_handlers = root_logger.handlers[:]
 original_auth_handlers = auth_logger.handlers[:]
@@ -198,8 +189,7 @@ logger.setLevel(logging.DEBUG)
 
 try:
 try:
-from auth_service.auth_core.database.database_manager import AuthDatabaseManager
-except ImportError as import_error:
+from auth_service.auth_core.database.database_manager import AuthDatabaseManager"""
 pytest.skip("formatted_string")
 
                     # Test various URL transformations with different credential patterns

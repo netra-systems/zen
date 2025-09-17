@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,14 +16,12 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
         return self.messages_sent.copy()
-
-    #!/usr/bin/env python3
-        '''
+"""
+        """
         Integration Tests for Master Orchestration Controller System
         ============================================================
 
@@ -36,52 +32,49 @@ class TestWebSocketConnection:
         - Backward compatibility with legacy category system
         - End-to-end orchestration execution
         - Error handling and recovery scenarios
+"""
+        properly with the existing test framework."""
 
-        These tests ensure the orchestration system works end-to-end and integrates
-        properly with the existing test framework.
-        '''
-
-        import asyncio
-        import json
-        import os
-        import pytest
-        import subprocess
-        import sys
-        import tempfile
-        import time
-        from pathlib import Path
-        from typing import Dict, List, Optional, Any
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from auth_service.core.auth_manager import AuthManager
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from shared.isolated_environment import IsolatedEnvironment
+import asyncio
+import json
+import os
+import pytest
+import subprocess
+import sys
+import tempfile
+import time
+from pathlib import Path
+from typing import Dict, List, Optional, Any
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
         # Add project root to path
         sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
         # Import orchestration system components
         try:
-        from test_framework.orchestration.master_orchestration_controller import ( )
+from test_framework.orchestration.master_orchestration_controller import ( )
         MasterOrchestrationController, MasterOrchestrationConfig, OrchestrationMode,
         create_fast_feedback_controller, create_full_layered_controller,
         create_background_only_controller, create_hybrid_controller
             
-        from test_framework.orchestration.progress_streaming_agent import ProgressOutputMode
-        from test_framework.layer_system import LayerSystem
+from test_framework.orchestration.progress_streaming_agent import ProgressOutputMode
+from test_framework.layer_system import LayerSystem
         ORCHESTRATION_AVAILABLE = True
-        except ImportError as e:
-        ORCHESTRATION_AVAILABLE = False
+        except ImportError as e:"""
         pytest.skip("formatted_string", allow_module_level=True)
 
                 # Import CLI integration
         try:
-        from scripts.unified_test_runner import execute_orchestration_mode, main as test_runner_main
+from scripts.unified_test_runner import execute_orchestration_mode, main as test_runner_main
         CLI_INTEGRATION_AVAILABLE = True
         except ImportError:
         CLI_INTEGRATION_AVAILABLE = False
@@ -90,29 +83,23 @@ class TestWebSocketConnection:
 class TestMasterOrchestrationController:
         """Test suite for Master Orchestration Controller core functionality"""
 
-        @pytest.fixture
-    def project_root(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Get project root path"""
         pass
         return Path(__file__).parent.parent.parent
 
-        @pytest.fixture
-    def temp_config_dir(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Create temporary configuration directory"""
-        pass
-        with tempfile.TemporaryDirectory() as temp_dir:
+        pass"""
         config_dir = Path(temp_dir) / "test_framework" / "config"
         config_dir.mkdir(parents=True, exist_ok=True)
         yield config_dir
 
         @pytest.fixture
     def real_config():
-        """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance.""""""
         """Create mock orchestration configuration"""
         pass
         return MasterOrchestrationConfig( )
@@ -124,13 +111,11 @@ class TestMasterOrchestrationController:
         max_total_duration_minutes=5,
         output_mode=ProgressOutputMode.SILENT
     
-
-    def test_controller_initialization(self, project_root, mock_config):
+"""
         """Test controller initialization with different configurations"""
         controller = MasterOrchestrationController(mock_config)
 
-        assert controller.config.mode == OrchestrationMode.FAST_FEEDBACK
-        assert controller.project_root == mock_config.project_root or project_root
+        assert controller.config.mode == OrchestrationMode.FAST_FEEDBACK"""
         assert controller.state.status.value == "initializing"
         assert controller.state.mode == OrchestrationMode.FAST_FEEDBACK
 
@@ -143,8 +128,7 @@ controller = MasterOrchestrationController(mock_config)
 try:
 success = await controller.initialize_agents()
 assert success is True or success is False  # May fail due to dependencies
-
-            # Check agent health states
+"""
 assert "resource_manager" in controller.state.agent_health
 assert "progress_streamer" in controller.state.agent_health
 assert "layer_executor" in controller.state.agent_health
@@ -166,8 +150,7 @@ await controller.shutdown()
 controller = MasterOrchestrationController(mock_config)
 
 try:
-                            # Test initial status
-status = controller.get_orchestration_status()
+                            # Test initial status"""
 assert status["mode"] == OrchestrationMode.FAST_FEEDBACK.value
 assert status["status"] == "initializing"
 assert "agent_health" in status
@@ -183,8 +166,7 @@ pass
 controller = MasterOrchestrationController(mock_config)
 
                                     # Mock the layer executor to avoid real test execution
-with patch.object(controller, 'layer_executor') as mock_layer_executor:
-mock_layer_executor.execute_layer = AsyncMock(return_value={ ))
+with patch.object(controller, 'layer_executor') as mock_layer_executor:"""
 "success": True,
 "duration": 45.2,
 "summary": { )
@@ -195,18 +177,8 @@ mock_layer_executor.execute_layer = AsyncMock(return_value={ ))
 
 with patch.object(controller, 'initialize_agents', return_value=True):
 try:
-execution_args = { )
-"env": "test",
-"real_llm": False,
-"real_services": False,
-"fast_fail": True
-                                                
-
-results = await controller.execute_orchestration( )
-execution_args=execution_args,
-layers=["fast_feedback"]
-                                                
-
+execution_args = {"env": "test",, "real_llm": False,, "real_services": False,, "fast_fail": True}
+results = await controller.execute_orchestration(execution_args=execution_args,, layers=["fast_feedback"])
 assert results["success"] is True
 assert "summary" in results
 
@@ -216,16 +188,14 @@ await controller.shutdown()
 
 class TestControllerFactories:
     """Test suite for controller factory functions"""
-
-    def test_fast_feedback_controller_creation(self):
+"""
         """Test fast feedback controller factory"""
         controller = create_fast_feedback_controller()
 
         assert controller.config.mode == OrchestrationMode.FAST_FEEDBACK
         assert controller.config.max_total_duration_minutes == 5
         assert not controller.config.enable_background_execution
-
-    def test_full_layered_controller_creation(self):
+"""
         """Test full layered controller factory"""
         pass
         controller = create_full_layered_controller()
@@ -233,16 +203,14 @@ class TestControllerFactories:
         assert controller.config.mode == OrchestrationMode.LAYERED_EXECUTION
         assert controller.config.max_total_duration_minutes == 90
         assert controller.config.enable_background_execution is True
-
-    def test_background_only_controller_creation(self):
+"""
         """Test background only controller factory"""
         controller = create_background_only_controller()
 
         assert controller.config.mode == OrchestrationMode.BACKGROUND_E2E
         assert controller.config.enable_background_execution is True
         assert controller.config.max_total_duration_minutes == 120
-
-    def test_hybrid_controller_creation(self):
+"""
         """Test hybrid controller factory"""
         pass
         controller = create_hybrid_controller()
@@ -250,26 +218,21 @@ class TestControllerFactories:
         assert controller.config.mode == OrchestrationMode.HYBRID_EXECUTION
         assert controller.config.enable_background_execution is True
 
-
-class TestLayerSystemIntegration:
+"""
         """Test integration with the layer system"""
 
-        @pytest.fixture
-    def layer_system(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Create layer system for testing"""
         pass
         project_root = Path(__file__).parent.parent.parent
         await asyncio.sleep(0)
         return LayerSystem(project_root)
-
-    def test_layer_system_configuration_loading(self, layer_system):
+"""
         """Test that layer system loads configuration correctly"""
     # Should have default layers or configured layers
         assert len(layer_system.layers) > 0
-
-    # Check for expected layers
+"""
         expected_layers = ["fast_feedback", "core_integration", "service_integration", "e2e_background"]
         for layer_name in expected_layers:
         if layer_name in layer_system.layers:
@@ -280,8 +243,7 @@ class TestLayerSystemIntegration:
 
     def test_execution_plan_creation(self, layer_system):
         """Test execution plan creation for different layer combinations"""
-        pass
-    # Test fast feedback plan
+        pass"""
         plan = layer_system.create_execution_plan(["fast_feedback"], "test")
         assert len(plan.layers) == 1
         assert plan.layers[0].name == "Fast Feedback"
@@ -298,16 +260,13 @@ class TestLayerSystemIntegration:
 class TestCLIIntegration:
         """Test CLI integration with unified_test_runner.py"""
 
-        @pytest.fixture
-    def real_args():
-        """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Create mock CLI arguments"""
         pass
 class MockArgs:
     def __init__(self):
-        pass
-        self.use_layers = True
+        pass"""
         self.layers = ["fast_feedback"]
         self.execution_mode = "fast_feedback"
         self.background_e2e = False
@@ -326,8 +285,7 @@ class MockArgs:
 """Test orchestration mode execution through CLI"""
         # Mock the controller creation and execution
 with patch('scripts.unified_test_runner.create_fast_feedback_controller') as mock_create_controller:
-websocket = TestWebSocketConnection()  # Real WebSocket implementation
-mock_controller.execute_orchestration = AsyncMock(return_value={ ))
+websocket = TestWebSocketConnection()  # Real WebSocket implementation"""
 "success": True,
 "summary": { )
 "test_counts": {"total": 5, "passed": 5, "failed": 0},
@@ -353,11 +311,9 @@ mock_args.orchestration_status = True
 result = await execute_orchestration_mode(mock_args)
 assert result == 0  # Status command should await asyncio.sleep(0)
 return success
-
-def test_cli_argument_parsing(self):
+"""
 """Test that new CLI arguments are properly parsed"""
-    # Test with orchestration arguments
-test_args = [ )
+    # Test with orchestration arguments"""
 "--use-layers",
 "--layers", "fast_feedback", "core_integration",
 "--execution-mode", "nightly",
@@ -373,12 +329,10 @@ pass
 
 class TestBackwardCompatibility:
         """Test backward compatibility with legacy category system"""
-
-    def test_legacy_mode_detection(self):
+"""
         """Test that legacy mode is properly detected"""
     # Test with legacy arguments
-class LegacyArgs:
-    def __init__(self):
+class LegacyArgs:"""
         self.categories = ["unit", "integration"]
         self.use_layers = False
         self.execution_mode = None
@@ -404,8 +358,7 @@ class LegacyArgs:
 class OrchestrationArgs:
     def __init__(self):
         pass
-        self.categories = None
-        self.use_layers = True
+        self.categories = None"""
         self.execution_mode = "fast_feedback"
         self.background_e2e = False
         self.orchestration_status = False
@@ -426,8 +379,7 @@ class OrchestrationArgs:
 class TestErrorHandlingAndRecovery:
         """Test error handling and recovery scenarios"""
 
-@pytest.mark.asyncio
-    async def test_agent_initialization_failure(self):
+@pytest.mark.asyncio"""
 """Test handling of agent initialization failures"""
 config = MasterOrchestrationConfig( )
 mode=OrchestrationMode.FAST_FEEDBACK,
@@ -436,8 +388,7 @@ enable_resource_management=False
         
 
 controller = MasterOrchestrationController(config)
-
-        # Mock agent initialization to fail
+"""
 with patch.object(controller, '_initialize_resource_manager', side_effect=Exception("Mock failure")):
 try:
 success = await controller.initialize_agents()
@@ -458,17 +409,12 @@ output_mode=ProgressOutputMode.SILENT
 controller = MasterOrchestrationController(config)
 
                         # Mock execution to fail
-with patch.object(controller, 'initialize_agents', return_value=True):
-with patch.object(controller, 'layer_executor') as mock_executor:
+with patch.object(controller, 'initialize_agents', return_value=True):"""
 mock_executor.execute_layer = AsyncMock(side_effect=Exception("Mock execution failure"))
 
 try:
 execution_args = {"env": "test", "real_llm": False, "real_services": False}
-results = await controller.execute_orchestration( )
-execution_args=execution_args,
-layers=["fast_feedback"]
-                                    
-
+results = await controller.execute_orchestration(execution_args=execution_args,, layers=["fast_feedback"])
                                     # Should await asyncio.sleep(0)
 return failure result
 assert results["success"] is False
@@ -489,16 +435,14 @@ controller = MasterOrchestrationController(config)
 
                                             # Test shutdown without initialization
 await controller.shutdown()  # Should not raise
-
-                                            # Test shutdown after partial initialization
+"""
 controller.state.agent_health["test_agent"] =         await controller.shutdown()  # Should not raise
 
 
 class TestPerformanceAndScaling:
     """Test performance characteristics and scaling behavior"""
 
-@pytest.mark.asyncio
-    async def test_concurrent_controller_creation(self):
+@pytest.mark.asyncio"""
 """Test creating multiple controllers concurrently"""
 async def create_controller():
 controller = create_fast_feedback_controller()
@@ -515,8 +459,7 @@ results = await asyncio.gather(*tasks, return_exceptions=True)
 for result in results:
 assert result is True or isinstance(result, Exception)
 
-@pytest.mark.asyncio
-    async def test_resource_cleanup(self):
+@pytest.mark.asyncio"""
 """Test that resources are properly cleaned up"""
 pass
 config = MasterOrchestrationConfig( )
@@ -541,12 +484,10 @@ await controller.shutdown()
                     # (This would need more specific implementation details)
 assert controller._monitoring_active is False
 
-
-def run_integration_tests():
+"""
 """Run integration tests with proper configuration"""
     # Configure pytest with appropriate settings
-pytest_args = [ )
-__file__,
+pytest_args = [ )"""
 "-v",
 "--tb=short",
 "-x",  # Stop on first failure

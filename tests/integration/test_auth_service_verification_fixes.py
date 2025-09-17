@@ -1,4 +1,4 @@
-'''
+"""
 Auth Service Verification Tests - Fix Functional Service Failures
 
 This test suite addresses auth service verification issues where services are
@@ -9,14 +9,10 @@ Key Issues from Iteration 8 Analysis:
 2. JWT token verification reporting false negatives
 3. OAuth flow verification timing out on functional endpoints
 4. Service readiness checks incorrectly reporting unavailable services
-5. Port configuration mismatches causing verification failures
-
-Business Value Justification (BVJ):
-- Segment: Platform/Internal
-- Business Goal: Accurate service health monitoring and verification
-- Value Impact: Prevents false positive service failures blocking deployments
-- Strategic Impact: Reliable service verification for all customer operations
-'''
+5. Port configuration mismatches causing verification failures"""
+Business Value Justification (BVJ):"""
+- Business Goal: Accurate service health monitoring and verification"""
+- Strategic Impact: Reliable service verification for all customer operations"""
 
 import asyncio
 import logging
@@ -30,44 +26,30 @@ import httpx
 from urllib.parse import urlparse
 
 from shared.isolated_environment import get_env
-
-logger = logging.getLogger(__name__)
-
-
-@dataclass
-class ServiceVerificationResult:
+"""
+"""
+@dataclass"""
     """Result of service verification test."""
     service_name: str
     verification_type: str
     success: bool
     response_time: float
-    status_code: Optional[int] = None
-    error: Optional[str] = None
-    details: Optional[Dict[str, Any]] = None
-
-
-class AuthServiceVerificationTester:
+    status_code: Optional[int] = None"""
+    details: Optional[Dict[str, Any]] = None"""
+"""
     """Tests auth service verification logic to identify false failure scenarios."""
 
     def __init__(self):
         pass
         self.test_results = []
         self.env = get_env()
-    # Enable isolation for test environment access per CLAUDE.md
-        self.env.enable_isolation()
-    # Use real service discovery to get actual running service URLs
-        self.service_urls = self._discover_real_service_urls()
-
-    def _discover_real_service_urls(self) -> Dict[str, str]:
+    # Enable isolation for test environment access per CLAUDE.md"""
+    # Use real service discovery to get actual running service URLs"""
+"""
         """Discover real running service URLs using environment and service discovery."""
     # Check for running services using real environment configuration
     # CRITICAL FIX: Use correct ports based on actual docker-compose configuration
-        raw_urls = { )
-        'auth_service': self.env.get('AUTH_SERVICE_URL', 'http://localhost:8081'),  # Fixed: was 8083
-        'backend': self.env.get('BACKEND_URL', 'http://localhost:8000'),
-        'frontend': self.env.get('FRONTEND_URL', 'http://localhost:3000')
-    
-
+raw_urls = {'auth_service': self.env.get('AUTH_SERVICE_URL', 'http://localhost:8081'),  # Fixed: was 8083, 'backend': self.env.get('BACKEND_URL', 'http://localhost:8000'),, 'frontend': self.env.get('FRONTEND_URL', 'http://localhost:3000')}
     # Convert Docker service names to localhost for direct testing
         service_urls = {}
         for service, url in raw_urls.items():
@@ -82,8 +64,8 @@ class AuthServiceVerificationTester:
 
                         Try to read from service discovery file if available
         try:
-        import json
-        from pathlib import Path
+import json
+from pathlib import Path
         discovery_file = Path('.dev_services_discovery.json')
         if discovery_file.exists():
         with open(discovery_file, 'r') as f:
@@ -91,26 +73,18 @@ class AuthServiceVerificationTester:
 
                                     Update URLs from service discovery
         if 'auth' in discovery_data and 'url' in discovery_data['auth']:
-        service_urls['auth_service'] = discovery_data['auth']['url']
-        if 'backend' in discovery_data and 'url' in discovery_data['backend']:
-        service_urls['backend'] = discovery_data['backend']['url']
-        if 'frontend' in discovery_data and 'url' in discovery_data['frontend']:
-        service_urls['frontend'] = discovery_data['frontend']['url']
-        except Exception as e:
+        service_urls['auth_service'] = discovery_data['auth']['url']"""
+        service_urls['backend'] = discovery_data['backend']['url']"""
+        service_urls['frontend'] = discovery_data['frontend']['url']"""
         logger.debug("formatted_string")
 
         logger.info("formatted_string")
         return service_urls
 
     async def verify_service_health(self, service_name: str, timeout: float = 10.0) -> ServiceVerificationResult:
-        """Verify service health endpoint with detailed diagnostics."""
-        start_time = time.time()
-        base_url = self.service_urls.get(service_name, 'http://localhost:8000')
-
-    # Try multiple health endpoint patterns
-        health_endpoints = ['/health', '/health/ready', '/health/live', '/api/health', '/status']
-
-        for endpoint in health_endpoints:
+        """Verify service health endpoint with detailed diagnostics.""""""
+    # Try multiple health endpoint patterns"""
+"""
         url = "formatted_string"
 
         try:
@@ -131,13 +105,7 @@ class AuthServiceVerificationTester:
         success=True,
         response_time=response_time,
         status_code=response.status_code,
-        details={ )
-        'endpoint': endpoint,
-        'url': url,
-        'health_data': health_data
-                            
-                            
-
+details={'endpoint': endpoint,, 'url': url,, 'health_data': health_data}
         except httpx.ConnectError as e:
                                 # Connection refused - service may be down
         continue
@@ -175,8 +143,6 @@ class AuthServiceVerificationTester:
 
         for endpoint_config in test_endpoints:
         start_time = time.time()
-        url = "formatted_string"
-
         try:
         async with httpx.AsyncClient(timeout=10.0) as client:
         if endpoint_config['method'] == 'GET':
@@ -188,25 +154,14 @@ class AuthServiceVerificationTester:
         response_time = time.time() - start_time
         expected_statuses = endpoint_config['expected_status']
         if isinstance(expected_statuses, int):
-        expected_statuses = [expected_statuses]
-
-        success = response.status_code in expected_statuses
-
-        result = ServiceVerificationResult( )
-        service_name='auth_service',
+        expected_statuses = [expected_statuses]"""
+        success = response.status_code in expected_statuses"""
+        result = ServiceVerificationResult( )"""
         verification_type="formatted_string",
         success=success,
         response_time=response_time,
         status_code=response.status_code,
-        details={ )
-        'endpoint': endpoint_config['path'],
-        'method': endpoint_config['method'],
-        'expected_statuses': expected_statuses,
-        'description': endpoint_config['description'],
-        'url': url
-                            
-                            
-
+details={'endpoint': endpoint_config['path'],, 'method': endpoint_config['method'],, 'expected_statuses': expected_statuses,, 'description': endpoint_config['description'],, 'url': url}
         if not success:
         result.error = "formatted_string"
 
@@ -228,9 +183,6 @@ class AuthServiceVerificationTester:
     async def verify_jwt_token_functionality(self) -> ServiceVerificationResult:
         """Verify JWT token verification functionality without requiring real tokens."""
         start_time = time.time()
-        auth_base_url = self.service_urls['auth_service']
-        verify_url = "formatted_string"
-
     # Test token verification endpoint with various invalid tokens to verify endpoint functionality
         test_cases = [ )
         {'token': None, 'expected_status': [400, 401], 'description': 'Missing token'},
@@ -249,12 +201,9 @@ class AuthServiceVerificationTester:
 
         async with httpx.AsyncClient(timeout=5.0) as client:
         response = await client.post(verify_url, headers=headers)
-
-        expected_statuses = test_case['expected_status']
-        if response.status_code in expected_statuses:
-        verification_working = True
-        break
-        else:
+"""
+        if response.status_code in expected_statuses:"""
+        break"""
         error_details.append("formatted_string")
 
         except Exception as e:
@@ -293,30 +242,18 @@ class AuthServiceVerificationTester:
 
         for endpoint_config in oauth_endpoints:
         start_time = time.time()
-        url = "formatted_string"
-
         try:
         async with httpx.AsyncClient(timeout=10.0, follow_redirects=False) as client:
         response = await client.get(url, params=endpoint_config.get('test_params', {}))
 
-        response_time = time.time() - start_time
-        expected_statuses = endpoint_config['expected_statuses']
-        success = response.status_code in expected_statuses
-
-        result = ServiceVerificationResult( )
-        service_name='auth_service',
+        response_time = time.time() - start_time"""
+        success = response.status_code in expected_statuses"""
+        result = ServiceVerificationResult( )"""
         verification_type="formatted_string",
         success=success,
         response_time=response_time,
         status_code=response.status_code,
-        details={ )
-        'endpoint': endpoint_config['path'],
-        'expected_statuses': expected_statuses,
-        'description': endpoint_config['description'],
-        'test_params': endpoint_config.get('test_params', {})
-                
-                
-
+details={'endpoint': endpoint_config['path'],, 'expected_statuses': expected_statuses,, 'description': endpoint_config['description'],, 'test_params': endpoint_config.get('test_params', {})}
         if not success:
         result.error = "formatted_string"
 
@@ -344,18 +281,10 @@ class AuthServiceVerificationTester:
 
         try:
         parsed_url = urlparse(base_url)
-        expected_ports = { )
-        'auth_service': [8081, 8001, 8080],  # Fixed: Added 8081 as primary expected port
-        'backend': [8000, 8080],  # Common backend ports
-        'frontend': [3000, 8080, 80]  # Common frontend ports
-            
-
-        actual_port = parsed_url.port or (80 if parsed_url.scheme == 'http' else 443)
-        expected_port_list = expected_ports.get(service_name, [8000])
-
-            # Test if service responds on the configured port
-        try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
+expected_ports = {'auth_service': [8081, 8001, 8080],  # Fixed: Added 8081 as primary expected port, 'backend': [8000, 8080],  # Common backend ports, 'frontend': [3000, 8080, 80]  # Common frontend ports}
+        actual_port = parsed_url.port or (80 if parsed_url.scheme == 'http' else 443)"""
+"""
+        try:"""
         response = await client.get("formatted_string")
         port_accessible = True
         port_response_code = response.status_code
@@ -375,15 +304,7 @@ class AuthServiceVerificationTester:
         success=success,
         response_time=response_time,
         status_code=port_response_code,
-        details={ )
-        'configured_url': base_url,
-        'actual_port': actual_port,
-        'expected_ports': expected_port_list,
-        'port_valid': port_valid,
-        'port_accessible': port_accessible
-                        
-                        
-
+details={'configured_url': base_url,, 'actual_port': actual_port,, 'expected_ports': expected_port_list,, 'port_valid': port_valid,, 'port_accessible': port_accessible}
         if not success:
         issues = []
         if not port_valid:
@@ -480,14 +401,7 @@ class AuthServiceVerificationTester:
         passed_tests = sum(1 for result in all_results if result.success)
         failed_tests = total_tests - passed_tests
 
-        verification_summary = { )
-        'total_tests': total_tests,
-        'passed_tests': passed_tests,
-        'failed_tests': failed_tests,
-        'success_rate': (passed_tests / total_tests) * 100 if total_tests > 0 else 0,
-        'all_results': all_results
-                                        
-
+verification_summary = {'total_tests': total_tests,, 'passed_tests': passed_tests,, 'failed_tests': failed_tests,, 'success_rate': (passed_tests / total_tests) * 100 if total_tests > 0 else 0,, 'all_results': all_results}
         print(f" )
         === VERIFICATION SUMMARY ===")
         print("formatted_string")
@@ -499,25 +413,19 @@ class AuthServiceVerificationTester:
 
 
 class AuthServiceVerificationFixer:
-        """Implements fixes for common auth service verification false failures."""
-
-        @staticmethod
-    def create_improved_health_check(service_name: str, timeout: float = 10.0):
+        """Implements fixes for common auth service verification false failures.""""""
+        @staticmethod"""
         """Create an improved health check function that reduces false failures."""
-
-    async def improved_health_check(base_url: str) -> Dict[str, Any]:
+"""
         """Improved health check with multiple fallback strategies."""
 
     # Strategy 1: Try standard health endpoints with graduated timeouts
         health_strategies = [ )
         {'endpoints': ['/health'], 'timeout': 2.0, 'description': 'Fast health check'},
         {'endpoints': ['/health/ready', '/health/live'], 'timeout': 5.0, 'description': 'Kubernetes-style probes'},
-        {'endpoints': ['/api/health', '/status', '/ping'], 'timeout': timeout, 'description': 'Alternative health endpoints'},
-    
-
-        for strategy in health_strategies:
-        for endpoint in strategy['endpoints']:
-        try:
+        {'endpoints': ['/api/health', '/status', '/ping'], 'timeout': timeout, 'description': 'Alternative health endpoints'},"""
+"""
+        for endpoint in strategy['endpoints']:"""
         url = "formatted_string"
         async with httpx.AsyncClient(timeout=strategy['timeout']) as client:
         response = await client.get(url)
@@ -566,8 +474,7 @@ class AuthServiceVerificationFixer:
         @staticmethod
     def create_improved_auth_verification(auth_service_url: str):
         """Create improved auth service verification that handles edge cases."""
-
-    async def improved_auth_verification() -> Dict[str, Any]:
+"""
         """Improved auth verification with multiple verification methods."""
 
         verification_methods = []
@@ -585,12 +492,9 @@ class AuthServiceVerificationFixer:
         verification_methods.append({ ))
         'method': 'health_check',
         'success': False,
-        'error': str(e)
-            
-
-            # Method 2: OAuth endpoint availability (not full flow)
-        try:
-        async with httpx.AsyncClient(timeout=5.0, follow_redirects=False) as client:
+        'error': str(e)"""
+"""
+        try:"""
         response = await client.get("formatted_string")
                     # OAuth endpoint working if it returns redirect or bad request (missing params)
         oauth_working = response.status_code in [200, 302, 400]
@@ -645,26 +549,19 @@ class AuthServiceVerificationFixer:
 
         @pytest.mark.integration
 class TestAuthServiceVerificationFixes:
-        '''Integration tests to fix auth service verification false failures.
-
-        CRITICAL: Tests MUST use real services per CLAUDE.md standards.
-        No mocks allowed - tests validate actual service behavior.
-        '''
-
-    def setup_method(self):
-        """Setup test environment using IsolatedEnvironment per CLAUDE.md."""
-        self.env = get_env()
-        self.env.enable_isolation()  # Required by CLAUDE.md
-    # Set source tracking for all environment operations
+        """Integration tests to fix auth service verification false failures.
+"""
+        No mocks allowed - tests validate actual service behavior."""
+"""
+        """Setup test environment using IsolatedEnvironment per CLAUDE.md.""""""
+        self.env.enable_isolation()  # Required by CLAUDE.md"""
         self.env.set("TEST_NAME", "test_auth_service_verification", "TestAuthServiceVerificationFixes")
 
 @pytest.mark.asyncio
     async def test_comprehensive_auth_service_verification(self):
-'''Test comprehensive auth service verification to identify false failures.
-
-CRITICAL: This test validates real service behavior and verification logic.
-Uses actual running services per CLAUDE.md requirements.
-'''
+"""Test comprehensive auth service verification to identify false failures.
+"""
+Uses actual running services per CLAUDE.md requirements."""
 
 tester = AuthServiceVerificationTester()
 results = await tester.comprehensive_auth_verification_test()
@@ -678,12 +575,9 @@ if not result.success and result.error:
                 # Check if this might be a false failure
 if any(indicator in result.error.lower() for indicator in )
 ['connection refused', 'timeout', 'unexpected status code']):
-false_failures.append(result)
-                    # Count services that are actually unavailable (not false failures)
-if any(indicator in result.error.lower() for indicator in )
-['nodename nor servname', 'connect call failed', 'connection refused']):
-service_unavailable_count += 1
-
+false_failures.append(result)"""
+if any(indicator in result.error.lower() for indicator in )"""
+service_unavailable_count += 1"""
 print(f" )
 === FALSE FAILURE ANALYSIS ===")
 print("formatted_string")
@@ -718,18 +612,13 @@ logger.info("formatted_string")
 
 @pytest.mark.asyncio
     async def test_improved_health_check_reduces_false_failures(self):
-'''Test that improved health check logic reduces false failures.
+"""Test that improved health check logic reduces false failures.
+"""
+This test bypasses the real_services fixture to test directly."""
 
-CRITICAL: Uses real auth service per CLAUDE.md standards.
-This test bypasses the real_services fixture to test directly.
-'''
-
-                                                        # Use real auth service URL - bypass fixture requirements
-auth_service_url = self.env.get('AUTH_SERVICE_URL', 'http://localhost:8081')  # Fixed: was 8083
-
-                                                        # Verify auth service is available first
-try:
-async with httpx.AsyncClient(timeout=2.0) as client:
+                                                        # Use real auth service URL - bypass fixture requirements"""
+"""
+try:"""
 response = await client.get("formatted_string")
 if response.status_code != 200:
 pytest.skip("formatted_string")
@@ -742,7 +631,6 @@ print(f" )
 
                                                                         # Standard health check (simplified)
 standard_start = time.time()
-standard_success = False
 try:
 async with httpx.AsyncClient(timeout=5.0) as client:
 response = await client.get("formatted_string")
@@ -755,11 +643,6 @@ print("formatted_string")
 
                                                                                     # Improved health check
 improved_start = time.time()
-improved_health_check = AuthServiceVerificationFixer.create_improved_health_check('auth_service')
-improved_result = await improved_health_check(auth_service_url)
-improved_time = time.time() - improved_start
-
-improved_success = improved_result.get('healthy', False)
 print("formatted_string")
 
 if improved_result.get('strategy'):
@@ -789,18 +672,13 @@ assert True, "Health check comparison completed"
 
 @pytest.mark.asyncio
     async def test_improved_auth_verification_reduces_false_failures(self):
-'''Test that improved auth verification logic reduces false failures.
+"""Test that improved auth verification logic reduces false failures.
+"""
+This test bypasses the real_services fixture to test directly."""
 
-CRITICAL: Uses real auth service per CLAUDE.md standards.
-This test bypasses the real_services fixture to test directly.
-'''
-
-                                                                                                                # Use environment-configured URL for real service testing
-auth_service_url = self.env.get('AUTH_SERVICE_URL', 'http://localhost:8081')  # Fixed: was 8083
-
-                                                                                                                # Verify auth service is available first
-try:
-async with httpx.AsyncClient(timeout=2.0) as client:
+                                                                                                                # Use environment-configured URL for real service testing"""
+"""
+try:"""
 response = await client.get("formatted_string")
 if response.status_code != 200:
 pytest.skip("formatted_string")
@@ -847,8 +725,7 @@ assert result['total_methods'] >= 3, "Should test multiple verification methods"
 return boolean verification result"
 
 def test_port_configuration_mismatch_detection(self):
-"""Test detection of port configuration mismatches causing verification failures."""
-
+"""Test detection of port configuration mismatches causing verification failures.""""""
 print(f" )
 === PORT CONFIGURATION MISMATCH DETECTION ===")
 

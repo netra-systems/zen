@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,34 +16,31 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
+        return self.messages_sent.copy()"""
         """Unit tests for WebSocket notification functionality."""
 
-        import asyncio
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from auth_service.core.auth_manager import AuthManager
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from shared.isolated_environment import IsolatedEnvironment
+import asyncio
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
-        import pytest
+import pytest
 
-        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-        from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
-@pytest.mark.asyncio
-    async def test_websocket_notifier_sends_all_events():
+@pytest.mark.asyncio"""
 """Test that WebSocketNotifier sends all required event types."""
         # Create mock WebSocket manager
 mock_ws_manager = Magic    mock_ws_manager.websocket = TestWebSocketConnection()
@@ -53,8 +48,7 @@ mock_ws_manager = Magic    mock_ws_manager.websocket = TestWebSocketConnection()
         # Create notifier
 notifier = WebSocketNotifier.create_for_user(mock_ws_manager)
 
-        # Create test context
-context = AgentExecutionContext( )
+        # Create test context"""
 agent_name="TestAgent",  run_id="test_run_001",
 thread_id="test_thread_001",
 user_id="test_user_001"
@@ -118,8 +112,7 @@ assert mock_ws_manager.send_to_thread.call_count >= 7
 pass
             # Create notifier without manager
 notifier = WebSocketNotifier.create_for_user(None)
-
-context = AgentExecutionContext( )
+"""
 agent_name="TestAgent",  run_id="test_run",
 thread_id="test_thread",
 user_id="test_user"
@@ -155,8 +148,7 @@ engine = ExecutionEngine._init_from_factory(mock_registry, mock_ws_manager)
 mock_agent = Magic    mock_agent.websocket = TestWebSocketConnection()
 mock_registry.get.return_value = mock_agent
 
-                # Create test context and state
-context = AgentExecutionContext( )
+                # Create test context and state"""
 agent_name="TestAgent",
 run_id="test_run",
 thread_id="test_thread",

@@ -27,8 +27,7 @@ from dev_launcher.process_manager import ProcessManager
 project_root = Path(__file__).parent.parent.parent
 logger = logging.getLogger(__name__)
 
-
-class TestSyntaxFix:
+"""
     """Test class for orphaned methods"""
     pass
 
@@ -48,8 +47,7 @@ class TestSyntaxFix:
 backend_port: int = 8000,
 frontend_port: Optional[int] = 3000,
 skip_frontend: bool = False,
-verbose: bool = False,
-parallel_startup: bool = True) -> LauncherConfig:
+verbose: bool = False,"""
 """Create test configuration."""
 config = LauncherConfig()
 config.backend_port = backend_port
@@ -57,8 +55,7 @@ config.frontend_port = frontend_port if not skip_frontend else None
 config.dynamic_ports = False
 config.no_backend_reload = True
 config.no_browser = True
-config.verbose = verbose
-config.non_interactive = True
+config.verbose = verbose"""
 config.startup_mode = "minimal"
 config.no_secrets = True
 config.parallel_startup = parallel_startup
@@ -78,19 +75,16 @@ self.console_errors.append(str(msg))
 return original_log(msg, *args, **kwargs)
 
 logger.error = capture_error
-
-def detect_console_errors(self) -> List[str]:
+"""
 """Detect console errors from service outputs."""
 pass
 return self.console_errors.copy()
-
-def verify_port_allocation(self) -> Tuple[bool, List[str]]:
+"""
 """Verify services are running on correct ports."""
 issues = []
 
     # Check backend port
-backend_port = self.config.backend_port or 8000
-if not self._is_port_in_use(backend_port):
+backend_port = self.config.backend_port or 8000"""
 issues.append("formatted_string")
 
         # Check auth port
@@ -112,12 +106,10 @@ s.bind(('localhost', port))
 return False
 except OSError:
 return True
-
-def verify_grace_periods(self) -> Tuple[bool, List[str]]:
+"""
 """Verify grace periods are respected in startup."""
 issues = []
-
-if not self.start_time:
+"""
 issues.append("Start time not recorded")
 return False, issues
 
@@ -140,10 +132,8 @@ def _force_free_test_ports(self):
 test_ports = [8000, 8081, 3000]
 for port in test_ports:
 self._force_free_port(port)
-
-def _force_free_port(self, port: int):
-"""Force free a specific port."""
-pass
+"""
+"""Force free a specific port.""""""
 if sys.platform == "win32":
 try:
 result = subprocess.run( )

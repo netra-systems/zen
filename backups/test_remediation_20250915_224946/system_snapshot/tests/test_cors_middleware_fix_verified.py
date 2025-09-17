@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,38 +16,32 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
-        '''
+        return self.messages_sent.copy()"""
+        """
         Test to verify CORS middleware fix for AsyncGeneratorContextManager bug.
+"""
+        callable without attempting to treat it as a context manager."""
 
-        This test ensures that the middleware correctly handles call_next as a simple
-        callable without attempting to treat it as a context manager.
-        '''
-
-        import pytest
-        from fastapi import Request, Response
-        from fastapi.responses import JSONResponse
-        from netra_backend.app.middleware.cors_fix_middleware import CORSFixMiddleware
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from auth_service.core.auth_manager import AuthManager
-        from shared.isolated_environment import IsolatedEnvironment
-        import asyncio
+import pytest
+from fastapi import Request, Response
+from fastapi.responses import JSONResponse
+from netra_backend.app.middleware.cors_fix_middleware import CORSFixMiddleware
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
+import asyncio
 
 
-@pytest.mark.asyncio
-    async def test_cors_middleware_direct_call_next():
-"""Test that middleware directly calls call_next without context manager handling."""
-        # Create mock app and middleware
+@pytest.mark.asyncio"""
+"""Test that middleware directly calls call_next without context manager handling.""""""
 app = Magic    middleware = CORSFixMiddleware(app, environment="development")
 
         # Create mock request with valid origin
@@ -81,8 +73,7 @@ assert response.headers["Access-Control-Allow-Credentials"] == "true"
 @pytest.mark.asyncio
     async def test_cors_middleware_error_handling():
 """Test that middleware properly handles errors from call_next."""
-pass
-            # Create mock app and middleware
+pass"""
 app = Magic    middleware = CORSFixMiddleware(app, environment="development")
 
             # Create mock request with valid origin
@@ -111,8 +102,7 @@ assert response.headers["Access-Control-Allow-Origin"] == "http://localhost:3000
 
 @pytest.mark.asyncio
     async def test_cors_middleware_no_origin():
-"""Test middleware behavior when no origin header is present."""
-                # Create mock app and middleware
+"""Test middleware behavior when no origin header is present.""""""
 app = Magic    middleware = CORSFixMiddleware(app, environment="development")
 
                 # Create request without origin header
@@ -138,8 +128,7 @@ assert "Access-Control-Allow-Origin" not in response.headers
 @pytest.mark.asyncio
     async def test_cors_middleware_invalid_origin():
 """Test middleware behavior with invalid origin."""
-pass
-                    # Create mock app and middleware
+pass"""
 app = Magic    middleware = CORSFixMiddleware(app, environment="development")
 
                     # Create request with invalid origin
@@ -164,15 +153,13 @@ assert "Access-Control-Allow-Origin" not in response.headers
 
 @pytest.mark.asyncio
     async def test_cors_middleware_preflight_request():
-"""Test middleware handles OPTIONS preflight requests."""
-                        # Create mock app and middleware
+"""Test middleware handles OPTIONS preflight requests.""""""
 app = Magic    middleware = CORSFixMiddleware(app, environment="development")
 
                         # Create OPTIONS request with origin
 request = MagicMock(spec=Request)
 request.method = "OPTIONS"
-request.headers = { )
-"origin": "http://localhost:3000",
+headers = {"origin": "http://localhost:3000",}
 "access-control-request-method": "POST"
                         
 request.url.path = "/api/test"

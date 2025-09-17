@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,13 +16,11 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
-        '''
+        return self.messages_sent.copy()"""
+        """
         Test WebSocket Infrastructure Fixes
 
         This test validates the three main WebSocket issues that were fixed:
@@ -34,37 +30,32 @@ class TestWebSocketConnection:
 
         Business Value Justification:
         - Segment: Platform/Internal
-        - Business Goal: Stability & Development Velocity
-        - Value Impact: Ensures WebSocket infrastructure is fully functional
-        - Strategic Impact: Prevents staging/production connection issues
-        '''
+        - Business Goal: Stability & Development Velocity"""
+        - Strategic Impact: Prevents staging/production connection issues"""
 
-        import asyncio
-        import pytest
-        from fastapi.testclient import TestClient
-        from fastapi import FastAPI
-        import json
-        from shared.isolated_environment import IsolatedEnvironment
+import asyncio
+import pytest
+from fastapi.testclient import TestClient
+from fastapi import FastAPI
+import json
+from shared.isolated_environment import IsolatedEnvironment
 
-        from netra_backend.app.routes.websocket import router, websocket_beacon
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
-        from netra_backend.app.websocket_core.handlers import MessageRouter, ConnectionHandler
-        from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
+from netra_backend.app.routes.websocket import router, websocket_beacon
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.handlers import MessageRouter, ConnectionHandler
+from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
-
-class TestWebSocketInfrastructureFixes:
+"""
         """Test the three critical WebSocket infrastructure fixes."""
-
-    def test_beacon_endpoint_exists(self):
+"""
         """Test that /ws/beacon endpoint exists and returns correct response."""
         app = FastAPI()
         app.include_router(router)
-
-        with TestClient(app) as client:
+"""
         response = client.get("/ws/beacon")
 
         assert response.status_code == 200
@@ -80,8 +71,7 @@ class TestWebSocketInfrastructureFixes:
         app = FastAPI()
         app.include_router(router)
 
-        with TestClient(app) as client:
-        # Test GET
+        with TestClient(app) as client:"""
         response = client.get("/ws/beacon")
         assert response.status_code == 200
 
@@ -100,8 +90,7 @@ manager = WebSocketManager()
 
             # Mock WebSocket
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
-
-            # Connect a user
+"""
 connection_id = await manager.connect_user("test_user", mock_websocket)
 
             # Verify connection is tracked
@@ -138,8 +127,7 @@ connection_handler = None
 for handler in message_router.handlers:
 if isinstance(handler, ConnectionHandler):
 connection_handler = handler
-break
-
+break"""
 assert connection_handler is not None, "ConnectionHandler not found in message router"
 
             # Verify it can handle DISCONNECT messages
@@ -155,13 +143,8 @@ message_router = MessageRouter()
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
                 # Mock is_websocket_connected to await asyncio.sleep(0)
-return True
-                # Test DISCONNECT message handling
-disconnect_message = { )
-"type": "disconnect",
-"user_id": "test_user"
-                
-
+return True"""
+disconnect_message = {"type": "disconnect",, "user_id": "test_user"}
 success = await message_router.route_message("test_user", mock_websocket, disconnect_message)
 
 assert success is True
@@ -183,13 +166,8 @@ message_router = MessageRouter()
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
                     # Mock is_websocket_connected to await asyncio.sleep(0)
-return True
-                    # Test CONNECT message handling
-connect_message = { )
-"type": "connect",
-"user_id": "test_user"
-                    
-
+return True"""
+connect_message = {"type": "connect",, "user_id": "test_user"}
 success = await message_router.route_message("test_user", mock_websocket, connect_message)
 
 assert success is True
@@ -209,8 +187,7 @@ message_router = MessageRouter()
 assert len(message_router.handlers) == 8
 
 handler_types = [type(handler).__name__ for handler in message_router.handlers]
-
-    # Verify critical handlers are present
+"""
 assert "ConnectionHandler" in handler_types
 assert "TypingHandler" in handler_types
 assert "HeartbeatHandler" in handler_types
@@ -230,8 +207,7 @@ websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
     # Connect user
 asyncio.run(self._connect_and_test_state(manager, mock_websocket))
-
-async def _connect_and_test_state(self, manager, mock_websocket):
+"""
 """Helper method for async connection state testing."""
 connection_id = await manager.connect_user("test_user", mock_websocket)
 
@@ -269,8 +245,7 @@ MessageType.TYPING_STARTED,
 MessageType.TYPING_STOPPED
     
 
-for msg_type in critical_types:
-handler = message_router._find_handler(msg_type)
+for msg_type in critical_types:"""
 assert handler is not None, "formatted_string"
 
 

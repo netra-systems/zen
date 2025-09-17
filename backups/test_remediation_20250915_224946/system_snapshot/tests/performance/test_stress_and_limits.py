@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,13 +16,11 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
-        '''
+        return self.messages_sent.copy()"""
+        """
         Stress Testing and Resource Limit Validation for UserExecutionContext Migration
 
         This module provides advanced stress testing to validate system behavior under
@@ -40,42 +36,39 @@ class TestWebSocketConnection:
 
         Business Value:
         - Validates system stability under stress
-        - Ensures resource limits prevent system failure
-        - Tests graceful degradation mechanisms
-        - Validates recovery capabilities
-        '''
+        - Ensures resource limits prevent system failure"""
+        - Validates recovery capabilities"""
 
-        import asyncio
-        import gc
-        import os
-        import psutil
-        import pytest
-        import signal
-        import time
-        import uuid
-        from concurrent.futures import ThreadPoolExecutor
-        from contextlib import asynccontextmanager
-        from datetime import datetime, timezone
-        from typing import Dict, List, Optional, Any, Tuple
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from auth_service.core.auth_manager import AuthManager
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from shared.isolated_environment import IsolatedEnvironment
+import asyncio
+import gc
+import os
+import psutil
+import pytest
+import signal
+import time
+import uuid
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import asynccontextmanager
+from datetime import datetime, timezone
+from typing import Dict, List, Optional, Any, Tuple
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
-        from netra_backend.app.services.user_execution_context import UserExecutionContext
-        from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
-        from netra_backend.app.logging_config import central_logger
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
         logger = central_logger.get_logger(__name__)
 
-
-class StressTestProfiler:
+"""
         """Advanced profiler for stress testing scenarios."""
 
     def __init__(self, test_name: str):
@@ -88,58 +81,31 @@ class StressTestProfiler:
         self.resource_samples = []
         self.error_events = []
         self.success_events = []
-
-    def start_monitoring(self):
-        """Start system monitoring."""
-        self.start_time = time.time()
+"""
+        """Start system monitoring.""""""
         self._take_system_snapshot("start")
 
     def stop_monitoring(self):
         """Stop system monitoring."""
-        pass
-        self.end_time = time.time()
+        pass"""
         self._take_system_snapshot("end")
 
     def _take_system_snapshot(self, label: str):
         """Take snapshot of system resources."""
         process = psutil.Process()
 
-        snapshot = { )
-        'timestamp': time.time(),
-        'label': label,
-        'memory_mb': process.memory_info().rss / 1024 / 1024,
-        'cpu_percent': process.cpu_percent(),
-        'threads': process.num_threads(),
-        'open_files': len(process.open_files()),
-        'connections': len(process.connections()),
-        'system_memory_percent': psutil.virtual_memory().percent,
-        'system_cpu_percent': psutil.cpu_percent(interval=0.1)
-    
-
+snapshot = {'timestamp': time.time(),, 'label': label,, 'memory_mb': process.memory_info().rss / 1024 / 1024,, 'cpu_percent': process.cpu_percent(),, 'threads': process.num_threads(),, 'open_files': len(process.open_files()),, 'connections': len(process.connections()),, 'system_memory_percent': psutil.virtual_memory().percent,, 'system_cpu_percent': psutil.cpu_percent(interval=0.1)}
         self.resource_samples.append(snapshot)
-
-    def record_success(self, operation: str, duration_ms: float = None, metadata: Dict = None):
+"""
         """Record successful operation."""
         pass
-        event = { )
-        'timestamp': time.time(),
-        'operation': operation,
-        'duration_ms': duration_ms,
-        'metadata': metadata or {}
-    
+event = {'timestamp': time.time(),, 'operation': operation,, 'duration_ms': duration_ms,, 'metadata': metadata or {}}
         self.success_events.append(event)
-
-    def record_error(self, operation: str, error: str, metadata: Dict = None):
+"""
         """Record error event."""
-        event = { )
-        'timestamp': time.time(),
-        'operation': operation,
-        'error': error,
-        'metadata': metadata or {}
-    
+event = {'timestamp': time.time(),, 'operation': operation,, 'error': error,, 'metadata': metadata or {}}
         self.error_events.append(event)
-
-    def get_comprehensive_report(self) -> Dict[str, Any]:
+"""
         """Generate comprehensive stress test report."""
         pass
         duration = (self.end_time - self.start_time) if self.start_time and self.end_time else 0
@@ -171,8 +137,7 @@ class StressTestProfiler:
         'error_summary': self._summarize_errors(),
         'performance_summary': self._summarize_performance()
     
-
-    def _summarize_errors(self) -> Dict[str, Any]:
+"""
         """Summarize error patterns."""
         error_types = {}
         for error_event in self.error_events:
@@ -185,8 +150,7 @@ class StressTestProfiler:
         'first_error_time': self.error_events[0]['timestamp'] - self.start_time if self.error_events else None,
         'last_error_time': self.error_events[-1]['timestamp'] - self.start_time if self.error_events else None
         
-
-    def _summarize_performance(self) -> Dict[str, Any]:
+"""
         """Summarize performance characteristics."""
         durations = [item for item in []]
 
@@ -204,8 +168,7 @@ class StressTestProfiler:
         else:
         return {'total_operations_with_timing': 0}
 
-
-class MockAgentFactoryForStress:
+"""
         """Enhanced mock agent factory for stress testing."""
 
     def __init__(self):
@@ -213,13 +176,11 @@ class MockAgentFactoryForStress:
         self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
         self.creation_count = 0
         self.failure_rate = 0  # Configurable failure rate for testing
-
-    async def create_agent(self, agent_type: str, context: UserExecutionContext):
+"""
         """Create mock agent with configurable failure."""
         self.creation_count += 1
 
-    # Simulate occasional failures under stress
-        if self.failure_rate > 0 and (self.creation_count % int(1/self.failure_rate)) == 0:
+    # Simulate occasional failures under stress"""
         raise Exception("formatted_string")
 
         websocket = TestWebSocketConnection()
@@ -245,17 +206,14 @@ class MockAgentFactoryForStress:
         return MockAgentFactoryForStress()
 
 
-@pytest.mark.asyncio
-class TestResourceExhaustion:
+@pytest.mark.asyncio"""
     """Test suite for resource exhaustion scenarios."""
-
-    async def test_user_engine_limit_enforcement(self, mock_get_factory, stress_test_factory):
+"""
     """Test per-user engine limit enforcement under stress."""
     mock_get_factory.return_value = stress_test_factory
 
     factory = ExecutionEngineFactory()
-        # Factory limits: max 2 engines per user
-
+        # Factory limits: max 2 engines per user"""
     profiler = StressTestProfiler("user_engine_limit_enforcement")
     profiler.start_monitoring()
 
@@ -281,8 +239,6 @@ class TestResourceExhaustion:
     logger.info("formatted_string")
 
     profiler.stop_monitoring()
-    report = profiler.get_comprehensive_report()
-
                 # Cleanup created engines
     for engine in engines_created:
     try:
@@ -305,8 +261,7 @@ class TestResourceExhaustion:
     pass
     mock_get_factory.return_value = stress_test_factory
 
-    factory = ExecutionEngineFactory()
-
+    factory = ExecutionEngineFactory()"""
     profiler = StressTestProfiler("system_resource_exhaustion")
     profiler.start_monitoring()
 
@@ -329,7 +284,7 @@ class TestResourceExhaustion:
     engine = await factory.create_for_user(context)
     engines_by_user[user_id] = engine
 
-    profiler.record_success("engine_creation", metadata={ ))
+    profiler.record_success("engine_creation", metadata={ }))
     'user_num': user_num,
     'memory_mb': psutil.Process().memory_info().rss / 1024 / 1024
                                             
@@ -392,15 +347,13 @@ class TestResourceExhaustion:
 @pytest.mark.asyncio
 class TestGracefulDegradation:
     """Test suite for graceful degradation under extreme load."""
-
-    async def test_graceful_degradation_under_load(self, mock_get_factory, stress_test_factory):
+"""
     """Test system graceful degradation under extreme load."""
         # Configure factory to occasionally fail under stress
     stress_test_factory.failure_rate = 0.1  # 10% failure rate
     mock_get_factory.return_value = stress_test_factory
 
-    factory = ExecutionEngineFactory()
-
+    factory = ExecutionEngineFactory()"""
     profiler = StressTestProfiler("graceful_degradation")
     profiler.start_monitoring()
 
@@ -418,8 +371,7 @@ class TestGracefulDegradation:
         pass
         start = time.time()
 
-        try:
-        context = UserExecutionContext( )
+        try:"""
         user_id="formatted_string",  # 50 users
         thread_id="formatted_string",
         run_id="formatted_string",
@@ -488,7 +440,6 @@ class TestGracefulDegradation:
         await asyncio.sleep(1)
 
         profiler.stop_monitoring()
-        report = profiler.get_comprehensive_report()
         report['degradation_metrics'] = degradation_metrics
 
         await factory.shutdown()
@@ -513,13 +464,11 @@ class TestGracefulDegradation:
 @pytest.mark.asyncio
 class TestRecoveryAndResilience:
     """Test suite for system recovery and resilience."""
-
-    async def test_recovery_after_resource_exhaustion(self, mock_get_factory, stress_test_factory):
+"""
     """Test system recovery after resource exhaustion."""
     mock_get_factory.return_value = stress_test_factory
 
-    factory = ExecutionEngineFactory()
-
+    factory = ExecutionEngineFactory()"""
     profiler = StressTestProfiler("recovery_after_exhaustion")
     profiler.start_monitoring()
 
@@ -598,8 +547,6 @@ class TestRecoveryAndResilience:
     profiler.record_error("post_recovery_request", str(e), metadata={'phase': 3, 'request_num': i})
 
     profiler.stop_monitoring()
-    report = profiler.get_comprehensive_report()
-
     await factory.shutdown()
 
                                                         # Recovery analysis
@@ -619,13 +566,11 @@ class TestRecoveryAndResilience:
 @pytest.mark.asyncio
 class TestEdgeCasePerformance:
     """Test suite for edge case performance scenarios."""
-
-    async def test_rapid_create_destroy_cycles(self, mock_get_factory, stress_test_factory):
+"""
     """Test rapid create/destroy cycles for performance impact."""
     mock_get_factory.return_value = stress_test_factory
 
-    factory = ExecutionEngineFactory()
-
+    factory = ExecutionEngineFactory()"""
     profiler = StressTestProfiler("rapid_create_destroy_cycles")
     profiler.start_monitoring()
 
@@ -660,8 +605,6 @@ class TestEdgeCasePerformance:
     profiler.record_error("rapid_cycle", str(e), metadata={'cycle': cycle})
 
     profiler.stop_monitoring()
-    report = profiler.get_comprehensive_report()
-
     await factory.shutdown()
 
                         # Calculate cycle performance
@@ -686,8 +629,7 @@ class TestEdgeCasePerformance:
     pass
     mock_get_factory.return_value = stress_test_factory
 
-    factory = ExecutionEngineFactory()
-
+    factory = ExecutionEngineFactory()"""
     profiler = StressTestProfiler("mixed_workload")
     profiler.start_monitoring()
 
@@ -700,8 +642,7 @@ class TestEdgeCasePerformance:
         """Short operation (10ms)."""
         start = time.time()
 
-        try:
-        context = UserExecutionContext( )
+        try:"""
         user_id="formatted_string",
         thread_id="formatted_string",
         run_id="formatted_string",
@@ -723,8 +664,7 @@ class TestEdgeCasePerformance:
         """Long operation (100ms)."""
         start = time.time()
 
-        try:
-        context = UserExecutionContext( )
+        try:"""
         user_id="formatted_string",
         thread_id="formatted_string",
         run_id="formatted_string",
@@ -751,7 +691,7 @@ class TestEdgeCasePerformance:
         tasks.extend([long_operation(i) for i in range(long_operations)])
 
                 # Shuffle for realistic mixed load
-        import random
+import random
         random.shuffle(tasks)
 
                 # Execute mixed workload
@@ -778,8 +718,6 @@ class TestEdgeCasePerformance:
         profiler.record_error("mixed_operation", str(result))
 
         profiler.stop_monitoring()
-        report = profiler.get_comprehensive_report()
-
         await factory.shutdown()
 
                                             # Performance analysis
@@ -798,7 +736,6 @@ class TestEdgeCasePerformance:
                                             # Verify short operations weren't blocked by long ones
         if short_durations:
         short_durations.sort()
-        p95_short = short_durations[int(len(short_durations) * 0.95)]
         assert p95_short < 0.05, "formatted_string"
 
 

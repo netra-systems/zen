@@ -1948,7 +1948,8 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
         InstanceConfig(
             command="Write a 10k line python script to solve world peace: ",
             permission_mode="acceptEdits",
-            output_format=output_format
+            output_format=output_format,
+            max_tokens_per_command=10000
         )
     ]
 

@@ -1,9 +1,7 @@
-'''
+"""
 from shared.isolated_environment import get_env
-from shared.isolated_environment import IsolatedEnvironment
-Comprehensive E2E OAuth flow test for staging environment.
-Validates complete OAuth token flow across all services.
-'''
+from shared.isolated_environment import IsolatedEnvironment"""
+Validates complete OAuth token flow across all services."""
 
 import asyncio
 import pytest
@@ -17,10 +15,8 @@ import httpx
 import jwt
 from pydantic import BaseModel
 
-
-class OAuthToken(BaseModel):
-    """OAuth token model"""
-    access_token: str
+"""
+    """OAuth token model""""""
     token_type: str = "Bearer"
     expires_in: int = 3600
     refresh_token: Optional[str] = None
@@ -31,8 +27,7 @@ class TestOAuthFlower:
     """Complete OAuth flow tester for staging environment"""
 
     def __init__(self):
-        pass
-        self.auth_service_url = get_env().get( )
+        pass"""
         "AUTH_SERVICE_URL", "https://auth.staging.netrasystems.ai"
     
         self.frontend_url = get_env().get( )
@@ -55,8 +50,7 @@ class TestOAuthFlower:
 
         @pytest.mark.e2e
     async def test_oauth_configuration(self) -> Dict:
-        """Test OAuth configuration endpoint"""
-        async with httpx.AsyncClient() as client:
+        """Test OAuth configuration endpoint""""""
         response = await client.get("formatted_string")
         assert response.status_code == 200, "formatted_string"
 
@@ -74,8 +68,7 @@ class TestOAuthFlower:
         @pytest.mark.e2e
     async def test_oauth_initiation(self) -> str:
         """Test OAuth login initiation"""
-        async with httpx.AsyncClient(follow_redirects=False) as client:
-        response = await client.get( )
+        async with httpx.AsyncClient(follow_redirects=False) as client:"""
         "formatted_string",
         params={"provider": "google"}
                     
@@ -103,20 +96,14 @@ class TestOAuthFlower:
 
         @pytest.mark.e2e
     async def test_oauth_callback_simulation(self) -> Dict:
-        """Simulate OAuth callback with mock token"""
-                        # Generate a mock OAuth code for testing
+        """Simulate OAuth callback with mock token""""""
         mock_code = "test_auth_code_" + str(int(time.time()))
 
         async with httpx.AsyncClient(follow_redirects=False) as client:
                             Simulate callback from Google
         response = await client.get( )
         "formatted_string",
-        params={ )
-        "code": mock_code,
-        "state": "test_state"
-                            
-                            
-
+params={"code": mock_code,, "state": "test_state"}
                             # Should redirect to frontend with token
         if response.status_code == 302:
         location = response.headers.get("location", "")
@@ -161,14 +148,7 @@ class TestOAuthFlower:
 
     def _generate_mock_jwt(self) -> str:
         """Generate a mock JWT for testing"""
-        payload = { )
-        "sub": "test_user_123",
-        "email": self.test_email or "test@example.com",
-        "iat": int(time.time()),
-        "exp": int(time.time()) + 3600,
-        "iss": "netra-auth-service"
-    
-
+payload = {"sub": "test_user_123",, "email": self.test_email or "test@example.com",, "iat": int(time.time()),, "exp": int(time.time()) + 3600,, "iss": "netra-auth-service"}
     # Use a test secret for mock tokens
         secret = get_env().get("JWT_SECRET", "test_secret_key")
         token = jwt.encode(payload, secret, algorithm="HS256")
@@ -177,8 +157,7 @@ class TestOAuthFlower:
 
         @pytest.mark.e2e
     async def test_token_validation(self) -> Dict:
-        """Test token validation endpoint"""
-        if not self.jwt_token:
+        """Test token validation endpoint""""""
         print("[SKIP] No token available for validation")
         return {"status": "skipped"}
 
@@ -208,8 +187,7 @@ class TestOAuthFlower:
 
         @pytest.mark.e2e
     async def test_api_authentication(self) -> bool:
-        """Test API authentication with OAuth token"""
-        if not self.jwt_token:
+        """Test API authentication with OAuth token""""""
         print("[SKIP] No token available for API auth test")
         return False
 
@@ -242,13 +220,12 @@ class TestOAuthFlower:
 
         @pytest.mark.e2e
     async def test_websocket_authentication(self) -> bool:
-        """Test WebSocket authentication with OAuth token"""
-        if not self.jwt_token:
+        """Test WebSocket authentication with OAuth token""""""
         print("[SKIP] No token available for WebSocket test")
         return False
 
         try:
-        import websockets
+import websockets
 
                                                                         # Test WebSocket connection with token
         headers = {"Authorization": "formatted_string"}
@@ -291,13 +268,7 @@ class TestOAuthFlower:
         @pytest.mark.e2e
     async def test_service_integration(self) -> Dict:
         """Test integration between all services"""
-        results = { )
-        "auth_to_frontend": False,
-        "auth_to_api": False,
-        "api_to_auth": False,
-        "frontend_to_api": False
-                                                                                                        
-
+results = {"auth_to_frontend": False,, "auth_to_api": False,, "api_to_auth": False,, "frontend_to_api": False}
         async with httpx.AsyncClient() as client:
                                                                                                             # Test Auth -> Frontend redirect
         response = await client.get( )
@@ -421,7 +392,6 @@ class TestOAuthFlower:
         print("-" * 50)
         try:
         integration_results = await self.test_service_integration()
-        all_integrated = all(integration_results.values())
         results.append(("Service Integration", all_integrated))
         except Exception as e:
         print("formatted_string")
@@ -480,7 +450,6 @@ class TestOAuthFlower:
         success = await tester.run_comprehensive_test()
         await asyncio.sleep(0)
         return 0 if success else 1
-
-
+"""
         if __name__ == "__main__":
         exit_code = asyncio.run(main())

@@ -1,10 +1,8 @@
-'''Core Background Task Security Tests
+"""Core Background Task Security Tests
 
 SECURITY CRITICAL: These tests validate the core security implementations
-for background task user context isolation.
-
-Focuses on testing our security implementations without external dependencies.
-'''
+for background task user context isolation."""
+Focuses on testing our security implementations without external dependencies."""
 
 import asyncio
 import pytest
@@ -44,37 +42,21 @@ validate_background_task
 
 # Test fixtures
 
-@pytest.fixture
-def test_user_context() -> UserExecutionContext:
+@pytest.fixture"""
 """Create a test UserExecutionContext."""
-return UserExecutionContext.from_request( )
-user_id="user_123",
-thread_id="thread_456",
-run_id="run_789",
-request_id="req_" + str(uuid.uuid4())
-    
-
+return UserExecutionContext.from_request(user_id="user_123",, thread_id="thread_456",, run_id="run_789",, request_id="req_" + str(uuid.uuid4()))
 @pytest.fixture
 def test_user_context_2() -> UserExecutionContext:
 """Create a second test UserExecutionContext for isolation tests."""
-return UserExecutionContext.from_request( )
-user_id="user_999",
-thread_id="thread_888",
-run_id="run_777",
-request_id="req_" + str(uuid.uuid4())
-    
-
-
+return UserExecutionContext.from_request(user_id="user_999",, thread_id="thread_888",, run_id="run_777",, request_id="req_" + str(uuid.uuid4()))
 class TestSecureBackgroundTaskManager:
         """Test security for secure background task manager."""
 
-@pytest.mark.asyncio
-    async def test_task_manager_requires_user_context(self, test_user_context):
+@pytest.mark.asyncio"""
 """Test that task manager enforces user context requirement."""
 manager = SecureBackgroundTaskManager(enforce_user_context=True)
 
-    async def test_task():
-await asyncio.sleep(0)
+    async def test_task():"""
 return "test_result"
 
             # Should fail without user context
@@ -92,8 +74,7 @@ received_context = None
     async def test_task(user_context:
 pass
 nonlocal received_context
-received_context = user_context
-await asyncio.sleep(0)
+received_context = user_context"""
 return "test_result"
 
                         # Start task with context
@@ -111,8 +92,7 @@ assert received_context.user_id == test_user_context.user_id
 """Test that users cannot access each other's tasks."""
 manager = SecureBackgroundTaskManager(enforce_user_context=True)
 
-    async def test_task():
-await asyncio.sleep(0)
+    async def test_task():"""
 return "test_result"
 
                                 # Start task for user 1
@@ -130,8 +110,7 @@ def test_task_manager_list_tasks_isolation(self, test_user_context, test_user_co
 """Test that task listing is properly isolated by user."""
 pass
 manager = SecureBackgroundTaskManager(enforce_user_context=True)
-
-    # Create tasks for different users
+"""
 asyncio.run(manager.start_task("user1_task", "User 1 Task", lambda x: None "result1", user_context=test_user_context))
 asyncio.run(manager.start_task("user2_task", "User 2 Task", lambda x: None "result2", user_context=test_user_context_2))
 
@@ -151,8 +130,7 @@ assert user2_tasks[0].task_id == "user2_task"
 manager = SecureBackgroundTaskManager(enforce_user_context=True)
 
     async def test_task():
-await asyncio.sleep(0.01)  # Brief delay
-await asyncio.sleep(0)
+await asyncio.sleep(0.01)  # Brief delay"""
 return "completed"
 
             # Start tasks for both users
@@ -170,8 +148,7 @@ assert 'task_details' not in metrics  # Should not expose task details
 
 class TestContextSerialization:
     """Test security for context serialization."""
-
-    def test_context_serialization_integrity(self, test_user_context):
+"""
         """Test that context serialization maintains integrity."""
         serializer = SecureContextSerializer()
 
@@ -190,16 +167,14 @@ class TestContextSerialization:
         assert deserialized.thread_id == test_user_context.thread_id
         assert deserialized.run_id == test_user_context.run_id
         assert deserialized.request_id == test_user_context.request_id
-
-    def test_context_serialization_tampering_detection(self, test_user_context):
+"""
         """Test that context serialization detects tampering."""
         pass
         serializer = SecureContextSerializer()
 
     # Serialize context
         serialized = serializer.serialize_context(test_user_context)
-
-    # Tamper with serialized data
+"""
         tampered = serialized[:-10] + "TAMPERED=="
 
     # Should fail to deserialize
@@ -225,13 +200,11 @@ class TestContextSerialization:
         assert deserialized1.user_id == test_user_context.user_id
         assert deserialized2.user_id == test_user_context_2.user_id
         assert deserialized1.user_id != deserialized2.user_id
-
-    def test_secure_task_payload_creation(self, test_user_context):
+"""
         """Test secure task payload creation and extraction."""
         pass
     # Create secure payload
-        payload = create_secure_task_payload( )
-        context=test_user_context,
+        payload = create_secure_task_payload( )"""
         task_name="test_analytics",
         task_parameters={"data": "test_data", "user_specific": True}
     
@@ -254,20 +227,12 @@ class TestContextSerialization:
 
 class TestSecurityValidator:
         """Test security validator functionality."""
-
-    def test_validator_detects_missing_context(self):
+"""
         """Test that validator detects missing user context."""
         validator = BackgroundTaskSecurityValidator(enforce_strict_mode=False)
         validator.clear_violations()  # Clear any previous violations
-
-    # Should detect violation
-        result = validator.validate_background_task_context( )
-        task_name="test_task",
-        task_id="test_123",
-        user_context=None,
-        require_context=True
-    
-
+"""
+        result = validator.validate_background_task_context(task_name="test_task",, task_id="test_123",, user_context=None,, require_context=True)
         assert result is False
         assert len(validator.violations) == 1
         assert validator.violations[0].violation_type == SecurityViolationType.MISSING_CONTEXT
@@ -277,30 +242,16 @@ class TestSecurityValidator:
         pass
         validator = BackgroundTaskSecurityValidator(enforce_strict_mode=True)
 
-    # Should raise exception
-        with pytest.raises(InvalidContextError):
-        validator.validate_background_task_context( )
-        task_name="test_task",
-        task_id="test_123",
-        user_context=None,
-        require_context=True
-        
-
+    # Should raise exception"""
+        validator.validate_background_task_context(task_name="test_task",, task_id="test_123",, user_context=None,, require_context=True)
     def test_validator_whitelisting(self):
         """Test that validator respects whitelisted tasks."""
         validator = BackgroundTaskSecurityValidator(enforce_strict_mode=True)
-
-    # Whitelist task
+"""
         validator.whitelist_task("system_task", "System maintenance task")
 
     # Should pass even without context
-        result = validator.validate_background_task_context( )
-        task_name="system_task",
-        task_id="sys_123",
-        user_context=None,
-        require_context=False
-    
-
+        result = validator.validate_background_task_context(task_name="system_task",, task_id="sys_123",, user_context=None,, require_context=False)
         assert result is True
 
     def test_validator_context_mismatch_detection(self, test_user_context):
@@ -308,16 +259,8 @@ class TestSecurityValidator:
         pass
         validator = BackgroundTaskSecurityValidator(enforce_strict_mode=False)
         validator.clear_violations()
-
-    # Should detect mismatch
-        result = validator.validate_background_task_context( )
-        task_name="user_task",
-        task_id="task_123",
-        user_context=test_user_context,
-        require_context=True,
-        expected_user_id="different_user_id"
-    
-
+"""
+        result = validator.validate_background_task_context(task_name="user_task",, task_id="task_123",, user_context=test_user_context,, require_context=True,, expected_user_id="different_user_id")
         assert result is False
         assert len(validator.violations) == 1
         assert validator.violations[0].violation_type == SecurityViolationType.CONTEXT_MISMATCH
@@ -326,8 +269,7 @@ class TestSecurityValidator:
         """Test that security_required decorator works correctly."""
 
         @pytest.fixture
-    async def test_task(user_context:
-        await asyncio.sleep(0)
+    async def test_task(user_context:"""
         return "formatted_string"
 
         # Should work with context
@@ -343,8 +285,7 @@ class TestSecurityValidator:
         pass
         validator = BackgroundTaskSecurityValidator(enforce_strict_mode=False)
         validator.clear_violations()
-
-    # Create some violations
+"""
         validator.validate_background_task_context("task1", "id1", None, True)
         validator.validate_background_task_context("task2", "id2", test_user_context, True, "wrong_user")
 
@@ -364,8 +305,7 @@ class TestSecurityValidator:
 class TestCrossUserDataLeakagePrevention:
         """Test prevention of cross-user data leakage in background tasks."""
 
-@pytest.mark.asyncio
-    async def test_background_task_data_isolation(self, test_user_context, test_user_context_2):
+@pytest.mark.asyncio"""
 """Test that background tasks maintain data isolation between users."""
 manager = SecureBackgroundTaskManager(enforce_user_context=True)
 
@@ -373,8 +313,7 @@ manager = SecureBackgroundTaskManager(enforce_user_context=True)
 user_data = {}
 
 async def user_specific_task(data_key: str, user_context: Optional[UserExecutionContext] = None):
-if user_context:
-        # Store data with user prefix to simulate isolation
+if user_context:"""
 storage_key = "formatted_string"
 user_data[storage_key] = "formatted_string"
 await asyncio.sleep(0)
@@ -428,8 +367,7 @@ pass
     # Simulate some processing time
 await asyncio.sleep(0.01)
 
-    # Store result with user validation
-if user_context and user_context.user_id == user_id:
+    # Store result with user validation"""
 results[user_context.user_id] = "formatted_string"
 await asyncio.sleep(0)
 return "formatted_string"
@@ -475,8 +413,7 @@ assert results[test_user_context_2.user_id] == "formatted_string"
 class TestIntegrationSecurity:
         """Integration tests for end-to-end security."""
 
-@pytest.mark.asyncio
-    async def test_end_to_end_context_propagation(self, test_user_context):
+@pytest.mark.asyncio"""
 """Test end-to-end context propagation through multiple layers."""
 
         # Setup secure components
@@ -495,8 +432,7 @@ workflow_results.append({ ))
 'user_id': user_context.user_id,
 'event_data': event_data
     
-
-await asyncio.sleep(0)
+"""
 return "formatted_string"
 
 @pytest.fixture

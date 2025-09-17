@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,48 +16,43 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
+        return self.messages_sent.copy()"""
         """Performance Tests - Split from test_startup_system.py"""
 
-        import asyncio
-        import os
-        import tempfile
-        import time
-        from pathlib import Path
-        from typing import Any, Dict
-        from shared.isolated_environment import IsolatedEnvironment
+import asyncio
+import os
+import tempfile
+import time
+from pathlib import Path
+from typing import Any, Dict
+from shared.isolated_environment import IsolatedEnvironment
 
-        import pytest
+import pytest
 
-        from dev_launcher.config import LauncherConfig
-        from dev_launcher.database_connector import ( )
+from dev_launcher.config import LauncherConfig
+from dev_launcher.database_connector import ( )
         ConnectionStatus,
         DatabaseConnector,
         DatabaseType)
-        from shared.isolated_environment import EnvironmentValidator, ValidationResult
-        from dev_launcher.launcher import DevLauncher
-        from netra_backend.app.core.network_constants import ( )
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import EnvironmentValidator, ValidationResult
+from dev_launcher.launcher import DevLauncher
+from netra_backend.app.core.network_constants import ( )
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
         DatabaseConstants,
         HostConstants,
         ServicePorts)
 
-
-class TestSyntaxFix:
+"""
         """Test class for orphaned methods"""
         pass
-
-    def setup_method(self):
+"""
         """Set up test environment."""
-        self.temp_dir = tempfile.mkdtemp()
-    # Create required directory structure for LauncherConfig validation
+        self.temp_dir = tempfile.mkdtemp()"""
         backend_dir = Path(self.temp_dir) / "netra_backend" / "app"
         backend_dir.mkdir(parents=True, exist_ok=True)
         (backend_dir / "main.py").touch()  # Create main.py file
@@ -77,24 +70,17 @@ class TestSyntaxFix:
     def teardown_method(self):
         """Clean up test environment."""
         pass
-        import shutil
+import shutil
         if hasattr(self, 'temp_dir') and os.path.exists(self.temp_dir):
         shutil.rmtree(self.temp_dir)
-
-    def test_configuration_loading(self):
+"""
         """Test configuration loading and validation."""
     # Test with minimal environment
-        essential_env = { )
-        'DATABASE_URL': 'postgresql://test:test@localhost:5433/test',
-        'JWT_SECRET_KEY': 'test-secret-key-for-testing-purposes',
-        'SECRET_KEY': 'test-app-secret-key-for-testing',
-        'ENVIRONMENT': 'development'
-    
-
+essential_env = {'DATABASE_URL': 'postgresql://test:test@localhost:5433/test',, 'JWT_SECRET_KEY': 'test-secret-key-for-testing-purposes',, 'SECRET_KEY': 'test-app-secret-key-for-testing',, 'ENVIRONMENT': 'development'}
         with patch.dict(os.environ, essential_env, clear=False):
         # Mock: Component isolation for testing without external dependencies
         launcher = DevLauncher(self.config)
         result = launcher.check_environment()
         assert isinstance(result, bool)
 
-        pass
+        pass"""

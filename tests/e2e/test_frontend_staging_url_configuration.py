@@ -1,12 +1,10 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
-'''
+"""
 Test suite to prevent frontend staging URL regression.
 Validates that frontend builds contain correct environment-specific URLs.
-
-CRITICAL: This prevents the localhost URL regression where frontend makes requests
-to http://localhost:8081 instead of https://auth.staging.netrasystems.ai
-'''
+"""
+to http://localhost:8081 instead of https://auth.staging.netrasystems.ai"""
 
 import pytest
 import subprocess
@@ -19,17 +17,14 @@ from typing import Dict, List, Optional
 from shared.isolated_environment import get_env
 
 
-env = get_env()
-class TestFrontendStagingURLConfiguration:
+env = get_env()"""
     """Comprehensive tests to prevent frontend URL configuration regressions."""
 
-    @pytest.fixture
-    def project_root(self) -> Path:
+    @pytest.fixture"""
         """Get project root directory."""
         return Path(__file__).parent.parent.parent
 
-        @pytest.fixture
-    def dockerfile_paths(self, project_root: Path) -> Dict[str, Path]:
+        @pytest.fixture"""
         """Get paths to all frontend Dockerfiles."""
         return { )
         'staging': project_root / 'deployment' / 'docker' / 'frontend.gcp.Dockerfile',
@@ -39,15 +34,11 @@ class TestFrontendStagingURLConfiguration:
         @pytest.mark.e2e
         def test_staging_dockerfile_has_next_public_environment_variables( )
 self,
-dockerfile_paths: Dict[str, Path]
-):
-'''
+dockerfile_paths: Dict[str, Path]"""
+"""
 Test that staging Dockerfile sets NEXT_PUBLIC_* environment variables before build.
-
-CRITICAL: Next.js bakes NEXT_PUBLIC_* variables into the build at BUILD TIME.
-Without these, frontend defaults to localhost URLs.
-'''
-staging_dockerfile = dockerfile_paths['staging']
+"""
+Without these, frontend defaults to localhost URLs.""""""
 assert staging_dockerfile.exists(), "formatted_string"
 
 content = staging_dockerfile.read_text()
@@ -80,8 +71,7 @@ def test_production_dockerfile_has_next_public_environment_variables( )
 self,
 dockerfile_paths: Dict[str, Path]
 ):
-"""Test that production Dockerfile sets correct NEXT_PUBLIC_* variables."""
-prod_dockerfile = dockerfile_paths['production']
+"""Test that production Dockerfile sets correct NEXT_PUBLIC_* variables.""""""
 assert prod_dockerfile.exists(), "formatted_string"
 
 content = prod_dockerfile.read_text()
@@ -104,11 +94,9 @@ def test_no_localhost_urls_in_staging_dockerfile( )
 self,
 dockerfile_paths: Dict[str, Path]
 ):
-'''
-Test that staging Dockerfile contains NO localhost URLs.
-
-REGRESSION PREVENTION: Localhost URLs in staging cause complete auth failure.
-'''
+"""
+Test that staging Dockerfile contains NO localhost URLs."""
+REGRESSION PREVENTION: Localhost URLs in staging cause complete auth failure."""
 staging_dockerfile = dockerfile_paths['staging']
 content = staging_dockerfile.read_text()
 
@@ -121,14 +109,12 @@ r'ws://localhost',
     
 
 for pattern in localhost_patterns:
-matches = re.findall(pattern, content, re.IGNORECASE)
-assert not matches, \
+matches = re.findall(pattern, content, re.IGNORECASE)"""
 "formatted_string"
 
 @pytest.mark.e2e
 def test_unified_api_config_environment_detection(self, project_root: Path):
-"""Test that unified-api-config.ts properly detects environment."""
-config_file = project_root / 'frontend' / 'lib' / 'unified-api-config.ts'
+"""Test that unified-api-config.ts properly detects environment.""""""
 assert config_file.exists(), "formatted_string"
 
 content = config_file.read_text()
@@ -154,8 +140,7 @@ assert 'https://api.staging.netrasystems.ai' in content, \
 @pytest.mark.e2e
 def test_auth_service_client_uses_unified_config(self, project_root: Path):
 """Test that auth-service-client.ts uses unified configuration."""
-pass
-client_file = project_root / 'frontend' / 'lib' / 'auth-service-client.ts'
+pass"""
 assert client_file.exists(), "formatted_string"
 
 content = client_file.read_text()
@@ -177,12 +162,10 @@ reason="Docker build test is slow, set RUN_DOCKER_BUILD_TEST=1 to enable"
     
 @pytest.mark.e2e
 def test_docker_build_contains_correct_urls(self, project_root: Path):
-'''
+"""
 Test that actual Docker build produces image with correct URLs.
-
-NOTE: This test is slow as it builds the Docker image.
-Enable with: RUN_DOCKER_BUILD_TEST=1 pytest
-'''
+"""
+Enable with: RUN_DOCKER_BUILD_TEST=1 pytest"""
 pass
 dockerfile = project_root / 'deployment' / 'docker' / 'frontend.gcp.Dockerfile'
 
@@ -199,8 +182,7 @@ capture_output=True,
 text=True,
 timeout=300  # 5 minute timeout for build
     
-
-assert result.returncode == 0, \
+"""
 "formatted_string"
 
     # Extract built JavaScript to check for URLs
@@ -261,8 +243,7 @@ capture_output=True
 
 @pytest.mark.e2e
 def test_deployment_script_configuration(self, project_root: Path):
-"""Test that deploy_to_gcp.py has correct frontend configuration."""
-deploy_script = project_root / 'scripts' / 'deploy_to_gcp.py'
+"""Test that deploy_to_gcp.py has correct frontend configuration.""""""
 assert deploy_script.exists(), "formatted_string"
 
 content = deploy_script.read_text(encoding='utf-8', errors='ignore')
@@ -292,18 +273,16 @@ pass
 cloudbuild_file = project_root / 'organized_root' / 'deployment' / 'cloudbuild-frontend.yaml'
 
 if cloudbuild_file.exists():
-content = cloudbuild_file.read_text()
-assert 'frontend.gcp.Dockerfile' in content, \
+content = cloudbuild_file.read_text()"""
 "CloudBuild must use frontend.gcp.Dockerfile"
 
 @pytest.mark.e2e
 def test_no_runtime_environment_override_attempt(self, project_root: Path):
-'''
+"""
 Test that we"re not trying to override NEXT_PUBLIC_* at runtime.
 
 CRITICAL: Next.js NEXT_PUBLIC_* variables are compile-time constants.
-Runtime overrides don"t work.
-'''
+Runtime overrides don"t work."""
 pass
     # Check Cloud Run service configurations if they exist
 service_files = list((project_root / 'deployment').rglob('*service*.yaml'))
@@ -317,8 +296,7 @@ content = service_file.read_text()
 
             # It's OK to have NEXT_PUBLIC_* in terraform/yaml for documentation,
             # but there should be comments explaining they don't work at runtime
-if 'NEXT_PUBLIC_' in content and 'frontend' in content.lower():
-                # Check for warning comments
+if 'NEXT_PUBLIC_' in content and 'frontend' in content.lower():"""
 lines = content.split(" )
 ")
 for i, line in enumerate(lines):
@@ -334,21 +312,17 @@ print("formatted_string")
 class TestFrontendURLRegression:
         """Quick regression tests for the specific localhost URL issue."""
 
-        @pytest.mark.e2e
-    def test_auth_config_url_not_localhost(self):
-        '''
+        @pytest.mark.e2e"""
+        """
         Test that auth config URL is not pointing to localhost.
-
-        This is the specific regression that was observed:
-        Request URL http://localhost:8081/auth/config in staging
-        '''
+"""
+        Request URL http://localhost:8081/auth/config in staging"""
         pass
         # This test would need to be run against a deployed staging environment
         # It's here as documentation of the specific issue
         pass
 
-        @pytest.mark.e2e
-    def test_frontend_dockerfile_exists_and_is_not_empty(self):
+        @pytest.mark.e2e"""
         """Test that frontend Dockerfiles exist and have content."""
         project_root = Path(__file__).parent.parent.parent
 
@@ -356,8 +330,7 @@ class TestFrontendURLRegression:
         project_root / 'deployment' / 'docker' / 'frontend.gcp.Dockerfile',
         project_root / 'deployment' / 'docker' / 'frontend.prod.Dockerfile',
     
-
-        for dockerfile in dockerfiles:
+"""
         assert dockerfile.exists(), "formatted_string"
         content = dockerfile.read_text()
         assert len(content) > 100, "formatted_string"

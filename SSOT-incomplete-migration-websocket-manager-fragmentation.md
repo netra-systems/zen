@@ -50,7 +50,27 @@ Multiple WebSocket manager implementations exist despite SSOT consolidation effo
 - Remove deprecated import patterns from tests
 
 ## SSOT Remediation Plan
-- TBD - Will plan in step 3
+### Canonical SSOT Implementation Identified
+- **SSOT File:** `/netra_backend/app/websocket_core/websocket_manager.py`
+- **Implementation:** Uses `unified_manager.py` internally
+- **Canonical Import:** `from netra_backend.app.websocket_core.websocket_manager import WebSocketManager`
+
+### Phase 1: Import Path Consolidation
+- Update all imports to canonical path
+- Fix startup_module.py and unified_tool_dispatcher.py
+- Batch update script to fix all 6,291 violations
+
+### Phase 2: Factory Consolidation  
+- Standardize on `get_websocket_manager()` factory
+- Update agent registry integration
+
+### Phase 3: Cleanup Compatibility Layers
+- Remove `/netra_backend/app/websocket_core/manager.py` (deprecated shim)
+- Clean up alternative import paths
+
+### Phase 4: Validation
+- Run SSOT compliance tests
+- Verify golden path still works
 
 ## Test Results Log
 ### New SSOT Validation Test Created

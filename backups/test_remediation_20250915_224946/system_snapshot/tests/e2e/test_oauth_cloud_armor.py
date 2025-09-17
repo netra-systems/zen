@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
-'''
+"""
 OAuth Cloud Armor Integration Test
 
 This test validates that:
 1. OAuth callbacks with URL-encoded parameters are not blocked
 2. SQL injection protection remains active for other endpoints
-3. Cloud Armor logs show no false positives for OAuth
-
-Run: python tests/e2e/test_oauth_cloud_armor.py
-'''
+3. Cloud Armor logs show no false positives for OAuth"""
+Run: python tests/e2e/test_oauth_cloud_armor.py"""
 
 import asyncio
 import aiohttp
@@ -25,42 +23,22 @@ from shared.isolated_environment import IsolatedEnvironment
     # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-
-class TestOAuthCloudArmor:
-    """Test OAuth flow and Cloud Armor integration."""
-
+"""
+    """Test OAuth flow and Cloud Armor integration.""""""
     def __init__(self, environment: str = "staging"):
         pass
         self.environment = environment
         self.base_url = self._get_base_url(environment)
         self.auth_url = self._get_auth_url(environment)
-        self.results = { )
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "environment": environment,
-        "tests": {},
-        "summary": { )
-        "passed": 0,
-        "failed": 0,
-        "warnings": 0
-    
-    
-
+results = {"timestamp": datetime.now(timezone.utc).isoformat(),, "environment": environment,, "tests": {},, "summary": { ), "passed": 0,, "failed": 0,, "warnings": 0}
     def _get_base_url(self, env: str) -> str:
         """Get API base URL for environment."""
-        urls = { )
-        "staging": "https://api.staging.netrasystems.ai",
-        "production": "https://api.netrasystems.ai",
-        "dev": "http://localhost:8000"
-    
+urls = {"staging": "https://api.staging.netrasystems.ai",, "production": "https://api.netrasystems.ai",, "dev": "http://localhost:8000"}
         return urls.get(env, urls["staging"])
 
     def _get_auth_url(self, env: str) -> str:
         """Get auth service URL for environment."""
-        urls = { )
-        "staging": "https://auth.staging.netrasystems.ai",
-        "production": "https://auth.netrasystems.ai",
-        "dev": "http://localhost:8001"
-    
+urls = {"staging": "https://auth.staging.netrasystems.ai",, "production": "https://auth.netrasystems.ai",, "dev": "http://localhost:8001"}
         return urls.get(env, urls["staging"])
 
         @pytest.mark.auth
@@ -289,13 +267,7 @@ class TestOAuthCloudArmor:
         rule_data = json.loads(result.stdout) if result.stdout else {}
 
             # Verify rule configuration
-        checks = { )
-        "rule_exists": len(rule_data) > 0,
-        "priority_correct": rule_data[0].get("priority") == 50 if rule_data else False,
-        "action_correct": rule_data[0].get("action") == "allow" if rule_data else False,
-        "path_correct": "/auth/callback" in str(rule_data) if rule_data else False
-            
-
+checks = {"rule_exists": len(rule_data) > 0,, "priority_correct": rule_data[0].get("priority") == 50 if rule_data else False,, "action_correct": rule_data[0].get("action") == "allow" if rule_data else False,, "path_correct": "/auth/callback" in str(rule_data) if rule_data else False}
         all_passed = all(checks.values())
 
         for check, passed in checks.items():
@@ -386,8 +358,7 @@ class TestOAuthCloudArmor:
 
 
     async def main():
-        """Main test runner."""
-    Get environment from command line or default to staging
+        """Main test runner.""""""
         env = sys.argv[1] if len(sys.argv) > 1 else "staging"
 
     # Run tests
