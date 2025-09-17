@@ -2,7 +2,7 @@
 """
 Placeholder test file - original had syntax errors blocking test collection.
 
-Original file: tests\race_conditions\test_race_condition_elimination_suite.py
+Original file: tests/race_conditions\test_race_condition_elimination_suite.py
 Replaced on: 2025-09-17
 Issue: Part of fixing 339 syntax errors in test collection (Issue #868)
 

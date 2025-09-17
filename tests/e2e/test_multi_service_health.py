@@ -2,7 +2,7 @@
 """
 Placeholder test file - original had syntax errors blocking test collection.
 
-Original file: tests\e2e\test_multi_service_health.py
+Original file: tests/e2e\test_multi_service_health.py
 Replaced on: 2025-09-17
 Issue: Part of fixing 339 syntax errors in test collection (Issue #868)
 

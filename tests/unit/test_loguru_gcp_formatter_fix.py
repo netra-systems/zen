@@ -2,7 +2,7 @@
 """
 Placeholder test file - original had syntax errors blocking test collection.
 
-Original file: tests\unit\test_loguru_gcp_formatter_fix.py
+Original file: tests/unit\test_loguru_gcp_formatter_fix.py
 Replaced on: 2025-09-17
 Issue: Part of fixing 339 syntax errors in test collection (Issue #868)
 

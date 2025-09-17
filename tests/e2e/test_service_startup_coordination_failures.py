@@ -2,7 +2,7 @@
 """
 Placeholder test file - original had syntax errors blocking test collection.
 
-Original file: tests\e2e\test_service_startup_coordination_failures.py
+Original file: tests/e2e\test_service_startup_coordination_failures.py
 Replaced on: 2025-09-17
 Issue: Part of fixing 339 syntax errors in test collection (Issue #868)
 

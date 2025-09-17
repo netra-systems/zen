@@ -2,7 +2,7 @@
 """
 Placeholder test file - original had syntax errors blocking test collection.
 
-Original file: tests\race_conditions\test_websocket_manager_race_conditions.py
+Original file: tests/race_conditions\test_websocket_manager_race_conditions.py
 Replaced on: 2025-09-17
 Issue: Part of fixing 339 syntax errors in test collection (Issue #868)
 

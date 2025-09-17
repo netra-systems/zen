@@ -2,7 +2,7 @@
 """
 Placeholder test file - original had syntax errors blocking test collection.
 
-Original file: tests\critical\phase1\test_supervisor_context_migration.py
+Original file: tests/critical\phase1\test_supervisor_context_migration.py
 Replaced on: 2025-09-17
 Issue: Part of fixing 339 syntax errors in test collection (Issue #868)
 

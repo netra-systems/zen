@@ -2,7 +2,7 @@
 """
 Placeholder test file - original had syntax errors blocking test collection.
 
-Original file: tests\mission_critical\test_orchestration_system_suite.py
+Original file: tests/mission_critical\test_orchestration_system_suite.py
 Replaced on: 2025-09-17
 Issue: Part of fixing 339 syntax errors in test collection (Issue #868)
 

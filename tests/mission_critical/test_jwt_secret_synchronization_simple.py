@@ -2,7 +2,7 @@
 """
 Placeholder test file - original had syntax errors blocking test collection.
 
-Original file: tests\mission_critical\test_jwt_secret_synchronization_simple.py
+Original file: tests/mission_critical\test_jwt_secret_synchronization_simple.py
 Replaced on: 2025-09-17
 Issue: Part of fixing 339 syntax errors in test collection (Issue #868)
 

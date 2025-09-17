@@ -2,7 +2,7 @@
 """
 Placeholder test file - original had syntax errors blocking test collection.
 
-Original file: tests\mission_critical\test_websocket_chat_bulletproof.py
+Original file: tests/mission_critical\test_websocket_chat_bulletproof.py
 Replaced on: 2025-09-17
 Issue: Part of fixing 339 syntax errors in test collection (Issue #868)
 
