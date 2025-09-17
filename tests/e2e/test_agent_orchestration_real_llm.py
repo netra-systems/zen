@@ -1,5 +1,5 @@
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-'''E2E Test: Agent Orchestration with Real LLM Integration - CLAUDE.md Compliant'''
+'''E2E Test: Agent Orchestration with Real LLM Integration - CLAUDE.md Compliant
 
 MISSION CRITICAL E2E test for agent orchestration with real LLM API calls.
 Validates complete agent lifecycle, multi-agent coordination, real-time processing,
@@ -19,7 +19,6 @@ tool_executing, tool_completed, agent_completed
 - Real services integration with graceful fallback
 - Comprehensive WebSocket event validation
 - Atomic test design with proper cleanup
-'''
 '''
 
 import asyncio
@@ -172,16 +171,17 @@ websocket_client = session_data.get("client")
 event_capture_task = None
 
 if websocket_client and hasattr(websocket_client, 'recv'):
-    pass
-event_capture_task = asyncio.create_task( )
-self._capture_websocket_events(websocket_client, websocket_event_validator)
+    event_capture_task = asyncio.create_task(
+        self._capture_websocket_events(websocket_client, websocket_event_validator)
+    )
             
 
 try:
     pass
 request = self._create_optimization_request(session_data["user_data"].id)
-response = await self._execute_agent_with_llm( )
-session_data, request, "data", use_real_llm, llm_timeout
+response = await self._execute_agent_with_llm(
+    session_data, request, "data", use_real_llm, llm_timeout
+)
                 
 
                 # Allow time for WebSocket events to be captured
@@ -228,16 +228,17 @@ websocket_client = session_data.get("client")
 event_capture_task = None
 
 if websocket_client and hasattr(websocket_client, 'recv'):
-    pass
-event_capture_task = asyncio.create_task( )
-self._capture_websocket_events(websocket_client, websocket_event_validator)
+    event_capture_task = asyncio.create_task(
+        self._capture_websocket_events(websocket_client, websocket_event_validator)
+    )
                                                 
 
 try:
     pass
 agents = ["triage", "data", "optimization"]
-results = await self._execute_multi_agent_flow( )
-session_data, agents, use_real_llm, llm_timeout
+results = await self._execute_multi_agent_flow(
+    session_data, agents, use_real_llm, llm_timeout
+)
                                                     
 
                                                     # Allow time for WebSocket events
@@ -286,11 +287,13 @@ conversation_flow = [ ]
 
 context = []
 for i, message in enumerate(conversation_flow):
-request = self._create_contextual_request( )
-session_data["user_data"].id, message, context
+request = self._create_contextual_request(
+    session_data["user_data"].id, message, context
+)
                                                                                         
-response = await self._execute_agent_with_llm( )
-session_data, request, "optimization", use_real_llm, llm_timeout
+response = await self._execute_agent_with_llm(
+    session_data, request, "optimization", use_real_llm, llm_timeout
+)
                                                                                         
 context.append({"message": message, "response": response})
 
@@ -314,8 +317,9 @@ try:
 request = self._create_performance_test_request(session_data["user_data"].id)
 
 start_time = time.time()
-response = await self._execute_agent_with_llm( )
-session_data, request, "performance", use_real_llm, llm_timeout
+response = await self._execute_agent_with_llm(
+    session_data, request, "performance", use_real_llm, llm_timeout
+)
                                                                                                     
 execution_time = time.time() - start_time
 
@@ -352,18 +356,21 @@ chain_results = []
 previous_output = None
 
 for step in chain:
-request = self._create_chain_request( )
-session_data["user_data"].id,
-step["task"],
-previous_output
+request = self._create_chain_request(
+    session_data["user_data"].id,
+    step["task"],
+    previous_output
+)
                                                                                                                             
-response = await self._execute_agent_with_llm( )
-session_data, request, step["agent"], use_real_llm, llm_timeout
+response = await self._execute_agent_with_llm(
+    session_data, request, step["agent"], use_real_llm, llm_timeout
+)
                                                                                                                             
-chain_results.append({ })
-"agent": step["agent"],
-"response": response,
-"execution_time": response.get("execution_time", 0)
+chain_results.append({
+    "agent": step["agent"],
+    "response": response,
+    "execution_time": response.get("execution_time", 0)
+})
                                                                                                                             
 previous_output = response.get("content", "")
 
@@ -428,14 +435,16 @@ session_data = await test_core.establish_conversation_session(PlanTier.PRO)
 
 try:
                                                                                                                                                                         # Test malformed request handling
-malformed_request = { }
-"type": "agent_request",
-"user_id": session_data["user_data"].id,
-                                                                                                                                                                        # Missing required fields
+malformed_request = {
+    "type": "agent_request",
+    "user_id": session_data["user_data"].id,
+    # Missing required fields
+}
                                                                                                                                                                         
 
-response = await self._execute_agent_with_error_handling( )
-session_data, malformed_request, use_real_llm
+response = await self._execute_agent_with_error_handling(
+    session_data, malformed_request, use_real_llm
+)
                                                                                                                                                                         
 
 assert response["status"] in ["error", "recovered"], "Error not handled properly"
@@ -457,14 +466,14 @@ while time.time() < end_time:
 try:
                 # Handle different WebSocket client types
 if hasattr(websocket_client, 'receive_json'):
-    pass
-message = await asyncio.wait_for( )
-websocket_client.receive_json(), timeout=0.5
+    message = await asyncio.wait_for(
+        websocket_client.receive_json(), timeout=0.5
+    )
                     
 elif hasattr(websocket_client, 'recv'):
-    pass
-raw_message = await asyncio.wait_for( )
-websocket_client.recv(), timeout=0.5
+    raw_message = await asyncio.wait_for(
+        websocket_client.recv(), timeout=0.5
+    )
                         
 message = json.loads(raw_message) if isinstance(raw_message, str) else raw_message
 else:
@@ -689,15 +698,17 @@ timeout: int) -> Dict[str, Any]:
 results = {}
 
 for agent in agents:
-request = { }
-"type": "agent_request",
-"user_id": session_data["user_data"].id,
-"message": "",
-"agent_type": agent
+request = {
+    "type": "agent_request",
+    "user_id": session_data["user_data"].id,
+    "message": "",
+    "agent_type": agent
+}
         
 
-results[agent] = await self._execute_agent_with_llm( )
-session_data, request, agent, use_real_llm, timeout
+results[agent) = await self._execute_agent_with_llm(
+    session_data, request, agent, use_real_llm, timeout
+)
         
 
 return results
@@ -708,15 +719,16 @@ use_real_llm: bool) -> Dict[str, Any]:
 """Execute agent with error handling."""
 try:
     pass
-return await self._execute_agent_with_llm( )
-session_data, request, "error_test", use_real_llm, 10
+return await self._execute_agent_with_llm(
+    session_data, request, "error_test", use_real_llm, 10
+)
         
 except Exception as e:
-    pass
-return { }
-"status": "error",
-"error": str(e),
-"recovered": False
+    return {
+        "status": "error",
+        "error": str(e),
+        "recovered": False
+    }
             
 
 def _validate_agent_response(self, response: Dict[str, Any], use_real_llm: bool, websocket_validator: Optional[MissionCriticalWebSocketValidator] = None):
@@ -859,3 +871,5 @@ await core.teardown_test_environment()
 pass
 
 '''
+'''
+]]]]

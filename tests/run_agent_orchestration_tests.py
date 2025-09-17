@@ -3,6 +3,8 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 #!/usr/bin/env python3
 '''
 '''
+'''
+'''
 env = get_env()
 Agent Orchestration Test Runner
 
@@ -24,6 +26,8 @@ python tests/run_agent_orchestration_tests.py --concurrent-load 15
 
     # Run with detailed reporting
 python tests/run_agent_orchestration_tests.py --detailed-reports
+'''
+'''
 '''
 '''
 
@@ -49,21 +53,20 @@ print("=" * 80)
 
 test_file = "tests/performance/test_agent_performance_metrics.py"
 
-cmd = ]
-"python", "-m", "pytest",
-test_file,
-"-v",
-"--asyncio-mode=auto",
-"-m", "performance",
-"--tb=short"
-    
+cmd = [
+    "python", "-m", "pytest",
+    test_file,
+    "-v",
+    "--asyncio-mode=auto",
+    "-m", "performance",
+    "--tb=short"
+]
 
 if detailed_reports:
-    pass
-cmd.extend(["--capture=no", "-s"])
+    cmd.extend(["--capture=no", "-s"])
 
-print("")
-print("")
+print(f"Running performance tests with concurrent load: {concurrent_load}")
+print(f"Detailed reports: {detailed_reports}")
 print()
 
         # Set environment variable for concurrent load
@@ -89,20 +92,19 @@ print("=" * 80)
 
 test_file = "tests/integration/test_agent_error_recovery.py"
 
-cmd = ]
-"python", "-m", "pytest",
-test_file,
-"-v",
-"--asyncio-mode=auto",
-"-m", "error_recovery",
-"--tb=short"
-    
+cmd = [
+    "python", "-m", "pytest",
+    test_file,
+    "-v",
+    "--asyncio-mode=auto",
+    "-m", "error_recovery",
+    "--tb=short"
+]
 
 if detailed_reports:
-    pass
-cmd.extend(["--capture=no", "-s"])
+    cmd.extend(["--capture=no", "-s"])
 
-print("")
+print("Running error recovery tests...")
 print()
 
 result = subprocess.run(cmd, capture_output=False)
@@ -127,8 +129,7 @@ start_time = time.time()
     # Run performance tests
 perf_result = run_performance_tests(concurrent_load, detailed_reports)
 
-print("")
-")"
+print("\\nSeparator between test phases\\n")
 
     # Run error recovery tests
 recovery_result = run_error_recovery_tests(detailed_reports)
@@ -137,22 +138,19 @@ recovery_result = run_error_recovery_tests(detailed_reports)
 end_time = time.time()
 duration = end_time - start_time
 
-print("")
- + =" * 80)"
+print("\\n" + "=" * 80)
 print("TEST SUITE SUMMARY")
 print("=" * 80)
-print("")
-print("")
-print("")
+print(f"Performance tests result: {perf_result}")
+print(f"Error recovery tests result: {recovery_result}")
+print(f"Total duration: {duration:.2f} seconds")
 
 overall_result = 0 if (perf_result == 0 and recovery_result == 0) else 1
 
 if overall_result == 0:
-    print("")
-[SUCCESS] ALL AGENT ORCHESTRATION TESTS PASSED!")"
+    print("[SUCCESS] ALL AGENT ORCHESTRATION TESTS PASSED!")
 else:
-    print("")
-[WARNING] SOME TESTS FAILED - CHECK OUTPUT ABOVE")"
+    print("[WARNING] SOME TESTS FAILED - CHECK OUTPUT ABOVE")
 
 print("=" * 80)
 
@@ -167,34 +165,31 @@ print("RUNNING QUICK AGENT ORCHESTRATION VALIDATION")
 print("=" * 80)
 
     # Quick performance validation
-cmd_perf = ]
-"python", "-m", "pytest",
-"tests/performance/test_agent_performance_metrics.py::test_single_agent_execution_time_benchmarks",
-"-v", "--asyncio-mode=auto", "--tb=short", "-x"
-    
+cmd_perf = [
+    "python", "-m", "pytest",
+    "tests/performance/test_agent_performance_metrics.py::test_single_agent_execution_time_benchmarks",
+    "-v", "--asyncio-mode=auto", "--tb=short", "-x"
+]
 
 print("Running quick performance validation...")
 perf_result = subprocess.run(cmd_perf, capture_output=False)
 
     # Quick error recovery validation
-cmd_recovery = ]
-"python", "-m", "pytest",
-"tests/integration/test_agent_error_recovery.py::test_individual_agent_timeout_recovery",
-"-v", "--asyncio-mode=auto", "--tb=short", "-x"
-    
+cmd_recovery = [
+    "python", "-m", "pytest",
+    "tests/integration/test_agent_error_recovery.py::test_individual_agent_timeout_recovery",
+    "-v", "--asyncio-mode=auto", "--tb=short", "-x"
+]
 
-print("")
-Running quick error recovery validation...")"
+print("Running quick error recovery validation...")
 recovery_result = subprocess.run(cmd_recovery, capture_output=False)
 
 overall_result = 0 if (perf_result.returncode == 0 and recovery_result.returncode == 0) else 1
 
 if overall_result == 0:
-    print("")
-[SUCCESS] Quick validation passed - full test suite should work")"
+    print("[SUCCESS] Quick validation passed - full test suite should work")
 else:
-    print("")
-[FAILED] Quick validation failed - check environment setup")"
+    print("[FAILED] Quick validation failed - check environment setup")
 
 return overall_result
 
@@ -202,11 +197,11 @@ return overall_result
 def main():
     pass
 """Main test runner entry point."""
-parser = argparse.ArgumentParser( )
-description="Agent Orchestration Test Runner",
-formatter_class=argparse.RawDescriptionHelpFormatter,
-epilog=__doc__
-    
+parser = argparse.ArgumentParser(
+    description="Agent Orchestration Test Runner",
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    epilog=__doc__
+)
 
 parser.add_argument( )
 "--performance-only",
