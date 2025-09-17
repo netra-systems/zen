@@ -1567,7 +1567,7 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
     try:
         logger = get_logger(__name__)
     except Exception as e:
-        # Fallback logger initialization if central_logger fails
+        # Fallback logger initialization if unified logging fails
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         logger = logging.getLogger(__name__)
         logger.error(f"Failed to initialize central logger, using fallback: {e}")
@@ -1626,8 +1626,8 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
             return start_time, logger
             
         except Exception as e:
-            # Use central_logger directly in exception handler to avoid scope issues
-            error_logger = central_logger.get_logger(__name__)
+            # Use unified logging directly in exception handler to avoid scope issues
+            error_logger = get_logger(__name__)
             error_logger.error(f"Error in robust startup: {e}")
             # Set startup failure flags
             app.state.startup_complete = False
