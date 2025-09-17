@@ -885,7 +885,7 @@ class CriticalAgentTests:
         
         async with httpx.AsyncClient(timeout=30) as client:
             # Test performance with multiple quick requests
-            test_endpoint = f"{config.backend_url}/health"
+            test_endpoint = config.api_health_endpoint
             
             for i in range(10):
                 request_start = time.time()
@@ -1429,7 +1429,7 @@ class CriticalScalabilityTests:
             # Make rapid requests to detect rate limiting
             for i in range(30):  # Send 30 requests rapidly
                 try:
-                    response = await client.get(f"{config.backend_url}/health")
+                    response = await client.get(config.api_health_endpoint)
                     
                     rate_limit_results["requests_made"] += 1
                     status = response.status_code
@@ -1580,7 +1580,7 @@ class CriticalScalabilityTests:
             try:
                 async with httpx.AsyncClient(timeout=timeout) as client:
                     test_start = time.time()
-                    response = await client.get(f"{config.backend_url}/health")
+                    response = await client.get(config.api_health_endpoint)
                     test_duration = time.time() - test_start
                     
                     resilience_results["timeout_tests"].append({
@@ -1601,7 +1601,7 @@ class CriticalScalabilityTests:
         for attempt in range(5):
             try:
                 async with httpx.AsyncClient(timeout=10) as client:
-                    response = await client.get(f"{config.backend_url}/health")
+                    response = await client.get(config.api_health_endpoint)
                     
                     resilience_results["connection_tests"].append({
                         "attempt": attempt + 1,
@@ -1720,7 +1720,7 @@ class CriticalScalabilityTests:
             
             try:
                 for i in range(3):
-                    response = await client_with_cookies.get(f"{config.backend_url}/health")
+                    response = await client_with_cookies.get(config.api_health_endpoint)
                     
                     session_results["cookie_persistence"][f"request_{i+1}"] = {
                         "status": response.status_code,
@@ -1743,7 +1743,7 @@ class CriticalScalabilityTests:
             for i in range(3):
                 try:
                     response = await client.get(
-                        f"{config.backend_url}/health",
+                        config.api_health_endpoint,
                         headers=session_headers
                     )
                     

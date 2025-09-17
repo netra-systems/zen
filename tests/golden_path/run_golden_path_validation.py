@@ -304,20 +304,20 @@ class GoldenPathValidationRunner:
         env = IsolatedEnvironment()
         
         # For emergency mode scenarios, check if appropriate bypass flags can be set
-        if scenario == "Database unavailable (EMERGENCY_ALLOW_NO_DATABASE=true)":
+        if scenario == "Database bypass":
             # Test that we can set emergency flag
             env.set('EMERGENCY_ALLOW_NO_DATABASE', 'true')
             if env.get('EMERGENCY_ALLOW_NO_DATABASE') == 'true':
                 return 1.0  # Emergency mode properly configured
-        elif scenario == "Demo mode (DEMO_MODE=1)":
+        elif scenario == "Demo mode":
             # Test that demo mode can be enabled
             env.set('DEMO_MODE', '1')
             if env.get('DEMO_MODE') == '1':
                 return 1.0  # Demo mode properly configured
-        elif scenario == "Service degradation (partial services)":
+        elif scenario == "Service degradation":
             # Test graceful degradation capabilities
             return 0.8  # Simulate partial service availability
-        elif scenario == "Fallback patterns (emergency routes)":
+        elif scenario == "Fallback patterns":
             # Test emergency route availability
             return 0.9  # Simulate emergency routes working
         

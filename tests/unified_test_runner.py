@@ -1123,6 +1123,14 @@ class UnifiedTestRunner:
             # Initialize components
             self.initialize_components(args)
             
+            # Set no-services mode if requested
+            self.no_services_mode = getattr(args, 'no_services', False)
+            if self.no_services_mode:
+                from shared.isolated_environment import get_env
+                env = get_env()
+                env.set('TEST_NO_SERVICES', 'true', 'test_runner')
+                print("[INFO] Running in no-services mode - external dependencies disabled")
+            
             # Configure environment
             self._configure_environment(args)
 
@@ -3430,10 +3438,15 @@ class UnifiedTestRunner:
         else:
             cmd_parts.extend(["--timeout=300", "--timeout-method=thread"])   # 5min for other test categories
         
+        # Add specific test file if specified
+        if hasattr(args, 'file') and args.file:
+            # If a specific file is provided, use it instead of default test discovery
+            cmd_parts.append(args.file)
+        
         # Add specific test pattern - only for categories that use pattern-based selection
         # Issue #1270 Fix: Pattern filtering should not be applied to categories that use
         # specific files (database, api, unit, integration) as it can cause test deselection
-        if args.pattern and self._should_category_use_pattern_filtering(category_name):
+        elif args.pattern and self._should_category_use_pattern_filtering(category_name):
             # Clean up pattern - remove asterisks that are invalid for pytest -k expressions
             # pytest -k expects Python-like expressions, not glob patterns
             clean_pattern = args.pattern.strip('*')
@@ -4447,6 +4460,11 @@ def main():
     parser.add_argument(
         "--pattern",
         help="Run tests matching pattern"
+    )
+    
+    parser.add_argument(
+        "--file",
+        help="Run specific test file"
     )
     
     # Legacy compatibility arguments from frontend/backend runners
