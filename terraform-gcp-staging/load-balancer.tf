@@ -210,7 +210,7 @@ resource "google_compute_url_map" "https_lb" {
   }
 
   host_rule {
-    hosts        = ["auth.staging.netrasystems.ai"]
+    hosts        = ["auth-staging.netrasystems.ai"]
     path_matcher = "auth-paths"
   }
 

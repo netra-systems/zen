@@ -159,6 +159,9 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       
       webSocketService.connect(wsUrl, {
         token: currentToken || undefined,
+        // Ticket authentication support
+        getTicket: authConfig.getTicket,
+        useTicketAuth: authConfig.useTicketAuth,
         refreshToken: async () => {
           try {
             // Use the unified auth service for token refresh
