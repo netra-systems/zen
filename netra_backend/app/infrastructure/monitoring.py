@@ -302,7 +302,7 @@ class WebSocketAuthenticationHealthCheck:
                     "remediation_available": remediation_available,
                     "auth_service_configured": bool(auth_service_url),
                     "internal_auth_configured": bool(internal_auth_url),
-                    "jwt_configured": bool(jwt_secret),
+                    # jwt_configured removed - JWT operations delegated to auth service (SSOT compliance)
                     "issues": issues
                 }
             )
