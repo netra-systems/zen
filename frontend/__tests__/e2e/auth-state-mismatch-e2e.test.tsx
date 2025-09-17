@@ -130,15 +130,13 @@ jest.mock('@/store/unified-chat', () => ({
   }
 }));
 
-jest.mock('jwt-decode', () => ({
-  jwtDecode: jest.fn(),
-}));
+// jwt-decode mock removed - JWT authentication removed from WebSocket service
 
 const mockUnifiedAuthService = unifiedAuthService as jest.Mocked<typeof unifiedAuthService>;
 const mockLogger = logger as jest.Mocked<typeof logger>;
 const mockMonitorAuthState = monitorAuthState as jest.MockedFunction<typeof monitorAuthState>;
 const mockDebugAuthState = debugAuthState as jest.MockedFunction<typeof debugAuthState>;
-const mockJwtDecode = require('jwt-decode').jwtDecode as jest.MockedFunction<any>;
+// mockJwtDecode removed - JWT authentication removed
 
 // Mock localStorage with persistence simulation
 const mockLocalStorage = (() => {
