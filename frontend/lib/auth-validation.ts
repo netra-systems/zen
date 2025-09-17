@@ -12,7 +12,7 @@
 
 import { User } from '@/types';
 import { logger } from '@/lib/logger';
-import { jwtDecode } from 'jwt-decode';
+// ISSUE #1117 SSOT CONSOLIDATION: Removed jwtDecode import - now using server-side validation
 
 export interface AuthStateValidation {
   isValid: boolean;
@@ -136,9 +136,10 @@ export function validateAuthState(
 }
 
 /**
- * Validates a JWT token
+ * Validates a JWT token using server-side validation (SSOT)
+ * ISSUE #1117 SSOT CONSOLIDATION: Replaced client-side JWT decode with server validation
  */
-export function validateToken(token: string): TokenValidation {
+export async function validateToken(token: string): Promise<TokenValidation> {
   const validation: TokenValidation = {
     isValid: false,
     isExpired: false,
@@ -153,7 +154,7 @@ export function validateToken(token: string): TokenValidation {
     return validation;
   }
 
-  // Check token format
+  // Basic token format check (still useful for early validation)
   const parts = token.split('.');
   if (parts.length !== 3) {
     validation.errors.push(`Invalid token format: expected 3 parts, got ${parts.length}`);
@@ -161,43 +162,48 @@ export function validateToken(token: string): TokenValidation {
   }
 
   try {
-    // Decode token
-    const decoded = jwtDecode(token) as Record<string, unknown> & {
-      email?: string;
-      exp?: number;
-      iat?: number;
-      sub?: string;
-    };
-    validation.decodedUser = decoded as User;
+    // SSOT COMPLIANCE: Use server-side validation via unified auth service
+    const response = await fetch('/api/auth/validate-token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ token })
+    });
 
-    // Check required fields
-    const requiredFields = ['email', 'exp'];
-    const missingFields = requiredFields.filter(field => !decoded[field]);
+    if (!response.ok) {
+      validation.errors.push(`Server validation failed: ${response.status} ${response.statusText}`);
+      return validation;
+    }
+
+    const result = await response.json();
     
-    if (missingFields.length > 0) {
-      validation.errors.push(`Missing required fields: ${missingFields.join(', ')}`);
-    } else {
-      validation.hasRequiredFields = true;
+    if (!result.valid) {
+      validation.errors.push(result.error || 'Token validation failed');
+      if (result.expired) {
+        validation.isExpired = true;
+      }
+      return validation;
     }
 
-    // Check expiration
-    const now = Math.floor(Date.now() / 1000);
-    if (decoded.exp && decoded.exp < now) {
-      validation.isExpired = true;
-      validation.errors.push(`Token expired at ${new Date(decoded.exp * 1000).toISOString()}`);
+    // Extract user data from server response
+    if (result.user) {
+      validation.decodedUser = result.user as User;
+      validation.hasRequiredFields = !!(result.user.email && result.user.exp);
+      
+      // Check if token is expired (server handles this, but we mirror for compatibility)
+      if (result.expired) {
+        validation.isExpired = true;
+        validation.errors.push('Token is expired');
+      }
     }
 
-    // Check issued at time (iat)
-    if (decoded.iat && decoded.iat > now + 60) { // Allow 60 seconds clock skew
-      validation.issuedInFuture = true;
-      validation.errors.push(`Token issued in future: ${new Date(decoded.iat * 1000).toISOString()}`);
-    }
-
-    // Token is valid if no errors
-    validation.isValid = validation.errors.length === 0;
+    // Token is valid if no errors and server confirmed validity
+    validation.isValid = validation.errors.length === 0 && result.valid;
 
   } catch (error) {
-    validation.errors.push(`Token decode error: ${(error as Error).message}`);
+    validation.errors.push(`Server validation error: ${(error as Error).message}`);
   }
 
   return validation;
@@ -451,12 +457,10 @@ export function debugAuthState(
   }
   
   if (token) {
-    try {
-      const decoded = jwtDecode(token);
-      console.log('Token Decoded:', decoded);
-    } catch {
-      console.error('Failed to decode token');
-    }
+    // ISSUE #1117 SSOT CONSOLIDATION: Removed client-side JWT decode
+    console.log('Token Present:', token.slice(0, 20) + '...[REDACTED]');
+    console.log('Token Length:', token.length);
+    console.log('Note: Use server-side validation for token details');
   }
   
   if (user) {

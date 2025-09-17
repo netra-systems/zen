@@ -1006,46 +1006,36 @@ async def generate_access_token(user_id: str, email: str = None, **kwargs) -> st
     except Exception as e:
         logger.error(f"Error generating access token: {e}")
         raise
-    """
-    Backend authentication integration class for SSOT compliance.
-    
-    This class provides a unified interface for backend authentication operations,
-    wrapping the existing auth service client functionality in a testable interface.
-    
-    SSOT COMPLIANCE:
-    - Wraps existing AuthServiceClient functionality
-    - Provides integration testing interface
-    - Maintains service boundaries (auth service is external)
-    - Uses existing dependency injection patterns
-    """
-    
-    def __init__(self, auth_interface=None):
-        """
-        Initialize backend auth integration.
-        
-        Args:
-            auth_interface: Optional UnifiedAuthInterface for advanced testing scenarios.
-                           If not provided, uses the standard auth_client for production.
-        """
-        self.auth_interface = auth_interface
-        self.auth_client = auth_client  # Use existing SSOT auth client
-        
-        logger.info("[U+1F527] BACKEND AUTH INTEGRATION: Initialized with auth service client")
-    
-    async def validate_request_token(self, authorization_header: str):
-        """
-        Validate a request token from Authorization header.
-        
-        Args:
-            authorization_header: Authorization header value (e.g., "Bearer <token>")
-            
-        Returns:
-            Validation result with user information
-        """
-        try:
-            # Extract token from header
-            if not authorization_header or not authorization_header.startswith("Bearer "):
-                return AuthValidationResult(
+
+
+# Issue #485 fix: Create auth_manager instance for test infrastructure access
+auth_manager = BackendAuthIntegration()
+
+# Backward compatibility alias for integration tests
+AuthIntegrationService = BackendAuthIntegration  # Tests expect this name
+
+# Export auth_manager for Issue #485 compatibility
+__all__ = [
+    "auth_client",
+    "get_current_user",
+    "get_optional_user",
+    "get_auth_client",
+    "get_auth_handler",  # Deployment compatibility alias
+    "generate_access_token",
+    "BackendAuthIntegration",
+    "AuthValidationResult",
+    "TokenRefreshResult",
+    "auth_manager",  # Issue #485 fix: Missing import
+    "unified_auth_client",  # Issue #762 Phase 2: Backward compatibility alias
+    "AuthIntegrationService",  # Backward compatibility for tests
+    "check_auth_service_health"  # P0 Action 4: Auth service health check
+]
+
+# Issue #762 Phase 2 Remediation: Add backward compatibility alias
+unified_auth_client = auth_client
+
+# Deployment compatibility alias for get_auth_handler
+get_auth_handler = get_auth_client
                     valid=False,
                     error="invalid_authorization_header",
                     user_id=None,

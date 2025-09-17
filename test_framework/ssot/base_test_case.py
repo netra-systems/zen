@@ -422,7 +422,7 @@ class SSotBaseTestCase:
             with ThreadPoolExecutor() as executor:
                 future = executor.submit(asyncio.run, coro)
                 # Issue #1278: Infrastructure-aware timeout for staging/production
-                env = self.env_manager.get("ENVIRONMENT", "development").lower()
+                env = self._env.get("ENVIRONMENT", "development").lower()
                 if env in ["staging", "production"]:
                     timeout = 60.0  # Extended timeout for infrastructure delays
                 else:
@@ -432,7 +432,7 @@ class SSotBaseTestCase:
             # No event loop running, safe to use asyncio.run
             # Issue #1278: Apply infrastructure-aware timeout here too
             try:
-                env = self.env_manager.get("ENVIRONMENT", "development").lower()
+                env = self._env.get("ENVIRONMENT", "development").lower()
                 if env in ["staging", "production"]:
                     # Infrastructure-aware async execution with timeout
                     async def run_with_timeout():
