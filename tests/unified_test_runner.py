@@ -1121,7 +1121,14 @@ class UnifiedTestRunner:
             
             # Configure environment
             self._configure_environment(args)
-            
+
+            # EMERGENCY: Infrastructure resilience check for golden path test execution (Issue #1278)
+            if self._detect_staging_environment(args) or args.env == 'staging':
+                print("[INFRASTRUCTURE] Detected staging environment - performing resilience check...")
+                if not infrastructure_resilience_check():
+                    print("[ERROR] Infrastructure resilience check failed - aborting test execution")
+                    return 1
+
             # PERFORMANCE: Skip service orchestration for fast collection
             if hasattr(args, 'fast_collection') and args.fast_collection:
                 print("[INFO] Fast collection mode - skipping service orchestration")
