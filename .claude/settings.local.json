@@ -18,7 +18,8 @@
       "Bash(python tests/test_pricing_engine.py)",
       "Bash(python tests/test_agent_interface.py)",
       "Bash(kill:*)",
-      "Bash(python test_tool_detection.py:*)"
+      "Bash(python test_tool_detection.py:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []
