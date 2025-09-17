@@ -68,13 +68,15 @@ class UserContextIsolationComprehensiveTests(SSotAsyncTestCase):
         self.race_condition_detected = False
         self.initial_memory = None
         self.context_references: List[weakref.ref] = []
+        # Initialize context manager synchronously since pytest doesn't always call async_setup_method
+        self.context_manager = UserContextManager()
+        gc.collect()
+        self.initial_memory = self._get_memory_usage()
 
     async def async_setup_method(self, method):
         """Async setup for context manager initialization."""
         await super().async_setup_method(method)
-        self.context_manager = UserContextManager()
-        gc.collect()
-        self.initial_memory = self._get_memory_usage()
+        # Context manager already initialized in setup_method to ensure it's available
 
     @pytest.mark.unit
     @pytest.mark.golden_path

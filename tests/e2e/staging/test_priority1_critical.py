@@ -50,7 +50,9 @@ class InfrastructureHealthChecker:
         
         try:
             async with httpx.AsyncClient(timeout=10) as client:
-                response = await client.get(config.api_health_endpoint)
+                # Check the actual health endpoint, not the proxied /api/health
+                health_url = f"{config.backend_url}/health"
+                response = await client.get(health_url)
                 
                 if response.status_code == 200:
                     health_data = response.json()
