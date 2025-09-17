@@ -21,27 +21,27 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Tuple, Any
 from urllib.parse import urlparse
 
-    # Database connection imports
+# Database connection imports
 try:
-import asyncpg
+    import asyncpg
 except ImportError:
-asyncpg = None
+    asyncpg = None
 
 try:
-import redis.asyncio as redis
+    import redis.asyncio as redis
 except ImportError:
-redis = None
+    redis = None
 
 try:
-import clickhouse_connect
+    import clickhouse_connect
 except ImportError:
-clickhouse_connect = None
+    clickhouse_connect = None
 
-                            # HTTP client for API checks
+# HTTP client for API checks
 try:
-import httpx
+    import httpx
 except ImportError:
-httpx = None
+    httpx = None
 
 logger = logging.getLogger(__name__)
 
@@ -197,11 +197,7 @@ class ServiceAvailabilityChecker:
     def _check_use_real_llm_flag(self) -> bool:
         """Check if real LLM usage is enabled."""
     # Check multiple flag variations that exist in the codebase
-<<<<<<< HEAD
-        real_llm_flags = [ ]
-=======
-        real_llm_flags = []
->>>>>>> c47cb7fb89750547779c59026fdec31faaa65c27
+        real_llm_flags = [
         "TEST_USE_REAL_LLM",
         "ENABLE_REAL_LLM_TESTING",
         "USE_REAL_LLM"
@@ -224,11 +220,7 @@ class ServiceAvailabilityChecker:
         
 
         # Try multiple common database URLs
-<<<<<<< HEAD
-        db_urls = [ ]
-=======
-        db_urls = []
->>>>>>> c47cb7fb89750547779c59026fdec31faaa65c27
+        db_urls = [
         get_env().get("DATABASE_URL"),
         get_env().get("POSTGRES_URL"),
         get_env().get("TEST_DATABASE_URL"),
@@ -255,11 +247,7 @@ class ServiceAvailabilityChecker:
         if result == 1:
                         # Parse URL for connection info (without password)
         parsed = urlparse(db_url)
-<<<<<<< HEAD
-        connection_info = { }
-=======
-        connection_info = {}
->>>>>>> c47cb7fb89750547779c59026fdec31faaa65c27
+        connection_info = {
         "host": parsed.hostname,
         "port": parsed.port or 5432,
         "database": parsed.path.lstrip("/") if parsed.path else "postgres"
@@ -297,11 +285,7 @@ class ServiceAvailabilityChecker:
         
 
         # Try multiple common Redis configurations
-<<<<<<< HEAD
-        redis_configs = [ ]
-=======
-        redis_configs = []
->>>>>>> c47cb7fb89750547779c59026fdec31faaa65c27
+        redis_configs = [
         {"url": get_env().get("REDIS_URL")},
         {"url": get_env().get("TEST_REDIS_URL")},
         {"host": "localhost", "port": 6379},
@@ -333,11 +317,7 @@ class ServiceAvailabilityChecker:
         await asyncio.wait_for(client.ping(), timeout=self.timeout)
         await client.aclose()  # Use aclose() instead of close()
 
-<<<<<<< HEAD
-        connection_info = { }
-=======
-        connection_info = {}
->>>>>>> c47cb7fb89750547779c59026fdec31faaa65c27
+        connection_info = {
         "host": config.get("host", "localhost"),
         "port": config.get("port", 6379)
                             
@@ -374,11 +354,7 @@ class ServiceAvailabilityChecker:
         
 
         # Try multiple ClickHouse configurations
-<<<<<<< HEAD
-        clickhouse_configs = [ ]
-=======
-        clickhouse_configs = []
->>>>>>> c47cb7fb89750547779c59026fdec31faaa65c27
+        clickhouse_configs = [
         {"host": "localhost", "port": 8123, "secure": False},
         {"host": "localhost", "port": 8443, "secure": True},
         {"host": "127.0.0.1", "port": 8123, "secure": False},
@@ -389,11 +365,7 @@ class ServiceAvailabilityChecker:
         if ch_url and ch_url.startswith("clickhouse://"):
         try:
         parsed = urlparse(ch_url.replace("clickhouse://", "http://"))
-<<<<<<< HEAD
-        clickhouse_configs.insert(0, { })
-=======
-        clickhouse_configs.insert(0, {})
->>>>>>> c47cb7fb89750547779c59026fdec31faaa65c27
+        clickhouse_configs.insert(0, {
         "host": parsed.hostname or "localhost",
         "port": parsed.port or 8123,
         "secure": False
@@ -521,13 +493,9 @@ class ServiceAvailabilityChecker:
         try:
                 # Test API with simple request (note: different endpoint structure)
         async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
-        response = await client.get( )
+        response = await client.get(
         "https://api.anthropic.com/messages",
-<<<<<<< HEAD
-        headers={ }
-=======
-        headers={}
->>>>>>> c47cb7fb89750547779c59026fdec31faaa65c27
+        headers={
         "x-api-key": api_key,
         "anthropic-version": "2023-06-01"
                     
@@ -624,13 +592,11 @@ class ServiceAvailabilityChecker:
 
                     # Exit with error code if critical services unavailable
         if not availability.has_real_databases and availability.use_real_services:
-        print("")
-        ERROR: USE_REAL_SERVICES=true but databases not available")
+        print("ERROR: USE_REAL_SERVICES=true but databases not available")
         sys.exit(1)
 
         if not availability.has_real_llm_apis and availability.use_real_llm:
-        print("")
-        ERROR: USE_REAL_LLM=true but LLM APIs not available")
+        print("ERROR: USE_REAL_LLM=true but LLM APIs not available")
         sys.exit(1)
 
 
