@@ -153,13 +153,23 @@ class DataHelperAgent(BaseAgent):
             # Log the error through unified system
             logger.error(f"Error in DataHelperAgent: user_id={context.user_id}, run_id={context.run_id}, error={str(e)}")
             
-            # Emit error event for WebSocket transparency
-            await self.emit_error(f"Data helper error: {str(e)}", type(e).__name__)
+            # Emit error event for WebSocket transparency (with cascading error prevention)
+            try:
+                await self.emit_error(f"Data helper error: {str(e)}", type(e).__name__)
+            except Exception as emit_error:
+                logger.error(f"Cascading error: Failed to emit error via WebSocket: {emit_error}")
             
-            # Store error result using SSOT metadata storage (SECURE)
-            self.store_metadata_result(context, 'data_helper_error', str(e))
-            self.store_metadata_result(context, 'data_helper_fallback_message', 
-                                     self._get_fallback_message(context.metadata.get('user_request', '')))
+            # Store error result using SSOT metadata storage (SECURE) (with cascading error prevention)
+            try:
+                self.store_metadata_result(context, 'data_helper_error', str(e))
+            except Exception as metadata_error:
+                logger.error(f"Cascading error: Failed to store error metadata: {metadata_error}")
+            
+            try:
+                self.store_metadata_result(context, 'data_helper_fallback_message', 
+                                         self._get_fallback_message(context.metadata.get('user_request', '')))
+            except Exception as fallback_error:
+                logger.error(f"Cascading error: Failed to store fallback message: {fallback_error}")
             
             # Return context with error state (don't re-raise - let BaseAgent handle)
             return context
@@ -192,11 +202,18 @@ class DataHelperAgent(BaseAgent):
         """Generate a fallback message when data request generation fails.
         
         Args:
-            user_request: Original user request
+            user_request: Original user request (may be None or empty)
             
         Returns:
             Fallback message for the user
         """
+        # Handle None or empty user request gracefully
+        if not user_request:
+            return (
+                "I encountered an issue generating a specific data request. "
+                "Please provide additional information about what you'd like me to analyze."
+            )
+        
         return (
             "I encountered an issue generating a specific data request. "
             "Please provide any additional information you think would be helpful "
