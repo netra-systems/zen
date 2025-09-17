@@ -157,3 +157,4 @@
 **Issue #1176 Status: ✅ CLOSED 2025-09-17 - All 4 phases finished. Test infrastructure crisis resolved.**
 **Issue #1294 Status: ✅ CLOSED 2025-09-17 - Secret loading failures resolved.**
 **Issue #1296 Status: ✅ ALL PHASES COMPLETE - AuthTicketManager fully implemented with legacy cleanup. Ready for closure.**
+**Issue #1309 Status: ✅ RESOLVED 2025-01-17 - SQLAlchemy AsyncAdaptedQueuePool migration complete.**
