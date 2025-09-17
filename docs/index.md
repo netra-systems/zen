@@ -96,9 +96,9 @@
 ### 🤖 Services & Automation
 
 #### Orchestration Services
-- **[Netra Orchestrator Client](../netra_orchestrator_client/INDEX.md)** 🎛️ - **STANDALONE SERVICE**: Multi-instance Claude Code orchestration with scheduling, monitoring, and metrics collection
-- **[Orchestrator Documentation Hub](../netra_orchestrator_client/README.md)** 📖 - Service overview, quick start, and usage patterns
-- **[Orchestrator Test Suite](../netra_orchestrator_client/tests/)** 🧪 - Complete test infrastructure for orchestration validation
+- **[Zen Orchestrator Service](../zen/README.md)** 🎛️ - **STANDALONE SERVICE**: Multi-instance Claude Code orchestration with scheduling, monitoring, and metrics collection
+- **[Orchestrator Documentation Hub](../zen/docs/)** 📖 - Service overview, quick start, and usage patterns
+- **[Orchestrator Test Suite](../zen/tests/)** 🧪 - Complete test infrastructure for orchestration validation
 - **[CloudSQL Integration Guide](../scripts/ORCHESTRATOR_CLOUDSQL_INTEGRATION.md)** 💾 - Database persistence and metrics tracking
 
 #### Main System Services

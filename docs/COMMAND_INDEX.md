@@ -822,9 +822,9 @@ All test commands enforce the **NO MOCKS** policy from CLAUDE.md:
 - **[Golden Path User Flow Analysis](./GOLDEN_PATH_USER_FLOW_COMPLETE.md)** 🚀 - Critical user journey analysis ($500K+ ARR dependency)
 
 ### Claude Code Automation & Orchestration
-- **[Netra Orchestrator Client Service](../netra_orchestrator_client/INDEX.md)** 🎛️ - **STANDALONE SERVICE** - Complete multi-instance Claude Code orchestration with scheduling, monitoring, and metrics
-- **[Orchestrator Documentation Hub](../netra_orchestrator_client/README.md)** 📖 - Service overview, quick start, and usage patterns
-- **[Orchestrator Script](../netra_orchestrator_client/claude_instance_orchestrator.py)** ⚙️ - Main orchestrator implementation with advanced features
+- **[Zen Orchestrator Service](../zen/README.md)** 🎛️ - **STANDALONE SERVICE** - Multi-instance Claude Code orchestration with scheduling, monitoring, and metrics
+- **[Orchestrator Documentation Hub](../zen/docs/)** 📖 - Service overview, quick start, and usage patterns
+- **[Orchestrator Script](../zen/zen_orchestrator.py)** ⚙️ - Main orchestrator implementation with advanced features
 - **[CloudSQL Integration](../scripts/ORCHESTRATOR_CLOUDSQL_INTEGRATION.md)** 💾 - Database persistence and metrics tracking
 
 ### Cross-Referenced Documentation
