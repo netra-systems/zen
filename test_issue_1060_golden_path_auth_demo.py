@@ -9,7 +9,7 @@ import sys
 import os
 import asyncio
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import patch, Mock, AsyncMock
 
 # Add the project root to Python path
@@ -105,8 +105,8 @@ async def simulate_login_auth(user_data):
             "email": user_data["email"],
             "subscription": user_data["subscription"],
             "permissions": user_data["expected_permissions"],
-            "iat": int(datetime.utcnow().timestamp()),
-            "exp": int((datetime.utcnow() + timedelta(hours=2)).timestamp())
+            "iat": int(datetime.now(UTC).timestamp()),
+            "exp": int((datetime.now(UTC) + timedelta(hours=2)).timestamp())
         }
         
         # Use login-specific JWT secret (simulating fragmentation)

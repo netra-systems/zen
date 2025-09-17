@@ -12,7 +12,7 @@ Full implementation should follow CLAUDE.md SSOT patterns.
 """
 
 import asyncio
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 import time
 from functools import wraps
 from typing import Callable, Any, Optional, Type, Union, List, Dict
@@ -22,7 +22,7 @@ from enum import Enum
 from shared.isolated_environment import get_env
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class RetryStrategy(Enum):

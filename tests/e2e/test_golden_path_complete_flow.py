@@ -502,7 +502,7 @@ class GoldenPathCompleteFlowTests(SSotAsyncTestCase):
         self, 
         subprotocols: List[str], 
         timeout: float
-    ) -> Optional[websockets.WebSocketClientProtocol]:
+    ) -> Optional[websockets.ClientConnection]:
         """
         Establish WebSocket connection for Golden Path testing
         

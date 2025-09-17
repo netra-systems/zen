@@ -152,38 +152,38 @@ class CloudRunSecretValidator:
         return fix_commands
 
 
-    def test_cloud_run_secret_configuration():
-        """Test that Cloud Run services have properly configured secrets."""
-        validator = CloudRunSecretValidator()
+def test_cloud_run_secret_configuration():
+    """Test that Cloud Run services have properly configured secrets."""
+    validator = CloudRunSecretValidator()
 
-        print("=" * 80)
-        print("CLOUD RUN SECRET CONFIGURATION VALIDATION")
-        print("=" * 80)
+    print("=" * 80)
+    print("CLOUD RUN SECRET CONFIGURATION VALIDATION")
+    print("=" * 80)
 
-        is_valid, issues = validator.validate_all_services()
+    is_valid, issues = validator.validate_all_services()
 
-        if not is_valid:
+    if not is_valid:
+        print("")
+        print("[X] VALIDATION FAILED - Issues found:")
+        for service, service_issues in issues.items():
+            print(f"Service: {service}")
+            for issue in service_issues:
+                print(f"  - {issue}")
+
+        # Generate fix commands
+        fix_commands = validator.generate_fix_commands(issues)
+        if fix_commands:
             print("")
-            print("[X] VALIDATION FAILED - Issues found:")
-            for service, service_issues in issues.items():
-                print(f"Service: {service}")
-                for issue in service_issues:
-                    print(f"  - {issue}")
+            print("[FIX] COMMANDS:")
+            for cmd in fix_commands:
+                print(f"  {cmd}")
 
-            # Generate fix commands
-            fix_commands = validator.generate_fix_commands(issues)
-            if fix_commands:
-                print("")
-                print("[FIX] COMMANDS:")
-                for cmd in fix_commands:
-                    print(f"  {cmd}")
-
-            # Fail the test
-            assert False, "Configuration validation failed"
-        else:
-            print("")
-            print("[OK] All services have properly configured secrets")
-            return True
+        # Fail the test
+        assert False, "Configuration validation failed"
+    else:
+        print("")
+        print("[OK] All services have properly configured secrets")
+        return True
 
 
 if __name__ == "__main__":

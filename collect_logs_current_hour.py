@@ -10,7 +10,7 @@ import json
 import time
 import os
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 # Set UTF-8 encoding for Windows
 if sys.platform == "win32":
@@ -44,7 +44,7 @@ class GCPLogCollector:
     def collect_logs_last_hour(self):
         """Collect logs from the last hour with all severities and full JSON payload"""
         # Calculate current time and 1 hour ago in UTC
-        now_utc = datetime.utcnow()
+        now_utc = datetime.now(UTC)
         one_hour_ago_utc = now_utc - timedelta(hours=1)
 
         start_time = one_hour_ago_utc.strftime('%Y-%m-%dT%H:%M:%S.%fZ')

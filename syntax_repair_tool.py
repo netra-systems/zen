@@ -153,7 +153,7 @@ class SyntaxRepairTool:
     
     def repair_file(self, filepath: str) -> bool:
         """Repair syntax errors in a single file."""
-        print(f"\n🔧 Repairing: {filepath}")
+        print(f"\nRepairing: {filepath}")
         
         try:
             # Read original content
@@ -194,20 +194,20 @@ class SyntaxRepairTool:
                     f.write(content)
                 
                 if total_fixes > 0:
-                    print(f"  ✅ Fixed {total_fixes} issues - syntax valid")
+                    print(f"  [OK] Fixed {total_fixes} issues - syntax valid")
                     self.stats['files_fixed'] += 1
                     return True
                 else:
-                    print(f"  ✅ No fixes needed - syntax already valid")
+                    print(f"  [OK] No fixes needed - syntax already valid")
                     return True
             else:
-                print(f"  ❌ Fixes applied but syntax still invalid")
+                print(f"  [FAIL] Fixes applied but syntax still invalid")
                 # Restore backup
                 shutil.copy2(f"{filepath}.backup", filepath)
                 return False
         
         except Exception as e:
-            print(f"  ❌ Error repairing file: {e}")
+            print(f"  [ERROR] Error repairing file: {e}")
             return False
         
         finally:
@@ -215,7 +215,7 @@ class SyntaxRepairTool:
     
     def repair_from_report(self, report_file: str) -> None:
         """Repair files listed in the syntax error report."""
-        print("🚀 Starting systematic syntax repair...")
+        print("Starting systematic syntax repair...")
         
         # Read error report
         with open(report_file, 'r') as f:
@@ -263,7 +263,7 @@ class SyntaxRepairTool:
         all_files.extend(other_files[:50])
         all_files.extend(indent_files[:50])
         
-        print(f"\n📊 Processing priority files:")
+        print(f"\nProcessing priority files:")
         print(f"  Bracket files: {len(bracket_files)} (processing first 50)")
         print(f"  Quote files: {len(quote_files)} (processing first 50)")
         print(f"  Other files: {len(other_files)} (processing first 50)")
@@ -279,11 +279,11 @@ class SyntaxRepairTool:
             
             # Progress update every 25 files
             if (i + 1) % 25 == 0:
-                print(f"\n📈 Progress: {i+1}/{min(200, len(all_files))} files processed")
+                print(f"\nProgress: {i+1}/{min(200, len(all_files))} files processed")
                 print(f"   Success rate: {success_count}/{i+1} ({success_count/(i+1)*100:.1f}%)")
         
         # Final report
-        print(f"\n🎉 REPAIR COMPLETED!")
+        print(f"\nREPAIR COMPLETED!")
         print(f"Files processed: {self.stats['files_processed']}")
         print(f"Files successfully fixed: {self.stats['files_fixed']}")
         print(f"Success rate: {self.stats['files_fixed']/self.stats['files_processed']*100:.1f}%")

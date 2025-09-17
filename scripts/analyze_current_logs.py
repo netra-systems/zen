@@ -6,7 +6,7 @@ Focus on WARNING, ERROR, and CRITICAL logs from the last hour
 
 import json
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from collections import defaultdict
 
 def load_logs(file_path):
@@ -20,7 +20,7 @@ def load_logs(file_path):
 
 def filter_logs_by_time_and_severity(logs, hours_back=1):
     """Filter logs to last N hours and WARNING+ severity"""
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
     cutoff_time = now - timedelta(hours=hours_back)
     
     filtered_logs = []

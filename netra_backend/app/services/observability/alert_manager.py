@@ -11,9 +11,9 @@ Business Value Justification (BVJ):
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 from enum import Enum
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class AlertSeverity(Enum):

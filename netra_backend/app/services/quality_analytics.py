@@ -11,11 +11,11 @@ Business Value Justification (BVJ):
 """
 
 import asyncio
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 async def analyze_trends(

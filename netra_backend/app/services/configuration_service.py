@@ -17,11 +17,11 @@ This migration protects the $500K+ ARR Golden Path by consolidating to proven SS
 ORIGINAL: Provides configuration management services.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 import warnings
 from typing import Any, Dict, Optional
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class EnvironmentConfigLoader:

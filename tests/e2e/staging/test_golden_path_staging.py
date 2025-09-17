@@ -555,7 +555,7 @@ class GoldenPathStagingTests(SSotAsyncTestCase):
                 'token_type': 'access_token'
             }
 
-    async def _establish_staging_websocket_connection(self) -> Optional[websockets.WebSocketClientProtocol]:
+    async def _establish_staging_websocket_connection(self) -> Optional[websockets.ClientConnection]:
         """Establish secure WebSocket connection to staging"""
         try:
             # Use proper staging WebSocket URL with SSL

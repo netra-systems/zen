@@ -4,14 +4,14 @@ Collects and aggregates billing-related metrics for cost tracking and analysis.
 """
 
 import asyncio
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class BillingEventType(Enum):
