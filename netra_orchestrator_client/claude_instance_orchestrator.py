@@ -43,7 +43,7 @@ except ImportError as e:
     # Graceful fallback if token budget package is not available
     TokenBudgetManager = None
     render_progress_bar = None
-    logger.warning(f"Token budget features not available: {e}")
+    # Note: logger is not yet defined here, will log warning after logger setup
 
 # Optional NetraOptimizer imports
 DatabaseClient = None
