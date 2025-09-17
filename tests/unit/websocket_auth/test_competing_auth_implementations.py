@@ -21,8 +21,7 @@ from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from typing import Dict, Any, Optional
 from fastapi import WebSocket
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuthenticator, authenticate_websocket_ssot, authenticate_websocket_connection, validate_websocket_token_business_logic
-from netra_backend.app.websocket_core.auth_remediation import WebSocketAuthIntegration, authenticate_websocket_with_remediation
+from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuthenticator, authenticate_websocket_ssot, authenticate_websocket_connection
 from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
 
 @pytest.mark.unit
@@ -57,8 +56,7 @@ class CompetingAuthImplementationsTests(SSotAsyncTestCase):
         1. UnifiedWebSocketAuthenticator.authenticate_websocket_connection()
         2. authenticate_websocket_ssot() function
         3. authenticate_websocket_connection() function  
-        4. authenticate_websocket_with_remediation() function
-        5. UserContextExtractor.validate_and_decode_jwt()
+        4. UserContextExtractor.validate_and_decode_jwt()
         
         Business Impact: Multiple paths cause race conditions and inconsistent auth results
         Expected Initial Result: FAIL - Multiple auth paths detected
@@ -71,10 +69,6 @@ class CompetingAuthImplementationsTests(SSotAsyncTestCase):
             auth_methods.append('authenticate_websocket_ssot')
         if callable(authenticate_websocket_connection):
             auth_methods.append('authenticate_websocket_connection')
-        if callable(authenticate_websocket_with_remediation):
-            auth_methods.append('authenticate_websocket_with_remediation')
-        if callable(validate_websocket_token_business_logic):
-            auth_methods.append('validate_websocket_token_business_logic')
         extractor = UserContextExtractor()
         if hasattr(extractor, 'validate_and_decode_jwt'):
             auth_methods.append('UserContextExtractor.validate_and_decode_jwt')
@@ -134,17 +128,12 @@ class CompetingAuthImplementationsTests(SSotAsyncTestCase):
         Expected Initial Result: FAIL - Multiple token validation implementations found
         """
         validation_methods = []
-        if callable(validate_websocket_token_business_logic):
-            validation_methods.append('validate_websocket_token_business_logic')
         extractor = UserContextExtractor()
         if hasattr(extractor, 'validate_and_decode_jwt'):
             validation_methods.append('UserContextExtractor.validate_and_decode_jwt')
         authenticator = UnifiedWebSocketAuthenticator()
         if hasattr(authenticator, '_validate_token') or hasattr(authenticator, 'validate_token'):
             validation_methods.append('UnifiedWebSocketAuthenticator token validation')
-        auth_integration = WebSocketAuthIntegration()
-        if hasattr(auth_integration, 'validate_token') or hasattr(auth_integration, '_decode_token'):
-            validation_methods.append('WebSocketAuthIntegration token validation')
         jwt_violations = []
         modules_to_check = ['netra_backend.app.websocket_core.unified_websocket_auth', 'netra_backend.app.websocket_core.user_context_extractor', 'netra_backend.app.websocket_core.auth_remediation']
         for module_name in modules_to_check:
@@ -178,15 +167,9 @@ class CompetingAuthImplementationsTests(SSotAsyncTestCase):
                 auth_entry_points.append({'type': 'class_method', 'name': 'UnifiedWebSocketAuthenticator.authenticate_websocket_connection', 'instance': authenticator})
         except Exception:
             pass
-        for func_name, func in [('authenticate_websocket_ssot', authenticate_websocket_ssot), ('authenticate_websocket_connection', authenticate_websocket_connection), ('authenticate_websocket_with_remediation', authenticate_websocket_with_remediation)]:
+        for func_name, func in [('authenticate_websocket_ssot', authenticate_websocket_ssot), ('authenticate_websocket_connection', authenticate_websocket_connection)]:
             if callable(func):
                 auth_entry_points.append({'type': 'function', 'name': func_name, 'callable': func})
-        try:
-            integration = WebSocketAuthIntegration()
-            if hasattr(integration, 'authenticate_websocket_connection'):
-                auth_entry_points.append({'type': 'integration_method', 'name': 'WebSocketAuthIntegration.authenticate_websocket_connection', 'instance': integration})
-        except Exception:
-            pass
         if len(auth_entry_points) > 1:
             results = []
             for entry_point in auth_entry_points[:3]:

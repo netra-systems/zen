@@ -25,7 +25,7 @@ from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.registry import ServerMessage, WebSocketMessage
 from netra_backend.app.services.quality_gate_service import QualityGateService
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 UnifiedWebSocketManager = WebSocketManager  # Alias for backward compatibility
 from tests.e2e.helpers.llm_config_detector import llm_detector, get_llm_config_for_test
 

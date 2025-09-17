@@ -53,7 +53,7 @@ from loguru import logger
 
 # Import SSOT components (unified manager only)
 try:
-    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     SSOT_IMPORTS_AVAILABLE = True
 except ImportError as e:

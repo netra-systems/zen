@@ -139,7 +139,7 @@ class MigrationConfig:
             "from netra_backend.app.websocket_core import create_websocket_manager",
         "from netra_backend.app.websocket_core import get_websocket_manager, create_websocket_manager":
             "from netra_backend.app.websocket_core import create_websocket_manager",
-        "from netra_backend.app.websocket_core.unified_manager import get_websocket_manager":
+        "from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager":
             "from netra_backend.app.websocket_core import create_websocket_manager"
     })
 

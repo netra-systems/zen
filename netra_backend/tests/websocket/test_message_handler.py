@@ -14,7 +14,7 @@ from typing import List, Dict, Any, Optional
 from test_framework.real_services import get_real_services, WebSocketTestClient
 from test_framework.environment_isolation import IsolatedEnvironment
 from netra_backend.app.services.websocket.message_handler import MessageHandlerService
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 @pytest.mark.asyncio
 class MessageHandlerRealConnectionsTests:
@@ -209,7 +209,7 @@ class MessageRoutingRealTests:
 
     async def test_message_routing_real_websocket(self):
         """Test message routing capabilities with real WebSocket connections."""
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         ws_manager = WebSocketManager()
         connections = {'admin_user': await self._create_test_connection('admin_123', ws_manager), 'regular_user': await self._create_test_connection('user_456', ws_manager), 'guest_user': await self._create_test_connection('guest_789', ws_manager)}
         try:

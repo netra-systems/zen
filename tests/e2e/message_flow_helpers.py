@@ -56,7 +56,7 @@ async def validate_message_processing(
     try:
         # Import real agent service components
         from netra_backend.app.services.agent_service_core import AgentService
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
         
         # Get real environment configuration
         env = get_env()

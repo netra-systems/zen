@@ -94,12 +94,12 @@ STAGING_TEST_SCENARIOS = [
     }
 ]
 
-# Canonical staging URLs (as specified in CLAUDE.md)
+# Canonical staging URLs (as specified in CLAUDE.md - Issue #1278 fix)
 STAGING_URLS = {
-    "auth_service": "https://auth.staging.netrasystems.ai",
-    "backend_api": "https://api.staging.netrasystems.ai",
-    "frontend": "https://app.staging.netrasystems.ai",
-    "websocket": "wss://api.staging.netrasystems.ai/ws"
+    "auth_service": "https://staging.netrasystems.ai",
+    "backend_api": "https://staging.netrasystems.ai",
+    "frontend": "https://staging.netrasystems.ai",
+    "websocket": "wss://api-staging.netrasystems.ai/ws"
 }
 
 

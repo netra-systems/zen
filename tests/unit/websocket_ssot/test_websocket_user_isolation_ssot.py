@@ -50,7 +50,7 @@ class WebSocketUserIsolationSSotTests(SSotAsyncTestCase, unittest.TestCase):
         AFTER REMEDIATION: This test should PASS (isolated instances per user)
         """
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         except ImportError as e:
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
         managers = []
@@ -72,7 +72,7 @@ class WebSocketUserIsolationSSotTests(SSotAsyncTestCase, unittest.TestCase):
         AFTER REMEDIATION: This test should PASS (proper user context isolation)
         """
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         except ImportError as e:
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
         user_managers = {}
@@ -98,7 +98,7 @@ class WebSocketUserIsolationSSotTests(SSotAsyncTestCase, unittest.TestCase):
         AFTER REMEDIATION: This test should PASS (proper concurrent isolation)
         """
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         except ImportError as e:
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
 
@@ -139,7 +139,7 @@ class WebSocketUserIsolationSSotTests(SSotAsyncTestCase, unittest.TestCase):
         AFTER REMEDIATION: This test should PASS (proper message isolation)
         """
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         except ImportError as e:
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
         user_managers = {}
@@ -170,7 +170,7 @@ class WebSocketUserIsolationSSotTests(SSotAsyncTestCase, unittest.TestCase):
         AFTER REMEDIATION: This test should PASS (isolated cleanup)
         """
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         except ImportError as e:
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
         user_managers = {}
@@ -211,7 +211,7 @@ class WebSocketUserIsolationSSotTests(SSotAsyncTestCase, unittest.TestCase):
         AFTER REMEDIATION: This test should PASS (strict user context requirement)
         """
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         except ImportError as e:
             self.fail(f'SSOT get_websocket_manager should be importable: {e}')
         try:

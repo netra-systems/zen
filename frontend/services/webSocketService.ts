@@ -4,14 +4,9 @@ import { WebSocketStatus, WebSocketState, WebSocketServiceError } from '../types
 import { config } from '@/config';
 import { logger } from '@/lib/logger';
 import { isWindowsPlatform, shouldUseWindowsStagingFallback } from '@/lib/unified-api-config';
+import { websocketTicketService } from './websocketTicketService';
+import type { TicketRequestResult } from '@/types/websocket-ticket';
 
-interface JWTPayload {
-  exp: number;
-  iat: number;
-  user_id: string;
-  email?: string;
-  permissions?: string[];
-}
 
 // WebSocketStatus, WebSocketState, and WebSocketServiceError types imported from domains/websocket.ts
 // Re-export for backward compatibility
@@ -43,13 +38,12 @@ interface WebSocketOptions {
   onChunkedMessage?: (data: any) => void;
   heartbeatInterval?: number;
   rateLimit?: RateLimitConfig;
-  // Ticket authentication options
+  // Ticket authentication options (Method 4 in auth chain)
   useTicketAuth?: boolean;
-  getTicket?: () => Promise<TicketRequestResult>;
-  clearTicketCache?: () => void;
+  ticketTtl?: number; // TTL in seconds for ticket requests
   // JWT authentication options (fallback)
   token?: string;
-  refreshToken?: () => Promise<string | null>;
+  // refreshToken removed - JWT authentication no longer supported
   compression?: string[];  // Supported compression algorithms
 }
 
@@ -98,10 +92,6 @@ class WebSocketService {
   private heartbeatTimer: NodeJS.Timeout | null = null;
   private url: string = '';
   private messageTimestamps: number[] = [];
-  private currentToken: string | null = null;
-  private tokenRefreshTimer: NodeJS.Timeout | null = null;
-  private tokenExpiryCheckTimer: NodeJS.Timeout | null = null;
-  private isRefreshingToken: boolean = false;
   private pendingMessages: (WebSocketMessage | UnifiedWebSocketEvent | AuthMessage | PingMessage | PongMessage)[] = [];
   private isConnecting: boolean = false;  // Prevent multiple simultaneous connections
   private isIntentionalDisconnect: boolean = false;  // Track manual disconnections
@@ -1019,7 +1009,7 @@ class WebSocketService {
     
     this.url = url;
     this.options = options;
-    this.currentToken = options.token || null;
+    // JWT authentication removed - only ticket authentication supported
     this.isIntentionalDisconnect = false;  // Reset on new connection
     this.isConnecting = true;
     
@@ -1206,7 +1196,7 @@ class WebSocketService {
               attemptId: currentAttemptId,
               error,
               state: this.state,
-              hasToken: !!this.currentToken,
+              hasToken: false, // JWT authentication removed
               ...windowsErrorContext
             }
           });
@@ -1221,11 +1211,11 @@ class WebSocketService {
         // - If we have a token but still got an error, it's likely an auth issue
         // - If we don't have a token, it's expected in production (not an error)
         // - Connection errors happen regardless of token status
-        const errorType = this.currentToken ? 'auth' : 'connection';
+        const errorType = 'connection'; // JWT removed - no token tracking
         const isDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
         
         // Don't report auth errors in production when there's no token (expected behavior)
-        if (!this.currentToken && !isDevelopment) {
+        if (!isDevelopment) { // No token tracking - auth handled by tickets
           logger.debug('WebSocket connection requires authentication');
           return;
         }
@@ -1397,15 +1387,7 @@ class WebSocketService {
       this.messageTimestamps.push(Date.now());
     }
     
-    // If refreshing token, queue message as pending with size limit
-    if (this.isRefreshingToken) {
-      if (this.pendingMessages.length < 50) {
-        this.pendingMessages.push(message);
-      } else {
-        logger.warn('Pending messages queue full, dropping message to prevent memory leak');
-      }
-      return;
-    }
+    // JWT token refresh logic removed - using ticket authentication only
     
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       try {
@@ -1505,8 +1487,7 @@ class WebSocketService {
     this.messageQueue.length = 0;
     this.pendingMessages.length = 0;
     this.messageTimestamps.length = 0;
-    this.currentToken = null;
-    this.isRefreshingToken = false;
+    // JWT authentication removed - tokens not tracked
     this.reconnectAttempts = 0;
     this.options = {};
     this.url = '';
@@ -1584,15 +1565,18 @@ class WebSocketService {
   }
 
   /**
-   * Creates a ticket-authenticated WebSocket connection
+   * Creates a ticket-authenticated WebSocket connection using the integrated ticket service
    */
   private async createTicketAuthenticatedWebSocket(url: string, options: WebSocketOptions): Promise<WebSocket> {
-    if (!options.getTicket) {
-      throw new Error('Ticket authentication requested but getTicket function not provided');
-    }
-
     try {
-      const ticketResult = await options.getTicket();
+      const ttlSeconds = options.ticketTtl || 300; // Default 5 minutes
+      logger.debug('Requesting WebSocket ticket', {
+        component: 'WebSocketService',
+        action: 'ticket_request',
+        metadata: { ttlSeconds }
+      });
+
+      const ticketResult = await websocketTicketService.acquireTicket(ttlSeconds);
       
       if (ticketResult.success && ticketResult.ticket) {
         // Add ticket to WebSocket URL as query parameter
@@ -1602,7 +1586,11 @@ class WebSocketService {
         logger.debug('Creating WebSocket with ticket authentication', {
           component: 'WebSocketService',
           action: 'ticket_auth',
-          ticketExpiry: new Date(ticketResult.ticket.expires_at).toISOString()
+          metadata: {
+            ticketLength: ticketResult.ticket.ticket.length,
+            ticketExpiry: new Date(ticketResult.ticket.expires_at).toISOString(),
+            hasUrl: !!ticketResult.ticket.websocket_url
+          }
         });
         
         return new WebSocket(wsUrl.toString());
@@ -1610,7 +1598,10 @@ class WebSocketService {
         logger.warn('Ticket authentication failed, falling back to JWT', {
           component: 'WebSocketService',
           action: 'ticket_auth_failed',
-          error: ticketResult.error
+          metadata: { 
+            error: ticketResult.error,
+            recoverable: ticketResult.recoverable 
+          }
         });
         
         // Fallback to JWT authentication
@@ -1626,323 +1617,29 @@ class WebSocketService {
   }
 
   /**
-   * Creates a secure WebSocket connection using proper authentication methods.
-   * Supports ticket-based authentication (preferred) with JWT fallback.
-   * Uses subprotocol for JWT authentication (browser-compatible method).
+   * Creates a secure WebSocket connection using ticket-based authentication.
+   * This is the primary authentication method - JWT fallback has been removed.
    * Supports both authenticated and development mode connections.
    */
   private createSecureWebSocket(url: string, options: WebSocketOptions): WebSocket | Promise<WebSocket> {
-    // PHASE 1: Try ticket-based authentication if enabled
+    // Use ticket-based authentication if enabled
     if (options.useTicketAuth && options.getTicket) {
-      return this.createTicketAuthenticatedWebSocket(url, options).catch((error) => {
-        logger.warn('Ticket authentication failed, falling back to JWT', error);
-        // Fall back to JWT authentication
-        return this.createJWTAuthenticatedWebSocket(url, options);
-      });
+      return this.createTicketAuthenticatedWebSocket(url, options);
     }
 
-    // PHASE 2: Use JWT authentication directly
-    return this.createJWTAuthenticatedWebSocket(url, options);
-  }
-
-  /**
-   * Creates a JWT-authenticated WebSocket connection
-   */
-  private createJWTAuthenticatedWebSocket(url: string, options: WebSocketOptions): WebSocket {
-    const token = options.token;
-    
     // In development mode, allow connections without authentication
-    if (!token) {
-      const isDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-      if (isDevelopment) {
-        logger.debug('Creating WebSocket without authentication (development mode)');
-      } else {
-        logger.debug('Creating WebSocket without authentication (waiting for token)');
-      }
+    const isDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+    if (isDevelopment) {
+      logger.debug('Creating WebSocket without authentication (development mode)');
       return new WebSocket(url);
     }
-
-    // Ensure the token has Bearer prefix for secure subprotocol auth
-    const bearerToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
     
-    // Use subprotocol for secure authentication (browser-compatible)
-    // Note: Browser WebSocket API doesn't support custom headers directly
-    // Encode the JWT token to make it safe for subprotocol use
-    // Remove "Bearer " prefix and encode for safe transmission
-    const cleanToken = bearerToken.startsWith('Bearer ') ? bearerToken.substring(7) : bearerToken;
-    
-    try {
-      // Properly encode token as base64url to match backend's urlsafe_b64decode
-      // Convert string to Uint8Array then to base64url
-      const encoder = new TextEncoder();
-      const data = encoder.encode(cleanToken);
-      const base64 = btoa(String.fromCharCode(...data));
-      // Convert to base64url format (URL-safe)
-      const encodedToken = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-      
-      // Build protocols array with auth and compression support
-      const protocols = [`jwt-auth`, `jwt.${encodedToken}`];
-      
-      // Add compression protocols if supported
-      if (options.compression) {
-        const compressionProtocols = options.compression
-          .filter(alg => this.supportedCompression.includes(alg))
-          .map(alg => `compression-${alg}`);
-        protocols.push(...compressionProtocols);
-      }
-      
-      logger.debug('Creating secure WebSocket with authentication and compression support', {
-        url: url,
-        protocols: protocols.map(p => p.startsWith('jwt.') ? 'jwt.[token]' : p),
-        tokenPrefix: cleanToken.substring(0, 10) + '...',
-        encodedTokenLength: encodedToken.length
-      });
-      
-      return new WebSocket(url, protocols);
-    } catch (error) {
-      logger.error('Failed to encode token for WebSocket authentication, falling back to unauthenticated connection', error as Error);
-      // Fallback to unauthenticated connection
-      return new WebSocket(url);
-    }
+    // For production, require ticket authentication
+    logger.error('WebSocket connection requires ticket authentication in production mode');
+    throw new Error('Authentication required: ticket authentication not available');
   }
 
-  /**
-   * Parse JWT token to extract payload information
-   */
-  private parseJWTToken(token: string): JWTPayload | null {
-    try {
-      // Remove Bearer prefix if present
-      const cleanToken = token.startsWith('Bearer ') ? token.substring(7) : token;
-      
-      // JWT structure: header.payload.signature
-      const parts = cleanToken.split('.');
-      if (parts.length !== 3) {
-        logger.warn('Invalid JWT token format');
-        return null;
-      }
-      
-      // Decode the payload (base64url decode)
-      const payload = parts[1];
-      // Add padding if needed for base64 decoding
-      const paddedPayload = payload.padEnd(payload.length + (4 - payload.length % 4) % 4, '=');
-      const decodedPayload = atob(paddedPayload.replace(/-/g, '+').replace(/_/g, '/'));
-      
-      return JSON.parse(decodedPayload) as JWTPayload;
-    } catch (error) {
-      logger.error('Failed to parse JWT token', error as Error, {
-        component: 'WebSocketService',
-        action: 'parse_jwt_token'
-      });
-      return null;
-    }
-  }
 
-  /**
-   * Check if token is expiring soon (within 5 minutes)
-   */
-  private isTokenExpiringSoon(token: string): boolean {
-    const payload = this.parseJWTToken(token);
-    if (!payload || !payload.exp) {
-      return false;
-    }
-    
-    const now = Math.floor(Date.now() / 1000);
-    const timeUntilExpiry = payload.exp - now;
-    const fiveMinutes = 5 * 60; // 5 minutes in seconds
-    
-    return timeUntilExpiry <= fiveMinutes;
-  }
-
-  /**
-   * Setup token refresh mechanism to handle token expiry during long-lived connections
-   */
-  private setupTokenRefresh(): void {
-    if (!this.options.refreshToken || !this.currentToken) {
-      return;
-    }
-
-    // Clear existing timers
-    this.clearTokenRefreshTimers();
-
-    // Parse token to get expiry time
-    const payload = this.parseJWTToken(this.currentToken);
-    if (!payload || !payload.exp) {
-      logger.warn('Cannot setup token refresh - invalid token payload');
-      return;
-    }
-
-    const now = Math.floor(Date.now() / 1000);
-    const timeUntilExpiry = payload.exp - now;
-    
-    // Set up proactive refresh 5 minutes before expiry
-    const refreshTime = Math.max(timeUntilExpiry - 300, 60); // At least 1 minute, but prefer 5 minutes before expiry
-    const refreshTimeMs = refreshTime * 1000;
-
-    logger.debug('Setting up token refresh', {
-      component: 'WebSocketService',
-      action: 'setup_token_refresh',
-      metadata: {
-        currentTime: now,
-        tokenExpiry: payload.exp,
-        timeUntilExpiry,
-        refreshInSeconds: refreshTime
-      }
-    });
-    
-    this.tokenRefreshTimer = setTimeout(async () => {
-      await this.performTokenRefresh();
-    }, refreshTimeMs);
-
-    // Also set up a periodic check for token expiry (every 30 seconds)
-    this.tokenExpiryCheckTimer = setInterval(async () => {
-      if (this.currentToken && this.isTokenExpiringSoon(this.currentToken) && !this.isRefreshingToken) {
-        logger.debug('Token expiring soon, triggering refresh');
-        await this.performTokenRefresh();
-      }
-    }, 30000); // Check every 30 seconds
-
-    logger.debug('Token refresh timers setup for WebSocket connection');
-  }
-
-  /**
-   * Clear token refresh timers
-   */
-  private clearTokenRefreshTimers(): void {
-    if (this.tokenRefreshTimer) {
-      clearTimeout(this.tokenRefreshTimer);
-      this.tokenRefreshTimer = null;
-    }
-    if (this.tokenExpiryCheckTimer) {
-      clearInterval(this.tokenExpiryCheckTimer);
-      this.tokenExpiryCheckTimer = null;
-    }
-  }
-
-  /**
-   * Perform token refresh with error handling and queuing
-   */
-  private async performTokenRefresh(): Promise<void> {
-    if (this.isRefreshingToken) {
-      logger.debug('Token refresh already in progress, skipping');
-      return;
-    }
-
-    this.isRefreshingToken = true;
-    
-    try {
-      logger.debug('Starting token refresh process');
-      
-      // Move queued messages to pending during refresh
-      this.pendingMessages.push(...this.messageQueue);
-      this.messageQueue = [];
-      
-      const newToken = await this.options.refreshToken!();
-      
-      if (newToken && newToken !== this.currentToken) {
-        logger.debug('Token refreshed successfully, updating WebSocket connection');
-        
-        const oldToken = this.currentToken;
-        this.currentToken = newToken;
-        this.options.token = newToken;
-        
-        // If connected, reconnect with new token
-        if (this.state === 'connected') {
-          await this.reconnectWithNewToken(newToken);
-        }
-        
-        // Setup new refresh timer for the new token
-        this.setupTokenRefresh();
-        
-        logger.debug('Token refresh completed successfully', {
-          component: 'WebSocketService',
-          action: 'token_refresh_success',
-          metadata: {
-            oldTokenPrefix: oldToken?.substring(0, 10) + '...',
-            newTokenPrefix: newToken.substring(0, 10) + '...'
-          }
-        });
-      } else {
-        logger.warn('Token refresh did not return a new token');
-      }
-    } catch (error) {
-      logger.error('Failed to refresh WebSocket token', error as Error, {
-        component: 'WebSocketService',
-        action: 'token_refresh_failed'
-      });
-      
-      // On refresh failure, continue with existing connection but clear timers
-      this.clearTokenRefreshTimers();
-    } finally {
-      this.isRefreshingToken = false;
-      
-      // Process any pending messages after refresh
-      this.processPendingMessages();
-    }
-  }
-
-  /**
-   * Process pending messages after token refresh
-   */
-  private processPendingMessages(): void {
-    if (this.pendingMessages.length > 0) {
-      logger.debug(`Processing ${this.pendingMessages.length} pending messages after token refresh`);
-      
-      // Limit processing to prevent memory exhaustion
-      const maxPendingMessages = 100;
-      if (this.pendingMessages.length > maxPendingMessages) {
-        logger.warn(`Too many pending messages (${this.pendingMessages.length}), keeping only last ${maxPendingMessages}`);
-        this.pendingMessages = this.pendingMessages.slice(-maxPendingMessages);
-      }
-      
-      // Move pending messages back to queue if not connected, or send if connected
-      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        // Send pending messages directly with batch processing
-        const messagesToSend = [...this.pendingMessages];
-        this.pendingMessages.length = 0; // Clear immediately to free memory
-        
-        messagesToSend.forEach(msg => {
-          this.send(msg);
-        });
-      } else {
-        // Move back to message queue for sending when connected
-        const totalMessages = this.messageQueue.length + this.pendingMessages.length;
-        if (totalMessages > 100) {
-          logger.warn(`Too many queued messages (${totalMessages}), dropping older messages`);
-          this.messageQueue = this.messageQueue.slice(-50);
-          this.pendingMessages = this.pendingMessages.slice(-50);
-        }
-        
-        this.messageQueue.unshift(...this.pendingMessages);
-        this.pendingMessages.length = 0; // Clear to free memory
-      }
-    }
-  }
-
-  /**
-   * Reconnect with a new token while preserving connection state
-   */
-  private async reconnectWithNewToken(newToken: string): Promise<void> {
-    if (this.state !== 'connected') {
-      return;
-    }
-
-    const wasConnected = this.state === 'connected';
-    const currentUrl = this.url;
-    const currentOptions = { ...this.options, token: newToken };
-
-    // Close current connection
-    if (this.ws) {
-      this.ws.close(1000, 'Token refresh');
-    }
-
-    // Small delay to ensure clean closure
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    // Reconnect with new token
-    if (wasConnected) {
-      this.connect(currentUrl, currentOptions);
-    }
-  }
 
   /**
    * Handle authentication failures with exponential backoff and retry limits
@@ -1976,9 +1673,7 @@ class WebSocketService {
         logger.debug('WebSocket closed due to ticket expiry, clearing cache and retrying');
         
         // Clear ticket cache to force fresh ticket generation
-        if (options.clearTicketCache) {
-          options.clearTicketCache();
-        }
+        websocketTicketService.clearTicketCache();
         
         // Attempt reconnection with fresh ticket
         if (this.authRetryCount < this.MAX_AUTH_RETRIES) {
@@ -1989,16 +1684,16 @@ class WebSocketService {
             action: 'ticket_max_retries_exceeded'
           });
           
-          // Fall back to JWT authentication
-          const fallbackOptions = { ...options, useTicketAuth: false };
-          this.connect(this.url, fallbackOptions);
+          // No JWT fallback available - connection failed
+          this.setState('error');
+          options.onClose?.();
         }
         return;
       }
     }
 
-    // In development mode without token, don't treat auth errors as fatal
-    if (!this.currentToken && !options.useTicketAuth) {
+    // In development mode without ticket auth, don't treat auth errors as fatal  
+    if (!options.useTicketAuth) {
       logger.debug('WebSocket auth error in development mode (no auth), ignoring');
       options.onClose?.();
       return;
@@ -2027,23 +1722,8 @@ class WebSocketService {
       return;
     }
 
-    // Check if this is a token expiry issue
-    const isTokenExpired = event.reason && (
-      event.reason.includes('Token expired') ||
-      event.reason.includes('token has expired') ||
-      event.reason.includes('JWT expired')
-    );
-    
-    if (isTokenExpired && !this.isRefreshingToken) {
-      logger.debug('WebSocket closed due to token expiry, attempting refresh');
-      this.performTokenRefresh().catch(error => {
-        logger.error('Token refresh after auth error failed', error as Error);
-        this.scheduleAuthRetry(options);
-      });
-    } else {
-      // Handle other auth failures with exponential backoff
-      this.scheduleAuthRetry(options);
-    }
+    // JWT token expiry logic removed - handle all auth failures with exponential backoff
+    this.scheduleAuthRetry(options);
   }
 
   /**
@@ -2137,14 +1817,14 @@ class WebSocketService {
    */
   private async attemptTokenRefreshAndReconnect(): Promise<void> {
     // If using ticket auth, attempt ticket refresh
-    if (this.options.useTicketAuth && this.options.getTicket) {
+    if (this.options.useTicketAuth) {
       try {
-        // Clear ticket cache to force fresh ticket
-        if (this.options.clearTicketCache) {
-          this.options.clearTicketCache();
-        }
+        // Clear ticket cache to force fresh ticket generation
+        websocketTicketService.clearTicketCache();
         
-        const freshTicket = await this.options.getTicket();
+        const ttlSeconds = this.options.ticketTtl || 300;
+        const freshTicket = await websocketTicketService.acquireTicket(ttlSeconds);
+        
         if (freshTicket.success) {
           logger.debug('Ticket refreshed after auth failure, reconnecting');
           
@@ -2158,96 +1838,20 @@ class WebSocketService {
           }, 1000);
           return;
         } else {
-          logger.warn('Failed to refresh ticket, falling back to JWT', {
-            error: freshTicket.error
+          logger.warn('Failed to refresh ticket - no JWT fallback available', {
+            error: freshTicket.error,
+            recoverable: freshTicket.recoverable
           });
-          // Fall through to JWT refresh
+          // No JWT fallback available - end process here
         }
       } catch (error) {
-        logger.error('Ticket refresh failed, attempting JWT fallback', error as Error);
-        // Fall through to JWT refresh
+        logger.error('Ticket refresh failed - no JWT fallback available', error as Error);
+        // No JWT refresh available
       }
     }
     
-    // JWT token refresh logic
-    const now = Date.now();
-    const timeSinceLastRefresh = now - this.lastRefreshAttempt;
-    
-    // Respect the auth service's cooldown period to prevent spam
-    if (timeSinceLastRefresh < this.MIN_REFRESH_INTERVAL_MS) {
-      const waitTime = this.MIN_REFRESH_INTERVAL_MS - timeSinceLastRefresh;
-      logger.debug(`WebSocket: Waiting ${waitTime}ms before token refresh (cooldown)`, {
-        component: 'WebSocketService',
-        action: 'refresh_cooldown',
-        waitTime,
-        timeSinceLastRefresh
-      });
-      
-      // Schedule a delayed retry instead of immediate failure
-      setTimeout(() => {
-        this.attemptTokenRefreshAndReconnect();
-      }, waitTime);
-      return;
-    }
-    
-    this.lastRefreshAttempt = now;
-    
-    try {
-      const newToken = await this.options.refreshToken!();
-      if (newToken) {
-        logger.debug('Auth error recovery: refreshed token, attempting reconnection');
-        this.currentToken = newToken;
-        const newOptions = { ...this.options, token: newToken };
-        
-        // Reset reconnect attempts on successful refresh
-        this.reconnectAttempts = 0;
-        
-        // Wait a bit before reconnecting
-        setTimeout(() => {
-          this.connect(this.url, newOptions);
-        }, 1000);
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      
-      // Handle auth loop protection error specifically
-      if (errorMessage.includes('preventing auth loop') || errorMessage.includes('too soon')) {
-        logger.warn('WebSocket: Auth loop protection triggered, backing off', {
-          component: 'WebSocketService',
-          action: 'auth_loop_protection',
-          error: errorMessage
-        });
-        
-        // Exponential backoff for reconnection
-        this.reconnectAttempts++;
-        const backoffDelay = Math.min(
-          this.baseReconnectDelay * Math.pow(2, this.reconnectAttempts),
-          this.maxReconnectDelay
-        );
-        
-        logger.debug(`WebSocket: Scheduling retry in ${backoffDelay}ms (attempt ${this.reconnectAttempts})`, {
-          component: 'WebSocketService',
-          action: 'schedule_retry',
-          delay: backoffDelay,
-          attempt: this.reconnectAttempts
-        });
-        
-        // Schedule a retry with exponential backoff
-        setTimeout(() => {
-          if (this.reconnectAttempts < this.maxReconnectAttempts) {
-            this.attemptTokenRefreshAndReconnect();
-          } else {
-            logger.error('WebSocket: Max reconnection attempts reached, giving up', {
-              component: 'WebSocketService',
-              action: 'max_attempts_exceeded'
-            });
-          }
-        }, backoffDelay);
-      } else {
-        // Other errors - log and don't retry immediately
-        logger.error('Failed to refresh token for auth error recovery', error as Error);
-      }
-    }
+    // JWT refresh logic removed - only ticket authentication supported
+    logger.error('WebSocket: Authentication failed and no JWT fallback available');
   }
 
   /**
@@ -2302,10 +1906,10 @@ class WebSocketService {
     tokenRefreshEnabled: boolean;
   } {
     return {
-      isSecure: !!this.currentToken,
-      authMethod: this.currentToken ? 'subprotocol' : 'none',
-      hasToken: !!this.currentToken,
-      tokenRefreshEnabled: !!this.options.refreshToken
+      isSecure: !!this.options.useTicketAuth,
+      authMethod: this.options.useTicketAuth ? 'ticket' : 'none', 
+      hasToken: false, // JWT tracking removed
+      tokenRefreshEnabled: false // JWT refresh removed
     };
   }
 }

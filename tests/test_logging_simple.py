@@ -176,7 +176,7 @@ def test_websocket_event_logging():
         sys.path.insert(0, os.getcwd())
         
         # Try to import WebSocket components to see if they have logging
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         
         manager = get_websocket_manager()
         

@@ -31,9 +31,9 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 from netra_backend.app.core.agent_health_monitor import AgentHealthMonitor
 from netra_backend.app.core.agent_execution_tracker import ExecutionRecord, ExecutionState
 from netra_backend.app.core.agent_reliability_types import AgentError
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 try:
-    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     WEBSOCKET_MANAGER_AVAILABLE = True
 except ImportError:
     WEBSOCKET_MANAGER_AVAILABLE = False
@@ -213,7 +213,7 @@ class WebSocketHealthIntegrationRequirementsTests(SSotAsyncTestCase):
         
         Expected to FAIL: No direct integration between WebSocket manager and agent health.
         """
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         health_monitor = AgentHealthMonitor()
         integration_analysis = {'websocket_has_health_monitor': hasattr(websocket_manager, 'agent_health_monitor'), 'websocket_has_health_check': hasattr(websocket_manager, 'check_agent_health'), 'websocket_has_health_callback': hasattr(websocket_manager, 'on_agent_health_change'), 'health_has_websocket_ref': hasattr(health_monitor, 'websocket_manager'), 'health_has_connection_callback': hasattr(health_monitor, 'notify_websocket_manager'), 'integration_methods_count': 0}

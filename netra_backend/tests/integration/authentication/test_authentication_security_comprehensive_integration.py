@@ -72,9 +72,9 @@ from netra_backend.app.websocket_core.unified_websocket_auth import (
     authenticate_websocket_connection,
     extract_e2e_context_from_websocket,
     create_authenticated_user_context,
-    validate_websocket_token_business_logic
+    authenticate_websocket_ssot
 )
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketConnectionManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketConnectionManager
 from netra_backend.app.core import security
 from netra_backend.app.middleware.auth_middleware import AuthMiddleware
 

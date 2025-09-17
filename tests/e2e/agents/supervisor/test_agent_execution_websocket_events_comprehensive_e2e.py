@@ -23,7 +23,7 @@ import uuid
 import json
 from datetime import datetime, timezone
 from typing import Dict, Any, List
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user
 from test_framework.base_e2e_test import BaseE2ETest
@@ -34,7 +34,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from langchain_core.tools import BaseTool
 
 

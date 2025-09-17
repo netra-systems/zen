@@ -40,7 +40,7 @@ from typing import Any, Dict, Optional, List
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, UserAgentSession, get_agent_registry
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.core.configuration.base import get_unified_config

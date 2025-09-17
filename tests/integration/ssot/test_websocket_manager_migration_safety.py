@@ -34,13 +34,13 @@ from netra_backend.app.services.user_execution_context import (
 )
 
 # WebSocket Manager - Both patterns being tested
-from netra_backend.app.websocket_core.canonical_import_patterns import (
+from netra_backend.app.websocket_core.websocket_manager import (
     get_websocket_manager, WebSocketManager
 )
 from netra_backend.app.websocket_core.websocket_manager_factory import (
     create_websocket_manager
 )
-from netra_backend.app.websocket_core.unified_manager import (
+from netra_backend.app.websocket_core.websocket_manager import (
     UnifiedWebSocketManager, WebSocketManagerMode
 )
 

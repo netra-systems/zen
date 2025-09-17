@@ -15,7 +15,7 @@ import re
 import shutil
 from pathlib import Path
 from typing import Dict, List, Optional
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
 

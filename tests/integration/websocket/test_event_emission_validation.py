@@ -43,7 +43,7 @@ from netra_backend.app.websocket_core.event_validator import (
     get_critical_event_types,
     create_mock_critical_events
 )
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID
 from shared.isolated_environment import get_env

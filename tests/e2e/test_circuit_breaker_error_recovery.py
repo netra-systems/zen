@@ -16,7 +16,8 @@ from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.db.database_manager import DatabaseManager as ConnectionManager, ConnectionMetrics
 from netra_backend.app.core.database_types import DatabaseType
-from netra_backend.app.core.database_types import DatabaseConfig
+# SSOT REMEDIATION: Use unified configuration instead of duplicate DatabaseConfig
+from netra_backend.app.config import get_config
 from netra_backend.app.core.resilience.unified_retry_handler import UnifiedRetryHandler
 
 pytestmark = [
@@ -41,19 +42,21 @@ class CircuitBreakerErrorRecoveryTests:
         """
         manager = ConnectionManager()
         
-        # Setup connection with aggressive circuit breaker settings
-        config = DatabaseConfig(
-            host="unreachable-host",  # Intentionally unreachable
-            port=5432,
-            database="test",
-            username="test", 
-            password="test",
-            db_type=DatabaseType.POSTGRESQL,
-            max_retries=2,  # Low retry count for fast failure
-            retry_delay=0.1  # Fast retry for testing
-        )
+        # SSOT REMEDIATION: Use configuration values from SSOT system
+        # Get base config and create test configuration dict
+        base_config = get_config()
+        config_dict = {
+            'host': "unreachable-host",  # Intentionally unreachable for testing
+            'port': 5432,
+            'database': "test",
+            'username': "test", 
+            'password': "test",
+            'db_type': DatabaseType.POSTGRESQL,
+            'max_retries': 2,  # Low retry count for fast failure
+            'retry_delay': 0.1  # Fast retry for testing
+        }
         
-        manager.add_connection("test_circuit", config)
+        manager.add_connection("test_circuit", config_dict)
         connection = manager.get_connection("test_circuit")
         
         # Step 1: Trigger circuit breaker by failing multiple times
@@ -162,25 +165,26 @@ class CircuitBreakerErrorRecoveryTests:
         # For now, we'll test basic connection isolation
         manager = ConnectionManager()
         
+        # SSOT REMEDIATION: Use configuration dicts instead of duplicate DatabaseConfig class
         # Setup two connections - one failing, one working
-        failing_config = DatabaseConfig(
-            host="unreachable-host",
-            port=5432,
-            database="test",
-            username="test",
-            password="test", 
-            db_type=DatabaseType.POSTGRESQL,
-            max_retries=1
-        )
+        failing_config = {
+            'host': "unreachable-host",
+            'port': 5432,
+            'database': "test",
+            'username': "test",
+            'password': "test", 
+            'db_type': DatabaseType.POSTGRESQL,
+            'max_retries': 1
+        }
         
-        working_config = DatabaseConfig(
-            host="localhost",
-            port=5432,
-            database="test",
-            username="test",
-            password="test",
-            db_type=DatabaseType.POSTGRESQL
-        )
+        working_config = {
+            'host': "localhost",
+            'port': 5432,
+            'database': "test",
+            'username': "test",
+            'password': "test",
+            'db_type': DatabaseType.POSTGRESQL
+        }
         
         manager.add_connection("failing_connection", failing_config)
         manager.add_connection("working_connection", working_config)

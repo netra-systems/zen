@@ -35,7 +35,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 import pytest
 import pytest_asyncio
@@ -462,7 +462,7 @@ class AgentPipelineInfrastructure:
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.config import get_config
         from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         
         # REAL components - no mocks
         config = get_config()

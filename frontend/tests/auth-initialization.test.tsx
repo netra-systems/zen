@@ -14,11 +14,11 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import { AuthProvider, useAuth } from '@/auth/context';
 import { AuthGuard } from '@/components/AuthGuard';
 import { unifiedAuthService } from '@/auth/unified-auth-service';
-import { jwtDecode } from 'jwt-decode';
+// jwt-decode import removed - JWT authentication removed
 
 // Mock dependencies
 jest.mock('@/auth/unified-auth-service');
-jest.mock('jwt-decode');
+// jwt-decode mock removed - JWT authentication removed
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: jest.fn(),

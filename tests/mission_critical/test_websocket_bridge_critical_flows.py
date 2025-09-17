@@ -250,7 +250,7 @@ class MockOrchestrator:
 @pytest.fixture
 async def real_websocket_manager():
     """Real WebSocket manager fixture - NO MOCKS."""
-    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
     manager = get_websocket_manager()
     yield manager
 

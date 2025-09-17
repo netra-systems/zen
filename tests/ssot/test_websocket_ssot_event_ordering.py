@@ -81,7 +81,7 @@ class WebSocketSSotEventOrderingTests(SSotAsyncTestCase):
         event_delivery_systems = {}
         
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager = UnifiedWebSocketManager()
             
             # Test event ordering through different delivery methods
@@ -194,7 +194,7 @@ class WebSocketSSotEventOrderingTests(SSotAsyncTestCase):
         cross_user_contamination = []
         
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             async def send_user_events(user_id: UserID):
                 """Send events for a single user."""

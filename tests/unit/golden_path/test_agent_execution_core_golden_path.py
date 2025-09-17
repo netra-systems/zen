@@ -286,9 +286,9 @@ class AgentExecutionCoreGoldenPathTests(SSotAsyncTestCase, unittest.TestCase):
             supervisor.websocket_bridge = mock_bridge
             # Execute and validate graceful error handling (SSOT pattern)
             result = await supervisor.execute(context=self.user_context, stream_updates=True)
-            return result
+            return result, supervisor
         
-        result = asyncio.run(_async_test())
+        result, supervisor = asyncio.run(_async_test())
         assert result is not None, "Execution should return result even on error"
         assert isinstance(result, dict), "Result should be dict format"
         
@@ -330,18 +330,18 @@ class AgentExecutionCoreGoldenPathTests(SSotAsyncTestCase, unittest.TestCase):
         from netra_backend.app.schemas.agent import SubAgentLifecycle
         assert final_state != SubAgentLifecycle.COMPLETED, f'Agent should not be in COMPLETED state after error, got {final_state}'
         # Test recovery mechanism with working client
-        async def _async_recovery_test():
+        async def _async_recovery_test(supervisor_instance):
             working_client = AsyncMock()
             working_client.agenerate.return_value = {'response': 'Recovery successful, proceeding with analysis.', 'status': 'recovered'}
             self.mock_llm_manager.get_default_client.return_value = working_client
             # Only reset state if not already in PENDING
-            current_state = supervisor.get_state()
+            current_state = supervisor_instance.get_state()
             if current_state != SubAgentLifecycle.PENDING:
-                supervisor.set_state(SubAgentLifecycle.PENDING)
-            recovery_result = await supervisor.execute(context=self.user_context, stream_updates=True)
-            return recovery_result, supervisor.get_state()
+                supervisor_instance.set_state(SubAgentLifecycle.PENDING)
+            recovery_result = await supervisor_instance.execute(context=self.user_context, stream_updates=True)
+            return recovery_result, supervisor_instance.get_state()
         
-        recovery_result, recovery_state = asyncio.run(_async_recovery_test())
+        recovery_result, recovery_state = asyncio.run(_async_recovery_test(supervisor))
         assert recovery_result is not None, 'Recovery execution should succeed'
         assert recovery_state != SubAgentLifecycle.FAILED, f'Agent should recover from error state, got {recovery_state}'
         logger.info(' PASS:  Agent error handling and recovery validation passed')

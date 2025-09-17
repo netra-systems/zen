@@ -8,10 +8,10 @@ import asyncio
 import pytest
 from datetime import datetime
 from typing import Dict, Any
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
-# REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import ( )
+# REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import ( )
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient

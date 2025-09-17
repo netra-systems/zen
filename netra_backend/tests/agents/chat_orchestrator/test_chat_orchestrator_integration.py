@@ -28,6 +28,7 @@ from test_framework.ssot.websocket import WebSocketTestUtility
 from netra_backend.app.agents.chat_orchestrator_main import ChatOrchestrator
 from netra_backend.app.agents.chat_orchestrator.intent_classifier import IntentType
 from netra_backend.app.agents.base.interface import ExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from dataclasses import dataclass
 
 @dataclass
@@ -60,6 +61,13 @@ class ChatOrchestratorIntegrationTests(SSotAsyncTestCase, unittest.TestCase):
         # Initialize WebSocket test utility
         self.websocket_util = WebSocketTestUtility()
 
+        # Create test user context for ChatOrchestrator
+        self.user_context = UserExecutionContext(
+            user_id="test_user_chat_orchestrator",
+            thread_id="test_thread_integration",
+            run_id="test_run_integration"
+        )
+
         # Create ChatOrchestrator with real dependencies
         self.chat_orchestrator = ChatOrchestrator(
             db_session=self.db_session,
@@ -67,7 +75,8 @@ class ChatOrchestratorIntegrationTests(SSotAsyncTestCase, unittest.TestCase):
             websocket_manager=self.websocket_manager,
             tool_dispatcher=self.tool_dispatcher,
             cache_manager=None,
-            semantic_cache_enabled=True
+            semantic_cache_enabled=True,
+            user_context=self.user_context
         )
 
         # Create test execution contexts for different scenarios
@@ -353,10 +362,10 @@ class ChatOrchestratorIntegrationTests(SSotAsyncTestCase, unittest.TestCase):
 
     def tearDown(self):
         """Clean up integration test environment."""
-        # Clean up WebSocket connections (sync cleanup)
+        # Clean up WebSocket connections (async cleanup in sync tearDown)
         if hasattr(self, 'websocket_util'):
-            # Note: Using sync cleanup since tearDown is not async
-            self.websocket_util.cleanup_sync()
+            # Run async cleanup in sync tearDown
+            asyncio.run(self.websocket_util.cleanup())
 
         super().tearDown()
 
@@ -374,11 +383,19 @@ class ChatOrchestratorWebSocketEventIntegrationTests(SSotAsyncTestCase, unittest
         self.tool_dispatcher = MagicMock()
         self.db_session = AsyncMock()
 
+        # Create test user context for WebSocket event testing
+        self.websocket_user_context = UserExecutionContext(
+            user_id="test_user_websocket_events",
+            thread_id="test_thread_websocket",
+            run_id="test_run_websocket"
+        )
+
         self.chat_orchestrator = ChatOrchestrator(
             db_session=self.db_session,
             llm_manager=self.llm_manager,
             websocket_manager=self.websocket_manager,
-            tool_dispatcher=self.tool_dispatcher
+            tool_dispatcher=self.tool_dispatcher,
+            user_context=self.websocket_user_context
         )
 
         # Set up WebSocket event capture

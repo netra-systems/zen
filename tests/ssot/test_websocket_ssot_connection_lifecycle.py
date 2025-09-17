@@ -45,7 +45,7 @@ class WebSocketSSotConnectionLifecycleTests(SSotAsyncTestCase):
         
         # Test different connection creation methods
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager = UnifiedWebSocketManager()
             
             # Test direct connection creation
@@ -57,7 +57,7 @@ class WebSocketSSotConnectionLifecycleTests(SSotAsyncTestCase):
             
             # Test factory-based creation
             try:
-                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                 factory = WebSocketManagerFactory()
                 factory_manager = factory.create_manager()
                 await factory_manager.add_connection(user_id, f"{connection_id}_factory", None)
@@ -106,7 +106,7 @@ class WebSocketSSotConnectionLifecycleTests(SSotAsyncTestCase):
         connection_leaks = []
         
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager = UnifiedWebSocketManager()
             
             # Create connections through different methods and test cleanup
@@ -199,7 +199,7 @@ class WebSocketSSotConnectionLifecycleTests(SSotAsyncTestCase):
         
         try:
             # Create multiple manager instances and check state sync
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             managers = []
             for i in range(3):

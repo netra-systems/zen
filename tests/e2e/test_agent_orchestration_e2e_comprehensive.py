@@ -53,7 +53,7 @@ from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAg
 from netra_backend.app.agents.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 from netra_backend.app.core.configuration import UnifiedConfigManager
 from netra_backend.app.db.postgres import get_postgres_db
 from netra_backend.app.services.user_execution_context import UserExecutionContext

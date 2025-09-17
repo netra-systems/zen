@@ -257,7 +257,7 @@ class WebSocketProtocolValidator:
             Dictionary with validation results and compliance details
             
         Example:
-            >>> from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            >>> from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             >>> manager = get_websocket_manager(user_context)
             >>> result = WebSocketManagerProtocolValidator.validate_manager_protocol(manager)
             >>> if not result['compliant']:

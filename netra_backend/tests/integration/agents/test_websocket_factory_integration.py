@@ -55,7 +55,7 @@ from netra_backend.app.agents.supervisor.user_execution_context import UserExecu
 
 # WebSocket core imports
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 
 
 class MockWebSocketConnection:

@@ -48,7 +48,7 @@
             # REMOVED_SYNTAX_ERROR: import time
             # REMOVED_SYNTAX_ERROR: from fastapi import WebSocket, HTTPException
             # REMOVED_SYNTAX_ERROR: from datetime import datetime, timezone
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.redis_manager import redis_manager
             # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager

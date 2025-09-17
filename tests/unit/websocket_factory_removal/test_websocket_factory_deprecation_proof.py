@@ -158,7 +158,7 @@ class WebSocketFactoryDeprecationProofTests(SSotAsyncTestCase):
                 pass
         try:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             context = UserExecutionContext(user_id=self.test_user_id, websocket_client_id='completeness_test')
             manager = WebSocketManager(user_context=context)
             self.assertIsNotNone(context)
@@ -177,7 +177,7 @@ class WebSocketFactoryDeprecationProofTests(SSotAsyncTestCase):
         logger.info('Testing Golden Path functionality preservation...')
         try:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
-            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             golden_path_user = f'golden_path_{self.test_user_id}'
             user_context = UserExecutionContext(user_id=golden_path_user, websocket_client_id='golden_path_test_client')
             websocket_manager = WebSocketManager(user_context=user_context)

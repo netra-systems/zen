@@ -24,7 +24,7 @@ import json
 import time
 from datetime import datetime, timedelta
 from typing import Dict, Any
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
 import jwt

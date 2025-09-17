@@ -49,7 +49,7 @@ from shared.isolated_environment import get_env
 
 # CRITICAL: Import REAL WebSocket components
 try:
-    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager, WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager, WebSocketManager
     from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory, create_agent_instance_factory

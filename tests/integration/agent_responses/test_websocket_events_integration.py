@@ -31,7 +31,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from collections import defaultdict
 import pytest
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 # SSOT imports following established patterns
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -48,7 +48,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory, create_agent_instance_factory
 from shared.id_generation import UnifiedIdGenerator
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
 
 

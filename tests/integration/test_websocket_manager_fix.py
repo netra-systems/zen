@@ -87,7 +87,7 @@ class WebSocketManagerFixTests:
     async def test_websocket_manager_with_mock_websocket(self):
         """Test WebSocket manager with mock WebSocket connection."""
         from fastapi import WebSocket
-        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
         
         # Create mock WebSocket
         mock_ws = MagicMock(spec=WebSocket)

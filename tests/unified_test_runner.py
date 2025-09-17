@@ -949,6 +949,9 @@ class UnifiedTestRunner:
         # Test execution timeout fix for iterations 41-60
         from shared.isolated_environment import get_env
         env = get_env()
+        
+        # Initialize no-services mode (will be set properly in run_tests)
+        self.no_services_mode = False
         self.max_collection_size = int(env.get("MAX_TEST_COLLECTION_SIZE", "1000"))
         
         # Test configurations - Use project root as working directory to fix import issues
@@ -1119,6 +1122,14 @@ class UnifiedTestRunner:
         try:
             # Initialize components
             self.initialize_components(args)
+            
+            # Set no-services mode if requested
+            self.no_services_mode = getattr(args, 'no_services', False)
+            if self.no_services_mode:
+                from shared.isolated_environment import get_env
+                env = get_env()
+                env.set('TEST_NO_SERVICES', 'true', 'test_runner')
+                print("[INFO] Running in no-services mode - external dependencies disabled")
             
             # Configure environment
             self._configure_environment(args)
@@ -2387,6 +2398,11 @@ class UnifiedTestRunner:
         required_services = list(dict.fromkeys(required_services))
         
         try:
+            # Skip service checks in no-services mode
+            if hasattr(args, 'no_services') and args.no_services:
+                print("[INFO] Skipping service availability checks (no-services mode)")
+                return True
+                
             # Check services with appropriate timeout
             timeout = 10.0 if self._detect_staging_environment(args) else 5.0
             require_real_services(
@@ -2401,6 +2417,7 @@ class UnifiedTestRunner:
             print(f"\nTIP: For mock testing, remove --real-services or --real-llm flags")
             print(f"TIP: For quick development setup, run: python scripts/dev_launcher.py")
             print(f"TIP: To use Alpine-based services: docker-compose -f docker-compose.alpine-test.yml up -d\n")
+            print(f"TIP: Use --no-services for lightweight testing without external dependencies\n")
             
             # Exit immediately - don't waste time on tests that will fail
             import sys
@@ -3458,10 +3475,15 @@ class UnifiedTestRunner:
         else:
             cmd_parts.extend(["--timeout=300", "--timeout-method=thread"])   # 5min for other test categories
         
+        # Add specific test file if specified
+        if hasattr(args, 'file') and args.file:
+            # If a specific file is provided, use it instead of default test discovery
+            cmd_parts.append(args.file)
+        
         # Add specific test pattern - only for categories that use pattern-based selection
         # Issue #1270 Fix: Pattern filtering should not be applied to categories that use
         # specific files (database, api, unit, integration) as it can cause test deselection
-        if args.pattern and self._should_category_use_pattern_filtering(category_name):
+        elif args.pattern and self._should_category_use_pattern_filtering(category_name):
             # Clean up pattern - remove asterisks that are invalid for pytest -k expressions
             # pytest -k expects Python-like expressions, not glob patterns
             clean_pattern = args.pattern.strip('*')
@@ -4483,6 +4505,11 @@ def main():
         help="Run tests matching pattern"
     )
     
+    parser.add_argument(
+        "--file",
+        help="Run specific test file"
+    )
+    
     # Legacy compatibility arguments from frontend/backend runners
     parser.add_argument(
         "--markers",
@@ -4799,6 +4826,12 @@ def main():
         "--auto-services",
         action="store_true",
         help="Automatically start required Docker services for tests (resolves localhost:8000 timeouts)"
+    )
+    
+    service_group.add_argument(
+        "--no-services",
+        action="store_true",
+        help="Run tests without external service dependencies (lightweight mode)"
     )
     
     service_group.add_argument(

@@ -54,7 +54,7 @@ try:
     from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
     from netra_backend.app.core.agent_execution_tracker import CircuitBreakerOpenError, AgentExecutionPhase
     from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
     from shared.types.core_types import UserID, ThreadID, RunID, MessageID
     REAL_ERROR_RECOVERY_COMPONENTS_AVAILABLE = True
 except ImportError as e:

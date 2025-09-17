@@ -92,7 +92,7 @@ class TestWebSocketSSotIntegrationCompliance(BaseTestClass):
         # Define expected consistent patterns
         expected_patterns = {
             'factory_import': 'from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory',
-            'manager_import': 'from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager',
+            'manager_import': 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager',
             'protocol_import': 'from netra_backend.app.core.interfaces_websocket import WebSocketManagerProtocol'
         }
         

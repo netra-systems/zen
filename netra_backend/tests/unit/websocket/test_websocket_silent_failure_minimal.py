@@ -64,7 +64,7 @@ class WebSocketSilentFailureMinimalTests(SSotAsyncTestCase):
         This test should PASS to prove modern infrastructure is available.
         """
         from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
         working_manager = Mock(spec=UnifiedWebSocketManager)
         working_manager.emit_critical_event = AsyncMock(return_value=True)
         emitter = UnifiedWebSocketEmitter(manager=working_manager, user_id='test_user')
@@ -86,7 +86,7 @@ class WebSocketSilentFailureMinimalTests(SSotAsyncTestCase):
         dispatcher_source = inspect.getsource(UnifiedToolDispatcher)
         has_warning_pattern = 'logger.warning' in dispatcher_source
         from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-        from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
         has_modern_emitter = hasattr(UnifiedWebSocketEmitter, 'emit_agent_started')
         has_modern_manager = hasattr(UnifiedWebSocketManager, 'emit_critical_event')
         self.assertTrue(has_warning_pattern, 'Old pattern (logger.warning) found in UnifiedToolDispatcher')

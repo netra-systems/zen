@@ -52,7 +52,7 @@ if project_root not in sys.path:
 import pytest
 from loguru import logger
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper, E2EAuthConfig
-from test_framework.environment_isolation import isolated_test_env
+from test_framework.environment_isolation import isolated_test_env_fixture
 from tests.clients.websocket_client import WebSocketTestClient
 from tests.clients.backend_client import BackendTestClient
 from tests.clients.auth_client import AuthTestClient

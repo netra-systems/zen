@@ -27,7 +27,7 @@ from shared.isolated_environment import IsolatedEnvironment
 # Import auth components that need integration testing
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.auth_integration.auth import create_auth_handler
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.auth import WebSocketAuth
 
 

@@ -42,25 +42,25 @@ class WebSocketImportConsolidator:
         self.replacements = [
             ImportReplacement(
                 old_pattern=r"from netra_backend\.app\.websocket_core\.manager import WebSocketManager",
-                new_pattern="from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as WebSocketManager",
+                new_pattern="from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager",
                 description="Legacy manager.py import → canonical SSOT",
                 risk_level="LOW"
             ),
             ImportReplacement(
                 old_pattern=r"from netra_backend\.app\.websocket_core\.websocket_manager import WebSocketManager",
-                new_pattern="from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as WebSocketManager",
+                new_pattern="from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager",
                 description="Direct websocket_manager.py import → canonical SSOT",
                 risk_level="LOW"
             ),
             ImportReplacement(
                 old_pattern=r"from netra_backend\.app\.websocket_core\.websocket_manager_factory import create_websocket_manager",
-                new_pattern="# FACTORY DEPRECATED: Use UnifiedWebSocketManager.get_instance() with UserExecutionContext\n# from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager",
+                new_pattern="# FACTORY DEPRECATED: Use UnifiedWebSocketManager.get_instance() with UserExecutionContext\n# from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager",
                 description="Factory pattern → SSOT manager with context (requires manual review)",
                 risk_level="MEDIUM"
             ),
             ImportReplacement(
                 old_pattern=r"from netra_backend\.app\.websocket_core\.unified_manager import _UnifiedWebSocketManagerImplementation",
-                new_pattern="from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager",
+                new_pattern="from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager",
                 description="Direct unified_manager import → canonical export",
                 risk_level="LOW"
             )
@@ -257,7 +257,7 @@ class WebSocketImportConsolidator:
             ["python", "-m", "py_compile", "netra_backend/app/websocket_core/canonical_import_patterns.py"],
 
             # Mission critical WebSocket tests (fast)
-            ["python", "-c", "from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager; print('Import successful')"],
+            ["python", "-c", "from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager; print('Import successful')"],
 
             # Import compliance check
             ["python", "scripts/validate_websocket_compliance_improved.py"]
@@ -329,7 +329,7 @@ Next Steps:
 4. Use rollback_changes() method if issues are detected
 
 SSOT Import Pattern (use this going forward):
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager as WebSocketManager
 """
 
         return report

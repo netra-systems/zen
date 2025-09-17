@@ -87,7 +87,7 @@ class TestFactoryPatternViolations(SSotAsyncTestCase):
 
         try:
             # Test the canonical factory pattern
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
             # Create multiple contexts
             context1 = {"user_id": "factory_test_user_1", "session_id": "session_1"}
@@ -162,7 +162,7 @@ class TestFactoryPatternViolations(SSotAsyncTestCase):
         context_isolation_violations = []
 
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
             # Create distinct user contexts
             alpha_context = {
@@ -267,7 +267,7 @@ class TestFactoryPatternViolations(SSotAsyncTestCase):
         config_sharing_violations = []
 
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
             # Create managers with different configuration needs
             prod_context = {
@@ -355,7 +355,7 @@ class TestFactoryPatternViolations(SSotAsyncTestCase):
         cleanup_violations = []
 
         try:
-            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
             # Create manager instance
             test_context = {"user_id": "cleanup_test_user", "session_id": "cleanup_session"}

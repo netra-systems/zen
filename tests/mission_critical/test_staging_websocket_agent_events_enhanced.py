@@ -661,4 +661,27 @@ class StagingWebSocketAuthenticationTests:
 if __name__ == "__main__":
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
-    pass  # TODO: Replace with appropriate SSOT test execution
+    # Execute enhanced staging WebSocket agent event tests
+    print("\n" + "=" * 80)
+    print("ENHANCED STAGING WEBSOCKET AGENT EVENTS TEST SUITE")
+    print("Environment: Staging (api-staging.netrasystems.ai)")
+    print("Purpose: Production-readiness validation")
+    print("Business Impact: $500K+ ARR revenue protection")
+    print("=" * 80)
+
+    import pytest
+    import sys
+
+    # Run enhanced staging tests with comprehensive coverage
+    exit_code = pytest.main([
+        __file__,
+        "-v",
+        "--tb=short", 
+        "--asyncio-mode=auto",
+        "--disable-warnings",
+        "--maxfail=3",  # Stop after 3 failures for staging tests
+        "-m", "staging or mission_critical"  # Run staging and mission critical markers
+    ])
+
+    print(f"\n✅ Enhanced staging test execution completed with exit code: {exit_code}")
+    sys.exit(exit_code)

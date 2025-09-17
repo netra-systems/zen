@@ -111,24 +111,21 @@ class WebSocketBridgeSSOTDelegationTests(SSotBaseTestCase):
         from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
         mock_websocket = Mock()
         mock_websocket.headers = {'sec-websocket-protocol': f'jwt.{self.valid_jwt_token}'}
-        with patch('netra_backend.app.websocket_core.auth_remediation.authenticate_websocket_with_remediation') as mock_remediation:
-            mock_remediation.return_value = (True, Mock(), None)
-            with patch('netra_backend.app.websocket_core.unified_websocket_auth.get_websocket_authenticator') as mock_get_authenticator:
-                mock_authenticator = Mock()
-                mock_auth_result = Mock()
-                mock_auth_result.success = True
-                mock_authenticator.authenticate_websocket_connection.return_value = mock_auth_result
-                mock_get_authenticator.return_value = mock_authenticator
-                try:
-                    result = asyncio.run(authenticate_websocket_ssot(mock_websocket))
-                except Exception as e:
-                    result = None
-                multiple_path_violations = []
-                if mock_remediation.called:
-                    multiple_path_violations.append('remediation authentication path used instead of SSOT')
-                if mock_get_authenticator.called:
-                    multiple_path_violations.append('SSOT authenticator used as fallback indicates multiple paths')
-                self.assertEqual(len(multiple_path_violations), 0, f'MULTIPLE PATH VIOLATIONS in WebSocket auth: {multiple_path_violations}. Must use single SSOT delegation path only')
+        with patch('netra_backend.app.websocket_core.unified_websocket_auth.get_websocket_authenticator') as mock_get_authenticator:
+            mock_authenticator = Mock()
+            mock_auth_result = Mock()
+            mock_auth_result.success = True
+            mock_authenticator.authenticate_websocket_connection.return_value = mock_auth_result
+            mock_get_authenticator.return_value = mock_authenticator
+            try:
+                result = asyncio.run(authenticate_websocket_ssot(mock_websocket))
+            except Exception as e:
+                result = None
+            multiple_path_violations = []
+            # Note: mock_remediation.called removed since function was deprecated and removed
+            if mock_get_authenticator.called:
+                multiple_path_violations.append('SSOT authenticator used as fallback indicates multiple paths')
+            self.assertEqual(len(multiple_path_violations), 0, f'MULTIPLE PATH VIOLATIONS in WebSocket auth: {multiple_path_violations}. Must use single SSOT delegation path only')
 
     def test_ssot_delegation_no_direct_jwt_secret_access(self):
         """

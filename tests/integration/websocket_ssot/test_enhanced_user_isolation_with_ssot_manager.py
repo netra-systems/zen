@@ -82,7 +82,7 @@ class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
         """
         logger.info("Validating bulletproof user data isolation with SSOT manager")
         
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         
         # Create isolated managers for each enterprise user
         enterprise_managers = []
@@ -353,7 +353,7 @@ class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
         """
         logger.info("Validating enterprise-grade security features")
         
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         
         # Create enterprise manager with maximum security context
         max_security_context = self.enterprise_users[1]  # beta_industries with maximum security
@@ -455,7 +455,7 @@ class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
         """
         logger.info("Validating SSOT manager performance under enterprise load")
         
-        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
         
         # Create multiple enterprise managers for load testing
         enterprise_load_managers = []

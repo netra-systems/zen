@@ -42,7 +42,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 import pytest
 from loguru import logger
-from test_framework.environment_isolation import isolated_test_env, get_test_env_manager
+from test_framework.environment_isolation import isolated_test_env_fixture, get_test_env_manager
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper, create_authenticated_user
 from tests.clients.websocket_client import WebSocketTestClient
 from tests.clients.backend_client import BackendTestClient
@@ -235,7 +235,7 @@ class RealAgentOrchestrationCriticalTests:
     'MISSION CRITICAL: Tests real agent orchestration for chat functionality.'
 
     @pytest.mark.asyncio
-    async def test_basic_chat_flow_real_services(self, isolated_test_env):
+    async def test_basic_chat_flow_real_services(self, isolated_test_env_fixture):
         """
         MISSION CRITICAL TEST: Basic Chat Flow with Real Services
         
@@ -251,7 +251,7 @@ class RealAgentOrchestrationCriticalTests:
         tester = RealServiceChatTester()
         test_start_time = time.time()
         try:
-            await tester.setup_real_services(isolated_test_env)
+            await tester.setup_real_services(isolated_test_env_fixture)
             basic_query = 'What are the top 3 ways to optimize cloud costs?'
             start_time = time.time()
             is_valid, validator = await tester.test_critical_chat_flow(user_message=basic_query, timeout=5.0)
@@ -279,7 +279,7 @@ class RealAgentOrchestrationCriticalTests:
             await tester.cleanup()
 
     @pytest.mark.asyncio
-    async def test_agent_thinking_visibility_real(self, isolated_test_env):
+    async def test_agent_thinking_visibility_real(self, isolated_test_env_fixture):
         """
         CRITICAL: Agent Thinking Visibility Test
         
@@ -289,7 +289,7 @@ class RealAgentOrchestrationCriticalTests:
         tester = RealServiceChatTester()
         test_start_time = time.time()
         try:
-            await tester.setup_real_services(isolated_test_env)
+            await tester.setup_real_services(isolated_test_env_fixture)
             analysis_query = 'Analyze my AWS infrastructure and provide optimization recommendations'
             is_valid, validator = await tester.test_critical_chat_flow(user_message=analysis_query, timeout=8.0)
             total_test_time = time.time() - test_start_time
@@ -306,7 +306,7 @@ class RealAgentOrchestrationCriticalTests:
             await tester.cleanup()
 
     @pytest.mark.asyncio
-    async def test_tool_execution_transparency_real(self, isolated_test_env):
+    async def test_tool_execution_transparency_real(self, isolated_test_env_fixture):
         """
         CRITICAL: Tool Execution Transparency Test
         
@@ -316,7 +316,7 @@ class RealAgentOrchestrationCriticalTests:
         tester = RealServiceChatTester()
         test_start_time = time.time()
         try:
-            await tester.setup_real_services(isolated_test_env)
+            await tester.setup_real_services(isolated_test_env_fixture)
             tool_query = 'Generate a cost optimization report for my cloud infrastructure'
             is_valid, validator = await tester.test_critical_chat_flow(user_message=tool_query, timeout=10.0)
             total_test_time = time.time() - test_start_time
@@ -335,7 +335,7 @@ class RealAgentOrchestrationCriticalTests:
             await tester.cleanup()
 
     @pytest.mark.asyncio
-    async def test_chat_completion_notification_real(self, isolated_test_env):
+    async def test_chat_completion_notification_real(self, isolated_test_env_fixture):
         """
         CRITICAL: Chat Completion Notification Test
         
@@ -345,7 +345,7 @@ class RealAgentOrchestrationCriticalTests:
         tester = RealServiceChatTester()
         test_start_time = time.time()
         try:
-            await tester.setup_real_services(isolated_test_env)
+            await tester.setup_real_services(isolated_test_env_fixture)
             simple_query = 'List 3 cloud cost optimization strategies'
             is_valid, validator = await tester.test_critical_chat_flow(user_message=simple_query, timeout=5.0)
             total_test_time = time.time() - test_start_time
@@ -364,7 +364,7 @@ class RealAgentOrchestrationCriticalTests:
             await tester.cleanup()
 
     @pytest.mark.asyncio
-    async def test_concurrent_chat_sessions_real(self, isolated_test_env):
+    async def test_concurrent_chat_sessions_real(self, isolated_test_env_fixture):
         """
         CRITICAL: Concurrent Chat Sessions Test
         
@@ -376,7 +376,7 @@ class RealAgentOrchestrationCriticalTests:
         try:
             for i in range(3):
                 tester = RealServiceChatTester()
-                await tester.setup_real_services(isolated_test_env)
+                await tester.setup_real_services(isolated_test_env_fixture)
                 testers.append(tester)
             queries = ['What are cloud optimization best practices?', 'How can I reduce AWS costs?', 'Provide infrastructure scaling recommendations']
             tasks = []

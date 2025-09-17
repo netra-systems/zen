@@ -212,7 +212,7 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 WebSocketManager = UnifiedWebSocketManager
 
 # SSOT PHASE 2 FIX: Remove UnifiedWebSocketManager alias to eliminate duplication
-# CANONICAL LOCATION: Use 'from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager'
+# CANONICAL LOCATION: Use 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'
 # For runtime usage, use get_websocket_manager() factory function
 
 # ISSUE #1182 REMEDIATION COMPLETED: WebSocketManagerFactory consolidated into get_websocket_manager()

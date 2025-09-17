@@ -6,7 +6,7 @@ Ensures security monitoring works correctly across system components.
 """
 import pytest
 from datetime import datetime, timezone
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from shared.isolated_environment import IsolatedEnvironment
 try:

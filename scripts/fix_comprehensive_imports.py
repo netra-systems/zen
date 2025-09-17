@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
 # Add project root to path
+PROJECT_ROOT = Path(__file__).parent.parent
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -53,23 +54,8 @@ class ComprehensiveImportFixerV2:
             original_content = content
             modified = False
             
-            # Fix DataSubAgentClickHouseOperations import
-            if 'DataSubAgentClickHouseOperations' in content:
-                # This class doesn't exist, comment it out
-                content = re.sub(
-                    r'^from netra_backend\.app\.services\.corpus\.clickhouse_operations import DataSubAgentClickHouseOperations.*$',
-                    r'# FIXME: DataSubAgentClickHouseOperations not available\n# \g<0>',
-                    content,
-                    flags=re.MULTILINE
-                )
-                # Also comment out any usage
-                content = re.sub(
-                    r'^(\s*)(.*)DataSubAgentClickHouseOperations',
-                    r'\1# FIXME: \2DataSubAgentClickHouseOperations',
-                    content,
-                    flags=re.MULTILINE
-                )
-                modified = True
+            # DataSubAgentClickHouseOperations import is now available (resolved)
+            # Removed FIXME logic - class is properly aliased in clickhouse_operations.py
             
             # Fix ExecutionEngine import 
             if 'from netra_backend.app.services.unified_tool_registry.execution_engine import ExecutionEngine' in content:
@@ -201,21 +187,31 @@ class ComprehensiveImportFixerV2:
             original_content = content
             modified = False
             
-            # Fix SupplyResearcherAgent import
+            # Fix SupplyResearcherAgent import - use correct path
             if 'SupplyResearcherAgent' in content:
+                # Fix incorrect import path from corpus_admin to supply_researcher (preserve aliases)
                 content = re.sub(
-                    r'^from netra_backend\.app\.agents\.corpus_admin\.agent import SupplyResearcherAgent.*$',
-                    r'# FIXME: SupplyResearcherAgent not available\n# \g<0>',
+                    r'^from netra_backend\.app\.agents\.corpus_admin\.agent import SupplyResearcherAgent(\s+as\s+\w+)?.*$',
+                    r'from netra_backend.app.agents.supply_researcher import SupplyResearcherAgent\1',
                     content,
                     flags=re.MULTILINE
                 )
-                # Comment out any usage
+                # Fix incorrect import from supply_researcher_sub_agent to supply_researcher (preserve aliases)
                 content = re.sub(
-                    r'^(\s*)(.*)SupplyResearcherAgent',
-                    r'\1# FIXME: \2SupplyResearcherAgent',
+                    r'^from netra_backend\.app\.agents\.supply_researcher_sub_agent import SupplyResearcherAgent(\s+as\s+\w+)?.*$',
+                    r'from netra_backend.app.agents.supply_researcher import SupplyResearcherAgent\1',
                     content,
                     flags=re.MULTILINE
                 )
+                # If there's a direct agent.py import, also fix it to module level (preserve aliases)
+                # BUT skip this fix if we're in the supply_researcher/__init__.py file itself
+                if not filepath.name == '__init__.py' or 'supply_researcher' not in str(filepath.parent):
+                    content = re.sub(
+                        r'^from netra_backend\.app\.agents\.supply_researcher\.agent import SupplyResearcherAgent(\s+as\s+\w+)?.*$',
+                        r'from netra_backend.app.agents.supply_researcher import SupplyResearcherAgent\1',
+                        content,
+                        flags=re.MULTILINE
+                    )
                 modified = True
             
             if modified and content != original_content:

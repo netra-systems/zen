@@ -14,7 +14,7 @@ from netra_backend.app.services.billing.token_counter import TokenCounter
 from netra_backend.app.services.token_optimization.context_manager import TokenOptimizationContextManager
 from netra_backend.app.services.token_optimization.session_factory import TokenOptimizationSessionFactory
 from netra_backend.app.services.token_optimization.config_manager import TokenOptimizationConfigManager
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

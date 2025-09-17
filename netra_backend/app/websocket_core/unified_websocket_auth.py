@@ -45,7 +45,7 @@ from netra_backend.app.services.unified_authentication_service import (
 from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
 from netra_backend.app.websocket_core.utils import _safe_websocket_state_for_logging
 
 logger = central_logger.get_logger(__name__)
@@ -1284,8 +1284,6 @@ async def authenticate_websocket_ssot(
     CONSOLIDATED IMPLEMENTATIONS:
     1. UnifiedWebSocketAuthenticator.authenticate_websocket_connection (class method)
     2. authenticate_websocket_connection (standalone function) 
-    3. authenticate_websocket_with_remediation (remediation function)
-    4. validate_websocket_token_business_logic (token validation function)
     5. UserContextExtractor.validate_and_decode_jwt (JWT validation method)
     6. _extract_token_from_websocket (token extraction utility)
     
@@ -1515,79 +1513,6 @@ def create_authenticated_user_context(
     return user_context
 
 
-async def validate_websocket_token_business_logic(token: str) -> Optional[Dict[str, Any]]:
-    """
-    DEPRECATED: Token validation function - use authenticate_websocket_ssot() instead.
-    
-    MIGRATION REQUIRED: This function is deprecated as part of SSOT consolidation.
-    Token validation is now handled internally by authenticate_websocket_ssot().
-    
-    This function provides backward compatibility for tests but should not be used
-    for new implementations.
-    
-    Args:
-        token: JWT token to validate
-        
-    Returns:
-        Dictionary with user data if valid, None if invalid
-    """
-    import warnings
-    warnings.warn(
-        "validate_websocket_token_business_logic() is deprecated. "
-        "Use authenticate_websocket_ssot() instead. "
-        "Token validation is now handled internally.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    
-    logger.warning(
-        "DEPRECATION: validate_websocket_token_business_logic() called. "
-        "Token validation is now internal to authenticate_websocket_ssot()."
-    )
-    
-    try:
-        if not token or not token.strip():
-            return None
-            
-        # For backward compatibility with tests, handle "valid" tokens specially
-        if "valid" in token.lower() and len(token) > 10:
-            # ISSUE #841 SSOT FIX: Use UnifiedIdGenerator for test user ID
-            return {
-                'sub': UnifiedIdGenerator.generate_base_id('test_user', True, 8),
-                'email': 'test@enterprise.com', 
-                'exp': 9999999999,  # Far future for tests
-                'permissions': ['execute_agents']
-            }
-            
-        # Use SSOT authentication service for actual validation
-        auth_service = get_unified_auth_service()
-        
-        # Create minimal authentication context for token validation
-        from netra_backend.app.services.unified_authentication_service import AuthenticationContext, AuthenticationMethod
-        context = AuthenticationContext(
-            method=AuthenticationMethod.JWT,
-            source="deprecated_token_validation",
-            metadata={"token": token}
-        )
-        
-        # Validate token using SSOT service
-        auth_result = await auth_service.authenticate(token, context)
-        
-        if not auth_result.success:
-            logger.debug(f"Deprecated token validation failed: {auth_result.error}")
-            return None
-            
-        # Return user data in expected format for tests
-        return {
-            'sub': auth_result.user_id,
-            'email': auth_result.email,
-            'exp': auth_result.validated_at.timestamp() + 3600 if auth_result.validated_at else 9999999999,
-            'permissions': auth_result.permissions or []
-        }
-        
-    except Exception as e:
-        logger.error(f"Deprecated token validation error: {e}")
-        return None
 
 
 # Legacy aliases for backward compatibility
@@ -1807,5 +1732,4 @@ __all__ = [
     "authenticate_websocket_ssot",
     "authenticate_websocket_connection",  # Backward compatibility
     "create_authenticated_user_context",  # Backward compatibility
-    "validate_websocket_token_business_logic"  # Backward compatibility
 ]

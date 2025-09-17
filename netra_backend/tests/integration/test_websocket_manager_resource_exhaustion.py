@@ -27,14 +27,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timezone
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.canonical_import_patterns import (
+from netra_backend.app.websocket_core.websocket_manager import (
     get_websocket_manager,
     UnifiedWebSocketManager,
     WebSocketConnection,
     create_test_user_context,
     check_websocket_service_available
 )
-from netra_backend.app.websocket_core.unified_manager import MAX_CONNECTIONS_PER_USER
+from netra_backend.app.websocket_core.websocket_manager import MAX_CONNECTIONS_PER_USER
 from netra_backend.app.websocket_core.types import WebSocketManagerMode
 from shared.types.core_types import ensure_user_id, ensure_websocket_id
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType

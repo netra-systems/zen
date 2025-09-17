@@ -201,7 +201,7 @@ class Issue989GoldenPathWebSocketFactoryPreservationTests(SSotAsyncTestCase):
             user_context = self.test_users['user_1']
             logger.info(f'Testing with user: {user_context.user_id}')
             try:
-                from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
                 websocket_manager = get_websocket_manager(user_context=user_context)
                 test_result.websocket_connection_success = True
                 logger.info('✅ SSOT direct initialization successful')
@@ -287,11 +287,11 @@ class Issue989GoldenPathWebSocketFactoryPreservationTests(SSotAsyncTestCase):
                             manager = await factory_func(user_context=user_context)
                             pattern_used = 'deprecated_factory'
                         except:
-                            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+                            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
                             manager = get_websocket_manager(user_context=user_context)
                             pattern_used = 'ssot_direct_fallback'
                     elif user_key == 'user_2':
-                        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+                        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
                         manager = get_websocket_manager(user_context=user_context)
                         pattern_used = 'ssot_direct'
                     else:

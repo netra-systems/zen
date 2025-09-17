@@ -65,7 +65,7 @@
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         # REMOVED_SYNTAX_ERROR: print("OK ExecutionEngine import successful")
 
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
         # REMOVED_SYNTAX_ERROR: print("OK WebSocketManager import successful")
 
         # REMOVED_SYNTAX_ERROR: return True
@@ -80,7 +80,7 @@
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: try:
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 
         # REMOVED_SYNTAX_ERROR: ws_manager = WebSocketManager()
         # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(ws_manager)
@@ -120,7 +120,7 @@
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.websocket_tool_enhancement import enhance_tool_dispatcher_with_notifications
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 
         # REMOVED_SYNTAX_ERROR: dispatcher = ToolDispatcher()
         # REMOVED_SYNTAX_ERROR: ws_manager = WebSocketManager()
@@ -163,7 +163,7 @@
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 
 # REMOVED_SYNTAX_ERROR: class MockLLM:
     # REMOVED_SYNTAX_ERROR: pass
@@ -192,7 +192,7 @@
                 # REMOVED_SYNTAX_ERROR: """Test UnifiedToolExecutionEngine without real WebSocket connections."""
                 # REMOVED_SYNTAX_ERROR: try:
                     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-                    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+                    # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
                     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
                     # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
 

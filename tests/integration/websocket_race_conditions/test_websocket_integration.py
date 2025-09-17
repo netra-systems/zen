@@ -26,7 +26,7 @@ import redis.asyncio as redis
 import websockets
 import httpx
 from fastapi.testclient import TestClient
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 from netra_backend.app.websocket_core.handlers import MessageRouter
 from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready

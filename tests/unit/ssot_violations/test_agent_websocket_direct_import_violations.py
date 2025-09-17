@@ -218,7 +218,7 @@ class AgentWebSocketDirectImportViolationsTests(SSotBaseTestCase):
         
         # Prohibited direct access patterns  
         prohibited_patterns = [
-            "from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
+            "from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
             "from netra_backend.app.websocket_core.manager import",
             "WebSocketManager(",
         ]

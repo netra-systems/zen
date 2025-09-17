@@ -65,7 +65,7 @@ from netra_backend.app.websocket_core.service_readiness_validator import (
     ServiceReadinessValidator
 )
 from netra_backend.app.websocket_core.manager import UnifiedWebSocketManager
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 # Shared types and utilities
 from shared.isolated_environment import get_env

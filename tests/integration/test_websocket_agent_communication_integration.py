@@ -42,7 +42,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional, Union
 from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock, MagicMock, patch
-from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 # SSOT imports following architecture patterns
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -56,7 +56,7 @@ import websockets
 try:
     from netra_backend.app.main import app
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
     from netra_backend.app.agents.supervisor.agent_instance_factory import (
         AgentInstanceFactory,

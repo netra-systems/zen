@@ -50,7 +50,7 @@ from netra_backend.app.llm.openai_manager import OpenAIManager
 # Import WebSocket core modules for chat flow testing  
 from netra_backend.app.websocket_core.types import ConnectionInfo, WebSocketMessage, MessageType
 from netra_backend.app.websocket_core.context import WebSocketRequestContext
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 # Import SSOT UnifiedIdGenerator for proper chat flow IDs
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator

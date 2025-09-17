@@ -35,7 +35,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 from shared.types.core_types import UserID, ConnectionID, WebSocketID, ThreadID
 from shared.logging.unified_logging_ssot import get_logger
-from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketManagerMode, WebSocketConnection, _serialize_message_safely, _get_enum_key_representation
+from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketManagerMode, WebSocketConnection, _serialize_message_safely, _get_enum_key_representation
 from netra_backend.app.core.user_execution_context import UserExecutionContext
 logger = get_logger(__name__)
 

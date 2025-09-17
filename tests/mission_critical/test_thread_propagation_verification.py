@@ -35,7 +35,7 @@ from shared.isolated_environment import IsolatedEnvironment
 # Import core services for thread propagation testing using SSOT paths
 try:
     # Use SSOT import paths from SSOT_IMPORT_REGISTRY.md
-    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager, WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager, WebSocketManager
     from netra_backend.app.services.message_handlers import MessageHandlerService
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     REAL_SERVICES_AVAILABLE = True

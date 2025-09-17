@@ -77,7 +77,7 @@ async def create_transparent_emitter(context: 'UserExecutionContext') -> Transpa
     Returns:
         UnifiedWebSocketEmitter instance (aliased as TransparentWebSocketEmitter)
     """
-    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
     
     # Get or create WebSocket manager
     manager = getattr(context, 'websocket_manager', None)
