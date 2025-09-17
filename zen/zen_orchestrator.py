@@ -2445,5 +2445,9 @@ async def main():
     # Exit with appropriate code
     sys.exit(0 if summary['failed'] == 0 else 1)
 
-if __name__ == "__main__":
+def run():
+    """Synchronous wrapper for the main function to be used as console script entry point."""
     asyncio.run(main())
+
+if __name__ == "__main__":
+    run()
