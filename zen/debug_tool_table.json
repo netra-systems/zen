@@ -1,9 +1,0 @@
-{
-  "instances": [
-    {
-      "name": "debug-tool-table",
-      "command": "/help",
-      "description": "Debug tool table issue"
-    }
-  ]
-}
