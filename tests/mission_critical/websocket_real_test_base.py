@@ -96,7 +96,7 @@ def require_docker_services_smart() -> None:
             docker_bypass = env.get('DOCKER_BYPASS', 'false').lower() == 'true'
 
             if docker_bypass:
-                logger.info(🔄 DOCKER_BYPASS enabled - starting mock WebSocket server")"
+                logger.info("🔄 DOCKER_BYPASS enabled - starting mock WebSocket server")
                 asyncio.run(setup_mock_websocket_environment())
                 return
 

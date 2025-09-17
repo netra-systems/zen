@@ -247,8 +247,8 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         await self._setup_mock_behaviors()
     
     async def _setup_mock_behaviors(self):
-        Setup realistic mock behaviors for pipeline executor testing."
-        # Conf"igure execution engine to simulate successful agent executions
+        """Setup realistic mock behaviors for pipeline executor testing."""
+        # Configure execution engine to simulate successful agent executions
         async def mock_execute_agent(context, user_context=None):
             execution_time = 0.1  # 100ms execution time
             await asyncio.sleep(execution_time)
@@ -258,9 +258,9 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                 agent_name=context.agent_name,
                 duration=execution_time,
                 data={
-                    result": fSuccess from {context.agent_name}",
-                    step_number: getattr(context, 'step_number', 0),
-                    timestamp: time.time()"
+                    "result": f"Success from {context.agent_name}",
+                    "step_number": getattr(context, 'step_number', 0),
+                    "timestamp": time.time()
                 }
             
             # Track execution event
@@ -269,7 +269,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                 'success': True,
                 'execution_time': execution_time,
                 'timestamp': time.time()
-            }
+            })
             
             return result
         
@@ -277,9 +277,9 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         
         # Configure execute_pipeline method that PipelineExecutor actually calls
         async def mock_execute_pipeline(pipeline, context, user_context=None):
-            "Mock execute_pipeline to simulate sequential agent executions.
+            """Mock execute_pipeline to simulate sequential agent executions."""
             results = []
-            f"or step in pipeline:
+            for step in pipeline:
                 # Create a mock context for each step
                 step_context = AgentExecutionContext(
                     run_id=context.run_id,
@@ -300,14 +300,14 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                 'user_id': request.user_id,
                 'run_id': request.run_id,
                 'timestamp': time.time()
-            }"
+            })
             return True
         
         self.mock_state_persistence.save_state = AsyncMock(side_effect=mock_save_state)
         self.mock_state_persistence.load_state = AsyncMock(return_value=self.test_agent_state)
         
         # Configure flow logger (sync methods, not async)
-        self.mock_flow_logger.start_flow = MagicMock(return_value="test_flow_id_001)"
+        self.mock_flow_logger.start_flow = MagicMock(return_value="test_flow_id_001")
         self.mock_flow_logger.log_step_start = MagicMock()
         self.mock_flow_logger.log_step_complete = MagicMock()
         self.mock_flow_logger.complete_flow = MagicMock()
