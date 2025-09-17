@@ -69,8 +69,8 @@ def test_p1_components():
     
     # Test 5: UnifiedDockerManager
     try:
-        from test_framework.unified_docker_manager import UnifiedDockerManager
-        manager = UnifiedDockerManager(environment_type="test")
+        from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType
+        manager = UnifiedDockerManager(environment_type=EnvironmentType.TEST)
         print("[PASS] UnifiedDockerManager - INITIALIZED")
         results.append(("Docker Manager", True))
     except Exception as e:

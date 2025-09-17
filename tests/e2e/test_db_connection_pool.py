@@ -33,7 +33,8 @@ from netra_backend.app.db.postgres import (
     async_session_factory,
     initialize_postgres,
 )
-from netra_backend.app.db.postgres_config import DatabaseConfig
+# SSOT REMEDIATION: Use unified configuration instead of duplicate DatabaseConfig
+from netra_backend.app.config import get_config
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.database.pool_metrics import ConnectionPoolMetrics
 

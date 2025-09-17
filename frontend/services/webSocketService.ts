@@ -7,13 +7,6 @@ import { isWindowsPlatform, shouldUseWindowsStagingFallback } from '@/lib/unifie
 import { websocketTicketService } from './websocketTicketService';
 import type { TicketRequestResult } from '@/types/websocket-ticket';
 
-interface JWTPayload {
-  exp: number;
-  iat: number;
-  user_id: string;
-  email?: string;
-  permissions?: string[];
-}
 
 // WebSocketStatus, WebSocketState, and WebSocketServiceError types imported from domains/websocket.ts
 // Re-export for backward compatibility
@@ -1637,23 +1630,26 @@ class WebSocketService {
   }
 
   /**
-   * Creates a secure WebSocket connection using proper authentication methods.
-   * Supports ticket-based authentication (preferred) with JWT fallback.
-   * Uses subprotocol for JWT authentication (browser-compatible method).
+   * Creates a secure WebSocket connection using ticket-based authentication.
+   * This is the primary authentication method - JWT fallback has been removed.
    * Supports both authenticated and development mode connections.
    */
   private createSecureWebSocket(url: string, options: WebSocketOptions): WebSocket | Promise<WebSocket> {
-    // PHASE 1: Try ticket-based authentication if enabled
+    // Use ticket-based authentication if enabled
     if (options.useTicketAuth && options.getTicket) {
-      return this.createTicketAuthenticatedWebSocket(url, options).catch((error) => {
-        logger.warn('Ticket authentication failed, falling back to JWT', error);
-        // Fall back to JWT authentication
-        return this.createJWTAuthenticatedWebSocket(url, options);
-      });
+      return this.createTicketAuthenticatedWebSocket(url, options);
     }
 
-    // PHASE 2: Use JWT authentication directly
-    return this.createJWTAuthenticatedWebSocket(url, options);
+    // In development mode, allow connections without authentication
+    const isDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+    if (isDevelopment) {
+      logger.debug('Creating WebSocket without authentication (development mode)');
+      return new WebSocket(url);
+    }
+    
+    // For production, require ticket authentication
+    logger.error('WebSocket connection requires ticket authentication in production mode');
+    throw new Error('Authentication required: ticket authentication not available');
   }
 
   /**
