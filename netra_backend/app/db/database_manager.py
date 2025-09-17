@@ -84,16 +84,16 @@ class DatabaseManager:
             logger.debug("Constructing database URL using DatabaseURLBuilder SSOT")
             database_url = self._get_database_url()
 
-            # Simple database configuration
+            # EMERGENCY DATABASE CONFIGURATION: Enhanced for golden path test execution
             echo = getattr(self.config, 'database_echo', False)
-            pool_size = getattr(self.config, 'database_pool_size', 25)
-            max_overflow = getattr(self.config, 'database_max_overflow', 25)  # Reduced from 50 to 25
-            pool_timeout = getattr(self.config, 'database_pool_timeout', 30)  # 30 second timeout
+            pool_size = getattr(self.config, 'database_pool_size', 50)      # EMERGENCY: Doubled from 25 to 50
+            max_overflow = getattr(self.config, 'database_max_overflow', 50) # EMERGENCY: Doubled from 25 to 50
+            pool_timeout = getattr(self.config, 'database_pool_timeout', 600) # EMERGENCY: 600s timeout for infrastructure pressure
 
             logger.info(f"[🔧] Database configuration: echo={echo}, pool_size={pool_size}, max_overflow={max_overflow}, timeout={pool_timeout}s")
 
             # Use appropriate pool class for async engines
-            pool_recycle = 1800  # Reduced from 3600 to 1800s for faster recycling
+            pool_recycle = 900  # EMERGENCY: Reduced from 1800 to 900s (15 min) for high-load scenarios
             application_name = "netra_backend_pool"
 
             engine_kwargs = {
