@@ -30,7 +30,24 @@ Multiple WebSocket manager implementations exist despite SSOT consolidation effo
 - Deprecation warnings still active indicating incomplete migration
 
 ## New Tests Required  
-- TBD - Will plan in step 1.2
+### Unit Tests (No Docker)
+1. `test_websocket_manager_single_implementation_validation.py` - Enforce single SSOT implementation
+2. `test_factory_pattern_isolation_validation.py` - Validate user isolation
+3. `test_deprecation_handling_validation.py` - Proper deprecation handling
+
+### Integration Tests (Real Services, No Docker)  
+4. `test_websocket_manager_initialization_real_services.py` - Real Redis/service init
+5. `test_multi_user_isolation_real_services.py` - Concurrent user isolation
+6. `test_agent_workflow_ssot_compliance.py` - Agent event delivery via SSOT
+
+### E2E Staging Tests
+7. `test_staging_websocket_ssot_validation.py` - Staging SSOT validation
+8. `test_production_user_isolation_staging.py` - Production-like isolation
+
+### Existing Test Updates (60% effort)
+- Fix AttributeError issues in test infrastructure
+- Update failing SSOT validation tests to proper assertions
+- Remove deprecated import patterns from tests
 
 ## SSOT Remediation Plan
 - TBD - Will plan in step 3
