@@ -19,7 +19,7 @@ from dataclasses import dataclass
 
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import QueuePool
+from sqlalchemy.pool import AsyncAdaptedQueuePool
 
 from shared.isolated_environment import get_env
 
@@ -128,7 +128,7 @@ class DatabaseConnectionManager:
         
         engine = create_async_engine(
             database_url,
-            poolclass=QueuePool,
+            poolclass=AsyncAdaptedQueuePool,
             pool_size=config.pool_size,
             max_overflow=config.max_overflow,
             pool_timeout=config.pool_timeout,

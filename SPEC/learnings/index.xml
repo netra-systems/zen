@@ -4,8 +4,8 @@
         <name>KnowledgeBase.LearningsIndex</name>
         <type>KnowledgeRetrievalMap</type>
         <version>2.2</version>
-        <last-updated>2025-09-16</last-updated>
-        <description>Index map for retrieving established patterns and critical learnings. System Health: CRITICAL ISSUE - VPC Egress Regression Breaks Cloud SQL (Sept 15, 2025).</description>
+        <last-updated>2025-01-17</last-updated>
+        <description>Index map for retrieving established patterns and critical learnings. System Health: IMPROVED - AuthTicketManager implemented, test infrastructure crisis resolved (Issues #1176, #1294, #1296 Phase 1 complete).</description>
     </metadata>
     
     <retrieval-protocol>
@@ -21,9 +21,9 @@
         </workflow>
     </retrieval-protocol>
     
-    <learning id="secret-loading-validation-critical-2025-09-16">
-        <title>🚨 CRITICAL: Secret Loading Silent Failures - Service Account Access</title>
-        <category>Deployment/Secrets/Validation/Critical</category>
+    <learning id="secret-loading-validation-critical-2025-01-17">
+        <title>✅ RESOLVED: Secret Loading Silent Failures - Service Account Access Fixed</title>
+        <category>Deployment/Secrets/Validation/Resolved</category>
         <keywords>secret-manager, service-account, silent-failure, jwt-secret, fernet-key, deployment-validation, runtime-failure, environment-variables</keywords>
         <path>secret_loading_validation_critical_issue_1294.xml</path>
         <critical-takeaway>
@@ -48,7 +48,7 @@
         <related-issues>Issue #1294 (Secret loading), Issue #1293 (JWT_SECRET), PR #1293 (Initial JWT fix)</related-issues>
     </learning>
 
-    <learning id="firewall-rules-implementation-1177-2025-09-16">
+    <learning id="firewall-rules-implementation-1177-2025-01-17">
         <title>🚨 CRITICAL: Firewall Rules Required for VPC Connectivity</title>
         <category>Infrastructure/Networking/Firewall/VPC/Redis</category>
         <keywords>firewall-rules, vpc-connector, redis-connectivity, cloud-run, gcp-networking, terraform, gcloud, issue-1177</keywords>
@@ -77,7 +77,7 @@
         <related-issues>Issue #1177 (Redis VPC), Issue #1278 (VPC capacity), Issue #1294 (Secrets)</related-issues>
     </learning>
 
-    <learning id="vpc-egress-cloud-sql-regression-2025-09-16">
+    <learning id="vpc-egress-cloud-sql-regression-2025-01-17">
         <title>🚨 CRITICAL: VPC Egress All-Traffic Breaks Cloud SQL Unix Sockets</title>
         <category>Infrastructure/VPC/Database/Critical</category>
         <keywords>vpc-egress, all-traffic, private-ranges-only, cloud-sql, unix-sockets, clickhouse, staging-regression, database-timeout, 15-second-timeout</keywords>
