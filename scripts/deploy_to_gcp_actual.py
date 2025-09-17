@@ -103,10 +103,10 @@ class GCPDeployer:
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
-                    "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+                    "AUTH_SERVICE_URL": "https://staging.netrasystems.ai",
                     "AUTH_SERVICE_INTERNAL_URL": f"https://netra-auth-service-uc.a.run.app",  # Internal VPC communication
                     "AUTH_SERVICE_ENABLED": "true",  # CRITICAL: Enable auth service integration
-                    "FRONTEND_URL": "https://app.staging.netrasystems.ai",
+                    "FRONTEND_URL": "https://staging.netrasystems.ai",
                     "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
                     "GCP_PROJECT_ID": self.project_id,  # CRITICAL: Required for secret loading logic
                     # ClickHouse configuration - password comes from secrets
@@ -143,8 +143,8 @@ class GCPDeployer:
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
-                    "FRONTEND_URL": "https://app.staging.netrasystems.ai",
-                    "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+                    "FRONTEND_URL": "https://staging.netrasystems.ai",
+                    "AUTH_SERVICE_URL": "https://staging.netrasystems.ai",
                     "JWT_ALGORITHM": "HS256",
                     "JWT_ACCESS_EXPIRY_MINUTES": "15",
                     "JWT_REFRESH_EXPIRY_DAYS": "7",
@@ -159,10 +159,10 @@ class GCPDeployer:
                     "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
                     "GCP_PROJECT_ID": self.project_id,  # CRITICAL: Required for secret loading logic
                     "SKIP_OAUTH_VALIDATION": "true",  # TEMPORARY: Skip OAuth validation for E2E testing
-                    # Auth Database Timeout Configuration (Issue #1229 Fix)
-                    "AUTH_DB_URL_TIMEOUT": "90.0",
-                    "AUTH_DB_ENGINE_TIMEOUT": "90.0",
-                    "AUTH_DB_VALIDATION_TIMEOUT": "90.0",
+                    # Auth Database Timeout Configuration (Issue #1278 Fix - Infrastructure Reliability)
+                    "AUTH_DB_URL_TIMEOUT": "600.0",
+                    "AUTH_DB_ENGINE_TIMEOUT": "600.0",
+                    "AUTH_DB_VALIDATION_TIMEOUT": "600.0",
                 }
             ),
             ServiceConfig(
@@ -182,13 +182,13 @@ class GCPDeployer:
                 environment_vars={
                     "NODE_ENV": "production",
                     "NEXT_PUBLIC_ENVIRONMENT": "staging",  # CRITICAL: Controls environment-specific behavior
-                    "NEXT_PUBLIC_API_URL": "https://api.staging.netrasystems.ai",  # CRITICAL: Backend API endpoint
-                    "NEXT_PUBLIC_WS_URL": "wss://api.staging.netrasystems.ai",  # CRITICAL: WebSocket endpoint
-                    "NEXT_PUBLIC_AUTH_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth service endpoint
-                    "NEXT_PUBLIC_AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth service alternative
-                    "NEXT_PUBLIC_AUTH_API_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth API endpoint
-                    "NEXT_PUBLIC_BACKEND_URL": "https://api.staging.netrasystems.ai",  # CRITICAL: Backend alternative endpoint
-                    "NEXT_PUBLIC_FRONTEND_URL": "https://app.staging.netrasystems.ai",  # CRITICAL: OAuth redirects
+                    "NEXT_PUBLIC_API_URL": "https://api-staging.netrasystems.ai",  # CRITICAL: Backend API endpoint
+                    "NEXT_PUBLIC_WS_URL": "wss://api-staging.netrasystems.ai",  # CRITICAL: WebSocket endpoint
+                    "NEXT_PUBLIC_AUTH_URL": "https://staging.netrasystems.ai",  # CRITICAL: Auth service endpoint
+                    "NEXT_PUBLIC_AUTH_SERVICE_URL": "https://staging.netrasystems.ai",  # CRITICAL: Auth service alternative
+                    "NEXT_PUBLIC_AUTH_API_URL": "https://staging.netrasystems.ai",  # CRITICAL: Auth API endpoint
+                    "NEXT_PUBLIC_BACKEND_URL": "https://api-staging.netrasystems.ai",  # CRITICAL: Backend alternative endpoint
+                    "NEXT_PUBLIC_FRONTEND_URL": "https://staging.netrasystems.ai",  # CRITICAL: OAuth redirects
                     "NEXT_PUBLIC_FORCE_HTTPS": "true",  # CRITICAL: Security enforcement
                     "NEXT_PUBLIC_GTM_CONTAINER_ID": "GTM-WKP28PNQ",  # Analytics tracking
                     "NEXT_PUBLIC_GTM_ENABLED": "true",  # Analytics enablement

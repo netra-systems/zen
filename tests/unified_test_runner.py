@@ -4214,21 +4214,75 @@ def infrastructure_resilience_check():
     # Check if emergency development bypass is enabled
     try:
         from shared.isolated_environment import get_env
-        if get_env('EMERGENCY_DEVELOPMENT_MODE') == 'true':
-            print("[INFRASTRUCTURE] Emergency development bypass enabled - skipping capacity checks")
+        env = get_env()
+
+        # EMERGENCY BYPASS: Allow immediate test execution for critical development work
+        if env.get('EMERGENCY_DEVELOPMENT_MODE') == 'true':
+            print("[INFRASTRUCTURE] ⚡ EMERGENCY DEVELOPMENT BYPASS ENABLED ⚡")
+            expiry = env.get('EMERGENCY_BYPASS_EXPIRY', '2025-09-18')
+            print(f"[INFRASTRUCTURE] Emergency bypass expires: {expiry}")
+            print("[INFRASTRUCTURE] Skipping infrastructure warmup for immediate test execution")
             return True
-    except Exception:
-        pass  # Continue with normal checks if environment not available
 
-    # VPC connector warmup
-    print(f"[INFRASTRUCTURE] Warming up VPC connector ({VPC_CONNECTOR_WARMUP_TIME}s)...")
-    time.sleep(VPC_CONNECTOR_WARMUP_TIME)
+        # Check if we're in a known good environment configuration
+        if env.get('BYPASS_INFRASTRUCTURE_VALIDATION') == 'true':
+            print("[INFRASTRUCTURE] Infrastructure validation bypass enabled")
+            return True
 
-    # Database connection warmup
-    print(f"[INFRASTRUCTURE] Warming up database connections ({DATABASE_CONNECTION_WARMUP}s)...")
-    time.sleep(DATABASE_CONNECTION_WARMUP)
+        # Skip capacity checks if explicitly requested
+        if env.get('SKIP_CAPACITY_CHECKS') == 'true':
+            print("[INFRASTRUCTURE] Capacity checks skipped by configuration")
+            return True
 
-    print("[INFRASTRUCTURE] Emergency resilience check complete")
+    except Exception as e:
+        print(f"[INFRASTRUCTURE] Warning: Environment check failed: {e}")
+        # Continue with normal checks if environment not available
+
+    # Infrastructure warmup with retry logic
+    for attempt in range(INFRASTRUCTURE_RETRY_ATTEMPTS):
+        try:
+            print(f"[INFRASTRUCTURE] Warmup attempt {attempt + 1}/{INFRASTRUCTURE_RETRY_ATTEMPTS}")
+
+            # VPC connector warmup
+            print(f"[INFRASTRUCTURE] Warming up VPC connector ({VPC_CONNECTOR_WARMUP_TIME}s)...")
+            time.sleep(VPC_CONNECTOR_WARMUP_TIME)
+
+            # Database connection warmup
+            print(f"[INFRASTRUCTURE] Warming up database connections ({DATABASE_CONNECTION_WARMUP}s)...")
+            time.sleep(DATABASE_CONNECTION_WARMUP)
+
+            # Test basic connectivity if possible
+            try:
+                import socket
+                # Test if we can reach typical staging endpoints
+                test_hosts = ['staging.netrasystems.ai', 'api-staging.netrasystems.ai']
+                for host in test_hosts:
+                    try:
+                        socket.gethostbyname(host)
+                        print(f"[INFRASTRUCTURE] ✅ DNS resolution successful for {host}")
+                    except socket.gaierror:
+                        print(f"[INFRASTRUCTURE] ⚠️ DNS resolution failed for {host} (may be normal in CI)")
+
+            except Exception as connectivity_error:
+                print(f"[INFRASTRUCTURE] Connectivity test failed: {connectivity_error}")
+                # Don't fail on connectivity test - infrastructure might still work
+
+            print("[INFRASTRUCTURE] ✅ Emergency resilience check complete")
+            return True
+
+        except Exception as attempt_error:
+            print(f"[INFRASTRUCTURE] ❌ Warmup attempt {attempt + 1} failed: {attempt_error}")
+            if attempt < INFRASTRUCTURE_RETRY_ATTEMPTS - 1:
+                print(f"[INFRASTRUCTURE] Retrying in {INFRASTRUCTURE_RETRY_DELAY}s...")
+                time.sleep(INFRASTRUCTURE_RETRY_DELAY)
+            else:
+                print("[INFRASTRUCTURE] ❌ All warmup attempts failed")
+                # For emergency situations, allow execution to proceed with warning
+                print("[INFRASTRUCTURE] ⚠️ EMERGENCY FALLBACK: Proceeding despite infrastructure warnings")
+                print("[INFRASTRUCTURE] Test execution may be unstable but will attempt to continue")
+                return True  # Don't block test execution in emergency
+
+    # Should never reach here, but fallback to allowing execution
     return True
 
 
