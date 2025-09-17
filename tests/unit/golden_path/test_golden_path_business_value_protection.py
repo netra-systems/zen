@@ -156,34 +156,42 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
         @contextmanager
         def log_capture():
             """Capture real SSOT logger output for correlation analysis."""
-            class LogCaptureHandler(logging.Handler):
-                def __init__(self, captured_logs):
-                    super().__init__()
-                    self.captured_logs = captured_logs
-                    
-                def emit(self, record):
-                    # Extract correlation data from real log records
-                    correlation_data = {
-                        'component': record.name.split('.')[-1] if '.' in record.name else record.name,
-                        'message': record.getMessage(),
-                        'correlation_id': getattr(record, 'correlation_id', None) or 
-                                        getattr(record, 'request_id', None),
-                        'timestamp': time.time(),
-                        'trackable': bool(getattr(record, 'correlation_id', None) or 
-                                        getattr(record, 'request_id', None))
-                    }
-                    self.captured_logs.append(correlation_data)
+            # Import loguru to intercept its logs
+            from loguru import logger
             
-            # Set up log capture handler
-            handler = LogCaptureHandler(correlation_chain)
-            root_logger = logging.getLogger()
-            root_logger.addHandler(handler)
-            root_logger.setLevel(logging.DEBUG)
+            def log_interceptor(record):
+                """Intercept loguru logs and extract correlation data."""
+                try:
+                    # Extract correlation context from loguru record
+                    extra = record.get('extra', {})
+                    correlation_id = extra.get('request_id') or extra.get('correlation_id')
+                    
+                    correlation_data = {
+                        'component': record.get('name', 'unknown').split('.')[-1] if '.' in record.get('name', '') else record.get('name', 'unknown'),
+                        'message': record.get('message', ''),
+                        'correlation_id': correlation_id,
+                        'timestamp': time.time(),
+                        'trackable': bool(correlation_id)
+                    }
+                    correlation_chain.append(correlation_data)
+                except Exception as e:
+                    print(f"Log interceptor error: {e}")
+                    # Still capture the log even if we can't extract correlation
+                    correlation_chain.append({
+                        'component': 'unknown',
+                        'message': str(record),
+                        'correlation_id': None,
+                        'timestamp': time.time(),
+                        'trackable': False
+                    })
+            
+            # Add loguru handler
+            handler_id = logger.add(log_interceptor, level="DEBUG")
             
             try:
                 yield
             finally:
-                root_logger.removeHandler(handler)
+                logger.remove(handler_id)
         
         # Use real SSOT logging with correlation context
         with log_capture():
@@ -267,39 +275,38 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
         @contextmanager
         def phase_capture():
             """Capture real SSOT phase logging for traceability analysis."""
-            class PhaseCaptureHandler(logging.Handler):
-                def __init__(self, tracked_phases):
-                    super().__init__()
-                    self.tracked_phases = tracked_phases
-                    
-                def emit(self, record):
-                    # Extract phase data from real log records with correlation
-                    correlation_id_from_record = getattr(record, 'correlation_id', None) or \
-                                               getattr(record, 'request_id', None)
+            # Import loguru to intercept its logs
+            from loguru import logger
+            
+            def phase_interceptor(record):
+                """Intercept loguru logs and extract phase data."""
+                try:
+                    # Extract correlation context from loguru record
+                    extra = record.get('extra', {})
+                    correlation_id_from_record = extra.get('request_id') or extra.get('correlation_id')
                     
                     if correlation_id_from_record == correlation_id:
-                        msg_lower = record.getMessage().lower()
+                        msg_lower = record.get('message', '').lower()
                         for phase in expected_phases:
                             # Enhanced phase matching with flexible keyword detection
                             phase_keywords = phase.replace('_', ' ').split()
                             if all(keyword in msg_lower for keyword in phase_keywords):
-                                self.tracked_phases.append({
+                                tracked_phases.append({
                                     'phase': phase,
-                                    'component': record.name.split('.')[-1] if '.' in record.name else record.name,
+                                    'component': record.get('name', 'unknown').split('.')[-1] if '.' in record.get('name', '') else record.get('name', 'unknown'),
                                     'traceable': True
                                 })
                                 break
+                except Exception as e:
+                    print(f"Phase interceptor error: {e}")
             
-            # Set up phase capture handler
-            handler = PhaseCaptureHandler(tracked_phases)
-            root_logger = logging.getLogger()
-            root_logger.addHandler(handler)
-            root_logger.setLevel(logging.DEBUG)
+            # Add loguru handler
+            handler_id = logger.add(phase_interceptor, level="DEBUG")
             
             try:
                 yield
             finally:
-                root_logger.removeHandler(handler)
+                logger.remove(handler_id)
         
         # Use real SSOT logging with correlation context for phase simulation
         with phase_capture():
