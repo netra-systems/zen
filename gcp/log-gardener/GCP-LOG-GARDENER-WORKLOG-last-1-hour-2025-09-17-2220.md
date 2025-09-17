@@ -24,8 +24,9 @@ ERROR: Application exited with code 3
 ERROR: Services startup phase failed in 0.466s
 ```
 
-**GitHub Issue Status:** TO BE CREATED
+**GitHub Issue Status:** PREPARED FOR CREATION (Manual action required)
 **Issue Title:** GCP-regression | P0 | WebSocket Bridge missing configure() method blocks all startup
+**Action:** Issue content prepared with complete technical details and GCP log evidence
 
 ---
 
@@ -37,8 +38,9 @@ ERROR: Services startup phase failed in 0.466s
 - **Issue:** SQLAlchemy text() expression requirement not met
 - **Impact:** Database health checks failing, potential connection issues
 
-**GitHub Issue Status:** TO BE CREATED/UPDATED
+**GitHub Issue Status:** PREPARED FOR CREATION (Manual action required)
 **Issue Title:** GCP-active-dev | P1 | SQLAlchemy text() expression failures in health checks
+**Action:** Issue content prepared with affected files list and solution steps
 
 ---
 
@@ -50,8 +52,9 @@ ERROR: Services startup phase failed in 0.466s
 - **Frequency:** Ongoing connection attempts
 - **Possible Cause:** VPC connector or Redis configuration issues
 
-**GitHub Issue Status:** TO BE CREATED/UPDATED
+**GitHub Issue Status:** PREPARED FOR CREATION (Manual action required)
 **Issue Title:** GCP-regression | P1 | Redis connection failures in staging environment
+**Action:** Issue content prepared with infrastructure analysis and validation commands
 
 ---
 
@@ -65,8 +68,9 @@ ERROR: Services startup phase failed in 0.466s
 - **Impact:** Configuration drift, missing error tracking
 - **Type:** Environment variable issues, missing dependencies
 
-**GitHub Issue Status:** TO BE CREATED/UPDATED
+**GitHub Issue Status:** PREPARED FOR CREATION (Manual action required)
 **Issue Title:** GCP-active-dev | P2 | Configuration drift and missing dependencies
+**Action:** Issue content prepared covering JWT config, SERVICE_ID, and Sentry SDK issues
 
 ---
 
@@ -98,4 +102,14 @@ ERROR: Services startup phase failed in 0.466s
 
 ---
 **Generated:** 2025-09-17 22:20 UTC
-**Next Steps:** Create/update GitHub issues for each cluster
+**Completed:** 2025-09-17 22:25 UTC
+**Next Steps:** All GitHub issues prepared for manual creation - requires GitHub CLI approval to create automatically
+**Completion Status:** All 4 clusters processed and documented with complete issue content
+
+## Issue Processing Summary
+1. **P0 WebSocket Bridge:** Issue content prepared with complete technical analysis
+2. **P1 Database Health:** Issue content prepared with affected files and solutions
+3. **P1 Redis Connection:** Issue content prepared with infrastructure details
+4. **P2 Configuration:** Issue content prepared covering all three config issues
+
+**Note:** Manual GitHub issue creation required due to CLI approval restrictions
