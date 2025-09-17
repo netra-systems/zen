@@ -162,31 +162,30 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
             def log_interceptor(record):
                 """Intercept loguru logs and extract correlation data."""
                 try:
-                    # Debug the record structure
-                    print(f"Record type: {type(record)}")
-                    print(f"Record attributes: {dir(record)}")
+                    # Access the actual loguru record object
+                    log_record = record.record if hasattr(record, 'record') else record
                     
-                    # Handle loguru record object properly - try accessing via attributes
-                    if hasattr(record, 'extra'):
-                        extra = record.extra
-                    else:
-                        extra = {}
+                    # Debug: Let's see what's actually in the log record
+                    print(f"Debug log_record type: {type(log_record)}")
+                    print(f"Debug log_record attributes: {dir(log_record)}")
+                    
+                    # Extract correlation context from loguru record
+                    extra = log_record.get('extra', {}) if hasattr(log_record, 'get') else getattr(log_record, 'extra', {})
+                    print(f"Debug extra: {extra}")
                     
                     correlation_id = extra.get('request_id') or extra.get('correlation_id') or extra.get('trace_id')
+                    print(f"Debug correlation_id: {correlation_id}")
                     
                     # Get component name from the record's name
-                    if hasattr(record, 'name'):
-                        logger_name = record.name
+                    if hasattr(log_record, 'get'):
+                        logger_name = log_record.get('name', 'unknown')
                     else:
-                        logger_name = 'unknown'
+                        logger_name = getattr(log_record, 'name', 'unknown')
                         
                     component = logger_name.split('.')[-1] if '.' in logger_name else logger_name
                     
-                    # Get message
-                    if hasattr(record, 'message'):
-                        message = str(record.message)
-                    else:
-                        message = str(record)
+                    # Get message - the record itself is the formatted message
+                    message = str(record)
                     
                     correlation_data = {
                         'component': component,
@@ -303,18 +302,24 @@ class GoldenPathBusinessValueProtectionTests(SSotAsyncTestCase, unittest.TestCas
             def phase_interceptor(record):
                 """Intercept loguru logs and extract phase data."""
                 try:
-                    # Handle loguru record object properly
-                    extra = record['extra'] if 'extra' in record else {}
+                    # Access the actual loguru record object
+                    log_record = record.record if hasattr(record, 'record') else record
+                    
+                    # Extract correlation context from loguru record
+                    extra = log_record.get('extra', {}) if hasattr(log_record, 'get') else getattr(log_record, 'extra', {})
                     correlation_id_from_record = extra.get('request_id') or extra.get('correlation_id') or extra.get('trace_id')
                     
                     if correlation_id_from_record == correlation_id:
-                        message = str(record['message']) if 'message' in record else str(record)
+                        message = str(record)
                         msg_lower = message.lower()
                         for phase in expected_phases:
                             # Enhanced phase matching with flexible keyword detection
                             phase_keywords = phase.replace('_', ' ').split()
                             if all(keyword in msg_lower for keyword in phase_keywords):
-                                logger_name = record.get('name', 'unknown')
+                                if hasattr(log_record, 'get'):
+                                    logger_name = log_record.get('name', 'unknown')
+                                else:
+                                    logger_name = getattr(log_record, 'name', 'unknown')
                                 component = logger_name.split('.')[-1] if '.' in logger_name else logger_name
                                 tracked_phases.append({
                                     'phase': phase,

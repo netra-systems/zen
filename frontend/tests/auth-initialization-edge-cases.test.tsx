@@ -115,7 +115,7 @@ describe('BULLETPROOF: Auth Initialization Edge Cases', () => {
       const token1 = generateMockToken();
       localStorage.setItem('jwt_token', token1);
       (unifiedAuthService.getToken as jest.Mock).mockReturnValue(token1);
-      (jwtDecode as jest.Mock).mockReturnValue(generateMockUser());
+      (unifiedAuthService.getCurrentUser as jest.Mock).mockReturnValue(generateMockUser());
       
       const { unmount, rerender } = render(
         <AuthProvider>
@@ -134,7 +134,7 @@ describe('BULLETPROOF: Auth Initialization Edge Cases', () => {
       
       // Remount with new token
       (unifiedAuthService.getToken as jest.Mock).mockReturnValue(token2);
-      (jwtDecode as jest.Mock).mockReturnValue(generateMockUser({ email: 'updated@example.com' }));
+      (unifiedAuthService.getCurrentUser as jest.Mock).mockReturnValue(generateMockUser({ email: 'updated@example.com' }));
       
       render(
         <AuthProvider>
@@ -153,7 +153,7 @@ describe('BULLETPROOF: Auth Initialization Edge Cases', () => {
       // Set corrupted token
       localStorage.setItem('jwt_token', 'corrupted.token.here');
       (unifiedAuthService.getToken as jest.Mock).mockReturnValue('corrupted.token.here');
-      (jwtDecode as jest.Mock).mockImplementation(() => {
+      (unifiedAuthService.getCurrentUser as jest.Mock).mockImplementation(() => {
         throw new Error('Invalid token');
       });
       
@@ -237,7 +237,7 @@ describe('BULLETPROOF: Auth Initialization Edge Cases', () => {
       const mockToken = generateMockToken();
       localStorage.setItem('jwt_token', mockToken);
       (unifiedAuthService.getToken as jest.Mock).mockReturnValue(mockToken);
-      (jwtDecode as jest.Mock).mockReturnValue(generateMockUser());
+      (unifiedAuthService.getCurrentUser as jest.Mock).mockReturnValue(generateMockUser());
       
       // Mock auth config to never resolve
       (unifiedAuthService.getAuthConfig as jest.Mock).mockImplementation(
@@ -263,7 +263,7 @@ describe('BULLETPROOF: Auth Initialization Edge Cases', () => {
       
       localStorage.setItem('jwt_token', expiredToken);
       (unifiedAuthService.getToken as jest.Mock).mockReturnValue(expiredToken);
-      (jwtDecode as jest.Mock).mockReturnValue(generateMockUser({ 
+      (unifiedAuthService.getCurrentUser as jest.Mock).mockReturnValue(generateMockUser({ 
         exp: Math.floor(Date.now() / 1000) - 3600 
       }));
       
@@ -314,7 +314,7 @@ describe('BULLETPROOF: Auth Initialization Edge Cases', () => {
       // localStorage works but cookies don't
       localStorage.setItem('jwt_token', mockToken);
       (unifiedAuthService.getToken as jest.Mock).mockReturnValue(mockToken);
-      (jwtDecode as jest.Mock).mockReturnValue(generateMockUser());
+      (unifiedAuthService.getCurrentUser as jest.Mock).mockReturnValue(generateMockUser());
       
       Object.defineProperty(document, 'cookie', {
         set: jest.fn().mockImplementation(() => {
@@ -341,7 +341,7 @@ describe('BULLETPROOF: Auth Initialization Edge Cases', () => {
       const initialToken = generateMockToken();
       localStorage.setItem('jwt_token', initialToken);
       (unifiedAuthService.getToken as jest.Mock).mockReturnValue(initialToken);
-      (jwtDecode as jest.Mock).mockReturnValue(generateMockUser());
+      (unifiedAuthService.getCurrentUser as jest.Mock).mockReturnValue(generateMockUser());
       
       render(
         <AuthProvider>
@@ -363,7 +363,7 @@ describe('BULLETPROOF: Auth Initialization Edge Cases', () => {
       });
       
       (unifiedAuthService.getToken as jest.Mock).mockReturnValue(newToken);
-      (jwtDecode as jest.Mock).mockReturnValue(generateMockUser({ email: 'newtab@example.com' }));
+      (unifiedAuthService.getCurrentUser as jest.Mock).mockReturnValue(generateMockUser({ email: 'newtab@example.com' }));
       
       act(() => {
         window.dispatchEvent(storageEvent);
@@ -379,7 +379,7 @@ describe('BULLETPROOF: Auth Initialization Edge Cases', () => {
       const mockToken = generateMockToken();
       localStorage.setItem('jwt_token', mockToken);
       (unifiedAuthService.getToken as jest.Mock).mockReturnValue(mockToken);
-      (jwtDecode as jest.Mock).mockReturnValue(generateMockUser());
+      (unifiedAuthService.getCurrentUser as jest.Mock).mockReturnValue(generateMockUser());
       
       render(
         <AuthProvider>
@@ -417,7 +417,7 @@ describe('BULLETPROOF: Auth Initialization Edge Cases', () => {
       const incompleteToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.signature';
       localStorage.setItem('jwt_token', incompleteToken);
       (unifiedAuthService.getToken as jest.Mock).mockReturnValue(incompleteToken);
-      (jwtDecode as jest.Mock).mockReturnValue({ sub: '1234567890' }); // Missing email, exp, etc.
+      (unifiedAuthService.getCurrentUser as jest.Mock).mockReturnValue({ sub: '1234567890' }); // Missing email, exp, etc.
       
       render(
         <AuthProvider>
@@ -439,7 +439,7 @@ describe('BULLETPROOF: Auth Initialization Edge Cases', () => {
       
       localStorage.setItem('jwt_token', futureToken);
       (unifiedAuthService.getToken as jest.Mock).mockReturnValue(futureToken);
-      (jwtDecode as jest.Mock).mockReturnValue(generateMockUser({
+      (unifiedAuthService.getCurrentUser as jest.Mock).mockReturnValue(generateMockUser({
         iat: Math.floor(Date.now() / 1000) + 3600,
         exp: Math.floor(Date.now() / 1000) + 7200,
       }));
@@ -466,7 +466,7 @@ describe('BULLETPROOF: Auth Initialization Edge Cases', () => {
       
       localStorage.setItem('jwt_token', largeToken);
       (unifiedAuthService.getToken as jest.Mock).mockReturnValue(largeToken);
-      (jwtDecode as jest.Mock).mockReturnValue(largePayload);
+      (unifiedAuthService.getCurrentUser as jest.Mock).mockReturnValue(largePayload);
       
       render(
         <AuthProvider>
@@ -485,7 +485,7 @@ describe('BULLETPROOF: Auth Initialization Edge Cases', () => {
       const mockToken = generateMockToken();
       localStorage.setItem('jwt_token', mockToken);
       (unifiedAuthService.getToken as jest.Mock).mockReturnValue(mockToken);
-      (jwtDecode as jest.Mock).mockReturnValue(generateMockUser());
+      (unifiedAuthService.getCurrentUser as jest.Mock).mockReturnValue(generateMockUser());
       
       // Rapidly mount and unmount
       for (let i = 0; i < 5; i++) {
@@ -518,7 +518,7 @@ describe('BULLETPROOF: Auth Initialization Edge Cases', () => {
       const mockToken = generateMockToken();
       localStorage.setItem('jwt_token', mockToken);
       (unifiedAuthService.getToken as jest.Mock).mockReturnValue(mockToken);
-      (jwtDecode as jest.Mock).mockReturnValue(generateMockUser());
+      (unifiedAuthService.getCurrentUser as jest.Mock).mockReturnValue(generateMockUser());
       
       let renderCount = 0;
       const CountingComponent = () => {
@@ -565,7 +565,7 @@ describe('BULLETPROOF: Auth Initialization Edge Cases', () => {
       act(() => {
         localStorage.setItem('jwt_token', mockToken);
         (unifiedAuthService.getToken as jest.Mock).mockReturnValue(mockToken);
-        (jwtDecode as jest.Mock).mockReturnValue(generateMockUser());
+        (unifiedAuthService.getCurrentUser as jest.Mock).mockReturnValue(generateMockUser());
       });
       
       rerender(
@@ -586,7 +586,7 @@ describe('BULLETPROOF: Auth Initialization Edge Cases', () => {
       const mockToken = generateMockToken();
       localStorage.setItem('jwt_token', mockToken);
       (unifiedAuthService.getToken as jest.Mock).mockReturnValue(mockToken);
-      (jwtDecode as jest.Mock).mockReturnValue(generateMockUser());
+      (unifiedAuthService.getCurrentUser as jest.Mock).mockReturnValue(generateMockUser());
       
       render(
         <AuthProvider>

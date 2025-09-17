@@ -186,18 +186,26 @@ class ComprehensiveImportFixerV2:
             original_content = content
             modified = False
             
-            # Fix SupplyResearcherAgent import
+            # Fix SupplyResearcherAgent import - use correct path
             if 'SupplyResearcherAgent' in content:
+                # Fix incorrect import path from corpus_admin to supply_researcher
                 content = re.sub(
                     r'^from netra_backend\.app\.agents\.corpus_admin\.agent import SupplyResearcherAgent.*$',
-                    r'# FIXME: SupplyResearcherAgent not available\n# \g<0>',
+                    r'from netra_backend.app.agents.supply_researcher import SupplyResearcherAgent',
                     content,
                     flags=re.MULTILINE
                 )
-                # Comment out any usage
+                # Fix incorrect import from supply_researcher_sub_agent to supply_researcher
                 content = re.sub(
-                    r'^(\s*)(.*)SupplyResearcherAgent',
-                    r'\1# FIXME: \2SupplyResearcherAgent',
+                    r'^from netra_backend\.app\.agents\.supply_researcher_sub_agent import SupplyResearcherAgent.*$',
+                    r'from netra_backend.app.agents.supply_researcher import SupplyResearcherAgent',
+                    content,
+                    flags=re.MULTILINE
+                )
+                # If there's a direct agent.py import, also fix it to module level
+                content = re.sub(
+                    r'^from netra_backend\.app\.agents\.supply_researcher\.agent import SupplyResearcherAgent.*$',
+                    r'from netra_backend.app.agents.supply_researcher import SupplyResearcherAgent',
                     content,
                     flags=re.MULTILINE
                 )
