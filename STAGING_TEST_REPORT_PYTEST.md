@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-17 08:59:45
+**Generated:** 2025-09-17 09:13:03
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -10,7 +10,7 @@
 - **Passed:** 0 (0.0%)
 - **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 10.58 seconds
+- **Duration:** 10.62 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,13 +19,13 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_001_websocket_connection_real | FAIL failed | 10.200s | test_priority1_critical.py |
+| test_001_websocket_connection_real | FAIL failed | 10.235s | test_priority1_critical.py |
 
 ## Failed Tests Details
 
 ### FAILED: test_001_websocket_connection_real
 - **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_priority1_critical.py
-- **Duration:** 10.200s
+- **Duration:** 10.235s
 - **Error:** /opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:543: in __await_impl__
     await self.connection.handshake(
 /opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:104: in handshake
@@ -41,7 +41,7 @@
 test_priority1_critical.py::test_001_websocket_connection_real FAILED
 
 ==================================================
-0 passed, 1 failed in 10.58s
+0 passed, 1 failed in 10.62s
 ```
 
 ## Test Coverage Matrix
