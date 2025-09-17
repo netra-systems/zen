@@ -14,7 +14,7 @@ class StagingConfig:
     # Backend URLs - Using CLAUDE.md *.netrasystems.ai domains (Issue #1278)
     backend_url: str = "https://staging.netrasystems.ai"
     api_url: str = "https://staging.netrasystems.ai/api"
-    websocket_url: str = "wss://api.staging.netrasystems.ai/api/v1/websocket"
+    websocket_url: str = "wss://api-staging.netrasystems.ai/api/v1/websocket"
     
     # CRITICAL FIX: Add missing base_url attribute (required by configuration system)
     base_url: str = "https://staging.netrasystems.ai"

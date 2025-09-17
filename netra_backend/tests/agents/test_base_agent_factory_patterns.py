@@ -80,6 +80,21 @@ class LegacyPatternAgent(BaseAgent):
         self.user_id = kwargs.get('user_id', 'test-user-legacy')
 
     # Missing _execute_with_user_context implementation to test migration status
+    # Note: This agent inherits execute_core_logic from BaseAgent, so it will be "legacy_bridge" pattern
+
+
+class NoMethodAgent(BaseAgent):
+    """Agent with no execution methods for testing 'none' pattern."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.agent_type = "no_method_agent"
+
+    # Override to remove execute_core_logic method
+    def __getattribute__(self, name):
+        if name == 'execute_core_logic':
+            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
+        return super().__getattribute__(name)
 
 
 class BaseAgentFactoryPatternsTests(SSotAsyncTestCase):
@@ -125,8 +140,8 @@ class BaseAgentFactoryPatternsTests(SSotAsyncTestCase):
         assert hasattr(agent, '_user_context')
         assert agent._user_context is self.test_context
 
-        # Note: user_context property is None until set_user_context is called
-        # This is expected behavior for create_with_context vs create_agent_with_context
+        # Verify: user_context property is properly set by factory method
+        assert agent.user_context is self.test_context
 
         # Verify: Configuration was applied for existing attributes only
         # The factory method only applies config to existing attributes
@@ -242,8 +257,18 @@ class BaseAgentFactoryPatternsTests(SSotAsyncTestCase):
 
         # Verify: Legacy agent fails validation
         assert legacy_validation["compliant"] is False
-        assert legacy_validation["pattern"] == "none"
-        assert len(legacy_validation["errors"]) > 0
+        assert legacy_validation["pattern"] == "legacy_bridge"
+        assert len(legacy_validation["errors"]) == 0  # legacy_bridge pattern has warnings, not errors
+        assert len(legacy_validation["warnings"]) > 0
+
+        # Test with agent that has no execution methods (true "none" pattern)
+        no_method_agent = NoMethodAgent(llm_manager=self.llm_manager)
+        none_validation = no_method_agent.validate_modern_implementation()
+
+        # Verify: Agent with no methods gets "none" pattern with errors
+        assert none_validation["compliant"] is False
+        assert none_validation["pattern"] == "none"
+        assert len(none_validation["errors"]) > 0
 
     def test_agent_assert_user_execution_context_pattern(self):
         """Test agent UserExecutionContext pattern assertions."""
@@ -256,9 +281,18 @@ class BaseAgentFactoryPatternsTests(SSotAsyncTestCase):
         # Test with legacy agent that has violations
         legacy_agent = LegacyPatternAgent(llm_manager=self.llm_manager)
 
-        # Should raise RuntimeError for critical violations
-        with pytest.raises(RuntimeError, match="CRITICAL COMPLIANCE VIOLATIONS"):
+        # Should not raise RuntimeError for legacy_bridge pattern (only warnings)
+        # Legacy bridge pattern issues deprecation warnings but doesn't fail hard
+        try:
             legacy_agent.assert_user_execution_context_pattern()
+        except RuntimeError:
+            # Should not raise RuntimeError for legacy_bridge pattern
+            pytest.fail("Legacy bridge pattern should not raise RuntimeError - only warnings")
+
+        # Test with agent that has "none" pattern - should raise RuntimeError
+        no_method_agent = NoMethodAgent(llm_manager=self.llm_manager)
+        with pytest.raises(RuntimeError, match="CRITICAL COMPLIANCE VIOLATIONS"):
+            no_method_agent.assert_user_execution_context_pattern()
 
     def test_agent_get_migration_status_comprehensive(self):
         """Test comprehensive migration status reporting."""
@@ -289,8 +323,9 @@ class BaseAgentFactoryPatternsTests(SSotAsyncTestCase):
 
         # Verify: Legacy agent shows needs_migration status
         assert legacy_status["migration_status"] == "needs_migration"
+        assert legacy_status["execution_pattern"] == "legacy_bridge"
         assert legacy_status["user_isolation_safe"] is False
-        assert legacy_status["errors_count"] > 0 or legacy_status["warnings_count"] > 0
+        assert legacy_status["warnings_count"] > 0  # legacy_bridge has warnings, not errors
 
     async def test_agent_validate_migration_completeness(self):
         """Test DeepAgentState migration completeness validation."""

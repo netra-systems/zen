@@ -1562,7 +1562,7 @@ class BackendServiceIntegrationTests(BaseIntegrationTest):
             def __init__(self):
                 self.service_registry = {
                     "auth_service": {"url": "http://localhost:8081", "status": "active"},
-                    "analytics_service": {"url": "http://localhost:8002", "status": "active"},
+                    "analytics_service": {"url": "http://localhost:8090", "status": "active"},
                     "notification_service": {"url": "http://localhost:8003", "status": "active"}
                 }
                 self.communication_log = []

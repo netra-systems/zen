@@ -137,12 +137,20 @@ class GoldenPathWebSocketAuthenticationTests:
         # Configure for Golden Path testing
         test_env = cls.env.get("TEST_ENV", "test")
         
-        if test_env == "staging":
+        # Check for staging indicators
+        is_staging = (
+            test_env == "staging" or
+            cls.env.get("ENVIRONMENT") == "staging" or
+            cls.env.get("GCP_PROJECT") == "netra-staging" or
+            cls.env.get("USE_STAGING", "").lower() == "true"
+        )
+        
+        if is_staging:
             cls.auth_config = E2EAuthConfig.for_staging()
         else:
-            # Golden Path optimized configuration
+            # Golden Path optimized configuration - Fixed port to 8081
             cls.auth_config = E2EAuthConfig(
-                auth_service_url="http://localhost:8083",
+                auth_service_url="http://localhost:8081",  # Fixed from 8083 to correct auth port
                 backend_url="http://localhost:8002",
                 websocket_url="ws://localhost:8002/ws",
                 timeout=35.0,  # Golden Path total timeout

@@ -23,7 +23,7 @@ import logging
 import json
 from abc import ABC, abstractmethod
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any, Dict, List, Optional, Union
 from uuid import uuid4
 
@@ -76,7 +76,7 @@ class UserDataContext(ABC):
         self.user_id = user_id
         self.request_id = request_id
         self.thread_id = thread_id
-        self.created_at = datetime.utcnow()
+        self.created_at = datetime.now(UTC)
         self.operation_count = 0
         self.last_activity = self.created_at
         self._initialized = False
@@ -107,7 +107,7 @@ class UserDataContext(ABC):
     def _update_activity(self) -> None:
         """Update activity tracking for this context."""
         self.operation_count += 1
-        self.last_activity = datetime.utcnow()
+        self.last_activity = datetime.now(UTC)
     
     def _create_audit_context(self, operation: str, **kwargs) -> Dict[str, Any]:
         """
@@ -125,8 +125,8 @@ class UserDataContext(ABC):
             "request_id": self.request_id,
             "thread_id": self.thread_id,
             "operation": operation,
-            "timestamp": datetime.utcnow().isoformat(),
-            "context_age_seconds": (datetime.utcnow() - self.created_at).total_seconds(),
+            "timestamp": datetime.now(UTC).isoformat(),
+            "context_age_seconds": (datetime.now(UTC) - self.created_at).total_seconds(),
             "operation_count": self.operation_count + 1,
             **kwargs
         }
@@ -138,8 +138,8 @@ class UserDataContext(ABC):
         Returns:
             Dictionary with context metadata
         """
-        age_seconds = (datetime.utcnow() - self.created_at).total_seconds()
-        last_activity_seconds = (datetime.utcnow() - self.last_activity).total_seconds()
+        age_seconds = (datetime.now(UTC) - self.created_at).total_seconds()
+        last_activity_seconds = (datetime.now(UTC) - self.last_activity).total_seconds()
         
         return {
             "user_id": f"{self.user_id[:8]}...",  # Truncated for security

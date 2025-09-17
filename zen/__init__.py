@@ -1,12 +1,12 @@
 """
-Netra Orchestrator Client
+ZEN - Multi-Instance Claude Orchestrator
 
-A standalone service for orchestrating multiple Claude Code instances.
+A service for orchestrating multiple Claude Code instances in parallel.
 """
 
 __version__ = "1.0.0"
 __author__ = "Netra Systems"
 
-from .claude_instance_orchestrator import ClaudeInstanceOrchestrator, InstanceConfig, InstanceStatus
+from .zen_orchestrator import ClaudeInstanceOrchestrator, InstanceConfig, InstanceStatus
 
 __all__ = ["ClaudeInstanceOrchestrator", "InstanceConfig", "InstanceStatus"]

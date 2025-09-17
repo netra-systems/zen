@@ -267,7 +267,7 @@ def get_database_timeout_config(environment: str) -> Dict[str, float]:
             # CRITICAL: Combines all remediation efforts with proven values from testing
             "initialization_timeout": 95.0,    # CRITICAL: Extended to handle compound VPC+CloudSQL delays (Issue #1278 Phase 1 evidence)
             "table_setup_timeout": 35.0,       # Extended for schema operations under load (auth service alignment)  
-            "connection_timeout": 50.0,        # Extended for VPC connector peak scaling delays (Issue #1278 remediation)
+            "connection_timeout": 75.0,        # Extended for VPC connector peak scaling delays (Issue #1278 remediation - increased to 75s)
             "pool_timeout": 60.0,              # Extended for connection pool exhaustion + VPC delays (increased from 45.0)
             "health_check_timeout": 30.0,      # Extended for compound infrastructure health checks (increased from 20.0)
         },
@@ -321,7 +321,7 @@ def get_cloud_sql_optimized_config(environment: str) -> Dict[str, any]:
             "pool_config": {
                 "pool_size": 10,              # Balanced for Cloud SQL connection limits (Issue #1278 remediation)
                 "max_overflow": 15,           # Conservative to stay within Cloud SQL capacity limits
-                "pool_timeout": 90.0,         # Extended for VPC connector + Cloud SQL delays (Issue #1278 proven value)
+                "pool_timeout": 120.0,        # Extended for VPC connector + Cloud SQL delays (Issue #1278 proven value - increased to 120s)
                 "pool_recycle": 1800,         # Issue #1278 remediation - faster refresh for better connection health
                 "pool_pre_ping": True,        # Always verify connections
                 "pool_reset_on_return": "rollback",  # Safe connection resets

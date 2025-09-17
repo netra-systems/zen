@@ -17,6 +17,7 @@ import subprocess
 import os
 from pathlib import Path
 import argparse
+from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 project_root = Path(__file__).parent
@@ -126,10 +127,11 @@ def validate_staging_services():
         print("⚠️  gcloud CLI not found - staging services may not be accessible")
         validation_passed = False
     
-    # Check if we can reach staging URLs (basic connectivity)
+    # Check if we can reach staging URLs (basic connectivity) using SSOT IsolatedEnvironment
+    env = IsolatedEnvironment()
     staging_urls = [
-        ("Backend", os.environ.get("NETRA_BACKEND_URL", "")),
-        ("Auth Service", os.environ.get("AUTH_SERVICE_URL", "")),
+        ("Backend", env.get("NETRA_BACKEND_URL", "")),
+        ("Auth Service", env.get("AUTH_SERVICE_URL", "")),
     ]
     
     for service_name, url in staging_urls:

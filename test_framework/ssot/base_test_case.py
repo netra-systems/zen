@@ -268,6 +268,10 @@ class SSotBaseTestCase:
     CRITICAL: This replaces ALL existing BaseTestCase implementations.
     """
     
+    # NOTE: Removed __init__ method as it prevents pytest from collecting test classes
+    # Pytest requires test classes to not have __init__ constructors
+    # Any initialization should be done in setup_method or setup_class instead
+    
     # === CLASS-LEVEL PYTEST COMPATIBILITY ===
     # These methods provide compatibility with pytest class-level fixtures
     
@@ -462,7 +466,7 @@ class SSotBaseTestCase:
             with ThreadPoolExecutor() as executor:
                 future = executor.submit(asyncio.run, coro)
                 # Issue #1278: Infrastructure-aware timeout for staging/production
-                env = self.env_manager.get("ENVIRONMENT", "development").lower()
+                env = self._env.get("ENVIRONMENT", "development").lower()
                 if env in ["staging", "production"]:
                     timeout = 60.0  # Extended timeout for infrastructure delays
                 else:
@@ -472,7 +476,7 @@ class SSotBaseTestCase:
             # No event loop running, safe to use asyncio.run
             # Issue #1278: Apply infrastructure-aware timeout here too
             try:
-                env = self.env_manager.get("ENVIRONMENT", "development").lower()
+                env = self._env.get("ENVIRONMENT", "development").lower()
                 if env in ["staging", "production"]:
                     # Infrastructure-aware async execution with timeout
                     async def run_with_timeout():
@@ -657,7 +661,7 @@ class SSotBaseTestCase:
     
     # === ENVIRONMENT UTILITIES ===
     
-    def set_env_var(self, key: str, value: str) -> None:
+    def set_env_var(self, key: str, value: str, source: Optional[str] = None) -> None:
         """
         Set an environment variable for this test.
         
@@ -666,8 +670,23 @@ class SSotBaseTestCase:
         Args:
             key: Environment variable name
             value: Environment variable value
+            source: Optional source identifier for the environment variable.
+                   If not provided, defaults to test-specific source.
+                   This parameter provides backward compatibility with existing tests.
         """
-        self._env.set(key, value, f"test_{self._test_context.test_id if self._test_context else 'unknown'}")
+        # If source is provided, add deprecation warning but continue to work
+        if source is not None:
+            import warnings
+            warnings.warn(
+                f"The 'source' parameter in set_env_var is deprecated and will be ignored. "
+                f"Provided source: '{source}' for key: '{key}'",
+                DeprecationWarning,
+                stacklevel=2
+            )
+        
+        # Always use the test-specific source for consistency
+        effective_source = f"test_{self._test_context.test_id if self._test_context else 'unknown'}"
+        self._env.set(key, value, effective_source)
     
     def get_env_var(self, key: str, default: Optional[str] = None) -> Optional[str]:
         """
@@ -1158,11 +1177,13 @@ class SSotBaseTestCase:
             )
 
 
-class SSotAsyncTestCase(SSotBaseTestCase, unittest.TestCase):
+class SSotAsyncTestCase(SSotBaseTestCase):
     """
     SSOT Async Test Case - For async tests only.
     
     This extends the base SSOT test case with async-specific functionality.
+    Inherits unittest compatibility methods from SSotBaseTestCase without 
+    multiple inheritance issues.
     """
     
     @classmethod

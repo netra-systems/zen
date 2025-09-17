@@ -4,7 +4,7 @@ Provides minimal alert management functionality with reduced overhead.
 """
 
 from typing import Any, Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, UTC
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.monitoring.alert_models import Alert, AlertLevel, AlertRule
@@ -55,7 +55,7 @@ class CompactAlertManager:
             "critical_alerts": len([a for a in self._active_alerts if a.level == AlertLevel.CRITICAL]),
             "warning_alerts": len([a for a in self._active_alerts if a.level == AlertLevel.WARNING]),
             "info_alerts": len([a for a in self._active_alerts if a.level == AlertLevel.INFO]),
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(UTC)
         }
 
 

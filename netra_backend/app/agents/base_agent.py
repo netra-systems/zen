@@ -29,7 +29,7 @@ from netra_backend.app.agents.interfaces import BaseAgentProtocol
 # Migration Guide: reports/archived/USER_CONTEXT_ARCHITECTURE.md
 # =============================================================================
 import warnings
-from netra_backend.app.core.config import get_config
+from netra_backend.app.config import get_config  # SSOT UnifiedConfigManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.llm.observability import generate_llm_correlation_id
 from netra_backend.app.logging_config import central_logger
@@ -44,7 +44,7 @@ from netra_backend.app.core.resilience.unified_retry_handler import (
     RetryConfig,
     AGENT_RETRY_POLICY
 )
-from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
@@ -1263,10 +1263,14 @@ class BaseAgent(ABC):
         # Use the already initialized monitor from __init__
         # Note: BaseExecutionEngine will be updated separately to use UnifiedRetryHandler
         # For now, passing None to avoid breaking changes
-        self._execution_engine = BaseExecutionEngine(
-            reliability_manager=None,  # Will be integrated with UnifiedRetryHandler in future update
-            monitor=self._execution_monitor
-        )
+        # TODO: UserExecutionEngine requires UserExecutionContext - temporary placeholder
+        # self._execution_engine = UserExecutionEngine(
+        #     context=user_context,  # Needs UserExecutionContext
+        #     agent_factory=agent_factory,  # Needs AgentInstanceFactory
+        #     websocket_emitter=websocket_emitter  # Needs UserWebSocketEmitter
+        # )
+        # For now, keeping None until full user context migration is complete
+        self._execution_engine = None
     
     def _init_caching_infrastructure(self) -> None:
         """Initialize optional caching infrastructure (SSOT pattern)."""
@@ -1306,7 +1310,7 @@ class BaseAgent(ABC):
         return self._unified_reliability_handler
     
     @property
-    def execution_engine(self) -> Optional[BaseExecutionEngine]:
+    def execution_engine(self) -> Optional[UserExecutionEngine]:
         """Get execution engine (SSOT pattern)."""
         return self._execution_engine
     
@@ -1841,11 +1845,14 @@ class BaseAgent(ABC):
         # Inject context-scoped dependencies (following factory pattern from design doc)
         agent._user_context = context
         
+        # CRITICAL FIX: Set user_context property for consistent factory behavior
+        # This ensures WebSocket integration works and tests pass
+        agent.set_user_context(context)
+        
         # Apply agent-specific configuration
         if agent_config:
             for key, value in agent_config.items():
-                if hasattr(agent, key):
-                    setattr(agent, key, value)
+                setattr(agent, key, value)
         
         # Validate agent implements modern pattern - only modern pattern allowed now
         if not hasattr(agent, '_execute_with_user_context'):

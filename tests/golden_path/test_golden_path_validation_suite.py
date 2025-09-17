@@ -97,7 +97,7 @@ class TestGoldenPathValidation(SSotAsyncTestCase):
         start_time = time.time()
 
         # Test emergency mode compatibility
-        emergency_mode = self.env.get_env('EMERGENCY_ALLOW_NO_DATABASE', 'false') == 'true'
+        emergency_mode = self.get_env_var('EMERGENCY_ALLOW_NO_DATABASE', 'false') == 'true'
 
         connection_result = await self._establish_websocket_connection()
         self.assertTrue(connection_result.success, "Golden path requires successful WebSocket connection")
@@ -223,11 +223,11 @@ class TestGoldenPathValidation(SSotAsyncTestCase):
         emergency configuration bypasses.
         """
         # Set emergency mode
-        original_emergency = self.env.get_env('EMERGENCY_ALLOW_NO_DATABASE', 'false')
+        original_emergency = self.get_env_var('EMERGENCY_ALLOW_NO_DATABASE', 'false')
 
         try:
             # Test with emergency mode enabled
-            self.env.set_env('EMERGENCY_ALLOW_NO_DATABASE', 'true')
+            self.set_env_var('EMERGENCY_ALLOW_NO_DATABASE', 'true')
 
             # Golden path should still work
             connection_result = await self._establish_websocket_connection()
@@ -254,7 +254,7 @@ class TestGoldenPathValidation(SSotAsyncTestCase):
 
         finally:
             # Restore original setting
-            self.env.set_env('EMERGENCY_ALLOW_NO_DATABASE', original_emergency)
+            self.set_env_var('EMERGENCY_ALLOW_NO_DATABASE', original_emergency)
 
     async def test_performance_requirements(self):
         """

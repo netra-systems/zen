@@ -19,7 +19,7 @@ validation that formal interface contracts are maintained during migrations.
 import asyncio
 import inspect
 from typing import Any, Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, UTC
 
 from netra_backend.app.websocket_core.protocols import (
     WebSocketManagerProtocol, 
@@ -103,7 +103,7 @@ def create_protocol_compliance_report(manager: Any) -> Dict[str, Any]:
         enhanced_report = {
             **validation_result,
             'report_metadata': {
-                'generated_at': datetime.utcnow().isoformat(),
+                'generated_at': datetime.now(UTC).isoformat(),
                 'report_version': '1.0.0',
                 'purpose': 'Five Whys Root Cause Prevention',
                 'root_cause': 'lack of formal interface contracts causing implementation drift'
@@ -161,7 +161,7 @@ def create_protocol_compliance_report(manager: Any) -> Dict[str, Any]:
             'compliant': False,
             'error': str(e),
             'report_metadata': {
-                'generated_at': datetime.utcnow().isoformat(),
+                'generated_at': datetime.now(UTC).isoformat(),
                 'error_occurred': True
             }
         }

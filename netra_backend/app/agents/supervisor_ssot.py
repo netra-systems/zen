@@ -50,6 +50,16 @@ class SupervisorAgent(BaseAgent):
     - No duplicate implementation of existing patterns
     """
     
+    # Class-level attributes for test framework compatibility
+    name = "Supervisor"
+    agent_type = "supervisor"
+    description = "Orchestrates sub-agents with complete user isolation using SSOT patterns"
+    
+    # Test framework compatibility attributes
+    _test_mode = False
+    _mock_responses = []
+    _execution_count = 0
+    
     def __init__(self,
                  llm_manager: LLMManager,
                  websocket_bridge: Optional[AgentWebSocketBridge] = None,

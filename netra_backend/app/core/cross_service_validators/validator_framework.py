@@ -41,7 +41,7 @@ class ValidationResult(BaseModel):
     severity: ValidationSeverity = Field(description="Issue severity")
     message: str = Field(description="Human readable message")
     details: Dict[str, Any] = Field(default_factory=dict)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     service_pair: Optional[str] = Field(None, description="Services validated")
     execution_time_ms: Optional[float] = Field(None)
 
@@ -49,7 +49,7 @@ class ValidationResult(BaseModel):
 class ValidationReport(BaseModel):
     """Complete validation report for service boundaries."""
     report_id: str = Field(description="Unique report identifier")
-    generated_at: datetime = Field(default_factory=datetime.utcnow)
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     services_validated: List[str] = Field(description="Services included")
     total_checks: int = Field(description="Total validation checks")
     passed_checks: int = Field(default=0)

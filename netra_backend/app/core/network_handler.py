@@ -123,7 +123,7 @@ class WebSocketConfig:
 @dataclass
 class NetworkMetrics:
     """Network performance and reliability metrics."""
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     active_connections: int = 0
     total_requests: int = 0
     failed_requests: int = 0

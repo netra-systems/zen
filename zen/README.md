@@ -1,108 +1,87 @@
-# Netra Orchestrator Client
+# ZEN - Multi-Instance Claude Orchestrator
 
-> **🏠 [← Return to Main Documentation](../docs/index.md)** | **📋 [View All Commands](../docs/COMMAND_INDEX.md)** | **📖 [Service Index](INDEX.md)**
-
-A standalone service for orchestrating multiple Claude Code instances with advanced scheduling, monitoring, and metrics collection capabilities.
-
-## Overview
-
-The Netra Orchestrator Client allows you to:
-- Run multiple Claude Code instances in parallel
-- Schedule executions with flexible timing options
-- Monitor real-time progress with status reports
-- Collect comprehensive metrics and token usage data
-- Save results to CloudSQL for analysis
-- Handle complex slash command orchestration
+ZEN orchestrates multiple Claude Code CLI instances for parallel task execution with token budget management and real-time monitoring.
 
 ## Quick Start
 
 ```bash
-# Basic usage with default configuration
-python claude_instance_orchestrator.py --workspace ~/my-project
+# Install dependencies
+pip install -r requirements.txt
 
-# Schedule execution for later
-python claude_instance_orchestrator.py --start-at "2h" --workspace ~/my-project
+# Basic usage
+python zen_orchestrator.py --config config_example.json
 
-# Custom configuration
-python claude_instance_orchestrator.py --config config_example.json --workspace ~/my-project
-
-# CloudSQL integration
-python claude_instance_orchestrator.py --use-cloud-sql --workspace ~/my-project
+# With budget control
+python zen_orchestrator.py --config my_config.json --overall-token-budget 50000
 ```
 
-## Features
+## Key Features
 
-### Parallel Instance Management
-- Launch multiple Claude Code instances with configurable delays
-- Real-time status monitoring and progress reporting
-- Automatic failure handling and timeout management
+- **Parallel Execution**: Run multiple Claude instances simultaneously
+- **Budget Management**: Token limits with cost tracking
+- **Real-time Monitoring**: Live status updates with progress visualization
+- **Execution Summary**: High-level results and token usage overview
+- **Tool Usage Tracking**: Detailed metrics for Claude Code tool usage with token costs
 
-### Flexible Scheduling
-- Immediate execution or scheduled start times
-- Support for relative timing (2h, 30m) and absolute times (14:30, 1am)
-- Countdown displays for long wait periods
+## Configuration
 
-### Comprehensive Metrics
-- Token usage tracking (input, output, cached)
-- Tool execution monitoring
-- Performance analytics and duration tracking
-- Cache hit rate calculations
+Create a JSON file with your tasks:
 
-### CloudSQL Integration
-- Optional NetraOptimizer database integration
-- Execution record persistence
-- Batch tracking for analysis
-- Cost calculation based on token usage
+```json
+{
+  "instances": [
+    {
+      "name": "task-1",
+      "command": "/my-command",
+      "description": "What this task does"
+    }
+  ]
+}
+```
 
-## Directory Structure
+## Documentation
+
+- [Quick Setup](docs/QUICK_SETUP.md) - Get started in minutes
+- [User Guide](docs/ZEN_GUIDE.md) - Comprehensive usage guide
+- [Examples](docs/EXAMPLES.md) - Common workflows and patterns
+- [Pricing Strategy](docs/pricing_strategy.md) - Token calculation and cost transparency
+- [Changelog](docs/changelog.md) - Version history and changes
+
+## Project Structure
 
 ```
-netra_orchestrator_client/
-├── claude_instance_orchestrator.py    # Main orchestrator service
-├── config_example.json               # Configuration template
-├── README.md                         # This file
-├── docs/                             # Documentation
-│   ├── TESTING.md                   # Test execution guide
-│   ├── claude-instance-orchestrator-enhancement-plan.md
-│   ├── claude-instance-orchestrator-token-budget-codex-plan.md
-│   ├── claude-orchestrator-deployment-strategy-plan.md
-│   ├── README-orchestrator.md
-│   ├── claude-orchestrator-modernization-summary.md
-│   └── universal-cli-orchestrator-enhancement-plan.md
-└── tests/                           # Test suite
-    ├── test_runner.py              # Test runner script
-    ├── test_claude_instance_orchestrator_commands.py
-    ├── test_claude_instance_orchestrator_integration.py
-    ├── test_claude_instance_orchestrator_metrics.py
-    └── test_claude_instance_orchestrator_unit.py
+zen/
+├── zen_orchestrator.py          # Main orchestrator
+├── config_example.json          # Configuration template
+├── agent_interface/             # Agent interfaces
+├── token_budget/               # Budget management
+├── token_transparency/         # Cost tracking
+├── tests/                      # Test suite
+└── docs/                       # User documentation
 ```
+
+## Requirements
+
+- Python 3.8+
+- Claude Code CLI
+- Dependencies in requirements.txt
+
+## Logging and Output
+
+- **Console Output**: All logs and execution results are displayed in the console
+- **No File Logging**: ZEN does not write logs to files by default
+- **Capturing Output**: To save execution logs, use output redirection:
+  ```bash
+  python zen_orchestrator.py --config tasks.json > execution.log 2>&1
+  ```
 
 ## Testing
 
-Run the complete test suite:
 ```bash
 cd tests/
 python test_runner.py
 ```
 
-Run specific test categories:
-```bash
-python test_runner.py unit
-python test_runner.py integration
-python test_runner.py commands
-python test_runner.py metrics
-```
+## License
 
-## Configuration
-
-See `config_example.json` for configuration options and `docs/` for detailed documentation.
-
-## Dependencies
-
-- Python 3.8+
-- Claude Code CLI
-- Optional: NetraOptimizer for CloudSQL integration
-
-## Service Independence
-
-This service is designed to be completely independent from the main Netra backend and can be deployed separately. It communicates with Claude Code instances through the standard CLI interface.
+See [LICENSE](../LICENSE) in the project root.

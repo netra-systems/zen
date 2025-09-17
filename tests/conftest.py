@@ -72,6 +72,20 @@ except ImportError:
     # Real services fixtures not available
     pass
 
+# Import isolated environment fixtures for Issue #1197 - fixture discovery
+# CRITICAL: Import directly from fixtures module to ensure pytest discovers them
+try:
+    from test_framework.isolated_environment_fixtures import (
+        isolated_env,
+        test_env,
+        staging_env,
+        production_env,
+        isolated_env_fixture  # Alias for backward compatibility
+    )
+except ImportError:
+    # IsolatedEnvironment fixtures not available
+    pass
+
 # Import no-docker mode plugin for integration test management
 try:
     from test_framework.ssot.pytest_no_docker_plugin import (

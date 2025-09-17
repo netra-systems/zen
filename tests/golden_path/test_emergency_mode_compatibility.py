@@ -78,9 +78,9 @@ class TestEmergencyModeCompatibility(SSotAsyncTestCase):
         """Restore original environment after tests"""
         for key, value in self.original_env_values.items():
             if value is None:
-                self.env.unset_env(key)
+                self.clear_env_var(key)
             else:
-                self.env.set_env(key, value)
+                self.set_env_var(key, value)
         super().tearDown()
 
     async def test_emergency_database_bypass_mode(self):
@@ -307,14 +307,14 @@ class TestEmergencyModeCompatibility(SSotAsyncTestCase):
     def _set_emergency_config(self, config: Dict[str, str]):
         """Set emergency configuration and store originals"""
         for key, value in config.items():
-            self.original_env_values[key] = self.env.get_env(key)
-            self.env.set_env(key, value)
+            self.original_env_values[key] = self.get_env_var(key)
+            self.set_env_var(key, value)
 
     def _restore_normal_config(self):
         """Restore normal configuration"""
         for key, original_value in self.original_env_values.items():
             if original_value is None:
-                self.env.unset_env(key)
+                self.clear_env_var(key)
             else:
                 self.env.set_env(key, original_value)
         self.original_env_values.clear()
@@ -351,7 +351,7 @@ class TestEmergencyModeCompatibility(SSotAsyncTestCase):
         results.events_received = ['agent_started', 'agent_completed']
 
         # Additional events may be available depending on degradation level
-        emergency_mode = self.env.get_env('EMERGENCY_ALLOW_NO_DATABASE', 'false') == 'true'
+        emergency_mode = self.get_env_var('EMERGENCY_ALLOW_NO_DATABASE', 'false') == 'true'
         if not emergency_mode:
             results.events_received.extend(['agent_thinking', 'tool_executing', 'tool_completed'])
 

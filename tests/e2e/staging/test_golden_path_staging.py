@@ -480,8 +480,12 @@ class GoldenPathStagingTests(SSotAsyncTestCase):
                             if header in response.headers:
                                 self.logger.info(f"{service_name} has security header: {header}")
                         
-                    except httpx.SSLError as e:
-                        pytest.fail(f'SSL error for {service_name}: {e}')
+                    except (httpx.ConnectError, httpx.TransportError) as e:
+                        # SSL errors typically manifest as connection/transport errors
+                        if 'SSL' in str(e) or 'certificate' in str(e).lower():
+                            pytest.fail(f'SSL error for {service_name}: {e}')
+                        else:
+                            raise  # Re-raise if not SSL-related
                     except Exception as e:
                         self.logger.warning(f'SSL test issue for {service_name}: {e}')
             

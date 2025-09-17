@@ -7,10 +7,12 @@ import sys
 import os
 sys.path.insert(0, '.')
 
-# Set minimal environment variables to bypass validation
-os.environ['ENVIRONMENT'] = 'development'
-os.environ['SECRET_KEY'] = 'test-secret-key-32-chars-minimum-req'
-os.environ['JWT_SECRET_KEY'] = 'test-jwt-secret-key-32-chars-minimum'
+# Set minimal environment variables to bypass validation using SSOT IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
+env = IsolatedEnvironment()
+env.set('ENVIRONMENT', 'development', 'test_session_middleware')
+env.set('SECRET_KEY', 'test-secret-key-32-chars-minimum-req', 'test_session_middleware')
+env.set('JWT_SECRET_KEY', 'test-jwt-secret-key-32-chars-minimum', 'test_session_middleware')
 
 def test_middleware_stack():
     """Test SessionMiddleware installation without full environment validation."""

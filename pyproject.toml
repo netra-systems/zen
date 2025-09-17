@@ -669,6 +669,7 @@ markers = [
     "tool_handoffs: Tool execution handoff between agents",
     "tool_timeout: Tool execution timeout handling tests",
     "tool_execution: Tool execution tests",
+    "tools: Tool-related tests and integrations",
     "issue_463: Issue #463 specific tests",
     "issue_465: Issue #465 specific tests",
     "issue_426_cluster: Issue #426 cluster specific tests",

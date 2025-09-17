@@ -23,16 +23,16 @@ logger = logging.getLogger(__name__)
 class StagingURLs:
     """Centralized staging environment URLs from deployed GCP services."""
     
-    # Primary staging URLs (Golden Path domains)
-    backend_url: str = "https://api.staging.netrasystems.ai"
-    auth_url: str = "https://auth.staging.netrasystems.ai"
-    frontend_url: str = "https://app.staging.netrasystems.ai"
+    # Primary staging URLs (FIXED: Use correct *.netrasystems.ai domains)
+    backend_url: str = "https://staging.netrasystems.ai"
+    auth_url: str = "https://staging.netrasystems.ai"
+    frontend_url: str = "https://staging.netrasystems.ai"
     
-    # WebSocket URL (derived from backend)
+    # WebSocket URL (FIXED: Use api-staging.netrasystems.ai for WebSocket)
     @property
     def websocket_url(self) -> str:
-        """Get WebSocket URL from backend URL."""
-        return self.backend_url.replace("https://", "wss://") + "/ws"
+        """Get WebSocket URL using correct api-staging domain."""
+        return "wss://api-staging.netrasystems.ai/ws"
     
     # API endpoints
     @property

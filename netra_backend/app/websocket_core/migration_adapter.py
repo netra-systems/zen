@@ -32,14 +32,14 @@ the factory pattern directly, this adapter should be removed.
 import asyncio
 import uuid
 import warnings
-from datetime import datetime
+from datetime import datetime, timezone, UTC
 from typing import Dict, Optional, Any, Set
 from contextlib import contextmanager
 import weakref
 import threading
 
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 # ISSUE #1184 REMEDIATION: Import from correct SSOT locations
 from netra_backend.app.websocket_core.types import WebSocketConnection
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
@@ -58,7 +58,7 @@ logger = central_logger.get_logger(__name__)
 # DEPRECATED: Use UnifiedWebSocketManager with appropriate mode instead
 
 # Keep the migration functions for backward compatibility
-class _LegacyWebSocketManagerAdapter:
+class _LegacyWSAdapter:
     """
     DEPRECATED: Migration adapter that delegates to get_websocket_manager().
 
@@ -235,7 +235,7 @@ class _LegacyWebSocketManagerAdapter:
         # Create context for this connection
         connection_info = {
             "user_id": user_id,
-            "connection_id": f"conn_{user_id}_{datetime.utcnow().timestamp()}"
+            "connection_id": f"conn_{user_id}_{datetime.now(UTC).timestamp()}"
         }
         if connection_metadata:
             connection_info.update(connection_metadata)
@@ -251,7 +251,7 @@ class _LegacyWebSocketManagerAdapter:
             connection_id=user_context.websocket_connection_id,
             user_id=user_id,
             websocket=websocket,
-            connected_at=datetime.utcnow()
+            connected_at=datetime.now(UTC)
         )
         
         # Add to isolated manager
@@ -448,11 +448,11 @@ class _LegacyWebSocketManagerAdapter:
 
 
 # Global adapter instance (singleton for backward compatibility)
-_adapter_instance: Optional[_LegacyWebSocketManagerAdapter] = None
+_adapter_instance: Optional[_LegacyWSAdapter] = None
 _adapter_lock = threading.RLock()
 
 
-def get_legacy_websocket_manager() -> _LegacyWebSocketManagerAdapter:
+def get_legacy_websocket_manager() -> _LegacyWSAdapter:
     """
     Get the legacy WebSocket manager adapter.
     
@@ -465,7 +465,7 @@ def get_legacy_websocket_manager() -> _LegacyWebSocketManagerAdapter:
     global _adapter_instance
     with _adapter_lock:
         if _adapter_instance is None:
-            _adapter_instance = _LegacyWebSocketManagerAdapter()
+            _adapter_instance = _LegacyWSAdapter()
         return _adapter_instance
 
 
@@ -500,7 +500,7 @@ def migrate_singleton_usage(user_context: UserExecutionContext) -> UnifiedWebSoc
 # ===== BACKWARD COMPATIBILITY ALIASES =====
 
 # Create alias for backward compatibility
-WebSocketManagerAdapter = _LegacyWebSocketManagerAdapter
+WebSocketManagerAdapter = _LegacyWSAdapter
 
 __all__ = [
     "get_legacy_websocket_manager",
@@ -508,5 +508,5 @@ __all__ = [
     "WebSocketManagerAdapter"  # Backward compatibility
 ]
 
-# DEPRECATED: WebSocketManagerAdapter is now an alias for _LegacyWebSocketManagerAdapter
+# DEPRECATED: WebSocketManagerAdapter is now an alias for _LegacyWSAdapter
 # Use get_websocket_manager() directly from canonical_import_patterns module

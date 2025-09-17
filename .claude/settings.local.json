@@ -7,7 +7,21 @@
       "Bash(python3:*)",
       "Bash(timeout 10s python3:*)",
       "Bash(grep:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Read(//Users/rindhujajohnson/Netra/GitHub/**)",
+      "mcp__serena__list_dir",
+      "mcp__serena__search_for_pattern",
+      "mcp__serena__check_onboarding_performed",
+      "WebFetch(domain:docs.claude.com)",
+      "WebSearch",
+      "Bash(python -m pytest tests/ -v)",
+      "Bash(python tests/test_pricing_engine.py)",
+      "Bash(python tests/test_agent_interface.py)",
+      "Bash(kill:*)",
+      "Bash(python test_tool_detection.py:*)",
+      "Bash(python:*)",
+      "Read(//tmp/**)",
+      "Bash(awk:*)"
     ],
     "deny": [],
     "ask": []

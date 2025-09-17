@@ -30,7 +30,7 @@ from typing import Dict, Any, Optional, List
 from fastapi import APIRouter, HTTPException, Query, Depends
 from pydantic import BaseModel
 
-from netra_backend.app.core.config import get_config
+from netra_backend.app.config import get_config  # SSOT UnifiedConfigManager
 from shared.isolated_environment import get_env
 from shared.database_url_builder import DatabaseURLBuilder
 from netra_backend.app.db.database_manager import get_database_manager

@@ -17,7 +17,7 @@ import time
 from typing import Dict, List, Optional, Any, Callable, Union
 from dataclasses import dataclass, field
 from enum import Enum
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from shared.isolated_environment import get_env
 
@@ -100,7 +100,7 @@ class HealthChecker:
             self._service_health[service_name] = ServiceHealth(
                 service_name=service_name,
                 overall_status=HealthStatus.UNKNOWN,
-                last_check=datetime.utcnow()
+                last_check=datetime.now(UTC)
             )
         
         logger.info(f"Registered health check '{check_name}' for service '{service_name}'")
@@ -123,7 +123,7 @@ class HealthChecker:
                 status=HealthStatus.UNKNOWN,
                 service_name=service_name,
                 check_name=check_name,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 response_time_ms=0.0,
                 error_message=f"Check '{check_name}' not registered for service '{service_name}'"
             )
@@ -161,7 +161,7 @@ class HealthChecker:
                 status=status,
                 service_name=service_name,
                 check_name=check_name,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 response_time_ms=response_time,
                 details=details,
                 error_message=error_message
@@ -173,7 +173,7 @@ class HealthChecker:
                 status=HealthStatus.UNHEALTHY,
                 service_name=service_name,
                 check_name=check_name,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 response_time_ms=response_time,
                 error_message=f"Health check timed out after {check_config['timeout']} seconds"
             )
@@ -185,7 +185,7 @@ class HealthChecker:
                 status=HealthStatus.UNHEALTHY,
                 service_name=service_name,
                 check_name=check_name,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 response_time_ms=response_time,
                 error_message=str(e)
             )
@@ -204,7 +204,7 @@ class HealthChecker:
             return ServiceHealth(
                 service_name=service_name,
                 overall_status=HealthStatus.UNKNOWN,
-                last_check=datetime.utcnow(),
+                last_check=datetime.now(UTC),
                 metadata={"error": "Service not registered"}
             )
         
@@ -217,7 +217,7 @@ class HealthChecker:
         if not service_checks:
             # No checks registered, assume healthy
             self._service_health[service_name].overall_status = HealthStatus.HEALTHY
-            self._service_health[service_name].last_check = datetime.utcnow()
+            self._service_health[service_name].last_check = datetime.now(UTC)
             return self._service_health[service_name]
         
         # Run all checks for the service
@@ -233,7 +233,7 @@ class HealthChecker:
         # Update service health
         service_health = self._service_health[service_name]
         service_health.overall_status = overall_status
-        service_health.last_check = datetime.utcnow()
+        service_health.last_check = datetime.now(UTC)
         service_health.checks = check_results
         
         return service_health
@@ -281,7 +281,7 @@ class HealthChecker:
                 system_health[service_name] = ServiceHealth(
                     service_name=service_name,
                     overall_status=HealthStatus.UNHEALTHY,
-                    last_check=datetime.utcnow(),
+                    last_check=datetime.now(UTC),
                     metadata={"error": str(e)}
                 )
         

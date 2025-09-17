@@ -29,10 +29,10 @@ warnings.warn(
 )
 
 # Import from canonical SSOT source
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as _CanonicalWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as _CanonicalWebSocketManager
 WebSocketManager = _CanonicalWebSocketManager
 
-from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as _CanonicalWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as _CanonicalWebSocketManager
 UnifiedWebSocketManager = _CanonicalWebSocketManager  # Legacy alias
 
 __all__ = ['UnifiedWebSocketManager', 'WebSocketManager']

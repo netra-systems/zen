@@ -4,7 +4,7 @@ Handles delivery of alerts through various notification channels.
 """
 
 from typing import Any, Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, UTC
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.monitoring.alert_models import Alert, NotificationChannel
@@ -49,7 +49,7 @@ class NotificationDeliveryManager:
                         "alert_id": alert.alert_id,
                         "channel_id": channel.channel_id,
                         "success": success,
-                        "timestamp": datetime.utcnow()
+                        "timestamp": datetime.now(UTC)
                     })
                     
                 except Exception as e:

@@ -5,7 +5,7 @@ Defines common interfaces for execution patterns across the system.
 
 from typing import Any, Dict, List, Optional, Protocol, Union
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timedelta, UTC
 from dataclasses import dataclass
 from enum import Enum
 
@@ -44,7 +44,7 @@ class ExecutionContext:
         if self.metadata is None:
             self.metadata = {}
         if self.created_at is None:
-            self.created_at = datetime.utcnow()
+            self.created_at = datetime.now(UTC)
 
 
 @dataclass 
@@ -63,7 +63,7 @@ class ExecutionResult:
         if self.metadata is None:
             self.metadata = {}
         if self.completed_at is None and self.status in [ExecutionStatus.COMPLETED, ExecutionStatus.FAILED, ExecutionStatus.CANCELLED]:
-            self.completed_at = datetime.utcnow()
+            self.completed_at = datetime.now(UTC)
     
     @property
     def is_success(self) -> bool:
@@ -112,7 +112,7 @@ class BaseExecutor(ABC):
     
     async def execute(self, context: ExecutionContext) -> ExecutionResult:
         """Execute operation with standard error handling and monitoring."""
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         self._active_executions[context.execution_id] = context
         
         try:
@@ -122,7 +122,7 @@ class BaseExecutor(ABC):
             result = await self._execute_operation(context)
             
             # Calculate duration
-            duration_ms = (datetime.utcnow() - start_time).total_seconds() * 1000
+            duration_ms = (datetime.now(UTC) - start_time).total_seconds() * 1000
             
             # Create successful result
             execution_result = ExecutionResult(
@@ -137,7 +137,7 @@ class BaseExecutor(ABC):
             
         except Exception as e:
             # Calculate duration for failed execution
-            duration_ms = (datetime.utcnow() - start_time).total_seconds() * 1000
+            duration_ms = (datetime.now(UTC) - start_time).total_seconds() * 1000
             
             # Create failed result
             execution_result = ExecutionResult(
@@ -241,7 +241,7 @@ class ExecutionMetrics:
             "duration_ms": result.duration_ms,
             "success": result.is_success,
             "error_type": result.error_type,
-            "timestamp": result.completed_at or datetime.utcnow()
+            "timestamp": result.completed_at or datetime.now(UTC)
         }
         
         self._metrics.append(metric)
@@ -254,7 +254,7 @@ class ExecutionMetrics:
         """Get performance summary for specified time period."""
         from datetime import timedelta
         
-        cutoff_time = datetime.utcnow() - timedelta(hours=hours)
+        cutoff_time = datetime.now(UTC) - timedelta(hours=hours)
         recent_metrics = [
             m for m in self._metrics
             if m.get("timestamp", datetime.min) > cutoff_time
@@ -290,7 +290,7 @@ class ExecutionMetrics:
             "success_rate": successful_executions / total_executions if total_executions > 0 else 0,
             "average_duration_ms": avg_duration,
             "error_types": error_types,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(UTC)
         }
 
 

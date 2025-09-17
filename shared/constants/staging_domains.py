@@ -62,9 +62,9 @@ STAGING_DOMAINS = {
     # API-specific domains (using main staging domain - api.staging.netrasystems.ai DNS not configured)
     "API_BASE_URL": "https://staging.netrasystems.ai",
 
-    # WebSocket domains (using main staging domain - api.staging.netrasystems.ai DNS not configured)
-    "WEBSOCKET_URL": "wss://staging.netrasystems.ai",
-    "WEBSOCKET_BASE": "wss://staging.netrasystems.ai/ws",
+    # WebSocket domains (using api-staging subdomain per CLAUDE.md Issue #1278)
+    "WEBSOCKET_URL": "wss://api-staging.netrasystems.ai",
+    "WEBSOCKET_BASE": "wss://api-staging.netrasystems.ai/ws",
 
     # Load balancer endpoints (preferred over direct Cloud Run)
     "LOAD_BALANCER_FRONTEND": "https://staging.netrasystems.ai",
@@ -78,8 +78,8 @@ DEPRECATED_STAGING_DOMAINS = {
     "OLD_FORMAT": [
         "*.staging.netrasystems.ai",  # Wrong subdomain format
         "https://app.staging.netrasystems.ai",
-        "https://api.staging.netrasystems.ai",
-        "https://auth.staging.netrasystems.ai",
+        "https://api-staging.netrasystems.ai",
+        "https://auth-staging.netrasystems.ai",
     ],
     "CLOUD_RUN_DIRECT": [
         "https://netra-backend-staging-701982941522.us-central1.run.app",
@@ -236,10 +236,9 @@ def is_deprecated_staging_domain(domain_url: str) -> bool:
 LEGACY_DOMAIN_MAPPING = {
     # Map old domain patterns to new ones
     "https://app.staging.netrasystems.ai": STAGING_DOMAINS["FRONTEND_URL"],
-    "https://api.staging.netrasystems.ai": STAGING_DOMAINS["API_BASE_URL"],
-    "https://auth.staging.netrasystems.ai": STAGING_DOMAINS["AUTH_SERVICE_URL"],
-    "wss://api.staging.netrasystems.ai": STAGING_DOMAINS["WEBSOCKET_URL"],
-    "wss://api.staging.netrasystems.ai": STAGING_DOMAINS["WEBSOCKET_URL"],
+    "https://api-staging.netrasystems.ai": STAGING_DOMAINS["API_BASE_URL"],
+    "https://auth-staging.netrasystems.ai": STAGING_DOMAINS["AUTH_SERVICE_URL"],
+    "wss://staging.netrasystems.ai": "wss://api-staging.netrasystems.ai",
 }
 
 

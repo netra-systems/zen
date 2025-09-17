@@ -153,7 +153,7 @@ class UnifiedConfigManager:
                     if environment == "staging" and validation_mode == "lenient":
                         # Allow weaker secrets in staging for development purposes
                         if not service_secret:
-                            service_secret = env.get('STAGING_JWT_SECRET', 'staging-development-secret-2025')
+                            service_secret = env.get('JWT_SECRET_KEY', 'staging-development-secret-2025')
                             self._get_logger().info(f"Using lenient staging JWT secret for environment: {environment}")
 
                     if service_secret:

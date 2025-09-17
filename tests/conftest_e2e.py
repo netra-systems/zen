@@ -101,14 +101,27 @@ e2e_logger = logging.getLogger("e2e_conftest")
 
 def get_e2e_config():
     """Get E2E configuration with environment detection."""
+    import sys
+    
+    # Auto-detect e2e mode: check if pytest collection path contains '/e2e/'
+    is_e2e_mode = any('e2e' in str(arg) for arg in sys.argv) or \
+                  any('tests/e2e' in str(arg) for arg in sys.argv) or \
+                  any('--category' in str(arg) and idx + 1 < len(sys.argv) and 'e2e' in sys.argv[idx + 1] 
+                      for idx, arg in enumerate(sys.argv))
+    
     current_env = get_env().get("ENVIRONMENT", get_env().get("TEST_ENV", "test")).lower()
+    
+    # Default e2e tests to staging unless explicitly overridden
+    if is_e2e_mode and current_env == "test":
+        current_env = "staging"
+        
     is_staging = current_env == "staging"
 
     if is_staging:
-        # Staging environment URLs
-        default_auth_url = "https://api.staging.netrasystems.ai"
-        default_backend_url = "https://api.staging.netrasystems.ai"
-        default_websocket_url = "wss://api.staging.netrasystems.ai/ws"
+        # Staging environment URLs - FIXED: Use correct staging domains
+        default_auth_url = "https://staging.netrasystems.ai"
+        default_backend_url = "https://staging.netrasystems.ai" 
+        default_websocket_url = "wss://api-staging.netrasystems.ai/ws"
         default_redis_url = get_env().get("STAGING_REDIS_URL", "redis://localhost:6379")
         default_postgres_url = get_env().get("STAGING_DATABASE_URL", "postgresql://postgres:netra@localhost:5432/netra_staging")
         default_clickhouse_url = get_env().get("STAGING_CLICKHOUSE_URL", "clickhouse://localhost:8123/netra_staging")

@@ -462,7 +462,7 @@ class AuthTraceLogger:
                     logger.error(
                         f" ALERT:  SYSTEM_USER_AUTH_FAILURE: The 'system' user failed authentication! | "
                         f"This indicates a service-to-service authentication problem. | "
-                        f"Check: SERVICE_SECRET, JWT_SECRET, authentication middleware, inter-service config | "
+                        f"Check: SERVICE_SECRET, JWT_SECRET_KEY, authentication middleware, inter-service config | "
                         f"Request: {getattr(context, 'request_id', 'unknown')} | "
                         f"SYSTEM_USER_CONTEXT: {comprehensive_dump}"
                     )
@@ -522,7 +522,7 @@ class AuthTraceLogger:
                 context.debug_hints.extend([
                     "403 'Not authenticated' suggests JWT validation failed",
                     "Check authentication middleware configuration",
-                    "Verify JWT_SECRET consistency across services",
+                    "Verify JWT_SECRET_KEY consistency across services",
                     "Check if token is being passed correctly in headers",
                     "Verify token format and expiration",
                     "Look for authentication dependency injection issues",

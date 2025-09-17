@@ -19,7 +19,7 @@ SSOT Migration:
 from typing import Optional, Dict, Any, List
 import asyncio
 import warnings
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import json
 import logging
 
@@ -273,8 +273,8 @@ class AuthRedisManager:
                 return {"status": "unhealthy", "error": "Cannot connect to Redis"}
             
             # Test basic auth operations using SSOT
-            test_session_id = f"health_check_{int(datetime.utcnow().timestamp())}"
-            test_session_data = {"test": "data", "timestamp": datetime.utcnow().isoformat()}
+            test_session_id = f"health_check_{int(datetime.now(timezone.utc).timestamp())}"
+            test_session_data = {"test": "data", "timestamp": datetime.now(timezone.utc).isoformat()}
             
             # Test session operations
             store_success = await self.store_session(test_session_id, test_session_data, 5)
@@ -295,7 +295,7 @@ class AuthRedisManager:
                     "ssot_available": SSOT_AVAILABLE,
                     "ssot_connected": self._redis.is_connected if SSOT_AVAILABLE else False,
                 },
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
             
         except Exception as e:

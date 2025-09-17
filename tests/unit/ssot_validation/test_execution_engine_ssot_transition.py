@@ -61,7 +61,7 @@ class ExecutionEngineSSotTransitionTests(SSotBaseTestCase):
             )
             
             assert user_engine is not None
-            assert user_engine.user_context.user_id == "test_user_123"
+            assert user_engine.get_user_context().user_id == "test_user_123"
             self.record_metric("user_execution_engine_instantiated", True)
             
         except Exception as e:
@@ -247,7 +247,7 @@ class ExecutionEngineSSotTransitionTests(SSotBaseTestCase):
             engine2 = UserExecutionEngine(context2, mock_factory, mock_websocket_emitter)
             
             # Verify complete isolation - no shared state
-            assert engine1.user_context.user_id != engine2.user_context.user_id
+            assert engine1.get_user_context().user_id != engine2.get_user_context().user_id
             assert engine1.active_runs is not engine2.active_runs
             assert engine1.run_history is not engine2.run_history
             assert engine1.execution_stats is not engine2.execution_stats
