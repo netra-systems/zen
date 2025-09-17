@@ -51,11 +51,11 @@ class SuiteCorruptionScanner:
     """Scans and analyzes test suite corruption for Issue #817."""
 
     CORRUPTION_PATTERNS = {
-        'removed_syntax_error': r'^# REMOVED_SYNTAX_ERROR:',
-        'commented_imports': r'^# REMOVED_SYNTAX_ERROR: import',
-        'commented_decorators': r'^# REMOVED_SYNTAX_ERROR: @',
-        'commented_functions': r'^# REMOVED_SYNTAX_ERROR: (def |async def )',
-        'commented_classes': r'^# REMOVED_SYNTAX_ERROR: class '
+    'removed_syntax_error': r'^',
+    'commented_imports': r'^ import',
+    'commented_decorators': r'^ @',
+    'commented_functions': r'^ (def |async def )',
+    'commented_classes': r'^ class '
     }
 
     MISSION_CRITICAL_PATTERNS = [
@@ -206,11 +206,11 @@ class CorruptionScannerTests:
         patterns = self.scanner.CORRUPTION_PATTERNS
 
         test_lines = [
-            "# REMOVED_SYNTAX_ERROR: import asyncio",
-            "# REMOVED_SYNTAX_ERROR: @pytest.mark.asyncio",
-            "# REMOVED_SYNTAX_ERROR: def test_function():",
-            "# REMOVED_SYNTAX_ERROR: async def async_test():",
-            "# REMOVED_SYNTAX_ERROR: class TestClass:",
+    " import asyncio",
+    " @pytest.mark.asyncio",
+    " def test_function():",
+    " async def async_test():",
+    " class TestClass:",
             "normal import line",
             "regular code"
         ]

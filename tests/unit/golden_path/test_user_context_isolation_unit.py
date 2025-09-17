@@ -79,8 +79,12 @@ class UserIsolationValidator:
             self.user_contexts[user_id] = context
             
             # Add isolation signature to context for tracking
-            if hasattr(context, '__dict__'):
-                context._isolation_signature = signature
+            # Note: UserExecutionContext is frozen, so we use object.__setattr__
+            try:
+                object.__setattr__(context, '_isolation_signature', signature)
+            except:
+                # If we can't set the attribute, use a different tracking method
+                pass
             
             return signature
     
@@ -92,7 +96,7 @@ class UserIsolationValidator:
                 **event,
                 "validation_timestamp": time.time(),
                 "receiving_user": user_id,
-                "source_signature": getattr(source_context, '_isolation_signature', 'unknown') if source_context else 'unknown'
+                "source_signature": getattr(source_context, '_isolation_signature', f"context_{id(source_context)}") if source_context else 'unknown'
             }
             
             self.user_events[user_id].append(event_with_validation)
@@ -111,17 +115,19 @@ class UserIsolationValidator:
                 self.cross_contamination_violations.append(violation)
             
             # Check for context signature mismatches
-            if source_context and hasattr(source_context, '_isolation_signature'):
-                expected_user_pattern = f"{user_id}_"
-                if not source_context._isolation_signature.startswith(expected_user_pattern):
-                    violation = {
-                        "receiving_user": user_id,
-                        "source_signature": source_context._isolation_signature,
-                        "contamination_type": "context_signature_mismatch",
-                        "timestamp": time.time(),
-                        "severity": "CRITICAL"
-                    }
-                    self.cross_contamination_violations.append(violation)
+            if source_context:
+                source_signature = getattr(source_context, '_isolation_signature', None)
+                if source_signature:
+                    expected_user_pattern = f"{user_id}_"
+                    if not source_signature.startswith(expected_user_pattern):
+                        violation = {
+                            "receiving_user": user_id,
+                            "source_signature": source_signature,
+                            "contamination_type": "context_signature_mismatch",
+                            "timestamp": time.time(),
+                            "severity": "CRITICAL"
+                        }
+                        self.cross_contamination_violations.append(violation)
     
     def validate_user_isolation(self) -> Dict[str, Any]:
         """Comprehensive isolation validation."""
@@ -201,8 +207,12 @@ class AdvancedUserContextFactory:
         signature = self.validator.register_user_context(user_id, context)
         self.created_contexts.append(context)
         
-        # Add isolation validation methods to context
-        context._validate_isolation = lambda: self.validator.validate_user_isolation()
+        # Add isolation validation methods to context (use object.__setattr__ for frozen dataclass)
+        try:
+            object.__setattr__(context, '_validate_isolation', lambda: self.validator.validate_user_isolation())
+        except:
+            # If we can't set the attribute, skip it
+            pass
         
         return context
     
@@ -298,8 +308,9 @@ class GoldenPathUserContextIsolationTests(SSotAsyncTestCase):
                 
                 user_ids.add(context.user_id)
                 
-                if hasattr(context, '_isolation_signature'):
-                    signatures.add(context._isolation_signature)
+                signature = getattr(context, '_isolation_signature', None)
+                if signature:
+                    signatures.add(signature)
             
             assert len(user_ids) == user_count, "User IDs should be unique"
             assert len(signatures) == user_count, "Isolation signatures should be unique"

@@ -1,243 +1,243 @@
-# REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
-    # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
+class TestWebSocketConnection:
+    """Real WebSocket connection for testing instead of mocks."""
 
-# REMOVED_SYNTAX_ERROR: def __init__(self):
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: self.messages_sent = []
-    # REMOVED_SYNTAX_ERROR: self.is_connected = True
-    # REMOVED_SYNTAX_ERROR: self._closed = False
+    def __init__(self):
+        pass
+        self.messages_sent = []
+        self.is_connected = True
+        self._closed = False
 
-# REMOVED_SYNTAX_ERROR: async def send_json(self, message: dict):
-    # REMOVED_SYNTAX_ERROR: """Send JSON message."""
-    # REMOVED_SYNTAX_ERROR: if self._closed:
-        # REMOVED_SYNTAX_ERROR: raise RuntimeError("WebSocket is closed")
-        # REMOVED_SYNTAX_ERROR: self.messages_sent.append(message)
+    async def send_json(self, message: dict):
+        """Send JSON message."""
+        if self._closed:
+        raise RuntimeError("WebSocket is closed")
+        self.messages_sent.append(message)
 
-# REMOVED_SYNTAX_ERROR: async def close(self, code: int = 1000, reason: str = "Normal closure"):
-    # REMOVED_SYNTAX_ERROR: """Close WebSocket connection."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: self._closed = True
-    # REMOVED_SYNTAX_ERROR: self.is_connected = False
+    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+        """Close WebSocket connection."""
+        pass
+        self._closed = True
+        self.is_connected = False
 
-# REMOVED_SYNTAX_ERROR: def get_messages(self) -> list:
-    # REMOVED_SYNTAX_ERROR: """Get all sent messages."""
-    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-    # REMOVED_SYNTAX_ERROR: return self.messages_sent.copy()
+    def get_messages(self) -> list:
+        """Get all sent messages."""
+        await asyncio.sleep(0)
+        return self.messages_sent.copy()
 
     #!/usr/bin/env python
-    # REMOVED_SYNTAX_ERROR: '''FINAL VALIDATION: WebSocket Agent Events Integration
+        '''FINAL VALIDATION: WebSocket Agent Events Integration
 
-    # REMOVED_SYNTAX_ERROR: This test validates that the CRITICAL fix is working:
-        # REMOVED_SYNTAX_ERROR: - AgentRegistry enhances tool dispatcher
-        # REMOVED_SYNTAX_ERROR: - Tool execution sends WebSocket events
-        # REMOVED_SYNTAX_ERROR: - All required events flow to frontend
+        This test validates that the CRITICAL fix is working:
+        - AgentRegistry enhances tool dispatcher
+        - Tool execution sends WebSocket events
+        - All required events flow to frontend
 
-        # REMOVED_SYNTAX_ERROR: RUN THIS TEST BEFORE ANY DEPLOYMENT.
-        # REMOVED_SYNTAX_ERROR: '''
+        RUN THIS TEST BEFORE ANY DEPLOYMENT.
+        '''
 
-        # REMOVED_SYNTAX_ERROR: import asyncio
-        # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
-        # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
+        import asyncio
+        from test_framework.database.test_database_manager import DatabaseTestManager
+        from auth_service.core.auth_manager import AuthManager
+        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+        from shared.isolated_environment import IsolatedEnvironment
 
-        # REMOVED_SYNTAX_ERROR: import pytest
-        # REMOVED_SYNTAX_ERROR: from loguru import logger
+        import pytest
+        from loguru import logger
 
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
+        from netra_backend.app.core.registry.universal_registry import AgentRegistry
+        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+        from netra_backend.app.db.database_manager import DatabaseManager
+        from netra_backend.app.clients.auth_client_core import AuthServiceClient
+        from shared.isolated_environment import get_env
 
 
-# REMOVED_SYNTAX_ERROR: class TestFinalValidation:
-    # REMOVED_SYNTAX_ERROR: """Final validation that WebSocket integration is complete."""
+class TestFinalValidation:
+        """Final validation that WebSocket integration is complete."""
 
-    # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
-    # REMOVED_SYNTAX_ERROR: @pytest.mark.mission_critical
-# REMOVED_SYNTAX_ERROR: def test_agent_registry_enhances_tool_dispatcher(self):
-    # REMOVED_SYNTAX_ERROR: """CRITICAL: Verify AgentRegistry enhances tool dispatcher."""
-# REMOVED_SYNTAX_ERROR: class MockLLM:
-    # REMOVED_SYNTAX_ERROR: pass
+        @pytest.mark.critical
+        @pytest.mark.mission_critical
+    def test_agent_registry_enhances_tool_dispatcher(self):
+        """CRITICAL: Verify AgentRegistry enhances tool dispatcher."""
+class MockLLM:
+        pass
 
     # Create tool dispatcher
-    # REMOVED_SYNTAX_ERROR: tool_dispatcher = ToolDispatcher()
-    # REMOVED_SYNTAX_ERROR: original_executor = tool_dispatcher.executor
+        tool_dispatcher = ToolDispatcher()
+        original_executor = tool_dispatcher.executor
 
     # Create registry
-    # REMOVED_SYNTAX_ERROR: registry = AgentRegistry(), tool_dispatcher)
+        registry = AgentRegistry(), tool_dispatcher)
 
     # Create WebSocket manager
-    # REMOVED_SYNTAX_ERROR: ws_manager = WebSocketManager()
+        ws_manager = WebSocketManager()
 
     # THIS IS THE CRITICAL FIX - must enhance tool dispatcher
-    # REMOVED_SYNTAX_ERROR: registry.set_websocket_manager(ws_manager)
+        registry.set_websocket_manager(ws_manager)
 
     # Verify enhancement
-    # REMOVED_SYNTAX_ERROR: assert tool_dispatcher.executor != original_executor, \
-    # REMOVED_SYNTAX_ERROR: "CRITICAL REGRESSION: Tool dispatcher not enhanced!"
+        assert tool_dispatcher.executor != original_executor, \
+        "CRITICAL REGRESSION: Tool dispatcher not enhanced!"
 
-    # REMOVED_SYNTAX_ERROR: assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
-    # REMOVED_SYNTAX_ERROR: "CRITICAL REGRESSION: Wrong executor type!"
+        assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
+        "CRITICAL REGRESSION: Wrong executor type!"
 
-    # REMOVED_SYNTAX_ERROR: assert hasattr(tool_dispatcher, '_websocket_enhanced'), \
-    # REMOVED_SYNTAX_ERROR: "CRITICAL REGRESSION: Enhancement marker missing!"
+        assert hasattr(tool_dispatcher, '_websocket_enhanced'), \
+        "CRITICAL REGRESSION: Enhancement marker missing!"
 
-    # REMOVED_SYNTAX_ERROR: logger.success(" PASS:  AgentRegistry properly enhances tool dispatcher")
+        logger.success(" PASS:  AgentRegistry properly enhances tool dispatcher")
 
-    # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
-    # REMOVED_SYNTAX_ERROR: @pytest.mark.mission_critical
-# REMOVED_SYNTAX_ERROR: def test_enhanced_tool_dispatcher_has_websocket_manager(self):
-    # REMOVED_SYNTAX_ERROR: """Verify enhanced tool dispatcher has WebSocket manager."""
-    # REMOVED_SYNTAX_ERROR: pass
-# REMOVED_SYNTAX_ERROR: class MockLLM:
-    # REMOVED_SYNTAX_ERROR: pass
+        @pytest.mark.critical
+        @pytest.mark.mission_critical
+    def test_enhanced_tool_dispatcher_has_websocket_manager(self):
+        """Verify enhanced tool dispatcher has WebSocket manager."""
+        pass
+class MockLLM:
+        pass
 
-    # REMOVED_SYNTAX_ERROR: tool_dispatcher = ToolDispatcher()
-    # REMOVED_SYNTAX_ERROR: registry = AgentRegistry(), tool_dispatcher)
-    # REMOVED_SYNTAX_ERROR: ws_manager = WebSocketManager()
+        tool_dispatcher = ToolDispatcher()
+        registry = AgentRegistry(), tool_dispatcher)
+        ws_manager = WebSocketManager()
 
     # Enhance
-    # REMOVED_SYNTAX_ERROR: registry.set_websocket_manager(ws_manager)
+        registry.set_websocket_manager(ws_manager)
 
     # Verify WebSocket manager is set
-    # REMOVED_SYNTAX_ERROR: assert hasattr(tool_dispatcher.executor, 'websocket_manager'), \
-    # REMOVED_SYNTAX_ERROR: "Enhanced executor missing websocket_manager"
+        assert hasattr(tool_dispatcher.executor, 'websocket_manager'), \
+        "Enhanced executor missing websocket_manager"
 
-    # REMOVED_SYNTAX_ERROR: assert tool_dispatcher.executor.websocket_manager is ws_manager, \
-    # REMOVED_SYNTAX_ERROR: "WebSocket manager not properly set"
+        assert tool_dispatcher.executor.websocket_manager is ws_manager, \
+        "WebSocket manager not properly set"
 
-    # REMOVED_SYNTAX_ERROR: logger.success(" PASS:  Enhanced tool dispatcher has WebSocket manager")
+        logger.success(" PASS:  Enhanced tool dispatcher has WebSocket manager")
 
-    # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
-    # REMOVED_SYNTAX_ERROR: @pytest.mark.mission_critical
-# REMOVED_SYNTAX_ERROR: def test_multiple_registry_instances_all_enhance(self):
-    # REMOVED_SYNTAX_ERROR: """Test that multiple registry instances all enhance properly."""
-# REMOVED_SYNTAX_ERROR: class MockLLM:
-    # REMOVED_SYNTAX_ERROR: pass
+        @pytest.mark.critical
+        @pytest.mark.mission_critical
+    def test_multiple_registry_instances_all_enhance(self):
+        """Test that multiple registry instances all enhance properly."""
+class MockLLM:
+        pass
 
-    # REMOVED_SYNTAX_ERROR: ws_manager = WebSocketManager()
+        ws_manager = WebSocketManager()
 
     # Create multiple registries (simulating different requests)
-    # REMOVED_SYNTAX_ERROR: for i in range(5):
-        # REMOVED_SYNTAX_ERROR: tool_dispatcher = ToolDispatcher()
-        # REMOVED_SYNTAX_ERROR: original = tool_dispatcher.executor
+        for i in range(5):
+        tool_dispatcher = ToolDispatcher()
+        original = tool_dispatcher.executor
 
-        # REMOVED_SYNTAX_ERROR: registry = AgentRegistry(), tool_dispatcher)
-        # REMOVED_SYNTAX_ERROR: registry.set_websocket_manager(ws_manager)
+        registry = AgentRegistry(), tool_dispatcher)
+        registry.set_websocket_manager(ws_manager)
 
         # Each must be enhanced
-        # REMOVED_SYNTAX_ERROR: assert tool_dispatcher.executor != original, \
-        # REMOVED_SYNTAX_ERROR: "formatted_string"
+        assert tool_dispatcher.executor != original, \
+        "formatted_string"
 
-        # REMOVED_SYNTAX_ERROR: assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
-        # REMOVED_SYNTAX_ERROR: "formatted_string"
+        assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
+        "formatted_string"
 
-        # REMOVED_SYNTAX_ERROR: logger.success(" PASS:  All registry instances properly enhance tool dispatcher")
+        logger.success(" PASS:  All registry instances properly enhance tool dispatcher")
 
-        # Removed problematic line: @pytest.mark.asyncio
-        # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
-        # REMOVED_SYNTAX_ERROR: @pytest.mark.mission_critical
-        # Removed problematic line: async def test_complete_integration_flow(self):
-            # REMOVED_SYNTAX_ERROR: """Test the complete integration flow end-to-end."""
-            # REMOVED_SYNTAX_ERROR: pass
+@pytest.mark.asyncio
+@pytest.mark.critical
+@pytest.mark.mission_critical
+    async def test_complete_integration_flow(self):
+"""Test the complete integration flow end-to-end."""
+pass
             # Track events
-            # REMOVED_SYNTAX_ERROR: events_sent = []
+events_sent = []
 
             # Create mock WebSocket
-            # REMOVED_SYNTAX_ERROR: mock_ws = Magic
-# REMOVED_SYNTAX_ERROR: async def capture(message):
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: events_sent.append(message)
+mock_ws = Magic
+async def capture(message):
+pass
+events_sent.append(message)
 
-    # REMOVED_SYNTAX_ERROR: mock_ws.send_json = AsyncMock(side_effect=capture)
+mock_ws.send_json = AsyncMock(side_effect=capture)
 
     # Setup components
-# REMOVED_SYNTAX_ERROR: class MockLLM:
-    # REMOVED_SYNTAX_ERROR: pass
+class MockLLM:
+        pass
 
-    # REMOVED_SYNTAX_ERROR: ws_manager = WebSocketManager()
-    # REMOVED_SYNTAX_ERROR: await ws_manager.connect_user("test-user", mock_ws, "test-conn")
+        ws_manager = WebSocketManager()
+        await ws_manager.connect_user("test-user", mock_ws, "test-conn")
 
-    # REMOVED_SYNTAX_ERROR: tool_dispatcher = ToolDispatcher()
-    # REMOVED_SYNTAX_ERROR: registry = AgentRegistry(), tool_dispatcher)
+        tool_dispatcher = ToolDispatcher()
+        registry = AgentRegistry(), tool_dispatcher)
 
     # CRITICAL: This must enhance the tool dispatcher
-    # REMOVED_SYNTAX_ERROR: registry.set_websocket_manager(ws_manager)
+        registry.set_websocket_manager(ws_manager)
 
     # Verify enhancement
-    # REMOVED_SYNTAX_ERROR: assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
-    # REMOVED_SYNTAX_ERROR: "Tool dispatcher not enhanced in integration test"
+        assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
+        "Tool dispatcher not enhanced in integration test"
 
-    # REMOVED_SYNTAX_ERROR: logger.success(" PASS:  Complete integration flow validated")
+        logger.success(" PASS:  Complete integration flow validated")
 
-    # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
-    # REMOVED_SYNTAX_ERROR: @pytest.mark.mission_critical
-# REMOVED_SYNTAX_ERROR: def test_enhancement_is_idempotent(self):
-    # REMOVED_SYNTAX_ERROR: """Test that enhancement can be called multiple times safely."""
-# REMOVED_SYNTAX_ERROR: class MockLLM:
-    # REMOVED_SYNTAX_ERROR: pass
+        @pytest.mark.critical
+        @pytest.mark.mission_critical
+    def test_enhancement_is_idempotent(self):
+        """Test that enhancement can be called multiple times safely."""
+class MockLLM:
+        pass
 
-    # REMOVED_SYNTAX_ERROR: tool_dispatcher = ToolDispatcher()
-    # REMOVED_SYNTAX_ERROR: registry = AgentRegistry(), tool_dispatcher)
-    # REMOVED_SYNTAX_ERROR: ws_manager1 = WebSocketManager()
-    # REMOVED_SYNTAX_ERROR: ws_manager2 = WebSocketManager()
+        tool_dispatcher = ToolDispatcher()
+        registry = AgentRegistry(), tool_dispatcher)
+        ws_manager1 = WebSocketManager()
+        ws_manager2 = WebSocketManager()
 
     # First enhancement
-    # REMOVED_SYNTAX_ERROR: registry.set_websocket_manager(ws_manager1)
-    # REMOVED_SYNTAX_ERROR: executor1 = tool_dispatcher.executor
+        registry.set_websocket_manager(ws_manager1)
+        executor1 = tool_dispatcher.executor
 
     # Second enhancement (should be safe)
-    # REMOVED_SYNTAX_ERROR: registry.set_websocket_manager(ws_manager2)
-    # REMOVED_SYNTAX_ERROR: executor2 = tool_dispatcher.executor
+        registry.set_websocket_manager(ws_manager2)
+        executor2 = tool_dispatcher.executor
 
     # Should still be enhanced
-    # REMOVED_SYNTAX_ERROR: assert isinstance(executor2, UnifiedToolExecutionEngine), \
-    # REMOVED_SYNTAX_ERROR: "Lost enhancement after second call"
+        assert isinstance(executor2, UnifiedToolExecutionEngine), \
+        "Lost enhancement after second call"
 
     # Should have updated WebSocket manager
-    # REMOVED_SYNTAX_ERROR: assert executor2.websocket_manager is ws_manager2, \
-    # REMOVED_SYNTAX_ERROR: "WebSocket manager not updated"
+        assert executor2.websocket_manager is ws_manager2, \
+        "WebSocket manager not updated"
 
-    # REMOVED_SYNTAX_ERROR: logger.success(" PASS:  Enhancement is idempotent and safe")
+        logger.success(" PASS:  Enhancement is idempotent and safe")
 
 
-# REMOVED_SYNTAX_ERROR: def run_final_validation():
-    # REMOVED_SYNTAX_ERROR: """Run all final validation tests."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("=" * 60)
-    # REMOVED_SYNTAX_ERROR: logger.info("RUNNING FINAL VALIDATION")
-    # REMOVED_SYNTAX_ERROR: logger.info("=" * 60)
+    def run_final_validation():
+        """Run all final validation tests."""
+        pass
+        logger.info("=" * 60)
+        logger.info("RUNNING FINAL VALIDATION")
+        logger.info("=" * 60)
 
-    # REMOVED_SYNTAX_ERROR: test = TestFinalValidation()
+        test = TestFinalValidation()
 
     # Run synchronous tests
-    # REMOVED_SYNTAX_ERROR: test.test_agent_registry_enhances_tool_dispatcher()
-    # REMOVED_SYNTAX_ERROR: test.test_enhanced_tool_dispatcher_has_websocket_manager()
-    # REMOVED_SYNTAX_ERROR: test.test_multiple_registry_instances_all_enhance()
-    # REMOVED_SYNTAX_ERROR: test.test_enhancement_is_idempotent()
+        test.test_agent_registry_enhances_tool_dispatcher()
+        test.test_enhanced_tool_dispatcher_has_websocket_manager()
+        test.test_multiple_registry_instances_all_enhance()
+        test.test_enhancement_is_idempotent()
 
     # Run async test
-    # REMOVED_SYNTAX_ERROR: asyncio.run(test.test_complete_integration_flow())
+        asyncio.run(test.test_complete_integration_flow())
 
-    # REMOVED_SYNTAX_ERROR: logger.info("=" * 60)
-    # REMOVED_SYNTAX_ERROR: logger.success(" PASS:  ALL FINAL VALIDATIONS PASSED")
-    # REMOVED_SYNTAX_ERROR: logger.info("WebSocket agent events integration is WORKING")
-    # REMOVED_SYNTAX_ERROR: logger.info("Basic chat functionality is OPERATIONAL")
-    # REMOVED_SYNTAX_ERROR: logger.info("=" * 60)
+        logger.info("=" * 60)
+        logger.success(" PASS:  ALL FINAL VALIDATIONS PASSED")
+        logger.info("WebSocket agent events integration is WORKING")
+        logger.info("Basic chat functionality is OPERATIONAL")
+        logger.info("=" * 60)
 
 
-    # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
+        if __name__ == "__main__":
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
-        # REMOVED_SYNTAX_ERROR: print("MIGRATION NOTICE: This file previously used direct pytest execution.")
-        # REMOVED_SYNTAX_ERROR: print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
-        # REMOVED_SYNTAX_ERROR: print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+        print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+        print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+        print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
