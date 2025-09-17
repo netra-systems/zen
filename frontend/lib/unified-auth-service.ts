@@ -7,6 +7,7 @@ import { authService as authServiceClient } from '@/lib/auth-service-config';
 import { authService } from '@/auth';
 import { authInterceptor } from '@/lib/auth-interceptor';
 import { logger } from '@/lib/logger';
+import { websocketTicketService } from '@/services/websocketTicketService';
 
 export interface AuthUser {
   id: string;
@@ -35,8 +36,7 @@ import type { WebSocketTicket, TicketRequestResult } from '@/types/websocket-tic
  * Unified authentication service that integrates all auth functionality
  */
 class UnifiedAuthService {
-  private ticketCache = new Map<string, WebSocketTicket>();
-  private readonly TICKET_REFRESH_THRESHOLD = 30000; // Refresh tickets 30s before expiry
+  // Remove internal ticket management - delegated to websocketTicketService
   
   /**
    * Initialize authentication and validate current session
