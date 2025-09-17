@@ -20,7 +20,8 @@
       "Bash(kill:*)",
       "Bash(python test_tool_detection.py:*)",
       "Bash(python:*)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(awk:*)"
     ],
     "deny": [],
     "ask": []
