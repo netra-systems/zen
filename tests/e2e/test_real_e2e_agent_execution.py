@@ -44,7 +44,7 @@ import pytest
 from loguru import logger
 from test_framework.base_e2e_test import BaseE2ETest
 from test_framework.fixtures.real_services import real_postgres_connection, with_test_database
-from test_framework.environment_fixtures import isolated_test_env
+from test_framework.environment_fixtures import isolated_test_env_fixture
 from test_framework.websocket_helpers import WebSocketTestHelpers, MockWebSocketConnection
 from test_framework.agent_test_helpers import AgentResultValidator, AgentTestExecutor, ValidationConfig, TestExecutionContext, create_test_execution_context, CommonValidators
 from shared.isolated_environment import get_env
@@ -453,7 +453,7 @@ class RealAgentExecutionTester(BaseE2ETest):
         logger.info(f'[U+2713] User isolation validated for {len(user_ids)} users')
 
 @pytest.fixture
-async def agent_tester(real_postgres_connection, isolated_test_env):
+async def agent_tester(real_postgres_connection, isolated_test_env_fixture):
     """Create and setup the agent execution tester with real services."""
     tester = RealAgentExecutionTester()
     await tester.setup_test_environment()

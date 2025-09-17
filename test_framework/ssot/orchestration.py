@@ -843,6 +843,29 @@ def get_orchestration_status() -> Dict[str, Any]:
     return get_orchestration_config().get_availability_status()
 
 
+def is_no_services_mode() -> bool:
+    """Convenience function to check if running in no-services mode."""
+    return get_orchestration_config().no_services_mode
+
+
+def check_service_available(service_name: str, host: str = "localhost", port: int = None, timeout: float = 2.0) -> bool:
+    """
+    Convenience function to check if a specific service is available.
+    
+    Args:
+        service_name: Name of the service (for logging)
+        host: Service host (default: localhost)
+        port: Service port
+        timeout: Connection timeout in seconds
+        
+    Returns:
+        True if service is available and responding
+    """
+    config = get_orchestration_config()
+    available, _ = config._check_service_availability(service_name, host, port, timeout)
+    return available
+
+
 # Create global singleton instance for easy importing
 orchestration_config = get_orchestration_config()
 
