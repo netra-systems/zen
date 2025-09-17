@@ -220,10 +220,16 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           
           // Handle different error types
           if (error.type === 'auth') {
+            // Clear ticket cache on auth errors to force refresh
+            unifiedAuthService.clearTicketCache();
+            
             if (error.code === 1008) {
               if (error.message.includes('Security violation')) {
                 logger.error('WebSocket security violation - using deprecated authentication method');
                 // This is a critical security issue - don't retry
+              } else if (error.message.includes('ticket')) {
+                logger.warn('WebSocket ticket authentication failed - may need refresh');
+                // Ticket refresh might help here
               } else {
                 logger.warn('WebSocket authentication failed - token may be expired or invalid');
                 // Token refresh might help here
@@ -231,7 +237,11 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
             } else {
               logger.warn('WebSocket authentication error', undefined, {
                 component: 'WebSocketProvider',
-                metadata: { code: error.code, message: error.message }
+                metadata: { 
+                  code: error.code, 
+                  message: error.message,
+                  authMethod: authConfig.useTicketAuth ? 'ticket' : 'jwt'
+                }
               });
             }
           }
