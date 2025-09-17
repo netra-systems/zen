@@ -130,12 +130,12 @@ oauth_user_data: Dict[str, Any]
 callback_start = time.time()
 
 try:
-service_urls = services_manager.get_service_urls()
+    service_urls = services_manager.get_service_urls()
 auth_url = service_urls["auth"]
 
         # Mock Google OAuth API responses
 with patch('httpx.AsyncClient') as mock_client:
-websocket = TestWebSocketConnection()
+    websocket = TestWebSocketConnection()
 mock_client.return_value.__aenter__.return_value = mock_instance
 
             # Mock token exchange response
@@ -167,7 +167,7 @@ callback_time = time.time() - callback_start
 
             Extract tokens from redirect URL
 if response.status_code == 302:
-redirect_url = response.headers.get("location", "")
+    redirect_url = response.headers.get("location", "")
 tokens = OAuthFlowHelper.extract_tokens_from_redirect(redirect_url)
 
 return { )
@@ -180,7 +180,7 @@ return { )
 "user_created": True
                 
 else:
-return { )
+    return { )
 "success": False,
 "status_code": response.status_code,
 "response_text": response.text,
@@ -189,7 +189,7 @@ return { )
                     
 
 except Exception as e:
-return { )
+    return { )
 "success": False,
 "error": str(e),
 "callback_time": time.time() - callback_start
@@ -210,9 +210,9 @@ oauth_user_data: Dict[str, Any]
 sync_start = time.time()
 
 try:
-access_token = tokens.get("access_token")
+    access_token = tokens.get("access_token")
 if not access_token:
-return { )
+    return { )
 "success": False,
 "error": "No access token available",
 "sync_time": time.time() - sync_start
@@ -254,7 +254,7 @@ return { )
             
 
 except Exception as e:
-return { )
+    return { )
 "success": False,
 "error": str(e),
 "sync_time": time.time() - sync_start

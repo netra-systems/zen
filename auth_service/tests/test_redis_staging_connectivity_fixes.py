@@ -52,7 +52,7 @@ class TestRedisConnectivityFixes:
     def test_redis_url_from_environment_variable(self, redis_manager):
         """Test Redis URL loading from environment variable"""
         with patch('shared.isolated_environment.get_env') as mock_env:
-        mock_env.return_value.get.side_effect = lambda x: None { )
+        mock_env.return_value.get.side_effect = lambda x: None { }
         'REDIS_URL': 'redis://test-redis:6379',
         'ENVIRONMENT': 'staging'
         }.get(key, default)
@@ -69,7 +69,7 @@ class TestRedisConnectivityFixes:
         mock_secret_manager.access_secret_version.return_value = mock_response
 
         with patch('shared.isolated_environment.get_env') as mock_env:
-        mock_env.return_value.get.side_effect = lambda x: None { )
+        mock_env.return_value.get.side_effect = lambda x: None { }
         'REDIS_URL': None,  # Not set in env
         'ENVIRONMENT': 'staging',
         'GCP_PROJECT_ID': 'netra-staging'
@@ -86,7 +86,7 @@ class TestRedisConnectivityFixes:
     def test_redis_url_graceful_degradation_on_secret_manager_failure(self):
         """Test graceful degradation when Secret Manager fails"""
         with patch('shared.isolated_environment.get_env') as mock_env:
-        mock_env.return_value.get.side_effect = lambda x: None { )
+        mock_env.return_value.get.side_effect = lambda x: None { }
         'REDIS_URL': None,  # Not set in env
         'ENVIRONMENT': 'staging',
         'GCP_PROJECT_ID': 'netra-staging'
@@ -104,8 +104,8 @@ class TestRedisConnectivityFixes:
 """Test Redis connection retry with exponential backoff"""
 pass
                 # Mock Redis client that fails first 2 attempts, succeeds on 3rd
-mock_redis_client = AsyncNone  # TODO: Use real service instance
-mock_redis_client.ping.side_effect = [ )
+mock_redis_client = MagicMock()  # TODO: Use real service instance
+mock_redis_client.ping.side_effect = [ ]
 Exception("Connection failed"),
 Exception("Connection failed"),
 True  # Success on 3rd attempt
@@ -129,7 +129,7 @@ mock_sleep.assert_any_call(2)  # Second retry after 2s
     async def test_redis_connection_retry_exhaustion(self, redis_manager):
 """Test that retry logic eventually gives up"""
                     # Mock Redis client that always fails
-mock_redis_client = AsyncNone  # TODO: Use real service instance
+mock_redis_client = MagicMock()  # TODO: Use real service instance
 mock_redis_client.ping.side_effect = Exception("Always fails")
 
 redis_manager.redis_client = mock_redis_client
@@ -154,7 +154,7 @@ session_manager.redis_manager = None
 assert await session_manager.async_health_check() == False
 
                             # Test with working Redis
-mock_manager = AsyncNone  # TODO: Use real service instance
+mock_manager = MagicMock()  # TODO: Use real service instance
 mock_manager.ping_with_timeout.return_value = True
 session_manager.redis_manager = mock_manager
 
@@ -175,7 +175,7 @@ assert await redis_manager.delete('test_key') == False
 
                                 # Test connection errors
 redis_manager.enabled = True
-mock_client = AsyncNone  # TODO: Use real service instance
+mock_client = MagicMock()  # TODO: Use real service instance
 mock_client.get.side_effect = redis.ConnectionError("Connection lost")
 mock_client.set.side_effect = redis.ConnectionError("Connection lost")
 mock_client.delete.side_effect = redis.ConnectionError("Connection lost")
@@ -221,7 +221,7 @@ assert info['max_connections'] == 10
 def test_redis_status_via_manager(self):
 """Test Redis status via manager methods"""
 with patch('shared.isolated_environment.get_env') as mock_env:
-mock_env.return_value.get.side_effect = lambda x: None { )
+mock_env.return_value.get.side_effect = lambda x: None { }
 'ENVIRONMENT': 'staging',
 'REDIS_URL': 'redis://test:6379'
 }.get(key, default)
@@ -263,7 +263,7 @@ def test_environment_specific_redis_behavior(self):
 """Test Redis behavior in different environments"""
     # Development environment - should allow empty Redis URL
 with patch('shared.isolated_environment.get_env') as mock_env:
-mock_env.return_value.get.side_effect = lambda x: None { )
+mock_env.return_value.get.side_effect = lambda x: None { }
 'REDIS_URL': None,
 'ENVIRONMENT': 'development'
 }.get(key, default)
@@ -274,7 +274,7 @@ return empty string, not raise error
 
         # Test environment - should allow empty Redis URL
 with patch('shared.isolated_environment.get_env') as mock_env:
-mock_env.return_value.get.side_effect = lambda x: None { )
+mock_env.return_value.get.side_effect = lambda x: None { }
 'REDIS_URL': None,
 'ENVIRONMENT': 'test'
 }.get(key, default)
@@ -284,7 +284,7 @@ assert redis_url == ''  # Should return empty string, not raise error
 
             # Staging environment - should try Secret Manager, then gracefully degrade
 with patch('shared.isolated_environment.get_env') as mock_env:
-mock_env.return_value.get.side_effect = lambda x: None { )
+mock_env.return_value.get.side_effect = lambda x: None { }
 'REDIS_URL': None,
 'ENVIRONMENT': 'staging',
 'GCP_PROJECT_ID': None  # No GCP project configured
@@ -301,7 +301,7 @@ class TestRedisStagingIntegration:
     async def test_staging_health_check_degraded_to_healthy(self):
 """Test that health check reports healthy when Redis is properly configured"""
 with patch('shared.isolated_environment.get_env') as mock_env:
-mock_env.return_value.get.side_effect = lambda x: None { )
+mock_env.return_value.get.side_effect = lambda x: None { }
 'ENVIRONMENT': 'staging',
 'GCP_PROJECT_ID': 'netra-staging'
 }.get(key, default)
@@ -330,7 +330,7 @@ def test_staging_redis_url_secret_name_format(self):
 """Test that Redis URL is loaded with correct secret name format"""
 pass
 with patch('shared.isolated_environment.get_env') as mock_env:
-mock_env.return_value.get.side_effect = lambda x: None { )
+mock_env.return_value.get.side_effect = lambda x: None { }
 'REDIS_URL': None,
 'ENVIRONMENT': 'staging',
 'GCP_PROJECT_ID': 'netra-staging'

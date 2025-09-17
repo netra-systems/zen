@@ -1,5 +1,5 @@
 class TestWebSocketConnection:
-    """Real WebSocket connection for testing instead of mocks."""
+    "Real WebSocket connection for testing instead of mocks.""
 
     def __init__(self):
         pass
@@ -8,19 +8,19 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        """Send JSON message."""
+        ""Send JSON message."
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
-        """Close WebSocket connection."""
+    async def close(self, code: int = 1000, reason: str = Normal closure"):
+        "Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
 
-    def get_messages(self) -> list:
-        """Get all sent messages."""
+    async def get_messages(self) -> list:
+        ""Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
@@ -73,13 +73,13 @@ class TestWebSocketConnection:
 
 
     def test_1_websocket_notifier_required_methods():
-        """CRITICAL: WebSocketNotifier has all required methods."""
-        print("Test 1: WebSocketNotifier required methods...")
+        "CRITICAL: WebSocketNotifier has all required methods.""
+        print(Test 1: WebSocketNotifier required methods...")
 
         ws_manager = WebSocketManager()
         notifier = WebSocketNotifier.create_for_user(ws_manager)
 
-        required_methods = [ )
+        required_methods = [
         'send_agent_started',  'send_agent_thinking',
         'send_partial_result',
         'send_tool_executing',
@@ -90,17 +90,17 @@ class TestWebSocketConnection:
 
         for method in required_methods:
         if not hasattr(notifier, method):
-        raise AssertionError("formatted_string")
+        raise AssertionError("formatted_string)
         if not callable(getattr(notifier, method)):
-        raise AssertionError("formatted_string")
+        raise AssertionError(formatted_string")
 
-        print("PASS: All required methods exist")
+        print("PASS: All required methods exist)
 
 
     def test_2_agent_registry_websocket_enhancement():
-        """CRITICAL: AgentRegistry.set_websocket_manager() MUST enhance tool dispatcher."""
+        ""CRITICAL: AgentRegistry.set_websocket_manager() MUST enhance tool dispatcher."
         pass
-        print("Test 2: AgentRegistry WebSocket enhancement...")
+        print("Test 2: AgentRegistry WebSocket enhancement...)
 
 class MockLLM:
         pass
@@ -116,20 +116,20 @@ class MockLLM:
 
     # Verify enhancement happened
         if tool_dispatcher.executor == original_executor:
-        raise AssertionError("CRITICAL: Tool dispatcher executor not enhanced")
+        raise AssertionError(CRITICAL: Tool dispatcher executor not enhanced")
 
         if not isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine):
-        raise AssertionError("formatted_string")
+        raise AssertionError("formatted_string)
 
         if not getattr(tool_dispatcher, '_websocket_enhanced', False):
-        raise AssertionError("CRITICAL: Enhancement marker not set")
+        raise AssertionError(CRITICAL: Enhancement marker not set")
 
-        print("PASS: AgentRegistry enhances tool dispatcher")
+        print("PASS: AgentRegistry enhances tool dispatcher)
 
 
     def test_3_execution_engine_websocket_notifier():
-        """CRITICAL: ExecutionEngine MUST have WebSocketNotifier initialized."""
-        print("Test 3: ExecutionEngine WebSocketNotifier initialization...")
+        ""CRITICAL: ExecutionEngine MUST have WebSocketNotifier initialized."
+        print("Test 3: ExecutionEngine WebSocketNotifier initialization...)
 
 class MockLLM:
         pass
@@ -141,18 +141,18 @@ class MockLLM:
 
     # Verify WebSocket components exist
         if not hasattr(engine, 'websocket_notifier'):
-        raise AssertionError("CRITICAL: ExecutionEngine missing websocket_notifier")
+        raise AssertionError(CRITICAL: ExecutionEngine missing websocket_notifier")
 
         if not isinstance(engine.websocket_notifier, WebSocketNotifier):
-        raise AssertionError("formatted_string")
+        raise AssertionError("formatted_string)
 
-        print("PASS: ExecutionEngine has WebSocketNotifier")
+        print(PASS: ExecutionEngine has WebSocketNotifier")
 
 
     async def test_4_unified_tool_execution_sends_events():
-        """CRITICAL: UnifiedToolExecutionEngine MUST wrap tool execution and send events."""
+        "CRITICAL: UnifiedToolExecutionEngine MUST wrap tool execution and send events.""
         pass
-        print("Test 4: Enhanced tool execution sends events...")
+        print(Test 4: Enhanced tool execution sends events...")
 
         ws_manager = WebSocketManager()
         sent_events = []
@@ -171,10 +171,10 @@ class MockLLM:
 
     # Create test context
         context = AgentExecutionContext( )
-        run_id="test-run",
-        thread_id="test-thread",
-        user_id="test-user",
-        agent_name="test",
+        run_id="test-run,
+        thread_id=test-thread",
+        user_id="test-user,
+        agent_name=test",
         retry_count=0,
         max_retries=1
     
@@ -184,43 +184,43 @@ class MockLLM:
         pass
         await asyncio.sleep(0.001)  # Minimal delay
         await asyncio.sleep(0)
-        return {"result": "success"}
+        return {"result: success"}
 
         # Create state
         state = DeepAgentState( )
-        chat_thread_id="test-thread",
-        user_id="test-user",
-        run_id="test-run"
+        chat_thread_id="test-thread,
+        user_id=test-user",
+        run_id="test-run
         
 
         # Execute tool
         result = await executor.execute_with_state( )
-        test_tool, "test_tool", {}, state, "test-run"
+        test_tool, test_tool", {}, state, "test-run
         
 
         # Verify execution worked
         if not result:
-        raise AssertionError("CRITICAL: Tool execution failed")
+        raise AssertionError(CRITICAL: Tool execution failed")
 
             # Verify WebSocket events were sent
         if len(sent_events) < 2:
-        raise AssertionError("formatted_string")
+        raise AssertionError("formatted_string)
 
                 # Check for critical event types
         event_types = [event.get('type') for event in sent_events]
 
         if 'tool_executing' not in event_types:
-        raise AssertionError("formatted_string")
+        raise AssertionError(formatted_string")
 
         if 'tool_completed' not in event_types:
-        raise AssertionError("formatted_string")
+        raise AssertionError("formatted_string)
 
-        print("formatted_string")
+        print(formatted_string")
 
 
     async def test_5_all_required_websocket_events():
-        """CRITICAL: All required WebSocket event types must be sent."""
-        print("Test 5: All required WebSocket events...")
+        "CRITICAL: All required WebSocket event types must be sent.""
+        print(Test 5: All required WebSocket events...")
 
         ws_manager = WebSocketManager()
         sent_events = []
@@ -237,45 +237,45 @@ class MockLLM:
 
     # Create test context
         context = AgentExecutionContext( )
-        run_id="event-test",  thread_id="event-thread",
-        user_id="event-user",
-        agent_name="test_agent",
+        run_id="event-test,  thread_id=event-thread",
+        user_id="event-user,
+        agent_name=test_agent",
         retry_count=0,
         max_retries=1
     
 
     # Send all required event types
         await notifier.send_agent_started(context)
-        await notifier.send_agent_thinking(context, "Processing...")
-        await notifier.send_tool_executing(context, "test_tool")
-        await notifier.send_tool_completed(context, "test_tool", {"status": "success"})
-        await notifier.send_agent_completed(context, {"success": True})
+        await notifier.send_agent_thinking(context, "Processing...)
+        await notifier.send_tool_executing(context, test_tool")
+        await notifier.send_tool_completed(context, "test_tool, {status": "success}
+        await notifier.send_agent_completed(context, {success": True}
 
     # Verify all events were sent
-        required_events = { )
-        "agent_started",
-        "agent_thinking",
-        "tool_executing",
-        "tool_completed",
-        "agent_completed"
+        required_events = {
+        "agent_started,
+        agent_thinking",
+        "tool_executing,
+        tool_completed",
+        "agent_completed
     
 
         event_types = set(event.get('type') for event in sent_events)
         missing_events = required_events - event_types
 
         if missing_events:
-        raise AssertionError("formatted_string")
+        raise AssertionError(formatted_string")
 
         if len(sent_events) < 5:
-        raise AssertionError("formatted_string")
+        raise AssertionError("formatted_string)
 
-        print("formatted_string")
+        print(formatted_string")
 
 
     async def test_6_regression_prevention():
-        """CRITICAL: Regression test for the specific issues mentioned in the task."""
+        "CRITICAL: Regression test for the specific issues mentioned in the task.""
         pass
-        print("Test 6: Regression prevention...")
+        print(Test 6: Regression prevention...")
 
                 # Test that AgentRegistry always enhances tool dispatcher (was broken)
 class MockLLM:
@@ -292,25 +292,25 @@ class MockLLM:
         registry.set_websocket_manager(ws_manager)
 
         if tool_dispatcher.executor == original_executor:
-        raise AssertionError("formatted_string")
+        raise AssertionError("formatted_string)
 
         if not isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine):
-        raise AssertionError("formatted_string")
+        raise AssertionError(formatted_string")
 
-        print("PASS: Regression prevention successful")
+        print("PASS: Regression prevention successful)
 
 
     async def main():
-        """Run all mission critical tests."""
-        print("=" * 70)
-        print("MISSION CRITICAL WEBSOCKET AGENT EVENTS TEST")
-        print("=" * 70)
-        print("Testing the core requirements from the task:")
-        print("1. AgentRegistry.set_websocket_manager() enhances tool dispatcher")
+        ""Run all mission critical tests."
+        print("= * 70)
+        print(MISSION CRITICAL WEBSOCKET AGENT EVENTS TEST")
+        print("= * 70)
+        print(Testing the core requirements from the task:")
+        print("1. AgentRegistry.set_websocket_manager() enhances tool dispatcher)
         print("2. ExecutionEngine has WebSocketNotifier initialized")
-        print("3. UnifiedToolExecutionEngine wraps tool execution")
+        print(3. UnifiedToolExecutionEngine wraps tool execution)
         print("4. All required WebSocket events are sent")
-        print("=" * 70)
+        print(= * 70)
 
         try:
         # Run all tests
@@ -321,25 +321,25 @@ class MockLLM:
         await test_5_all_required_websocket_events()
         await test_6_regression_prevention()
 
-        print(" )
-        " + "=" * 70)
-        print("SUCCESS: ALL MISSION CRITICAL TESTS PASSED!")
-        print("WebSocket agent events are working correctly.")
-        print("Basic chat functionality is operational.")
-        print("=" * 70)
+        print("")
+         + =" * 70)
+        print("SUCCESS: ALL MISSION CRITICAL TESTS PASSED!)
+        print(WebSocket agent events are working correctly.")
+        print("Basic chat functionality is operational.)
+        print(=" * 70)
         await asyncio.sleep(0)
         return True
 
         except Exception as e:
-        print("formatted_string")
-        print("=" * 70)
-        print("WebSocket agent events REQUIRE IMMEDIATE ATTENTION!")
-        print("Chat functionality will be broken without these fixes.")
-        print("=" * 70)
+        print("formatted_string)
+        print(=" * 70)
+        print("WebSocket agent events REQUIRE IMMEDIATE ATTENTION!)
+        print(Chat functionality will be broken without these fixes.")
+        print("= * 70)
         return False
 
 
-        if __name__ == "__main__":
+        if __name__ == __main__":
         success = asyncio.run(main())
         sys.exit(0 if success else 1)
         pass

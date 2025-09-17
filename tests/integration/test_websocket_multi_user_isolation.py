@@ -1,4 +1,4 @@
-"""WebSocket Multi-User Isolation Test Suite
+"WebSocket Multi-User Isolation Test Suite
 
 PURPOSE: Validate proper user context separation for Issue #1182 WebSocket Manager SSOT Migration
 BUSINESS VALUE: Protects $500K+ ARR by ensuring enterprise-grade user isolation for HIPAA, SOC2, SEC compliance
@@ -10,7 +10,7 @@ CRITICAL: These tests follow claude.md requirements:
 - Real services focus
 - Multi-user isolation validation
 - Enterprise security requirements
-"""
+""
 
 import pytest
 import asyncio
@@ -32,7 +32,7 @@ logger = get_logger(__name__)
 
 @dataclass
 class UserSession:
-    """Represents a user session for isolation testing."""
+    ""Represents a user session for isolation testing."
     user_id: str
     session_id: str
     websocket_manager: Any = None
@@ -43,14 +43,14 @@ class UserSession:
 
 @pytest.mark.integration
 class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
-    """Test WebSocket manager multi-user isolation and security.
+    "Test WebSocket manager multi-user isolation and security.
     
     These tests MUST FAIL with current cross-user state contamination.
     After SSOT consolidation, they MUST PASS with complete user isolation.
-    """
+    ""
 
     def setUp(self):
-        """Set up test environment for multi-user isolation testing."""
+        ""Set up test environment for multi-user isolation testing."
         super().setUp()
         self.user_sessions = {}
         self.contamination_violations = []
@@ -58,19 +58,19 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
         self.performance_violations = []
         
     async def asyncSetUp(self):
-        """Async setup for multi-user testing."""
+        "Async setup for multi-user testing.""
         await super().asyncSetUp()
         await self._create_isolated_user_sessions()
         
     async def _create_isolated_user_sessions(self) -> None:
-        """Create isolated user sessions for testing."""
+        ""Create isolated user sessions for testing."
         # Create different types of users for comprehensive testing
         user_profiles = [
-            {"type": "healthcare_user", "compliance": "HIPAA", "sensitivity": "high"},
-            {"type": "financial_user", "compliance": "SOC2", "sensitivity": "high"},
-            {"type": "government_user", "compliance": "SEC", "sensitivity": "critical"},
-            {"type": "enterprise_user", "compliance": "general", "sensitivity": "medium"},
-            {"type": "free_tier_user", "compliance": "basic", "sensitivity": "low"}
+            {"type: healthcare_user", "compliance: HIPAA", "sensitivity: high"},
+            {"type: financial_user", "compliance: SOC2", "sensitivity: high"},
+            {"type: government_user", "compliance: SEC", "sensitivity: critical"},
+            {"type: enterprise_user", "compliance: general", "sensitivity: medium"},
+            {"type: free_tier_user", "compliance: basic", "sensitivity: low"}
         ]
         
         for i, profile in enumerate(user_profiles):
@@ -79,19 +79,19 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
                 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
                 
                 id_manager = UnifiedIDManager()
-                user_id = ensure_user_id(id_manager.generate_id(IDType.USER, prefix=f"isolation_test_{profile['type']}"))
-                session_id = id_manager.generate_id(IDType.THREAD, prefix=f"session_{profile['type']}")
+                user_id = ensure_user_id(id_manager.generate_id(IDType.USER, prefix=f"isolation_test_{profile['type']}))
+                session_id = id_manager.generate_id(IDType.THREAD, prefix=fsession_{profile['type']}")
                 
                 # Create user context with compliance requirements
                 user_context = type('TestUserContext', (), {
                     'user_id': user_id,
                     'session_id': session_id,
-                    'request_id': id_manager.generate_id(IDType.REQUEST, prefix=f"req_{profile['type']}"),
+                    'request_id': id_manager.generate_id(IDType.REQUEST, prefix=f"req_{profile['type']}),
                     'is_test': True,
                     'compliance_level': profile['compliance'],
                     'sensitivity_level': profile['sensitivity'],
                     'user_type': profile['type']
-                })()
+                }()
                 
                 # Create user session
                 user_session = UserSession(
@@ -101,30 +101,30 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
                 
                 # Add sensitive test data that must NOT leak between users
                 user_session.secret_data = {
-                    'ssn': f"000-00-{1000 + i}",  # Mock SSN for testing
-                    'financial_data': f"account_{user_id}_{i}",
-                    'health_record': f"patient_record_{user_id}",
-                    'classified_info': f"top_secret_{profile['type']}_{uuid.uuid4()}",
-                    'api_key': f"sk-{uuid.uuid4().hex}",
-                    'session_token': f"token_{uuid.uuid4().hex}"
+                    'ssn': f000-00-{1000 + i}",  # Mock SSN for testing
+                    'financial_data': f"account_{user_id}_{i},
+                    'health_record': fpatient_record_{user_id}",
+                    'classified_info': f"top_secret_{profile['type']}_{uuid.uuid4()},
+                    'api_key': fsk-{uuid.uuid4().hex}",
+                    'session_token': f"token_{uuid.uuid4().hex}
                 }
                 
                 self.user_sessions[user_id] = user_session
-                logger.info(f"Created isolated user session for {profile['type']}: {user_id}")
+                logger.info(fCreated isolated user session for {profile['type']}: {user_id}")
                 
             except Exception as e:
-                logger.error(f"Failed to create user session {i}: {e}")
-                self.fail(f"Unable to create test user sessions: {e}")
+                logger.error(f"Failed to create user session {i}: {e})
+                self.fail(fUnable to create test user sessions: {e}")
 
     async def test_websocket_manager_user_data_isolation(self):
-        """
+        "
         CRITICAL TEST: Verify complete isolation of user data between WebSocket managers
         
         EXPECTED BEHAVIOR:
         - MUST FAIL (current): User data leaks between manager instances
         - MUST PASS (after SSOT): Complete user data isolation
-        """
-        logger.info("Testing WebSocket manager user data isolation...")
+        ""
+        logger.info(Testing WebSocket manager user data isolation...")
         
         try:
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
@@ -137,7 +137,7 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
                         'user_id': user_id,
                         'session_id': session.session_id,
                         'is_test': True
-                    })()
+                    }()
                     
                     # Get WebSocket manager
                     manager = get_websocket_manager(user_context=user_context)
@@ -148,13 +148,13 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
                         manager._user_data = session.secret_data.copy()
                     elif hasattr(manager, '__dict__'):
                         for key, value in session.secret_data.items():
-                            setattr(manager, f"user_{key}", value)
+                            setattr(manager, f"user_{key}, value)
                     
-                    logger.info(f"Set sensitive data for user {user_id}: {list(session.secret_data.keys())}")
+                    logger.info(fSet sensitive data for user {user_id}: {list(session.secret_data.keys())}")
                     
                 except Exception as e:
-                    logger.error(f"Failed to create manager for user {user_id}: {e}")
-                    self.contamination_violations.append(f"Manager creation failed for {user_id}: {e}")
+                    logger.error(f"Failed to create manager for user {user_id}: {e})
+                    self.contamination_violations.append(fManager creation failed for {user_id}: {e}")
             
             # Test for data leakage between users
             data_leakage_violations = []
@@ -173,50 +173,50 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
                     # Test different ways data might leak
                     for secret_key, secret_value in session2.secret_data.items():
                         # Check direct attribute access
-                        if hasattr(manager1, f"user_{secret_key}"):
-                            leaked_value = getattr(manager1, f"user_{secret_key}")
+                        if hasattr(manager1, f"user_{secret_key}):
+                            leaked_value = getattr(manager1, fuser_{secret_key}")
                             if leaked_value == secret_value:
                                 data_leakage_violations.append(
-                                    f"CRITICAL: User {user_id1} manager has access to {user_id2}'s {secret_key}: {leaked_value}"
+                                    f"CRITICAL: User {user_id1} manager has access to {user_id2}'s {secret_key}: {leaked_value}
                                 )
                         
                         # Check user data dictionary
                         if hasattr(manager1, '_user_data') and isinstance(manager1._user_data, dict):
                             if secret_key in manager1._user_data and manager1._user_data[secret_key] == secret_value:
                                 data_leakage_violations.append(
-                                    f"CRITICAL: User {user_id1} manager._user_data contains {user_id2}'s {secret_key}"
+                                    fCRITICAL: User {user_id1} manager._user_data contains {user_id2}'s {secret_key}"
                                 )
                         
                         # Check for shared object references
                         if hasattr(manager1, '_user_data') and hasattr(session2.websocket_manager, '_user_data'):
                             if id(manager1._user_data) == id(session2.websocket_manager._user_data):
                                 data_leakage_violations.append(
-                                    f"CRITICAL: Shared _user_data object between {user_id1} and {user_id2}"
+                                    f"CRITICAL: Shared _user_data object between {user_id1} and {user_id2}
                                 )
             
             # ASSERTION: This MUST FAIL currently (proving data leakage exists)
             # After SSOT consolidation, this MUST PASS (complete data isolation)
             self.assertEqual(len(data_leakage_violations), 0,
-                           f"USER DATA ISOLATION VIOLATIONS: Found {len(data_leakage_violations)} data leakage issues. "
-                           f"Violations: {data_leakage_violations}")
+                           fUSER DATA ISOLATION VIOLATIONS: Found {len(data_leakage_violations)} data leakage issues. "
+                           f"Violations: {data_leakage_violations})
                            
         except Exception as e:
-            self.fail(f"Failed to test user data isolation: {e}")
+            self.fail(fFailed to test user data isolation: {e}")
 
     async def test_websocket_manager_concurrent_operation_isolation(self):
-        """
+        "
         CRITICAL TEST: Verify concurrent operations don't contaminate user contexts
         
         EXPECTED BEHAVIOR:
         - MUST FAIL (current): Concurrent operations share state
         - MUST PASS (after SSOT): Complete operation isolation
-        """
-        logger.info("Testing WebSocket manager concurrent operation isolation...")
+        ""
+        logger.info(Testing WebSocket manager concurrent operation isolation...")
         
         concurrent_violations = []
         
         async def simulate_user_operation(user_id: str, operation_id: str, secret_payload: str) -> Dict[str, Any]:
-            """Simulate a user-specific operation with sensitive data."""
+            "Simulate a user-specific operation with sensitive data.""
             try:
                 session = self.user_sessions[user_id]
                 manager = session.websocket_manager
@@ -230,14 +230,14 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
                     'operation_id': operation_id,
                     'secret_payload': secret_payload,
                     'timestamp': time.time(),
-                    'processing_flag': f"processing_{user_id}_{operation_id}"
+                    'processing_flag': fprocessing_{user_id}_{operation_id}"
                 }
                 
                 # Set state in manager
                 if hasattr(manager, '_current_operation'):
                     manager._current_operation = operation_state
                 elif hasattr(manager, '__dict__'):
-                    manager.__dict__.update({f'op_{operation_id}': operation_state})
+                    manager.__dict__.update({f'op_{operation_id}': operation_state}
                 
                 # Simulate some async work
                 await asyncio.sleep(0.02)  # Allow time for race conditions
@@ -247,7 +247,7 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
                     current_state = manager._current_operation
                     if current_state.get('user_id') != user_id:
                         return {
-                            'contamination': f"Operation state contaminated: expected {user_id}, got {current_state.get('user_id')}",
+                            'contamination': f"Operation state contaminated: expected {user_id}, got {current_state.get('user_id')},
                             'user_id': user_id,
                             'operation_id': operation_id
                         }
@@ -270,8 +270,8 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
         tasks = []
         for user_id in self.user_sessions.keys():
             for op_num in range(5):  # Multiple operations per user
-                secret_payload = f"secret_operation_{user_id}_{op_num}_{uuid.uuid4().hex[:8]}"
-                operation_id = f"op_{op_num}"
+                secret_payload = fsecret_operation_{user_id}_{op_num}_{uuid.uuid4().hex[:8]}"
+                operation_id = f"op_{op_num}
                 task = simulate_user_operation(user_id, operation_id, secret_payload)
                 tasks.append(task)
         
@@ -282,25 +282,25 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
         for result in results:
             if isinstance(result, dict):
                 if 'contamination' in result:
-                    concurrent_violations.append(result['contamination'])
+                    concurrent_violations.append(result['contamination']
                 elif 'error' in result:
-                    concurrent_violations.append(f"Operation failed for {result.get('user_id', 'unknown')}: {result['error']}")
+                    concurrent_violations.append(fOperation failed for {result.get('user_id', 'unknown')}: {result['error']}")
         
         # ASSERTION: This MUST FAIL currently (proving concurrent contamination)
         # After SSOT consolidation, this MUST PASS (isolated concurrent operations)
         self.assertEqual(len(concurrent_violations), 0,
-                        f"CONCURRENT OPERATION VIOLATIONS: Found {len(concurrent_violations)} contamination issues. "
-                        f"Violations: {concurrent_violations}")
+                        f"CONCURRENT OPERATION VIOLATIONS: Found {len(concurrent_violations)} contamination issues. 
+                        fViolations: {concurrent_violations}")
 
     async def test_websocket_manager_memory_boundary_enforcement(self):
-        """
+        "
         CRITICAL TEST: Verify memory boundaries prevent cross-user access
         
         EXPECTED BEHAVIOR:
         - MUST FAIL (current): Shared memory allows cross-user access
         - MUST PASS (after SSOT): Strict memory boundaries between users
-        """
-        logger.info("Testing WebSocket manager memory boundary enforcement...")
+        ""
+        logger.info(Testing WebSocket manager memory boundary enforcement...")
         
         memory_violations = []
         
@@ -326,7 +326,7 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
                 }
                 
                 # Set unique memory markers
-                memory_marker = f"memory_marker_{user_id}_{uuid.uuid4().hex}"
+                memory_marker = f"memory_marker_{user_id}_{uuid.uuid4().hex}
                 if hasattr(manager, '__dict__'):
                     manager.__dict__[f'memory_marker_{user_id}'] = memory_marker
             
@@ -338,45 +338,45 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
                     
                     # Check for shared manager instances
                     if info1['manager_id'] == info2['manager_id']:
-                        memory_violations.append(f"CRITICAL: Shared manager instance between {user_id1} and {user_id2}")
+                        memory_violations.append(fCRITICAL: Shared manager instance between {user_id1} and {user_id2}")
                     
                     # Check for shared __dict__ objects
                     if info1['dict_id'] and info2['dict_id'] and info1['dict_id'] == info2['dict_id']:
-                        memory_violations.append(f"CRITICAL: Shared __dict__ object between {user_id1} and {user_id2}")
+                        memory_violations.append(f"CRITICAL: Shared __dict__ object between {user_id1} and {user_id2})
                     
                     # Check for memory marker leakage
                     manager1 = self.user_sessions[user_id1].websocket_manager
                     manager2 = self.user_sessions[user_id2].websocket_manager
                     
                     if hasattr(manager1, f'memory_marker_{user_id2}'):
-                        memory_violations.append(f"CRITICAL: {user_id1} manager has memory marker from {user_id2}")
+                        memory_violations.append(fCRITICAL: {user_id1} manager has memory marker from {user_id2}")
                     
                     if hasattr(manager2, f'memory_marker_{user_id1}'):
-                        memory_violations.append(f"CRITICAL: {user_id2} manager has memory marker from {user_id1}")
+                        memory_violations.append(f"CRITICAL: {user_id2} manager has memory marker from {user_id1})
             
             # ASSERTION: This MUST FAIL currently (proving memory boundary violations)
             # After SSOT consolidation, this MUST PASS (strict memory boundaries)
             self.assertEqual(len(memory_violations), 0,
-                           f"MEMORY BOUNDARY VIOLATIONS: Found {len(memory_violations)} memory sharing issues. "
-                           f"Violations: {memory_violations}")
+                           fMEMORY BOUNDARY VIOLATIONS: Found {len(memory_violations)} memory sharing issues. "
+                           f"Violations: {memory_violations})
                            
         except Exception as e:
-            self.fail(f"Failed to test memory boundary enforcement: {e}")
+            self.fail(fFailed to test memory boundary enforcement: {e}")
 
     async def test_websocket_manager_thread_local_isolation(self):
-        """
+        "
         CRITICAL TEST: Verify thread-local storage isolates user contexts
         
         EXPECTED BEHAVIOR:
         - MUST FAIL (current): Thread-local data leaks between users
         - MUST PASS (after SSOT): Proper thread-local isolation
-        """
-        logger.info("Testing WebSocket manager thread-local isolation...")
+        ""
+        logger.info(Testing WebSocket manager thread-local isolation...")
         
         thread_violations = []
         
         def test_thread_isolation(user_id: str, thread_id: int) -> Dict[str, Any]:
-            """Test thread isolation for a specific user."""
+            "Test thread isolation for a specific user.""
             try:
                 # Create new event loop for this thread
                 loop = asyncio.new_event_loop()
@@ -391,13 +391,13 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
                             'user_id': user_id,
                             'thread_id': thread_id,
                             'is_test': True
-                        })()
+                        }()
                         
                         # Get manager in this thread
                         manager = get_websocket_manager(user_context=user_context)
                         
                         # Set thread-specific data
-                        thread_data = f"thread_data_{user_id}_{thread_id}_{uuid.uuid4().hex}"
+                        thread_data = fthread_data_{user_id}_{thread_id}_{uuid.uuid4().hex}"
                         if hasattr(manager, '__dict__'):
                             manager.__dict__[f'thread_data_{thread_id}'] = thread_data
                         
@@ -409,7 +409,7 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
                             stored_data = getattr(manager, f'thread_data_{thread_id}')
                             if stored_data != thread_data:
                                 return {
-                                    'contamination': f"Thread data contaminated for {user_id} in thread {thread_id}",
+                                    'contamination': f"Thread data contaminated for {user_id} in thread {thread_id},
                                     'expected': thread_data,
                                     'actual': stored_data
                                 }
@@ -453,25 +453,25 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
             for future in as_completed(futures):
                 result = future.result()
                 if 'contamination' in result:
-                    thread_violations.append(result['contamination'])
+                    thread_violations.append(result['contamination']
                 elif 'error' in result:
-                    thread_violations.append(f"Thread test failed: {result['error']}")
+                    thread_violations.append(fThread test failed: {result['error']}")
         
         # ASSERTION: This MUST FAIL currently (proving thread isolation violations)
         # After SSOT consolidation, this MUST PASS (proper thread isolation)
         self.assertEqual(len(thread_violations), 0,
-                        f"THREAD ISOLATION VIOLATIONS: Found {len(thread_violations)} thread contamination issues. "
-                        f"Violations: {thread_violations}")
+                        f"THREAD ISOLATION VIOLATIONS: Found {len(thread_violations)} thread contamination issues. 
+                        fViolations: {thread_violations}")
 
     async def test_websocket_manager_compliance_boundary_validation(self):
-        """
+        "
         CRITICAL TEST: Verify compliance boundaries prevent cross-user data access
         
         EXPECTED BEHAVIOR:
         - MUST FAIL (current): Compliance data leaks between different compliance levels
         - MUST PASS (after SSOT): Strict compliance boundary enforcement
-        """
-        logger.info("Testing WebSocket manager compliance boundary validation...")
+        ""
+        logger.info(Testing WebSocket manager compliance boundary validation...")
         
         compliance_violations = []
         
@@ -492,7 +492,7 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
                 compliance_groups[compliance_level] = []
             compliance_groups[compliance_level].append((user_id, session))
         
-        logger.info(f"Compliance groups: {list(compliance_groups.keys())}")
+        logger.info(f"Compliance groups: {list(compliance_groups.keys())})
         
         # Test cross-compliance data isolation
         for compliance1, users1 in compliance_groups.items():
@@ -509,11 +509,11 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
                         if compliance1 in ['HIPAA', 'SOC2', 'SEC'] and compliance2 == 'basic':
                             # High compliance user should not be able to access basic compliance data
                             if hasattr(manager1, '_user_data'):
-                                user_data = getattr(manager1, '_user_data', {})
+                                user_data = getattr(manager1, '_user_data', {}
                                 for key, value in session2.secret_data.items():
                                     if key in user_data and user_data[key] == value:
                                         compliance_violations.append(
-                                            f"COMPLIANCE VIOLATION: {compliance1} user {user_id1} has access to {compliance2} user {user_id2}'s {key}"
+                                            fCOMPLIANCE VIOLATION: {compliance1} user {user_id1} has access to {compliance2} user {user_id2}'s {key}"
                                         )
                         
                         # Check for shared compliance data structures
@@ -521,17 +521,17 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
                             hasattr(session2.websocket_manager, '_compliance_data')):
                             if id(manager1._compliance_data) == id(session2.websocket_manager._compliance_data):
                                 compliance_violations.append(
-                                    f"COMPLIANCE VIOLATION: Shared _compliance_data between {compliance1} and {compliance2} users"
+                                    f"COMPLIANCE VIOLATION: Shared _compliance_data between {compliance1} and {compliance2} users
                                 )
         
         # ASSERTION: This MUST FAIL currently (proving compliance violations)
         # After SSOT consolidation, this MUST PASS (strict compliance boundaries)
         self.assertEqual(len(compliance_violations), 0,
-                        f"COMPLIANCE BOUNDARY VIOLATIONS: Found {len(compliance_violations)} compliance issues. "
-                        f"Violations: {compliance_violations}")
+                        fCOMPLIANCE BOUNDARY VIOLATIONS: Found {len(compliance_violations)} compliance issues. "
+                        f"Violations: {compliance_violations})
 
     async def asyncTearDown(self):
-        """Clean up user sessions and managers."""
+        ""Clean up user sessions and managers."
         for user_id, session in self.user_sessions.items():
             if session.websocket_manager:
                 try:
@@ -540,17 +540,17 @@ class WebSocketMultiUserIsolationTests(SSotAsyncTestCase):
                     elif hasattr(session.websocket_manager, 'close'):
                         await session.websocket_manager.close()
                 except Exception as e:
-                    logger.warning(f"Failed to cleanup manager for user {user_id}: {e}")
+                    logger.warning(f"Failed to cleanup manager for user {user_id}: {e})
         
         await super().asyncTearDown()
         
     def tearDown(self):
-        """Clean up after multi-user isolation tests."""
+        ""Clean up after multi-user isolation tests."
         super().tearDown()
-        logger.info(f"Multi-user isolation test completed.")
-        logger.info(f"Contamination violations: {len(self.contamination_violations)}")
-        logger.info(f"Security violations: {len(self.security_violations)}")
-        logger.info(f"Performance violations: {len(self.performance_violations)}")
+        logger.info(f"Multi-user isolation test completed.)
+        logger.info(fContamination violations: {len(self.contamination_violations)}")
+        logger.info(f"Security violations: {len(self.security_violations)})
+        logger.info(fPerformance violations: {len(self.performance_violations)}")
 
 
 if __name__ == '__main__':

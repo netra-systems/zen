@@ -1,4 +1,4 @@
-"""
+"
 Integration tests for WebSocket authentication handshake (Issue #280)
 
 This test suite validates the WebSocket authentication handshake process
@@ -6,7 +6,7 @@ without requiring Docker containers - focuses on the handshake and
 subprotocol negotiation logic.
 
 Expected: ALL TESTS SHOULD FAIL initially - demonstrating handshake issues
-"""
+""
 import asyncio
 import pytest
 from unittest.mock import Mock, patch, AsyncMock
@@ -15,10 +15,10 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 @pytest.mark.integration
 class WebSocketAuthHandshakeTests(SSotBaseTestCase):
-    """Integration tests for WebSocket authentication handshake"""
+    ""Integration tests for WebSocket authentication handshake"
 
     def setup_method(self, method=None):
-        """Set up test fixtures"""
+        "Set up test fixtures""
         super().setup_method(method)
         self.test_jwt_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiZXhwIjoxNjcwMDAwMDAwfQ.signature'
         self.mock_websocket = Mock(spec=WebSocket)
@@ -27,10 +27,10 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
         self.mock_websocket.close = AsyncMock()
 
     def test_websocket_handshake_without_subprotocol_fails(self):
-        """
+        ""
         Test: WebSocket handshake should FAIL when no subprotocol is provided
         Expected: Should reject connection during handshake phase
-        """
+        "
         self.mock_websocket.headers = {}
         try:
             from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
@@ -42,16 +42,16 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             assert 'subprotocol' in str(e).lower() or 'auth' in str(e).lower() or '401' in str(e)
 
     def test_websocket_handshake_with_jwt_auth_succeeds(self):
-        """
+        "
         Test: WebSocket handshake should SUCCEED with valid JWT subprotocol
         Expected: Should complete handshake and return authenticated user context
-        """
+        ""
         self.mock_websocket.headers = {'sec-websocket-protocol': f'jwt.{self.test_jwt_token}'}
         try:
             from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
             with patch('netra_backend.app.auth_integration.auth.get_auth_client') as mock_auth_client:
                 mock_client = Mock()
-                mock_client.verify_token = Mock(return_value={'user_id': 'user123', 'username': 'testuser', 'valid': True})
+                mock_client.verify_token = Mock(return_value={'user_id': 'user123', 'username': 'testuser', 'valid': True}
                 mock_auth_client.return_value = mock_client
                 result = asyncio.run(authenticate_websocket_ssot(self.mock_websocket))
                 if result is None:
@@ -63,10 +63,10 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             pass
 
     def test_missing_subprotocol_error_handling(self):
-        """
+        ""
         Test: Missing subprotocol should be handled gracefully
         Expected: Should return proper error message and close connection
-        """
+        "
         self.mock_websocket.headers = {}
         try:
             from netra_backend.app.routes.websocket_ssot import WebSocketSSotRouter
@@ -77,36 +77,36 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             pass
         except Exception as e:
             error_msg = str(e).lower()
-            assert any((word in error_msg for word in ['subprotocol', 'auth', '401', 'unauthorized']))
+            assert any((word in error_msg for word in ['subprotocol', 'auth', '401', 'unauthorized'])
 
     def test_invalid_jwt_token_rejection(self):
-        """
+        "
         Test: Invalid JWT token in subprotocol should be rejected
         Expected: Should validate JWT and reject malformed tokens
-        """
+        ""
         invalid_tokens = ['invalid.jwt.token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid', 'malformed_token', '']
         for invalid_token in invalid_tokens:
             self.mock_websocket.headers = {'sec-websocket-protocol': f'jwt.{invalid_token}'}
             try:
                 from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
                 result = asyncio.run(authenticate_websocket_ssot(self.mock_websocket))
-                pytest.fail(f"Should reject invalid token '{invalid_token}', but got: {result}")
+                pytest.fail(fShould reject invalid token '{invalid_token}', but got: {result}")
             except ImportError:
                 break
             except Exception:
                 pass
 
     def test_websocket_accept_with_subprotocol_response(self):
-        """
+        "
         Test: WebSocket accept should include selected subprotocol in response
         Expected: Should follow RFC 6455 and return Sec-WebSocket-Protocol header
-        """
+        ""
         self.mock_websocket.headers = {'sec-websocket-protocol': f'jwt.{self.test_jwt_token}'}
         try:
             from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
             with patch('netra_backend.app.auth_integration.auth.get_auth_client') as mock_auth_client:
                 mock_client = Mock()
-                mock_client.verify_token = Mock(return_value={'user_id': 'user123', 'valid': True})
+                mock_client.verify_token = Mock(return_value={'user_id': 'user123', 'valid': True}
                 mock_auth_client.return_value = mock_client
                 result = asyncio.run(authenticate_websocket_ssot(self.mock_websocket))
                 if self.mock_websocket.accept.called:
@@ -121,10 +121,10 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             pass
 
     def test_websocket_handshake_timeout_handling(self):
-        """
+        ""
         Test: WebSocket handshake should handle timeouts gracefully
         Expected: Should implement timeout for authentication process
-        """
+        "
         self.mock_websocket.headers = {'sec-websocket-protocol': f'jwt.{self.test_jwt_token}'}
         try:
             from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
@@ -141,7 +141,7 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             pass
 
     def test_concurrent_websocket_handshakes(self):
-        """
+        "
         Test: Multiple concurrent WebSocket handshakes should be handled safely
         Expected: Should support concurrent authentication without conflicts
         """
@@ -157,7 +157,7 @@ class WebSocketAuthHandshakeTests(SSotBaseTestCase):
             from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
             with patch('netra_backend.app.auth_integration.auth.get_auth_client') as mock_auth_client:
                 mock_client = Mock()
-                mock_client.verify_token = Mock(return_value={'user_id': 'user123', 'valid': True})
+                mock_client.verify_token = Mock(return_value={'user_id': 'user123', 'valid': True}
                 mock_auth_client.return_value = mock_client
 
                 async def run_concurrent_handshakes():

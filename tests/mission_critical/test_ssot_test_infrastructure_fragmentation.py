@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+"
 SSOT Test Infrastructure Fragmentation Detection - Issue #1075
 Integration test to detect test infrastructure fragmentation leading to -1981.6% compliance.
 
@@ -11,7 +11,7 @@ CRITICAL BUSINESS IMPACT: Test infrastructure fragmentation causes:
 
 This test is designed to FAIL initially to prove the massive fragmentation exists.
 Expected: 6,096+ duplicate test implementations across the codebase.
-"""
+""
 
 import os
 import sys
@@ -29,25 +29,25 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class TestInfrastructureFragmentationAnalyzer:
-    """Analyzes test infrastructure fragmentation across the codebase"""
+    ""Analyzes test infrastructure fragmentation across the codebase"
 
     def __init__(self, project_root: Path):
         self.project_root = project_root
         self.test_base_patterns = [
-            "BaseTestCase", "AsyncTestCase", "TestCase", "BaseTest",
-            "IntegrationTestCase", "UnitTestCase", "E2ETestCase"
+            "BaseTestCase, AsyncTestCase", "TestCase, BaseTest",
+            "IntegrationTestCase, UnitTestCase", "E2ETestCase
         ]
         self.mock_patterns = [
-            "MockFactory", "MockAgent", "MockManager", "MockService",
-            "TestMock", "FakeMock", "StubMock"
+            MockFactory", "MockAgent, MockManager", "MockService,
+            TestMock", "FakeMock, StubMock"
         ]
         self.test_utility_patterns = [
-            "TestUtility", "TestHelper", "TestConfiguration", "TestMetrics",
-            "TestContext", "TestValidator", "TestRunner"
+            "TestUtility, TestHelper", "TestConfiguration, TestMetrics",
+            "TestContext, TestValidator", "TestRunner
         ]
 
     def scan_test_files(self) -> Dict[str, List[Path]]:
-        """Scan all test files in the project"""
+        ""Scan all test files in the project"
         test_files = {
             'unit_tests': [],
             'integration_tests': [],
@@ -56,7 +56,7 @@ class TestInfrastructureFragmentationAnalyzer:
             'other_tests': []
         }
 
-        for file_path in self.project_root.rglob("*.py"):
+        for file_path in self.project_root.rglob("*.py):
             if self._is_test_file(file_path):
                 category = self._categorize_test_file(file_path)
                 test_files[category].append(file_path)
@@ -64,7 +64,7 @@ class TestInfrastructureFragmentationAnalyzer:
         return test_files
 
     def _is_test_file(self, file_path: Path) -> bool:
-        """Determine if a file is a test file"""
+        ""Determine if a file is a test file"
         # Skip obvious non-test directories
         skip_dirs = {'.git', '__pycache__', '.pytest_cache', 'node_modules'}
         if any(skip_dir in file_path.parts for skip_dir in skip_dirs):
@@ -79,7 +79,7 @@ class TestInfrastructureFragmentationAnalyzer:
         )
 
     def _categorize_test_file(self, file_path: Path) -> str:
-        """Categorize test file by type"""
+        "Categorize test file by type""
         path_str = str(file_path).lower()
 
         if 'mission_critical' in path_str:
@@ -93,8 +93,8 @@ class TestInfrastructureFragmentationAnalyzer:
         else:
             return 'other_tests'
 
-    def analyze_test_base_class_duplicates(self, test_files: Dict[str, List[Path]]) -> Dict[str, Any]:
-        """Analyze duplicate test base class implementations"""
+    def analyze_test_base_class_duplicates(self, test_files: Dict[str, List[Path]] -> Dict[str, Any]:
+        ""Analyze duplicate test base class implementations"
         base_class_implementations = defaultdict(list)
 
         all_test_files = []
@@ -117,10 +117,10 @@ class TestInfrastructureFragmentationAnalyzer:
                                         'line': node.lineno,
                                         'relative_path': str(file_path.relative_to(self.project_root)),
                                         'category': self._categorize_test_file(file_path)
-                                    })
+                                    }
 
             except Exception as e:
-                print(f"Warning: Could not parse test file {file_path}: {e}")
+                print(f"Warning: Could not parse test file {file_path}: {e})
                 continue
 
         # Calculate duplication statistics
@@ -134,8 +134,8 @@ class TestInfrastructureFragmentationAnalyzer:
             'fragmentation_score': total_duplicates / max(len(base_class_implementations), 1)
         }
 
-    def analyze_mock_implementation_duplicates(self, test_files: Dict[str, List[Path]]) -> Dict[str, Any]:
-        """Analyze duplicate mock implementations"""
+    def analyze_mock_implementation_duplicates(self, test_files: Dict[str, List[Path]] -> Dict[str, Any]:
+        ""Analyze duplicate mock implementations"
         mock_implementations = defaultdict(list)
 
         all_test_files = []
@@ -158,7 +158,7 @@ class TestInfrastructureFragmentationAnalyzer:
                                         'line': node.lineno,
                                         'relative_path': str(file_path.relative_to(self.project_root)),
                                         'category': self._categorize_test_file(file_path)
-                                    })
+                                    }
 
             except Exception:
                 continue
@@ -174,8 +174,8 @@ class TestInfrastructureFragmentationAnalyzer:
             'mock_fragmentation_score': total_mock_duplicates / max(len(mock_implementations), 1)
         }
 
-    def analyze_test_execution_patterns(self, test_files: Dict[str, List[Path]]) -> Dict[str, Any]:
-        """Analyze test execution patterns and detect bypass behaviors"""
+    def analyze_test_execution_patterns(self, test_files: Dict[str, List[Path]] -> Dict[str, Any]:
+        "Analyze test execution patterns and detect bypass behaviors""
         execution_patterns = {
             'direct_pytest_usage': [],
             'direct_unittest_usage': [],
@@ -213,13 +213,13 @@ class TestInfrastructureFragmentationAnalyzer:
 
         return execution_patterns
 
-    def analyze_test_configuration_fragmentation(self, test_files: Dict[str, List[Path]]) -> Dict[str, Any]:
-        """Analyze test configuration fragmentation"""
+    def analyze_test_configuration_fragmentation(self, test_files: Dict[str, List[Path]] -> Dict[str, Any]:
+        ""Analyze test configuration fragmentation"
         config_files = []
         config_patterns = defaultdict(list)
 
         # Look for test configuration files
-        for config_file in self.project_root.rglob("*"):
+        for config_file in self.project_root.rglob("*):
             if config_file.name in ['pytest.ini', 'conftest.py', 'setup.cfg', 'tox.ini', '.pytest_cache']:
                 config_files.append(str(config_file.relative_to(self.project_root)))
 
@@ -252,12 +252,12 @@ class TestInfrastructureFragmentationAnalyzer:
             'total_config_fragments': len(config_files) + sum(len(patterns) for patterns in config_patterns.values())
         }
 
-    def calculate_fragmentation_metrics(self, analysis_results: Dict[str, Any]) -> Dict[str, float]:
-        """Calculate comprehensive fragmentation metrics"""
-        base_class_analysis = analysis_results.get('base_class_analysis', {})
-        mock_analysis = analysis_results.get('mock_analysis', {})
-        execution_analysis = analysis_results.get('execution_analysis', {})
-        config_analysis = analysis_results.get('config_analysis', {})
+    def calculate_fragmentation_metrics(self, analysis_results: Dict[str, Any] -> Dict[str, float]:
+        ""Calculate comprehensive fragmentation metrics"
+        base_class_analysis = analysis_results.get('base_class_analysis', {}
+        mock_analysis = analysis_results.get('mock_analysis', {}
+        execution_analysis = analysis_results.get('execution_analysis', {}
+        config_analysis = analysis_results.get('config_analysis', {}
 
         # Base fragmentation score
         base_fragmentation = base_class_analysis.get('fragmentation_score', 0)
@@ -292,60 +292,60 @@ class TestInfrastructureFragmentationAnalyzer:
 
 
 class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
-    """
+    "
     SSOT Test Infrastructure Fragmentation Detection
 
     These tests are designed to FAIL initially and detect the massive test
     infrastructure fragmentation leading to -1981.6% compliance.
-    """
+    ""
 
     @classmethod
     def setup_class(cls):
-        """Setup class-level resources"""
+        ""Setup class-level resources"
         super().setup_class()
         cls.analyzer = TestInfrastructureFragmentationAnalyzer(PROJECT_ROOT)
         cls.test_files = cls.analyzer.scan_test_files()
 
     def test_detect_test_base_class_fragmentation(self):
-        """
+        "
         Integration Test: Detect test base class fragmentation
 
         This test should FAIL initially to prove massive BaseTestCase duplication.
         Expected: 50+ duplicate BaseTestCase implementations across test files.
-        """
-        self.record_metric("test_category", "integration")
-        self.record_metric("expected_outcome", "FAIL - detect base class fragmentation")
+        ""
+        self.record_metric(test_category", "integration)
+        self.record_metric(expected_outcome", "FAIL - detect base class fragmentation)
 
         base_class_analysis = self.analyzer.analyze_test_base_class_duplicates(self.test_files)
 
         # Record detailed metrics
-        self.record_metric("duplicate_base_classes", len(base_class_analysis['duplicate_base_classes']))
-        self.record_metric("total_duplicate_instances", base_class_analysis['total_duplicate_count'])
-        self.record_metric("fragmentation_score", base_class_analysis['fragmentation_score'])
+        self.record_metric(duplicate_base_classes", len(base_class_analysis['duplicate_base_classes'])
+        self.record_metric("total_duplicate_instances, base_class_analysis['total_duplicate_count']
+        self.record_metric(fragmentation_score", base_class_analysis['fragmentation_score']
 
         # Log fragmentation details
         duplicates = base_class_analysis['duplicate_base_classes']
         if duplicates:
-            print(f"\n=== TEST BASE CLASS FRAGMENTATION ({len(duplicates)} duplicate types) ===")
-            print(f"Total duplicate instances: {base_class_analysis['total_duplicate_count']}")
-            print(f"Fragmentation score: {base_class_analysis['fragmentation_score']:.2f}")
+            print(f"\n=== TEST BASE CLASS FRAGMENTATION ({len(duplicates)} duplicate types) ===)
+            print(fTotal duplicate instances: {base_class_analysis['total_duplicate_count']}")
+            print(f"Fragmentation score: {base_class_analysis['fragmentation_score']:.2f})
             print()
 
             # Show most fragmented base classes
-            sorted_duplicates = sorted(duplicates.items(), key=lambda x: len(x[1]), reverse=True)
+            sorted_duplicates = sorted(duplicates.items(), key=lambda x: len(x[1], reverse=True)
             for class_name, implementations in sorted_duplicates[:5]:
-                print(f"{class_name} ({len(implementations)} implementations):")
+                print(f{class_name} ({len(implementations)} implementations):")
                 for impl in implementations[:3]:  # Show first 3
-                    print(f"  - {impl['relative_path']}:{impl['line']} ({impl['category']})")
+                    print(f"  - {impl['relative_path']}:{impl['line']} ({impl['category']})
                 if len(implementations) > 3:
-                    print(f"  ... and {len(implementations) - 3} more")
+                    print(f  ... and {len(implementations) - 3} more")
                 print()
 
         # This assertion should FAIL initially due to massive fragmentation
         self.assertGreater(
             base_class_analysis['total_duplicate_count'], 20,
-            f"Expected 20+ duplicate base class instances but found {base_class_analysis['total_duplicate_count']}. "
-            f"Analysis indicated massive test fragmentation - verify scan is working correctly."
+            f"Expected 20+ duplicate base class instances but found {base_class_analysis['total_duplicate_count']}. 
+            fAnalysis indicated massive test fragmentation - verify scan is working correctly."
         )
 
         # Check for BaseTestCase specifically (known SSOT violation)
@@ -356,54 +356,54 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
 
         if base_test_case_duplicates:
             base_test_instances = sum(
-                len(duplicates[class_name]) for class_name in base_test_case_duplicates
+                len(duplicates[class_name] for class_name in base_test_case_duplicates
             )
-            self.record_metric("base_test_case_duplicates", base_test_instances)
+            self.record_metric("base_test_case_duplicates, base_test_instances)
 
             self.assertGreater(
                 base_test_instances, 5,
-                f"Expected significant BaseTestCase duplication but found {base_test_instances} instances"
+                fExpected significant BaseTestCase duplication but found {base_test_instances} instances"
             )
 
     def test_detect_mock_implementation_fragmentation(self):
-        """
+        "
         Integration Test: Detect mock implementation fragmentation
 
         Expected: Massive duplication of mock implementations across test files.
         This contributes significantly to the -1981.6% compliance score.
-        """
-        self.record_metric("test_category", "integration")
+        ""
+        self.record_metric(test_category", "integration)
 
         mock_analysis = self.analyzer.analyze_mock_implementation_duplicates(self.test_files)
 
         # Record metrics
-        self.record_metric("duplicate_mock_types", len(mock_analysis['duplicate_mocks']))
-        self.record_metric("total_mock_duplicates", mock_analysis['total_mock_duplicates'])
-        self.record_metric("mock_fragmentation_score", mock_analysis['mock_fragmentation_score'])
+        self.record_metric(duplicate_mock_types", len(mock_analysis['duplicate_mocks'])
+        self.record_metric("total_mock_duplicates, mock_analysis['total_mock_duplicates']
+        self.record_metric(mock_fragmentation_score", mock_analysis['mock_fragmentation_score']
 
         # Log mock fragmentation
         mock_duplicates = mock_analysis['duplicate_mocks']
         if mock_duplicates:
-            print(f"\n=== MOCK IMPLEMENTATION FRAGMENTATION ({len(mock_duplicates)} duplicate types) ===")
-            print(f"Total mock duplicates: {mock_analysis['total_mock_duplicates']}")
-            print(f"Mock fragmentation score: {mock_analysis['mock_fragmentation_score']:.2f}")
+            print(f"\n=== MOCK IMPLEMENTATION FRAGMENTATION ({len(mock_duplicates)} duplicate types) ===)
+            print(fTotal mock duplicates: {mock_analysis['total_mock_duplicates']}")
+            print(f"Mock fragmentation score: {mock_analysis['mock_fragmentation_score']:.2f})
             print()
 
             # Show most duplicated mocks
-            sorted_mocks = sorted(mock_duplicates.items(), key=lambda x: len(x[1]), reverse=True)
+            sorted_mocks = sorted(mock_duplicates.items(), key=lambda x: len(x[1], reverse=True)
             for mock_name, implementations in sorted_mocks[:5]:
-                print(f"{mock_name} ({len(implementations)} implementations):")
+                print(f{mock_name} ({len(implementations)} implementations):")
                 for impl in implementations[:3]:  # Show first 3
-                    print(f"  - {impl['relative_path']}:{impl['line']}")
+                    print(f"  - {impl['relative_path']}:{impl['line']})
                 if len(implementations) > 3:
-                    print(f"  ... and {len(implementations) - 3} more")
+                    print(f  ... and {len(implementations) - 3} more")
                 print()
 
         # Check for significant mock duplication
         self.assertGreater(
             mock_analysis['total_mock_duplicates'], 10,
-            f"Expected 10+ mock duplicates but found {mock_analysis['total_mock_duplicates']}. "
-            f"Mock implementation should be fragmented across test files."
+            f"Expected 10+ mock duplicates but found {mock_analysis['total_mock_duplicates']}. 
+            fMock implementation should be fragmented across test files."
         )
 
         # Check for MockFactory specifically (critical SSOT violation)
@@ -414,50 +414,50 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
 
         if mock_factory_duplicates:
             factory_instances = sum(
-                len(mock_duplicates[mock_name]) for mock_name in mock_factory_duplicates
+                len(mock_duplicates[mock_name] for mock_name in mock_factory_duplicates
             )
-            self.record_metric("mock_factory_duplicates", factory_instances)
+            self.record_metric("mock_factory_duplicates, factory_instances)
 
             self.assertGreater(
                 factory_instances, 2,
-                f"Expected MockFactory duplication but found {factory_instances} instances"
+                fExpected MockFactory duplication but found {factory_instances} instances"
             )
 
     def test_detect_test_execution_pattern_fragmentation(self):
-        """
+        "
         Integration Test: Detect test execution pattern fragmentation
 
         This identifies bypassing of SSOT unified test runner leading to
         inconsistent test execution patterns across the codebase.
-        """
-        self.record_metric("test_category", "integration")
+        ""
+        self.record_metric(test_category", "integration)
 
         execution_analysis = self.analyzer.analyze_test_execution_patterns(self.test_files)
 
         # Record metrics for each pattern
         for pattern_name, files in execution_analysis.items():
-            self.record_metric(f"execution_pattern_{pattern_name}", len(files))
+            self.record_metric(fexecution_pattern_{pattern_name}", len(files))
 
         total_execution_fragments = sum(len(files) for files in execution_analysis.values())
-        self.record_metric("total_execution_fragments", total_execution_fragments)
+        self.record_metric("total_execution_fragments, total_execution_fragments)
 
         # Log execution pattern fragmentation
-        print(f"\n=== TEST EXECUTION PATTERN FRAGMENTATION ===")
-        print(f"Total execution fragments: {total_execution_fragments}")
+        print(f\n=== TEST EXECUTION PATTERN FRAGMENTATION ===")
+        print(f"Total execution fragments: {total_execution_fragments})
         for pattern_name, files in execution_analysis.items():
             if files:
-                print(f"\n{pattern_name.replace('_', ' ').title()}: {len(files)} files")
+                print(f\n{pattern_name.replace('_', ' ').title()}: {len(files)} files")
                 for file_path in files[:3]:  # Show first 3
-                    print(f"  - {file_path}")
+                    print(f"  - {file_path})
                 if len(files) > 3:
-                    print(f"  ... and {len(files) - 3} more")
+                    print(f  ... and {len(files) - 3} more")
 
         # Check for SSOT unified test runner bypassing
         bypassed_files = execution_analysis['bypassed_ssot_runners']
         direct_pytest_files = execution_analysis['direct_pytest_usage']
 
-        self.record_metric("ssot_runner_bypass_count", len(bypassed_files))
-        self.record_metric("direct_pytest_usage_count", len(direct_pytest_files))
+        self.record_metric("ssot_runner_bypass_count, len(bypassed_files))
+        self.record_metric(direct_pytest_usage_count", len(direct_pytest_files))
 
         # This indicates SSOT test runner is being bypassed
         if len(bypassed_files) > 0 or len(direct_pytest_files) > 0:
@@ -465,55 +465,55 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
 
             self.assertGreater(
                 total_bypass_violations, 5,
-                f"Expected significant SSOT test runner bypassing but found {total_bypass_violations} violations"
+                f"Expected significant SSOT test runner bypassing but found {total_bypass_violations} violations
             )
 
     def test_detect_test_configuration_fragmentation(self):
-        """
+        ""
         Integration Test: Detect test configuration fragmentation
 
         Multiple test configuration approaches lead to inconsistent test
         behavior and contribute to the fragmentation score.
-        """
-        self.record_metric("test_category", "integration")
+        "
+        self.record_metric("test_category, integration")
 
         config_analysis = self.analyzer.analyze_test_configuration_fragmentation(self.test_files)
 
         # Record metrics
-        self.record_metric("config_files_count", len(config_analysis['config_files']))
-        self.record_metric("total_config_fragments", config_analysis['total_config_fragments'])
+        self.record_metric("config_files_count, len(config_analysis['config_files'])
+        self.record_metric(total_config_fragments", config_analysis['total_config_fragments']
 
         # Log configuration fragmentation
-        print(f"\n=== TEST CONFIGURATION FRAGMENTATION ===")
-        print(f"Configuration files: {len(config_analysis['config_files'])}")
-        print(f"Total config fragments: {config_analysis['total_config_fragments']}")
+        print(f"\n=== TEST CONFIGURATION FRAGMENTATION ===)
+        print(fConfiguration files: {len(config_analysis['config_files']}")
+        print(f"Total config fragments: {config_analysis['total_config_fragments']})
         print()
 
         if config_analysis['config_files']:
-            print("Configuration files found:")
+            print(Configuration files found:")
             for config_file in config_analysis['config_files']:
-                print(f"  - {config_file}")
+                print(f"  - {config_file})
             print()
 
         for pattern_name, files in config_analysis['config_patterns'].items():
             if files:
-                print(f"{pattern_name.replace('_', ' ').title()}: {len(files)} files")
+                print(f{pattern_name.replace('_', ' ').title()}: {len(files)} files")
 
         # Check for excessive configuration fragmentation
         self.assertGreater(
             config_analysis['total_config_fragments'], 15,
-            f"Expected 15+ configuration fragments but found {config_analysis['total_config_fragments']}. "
-            f"Test configuration should be fragmented across multiple files."
+            f"Expected 15+ configuration fragments but found {config_analysis['total_config_fragments']}. 
+            fTest configuration should be fragmented across multiple files."
         )
 
     def test_calculate_comprehensive_fragmentation_metrics(self):
-        """
+        "
         Integration Test: Calculate comprehensive fragmentation metrics
 
         This generates the overall fragmentation assessment that should
         approximate the -1981.6% compliance score from the analysis.
-        """
-        self.record_metric("test_category", "comprehensive")
+        ""
+        self.record_metric(test_category", "comprehensive)
 
         # Run all analyses
         analysis_results = {
@@ -531,55 +531,55 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
             self.record_metric(metric_name, value)
 
         # Generate comprehensive report
-        print(f"\n{'='*80}")
-        print(f"COMPREHENSIVE TEST INFRASTRUCTURE FRAGMENTATION REPORT")
-        print(f"{'='*80}")
-        print(f"Total Duplicate Instances: {fragmentation_metrics['total_duplicate_instances']}")
-        print(f"Compliance Percentage: {fragmentation_metrics['compliance_percentage']:.1f}%")
-        print(f"Business Risk Score: {fragmentation_metrics['business_risk_score']:.1f}/100")
+        print(f\n{'='*80}")
+        print(f"COMPREHENSIVE TEST INFRASTRUCTURE FRAGMENTATION REPORT)
+        print(f{'='*80}")
+        print(f"Total Duplicate Instances: {fragmentation_metrics['total_duplicate_instances']})
+        print(fCompliance Percentage: {fragmentation_metrics['compliance_percentage']:.1f}%")
+        print(f"Business Risk Score: {fragmentation_metrics['business_risk_score']:.1f}/100)
         print()
 
-        print("Fragmentation Breakdown:")
-        print(f"  Base Class Fragmentation: {fragmentation_metrics['base_class_fragmentation']:.2f}")
-        print(f"  Mock Implementation Fragmentation: {fragmentation_metrics['mock_fragmentation']:.2f}")
-        print(f"  Execution Pattern Fragmentation: {fragmentation_metrics['execution_fragmentation']}")
-        print(f"  Configuration Fragmentation: {fragmentation_metrics['config_fragmentation']}")
+        print(Fragmentation Breakdown:")
+        print(f"  Base Class Fragmentation: {fragmentation_metrics['base_class_fragmentation']:.2f})
+        print(f  Mock Implementation Fragmentation: {fragmentation_metrics['mock_fragmentation']:.2f}")
+        print(f"  Execution Pattern Fragmentation: {fragmentation_metrics['execution_fragmentation']})
+        print(f  Configuration Fragmentation: {fragmentation_metrics['config_fragmentation']}")
         print()
 
         # Business impact assessment
         compliance = fragmentation_metrics['compliance_percentage']
         if compliance < -1000:
-            risk_level = "CATASTROPHIC"
+            risk_level = "CATASTROPHIC
         elif compliance < -500:
-            risk_level = "CRITICAL"
+            risk_level = CRITICAL"
         elif compliance < 0:
-            risk_level = "HIGH"
+            risk_level = "HIGH
         else:
-            risk_level = "MEDIUM"
+            risk_level = MEDIUM"
 
-        print(f"Risk Level: {risk_level}")
-        print(f"Estimated Remediation Effort: {fragmentation_metrics['total_duplicate_instances'] * 0.25:.1f} hours")
+        print(f"Risk Level: {risk_level})
+        print(fEstimated Remediation Effort: {fragmentation_metrics['total_duplicate_instances'] * 0.25:.1f} hours")
         print()
 
         # This should validate massive fragmentation
         self.assertGreater(
             fragmentation_metrics['total_duplicate_instances'], 50,
-            f"Expected 50+ total fragmentation instances but found {fragmentation_metrics['total_duplicate_instances']}. "
-            f"Test infrastructure should be heavily fragmented according to analysis."
+            f"Expected 50+ total fragmentation instances but found {fragmentation_metrics['total_duplicate_instances']}. 
+            fTest infrastructure should be heavily fragmented according to analysis."
         )
 
         # Check if compliance is significantly negative (indicating massive over-duplication)
         self.assertLess(
             fragmentation_metrics['compliance_percentage'], -100,
-            f"Expected severely negative compliance percentage but got {fragmentation_metrics['compliance_percentage']:.1f}%. "
-            f"This should indicate massive test infrastructure fragmentation."
+            f"Expected severely negative compliance percentage but got {fragmentation_metrics['compliance_percentage']:.1f}%. 
+            fThis should indicate massive test infrastructure fragmentation."
         )
 
         # Validate business risk is high
         self.assertGreater(
             fragmentation_metrics['business_risk_score'], 20,
-            f"Expected high business risk score but got {fragmentation_metrics['business_risk_score']:.1f}. "
-            f"Fragmentation should pose significant business risk."
+            f"Expected high business risk score but got {fragmentation_metrics['business_risk_score']:.1f}. 
+            fFragmentation should pose significant business risk."
         )
 
 

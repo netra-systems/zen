@@ -353,7 +353,7 @@ class MockAgentContext:
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_basic_reconnection_preserves_conversation_history(established_conversation, session_token):
-'''
+        '''
 pass
 Test Case 1: Basic reconnection with valid token preserves conversation history.
 
@@ -404,7 +404,7 @@ assert all(msg_id in retrieved_ids for msg_id in original_message_ids), "Missing
 
             # Verify message order and content integrity
 for i, original_msg in enumerate(original_history):
-retrieved_msg = retrieved_history[i]
+    retrieved_msg = retrieved_history[i]
 assert retrieved_msg["content"] == original_msg["content"], "formatted_string"
 assert retrieved_msg["role"] == original_msg["role"], "formatted_string"
 
@@ -416,7 +416,7 @@ logger.info("formatted_string")
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_reconnection_preserves_agent_memory_and_context(established_conversation, session_token):
-'''
+        '''
 Test Case 2: Reconnection preserves agent memory and context state.
 
 Ensures that agent-specific context, memory, and processing state are maintained
@@ -479,7 +479,7 @@ logger.info("formatted_string")
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_reconnection_same_token_different_ip_location(established_conversation, session_token):
-'''
+        '''
 Test Case 3: Reconnection with same token from different IP/location.
 
 Validates that users can reconnect from different IP addresses or geographic
@@ -557,7 +557,7 @@ logger.info("formatted_string")
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_multiple_reconnections_maintain_consistency(established_conversation, session_token):
-'''
+        '''
 Test Case 4: Multiple reconnections in sequence maintain consistency.
 
 Tests system resilience with rapid multiple reconnections, ensuring state
@@ -579,7 +579,7 @@ memory_usage = [initial_memory]
 logger.info("formatted_string")
 
 for cycle in range(reconnection_cycles):
-cycle_start = time.time()
+    cycle_start = time.time()
 
                                 # Disconnect
 await client.disconnect()
@@ -638,7 +638,7 @@ logger.info("formatted_string")
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_reconnection_brief_vs_extended_disconnection_periods(established_conversation, session_token, mock_auth_service):
-'''
+        '''
 Test Case 5: Reconnection after brief vs extended disconnection periods.
 
 Compares system behavior for brief network interruptions versus extended
@@ -756,7 +756,7 @@ logger.info("formatted_string")
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_websocket_client_error_handling(session_token):
-"""Test WebSocket client error handling and recovery."""
+        """Test WebSocket client error handling and recovery."""
 client = WebSocketTestClient("ws://localhost:8000/ws", session_token)
 
                                         # Force real connection behavior for error testing
@@ -765,7 +765,7 @@ client._real_connection = True
                                         # Test connection failure handling
                                         # Mock: Component isolation for testing without external dependencies
 with patch('websockets.connect', side_effect=ConnectionRefusedError()):
-success = await client.connect()
+    success = await client.connect()
 assert not success
 assert not client.is_connected
 
@@ -788,7 +788,7 @@ assert message is None
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_mock_services_functionality(mock_auth_service, mock_agent_context):
-"""Test mock service functionality for proper test isolation."""
+        """Test mock service functionality for proper test isolation."""
 pass
                                                 # Test auth service
 token = mock_auth_service.create_session_token("test_user")
@@ -814,13 +814,13 @@ assert retrieved_context["conversation_history"][0]["content"] == "test message"
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_performance_benchmarks(established_conversation, session_token):
-"""Benchmark performance metrics for reconnection scenarios."""
+        """Benchmark performance metrics for reconnection scenarios."""
 client, mock_context, _ = established_conversation
 
                                                     # Benchmark connection times
 connection_times = []
 for i in range(5):
-await client.disconnect()
+    await client.disconnect()
 await asyncio.sleep(0.1)
 
 start_time = time.time()

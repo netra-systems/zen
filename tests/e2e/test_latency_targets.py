@@ -357,7 +357,7 @@ class TestApiP99Latency:
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_latency_target_summary(latency_measurer):
-"""Summary test validating all latency targets are met."""
+        """Summary test validating all latency targets are met."""
 failed_targets = _check_all_targets(latency_measurer)
 assert not failed_targets, "formatted_string"
 
@@ -368,13 +368,13 @@ return failures.'''
 pass
 failed = []
 for operation, target in measurer.targets.items():
-if operation in measurer.measurements:
-failed.extend(_check_single_target(measurer, operation, target))
+    if operation in measurer.measurements:
+        failed.extend(_check_single_target(measurer, operation, target))
 return failed
 
 
 def _check_single_target(measurer, operation, target):
-"""Check single target and return failure if exceeded."""
+    """Check single target and return failure if exceeded."""
 stats = LatencyStats.calc_percentiles(measurer.measurements[operation])
 metric = stats["p95"] if operation != "api_p99" else stats["p99"]
 return ["formatted_string"] if metric > target else []

@@ -44,11 +44,11 @@ from netra_backend.app.services.unified_authentication_service import (
 )
 from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
 from netra_backend.app.websocket_core.utils import _safe_websocket_state_for_logging
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[str, Any]]:

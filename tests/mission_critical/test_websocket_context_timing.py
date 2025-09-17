@@ -1,7 +1,7 @@
 # Import SSOT WebSocket test utility
 from test_framework.ssot.websocket_connection_test_utility import TestWebSocketConnection
 
-"""
+"
 Mission-critical WebSocket context timing tests.
 Tests race conditions and timing scenarios in WebSocket thread association.
 
@@ -12,7 +12,7 @@ Critical scenarios covered:
 4. Multiple simultaneous connections with different timing
 5. Agent execution starting before WebSocket ready
 6. Thread context update failures and retries
-"""
+""
 
 import asyncio
 import time
@@ -36,11 +36,11 @@ from shared.isolated_environment import get_env
 
 
 class WebSocketContextTimingTests:
-    """Test critical WebSocket timing and race condition scenarios."""
+    ""Test critical WebSocket timing and race condition scenarios."
 
     @pytest.fixture
     async def setup(self):
-        """Setup test environment with WebSocket infrastructure."""
+        "Setup test environment with WebSocket infrastructure.""
         # Create WebSocket manager
         manager = WebSocketManager()
         
@@ -67,7 +67,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_connection_without_initial_thread_id(self, setup):
-        """Test WebSocket connection without initial thread_id."""
+        ""Test WebSocket connection without initial thread_id."
         manager = setup['manager']
         mock_ws = setup['mock_ws']
         user_id = setup['user_id']
@@ -109,7 +109,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_message_arrives_before_thread_context(self, setup):
-        """Test message arriving before thread context is established."""
+        "Test message arriving before thread context is established.""
         manager = setup['manager']
         mock_ws = setup['mock_ws']
         user_id = setup['user_id']
@@ -150,7 +150,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_rapid_thread_switching(self, setup):
-        """Test rapid thread switching during message processing."""
+        ""Test rapid thread switching during message processing."
         manager = setup['manager']
         mock_ws = setup['mock_ws']
         user_id = setup['user_id']
@@ -164,7 +164,7 @@ class WebSocketContextTimingTests:
         await manager.send_to_user(user_id, {
             'type': 'agent_started',
             'data': {'agent': 'agent1'}
-        })
+        }
         
         # Rapidly switch threads multiple times
         thread2 = str(uuid.uuid4())
@@ -175,13 +175,13 @@ class WebSocketContextTimingTests:
         await manager.send_to_user(user_id, {
             'type': 'agent_thinking',
             'data': {'thought': 'Processing with thread2'}
-        })
+        }
         
         manager.update_connection_thread(connection_id, thread3)
         await manager.send_to_user(user_id, {
             'type': 'agent_completed',
             'data': {'result': 'Done with thread3'}
-        })
+        }
         
         # Allow processing
         await asyncio.sleep(0.1)
@@ -192,7 +192,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_multiple_simultaneous_connections_timing(self, setup):
-        """Test multiple simultaneous connections with different timing."""
+        "Test multiple simultaneous connections with different timing.""
         manager = setup['manager']
         
         # Create multiple connections with different timing
@@ -214,14 +214,14 @@ class WebSocketContextTimingTests:
                 'connection_id': connection_id,
                 'thread_id': thread_id,
                 'index': i
-            })
+            }
         
         # Send messages to all connections
         for conn in connections:
             await manager.send_to_user(conn['user_id'], {
                 'type': 'test_message',
                 'data': {'index': conn['index']}
-            })
+            }
         
         # Update thread_ids for connections that didn't have them
         for conn in connections:
@@ -242,7 +242,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_agent_execution_before_websocket_ready(self, setup):
-        """Test agent execution starting before WebSocket is ready."""
+        ""Test agent execution starting before WebSocket is ready."
         manager = setup['manager']
         user_id = setup['user_id']
         
@@ -276,7 +276,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_thread_context_update_failures_and_retries(self, setup):
-        """Test handling of thread context update failures and retries."""
+        "Test handling of thread context update failures and retries.""
         manager = setup['manager']
         mock_ws = setup['mock_ws']
         user_id = setup['user_id']
@@ -288,7 +288,7 @@ class WebSocketContextTimingTests:
         await manager.send_to_user(user_id, {
             'type': 'test_message',
             'data': {'content': 'waiting for thread'}
-        })
+        }
         
         # Simulate thread update with potential failure handling
         thread_id = setup['thread_id']
@@ -306,7 +306,7 @@ class WebSocketContextTimingTests:
         await manager.send_to_user(user_id, {
             'type': 'followup_message', 
             'data': {'content': 'thread updated'}
-        })
+        }
         
         # Allow processing
         await asyncio.sleep(0.1)
@@ -316,7 +316,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_concurrent_message_and_thread_update(self, setup):
-        """Test concurrent message sending and thread updates."""
+        ""Test concurrent message sending and thread updates."
         manager = setup['manager']
         mock_ws = setup['mock_ws']
         user_id = setup['user_id']
@@ -331,7 +331,7 @@ class WebSocketContextTimingTests:
                 await manager.send_to_user(user_id, {
                     'type': f'message_{i}',
                     'data': {'index': i}
-                })
+                }
                 await asyncio.sleep(0.01)
         
         async def update_threads():
@@ -357,7 +357,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_websocket_disconnection_during_thread_update(self, setup):
-        """Test WebSocket disconnection during thread update."""
+        "Test WebSocket disconnection during thread update.""
         manager = setup['manager']
         mock_ws = setup['mock_ws']
         user_id = setup['user_id']
@@ -369,10 +369,10 @@ class WebSocketContextTimingTests:
         await manager.send_to_user(user_id, {
             'type': 'important_message',
             'data': {'content': 'must deliver'}
-        })
+        }
         
         # Disconnect during thread update
-        await manager.disconnect_user(user_id, mock_ws, 1000, "Test disconnect")
+        await manager.disconnect_user(user_id, mock_ws, 1000, Test disconnect")
         
         # Try to update thread (should handle gracefully since connection is gone)
         thread_id = setup['thread_id']
@@ -390,7 +390,7 @@ class WebSocketContextTimingTests:
         await manager.send_to_user(user_id, {
             'type': 'reconnect_message',
             'data': {'content': 'after reconnect'}
-        })
+        }
         
         # Verify message delivered to new connection
         await asyncio.sleep(0.1)
@@ -401,7 +401,7 @@ class WebSocketContextTimingTests:
 
     @pytest.mark.asyncio
     async def test_thread_id_propagation_to_message_handler(self, setup):
-        """Test thread_id propagation from WebSocket to message handler."""
+        "Test thread_id propagation from WebSocket to message handler.""
         manager = setup['manager']
         user_id = setup['user_id']
         thread_id = setup['thread_id']
@@ -436,7 +436,7 @@ class WebSocketContextTimingTests:
         assert conn['thread_id'] == thread_id
 
 
-if __name__ == "__main__":
+if __name__ == __main__":
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

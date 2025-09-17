@@ -431,14 +431,14 @@ class TestConcurrencyRaceConditions:
 
 @pytest.mark.asyncio
     async def test_concurrent_context_creation(self):
-'''
+        '''
 Edge Case: Many contexts created concurrently causing race conditions.
 
 This could cause ID collisions or resource contention.
 '''
 pass
 async def create_context(index):
-pass
+    pass
 await asyncio.sleep(0)
 return UserExecutionContext( )
 user_id="formatted_string",
@@ -460,13 +460,13 @@ assert len(set(request_ids)) == 100  # All request_ids unique
 
     # Verify each context is properly formed
 for ctx in contexts:
-assert isinstance(ctx.user_id, str)
+    assert isinstance(ctx.user_id, str)
 assert isinstance(ctx.request_id, str)
 assert ctx.user_id.startswith("concurrent_user_")
 
 @pytest.mark.asyncio
     async def test_concurrent_child_context_creation(self):
-'''
+        '''
 Edge Case: Multiple child contexts created concurrently from same parent.
 
 This could cause race conditions in request ID generation or metadata handling.
@@ -480,7 +480,7 @@ metadata={"parent_data": "shared"}
             
 
 async def create_child_context(index):
-pass
+    pass
 await asyncio.sleep(0)
 return parent_context.create_child_context( )
 operation_name="formatted_string",
@@ -497,23 +497,23 @@ assert len(set(request_ids)) == 50  # All request_ids unique
 
     # Verify parent data is preserved in all children
 for ctx in child_contexts:
-assert ctx.user_id == parent_context.user_id
+    assert ctx.user_id == parent_context.user_id
 assert ctx.thread_id == parent_context.thread_id
 assert ctx.run_id == parent_context.run_id
 assert ctx.request_id != parent_context.request_id
 assert "parent_data" in ctx.metadata
 
 def test_thread_safety_context_operations(self):
-'''
+    '''
 Edge Case: Context operations in multithreaded environment.
 
 This could cause race conditions in validation or serialization.
 '''
 pass
 def create_and_serialize_context(thread_id):
-pass
+    pass
 try:
-context = UserExecutionContext( )
+    context = UserExecutionContext( )
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id="formatted_string",
@@ -537,11 +537,11 @@ return { )
 "child_id": child.request_id
         
 except Exception as e:
-return {"success": False, "error": str(e)}
+    return {"success": False, "error": str(e)}
 
             # Run in multiple threads
 with ThreadPoolExecutor(max_workers=10) as executor:
-futures = [executor.submit(create_and_serialize_context, i) for i in range(20)]
+    futures = [executor.submit(create_and_serialize_context, i) for i in range(20)]
 results = [future.result() for future in as_completed(futures)]
 
                 # Verify all operations succeeded
@@ -604,7 +604,7 @@ class TestDatabaseConnectionEdgeCases:
 
 @pytest.mark.asyncio
     async def test_database_session_context_switching(self):
-'''
+        '''
 Edge Case: Rapidly switching database sessions in context.
 
 This could cause connection leaks or session confusion.
@@ -622,7 +622,7 @@ sessions = [Mock(spec=AsyncSession) for _ in range(10)]
             # Switch sessions rapidly
 contexts_with_sessions = []
 for i, session in enumerate(sessions):
-ctx = base_context.with_db_session(session)
+    ctx = base_context.with_db_session(session)
 contexts_with_sessions.append(ctx)
 
                 # Verify each context has correct session
@@ -823,7 +823,7 @@ class TestSystemLimitEdgeCases:
 
 @pytest.mark.asyncio
     async def test_async_operation_timeout_edge_cases(self):
-'''
+        '''
 Edge Case: Context operations that timeout in async scenarios.
 
 This simulates network timeouts, database timeouts, or slow operations.
@@ -838,27 +838,27 @@ run_id="run_timeout_test"
 
                     # Simulate slow operations
 async def slow_operation():
-pass
+    pass
 await asyncio.sleep(0.1)  # Simulate slow operation
 await asyncio.sleep(0)
 return context.to_dict()
 
 async def very_slow_operation():
-pass
+    pass
 await asyncio.sleep(1.0)  # Very slow operation
 await asyncio.sleep(0)
 return context.get_correlation_id()
 
     # Test operation with timeout
 try:
-result = await asyncio.wait_for(slow_operation(), timeout=0.2)
+    result = await asyncio.wait_for(slow_operation(), timeout=0.2)
 assert isinstance(result, dict)
 except asyncio.TimeoutError:
-pytest.fail("Normal operation should not timeout")
+    pytest.fail("Normal operation should not timeout")
 
             # Test very slow operation with short timeout
 with pytest.raises(asyncio.TimeoutError):
-await asyncio.wait_for(very_slow_operation(), timeout=0.05)
+    await asyncio.wait_for(very_slow_operation(), timeout=0.05)
 
 
 class TestErrorRecoveryEdgeCases:

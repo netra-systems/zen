@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""MISSION CRITICAL TEST SUITE: WebSocket Agent Events - REAL SERVICES ONLY
+"MISSION CRITICAL TEST SUITE: WebSocket Agent Events - REAL SERVICES ONLY
 
 THIS SUITE MUST PASS OR THE PRODUCT IS BROKEN.
 Business Value: $500K+ ARR - Core chat functionality
@@ -11,7 +11,7 @@ This test suite uses ONLY real WebSocket connections per CLAUDE.md "MOCKS = Abom
 4. Ensures all required WebSocket events enable substantive chat value
 
 ANY FAILURE HERE BLOCKS DEPLOYMENT.
-"""
+"
 
 import asyncio
 import json
@@ -58,15 +58,15 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager 
 # ============================================================================
 
 class RealWebSocketEventValidator:
-    """Validates WebSocket events with real service interactions."""
+    "Validates WebSocket events with real service interactions.""
     
     # CLAUDE.md Section 6.1: Required WebSocket Events for Substantive Chat Value
     REQUIRED_EVENTS = {
-        "agent_started",     # User must see agent began processing
-        "agent_thinking",    # Real-time reasoning visibility  
-        "tool_executing",    # Tool usage transparency
-        "tool_completed",    # Tool results display
-        "agent_completed"    # User knows response is ready
+        agent_started",     # User must see agent began processing
+        "agent_thinking,    # Real-time reasoning visibility  
+        tool_executing",    # Tool usage transparency
+        "tool_completed,    # Tool results display
+        agent_completed"    # User knows response is ready
     }
     
     def __init__(self, strict_mode: bool = True):
@@ -79,104 +79,104 @@ class RealWebSocketEventValidator:
         self.start_time = time.time()
     
     def record_event(self, event: Dict) -> None:
-        """Record an event with detailed tracking."""
+        "Record an event with detailed tracking.""
         timestamp = time.time() - self.start_time
-        event_type = event.get("type", "unknown")
+        event_type = event.get(type", "unknown)
         
         # Add capture metadata
         event_with_metadata = {
             **event,
-            "capture_timestamp": time.time(),
-            "relative_time": timestamp
+            capture_timestamp": time.time(),
+            "relative_time: timestamp
         }
         
         self.events.append(event_with_metadata)
         self.event_timeline.append((timestamp, event_type, event_with_metadata))
         self.event_counts[event_type] = self.event_counts.get(event_type, 0) + 1
         
-        logger.debug(f" CHART:  Event recorded: {event_type} at {timestamp:.2f}s")
+        logger.debug(f CHART:  Event recorded: {event_type} at {timestamp:.2f}s")
     
     def validate_critical_requirements(self) -> tuple[bool, List[str]]:
-        """Validate that ALL critical requirements are met per CLAUDE.md."""
+        "Validate that ALL critical requirements are met per CLAUDE.md.""
         failures = []
         
         # 1. Check for required events (CLAUDE.md Section 6.1)
         missing = self.REQUIRED_EVENTS - set(self.event_counts.keys())
         if missing:
-            failures.append(f"CRITICAL: Missing required WebSocket events: {missing}")
+            failures.append(fCRITICAL: Missing required WebSocket events: {missing}")
         
         # 2. Validate event ordering
         if not self._validate_event_order():
-            failures.append("CRITICAL: Invalid event order - agent_started must be first")
+            failures.append("CRITICAL: Invalid event order - agent_started must be first)
         
         # 3. Check for paired events
         if not self._validate_paired_events():
-            failures.append("CRITICAL: Unpaired tool events - tool_executing without tool_completed")
+            failures.append(CRITICAL: Unpaired tool events - tool_executing without tool_completed")
         
         # 4. Validate timing constraints (CLAUDE.md: <10s response time)
         if not self._validate_timing():
-            failures.append("CRITICAL: Event timing violations - responses too slow")
+            failures.append("CRITICAL: Event timing violations - responses too slow)
         
         # 5. Check for data completeness
         if not self._validate_event_data():
-            failures.append("CRITICAL: Incomplete event data - missing required fields")
+            failures.append(CRITICAL: Incomplete event data - missing required fields")
         
         return len(failures) == 0, failures
     
     def _validate_event_order(self) -> bool:
-        """Ensure events follow logical order per CLAUDE.md requirements."""
+        "Ensure events follow logical order per CLAUDE.md requirements.""
         if not self.event_timeline:
             return False
         
         # First event must be agent_started (CLAUDE.md Section 6.1)
-        if self.event_timeline[0][1] != "agent_started":
-            self.errors.append(f"First event was {self.event_timeline[0][1]}, expected agent_started")
+        if self.event_timeline[0][1] != agent_started":
+            self.errors.append(f"First event was {self.event_timeline[0][1]}, expected agent_started)
             return False
         
         # Last event should be completion
         last_event = self.event_timeline[-1][1]
-        if last_event not in ["agent_completed", "final_report"]:
-            self.warnings.append(f"Last event was {last_event}, expected agent_completed")
+        if last_event not in [agent_completed", "final_report]:
+            self.warnings.append(fLast event was {last_event}, expected agent_completed")
         
         return True
     
     def _validate_paired_events(self) -> bool:
-        """Ensure tool events are properly paired."""
-        tool_starts = self.event_counts.get("tool_executing", 0)
-        tool_ends = self.event_counts.get("tool_completed", 0)
+        "Ensure tool events are properly paired.""
+        tool_starts = self.event_counts.get(tool_executing", 0)
+        tool_ends = self.event_counts.get("tool_completed, 0)
         
         if tool_starts != tool_ends:
-            self.errors.append(f"Unpaired tool events: {tool_starts} starts vs {tool_ends} completions")
+            self.errors.append(fUnpaired tool events: {tool_starts} starts vs {tool_ends} completions")
             return False
         
         return True
     
     def _validate_timing(self) -> bool:
-        """Validate event timing constraints per CLAUDE.md (<10s response time)."""
+        "Validate event timing constraints per CLAUDE.md (<10s response time).""
         if not self.event_timeline:
             return True
         
         # Check for events that arrive too late (CLAUDE.md: <10s for performance)
         for timestamp, event_type, _ in self.event_timeline:
             if timestamp > 30:  # 30 second absolute timeout for real services
-                self.errors.append(f"Event {event_type} arrived too late: {timestamp:.2f}s")
+                self.errors.append(fEvent {event_type} arrived too late: {timestamp:.2f}s")
                 return False
         
         return True
     
     def _validate_event_data(self) -> bool:
-        """Validate event data completeness."""
+        "Validate event data completeness.""
         for event in self.events:
-            event_type = event.get("type")
+            event_type = event.get(type")
             
             # Check required fields per event type
-            if event_type == "agent_started":
-                if not event.get("agent_id") and not event.get("thread_id"):
-                    self.errors.append("agent_started missing agent_id or thread_id")
+            if event_type == "agent_started:
+                if not event.get(agent_id") and not event.get("thread_id):
+                    self.errors.append(agent_started missing agent_id or thread_id")
                     return False
-            elif event_type == "tool_executing":
-                if not event.get("tool_name"):
-                    self.errors.append("tool_executing missing tool_name")
+            elif event_type == "tool_executing:
+                if not event.get(tool_name"):
+                    self.errors.append("tool_executing missing tool_name)
                     return False
         
         return True
@@ -187,7 +187,7 @@ class RealWebSocketEventValidator:
 # ============================================================================
 
 class RealWebSocketTestInfrastructure:
-    """Real service test infrastructure with Docker integration."""
+    ""Real service test infrastructure with Docker integration."
     
     def __init__(self):
         self.auth_helper: Optional[E2EWebSocketAuthHelper] = None
@@ -195,8 +195,8 @@ class RealWebSocketTestInfrastructure:
         self.authenticated_user: Optional[AuthenticatedUser] = None
         self.test_env = get_env()
         
-    async def setup_real_services(self, environment: str = "test") -> Dict[str, Any]:
-        """Setup real service connections per CLAUDE.md requirements."""
+    async def setup_real_services(self, environment: str = "test) -> Dict[str, Any]:
+        ""Setup real service connections per CLAUDE.md requirements."
         
         # CLAUDE.md: E2E Auth Mandatory - ALL e2e tests MUST use authentication
         self.auth_helper = E2EWebSocketAuthHelper(environment=environment)
@@ -215,23 +215,23 @@ class RealWebSocketTestInfrastructure:
         )
         
         if not connected:
-            raise RuntimeError(f"Failed to connect to real WebSocket service at {ws_url}")
+            raise RuntimeError(f"Failed to connect to real WebSocket service at {ws_url})
         
-        logger.info(f" PASS:  Real services setup complete - WebSocket connected to {ws_url}")
+        logger.info(f PASS:  Real services setup complete - WebSocket connected to {ws_url}")
         
         return {
-            "ws_client": self.ws_client,
-            "auth_helper": self.auth_helper,
-            "authenticated_user": self.authenticated_user,
-            "environment": environment
+            "ws_client: self.ws_client,
+            auth_helper": self.auth_helper,
+            "authenticated_user: self.authenticated_user,
+            environment": environment
         }
     
     async def teardown_real_services(self):
-        """Cleanup real service connections."""
+        "Cleanup real service connections.""
         if self.ws_client:
             await self.ws_client.disconnect()
         
-        logger.info("[U+1F9F9] Real services teardown complete")
+        logger.info([U+1F9F9] Real services teardown complete")
 
 
 # ============================================================================
@@ -241,18 +241,18 @@ class RealWebSocketTestInfrastructure:
 @pytest.mark.asyncio
 @pytest.mark.mission_critical
 class WebSocketAgentEventsRealTests:
-    """Mission critical tests using REAL WebSocket connections and services."""
+    "Mission critical tests using REAL WebSocket connections and services.""
     
     @pytest.fixture
     async def real_service_infrastructure(self):
-        """Setup real service test infrastructure."""
+        ""Setup real service test infrastructure."
         infrastructure = RealWebSocketTestInfrastructure()
         services = await infrastructure.setup_real_services()
         yield services
         await infrastructure.teardown_real_services()
     
     async def test_real_websocket_required_events_validation(self, real_service_infrastructure):
-        """
+        "
         MISSION CRITICAL: Test all 5 required WebSocket events with REAL services.
         
         CLAUDE.md Section 6.1: This test validates the core chat functionality that 
@@ -260,13 +260,13 @@ class WebSocketAgentEventsRealTests:
         tool_executing, tool_completed, agent_completed.
         
         Uses real WebSocket connections, real agent execution, real event timing.
-        """
-        ws_client = real_service_infrastructure["ws_client"]
+        ""
+        ws_client = real_service_infrastructure[ws_client"]
         validator = RealWebSocketEventValidator()
         
         # Start capturing real events from live WebSocket
         async def capture_websocket_events():
-            """Capture events from real WebSocket connection."""
+            "Capture events from real WebSocket connection.""
             event_count = 0
             timeout_start = time.time()
             
@@ -276,19 +276,19 @@ class WebSocketAgentEventsRealTests:
                     if event:
                         validator.record_event(event)
                         event_count += 1
-                        logger.info(f"[U+1F4E1] Captured event {event_count}: {event.get('type', 'unknown')}")
+                        logger.info(f[U+1F4E1] Captured event {event_count}: {event.get('type', 'unknown')}")
                         
                         # Stop after getting completion event
-                        if event.get("type") in ["agent_completed", "final_report"]:
-                            logger.info("[U+1F3C1] Completion event received - stopping capture")
+                        if event.get("type) in [agent_completed", "final_report]:
+                            logger.info([U+1F3C1] Completion event received - stopping capture")
                             break
                 except Exception as e:
-                    logger.warning(f" WARNING: [U+FE0F] Event capture timeout or error: {e}")
+                    logger.warning(f" WARNING: [U+FE0F] Event capture timeout or error: {e})
                     break
         
         # Send real chat message that will trigger agent execution
-        chat_message = "Analyze cost optimization opportunities for my AI infrastructure setup"
-        logger.info(f"[U+1F4AC] Sending chat message: {chat_message}")
+        chat_message = Analyze cost optimization opportunities for my AI infrastructure setup"
+        logger.info(f"[U+1F4AC] Sending chat message: {chat_message})
         
         await ws_client.send_chat(chat_message)
         
@@ -300,73 +300,73 @@ class WebSocketAgentEventsRealTests:
         
         # CLAUDE.md: Tests must fail hard - no bypassing
         if not success:
-            error_summary = "\n".join([
-                " ALERT:  CRITICAL WEBSOCKET EVENT FAILURES:",
+            error_summary = \n".join([
+                " ALERT:  CRITICAL WEBSOCKET EVENT FAILURES:,
                 *failures,
-                f"\n CHART:  Event Summary:",
-                f"  - Total events captured: {len(validator.events)}",
-                f"  - Event types: {list(validator.event_counts.keys())}",
-                f"  - Event counts: {validator.event_counts}",
-                f"\n[U+23F1][U+FE0F] Event Timeline:",
-                *[f"  {i+1}. {timestamp:.2f}s: {event_type}" 
-                  for i, (timestamp, event_type, _) in enumerate(validator.event_timeline[:10])]
-            ])
+                f\n CHART:  Event Summary:",
+                f"  - Total events captured: {len(validator.events)},
+                f  - Event types: {list(validator.event_counts.keys())}",
+                f"  - Event counts: {validator.event_counts},
+                f\n[U+23F1][U+FE0F] Event Timeline:",
+                *[f"  {i+1}. {timestamp:.2f}s: {event_type} 
+                  for i, (timestamp, event_type, _) in enumerate(validator.event_timeline[:10]]
+            ]
             pytest.fail(error_summary)
         
         # Additional validations for real service quality
-        assert len(validator.events) >= 3, f"Too few events captured: {len(validator.events)}"
-        assert validator.event_counts.get("agent_started", 0) >= 1, "No agent_started events"
-        assert validator.event_counts.get("agent_completed", 0) >= 1, "No agent_completed events"
+        assert len(validator.events) >= 3, fToo few events captured: {len(validator.events)}"
+        assert validator.event_counts.get("agent_started, 0) >= 1, No agent_started events"
+        assert validator.event_counts.get("agent_completed, 0) >= 1, No agent_completed events"
         
-        logger.info(f" PASS:  Real WebSocket agent event flow validated successfully - {len(validator.events)} events")
+        logger.info(f" PASS:  Real WebSocket agent event flow validated successfully - {len(validator.events)} events)
     
     async def test_real_websocket_connection_stability(self, real_service_infrastructure):
-        """
+        ""
         MISSION CRITICAL: Test WebSocket connection stability with real services.
         
         Validates that real WebSocket connections remain stable during agent execution
         and can handle multiple sequential requests without dropping connection.
-        """
-        ws_client = real_service_infrastructure["ws_client"]
+        "
+        ws_client = real_service_infrastructure["ws_client]
         
         # Verify initial connection
-        assert ws_client.is_connected, "Real WebSocket connection not established"
+        assert ws_client.is_connected, Real WebSocket connection not established"
         
         # Send multiple messages to test stability
         messages = [
-            "Quick status check",
-            "Brief analysis request", 
-            "Simple performance query"
+            "Quick status check,
+            Brief analysis request", 
+            "Simple performance query
         ]
         
         for i, message in enumerate(messages):
-            logger.info(f"[U+1F4E4] Sending stability test message {i+1}: {message}")
+            logger.info(f[U+1F4E4] Sending stability test message {i+1}: {message}")
             await ws_client.send_chat(message)
             
             # Wait for response to verify connection stability
             response = await ws_client.receive(timeout=10.0)
-            assert response is not None, f"No response to message {i+1} - connection unstable"
+            assert response is not None, f"No response to message {i+1} - connection unstable
             
             # Verify connection remains active
-            assert ws_client.is_connected, f"WebSocket connection lost after message {i+1}"
+            assert ws_client.is_connected, fWebSocket connection lost after message {i+1}"
             
             # Small delay between messages
             await asyncio.sleep(0.5)
         
-        logger.info(" PASS:  Real WebSocket connection stability validated")
+        logger.info(" PASS:  Real WebSocket connection stability validated)
     
     async def test_real_agent_event_sequence_ordering(self, real_service_infrastructure):
-        """
+        ""
         MISSION CRITICAL: Validate agent event ordering with real execution.
         
         CLAUDE.md Section 6.1: Events must arrive in correct order to provide
         substantive chat value. Validates: started  ->  thinking  ->  executing  ->  completed
-        """
-        ws_client = real_service_infrastructure["ws_client"]
+        "
+        ws_client = real_service_infrastructure["ws_client]
         validator = RealWebSocketEventValidator()
         
         # Send real agent request
-        await ws_client.send_chat("Provide a brief analysis for event ordering validation")
+        await ws_client.send_chat(Provide a brief analysis for event ordering validation")
         
         # Collect events with detailed timeline tracking
         collected_events = []
@@ -379,7 +379,7 @@ class WebSocketAgentEventsRealTests:
                 validator.record_event(event)
                 
                 # Stop after getting completion event
-                if event.get("type") in ["agent_completed", "final_report"]:
+                if event.get("type) in [agent_completed", "final_report]:
                     break
         
         # Validate event ordering per CLAUDE.md requirements
@@ -387,59 +387,59 @@ class WebSocketAgentEventsRealTests:
         
         if not success:
             # Log detailed event sequence for debugging
-            logger.error(" SEARCH:  Event sequence analysis:")
+            logger.error( SEARCH:  Event sequence analysis:")
             for i, (timestamp, event_type, event_data) in enumerate(validator.event_timeline):
-                logger.error(f"  {i+1}. {timestamp:.2f}s: {event_type} - {event_data.get('message', '')[:50]}")
+                logger.error(f"  {i+1}. {timestamp:.2f}s: {event_type} - {event_data.get('message', '')[:50]})
             
-            pytest.fail(f" ALERT:  CRITICAL EVENT ORDERING FAILURES:\n" + "\n".join(failures))
+            pytest.fail(f ALERT:  CRITICAL EVENT ORDERING FAILURES:\n" + "\n.join(failures))
         
-        logger.info(f" PASS:  Real agent event ordering validated - {len(collected_events)} events in correct sequence")
+        logger.info(f PASS:  Real agent event ordering validated - {len(collected_events)} events in correct sequence")
     
     async def test_real_agent_performance_timing(self, real_service_infrastructure):
-        """
+        "
         MISSION CRITICAL: Validate agent performance with real services.
         
         CLAUDE.md: Agent responses must meet performance requirements (<10s) with 
         real infrastructure to ensure user experience quality.
-        """
-        ws_client = real_service_infrastructure["ws_client"]
+        ""
+        ws_client = real_service_infrastructure[ws_client"]
         
         start_time = time.time()
         
         # Send performance test request
-        await ws_client.send_chat("Quick performance validation test")
+        await ws_client.send_chat("Quick performance validation test)
         
         # Wait for first meaningful response
         first_response = None
         while time.time() - start_time < 15.0:
             event = await ws_client.receive(timeout=2.0)
-            if event and event.get("type") in ["agent_thinking", "tool_executing", "agent_started"]:
+            if event and event.get(type") in ["agent_thinking, tool_executing", "agent_started]:
                 first_response = event
                 break
         
         response_time = time.time() - start_time
         
         # Validate performance requirements per CLAUDE.md
-        assert first_response is not None, "No agent response within timeout period"
-        assert response_time < 10.0, f"Response too slow: {response_time:.2f}s (limit: 10s)"
+        assert first_response is not None, No agent response within timeout period"
+        assert response_time < 10.0, f"Response too slow: {response_time:.2f}s (limit: 10s)
         
-        logger.info(f" PASS:  Real agent performance validated - first response in {response_time:.2f}s")
+        logger.info(f PASS:  Real agent performance validated - first response in {response_time:.2f}s")
     
     async def test_real_error_handling_resilience(self, real_service_infrastructure):
-        """
+        "
         MISSION CRITICAL: Test error handling with real services.
         
         System must handle errors gracefully and maintain WebSocket connection
         to ensure continuous chat functionality.
-        """
-        ws_client = real_service_infrastructure["ws_client"]
+        ""
+        ws_client = real_service_infrastructure[ws_client"]
         
         # Verify initial connection state
         initial_connection = ws_client.is_connected
-        assert initial_connection, "WebSocket not connected before error test"
+        assert initial_connection, "WebSocket not connected before error test
         
         # Send request that might cause processing challenges
-        error_test_message = "Handle this edge case gracefully: complex multi-step analysis with potential errors"
+        error_test_message = Handle this edge case gracefully: complex multi-step analysis with potential errors"
         await ws_client.send_chat(error_test_message)
         
         # Collect responses including potential errors
@@ -452,34 +452,34 @@ class WebSocketAgentEventsRealTests:
                 responses.append(event)
                 
                 # Stop if we get a completion or error event
-                if event.get("type") in ["agent_completed", "error", "agent_error", "final_report"]:
+                if event.get("type) in [agent_completed", "error, agent_error", "final_report]:
                     break
         
         # Validate error handling capability
-        assert ws_client.is_connected, "WebSocket connection lost during error handling"
-        assert len(responses) > 0, "No response to error test request"
+        assert ws_client.is_connected, WebSocket connection lost during error handling"
+        assert len(responses) > 0, "No response to error test request
         
         # Verify system can handle normal requests after potential error
-        await ws_client.send_chat("Recovery test - simple status check")
+        await ws_client.send_chat(Recovery test - simple status check")
         recovery_response = await ws_client.receive(timeout=8.0)
-        assert recovery_response is not None, "System failed to recover after error scenario"
+        assert recovery_response is not None, "System failed to recover after error scenario
         
-        logger.info(" PASS:  Real error handling and recovery validated")
+        logger.info( PASS:  Real error handling and recovery validated")
     
     async def test_real_concurrent_message_handling(self, real_service_infrastructure):
-        """
+        "
         MISSION CRITICAL: Test concurrent WebSocket message handling.
         
         System must handle multiple concurrent messages without losing events
         to support active user sessions.
-        """
-        ws_client = real_service_infrastructure["ws_client"]
+        ""
+        ws_client = real_service_infrastructure[ws_client"]
         
         # Send multiple concurrent messages
         messages = [
-            "Concurrent request 1 - brief status",
-            "Concurrent request 2 - quick check", 
-            "Concurrent request 3 - simple query"
+            "Concurrent request 1 - brief status,
+            Concurrent request 2 - quick check", 
+            "Concurrent request 3 - simple query
         ]
         
         # Send messages with small delays
@@ -504,14 +504,14 @@ class WebSocketAgentEventsRealTests:
                     break
         
         # Validate concurrent handling
-        assert len(all_responses) >= len(messages), f"Too few responses: {len(all_responses)} for {len(messages)} messages"
-        assert ws_client.is_connected, "WebSocket connection lost during concurrent handling"
+        assert len(all_responses) >= len(messages), fToo few responses: {len(all_responses)} for {len(messages)} messages"
+        assert ws_client.is_connected, "WebSocket connection lost during concurrent handling
         
         # Check for agent_started events (should have at least one)
-        started_events = [r for r in all_responses if r.get("type") == "agent_started"]
-        assert len(started_events) >= 1, "No agent_started events in concurrent test"
+        started_events = [r for r in all_responses if r.get(type") == "agent_started]
+        assert len(started_events) >= 1, No agent_started events in concurrent test"
         
-        logger.info(f" PASS:  Real concurrent message handling validated - {len(all_responses)} responses to {len(messages)} messages")
+        logger.info(f" PASS:  Real concurrent message handling validated - {len(all_responses)} responses to {len(messages)} messages)
 
 
 # ============================================================================
@@ -522,32 +522,32 @@ class WebSocketAgentEventsRealTests:
 @pytest.mark.mission_critical
 @pytest.mark.performance  
 class WebSocketPerformanceRealTests:
-    """Performance validation using real WebSocket infrastructure."""
+    ""Performance validation using real WebSocket infrastructure."
     
     @pytest.fixture
     async def real_service_infrastructure(self):
-        """Setup real service test infrastructure."""
+        "Setup real service test infrastructure.""
         infrastructure = RealWebSocketTestInfrastructure()
         services = await infrastructure.setup_real_services()
         yield services
         await infrastructure.teardown_real_services()
     
     async def test_real_websocket_response_time_compliance(self, real_service_infrastructure):
-        """
+        ""
         PERFORMANCE TEST: Validate WebSocket response times with real services.
         
         CLAUDE.md requirement: Responses must be < 10 seconds for user experience.
         Validates system performance under real infrastructure constraints.
-        """
-        ws_client = real_service_infrastructure["ws_client"]
+        "
+        ws_client = real_service_infrastructure["ws_client]
         
         # Test multiple requests to get performance baseline
         response_times = []
         
         test_messages = [
-            "Quick performance test 1",
-            "Brief response validation 2", 
-            "Simple timing check 3"
+            Quick performance test 1",
+            "Brief response validation 2, 
+            Simple timing check 3"
         ]
         
         for i, message in enumerate(test_messages):
@@ -558,15 +558,15 @@ class WebSocketPerformanceRealTests:
             first_response = None
             while time.time() - start_time < 12.0:
                 event = await ws_client.receive(timeout=1.0)
-                if event and event.get("type") in ["agent_started", "agent_thinking"]:
+                if event and event.get("type) in [agent_started", "agent_thinking]:
                     first_response = event
                     break
             
             response_time = time.time() - start_time
             response_times.append(response_time)
             
-            assert first_response is not None, f"No response to message {i+1}"
-            assert response_time < 10.0, f"Message {i+1} too slow: {response_time:.2f}s"
+            assert first_response is not None, fNo response to message {i+1}"
+            assert response_time < 10.0, f"Message {i+1} too slow: {response_time:.2f}s
             
             # Small delay between tests
             await asyncio.sleep(1.0)
@@ -575,14 +575,14 @@ class WebSocketPerformanceRealTests:
         avg_response_time = sum(response_times) / len(response_times)
         max_response_time = max(response_times)
         
-        logger.info(f" PASS:  Performance validation complete:")
-        logger.info(f"  - Average response time: {avg_response_time:.2f}s")
-        logger.info(f"  - Max response time: {max_response_time:.2f}s")
-        logger.info(f"  - All responses under 10s limit: {all(t < 10.0 for t in response_times)}")
+        logger.info(f PASS:  Performance validation complete:")
+        logger.info(f"  - Average response time: {avg_response_time:.2f}s)
+        logger.info(f  - Max response time: {max_response_time:.2f}s")
+        logger.info(f"  - All responses under 10s limit: {all(t < 10.0 for t in response_times)})
         
         # Performance assertions
-        assert avg_response_time < 5.0, f"Average response time too slow: {avg_response_time:.2f}s"
-        assert max_response_time < 10.0, f"Maximum response time exceeded: {max_response_time:.2f}s"
+        assert avg_response_time < 5.0, fAverage response time too slow: {avg_response_time:.2f}s"
+        assert max_response_time < 10.0, f"Maximum response time exceeded: {max_response_time:.2f}s
 
 
 if __name__ == '__main__':
@@ -593,9 +593,9 @@ if __name__ == '__main__':
     # Run comprehensive WebSocket agent event tests
     pytest.main([
         __file__,
-        "-v",
-        "--tb=short",
-        "--asyncio-mode=auto",
-        "-x",  # Stop on first failure for mission critical tests
-        "--disable-warnings"
-    ])
+        -v",
+        "--tb=short,
+        --asyncio-mode=auto",
+        "-x,  # Stop on first failure for mission critical tests
+        --disable-warnings"
+    ]

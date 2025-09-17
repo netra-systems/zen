@@ -91,7 +91,7 @@ class TestHighConcurrency:
 
 @pytest.mark.asyncio
     async def test_100_concurrent_users(self, supervisor_for_stress):
-"""Test handling 100 concurrent users."""
+        """Test handling 100 concurrent users."""
 supervisor = supervisor_for_stress
 num_users = 100
 
@@ -101,8 +101,8 @@ end_times = []
 errors = []
 
 async def simulate_user(user_id):
-try:
-start_times.append(time.time())
+    try:
+        start_times.append(time.time())
 
 state = DeepAgentState()
 state.user_id = "formatted_string"
@@ -121,7 +121,7 @@ await asyncio.sleep(0)
 return True
 
 except Exception as e:
-errors.append(str(e))
+    errors.append(str(e))
 return False
 
                 # Execute all users concurrently
@@ -147,7 +147,7 @@ print("formatted_string")
 
 @pytest.mark.asyncio
     async def test_burst_traffic(self, supervisor_for_stress):
-"""Test handling sudden burst of traffic."""
+        """Test handling sudden burst of traffic."""
 pass
 supervisor = supervisor_for_stress
 
@@ -159,7 +159,7 @@ results = []
 
                     # Phase 1: Steady traffic
 for i in range(10):
-state = DeepAgentState()
+    state = DeepAgentState()
 state.messages = [{"role": "user", "content": "formatted_string"}]
 
 with patch.object(supervisor, '_execute_protected_workflow',
@@ -174,7 +174,7 @@ burst_start = time.time()
 burst_tasks = []
 
 for i in range(burst_rate):
-state = DeepAgentState()
+    state = DeepAgentState()
 state.messages = [{"role": "user", "content": "formatted_string"}]
 
 with patch.object(supervisor, '_execute_protected_workflow',
@@ -198,7 +198,7 @@ print("formatted_string")
 
 @pytest.mark.asyncio
     async def test_sustained_load(self, supervisor_for_stress):
-"""Test sustained high load over extended period."""
+        """Test sustained high load over extended period."""
 supervisor = supervisor_for_stress
 duration = 30  # 30 seconds of sustained load
 target_rps = 20  # Target 20 requests per second
@@ -208,19 +208,19 @@ request_count = 0
 errors = []
 
 async def generate_load():
-nonlocal request_count
+    nonlocal request_count
 while time.time() - start_time < duration:
-state = DeepAgentState()
+    state = DeepAgentState()
 state.messages = [{"role": "user", "content": "formatted_string"}]
 
 try:
-with patch.object(supervisor, '_execute_protected_workflow',
+    with patch.object(supervisor, '_execute_protected_workflow',
 return_value=[ExecutionResult(success=True)]):
                 # Removed problematic line: await supervisor.execute(state, f"Error executing agent: {e}",
 stream_updates=False)
 request_count += 1
 except Exception as e:
-errors.append(str(e))
+    errors.append(str(e))
 
                     # Control rate
 await asyncio.sleep(1.0 / target_rps)
@@ -248,7 +248,7 @@ class TestMemoryPressure:
 
 @pytest.mark.asyncio
     async def test_memory_leak_prevention(self, supervisor_for_stress):
-"""Test that supervisor doesn't leak memory under load."""
+        """Test that supervisor doesn't leak memory under load."""
 supervisor = supervisor_for_stress
 
         # Get initial memory usage
@@ -257,10 +257,10 @@ initial_memory = process.memory_info().rss / 1024 / 1024  # MB
 
         # Generate load to stress memory
 for batch in range(10):
-tasks = []
+    tasks = []
 
 for i in range(100):
-state = DeepAgentState()
+    state = DeepAgentState()
                 # Large message to stress memory
 state.messages = [ )
 {"role": "user", "content": "x" * 10000}
@@ -293,7 +293,7 @@ print("formatted_string")
 
 @pytest.mark.asyncio
     async def test_large_state_handling(self, supervisor_for_stress):
-"""Test handling of large state objects."""
+        """Test handling of large state objects."""
 pass
 supervisor = supervisor_for_stress
 
@@ -303,7 +303,7 @@ large_state.messages = []
 
                         # Add many messages to create large state
 for i in range(1000):
-large_state.messages.append({ ))
+    large_state.messages.append({ ))
 "role": "user" if i % 2 == 0 else "assistant",
 "content": "formatted_string" + "x" * 500
                             
@@ -330,14 +330,14 @@ class TestResourceExhaustion:
 
 @pytest.mark.asyncio
     async def test_connection_pool_exhaustion(self, supervisor_for_stress):
-"""Test behavior when connection pools are exhausted."""
+        """Test behavior when connection pools are exhausted."""
 supervisor = supervisor_for_stress
 
         # Simulate connection pool exhaustion
 connection_errors = []
 
 async def failing_db_operation(*args, **kwargs):
-connection_errors.append(time.time())
+    connection_errors.append(time.time())
 if len(connection_errors) > 5:
         # Start succeeding after some failures
 await asyncio.sleep(0)
@@ -349,16 +349,16 @@ supervisor.db_session.execute = failing_db_operation
         # Try multiple operations
 results = []
 for i in range(10):
-state = DeepAgentState()
+    state = DeepAgentState()
 state.messages = [{"role": "user", "content": "formatted_string"}]
 
 try:
-with patch.object(supervisor, '_execute_protected_workflow',
+    with patch.object(supervisor, '_execute_protected_workflow',
 return_value=[ExecutionResult(success=True)]):
 await supervisor.execute(state, "formatted_string", stream_updates=False)
 results.append("success")
 except Exception:
-results.append("failure")
+    results.append("failure")
 
                         # Should recover after initial failures
 successes = results.count("success")
@@ -372,17 +372,17 @@ print("formatted_string")
 
 @pytest.mark.asyncio
     async def test_cpu_saturation(self, supervisor_for_stress):
-"""Test behavior under CPU saturation."""
+        """Test behavior under CPU saturation."""
 pass
 supervisor = supervisor_for_stress
 
                             # Create CPU-intensive tasks
 def cpu_intensive_work():
-pass
+    pass
     # Simulate CPU-intensive work
 result = 0
 for i in range(1000000):
-result += i * i
+    result += i * i
 await asyncio.sleep(0)
 return result
 
@@ -399,7 +399,7 @@ supervisor_tasks = []
 start = time.time()
 
 for i in range(10):
-state = DeepAgentState()
+    state = DeepAgentState()
 state.messages = [{"role": "user", "content": "formatted_string"}]
 
 with patch.object(supervisor, '_execute_protected_workflow',
@@ -429,7 +429,7 @@ class TestCascadingFailures:
 
 @pytest.mark.asyncio
     async def test_agent_cascade_failure(self, supervisor_for_stress):
-"""Test handling of cascading agent failures."""
+        """Test handling of cascading agent failures."""
 supervisor = supervisor_for_stress
 
         # Track failure cascade
@@ -438,12 +438,12 @@ failed_agents = set()
 async def cascading_agent_execute(context, state):
     # Simulate cascade: if one fails, others start failing
 if len(failed_agents) > 0 and random.random() < 0.7:
-failed_agents.add(context.agent_name)
+    failed_agents.add(context.agent_name)
 raise Exception("formatted_string")
 
         # Random initial failure
 if random.random() < 0.1:
-failed_agents.add(context.agent_name)
+    failed_agents.add(context.agent_name)
 raise Exception("formatted_string")
 
 await asyncio.sleep(0)
@@ -454,14 +454,14 @@ side_effect=cascading_agent_execute):
 
 results = []
 for i in range(20):
-state = DeepAgentState()
+    state = DeepAgentState()
 state.messages = [{"role": "user", "content": "formatted_string"}]
 
 try:
-await supervisor.execute(state, "formatted_string", stream_updates=False)
+    await supervisor.execute(state, "formatted_string", stream_updates=False)
 results.append("success")
 except Exception:
-results.append("failure")
+    results.append("failure")
 
                             # Small delay to allow cascade to develop
 await asyncio.sleep(0.1)
@@ -478,7 +478,7 @@ print("formatted_string")
 
 @pytest.mark.asyncio
     async def test_circuit_breaker_under_stress(self, supervisor_for_stress):
-"""Test circuit breaker effectiveness under stress."""
+        """Test circuit breaker effectiveness under stress."""
 pass
 supervisor = supervisor_for_stress
 
@@ -486,7 +486,7 @@ supervisor = supervisor_for_stress
 circuit_trips = []
 
 async def monitor_circuit_breaker(context, func):
-pass
+    pass
     # Simulate circuit breaker behavior
 if len(circuit_trips) >= 3:
         # Circuit open
@@ -499,10 +499,10 @@ return await func()
 raise Exception("Circuit breaker open")
 
 try:
-result = await func()
+    result = await func()
 return result
 except Exception as e:
-circuit_trips.append(time.time())
+    circuit_trips.append(time.time())
 raise e
 
 supervisor.circuit_breaker_integration.execute_with_circuit_protection = \
@@ -511,12 +511,12 @@ monitor_circuit_breaker
                     # Generate failing load
 results = []
 for i in range(30):
-state = DeepAgentState()
+    state = DeepAgentState()
 state.messages = [{"role": "user", "content": "formatted_string"}]
 
                         # Inject failures for first requests
 if i < 5:
-with patch.object(supervisor.workflow_orchestrator,
+    with patch.object(supervisor.workflow_orchestrator,
 'execute_standard_workflow',
 side_effect=Exception("Service error")):
 try:
@@ -524,16 +524,16 @@ try:
 stream_updates=False)
 results.append("success")
 except Exception:
-results.append("failure")
+    results.append("failure")
 else:
-with patch.object(supervisor, '_execute_protected_workflow',
+    with patch.object(supervisor, '_execute_protected_workflow',
 return_value=[ExecutionResult(success=True)]):
 try:
                                                     # Removed problematic line: await supervisor.execute(state, f"Error executing agent: {e}",
 stream_updates=False)
 results.append("success")
 except Exception:
-results.append("failure")
+    results.append("failure")
 
                                                         # Circuit breaker should prevent cascade
                                                         # After initial failures, circuit should trip and protect system
@@ -552,14 +552,14 @@ class TestRecoveryUnderLoad:
 
 @pytest.mark.asyncio
     async def test_graceful_degradation(self, supervisor_for_stress):
-"""Test graceful degradation under overload."""
+        """Test graceful degradation under overload."""
 supervisor = supervisor_for_stress
 
         # Track degradation levels
 degradation_levels = []
 
 async def adaptive_execution(context):
-load = len(degradation_levels)
+    load = len(degradation_levels)
 
 if load < 10:
         # Normal operation
@@ -588,7 +588,7 @@ side_effect=adaptive_execution):
                     # Generate increasing load
 tasks = []
 for i in range(30):
-state = DeepAgentState()
+    state = DeepAgentState()
 state.messages = [{"role": "user", "content": "formatted_string"}]
 
 task = supervisor.execute(state, "formatted_string", stream_updates=False)
@@ -596,7 +596,7 @@ tasks.append(task)
 
                         # Stagger requests
 if i % 5 == 0:
-await asyncio.sleep(0.1)
+    await asyncio.sleep(0.1)
 
 results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -617,14 +617,14 @@ print("formatted_string")
 
 @pytest.mark.asyncio
     async def test_recovery_after_overload(self, supervisor_for_stress):
-"""Test system recovery after overload condition."""
+        """Test system recovery after overload condition."""
 pass
 supervisor = supervisor_for_stress
 
                                 # Phase 1: Overload the system
 overload_tasks = []
 for i in range(50):
-state = DeepAgentState()
+    state = DeepAgentState()
 state.messages = [{"role": "user", "content": "formatted_string"}]
 
 with patch.object(supervisor, '_execute_protected_workflow',
@@ -643,7 +643,7 @@ await asyncio.sleep(2)  # Allow system to recover
                                         # Phase 3: Normal load after recovery
 recovery_tasks = []
 for i in range(10):
-state = DeepAgentState()
+    state = DeepAgentState()
 state.messages = [{"role": "user", "content": "formatted_string"}]
 
 with patch.object(supervisor, '_execute_protected_workflow',

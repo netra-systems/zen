@@ -480,7 +480,7 @@ class TestAgentClassRegistryIsolation:
 
 @pytest.mark.asyncio
     async def test_registry_immutability_after_freeze(self):
-"""Test that registry becomes immutable after freeze."""
+        """Test that registry becomes immutable after freeze."""
 registry = create_test_registry()
 
         # Register agents before freeze
@@ -498,7 +498,7 @@ assert registry.is_frozen()
 
         # Verify registration fails after freeze
 with pytest.raises(RuntimeError, match="Cannot register agent classes after registry is frozen"):
-registry.register("new_agent", MockAgent, "Should fail")
+    registry.register("new_agent", MockAgent, "Should fail")
 
             # Verify reads still work
 triage_class = registry.get_agent_class("triage")
@@ -510,20 +510,20 @@ assert data_info.agent_class == MockDataAgent
 
 @pytest.mark.asyncio
     async def test_concurrent_registry_reads(self):
-"""Test thread-safe concurrent reads after freeze."""
+        """Test thread-safe concurrent reads after freeze."""
 pass
 registry = create_test_registry()
 
                 # Register multiple agents
 for i in range(10):
-agent_name = "formatted_string"
+    agent_name = "formatted_string"
 registry.register(agent_name, MockAgent, "formatted_string")
 
 registry.freeze()
 
                     # Test concurrent reads
 async def concurrent_reader(reader_id: int) -> Dict[str, Any]:
-results = []
+    results = []
 for _ in range(100):
         # Read different agents concurrently
 agent_name = "formatted_string"
@@ -550,14 +550,14 @@ total_reads = sum(len(results) for results in all_results)
 assert total_reads == 20 * 100  # 20 readers  x  100 reads each
 
 for results in all_results:
-for result in results:
-assert result['class_found'], "formatted_string"
+    for result in results:
+        assert result['class_found'], "formatted_string"
 assert result['info_found'], "formatted_string"
 assert result['class_correct'], "formatted_string"
 
 @pytest.mark.asyncio
     async def test_registry_dependency_validation(self):
-"""Test dependency validation functionality."""
+        """Test dependency validation functionality."""
 registry = create_test_registry()
 
                     # Register agents with dependencies
@@ -709,7 +709,7 @@ factory.configure(mock_agent_registry, mock_websocket_bridge)
                 # Create contexts for 3 users
 contexts = []
 for i in range(3):
-context = await factory.create_user_execution_context( )
+    context = await factory.create_user_execution_context( )
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id="formatted_string",
@@ -720,13 +720,13 @@ contexts.append(context)
                     # Create agents and execute simultaneously
 agents = []
 for i, context in enumerate(contexts):
-agent = await factory.create_agent_instance("triage", context)
+    agent = await factory.create_agent_instance("triage", context)
 agents.append(agent)
 
                         # Execute agents concurrently
 tasks = []
 for i, (agent, context) in enumerate(zip(agents, contexts)):
-state = DeepAgentState( )
+    state = DeepAgentState( )
 user_message="formatted_string",
 thread_id="formatted_string"
                             
@@ -737,16 +737,16 @@ results = await asyncio.gather(*tasks)
                             # Verify WebSocket events are properly isolated
 events_by_run = {}
 for event in mock_websocket_bridge.events_sent:
-run_id = event['run_id']
+    run_id = event['run_id']
 if run_id not in events_by_run:
-events_by_run[run_id] = []
+    events_by_run[run_id] = []
 events_by_run[run_id].append(event)
 
                                     # Each user should have their own events
 assert len(events_by_run) == 3
 
 for i in range(3):
-run_id = "formatted_string"
+    run_id = "formatted_string"
 thread_id = "formatted_string"
 
 assert run_id in events_by_run
@@ -758,11 +758,11 @@ assert len(thinking_events) > 0
 
                                         # All events for this user should have correct thread_id
 for event in user_events:
-assert event['thread_id'] == thread_id, "formatted_string"
+    assert event['thread_id'] == thread_id, "formatted_string"
 
                                             # Cleanup all contexts
 for context in contexts:
-await factory.cleanup_user_context(context)
+    await factory.cleanup_user_context(context)
 
 @pytest.mark.asyncio
                                                 # Removed problematic line: async def test_concurrent_user_execution_stress(self,
@@ -777,7 +777,7 @@ num_concurrent_users = 10
 executions_per_user = 5
 
 async def execute_user_workflow(user_index: int) -> ConcurrentUserTestResult:
-user_id = "formatted_string"
+    user_id = "formatted_string"
 thread_id = "formatted_string"
 
 start_time = time.time()
@@ -789,7 +789,7 @@ success = True
 try:
         # Execute multiple operations for this user
 for exec_index in range(executions_per_user):
-run_id = "formatted_string"
+    run_id = "formatted_string"
 
             # Use scoped execution context
 async with factory.user_execution_scope( )
@@ -811,11 +811,11 @@ result = await agent.execute(state, run_id)
 
                 # Validate result isolation
 if user_id not in result.user_message:
-success = False
+    success = False
 error_message = "formatted_string"
 
 if result.additional_context.get("agent_user_id") != user_id:
-success = False
+    success = False
 error_message = "formatted_string"
 
                         # Collect agent execution data
@@ -824,11 +824,11 @@ agent_logs.append(agent_summary)
 
                         # Collect WebSocket events for this user
 for event in mock_websocket_bridge.events_sent:
-if event['run_id'].startswith("formatted_string"):
-websocket_events.append(event)
+    if event['run_id'].startswith("formatted_string"):
+        websocket_events.append(event)
 
 except Exception as e:
-success = False
+    success = False
 error_message = str(e)
 logger.error("formatted_string")
 
@@ -872,22 +872,22 @@ assert len(successful_results) >= (num_concurrent_users * 0.8), "formatted_strin
                                     # Verify isolation - each user should have their own events
 all_websocket_events = []
 for result in successful_results:
-all_websocket_events.extend(result.websocket_events_received)
+    all_websocket_events.extend(result.websocket_events_received)
 
                                         # Group events by user
 events_by_user = {}
 for event in all_websocket_events:
-run_id = event['run_id']
+    run_id = event['run_id']
 user_match = run_id.split('_')
 if len(user_match) >= 3:
-user_key = "formatted_string"  # stress_user_XXX
+    user_key = "formatted_string"  # stress_user_XXX
 if user_key not in events_by_user:
-events_by_user[user_key] = []
+    events_by_user[user_key] = []
 events_by_user[user_key].append(event)
 
                                                     # Each successful user should have events
 for result in successful_results:
-user_key = result.user_id
+    user_key = result.user_id
 assert user_key in events_by_user, "formatted_string"
 user_events = events_by_user[user_key]
 assert len(user_events) >= executions_per_user, "formatted_string"
@@ -990,12 +990,12 @@ class TestUserExecutionContextValidation:
 
 @pytest.mark.asyncio
     async def test_context_isolation_across_requests(self):
-"""Test that contexts from different requests are completely isolated."""
+        """Test that contexts from different requests are completely isolated."""
 pass
                                 # Create multiple contexts simulating different requests
 contexts = []
 for i in range(10):
-context = ModelsUserExecutionContext( )
+    context = ModelsUserExecutionContext( )
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id="formatted_string",
@@ -1016,7 +1016,7 @@ assert len(set(request_ids)) == 10  # All unique
 
                                     # Verify contexts don't interfere with each other
 for i, context in enumerate(contexts):
-expected_user_id = "formatted_string"
+    expected_user_id = "formatted_string"
 expected_thread_id = "formatted_string"
 expected_run_id = "formatted_string"
 expected_request_id = "formatted_string"
@@ -1051,7 +1051,7 @@ instance_factory.configure(mock_agent_registry, mock_websocket_bridge)
 
         # Step 2: Simulate FastAPI request processing
 async def simulate_api_request(user_id: str, message: str) -> Dict[str, Any]:
-thread_id = "formatted_string"
+    thread_id = "formatted_string"
 run_id = "formatted_string"
 request_id = "formatted_string"
 
@@ -1124,7 +1124,7 @@ assert len(api_responses) == 5
 
         # Verify each response is for the correct user
 for i, (expected_user, expected_message) in enumerate(test_users):
-response = api_responses[i]
+    response = api_responses[i]
 
 assert response["success"] is True
 assert response["user_id"] == expected_user
@@ -1138,19 +1138,19 @@ assert agent_summary["total_executions"] == 1
             # Step 5: Verify WebSocket events were properly routed
 events_by_user = {}
 for event in mock_websocket_bridge.events_sent:
-run_id = event["run_id"]
+    run_id = event["run_id"]
                 # Find which user this run_id belongs to
 for response in api_responses:
-if response["run_id"] == run_id:
-user_id = response["user_id"]
+    if response["run_id"] == run_id:
+        user_id = response["user_id"]
 if user_id not in events_by_user:
-events_by_user[user_id] = []
+    events_by_user[user_id] = []
 events_by_user[user_id].append(event)
 break
 
                             # Each user should have received their own WebSocket events
 for expected_user, _ in test_users:
-assert expected_user in events_by_user, "formatted_string"
+    assert expected_user in events_by_user, "formatted_string"
 user_events = events_by_user[expected_user]
 assert len(user_events) > 0, "formatted_string"
 
@@ -1225,7 +1225,7 @@ assert user_id in result.user_message
 
                                             # Force some garbage collection within the loop
 if i % 10 == 0:
-gc.collect()
+    gc.collect()
 
                                                 # Force garbage collection after all contexts are cleaned up
 gc.collect()
@@ -1285,11 +1285,11 @@ db_session=test_database_sessions[0]
 mock_agent_registry.get = Mock(return_value=None)
 
 with pytest.raises(RuntimeError, match="Agent creation failed"):
-await factory.create_agent_instance("nonexistent_agent", context)
+    await factory.create_agent_instance("nonexistent_agent", context)
 
             # Test invalid context
 with pytest.raises(ValueError, match="UserExecutionContext is required"):
-await factory.create_agent_instance("triage", None)
+    await factory.create_agent_instance("triage", None)
 
 await factory.cleanup_user_context(context)
 
@@ -1361,12 +1361,12 @@ assert context._is_cleaned
 
 @pytest.mark.asyncio
     async def test_factory_configuration_validation(self):
-"""Test factory configuration validation."""
+        """Test factory configuration validation."""
 factory = AgentInstanceFactory()
 
                             # Test unconfigured factory
 with pytest.raises(ValueError, match="Factory not configured"):
-await factory.create_user_execution_context( )
+    await factory.create_user_execution_context( )
 user_id="test",
 thread_id="test",
 run_id="test",
@@ -1374,11 +1374,11 @@ db_session=Magic            )
 
                                 # Test invalid configuration - WebSocket bridge is checked first
 with pytest.raises(ValueError, match="AgentWebSocketBridge cannot be None"):
-factory.configure(agent_registry=None, websocket_bridge=None)
+    factory.configure(agent_registry=None, websocket_bridge=None)
 
                                     # Test missing WebSocket bridge
 with pytest.raises(ValueError, match="AgentWebSocketBridge cannot be None"):
-factory.configure(agent_registry=Magic )
+    factory.configure(agent_registry=Magic )
 @pytest.mark.asyncio
                                         # Removed problematic line: async def test_context_creation_parameter_validation(self,
 mock_agent_registry,
@@ -1392,7 +1392,7 @@ mock_session = MagicMock(spec=AsyncSession)
 
                                             # Test missing required parameters
 with pytest.raises(ValueError, match="user_id, thread_id, and run_id are required"):
-await factory.create_user_execution_context( )
+    await factory.create_user_execution_context( )
 user_id="",
 thread_id="test_thread",
 run_id="test_run",
@@ -1400,7 +1400,7 @@ db_session=mock_session
                                                 
 
 with pytest.raises(ValueError, match="user_id, thread_id, and run_id are required"):
-await factory.create_user_execution_context( )
+    await factory.create_user_execution_context( )
 user_id="test_user",
 thread_id="",
 run_id="test_run",
@@ -1408,7 +1408,7 @@ db_session=mock_session
                                                     
 
 with pytest.raises(ValueError, match="user_id, thread_id, and run_id are required"):
-await factory.create_user_execution_context( )
+    await factory.create_user_execution_context( )
 user_id="test_user",
 thread_id="test_thread",
 run_id="",
@@ -1416,7 +1416,7 @@ db_session=mock_session
                                                         
 
 with pytest.raises(ValueError, match="db_session is required for request isolation"):
-await factory.create_user_execution_context( )
+    await factory.create_user_execution_context( )
 user_id="test_user",
 thread_id="test_thread",
 run_id="test_run",

@@ -144,22 +144,22 @@ class TestConcurrentUserLoad:
 @pytest.mark.asyncio
 @pytest.mark.performance
     async def test_concurrent_user_creation_10_users(self, registry, performance_metrics):
-"""Test concurrent creation of 10 user registries."""
+        """Test concurrent creation of 10 user registries."""
 num_users = 10
 user_ids = ["formatted_string" for i in range(num_users)]
 
 performance_metrics.record_memory()
 
 async def create_user_registry(user_id: str):
-start_time = time.time()
+    start_time = time.time()
 try:
-user_registry = await registry.get_user_registry(user_id)
+    user_registry = await registry.get_user_registry(user_id)
 assert user_registry.user_id == user_id
 performance_metrics.record_operation(time.time() - start_time)
 await asyncio.sleep(0)
 return user_registry
 except Exception as e:
-performance_metrics.record_error()
+    performance_metrics.record_error()
 raise e
 
             # Create users concurrently
@@ -183,7 +183,7 @@ print("formatted_string")
 @pytest.mark.asyncio
 @pytest.mark.performance
     async def test_concurrent_agent_creation_50_agents(self, registry, performance_metrics):
-"""Test concurrent agent creation across multiple users."""
+        """Test concurrent agent creation across multiple users."""
 pass
 num_users = 5
 agents_per_user = 10
@@ -191,7 +191,7 @@ total_agents = num_users * agents_per_user
 
                 # Register mock factory
 async def mock_factory(context, llm_manager=None, websocket_bridge=None):
-pass
+    pass
     # Simulate some work
 await asyncio.sleep(0.01)  # 10ms of "work"
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
@@ -205,12 +205,12 @@ registry.register_agent_factory("load_test_agent", mock_factory)
 performance_metrics.record_memory()
 
 async def create_user_agents(user_id: str):
-"""Create multiple agents for one user."""
+    """Create multiple agents for one user."""
 agents = []
 for i in range(agents_per_user):
-start_time = time.time()
+    start_time = time.time()
 try:
-user_context = UserExecutionContext.from_request( )
+    user_context = UserExecutionContext.from_request( )
 user_id=user_id,
 thread_id="formatted_string",
 run_id="formatted_string"
@@ -221,7 +221,7 @@ user_id, "load_test_agent", user_context
 agents.append(agent)
 performance_metrics.record_operation(time.time() - start_time)
 except Exception as e:
-performance_metrics.record_error()
+    performance_metrics.record_error()
 raise e
 await asyncio.sleep(0)
 return agents
@@ -250,7 +250,7 @@ print("formatted_string")
 @pytest.mark.asyncio
 @pytest.mark.performance
     async def test_memory_usage_scaling(self, registry, performance_metrics):
-"""Test memory usage scales linearly with user count."""
+        """Test memory usage scales linearly with user count."""
 pass
 user_counts = [1, 5, 10, 20]
 memory_per_user_samples = []
@@ -268,7 +268,7 @@ user_ids = ["formatted_string" for i in range(user_count)]
 
                         # Mock factory for agents
 async def mock_factory(context, llm_manager=None, websocket_bridge=None):
-pass
+    pass
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
 mock_agent.cleanup = lambda x: None None
 await asyncio.sleep(0)
@@ -278,7 +278,7 @@ registry.register_agent_factory("mem_test_agent", mock_factory)
 
     # Create agents for users
 for user_id in user_ids:
-user_context = UserExecutionContext.from_request( )
+    user_context = UserExecutionContext.from_request( )
 user_id=user_id,
 thread_id="thread_1",
 run_id="run_1"
@@ -306,13 +306,13 @@ print("formatted_string")
 @pytest.mark.asyncio
 @pytest.mark.performance
     async def test_cleanup_performance(self, registry, performance_metrics):
-"""Test cleanup performance with many users."""
+        """Test cleanup performance with many users."""
 num_users = 20
 
             # Create users with agents
 user_ids = []
 for i in range(num_users):
-user_id = "formatted_string"
+    user_id = "formatted_string"
 user_ids.append(user_id)
 
                 # Create user registry (this will create agents)
@@ -354,22 +354,22 @@ class TestThreadSafety:
 @pytest.mark.asyncio
 @pytest.mark.performance
     async def test_thread_safety_stress(self):
-"""Test thread safety with 100+ concurrent operations."""
+        """Test thread safety with 100+ concurrent operations."""
 registry = AgentRegistry()
 operations_count = 100
 errors = []
 
         # Mock factory
 async def mock_factory(context, llm_manager=None, websocket_bridge=None):
-await asyncio.sleep(0)
+    await asyncio.sleep(0)
 return
 registry.register_agent_factory("stress_test_agent", mock_factory)
 
 async def stress_operation(op_id: int):
-"""Perform a stress operation."""
+    """Perform a stress operation."""
 pass
 try:
-user_id = "formatted_string"  # 10 users, multiple ops per user
+    user_id = "formatted_string"  # 10 users, multiple ops per user
 user_context = UserExecutionContext.from_request( )
 user_id=user_id,
 thread_id="formatted_string",
@@ -391,10 +391,10 @@ await asyncio.sleep(0.001)  # 1ms
 retrieved_agent = await user_registry.get_agent("stress_test_agent")
 
 if retrieved_agent != agent:
-errors.append("formatted_string")
+    errors.append("formatted_string")
 
 except Exception as e:
-errors.append("formatted_string")
+    errors.append("formatted_string")
 
                 # Run all operations concurrently
 start_time = time.time()
@@ -422,12 +422,12 @@ class TestMemoryLeakDetection:
 @pytest.mark.performance
 @pytest.mark.slow
     async def test_no_memory_leaks_1000_operations(self):
-"""Test for memory leaks over 1000 create/destroy cycles."""
+        """Test for memory leaks over 1000 create/destroy cycles."""
 registry = AgentRegistry()
 
         # Mock factory
 async def mock_factory(context, llm_manager=None, websocket_bridge=None):
-websocket = TestWebSocketConnection()  # Real WebSocket implementation
+    websocket = TestWebSocketConnection()  # Real WebSocket implementation
 await asyncio.sleep(0)
 return mock_agent
 
@@ -441,7 +441,7 @@ memory_samples = [baseline_memory]
     # Perform 1000 create/destroy cycles
 cycles = 1000
 for i in range(cycles):
-user_id = "formatted_string"
+    user_id = "formatted_string"
 user_context = UserExecutionContext.from_request( )
 user_id=user_id,
 thread_id="formatted_string",
@@ -456,7 +456,7 @@ await registry.cleanup_user_session(user_id)
 
         # Sample memory every 100 cycles
 if i % 100 == 0:
-current_memory = process.memory_info().rss / 1024 / 1024
+    current_memory = process.memory_info().rss / 1024 / 1024
 memory_samples.append(current_memory)
 print("formatted_string")
 
@@ -487,7 +487,7 @@ class TestGlobalRegistryPerformance:
 
 @pytest.mark.asyncio
     async def test_concurrent_registry_creation_performance(self):
-"""Test concurrent registry creation performance with proper isolation."""
+        """Test concurrent registry creation performance with proper isolation."""
 num_concurrent_accesses = 50
 
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -496,7 +496,7 @@ start_time = time.time()
 
         # Create registries concurrently (proper isolation pattern)
 def create_registry():
-mock_llm_manager = Mock(spec=LLMManager)
+    mock_llm_manager = Mock(spec=LLMManager)
 await asyncio.sleep(0)
 return AgentRegistry(mock_llm_manager)
 

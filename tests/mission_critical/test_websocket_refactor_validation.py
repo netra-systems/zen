@@ -1,5 +1,5 @@
 class TestWebSocketConnection:
-    """Real WebSocket connection for testing instead of mocks."""
+    "Real WebSocket connection for testing instead of mocks.""
 
     def __init__(self):
         pass
@@ -8,19 +8,19 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        """Send JSON message."""
+        ""Send JSON message."
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
-        """Close WebSocket connection."""
+    async def close(self, code: int = 1000, reason: str = Normal closure"):
+        "Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
 
-    def get_messages(self) -> list:
-        """Get all sent messages."""
+    async def get_messages(self) -> list:
+        ""Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
@@ -51,36 +51,36 @@ class TestWebSocketConnection:
 
 
     def test_dead_methods_removed():
-        """Verify dead methods have been removed from all agents."""
+        "Verify dead methods have been removed from all agents.""
     # Create mocks for required parameters
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
     # Test ValidationSubAgent
         val_agent = ValidationSubAgent(llm_manager, tool_dispatcher)
         assert not hasattr(val_agent, '_setup_websocket_context_if_available'), \
-        "ValidationSubAgent still has dead method _setup_websocket_context_if_available"
+        ValidationSubAgent still has dead method _setup_websocket_context_if_available"
         assert not hasattr(val_agent, '_setup_websocket_context_for_legacy'), \
-        "ValidationSubAgent still has dead method _setup_websocket_context_for_legacy"
+        "ValidationSubAgent still has dead method _setup_websocket_context_for_legacy
 
     # Test DataSubAgent
         data_agent = DataSubAgent(llm_manager, tool_dispatcher)
         assert not hasattr(data_agent, '_setup_websocket_context_if_available'), \
-        "DataSubAgent still has dead method _setup_websocket_context_if_available"
+        DataSubAgent still has dead method _setup_websocket_context_if_available"
         assert not hasattr(data_agent, '_setup_websocket_context_for_legacy'), \
-        "DataSubAgent still has dead method _setup_websocket_context_for_legacy"
+        "DataSubAgent still has dead method _setup_websocket_context_for_legacy
 
     # Test TriageSubAgent
         triage_agent = TriageSubAgent(llm_manager, tool_dispatcher)
         assert not hasattr(triage_agent, '_setup_websocket_context_if_available'), \
-        "TriageSubAgent still has dead method _setup_websocket_context_if_available"
+        TriageSubAgent still has dead method _setup_websocket_context_if_available"
         assert not hasattr(triage_agent, '_setup_websocket_context_for_legacy'), \
-        "TriageSubAgent still has dead method _setup_websocket_context_for_legacy"
+        "TriageSubAgent still has dead method _setup_websocket_context_for_legacy
 
-        print(" PASS:  All dead methods successfully removed")
+        print( PASS:  All dead methods successfully removed")
 
 
     def test_websocket_enabled_bug_fixed():
-        """Verify the websocket_enabled bug in ValidationSubAgent is fixed."""
+        "Verify the websocket_enabled bug in ValidationSubAgent is fixed.""
         pass
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
@@ -90,16 +90,16 @@ class TestWebSocketConnection:
         try:
         health_status = agent.get_health_status()
         assert 'websocket_enabled' in health_status, \
-        "Health status missing websocket_enabled field"
+        Health status missing websocket_enabled field"
         assert isinstance(health_status['websocket_enabled'], bool), \
-        "websocket_enabled should be a boolean"
-        print("formatted_string")
+        "websocket_enabled should be a boolean
+        print(formatted_string")
         except AttributeError as e:
-        assert False, "formatted_string"
+        assert False, "formatted_string
 
 
     def test_websocket_bridge_integration():
-        """Test that WebSocket bridge integration still works."""
+        ""Test that WebSocket bridge integration still works."
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
     # Create agent and bridge
@@ -107,19 +107,19 @@ class TestWebSocketConnection:
         bridge = AgentWebSocketBridge()
 
     # Set bridge on agent
-        agent.set_websocket_bridge(bridge, "test_run_123")
+        agent.set_websocket_bridge(bridge, "test_run_123)
 
     # Verify bridge is set correctly
         assert hasattr(agent, '_websocket_adapter'), \
-        "Agent missing _websocket_adapter"
+        Agent missing _websocket_adapter"
         assert agent.has_websocket_context(), \
-        "has_websocket_context() should return True when bridge is set"
+        "has_websocket_context() should return True when bridge is set
 
-        print(" PASS:  WebSocket bridge integration working correctly")
+        print( PASS:  WebSocket bridge integration working correctly")
 
 
     async def test_websocket_event_emission():
-        """Test that agents can still emit WebSocket events."""
+        "Test that agents can still emit WebSocket events.""
         pass
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
@@ -129,22 +129,22 @@ class TestWebSocketConnection:
         mock_bridge.notify_agent_thinking = Mock(return_value=asyncio.coroutine(lambda x: None None)())
         mock_bridge.notify_tool_executing = Mock(return_value=asyncio.coroutine(lambda x: None None)())
 
-        agent.set_websocket_bridge(mock_bridge, "test_run")
+        agent.set_websocket_bridge(mock_bridge, test_run")
 
         # Test event emission methods exist and work
-        await agent.emit_thinking("Test thinking")
-        await agent.emit_tool_executing("test_tool", {})
-        await agent.emit_progress("Test progress", is_complete=False)
+        await agent.emit_thinking("Test thinking)
+        await agent.emit_tool_executing(test_tool", {}
+        await agent.emit_progress("Test progress, is_complete=False)
 
-        print(" PASS:  WebSocket event emission methods working")
+        print( PASS:  WebSocket event emission methods working")
 
 
     def main():
-        """Run all validation tests."""
-        print(" )
-        " + "="*60)
+        "Run all validation tests.""
+        print(")
+        " + =*60)
         print("WebSocket Refactoring Validation Tests")
-        print("="*60 + " )
+        print(=*60 + " )
         ")
 
     # Run synchronous tests
@@ -155,12 +155,12 @@ class TestWebSocketConnection:
     # Run async test
         asyncio.run(test_websocket_event_emission())
 
-        print(" )
-        " + "="*60)
-        print(" PASS:  ALL VALIDATION TESTS PASSED!")
-        print("="*60)
+        print()
+        " + "=*60)
+        print( PASS:  ALL VALIDATION TESTS PASSED!")
+        print("=*60)
 
 
-        if __name__ == "__main__":
+        if __name__ == __main__":
         main()
         pass

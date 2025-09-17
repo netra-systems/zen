@@ -231,7 +231,7 @@ mock_config.dynamic_ports = True
 frontend_path = PROJECT_ROOT / "frontend"
 
 with patch('dev_launcher.config.resolve_path') as mock_resolve:
-mock_resolve.return_value = frontend_path
+    mock_resolve.return_value = frontend_path
 
 with patch('dev_launcher.frontend_starter.create_subprocess') as mock_subprocess:
                                 # Mock successful process creation
@@ -271,7 +271,7 @@ mock_server.stop()
 
 @pytest.mark.e2e
 def test_port_manager_allocation_with_conflict(self):
-"""Test 3: PortManager properly handles port conflicts and allocates alternatives."""
+    """Test 3: PortManager properly handles port conflicts and allocates alternatives."""
 port_manager = PortManager()
 
     # Step 1: Occupy port 3000
@@ -310,16 +310,16 @@ mock_server.stop()
 
 @pytest.mark.e2e
 def test_find_available_port_fallback_mechanism(self):
-"""Test 4: find_available_port function handles port conflicts correctly."""
+    """Test 4: find_available_port function handles port conflicts correctly."""
 pass
     # Step 1: Occupy multiple ports to test fallback mechanism
 servers = []
 occupied_ports = [3000, 3001, 3002]
 
 for port in occupied_ports:
-server = MockServer(port)
+    server = MockServer(port)
 if server.start():
-servers.append(server)
+    servers.append(server)
 
 try:
                 # Step 2: Test fallback mechanism
@@ -339,37 +339,37 @@ print("formatted_string")
 finally:
                     # Clean up
 for server in servers:
-server.stop()
+    server.stop()
 
 @pytest.mark.e2e
 def test_concurrent_port_allocation_race_condition_prevention(self):
-"""Test 5: Prevent race conditions when multiple services try to allocate ports simultaneously."""
+    """Test 5: Prevent race conditions when multiple services try to allocate ports simultaneously."""
 port_manager = PortManager()
 allocated_ports = []
 errors = []
 
 def allocate_port(service_name: str, preferred_port: int):
-"""Helper function to allocate port in thread."""
+    """Helper function to allocate port in thread."""
 pass
 try:
-port = port_manager.allocate_port( )
+    port = port_manager.allocate_port( )
 service_name=service_name,
 preferred_port=preferred_port,
 port_range=(3000, 3020),
 max_retries=5
         
 if port:
-allocated_ports.append((service_name, port))
+    allocated_ports.append((service_name, port))
 print("formatted_string")
 else:
-errors.append("formatted_string")
+    errors.append("formatted_string")
 except Exception as e:
-errors.append("formatted_string")
+    errors.append("formatted_string")
 
                     # Step 1: Start multiple threads trying to allocate similar ports
 threads = []
 for i in range(5):
-thread = threading.Thread( )
+    thread = threading.Thread( )
 target=allocate_port,
 args=("formatted_string", 3000)
                         
@@ -377,11 +377,11 @@ threads.append(thread)
 
                         # Step 2: Start all threads simultaneously
 for thread in threads:
-thread.start()
+    thread.start()
 
                             # Step 3: Wait for completion
 for thread in threads:
-thread.join(timeout=10)
+    thread.join(timeout=10)
 
                                 # Step 4: Verify results
 assert len(errors) == 0, "formatted_string"
@@ -393,24 +393,24 @@ assert len(set(ports_only)) == 5, "formatted_string"
 
                                 # Step 6: Verify all ports are in valid range
 for service_name, port in allocated_ports:
-assert 3000 <= port <= 3020, "formatted_string"
+    assert 3000 <= port <= 3020, "formatted_string"
 
 print("formatted_string")
 
                                     # Clean up
 for service_name, _ in allocated_ports:
-port_manager.release_port(service_name)
+    port_manager.release_port(service_name)
 
 @pytest.mark.e2e
 def test_windows_specific_port_race_condition_fix(self):
-"""Test 6: Verify Windows-specific port race condition is properly handled."""
+    """Test 6: Verify Windows-specific port race condition is properly handled."""
 if sys.platform != "win32":
-pytest.skip("Windows-specific test")
+    pytest.skip("Windows-specific test")
 
         # Step 1: Test rapid port allocation/deallocation cycles
 results = []
 for i in range(10):
-start_time = time.time()
+    start_time = time.time()
 
             # Step 2: Check port availability
 port_available_before = is_port_available(3005, '0.0.0.0', allow_reuse=False)
@@ -439,7 +439,7 @@ time.sleep(0.01)
 
             # Step 5: Verify no race conditions occurred
 for result in results:
-assert result['allocated_port'] is not None, "formatted_string"
+    assert result['allocated_port'] is not None, "formatted_string"
 assert result['duration'] < 1.0, "formatted_string"
 
 print("formatted_string")
@@ -484,7 +484,7 @@ print(" SUCCESS: Frontend startup failure handled gracefully")
 
 @pytest.mark.e2e
 def test_port_availability_check_interface_consistency(self):
-"""Test 8: Ensure port availability checks use consistent interface (0.0.0.0 vs localhost)."""
+    """Test 8: Ensure port availability checks use consistent interface (0.0.0.0 vs localhost)."""
 test_port = 3007
 
     # Step 1: Test port availability on different interfaces
@@ -499,7 +499,7 @@ assert available_on_localhost == available_on_all_interfaces, \
     # Step 3: Test with occupied port
 mock_server = MockServer(test_port, '0.0.0.0')
 if mock_server.start():
-try:
+    try:
             # Step 4: Both interfaces should report unavailable
 available_localhost_occupied = is_port_available(test_port, 'localhost')
 available_all_occupied = is_port_available(test_port, '0.0.0.0')
@@ -510,7 +510,7 @@ assert not available_all_occupied, "Port should be unavailable on 0.0.0.0"
 print("formatted_string")
 
 finally:
-mock_server.stop()
+    mock_server.stop()
 
 
 @pytest.mark.e2e

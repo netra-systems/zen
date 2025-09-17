@@ -250,7 +250,7 @@ class TestContainerLifecycleHandling:
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_database_connection_cleanup(self):
-"""Test database connections are properly cleaned up on shutdown."""
+        """Test database connections are properly cleaned up on shutdown."""
 pass
 from netra_backend.app.db.postgres_core import async_engine
 
@@ -260,9 +260,9 @@ assert hasattr(async_engine, 'dispose')
 
                             # Test that dispose can be called without errors
 try:
-await async_engine.dispose()
+    await async_engine.dispose()
 except Exception as e:
-pytest.fail("formatted_string")
+    pytest.fail("formatted_string")
 
 
 @pytest.mark.e2e
@@ -272,7 +272,7 @@ class TestStagingSpecificValidation:
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_staging_health_check_endpoint(self):
-"""Test health check endpoint works in staging configuration."""
+        """Test health check endpoint works in staging configuration."""
 with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
             # Mock the FastAPI app
             # Mock: Generic component isolation for controlled unit testing
@@ -284,7 +284,7 @@ assert health_check_response["environment"] in ["staging", "testing"]
 
 @pytest.mark.e2e
 def test_staging_cors_configuration(self):
-"""Test CORS is properly configured for staging."""
+    """Test CORS is properly configured for staging."""
 pass
 with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
         # Expected staging frontend URL
@@ -299,7 +299,7 @@ assert config.environment in ['staging', 'testing']
 
 @pytest.mark.e2e
 def test_staging_database_url_format(self):
-"""Test database URL format is correct for Cloud SQL in staging."""
+    """Test database URL format is correct for Cloud SQL in staging."""
 with patch.dict(os.environ, { ))
 'ENVIRONMENT': 'staging',
 'DATABASE_URL': 'postgresql://user:pass@/dbname?host=/cloudsql/project:region:instance'

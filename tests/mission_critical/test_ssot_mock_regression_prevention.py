@@ -1,4 +1,4 @@
-"""
+"
 SSOT Mock Factory Regression Prevention Tests
 Test 4 - Important Priority
 
@@ -13,7 +13,7 @@ Business Value:
 Issue: #1107 - SSOT Mock Factory Duplication
 Phase: 2 - Test Creation
 Priority: Important (Mission Critical)
-"""
+""
 
 import pytest
 import ast
@@ -26,12 +26,12 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class SSotMockRegressionPreventionTests(SSotBaseTestCase):
-    """
+    ""
     Mission Critical test suite preventing SSOT mock factory regression.
     
     Automatically scans codebase for new mock violations and prevents
     regression back to direct mock creation patterns.
-    """
+    "
 
     # Define SSOT violation patterns to detect
     VIOLATION_PATTERNS = {
@@ -78,18 +78,18 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
     }
 
     def setUp(self):
-        """Set up regression prevention testing."""
+        "Set up regression prevention testing.""
         super().setUp()
         self.project_root = Path(__file__).parent.parent.parent
         self.violation_count = 0
         self.regression_violations = []
 
     def test_no_new_direct_mock_creation(self):
-        """
+        ""
         Test that no new direct Mock() creation patterns have been introduced.
         
         CRITICAL: Direct mock creation violates SSOT principles.
-        """
+        "
         violations = self._scan_for_violations('direct_mock_creation')
         
         # Filter out allowed exceptions
@@ -97,51 +97,51 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         
         # Assert no new violations
         self.assertEqual(len(filtered_violations), 0, 
-                        f"New direct mock creation violations detected: {filtered_violations}")
+                        f"New direct mock creation violations detected: {filtered_violations})
 
     def test_no_new_websocket_mock_violations(self):
-        """
+        ""
         Test that no new WebSocket mock violations have been introduced.
         
         CRITICAL: WebSocket mock violations impact Golden Path testing.
-        """
+        "
         violations = self._scan_for_violations('websocket_mock_violations')
         filtered_violations = self._filter_allowed_violations(violations)
         
         # WebSocket violations are high-impact for Golden Path
         self.assertEqual(len(filtered_violations), 0,
-                        f"New WebSocket mock violations detected: {filtered_violations}")
+                        f"New WebSocket mock violations detected: {filtered_violations})
 
     def test_no_new_agent_mock_violations(self):
-        """
+        ""
         Test that no new agent mock violations have been introduced.
         
         CRITICAL: Agent mock violations impact AI response testing.
-        """
+        "
         violations = self._scan_for_violations('agent_mock_violations')
         filtered_violations = self._filter_allowed_violations(violations)
         
         self.assertEqual(len(filtered_violations), 0,
-                        f"New agent mock violations detected: {filtered_violations}")
+                        f"New agent mock violations detected: {filtered_violations})
 
     def test_no_new_database_mock_violations(self):
-        """
+        ""
         Test that no new database mock violations have been introduced.
         
         IMPORTANT: Database mock violations impact persistence testing.
-        """
+        "
         violations = self._scan_for_violations('database_mock_violations')
         filtered_violations = self._filter_allowed_violations(violations)
         
         self.assertEqual(len(filtered_violations), 0,
-                        f"New database mock violations detected: {filtered_violations}")
+                        f"New database mock violations detected: {filtered_violations})
 
     def test_ssot_mock_factory_usage_compliance(self):
-        """
+        ""
         Test that new test files use SSotMockFactory instead of direct mocks.
         
         IMPORTANT: Ensures new code follows SSOT patterns.
-        """
+        "
         # Scan for test files that should be using SSOT patterns
         test_files = self._get_test_files()
         non_compliant_files = []
@@ -154,14 +154,14 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
                         non_compliant_files.append(test_file)
         
         self.assertEqual(len(non_compliant_files), 0,
-                        f"Test files using mocks without SSOT factory: {non_compliant_files}")
+                        f"Test files using mocks without SSOT factory: {non_compliant_files})
 
     def test_import_compliance_validation(self):
-        """
+        ""
         Test that new files import from SSOT mock factory correctly.
         
         IMPORTANT: Proper imports are essential for SSOT compliance.
-        """
+        "
         violations = []
         test_files = self._get_test_files()
         
@@ -182,17 +182,17 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
                             'file': test_file,
                             'issue': 'Uses mocks without SSOT factory import',
                             'imports': imports
-                        })
+                        }
         
         self.assertEqual(len(violations), 0,
-                        f"Files missing SSOT factory imports: {[v['file'] for v in violations]}")
+                        f"Files missing SSOT factory imports: {[v['file'] for v in violations]})
 
     def test_mock_pattern_consistency_enforcement(self):
-        """
+        ""
         Test that mock creation patterns are consistent with SSOT standards.
         
         IMPORTANT: Pattern consistency ensures maintainable test code.
-        """
+        "
         pattern_violations = []
         test_files = self._get_test_files()
         
@@ -224,17 +224,17 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
                             'line': self._get_line_number(content, match.start()),
                             'pattern': match.group(),
                             'issue': 'Uses deprecated mock pattern'
-                        })
+                        }
         
         self.assertEqual(len(pattern_violations), 0,
-                        f"Deprecated mock patterns found: {pattern_violations}")
+                        f"Deprecated mock patterns found: {pattern_violations})
 
     def test_regression_baseline_validation(self):
-        """
+        ""
         Test current state against known baseline of SSOT violations.
         
         CRITICAL: Ensures no regression beyond established baseline.
-        """
+        "
         # Get current violation count
         all_violations = {}
         for violation_type in self.VIOLATION_PATTERNS:
@@ -263,21 +263,21 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
                     'baseline': baseline_count,
                     'current': current_count,
                     'regression': current_count - baseline_count
-                })
+                }
         
         if regression_detected:
-            regression_summary = "\n".join([
-                f"  {detail['violation_type']}: {detail['baseline']} -> {detail['current']} (+{detail['regression']})"
+            regression_summary = "\n.join([
+                f  {detail['violation_type']}: {detail['baseline']} -> {detail['current']} (+{detail['regression']}"
                 for detail in regression_details
-            ])
-            self.fail(f"SSOT mock regression detected:\n{regression_summary}")
+            ]
+            self.fail(f"SSOT mock regression detected:\n{regression_summary})
 
     def test_automated_violation_detection_coverage(self):
-        """
+        ""
         Test that violation detection covers all critical mock patterns.
         
         IMPORTANT: Ensures comprehensive regression prevention.
-        """
+        "
         # Verify violation patterns cover expected mock types
         required_coverage = {
             'Mock()': 'direct_mock_creation',
@@ -291,7 +291,7 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         coverage_gaps = []
         for pattern, expected_category in required_coverage.items():
             # Check if pattern is covered by violation detection
-            category_patterns = self.VIOLATION_PATTERNS.get(expected_category, [])
+            category_patterns = self.VIOLATION_PATTERNS.get(expected_category, []
             pattern_covered = any(
                 pattern.lower() in cat_pattern.lower()
                 for cat_pattern in category_patterns
@@ -302,17 +302,17 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
                     'pattern': pattern,
                     'expected_category': expected_category,
                     'available_patterns': category_patterns
-                })
+                }
         
         self.assertEqual(len(coverage_gaps), 0,
-                        f"Violation detection coverage gaps: {coverage_gaps}")
+                        f"Violation detection coverage gaps: {coverage_gaps})
 
     def test_ci_cd_integration_readiness(self):
-        """
+        ""
         Test that regression prevention is ready for CI/CD integration.
         
         IMPORTANT: Ensures automated prevention in development workflow.
-        """
+        "
         # Verify test can be run in CI environment
         ci_readiness_checks = []
         
@@ -328,29 +328,29 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         
         # Should complete in under 10 seconds for CI efficiency
         if scan_duration > 10.0:
-            ci_readiness_checks.append(f"Scan too slow for CI: {scan_duration:.1f}s > 10.0s")
+            ci_readiness_checks.append(f"Scan too slow for CI: {scan_duration:.1f}s > 10.0s)
         
         # Check that violation detection produces actionable results
         if not hasattr(self, '_scan_for_violations'):
-            ci_readiness_checks.append("Violation scanning method not implemented")
+            ci_readiness_checks.append(Violation scanning method not implemented")
         
         # Check that results can be formatted for CI output
         try:
             violation_summary = self._generate_violation_summary(violations)
             if not isinstance(violation_summary, str):
-                ci_readiness_checks.append("Cannot generate CI-compatible violation summary")
+                ci_readiness_checks.append("Cannot generate CI-compatible violation summary)
         except Exception as e:
-            ci_readiness_checks.append(f"Violation summary generation failed: {e}")
+            ci_readiness_checks.append(fViolation summary generation failed: {e}")
         
         self.assertEqual(len(ci_readiness_checks), 0,
-                        f"CI/CD readiness issues: {ci_readiness_checks}")
+                        f"CI/CD readiness issues: {ci_readiness_checks})
 
     # Helper methods for regression prevention
 
     def _scan_for_violations(self, violation_type: str) -> List[Dict]:
-        """Scan codebase for specific violation type."""
+        ""Scan codebase for specific violation type."
         violations = []
-        patterns = self.VIOLATION_PATTERNS.get(violation_type, [])
+        patterns = self.VIOLATION_PATTERNS.get(violation_type, []
         
         for pattern in patterns:
             violations.extend(self._scan_pattern(pattern, violation_type))
@@ -358,7 +358,7 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         return violations
 
     def _scan_pattern(self, pattern: str, violation_type: str) -> List[Dict]:
-        """Scan for specific pattern in codebase."""
+        "Scan for specific pattern in codebase.""
         violations = []
         test_files = self._get_test_files()
         
@@ -373,22 +373,22 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
                     'pattern': match.group(),
                     'violation_type': violation_type,
                     'context': self._get_line_context(content, match.start())
-                })
+                }
         
         return violations
 
-    def _filter_allowed_violations(self, violations: List[Dict]) -> List[Dict]:
-        """Filter out violations that are explicitly allowed."""
+    def _filter_allowed_violations(self, violations: List[Dict] -> List[Dict]:
+        ""Filter out violations that are explicitly allowed."
         filtered = []
         
         for violation in violations:
-            if not self._is_violation_allowed(violation['file'], violation['pattern']):
+            if not self._is_violation_allowed(violation['file'], violation['pattern']:
                 filtered.append(violation)
         
         return filtered
 
     def _is_violation_allowed(self, file_path: str, pattern: str) -> bool:
-        """Check if violation is explicitly allowed."""
+        "Check if violation is explicitly allowed.""
         # Check allowed files
         for allowed_file in self.ALLOWED_EXCEPTIONS['files']:
             if allowed_file in file_path:
@@ -402,7 +402,7 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         return False
 
     def _get_test_files(self) -> List[str]:
-        """Get all test files in the project."""
+        ""Get all test files in the project."
         test_files = []
         test_dirs = ['tests', 'netra_backend/tests', 'test_framework/tests']
         
@@ -416,15 +416,15 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         return test_files
 
     def _file_should_use_ssot(self, file_path: str) -> bool:
-        """Check if file should be using SSOT patterns."""
+        "Check if file should be using SSOT patterns.""
         # New test files should use SSOT
         return (
             'test_' in os.path.basename(file_path) and
-            not any(exc in file_path for exc in self.ALLOWED_EXCEPTIONS['files'])
+            not any(exc in file_path for exc in self.ALLOWED_EXCEPTIONS['files']
         )
 
     def _file_uses_ssot_factory(self, file_path: str) -> bool:
-        """Check if file imports and uses SSOT mock factory."""
+        ""Check if file imports and uses SSOT mock factory."
         content = self._get_file_content(file_path)
         return (
             'SSotMockFactory' in content or
@@ -432,7 +432,7 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         )
 
     def _file_has_mock_creation(self, file_path: str) -> bool:
-        """Check if file creates mocks."""
+        "Check if file creates mocks.""
         content = self._get_file_content(file_path)
         mock_patterns = [
             r'Mock\(',
@@ -444,12 +444,12 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         return any(re.search(pattern, content) for pattern in mock_patterns)
 
     def _file_has_mock_usage(self, file_path: str) -> bool:
-        """Check if file uses mocks in any way."""
+        ""Check if file uses mocks in any way."
         content = self._get_file_content(file_path)
         return 'mock' in content.lower()
 
     def _get_file_imports(self, file_path: str) -> List[str]:
-        """Extract import statements from file."""
+        "Extract import statements from file.""
         imports = []
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
@@ -465,7 +465,7 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
                     elif isinstance(node, ast.ImportFrom):
                         module = node.module or ''
                         for alias in node.names:
-                            imports.append(f"{module}.{alias.name}")
+                            imports.append(f{module}.{alias.name}")
             except SyntaxError:
                 # Fallback to regex for files with syntax issues
                 import_lines = re.findall(r'^(?:from|import)\s+(.+)', content, re.MULTILINE)
@@ -478,19 +478,19 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         return imports
 
     def _get_file_content(self, file_path: str) -> str:
-        """Get file content safely."""
+        "Get file content safely.""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 return f.read()
         except Exception:
-            return ""
+            return "
 
     def _get_line_number(self, content: str, position: int) -> int:
-        """Get line number for character position in content."""
+        "Get line number for character position in content.""
         return content[:position].count('\n') + 1
 
     def _get_line_context(self, content: str, position: int) -> str:
-        """Get context around violation for better debugging."""
+        ""Get context around violation for better debugging."
         lines = content.split('\n')
         line_num = self._get_line_number(content, position) - 1
         
@@ -499,19 +499,19 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         
         context_lines = []
         for i in range(start_line, end_line):
-            marker = " -> " if i == line_num else "    "
-            context_lines.append(f"{marker}Line {i+1}: {lines[i]}")
+            marker = " ->  if i == line_num else     "
+            context_lines.append(f"{marker}Line {i+1}: {lines[i]})
         
-        return "\n".join(context_lines)
+        return \n".join(context_lines)
 
-    def _generate_violation_summary(self, violations: List[Dict]) -> str:
-        """Generate violation summary for CI/CD output."""
+    def _generate_violation_summary(self, violations: List[Dict] -> str:
+        "Generate violation summary for CI/CD output.""
         if not violations:
-            return "No SSOT mock violations detected."
+            return No SSOT mock violations detected."
         
         summary_lines = [
-            f"SSOT Mock Violations Detected: {len(violations)}",
-            "=" * 50
+            f"SSOT Mock Violations Detected: {len(violations)},
+            =" * 50
         ]
         
         # Group violations by type
@@ -523,13 +523,13 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
             by_type[vtype].append(violation)
         
         for vtype, vlist in by_type.items():
-            summary_lines.append(f"\n{vtype}: {len(vlist)} violations")
+            summary_lines.append(f"\n{vtype}: {len(vlist)} violations)
             for v in vlist[:3]:  # Show first 3 for brevity
-                summary_lines.append(f"  - {v['file']}:L{v['line']} - {v['pattern']}")
+                summary_lines.append(f  - {v['file']}:L{v['line']} - {v['pattern']}")
             if len(vlist) > 3:
-                summary_lines.append(f"  ... and {len(vlist) - 3} more")
+                summary_lines.append(f"  ... and {len(vlist) - 3} more)
         
-        return "\n".join(summary_lines)
+        return \n".join(summary_lines)
 
 
 if __name__ == "__main__":

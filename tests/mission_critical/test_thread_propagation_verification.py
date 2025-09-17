@@ -1,4 +1,4 @@
-"""
+"
 Mission-critical thread propagation verification tests.
 
 Tests that thread_id correctly propagates through the entire system
@@ -17,7 +17,7 @@ Business Context:
 - Each user's conversation must remain isolated from other users
 - WebSocket events must deliver to correct user only
 - Agent execution context must preserve thread identity
-"""
+""
 
 import asyncio
 import logging
@@ -51,24 +51,24 @@ logger = logging.getLogger(__name__)
 
 
 class ThreadPropagationTestMessageHandler:
-    """
+    ""
     Simple message handler for thread propagation testing.
     
     ISSUE #556 FIX: Demonstrates thread context preservation through message handling chain.
-    """
+    "
     
     async def handle_user_message(self, user_id: str, message: Dict[str, Any], websocket_manager=None) -> Dict[str, Any]:
-        """
+        "
         Handle user message and preserve thread context.
         
         This method demonstrates thread propagation from WebSocket -> Message Handler -> Agent Registry.
-        """
+        ""
         try:
             # Extract thread_id from message
             thread_id = message.get('thread_id')
             content = message.get('content', '')
             
-            logger.info(f"ThreadPropagationTestMessageHandler: Processing message for user {user_id}, thread {thread_id}")
+            logger.info(fThreadPropagationTestMessageHandler: Processing message for user {user_id}, thread {thread_id}")
             
             # Simulate forwarding to agent registry with thread context
             if websocket_manager and thread_id:
@@ -78,18 +78,18 @@ class ThreadPropagationTestMessageHandler:
                     user_context = UserExecutionContext(
                         user_id=user_id,
                         thread_id=thread_id,
-                        run_id=f"test_run_{uuid.uuid4().hex[:8]}"
+                        run_id=f"test_run_{uuid.uuid4().hex[:8]}
                     )
                 else:
                     # Fallback for testing without full service availability
                     user_context = type('MockUserContext', (), {
                         'user_id': user_id,
                         'thread_id': thread_id,
-                        'run_id': f"test_run_{uuid.uuid4().hex[:8]}"
-                    })()
+                        'run_id': ftest_run_{uuid.uuid4().hex[:8]}"
+                    }()
                 
                 # Simulate agent registry call (this would normally call the real agent registry)
-                logger.info(f"ThreadPropagationTestMessageHandler: Forwarding to agent registry with thread context {thread_id}")
+                logger.info(f"ThreadPropagationTestMessageHandler: Forwarding to agent registry with thread context {thread_id})
                 
                 # Return result that includes thread_id to prove propagation
                 return {
@@ -102,14 +102,14 @@ class ThreadPropagationTestMessageHandler:
                 }
             else:
                 # Failure case - thread context not preserved
-                logger.warning(f"ThreadPropagationTestMessageHandler: Thread context not preserved - thread_id: {thread_id}, websocket_manager: {websocket_manager is not None}")
+                logger.warning(fThreadPropagationTestMessageHandler: Thread context not preserved - thread_id: {thread_id}, websocket_manager: {websocket_manager is not None}")
                 return {
                     'status': 'error',
                     'message': 'Thread context not preserved'
                 }
                 
         except Exception as e:
-            logger.error(f"ThreadPropagationTestMessageHandler error: {e}")
+            logger.error(f"ThreadPropagationTestMessageHandler error: {e})
             return {
                 'status': 'error',
                 'message': f'Handler error: {e}'
@@ -117,15 +117,15 @@ class ThreadPropagationTestMessageHandler:
 
 
 class ThreadPropagationVerificationTests(SSotAsyncTestCase):
-    """
+    ""
     Mission-critical thread propagation validation using real services.
     
     These tests MUST fail initially to prove they work, then pass when
     proper thread propagation is implemented.
-    """
+    "
     
     def setup_method(self, method):
-        """Setup test environment for thread propagation testing."""
+        "Setup test environment for thread propagation testing.""
         super().setup_method(method)
         
         # Generate unique test identifiers
@@ -145,41 +145,41 @@ class ThreadPropagationVerificationTests(SSotAsyncTestCase):
                 self.websocket_manager = None  # Defer to async initialization
                 # ISSUE #556 FIX: Create simple message handler for thread propagation testing
                 self.message_handler = ThreadPropagationTestMessageHandler()
-                logger.info("Message handler initialized, WebSocket manager will be initialized in async methods")
+                logger.info(Message handler initialized, WebSocket manager will be initialized in async methods")
             except Exception as e:
-                logger.info(f"Using mock mode for services due to: {e}")
+                logger.info(f"Using mock mode for services due to: {e})
                 self.websocket_manager = None
                 self.message_handler = None
         else:
-            logger.info("Real services not available - using mock mode")
+            logger.info(Real services not available - using mock mode")
             self.websocket_manager = None
             self.message_handler = None
         
         # Track thread propagation
         self.thread_capture_log = {}
         
-        logger.info(f"Thread propagation test setup - User: {self.user_id[:8]}, Thread: {self.thread_id[:8]}")
+        logger.info(f"Thread propagation test setup - User: {self.user_id[:8]}, Thread: {self.thread_id[:8]})
     
-    def teardown_method(self, method):
-        """Cleanup test resources."""
+    async def teardown_method(self, method):
+        ""Cleanup test resources."
         try:
             if hasattr(self, 'websocket_manager') and self.websocket_manager:
                 # Can't use await in sync method - WebSocket manager should handle cleanup
                 pass
         except Exception as e:
-            logger.warning(f"Websocket cleanup warning: {e}")
+            logger.warning(f"Websocket cleanup warning: {e})
         
         super().teardown_method(method)
     
     @pytest.mark.asyncio
     async def test_websocket_to_message_handler_propagation_FAIL_FIRST(self):
-        """
+        ""
         Test thread_id propagation from WebSocket to message handler.
         
         This test is designed to FAIL initially to prove thread propagation
         is not working, then PASS when proper implementation is added.
-        """
-        logger.info("Testing WebSocket to Message Handler thread propagation")
+        "
+        logger.info("Testing WebSocket to Message Handler thread propagation)
         
         # Initialize WebSocket test utility in mock mode (no real server needed)
         # Set environment to force mock mode
@@ -202,12 +202,12 @@ class ThreadPropagationVerificationTests(SSotAsyncTestCase):
                 user_context = UserExecutionContext(
                     user_id=self.user_id,
                     thread_id=self.thread_id,
-                    run_id=f"test_run_{uuid.uuid4().hex[:8]}"
+                    run_id=ftest_run_{uuid.uuid4().hex[:8]}"
                 )
 
                 # Initialize WebSocket manager with proper user context
                 self.websocket_manager = get_websocket_manager(user_context=user_context)
-                logger.info(f"WebSocket manager initialized with user context: {self.user_id[:8]}")
+                logger.info(f"WebSocket manager initialized with user context: {self.user_id[:8]})
 
                 # Connect with thread context
                 connection_id = await self.websocket_manager.connect_user(
@@ -218,47 +218,47 @@ class ThreadPropagationVerificationTests(SSotAsyncTestCase):
 
                 # FAILING ASSERTION: Check if WebSocket manager preserves thread context
                 # This should fail initially because proper thread propagation is not implemented
-                self.assertIsNotNone(connection_id, "Connection should be established")
+                self.assertIsNotNone(connection_id, Connection should be established")
 
                 # Check if we can retrieve the connection with thread context
                 connection_info = self.websocket_manager.get_connection_info(connection_id)
 
                 # This will likely fail, proving thread context is not properly maintained
-                self.assertIsNotNone(connection_info, "Connection info should be retrievable")
+                self.assertIsNotNone(connection_info, "Connection info should be retrievable)
 
                 # Test thread_id propagation in connection info
                 if hasattr(connection_info, 'get'):
                     thread_in_info = connection_info.get('thread_id')
                     if thread_in_info:
                         self.assertEqual(thread_in_info, self.thread_id,
-                            "Thread ID should match what was provided during connection")
+                            Thread ID should match what was provided during connection")
                     else:
                         # This is the expected failure - thread_id not being propagated
-                        logger.warning("EXPECTED FAILURE: thread_id not found in connection_info")
-                        assert False, "Thread ID not preserved in connection info - thread propagation failing as expected"
+                        logger.warning("EXPECTED FAILURE: thread_id not found in connection_info)
+                        assert False, Thread ID not preserved in connection info - thread propagation failing as expected"
 
             except AssertionError as e:
                 # Expected failure - proves test works
-                logger.warning(f"Expected failure in WebSocket thread propagation: {e}")
+                logger.warning(f"Expected failure in WebSocket thread propagation: {e})
                 raise
             except Exception as e:
                 # Any exception indicates thread propagation issues
-                logger.error(f"WebSocket thread propagation error: {e}")
+                logger.error(fWebSocket thread propagation error: {e}")
                 raise
         else:
             # No WebSocket manager available - test fails as expected
-            assert False, "WebSocket manager not available - thread propagation cannot be tested"
+            assert False, "WebSocket manager not available - thread propagation cannot be tested
         
-        logger.info("WebSocket to Message Handler propagation test completed")
+        logger.info(WebSocket to Message Handler propagation test completed")
     
     @pytest.mark.asyncio  
     async def test_message_handler_to_agent_registry_propagation_FAIL_FIRST(self):
-        """
+        "
         Test thread_id propagation from message handler to downstream services.
         
         Designed to fail initially, proving thread context is not preserved.
-        """
-        logger.info("Testing Message Handler thread context propagation")
+        ""
+        logger.info(Testing Message Handler thread context propagation")
         
         # Test with mock context to prove thread propagation logic
         test_context = {
@@ -277,30 +277,30 @@ class ThreadPropagationVerificationTests(SSotAsyncTestCase):
                 )
                 
                 # FAILING ASSERTION: Should preserve thread context
-                self.assertIsInstance(result, (dict, type(None)), "Handler should return result")
+                self.assertIsInstance(result, (dict, type(None)), "Handler should return result)
                 # This will fail if thread context is not maintained
                 self.assertIn(self.thread_id, str(result) if result else '',
-                    "Thread ID should be preserved in processing chain")
+                    Thread ID should be preserved in processing chain")
             else:
                 # No real services - this failure proves the test works
-                assert False, "Message handler not available - thread propagation cannot be tested"
+                assert False, "Message handler not available - thread propagation cannot be tested
             
         except AssertionError as e:
-            logger.warning(f"Expected failure in message handler propagation: {e}")
+            logger.warning(fExpected failure in message handler propagation: {e}")
             raise
         except Exception as e:
-            logger.error(f"Message handler error indicates thread propagation issue: {e}")
+            logger.error(f"Message handler error indicates thread propagation issue: {e})
             raise
     
     @pytest.mark.asyncio
     async def test_thread_context_isolation_FAIL_FIRST(self):
-        """
+        ""
         Test that thread contexts are properly isolated between concurrent users.
         
         This test validates the business-critical requirement that each user's
         conversation thread remains isolated from other users.
-        """
-        logger.info("Testing Thread Context Isolation")
+        "
+        logger.info("Testing Thread Context Isolation)
         
         # Create multiple user contexts  
         user_contexts = []
@@ -309,7 +309,7 @@ class ThreadPropagationVerificationTests(SSotAsyncTestCase):
                 'user_id': str(uuid.uuid4()),
                 'thread_id': str(uuid.uuid4()),
                 'message': f'User {i+1} test message'
-            })
+            }
         
         # Initialize WebSocket utility if needed
         if not self.websocket_util:
@@ -324,7 +324,6 @@ class ThreadPropagationVerificationTests(SSotAsyncTestCase):
         for ctx in user_contexts:
             conn = await self.websocket_util.create_test_client(
                 user_id=ctx['user_id']
-            )
             connections.append((ctx, conn))
         
         try:
@@ -334,7 +333,7 @@ class ThreadPropagationVerificationTests(SSotAsyncTestCase):
                 test_user_context = UserExecutionContext(
                     user_id=self.user_id,
                     thread_id=self.thread_id,
-                    run_id=f"test_isolation_{uuid.uuid4().hex[:8]}"
+                    run_id=ftest_isolation_{uuid.uuid4().hex[:8]}"
                 )
                 self.websocket_manager = get_websocket_manager(user_context=test_user_context)
 
@@ -346,37 +345,36 @@ class ThreadPropagationVerificationTests(SSotAsyncTestCase):
                             user_id=ctx['user_id'],
                             websocket=conn.websocket,
                             thread_id=ctx['thread_id']
-                        )
                         connection_results.append((ctx, connection_id))
                     except Exception as e:
-                        logger.error(f"Connection failed for user {ctx['user_id']}: {e}")
+                        logger.error(f"Connection failed for user {ctx['user_id']}: {e})
 
                 # FAILING ASSERTION: Thread contexts should be isolated
                 # This will fail if thread isolation is not properly implemented
                 self.assertGreater(len(connection_results), 0,
-                    "At least one connection should be established")
+                    At least one connection should be established")
 
                 # Each connection should maintain its own thread context
                 unique_threads = set(ctx['thread_id'] for ctx, _ in connection_results)
                 self.assertEqual(len(unique_threads), len(connection_results),
-                    "Each connection should have unique thread context")
+                    "Each connection should have unique thread context)
 
             else:
                 # No WebSocket manager - test fails as expected
-                assert False, "WebSocket manager not available - thread isolation cannot be tested"
+                assert False, WebSocket manager not available - thread isolation cannot be tested"
                 
         except AssertionError as e:
-            logger.warning(f"Expected failure in thread isolation: {e}")
+            logger.warning(f"Expected failure in thread isolation: {e})
             raise
         except Exception as e:
-            logger.error(f"Thread isolation error: {e}")
+            logger.error(fThread isolation error: {e}")
             raise
         
-        logger.info("Thread Context Isolation test completed")
+        logger.info("Thread Context Isolation test completed)
     
 
 
-if __name__ == "__main__":
+if __name__ == __main__":
     # Run tests with verbose output to see failures
     import sys
     # MIGRATED: Use SSOT unified test runner

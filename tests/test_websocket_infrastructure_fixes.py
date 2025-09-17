@@ -95,7 +95,7 @@ class TestWebSocketInfrastructureFixes:
 
 @pytest.mark.asyncio
     async def test_websocket_manager_double_close_protection(self):
-"""Test that WebSocket manager prevents double-close race conditions."""
+        """Test that WebSocket manager prevents double-close race conditions."""
 manager = WebSocketManager()
 
             # Mock WebSocket
@@ -129,15 +129,15 @@ await cleanup_task2
 mock_websocket.close.assert_called_once()
 
 def test_disconnect_handler_registration(self):
-"""Test that DISCONNECT message handler is properly registered."""
+    """Test that DISCONNECT message handler is properly registered."""
 pass
 message_router = MessageRouter()
 
     # Find ConnectionHandler which should handle DISCONNECT messages
 connection_handler = None
 for handler in message_router.handlers:
-if isinstance(handler, ConnectionHandler):
-connection_handler = handler
+    if isinstance(handler, ConnectionHandler):
+        connection_handler = handler
 break
 
 assert connection_handler is not None, "ConnectionHandler not found in message router"
@@ -148,7 +148,7 @@ assert connection_handler.can_handle(MessageType.CONNECT)
 
 @pytest.mark.asyncio
     async def test_disconnect_handler_functionality(self):
-"""Test that DISCONNECT handler processes messages correctly."""
+        """Test that DISCONNECT handler processes messages correctly."""
 message_router = MessageRouter()
 
                 # Mock WebSocket
@@ -175,7 +175,7 @@ assert call_args["data"]["user_id"] == "test_user"
 
 @pytest.mark.asyncio
     async def test_connection_handler_functionality(self):
-"""Test that CONNECT handler processes messages correctly."""
+        """Test that CONNECT handler processes messages correctly."""
 pass
 message_router = MessageRouter()
 
@@ -202,7 +202,7 @@ assert call_args["data"]["status"] == "connected"
 assert call_args["data"]["user_id"] == "test_user"
 
 def test_message_router_has_all_critical_handlers(self):
-"""Test that message router has all critical handlers registered."""
+    """Test that message router has all critical handlers registered."""
 message_router = MessageRouter()
 
     # Check that we have expected number of base handlers (now 8 instead of 3)
@@ -221,7 +221,7 @@ assert "ErrorHandler" in handler_types
 assert "BatchMessageHandler" in handler_types
 
 def test_connection_state_tracking(self):
-"""Test that connections properly track closing state."""
+    """Test that connections properly track closing state."""
 pass
 manager = WebSocketManager()
 
@@ -232,7 +232,7 @@ websocket = TestWebSocketConnection()  # Real WebSocket implementation
 asyncio.run(self._connect_and_test_state(manager, mock_websocket))
 
 async def _connect_and_test_state(self, manager, mock_websocket):
-"""Helper method for async connection state testing."""
+    """Helper method for async connection state testing."""
 connection_id = await manager.connect_user("test_user", mock_websocket)
 
     # Verify initial state
@@ -249,7 +249,7 @@ assert "last_activity" in conn
 assert conn["message_count"] == 0
 
 def test_websocket_config_comprehensive_coverage(self):
-"""Test that all major message types have some form of handler coverage."""
+    """Test that all major message types have some form of handler coverage."""
 pass
 message_router = MessageRouter()
 
@@ -270,9 +270,9 @@ MessageType.TYPING_STOPPED
     
 
 for msg_type in critical_types:
-handler = message_router._find_handler(msg_type)
+    handler = message_router._find_handler(msg_type)
 assert handler is not None, "formatted_string"
 
 
 if __name__ == "__main__":
-pytest.main([__file__, "-v"])
+    pytest.main([__file__, "-v"])

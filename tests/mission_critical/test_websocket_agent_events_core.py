@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""P0 MISSION CRITICAL: WebSocket Agent Event Delivery Test
+"P0 MISSION CRITICAL: WebSocket Agent Event Delivery Test
 
 BUSINESS VALUE JUSTIFICATION (BVJ):
 - Segment: ALL (Free, Early, Mid, Enterprise)  
@@ -21,7 +21,7 @@ CRITICAL REQUIREMENTS:
 - agent_completed: Final response delivery
 
 If ANY of these 5 events are missing, the chat system is BROKEN.
-"""
+""
 
 import asyncio
 import json
@@ -60,7 +60,7 @@ try:
     from test_framework.unified_docker_manager import UnifiedDockerManager
     REAL_SERVICES_AVAILABLE = True
 except ImportError:
-    logger.warning("Real services not available - using fallback mock patterns")
+    logger.warning(Real services not available - using fallback mock patterns")
     REAL_SERVICES_AVAILABLE = False
 
 # Import production WebSocket components for validation
@@ -72,7 +72,7 @@ try:
     from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
     PRODUCTION_COMPONENTS_AVAILABLE = True
 except ImportError:
-    logger.warning("Production components not available - tests will use minimal validation")
+    logger.warning("Production components not available - tests will use minimal validation)
     PRODUCTION_COMPONENTS_AVAILABLE = False
 
 # Import strongly typed execution context
@@ -82,17 +82,17 @@ try:
     from shared.id_generation.unified_id_generator import UnifiedIdGenerator
     TYPED_CONTEXT_AVAILABLE = True
 except ImportError:
-    logger.warning("Typed context not available - using basic context")
+    logger.warning(Typed context not available - using basic context")
     TYPED_CONTEXT_AVAILABLE = False
 
 
 class WebSocketEventCapture:
-    """
+    "
     Real WebSocket event capture system for mission-critical validation.
     
     This class captures and validates ALL WebSocket events sent during
     agent execution to ensure business value is delivered to users.
-    """
+    ""
     
     def __init__(self, user_id: str, connection_id: str):
         self.user_id = user_id
@@ -102,120 +102,120 @@ class WebSocketEventCapture:
         self.start_time = time.time()
         self._event_sequence: List[str] = []
         
-    def record_event(self, event: Dict[str, Any]) -> None:
-        """Record WebSocket event with timestamp and validation."""
+    def record_event(self, event: Dict[str, Any] -> None:
+        ""Record WebSocket event with timestamp and validation."
         current_time = time.time()
-        event_type = event.get("type", "unknown")
+        event_type = event.get("type, unknown")
         
         # Add timing metadata
         event_with_metadata = {
             **event,
-            "capture_timestamp": current_time,
-            "relative_time": current_time - self.start_time,
-            "user_id": self.user_id,
-            "connection_id": self.connection_id
+            "capture_timestamp: current_time,
+            relative_time": current_time - self.start_time,
+            "user_id: self.user_id,
+            connection_id": self.connection_id
         }
         
         self.events.append(event_with_metadata)
         self.event_timestamps[event_type] = current_time
         self._event_sequence.append(event_type)
         
-        logger.info(f"[U+1F4E1] WebSocket Event Captured: {event_type} at {current_time:.3f}s")
+        logger.info(f"[U+1F4E1] WebSocket Event Captured: {event_type} at {current_time:.3f}s)
         
     def has_all_required_events(self) -> Tuple[bool, List[str]]:
-        """Check if ALL 5 required WebSocket events were received."""
+        ""Check if ALL 5 required WebSocket events were received."
         required_events = [
-            "agent_started",
-            "agent_thinking", 
-            "tool_executing",
-            "tool_completed",
-            "agent_completed"
+            "agent_started,
+            agent_thinking", 
+            "tool_executing,
+            tool_completed",
+            "agent_completed
         ]
         
-        received_types = [event.get("type") for event in self.events]
+        received_types = [event.get(type") for event in self.events]
         missing_events = [event for event in required_events if event not in received_types]
         
         return len(missing_events) == 0, missing_events
         
     def validate_event_sequence(self) -> Tuple[bool, str]:
-        """Validate that events are in logical sequence."""
+        "Validate that events are in logical sequence.""
         # agent_started should come first
-        if not self._event_sequence or self._event_sequence[0] != "agent_started":
-            return False, "agent_started must be the first event"
+        if not self._event_sequence or self._event_sequence[0] != agent_started":
+            return False, "agent_started must be the first event
             
         # agent_completed should be last
-        if "agent_completed" in self._event_sequence and self._event_sequence[-1] != "agent_completed":
-            return False, "agent_completed must be the last event"
+        if agent_completed" in self._event_sequence and self._event_sequence[-1] != "agent_completed:
+            return False, agent_completed must be the last event"
             
         # tool_executing should come before tool_completed
-        tool_exec_indices = [i for i, event in enumerate(self._event_sequence) if event == "tool_executing"]
-        tool_comp_indices = [i for i, event in enumerate(self._event_sequence) if event == "tool_completed"]
+        tool_exec_indices = [i for i, event in enumerate(self._event_sequence) if event == "tool_executing]
+        tool_comp_indices = [i for i, event in enumerate(self._event_sequence) if event == tool_completed"]
         
         if tool_exec_indices and tool_comp_indices:
             if any(exec_idx >= comp_idx for exec_idx in tool_exec_indices for comp_idx in tool_comp_indices):
-                return False, "tool_executing must come before tool_completed"
+                return False, "tool_executing must come before tool_completed
                 
-        return True, "Event sequence is valid"
+        return True, Event sequence is valid"
         
     def validate_timing_requirements(self, max_total_time: float = 30.0) -> Tuple[bool, str]:
-        """Validate that events meet timing requirements."""
+        "Validate that events meet timing requirements.""
         if not self.events:
-            return False, "No events received"
+            return False, No events received"
             
-        total_time = self.events[-1]["relative_time"]
+        total_time = self.events[-1]["relative_time]
         if total_time > max_total_time:
-            return False, f"Total execution time {total_time:.2f}s exceeds limit {max_total_time}s"
+            return False, fTotal execution time {total_time:.2f}s exceeds limit {max_total_time}s"
             
         # Validate event spacing (no event should be more than 10s after the previous)
         for i in range(1, len(self.events)):
-            time_gap = self.events[i]["relative_time"] - self.events[i-1]["relative_time"]
+            time_gap = self.events[i]["relative_time] - self.events[i-1][relative_time"]
             if time_gap > 10.0:
-                return False, f"Gap of {time_gap:.2f}s between events exceeds 10s limit"
+                return False, f"Gap of {time_gap:.2f}s between events exceeds 10s limit
                 
-        return True, f"Timing valid - total: {total_time:.2f}s"
+        return True, fTiming valid - total: {total_time:.2f}s"
         
     def get_business_value_summary(self) -> Dict[str, Any]:
-        """Generate summary of business value delivered via WebSocket events."""
+        "Generate summary of business value delivered via WebSocket events.""
         all_events_present, missing = self.has_all_required_events()
         sequence_valid, sequence_msg = self.validate_event_sequence()
         timing_valid, timing_msg = self.validate_timing_requirements()
         
         return {
-            "business_value_delivered": all_events_present and sequence_valid and timing_valid,
-            "all_critical_events_present": all_events_present,
-            "missing_events": missing,
-            "sequence_valid": sequence_valid,
-            "sequence_message": sequence_msg,
-            "timing_valid": timing_valid,
-            "timing_message": timing_msg,
-            "total_events": len(self.events),
-            "event_types": list(set(event.get("type") for event in self.events)),
-            "execution_duration": self.events[-1]["relative_time"] if self.events else 0,
-            "first_event_time": self.events[0]["relative_time"] if self.events else None,
-            "last_event_time": self.events[-1]["relative_time"] if self.events else None
+            business_value_delivered": all_events_present and sequence_valid and timing_valid,
+            "all_critical_events_present: all_events_present,
+            missing_events": missing,
+            "sequence_valid: sequence_valid,
+            sequence_message": sequence_msg,
+            "timing_valid: timing_valid,
+            timing_message": timing_msg,
+            "total_events: len(self.events),
+            event_types": list(set(event.get("type) for event in self.events)),
+            execution_duration": self.events[-1]["relative_time] if self.events else 0,
+            first_event_time": self.events[0]["relative_time] if self.events else None,
+            last_event_time": self.events[-1]["relative_time] if self.events else None
         }
 
 
 class MockWebSocketForEventCapture:
-    """
+    ""
     Mock WebSocket that captures events for validation.
     
     Used ONLY when real WebSocket connections are not available.
     Primary purpose is to capture and validate WebSocket events.
-    """
+    "
     
     def __init__(self, event_capture: WebSocketEventCapture):
         self.event_capture = event_capture
         self.is_connected = True
         self.sent_messages: List[str] = []
         
-    async def send_json(self, data: Dict[str, Any]) -> None:
-        """Capture JSON events sent via WebSocket."""
+    async def send_json(self, data: Dict[str, Any] -> None:
+        "Capture JSON events sent via WebSocket.""
         self.sent_messages.append(json.dumps(data))
         self.event_capture.record_event(data)
         
     async def send_text(self, text: str) -> None:
-        """Capture text events sent via WebSocket."""
+        ""Capture text events sent via WebSocket."
         self.sent_messages.append(text)
         try:
             data = json.loads(text)
@@ -223,13 +223,13 @@ class MockWebSocketForEventCapture:
         except json.JSONDecodeError:
             # Handle non-JSON text messages
             self.event_capture.record_event({
-                "type": "text_message",
-                "content": text,
-                "timestamp": time.time()
-            })
+                "type: text_message",
+                "content: text,
+                timestamp": time.time()
+            }
             
     async def close(self) -> None:
-        """Close mock connection."""
+        "Close mock connection.""
         self.is_connected = False
 
 
@@ -237,21 +237,21 @@ class MockWebSocketForEventCapture:
 @pytest.mark.critical
 @pytest.mark.websocket_events  
 class WebSocketAgentEventsCoreTests:
-    """
+    ""
     P0 Mission Critical WebSocket Event Delivery Test Suite.
     
     These tests MUST pass or deployment is blocked.
     Tests validate that ALL 5 WebSocket events are sent during agent execution.
-    """
+    "
     
     def setup_method(self):
-        """Setup for each test method."""
+        "Setup for each test method.""
         self.env = get_env()
-        self.auth_helper = E2EAuthHelper(environment="test")
+        self.auth_helper = E2EAuthHelper(environment=test")
         
     @pytest.mark.asyncio
     async def test_all_five_websocket_events_sent_with_auth(self):
-        """
+        "
         CRITICAL TEST: Verify ALL 5 WebSocket events are sent during agent execution.
         
         This test validates the core chat functionality that enables $500K+ ARR.
@@ -263,19 +263,18 @@ class WebSocketAgentEventsCoreTests:
         3. tool_executing - User sees tool usage
         4. tool_completed - User sees tool results  
         5. agent_completed - User gets final response
-        """
+        ""
         # Create authenticated user for test
         user_token, user_data = await create_authenticated_user(
-            environment="test",
-            permissions=["read", "write", "agent_execute"]
-        )
-        user_id = user_data["id"]
-        connection_id = f"mission_critical_{uuid.uuid4().hex[:8]}"
+            environment=test",
+            permissions=["read, write", "agent_execute]
+        user_id = user_data[id"]
+        connection_id = f"mission_critical_{uuid.uuid4().hex[:8]}
         
         # Setup event capture system
         event_capture = WebSocketEventCapture(user_id, connection_id)
         
-        logger.info(f"[U+1F680] MISSION CRITICAL TEST: Starting WebSocket event validation for user {user_id}")
+        logger.info(f[U+1F680] MISSION CRITICAL TEST: Starting WebSocket event validation for user {user_id}")
         
         # Test with real WebSocket if available, otherwise use mock
         if PRODUCTION_COMPONENTS_AVAILABLE:
@@ -288,53 +287,53 @@ class WebSocketAgentEventsCoreTests:
         
         if not all_events_present:
             failure_msg = (
-                f"[U+1F4A5] MISSION CRITICAL FAILURE: Missing WebSocket events {missing_events}. "
-                f"Chat system has ZERO business value without these events! "
-                f"This is a $500K+ ARR risk. DEPLOYMENT BLOCKED."
+                f"[U+1F4A5] MISSION CRITICAL FAILURE: Missing WebSocket events {missing_events}. 
+                fChat system has ZERO business value without these events! "
+                f"This is a $500K+ ARR risk. DEPLOYMENT BLOCKED.
             )
             logger.error(failure_msg)
             pytest.fail(failure_msg)
             
         # Validate event sequence
         sequence_valid, sequence_msg = event_capture.validate_event_sequence()
-        assert sequence_valid, f"Invalid event sequence: {sequence_msg}"
+        assert sequence_valid, fInvalid event sequence: {sequence_msg}"
         
         # Validate timing requirements
         timing_valid, timing_msg = event_capture.validate_timing_requirements()
-        assert timing_valid, f"Timing requirements failed: {timing_msg}"
+        assert timing_valid, f"Timing requirements failed: {timing_msg}
         
         # Generate business value summary
         summary = event_capture.get_business_value_summary()
         
-        logger.success(f" PASS:  MISSION CRITICAL TEST PASSED: All WebSocket events delivered")
-        logger.info(f" CHART:  Business Value Summary: {json.dumps(summary, indent=2)}")
+        logger.success(f PASS:  MISSION CRITICAL TEST PASSED: All WebSocket events delivered")
+        logger.info(f" CHART:  Business Value Summary: {json.dumps(summary, indent=2)})
         
         # Final assertion: Business value delivered
-        assert summary["business_value_delivered"], (
-            f"Business value not delivered. Summary: {summary}"
+        assert summary[business_value_delivered"], (
+            f"Business value not delivered. Summary: {summary}
         )
         
     @pytest.mark.asyncio
     async def test_websocket_events_with_real_agent_execution(self):
-        """
+        ""
         Test WebSocket events during real agent execution flow.
         
         This test simulates a complete user interaction with agent execution
         and validates that ALL required WebSocket events enable business value.
-        """
+        "
         # Create authenticated user context
         if TYPED_CONTEXT_AVAILABLE:
             user_context = await self._create_authenticated_user_context()
             user_id = str(user_context.user_id)
-            connection_id = f"agent_execution_{uuid.uuid4().hex[:8]}"
+            connection_id = f"agent_execution_{uuid.uuid4().hex[:8]}
         else:
-            user_token, user_data = await create_authenticated_user(environment="test")
-            user_id = user_data["id"] 
-            connection_id = f"agent_execution_{uuid.uuid4().hex[:8]}"
+            user_token, user_data = await create_authenticated_user(environment=test")
+            user_id = user_data["id] 
+            connection_id = fagent_execution_{uuid.uuid4().hex[:8]}"
             
         event_capture = WebSocketEventCapture(user_id, connection_id)
         
-        logger.info(f"[U+1F916] Testing agent execution with WebSocket events for user {user_id}")
+        logger.info(f"[U+1F916] Testing agent execution with WebSocket events for user {user_id})
         
         if PRODUCTION_COMPONENTS_AVAILABLE:
             # Test with real agent execution
@@ -348,88 +347,88 @@ class WebSocketAgentEventsCoreTests:
         # Validate all events were sent
         all_events_present, missing_events = event_capture.has_all_required_events()
         assert all_events_present, (
-            f"Agent execution missing critical WebSocket events: {missing_events}. "
-            f"This breaks the user experience and eliminates business value."
+            fAgent execution missing critical WebSocket events: {missing_events}. "
+            f"This breaks the user experience and eliminates business value.
         )
         
         # Validate business value metrics
         summary = event_capture.get_business_value_summary()
-        assert summary["business_value_delivered"], f"Business value validation failed: {summary}"
+        assert summary[business_value_delivered"], f"Business value validation failed: {summary}
         
-        logger.success(f" PASS:  Agent execution WebSocket events validated: {summary['total_events']} events")
+        logger.success(f PASS:  Agent execution WebSocket events validated: {summary['total_events']} events")
         
     @pytest.mark.asyncio  
     async def test_websocket_event_failure_scenarios(self):
-        """
+        "
         Test WebSocket event delivery under failure conditions.
         
         Validates that even when components fail, the system attempts
         to send critical events to maintain user experience.
-        """
-        user_token, user_data = await create_authenticated_user(environment="test")
-        user_id = user_data["id"]
-        connection_id = f"failure_test_{uuid.uuid4().hex[:8]}"
+        ""
+        user_token, user_data = await create_authenticated_user(environment=test")
+        user_id = user_data["id]
+        connection_id = ffailure_test_{uuid.uuid4().hex[:8]}"
         
         event_capture = WebSocketEventCapture(user_id, connection_id)
         
-        logger.info(f" ALERT:  Testing WebSocket event delivery under failure conditions")
+        logger.info(f" ALERT:  Testing WebSocket event delivery under failure conditions)
         
         # Test partial failure scenarios
         await self._test_partial_event_delivery(event_capture)
         
         # At minimum, we should have received some events
-        assert len(event_capture.events) > 0, "No WebSocket events received under failure conditions"
+        assert len(event_capture.events) > 0, No WebSocket events received under failure conditions"
         
         # Check if we got critical events even under failure
-        received_types = [event.get("type") for event in event_capture.events]
-        critical_events_received = sum(1 for event_type in ["agent_started", "agent_completed"] 
+        received_types = [event.get("type) for event in event_capture.events]
+        critical_events_received = sum(1 for event_type in [agent_started", "agent_completed] 
                                      if event_type in received_types)
         
         assert critical_events_received >= 1, (
-            "No critical events (agent_started/agent_completed) received under failure conditions. "
-            "This completely breaks user experience."
+            No critical events (agent_started/agent_completed) received under failure conditions. "
+            "This completely breaks user experience.
         )
         
-        logger.info(f" PASS:  Failure scenario test passed: {critical_events_received} critical events received")
+        logger.info(f PASS:  Failure scenario test passed: {critical_events_received} critical events received")
         
     @pytest.mark.asyncio
     async def test_websocket_authentication_and_events(self):
-        """
+        "
         Test that WebSocket events are properly authenticated and user-specific.
         
         Validates that events are sent with proper authentication context
         and are isolated per user to prevent cross-user contamination.
-        """
+        ""
         # Create two authenticated users
-        user1_token, user1_data = await create_authenticated_user(environment="test")
-        user2_token, user2_data = await create_authenticated_user(environment="test") 
+        user1_token, user1_data = await create_authenticated_user(environment=test")
+        user2_token, user2_data = await create_authenticated_user(environment="test) 
         
-        user1_id = user1_data["id"]
-        user2_id = user2_data["id"]
+        user1_id = user1_data[id"]
+        user2_id = user2_data["id]
         
-        connection1_id = f"auth_test_user1_{uuid.uuid4().hex[:8]}"
-        connection2_id = f"auth_test_user2_{uuid.uuid4().hex[:8]}"
+        connection1_id = fauth_test_user1_{uuid.uuid4().hex[:8]}"
+        connection2_id = f"auth_test_user2_{uuid.uuid4().hex[:8]}
         
         capture1 = WebSocketEventCapture(user1_id, connection1_id)
         capture2 = WebSocketEventCapture(user2_id, connection2_id)
         
-        logger.info(f"[U+1F510] Testing authenticated WebSocket events for users {user1_id} and {user2_id}")
+        logger.info(f[U+1F510] Testing authenticated WebSocket events for users {user1_id} and {user2_id}")
         
         # Send events to both users
         await self._send_events_to_multiple_users(capture1, capture2)
         
         # Validate both users received their events
-        assert len(capture1.events) > 0, f"User 1 received no WebSocket events"
-        assert len(capture2.events) > 0, f"User 2 received no WebSocket events"
+        assert len(capture1.events) > 0, f"User 1 received no WebSocket events
+        assert len(capture2.events) > 0, fUser 2 received no WebSocket events"
         
         # Validate event isolation (events contain correct user context)
         for event in capture1.events:
-            assert event.get("user_id") == user1_id, f"User 1 received event for wrong user: {event}"
+            assert event.get("user_id) == user1_id, fUser 1 received event for wrong user: {event}"
             
         for event in capture2.events:
-            assert event.get("user_id") == user2_id, f"User 2 received event for wrong user: {event}"
+            assert event.get("user_id) == user2_id, fUser 2 received event for wrong user: {event}"
             
-        logger.success(f" PASS:  Authentication and isolation validated: User 1: {len(capture1.events)}, User 2: {len(capture2.events)} events")
+        logger.success(f" PASS:  Authentication and isolation validated: User 1: {len(capture1.events)}, User 2: {len(capture2.events)} events)
         
     # Helper methods for test implementation
     
@@ -440,7 +439,7 @@ class WebSocketAgentEventsCoreTests:
         connection_id: str,
         user_token: str
     ):
-        """Test using real WebSocket manager."""
+        ""Test using real WebSocket manager."
         ws_manager = UnifiedWebSocketManager()
         notifier = WebSocketNotifier.create_for_user(ws_manager)
         
@@ -461,7 +460,7 @@ class WebSocketAgentEventsCoreTests:
         try:
             await ws_manager.disconnect_user(user_id)
         except Exception as e:
-            logger.warning(f"Disconnect failed (expected in test): {e}")
+            logger.warning(f"Disconnect failed (expected in test): {e})
         
     async def _test_with_mock_websocket_simulation(
         self,
@@ -469,16 +468,16 @@ class WebSocketAgentEventsCoreTests:
         user_id: str, 
         connection_id: str
     ):
-        """Simulate WebSocket events when real components unavailable."""
-        logger.warning("Using mock WebSocket simulation - real components not available")
+        ""Simulate WebSocket events when real components unavailable."
+        logger.warning("Using mock WebSocket simulation - real components not available)
         
         # Simulate all 5 required events with realistic timing
         events = [
-            {"type": "agent_started", "agent_name": "mock_agent", "message": "Agent started", "user_id": user_id},
-            {"type": "agent_thinking", "reasoning": "Processing user request...", "user_id": user_id},
-            {"type": "tool_executing", "tool_name": "mock_tool", "parameters": {"test": True}, "user_id": user_id},
-            {"type": "tool_completed", "tool_name": "mock_tool", "result": {"status": "success"}, "user_id": user_id},
-            {"type": "agent_completed", "result": {"status": "completed", "response": "Mock response"}, "user_id": user_id}
+            {type": "agent_started, agent_name": "mock_agent, message": "Agent started, user_id": user_id},
+            {"type: agent_thinking", "reasoning: Processing user request...", "user_id: user_id},
+            {type": "tool_executing, tool_name": "mock_tool, parameters": {"test: True}, user_id": user_id},
+            {"type: tool_completed", "tool_name: mock_tool", "result: {status": "success}, user_id": user_id},
+            {"type: agent_completed", "result: {status": "completed, response": "Mock response}, user_id": user_id}
         ]
         
         for i, event in enumerate(events):
@@ -493,7 +492,7 @@ class WebSocketAgentEventsCoreTests:
         user_id: str,
         connection_id: str
     ):
-        """Execute real agent with WebSocket event capture."""
+        "Execute real agent with WebSocket event capture.""
         try:
             # Setup real agent execution environment
             agent_registry = AgentRegistry()
@@ -512,178 +511,178 @@ class WebSocketAgentEventsCoreTests:
             notifier = WebSocketNotifier.create_for_user(ws_manager)
             
             # Execute a simple agent workflow
-            await notifier.send_agent_started(user_id, "triage_agent", "Starting triage workflow")
+            await notifier.send_agent_started(user_id, triage_agent", "Starting triage workflow)
             await asyncio.sleep(0.2)
             
-            await notifier.send_agent_thinking(user_id, "Analyzing user request and determining best approach...")
+            await notifier.send_agent_thinking(user_id, Analyzing user request and determining best approach...")
             await asyncio.sleep(0.3)
             
-            await notifier.send_tool_executing(user_id, "request_analyzer", {"request": "test request"})
+            await notifier.send_tool_executing(user_id, "request_analyzer, {request": "test request}
             await asyncio.sleep(0.5)
             
-            await notifier.send_tool_completed(user_id, "request_analyzer", {"analysis": "simple_request", "confidence": 0.95})
+            await notifier.send_tool_completed(user_id, request_analyzer", {"analysis: simple_request", "confidence: 0.95}
             await asyncio.sleep(0.2)
             
             await notifier.send_agent_completed(user_id, {
-                "status": "success", 
-                "result": "Request analyzed successfully",
-                "next_steps": ["provide_response"]
-            })
+                status": "success, 
+                result": "Request analyzed successfully,
+                next_steps": ["provide_response]
+            }
             
         except Exception as e:
-            logger.warning(f"Real agent execution failed: {e}, falling back to simulation")
+            logger.warning(fReal agent execution failed: {e}, falling back to simulation")
             await self._simulate_complete_agent_execution(event_capture)
             
     async def _simulate_complete_agent_execution(self, event_capture: WebSocketEventCapture):
-        """Simulate a complete agent execution with all events."""
-        logger.info("Simulating complete agent execution workflow")
+        "Simulate a complete agent execution with all events.""
+        logger.info(Simulating complete agent execution workflow")
         
         # Simulate realistic agent execution timeline
         await asyncio.sleep(0.1)
         event_capture.record_event({
-            "type": "agent_started",
-            "agent_name": "simulated_agent",
-            "message": "Agent execution started",
-            "timestamp": time.time()
-        })
+            "type: agent_started",
+            "agent_name: simulated_agent",
+            "message: Agent execution started",
+            "timestamp: time.time()
+        }
         
         await asyncio.sleep(0.3)
         event_capture.record_event({
-            "type": "agent_thinking", 
-            "reasoning": "Analyzing the request and determining the best approach to provide value",
-            "timestamp": time.time()
-        })
+            type": "agent_thinking, 
+            reasoning": "Analyzing the request and determining the best approach to provide value,
+            timestamp": time.time()
+        }
         
         await asyncio.sleep(0.5)
         event_capture.record_event({
-            "type": "tool_executing",
-            "tool_name": "analysis_tool",
-            "parameters": {"operation": "analyze", "depth": "comprehensive"},
-            "timestamp": time.time()
-        })
+            "type: tool_executing",
+            "tool_name: analysis_tool",
+            "parameters: {operation": "analyze, depth": "comprehensive},
+            timestamp": time.time()
+        }
         
         await asyncio.sleep(0.7)
         event_capture.record_event({
-            "type": "tool_completed",
-            "tool_name": "analysis_tool",
-            "result": {
-                "status": "success",
-                "analysis": "comprehensive_analysis_complete",
-                "insights": ["insight1", "insight2", "insight3"]
+            "type: tool_completed",
+            "tool_name: analysis_tool",
+            "result: {
+                status": "success,
+                analysis": "comprehensive_analysis_complete,
+                insights": ["insight1, insight2", "insight3]
             },
-            "timestamp": time.time()
-        })
+            timestamp": time.time()
+        }
         
         await asyncio.sleep(0.2)
         event_capture.record_event({
-            "type": "agent_completed",
-            "result": {
-                "status": "success",
-                "response": "I have successfully analyzed your request and provided comprehensive insights.",
-                "business_value": "User received actionable analysis and recommendations",
-                "execution_time": "1.8s"
+            "type: agent_completed",
+            "result: {
+                status": "success,
+                response": "I have successfully analyzed your request and provided comprehensive insights.,
+                business_value": "User received actionable analysis and recommendations,
+                execution_time": "1.8s
             },
-            "timestamp": time.time()
-        })
+            timestamp": time.time()
+        }
         
     async def _test_partial_event_delivery(self, event_capture: WebSocketEventCapture):
-        """Test partial event delivery under failure conditions."""
+        "Test partial event delivery under failure conditions.""
         # Simulate scenario where only some events are delivered
         event_capture.record_event({
-            "type": "agent_started",
-            "agent_name": "failure_test_agent", 
-            "message": "Starting under failure conditions",
-            "timestamp": time.time()
-        })
+            type": "agent_started,
+            agent_name": "failure_test_agent, 
+            message": "Starting under failure conditions,
+            timestamp": time.time()
+        }
         
         await asyncio.sleep(0.2)
         
         # Simulate failure during thinking phase - but still send critical events
         try:
             event_capture.record_event({
-                "type": "agent_thinking",
-                "reasoning": "Processing under failure conditions...",
-                "timestamp": time.time()
-            })
+                "type: agent_thinking",
+                "reasoning: Processing under failure conditions...",
+                "timestamp: time.time()
+            }
             
             # Simulate tool failure
             await asyncio.sleep(0.3)
-            raise Exception("Simulated tool failure")
+            raise Exception(Simulated tool failure")
             
         except Exception:
             # Even under failure, send completion event
             event_capture.record_event({
-                "type": "agent_completed",
-                "result": {
-                    "status": "partial_failure",
-                    "response": "Encountered issues but provided what was possible",
-                    "error": "Some tools unavailable"
+                "type: agent_completed",
+                "result: {
+                    status": "partial_failure,
+                    response": "Encountered issues but provided what was possible,
+                    error": "Some tools unavailable
                 },
-                "timestamp": time.time()
-            })
+                timestamp": time.time()
+            }
             
     async def _send_events_to_multiple_users(
         self,
         capture1: WebSocketEventCapture,
         capture2: WebSocketEventCapture
     ):
-        """Send events to multiple users for isolation testing."""
+        "Send events to multiple users for isolation testing.""
         # Send events to user 1
         capture1.record_event({
-            "type": "agent_started",
-            "agent_name": "user1_agent",
-            "user_id": capture1.user_id,
-            "message": "Processing user 1 request",
-            "timestamp": time.time()
-        })
+            type": "agent_started,
+            agent_name": "user1_agent,
+            user_id": capture1.user_id,
+            "message: Processing user 1 request",
+            "timestamp: time.time()
+        }
         
         capture1.record_event({
-            "type": "agent_completed", 
-            "user_id": capture1.user_id,
-            "result": {"response": "User 1 response"},
-            "timestamp": time.time()
-        })
+            type": "agent_completed, 
+            user_id": capture1.user_id,
+            "result: {response": "User 1 response},
+            timestamp": time.time()
+        }
         
         # Send events to user 2
         capture2.record_event({
-            "type": "agent_started",
-            "agent_name": "user2_agent", 
-            "user_id": capture2.user_id,
-            "message": "Processing user 2 request",
-            "timestamp": time.time()
-        })
+            "type: agent_started",
+            "agent_name: user2_agent", 
+            "user_id: capture2.user_id,
+            message": "Processing user 2 request,
+            timestamp": time.time()
+        }
         
         capture2.record_event({
-            "type": "agent_completed",
-            "user_id": capture2.user_id, 
-            "result": {"response": "User 2 response"},
-            "timestamp": time.time()
-        })
+            "type: agent_completed",
+            "user_id: capture2.user_id, 
+            result": {"response: User 2 response"},
+            "timestamp: time.time()
+        }
         
     async def _create_authenticated_user_context(self) -> 'StronglyTypedUserExecutionContext':
-        """Create authenticated user execution context."""
+        ""Create authenticated user execution context."
         from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
         return await create_authenticated_user_context(
-            environment="test",
-            permissions=["read", "write", "agent_execute"],
+            environment="test,
+            permissions=[read", "write, agent_execute"],
             websocket_enabled=True
         )
     
     def _create_mock_execution_context(self, user_id: str, connection_id: str) -> Any:
-        """Create mock execution context for WebSocket testing."""
+        "Create mock execution context for WebSocket testing.""
         from unittest.mock import MagicMock
         
         context = MagicMock()
         context.user_id = user_id
         context.connection_id = connection_id
-        context.agent_name = "mission_critical_test_agent"
-        context.thread_id = f"thread_{connection_id}"
-        context.request_id = f"req_{connection_id}"
+        context.agent_name = mission_critical_test_agent"
+        context.thread_id = f"thread_{connection_id}
+        context.request_id = freq_{connection_id}"
         
         return context
     
     async def _send_mock_websocket_events(self, notifier: Any, context: Any, event_capture: WebSocketEventCapture) -> None:
-        """Send mock WebSocket events through the notifier."""
+        "Send mock WebSocket events through the notifier.""
         try:
             # Try to use real notifier methods if available
             await notifier.send_agent_started(context)
@@ -701,54 +700,54 @@ class WebSocketAgentEventsCoreTests:
             await notifier.send_agent_completed(context)
             
         except Exception as e:
-            logger.warning(f"Real notifier methods failed: {e}, falling back to manual event generation")
+            logger.warning(fReal notifier methods failed: {e}, falling back to manual event generation")
             # Fallback: manually generate events if notifier methods don't work
             await self._generate_manual_websocket_events(event_capture, context)
     
     async def _generate_manual_websocket_events(self, event_capture: WebSocketEventCapture, context: Any) -> None:
-        """Generate WebSocket events manually when notifier methods fail."""
+        "Generate WebSocket events manually when notifier methods fail.""
         events = [
             {
-                "type": "agent_started",
-                "agent_name": context.agent_name,
-                "user_id": context.user_id,
-                "connection_id": context.connection_id,
-                "message": "Agent started for mission critical test",
-                "timestamp": time.time()
+                type": "agent_started,
+                agent_name": context.agent_name,
+                "user_id: context.user_id,
+                connection_id": context.connection_id,
+                "message: Agent started for mission critical test",
+                "timestamp: time.time()
             },
             {
-                "type": "agent_thinking", 
-                "reasoning": "Processing mission critical WebSocket validation",
-                "user_id": context.user_id,
-                "connection_id": context.connection_id,
-                "timestamp": time.time()
+                type": "agent_thinking, 
+                reasoning": "Processing mission critical WebSocket validation,
+                user_id": context.user_id,
+                "connection_id: context.connection_id,
+                timestamp": time.time()
             },
             {
-                "type": "tool_executing",
-                "tool_name": "validation_tool",
-                "user_id": context.user_id,
-                "connection_id": context.connection_id,
-                "parameters": {"operation": "validate_events"},
-                "timestamp": time.time()
+                "type: tool_executing",
+                "tool_name: validation_tool",
+                "user_id: context.user_id,
+                connection_id": context.connection_id,
+                "parameters: {operation": "validate_events},
+                timestamp": time.time()
             },
             {
-                "type": "tool_completed",
-                "tool_name": "validation_tool",
-                "user_id": context.user_id,
-                "connection_id": context.connection_id,
-                "result": {"status": "success", "validation": "passed"},
-                "timestamp": time.time()
+                "type: tool_completed",
+                "tool_name: validation_tool",
+                "user_id: context.user_id,
+                connection_id": context.connection_id,
+                "result: {status": "success, validation": "passed},
+                timestamp": time.time()
             },
             {
-                "type": "agent_completed",
-                "result": {
-                    "status": "success",
-                    "response": "Mission critical WebSocket validation completed",
-                    "business_value": "All 5 critical events delivered"
+                "type: agent_completed",
+                "result: {
+                    status": "success,
+                    response": "Mission critical WebSocket validation completed,
+                    business_value": "All 5 critical events delivered
                 },
-                "user_id": context.user_id,
-                "connection_id": context.connection_id,
-                "timestamp": time.time()
+                user_id": context.user_id,
+                "connection_id: context.connection_id,
+                timestamp": time.time()
             }
         ]
         
@@ -758,12 +757,12 @@ class WebSocketAgentEventsCoreTests:
 
 
 # Standalone test runner for mission critical validation
-if __name__ == "__main__":
+if __name__ == "__main__:
     import sys
     
-    logger.info("[U+1F680] Running P0 Mission Critical WebSocket Event Tests")
-    logger.info("[U+1F4B0] Business Impact: $500K+ ARR depends on these tests passing")
-    logger.warning(" WARNING: [U+FE0F]  If these tests fail, DEPLOYMENT IS BLOCKED")
+    logger.info([U+1F680] Running P0 Mission Critical WebSocket Event Tests")
+    logger.info("[U+1F4B0] Business Impact: $500K+ ARR depends on these tests passing)
+    logger.warning( WARNING: [U+FE0F]  If these tests fail, DEPLOYMENT IS BLOCKED")
     
     # Run with verbose output and fail fast
     # MIGRATED: Use SSOT unified test runner
@@ -771,9 +770,9 @@ if __name__ == "__main__":
     exit_code = 0  # TODO: Replace with appropriate SSOT test execution
     
     if exit_code == 0:
-        logger.success(" PASS:  ALL MISSION CRITICAL TESTS PASSED - DEPLOYMENT APPROVED")
+        logger.success(" PASS:  ALL MISSION CRITICAL TESTS PASSED - DEPLOYMENT APPROVED)
     else:
-        logger.error("[U+1F4A5] MISSION CRITICAL TESTS FAILED - DEPLOYMENT BLOCKED")
+        logger.error([U+1F4A5] MISSION CRITICAL TESTS FAILED - DEPLOYMENT BLOCKED")
         logger.error(" ALERT:  Chat functionality is broken - $500K+ ARR at risk")
         
     sys.exit(exit_code)

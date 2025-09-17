@@ -6,14 +6,13 @@ to the consolidated Redis session manager.
 
 import asyncio
 import json
-import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.services.redis.session_manager import RedisSessionManager
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class SessionMigrationUtility:

@@ -422,7 +422,7 @@ class TestAgentInstanceFactory:
 
 @pytest.mark.asyncio
     async def test_user_context_creation(self, configured_factory):
-"""Test user execution context creation."""
+        """Test user execution context creation."""
 context = await configured_factory.create_user_execution_context( )
 user_id="user123",
 thread_id="thread456",
@@ -436,7 +436,7 @@ assert context.request_id is not None
 
 @pytest.mark.asyncio
     async def test_agent_instance_creation(self, configured_factory):
-"""Test agent instance creation with proper context binding."""
+        """Test agent instance creation with proper context binding."""
 pass
 context = await configured_factory.create_user_execution_context( )
 user_id="user123",
@@ -453,7 +453,7 @@ assert agent.websocket_bridge is not None
 
 @pytest.mark.asyncio
     async def test_user_execution_scope(self, configured_factory):
-"""Test user execution scope context manager."""
+        """Test user execution scope context manager."""
 async with configured_factory.user_execution_scope( )
 user_id="user123",
 thread_id="thread456",
@@ -472,10 +472,10 @@ assert metrics['total_contexts_cleaned'] >= 1
 
 @pytest.mark.asyncio
     async def test_concurrent_user_isolation(self, configured_factory):
-"""Test that concurrent users have completely isolated contexts."""
+        """Test that concurrent users have completely isolated contexts."""
 pass
 async def user_workflow(user_id: str, results: list):
-pass
+    pass
 async with configured_factory.user_execution_scope( )
 user_id=user_id,
 thread_id="formatted_string",
@@ -501,7 +501,7 @@ results.append({ ))
 results = []
 tasks = []
 for i in range(5):
-user_id = "formatted_string"
+    user_id = "formatted_string"
 task = asyncio.create_task(user_workflow(user_id, results))
 tasks.append(task)
 
@@ -517,7 +517,7 @@ run_ids = [r['run_id'] for r in results]
 
             # All user IDs should match their respective contexts/agents
 for result in results:
-assert result['user_id'] == result['agent_user_id']
+    assert result['user_id'] == result['agent_user_id']
 assert result['user_id'] == result['context_user_id']
 assert result['run_id'].endswith(result['user_id'])
 
@@ -529,7 +529,7 @@ assert len(set(user_ids)) == 5
 
 @pytest.mark.asyncio
     async def test_websocket_emitter_isolation(self, configured_factory):
-"""Test that WebSocket emitters are properly isolated per user."""
+        """Test that WebSocket emitters are properly isolated per user."""
                     # Create contexts for two different users
 context1 = await configured_factory.create_user_execution_context( )
 user_id="user1",
@@ -561,7 +561,7 @@ assert agent1.websocket_bridge is agent2.websocket_bridge
 assert agent1.run_id != agent2.run_id
 
 def test_factory_metrics_tracking(self, configured_factory):
-"""Test factory tracks metrics properly."""
+    """Test factory tracks metrics properly."""
 pass
 initial_metrics = configured_factory.get_factory_metrics()
 
@@ -623,7 +623,7 @@ class TestAgentRegistryMigration:
 
 @pytest.mark.asyncio
     async def test_create_request_factory(self, legacy_registry):
-"""Test creating request factory from legacy registry."""
+        """Test creating request factory from legacy registry."""
         # Create a user context
 context = UserExecutionContext.from_request( )
 user_id="test_user",
@@ -641,11 +641,11 @@ metrics = factory.get_factory_metrics()
 assert metrics['configuration_status']['agent_registry_configured'] is True
 
 def test_deprecation_warnings(self):
-"""Test that deprecation warnings are issued for legacy usage."""
+    """Test that deprecation warnings are issued for legacy usage."""
 pass
 llm_manager = Magic        tool_dispatcher = Magic
 with patch('warnings.warn') as mock_warn:
-registry = AgentRegistry()
+    registry = AgentRegistry()
 
         # Should have issued deprecation warning
 mock_warn.assert_called_once()
@@ -698,7 +698,7 @@ class TestBackwardCompatibility:
 
 @pytest.mark.asyncio
     async def test_old_and_new_coexistence(self, configured_environment):
-"""Test that old and new patterns can coexist."""
+        """Test that old and new patterns can coexist."""
 legacy_registry = configured_environment['legacy_registry']
 factory = configured_environment['factory']
 
@@ -723,7 +723,7 @@ assert old_agent is not new_agent
 assert old_agent.user_id != new_agent.user_id
 
 def test_legacy_methods_still_work(self, configured_environment):
-"""Test that legacy methods continue to function."""
+    """Test that legacy methods continue to function."""
 pass
 legacy_registry = configured_environment['legacy_registry']
 
@@ -736,7 +736,7 @@ assert health['total_agents'] > 0
 
 @pytest.mark.asyncio
     async def test_migration_path_examples(self, configured_environment):
-"""Test examples of migration path usage."""
+        """Test examples of migration path usage."""
 legacy_registry = configured_environment['legacy_registry']
 
         # Example 1: Get infrastructure registry

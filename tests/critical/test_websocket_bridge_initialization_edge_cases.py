@@ -174,7 +174,7 @@ class TestBridgeInitializationRaceConditions:
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_concurrent_bridge_initialization_corruption(self, bridge_tracker):
-"""CRITICAL: Test concurrent bridge initialization causes state corruption."""
+        """CRITICAL: Test concurrent bridge initialization causes state corruption."""
         # This test SHOULD FAIL initially
 
 user_id = "user_001"
@@ -189,14 +189,14 @@ shared_bridge_state = { )
         
 
 async def initialize_bridge_with_race_condition(thread_id: str):
-"""Simulate bridge initialization with race conditions."""
+    """Simulate bridge initialization with race conditions."""
 pass
 bridge_tracker.record_initialization_start(user_id, thread_id)
 
 try:
         # Check if already initialized (race condition window!)
 if shared_bridge_state["initialized"]:
-bridge_tracker.record_initialization_end( )
+    bridge_tracker.record_initialization_end( )
 user_id, thread_id, True,
 "Bridge already initialized",
 shared_bridge_state["bridge_instance"]
@@ -229,7 +229,7 @@ None, bridge_instance
 return bridge_instance
 
 except Exception as e:
-bridge_tracker.record_initialization_end( )
+    bridge_tracker.record_initialization_end( )
 user_id, thread_id, False, str(e)
                 
 return None
@@ -239,7 +239,7 @@ tasks = []
 thread_ids = ["formatted_string" for i in range(num_concurrent_threads)]
 
 for thread_id in thread_ids:
-tasks.append(initialize_bridge_with_race_condition(thread_id))
+    tasks.append(initialize_bridge_with_race_condition(thread_id))
 
                     # Detect race condition
 bridge_tracker.detect_race_condition(user_id, thread_ids)
@@ -266,12 +266,12 @@ if len(successful_results) > 1:
                         # Multiple bridge instances created (corruption!)
 bridge_instances = set(id(r) for r in successful_results if hasattr(r, 'user_id'))
 if len(bridge_instances) > 1:
-assert True, "Race condition created multiple bridge instances"
+    assert True, "Race condition created multiple bridge instances"
 
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_bridge_initialization_timeout_under_load(self, bridge_tracker):
-"""CRITICAL: Test bridge initialization timeouts under load."""
+        """CRITICAL: Test bridge initialization timeouts under load."""
                                 # This test SHOULD FAIL initially
 
 num_users = 20
@@ -281,7 +281,7 @@ initialization_timeout = 2.0  # 2 second timeout
 initialization_delay_base = 0.1  # Base delay
 
 async def slow_bridge_initialization(user_id: str):
-"""Simulate slow bridge initialization."""
+    """Simulate slow bridge initialization."""
 pass
 thread_id = "formatted_string"
 bridge_tracker.record_initialization_start(user_id, thread_id)
@@ -316,7 +316,7 @@ user_id, thread_id, False,
             
 return None
 except Exception as e:
-bridge_tracker.record_initialization_end( )
+    bridge_tracker.record_initialization_end( )
 user_id, thread_id, False, str(e)
                 
 return None
@@ -351,7 +351,7 @@ assert failed_count > 0, "formatted_string"
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_bridge_state_corruption_during_initialization(self, bridge_tracker):
-"""CRITICAL: Test bridge state corruption during concurrent initialization."""
+        """CRITICAL: Test bridge state corruption during concurrent initialization."""
                     # This test SHOULD FAIL initially
 
 user_ids = ["user_001", "user_002", "user_003"]
@@ -365,7 +365,7 @@ global_bridge_registry = { )
                     
 
 async def initialize_bridge_with_state_corruption(user_id: str):
-"""Initialize bridge with potential state corruption."""
+    """Initialize bridge with potential state corruption."""
 pass
 thread_id = "formatted_string"
 bridge_tracker.record_initialization_start(user_id, thread_id)
@@ -373,7 +373,7 @@ bridge_tracker.record_initialization_start(user_id, thread_id)
 try:
         # Check if already initializing (shared state check)
 if user_id in global_bridge_registry["initializing"]:
-bridge_tracker.record_initialization_end( )
+    bridge_tracker.record_initialization_end( )
 user_id, thread_id, False,
 "Already initializing (state corruption possible)"
             
@@ -417,7 +417,7 @@ bridge
 return bridge
 
 except Exception as e:
-global_bridge_registry["initializing"].discard(user_id)
+    global_bridge_registry["initializing"].discard(user_id)
 bridge_tracker.record_initialization_end( )
 user_id, thread_id, False, str(e)
                     
@@ -428,7 +428,7 @@ tasks = []
 for user_id in user_ids:
                         # Multiple initialization attempts per user to increase corruption chance
 for attempt in range(3):
-tasks.append(initialize_bridge_with_state_corruption(user_id))
+    tasks.append(initialize_bridge_with_state_corruption(user_id))
 
 results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -462,7 +462,7 @@ class TestBridgeLifecycleFailures:
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_bridge_becomes_none_during_agent_execution(self, bridge_tracker):
-"""CRITICAL: Test bridge becomes None during agent execution."""
+        """CRITICAL: Test bridge becomes None during agent execution."""
         # This test SHOULD FAIL initially
 
 user_id = "user_001"
@@ -497,17 +497,17 @@ notifications_sent = []
 notifications_failed = []
 
 for step_num, (event_type, payload) in enumerate(execution_steps):
-try:
+    try:
                 # Bridge becomes None after step 2 (real-world scenario!)
 if step_num >= 2:
-context.websocket_bridge = None
+    context.websocket_bridge = None
 
                     # Try to send notification
 if context.websocket_bridge:
-if event_type.startswith("tool_"):
-await context.websocket_bridge.send_tool_event(event_type, payload)
+    if event_type.startswith("tool_"):
+        await context.websocket_bridge.send_tool_event(event_type, payload)
 else:
-await context.websocket_bridge.send_agent_event(event_type, payload)
+    await context.websocket_bridge.send_agent_event(event_type, payload)
 
 notifications_sent.append((event_type, payload))
 else:
@@ -545,7 +545,7 @@ assert len(silent_failures) > 0, "Expected silent failures when bridge is None"
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_bridge_dependency_missing_causes_silent_failure(self, bridge_tracker):
-"""CRITICAL: Test missing bridge dependencies cause silent failures."""
+        """CRITICAL: Test missing bridge dependencies cause silent failures."""
 pass
                                             # This test SHOULD FAIL initially
 
@@ -559,7 +559,7 @@ missing_dependencies = { )
                                             
 
 async def attempt_bridge_initialization_with_missing_deps(dependency_name: str):
-"""Attempt bridge initialization with missing dependency."""
+    """Attempt bridge initialization with missing dependency."""
 thread_id = "formatted_string"
 bridge_tracker.record_initialization_start(user_id, thread_id)
 
@@ -627,7 +627,7 @@ assert len(successful_results) == 0, "Expected all initialization attempts to fa
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_bridge_recovery_fails_silently(self, bridge_tracker):
-"""CRITICAL: Test bridge recovery attempts fail silently."""
+        """CRITICAL: Test bridge recovery attempts fail silently."""
 pass
                     # This test SHOULD FAIL initially
 
@@ -640,7 +640,7 @@ failed_bridge.is_healthy = AsyncMock(return_value=False)
 recovery_attempts = []
 
 async def attempt_bridge_recovery(attempt_num: int):
-"""Attempt to recover failed bridge."""
+    """Attempt to recover failed bridge."""
 thread_id = "formatted_string"
 bridge_tracker.record_initialization_start(user_id, thread_id)
 
@@ -648,7 +648,7 @@ try:
         # Check if bridge needs recovery
 is_healthy = await failed_bridge.is_healthy()
 if is_healthy:
-bridge_tracker.record_initialization_end( )
+    bridge_tracker.record_initialization_end( )
 user_id, thread_id, True, "Bridge already healthy"
             
 await asyncio.sleep(0)

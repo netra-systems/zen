@@ -15,9 +15,9 @@ from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
 
 from netra_backend.app.auth_integration import get_current_user_optional
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 router = APIRouter()
 
 

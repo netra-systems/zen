@@ -50,9 +50,10 @@ class TestAuthEndpointIntegration:
         mock_auth.blacklist_token = AsyncNone  # TODO: Use real service instance
 
         # Step 1: Login
-        login_response = test_client.post("/auth/login", json={ ))
-        "email": "test@example.com",
-        "password": "password123"
+        login_response = test_client.post("/auth/login", json={
+            "email": "test@example.com",
+            "password": "password123"
+        })
         
 
         assert login_response.status_code == 200, "formatted_string"
@@ -64,8 +65,9 @@ class TestAuthEndpointIntegration:
         refresh_token = login_data["refresh_token"]
 
         # Step 2: Use refresh token to get new tokens
-        refresh_response = test_client.post("/auth/refresh", json={ ))
-        "refresh_token": refresh_token
+        refresh_response = test_client.post("/auth/refresh", json={
+            "refresh_token": refresh_token
+        })
         
 
         assert refresh_response.status_code == 200, "formatted_string"

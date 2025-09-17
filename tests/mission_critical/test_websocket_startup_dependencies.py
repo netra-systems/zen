@@ -1,5 +1,5 @@
 class TestWebSocketConnection:
-    """Real WebSocket connection for testing instead of mocks."""
+    "Real WebSocket connection for testing instead of mocks.""
 
     def __init__(self):
         pass
@@ -8,19 +8,19 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        """Send JSON message."""
+        ""Send JSON message."
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
-        """Close WebSocket connection."""
+    async def close(self, code: int = 1000, reason: str = Normal closure"):
+        "Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
 
-    def get_messages(self) -> list:
-        """Get all sent messages."""
+    async def get_messages(self) -> list:
+        ""Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
@@ -52,11 +52,11 @@ class TestWebSocketConnection:
 
 
 class TestWebSocketStartupDependencies:
-        """Test WebSocket dependencies are properly initialized during startup."""
+        "Test WebSocket dependencies are properly initialized during startup.""
 
 @pytest.mark.asyncio
     async def test_phase_two_initializes_llm_manager(self):
-"""Test that Phase 2 properly initializes llm_manager."""
+""Test that Phase 2 properly initializes llm_manager."
 app = FastAPI()
 app.state = Magic
         # Mock logger
@@ -72,7 +72,7 @@ mock_init_core.return_value = mock_key_manager
             # Mock background task manager
             # Mock startup fixes
 with patch('netra_backend.app.startup_module.startup_fixes') as mock_fixes:
-mock_fixes.run_comprehensive_verification = AsyncMock(return_value={'total_fixes': 5})
+mock_fixes.run_comprehensive_verification = AsyncMock(return_value={'total_fixes': 5}
 
                 # Run Phase 2
 await _deprecated_run_startup_phase_two(app, logger)
@@ -82,11 +82,11 @@ assert hasattr(app.state, 'llm_manager')
 assert app.state.llm_manager is not None
 
                 # Verify logging
-logger.info.assert_any_call("Phase 2 completed successfully - core services initialized")
+logger.info.assert_any_call("Phase 2 completed successfully - core services initialized)
 
 @pytest.mark.asyncio
     async def test_phase_three_requires_dependencies(self):
-"""Test that Phase 3 fails properly when dependencies are missing."""
+""Test that Phase 3 fails properly when dependencies are missing."
 pass
 app = FastAPI()
 app.state = Magic
@@ -106,11 +106,11 @@ mock_env.return_value.get.return_value = 'staging'
 with pytest.raises(RuntimeError) as exc_info:
 await _deprecated_run_startup_phase_three(app, logger)
 
-assert "missing dependencies" in str(exc_info.value).lower()
+assert "missing dependencies in str(exc_info.value).lower()
 
 @pytest.mark.asyncio
     async def test_supervisor_logs_missing_dependencies(self):
-"""Test that supervisor creation logs detailed missing dependencies."""
+""Test that supervisor creation logs detailed missing dependencies."
 app = FastAPI()
 app.state = Magic
                                 # Set some but not all dependencies
@@ -127,18 +127,18 @@ mock_env.return_value.get.return_value = 'staging'
 with pytest.raises(RuntimeError) as exc_info:
 _create_agent_supervisor(app)
 
-assert "llm_manager" in str(exc_info.value)
-assert "missing dependencies" in str(exc_info.value).lower()
+assert "llm_manager in str(exc_info.value)
+assert missing dependencies" in str(exc_info.value).lower()
 
 @pytest.mark.asyncio
     async def test_websocket_fails_gracefully_without_supervisor(self):
-"""Test that WebSocket endpoint fails gracefully when supervisor is missing."""
+"Test that WebSocket endpoint fails gracefully when supervisor is missing.""
 pass
 from netra_backend.app.routes.websocket import websocket_endpoint
 
                                             # Create mock WebSocket
 websocket = TestWebSocketConnection()
-mock_websocket.app.state = Magic        mock_websocket.headers = {"sec-websocket-protocol": ""}
+mock_websocket.app.state = Magic        mock_websocket.headers = {sec-websocket-protocol": "}
 
                                             # Don't set supervisor
 mock_websocket.app.state.agent_supervisor = None
@@ -152,12 +152,12 @@ mock_env.return_value.get.return_value = 'staging'
 with pytest.raises(RuntimeError) as exc_info:
 await websocket_endpoint(mock_websocket)
 
-assert "Critical WebSocket dependencies missing" in str(exc_info.value)
-assert "agent_supervisor" in str(exc_info.value)
+assert Critical WebSocket dependencies missing" in str(exc_info.value)
+assert "agent_supervisor in str(exc_info.value)
 
 @pytest.mark.asyncio
     async def test_full_startup_sequence_success(self):
-"""Test successful full startup sequence with all dependencies."""
+""Test successful full startup sequence with all dependencies."
 app = FastAPI()
 app.state = Magic
                                                         # Mock logger
@@ -169,7 +169,7 @@ websocket = TestWebSocketConnection()  # Real WebSocket implementation
 mock_init_core.return_value = mock_key_manager
 
 with patch('netra_backend.app.startup_module.startup_fixes') as mock_fixes:
-mock_fixes.run_comprehensive_verification = AsyncMock(return_value={'total_fixes': 5})
+mock_fixes.run_comprehensive_verification = AsyncMock(return_value={'total_fixes': 5}
 
                                                                 # Run Phase 2
 await _deprecated_run_startup_phase_two(app, logger)
@@ -195,4 +195,4 @@ assert app.state.thread_service is not None
 
 
 if __name__ == "__main__":
-pass
+    pass

@@ -170,7 +170,7 @@ class TestUnifiedToolDispatcher:
 
 @pytest.mark.asyncio
     async def test_dispatcher_initialization(self, mock_user_context, mock_websocket_emitter):
-"""Test dispatcher initialization with different configurations."""
+        """Test dispatcher initialization with different configurations."""
         # Default initialization
 dispatcher = UnifiedToolDispatcher()
 assert dispatcher.strategy is not None
@@ -192,13 +192,13 @@ assert isinstance(dispatcher.strategy, AdminDispatchStrategy)
 
 @pytest.mark.asyncio
     async def test_tool_registration_and_discovery(self, sample_tools):
-"""Test tool registration and discovery."""
+        """Test tool registration and discovery."""
 pass
 dispatcher = UnifiedToolDispatcher()
 
             # Register tools
 for tool in sample_tools:
-await dispatcher.register_tool(tool)
+    await dispatcher.register_tool(tool)
 
                 # Discover all tools
 tools = dispatcher.discover_tools()
@@ -209,12 +209,12 @@ assert len(tools) == 3
 
 @pytest.mark.asyncio
     async def test_tool_dispatch_success(self, mock_websocket_emitter):
-"""Test successful tool dispatch."""
+        """Test successful tool dispatch."""
 dispatcher = UnifiedToolDispatcher(websocket_emitter=mock_websocket_emitter)
 
                     # Register a test tool
     async def test_handler(input:
-await asyncio.sleep(0)
+        await asyncio.sleep(0)
 return "formatted_string"
 
 tool_def = ToolDefinition( )
@@ -238,14 +238,14 @@ mock_websocket_emitter.notify_tool_completed.assert_called_once()
 
 @pytest.mark.asyncio
     async def test_tool_dispatch_with_admin_strategy(self):
-"""Test tool dispatch with admin strategy."""
+        """Test tool dispatch with admin strategy."""
 pass
 admin_strategy = AdminDispatchStrategy()
 dispatcher = UnifiedToolDispatcher(strategy=admin_strategy)
 
                             # Register admin tool
 async def admin_handler(**kwargs) -> str:
-await asyncio.sleep(0)
+    await asyncio.sleep(0)
 return "formatted_string"
 
 tool_def = ToolDefinition( )
@@ -270,12 +270,12 @@ assert "Admin action: True" in result.result
 
 @pytest.mark.asyncio
     async def test_dispatch_performance(self):
-"""Test dispatch performance meets <5ms requirement."""
+        """Test dispatch performance meets <5ms requirement."""
 dispatcher = UnifiedToolDispatcher(enable_metrics=True)
 
         # Register fast tool
 async def fast_handler() -> str:
-await asyncio.sleep(0)
+    await asyncio.sleep(0)
 return "fast"
 
 tool_def = ToolDefinition( )
@@ -289,7 +289,7 @@ await dispatcher.registry.register_tool("fast", tool_def)
     # Run multiple dispatches
 dispatch_times = []
 for _ in range(10):
-start = time.perf_counter()
+    start = time.perf_counter()
 result = await dispatcher.dispatch("fast", {})
 dispatch_time_ms = (time.perf_counter() - start) * 1000
 dispatch_times.append(dispatch_time_ms)
@@ -306,7 +306,7 @@ assert len(fast_dispatches) >= 8  # At least 80% under 5ms
 
 @pytest.mark.asyncio
     async def test_request_scoped_dispatcher(self, mock_user_context):
-"""Test request-scoped dispatcher isolation."""
+        """Test request-scoped dispatcher isolation."""
 pass
 base_dispatcher = UnifiedToolDispatcher(user_context=mock_user_context)
 
@@ -317,7 +317,7 @@ assert request_dispatcher.request_id == "req_789"
 
             # Register tool
 async def scoped_handler() -> str:
-await asyncio.sleep(0)
+    await asyncio.sleep(0)
 return "scoped result"
 
 tool_def = ToolDefinition( )
@@ -335,7 +335,7 @@ assert result.status == ToolStatus.SUCCESS
     # Close and verify closed state
 request_dispatcher.close()
 with pytest.raises(RuntimeError, match="has been closed"):
-await request_dispatcher.dispatch("scoped", {})
+    await request_dispatcher.dispatch("scoped", {})
 
 
         # ============================================================================
@@ -347,7 +347,7 @@ class TestExecutionEngine:
 
 @pytest.mark.asyncio
     async def test_engine_initialization(self, mock_agent_registry, mock_websocket_bridge):
-"""Test engine initialization with different configurations."""
+        """Test engine initialization with different configurations."""
         # Default configuration
 engine = UserExecutionEngine()
 assert engine.config is not None
@@ -376,7 +376,7 @@ assert 'websocket' in engine._extensions
 
 @pytest.mark.asyncio
     async def test_agent_execution_success(self, mock_agent_registry, mock_user_context):
-"""Test successful agent execution."""
+        """Test successful agent execution."""
 pass
 engine = UserExecutionEngine( )
 registry=mock_agent_registry,
@@ -395,7 +395,7 @@ mock_agent_registry.get_agent.assert_called_with("test_agent")
 
 @pytest.mark.asyncio
     async def test_execution_with_extensions(self, mock_agent_registry, mock_websocket_bridge):
-"""Test execution with all extensions."""
+        """Test execution with all extensions."""
 config = EngineConfig( )
 enable_user_features=True,
 enable_websocket_events=True
@@ -420,7 +420,7 @@ mock_websocket_bridge.notify_agent_completed.assert_called_once()
 
 @pytest.mark.asyncio
     async def test_execution_performance(self, mock_agent_registry):
-"""Test execution meets <2s requirement."""
+        """Test execution meets <2s requirement."""
 pass
                     # Configure fast agent
 websocket = TestWebSocketConnection()
@@ -437,7 +437,7 @@ registry=mock_agent_registry
                     # Execute multiple times
 execution_times = []
 for _ in range(5):
-start = time.perf_counter()
+    start = time.perf_counter()
 result = await engine.execute("fast_agent", {"task": "speed_test"})
 execution_time = time.perf_counter() - start
 execution_times.append(execution_time)
@@ -452,7 +452,7 @@ assert metrics['success_rate'] == 1.0
 
 @pytest.mark.asyncio
     async def test_concurrent_user_execution(self, mock_agent_registry):
-"""Test concurrent execution for 10+ users."""
+        """Test concurrent execution for 10+ users."""
                             # Create multiple engines for different users
 engines = []
 for i in range(12):  # Test with 12 concurrent users
@@ -472,7 +472,7 @@ engines.append(engine)
                             # Execute agents concurrently
 tasks = []
 for i, engine in enumerate(engines):
-task = engine.execute("formatted_string", {"task": "formatted_string"})
+    task = engine.execute("formatted_string", {"task": "formatted_string"})
 tasks.append(task)
 
                                 # Wait for all to complete
@@ -480,11 +480,11 @@ results = await asyncio.gather(*tasks)
 
                                 # Verify all succeeded
 for result in results:
-assert result.success is True
+    assert result.success is True
 
                                     # Check that user isolation was maintained
 for i, engine in enumerate(engines):
-metrics = engine.get_metrics()
+    metrics = engine.get_metrics()
 assert metrics['success_count'] == 1
 
 
@@ -497,7 +497,7 @@ class TestFactories:
 
 @pytest.mark.asyncio
     async def test_dispatcher_factory(self, mock_user_context):
-"""Test dispatcher factory functions."""
+        """Test dispatcher factory functions."""
         # Create default dispatcher
 dispatcher = create_dispatcher()
 assert isinstance(dispatcher, UnifiedToolDispatcher)
@@ -517,7 +517,7 @@ assert dispatcher.user_context == mock_user_context
 
 @pytest.mark.asyncio
     async def test_request_scoped_dispatcher_factory(self, mock_user_context):
-"""Test request-scoped dispatcher factory."""
+        """Test request-scoped dispatcher factory."""
 pass
 dispatcher = create_request_scoped_dispatcher( )
 request_id="test_req_001",
@@ -529,7 +529,7 @@ assert dispatcher.request_id == "test_req_001"
 
 @pytest.mark.asyncio
     async def test_execution_engine_factory(self, mock_user_context, mock_agent_registry):
-"""Test execution engine factory methods."""
+        """Test execution engine factory methods."""
                 # Set defaults
 ExecutionEngineFactory.set_defaults( )
 registry=mock_agent_registry
@@ -558,7 +558,7 @@ assert engine.config.enable_mcp is True
 
 @pytest.mark.asyncio
     async def test_request_scoped_engine_factory(self, mock_user_context):
-"""Test request-scoped engine factory."""
+        """Test request-scoped engine factory."""
 pass
 engine = ExecutionEngineFactory.create_request_scoped_engine( )
 request_id="test_req_002",
@@ -593,7 +593,7 @@ websocket_emitter=mock_websocket_bridge
 
         # Register tools
 for tool in sample_tools:
-await dispatcher.register_tool(tool)
+    await dispatcher.register_tool(tool)
 
             # Create engine with dispatcher
 engine = ExecutionEngineFactory.create_user_engine( )
@@ -615,11 +615,11 @@ assert engine_metrics['success_count'] >= 1
 
 @pytest.mark.asyncio
     async def test_request_isolation_e2e(self, mock_agent_registry):
-"""Test request isolation end-to-end."""
+        """Test request isolation end-to-end."""
                 # Create multiple request-scoped engines
 requests = []
 for i in range(5):
-user_context = Magic            user_context.user_id = "formatted_string"
+    user_context = Magic            user_context.user_id = "formatted_string"
 user_context.request_id = "formatted_string"
 
 engine = ExecutionEngineFactory.create_request_scoped_engine( )
@@ -632,14 +632,14 @@ requests.append((engine, user_context))
                     # Execute concurrently
 tasks = []
 for engine, context in requests:
-task = engine.execute("formatted_string", {"data": "test"})
+    task = engine.execute("formatted_string", {"data": "test"})
 tasks.append(task)
 
 results = await asyncio.gather(*tasks)
 
                         # Verify all succeeded with isolation
 for result in results:
-assert result.success is True
+    assert result.success is True
 
 @pytest.mark.asyncio
                             # Removed problematic line: async def test_websocket_event_flow( )
@@ -658,7 +658,7 @@ websocket_emitter=mock_websocket_bridge
 
                                 # Register tool
 async def event_tool() -> str:
-await asyncio.sleep(0)
+    await asyncio.sleep(0)
 return "event_result"
 
 tool_def = ToolDefinition( )
@@ -694,7 +694,7 @@ assert mock_websocket_bridge.notify_tool_completed.called
 
 @pytest.mark.asyncio
     async def test_performance_requirements(self, mock_agent_registry):
-"""Test system meets performance requirements."""
+        """Test system meets performance requirements."""
         # Create optimized configuration
 config = EngineConfig( )
 enable_metrics=True,
@@ -712,7 +712,7 @@ tool_dispatcher=dispatcher
 
         # Register fast tool
 async def perf_tool() -> str:
-await asyncio.sleep(0)
+    await asyncio.sleep(0)
 return "perf"
 
 tool_def = ToolDefinition( )
@@ -726,7 +726,7 @@ await dispatcher.registry.register_tool("perf_tool", tool_def)
     # Test dispatch performance (<5ms)
 dispatch_times = []
 for _ in range(20):
-start = time.perf_counter()
+    start = time.perf_counter()
 await dispatcher.dispatch("perf_tool", {})
 dispatch_time = (time.perf_counter() - start) * 1000
 dispatch_times.append(dispatch_time)
@@ -737,7 +737,7 @@ assert avg_dispatch < 5, "formatted_string"
         # Test execution performance (<2s)
 execution_times = []
 for _ in range(10):
-start = time.perf_counter()
+    start = time.perf_counter()
 await engine.execute("test_agent", {"task": "perf"})
 execution_time = time.perf_counter() - start
 execution_times.append(execution_time)
@@ -755,10 +755,10 @@ assert engine_metrics['success_rate'] >= 0.95  # 95% success rate
 
 @pytest.mark.asyncio
     async def test_backwards_compatibility(self, mock_user_context, mock_agent_registry):
-"""Test backward compatibility with old APIs."""
+        """Test backward compatibility with old APIs."""
 pass
 with warnings.catch_warnings(record=True) as w:
-warnings.simplefilter("always")
+    warnings.simplefilter("always")
 
                     # Test legacy dispatcher function
 from netra_backend.app.agents.tool_dispatcher_consolidated import get_tool_dispatcher
@@ -776,7 +776,7 @@ assert "deprecated" in str(w[1].message)
 
 @pytest.mark.asyncio
     async def test_extension_lifecycle(self, mock_agent_registry):
-"""Test extension initialization and cleanup."""
+        """Test extension initialization and cleanup."""
                         # Create engine with all extensions
 config = EngineConfig( )
 enable_user_features=True,
@@ -814,12 +814,12 @@ class TestStress:
 
 @pytest.mark.asyncio
     async def test_high_concurrent_dispatch(self):
-"""Test dispatcher under high concurrent load."""
+        """Test dispatcher under high concurrent load."""
 dispatcher = UnifiedToolDispatcher(enable_metrics=True)
 
         # Register simple tool
 async def stress_tool(value: int) -> int:
-await asyncio.sleep(0.001)  # Tiny delay
+    await asyncio.sleep(0.001)  # Tiny delay
 await asyncio.sleep(0)
 return value * 2
 
@@ -834,7 +834,7 @@ await dispatcher.registry.register_tool("stress", tool_def)
     # Dispatch 100 tools concurrently
 tasks = []
 for i in range(100):
-task = dispatcher.dispatch("stress", {"value": i})
+    task = dispatcher.dispatch("stress", {"value": i})
 tasks.append(task)
 
 results = await asyncio.gather(*tasks)
@@ -850,7 +850,7 @@ assert metrics['average_dispatch_ms'] < 10  # Reasonable under load
 
 @pytest.mark.asyncio
     async def test_high_concurrent_execution(self, mock_agent_registry):
-"""Test engine under high concurrent load."""
+        """Test engine under high concurrent load."""
 pass
 config = EngineConfig( )
 max_concurrent_agents=50,
@@ -865,7 +865,7 @@ registry=mock_agent_registry
             # Execute 50 agents concurrently
 tasks = []
 for i in range(50):
-task = engine.execute("formatted_string", {"task": "formatted_string"})
+    task = engine.execute("formatted_string", {"task": "formatted_string"})
 tasks.append(task)
 
 results = await asyncio.gather(*tasks)
@@ -889,7 +889,7 @@ class TestErrorHandling:
 
 @pytest.mark.asyncio
     async def test_dispatcher_error_handling(self, mock_websocket_emitter):
-"""Test dispatcher error handling."""
+        """Test dispatcher error handling."""
 dispatcher = UnifiedToolDispatcher(websocket_emitter=mock_websocket_emitter)
 
         # Try to dispatch non-existent tool
@@ -899,7 +899,7 @@ assert "not found" in result.error
 
         # Register failing tool
 async def failing_tool() -> str:
-raise ValueError("Tool failed intentionally")
+    raise ValueError("Tool failed intentionally")
 
 tool_def = ToolDefinition( )
 name="failing",
@@ -919,7 +919,7 @@ mock_websocket_emitter.notify_tool_error.assert_called()
 
 @pytest.mark.asyncio
     async def test_engine_timeout_handling(self, mock_agent_registry):
-"""Test engine timeout handling."""
+        """Test engine timeout handling."""
 pass
         # Configure with short timeout
 config = EngineConfig(agent_execution_timeout=0.1)

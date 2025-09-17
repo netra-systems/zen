@@ -112,7 +112,7 @@ class TestReportingSubAgent(TestPhase2AgentsMigration):
 
 @pytest.mark.asyncio
     async def test_reporting_agent_user_isolation(self, user_context, mock_websocket_manager):
-"""Test that ReportingSubAgent properly isolates user data."""
+        """Test that ReportingSubAgent properly isolates user data."""
 agent = ReportingSubAgent()
 
         # Create two different user contexts
@@ -133,7 +133,7 @@ metadata={ )
 
         # Execute for both users concurrently
 with patch.object(agent, '_generate_report_with_llm', return_value={"report": "test"}):
-results = await asyncio.gather( )
+    results = await asyncio.gather( )
 agent.execute(context1, stream_updates=False),
 agent.execute(context2, stream_updates=False)
             
@@ -145,21 +145,21 @@ assert "different_user_789" not in str(results[0])
 
 @pytest.mark.asyncio
     async def test_reporting_context_validation(self, mock_websocket_manager):
-"""Test that ReportingSubAgent validates UserExecutionContext."""
+        """Test that ReportingSubAgent validates UserExecutionContext."""
 pass
 agent = ReportingSubAgent(websocket_manager=mock_websocket_manager)
 
                 # Test with invalid context type
 with pytest.raises(TypeError):
-await agent.execute("not_a_context", stream_updates=False)
+    await agent.execute("not_a_context", stream_updates=False)
 
                     # Test with None context
 with pytest.raises(TypeError):
-await agent.execute(None, stream_updates=False)
+    await agent.execute(None, stream_updates=False)
 
 @pytest.mark.asyncio
     async def test_reporting_missing_metadata(self, user_context, mock_websocket_manager):
-"""Test ReportingSubAgent handles missing metadata gracefully."""
+        """Test ReportingSubAgent handles missing metadata gracefully."""
 agent = ReportingSubAgent(websocket_manager=mock_websocket_manager)
 
                             # Remove required metadata
@@ -179,14 +179,14 @@ assert "fallback" in str(result).lower() or "unavailable" in str(result).lower()
 
 @pytest.mark.asyncio
     async def test_reporting_concurrent_execution(self, user_context, mock_websocket_manager):
-"""Test ReportingSubAgent handles concurrent executions safely."""
+        """Test ReportingSubAgent handles concurrent executions safely."""
 pass
 agent = ReportingSubAgent(websocket_manager=mock_websocket_manager)
 
                                 # Create 10 concurrent executions
 contexts = []
 for i in range(10):
-ctx = UserExecutionContext( )
+    ctx = UserExecutionContext( )
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id=str(uuid.uuid4()),
@@ -211,7 +211,7 @@ class TestOptimizationsCoreSubAgent(TestPhase2AgentsMigration):
 
 @pytest.mark.asyncio
     async def test_optimizations_context_isolation(self, user_context, mock_websocket_manager):
-"""Test that OptimizationsCoreSubAgent maintains context isolation."""
+        """Test that OptimizationsCoreSubAgent maintains context isolation."""
 dispatcher = Magic        agent = OptimizationsCoreSubAgent( )
 tool_dispatcher=dispatcher,
 websocket_manager=mock_websocket_manager
@@ -219,7 +219,7 @@ websocket_manager=mock_websocket_manager
 
         # Mock LLM response
 with patch.object(agent, '_analyze_with_llm', return_value={"optimizations": ["cache", "index"]}):
-result = await agent.execute(user_context, stream_updates=False)
+    result = await agent.execute(user_context, stream_updates=False)
 
             # Verify result contains user-specific data
 assert result is not None
@@ -231,7 +231,7 @@ assert user_context.thread_id == "thread_456"
 
 @pytest.mark.asyncio
     async def test_optimizations_database_session_management(self, user_context, mock_websocket_manager):
-"""Test database session management in OptimizationsCoreSubAgent."""
+        """Test database session management in OptimizationsCoreSubAgent."""
 pass
 dispatcher = Magic        agent = OptimizationsCoreSubAgent( )
 tool_dispatcher=dispatcher,
@@ -247,7 +247,7 @@ user_context.db_session.rollback.assert_called()
 
 @pytest.mark.asyncio
     async def test_optimizations_tool_dispatcher_integration(self, user_context, mock_websocket_manager):
-"""Test tool dispatcher integration with UserExecutionContext."""
+        """Test tool dispatcher integration with UserExecutionContext."""
 dispatcher = Magic        dispatcher.execute_tool = AsyncMock(return_value={"tool_result": "success"})
 
 agent = OptimizationsCoreSubAgent( )
@@ -256,8 +256,8 @@ websocket_manager=mock_websocket_manager
                         
 
 with patch.object(agent, '_needs_tools', return_value=True):
-with patch.object(agent, '_analyze_with_llm', return_value={"optimizations": ["use_tool"]}):
-result = await agent.execute(user_context, stream_updates=False)
+    with patch.object(agent, '_analyze_with_llm', return_value={"optimizations": ["use_tool"]}):
+        result = await agent.execute(user_context, stream_updates=False)
 
                                 # Tool dispatcher should be called with context
 dispatcher.execute_tool.assert_called()
@@ -268,18 +268,18 @@ class TestSyntheticDataSubAgent(TestPhase2AgentsMigration):
 
 @pytest.mark.asyncio
     async def test_synthetic_data_user_isolation(self, user_context, mock_websocket_manager):
-"""Test that synthetic data generation is isolated per user."""
+        """Test that synthetic data generation is isolated per user."""
 agent = SyntheticDataSubAgent()
 
         # Mock generation components
 with patch('netra_backend.app.agents.synthetic_data_sub_agent.GenerationWorkflow') as mock_workflow:
-mock_workflow_instance = Magic            mock_workflow_instance.execute = AsyncMock(return_value={"synthetic_data": "test"})
+    mock_workflow_instance = Magic            mock_workflow_instance.execute = AsyncMock(return_value={"synthetic_data": "test"})
 mock_workflow.return_value = mock_workflow_instance
 
             # Execute for multiple users
 contexts = []
 for i in range(5):
-ctx = UserExecutionContext( )
+    ctx = UserExecutionContext( )
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id=str(uuid.uuid4()),
@@ -299,7 +299,7 @@ assert all(r is not None for r in results)
 
 @pytest.mark.asyncio
     async def test_synthetic_data_approval_workflow(self, user_context, mock_websocket_manager):
-"""Test approval workflow with UserExecutionContext."""
+        """Test approval workflow with UserExecutionContext."""
 pass
 agent = SyntheticDataSubAgent()
 
@@ -307,12 +307,12 @@ agent = SyntheticDataSubAgent()
 user_context.metadata["requires_approval"] = True
 
 with patch('netra_backend.app.agents.synthetic_data_sub_agent.ApprovalWorkflow') as mock_approval:
-mock_approval_instance = Magic            mock_approval_instance.check_approval_required = MagicMock(return_value=True)
+    mock_approval_instance = Magic            mock_approval_instance.check_approval_required = MagicMock(return_value=True)
 mock_approval_instance.request_approval = AsyncMock(return_value=True)
 mock_approval.return_value = mock_approval_instance
 
 with patch('netra_backend.app.agents.synthetic_data_sub_agent.GenerationWorkflow') as mock_gen:
-mock_gen_instance = Magic                mock_gen_instance.execute = AsyncMock(return_value={"data": "approved"})
+    mock_gen_instance = Magic                mock_gen_instance.execute = AsyncMock(return_value={"data": "approved"})
 mock_gen.return_value = mock_gen_instance
 
 result = await agent.execute(user_context, stream_updates=False)
@@ -323,7 +323,7 @@ assert result is not None
 
 @pytest.mark.asyncio
     async def test_synthetic_data_batch_processing(self, user_context, mock_websocket_manager):
-"""Test batch processing maintains context isolation."""
+        """Test batch processing maintains context isolation."""
 agent = SyntheticDataSubAgent()
 
                                 # Set up batch request
@@ -335,7 +335,7 @@ user_context.metadata["workload_profile"] = { )
                                 
 
 with patch('netra_backend.app.agents.synthetic_data_sub_agent.SyntheticDataBatchProcessor') as mock_batch:
-mock_batch_instance = Magic            mock_batch_instance.process_all_batches = AsyncMock( )
+    mock_batch_instance = Magic            mock_batch_instance.process_all_batches = AsyncMock( )
 return_value=[{"batch": i} for i in range(10)]
                                     
 mock_batch.return_value = mock_batch_instance
@@ -352,21 +352,21 @@ class TestGoalsTriageSubAgent(TestPhase2AgentsMigration):
 
 @pytest.mark.asyncio
     async def test_goals_triage_context_validation(self, user_context, mock_websocket_manager):
-"""Test context validation in GoalsTriageSubAgent."""
+        """Test context validation in GoalsTriageSubAgent."""
 agent = GoalsTriageSubAgent(websocket_manager=mock_websocket_manager)
 
         # Test with valid context
 with patch.object(agent, '_extract_and_analyze_goals', return_value={"goals": ["goal1"]}):
-result = await agent.execute(user_context, stream_updates=False)
+    result = await agent.execute(user_context, stream_updates=False)
 assert result is not None
 
             # Test with invalid context
 with pytest.raises(TypeError):
-await agent.execute({"not": "a_context"}, stream_updates=False)
+    await agent.execute({"not": "a_context"}, stream_updates=False)
 
 @pytest.mark.asyncio
     async def test_goals_priority_isolation(self, user_context, mock_websocket_manager):
-"""Test that goal priorities are isolated per user."""
+        """Test that goal priorities are isolated per user."""
 pass
 agent = GoalsTriageSubAgent(websocket_manager=mock_websocket_manager)
 
@@ -384,7 +384,7 @@ metadata={"user_request": "Maybe someday optimize this"}
                     
 
 with patch.object(agent, '_extract_and_analyze_goals') as mock_analyze:
-mock_analyze.side_effect = [ )
+    mock_analyze.side_effect = [ )
 {"goals": ["fix_production"], "priority": "critical"},
 {"goals": ["optimize"], "priority": "low"}
                         
@@ -399,12 +399,12 @@ assert "low" in str(low_result) or "optimize" in str(low_result)
 
 @pytest.mark.asyncio
     async def test_goals_fallback_handling(self, user_context, mock_websocket_manager):
-"""Test fallback goal generation when analysis fails."""
+        """Test fallback goal generation when analysis fails."""
 agent = GoalsTriageSubAgent(websocket_manager=mock_websocket_manager)
 
                             # Make analysis fail
 with patch.object(agent, '_extract_and_analyze_goals', side_effect=Exception("LLM failed")):
-result = await agent.execute(user_context, stream_updates=False)
+    result = await agent.execute(user_context, stream_updates=False)
 
                                 # Should await asyncio.sleep(0)
 return fallback goals
@@ -417,13 +417,13 @@ class TestActionsToMeetGoalsSubAgent(TestPhase2AgentsMigration):
 
 @pytest.mark.asyncio
     async def test_actions_plan_user_isolation(self, user_context, mock_websocket_manager):
-"""Test that action plans are isolated per user."""
+        """Test that action plans are isolated per user."""
 agent = ActionsToMeetGoalsSubAgent(websocket_manager=mock_websocket_manager)
 
         # Create multiple user contexts
 contexts = []
 for i in range(3):
-ctx = UserExecutionContext( )
+    ctx = UserExecutionContext( )
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id=str(uuid.uuid4()),
@@ -438,7 +438,7 @@ metadata={ )
 contexts.append(ctx)
 
 with patch.object(agent, '_generate_action_plan') as mock_plan:
-mock_plan.side_effect = [ )
+    mock_plan.side_effect = [ )
 {"plan": "formatted_string"} for i in range(3)
                 
 
@@ -449,18 +449,18 @@ agent.execute(ctx, stream_updates=False) for ctx in contexts
                 # Verify each user got their own plan
 assert len(results) == 3
 for i, result in enumerate(results):
-assert "formatted_string" in str(result)
+    assert "formatted_string" in str(result)
 
 @pytest.mark.asyncio
     async def test_actions_metadata_immutability(self, user_context, mock_websocket_manager):
-"""Test that context metadata is handled correctly despite immutability."""
+        """Test that context metadata is handled correctly despite immutability."""
 pass
 agent = ActionsToMeetGoalsSubAgent(websocket_manager=mock_websocket_manager)
 
 original_metadata = user_context.metadata.copy()
 
 with patch.object(agent, '_generate_action_plan', return_value={"plan": "test"}):
-result = await agent.execute(user_context, stream_updates=False)
+    result = await agent.execute(user_context, stream_updates=False)
 
                             # Context metadata should not be mutated
 assert user_context.metadata == original_metadata
@@ -472,12 +472,12 @@ class TestEnhancedExecutionAgent(TestPhase2AgentsMigration):
 
 @pytest.mark.asyncio
     async def test_enhanced_execution_isolation(self, user_context, mock_websocket_manager):
-"""Test enhanced execution maintains user isolation."""
+        """Test enhanced execution maintains user isolation."""
 agent = EnhancedExecutionAgent(websocket_manager=mock_websocket_manager)
 
         # Mock supervisor
 with patch('netra_backend.app.agents.enhanced_execution_agent.EnhancedSupervisorWrapper') as mock_supervisor:
-mock_supervisor_instance = Magic            mock_supervisor_instance.execute_with_context = AsyncMock( )
+    mock_supervisor_instance = Magic            mock_supervisor_instance.execute_with_context = AsyncMock( )
 return_value={"execution_result": "success"}
             
 mock_supervisor.return_value = mock_supervisor_instance
@@ -490,12 +490,12 @@ mock_supervisor_instance.execute_with_context.assert_called()
 
 @pytest.mark.asyncio
     async def test_enhanced_websocket_notifications(self, user_context, mock_websocket_manager):
-"""Test WebSocket notifications use new pattern."""
+        """Test WebSocket notifications use new pattern."""
 pass
 agent = EnhancedExecutionAgent(websocket_manager=mock_websocket_manager)
 
 with patch.object(agent, '_process_with_llm', return_value={"result": "test"}):
-await agent.execute(user_context, stream_updates=True)
+    await agent.execute(user_context, stream_updates=True)
 
                     # Verify new emit_* methods were called
 mock_websocket_manager.emit_agent_started.assert_called()
@@ -503,15 +503,15 @@ mock_websocket_manager.emit_agent_completed.assert_called()
 
 @pytest.mark.asyncio
     async def test_enhanced_tool_execution(self, user_context, mock_websocket_manager):
-"""Test tool execution with UserExecutionContext."""
+        """Test tool execution with UserExecutionContext."""
 agent = EnhancedExecutionAgent(websocket_manager=mock_websocket_manager)
 
                         # Set up tool requirement
 user_context.metadata["user_request"] = "Execute database query tool"
 
 with patch.object(agent, '_needs_tools', return_value=True):
-with patch.object(agent, '_execute_tools', return_value={"tools_executed": ["db_query"]}):
-result = await agent.execute(user_context, stream_updates=False)
+    with patch.object(agent, '_execute_tools', return_value={"tools_executed": ["db_query"]}):
+        result = await agent.execute(user_context, stream_updates=False)
 
                                 # Verify tools were executed
 assert result is not None
@@ -519,13 +519,13 @@ assert "tools_executed" in result or "db_query" in str(result)
 
 @pytest.mark.asyncio
     async def test_enhanced_error_handling(self, user_context, mock_websocket_manager):
-"""Test error handling and recovery."""
+        """Test error handling and recovery."""
 pass
 agent = EnhancedExecutionAgent(websocket_manager=mock_websocket_manager)
 
                                     # Simulate various errors
 with patch.object(agent, '_begin_execution', side_effect=Exception("Startup failed")):
-result = await agent.execute(user_context, stream_updates=False)
+    result = await agent.execute(user_context, stream_updates=False)
 
                                         # Should handle error gracefully
 mock_websocket_manager.emit_error.assert_called()
@@ -538,7 +538,7 @@ class TestConcurrentUserIsolation(TestPhase2AgentsMigration):
 
 @pytest.mark.asyncio
     async def test_all_agents_concurrent_isolation(self, mock_db_session, mock_websocket_manager):
-"""Test all Phase 2 agents handle concurrent users correctly."""
+        """Test all Phase 2 agents handle concurrent users correctly."""
         # Create agents
 agents = [ )
 ReportingSubAgent(websocket_manager=mock_websocket_manager),
@@ -554,7 +554,7 @@ EnhancedExecutionAgent(websocket_manager=mock_websocket_manager)
         # Create 5 user contexts
 contexts = []
 for i in range(5):
-ctx = UserExecutionContext( )
+    ctx = UserExecutionContext( )
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id=str(uuid.uuid4()),
@@ -574,22 +574,22 @@ tasks = []
 for agent in agents:
                 # Mock agent-specific methods
 if hasattr(agent, '_generate_report_with_llm'):
-agent._generate_report_with_llm = MagicMock(return_value={"report": "test"})
+    agent._generate_report_with_llm = MagicMock(return_value={"report": "test"})
 if hasattr(agent, '_analyze_with_llm'):
-agent._analyze_with_llm = MagicMock(return_value={"result": "test"})
+    agent._analyze_with_llm = MagicMock(return_value={"result": "test"})
 if hasattr(agent, '_extract_and_analyze_goals'):
-agent._extract_and_analyze_goals = MagicMock(return_value={"goals": ["test"]})
+    agent._extract_and_analyze_goals = MagicMock(return_value={"goals": ["test"]})
 if hasattr(agent, '_generate_action_plan'):
-agent._generate_action_plan = MagicMock(return_value={"plan": "test"})
+    agent._generate_action_plan = MagicMock(return_value={"plan": "test"})
 if hasattr(agent, '_process_with_llm'):
-agent._process_with_llm = MagicMock(return_value={"result": "test"})
+    agent._process_with_llm = MagicMock(return_value={"result": "test"})
 
                                     # Patch synthetic data components
 if isinstance(agent, SyntheticDataSubAgent):
-pass
+    pass
 
 for ctx in contexts:
-tasks.append(agent.execute(ctx, stream_updates=False))
+    tasks.append(agent.execute(ctx, stream_updates=False))
 
                                             # Execute all tasks concurrently
 results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -601,11 +601,11 @@ assert len(successful_results) > 0  # At least some should succeed
                                             # Log any exceptions for debugging
 exceptions = [item for item in []]
 for exc in exceptions:
-print("formatted_string")
+    print("formatted_string")
 
 @pytest.mark.asyncio
     async def test_thread_safety_with_shared_resources(self, mock_db_session, mock_websocket_manager):
-"""Test thread safety when agents share resources."""
+        """Test thread safety when agents share resources."""
 pass
 shared_resource = {"counter": 0}
 lock = threading.Lock()
@@ -672,7 +672,7 @@ class TestSecurityAndDataLeakage(TestPhase2AgentsMigration):
 
 @pytest.mark.asyncio
     async def test_no_data_leakage_between_users(self, mock_db_session, mock_websocket_manager):
-"""Ensure no data leaks between different user contexts."""
+        """Ensure no data leaks between different user contexts."""
 agent = ReportingSubAgent(websocket_manager=mock_websocket_manager)
 
         # User 1 with sensitive data
@@ -708,7 +708,7 @@ with patch.object(agent, '_generate_report_with_llm') as mock_generate:
 captured_data = []
 
 def capture_and_return(prompt, *args, **kwargs):
-captured_data.append(prompt)
+    captured_data.append(prompt)
 await asyncio.sleep(0)
 return {"report": "formatted_string"}
 
@@ -730,7 +730,7 @@ assert "public_info" not in captured_data[0]  # Sensitive user"s prompt
 
 @pytest.mark.asyncio
     async def test_database_session_isolation(self, mock_websocket_manager):
-"""Test that database sessions are properly isolated."""
+        """Test that database sessions are properly isolated."""
 pass
 agent = OptimizationsCoreSubAgent( )
 tool_dispatcher=Magic            websocket_manager=mock_websocket_manager
@@ -758,7 +758,7 @@ metadata={"data_result": {"test": 2}}
         
 
 with patch.object(agent, '_analyze_with_llm', return_value={"result": "test"}):
-await asyncio.gather( )
+    await asyncio.gather( )
 agent.execute(context1, stream_updates=False),
 agent.execute(context2, stream_updates=False)
             
@@ -776,13 +776,13 @@ class TestPerformanceAndStress(TestPhase2AgentsMigration):
 
 @pytest.mark.asyncio
     async def test_high_concurrency_performance(self, mock_db_session, mock_websocket_manager):
-"""Test agents under high concurrent load."""
+        """Test agents under high concurrent load."""
 agent = GoalsTriageSubAgent(websocket_manager=mock_websocket_manager)
 
         # Create 100 concurrent requests
 contexts = []
 for i in range(100):
-ctx = UserExecutionContext( )
+    ctx = UserExecutionContext( )
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id=str(uuid.uuid4()),
@@ -793,7 +793,7 @@ metadata={"user_request": "formatted_string"}
 contexts.append(ctx)
 
 with patch.object(agent, '_extract_and_analyze_goals', return_value={"goals": ["test"]}):
-start_time = datetime.now()
+    start_time = datetime.now()
                 # Removed problematic line: results = await asyncio.gather(*[ ))
 agent.execute(ctx, stream_updates=False) for ctx in contexts
                 
@@ -809,13 +809,13 @@ assert duration < 10, "formatted_string"
 
 @pytest.mark.asyncio
     async def test_memory_leak_prevention(self, mock_db_session, mock_websocket_manager):
-"""Test that agents don't leak memory with repeated executions."""
+        """Test that agents don't leak memory with repeated executions."""
 pass
 agent = ActionsToMeetGoalsSubAgent(websocket_manager=mock_websocket_manager)
 
                     # Execute many times with same agent instance
 for i in range(100):
-ctx = UserExecutionContext( )
+    ctx = UserExecutionContext( )
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id=str(uuid.uuid4()),
@@ -828,7 +828,7 @@ metadata={ )
                         
 
 with patch.object(agent, '_generate_action_plan', return_value={"plan": "formatted_string"}):
-result = await agent.execute(ctx, stream_updates=False)
+    result = await agent.execute(ctx, stream_updates=False)
 
                             # Result should be independent
 assert "formatted_string" in str(result)
@@ -840,4 +840,4 @@ assert not hasattr(agent, 'formatted_string')
 
                             # Run all tests
 if __name__ == "__main__":
-pytest.main([__file__, "-v", "--tb=short"])
+    pytest.main([__file__, "-v", "--tb=short"])

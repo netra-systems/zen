@@ -1,4 +1,4 @@
-"""
+"
 E2E Tests for WebSocket Authentication Staging Scoping Bug
 
 This test suite performs end-to-end testing of WebSocket authentication
@@ -17,7 +17,7 @@ CRITICAL REQUIREMENTS PER CLAUDE.md:
 - Must validate GOLDEN PATH: login  ->  message  ->  response
 - Tests designed to FAIL HARD in every way
 - Use test_framework.ssot.e2e_auth_helper for authentication
-"""
+""
 import pytest
 import asyncio
 import json
@@ -31,16 +31,16 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from netra_backend.app.websocket_core.unified_websocket_auth import extract_e2e_context_from_websocket, authenticate_websocket_ssot, WebSocketAuthResult
 
 class StagingWebSocketAuthScopingE2ETests:
-    """E2E tests for staging environment WebSocket authentication scoping bug."""
+    ""E2E tests for staging environment WebSocket authentication scoping bug."
 
     @pytest.fixture
     def e2e_auth_helper(self):
-        """Create E2E authentication helper with staging configuration."""
+        "Create E2E authentication helper with staging configuration.""
         return E2EAuthHelper(environment='staging')
 
     @pytest.fixture
     async def authenticated_e2e_session(self, e2e_auth_helper):
-        """Create authenticated E2E session for staging tests."""
+        ""Create authenticated E2E session for staging tests."
         test_user = {'user_id': str(uuid.uuid4()), 'email': 'e2e.staging.test@netra.com', 'permissions': ['execute_agents', 'websocket_access', 'chat_access'], 'subscription_tier': 'early'}
         session = await create_authenticated_e2e_session(user_context=test_user, environment='staging', auth_helper=e2e_auth_helper)
         assert session['authenticated'] is True
@@ -52,7 +52,7 @@ class StagingWebSocketAuthScopingE2ETests:
     @pytest.mark.golden_path
     @pytest.mark.asyncio
     async def test_golden_path_staging_websocket_auth(self, authenticated_e2e_session):
-        """
+        "
         MISSION CRITICAL E2E TEST: Validate GOLDEN PATH in staging environment.
         
         This test validates the complete user flow:
@@ -61,7 +61,7 @@ class StagingWebSocketAuthScopingE2ETests:
         3. User can send message and receive response
         
         This test MUST FAIL if the variable scoping bug is present.
-        """
+        ""
         staging_environment = {'ENVIRONMENT': 'staging', 'GOOGLE_CLOUD_PROJECT': 'netra-staging-e2e-test', 'K_SERVICE': 'netra-backend-staging-e2e', 'E2E_TESTING': '1', 'STAGING_E2E_TEST': '1', 'E2E_TEST_ENV': 'staging', 'E2E_OAUTH_SIMULATION_KEY': 'staging-e2e-key-12345'}
         with patch('shared.isolated_environment.get_env', return_value=staging_environment):
             session = authenticated_e2e_session
@@ -70,9 +70,9 @@ class StagingWebSocketAuthScopingE2ETests:
 
             class E2EStagingWebSocket:
 
-                def __init__(self, jwt_token: str, user_context: Dict[str, Any]):
+                def __init__(self, jwt_token: str, user_context: Dict[str, Any]:
                     self.headers = {'authorization': f'Bearer {jwt_token}', 'x-e2e-test': 'staging', 'x-environment': 'staging', 'x-user-id': user_context['user_id'], 'host': 'staging-e2e.netra.com', 'user-agent': 'e2e-test-client/1.0'}
-                    self.client = type('Client', (), {'host': 'staging-e2e.netra.com', 'port': 443})()
+                    self.client = type('Client', (), {'host': 'staging-e2e.netra.com', 'port': 443}()
                     self.client_state = 'CONNECTED'
                     self.user_id = user_context['user_id']
                     self.test_session_id = str(uuid.uuid4())
@@ -106,12 +106,12 @@ class StagingWebSocketAuthScopingE2ETests:
     @pytest.mark.e2e
     @pytest.mark.asyncio
     async def test_staging_websocket_agent_event_flow(self, authenticated_e2e_session):
-        """
+        ""
         E2E test for WebSocket agent event flow in staging environment.
         
         This validates that users can receive agent events (critical for chat value)
         even when the scoping bug conditions are present.
-        """
+        "
         staging_agent_env = {'ENVIRONMENT': 'staging', 'GOOGLE_CLOUD_PROJECT': 'netra-staging-agent-test', 'K_SERVICE': 'netra-agent-staging', 'E2E_TESTING': '1', 'STAGING_E2E_TEST': '1'}
         with patch('shared.isolated_environment.get_env', return_value=staging_agent_env):
             session = authenticated_e2e_session
@@ -120,16 +120,16 @@ class StagingWebSocketAuthScopingE2ETests:
 
             class AgentEventWebSocket:
 
-                def __init__(self, jwt_token: str, user_context: Dict[str, Any]):
+                def __init__(self, jwt_token: str, user_context: Dict[str, Any]:
                     self.headers = {'authorization': f'Bearer {jwt_token}', 'x-e2e-test': 'staging-agent-flow', 'x-agent-test': 'true', 'host': 'staging-agents.netra.com'}
-                    self.client = type('Client', (), {'host': 'staging-agents.netra.com', 'port': 8080})()
+                    self.client = type('Client', (), {'host': 'staging-agents.netra.com', 'port': 8080}()
                     self.client_state = 'CONNECTED'
                     self.sent_messages = []
 
                 async def send_json(self, message):
-                    """Mock send_json for testing agent events."""
+                    "Mock send_json for testing agent events.""
                     self.sent_messages.append(message)
-                    print(f"Agent Event Sent: {message.get('type', 'unknown')}")
+                    print(fAgent Event Sent: {message.get('type', 'unknown')}")
             websocket = AgentEventWebSocket(jwt_token, user_context)
             try:
                 e2e_context = extract_e2e_context_from_websocket(websocket)
@@ -155,12 +155,12 @@ class StagingWebSocketAuthScopingE2ETests:
     @pytest.mark.performance
     @pytest.mark.asyncio
     async def test_staging_performance_regression_validation(self, authenticated_e2e_session):
-        """
+        "
         E2E performance test to ensure scoping bug fix doesn't introduce regressions.
         
         This test validates that authentication performance remains acceptable
         after fixing the variable scoping bug.
-        """
+        ""
         staging_perf_env = {'ENVIRONMENT': 'staging', 'GOOGLE_CLOUD_PROJECT': 'netra-staging-performance', 'K_SERVICE': 'netra-backend-staging-perf'}
         session = authenticated_e2e_session
         jwt_token = session['jwt_token']
@@ -174,7 +174,7 @@ class StagingWebSocketAuthScopingE2ETests:
 
                 def __init__(self, iteration: int):
                     self.headers = {'authorization': f'Bearer {jwt_token}', 'x-e2e-test': f'perf-test-{iteration}', 'x-iteration': str(iteration), 'host': f'perf{iteration}.staging.netra.com'}
-                    self.client = type('Client', (), {'host': f'perf{iteration}.staging.netra.com', 'port': 443})()
+                    self.client = type('Client', (), {'host': f'perf{iteration}.staging.netra.com', 'port': 443}()
                     self.client_state = 'CONNECTED'
                     self.iteration = iteration
             websocket = PerfTestWebSocket(iteration)
@@ -218,12 +218,12 @@ class StagingWebSocketAuthScopingE2ETests:
     @pytest.mark.e2e
     @pytest.mark.asyncio
     async def test_real_gcp_staging_environment_detection(self, authenticated_e2e_session):
-        """
+        ""
         E2E test simulating real GCP staging environment conditions.
         
         This test uses actual GCP environment variables and headers that would
         be present in a real staging deployment to validate scoping bug fix.
-        """
+        "
         real_gcp_staging_env = {'ENVIRONMENT': 'staging', 'GOOGLE_CLOUD_PROJECT': 'netra-staging-gcp-real', 'K_SERVICE': 'netra-backend-staging', 'PORT': '8080', 'K_REVISION': 'netra-backend-staging-00042-zox', 'K_CONFIGURATION': 'netra-backend-staging', 'GAE_ENV': 'standard', 'GCLOUD_PROJECT': 'netra-staging-gcp-real', 'GOOGLE_APPLICATION_CREDENTIALS': '/var/secrets/gcp-key.json', 'E2E_TESTING': '1', 'STAGING_E2E_TEST': '1'}
         session = authenticated_e2e_session
         jwt_token = session['jwt_token']
@@ -233,7 +233,7 @@ class StagingWebSocketAuthScopingE2ETests:
 
             def __init__(self):
                 self.headers = {'authorization': f'Bearer {jwt_token}', 'x-forwarded-for': '169.254.1.1', 'x-forwarded-proto': 'https', 'x-goog-trace': 'ac64a5b4cdf9b1e8b0e7e8e9d8c7b6a5', 'x-appengine-request-log': 'staging-request-log-id', 'x-cloud-run-service': 'netra-backend-staging', 'x-gcp-environment': 'staging', 'host': 'netra-backend-staging-abc123-uc.a.run.app', 'user-agent': 'Google-Cloud-Functions/2.10'}
-                self.client = type('Client', (), {'host': '169.254.1.1', 'port': 8080})()
+                self.client = type('Client', (), {'host': '169.254.1.1', 'port': 8080}()
                 self.client_state = 'CONNECTED'
                 self.gcp_metadata = {'instance_id': 'staging-instance-12345', 'zone': 'us-central1-a', 'machine_type': 'e2-micro'}
         websocket = RealGCPWebSocket()
@@ -260,19 +260,19 @@ class StagingWebSocketAuthScopingE2ETests:
                     raise
 
 class StagingScopingEdgeCasesTests:
-    """E2E tests for edge cases in staging environment scoping."""
+    "E2E tests for edge cases in staging environment scoping.""
 
     @pytest.mark.e2e
     @pytest.mark.asyncio
     async def test_mixed_production_staging_indicators(self):
-        """Test edge case where environment has mixed production/staging indicators."""
+        ""Test edge case where environment has mixed production/staging indicators."
         mixed_env = {'ENVIRONMENT': 'staging', 'GOOGLE_CLOUD_PROJECT': 'netra-prod-staging-test', 'K_SERVICE': 'netra-backend-staging', 'PROD_MODE': 'false', 'STAGING_MODE': 'true', 'E2E_TESTING': '1'}
 
         class MixedEnvironmentWebSocket:
 
             def __init__(self):
                 self.headers = {'x-environment': 'staging', 'x-mixed-test': 'prod-staging-edge-case', 'host': 'mixed.staging.netra.com'}
-                self.client = type('Client', (), {'host': 'mixed.staging.netra.com', 'port': 443})()
+                self.client = type('Client', (), {'host': 'mixed.staging.netra.com', 'port': 443}()
                 self.client_state = 'CONNECTED'
         websocket = MixedEnvironmentWebSocket()
         with patch('shared.isolated_environment.get_env', return_value=mixed_env):
@@ -291,17 +291,17 @@ class StagingScopingEdgeCasesTests:
     @pytest.mark.e2e
     @pytest.mark.asyncio
     async def test_concurrent_authentication_race_conditions(self):
-        """Test for race conditions in concurrent authentication scenarios."""
+        "Test for race conditions in concurrent authentication scenarios.""
         concurrent_staging_env = {'ENVIRONMENT': 'staging', 'GOOGLE_CLOUD_PROJECT': 'netra-staging-race-test', 'K_SERVICE': 'netra-backend-staging', 'PYTEST_XDIST_WORKER': 'gw0', 'CONCURRENT_E2E_SESSION_ID': 'race-test-session', 'E2E_TESTING': '1'}
 
         async def concurrent_auth_test(worker_id: int):
-            """Single concurrent authentication test."""
+            ""Single concurrent authentication test."
 
             class ConcurrentWebSocket:
 
                 def __init__(self, worker_id: int):
                     self.headers = {'x-worker-id': str(worker_id), 'x-concurrent-test': 'race-condition', 'host': f'worker{worker_id}.staging.netra.com'}
-                    self.client = type('Client', (), {'host': f'worker{worker_id}.staging.netra.com', 'port': 8000})()
+                    self.client = type('Client', (), {'host': f'worker{worker_id}.staging.netra.com', 'port': 8000}()
                     self.client_state = 'CONNECTED'
                     self.worker_id = worker_id
             websocket = ConcurrentWebSocket(worker_id)

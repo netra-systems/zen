@@ -82,7 +82,7 @@ class TestAgentDeathPrevention:
 
 @pytest.mark.asyncio
     async def test_prevents_silent_agent_death(self, security_manager):
-"""Test that silent agent death is detected and handled."""
+        """Test that silent agent death is detected and handled."""
 request = ExecutionRequest( )
 agent_name="death_prone_agent",
 user_id="test_user",
@@ -105,7 +105,7 @@ try:
 async with asyncio.timeout(permission.timeout_seconds):
                 # Simulate dead agent - infinite loop with no progress
 while True:
-await asyncio.sleep(0.1)
+    await asyncio.sleep(0.1)
                     # Agent would be stuck here in real scenario
 except asyncio.TimeoutError:
                         # Expected - timeout should prevent infinite hanging
@@ -124,12 +124,12 @@ assert execution_time < permission.timeout_seconds + 0.5  # Small buffer
                         # Check that circuit breaker is tracking this failure
 status = await security_manager.get_security_status()
 if "circuit_breaker" in status:
-circuit_status = status["circuit_breaker"]
+    circuit_status = status["circuit_breaker"]
 assert circuit_status["global_failure_count"] > 0
 
 @pytest.mark.asyncio
     async def test_detects_silent_failure_patterns(self, execution_engine):
-"""Test detection of common silent failure patterns."""
+        """Test detection of common silent failure patterns."""
 
                                 # Test None result detection
 class NoneResultTool:
@@ -166,7 +166,7 @@ class EllipsisResultTool:
 
 @pytest.mark.asyncio
     async def test_execution_tracking_prevents_lost_agents(self, execution_engine):
-"""Test that execution tracking prevents losing track of agents."""
+        """Test that execution tracking prevents losing track of agents."""
 user_id = "tracking_user"
 tool_name = "tracked_tool"
 
@@ -205,7 +205,7 @@ class HangingTool:
 
 @pytest.mark.asyncio
     async def test_websocket_health_vs_processing_capability(self, execution_engine):
-"""Test that health checks verify processing capability, not just WebSocket health."""
+        """Test that health checks verify processing capability, not just WebSocket health."""
 pass
                 # Mock a WebSocket that appears healthy but processing is broken
 mock_websocket_bridge = Magic        mock_websocket_bridge.is_connected.return_value = True
@@ -226,7 +226,7 @@ assert health_status["can_process_agents"] is not None
 
 @pytest.mark.asyncio
     async def test_heartbeat_timeout_detection(self, security_manager):
-"""Test that missing heartbeats trigger timeout detection."""
+        """Test that missing heartbeats trigger timeout detection."""
 request = ExecutionRequest( )
 agent_name="heartbeat_test_agent",
 user_id="heartbeat_user"
@@ -239,7 +239,7 @@ start_time = time.time()
 
                     # Simulate execution that stops sending heartbeats (agent death)
 try:
-async with asyncio.timeout(permission.timeout_seconds):
+    async with asyncio.timeout(permission.timeout_seconds):
                             # Agent would normally send periodic updates/heartbeats
                             # But in death scenario, it just stops without exception
 await asyncio.sleep(permission.timeout_seconds + 1)
@@ -260,7 +260,7 @@ assert status["manager"]["security_violations"] > 0
 
 @pytest.mark.asyncio
     async def test_circuit_breaker_prevents_repeated_death(self, security_manager):
-"""Test that circuit breaker prevents repeated agent death scenarios."""
+        """Test that circuit breaker prevents repeated agent death scenarios."""
 pass
 agent_name = "death_prone_agent"
 user_id = "circuit_test_user"
@@ -287,12 +287,12 @@ assert "unavailable" in permission.reason.lower()
                                         # Verify circuit breaker is protecting against further death scenarios
 status = await security_manager.get_security_status()
 if "circuit_breaker" in status:
-circuit_status = status["circuit_breaker"]
+    circuit_status = status["circuit_breaker"]
 assert circuit_status["agent_summary"]["failed_agents"] > 0
 
 @pytest.mark.asyncio
     async def test_emergency_recovery_from_death_state(self, security_manager):
-"""Test emergency recovery when agents are in death state."""
+        """Test emergency recovery when agents are in death state."""
                                                 # Simulate system in degraded state with multiple dead agents
 request = ExecutionRequest("emergency_test_agent", "emergency_user")
 permission = await security_manager.validate_execution_request(request)
@@ -318,7 +318,7 @@ assert new_permission.allowed is True
 
 @pytest.mark.asyncio
     async def test_user_feedback_on_agent_death(self):
-"""Test that users get proper error messages instead of infinite loading."""
+        """Test that users get proper error messages instead of infinite loading."""
 pass
 execution_engine = UnifiedToolExecutionEngine()
 
@@ -370,7 +370,7 @@ class TestDeathDetectionMechanisms:
 
 @pytest.mark.asyncio
     async def test_result_validation_catches_empty_responses(self):
-"""Test that result validation catches the '...' status mentioned in bug report."""
+        """Test that result validation catches the '...' status mentioned in bug report."""
 execution_engine = UnifiedToolExecutionEngine()
 
         Test various failure patterns from the bug report
@@ -384,7 +384,7 @@ None,           # No result
         
 
 for pattern in failure_patterns:
-class FailurePatternTool:
+    class FailurePatternTool:
     async def arun(self, kwargs):
         await asyncio.sleep(0)
         return pattern
@@ -400,7 +400,7 @@ class FailurePatternTool:
 
 @pytest.mark.asyncio
     async def test_execution_state_tracking_prevents_loss(self):
-"""Test execution state tracking prevents losing track of agents."""
+        """Test execution state tracking prevents losing track of agents."""
 pass
 execution_engine = UnifiedToolExecutionEngine()
 
@@ -432,7 +432,7 @@ assert execution_engine._active_executions.get(execution_id) is not None or clea
 
 @pytest.mark.asyncio
     async def test_health_service_accuracy(self):
-"""Test that health service accurately reflects processing capability."""
+        """Test that health service accurately reflects processing capability."""
 execution_engine = UnifiedToolExecutionEngine()
 
                 # Get health status
@@ -461,5 +461,5 @@ pytest.mark.critical  # These tests address critical bug
 
 
 if __name__ == "__main__":
-pytest.main([__file__, "-v", "--tb=short"])
+    pytest.main([__file__, "-v", "--tb=short"])
 pass

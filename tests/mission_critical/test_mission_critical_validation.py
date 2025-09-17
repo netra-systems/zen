@@ -1,4 +1,4 @@
-"""
+"
 Issue #519: Mission Critical Test Suite Validation - Phase 4
 
 This test suite validates that the Mission Critical WebSocket test suite
@@ -12,7 +12,7 @@ Focus Areas:
 
 Business Impact: CRITICAL - Protects $500K+ ARR through reliable test execution
 Priority: P0 - Essential for business value validation
-"""
+""
 
 import subprocess
 import sys
@@ -23,26 +23,26 @@ from typing import List, Dict, Any, Optional
 
 
 class MissionCriticalAccessibilityTests:
-    """Test that Mission Critical tests are accessible and runnable."""
+    ""Test that Mission Critical tests are accessible and runnable."
     
     def test_phase4_mission_critical_test_discovery(self):
-        """PHASE 4: Test that Mission Critical tests can be discovered.
+        "PHASE 4: Test that Mission Critical tests can be discovered.
         
         This test should FAIL initially if pytest configuration conflicts
         prevent proper test discovery.
-        """
+        ""
         project_root = Path(__file__).parent.parent.parent
-        mission_critical_dir = project_root / "tests" / "mission_critical"
+        mission_critical_dir = project_root / tests" / "mission_critical
         
         if not mission_critical_dir.exists():
-            pytest.fail(f"Mission Critical test directory not found: {mission_critical_dir}")
+            pytest.fail(fMission Critical test directory not found: {mission_critical_dir}")
         
         # Try to collect Mission Critical tests
         cmd = [
-            sys.executable, "-m", "pytest",
+            sys.executable, "-m, pytest",
             str(mission_critical_dir),
-            "--collect-only",
-            "-q"
+            "--collect-only,
+            -q"
         ]
         
         result = subprocess.run(
@@ -55,11 +55,11 @@ class MissionCriticalAccessibilityTests:
         
         if result.returncode != 0:
             pytest.fail(
-                f"Mission Critical test discovery failed:\n"
-                f"Return code: {result.returncode}\n"
-                f"STDOUT: {result.stdout}\n"
-                f"STDERR: {result.stderr}\n"
-                f"This indicates pytest configuration conflicts are still present."
+                f"Mission Critical test discovery failed:\n
+                fReturn code: {result.returncode}\n"
+                f"STDOUT: {result.stdout}\n
+                fSTDERR: {result.stderr}\n"
+                f"This indicates pytest configuration conflicts are still present.
             )
         
         # Parse collection output to count tests
@@ -75,29 +75,29 @@ class MissionCriticalAccessibilityTests:
         
         if test_count == 0:
             pytest.fail(
-                f"No Mission Critical tests discovered. Collection output:\n{result.stdout}"
+                fNo Mission Critical tests discovered. Collection output:\n{result.stdout}"
             )
         
-        assert test_count > 0, f"Mission Critical tests discovered: {test_count} tests"
+        assert test_count > 0, f"Mission Critical tests discovered: {test_count} tests
     
     def test_phase4_websocket_test_suite_accessibility(self):
-        """PHASE 4: Test WebSocket test suite accessibility specifically.
+        ""PHASE 4: Test WebSocket test suite accessibility specifically.
         
         This is the exact test suite blocked by Issue #519.
         Should FAIL if conflicts prevent access to this critical suite.
-        """
+        "
         project_root = Path(__file__).parent.parent.parent
-        websocket_test_path = project_root / "tests" / "mission_critical" / "test_websocket_agent_events_suite.py"
+        websocket_test_path = project_root / "tests / mission_critical" / "test_websocket_agent_events_suite.py
         
         if not websocket_test_path.exists():
-            pytest.skip(f"WebSocket test suite not found at {websocket_test_path}")
+            pytest.skip(fWebSocket test suite not found at {websocket_test_path}")
         
         # Try to collect the specific WebSocket test suite
         cmd = [
-            sys.executable, "-m", "pytest", 
+            sys.executable, "-m, pytest", 
             str(websocket_test_path),
-            "--collect-only",
-            "-v"
+            "--collect-only,
+            -v"
         ]
         
         result = subprocess.run(
@@ -110,17 +110,17 @@ class MissionCriticalAccessibilityTests:
         
         if result.returncode != 0:
             pytest.fail(
-                f"WebSocket test suite collection failed (Issue #519 not resolved):\n"
-                f"Return code: {result.returncode}\n"
-                f"STDOUT: {result.stdout}\n"
-                f"STDERR: {result.stderr}\n"
-                f"This is the exact blockage reported in Issue #519."
+                f"WebSocket test suite collection failed (Issue #519 not resolved):\n
+                fReturn code: {result.returncode}\n"
+                f"STDOUT: {result.stdout}\n
+                fSTDERR: {result.stderr}\n"
+                f"This is the exact blockage reported in Issue #519.
             )
         
         # Verify specific WebSocket tests are found
         expected_tests = [
-            "test_websocket_agent_events_comprehensive",
-            "test_mission_critical_websocket_events"
+            test_websocket_agent_events_comprehensive",
+            "test_mission_critical_websocket_events
         ]
         
         found_tests = []
@@ -131,29 +131,29 @@ class MissionCriticalAccessibilityTests:
         
         if not found_tests:
             pytest.fail(
-                f"Expected WebSocket tests not found in collection:\n"
-                f"Expected: {expected_tests}\n"
-                f"Collection output: {result.stdout}"
+                fExpected WebSocket tests not found in collection:\n"
+                f"Expected: {expected_tests}\n
+                fCollection output: {result.stdout}"
             )
         
-        assert len(found_tests) > 0, f"WebSocket tests accessible: {found_tests}"
+        assert len(found_tests) > 0, f"WebSocket tests accessible: {found_tests}
     
     def test_phase4_mission_critical_with_analyze_service_deps(self):
-        """PHASE 4: Test Mission Critical tests with the conflicting option.
+        ""PHASE 4: Test Mission Critical tests with the conflicting option.
         
         This specifically tests the --analyze-service-deps option that was
         causing the duplicate registration conflict.
-        """
+        "
         project_root = Path(__file__).parent.parent.parent
-        mission_critical_dir = project_root / "tests" / "mission_critical"
+        mission_critical_dir = project_root / "tests / mission_critical"
         
         # Use the problematic option that was causing conflicts
         cmd = [
-            sys.executable, "-m", "pytest",
+            sys.executable, "-m, pytest",
             str(mission_critical_dir),
-            "--analyze-service-deps",  # This is the conflicting option
-            "--collect-only",
-            "-q"
+            "--analyze-service-deps,  # This is the conflicting option
+            --collect-only",
+            "-q
         ]
         
         result = subprocess.run(
@@ -167,42 +167,42 @@ class MissionCriticalAccessibilityTests:
         if result.returncode != 0:
             # Check if it's specifically the option conflict error
             if any(keyword in result.stderr.lower() for keyword in [
-                "already added", "conflict", "duplicate", "option"
-            ]):
+                already added", "conflict, duplicate", "option
+            ]:
                 pytest.fail(
-                    f"Option conflict still present (Issue #519 not resolved):\n"
-                    f"STDERR: {result.stderr}\n"
-                    f"The --analyze-service-deps option is still causing conflicts."
+                    fOption conflict still present (Issue #519 not resolved):\n"
+                    f"STDERR: {result.stderr}\n
+                    fThe --analyze-service-deps option is still causing conflicts."
                 )
             else:
                 pytest.fail(
-                    f"Mission Critical tests failed with --analyze-service-deps:\n"
-                    f"Return code: {result.returncode}\n"
-                    f"STDERR: {result.stderr}\n"
-                    f"May be related to Issue #519 or a different issue."
+                    f"Mission Critical tests failed with --analyze-service-deps:\n
+                    fReturn code: {result.returncode}\n"
+                    f"STDERR: {result.stderr}\n
+                    fMay be related to Issue #519 or a different issue."
                 )
         
-        assert True, "Mission Critical tests work with --analyze-service-deps option"
+        assert True, "Mission Critical tests work with --analyze-service-deps option
 
 
 class BusinessValueProtectionTests:
-    """Test that business value protection through tests is functional."""
+    ""Test that business value protection through tests is functional."
     
     def test_phase4_critical_test_execution_capability(self):
-        """PHASE 4: Test ability to execute critical business protection tests.
+        "PHASE 4: Test ability to execute critical business protection tests.
         
         Should FAIL if critical tests cannot be executed due to config conflicts.
-        """
+        ""
         project_root = Path(__file__).parent.parent.parent
         
         # Try to run a minimal subset of Mission Critical tests
         # We'll use a small, fast test to verify execution capability
         cmd = [
-            sys.executable, "-m", "pytest",
-            str(project_root / "tests" / "mission_critical"),
-            "-k", "test_no_ssot_violations",  # A specific fast test
-            "-v",
-            "--tb=short"
+            sys.executable, -m", "pytest,
+            str(project_root / tests" / "mission_critical),
+            -k", "test_no_ssot_violations,  # A specific fast test
+            -v",
+            "--tb=short
         ]
         
         result = subprocess.run(
@@ -216,51 +216,51 @@ class BusinessValueProtectionTests:
         # If execution fails due to config conflicts, this is Issue #519
         if result.returncode != 0:
             if any(keyword in (result.stderr + result.stdout).lower() for keyword in [
-                "already added", "conflict", "duplicate", "option"
-            ]):
+                already added", "conflict, duplicate", "option
+            ]:
                 pytest.fail(
-                    f"Test execution blocked by configuration conflicts (Issue #519):\n"
-                    f"Output: {result.stderr}\n"
-                    f"Configuration conflicts are preventing business value protection."
+                    fTest execution blocked by configuration conflicts (Issue #519):\n"
+                    f"Output: {result.stderr}\n
+                    fConfiguration conflicts are preventing business value protection."
                 )
             
             # If it's test failures (not config conflicts), that's different
-            if "FAILED" in result.stdout and "ERRORS" not in result.stdout:
+            if "FAILED in result.stdout and ERRORS" not in result.stdout:
                 pytest.skip(
-                    f"Tests can execute but have failures (not a config issue):\n"
-                    f"Return code: {result.returncode}\n"
-                    f"This indicates Issue #519 is resolved but tests need fixes."
+                    f"Tests can execute but have failures (not a config issue):\n
+                    fReturn code: {result.returncode}\n"
+                    f"This indicates Issue #519 is resolved but tests need fixes.
                 )
             
             # If there are errors (not just failures), investigate
             pytest.fail(
-                f"Critical test execution failed:\n"
-                f"Return code: {result.returncode}\n"
-                f"STDOUT: {result.stdout[-1000:]}\n"  # Last 1000 chars
-                f"STDERR: {result.stderr}\n"
-                f"May indicate ongoing configuration issues."
+                fCritical test execution failed:\n"
+                f"Return code: {result.returncode}\n
+                fSTDOUT: {result.stdout[-1000:]}\n"  # Last 1000 chars
+                f"STDERR: {result.stderr}\n
+                fMay indicate ongoing configuration issues."
             )
         
-        assert True, "Critical test execution capability confirmed"
+        assert True, "Critical test execution capability confirmed
     
     def test_phase4_websocket_business_value_validation(self):
-        """PHASE 4: Validate WebSocket test suite can protect business value.
+        ""PHASE 4: Validate WebSocket test suite can protect business value.
         
         This specifically tests that the WebSocket tests protecting $500K+ ARR
         can execute properly.
-        """
+        "
         project_root = Path(__file__).parent.parent.parent
-        websocket_test_path = project_root / "tests" / "mission_critical" / "test_websocket_agent_events_suite.py"
+        websocket_test_path = project_root / "tests / mission_critical" / "test_websocket_agent_events_suite.py
         
         if not websocket_test_path.exists():
-            pytest.skip("WebSocket test suite not found - cannot validate business protection")
+            pytest.skip(WebSocket test suite not found - cannot validate business protection")
         
         # Try to execute a lightweight version of the WebSocket test
         # We'll run with collection only first, then minimal execution
         cmd = [
-            sys.executable, "-m", "pytest",
+            sys.executable, "-m, pytest",
             str(websocket_test_path),
-            "--collect-only"
+            "--collect-only
         ]
         
         result = subprocess.run(
@@ -273,17 +273,17 @@ class BusinessValueProtectionTests:
         
         if result.returncode != 0:
             pytest.fail(
-                f"WebSocket business value tests cannot be accessed:\n"
-                f"This blocks protection of $500K+ ARR dependent on chat functionality.\n"
-                f"Error: {result.stderr}"
+                fWebSocket business value tests cannot be accessed:\n"
+                f"This blocks protection of $500K+ ARR dependent on chat functionality.\n
+                fError: {result.stderr}"
             )
         
         # Now try minimal execution (dry run style)
         cmd = [
-            sys.executable, "-m", "pytest", 
+            sys.executable, "-m, pytest", 
             str(websocket_test_path),
-            "--setup-only",  # Setup only, don't run test bodies
-            "-v"
+            "--setup-only,  # Setup only, don't run test bodies
+            -v"
         ]
         
         result = subprocess.run(
@@ -297,41 +297,41 @@ class BusinessValueProtectionTests:
         if result.returncode != 0:
             # Check if it's configuration conflicts
             if any(keyword in result.stderr.lower() for keyword in [
-                "already added", "conflict", "duplicate", "option"
-            ]):
+                "already added, conflict", "duplicate, option"
+            ]:
                 pytest.fail(
-                    f"WebSocket tests blocked by config conflicts (Issue #519):\n"
-                    f"$500K+ ARR business value protection is blocked.\n"
-                    f"Error: {result.stderr}"
+                    f"WebSocket tests blocked by config conflicts (Issue #519):\n
+                    f$500K+ ARR business value protection is blocked.\n"
+                    f"Error: {result.stderr}
                 )
             
             # Other errors might be test environment issues
             pytest.skip(
-                f"WebSocket tests have setup issues (not config conflicts):\n"
-                f"Return code: {result.returncode}\n"
-                f"This suggests Issue #519 resolved but environment needs setup."
+                fWebSocket tests have setup issues (not config conflicts):\n"
+                f"Return code: {result.returncode}\n
+                fThis suggests Issue #519 resolved but environment needs setup."
             )
         
-        assert True, "WebSocket business value protection tests are accessible"
+        assert True, "WebSocket business value protection tests are accessible
 
 
 class StagingEnvironmentIntegrationTests:
-    """Test integration with staging environment for validation."""
+    ""Test integration with staging environment for validation."
     
     def test_phase4_staging_environment_test_execution(self):
-        """PHASE 4: Test Mission Critical execution against staging.
+        "PHASE 4: Test Mission Critical execution against staging.
         
         Should FAIL if staging environment tests cannot run due to config conflicts.
-        """
+        ""
         project_root = Path(__file__).parent.parent.parent
         
         # Check if we can run tests in staging mode
         # This simulates the production validation process
         cmd = [
-            sys.executable, "-m", "pytest",
-            str(project_root / "tests" / "mission_critical"),
-            "--collect-only",
-            "-m", "staging"  # Staging marker
+            sys.executable, -m", "pytest,
+            str(project_root / tests" / "mission_critical),
+            --collect-only",
+            "-m, staging"  # Staging marker
         ]
         
         result = subprocess.run(
@@ -345,34 +345,34 @@ class StagingEnvironmentIntegrationTests:
         # Configuration conflicts would prevent even collection
         if result.returncode != 0:
             if any(keyword in result.stderr.lower() for keyword in [
-                "already added", "conflict", "duplicate", "option"
-            ]):
+                "already added, conflict", "duplicate, option"
+            ]:
                 pytest.fail(
-                    f"Staging environment testing blocked by config conflicts:\n"
-                    f"Issue #519 prevents validation of production readiness.\n"
-                    f"Error: {result.stderr}"
+                    f"Staging environment testing blocked by config conflicts:\n
+                    fIssue #519 prevents validation of production readiness.\n"
+                    f"Error: {result.stderr}
                 )
         
         # Even if no staging tests found, collection should succeed
-        assert result.returncode == 0 or "no tests ran" in result.stdout.lower(), (
-            f"Staging environment test collection failed:\n{result.stderr}"
+        assert result.returncode == 0 or no tests ran" in result.stdout.lower(), (
+            f"Staging environment test collection failed:\n{result.stderr}
         )
     
     def test_phase4_production_readiness_validation_capability(self):
-        """PHASE 4: Test production readiness validation capability.
+        ""PHASE 4: Test production readiness validation capability.
         
         This ensures the test infrastructure can validate production readiness,
         which is critical for business value protection.
-        """
+        "
         project_root = Path(__file__).parent.parent.parent
         
         # Test ability to run comprehensive validation
         # This would be used before production deployments
         cmd = [
-            sys.executable, "-m", "pytest",
-            str(project_root / "tests" / "mission_critical"),
-            "--collect-only",
-            "-m", "critical or mission_critical"
+            sys.executable, "-m, pytest",
+            str(project_root / "tests / mission_critical"),
+            "--collect-only,
+            -m", "critical or mission_critical
         ]
         
         result = subprocess.run(
@@ -385,10 +385,10 @@ class StagingEnvironmentIntegrationTests:
         
         if result.returncode != 0:
             pytest.fail(
-                f"Production readiness validation capability blocked:\n"
-                f"Cannot validate system before production deployment.\n"
-                f"Return code: {result.returncode}\n"
-                f"STDERR: {result.stderr}"
+                fProduction readiness validation capability blocked:\n"
+                f"Cannot validate system before production deployment.\n
+                fReturn code: {result.returncode}\n"
+                f"STDERR: {result.stderr}
             )
         
         # Parse to see how many critical tests we can run
@@ -403,43 +403,43 @@ class StagingEnvironmentIntegrationTests:
         
         if test_count == 0:
             pytest.fail(
-                f"No critical tests available for production readiness validation.\n"
-                f"This blocks business value protection processes."
+                fNo critical tests available for production readiness validation.\n"
+                f"This blocks business value protection processes.
             )
         
-        assert test_count > 0, f"Production readiness validation ready: {test_count} critical tests"
+        assert test_count > 0, fProduction readiness validation ready: {test_count} critical tests"
 
 
 class RegressionPreventionTests:
-    """Test that fixes don't introduce regressions."""
+    "Test that fixes don't introduce regressions.""
     
     def test_phase4_configuration_regression_detection(self):
-        """PHASE 4: Test detection of configuration regressions.
+        ""PHASE 4: Test detection of configuration regressions.
         
         This test validates that our testing can detect if Issue #519
         regresses in the future.
-        """
+        "
         project_root = Path(__file__).parent.parent.parent
         
         # Test multiple pytest invocations to ensure consistency
         commands = [
             # Basic collection
             [
-                sys.executable, "-m", "pytest",
-                str(project_root / "tests" / "mission_critical"),
-                "--collect-only", "-q"
+                sys.executable, "-m, pytest",
+                str(project_root / "tests / mission_critical"),
+                "--collect-only, -q"
             ],
             # With problematic option
             [
-                sys.executable, "-m", "pytest", 
-                str(project_root / "tests" / "mission_critical"),
-                "--analyze-service-deps", "--collect-only", "-q"
+                sys.executable, "-m, pytest", 
+                str(project_root / "tests / mission_critical"),
+                "--analyze-service-deps, --collect-only", "-q
             ],
             # With verbose output
             [
-                sys.executable, "-m", "pytest",
-                str(project_root / "tests" / "mission_critical"),
-                "--collect-only", "-v"
+                sys.executable, -m", "pytest,
+                str(project_root / tests" / "mission_critical),
+                --collect-only", "-v
             ]
         ]
         
@@ -457,7 +457,7 @@ class RegressionPreventionTests:
                 'returncode': result.returncode,
                 'stdout': result.stdout,
                 'stderr': result.stderr
-            })
+            }
         
         # Check for any configuration conflicts in any command
         conflicts_found = []
@@ -465,14 +465,14 @@ class RegressionPreventionTests:
             if result['returncode'] != 0:
                 error_output = result['stderr'].lower()
                 if any(keyword in error_output for keyword in [
-                    "already added", "conflict", "duplicate", "option"
-                ]):
-                    conflicts_found.append(f"Command {result['command_index']}: {result['stderr']}")
+                    already added", "conflict, duplicate", "option
+                ]:
+                    conflicts_found.append(fCommand {result['command_index']}: {result['stderr']}")
         
         if conflicts_found:
             pytest.fail(
-                f"Configuration conflicts detected (Issue #519 regression):\n" +
-                "\n".join(conflicts_found)
+                f"Configuration conflicts detected (Issue #519 regression):\n +
+                \n".join(conflicts_found)
             )
         
         # Check for consistency across commands
@@ -480,31 +480,31 @@ class RegressionPreventionTests:
         
         if success_count != len(results):
             failure_details = [
-                f"Command {result['command_index']}: exit {result['returncode']}"
+                f"Command {result['command_index']}: exit {result['returncode']}
                 for result in results if result['returncode'] != 0
             ]
             
             pytest.fail(
-                f"Inconsistent behavior across pytest invocations:\n" +
-                "\n".join(failure_details) +
-                f"\nThis may indicate configuration instability."
+                fInconsistent behavior across pytest invocations:\n" +
+                "\n.join(failure_details) +
+                f\nThis may indicate configuration instability."
             )
         
-        assert True, f"Configuration regression detection validated: {len(results)} commands succeeded"
+        assert True, f"Configuration regression detection validated: {len(results)} commands succeeded
     
     def test_phase4_plugin_loading_stability(self):
-        """PHASE 4: Test plugin loading stability over multiple invocations.
+        ""PHASE 4: Test plugin loading stability over multiple invocations.
         
         This ensures that plugin loading is consistent and doesn't have
         intermittent conflicts.
-        """
+        "
         project_root = Path(__file__).parent.parent.parent
         
         # Run the same command multiple times to check for consistency
         cmd = [
-            sys.executable, "-m", "pytest",
-            str(project_root / "tests" / "mission_critical"),
-            "--collect-only", "--trace-config", "-q"
+            sys.executable, "-m, pytest",
+            str(project_root / "tests / mission_critical"),
+            "--collect-only, --trace-config", "-q
         ]
         
         results = []
@@ -521,7 +521,7 @@ class RegressionPreventionTests:
                 'returncode': result.returncode,
                 'stderr': result.stderr,
                 'stdout': result.stdout
-            })
+            }
             
             # Small delay between runs
             time.sleep(0.5)
@@ -531,25 +531,25 @@ class RegressionPreventionTests:
         
         if len(set(return_codes)) > 1:
             pytest.fail(
-                f"Inconsistent return codes across runs: {return_codes}\n"
-                f"This indicates unstable plugin loading.\n"
-                f"Results: {[(r['run'], r['returncode']) for r in results]}"
+                fInconsistent return codes across runs: {return_codes}\n"
+                f"This indicates unstable plugin loading.\n
+                fResults: {[(r['run'], r['returncode'] for r in results]}"
             )
         
         # Check for any plugin conflicts in any run
         plugin_conflicts = []
         for result in results:
             if any(keyword in result['stderr'].lower() for keyword in [
-                "already added", "conflict", "duplicate", "plugin"
-            ]):
-                plugin_conflicts.append(f"Run {result['run']}: {result['stderr']}")
+                "already added, conflict", "duplicate, plugin"
+            ]:
+                plugin_conflicts.append(f"Run {result['run']}: {result['stderr']})
         
         if plugin_conflicts:
             pytest.fail(
-                f"Plugin loading conflicts detected:\n" +
-                "\n".join(plugin_conflicts)
+                fPlugin loading conflicts detected:\n" +
+                "\n.join(plugin_conflicts)
             )
         
         assert all(code == 0 for code in return_codes), (
-            f"Plugin loading stable across {len(results)} runs"
+            fPlugin loading stable across {len(results)} runs"
         )

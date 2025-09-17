@@ -156,7 +156,7 @@ class TestDatabaseCrossSystemFailures:
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_66_write_write_conflict(self, mock_postgres_session, redis_client):
-'''Test 66: Write-Write Conflict - Same user updated in two databases simultaneously
+        '''Test 66: Write-Write Conflict - Same user updated in two databases simultaneously
 
 This test WILL FAIL because concurrent writes to the same user
 in PostgreSQL and Redis create inconsistent state without proper locking.
@@ -192,7 +192,7 @@ await redis_client.hset(cache_key, mapping=initial_data)
             # Simulate concurrent writes with different values
             # This creates write-write conflict
 async def update_postgres():
-"""Update user in PostgreSQL."""
+    """Update user in PostgreSQL."""
 await asyncio.sleep(0.1)  # Small delay to create race condition
 await mock_postgres_session.execute( )
 text(''' )
@@ -208,7 +208,7 @@ WHERE id = :id
 await mock_postgres_session.commit()
 
 async def update_redis():
-"""Update user in Redis."""
+    """Update user in Redis."""
 await asyncio.sleep(0.05)  # Different delay to create race
     # Removed problematic line: await redis_client.hset(cache_key, mapping={)
 "full_name": "Redis Updated Name",
@@ -236,14 +236,14 @@ assert pg_name == redis_name, "formatted_string"
 logger.warning("Test 66: Unexpected success - write-write conflict was resolved")
 
 except Exception as e:
-logger.error("formatted_string")
+    logger.error("formatted_string")
         # Re-raise to mark test as failed
 raise AssertionError("formatted_string")
 
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_67_read_after_write_inconsistency(self, mock_postgres_session, redis_client):
-'''Test 67: Read-After-Write Inconsistency - Write to Postgres, immediate read from cache misses
+        '''Test 67: Read-After-Write Inconsistency - Write to Postgres, immediate read from cache misses
 
 This test WILL FAIL because writing to PostgreSQL doesn"t immediately
 invalidate Redis cache, causing stale data reads.
@@ -300,14 +300,14 @@ f"Cache should be invalidated after PostgreSQL write."
 logger.warning("Test 67: Unexpected success - cache invalidation is working")
 
 except Exception as e:
-logger.error("formatted_string")
+    logger.error("formatted_string")
                     # Re-raise to mark test as failed
 raise AssertionError("formatted_string")
 
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_68_transaction_rollback_partial(self, mock_postgres_session, redis_client):
-'''Test 68: Transaction Rollback Partial - Transaction rolls back in one DB but not another
+        '''Test 68: Transaction Rollback Partial - Transaction rolls back in one DB but not another
 
 This test WILL FAIL because PostgreSQL transaction rollback doesn"t
 rollback corresponding Redis operations, creating inconsistent state.
@@ -388,14 +388,14 @@ assert redis_plan == pg_plan, ( )
 logger.warning("Test 68: Unexpected success - distributed transaction rollback working")
 
 except Exception as e:
-logger.error("formatted_string")
+    logger.error("formatted_string")
                                         # Re-raise to mark test as failed
 raise AssertionError("formatted_string")
 
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_69_cache_invalidation_failure(self, mock_postgres_session, redis_client):
-'''Test 69: Cache Invalidation Failure - Cache not invalidated after database update
+        '''Test 69: Cache Invalidation Failure - Cache not invalidated after database update
 
 This test WILL FAIL because there"s no automatic cache invalidation
 mechanism when PostgreSQL data is updated.
@@ -446,7 +446,7 @@ await mock_postgres_session.commit()
 cached_updated_time = await redis_client.hget(cache_key, "updated_at")
 
 if cached_updated_time:
-cached_updated_time = float(cached_updated_time.decode())
+    cached_updated_time = float(cached_updated_time.decode())
 
                                                     # PostgreSQL would now have the updated timestamp
 pg_updated_time = current_time.timestamp()  # Simulate new timestamp
@@ -469,7 +469,7 @@ connection_attempts = {}
 
                                                                 # Simulate each service trying to get multiple connections
 for service in services:
-connection_attempts[service] = []
+    connection_attempts[service] = []
                                                                     # Each service tries to get 20 connections (simulating load)
 for i in range(20):
                                                                         # In a real system, this would attempt to get a database connection
@@ -506,6 +506,6 @@ assert monopolized_percentage <= 20.0, ( )
 logger.warning("Test 70: Unexpected success - connection pool has fair resource allocation")
 
 except Exception as e:
-logger.error("formatted_string")
+    logger.error("formatted_string")
                                                                             # Re-raise to mark test as failed
 raise AssertionError("formatted_string")

@@ -19,13 +19,13 @@ from netra_backend.app.agents.base_agent import BaseAgent
 # SSOT COMPLIANCE: Import from core SSOT location
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.tools.data_helper import DataHelper
 # SSOT Imports for compliance
 from netra_backend.app.core.unified_error_handler import agent_error_handler
 from netra_backend.app.schemas.shared_types import ErrorContext
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class DataHelperAgent(BaseAgent):

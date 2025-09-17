@@ -78,14 +78,14 @@ class TestWebSocketPerformance:
 
 @pytest.mark.asyncio
     async def test_concurrent_user_connections(self, factory):
-"""Test system handles 10+ concurrent user connections."""
+        """Test system handles 10+ concurrent user connections."""
 num_users = 15
 users = []
 
             # Create concurrent user connections
 tasks = []
 for i in range(num_users):
-user_id = "formatted_string"
+    user_id = "formatted_string"
 session_id = "formatted_string"
 
 ws = Magic            ws.websocket = TestWebSocketConnection()
@@ -115,7 +115,7 @@ assert pool.total_connections == num_users
                 # Send events to all users concurrently
 send_tasks = []
 for emitter in emitters:
-event = {"type": "test", "data": {"user": emitter.user_id}}
+    event = {"type": "test", "data": {"user": emitter.user_id}}
 send_tasks.append(emitter.emit(event))
 
 start_time = time.time()
@@ -127,11 +127,11 @@ assert send_time < 2  # 2 seconds for 15 users
 
                     # Verify all WebSockets received events
 for _, ws in users:
-ws.send.assert_called()
+    ws.send.assert_called()
 
 @pytest.mark.asyncio
     async def test_event_throughput(self, factory):
-"""Test WebSocket event throughput rate."""
+        """Test WebSocket event throughput rate."""
 pass
 user_id = "perf-user"
 num_events = 1000
@@ -156,7 +156,7 @@ start_time = time.time()
 
                             # Send all events
 for event in events:
-await emitter.emit(event)
+    await emitter.emit(event)
 
 elapsed_time = time.time() - start_time
 throughput = num_events / elapsed_time
@@ -171,7 +171,7 @@ print("formatted_string")
 
 @pytest.mark.asyncio
     async def test_connection_pool_scaling(self, factory):
-"""Test connection pool scales with users."""
+        """Test connection pool scales with users."""
 pool = factory.connection_pool
 measurements = []
 
@@ -181,7 +181,7 @@ connections = []
 start_time = time.time()
 
 for i in range(num_users):
-ws = Magic                ws.websocket = TestWebSocketConnection()
+    ws = Magic                ws.websocket = TestWebSocketConnection()
 ws.state = Magic                ws.state.name = "OPEN"
 
 conn_id = await pool.add_connection("formatted_string", ws)
@@ -193,7 +193,7 @@ add_time = time.time() - start_time
 start_time = time.time()
 
 for i in range(num_users):
-await pool.broadcast_to_user("formatted_string", {"type": "test"})
+    await pool.broadcast_to_user("formatted_string", {"type": "test"})
 
 broadcast_time = time.time() - start_time
 
@@ -207,11 +207,11 @@ measurements.append({ ))
 
                                                 # Cleanup for next iteration
 for conn_id in connections:
-await pool.remove_connection(conn_id)
+    await pool.remove_connection(conn_id)
 
                                                     # Verify scaling is reasonable (not exponential)
 for i in range(1, len(measurements)):
-prev = measurements[i-1]
+    prev = measurements[i-1]
 curr = measurements[i]
 
                                                         # Average times shouldn't increase dramatically
@@ -220,7 +220,7 @@ assert scaling_factor < 2  # Less than 2x increase
 
 @pytest.mark.asyncio
     async def test_memory_usage_under_load(self, factory):
-"""Test memory usage with many connections and events."""
+        """Test memory usage with many connections and events."""
 pass
 process = psutil.Process()
 initial_memory = process.memory_info().rss / 1024 / 1024  # MB
@@ -231,7 +231,7 @@ events_per_user = 100
                                                             # Create many user connections
 emitters = []
 for i in range(num_users):
-ws = Magic            ws.websocket = TestWebSocketConnection()
+    ws = Magic            ws.websocket = TestWebSocketConnection()
 ws.state = Magic            ws.state.name = "OPEN"
 
 emitter = await factory.create_user_emitter( )
@@ -243,8 +243,8 @@ emitters.append(emitter)
 
                                                                 # Send many events
 for emitter in emitters:
-for j in range(events_per_user):
-await emitter.emit({"type": "formatted_string", "data": {"index": j}})
+    for j in range(events_per_user):
+        await emitter.emit({"type": "formatted_string", "data": {"index": j}})
 
                                                                         # Check memory after load
 gc.collect()  # Force garbage collection
@@ -256,7 +256,7 @@ assert memory_increase < 100  # Less than 100MB increase
 
                                                                         # Cleanup
 for i in range(num_users):
-await factory.remove_user_emitter("formatted_string")
+    await factory.remove_user_emitter("formatted_string")
 
                                                                             # Memory should be released
 gc.collect()
@@ -267,7 +267,7 @@ assert cleanup_memory - initial_memory < 50  # Less than 50MB retained
 
 @pytest.mark.asyncio
     async def test_event_latency(self, factory):
-"""Test event delivery latency."""
+        """Test event delivery latency."""
 user_id = "latency-user"
 num_samples = 100
 latencies = []
@@ -277,7 +277,7 @@ ws = Magic
                                                                                 # Track send times
 send_times = []
 async def mock_send(data):
-send_times.append(time.time())
+    send_times.append(time.time())
 
 ws.send = mock_send
 ws.state = Magic        ws.state.name = "OPEN"
@@ -290,18 +290,18 @@ websocket=ws
 
     # Measure latency for each event
 for i in range(num_samples):
-event = {"type": "formatted_string", "data": {"index": i}}
+    event = {"type": "formatted_string", "data": {"index": i}}
 
 start_time = time.time()
 await emitter.emit(event)
 
 if send_times:
-latency = send_times[-1] - start_time
+    latency = send_times[-1] - start_time
 latencies.append(latency * 1000)  # Convert to ms
 
             # Calculate statistics
 if latencies:
-avg_latency = statistics.mean(latencies)
+    avg_latency = statistics.mean(latencies)
 median_latency = statistics.median(latencies)
 p95_latency = statistics.quantiles(latencies, n=20)[18]  # 95th percentile
 
@@ -314,7 +314,7 @@ print("formatted_string")
 
 @pytest.mark.asyncio
     async def test_queue_performance(self, factory):
-"""Test event queue performance under load."""
+        """Test event queue performance under load."""
 pass
 user_id = "queue-user"
 queue_sizes = [100, 500, 1000]
@@ -332,7 +332,7 @@ emitter.max_queue_size = queue_size * 2  # Ensure no overflow
 start_time = time.time()
 
 for i in range(queue_size):
-emitter.queue_event({"type": "formatted_string", "data": {"index": i}})
+    emitter.queue_event({"type": "formatted_string", "data": {"index": i}})
 
 queue_time = time.time() - start_time
 
@@ -361,14 +361,14 @@ await factory.remove_user_emitter(user_id)
 
 @pytest.mark.asyncio
     async def test_concurrent_broadcasts(self, factory):
-"""Test concurrent broadcasts to multiple users."""
+        """Test concurrent broadcasts to multiple users."""
 num_users = 10
 broadcasts_per_user = 50
 
                                 # Create users
 users = []
 for i in range(num_users):
-ws = Magic            ws.websocket = TestWebSocketConnection()
+    ws = Magic            ws.websocket = TestWebSocketConnection()
 ws.state = Magic            ws.state.name = "OPEN"
 
 emitter = await factory.create_user_emitter( )
@@ -382,8 +382,8 @@ users.append(("formatted_string", emitter, ws))
 start_time = time.time()
 
 async def broadcast_to_user(user_id, emitter, count):
-for i in range(count):
-await emitter.emit({"type": "formatted_string", "data": {"user": user_id}})
+    for i in range(count):
+        await emitter.emit({"type": "formatted_string", "data": {"user": user_id}})
 
 tasks = [ )
 broadcast_to_user(user_id, emitter, broadcasts_per_user)
@@ -401,11 +401,11 @@ assert broadcast_rate > 100  # > 100 broadcasts/second
 
         # Verify all broadcasts sent
 for _, _, ws in users:
-assert ws.send.call_count == broadcasts_per_user
+    assert ws.send.call_count == broadcasts_per_user
 
 @pytest.mark.asyncio
     async def test_connection_cleanup_performance(self, factory):
-"""Test performance of connection cleanup."""
+        """Test performance of connection cleanup."""
 pass
 pool = factory.connection_pool
 num_connections = 100
@@ -413,7 +413,7 @@ num_connections = 100
                 # Add many connections
 connections = []
 for i in range(num_connections):
-ws = Magic            ws.websocket = TestWebSocketConnection()
+    ws = Magic            ws.websocket = TestWebSocketConnection()
 ws.state = Magic            ws.state.name = "OPEN" if i % 2 == 0 else "CLOSED"
 
 conn_id = await pool.add_connection("formatted_string", ws)
@@ -421,8 +421,8 @@ connections.append((conn_id, ws))
 
                     # Mark half as inactive
 for i, (conn_id, _) in enumerate(connections):
-if i % 2 == 1:
-pool.connections[conn_id].is_active = False
+    if i % 2 == 1:
+        pool.connections[conn_id].is_active = False
 
                             # Cleanup inactive connections
 start_time = time.time()
@@ -434,15 +434,15 @@ assert cleanup_time < 1  # Should complete within 1 second
 
                             # Verify correct connections removed
 for i, (conn_id, ws) in enumerate(connections):
-if i % 2 == 1:
-assert conn_id not in pool.connections
+    if i % 2 == 1:
+        assert conn_id not in pool.connections
 ws.close.assert_called()
 else:
-assert conn_id in pool.connections
+    assert conn_id in pool.connections
 
 @pytest.mark.asyncio
     async def test_stress_test_sustained_load(self, factory):
-"""Test system under sustained load for extended period."""
+        """Test system under sustained load for extended period."""
 num_users = 5
 duration_seconds = 10
 events_per_second = 10
@@ -452,7 +452,7 @@ emitters = []
 websockets = []
 
 for i in range(num_users):
-ws = Magic            ws.websocket = TestWebSocketConnection()
+    ws = Magic            ws.websocket = TestWebSocketConnection()
 ws.state = Magic            ws.state.name = "OPEN"
 websockets.append(ws)
 
@@ -472,7 +472,7 @@ while time.time() - start_time < duration_seconds:
                                                     # Send events to all users
 tasks = []
 for emitter in emitters:
-event = { )
+    event = { )
 "type": "stress_test",
 "data": { )
 "timestamp": time.time(),
@@ -486,10 +486,10 @@ results = await asyncio.gather(*tasks, return_exceptions=True)
 
                                                         # Count errors
 for result in results:
-if isinstance(result, Exception):
-errors += 1
+    if isinstance(result, Exception):
+        errors += 1
 else:
-event_count += 1
+    event_count += 1
 
                                                                     # Rate limit
 await asyncio.sleep(1 / events_per_second)
@@ -500,7 +500,7 @@ assert error_rate < 0.01  # Less than 1% error rate
 
                                                                     # Verify events were sent
 for ws in websockets:
-assert ws.send.call_count > 0
+    assert ws.send.call_count > 0
 
 print("formatted_string")
 pass

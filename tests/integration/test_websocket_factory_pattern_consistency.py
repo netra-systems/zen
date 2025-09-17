@@ -1,4 +1,4 @@
-"""
+"
 Integration tests for WebSocket factory pattern consistency validation.
 
 This test file validates the consistency of WebSocket factory patterns
@@ -9,7 +9,7 @@ Issue #1126 - WebSocket Factory Dual Pattern Fragmentation
 
 Business Value Protection: $500K+ ARR Golden Path reliability
 Priority: Critical infrastructure integration validation
-"""
+""
 
 import pytest
 import asyncio
@@ -26,10 +26,10 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.integration
 class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
-    """Integration tests for WebSocket factory pattern consistency."""
+    ""Integration tests for WebSocket factory pattern consistency."
     
     def setup_method(self, method):
-        """Set up test with integration-specific categories."""
+        "Set up test with integration-specific categories.""
         super().setup_method(method)
         if self._test_context:
             self._test_context.test_category = CategoryType.INTEGRATION
@@ -37,14 +37,14 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
                 'business_impact': '$500K+ ARR',
                 'issue': '#1126',
                 'test_type': 'factory_pattern_integration'
-            })
+            }
     
     async def test_websocket_manager_factory_creation_consistency(self):
-        """Test consistency of WebSocket manager creation across different patterns.
+        ""Test consistency of WebSocket manager creation across different patterns.
         
         EXPECTED FAILURE: Different factory patterns should create inconsistent manager instances.
-        """
-        logger.info("Testing WebSocket manager factory creation consistency")
+        "
+        logger.info("Testing WebSocket manager factory creation consistency)
         
         created_managers = []
         creation_methods = []
@@ -61,7 +61,7 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
             creation_methods.append('direct_unified')
             
         except Exception as e:
-            logger.warning(f"Direct unified manager creation failed: {e}")
+            logger.warning(fDirect unified manager creation failed: {e}")
         
         # Method 2: Legacy manager import
         try:
@@ -75,7 +75,7 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
             creation_methods.append('legacy_manager')
             
         except Exception as e:
-            logger.warning(f"Legacy manager creation failed: {e}")
+            logger.warning(f"Legacy manager creation failed: {e})
         
         # Method 3: Factory function (deprecated)
         try:
@@ -86,7 +86,7 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
             creation_methods.append('factory_function')
             
         except Exception as e:
-            logger.warning(f"Factory function creation failed: {e}")
+            logger.warning(fFactory function creation failed: {e}")
         
         # Method 4: Bridge factory
         try:
@@ -103,13 +103,13 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
                 creation_methods.append('bridge_factory')
             
         except Exception as e:
-            logger.warning(f"Bridge factory creation failed: {e}")
+            logger.warning(f"Bridge factory creation failed: {e})
         
         self.record_metric('creation_methods_attempted', len(creation_methods))
         self.record_metric('managers_created', len(created_managers))
         self.record_metric('creation_methods', creation_methods)
         
-        logger.info(f"Created managers via methods: {creation_methods}")
+        logger.info(fCreated managers via methods: {creation_methods}")
         
         # CRITICAL TEST: All managers should be of the same type (SSOT compliance)
         if len(created_managers) > 1:
@@ -124,26 +124,26 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
                         'inconsistent_method': method,
                         'inconsistent_type': manager_type.__name__,
                         'same_type': manager_type is reference_type
-                    })
+                    }
             
             self.record_metric('type_inconsistencies', len(type_inconsistencies))
             self.record_metric('inconsistency_details', type_inconsistencies)
             
             # EXPECTED FAILURE: Should detect type inconsistencies (SSOT violation)
             assert len(type_inconsistencies) == 0, (
-                f"SSOT VIOLATION: Found {len(type_inconsistencies)} type inconsistencies "
-                f"across WebSocket manager creation methods. All should create same type. "
-                f"Inconsistencies: {type_inconsistencies}"
+                f"SSOT VIOLATION: Found {len(type_inconsistencies)} type inconsistencies 
+                facross WebSocket manager creation methods. All should create same type. "
+                f"Inconsistencies: {type_inconsistencies}
             )
         
-        logger.info("No type inconsistencies detected - SSOT compliance maintained")
+        logger.info(No type inconsistencies detected - SSOT compliance maintained")
     
     async def test_websocket_manager_user_isolation_consistency(self):
-        """Test user isolation consistency across different manager creation patterns.
+        "Test user isolation consistency across different manager creation patterns.
         
         EXPECTED FAILURE: Different patterns should create managers with inconsistent isolation.
-        """
-        logger.info("Testing WebSocket manager user isolation consistency")
+        ""
+        logger.info(Testing WebSocket manager user isolation consistency")
         
         isolation_results = {}
         
@@ -178,28 +178,28 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
                     
                     # Test isolation properties
                     isolation_results[pattern_name] = {
-                        'manager1_user_id': getattr(manager1, 'user_context', {}).get('user_id', None),
-                        'manager2_user_id': getattr(manager2, 'user_context', {}).get('user_id', None),
+                        'manager1_user_id': getattr(manager1, 'user_context', {}.get('user_id', None),
+                        'manager2_user_id': getattr(manager2, 'user_context', {}.get('user_id', None),
                         'managers_are_same_object': manager1 is manager2,
                         'user_contexts_are_same': user_context1 is user_context2,
                         'user_ids_are_different': (
-                            getattr(manager1, 'user_context', {}).get('user_id') != 
-                            getattr(manager2, 'user_context', {}).get('user_id')
+                            getattr(manager1, 'user_context', {}.get('user_id') != 
+                            getattr(manager2, 'user_context', {}.get('user_id')
                         )
                     }
                     
                 except Exception as e:
                     isolation_results[pattern_name] = {'error': str(e)}
-                    logger.warning(f"Isolation test failed for {pattern_name}: {e}")
+                    logger.warning(f"Isolation test failed for {pattern_name}: {e})
         
         except Exception as e:
-            logger.warning(f"User context creation failed: {e}")
+            logger.warning(fUser context creation failed: {e}")
             return
         
         self.record_metric('isolation_patterns_tested', len(isolation_results))
         self.record_metric('isolation_results', isolation_results)
         
-        logger.info(f"Isolation test results: {isolation_results}")
+        logger.info(f"Isolation test results: {isolation_results})
         
         # Check for isolation consistency across patterns
         isolation_behaviors = set()
@@ -216,19 +216,19 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
         
         # EXPECTED FAILURE: Different patterns should have consistent isolation behavior
         assert len(isolation_behaviors) <= 1, (
-            f"SSOT VIOLATION: Found {len(isolation_behaviors)} different isolation behaviors "
-            f"across WebSocket manager creation patterns. All patterns should behave consistently. "
-            f"Results: {isolation_results}"
+            fSSOT VIOLATION: Found {len(isolation_behaviors)} different isolation behaviors "
+            f"across WebSocket manager creation patterns. All patterns should behave consistently. 
+            fResults: {isolation_results}"
         )
         
-        logger.info("Isolation behavior consistent across patterns - SSOT compliance maintained")
+        logger.info("Isolation behavior consistent across patterns - SSOT compliance maintained)
     
     async def test_websocket_event_delivery_pattern_consistency(self):
-        """Test event delivery consistency across different WebSocket patterns.
+        ""Test event delivery consistency across different WebSocket patterns.
         
         EXPECTED FAILURE: Different patterns should have inconsistent event delivery.
-        """
-        logger.info("Testing WebSocket event delivery pattern consistency")
+        "
+        logger.info("Testing WebSocket event delivery pattern consistency)
         
         event_delivery_results = {}
         
@@ -251,7 +251,7 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
                 manager1 = UnifiedWebSocketManager(user_context=user_context)
                 manager_patterns.append(('unified', manager1))
             except Exception as e:
-                logger.warning(f"Unified manager creation failed: {e}")
+                logger.warning(fUnified manager creation failed: {e}")
             
             # Pattern 2: Legacy manager
             try:
@@ -259,23 +259,23 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
                 manager2 = WebSocketManager(user_context=user_context)
                 manager_patterns.append(('legacy', manager2))
             except Exception as e:
-                logger.warning(f"Legacy manager creation failed: {e}")
+                logger.warning(f"Legacy manager creation failed: {e})
             
             # Test event emission for each pattern
             for pattern_name, manager in manager_patterns:
                 try:
                     # Add mock connection
-                    connection_id = f"test_conn_{pattern_name}"
+                    connection_id = ftest_conn_{pattern_name}"
                     if hasattr(manager, 'add_connection'):
                         await manager.add_connection(connection_id, mock_websocket)
                     
                     # Test standard WebSocket events
                     test_events = [
-                        ('agent_started', {'message': 'Agent started'}),
-                        ('agent_thinking', {'message': 'Agent thinking'}),
-                        ('tool_executing', {'tool': 'test_tool'}),
-                        ('tool_completed', {'tool': 'test_tool', 'result': 'success'}),
-                        ('agent_completed', {'message': 'Agent completed'})
+                        ('agent_started', {'message': 'Agent started'},
+                        ('agent_thinking', {'message': 'Agent thinking'},
+                        ('tool_executing', {'tool': 'test_tool'},
+                        ('tool_completed', {'tool': 'test_tool', 'result': 'success'},
+                        ('agent_completed', {'message': 'Agent completed'}
                     ]
                     
                     event_results = []
@@ -286,7 +286,7 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
                                 await manager.emit_event(event_type, event_data)
                                 event_results.append((event_type, 'success', None))
                             elif hasattr(manager, 'send_message'):
-                                await manager.send_message({'type': event_type, **event_data})
+                                await manager.send_message({'type': event_type, **event_data}
                                 event_results.append((event_type, 'success', None))
                             else:
                                 event_results.append((event_type, 'no_method', 'No event method found'))
@@ -295,24 +295,24 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
                     
                     event_delivery_results[pattern_name] = {
                         'events_tested': len(test_events),
-                        'events_successful': len([r for r in event_results if r[1] == 'success']),
-                        'events_failed': len([r for r in event_results if r[1] == 'error']),
-                        'events_no_method': len([r for r in event_results if r[1] == 'no_method']),
+                        'events_successful': len([r for r in event_results if r[1] == 'success'],
+                        'events_failed': len([r for r in event_results if r[1] == 'error'],
+                        'events_no_method': len([r for r in event_results if r[1] == 'no_method'],
                         'event_details': event_results
                     }
                     
                 except Exception as e:
                     event_delivery_results[pattern_name] = {'error': str(e)}
-                    logger.warning(f"Event delivery test failed for {pattern_name}: {e}")
+                    logger.warning(f"Event delivery test failed for {pattern_name}: {e})
         
         except Exception as e:
-            logger.warning(f"Event delivery setup failed: {e}")
+            logger.warning(fEvent delivery setup failed: {e}")
             return
         
         self.record_metric('event_delivery_patterns_tested', len(event_delivery_results))
         self.record_metric('event_delivery_results', event_delivery_results)
         
-        logger.info(f"Event delivery results: {event_delivery_results}")
+        logger.info(f"Event delivery results: {event_delivery_results})
         
         # Check for consistency in event delivery capabilities
         delivery_capabilities = set()
@@ -329,19 +329,19 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
         
         # EXPECTED FAILURE: Different patterns should have consistent event delivery capabilities
         assert len(delivery_capabilities) <= 1, (
-            f"SSOT VIOLATION: Found {len(delivery_capabilities)} different event delivery capabilities "
-            f"across WebSocket manager patterns. All patterns should have same capabilities. "
-            f"Results: {event_delivery_results}"
+            fSSOT VIOLATION: Found {len(delivery_capabilities)} different event delivery capabilities "
+            f"across WebSocket manager patterns. All patterns should have same capabilities. 
+            fResults: {event_delivery_results}"
         )
         
-        logger.info("Event delivery capabilities consistent across patterns - SSOT compliance maintained")
+        logger.info("Event delivery capabilities consistent across patterns - SSOT compliance maintained)
     
     async def test_websocket_connection_lifecycle_pattern_consistency(self):
-        """Test connection lifecycle consistency across different WebSocket patterns.
+        ""Test connection lifecycle consistency across different WebSocket patterns.
         
         EXPECTED FAILURE: Different patterns should have inconsistent lifecycle management.
-        """
-        logger.info("Testing WebSocket connection lifecycle pattern consistency")
+        "
+        logger.info("Testing WebSocket connection lifecycle pattern consistency)
         
         lifecycle_results = {}
         
@@ -375,7 +375,7 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
                     mock_websocket = MagicMock()
                     mock_websocket.send_text = AsyncMock()
                     
-                    connection_id = f"test_conn_{pattern_name}"
+                    connection_id = ftest_conn_{pattern_name}"
                     
                     # Test lifecycle operations
                     lifecycle_ops = {}
@@ -424,16 +424,16 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
                     
                 except Exception as e:
                     lifecycle_results[pattern_name] = {'error': str(e)}
-                    logger.warning(f"Lifecycle test failed for {pattern_name}: {e}")
+                    logger.warning(f"Lifecycle test failed for {pattern_name}: {e})
         
         except Exception as e:
-            logger.warning(f"Lifecycle setup failed: {e}")
+            logger.warning(fLifecycle setup failed: {e}")
             return
         
         self.record_metric('lifecycle_patterns_tested', len(lifecycle_results))
         self.record_metric('lifecycle_results', lifecycle_results)
         
-        logger.info(f"Lifecycle test results: {lifecycle_results}")
+        logger.info(f"Lifecycle test results: {lifecycle_results})
         
         # Check for consistency in lifecycle method availability
         lifecycle_signatures = set()
@@ -443,16 +443,16 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
                 signature = tuple(sorted([
                     (method, status) for method, status in results.items()
                     if status != 'method_not_found'
-                ]))
+                ])
                 lifecycle_signatures.add(signature)
         
         self.record_metric('unique_lifecycle_signatures', len(lifecycle_signatures))
         
         # EXPECTED FAILURE: Different patterns should have consistent lifecycle methods
         assert len(lifecycle_signatures) <= 1, (
-            f"SSOT VIOLATION: Found {len(lifecycle_signatures)} different lifecycle method signatures "
-            f"across WebSocket manager patterns. All patterns should have same lifecycle methods. "
-            f"Results: {lifecycle_results}"
+            fSSOT VIOLATION: Found {len(lifecycle_signatures)} different lifecycle method signatures "
+            f"across WebSocket manager patterns. All patterns should have same lifecycle methods. 
+            fResults: {lifecycle_results}"
         )
         
         logger.info("Lifecycle method signatures consistent across patterns - SSOT compliance maintained")

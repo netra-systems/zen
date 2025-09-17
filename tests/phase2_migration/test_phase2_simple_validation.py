@@ -73,7 +73,7 @@ class TestPhase2AgentsBasicValidation:
 
 @pytest.mark.asyncio
     async def test_reporting_agent_accepts_context(self, user_context):
-"""Test ReportingSubAgent accepts UserExecutionContext."""
+        """Test ReportingSubAgent accepts UserExecutionContext."""
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -92,7 +92,7 @@ assert result is not None
 
 @pytest.mark.asyncio
     async def test_optimizations_agent_accepts_context(self, user_context):
-"""Test OptimizationsCoreSubAgent accepts UserExecutionContext."""
+        """Test OptimizationsCoreSubAgent accepts UserExecutionContext."""
 pass
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -111,7 +111,7 @@ assert result is not None
 
 @pytest.mark.asyncio
     async def test_goals_triage_agent_accepts_context(self, user_context):
-"""Test GoalsTriageSubAgent accepts UserExecutionContext."""
+        """Test GoalsTriageSubAgent accepts UserExecutionContext."""
 from netra_backend.app.agents.goals_triage_sub_agent import GoalsTriageSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -129,10 +129,10 @@ assert result is not None
 
 @pytest.mark.asyncio
     async def test_actions_goals_agent_accepts_context(self, user_context):
-"""Test ActionsToMeetGoalsSubAgent accepts UserExecutionContext."""
+        """Test ActionsToMeetGoalsSubAgent accepts UserExecutionContext."""
 pass
 try:
-from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
+    from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
@@ -152,9 +152,9 @@ pytest.skip("Agent has import issues")
 
 @pytest.mark.asyncio
     async def test_enhanced_execution_accepts_context(self, user_context):
-"""Test EnhancedExecutionAgent accepts UserExecutionContext."""
+        """Test EnhancedExecutionAgent accepts UserExecutionContext."""
 try:
-from netra_backend.app.agents.enhanced_execution_agent import EnhancedExecutionAgent
+    from netra_backend.app.agents.enhanced_execution_agent import EnhancedExecutionAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 
                                         # Create mocks for dependencies
@@ -175,7 +175,7 @@ pytest.skip("Agent has import issues")
 
 @pytest.mark.asyncio
     async def test_synthetic_data_accepts_context(self, user_context):
-"""Test SyntheticDataSubAgent accepts UserExecutionContext."""
+        """Test SyntheticDataSubAgent accepts UserExecutionContext."""
 pass
 from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -190,7 +190,7 @@ agent = SyntheticDataSubAgent(llm_manager=mock_llm, tool_dispatcher=mock_dispatc
 
                                                 # Mock the generation workflow
 with patch('netra_backend.app.agents.synthetic_data_sub_agent.GenerationWorkflow') as mock_workflow:
-mock_instance = Magic            mock_instance.execute = AsyncMock(return_value={"data": "test"})
+    mock_instance = Magic            mock_instance.execute = AsyncMock(return_value={"data": "test"})
 mock_workflow.return_value = mock_instance
 
                                                     # Should not raise TypeError
@@ -199,7 +199,7 @@ assert result is not None
 
 @pytest.mark.asyncio
     async def test_concurrent_isolation(self, user_context):
-"""Test that multiple agents can run concurrently with different contexts."""
+        """Test that multiple agents can run concurrently with different contexts."""
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.agents.goals_triage_sub_agent import GoalsTriageSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -238,7 +238,7 @@ assert all(r is not None for r in results)
 
 @pytest.mark.asyncio
     async def test_context_validation(self):
-"""Test that agents validate context properly."""
+        """Test that agents validate context properly."""
 pass
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -252,16 +252,16 @@ agent = ReportingSubAgent(llm_manager=mock_llm, tool_dispatcher=mock_dispatcher)
 
                                                                 # Test with invalid context (not UserExecutionContext)
 with pytest.raises((TypeError, AttributeError, Exception)):
-await agent.execute("not_a_context", stream_updates=False)
+    await agent.execute("not_a_context", stream_updates=False)
 
                                                                     # Test with None
 with pytest.raises((TypeError, AttributeError, Exception)):
-await agent.execute(None, stream_updates=False)
+    await agent.execute(None, stream_updates=False)
 
                                                                         # Test with dict (not UserExecutionContext)
 with pytest.raises((TypeError, AttributeError, Exception)):
-await agent.execute({"user_id": "test"}, stream_updates=False)
+    await agent.execute({"user_id": "test"}, stream_updates=False)
 
 
 if __name__ == "__main__":
-pytest.main([__file__, "-v"])
+    pytest.main([__file__, "-v"])

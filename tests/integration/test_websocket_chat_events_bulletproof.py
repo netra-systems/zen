@@ -1,17 +1,17 @@
-"""MISSION CRITICAL INTEGRATION TEST: WebSocket Chat Event Flow
+"MISSION CRITICAL INTEGRATION TEST: WebSocket Chat Event Flow
 
 Business Value: $500K+ ARR - Real-time chat interaction and agent visibility
 CHAT IS KING - THIS TEST MUST PASS.
 
 Tests the complete WebSocket event flow for chat interactions:
-1. All required agent events per spec
+    1. All required agent events per spec
 2. Event ordering and timing
 3. Message correlation and deduplication
 4. Error recovery and resilience
 5. Performance under load
 
 NO MOCKS - Uses real WebSocket connections and services.
-"""
+""
 import asyncio
 import json
 import os
@@ -37,7 +37,7 @@ from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine, enhance_tool_dispatcher_with_notifications
 
 class WebSocketEventValidator:
-    """Validates WebSocket events against specification requirements."""
+    ""Validates WebSocket events against specification requirements."
     REQUIRED_EVENTS = {'agent_started': {'critical': True, 'description': 'User must know agent is processing'}, 'agent_thinking': {'critical': True, 'description': 'Real-time reasoning visibility'}, 'tool_executing': {'critical': True, 'description': 'Tool usage transparency'}, 'tool_completed': {'critical': True, 'description': 'Tool results display'}, 'agent_completed': {'critical': True, 'description': 'User must know when done'}, 'partial_result': {'critical': False, 'description': 'Streaming response UX'}, 'final_report': {'critical': False, 'description': 'Comprehensive summary'}}
     EVENT_SEQUENCES = [['agent_started', 'agent_thinking'], ['tool_executing', 'tool_completed'], ['agent_started', 'agent_completed']]
     MAX_EVENT_DELAYS = {'agent_started': 500, 'agent_thinking': 1000, 'tool_executing': 2000, 'agent_completed': 30000}
@@ -48,25 +48,25 @@ class WebSocketEventValidator:
         self.validation_errors: List[str] = []
 
     def add_event(self, event: Dict) -> None:
-        """Add an event for validation."""
+        "Add an event for validation.""
         event_type = event.get('type')
         timestamp = time.time()
-        self.events.append({'event': event, 'timestamp': timestamp, 'type': event_type})
+        self.events.append({'event': event, 'timestamp': timestamp, 'type': event_type}
         if event_type not in self.event_times:
             self.event_times[event_type] = []
         self.event_times[event_type].append(timestamp)
         logger.debug(f'Event received: {event_type} at {timestamp}')
 
     def validate_required_events(self) -> bool:
-        """Validate all critical required events are present."""
+        ""Validate all critical required events are present."
         received_types = {e['type'] for e in self.events}
         for event_type, config in self.REQUIRED_EVENTS.items():
             if config['critical'] and event_type not in received_types:
-                self.validation_errors.append(f"Missing critical event: {event_type} - {config['description']}")
+                self.validation_errors.append(f"Missing critical event: {event_type} - {config['description']})
         return len(self.validation_errors) == 0
 
     def validate_event_ordering(self) -> bool:
-        """Validate events follow correct ordering."""
+        ""Validate events follow correct ordering."
         event_sequence = [e['type'] for e in self.events]
         for required_seq in self.EVENT_SEQUENCES:
             seq_indices = []
@@ -82,17 +82,17 @@ class WebSocketEventValidator:
         return len(self.validation_errors) == 0
 
     def validate_event_timing(self, start_time: float) -> bool:
-        """Validate events occur within timing constraints."""
+        "Validate events occur within timing constraints.""
         for event_type, max_delay in self.MAX_EVENT_DELAYS.items():
             if event_type in self.event_times:
-                first_occurrence = min(self.event_times[event_type])
+                first_occurrence = min(self.event_times[event_type]
                 delay = (first_occurrence - start_time) * 1000
                 if delay > max_delay:
                     self.validation_errors.append(f'Event {event_type} delayed by {delay:.0f}ms (max: {max_delay}ms)')
         return len(self.validation_errors) == 0
 
     def validate_event_pairing(self) -> bool:
-        """Validate paired events (e.g., tool_executing/tool_completed)."""
+        ""Validate paired events (e.g., tool_executing/tool_completed)."
         event_counts = {}
         for event in self.events:
             event_type = event['type']
@@ -104,13 +104,13 @@ class WebSocketEventValidator:
         return len(self.validation_errors) == 0
 
     def get_validation_report(self) -> Dict[str, Any]:
-        """Get comprehensive validation report."""
+        "Get comprehensive validation report.""
         received_types = {e['type'] for e in self.events}
         critical_events = {k for k, v in self.REQUIRED_EVENTS.items() if v['critical']}
         return {'total_events': len(self.events), 'unique_event_types': len(received_types), 'received_types': list(received_types), 'critical_events_received': list(critical_events & received_types), 'critical_events_missing': list(critical_events - received_types), 'validation_errors': self.validation_errors, 'is_valid': len(self.validation_errors) == 0}
 
 class WebSocketChatClient:
-    """Simulates a frontend WebSocket client for chat interactions."""
+    ""Simulates a frontend WebSocket client for chat interactions."
 
     def __init__(self, client_id: str=None):
         self.client_id = client_id or f'test_client_{uuid.uuid4().hex[:8]}'
@@ -122,7 +122,7 @@ class WebSocketChatClient:
         self.errors = []
 
     async def connect(self, url: str, token: str) -> bool:
-        """Connect to WebSocket server with authentication."""
+        "Connect to WebSocket server with authentication.""
         try:
             ws_url = f'{url}?jwt={token}'
             self.websocket = await websockets.connect(ws_url, subprotocols=[f'jwt.{token}'], ping_interval=10, ping_timeout=5)
@@ -132,11 +132,11 @@ class WebSocketChatClient:
             return True
         except Exception as e:
             logger.error(f'WebSocket connection failed: {e}')
-            self.errors.append({'phase': 'connection', 'error': str(e)})
+            self.errors.append({'phase': 'connection', 'error': str(e)}
             return False
 
     async def _listen_for_messages(self):
-        """Listen for incoming WebSocket messages."""
+        ""Listen for incoming WebSocket messages."
         try:
             async for message in self.websocket:
                 try:
@@ -153,10 +153,10 @@ class WebSocketChatClient:
             self.connected = False
         except Exception as e:
             logger.error(f'Error in message listener: {e}')
-            self.errors.append({'phase': 'listening', 'error': str(e)})
+            self.errors.append({'phase': 'listening', 'error': str(e)}
 
     async def send_chat_message(self, content: str, thread_id: str=None) -> Dict[str, Any]:
-        """Send a chat message and track response events."""
+        "Send a chat message and track response events.""
         if not self.connected:
             return {'success': False, 'error': 'Not connected'}
         message_id = f'msg_{uuid.uuid4().hex[:8]}'
@@ -185,14 +185,14 @@ class WebSocketChatClient:
             return {'success': False, 'error': str(e)}
 
     async def disconnect(self):
-        """Disconnect from WebSocket."""
+        ""Disconnect from WebSocket."
         if self.websocket:
             await self.websocket.close()
             self.connected = False
             logger.info(f'Client {self.client_id} disconnected')
 
 class WebSocketChatIntegrationTest:
-    """Comprehensive WebSocket chat integration tests."""
+    "Comprehensive WebSocket chat integration tests.""
 
     def __init__(self):
         self.ws_manager = WebSocketManager()
@@ -200,7 +200,7 @@ class WebSocketChatIntegrationTest:
         self.clients: List[WebSocketChatClient] = []
 
     async def setup(self):
-        """Set up test environment."""
+        ""Set up test environment."
         self.agent_registry.set_websocket_manager(self.ws_manager)
         if hasattr(self.agent_registry.tool_dispatcher, '_websocket_enhanced'):
             logger.info('Tool dispatcher properly enhanced with WebSocket notifications')
@@ -208,7 +208,7 @@ class WebSocketChatIntegrationTest:
             logger.error('CRITICAL: Tool dispatcher not enhanced!')
 
     async def test_single_message_flow(self, token: str) -> Dict[str, Any]:
-        """Test single message flow with all required events."""
+        "Test single message flow with all required events.""
         client = WebSocketChatClient()
         self.clients.append(client)
         ws_url = 'ws://localhost:8080/ws'
@@ -220,7 +220,7 @@ class WebSocketChatIntegrationTest:
         return result
 
     async def test_concurrent_messages(self, token: str, num_messages: int=5) -> Dict[str, Any]:
-        """Test multiple concurrent messages from single client."""
+        ""Test multiple concurrent messages from single client."
         client = WebSocketChatClient()
         self.clients.append(client)
         ws_url = 'ws://localhost:8080/ws'
@@ -238,7 +238,7 @@ class WebSocketChatIntegrationTest:
         return {'success': successful == num_messages, 'total': num_messages, 'successful': successful, 'results': results}
 
     async def test_message_deduplication(self, token: str) -> Dict[str, Any]:
-        """Test that duplicate messages are properly handled."""
+        "Test that duplicate messages are properly handled.""
         client = WebSocketChatClient()
         self.clients.append(client)
         ws_url = 'ws://localhost:8080/ws'
@@ -254,7 +254,7 @@ class WebSocketChatIntegrationTest:
         return {'success': len(agent_started_events) == 1, 'agent_started_count': len(agent_started_events), 'total_events': len(client.validator.events)}
 
     async def test_websocket_reconnection(self, token: str) -> Dict[str, Any]:
-        """Test WebSocket reconnection and message continuity."""
+        ""Test WebSocket reconnection and message continuity."
         client = WebSocketChatClient()
         self.clients.append(client)
         ws_url = 'ws://localhost:8080/ws'
@@ -268,7 +268,7 @@ class WebSocketChatIntegrationTest:
         return {'success': result1.get('success') and result2.get('success'), 'before_disconnect': result1, 'after_reconnect': result2}
 
     async def test_error_recovery(self, token: str) -> Dict[str, Any]:
-        """Test error recovery and resilience."""
+        "Test error recovery and resilience.""
         client = WebSocketChatClient()
         self.clients.append(client)
         ws_url = 'ws://localhost:8080/ws'
@@ -283,10 +283,10 @@ class WebSocketChatIntegrationTest:
         return {'success': result.get('success'), 'recovered': client.connected, 'result': result}
 
 class WebSocketEventStressTest:
-    """Stress test for high volume WebSocket events."""
+    ""Stress test for high volume WebSocket events."
 
     async def test_event_storm(self, token: str, num_clients: int=10, messages_per_client: int=5):
-        """Test system under high event load."""
+        "Test system under high event load.""
         clients = []
         for i in range(num_clients):
             client = WebSocketChatClient(f'stress_client_{i}')
@@ -311,52 +311,52 @@ class WebSocketEventStressTest:
             if isinstance(r, dict) and 'validation_report' in r:
                 report = r['validation_report']
                 if not report['is_valid']:
-                    validation_errors.extend(report['validation_errors'])
+                    validation_errors.extend(report['validation_errors']
         return {'total_messages': len(results), 'successful': successful, 'failed': failed, 'success_rate': successful / len(results) * 100 if results else 0, 'validation_errors': validation_errors[:10]}
 
 @pytest.mark.asyncio
 @pytest.mark.mission_critical
 async def test_websocket_chat_events_complete_flow():
-    """Test complete WebSocket chat event flow."""
+    ""Test complete WebSocket chat event flow."
     test = WebSocketChatIntegrationTest()
     await test.setup()
     from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
     auth_helper = E2EAuthHelper()
     token = auth_helper.create_test_jwt_token(user_id='test_user', email='test@netrasystems.ai')
     result = await test.test_single_message_flow(token)
-    assert result['success'], f"Chat flow failed: {result.get('error')}"
+    assert result['success'], f"Chat flow failed: {result.get('error')}
     report = result['validation_report']
-    assert report['is_valid'], f"Validation errors: {report['validation_errors']}"
-    assert len(report['critical_events_missing']) == 0, f"Missing critical events: {report['critical_events_missing']}"
+    assert report['is_valid'], fValidation errors: {report['validation_errors']}"
+    assert len(report['critical_events_missing'] == 0, f"Missing critical events: {report['critical_events_missing']}
 
 @pytest.mark.asyncio
 @pytest.mark.mission_critical
 async def test_websocket_concurrent_messages():
-    """Test concurrent message handling."""
+    ""Test concurrent message handling."
     test = WebSocketChatIntegrationTest()
     await test.setup()
     from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
     auth_helper = E2EAuthHelper()
     token = auth_helper.create_test_jwt_token(user_id='test_user', email='test@netrasystems.ai')
     result = await test.test_concurrent_messages(token, num_messages=5)
-    assert result['success'], f"Concurrent messages failed: {result['successful']}/{result['total']}"
+    assert result['success'], f"Concurrent messages failed: {result['successful']}/{result['total']}
 
 @pytest.mark.asyncio
 @pytest.mark.mission_critical
 async def test_websocket_deduplication():
-    """Test message deduplication."""
+    ""Test message deduplication."
     test = WebSocketChatIntegrationTest()
     await test.setup()
     from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
     auth_helper = E2EAuthHelper()
     token = auth_helper.create_test_jwt_token(user_id='test_user', email='test@netrasystems.ai')
     result = await test.test_message_deduplication(token)
-    assert result['success'], f"Deduplication failed: {result['agent_started_count']} agent_started events"
+    assert result['success'], f"Deduplication failed: {result['agent_started_count']} agent_started events
 
 @pytest.mark.asyncio
 @pytest.mark.stress
 async def test_websocket_event_storm():
-    """Stress test with high volume of events."""
+    ""Stress test with high volume of events."
     stress_test = WebSocketEventStressTest()
     from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
     auth_helper = E2EAuthHelper()

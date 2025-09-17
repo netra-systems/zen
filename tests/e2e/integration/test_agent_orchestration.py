@@ -256,12 +256,12 @@ class TestAgentOrchestration:
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_supervisor_sub_agent_coordination(self, orchestration_tester):
-"""Test supervisor coordinating multiple sub-agents."""
+        """Test supervisor coordinating multiple sub-agents."""
 pass
 supervisor = await orchestration_tester.create_supervisor_agent("TestSupervisor001")
 sub_agents = []
 for i, agent_type in enumerate(["triage", "data", "optimization"]):
-agent = await orchestration_tester.create_sub_agent(agent_type, "formatted_string")
+    agent = await orchestration_tester.create_sub_agent(agent_type, "formatted_string")
 sub_agents.append(agent)
 
 task = "Comprehensive infrastructure analysis and optimization"
@@ -274,7 +274,7 @@ assert len(orchestration_tester.coordination_events) > 0
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_sub_agent_invocation_flow(self, orchestration_tester):
-"""Test supervisor invoking specific sub-agents."""
+        """Test supervisor invoking specific sub-agents."""
 supervisor = await orchestration_tester.create_supervisor_agent("InvokeSupervisor001")
 await orchestration_tester.create_sub_agent("triage", "TriageAgent001")
 await orchestration_tester.create_sub_agent("data", "DataAgent001")
@@ -293,7 +293,7 @@ assert len(orchestration_tester.coordination_events) == 2
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_response_layer_accumulation(self, orchestration_tester):
-"""Test response accumulation across agent layers."""
+        """Test response accumulation across agent layers."""
 pass
 supervisor = await orchestration_tester.create_supervisor_agent("AccumSupervisor001")
 sub_agents = [ )
@@ -312,7 +312,7 @@ assert len(coordination_result["sub_agent_responses"]) == 4
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_agent_error_handling_propagation(self, orchestration_tester):
-"""Test error propagation through agent hierarchy."""
+        """Test error propagation through agent hierarchy."""
 supervisor = await orchestration_tester.create_supervisor_agent("ErrorSupervisor001")
 await orchestration_tester.create_sub_agent("error_test", "FailingAgent001")
 
@@ -324,7 +324,7 @@ assert "recovery_strategy" in error_result or error_result.get("fallback_trigger
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_concurrent_agent_orchestration(self, orchestration_tester):
-"""Test concurrent agent orchestration scenarios."""
+        """Test concurrent agent orchestration scenarios."""
 pass
 supervisor = await orchestration_tester.create_supervisor_agent("ConcurrentSupervisor001")
 agent_groups = [ )
@@ -354,7 +354,7 @@ class TestCriticalOrchestrationScenarios:
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_enterprise_scale_orchestration(self):
-"""Test enterprise-scale agent orchestration."""
+        """Test enterprise-scale agent orchestration."""
 tester = AgentOrchestrationTester(use_mock_llm=True)
 supervisor = await tester.create_supervisor_agent("EnterpriseSupervisor001")
 

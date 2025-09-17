@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""
+"
 FAILING TEST: Concurrent User WebSocket Isolation Violation - Issue #680
 
 This test REPRODUCES the 0% concurrent user success rate by proving SSOT violations exist.
@@ -12,7 +12,7 @@ Test Strategy:
 - Should FAIL: Shared state between users causing race conditions
 
 Expected Result: FAILS before SSOT refactor, PASSES after SSOT consolidation
-"""
+""
 
 import asyncio
 import json
@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 
 class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
-    """
+    ""
     FAILING TEST: Proves WebSocket SSOT violations cause 0% concurrent user success rate.
     
     This test is designed to FAIL and demonstrate the issue described in Issue #680:
@@ -52,10 +52,10 @@ class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
     - Multiple concurrent users cannot operate independently
     
     After SSOT consolidation, this test should PASS with proper user isolation.
-    """
+    "
     
     def setup_method(self, method=None):
-        """Setup for concurrent user isolation testing."""
+        "Setup for concurrent user isolation testing.""
         super().setup_method(method)
         
         # Test configuration
@@ -73,34 +73,34 @@ class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
         self.shared_state_violations = []
         self.concurrent_operation_failures = []
         
-        logger.info(f"Starting test: {self._test_context.test_id}")
+        logger.info(fStarting test: {self._test_context.test_id}")
     
     def teardown_method(self, method=None):
-        """Clean up test resources."""
+        "Clean up test resources.""
         # Clean up WebSocket managers
         for manager in self.websocket_managers.values():
             try:
                 if hasattr(manager, 'cleanup'):
                     manager.cleanup()
             except Exception as e:
-                logger.warning(f"Cleanup warning: {e}")
+                logger.warning(fCleanup warning: {e}")
         
         super().teardown_method(method)
     
     async def create_isolated_user_context(self, user_id: str) -> Dict[str, Any]:
-        """
+        "
         Create isolated user context for testing.
         
         This method is designed to expose SSOT violations by attempting
         to create truly isolated user contexts. If SSOT violations exist,
         we'll see shared state leakage.
-        """
+        ""
         # Create user execution context
         context = await create_isolated_execution_context(
             user_id=user_id,
-            request_id=f"req_{user_id}_{uuid.uuid4().hex[:8]}",
-            thread_id=f"thread_{user_id}_{uuid.uuid4().hex[:8]}",
-            run_id=f"run_{user_id}_{uuid.uuid4().hex[:8]}"
+            request_id=freq_{user_id}_{uuid.uuid4().hex[:8]}",
+            thread_id=f"thread_{user_id}_{uuid.uuid4().hex[:8]},
+            run_id=frun_{user_id}_{uuid.uuid4().hex[:8]}"
         )
         
         # Create WebSocket manager (should be isolated per user)
@@ -137,26 +137,26 @@ class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
         return user_data
     
     async def simulate_agent_execution(self, user_id: str, operation_name: str) -> Dict[str, Any]:
-        """
+        "
         Simulate agent execution that should trigger WebSocket events.
         
         This exposes SSOT violations by running concurrent agent operations
         and checking if events cross-contaminate between users.
-        """
+        ""
         user_data = self.user_contexts.get(user_id)
         if not user_data:
-            raise ValueError(f"User context not found for {user_id}")
+            raise ValueError(fUser context not found for {user_id}")
         
         execution_engine = user_data['execution_engine']
         bridge = user_data['bridge']
         
         # Simulate the 5 critical WebSocket events that should be isolated per user
         events_to_send = [
-            {"type": "agent_started", "data": {"operation": operation_name, "user_id": user_id}},
-            {"type": "agent_thinking", "data": {"thought": f"Processing {operation_name} for {user_id}"}},
-            {"type": "tool_executing", "data": {"tool": "test_tool", "user_id": user_id}},
-            {"type": "tool_completed", "data": {"tool": "test_tool", "result": "success", "user_id": user_id}},
-            {"type": "agent_completed", "data": {"operation": operation_name, "status": "completed", "user_id": user_id}}
+            {"type: agent_started", "data: {operation": operation_name, "user_id: user_id}},
+            {type": "agent_thinking, data": {"thought: fProcessing {operation_name} for {user_id}"}},
+            {"type: tool_executing", "data: {tool": "test_tool, user_id": user_id}},
+            {"type: tool_completed", "data: {tool": "test_tool, result": "success, user_id": user_id}},
+            {"type: agent_completed", "data: {operation": operation_name, "status: completed", "user_id: user_id}}
         ]
         
         sent_events = []
@@ -169,7 +169,7 @@ class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
                 event['sent_by_user'] = user_id
                 
                 # Send through WebSocket bridge
-                await bridge.send_event(event['type'], event['data'])
+                await bridge.send_event(event['type'], event['data']
                 sent_events.append(event)
                 
                 # Record that this user sent this event
@@ -177,19 +177,19 @@ class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
                     'action': 'sent',
                     'event': event,
                     'timestamp': time.time()
-                })
+                }
                 
                 # Small delay to simulate processing
                 await asyncio.sleep(0.1)
                 
             except Exception as e:
-                logger.error(f"Failed to send event {event['type']} for user {user_id}: {e}")
+                logger.error(fFailed to send event {event['type']} for user {user_id}: {e}")
                 self.concurrent_operation_failures.append({
                     'user_id': user_id,
                     'operation': operation_name,
                     'event_type': event['type'],
                     'error': str(e)
-                })
+                }
         
         return {
             'user_id': user_id,
@@ -199,12 +199,12 @@ class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
         }
     
     def detect_cross_contamination(self) -> List[Dict[str, Any]]:
-        """
+        "
         Detect if events from one user are received by another user.
         
         This is the core SSOT violation detection logic.
         If WebSocket managers are shared (SSOT violation), events will cross-contaminate.
-        """
+        ""
         violations = []
         
         # Check if WebSocket managers are the same instance (SSOT violation)
@@ -218,7 +218,7 @@ class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
                         'description': f'WebSocket manager instance shared between users (SSOT violation)',
                         'manager_id': id(manager),
                         'users_affected': list(self.websocket_managers.keys())
-                    })
+                    }
         
         # Check if execution engines share state
         engine_instances = list(self.execution_engines.values())
@@ -233,7 +233,7 @@ class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
                             'description': f'Execution engines share internal state (SSOT violation)',
                             'state_id': id(first_engine._shared_state),
                             'users_affected': list(self.execution_engines.keys())
-                        })
+                        }
         
         # Check for event cross-contamination in logs
         for user_id, events in self.event_logs.items():
@@ -243,21 +243,21 @@ class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
                     if 'sent_by_user' in event and event['sent_by_user'] != user_id:
                         violations.append({
                             'type': 'event_cross_contamination',
-                            'description': f'User {user_id} received event sent by {event["sent_by_user"]}',
+                            'description': f'User {user_id} received event sent by {event[sent_by_user"]}',
                             'receiving_user': user_id,
                             'sending_user': event['sent_by_user'],
                             'event_type': event.get('type'),
                             'timestamp': event_log['timestamp']
-                        })
+                        }
         
         return violations
     
     def detect_concurrent_operation_failures(self) -> List[Dict[str, Any]]:
-        """
+        "
         Detect failures specific to concurrent operations.
         
         These failures indicate SSOT violations preventing proper multi-user support.
-        """
+        ""
         failures = []
         
         # Check if any operations failed due to shared state conflicts
@@ -283,13 +283,13 @@ class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
                         'user_id': failure['user_id'],
                         'error': failure['error'],
                         'timing_spread': max_timing - min_timing
-                    })
+                    }
         
         return failures
     
     @pytest.mark.asyncio
     async def test_concurrent_users_websocket_isolation_violation(self):
-        """
+        ""
         FAILING TEST: Proves 0% concurrent user success rate from SSOT violations.
         
         This test creates 2 concurrent users and verifies they are properly isolated.
@@ -300,14 +300,14 @@ class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
         4. Shared state in execution engines
         
         After SSOT consolidation, this test should PASS with proper isolation.
-        """
-        logger.info("Starting concurrent user WebSocket isolation violation test")
+        "
+        logger.info("Starting concurrent user WebSocket isolation violation test)
         
         # Define test users
         test_users = ['user_alpha', 'user_beta']
         
         # Phase 1: Create isolated user contexts concurrently
-        logger.info("Phase 1: Creating isolated user contexts")
+        logger.info(Phase 1: Creating isolated user contexts")
         context_tasks = []
         for user_id in test_users:
             task = asyncio.create_task(self.create_isolated_user_context(user_id))
@@ -317,20 +317,20 @@ class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
         for user_id, task in context_tasks:
             try:
                 user_data = await asyncio.wait_for(task, timeout=self.test_timeout)
-                logger.info(f"Created context for {user_id}")
+                logger.info(f"Created context for {user_id})
             except asyncio.TimeoutError:
                 self.concurrent_operation_failures.append({
                     'user_id': user_id,
                     'operation': 'context_creation',
                     'event_type': 'setup',
                     'error': 'Context creation timed out'
-                })
+                }
         
         # Phase 2: Run concurrent agent operations
-        logger.info("Phase 2: Running concurrent agent operations")
+        logger.info(Phase 2: Running concurrent agent operations")
         operation_tasks = []
         for i, user_id in enumerate(test_users):
-            operation_name = f"test_operation_{i}"
+            operation_name = f"test_operation_{i}
             task = asyncio.create_task(self.simulate_agent_execution(user_id, operation_name))
             operation_tasks.append((user_id, task))
         
@@ -340,21 +340,21 @@ class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
             try:
                 result = await asyncio.wait_for(task, timeout=self.test_timeout)
                 operation_results[user_id] = result
-                logger.info(f"Completed operation for {user_id}: {result['sent_count']} events sent")
+                logger.info(fCompleted operation for {user_id}: {result['sent_count']} events sent")
             except asyncio.TimeoutError:
                 self.concurrent_operation_failures.append({
                     'user_id': user_id,
                     'operation': 'agent_execution',
                     'event_type': 'timeout',
                     'error': 'Agent execution timed out'
-                })
+                }
         
         # Phase 3: Wait for event propagation
-        logger.info("Phase 3: Waiting for event propagation")
+        logger.info("Phase 3: Waiting for event propagation)
         await asyncio.sleep(self.event_capture_timeout)
         
         # Phase 4: Detect SSOT violations
-        logger.info("Phase 4: Analyzing for SSOT violations")
+        logger.info(Phase 4: Analyzing for SSOT violations")
         
         # Detect cross-contamination
         cross_contamination_violations = self.detect_cross_contamination()
@@ -363,7 +363,7 @@ class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
         concurrent_failures = self.detect_concurrent_operation_failures()
         
         # Phase 5: Assert violations exist (test should FAIL)
-        logger.info("Phase 5: Asserting SSOT violations exist")
+        logger.info("Phase 5: Asserting SSOT violations exist)
         
         # Record test metrics
         self.record_metric('users_tested', len(test_users))
@@ -374,19 +374,19 @@ class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
         self.record_metric('concurrent_failures', len(concurrent_failures))
         
         # Document violations for debugging
-        logger.error(f"SSOT Violations Detected:")
-        logger.error(f"  Cross-contamination violations: {len(cross_contamination_violations)}")
-        logger.error(f"  Concurrent operation failures: {len(concurrent_failures)}")
+        logger.error(fSSOT Violations Detected:")
+        logger.error(f"  Cross-contamination violations: {len(cross_contamination_violations)})
+        logger.error(f  Concurrent operation failures: {len(concurrent_failures)}")
         
         if cross_contamination_violations:
-            logger.error("Cross-contamination details:")
+            logger.error("Cross-contamination details:)
             for violation in cross_contamination_violations:
-                logger.error(f"  - {violation['type']}: {violation['description']}")
+                logger.error(f  - {violation['type']}: {violation['description']}")
         
         if concurrent_failures:
-            logger.error("Concurrent failure details:")
+            logger.error("Concurrent failure details:)
             for failure in concurrent_failures:
-                logger.error(f"  - {failure.get('type', 'unknown')}: {failure.get('description', failure.get('error'))}")
+                logger.error(f  - {failure.get('type', 'unknown')}: {failure.get('description', failure.get('error'))}")
         
         # SUCCESS CRITERIA FOR AFTER SSOT CONSOLIDATION:
         # After SSOT refactor, these assertions should be flipped to verify isolation works
@@ -400,30 +400,30 @@ class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
         # If no violations detected, the test infrastructure might not be sensitive enough
         if total_violations == 0:
             pytest.fail(
-                "UNEXPECTED: No SSOT violations detected. "
-                "Either the violations don't exist (good) or the test needs improvement. "
-                "Expected: WebSocket cross-contamination and concurrent user failures."
+                "UNEXPECTED: No SSOT violations detected. 
+                Either the violations don't exist (good) or the test needs improvement. "
+                "Expected: WebSocket cross-contamination and concurrent user failures.
             )
         
         # Expected violations that prove Issue #680 exists
         assert total_violations > 0, (
-            f"EXPECTED SSOT VIOLATIONS DETECTED: {total_violations} violations found. "
-            f"Cross-contamination: {len(cross_contamination_violations)}, "
-            f"Concurrent failures: {len(concurrent_failures)}. "
-            "This confirms Issue #680 exists and requires SSOT consolidation."
+            fEXPECTED SSOT VIOLATIONS DETECTED: {total_violations} violations found. "
+            f"Cross-contamination: {len(cross_contamination_violations)}, 
+            fConcurrent failures: {len(concurrent_failures)}. "
+            "This confirms Issue #680 exists and requires SSOT consolidation.
         )
         
         # Specific checks for types of violations we expect
         violation_types = set()
         for violation in cross_contamination_violations:
-            violation_types.add(violation['type'])
+            violation_types.add(violation['type']
         
         # Document the specific SSOT violations found
-        logger.info(f"SSOT violation types detected: {violation_types}")
+        logger.info(fSSOT violation types detected: {violation_types}")
         
         # The test PASSES by proving violations exist (confirming the issue)
-        logger.info("TEST PASSES: SSOT violations confirmed, Issue #680 reproduced")
-        logger.info("Next step: Implement SSOT consolidation to fix these violations")
+        logger.info("TEST PASSES: SSOT violations confirmed, Issue #680 reproduced)
+        logger.info(Next step: Implement SSOT consolidation to fix these violations")
         
         # Return violation details for analysis
         return {
@@ -435,12 +435,12 @@ class ConcurrentUserWebSocketFailuresTests(SSotAsyncTestCase):
         }
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
-    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
-    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
-    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print(MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>)
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md")
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

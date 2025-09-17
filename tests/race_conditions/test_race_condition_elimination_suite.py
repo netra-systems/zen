@@ -70,12 +70,12 @@ class TestAuthClientCacheRaceConditions:
 
 @pytest.mark.asyncio
     async def test_concurrent_user_cache_access(self, auth_cache):
-"""Test concurrent access to user-scoped cache prevents race conditions."""
+        """Test concurrent access to user-scoped cache prevents race conditions."""
 users = ["formatted_string" for i in range(10)]
 keys_per_user = 5
 
 async def set_user_data(user_id: str, key_suffix: int):
-"""Set data for a specific user concurrently."""
+    """Set data for a specific user concurrently."""
 pass
 key = "formatted_string"
 value = "formatted_string"
@@ -84,7 +84,7 @@ await asyncio.sleep(0)
 return user_id, key, value
 
 async def get_user_data(user_id: str, key_suffix: int):
-"""Get data for a specific user concurrently."""
+    """Get data for a specific user concurrently."""
 key = "formatted_string"
 value = await auth_cache.get_user_scoped(user_id, key)
 await asyncio.sleep(0)
@@ -94,8 +94,8 @@ return user_id, key, value
 set_tasks = []
 expected_values = {}
 for user in users:
-for key_suffix in range(keys_per_user):
-task = set_user_data(user, key_suffix)
+    for key_suffix in range(keys_per_user):
+        task = set_user_data(user, key_suffix)
 set_tasks.append(task)
 
             # Execute all set operations concurrently
@@ -103,15 +103,15 @@ set_results = await asyncio.gather(*set_tasks)
 
             # Build expected values map
 for user_id, key, value in set_results:
-if user_id not in expected_values:
-expected_values[user_id] = {}
+    if user_id not in expected_values:
+        expected_values[user_id] = {}
 expected_values[user_id][key] = value
 
                     # Create concurrent get operations
 get_tasks = []
 for user in users:
-for key_suffix in range(keys_per_user):
-task = get_user_data(user, key_suffix)
+    for key_suffix in range(keys_per_user):
+        task = get_user_data(user, key_suffix)
 get_tasks.append(task)
 
                             # Execute all get operations concurrently
@@ -119,7 +119,7 @@ get_results = await asyncio.gather(*get_tasks)
 
                             # Verify no race conditions occurred
 for user_id, key, retrieved_value in get_results:
-expected_value = expected_values[user_id][key]
+    expected_value = expected_values[user_id][key]
 assert retrieved_value == expected_value, ( )
 "formatted_string"
 "formatted_string"
@@ -127,16 +127,16 @@ assert retrieved_value == expected_value, ( )
 
 @pytest.mark.asyncio
     async def test_concurrent_user_cache_operations_isolation(self, auth_cache):
-"""Test that concurrent operations on different users are isolated."""
+        """Test that concurrent operations on different users are isolated."""
 pass
 user1, user2 = "user_1", "user_2"
 operations_per_user = 20
 
 async def user_operations(user_id: str, op_count: int):
-"""Perform mixed operations for a user."""
+    """Perform mixed operations for a user."""
 results = []
 for i in range(op_count):
-key = "formatted_string"
+    key = "formatted_string"
 value = "formatted_string"
 
         # Set value
@@ -145,10 +145,10 @@ await auth_cache.set_user_scoped(user_id, key, value)
 retrieved = await auth_cache.get_user_scoped(user_id, key)
         # Delete some values
 if i % 3 == 0:
-deleted = await auth_cache.delete_user_scoped(user_id, key)
+    deleted = await auth_cache.delete_user_scoped(user_id, key)
 results.append((key, value, retrieved, deleted))
 else:
-results.append((key, value, retrieved, None))
+    results.append((key, value, retrieved, None))
 await asyncio.sleep(0)
 return results
 
@@ -164,11 +164,11 @@ assert len(user2_results) == operations_per_user
 
                 # Check data integrity for each user
 for key, original_value, retrieved_value, was_deleted in user1_results:
-if was_deleted is None:  # Not deleted
+    if was_deleted is None:  # Not deleted
 assert retrieved_value == original_value, "formatted_string"
 
 for key, original_value, retrieved_value, was_deleted in user2_results:
-if was_deleted is None:  # Not deleted
+    if was_deleted is None:  # Not deleted
 assert retrieved_value == original_value, "formatted_string"
 
 
@@ -194,16 +194,16 @@ class TestUnifiedWebSocketManagerRaceConditions:
 
 @pytest.mark.asyncio
     async def test_concurrent_connection_management(self, websocket_manager, mock_websocket):
-"""Test concurrent connection add/remove operations are thread-safe."""
+        """Test concurrent connection add/remove operations are thread-safe."""
 users = ["formatted_string" for i in range(10)]
 connections_per_user = 3
 
 async def add_user_connections(user_id: str, count: int):
-"""Add multiple connections for a user concurrently."""
+    """Add multiple connections for a user concurrently."""
 pass
 connections = []
 for i in range(count):
-connection_id = "formatted_string"
+    connection_id = "formatted_string"
 connection = WebSocketConnection( )
 connection_id=connection_id,
 user_id=user_id,
@@ -216,10 +216,10 @@ await asyncio.sleep(0)
 return connections
 
 async def remove_user_connections(connections: List[WebSocketConnection]):
-"""Remove connections for a user concurrently."""
+    """Remove connections for a user concurrently."""
 removed = []
 for connection in connections:
-await websocket_manager.remove_connection(connection.connection_id)
+    await websocket_manager.remove_connection(connection.connection_id)
 removed.append(connection.connection_id)
 await asyncio.sleep(0)
 return removed
@@ -227,7 +227,7 @@ return removed
         # Add connections concurrently for all users
 add_tasks = []
 for user in users:
-task = add_user_connections(user, connections_per_user)
+    task = add_user_connections(user, connections_per_user)
 add_tasks.append(task)
 
 all_connections = await asyncio.gather(*add_tasks)
@@ -257,7 +257,7 @@ assert final_stats['total_connections'] == expected_remaining
 
 @pytest.mark.asyncio
     async def test_concurrent_message_sending_safety(self, websocket_manager, mock_websocket):
-"""Test concurrent message sending to users is thread-safe."""
+        """Test concurrent message sending to users is thread-safe."""
 pass
 users = ["formatted_string" for i in range(5)]
 connections_per_user = 2
@@ -265,8 +265,8 @@ messages_per_user = 10
 
                     # Add connections for all users
 for user in users:
-for i in range(connections_per_user):
-connection_id = "formatted_string"
+    for i in range(connections_per_user):
+        connection_id = "formatted_string"
 connection = WebSocketConnection( )
 connection_id=connection_id,
 user_id=user,
@@ -276,10 +276,10 @@ connected_at=datetime.now()
 await websocket_manager.add_connection(connection)
 
 async def send_messages_to_user(user_id: str, message_count: int):
-"""Send multiple messages to a user concurrently."""
+    """Send multiple messages to a user concurrently."""
 sent_messages = []
 for i in range(message_count):
-message = { )
+    message = { )
 "type": "test_message",
 "data": "formatted_string",
 "timestamp": datetime.utcnow().isoformat()
@@ -292,7 +292,7 @@ return sent_messages
         # Send messages to all users concurrently
 send_tasks = []
 for user in users:
-task = send_messages_to_user(user, messages_per_user)
+    task = send_messages_to_user(user, messages_per_user)
 send_tasks.append(task)
 
 all_sent_messages = await asyncio.gather(*send_tasks)
@@ -325,7 +325,7 @@ class TestExecutionEngineRaceConditions:
 
 @pytest.mark.asyncio
     async def test_user_state_isolation(self, mock_registry, mock_websocket_bridge):
-"""Test that user execution states are properly isolated."""
+        """Test that user execution states are properly isolated."""
         # Create execution engine instance using the factory method
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
@@ -356,11 +356,11 @@ assert engine2.user_context.user_id == "user_2"
 
         # Test concurrent state access
 async def access_user_state(engine, user_id: str, iterations: int):
-"""Access user state concurrently."""
+    """Access user state concurrently."""
 pass
 results = []
 for i in range(iterations):
-lock = await engine._get_user_state_lock(user_id)
+    lock = await engine._get_user_state_lock(user_id)
 async with lock:
 state = await engine._get_user_execution_state(user_id)
 state['test_counter'] = state.get('test_counter', 0) + 1
@@ -393,7 +393,7 @@ class TestIntegratedRaceConditionPrevention:
 
 @pytest.mark.asyncio
     async def test_end_to_end_concurrent_user_operations(self):
-"""Test end-to-end concurrent operations across all enhanced components."""
+        """Test end-to-end concurrent operations across all enhanced components."""
         # Create instances of all enhanced components
 auth_cache = AuthClientCache(default_ttl=300)
 websocket_manager = UnifiedWebSocketManager()
@@ -402,7 +402,7 @@ users = ["formatted_string" for i in range(5)]
 operations_per_user = 10
 
 async def simulate_user_session(user_id: str, operation_count: int):
-"""Simulate a complete user session with auth, WebSocket, and execution."""
+    """Simulate a complete user session with auth, WebSocket, and execution."""
 pass
 session_results = { )
 'auth_operations': 0,
@@ -420,12 +420,12 @@ await auth_cache.set_user_scoped(user_id, "formatted_string", token)
             # Retrieve token
 cached_token = await auth_cache.get_user_scoped(user_id, "formatted_string")
 if cached_token == token:
-session_results['auth_operations'] += 1
+    session_results['auth_operations'] += 1
 
                 # Simulate WebSocket operations
 websocket = TestWebSocketConnection()
 for i in range(operation_count):
-connection_id = "formatted_string"
+    connection_id = "formatted_string"
 connection = WebSocketConnection( )
 connection_id=connection_id,
 user_id=user_id,
@@ -440,7 +440,7 @@ await websocket_manager.send_to_user(user_id, message)
 session_results['websocket_operations'] += 1
 
 except Exception as e:
-session_results['errors'].append(str(e))
+    session_results['errors'].append(str(e))
 
 await asyncio.sleep(0)
 return session_results
@@ -448,14 +448,14 @@ return session_results
                         # Run concurrent user sessions
 session_tasks = []
 for user in users:
-task = simulate_user_session(user, operations_per_user)
+    task = simulate_user_session(user, operations_per_user)
 session_tasks.append(task)
 
 results = await asyncio.gather(*session_tasks)
 
                             # Verify all operations completed without race conditions
 for i, result in enumerate(results):
-user_id = users[i]
+    user_id = users[i]
 assert len(result['errors']) == 0, "formatted_string"
 assert result['auth_operations'] == operations_per_user
 assert result['websocket_operations'] == operations_per_user
@@ -468,4 +468,4 @@ assert stats['unique_users'] == len(users)
 
 
 if __name__ == "__main__":
-pytest.main([__file__, "-v", "--tb=short"])
+    pytest.main([__file__, "-v", "--tb=short"])

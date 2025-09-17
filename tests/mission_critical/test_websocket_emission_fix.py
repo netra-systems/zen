@@ -1,10 +1,10 @@
 # Import SSOT WebSocket test utility
 from test_framework.ssot.websocket_connection_test_utility import TestWebSocketConnection
 
-"""
+"
 Mission Critical Test: WebSocket Emission Method Fix
 Verifies that SupervisorAgent correctly uses emit_agent_event
-"""
+""
 
 import pytest
 import asyncio
@@ -32,11 +32,11 @@ from shared.isolated_environment import get_env
 
 
 class WebSocketEmissionFixTests:
-    """Test that the WebSocket emission method fix is working correctly."""
+    ""Test that the WebSocket emission method fix is working correctly."
     
     @pytest.mark.asyncio
     async def test_supervisor_uses_emit_agent_event(self):
-        """Verify SupervisorAgent calls emit_agent_event correctly."""
+        "Verify SupervisorAgent calls emit_agent_event correctly.""
         
         # Create mock WebSocket bridge
         mock_bridge = AsyncMock(spec=AgentWebSocketBridge)
@@ -44,7 +44,7 @@ class WebSocketEmissionFixTests:
         
         # Create mock dependencies
         websocket = TestWebSocketConnection()
-        mock_llm.invoke = AsyncMock(return_value=MagicMock(content="Test response"))
+        mock_llm.invoke = AsyncMock(return_value=MagicMock(content=Test response"))
         
         websocket = TestWebSocketConnection()
         
@@ -56,14 +56,14 @@ class WebSocketEmissionFixTests:
         
         # Create context
         context = UserExecutionContext.create(
-            user_id="test_user",
-            thread_id="test_thread",
-            run_id="test_run_123",
-            websocket_connection_id="ws_conn_456"
+            user_id="test_user,
+            thread_id=test_thread",
+            run_id="test_run_123,
+            websocket_connection_id=ws_conn_456"
         )
         
         # Call _emit_thinking
-        await supervisor._emit_thinking(context, "Test thinking message")
+        await supervisor._emit_thinking(context, "Test thinking message)
         
         # Verify emit_agent_event was called correctly
         mock_bridge.emit_agent_event.assert_called_once()
@@ -73,15 +73,15 @@ class WebSocketEmissionFixTests:
         assert call_args[1]['event_type'] == 'agent_thinking'
         assert call_args[1]['run_id'] == 'test_run_123'
         assert call_args[1]['agent_name'] == 'Supervisor'
-        assert 'Test thinking message' in str(call_args[1]['data'])
+        assert 'Test thinking message' in str(call_args[1]['data']
     
     @pytest.mark.asyncio
     async def test_emit_thinking_handles_errors_gracefully(self):
-        """Verify _emit_thinking doesn't crash on WebSocket errors."""
+        ""Verify _emit_thinking doesn't crash on WebSocket errors."
         
         # Create mock bridge that fails
         mock_bridge = AsyncMock(spec=AgentWebSocketBridge)
-        mock_bridge.emit_agent_event = AsyncMock(side_effect=Exception("WebSocket error"))
+        mock_bridge.emit_agent_event = AsyncMock(side_effect=Exception("WebSocket error))
         
         # Create supervisor with required LLM manager
         from netra_backend.app.llm.llm_manager import LLMManager
@@ -93,20 +93,20 @@ class WebSocketEmissionFixTests:
         
         # Create context
         context = UserExecutionContext.create(
-            user_id="test_user",
-            thread_id="test_thread",
-            run_id="test_run_123"
+            user_id=test_user",
+            thread_id="test_thread,
+            run_id=test_run_123"
         )
         
         # This should not raise an exception
-        await supervisor._emit_thinking(context, "Test message")
+        await supervisor._emit_thinking(context, "Test message)
         
         # Verify the method was called despite the error
         mock_bridge.emit_agent_event.assert_called_once()
     
     @pytest.mark.asyncio
     async def test_startup_validates_emit_agent_event(self):
-        """Verify startup module validates for emit_agent_event method."""
+        ""Verify startup module validates for emit_agent_event method."
         
         # Import startup validation
         from netra_backend.app.startup_module import validate_websocket_infrastructure
@@ -131,13 +131,13 @@ class WebSocketEmissionFixTests:
     
     @pytest.mark.asyncio
     async def test_integration_with_real_bridge_structure(self):
-        """Test that the fix works with real AgentWebSocketBridge structure."""
+        "Test that the fix works with real AgentWebSocketBridge structure.""
         
         # Create a mock that mimics real bridge
         websocket = TestWebSocketConnection()
         mock_bridge.emit_agent_event = AsyncMock(return_value=True)
         mock_bridge._validate_event_context = MagicMock(return_value=True)
-        mock_bridge._resolve_thread_id_from_run_id = AsyncMock(return_value="test_thread")
+        mock_bridge._resolve_thread_id_from_run_id = AsyncMock(return_value=test_thread")
         
         # Create supervisor with required LLM manager
         from netra_backend.app.llm.llm_manager import LLMManager
@@ -149,14 +149,14 @@ class WebSocketEmissionFixTests:
         
         # Create context with all fields
         context = UserExecutionContext.create(
-            user_id="user_123",
-            thread_id="thread_456",
-            run_id="run_789",
-            websocket_connection_id="ws_abc"
+            user_id="user_123,
+            thread_id=thread_456",
+            run_id="run_789,
+            websocket_connection_id=ws_abc"
         )
         
         # Emit thinking
-        await supervisor._emit_thinking(context, "Processing your request...")
+        await supervisor._emit_thinking(context, "Processing your request...)
         
         # Verify correct method was called
         mock_bridge.emit_agent_event.assert_called_once()
@@ -170,7 +170,7 @@ class WebSocketEmissionFixTests:
         assert call_data['data']['connection_id'] == 'ws_abc'
 
 
-if __name__ == "__main__":
+if __name__ == __main__":
     # Run the tests
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

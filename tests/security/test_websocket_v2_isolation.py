@@ -226,7 +226,7 @@ class TestWebSocketV2MessageIsolation:
 
 @pytest.mark.asyncio
     async def test_no_cross_user_message_leakage(self):
-"""Test that messages sent to one user don't leak to other users."""
+        """Test that messages sent to one user don't leak to other users."""
         # Create isolated managers for two users
 user1_context = UserExecutionContext( )
 user_id="user_111",
@@ -301,7 +301,7 @@ assert user1_message not in user2_calls, "User2 should never receive user1"s mes
 
 @pytest.mark.asyncio
     async def test_connection_security_validation(self):
-"""Test that connections are validated to belong to the correct user."""
+        """Test that connections are validated to belong to the correct user."""
 pass
 user1_context = UserExecutionContext( )
 user_id="user_111",
@@ -330,7 +330,7 @@ connected_at=datetime.utcnow()
 
             # CRITICAL: Attempt to add user2's connection to user1's manager
 with pytest.raises(ValueError, match="does not match manager user_id"):
-await manager1.add_connection(user2_connection)
+    await manager1.add_connection(user2_connection)
 
                 # CRITICAL: Verify manager1 has no connections after failed attempt
 assert len(manager1.get_user_connections()) == 0
@@ -341,7 +341,7 @@ assert len(manager2.get_user_connections()) == 1
 
 @pytest.mark.asyncio
     async def test_critical_event_isolation(self):
-"""Test that critical events are isolated between users."""
+        """Test that critical events are isolated between users."""
                     # Create managers for two users
 user1_context = UserExecutionContext( )
 user_id="user_aaa",
@@ -475,7 +475,7 @@ class TestWebSocketV2FactoryPattern:
 
 @pytest.mark.asyncio
     async def test_factory_cleanup_mechanisms(self):
-"""Test that factory properly cleans up managers."""
+        """Test that factory properly cleans up managers."""
 factory = WebSocketManagerFactory()
 
 user_context = UserExecutionContext( )
@@ -507,7 +507,7 @@ assert stats_after["factory_metrics"]["managers_cleaned_up"] == 1
 assert not manager._is_active
 
 def test_factory_metrics_tracking(self):
-"""Test that factory properly tracks metrics."""
+    """Test that factory properly tracks metrics."""
 pass
 factory = WebSocketManagerFactory()
 
@@ -518,7 +518,7 @@ assert initial_stats["factory_metrics"]["managers_active"] == 0
 
     # Create managers
 for i in range(3):
-context = UserExecutionContext( )
+    context = UserExecutionContext( )
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id="formatted_string",
@@ -602,7 +602,7 @@ class TestWebSocketV2SecurityIntegration:
 
 @pytest.mark.asyncio
     async def test_end_to_end_user_isolation(self):
-"""End-to-end test of complete user isolation."""
+        """End-to-end test of complete user isolation."""
         # Create contexts for 3 different users
 users_data = [ )
 ("user_alpha", "secret_alpha_data", "task_alpha"),
@@ -615,7 +615,7 @@ websockets = []
 
         # Create isolated managers and connections for each user
 for i, (user_id, secret_data, task) in enumerate(users_data):
-context = UserExecutionContext( )
+    context = UserExecutionContext( )
 user_id=user_id,
 thread_id="formatted_string",
 run_id="formatted_string",
@@ -646,7 +646,7 @@ for i, (user_id, secret_data, task) in enumerate(users_data):
 
                 # CRITICAL: Verify each user only received their own data
 for i, (user_id, secret_data, task) in enumerate(users_data):
-websocket = websockets[i]
+    websocket = websockets[i]
 calls = websocket.send_json.call_args_list
 
 assert len(calls) == 1, "formatted_string"
@@ -658,13 +658,13 @@ assert event["user_context"]["user_id"] == user_id
 
                     # CRITICAL: Verify no other user's data is present
 for j, (other_user, other_secret, other_task) in enumerate(users_data):
-if i != j:
-assert other_secret not in str(event), "formatted_string"s secret"
+    if i != j:
+        assert other_secret not in str(event), "formatted_string"s secret"
 assert other_task not in str(event), "formatted_string"s task"
 
 @pytest.mark.asyncio
     async def test_connection_lifecycle_security(self):
-"""Test that connection lifecycle maintains security throughout."""
+        """Test that connection lifecycle maintains security throughout."""
 pass
 user_context = UserExecutionContext( )
 user_id="user_lifecycle",
@@ -703,14 +703,14 @@ await manager.send_to_user({"type": "test2", "data": "more_data"})
 websocket.send_json.assert_not_called()
 
 def test_resource_exhaustion_prevention(self):
-"""Test that factory prevents resource exhaustion attacks."""
+    """Test that factory prevents resource exhaustion attacks."""
 factory = WebSocketManagerFactory(max_managers_per_user=3)
 
 attacker_user_id = "attacker_user"
 
     # Create maximum allowed managers
 for i in range(3):
-context = UserExecutionContext( )
+    context = UserExecutionContext( )
 user_id=attacker_user_id,
 thread_id="formatted_string",
 run_id="formatted_string",
@@ -730,7 +730,7 @@ websocket_connection_id="conn_overflow"
         
 
 with pytest.raises(RuntimeError, match="maximum number of WebSocket managers"):
-factory.create_manager(context_overflow)
+    factory.create_manager(context_overflow)
 
             # Verify metrics show resource limit hit
 stats = factory.get_factory_stats()
@@ -738,6 +738,6 @@ assert stats["factory_metrics"]["resource_limit_hits"] >= 1
 
 
 if __name__ == "__main__":
-import sys
+    import sys
 sys.exit(pytest.main([__file__, "-v"]))
 pass

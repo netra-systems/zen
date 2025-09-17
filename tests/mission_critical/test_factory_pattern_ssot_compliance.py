@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""
+"
 FAILING TEST: Factory Pattern SSOT Compliance - Issue #680
 
 This test PROVES factory pattern violates user isolation by creating shared instances.
@@ -11,7 +11,7 @@ Test Strategy:
 - Should PASS after SSOT consolidation (proper isolation)
 
 Expected Result: FAILS before SSOT refactor, PASSES after SSOT consolidation
-"""
+""
 
 import asyncio
 import logging
@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 
 class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
-    """
+    ""
     FAILING TEST: Proves factory pattern violates user isolation.
     
     This test creates WebSocket-related instances for multiple users and verifies
@@ -54,10 +54,10 @@ class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
     4. Memory leaks from shared singleton patterns
     
     After SSOT consolidation, should PASS with proper user isolation.
-    """
+    "
     
     def setup_method(self, method=None):
-        """Setup for factory pattern testing."""
+        "Setup for factory pattern testing.""
         super().setup_method(method)
         
         # Test configuration
@@ -74,24 +74,24 @@ class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
             'execution_engine': 0
         }
         
-        logger.info(f"Starting factory pattern SSOT compliance test")
+        logger.info(fStarting factory pattern SSOT compliance test")
     
     async def create_user_websocket_components(self, user_id: str) -> Dict[str, Any]:
-        """
+        "
         Create WebSocket components for a user using factory patterns.
         
         This method uses the same factory calls that would be used in production
         to expose shared instance violations.
-        """
+        ""
         components = {}
         
         # Create execution context (should be unique per user)
         self.factory_call_counts['execution_context'] += 1
         execution_context = await create_isolated_execution_context(
             user_id=user_id,
-            request_id=f"req_{user_id}_{uuid.uuid4().hex[:8]}",
-            thread_id=f"thread_{user_id}_{uuid.uuid4().hex[:8]}",
-            run_id=f"run_{user_id}_{uuid.uuid4().hex[:8]}"
+            request_id=freq_{user_id}_{uuid.uuid4().hex[:8]}",
+            thread_id=f"thread_{user_id}_{uuid.uuid4().hex[:8]},
+            run_id=frun_{user_id}_{uuid.uuid4().hex[:8]}"
         )
         components['execution_context'] = execution_context
         
@@ -128,12 +128,12 @@ class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
         
         return components
     
-    def analyze_shared_instances(self, all_user_components: Dict[str, Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """
+    def analyze_shared_instances(self, all_user_components: Dict[str, Dict[str, Any]] -> List[Dict[str, Any]]:
+        "
         Analyze components across users to detect shared instances.
         
         Returns list of shared instance violations.
-        """
+        ""
         violations = []
         
         # Component types to check for sharing
@@ -184,7 +184,7 @@ class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
                             'instance_id': instance_id,
                             'shared_by_users': users,
                             'user_count': len(users)
-                        })
+                        }
                 
                 violations.append({
                     'component_type': component_type,
@@ -193,12 +193,12 @@ class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
                     'actual_unique': actual_unique_count,
                     'shared_instances': sharing_violations,
                     'severity': self._get_sharing_severity(component_type)
-                })
+                }
         
         return violations
     
     def _get_sharing_severity(self, component_type: str) -> str:
-        """Get severity level for different types of component sharing."""
+        ""Get severity level for different types of component sharing."
         severity_map = {
             'websocket_manager': 'CRITICAL',  # Core business functionality
             'execution_context': 'CRITICAL',  # Security violation
@@ -207,13 +207,13 @@ class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
         }
         return severity_map.get(component_type, 'MEDIUM')
     
-    def analyze_memory_leaks(self, all_user_components: Dict[str, Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """
+    def analyze_memory_leaks(self, all_user_components: Dict[str, Dict[str, Any]] -> List[Dict[str, Any]]:
+        "
         Analyze for potential memory leaks from shared instances.
         
         Shared instances can cause memory leaks as user-specific data
         accumulates in shared objects.
-        """
+        ""
         memory_issues = []
         
         # Check for objects that accumulate user-specific state
@@ -236,7 +236,7 @@ class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
                                     'type': type(attr_value).__name__,
                                     'size': len(attr_value),
                                     'sample_content': str(attr_value)[:100] if attr_value else None
-                                })
+                                }
                     
                     if accumulating_attributes:
                         # Check if this is a shared instance
@@ -245,7 +245,7 @@ class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
                         
                         for other_user_id, other_components in all_user_components.items():
                             if other_user_id != user_id and component_name in other_components:
-                                if id(other_components[component_name]) == component_id:
+                                if id(other_components[component_name] == component_id:
                                     other_users_with_same_instance.append(other_user_id)
                         
                         if other_users_with_same_instance:
@@ -256,23 +256,23 @@ class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
                                 'accumulating_state': accumulating_attributes,
                                 'memory_leak_risk': 'HIGH',
                                 'issue_type': 'shared_instance_accumulating_state'
-                            })
+                            }
         
         return memory_issues
     
     async def test_websocket_factory_creates_shared_instances_violation(self):
-        """
+        ""
         FAILING TEST: Proves factory pattern violates user isolation.
         
         Creates WebSocket instances for multiple users and verifies they are isolated.
         Expected to FAIL due to factory patterns returning shared instances.
         
         After SSOT consolidation, should PASS with proper user isolation.
-        """
-        logger.info("Starting factory pattern SSOT compliance test")
+        "
+        logger.info("Starting factory pattern SSOT compliance test)
         
         # Phase 1: Create components for multiple users
-        logger.info("Phase 1: Creating WebSocket components for multiple users")
+        logger.info(Phase 1: Creating WebSocket components for multiple users")
         
         all_user_components = {}
         creation_errors = []
@@ -281,25 +281,25 @@ class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
             try:
                 components = await self.create_user_websocket_components(user_id)
                 all_user_components[user_id] = components
-                logger.info(f"Created components for user {user_id}")
+                logger.info(f"Created components for user {user_id})
             except Exception as e:
                 creation_errors.append({
                     'user_id': user_id,
                     'error': str(e),
                     'error_type': type(e).__name__
-                })
-                logger.error(f"Failed to create components for user {user_id}: {e}")
+                }
+                logger.error(fFailed to create components for user {user_id}: {e}")
         
         # Phase 2: Analyze for shared instances
-        logger.info("Phase 2: Analyzing for shared instance violations")
+        logger.info("Phase 2: Analyzing for shared instance violations)
         shared_instance_violations = self.analyze_shared_instances(all_user_components)
         
         # Phase 3: Analyze for memory leak risks
-        logger.info("Phase 3: Analyzing for memory leak risks")
+        logger.info(Phase 3: Analyzing for memory leak risks")
         memory_leak_risks = self.analyze_memory_leaks(all_user_components)
         
         # Phase 4: Check factory call efficiency
-        logger.info("Phase 4: Analyzing factory call patterns")
+        logger.info("Phase 4: Analyzing factory call patterns)
         expected_calls_per_type = len(self.test_users)
         factory_efficiency_issues = []
         
@@ -310,7 +310,7 @@ class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
                     'expected_calls': expected_calls_per_type,
                     'actual_calls': call_count,
                     'efficiency_issue': call_count < expected_calls_per_type
-                })
+                }
         
         # Phase 5: Record metrics
         self.record_metric('users_tested', len(self.test_users))
@@ -321,43 +321,43 @@ class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
         self.record_metric('factory_efficiency_issues', len(factory_efficiency_issues))
         
         # Log detailed findings
-        logger.info(f"Factory Pattern Analysis Results:")
-        logger.info(f"  Users tested: {len(self.test_users)}")
-        logger.info(f"  Components created: {len(all_user_components)}")
-        logger.info(f"  Creation errors: {len(creation_errors)}")
-        logger.info(f"  Shared instance violations: {len(shared_instance_violations)}")
-        logger.info(f"  Memory leak risks: {len(memory_leak_risks)}")
+        logger.info(fFactory Pattern Analysis Results:")
+        logger.info(f"  Users tested: {len(self.test_users)})
+        logger.info(f  Components created: {len(all_user_components)}")
+        logger.info(f"  Creation errors: {len(creation_errors)})
+        logger.info(f  Shared instance violations: {len(shared_instance_violations)}")
+        logger.info(f"  Memory leak risks: {len(memory_leak_risks)})
         
         # Log specific violations
         if shared_instance_violations:
-            logger.error("Shared Instance Violations:")
+            logger.error(Shared Instance Violations:")
             for violation in shared_instance_violations:
-                logger.error(f"  - {violation['component_type']}: {violation['violation_type']}")
-                logger.error(f"    Expected unique: {violation['expected_unique']}, Actual: {violation['actual_unique']}")
-                logger.error(f"    Severity: {violation['severity']}")
+                logger.error(f"  - {violation['component_type']}: {violation['violation_type']})
+                logger.error(f    Expected unique: {violation['expected_unique']}, Actual: {violation['actual_unique']}")
+                logger.error(f"    Severity: {violation['severity']})
                 
                 for shared_instance in violation['shared_instances']:
-                    logger.error(f"    Shared by users: {shared_instance['shared_by_users']}")
+                    logger.error(f    Shared by users: {shared_instance['shared_by_users']}")
         
         if memory_leak_risks:
-            logger.warning("Memory Leak Risks:")
+            logger.warning("Memory Leak Risks:)
             for risk in memory_leak_risks:
-                logger.warning(f"  - {risk['component_type']}: {risk['issue_type']}")
-                logger.warning(f"    Shared by: {risk['shared_by_users']}")
-                logger.warning(f"    Risk level: {risk['memory_leak_risk']}")
+                logger.warning(f  - {risk['component_type']}: {risk['issue_type']}")
+                logger.warning(f"    Shared by: {risk['shared_by_users']})
+                logger.warning(f    Risk level: {risk['memory_leak_risk']}")
         
         if creation_errors:
-            logger.error("Component Creation Errors:")
+            logger.error("Component Creation Errors:)
             for error in creation_errors:
-                logger.error(f"  - User {error['user_id']}: {error['error_type']} - {error['error']}")
+                logger.error(f  - User {error['user_id']}: {error['error_type']} - {error['error']}")
         
         # Phase 6: Assert violations exist (test should FAIL)
-        logger.info("Phase 6: Checking for factory pattern SSOT violations")
+        logger.info("Phase 6: Checking for factory pattern SSOT violations)
         
         # Check that we successfully created components
         assert len(all_user_components) > 0, (
-            "No user components created successfully. "
-            "Cannot test factory pattern isolation."
+            No user components created successfully. "
+            "Cannot test factory pattern isolation.
         )
         
         # SUCCESS CRITERIA FOR AFTER SSOT CONSOLIDATION:
@@ -373,12 +373,12 @@ class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
         
         # If no violations, might indicate good factory pattern implementation
         if total_violations == 0:
-            logger.info("No factory pattern violations detected - checking if this is expected")
+            logger.info(No factory pattern violations detected - checking if this is expected")
             
             # Verify we actually have multiple users with different instances
             if len(all_user_components) >= 2:
                 # This might actually be good - proper isolation working
-                logger.info("Factory pattern appears to be working correctly with proper isolation")
+                logger.info("Factory pattern appears to be working correctly with proper isolation)
                 return {
                     'status': 'proper_isolation_detected',
                     'users_tested': len(self.test_users),
@@ -386,11 +386,11 @@ class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
                     'message': 'Factory pattern may already provide proper user isolation'
                 }
             else:
-                pytest.fail("Insufficient test data to verify factory pattern behavior")
+                pytest.fail(Insufficient test data to verify factory pattern behavior")
         
         # Expected: Find violations that confirm Issue #680 factory pattern problems
-        logger.info(f"Factory pattern violations detected: {total_violations}")
-        logger.info(f"Critical violations: {len(critical_violations)}")
+        logger.info(f"Factory pattern violations detected: {total_violations})
+        logger.info(fCritical violations: {len(critical_violations)}")
         
         # Check for specific critical violations
         websocket_manager_violations = [
@@ -405,27 +405,27 @@ class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
         
         # Assert violations exist to confirm the issue
         assert total_violations > 0, (
-            f"EXPECTED FACTORY PATTERN VIOLATIONS DETECTED: {total_violations} violations found. "
-            f"Critical: {len(critical_violations)}. "
-            "This confirms factory patterns violate user isolation (Issue #680)."
+            f"EXPECTED FACTORY PATTERN VIOLATIONS DETECTED: {total_violations} violations found. 
+            fCritical: {len(critical_violations)}. "
+            "This confirms factory patterns violate user isolation (Issue #680).
         )
         
         # Check for specific critical component sharing
         if critical_violations:
-            logger.error(f"Critical factory violations found: {len(critical_violations)}")
+            logger.error(fCritical factory violations found: {len(critical_violations)}")
             for violation in critical_violations:
-                logger.error(f"  - {violation['component_type']}: {violation['violation_type']}")
+                logger.error(f"  - {violation['component_type']}: {violation['violation_type']})
         
         # Special check for WebSocket manager sharing (most critical for Issue #680)
         if websocket_manager_violations:
             assert len(websocket_manager_violations) > 0, (
-                f"WebSocket manager sharing confirmed: {len(websocket_manager_violations)} violations. "
-                "This confirms the core factory pattern issue in Issue #680."
+                fWebSocket manager sharing confirmed: {len(websocket_manager_violations)} violations. "
+                "This confirms the core factory pattern issue in Issue #680.
             )
         
         # The test PASSES by proving violations exist (confirming the issue)
-        logger.info("TEST PASSES: Factory pattern SSOT violations confirmed")
-        logger.info("Next step: Implement proper factory isolation patterns")
+        logger.info(TEST PASSES: Factory pattern SSOT violations confirmed")
+        logger.info("Next step: Implement proper factory isolation patterns)
         
         return {
             'total_violations': total_violations,
@@ -438,11 +438,11 @@ class FactoryPatternSSotComplianceTests(SSotAsyncTestCase):
         }
 
 
-if __name__ == "__main__":
+if __name__ == __main__":
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
-    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
-    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.)
+    print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")
     print("For more info: reports/TEST_EXECUTION_GUIDE.md")
 
     # Uncomment and customize the following for SSOT execution:

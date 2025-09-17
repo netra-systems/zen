@@ -1,4 +1,4 @@
-"""Integration tests for ExecutionEngineFactory with WebSocket bridge.
+"Integration tests for ExecutionEngineFactory with WebSocket bridge.
 
 Business Value Justification:
 - Segment: Platform/Internal
@@ -14,7 +14,7 @@ CRITICAL REQUIREMENTS per CLAUDE.md:
 5. BUSINESS VALUE DELIVERY - Test critical WebSocket events through factory
 
 This tests the factory WebSocket integration that enables scalable chat business value.
-"""
+""
 import pytest
 import asyncio
 import uuid
@@ -29,11 +29,11 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocke
 
 @pytest.mark.integration
 class ExecutionEngineFactoryWebSocketIntegrationTests:
-    """Test ExecutionEngineFactory WebSocket bridge integration patterns."""
+    ""Test ExecutionEngineFactory WebSocket bridge integration patterns."
 
     @pytest.fixture
     def mock_websocket_bridge(self):
-        """Create mock WebSocket bridge with comprehensive event tracking."""
+        "Create mock WebSocket bridge with comprehensive event tracking.""
         bridge = MagicMock()
         bridge.is_connected.return_value = True
         bridge.emit = AsyncMock(return_value=True)
@@ -41,7 +41,7 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
         bridge.event_log = []
 
         def log_event(event_type, **kwargs):
-            bridge.event_log.append({'event_type': event_type, 'timestamp': datetime.now(timezone.utc), 'args': kwargs})
+            bridge.event_log.append({'event_type': event_type, 'timestamp': datetime.now(timezone.utc), 'args': kwargs}
             return True
         original_emit = bridge.emit
         original_emit_to_user = bridge.emit_to_user
@@ -58,11 +58,11 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
         return bridge
 
     def create_user_context(self, user_suffix: str) -> UserExecutionContext:
-        """Create user execution context for factory testing."""
+        ""Create user execution context for factory testing."
         return UserExecutionContext(user_id=f'factory_user_{user_suffix}_{uuid.uuid4().hex[:8]}', thread_id=f'factory_thread_{user_suffix}_{uuid.uuid4().hex[:8]}', run_id=f'factory_run_{user_suffix}_{uuid.uuid4().hex[:8]}', request_id=f'factory_req_{user_suffix}_{uuid.uuid4().hex[:8]}', websocket_client_id=f'factory_ws_{user_suffix}_{uuid.uuid4().hex[:8]}')
 
     def test_factory_supports_none_websocket_bridge_for_test_environments(self):
-        """Test factory allows None WebSocket bridge for test environments (Issue #920 fixed)."""
+        "Test factory allows None WebSocket bridge for test environments (Issue #920 fixed).""
         # Issue #920 FIXED: Factory should now accept None websocket_bridge for test environments
         factory = ExecutionEngineFactory(websocket_bridge=None)
         assert factory._websocket_bridge is None
@@ -77,7 +77,7 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
 
     @pytest.mark.asyncio
     async def test_factory_creates_user_engines_with_websocket_integration(self, mock_websocket_bridge):
-        """Test factory creates user engines with proper WebSocket integration."""
+        ""Test factory creates user engines with proper WebSocket integration."
         factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
         user_context = self.create_user_context('websocket_integration')
         with patch('netra_backend.app.agents.supervisor.execution_engine_factory.get_agent_instance_factory') as mock_get_factory:
@@ -101,7 +101,7 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
 
     @pytest.mark.asyncio
     async def test_factory_user_websocket_emitter_creation_with_bridge_validation(self, mock_websocket_bridge):
-        """Test factory creates UserWebSocketEmitter with validated bridge."""
+        "Test factory creates UserWebSocketEmitter with validated bridge.""
         factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
         user_context = self.create_user_context('emitter_creation')
         mock_agent_factory = MagicMock()
@@ -112,7 +112,7 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
 
     @pytest.mark.asyncio
     async def test_factory_concurrent_websocket_emitter_creation_isolation(self, mock_websocket_bridge):
-        """Test factory creates isolated WebSocket emitters for concurrent users."""
+        ""Test factory creates isolated WebSocket emitters for concurrent users."
         factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
         user1_context = self.create_user_context('concurrent_user1')
         user2_context = self.create_user_context('concurrent_user2')
@@ -145,7 +145,7 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
 
     @pytest.mark.asyncio
     async def test_factory_user_execution_scope_websocket_lifecycle(self, mock_websocket_bridge):
-        """Test factory user execution scope manages WebSocket lifecycle properly."""
+        "Test factory user execution scope manages WebSocket lifecycle properly.""
         factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
         user_context = self.create_user_context('scope_lifecycle')
         with patch('netra_backend.app.agents.supervisor.execution_engine_factory.get_agent_instance_factory') as mock_get_factory:
@@ -176,7 +176,7 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
 
     @pytest.mark.asyncio
     async def test_factory_websocket_bridge_error_handling(self, mock_websocket_bridge):
-        """Test factory handles WebSocket bridge errors gracefully."""
+        ""Test factory handles WebSocket bridge errors gracefully."
         factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
         user_context = self.create_user_context('error_handling')
         with patch('netra_backend.app.agents.supervisor.execution_engine_factory.get_agent_instance_factory') as mock_get_factory:
@@ -194,7 +194,7 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
 
     @pytest.mark.asyncio
     async def test_factory_websocket_events_through_created_engines(self, mock_websocket_bridge):
-        """Test WebSocket events work through engines created by factory."""
+        "Test WebSocket events work through engines created by factory.""
         factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
         user_context = self.create_user_context('events_testing')
         with patch('netra_backend.app.agents.supervisor.execution_engine_factory.get_agent_instance_factory') as mock_get_factory:
@@ -223,11 +223,11 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
 
 @pytest.mark.integration
 class ExecutionEngineFactoryWebSocketConfigurationTests:
-    """Test ExecutionEngineFactory WebSocket configuration and setup."""
+    ""Test ExecutionEngineFactory WebSocket configuration and setup."
 
     @pytest.mark.asyncio
     async def test_configure_execution_engine_factory_with_websocket_bridge(self):
-        """Test configuring factory with WebSocket bridge for production use."""
+        "Test configuring factory with WebSocket bridge for production use.""
         mock_bridge = MagicMock()
         mock_bridge.is_connected.return_value = True
         factory = await configure_execution_engine_factory(websocket_bridge=mock_bridge, database_session_manager=None, redis_manager=None)
@@ -239,7 +239,7 @@ class ExecutionEngineFactoryWebSocketConfigurationTests:
         assert retrieved_factory._websocket_bridge == mock_bridge
 
     def test_factory_websocket_bridge_validation_prevents_late_errors(self):
-        """Test early WebSocket bridge validation prevents runtime errors."""
+        ""Test early WebSocket bridge validation prevents runtime errors."
         with pytest.raises(ExecutionEngineFactoryError, match='ExecutionEngineFactory requires websocket_bridge'):
             ExecutionEngineFactory(websocket_bridge=None)
         mock_bridge = MagicMock()
@@ -248,7 +248,7 @@ class ExecutionEngineFactoryWebSocketConfigurationTests:
         assert factory._websocket_bridge is not None
 
     def test_factory_websocket_bridge_configuration_persistence(self):
-        """Test WebSocket bridge configuration persists through factory lifecycle."""
+        "Test WebSocket bridge configuration persists through factory lifecycle.""
         mock_bridge = MagicMock()
         mock_bridge.connection_id = f'bridge_{uuid.uuid4().hex[:8]}'
         factory = ExecutionEngineFactory(websocket_bridge=mock_bridge)
@@ -262,7 +262,7 @@ class ExecutionEngineFactoryWebSocketConfigurationTests:
 
     @pytest.mark.asyncio
     async def test_factory_websocket_bridge_infrastructure_integration(self):
-        """Test factory WebSocket bridge integrates with infrastructure managers."""
+        ""Test factory WebSocket bridge integrates with infrastructure managers."
         mock_bridge = MagicMock()
         mock_database_manager = MagicMock()
         mock_redis_manager = MagicMock()
@@ -287,10 +287,10 @@ class ExecutionEngineFactoryWebSocketConfigurationTests:
 
 @pytest.mark.integration
 class ExecutionEngineFactoryWebSocketBusinessValueTests:
-    """Test ExecutionEngineFactory delivers WebSocket business value."""
+    "Test ExecutionEngineFactory delivers WebSocket business value.""
 
     def test_factory_websocket_integration_enables_chat_business_value(self):
-        """Test factory WebSocket integration enables critical chat business value delivery."""
+        ""Test factory WebSocket integration enables critical chat business value delivery."
         mock_bridge = MagicMock()
         mock_bridge.is_connected.return_value = True
         mock_bridge.supports_chat_events = True
@@ -304,11 +304,11 @@ class ExecutionEngineFactoryWebSocketBusinessValueTests:
 
     @pytest.mark.asyncio
     async def test_factory_enables_real_time_agent_feedback_business_value(self, mock_websocket_bridge):
-        """Test factory enables real-time agent feedback for business value delivery."""
+        "Test factory enables real-time agent feedback for business value delivery."""
         mock_websocket_bridge.business_value_events = []
 
         def track_business_value_event(event_type, user_id, **kwargs):
-            mock_websocket_bridge.business_value_events.append({'event_type': event_type, 'user_id': user_id, 'business_value': True, 'timestamp': datetime.now(timezone.utc)})
+            mock_websocket_bridge.business_value_events.append({'event_type': event_type, 'user_id': user_id, 'business_value': True, 'timestamp': datetime.now(timezone.utc)}
             return True
 
         async def business_value_emit(event_type, data, **kwargs):

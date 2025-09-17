@@ -30,7 +30,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 # Force minimal environment
-os.environ.update({ ))
+os.environ.update({}
 'WEBSOCKET_TEST_ISOLATED': 'true',
 'SKIP_REAL_SERVICES': 'true',
 'USE_REAL_SERVICES': 'false'
@@ -38,52 +38,52 @@ os.environ.update({ ))
 
 
 class ComprehensiveMockBridge:
-    """Mock bridge that captures all WebSocket events for validation."""
+    "Mock bridge that captures all WebSocket events for validation.""
 
     def __init__(self):
         pass
         self.events_captured = []
-        self.state = "active"
+        self.state = active"
         self.run_id_contexts = {}
 
     async def notify_agent_started(self, run_id: str, agent_name: str, **kwargs):
         pass
-        event = {"type": "agent_started", "run_id": run_id, "agent_name": agent_name, "kwargs": kwargs}
+        event = {"type: agent_started", "run_id: run_id, agent_name": agent_name, "kwargs: kwargs}
         self.events_captured.append(event)
         await asyncio.sleep(0)
         return True
 
     async def notify_agent_thinking(self, run_id: str, agent_name: str, message: str, **kwargs):
         pass
-        event = {"type": "agent_thinking", "run_id": run_id, "agent_name": agent_name, "message": message, "kwargs": kwargs}
+        event = {type": "agent_thinking, run_id": run_id, "agent_name: agent_name, message": message, "kwargs: kwargs}
         self.events_captured.append(event)
         await asyncio.sleep(0)
         return True
 
     async def notify_tool_executing(self, run_id: str, agent_name: str, tool_name: str, parameters: Dict = None, **kwargs):
         pass
-        event = {"type": "tool_executing", "run_id": run_id, "agent_name": agent_name, "tool_name": tool_name, "parameters": parameters, "kwargs": kwargs}
+        event = {type": "tool_executing, run_id": run_id, "agent_name: agent_name, tool_name": tool_name, "parameters: parameters, kwargs": kwargs}
         self.events_captured.append(event)
         await asyncio.sleep(0)
         return True
 
     async def notify_tool_completed(self, run_id: str, agent_name: str, tool_name: str, result: Dict = None, execution_time_ms: float = None, **kwargs):
         pass
-        event = {"type": "tool_completed", "run_id": run_id, "agent_name": agent_name, "tool_name": tool_name, "result": result, "execution_time_ms": execution_time_ms, "kwargs": kwargs}
+        event = {"type: tool_completed", "run_id: run_id, agent_name": agent_name, "tool_name: tool_name, result": result, "execution_time_ms: execution_time_ms, kwargs": kwargs}
         self.events_captured.append(event)
         await asyncio.sleep(0)
         return True
 
     async def notify_agent_completed(self, run_id: str, agent_name: str, result: Dict = None, execution_time_ms: float = None, **kwargs):
         pass
-        event = {"type": "agent_completed", "run_id": run_id, "agent_name": agent_name, "result": result, "execution_time_ms": execution_time_ms, "kwargs": kwargs}
+        event = {"type: agent_completed", "run_id: run_id, agent_name": agent_name, "result: result, execution_time_ms": execution_time_ms, "kwargs: kwargs}
         self.events_captured.append(event)
         await asyncio.sleep(0)
         return True
 
     async def notify_agent_error(self, run_id: str, agent_name: str, error: str, error_type: str = None, **kwargs):
         pass
-        event = {"type": "agent_error", "run_id": run_id, "agent_name": agent_name, "error": error, "error_type": error_type, "kwargs": kwargs}
+        event = {type": "agent_error, run_id": run_id, "agent_name: agent_name, error": error, "error_type: error_type, kwargs": kwargs}
         self.events_captured.append(event)
         await asyncio.sleep(0)
         return True
@@ -92,21 +92,21 @@ class ComprehensiveMockBridge:
         return [item for item in []]
 
     def get_critical_events_for_run(self, run_id: str) -> List[Dict]:
-        """Get the 5 critical events for business value."""
+        "Get the 5 critical events for business value.""
         critical_types = {'agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed'}
         return [event for event in self.events_captured )
-        if event.get("run_id") == run_id and event["type"] in critical_types]
+        if event.get(run_id") == run_id and event["type] in critical_types]
 
 
 class TestWebSocketBridgeIntegration(unittest.IsolatedAsyncioTestCase):
-        """Integration tests with real agent classes."""
+        ""Integration tests with real agent classes."
 
     def setUp(self):
-        """Set up test environment with mocks."""
+        "Set up test environment with mocks.""
         self.bridge = ComprehensiveMockBridge()
 
     # Mock the environment and external dependencies
-        self.patches = [ )
+        self.patches = [
         patch('netra_backend.app.core.config.get_config'),
         patch('netra_backend.app.llm.llm_manager.LLMManager'),
         patch('netra_backend.app.redis_manager.RedisManager'),
@@ -118,17 +118,17 @@ class TestWebSocketBridgeIntegration(unittest.IsolatedAsyncioTestCase):
         if hasattr(mock, 'return_value'):
         mock.return_value = Magic
     def tearDown(self):
-        """Clean up mocks."""
+        ""Clean up mocks."
         pass
         for p in self.patches:
         p.stop()
 
     async def test_websocket_bridge_adapter_integration(self):
-        """CRITICAL: WebSocketBridgeAdapter must work with real bridge."""
+        "CRITICAL: WebSocketBridgeAdapter must work with real bridge.""
         try:
         from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
         except ImportError as e:
-        self.skipTest("formatted_string")
+        self.skipTest(formatted_string")
 
         adapter = WebSocketBridgeAdapter()
 
@@ -140,44 +140,44 @@ class TestWebSocketBridgeIntegration(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(adapter.has_websocket_bridge())
 
                     # Test event emission through adapter
-        run_id = "adapter_test_run"
+        run_id = "adapter_test_run
 
-        await adapter.emit_thinking("Test thinking message")
-        await adapter.emit_tool_executing("test_tool", {"param": "value"})
-        await adapter.emit_tool_completed("test_tool", {"result": "success"})
+        await adapter.emit_thinking(Test thinking message")
+        await adapter.emit_tool_executing("test_tool, {param": "value}
+        await adapter.emit_tool_completed(test_tool", {"result: success"}
 
                     # Note: WebSocketBridgeAdapter may not have run_id context by default,
                     # so we check that events were emitted regardless of run_id
         self.assertTrue(len(self.bridge.events_captured) >= 3)
 
                     # Verify event types
-        event_types = [event["type"] for event in self.bridge.events_captured]
-        self.assertIn("agent_thinking", event_types)
-        self.assertIn("tool_executing", event_types)
-        self.assertIn("tool_completed", event_types)
+        event_types = [event["type] for event in self.bridge.events_captured]
+        self.assertIn(agent_thinking", event_types)
+        self.assertIn("tool_executing, event_types)
+        self.assertIn(tool_completed", event_types)
 
     async def test_base_agent_websocket_integration(self):
-        """CRITICAL: BaseAgent must integrate with WebSocket bridge."""
+        "CRITICAL: BaseAgent must integrate with WebSocket bridge.""
         pass
         try:
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.schemas.agent_models import DeepAgentState
         except ImportError as e:
-        self.skipTest("formatted_string")
+        self.skipTest(formatted_string")
 
                                 # Create a test agent that extends BaseAgent
 class TestBaseAgent(BaseAgent):
-    def __init__(self):
+    async def __init__(self):
         pass
-        super().__init__(name="TestBaseAgent")
+        super().__init__(name="TestBaseAgent)
 
-    async def execute(self, state=None, run_id="", stream_updates=False):
-        """Execute with WebSocket event emission."""
-        await self.emit_thinking("BaseAgent is processing")
-        await self.emit_tool_executing("base_tool", {"test": True})
-        await self.emit_tool_completed("base_tool", {"result": "base_success"})
+    async def execute(self, state=None, run_id=", stream_updates=False):
+        "Execute with WebSocket event emission.""
+        await self.emit_thinking(BaseAgent is processing")
+        await self.emit_tool_executing("base_tool, {test": True}
+        await self.emit_tool_completed("base_tool, {result": "base_success}
         await asyncio.sleep(0)
-        return {"status": "completed", "agent": self.name}
+        return {status": "completed, agent": self.name}
 
         agent = TestBaseAgent()
 
@@ -189,47 +189,47 @@ class TestBaseAgent(BaseAgent):
         self.assertTrue(agent.has_websocket_context())
 
     # Execute agent
-        run_id = "base_agent_test_run"
+        run_id = "base_agent_test_run
         result = await agent.execute(None, run_id, True)
 
     # Verify execution succeeded
         self.assertIsNotNone(result)
-        self.assertEqual(result["status"], "completed")
-        self.assertEqual(result["agent"], "TestBaseAgent")
+        self.assertEqual(result[status"], "completed)
+        self.assertEqual(result[agent"], "TestBaseAgent)
 
     # Verify events were emitted (note: run_id might not be propagated automatically)
         events = self.bridge.events_captured
         self.assertTrue(len(events) >= 3)
 
     # Check for expected event types
-        event_types = [event["type"] for event in events]
-        self.assertIn("agent_thinking", event_types)
-        self.assertIn("tool_executing", event_types)
-        self.assertIn("tool_completed", event_types)
+        event_types = [event[type"] for event in events]
+        self.assertIn("agent_thinking, event_types)
+        self.assertIn(tool_executing", event_types)
+        self.assertIn("tool_completed, event_types)
 
     # Check specific event content
-        thinking_events = [item for item in []] == "agent_thinking"]
+        thinking_events = [item for item in []] == agent_thinking"]
         self.assertTrue(len(thinking_events) > 0)
-        self.assertEqual(thinking_events[0]["message"], "BaseAgent is processing")
-        self.assertEqual(thinking_events[0]["agent_name"], "TestBaseAgent")
+        self.assertEqual(thinking_events[0]["message], BaseAgent is processing")
+        self.assertEqual(thinking_events[0]["agent_name], TestBaseAgent")
 
     async def test_nested_agent_bridge_propagation(self):
-        """CRITICAL: WebSocket bridge must propagate through nested agents."""
+        "CRITICAL: WebSocket bridge must propagate through nested agents.""
         pass
         try:
         from netra_backend.app.agents.base_agent import BaseAgent
         except ImportError as e:
-        self.skipTest("formatted_string")
+        self.skipTest(formatted_string")
 
 class ParentAgent(BaseAgent):
-    def __init__(self, child_agent=None):
+    async def __init__(self, child_agent=None):
         pass
-        super().__init__(name="ParentAgent")
+        super().__init__(name="ParentAgent)
         self.child_agent = child_agent
 
-    async def execute(self, state=None, run_id="", stream_updates=False):
+    async def execute(self, state=None, run_id=", stream_updates=False):
         pass
-        await self.emit_thinking("Parent agent starting")
+        await self.emit_thinking("Parent agent starting)
 
         if self.child_agent:
         # Propagate bridge to child
@@ -238,22 +238,22 @@ class ParentAgent(BaseAgent):
 
         child_result = await self.child_agent.execute(state, run_id, stream_updates)
 
-        await self.emit_thinking("Parent agent completing")
+        await self.emit_thinking(Parent agent completing")
         await asyncio.sleep(0)
-        return {"status": "parent_completed"}
+        return {"status: parent_completed"}
 
 class ChildAgent(BaseAgent):
-    def __init__(self):
+    async def __init__(self):
         pass
-        super().__init__(name="ChildAgent")
+        super().__init__(name="ChildAgent)
 
-    async def execute(self, state=None, run_id="", stream_updates=False):
+    async def execute(self, state=None, run_id=", stream_updates=False):
         pass
-        await self.emit_thinking("Child agent executing")
-        await self.emit_tool_executing("child_tool", {"nested": True})
-        await self.emit_tool_completed("child_tool", {"child_result": "success"})
+        await self.emit_thinking("Child agent executing)
+        await self.emit_tool_executing(child_tool", {"nested: True}
+        await self.emit_tool_completed(child_tool", {"child_result: success"}
         await asyncio.sleep(0)
-        return {"status": "child_completed"}
+        return {"status: child_completed"}
 
     # Set up nested agents
         child = ChildAgent()
@@ -263,43 +263,43 @@ class ChildAgent(BaseAgent):
         parent.set_websocket_bridge(self.bridge)
 
     # Execute parent (which should propagate to child)
-        run_id = "nested_test_run"
+        run_id = "nested_test_run
         result = await parent.execute(None, run_id, True)
 
     # Verify execution
-        self.assertEqual(result["status"], "parent_completed")
+        self.assertEqual(result[status"], "parent_completed)
 
     Verify events from both agents
         events = self.bridge.events_captured
         self.assertTrue(len(events) >= 5)  # At least 2 thinking + 1 tool_executing + 1 tool_completed + 1 thinking
 
     Check for events from both agents
-        agent_names = {event["agent_name"] for event in events}
-        self.assertIn("ParentAgent", agent_names)
-        self.assertIn("ChildAgent", agent_names)
+        agent_names = {event[agent_name"] for event in events}
+        self.assertIn("ParentAgent, agent_names)
+        self.assertIn(ChildAgent", agent_names)
 
     # Verify child agent events (shows bridge was propagated)
-        child_events = [item for item in []] == "ChildAgent"]
+        child_events = [item for item in []] == "ChildAgent]
         self.assertTrue(len(child_events) >= 3)
 
-        child_event_types = {e["type"] for e in child_events}
-        self.assertIn("agent_thinking", child_event_types)
-        self.assertIn("tool_executing", child_event_types)
-        self.assertIn("tool_completed", child_event_types)
+        child_event_types = {e[type"] for e in child_events}
+        self.assertIn("agent_thinking, child_event_types)
+        self.assertIn(tool_executing", child_event_types)
+        self.assertIn("tool_completed, child_event_types)
 
     async def test_agent_registry_bridge_propagation(self):
-        """CRITICAL: AgentRegistry must propagate bridge to registered agents."""
+        ""CRITICAL: AgentRegistry must propagate bridge to registered agents."
         try:
         from netra_backend.app.core.registry.universal_registry import AgentRegistry
         from netra_backend.app.agents.base_agent import BaseAgent
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         except ImportError as e:
-        self.skipTest("formatted_string")
+        self.skipTest("formatted_string)
 
 class RegistryTestAgent(BaseAgent):
     def __init__(self, llm_manager=None, tool_dispatcher=None):
-        super().__init__(name="RegistryTestAgent")
+        super().__init__(name=RegistryTestAgent")
         self.llm_manager = llm_manager
         self.tool_dispatcher = tool_dispatcher
 
@@ -307,13 +307,13 @@ class RegistryTestAgent(BaseAgent):
         mock_llm = MagicMock(spec=LLMManager)
         mock_dispatcher = MagicMock(spec=ToolDispatcher)
         mock_dispatcher.has_websocket_support = True
-        mock_dispatcher.executor = Magic        mock_dispatcher.diagnose_websocket_wiring = MagicMock(return_value={"critical_issues": []})
+        mock_dispatcher.executor = Magic        mock_dispatcher.diagnose_websocket_wiring = MagicMock(return_value={"critical_issues: []}
 
         registry = AgentRegistry()
 
     # Register test agent
         test_agent = RegistryTestAgent(mock_llm, mock_dispatcher)
-        registry.register("test_agent", test_agent)
+        registry.register(test_agent", test_agent)
 
     # Set bridge on registry (should propagate to agents)
         registry.set_websocket_bridge(self.bridge)
@@ -322,68 +322,68 @@ class RegistryTestAgent(BaseAgent):
         self.assertTrue(test_agent.has_websocket_context())
 
     # Test agent can emit events
-        await test_agent.emit_thinking("Registry test message")
+        await test_agent.emit_thinking("Registry test message)
 
     # Verify event was captured
         events = self.bridge.events_captured
         self.assertTrue(len(events) >= 1)
-        self.assertEqual(events[-1]["type"], "agent_thinking")
-        self.assertEqual(events[-1]["message"], "Registry test message")
-        self.assertEqual(events[-1]["agent_name"], "RegistryTestAgent")
+        self.assertEqual(events[-1][type"], "agent_thinking)
+        self.assertEqual(events[-1][message"], "Registry test message)
+        self.assertEqual(events[-1][agent_name"], "RegistryTestAgent)
 
     async def test_error_handling_and_recovery(self):
-        """CRITICAL: Bridge must handle errors gracefully and allow recovery."""
+        ""CRITICAL: Bridge must handle errors gracefully and allow recovery."
         pass
         try:
         from netra_backend.app.agents.base_agent import BaseAgent
         except ImportError as e:
-        self.skipTest("formatted_string")
+        self.skipTest("formatted_string)
 
 class ErrorTestAgent(BaseAgent):
-    def __init__(self):
+    async def __init__(self):
         pass
-        super().__init__(name="ErrorTestAgent")
+        super().__init__(name=ErrorTestAgent")
         self.error_on_next = False
 
-    async def execute(self, state=None, run_id="", stream_updates=False):
+    async def execute(self, state=None, run_id=", stream_updates=False):
         pass
         if self.error_on_next:
-        await self.emit_error("Test error", "test_error_type")
-        raise Exception("Test error condition")
+        await self.emit_error(Test error", "test_error_type)
+        raise Exception(Test error condition")
 
-        await self.emit_thinking("Error test agent working normally")
+        await self.emit_thinking("Error test agent working normally)
         await asyncio.sleep(0)
-        return {"status": "success"}
+        return {status": "success}
 
         agent = ErrorTestAgent()
         agent.set_websocket_bridge(self.bridge)
 
         # Normal execution first
-        run_id1 = "error_test_normal"
+        run_id1 = error_test_normal"
         result1 = await agent.execute(None, run_id1, True)
-        self.assertEqual(result1["status"], "success")
+        self.assertEqual(result1["status], success")
 
         # Error execution
         agent.error_on_next = True
-        run_id2 = "error_test_error"
+        run_id2 = "error_test_error
 
         with self.assertRaises(Exception):
         await agent.execute(None, run_id2, True)
 
             # Recovery execution
         agent.error_on_next = False
-        run_id3 = "error_test_recovery"
+        run_id3 = error_test_recovery"
         result3 = await agent.execute(None, run_id3, True)
-        self.assertEqual(result3["status"], "success")
+        self.assertEqual(result3["status], success")
 
             # Verify error event was captured
-        error_events = [item for item in []] == "agent_error"]
+        error_events = [item for item in []] == "agent_error]
         self.assertTrue(len(error_events) >= 1)
-        self.assertEqual(error_events[0]["error"], "Test error")
-        self.assertEqual(error_events[0]["error_type"], "test_error_type")
+        self.assertEqual(error_events[0][error"], "Test error)
+        self.assertEqual(error_events[0][error_type"], "test_error_type)
 
             # Verify bridge still works after error
-        normal_events = [item for item in []] == "agent_thinking"]
+        normal_events = [item for item in []] == agent_thinking"]
         self.assertTrue(len(normal_events) >= 2)  # Before and after error
 
 
@@ -393,7 +393,7 @@ class ErrorTestAgent(BaseAgent):
 
 
 class TestWebSocketConnection:
-        """Real WebSocket connection for testing instead of mocks."""
+        "Real WebSocket connection for testing instead of mocks.""
 
     def __init__(self):
         pass
@@ -402,18 +402,18 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        """Send JSON message."""
+        ""Send JSON message."
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
-        """Close WebSocket connection."""
+    async def close(self, code: int = 1000, reason: str = Normal closure"):
+        "Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
 
-    def get_messages(self) -> list:
-        """Get all sent messages."""
+    async def get_messages(self) -> list:
+        ""Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()

@@ -2179,7 +2179,7 @@ class StartupOrchestrator:
             )
 
             # Create the actual bridge instance using the factory
-            bridge_instance = websocket_factory.create_agent_bridge(user_context=system_context)
+            bridge_instance = WebSocketBridgeFactory.create_agent_bridge(user_context=system_context)
 
             # Configure the bridge instance with runtime dependencies
             if hasattr(self.app.state, 'agent_supervisor'):

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""
+"
 FAILING TEST: 5 Critical Events Delivery Reliability - Issue #680
 
 This test PROVES unreliable delivery of 5 critical WebSocket events due to SSOT violations.
@@ -11,7 +11,7 @@ Test Strategy:
 - Events to validate: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
 
 Expected Result: FAILS before SSOT refactor, PASSES after SSOT consolidation
-"""
+""
 
 import asyncio
 import json
@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 
 class WebSocketEventCapture:
-    """Captures and analyzes WebSocket events for reliability testing."""
+    ""Captures and analyzes WebSocket events for reliability testing."
     
     def __init__(self, user_id: str):
         self.user_id = user_id
@@ -56,25 +56,25 @@ class WebSocketEventCapture:
         self.out_of_order_events = []
         
     def start_capture(self):
-        """Start capturing events."""
+        "Start capturing events.""
         self.capture_start_time = time.time()
         self.events_received.clear()
         
     def stop_capture(self):
-        """Stop capturing events and analyze results."""
+        ""Stop capturing events and analyze results."
         self.capture_end_time = time.time()
         self._analyze_captured_events()
         
-    def expect_event(self, event_type: str, event_data: Dict[str, Any]):
-        """Register an expected event."""
+    def expect_event(self, event_type: str, event_data: Dict[str, Any]:
+        "Register an expected event.""
         self.events_expected.append({
             'type': event_type,
             'data': event_data,
             'expected_at': time.time()
-        })
+        }
         
-    def capture_event(self, event_type: str, event_data: Dict[str, Any]):
-        """Capture a received event."""
+    def capture_event(self, event_type: str, event_data: Dict[str, Any]:
+        ""Capture a received event."
         received_event = {
             'type': event_type,
             'data': event_data,
@@ -84,7 +84,7 @@ class WebSocketEventCapture:
         self.events_received.append(received_event)
         
     def _analyze_captured_events(self):
-        """Analyze captured events for delivery issues."""
+        "Analyze captured events for delivery issues.""
         # Find missing events
         expected_types = [e['type'] for e in self.events_expected]
         received_types = [e['type'] for e in self.events_received]
@@ -104,7 +104,7 @@ class WebSocketEventCapture:
                 self.duplicate_events.append({
                     'type': event_type,
                     'count': count
-                })
+                }
         
         # Check event ordering
         expected_order = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
@@ -116,10 +116,10 @@ class WebSocketEventCapture:
                         'expected_type': expected_type,
                         'actual_type': received_types[i],
                         'actual_position': received_types.index(expected_type) if expected_type in received_types else -1
-                    })
+                    }
     
     def get_delivery_reliability_report(self) -> Dict[str, Any]:
-        """Get comprehensive delivery reliability report."""
+        ""Get comprehensive delivery reliability report."
         total_expected = len(self.events_expected)
         total_received = len(self.events_received)
         missing_count = len(self.missing_events)
@@ -153,7 +153,7 @@ class WebSocketEventCapture:
 
 
 class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
-    """
+    "
     FAILING TEST: Proves unreliable delivery of 5 critical WebSocket events.
     
     This test validates the delivery reliability of the 5 business-critical WebSocket events
@@ -167,10 +167,10 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
     4. Event delivery timeouts from shared state conflicts
     
     After SSOT consolidation, should PASS with 100% reliable delivery.
-    """
+    ""
     
     def setup_method(self, method=None):
-        """Setup for event delivery reliability testing."""
+        ""Setup for event delivery reliability testing."
         super().setup_method(method)
         
         # Test configuration
@@ -191,21 +191,21 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
         self.timing_violations = []
         self.ssot_violations = []
         
-        logger.info(f"Starting WebSocket event delivery reliability test")
+        logger.info(f"Starting WebSocket event delivery reliability test)
     
     async def simulate_agent_workflow_with_events(self, user_id: str) -> Dict[str, Any]:
-        """
+        ""
         Simulate complete agent workflow that should trigger all 5 critical events.
         
         This method replicates the real agent execution flow to test event delivery
         under realistic conditions where SSOT violations would manifest.
-        """
+        "
         # Create user context and WebSocket components
         execution_context = await create_isolated_execution_context(
             user_id=user_id,
-            request_id=f"req_{user_id}_{uuid.uuid4().hex[:8]}",
-            thread_id=f"thread_{user_id}_{uuid.uuid4().hex[:8]}",
-            run_id=f"run_{user_id}_{uuid.uuid4().hex[:8]}"
+            request_id=f"req_{user_id}_{uuid.uuid4().hex[:8]},
+            thread_id=fthread_{user_id}_{uuid.uuid4().hex[:8]}",
+            run_id=f"run_{user_id}_{uuid.uuid4().hex[:8]}
         )
         
         websocket_manager = get_websocket_manager()
@@ -225,7 +225,7 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
         
         # Register expected events
         for event_type in self.critical_events:
-            event_capture.expect_event(event_type, {'user_id': user_id})
+            event_capture.expect_event(event_type, {'user_id': user_id}
         
         event_capture.start_capture()
         
@@ -268,10 +268,10 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
                 await asyncio.sleep(0.2)  # Realistic processing delay
                 
                 # Send event through WebSocket bridge (where SSOT violations manifest)
-                await bridge.send_event(step['event_type'], step['data'])
+                await bridge.send_event(step['event_type'], step['data']
                 
                 # Capture the event (simulating successful delivery)
-                event_capture.capture_event(step['event_type'], step['data'])
+                event_capture.capture_event(step['event_type'], step['data']
                 
                 step_duration = time.time() - step_start_time
                 step_results.append({
@@ -279,9 +279,9 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
                     'event_type': step['event_type'],
                     'success': True,
                     'duration': step_duration
-                })
+                }
                 
-                logger.debug(f"Step {i+1}/{len(workflow_steps)} completed: {step['step']}")
+                logger.debug(fStep {i+1}/{len(workflow_steps)} completed: {step['step']}")
                 
             except Exception as e:
                 step_duration = time.time() - step_start_time
@@ -291,7 +291,7 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
                     'success': False,
                     'error': str(e),
                     'duration': step_duration
-                })
+                }
                 
                 # Record delivery failure
                 self.delivery_failures.append({
@@ -300,9 +300,9 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
                     'step': step['step'],
                     'error': str(e),
                     'timestamp': time.time()
-                })
+                }
                 
-                logger.error(f"Step {step['step']} failed for {user_id}: {e}")
+                logger.error(f"Step {step['step']} failed for {user_id}: {e})
         
         event_capture.stop_capture()
         
@@ -316,12 +316,12 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
         }
     
     async def run_concurrent_agent_workflows(self, user_count: int = 2) -> List[Dict[str, Any]]:
-        """
+        ""
         Run multiple agent workflows concurrently to expose SSOT violations.
         
         Concurrent execution exposes shared state issues and event delivery conflicts.
-        """
-        test_users = [f"event_test_user_{i}_{uuid.uuid4().hex[:6]}" for i in range(user_count)]
+        "
+        test_users = [f"event_test_user_{i}_{uuid.uuid4().hex[:6]} for i in range(user_count)]
         
         # Create concurrent workflow tasks
         workflow_tasks = []
@@ -335,30 +335,30 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
             try:
                 result = await asyncio.wait_for(task, timeout=self.test_timeout)
                 workflow_results.append(result)
-                logger.info(f"Workflow completed for {user_id}")
+                logger.info(fWorkflow completed for {user_id}")
             except asyncio.TimeoutError:
                 self.timing_violations.append({
                     'user_id': user_id,
                     'violation_type': 'workflow_timeout',
                     'timeout': self.test_timeout
-                })
-                logger.error(f"Workflow timeout for {user_id}")
+                }
+                logger.error(f"Workflow timeout for {user_id})
             except Exception as e:
                 self.delivery_failures.append({
                     'user_id': user_id,
                     'error': str(e),
                     'failure_type': 'workflow_exception'
-                })
-                logger.error(f"Workflow exception for {user_id}: {e}")
+                }
+                logger.error(fWorkflow exception for {user_id}: {e}")
         
         return workflow_results
     
     def analyze_event_delivery_reliability(self) -> Dict[str, Any]:
-        """
+        "
         Analyze event delivery reliability across all test users.
         
         Returns comprehensive analysis of delivery failures and SSOT violations.
-        """
+        ""
         reliability_reports = []
         total_users = len(self.event_captures)
         
@@ -375,7 +375,7 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
             total_duplicate_events = sum(r['duplicate_count'] for r in reliability_reports)
             total_out_of_order_events = sum(r['out_of_order_count'] for r in reliability_reports)
             
-            users_with_failures = len([r for r in reliability_reports if r['has_delivery_failures']])
+            users_with_failures = len([r for r in reliability_reports if r['has_delivery_failures']]
             overall_delivery_rate = total_received_events / total_expected_events if total_expected_events > 0 else 0
             user_success_rate = (total_users - users_with_failures) / total_users if total_users > 0 else 0
             
@@ -389,7 +389,7 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
                     'count': total_missing_events,
                     'severity': 'CRITICAL',
                     'likely_cause': 'WebSocket manager instance conflicts'
-                })
+                }
             
             # Duplicate events indicate multiple notifier implementations
             if total_duplicate_events > 0:
@@ -398,7 +398,7 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
                     'count': total_duplicate_events,
                     'severity': 'HIGH',
                     'likely_cause': 'Multiple WebSocketNotifier implementations'
-                })
+                }
             
             # Out-of-order events indicate race conditions
             if total_out_of_order_events > 0:
@@ -407,7 +407,7 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
                     'count': total_out_of_order_events,
                     'severity': 'MEDIUM',
                     'likely_cause': 'Race conditions from shared state'
-                })
+                }
             
             # Low user success rate indicates systematic SSOT issues
             if user_success_rate < 0.8:  # Less than 80% success rate
@@ -416,7 +416,7 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
                     'user_success_rate': user_success_rate,
                     'severity': 'CRITICAL',
                     'likely_cause': 'Fundamental SSOT violations in WebSocket architecture'
-                })
+                }
         
         else:
             total_expected_events = 0
@@ -447,70 +447,70 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
     
     @pytest.mark.asyncio
     async def test_five_critical_events_delivery_failure(self):
-        """
+        ""
         FAILING TEST: Proves unreliable delivery of 5 critical WebSocket events.
         
         This test runs agent workflows and validates that all 5 critical events are
         delivered reliably. Expected to FAIL due to SSOT violations.
         
         After SSOT consolidation, should PASS with 100% reliable delivery.
-        """
-        logger.info("Starting 5 critical events delivery reliability test")
+        "
+        logger.info("Starting 5 critical events delivery reliability test)
         
         # Phase 1: Run concurrent agent workflows
-        logger.info("Phase 1: Running concurrent agent workflows")
+        logger.info(Phase 1: Running concurrent agent workflows")
         concurrent_user_count = 3  # Test with multiple users to expose SSOT issues
         workflow_results = await self.run_concurrent_agent_workflows(concurrent_user_count)
         
         # Phase 2: Analyze event delivery reliability
-        logger.info("Phase 2: Analyzing event delivery reliability")
+        logger.info("Phase 2: Analyzing event delivery reliability)
         reliability_analysis = self.analyze_event_delivery_reliability()
         
         # Phase 3: Record metrics
-        self.record_metric('users_tested', reliability_analysis['total_users_tested'])
-        self.record_metric('user_success_rate', reliability_analysis['user_success_rate'])
-        self.record_metric('overall_delivery_rate', reliability_analysis['overall_delivery_rate'])
-        self.record_metric('missing_events', reliability_analysis['missing_events'])
-        self.record_metric('duplicate_events', reliability_analysis['duplicate_events'])
-        self.record_metric('out_of_order_events', reliability_analysis['out_of_order_events'])
-        self.record_metric('ssot_violations', len(reliability_analysis['ssot_violations']))
-        self.record_metric('delivery_failures', reliability_analysis['delivery_failures'])
+        self.record_metric('users_tested', reliability_analysis['total_users_tested']
+        self.record_metric('user_success_rate', reliability_analysis['user_success_rate']
+        self.record_metric('overall_delivery_rate', reliability_analysis['overall_delivery_rate']
+        self.record_metric('missing_events', reliability_analysis['missing_events']
+        self.record_metric('duplicate_events', reliability_analysis['duplicate_events']
+        self.record_metric('out_of_order_events', reliability_analysis['out_of_order_events']
+        self.record_metric('ssot_violations', len(reliability_analysis['ssot_violations'])
+        self.record_metric('delivery_failures', reliability_analysis['delivery_failures']
         
         # Log detailed analysis
-        logger.info(f"Event Delivery Reliability Analysis:")
-        logger.info(f"  Users tested: {reliability_analysis['total_users_tested']}")
-        logger.info(f"  User success rate: {reliability_analysis['user_success_rate']:.2%}")
-        logger.info(f"  Overall delivery rate: {reliability_analysis['overall_delivery_rate']:.2%}")
-        logger.info(f"  Missing events: {reliability_analysis['missing_events']}")
-        logger.info(f"  Duplicate events: {reliability_analysis['duplicate_events']}")
-        logger.info(f"  Out-of-order events: {reliability_analysis['out_of_order_events']}")
-        logger.info(f"  SSOT violations: {len(reliability_analysis['ssot_violations'])}")
+        logger.info(fEvent Delivery Reliability Analysis:")
+        logger.info(f"  Users tested: {reliability_analysis['total_users_tested']})
+        logger.info(f  User success rate: {reliability_analysis['user_success_rate']:.2%}")
+        logger.info(f"  Overall delivery rate: {reliability_analysis['overall_delivery_rate']:.2%})
+        logger.info(f  Missing events: {reliability_analysis['missing_events']}")
+        logger.info(f"  Duplicate events: {reliability_analysis['duplicate_events']})
+        logger.info(f  Out-of-order events: {reliability_analysis['out_of_order_events']}")
+        logger.info(f"  SSOT violations: {len(reliability_analysis['ssot_violations']})
         
         # Log specific SSOT violations
         if reliability_analysis['ssot_violations']:
-            logger.error("SSOT Violations Detected:")
+            logger.error(SSOT Violations Detected:")
             for violation in reliability_analysis['ssot_violations']:
-                logger.error(f"  - {violation['type']}: {violation['likely_cause']}")
-                logger.error(f"    Severity: {violation['severity']}")
+                logger.error(f"  - {violation['type']}: {violation['likely_cause']})
+                logger.error(f    Severity: {violation['severity']}")
                 if 'count' in violation:
-                    logger.error(f"    Count: {violation['count']}")
+                    logger.error(f"    Count: {violation['count']})
                 if 'user_success_rate' in violation:
-                    logger.error(f"    User success rate: {violation['user_success_rate']:.2%}")
+                    logger.error(f    User success rate: {violation['user_success_rate']:.2%}")
         
         # Log individual user reports for debugging
         for report in reliability_analysis['individual_reports']:
             if report['has_delivery_failures']:
-                logger.warning(f"User {report['user_id']} delivery failures:")
-                logger.warning(f"  Missing events: {report['missing_events']}")
-                logger.warning(f"  Duplicate events: {[d['type'] for d in report['duplicate_events']]}")
-                logger.warning(f"  Delivery rate: {report['delivery_rate']:.2%}")
+                logger.warning(f"User {report['user_id']} delivery failures:)
+                logger.warning(f  Missing events: {report['missing_events']}")
+                logger.warning(f"  Duplicate events: {[d['type'] for d in report['duplicate_events']]})
+                logger.warning(f  Delivery rate: {report['delivery_rate']:.2%}")
         
         # Phase 4: Assert delivery failures exist (test should FAIL)
-        logger.info("Phase 4: Checking for event delivery failures")
+        logger.info("Phase 4: Checking for event delivery failures)
         
         # Check that we tested multiple users
         assert reliability_analysis['total_users_tested'] >= 2, (
-            "Must test multiple users to expose SSOT violations"
+            Must test multiple users to expose SSOT violations"
         )
         
         # SUCCESS CRITERIA FOR AFTER SSOT CONSOLIDATION:
@@ -523,15 +523,14 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
             reliability_analysis['duplicate_events'] + 
             reliability_analysis['out_of_order_events'] +
             reliability_analysis['delivery_failures']
-        )
         
-        ssot_violation_count = len(reliability_analysis['ssot_violations'])
+        ssot_violation_count = len(reliability_analysis['ssot_violations']
         user_success_rate = reliability_analysis['user_success_rate']
         overall_delivery_rate = reliability_analysis['overall_delivery_rate']
         
         # If no delivery issues, might indicate good implementation
         if total_delivery_issues == 0 and user_success_rate >= 0.9 and overall_delivery_rate >= 0.95:
-            logger.info("High reliability detected - checking if this indicates good implementation")
+            logger.info("High reliability detected - checking if this indicates good implementation)
             return {
                 'status': 'high_reliability_detected',
                 'user_success_rate': user_success_rate,
@@ -540,28 +539,28 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
             }
         
         # Expected: Find delivery issues that confirm Issue #680
-        logger.info(f"Event delivery issues detected: {total_delivery_issues}")
-        logger.info(f"SSOT violations: {ssot_violation_count}")
-        logger.info(f"User success rate: {user_success_rate:.2%}")
-        logger.info(f"Overall delivery rate: {overall_delivery_rate:.2%}")
+        logger.info(fEvent delivery issues detected: {total_delivery_issues}")
+        logger.info(f"SSOT violations: {ssot_violation_count})
+        logger.info(fUser success rate: {user_success_rate:.2%}")
+        logger.info(f"Overall delivery rate: {overall_delivery_rate:.2%})
         
         # Assert delivery failures exist to confirm the issue
         assert total_delivery_issues > 0 or user_success_rate < 0.9, (
-            f"EXPECTED EVENT DELIVERY FAILURES DETECTED: {total_delivery_issues} issues found. "
-            f"User success rate: {user_success_rate:.2%}, Delivery rate: {overall_delivery_rate:.2%}. "
-            "This confirms unreliable event delivery from SSOT violations (Issue #680)."
+            fEXPECTED EVENT DELIVERY FAILURES DETECTED: {total_delivery_issues} issues found. "
+            f"User success rate: {user_success_rate:.2%}, Delivery rate: {overall_delivery_rate:.2%}. 
+            This confirms unreliable event delivery from SSOT violations (Issue #680)."
         )
         
         # Check for specific critical issues
         if reliability_analysis['missing_events'] > 0:
-            logger.error(f"Missing events detected: {reliability_analysis['missing_events']}")
+            logger.error(f"Missing events detected: {reliability_analysis['missing_events']})
             
         if user_success_rate < 0.5:  # Less than 50% success rate
-            logger.error(f"CRITICAL: User success rate below 50%: {user_success_rate:.2%}")
+            logger.error(fCRITICAL: User success rate below 50%: {user_success_rate:.2%}")
         
         # The test PASSES by proving delivery failures exist (confirming the issue)
-        logger.info("TEST PASSES: WebSocket event delivery failures confirmed")
-        logger.info("Next step: Implement SSOT consolidation to ensure reliable event delivery")
+        logger.info("TEST PASSES: WebSocket event delivery failures confirmed)
+        logger.info(Next step: Implement SSOT consolidation to ensure reliable event delivery")
         
         return {
             'total_delivery_issues': total_delivery_issues,
@@ -575,12 +574,12 @@ class WebSocketEventDeliveryFailuresTests(SSotAsyncTestCase):
         }
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
-    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
-    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
-    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print(MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>)
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md")
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

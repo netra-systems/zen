@@ -637,9 +637,9 @@ class TestRealComponentIntegration:
 
 @pytest.mark.asyncio
     async def test_real_websocket_manager_integration(self, user_context_1):
-"""Test integration with real WebSocket manager if available."""
+        """Test integration with real WebSocket manager if available."""
 try:
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
             # Only run if WebSocket manager is available
 websocket_manager = get_websocket_manager()
@@ -656,7 +656,7 @@ await emitter.cleanup()
 assert not emitter.is_active
 
 except ImportError:
-pytest.skip("WebSocket manager not available for integration test")
+    pytest.skip("WebSocket manager not available for integration test")
 
 
 if __name__ == "__main__":

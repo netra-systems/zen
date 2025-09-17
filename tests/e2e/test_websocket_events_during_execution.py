@@ -1,4 +1,4 @@
-"""E2E tests for WebSocket events during execution.
+"E2E tests for WebSocket events during execution.
 
 Business Value Justification:
 - Segment: ALL (Free  ->  Enterprise)
@@ -15,7 +15,7 @@ CRITICAL REQUIREMENTS per CLAUDE.md:
 5. CHAT BUSINESS VALUE - Test complete execution workflow delivers chat value
 
 This tests the mission-critical WebSocket events that enable $500K+ ARR chat functionality.
-"""
+""
 import pytest
 import asyncio
 import uuid
@@ -35,10 +35,10 @@ from shared.types.execution_types import StronglyTypedWebSocketEvent, WebSocketE
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
 
 class MockWebSocketConnection:
-    """Mock WebSocket connection for E2E testing with real event tracking."""
+    ""Mock WebSocket connection for E2E testing with real event tracking."
 
     def __init__(self, user_id: str, connection_id: str):
-        """Initialize mock WebSocket connection."""
+        "Initialize mock WebSocket connection.""
         self.user_id = user_id
         self.connection_id = connection_id
         self.connected = True
@@ -47,46 +47,46 @@ class MockWebSocketConnection:
         self.business_value_events = []
 
     async def send(self, message: str):
-        """Mock sending message to WebSocket."""
+        ""Mock sending message to WebSocket."
         try:
             event_data = json.loads(message)
-            self.events_received.append({'timestamp': datetime.now(timezone.utc), 'event_data': event_data, 'user_id': self.user_id, 'connection_id': self.connection_id})
+            self.events_received.append({'timestamp': datetime.now(timezone.utc), 'event_data': event_data, 'user_id': self.user_id, 'connection_id': self.connection_id}
             if self._is_business_value_event(event_data):
-                self.business_value_events.append({'event_type': event_data.get('type', 'unknown'), 'agent_name': event_data.get('agent_name'), 'timestamp': datetime.now(timezone.utc), 'business_value': True, 'user_id': self.user_id})
+                self.business_value_events.append({'event_type': event_data.get('type', 'unknown'), 'agent_name': event_data.get('agent_name'), 'timestamp': datetime.now(timezone.utc), 'business_value': True, 'user_id': self.user_id}
             return True
         except (json.JSONDecodeError, Exception) as e:
             print(f'Mock WebSocket send error: {e}')
             return False
 
-    def _is_business_value_event(self, event_data: Dict[str, Any]) -> bool:
-        """Check if event delivers business value (critical chat events)."""
+    def _is_business_value_event(self, event_data: Dict[str, Any] -> bool:
+        "Check if event delivers business value (critical chat events).""
         business_critical_events = {'agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed', 'agent_error'}
         event_type = event_data.get('type', '').lower()
         return any((critical in event_type for critical in business_critical_events))
 
     def get_business_value_summary(self) -> Dict[str, Any]:
-        """Get summary of business value events received."""
+        ""Get summary of business value events received."
         event_types = [event['event_type'] for event in self.business_value_events]
         return {'total_business_events': len(self.business_value_events), 'event_types': list(set(event_types)), 'first_event_time': self.business_value_events[0]['timestamp'] if self.business_value_events else None, 'last_event_time': self.business_value_events[-1]['timestamp'] if self.business_value_events else None, 'user_id': self.user_id, 'connection_id': self.connection_id}
 
 class MockWebSocketBridge:
-    """Mock WebSocket bridge that simulates real WebSocket infrastructure."""
+    "Mock WebSocket bridge that simulates real WebSocket infrastructure.""
 
     def __init__(self):
-        """Initialize mock WebSocket bridge."""
+        ""Initialize mock WebSocket bridge."
         self.connections: Dict[str, MockWebSocketConnection] = {}
         self.user_connections: Dict[str, List[str]] = {}
         self.event_log = []
         self.business_value_metrics = {'total_events_sent': 0, 'users_served': set(), 'critical_events_delivered': 0}
 
     def is_connected(self, connection_id: Optional[str]=None) -> bool:
-        """Check if WebSocket is connected."""
+        "Check if WebSocket is connected.""
         if connection_id:
             return connection_id in self.connections and self.connections[connection_id].connected
         return len(self.connections) > 0
 
     def add_user_connection(self, user_id: str, connection_id: str) -> MockWebSocketConnection:
-        """Add user connection for testing."""
+        ""Add user connection for testing."
         connection = MockWebSocketConnection(user_id, connection_id)
         self.connections[connection_id] = connection
         if user_id not in self.user_connections:
@@ -95,18 +95,18 @@ class MockWebSocketBridge:
         return connection
 
     async def emit(self, event_type: str, data: Dict[str, Any], **kwargs) -> bool:
-        """Mock emit to all connections."""
+        "Mock emit to all connections.""
         success_count = 0
         for connection in self.connections.values():
             if connection.connected:
-                message = json.dumps({'type': event_type, **data, 'timestamp': datetime.now(timezone.utc).isoformat()})
+                message = json.dumps({'type': event_type, **data, 'timestamp': datetime.now(timezone.utc).isoformat()}
                 if await connection.send(message):
                     success_count += 1
         self._track_business_value_event(event_type, data)
         return success_count > 0
 
     async def emit_to_user(self, user_id: str, event_type: str, data: Dict[str, Any], **kwargs) -> bool:
-        """Mock emit to specific user's connections."""
+        ""Mock emit to specific user's connections."
         if user_id not in self.user_connections:
             return False
         success_count = 0
@@ -114,14 +114,14 @@ class MockWebSocketBridge:
             if connection_id in self.connections:
                 connection = self.connections[connection_id]
                 if connection.connected:
-                    message = json.dumps({'type': event_type, 'user_id': user_id, **data, 'timestamp': datetime.now(timezone.utc).isoformat()})
+                    message = json.dumps({'type': event_type, 'user_id': user_id, **data, 'timestamp': datetime.now(timezone.utc).isoformat()}
                     if await connection.send(message):
                         success_count += 1
         self._track_business_value_event(event_type, data, user_id)
         return success_count > 0
 
     def _track_business_value_event(self, event_type: str, data: Dict[str, Any], user_id: Optional[str]=None):
-        """Track business value metrics."""
+        "Track business value metrics.""
         self.business_value_metrics['total_events_sent'] += 1
         if user_id:
             self.business_value_metrics['users_served'].add(user_id)
@@ -130,34 +130,34 @@ class MockWebSocketBridge:
             self.business_value_metrics['critical_events_delivered'] += 1
 
     def get_business_value_metrics(self) -> Dict[str, Any]:
-        """Get business value metrics."""
-        return {**self.business_value_metrics, 'users_served_count': len(self.business_value_metrics['users_served']), 'connections_active': len([c for c in self.connections.values() if c.connected])}
+        ""Get business value metrics."
+        return {**self.business_value_metrics, 'users_served_count': len(self.business_value_metrics['users_served'], 'connections_active': len([c for c in self.connections.values() if c.connected]}
 
 @pytest.mark.e2e
 class WebSocketEventsE2ETests(SSotBaseTestCase):
-    """Test WebSocket events during execution end-to-end with authentication."""
+    "Test WebSocket events during execution end-to-end with authentication.""
 
     @pytest.fixture
     async def e2e_auth_helper(self) -> E2EAuthHelper:
-        """Create E2E authentication helper."""
+        ""Create E2E authentication helper."
         config = E2EAuthConfig.for_environment('staging')
         return E2EAuthHelper(config=config)
 
     @pytest.fixture
     async def authenticated_user_context(self, e2e_auth_helper: E2EAuthHelper) -> UserExecutionContext:
-        """Create authenticated user context with WebSocket connection."""
+        "Create authenticated user context with WebSocket connection.""
         auth_result = await e2e_auth_helper.authenticate_test_user()
         websocket_id = f'e2e_ws_{uuid.uuid4().hex[:12]}'
-        return UserExecutionContext(user_id=auth_result.user_id, thread_id=f'e2e_ws_thread_{uuid.uuid4().hex[:12]}', run_id=f'e2e_ws_run_{uuid.uuid4().hex[:12]}', request_id=f'e2e_ws_req_{uuid.uuid4().hex[:12]}', websocket_client_id=websocket_id, agent_context={'authenticated': True, 'websocket_events_enabled': True, 'business_value_test': True, 'chat_functionality': True}, audit_metadata={'auth_flow': 'e2e_jwt', 'websocket_id': websocket_id, 'test_type': 'websocket_events_e2e', 'business_critical': True})
+        return UserExecutionContext(user_id=auth_result.user_id, thread_id=f'e2e_ws_thread_{uuid.uuid4().hex[:12]}', run_id=f'e2e_ws_run_{uuid.uuid4().hex[:12]}', request_id=f'e2e_ws_req_{uuid.uuid4().hex[:12]}', websocket_client_id=websocket_id, agent_context={'authenticated': True, 'websocket_events_enabled': True, 'business_value_test': True, 'chat_functionality': True}, audit_metadata={'auth_flow': 'e2e_jwt', 'websocket_id': websocket_id, 'test_type': 'websocket_events_e2e', 'business_critical': True}
 
     @pytest.fixture
     def mock_websocket_bridge(self) -> MockWebSocketBridge:
-        """Create mock WebSocket bridge with real event tracking."""
+        ""Create mock WebSocket bridge with real event tracking."
         return MockWebSocketBridge()
 
     @pytest.mark.asyncio
     async def test_mission_critical_websocket_events_during_execution_e2e(self, e2e_auth_helper: E2EAuthHelper, authenticated_user_context: UserExecutionContext, mock_websocket_bridge: MockWebSocketBridge):
-        """Test all mission-critical WebSocket events during agent execution."""
+        "Test all mission-critical WebSocket events during agent execution.""
         connection = mock_websocket_bridge.add_user_connection(authenticated_user_context.user_id, authenticated_user_context.websocket_client_id)
         connection.auth_validated = True
         factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
@@ -168,7 +168,7 @@ class WebSocketEventsE2ETests(SSotBaseTestCase):
             mock_get_factory.return_value = mock_agent_factory
             engine = await factory.create_for_user(authenticated_user_context)
             try:
-                exec_context = AgentExecutionContext(user_id=authenticated_user_context.user_id, thread_id=authenticated_user_context.thread_id, run_id=authenticated_user_context.run_id, request_id=authenticated_user_context.request_id, agent_name='business_value_agent', step=PipelineStep.INITIALIZATION, execution_timestamp=datetime.now(timezone.utc), pipeline_step_num=1, metadata={'business_critical': True, 'chat_interaction': True, 'websocket_test': True})
+                exec_context = AgentExecutionContext(user_id=authenticated_user_context.user_id, thread_id=authenticated_user_context.thread_id, run_id=authenticated_user_context.run_id, request_id=authenticated_user_context.request_id, agent_name='business_value_agent', step=PipelineStep.INITIALIZATION, execution_timestamp=datetime.now(timezone.utc), pipeline_step_num=1, metadata={'business_critical': True, 'chat_interaction': True, 'websocket_test': True}
                 await engine._send_user_agent_started(exec_context)
                 await asyncio.sleep(0.05)
                 await engine._send_user_agent_thinking(exec_context, 'Analyzing business requirements and preparing execution plan', step_number=1)
@@ -177,7 +177,7 @@ class WebSocketEventsE2ETests(SSotBaseTestCase):
                 for i, thinking_text in enumerate(thinking_updates, 2):
                     await engine._send_user_agent_thinking(exec_context, thinking_text, step_number=i)
                     await asyncio.sleep(0.03)
-                mock_result = AgentExecutionResult(success=True, agent_name='business_value_agent', execution_time=2.5, error=None, state=None, metadata={'business_value_delivered': True, 'user_satisfaction': 'high', 'chat_interaction_complete': True})
+                mock_result = AgentExecutionResult(success=True, agent_name='business_value_agent', execution_time=2.5, error=None, state=None, metadata={'business_value_delivered': True, 'user_satisfaction': 'high', 'chat_interaction_complete': True}
                 await engine._send_user_agent_completed(exec_context, mock_result)
                 business_summary = connection.get_business_value_summary()
                 assert business_summary['total_business_events'] >= 4
@@ -198,11 +198,11 @@ class WebSocketEventsE2ETests(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_concurrent_user_websocket_events_isolation_e2e(self, e2e_auth_helper: E2EAuthHelper, mock_websocket_bridge: MockWebSocketBridge):
-        """Test concurrent user WebSocket events maintain isolation end-to-end."""
+        ""Test concurrent user WebSocket events maintain isolation end-to-end."
         num_users = 4
         authenticated_users = []
         for i in range(num_users):
-            user_context = UserExecutionContext(user_id=f'concurrent_ws_user_{i}_{uuid.uuid4().hex[:8]}', thread_id=f'concurrent_ws_thread_{i}_{uuid.uuid4().hex[:8]}', run_id=f'concurrent_ws_run_{i}_{uuid.uuid4().hex[:8]}', request_id=f'concurrent_ws_req_{i}_{uuid.uuid4().hex[:8]}', websocket_client_id=f'concurrent_ws_{i}_{uuid.uuid4().hex[:8]}', agent_context={'authenticated': True, 'user_index': i, 'concurrent_test': True, 'websocket_isolation': True}, audit_metadata={'user_index': i, 'concurrent_websocket_test': True, 'isolation_critical': True})
+            user_context = UserExecutionContext(user_id=f'concurrent_ws_user_{i}_{uuid.uuid4().hex[:8]}', thread_id=f'concurrent_ws_thread_{i}_{uuid.uuid4().hex[:8]}', run_id=f'concurrent_ws_run_{i}_{uuid.uuid4().hex[:8]}', request_id=f'concurrent_ws_req_{i}_{uuid.uuid4().hex[:8]}', websocket_client_id=f'concurrent_ws_{i}_{uuid.uuid4().hex[:8]}', agent_context={'authenticated': True, 'user_index': i, 'concurrent_test': True, 'websocket_isolation': True}, audit_metadata={'user_index': i, 'concurrent_websocket_test': True, 'isolation_critical': True}
             connection = mock_websocket_bridge.add_user_connection(user_context.user_id, user_context.websocket_client_id)
             connection.auth_validated = True
             authenticated_users.append((user_context, connection))
@@ -219,7 +219,7 @@ class WebSocketEventsE2ETests(SSotBaseTestCase):
             try:
 
                 async def execute_user_websocket_workflow(user_context: UserExecutionContext, connection: MockWebSocketConnection, engine: UserExecutionEngine, user_index: int):
-                    """Execute WebSocket workflow for a specific user."""
+                    "Execute WebSocket workflow for a specific user.""
                     exec_context = MagicMock()
                     exec_context.agent_name = f'concurrent_agent_user_{user_index}'
                     exec_context.user_id = user_context.user_id
@@ -241,7 +241,7 @@ class WebSocketEventsE2ETests(SSotBaseTestCase):
                 for i, result in enumerate(workflow_results):
                     assert result['user_index'] == i
                     assert result['workflow_completed'] is True
-                    assert len(result['events_sent']) == 3
+                    assert len(result['events_sent'] == 3
                     assert f'concurrent_ws_user_{i}' in result['user_id']
                 for i, (user_context, connection, engine) in enumerate(user_engines):
                     user_events = connection.business_value_events
@@ -273,7 +273,7 @@ class WebSocketEventsE2ETests(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_events_with_error_handling_e2e(self, e2e_auth_helper: E2EAuthHelper, authenticated_user_context: UserExecutionContext, mock_websocket_bridge: MockWebSocketBridge):
-        """Test WebSocket events with error handling during execution."""
+        ""Test WebSocket events with error handling during execution."
         connection = mock_websocket_bridge.add_user_connection(authenticated_user_context.user_id, authenticated_user_context.websocket_client_id)
         connection.auth_validated = True
         factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
@@ -290,10 +290,10 @@ class WebSocketEventsE2ETests(SSotBaseTestCase):
                 exec_context.metadata = {'error_test': True}
                 await engine._send_user_agent_started(exec_context)
                 await engine._send_user_agent_thinking(exec_context, 'Processing request - encountering error condition', step_number=1)
-                error_result = AgentExecutionResult(success=False, agent_name='error_handling_agent', execution_time=1.2, error='Simulated execution error for WebSocket testing', state=None, metadata={'error_type': 'simulated_error', 'recoverable': True, 'user_notified': True})
+                error_result = AgentExecutionResult(success=False, agent_name='error_handling_agent', execution_time=1.2, error='Simulated execution error for WebSocket testing', state=None, metadata={'error_type': 'simulated_error', 'recoverable': True, 'user_notified': True}
                 await engine._send_user_agent_completed(exec_context, error_result)
                 await engine._send_user_agent_thinking(exec_context, 'Attempting error recovery and retry', step_number=2)
-                recovery_result = AgentExecutionResult(success=True, agent_name='error_handling_agent', execution_time=0.8, error=None, state=None, metadata={'recovered_from_error': True, 'retry_successful': True, 'user_experience_maintained': True})
+                recovery_result = AgentExecutionResult(success=True, agent_name='error_handling_agent', execution_time=0.8, error=None, state=None, metadata={'recovered_from_error': True, 'retry_successful': True, 'user_experience_maintained': True}
                 await engine._send_user_agent_completed(exec_context, recovery_result)
                 business_summary = connection.get_business_value_summary()
                 assert business_summary['total_business_events'] >= 5
@@ -310,14 +310,14 @@ class WebSocketEventsE2ETests(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_strongly_typed_websocket_events_e2e(self, e2e_auth_helper: E2EAuthHelper, authenticated_user_context: UserExecutionContext, mock_websocket_bridge: MockWebSocketBridge):
-        """Test strongly typed WebSocket events end-to-end."""
+        "Test strongly typed WebSocket events end-to-end."""
         connection = mock_websocket_bridge.add_user_connection(authenticated_user_context.user_id, authenticated_user_context.websocket_client_id)
         user_id = UserID(authenticated_user_context.user_id)
         thread_id = ThreadID(authenticated_user_context.thread_id)
         request_id = RequestID(authenticated_user_context.request_id)
         websocket_id = WebSocketID(authenticated_user_context.websocket_client_id)
-        agent_started_event = StronglyTypedWebSocketEvent(event_type='agent_started', priority=WebSocketEventPriority.HIGH, user_id=user_id, thread_id=thread_id, request_id=request_id, websocket_id=websocket_id, data={'agent_name': 'strongly_typed_agent', 'business_value': True, 'authenticated_execution': True})
-        agent_thinking_event = StronglyTypedWebSocketEvent(event_type='agent_thinking', priority=WebSocketEventPriority.NORMAL, user_id=user_id, thread_id=thread_id, request_id=request_id, websocket_id=websocket_id, data={'agent_name': 'strongly_typed_agent', 'thinking': 'Processing with strong type safety', 'step_number': 1})
+        agent_started_event = StronglyTypedWebSocketEvent(event_type='agent_started', priority=WebSocketEventPriority.HIGH, user_id=user_id, thread_id=thread_id, request_id=request_id, websocket_id=websocket_id, data={'agent_name': 'strongly_typed_agent', 'business_value': True, 'authenticated_execution': True}
+        agent_thinking_event = StronglyTypedWebSocketEvent(event_type='agent_thinking', priority=WebSocketEventPriority.NORMAL, user_id=user_id, thread_id=thread_id, request_id=request_id, websocket_id=websocket_id, data={'agent_name': 'strongly_typed_agent', 'thinking': 'Processing with strong type safety', 'step_number': 1}
         assert isinstance(agent_started_event.user_id, UserID)
         assert isinstance(agent_started_event.thread_id, ThreadID)
         assert isinstance(agent_started_event.request_id, RequestID)

@@ -1,5 +1,5 @@
 class TestWebSocketConnection:
-    """Real WebSocket connection for testing instead of mocks."""
+    "Real WebSocket connection for testing instead of mocks.""
 
     def __init__(self):
         pass
@@ -8,19 +8,19 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        """Send JSON message."""
+        ""Send JSON message."
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
-        """Close WebSocket connection."""
+    async def close(self, code: int = 1000, reason: str = Normal closure"):
+        "Close WebSocket connection.""
         pass
         self._closed = True
         self.is_connected = False
 
-    def get_messages(self) -> list:
-        """Get all sent messages."""
+    async def get_messages(self) -> list:
+        ""Get all sent messages."
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
@@ -51,7 +51,7 @@ class TestWebSocketConnection:
 
 
     def test_message_router_add_handler_works():
-        """Test that add_handler method works correctly."""
+        "Test that add_handler method works correctly.""
         from netra_backend.app.websocket_core.handlers import get_message_router
 
     # Get the router instance
@@ -74,12 +74,12 @@ class TestWebSocketConnection:
         message_router.remove_handler(mock_handler)
         assert len(message_router.handlers) == initial_count
 
-        print(f"[PASS] add_handler() works correctly")
-        print(f"[PASS] Handler was successfully added and removed")
+        print(f[PASS] add_handler() works correctly")
+        print(f"[PASS] Handler was successfully added and removed)
 
 
     def test_agent_handler_registration_simulation():
-        """Simulate the exact registration that happens in websocket.py after fix."""
+        ""Simulate the exact registration that happens in websocket.py after fix."
         pass
         from netra_backend.app.websocket_core.handlers import get_message_router
         from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
@@ -108,22 +108,22 @@ class TestWebSocketConnection:
         assert len(message_router.handlers) == initial_count + 1
         assert agent_handler in message_router.handlers
 
-        print(f"[PASS] AgentMessageHandler registration successful with add_handler()")
-        print(f"[PASS] No AttributeError - fix confirmed working!")
+        print(f"[PASS] AgentMessageHandler registration successful with add_handler())
+        print(f[PASS] No AttributeError - fix confirmed working!")
 
         # Clean up
         message_router.remove_handler(agent_handler)
 
         except AttributeError as e:
-        pytest.fail("formatted_string")
+        pytest.fail("formatted_string)
         except Exception as e:
                 # Other exceptions are OK for this test (missing imports etc)
-        print("formatted_string")
-        print("But the important part is NO AttributeError on add_handler()")
+        print(formatted_string")
+        print("But the important part is NO AttributeError on add_handler())
 
 
     def test_fallback_handler_registration():
-        """Test that fallback handler registration also works."""
+        ""Test that fallback handler registration also works.""
         from netra_backend.app.websocket_core.handlers import get_message_router, BaseMessageHandler
         from netra_backend.app.websocket_core.types import MessageType
 
@@ -133,7 +133,7 @@ class TestWebSocketConnection:
     # Create a mock fallback handler similar to _create_fallback_agent_handler
 class FallbackHandler(BaseMessageHandler):
     def __init__(self):
-        super().__init__([MessageType.AGENT_REQUEST, MessageType.START_AGENT])
+        super().__init__([MessageType.AGENT_REQUEST, MessageType.START_AGENT]
 
         fallback_handler = FallbackHandler()
 
@@ -145,20 +145,20 @@ class FallbackHandler(BaseMessageHandler):
         assert len(message_router.handlers) == initial_count + 1
         assert fallback_handler in message_router.handlers
 
-        print(f"[PASS] Fallback handler registration successful")
+        print(f[PASS] Fallback handler registration successful)
 
     # Clean up
         message_router.remove_handler(fallback_handler)
 
 
         if __name__ == "__main__":
-        print("Running MessageRouter FIX verification tests... )
+        print(Running MessageRouter FIX verification tests... )
         ")
         test_message_router_add_handler_works()
         print()
         test_agent_handler_registration_simulation()
         print()
         test_fallback_handler_registration()
-        print(" )
+        print("")
         [SUCCESS] All tests passed - Fix is working correctly!")
         pass

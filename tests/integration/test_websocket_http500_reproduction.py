@@ -1,4 +1,4 @@
-"""
+"
 Integration Tests for WebSocket HTTP 500 Error Reproduction
 
 These tests target Issue #517 - reproducing HTTP 500 WebSocket connection errors
@@ -9,7 +9,7 @@ Business Value Justification:
 - Goal: Stability - Identify and reproduce HTTP 500 WebSocket errors  
 - Impact: Protects $500K+ ARR chat functionality from connection failures
 - Revenue Impact: Prevents WebSocket service degradation affecting customer chat
-"""
+""
 import asyncio
 import json
 import pytest
@@ -25,10 +25,10 @@ from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.integration
 class WebSocketHTTP500ReproductionTests(SSotAsyncTestCase):
-    """Reproduce WebSocket HTTP 500 errors in integration environment"""
+    ""Reproduce WebSocket HTTP 500 errors in integration environment"
 
     def setup_method(self):
-        """Set up test environment and authentication"""
+        "Set up test environment and authentication""
         super().setup_method()
         self.env = IsolatedEnvironment()
         self.auth_helper = TestAuthHelper(environment='test')
@@ -38,36 +38,36 @@ class WebSocketHTTP500ReproductionTests(SSotAsyncTestCase):
         self.test_token = self.auth_helper.create_test_token(f'integration_test_user_{int(time.time())}', 'integration@test.netrasystems.ai')
 
     async def test_websocket_handshake_http_500_reproduction(self):
-        """Test WebSocket handshake failures that result in HTTP 500 errors"""
+        ""Test WebSocket handshake failures that result in HTTP 500 errors"
         print('[INFO] Testing WebSocket handshake for HTTP 500 reproduction...')
         http_500_detected = False
         connection_details = {}
         test_scenarios = [{'name': 'malformed_auth_header', 'headers': {'Authorization': 'Bearer invalid_token_format_12345'}, 'expected_error': 'HTTP 500 due to malformed auth'}, {'name': 'missing_auth_header', 'headers': {}, 'expected_error': 'HTTP 500 due to missing auth processing'}, {'name': 'invalid_subprotocol', 'headers': {'Authorization': f'Bearer {self.test_token}'}, 'subprotocols': ['invalid-protocol'], 'expected_error': 'HTTP 500 due to subprotocol handling'}, {'name': 'malformed_upgrade_request', 'headers': {'Authorization': f'Bearer {self.test_token}', 'Connection': 'Invalid', 'Upgrade': 'not-websocket'}, 'expected_error': 'HTTP 500 due to malformed upgrade'}]
         for scenario in test_scenarios:
-            print(f"[TEST] Scenario: {scenario['name']}")
+            print(f"[TEST] Scenario: {scenario['name']})
             try:
                 connect_kwargs = {'additional_headers': scenario['headers']}
                 if 'subprotocols' in scenario:
                     connect_kwargs['subprotocols'] = scenario['subprotocols']
                 async with websockets.connect(self.websocket_url, **connect_kwargs) as websocket:
-                    print(f"[UNEXPECTED] {scenario['name']} - Connection succeeded (should have failed)")
+                    print(f[UNEXPECTED] {scenario['name']} - Connection succeeded (should have failed)")
                     connection_details[scenario['name']] = 'success'
             except InvalidStatus as e:
                 if hasattr(e, 'status_code') and e.status_code == 500:
-                    print(f"[REPRODUCED] {scenario['name']} - HTTP 500 detected: {e}")
+                    print(f"[REPRODUCED] {scenario['name']} - HTTP 500 detected: {e})
                     http_500_detected = True
                     connection_details[scenario['name']] = f'HTTP_500: {e}'
                 elif hasattr(e, 'status_code') and e.status_code == 403:
-                    print(f"[EXPECTED] {scenario['name']} - HTTP 403 (expected auth error): {e}")
+                    print(f[EXPECTED] {scenario['name']} - HTTP 403 (expected auth error): {e}")
                     connection_details[scenario['name']] = f'HTTP_403: {e}'
                 else:
-                    print(f"[INFO] {scenario['name']} - Other HTTP error: {e}")
-                    connection_details[scenario['name']] = f"HTTP_{getattr(e, 'status_code', 'UNKNOWN')}: {e}"
+                    print(f"[INFO] {scenario['name']} - Other HTTP error: {e})
+                    connection_details[scenario['name']] = fHTTP_{getattr(e, 'status_code', 'UNKNOWN')}: {e}"
             except WebSocketException as e:
-                print(f"[INFO] {scenario['name']} - WebSocket protocol error: {e}")
+                print(f"[INFO] {scenario['name']} - WebSocket protocol error: {e})
                 connection_details[scenario['name']] = f'WS_ERROR: {e}'
             except Exception as e:
-                print(f"[ERROR] {scenario['name']} - Unexpected error: {e}")
+                print(f[ERROR] {scenario['name']} - Unexpected error: {e}")
                 connection_details[scenario['name']] = f'UNEXPECTED: {e}'
         print(f'[RESULT] Connection test results: {connection_details}')
         if http_500_detected:
@@ -76,7 +76,7 @@ class WebSocketHTTP500ReproductionTests(SSotAsyncTestCase):
             print('[INFO] No HTTP 500 errors detected - Issue #517 may be resolved')
 
     async def test_websocket_asgi_scope_errors(self):
-        """Test ASGI scope-related errors that cause HTTP 500"""
+        "Test ASGI scope-related errors that cause HTTP 500""
         print('[INFO] Testing ASGI scope errors in WebSocket connections...')
         backend_healthy = await self._check_backend_health()
         if not backend_healthy:
@@ -84,24 +84,24 @@ class WebSocketHTTP500ReproductionTests(SSotAsyncTestCase):
         asgi_errors_detected = []
         asgi_test_cases = [{'name': 'rapid_connect_disconnect', 'test': self._test_rapid_connect_disconnect, 'description': 'Rapid connections can cause ASGI scope race conditions'}, {'name': 'concurrent_handshakes', 'test': self._test_concurrent_handshakes, 'description': 'Concurrent handshakes can cause scope conflicts'}, {'name': 'malformed_websocket_request', 'test': self._test_malformed_websocket_request, 'description': 'Malformed requests can cause scope validation failures'}]
         for test_case in asgi_test_cases:
-            print(f"[TEST] ASGI test: {test_case['name']} - {test_case['description']}")
+            print(f[TEST] ASGI test: {test_case['name']} - {test_case['description']}")
             try:
                 result = await test_case['test']()
                 if result.get('http_500_detected', False):
-                    asgi_errors_detected.append({'test': test_case['name'], 'error': result.get('error_details', 'Unknown'), 'description': test_case['description']})
-                    print(f"[REPRODUCED] {test_case['name']} - ASGI HTTP 500 error detected")
+                    asgi_errors_detected.append({'test': test_case['name'], 'error': result.get('error_details', 'Unknown'), 'description': test_case['description']}
+                    print(f"[REPRODUCED] {test_case['name']} - ASGI HTTP 500 error detected)
                 else:
-                    print(f"[PASS] {test_case['name']} - No ASGI errors detected")
+                    print(f[PASS] {test_case['name']} - No ASGI errors detected")
             except Exception as e:
-                print(f"[ERROR] {test_case['name']} - Test execution error: {e}")
-                asgi_errors_detected.append({'test': test_case['name'], 'error': str(e), 'description': f"Test execution failed: {test_case['description']}"})
+                print(f"[ERROR] {test_case['name']} - Test execution error: {e})
+                asgi_errors_detected.append({'test': test_case['name'], 'error': str(e), 'description': fTest execution failed: {test_case['description']}"}
         if asgi_errors_detected:
             pytest.fail(f'ASGI scope errors causing HTTP 500 detected. Issue #517 reproduced. Errors: {asgi_errors_detected}')
         else:
             print('[INFO] No ASGI scope errors detected - Issue #517 may be resolved')
 
     async def _check_backend_health(self) -> bool:
-        """Check if backend is healthy for testing"""
+        "Check if backend is healthy for testing""
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.get(f'{self.base_url}/health', timeout=5.0)
@@ -111,7 +111,7 @@ class WebSocketHTTP500ReproductionTests(SSotAsyncTestCase):
             return False
 
     async def _test_rapid_connect_disconnect(self) -> Dict:
-        """Test rapid WebSocket connect/disconnect cycles for ASGI scope race conditions"""
+        ""Test rapid WebSocket connect/disconnect cycles for ASGI scope race conditions"
         try:
             http_500_count = 0
             for i in range(5):
@@ -129,7 +129,7 @@ class WebSocketHTTP500ReproductionTests(SSotAsyncTestCase):
             return {'http_500_detected': False, 'error_details': f'Test execution error: {e}'}
 
     async def _test_concurrent_handshakes(self) -> Dict:
-        """Test concurrent WebSocket handshakes for ASGI scope conflicts"""
+        "Test concurrent WebSocket handshakes for ASGI scope conflicts""
         try:
             tasks = []
             for i in range(3):
@@ -150,7 +150,7 @@ class WebSocketHTTP500ReproductionTests(SSotAsyncTestCase):
             return {'http_500_detected': False, 'error_details': f'Concurrent test error: {e}'}
 
     async def _test_malformed_websocket_request(self) -> Dict:
-        """Test malformed WebSocket requests that could cause ASGI scope errors"""
+        ""Test malformed WebSocket requests that could cause ASGI scope errors"
         try:
             malformed_headers = {'Authorization': f'Bearer {self.test_token}', 'Sec-WebSocket-Key': 'invalid_key_format', 'Sec-WebSocket-Version': '99', 'Origin': 'http://malicious-site.com'}
             try:
@@ -163,15 +163,15 @@ class WebSocketHTTP500ReproductionTests(SSotAsyncTestCase):
                 if status_code == 500:
                     return {'http_500_detected': True, 'error_details': f'Malformed request caused HTTP 500: {e}'}
                 else:
-                    return {'http_500_detected': False, 'error_details': f"Malformed request handled correctly: HTTP {status_code or 'UNKNOWN'}"}
+                    return {'http_500_detected': False, 'error_details': f"Malformed request handled correctly: HTTP {status_code or 'UNKNOWN'}}
         except Exception as e:
             return {'http_500_detected': False, 'error_details': f'Malformed request test error: {e}'}
 
     async def _attempt_websocket_connection(self, connection_id: str):
-        """Attempt a single WebSocket connection for testing"""
+        ""Attempt a single WebSocket connection for testing"
         try:
             async with websockets.connect(self.websocket_url, additional_headers={'Authorization': f'Bearer {self.test_token}'}, timeout=5.0) as ws:
-                await ws.send(json.dumps({'type': 'test', 'connection_id': connection_id}))
+                await ws.send(json.dumps({'type': 'test', 'connection_id': connection_id})
                 try:
                     response = await asyncio.wait_for(ws.recv(), timeout=2.0)
                     return {'success': True, 'response': response}
@@ -182,21 +182,21 @@ class WebSocketHTTP500ReproductionTests(SSotAsyncTestCase):
 
 @pytest.mark.integration
 class WebSocketMiddlewareIntegrationTests(SSotAsyncTestCase):
-    """Test WebSocket middleware integration for HTTP 500 prevention"""
+    "Test WebSocket middleware integration for HTTP 500 prevention""
 
     def setup_method(self):
-        """Set up middleware integration tests"""
+        ""Set up middleware integration tests"
         super().setup_method()
         self.env = IsolatedEnvironment()
 
     async def test_middleware_stack_websocket_handling(self):
-        """Test that middleware stack handles WebSocket requests without HTTP 500"""
+        "Test that middleware stack handles WebSocket requests without HTTP 500""
         print('[INFO] Testing middleware stack WebSocket handling...')
         assert True
         print('[PASS] Middleware stack test completed')
 
     async def test_cors_middleware_websocket_interaction(self):
-        """Test CORS middleware interaction with WebSocket requests"""
+        ""Test CORS middleware interaction with WebSocket requests"
         print('[INFO] Testing CORS middleware WebSocket interaction...')
         cors_test_scenarios = [{'origin': 'http://localhost:3000', 'should_succeed': True}, {'origin': 'http://malicious-site.com', 'should_fail': True}, {'origin': '', 'should_fail': True}, {'origin': None, 'should_fail': True}]
         for scenario in cors_test_scenarios:
@@ -206,7 +206,7 @@ class WebSocketMiddlewareIntegrationTests(SSotAsyncTestCase):
         print('[PASS] CORS middleware test completed')
 
     async def test_authentication_middleware_websocket_errors(self):
-        """Test authentication middleware WebSocket error handling"""
+        "Test authentication middleware WebSocket error handling"""
         print('[INFO] Testing authentication middleware WebSocket error handling...')
         auth_test_cases = [{'token': None, 'expected_status': 401}, {'token': 'invalid', 'expected_status': 401}, {'token': 'expired_token_12345', 'expected_status': 401}, {'token': '', 'expected_status': 401}]
         for test_case in auth_test_cases:

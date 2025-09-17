@@ -40,25 +40,25 @@ def lazy_import(module_path: str, component: str = None):
 """Real WebSocket connection for testing instead of mocks."""
 
 def __init__(self):
-pass
+    pass
 self.messages_sent = []
 self.is_connected = True
 self._closed = False
 
 async def send_json(self, message: dict):
-"""Send JSON message."""
+    """Send JSON message."""
 if self._closed:
-raise RuntimeError("WebSocket is closed")
+    raise RuntimeError("WebSocket is closed")
 self.messages_sent.append(message)
 
 async def close(self, code: int = 1000, reason: str = "Normal closure"):
-"""Close WebSocket connection."""
+    """Close WebSocket connection."""
 pass
 self._closed = True
 self.is_connected = False
 
 def get_messages(self) -> list:
-"""Get all sent messages."""
+    """Get all sent messages."""
 await asyncio.sleep(0)
 return self.messages_sent.copy()
 
@@ -104,7 +104,7 @@ from shared.isolated_environment import IsolatedEnvironment
             # Add project root to Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if project_root not in sys.path:
-sys.path.insert(0, project_root)
+    sys.path.insert(0, project_root)
 
 import pytest
 from loguru import logger
@@ -309,7 +309,7 @@ class TestWebSocketCriticalFixValidation:
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_agent_registry_enhances_tool_dispatcher_automatically(self):
-"""Test that AgentRegistry.set_websocket_manager() enhances tool dispatcher."""
+        """Test that AgentRegistry.set_websocket_manager() enhances tool dispatcher."""
 
 class MockLLM:
     pass
@@ -345,7 +345,7 @@ class MockLLM:
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_enhanced_tool_executor_sends_websocket_events(self):
-"""Test that enhanced tool executor actually sends WebSocket events."""
+        """Test that enhanced tool executor actually sends WebSocket events."""
 
 ws_manager = WebSocketManager()
 validator = CriticalFixValidator()
@@ -354,11 +354,11 @@ validator = CriticalFixValidator()
 conn_id = "test-enhanced-events"
 mock_ws = Magic
 async def capture_event(message, timeout=None):
-pass
+    pass
 if isinstance(message, str):
-data = json.loads(message)
+    data = json.loads(message)
 else:
-data = message
+    data = message
 validator.record_event(data)
 
 mock_ws.send_json = AsyncMock(side_effect=capture_event)
@@ -389,7 +389,7 @@ await asyncio.sleep(0.2)
 fix_valid, failures = validator.validate_tool_execution_fix()
 
 if not fix_valid:
-logger.error(validator.generate_fix_validation_report())
+    logger.error(validator.generate_fix_validation_report())
 
 assert fix_valid, "formatted_string"
 assert test_tool.call_count == 1, "Tool was not actually executed"
@@ -398,7 +398,7 @@ assert result is not None, "Tool execution returned no result"
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_tool_events_sent_even_when_tool_fails(self):
-"""Test that tool events are sent even when tools fail."""
+        """Test that tool events are sent even when tools fail."""
 
 ws_manager = WebSocketManager()
 validator = CriticalFixValidator()
@@ -407,10 +407,10 @@ validator = CriticalFixValidator()
 conn_id = "test-tool-error-events"
 mock_ws = Magic
 async def capture_event(message, timeout=None):
-if isinstance(message, str):
-data = json.loads(message)
+    if isinstance(message, str):
+        data = json.loads(message)
 else:
-data = message
+    data = message
 validator.record_event(data)
 
 mock_ws.send_json = AsyncMock(side_effect=capture_event)
@@ -431,7 +431,7 @@ failing_tool = MockToolForTesting("failing_tool", should_fail=True, delay=0.05)
 
             # Execute failing tool
 with pytest.raises(Exception, match="intentionally failed"):
-await enhanced_executor.execute_with_state( )
+    await enhanced_executor.execute_with_state( )
 failing_tool, "failing_tool", {}, state, "error-test-run"
                 
 
@@ -443,7 +443,7 @@ fix_valid, failures = validator.validate_tool_execution_fix()
 error_valid, error_failures = validator.validate_error_resilience()
 
 if not (fix_valid and error_valid):
-logger.error(validator.generate_fix_validation_report())
+    logger.error(validator.generate_fix_validation_report())
 
 assert fix_valid, "formatted_string"
 assert error_valid, "formatted_string"
@@ -456,10 +456,10 @@ assert len(completed_events) >= 1, "No tool_completed event sent for failed tool
                     # Check that error is indicated in the completed event
 error_indicated = False
 for event in completed_events:
-payload = event.get("payload", {})
+    payload = event.get("payload", {})
 result = payload.get("result", {})
 if result.get("status") == "error" or "error" in str(result).lower():
-error_indicated = True
+    error_indicated = True
 break
 
 assert error_indicated, "Tool error not properly indicated in WebSocket events"
@@ -467,7 +467,7 @@ assert error_indicated, "Tool error not properly indicated in WebSocket events"
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_agent_completion_events_sent_even_on_execution_error(self):
-"""Test that agent completion events are sent even when agent execution fails."""
+        """Test that agent completion events are sent even when agent execution fails."""
 
 ws_manager = WebSocketManager()
 validator = CriticalFixValidator()
@@ -476,11 +476,11 @@ validator = CriticalFixValidator()
 conn_id = "test-agent-error-completion"
 mock_ws = Magic
 async def capture_event(message, timeout=None):
-pass
+    pass
 if isinstance(message, str):
-data = json.loads(message)
+    data = json.loads(message)
 else:
-data = message
+    data = message
 validator.record_event(data)
 
 mock_ws.send_json = AsyncMock(side_effect=capture_event)
@@ -547,7 +547,7 @@ class FailingLLM:
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_complete_end_to_end_websocket_flow_with_tools(self):
-"""Test complete end-to-end flow with multiple tools to validate the full fix."""
+        """Test complete end-to-end flow with multiple tools to validate the full fix."""
 
 ws_manager = WebSocketManager()
 validator = CriticalFixValidator()
@@ -556,10 +556,10 @@ validator = CriticalFixValidator()
 conn_id = "test-e2e-complete-flow"
 mock_ws = Magic
 async def capture_event(message, timeout=None):
-if isinstance(message, str):
-data = json.loads(message)
+    if isinstance(message, str):
+        data = json.loads(message)
 else:
-data = message
+    data = message
 validator.record_event(data)
 
 mock_ws.send_json = AsyncMock(side_effect=capture_event)
@@ -687,7 +687,7 @@ class MultiToolAgent:
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_stress_test_fix_under_load(self):
-"""Stress test the fix under high load to ensure it doesn't break."""
+        """Stress test the fix under high load to ensure it doesn't break."""
 
 ws_manager = WebSocketManager()
 
@@ -697,17 +697,17 @@ validators = {}
 connections = []
 
 for i in range(connection_count):
-conn_id = "formatted_string"
+    conn_id = "formatted_string"
 validator = CriticalFixValidator()
 validators[conn_id] = validator
 
 mock_ws = Magic
 async def capture_event(message, timeout=None, v=validator):
-pass
+    pass
 if isinstance(message, str):
-data = json.loads(message)
+    data = json.loads(message)
 else:
-data = message
+    data = message
 v.record_event(data)
 
 mock_ws.send_json = AsyncMock(side_effect=capture_event)
@@ -717,11 +717,11 @@ connections.append((conn_id, mock_ws))
             # Create enhanced executors for each connection
 executors = {}
 for conn_id, _ in connections:
-executors[conn_id] = UnifiedToolExecutionEngine(ws_manager)
+    executors[conn_id] = UnifiedToolExecutionEngine(ws_manager)
 
                 # Execute tools concurrently on all connections
 async def execute_tools_on_connection(conn_id, executor):
-pass
+    pass
 state = DeepAgentState( )
 chat_thread_id=conn_id,
 user_id=conn_id,
@@ -733,11 +733,11 @@ for i in range(5):  # 5 tools per connection
 tool = MockToolForTesting("formatted_string", should_fail=False, delay=0.01)
 
 try:
-await executor.execute_with_state( )
+    await executor.execute_with_state( )
 tool, "formatted_string", {}, state, "formatted_string"
         
 except Exception as e:
-logger.error("formatted_string")
+    logger.error("formatted_string")
 
             # Run all executions concurrently
 tasks = [ )
@@ -758,9 +758,9 @@ all_valid = True
 failures = []
 
 for conn_id, validator in validators.items():
-fix_valid, fix_failures = validator.validate_tool_execution_fix()
+    fix_valid, fix_failures = validator.validate_tool_execution_fix()
 if not fix_valid:
-all_valid = False
+    all_valid = False
 failures.extend(["formatted_string" for f in fix_failures])
 total_events += len(validator.events)
 
@@ -774,12 +774,12 @@ assert events_per_second > 50, "formatted_string"
 
                     # Cleanup
 for conn_id, mock_ws in connections:
-await ws_manager.disconnect_user(conn_id, mock_ws, conn_id)
+    await ws_manager.disconnect_user(conn_id, mock_ws, conn_id)
 
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_regression_prevention_double_enhancement(self):
-"""Test that double-enhancement doesn't break the system."""
+        """Test that double-enhancement doesn't break the system."""
 
 class MockLLM:
     pass
@@ -809,7 +809,7 @@ class MockLLM:
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_fix_validation_comprehensive_report(self):
-"""Generate comprehensive report on fix validation."""
+        """Generate comprehensive report on fix validation."""
 
 logger.info(" )
 " + "=" * 80)
@@ -821,7 +821,7 @@ test_results = {}
 
         # 1. Enhancement Integration
 try:
-class MockLLM:
+    class MockLLM:
     pass
     tool_dispatcher = ToolDispatcher()
     registry = AgentRegistry(), tool_dispatcher)

@@ -111,7 +111,7 @@ class TestWebSocketBridgeFactory:
 
 @pytest.mark.asyncio
     async def test_create_user_emitter(self, factory, mock_pool):
-"""Test creating a user-specific emitter."""
+        """Test creating a user-specific emitter."""
 factory.connection_pool = mock_pool
 user_id = "user-123"
 session_id = "session-456"
@@ -129,7 +129,7 @@ assert factory.user_emitters[user_id] == emitter
 
 @pytest.mark.asyncio
     async def test_create_emitter_with_websocket(self, factory, mock_pool, mock_websocket):
-"""Test creating emitter with WebSocket connection."""
+        """Test creating emitter with WebSocket connection."""
 pass
 factory.connection_pool = mock_pool
 user_id = "user-123"
@@ -147,7 +147,7 @@ assert emitter.connection_id == "conn-123"
 
 @pytest.mark.asyncio
     async def test_get_existing_emitter(self, factory, mock_pool):
-"""Test getting an existing emitter."""
+        """Test getting an existing emitter."""
 factory.connection_pool = mock_pool
 user_id = "user-123"
 session_id = "session-456"
@@ -161,14 +161,14 @@ emitter2 = factory.get_user_emitter(user_id)
 assert emitter2 is emitter1
 
 def test_get_nonexistent_emitter(self, factory):
-"""Test getting non-existent emitter returns None."""
+    """Test getting non-existent emitter returns None."""
 pass
 emitter = factory.get_user_emitter("non-existent-user")
 assert emitter is None
 
 @pytest.mark.asyncio
     async def test_remove_user_emitter(self, factory, mock_pool):
-"""Test removing a user emitter."""
+        """Test removing a user emitter."""
 factory.connection_pool = mock_pool
 user_id = "user-123"
 session_id = "session-456"
@@ -185,7 +185,7 @@ mock_pool.cleanup_user_connections.assert_called_once_with(user_id)
 
 @pytest.mark.asyncio
     async def test_remove_nonexistent_emitter(self, factory, mock_pool):
-"""Test removing non-existent emitter."""
+        """Test removing non-existent emitter."""
 pass
 factory.connection_pool = mock_pool
 removed = await factory.remove_user_emitter("non-existent-user")
@@ -195,7 +195,7 @@ mock_pool.cleanup_user_connections.assert_not_called()
 
 @pytest.mark.asyncio
     async def test_broadcast_to_user(self, factory, mock_pool):
-"""Test broadcasting event to user."""
+        """Test broadcasting event to user."""
 factory.connection_pool = mock_pool
 user_id = "user-123"
 
@@ -215,7 +215,7 @@ mock_pool.broadcast_to_user.assert_called_once()
 
 @pytest.mark.asyncio
     async def test_broadcast_to_nonexistent_user(self, factory, mock_pool):
-"""Test broadcasting to non-existent user."""
+        """Test broadcasting to non-existent user."""
 pass
 factory.connection_pool = mock_pool
 
@@ -227,7 +227,7 @@ mock_pool.broadcast_to_user.assert_not_called()
 
 @pytest.mark.asyncio
     async def test_cleanup_inactive_emitters(self, factory, mock_pool):
-"""Test cleaning up inactive emitters."""
+        """Test cleaning up inactive emitters."""
 factory.connection_pool = mock_pool
 
                         # Create multiple emitters
@@ -249,7 +249,7 @@ assert user1 not in factory.user_emitters
 assert user2 in factory.user_emitters
 
 def test_get_factory_metrics(self, factory):
-"""Test getting factory metrics."""
+    """Test getting factory metrics."""
 pass
 metrics = factory.get_factory_metrics()
 
@@ -260,7 +260,7 @@ assert metrics["total_emitters"] == 0
 
 @pytest.mark.asyncio
     async def test_factory_with_multiple_users(self, factory, mock_pool):
-"""Test factory handles multiple users correctly."""
+        """Test factory handles multiple users correctly."""
 factory.connection_pool = mock_pool
 
 users = ["user-1", "user-2", "user-3"]
@@ -268,7 +268,7 @@ emitters = []
 
         # Create emitters for multiple users
 for user_id in users:
-emitter = await factory.create_user_emitter( )
+    emitter = await factory.create_user_emitter( )
 user_id=user_id,
 session_id="formatted_string"
             
@@ -279,11 +279,11 @@ assert len(factory.user_emitters) == 3
 
             # Verify each user has unique emitter
 for i, user_id in enumerate(users):
-assert factory.get_user_emitter(user_id) == emitters[i]
+    assert factory.get_user_emitter(user_id) == emitters[i]
 
 @pytest.mark.asyncio
     async def test_factory_error_handling(self, factory):
-"""Test factory error handling."""
+        """Test factory error handling."""
 pass
                     # Mock pool to raise error
 mock_pool = MagicMock(spec=WebSocketConnectionPool)
@@ -302,7 +302,7 @@ assert emitter.connection_id is None
 
 @pytest.mark.asyncio
     async def test_configure_factory(self, factory):
-"""Test factory configuration."""
+        """Test factory configuration."""
 config = { )
 "max_queue_size": 1000,
 "batch_size": 50,
@@ -319,7 +319,7 @@ assert factory.configuration["retry_attempts"] == 5
 
 @pytest.mark.asyncio
     async def test_factory_health_check(self, factory, mock_pool):
-"""Test factory health check."""
+        """Test factory health check."""
 pass
 factory.connection_pool = mock_pool
 
@@ -379,7 +379,7 @@ class TestUserWebSocketEmitter:
 
 @pytest.mark.asyncio
     async def test_emit_event(self, emitter, mock_pool):
-"""Test emitting an event."""
+        """Test emitting an event."""
 pass
 event = { )
 "type": "agent_started",
@@ -394,7 +394,7 @@ assert emitter.metrics["events_sent"] == 1
 
 @pytest.mark.asyncio
     async def test_emit_with_priority(self, emitter, mock_pool):
-"""Test emitting event with priority."""
+        """Test emitting event with priority."""
 event = { )
 "type": "error",
 "data": {"message": "Critical error"}
@@ -408,7 +408,7 @@ mock_pool.broadcast_to_user.assert_called_once()
 
 @pytest.mark.asyncio
     async def test_queue_event(self, emitter):
-"""Test queueing events."""
+        """Test queueing events."""
 pass
 event1 = {"type": "test1"}
 event2 = {"type": "test2"}
@@ -421,13 +421,13 @@ assert emitter.metrics["events_queued"] == 2
 
 @pytest.mark.asyncio
     async def test_flush_queue(self, emitter, mock_pool):
-"""Test flushing event queue."""
+        """Test flushing event queue."""
                     # Queue some events
 events = [ )
 {"type": "formatted_string"} for i in range(5)
                     
 for event in events:
-emitter.queue_event(event)
+    emitter.queue_event(event)
 
                         # Flush queue
 flushed = await emitter.flush_queue()
@@ -438,14 +438,14 @@ assert mock_pool.broadcast_to_user.call_count == 5
 
 @pytest.mark.asyncio
     async def test_batch_processing(self, emitter, mock_pool):
-"""Test batch event processing."""
+        """Test batch event processing."""
 pass
                             # Configure for batching
 emitter.batch_size = 3
 
                             # Queue many events
 for i in range(10):
-emitter.queue_event({"type": "formatted_string"})
+    emitter.queue_event({"type": "formatted_string"})
 
                                 # Process batch
 processed = await emitter.process_batch()
@@ -456,7 +456,7 @@ assert mock_pool.broadcast_to_user.call_count == 3
 
 @pytest.mark.asyncio
     async def test_emit_handles_errors(self, emitter, mock_pool):
-"""Test emit handles broadcast errors."""
+        """Test emit handles broadcast errors."""
 mock_pool.broadcast_to_user.side_effect = Exception("Send failed")
 
 event = {"type": "test"}
@@ -467,7 +467,7 @@ assert emitter.metrics["events_failed"] == 1
 
 @pytest.mark.asyncio
     async def test_sanitize_event(self, emitter):
-"""Test event sanitization."""
+        """Test event sanitization."""
 pass
 event = { )
 "type": "agent_thinking",
@@ -483,7 +483,7 @@ sanitized = emitter.sanitize_event(event)
 assert "sk-12345" not in str(sanitized)
 
 def test_inactive_emitter(self, emitter):
-"""Test inactive emitter behavior."""
+    """Test inactive emitter behavior."""
 emitter.is_active = False
 
     # Should not queue events when inactive
@@ -492,7 +492,7 @@ assert len(emitter.event_queue) == 0
 
 @pytest.mark.asyncio
     async def test_connection_management(self, emitter):
-"""Test connection ID management."""
+        """Test connection ID management."""
 pass
         # Set connection ID
 emitter.set_connection_id("conn-123")
@@ -503,7 +503,7 @@ emitter.clear_connection_id()
 assert emitter.connection_id is None
 
 def test_get_metrics(self, emitter):
-"""Test getting emitter metrics."""
+    """Test getting emitter metrics."""
 emitter.metrics["events_sent"] = 10
 emitter.metrics["events_failed"] = 2
 emitter.metrics["events_queued"] = 5
@@ -518,7 +518,7 @@ assert metrics["session_id"] == "session-456"
 
 @pytest.mark.asyncio
     async def test_lifecycle_events(self, emitter, mock_pool):
-"""Test lifecycle event emissions."""
+        """Test lifecycle event emissions."""
 pass
         # Start event
 await emitter.emit_lifecycle_event("started")

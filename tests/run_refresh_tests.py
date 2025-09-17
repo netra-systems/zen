@@ -15,13 +15,13 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 async def run_tests():
 """Run all refresh-related tests."""
-print(" )
+print("")
 " + "="*70)
 print("[RUNNING PAGE REFRESH TEST SUITE]")
-print("formatted_string")
+print("")
 print("="*70)
 
-results = { )
+results = { }
 'total': 0,
 'passed': 0,
 'failed': 0,
@@ -29,12 +29,12 @@ results = { )
     
 
     # Test 1: WebSocket Service Unit Tests
-print(" )
+print("")
 [Test 1: WebSocket Service Enhancements]")
 print("-"*50)
 try:
         # Check if the enhanced files exist
-files_to_check = [ )
+files_to_check = [ ]
 '../frontend/services/webSocketService.ts',
 '../frontend/services/chatStatePersistence.ts',
 '../frontend/providers/WebSocketProvider.tsx'
@@ -43,9 +43,9 @@ files_to_check = [ )
 all_exist = True
 for file in files_to_check:
 if os.path.exists(file):
-print("formatted_string")
+print("")
 else:
-print("formatted_string")
+print("")
 all_exist = False
 
 if all_exist:
@@ -55,17 +55,17 @@ else:
 results['failed'] += 1
 print("[FAIL] Some enhanced files missing")
 except Exception as e:
-print("formatted_string")
+print("")
 results['failed'] += 1
 finally:
 results['total'] += 1
 
                                     # Test 2: Test File Creation Verification
-print(" )
+print("")
 [Test 2: Test Coverage Files]")
 print("-"*50)
 try:
-test_files = [ )
+test_files = [ ]
 'e2e/test_page_refresh_comprehensive.py',
 'integration/test_websocket_reconnection_robust.py',
 'stress/test_rapid_refresh_stress.py',
@@ -78,9 +78,9 @@ if os.path.exists(test_file):
                                                 # Count lines to verify substance
 with open(test_file, 'r', encoding='utf-8') as f:
 lines = len(f.readlines())
-print("formatted_string")
+print("")
 else:
-print("formatted_string")
+print("")
 all_test_files_exist = False
 
 if all_test_files_exist:
@@ -90,13 +90,13 @@ else:
 results['failed'] += 1
 print("[FAIL] Some test files missing")
 except Exception as e:
-print("formatted_string")
+print("")
 results['failed'] += 1
 finally:
 results['total'] += 1
 
                                                                         # Test 3: Key Feature Validation
-print(" )
+print("")
 [Test 3: Key Features Implementation]")
 print("-"*50)
 features = []
@@ -152,16 +152,16 @@ print(feature)
 results['total'] += 5
 
 except Exception as e:
-print("formatted_string")
+print("")
 results['failed'] += 1
 results['total'] += 1
 
                                                                                                                                     # Test 4: Test Structure Validation
-print(" )
+print("")
 [Test 4: Test Structure and Coverage]")
 print("-"*50)
 try:
-coverage_areas = { )
+coverage_areas = { }
 'E2E Tests': 'e2e/test_page_refresh_comprehensive.py',
 'Integration Tests': 'integration/test_websocket_reconnection_robust.py',
 'Stress Tests': 'stress/test_rapid_refresh_stress.py',
@@ -175,32 +175,32 @@ content = f.read()
                                                                                                                                                     # Check for key test methods
 test_count = content.count('async def test_')
 if test_count > 0:
-print("formatted_string")
+print("")
 results['passed'] += 1
 else:
-print("formatted_string")
+print("")
 results['failed'] += 1
 else:
-print("formatted_string")
+print("")
 results['failed'] += 1
 results['total'] += 1
 except Exception as e:
-print("formatted_string")
+print("")
 results['failed'] += 1
 results['total'] += 1
 
                                                                                                                                                                     # Summary
-print(" )
+print("")
 " + "="*70)
 print("[TEST SUMMARY]")
 print("="*70)
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
+print("")
 
                                                                                                                                                                     # Overall assessment
-print(" )
+print("")
 [OVERALL ASSESSMENT]:")
 if results['failed'] == 0:
 print("[EXCELLENT] - All refresh robustness improvements verified!")
@@ -210,23 +210,23 @@ print("   - Comprehensive test coverage created")
 print("   - System is now robust against page refreshes")
 elif results['passed'] >= results['total'] * 0.8:
 print("[GOOD] - Most improvements successfully implemented")
-print("formatted_string")
+print("")
 print("   - Core functionality enhanced")
 print("   - Minor issues may need attention")
 elif results['passed'] >= results['total'] * 0.6:
 print("[ACCEPTABLE] - Basic improvements in place")
-print("formatted_string")
+print("")
 print("   - Review failed items for completion")
 else:
 print("[NEEDS WORK] - Significant improvements needed")
-print("formatted_string")
+print("")
 
 return results
 
 
 async def check_playwright_tests():
 """Try to run actual Playwright tests if environment allows."""
-print(" )
+print("")
 " + "="*70)
 print("[PLAYWRIGHT TEST VALIDATION]")
 print("="*70)
@@ -258,7 +258,7 @@ print("[OK] Playwright tests can be executed")
 return True
 
 except Exception as e:
-print("formatted_string")
+print("")
 print("   Tests would need actual frontend running")
 return False
 
@@ -276,25 +276,25 @@ results = await run_tests()
     # Check Playwright capability
 can_run_browser_tests = await check_playwright_tests()
 
-print(" )
+print("")
 " + "="*70)
 print("[FINAL REPORT]")
 print("="*70)
 
-print(" )
+print("")
 [Test Implementation Status]:")
-print("formatted_string")
-print("formatted_string")
-print("formatted_string")
+print("")
+print("")
+print("")
 
-print(" )
+print("")
 [Key Achievements]:")
 print("   1. WebSocket service enhanced with reconnection logic")
 print("   2. Chat state persistence service created")
 print("   3. Comprehensive test suites developed")
 print("   4. Stress testing framework established")
 
-print(" )
+print("")
 [Recommendations]:")
 if not can_run_browser_tests:
 print("   - Install Playwright browsers: playwright install chromium")
@@ -304,11 +304,11 @@ print("   - Execute full test suite when services are running")
 
         # Exit code based on results
 if results['failed'] == 0:
-print(" )
+print("")
 [SUCCESS] - Page refresh robustness achieved!")
 return 0
 else:
-print("formatted_string")
+print("")
 return 1
 
 

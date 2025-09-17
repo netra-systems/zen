@@ -55,7 +55,7 @@ class TestHealthMonitoringFixVerification:
 
 @pytest.mark.asyncio
     async def test_monitoring_integration_no_errors(self):
-"""Test that monitoring integration doesn't have import or undefined variable errors."""
+        """Test that monitoring integration doesn't have import or undefined variable errors."""
 pass
         # Create a mock environment for the function
 mock_logger = Magic        mock_logger.info = Magic        mock_logger.debug = Magic        mock_logger.warning = Magic        mock_logger.error = Magic
@@ -88,10 +88,10 @@ import_errors = [item for item in []]
 assert len(import_errors) == 0, "formatted_string"
 
 def test_no_legacy_bridge_registration(self):
-"""Verify that the legacy bridge registration code has been removed."""
+    """Verify that the legacy bridge registration code has been removed."""
     # Read the startup_module code
 with open('netra_backend/app/startup_module.py', 'r', encoding='utf-8') as f:
-content = f.read()
+    content = f.read()
 
         # The problematic code that used undefined 'bridge' variable should not exist
         # Removed problematic line: assert 'await chat_event_monitor.register_component_for_monitoring(' not in content )
@@ -103,5 +103,5 @@ assert 'per-request bridges work independently' in content
 
 
 if __name__ == "__main__":
-pytest.main([__file__, "-v"])
+    pytest.main([__file__, "-v"])
 pass

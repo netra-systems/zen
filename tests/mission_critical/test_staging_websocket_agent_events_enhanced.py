@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""
+"
 MISSION CRITICAL TEST SUITE: Enhanced Staging WebSocket Agent Events - COMPREHENSIVE AUTH & USER JOURNEYS
 =====================================================================================================
 
@@ -25,7 +25,7 @@ REQUIREMENTS:
 - SSL/TLS validation for production readiness
 
 ANY FAILURE HERE INDICATES STAGING WEBSOCKET ISSUES THAT WILL AFFECT PRODUCTION.
-"""
+""
 
 import asyncio
 import json
@@ -55,7 +55,7 @@ try:
     import websockets
 except ImportError:
     websockets = None
-    logger.warning("websockets not available, WebSocket tests will be skipped")
+    logger.warning(websockets not available, WebSocket tests will be skipped")
 from loguru import logger
 
 # Set up logging
@@ -64,7 +64,7 @@ logging.basicConfig(level=logging.INFO)
 
 @dataclass
 class UserJourneyMetrics:
-    """Metrics for tracking user journey performance and business value."""
+    "Metrics for tracking user journey performance and business value.""
     signup_time: float = 0.0
     login_time: float = 0.0
     first_websocket_connection_time: float = 0.0
@@ -78,9 +78,9 @@ class UserJourneyMetrics:
 
 @dataclass
 class AuthenticationFlowResult:
-    """Result of authentication flow testing."""
+    ""Result of authentication flow testing."
     success: bool = False
-    method: str = ""
+    method: str = "
     response_time: float = 0.0
     access_token: Optional[str] = None
     refresh_token: Optional[str] = None
@@ -90,7 +90,7 @@ class AuthenticationFlowResult:
 
 @dataclass
 class WebSocketEventValidation:
-    """WebSocket event validation result."""
+    ""WebSocket event validation result."
     event_type: str
     received_time: float
     payload_valid: bool
@@ -101,112 +101,112 @@ class WebSocketEventValidation:
 
 
 class EnhancedStagingWebSocketEventValidator:
-    """Comprehensive WebSocket event validation in staging environment with authentication flows."""
+    "Comprehensive WebSocket event validation in staging environment with authentication flows.""
     
     REQUIRED_EVENTS = {
-        "agent_started",
-        "agent_thinking",
-        "tool_executing",
-        "tool_completed",
-        "agent_completed",
-        "agent_error",
-        "progress_update",
-        "user_message",
-        "system_notification"
+        agent_started",
+        "agent_thinking,
+        tool_executing",
+        "tool_completed,
+        agent_completed",
+        "agent_error,
+        progress_update",
+        "user_message,
+        system_notification"
     }
     
     BUSINESS_CRITICAL_EVENTS = {
-        "agent_started",
-        "agent_completed",
-        "tool_completed",
-        "progress_update"
+        "agent_started,
+        agent_completed",
+        "tool_completed,
+        progress_update"
     }
     
     PERFORMANCE_REQUIREMENTS = {
-        "max_event_latency_ms": 2000,  # 2 seconds max
-        "min_events_per_session": 3,   # At least start, think, complete
-        "max_session_duration_seconds": 300,  # 5 minutes max
-        "concurrent_connections_supported": 50
+        "max_event_latency_ms: 2000,  # 2 seconds max
+        min_events_per_session": 3,   # At least start, think, complete
+        "max_session_duration_seconds: 300,  # 5 minutes max
+        concurrent_connections_supported": 50
     }
     
     def __init__(self):
-        self.staging_websocket_url = "wss://api.staging.netrasystems.ai/ws"
-        self.staging_auth_url = "https://auth.staging.netrasystems.ai"
-        self.staging_backend_url = "https://api.staging.netrasystems.ai"
+        self.staging_websocket_url = "wss://api.staging.netrasystems.ai/ws
+        self.staging_auth_url = https://auth.staging.netrasystems.ai"
+        self.staging_backend_url = "https://api.staging.netrasystems.ai
         
         self.authentication_metrics = {
-            "successful_signups": 0,
-            "successful_logins": 0,
-            "failed_authentications": 0,
-            "websocket_connections": 0,
-            "websocket_failures": 0
+            successful_signups": 0,
+            "successful_logins: 0,
+            failed_authentications": 0,
+            "websocket_connections: 0,
+            websocket_failures": 0
         }
         
         self.business_metrics = {
-            "total_user_journeys": 0,
-            "successful_journeys": 0,
-            "revenue_attribution": 0.0,
-            "average_journey_time": 0.0,
-            "user_satisfaction_scores": [],
-            "conversion_rate": 0.0
+            "total_user_journeys: 0,
+            successful_journeys": 0,
+            "revenue_attribution: 0.0,
+            average_journey_time": 0.0,
+            "user_satisfaction_scores: [],
+            conversion_rate": 0.0
         }
         
         self.performance_metrics = {
-            "websocket_response_times": [],
-            "authentication_times": [],
-            "concurrent_connections_peak": 0,
-            "memory_usage_samples": [],
-            "error_rates": []
+            "websocket_response_times: [],
+            authentication_times": [],
+            "concurrent_connections_peak: 0,
+            memory_usage_samples": [],
+            "error_rates: []
         }
     
     def generate_test_user_credentials(self) -> Dict[str, str]:
-        """Generate unique test user credentials for staging."""
+        ""Generate unique test user credentials for staging."
         suffix = ''.join(secrets.choice(string.ascii_lowercase) for _ in range(8))
         return {
-            "email": f"ws-test-{suffix}@staging.example.com",
-            "password": "WsStaging123!",
-            "first_name": "WebSocket",
-            "last_name": "Tester"
+            "email: fws-test-{suffix}@staging.example.com",
+            "password: WsStaging123!",
+            "first_name: WebSocket",
+            "last_name: Tester"
         }
     
-    async def authenticate_staging_user(self, credentials: Dict[str, str]) -> AuthenticationFlowResult:
-        """Authenticate user with staging auth service."""
-        logger.info(f"[U+1F510] Authenticating staging user: {credentials['email']}")
+    async def authenticate_staging_user(self, credentials: Dict[str, str] -> AuthenticationFlowResult:
+        "Authenticate user with staging auth service.""
+        logger.info(f[U+1F510] Authenticating staging user: {credentials['email']}")
         start_time = time.time()
         
         # Try registration first
         registration_result = await self._attempt_user_registration(credentials)
         if registration_result.success:
-            logger.info(f" PASS:  User registration successful in {registration_result.response_time:.2f}s")
+            logger.info(f" PASS:  User registration successful in {registration_result.response_time:.2f}s)
             return registration_result
         
         # Try login if registration failed (user might already exist)
         login_result = await self._attempt_user_login(credentials)
         if login_result.success:
-            logger.info(f" PASS:  User login successful in {login_result.response_time:.2f}s")
+            logger.info(f PASS:  User login successful in {login_result.response_time:.2f}s")
             return login_result
         
-        logger.error(f" FAIL:  Authentication failed for {credentials['email']}")
+        logger.error(f" FAIL:  Authentication failed for {credentials['email']})
         return AuthenticationFlowResult(
             success=False,
-            method="both_failed",
+            method=both_failed",
             response_time=time.time() - start_time,
-            error="Both registration and login failed"
+            error="Both registration and login failed
         )
     
-    async def _attempt_user_registration(self, credentials: Dict[str, str]) -> AuthenticationFlowResult:
-        """Attempt user registration with staging service."""
+    async def _attempt_user_registration(self, credentials: Dict[str, str] -> AuthenticationFlowResult:
+        ""Attempt user registration with staging service."
         start_time = time.time()
         
         registration_endpoints = [
-            "/auth/register",
-            "/api/auth/register",
-            "/api/v1/auth/register"
+            "/auth/register,
+            /api/auth/register",
+            "/api/v1/auth/register
         ]
         
         for endpoint in registration_endpoints:
             try:
-                url = f"{self.staging_auth_url}{endpoint}"
+                url = f{self.staging_auth_url}{endpoint}"
                 async with httpx.AsyncClient(timeout=30.0) as client:
                     response = await client.post(url, json=credentials)
                     
@@ -214,51 +214,51 @@ class EnhancedStagingWebSocketEventValidator:
                         response_data = response.json()
                         return AuthenticationFlowResult(
                             success=True,
-                            method="registration",
+                            method="registration,
                             response_time=time.time() - start_time,
-                            access_token=response_data.get("access_token"),
-                            refresh_token=response_data.get("refresh_token"),
-                            user_id=response_data.get("user_id"),
+                            access_token=response_data.get(access_token"),
+                            refresh_token=response_data.get("refresh_token),
+                            user_id=response_data.get(user_id"),
                             websocket_compatible=True
                         )
                     elif response.status_code == 409:
                         # User already exists - this is OK
                         return AuthenticationFlowResult(
                             success=False,
-                            method="registration",
+                            method="registration,
                             response_time=time.time() - start_time,
-                            error="User already exists"
+                            error=User already exists"
                         )
                         
             except Exception as e:
-                logger.error(f"Registration failed at {endpoint}: {e}")
+                logger.error(f"Registration failed at {endpoint}: {e})
                 continue
         
         return AuthenticationFlowResult(
             success=False,
-            method="registration",
+            method=registration",
             response_time=time.time() - start_time,
-            error="All registration endpoints failed"
+            error="All registration endpoints failed
         )
     
-    async def _attempt_user_login(self, credentials: Dict[str, str]) -> AuthenticationFlowResult:
-        """Attempt user login with staging service."""
+    async def _attempt_user_login(self, credentials: Dict[str, str] -> AuthenticationFlowResult:
+        ""Attempt user login with staging service."
         start_time = time.time()
         
         login_endpoints = [
-            "/auth/login",
-            "/api/auth/login",
-            "/api/v1/auth/login"
+            "/auth/login,
+            /api/auth/login",
+            "/api/v1/auth/login
         ]
         
         login_data = {
-            "email": credentials["email"],
-            "password": credentials["password"]
+            email": credentials["email],
+            password": credentials["password]
         }
         
         for endpoint in login_endpoints:
             try:
-                url = f"{self.staging_auth_url}{endpoint}"
+                url = f{self.staging_auth_url}{endpoint}"
                 async with httpx.AsyncClient(timeout=30.0) as client:
                     response = await client.post(url, json=login_data)
                     
@@ -266,54 +266,54 @@ class EnhancedStagingWebSocketEventValidator:
                         response_data = response.json()
                         return AuthenticationFlowResult(
                             success=True,
-                            method="login",
+                            method="login,
                             response_time=time.time() - start_time,
-                            access_token=response_data.get("access_token"),
-                            refresh_token=response_data.get("refresh_token"),
-                            user_id=response_data.get("user_id"),
+                            access_token=response_data.get(access_token"),
+                            refresh_token=response_data.get("refresh_token),
+                            user_id=response_data.get(user_id"),
                             websocket_compatible=True
                         )
                         
             except Exception as e:
-                logger.error(f"Login failed at {endpoint}: {e}")
+                logger.error(f"Login failed at {endpoint}: {e})
                 continue
         
         return AuthenticationFlowResult(
             success=False,
-            method="login",
+            method=login",
             response_time=time.time() - start_time,
-            error="All login endpoints failed"
+            error="All login endpoints failed
         )
     
     async def establish_mock_websocket_connection(self, auth_result: AuthenticationFlowResult) -> Optional[Dict[str, Any]]:
-        """Mock WebSocket connection for testing when websockets package not available."""
+        ""Mock WebSocket connection for testing when websockets package not available."
         if not websockets:
-            logger.info("[U+1F50C] Mocking WebSocket connection (websockets package not available)")
+            logger.info("[U+1F50C] Mocking WebSocket connection (websockets package not available))
             if not auth_result.success or not auth_result.access_token:
-                logger.error("Cannot establish WebSocket connection without valid authentication")
+                logger.error(Cannot establish WebSocket connection without valid authentication")
                 return None
             
             # Simulate connection establishment
             await asyncio.sleep(0.1)
-            self.authentication_metrics["websocket_connections"] += 1
+            self.authentication_metrics["websocket_connections] += 1
             
             return {
-                "mock_connection": True,
-                "auth_token": auth_result.access_token,
-                "connected": True
+                mock_connection": True,
+                "auth_token: auth_result.access_token,
+                connected": True
             }
         
-        logger.info(f"[U+1F50C] Establishing WebSocket connection to {self.staging_websocket_url}")
+        logger.info(f"[U+1F50C] Establishing WebSocket connection to {self.staging_websocket_url})
         
         if not auth_result.success or not auth_result.access_token:
-            logger.error("Cannot establish WebSocket connection without valid authentication")
+            logger.error(Cannot establish WebSocket connection without valid authentication")
             return None
         
         try:
             # Prepare authentication headers
             headers = {
-                "Authorization": f"Bearer {auth_result.access_token}",
-                "Origin": "https://app.staging.netrasystems.ai"
+                "Authorization: fBearer {auth_result.access_token}",
+                "Origin: https://app.staging.netrasystems.ai"
             }
             
             # Connect to staging WebSocket
@@ -325,20 +325,20 @@ class EnhancedStagingWebSocketEventValidator:
                 close_timeout=10
             )
             
-            logger.info(" PASS:  WebSocket connection established successfully")
-            self.authentication_metrics["websocket_connections"] += 1
-            return {"connection": websocket, "connected": True}
+            logger.info(" PASS:  WebSocket connection established successfully)
+            self.authentication_metrics[websocket_connections"] += 1
+            return {"connection: websocket, connected": True}
             
         except Exception as e:
-            logger.error(f" FAIL:  WebSocket connection failed: {e}")
-            self.authentication_metrics["websocket_failures"] += 1
+            logger.error(f" FAIL:  WebSocket connection failed: {e})
+            self.authentication_metrics[websocket_failures"] += 1
             return None
     
     async def validate_mock_websocket_event_flow(self, connection: Dict[str, Any], timeout_seconds: int = 30) -> List[WebSocketEventValidation]:
-        """Mock WebSocket event flow validation when real WebSocket not available."""
-        logger.info(" TARGET:  Validating mock WebSocket event flow...")
+        "Mock WebSocket event flow validation when real WebSocket not available.""
+        logger.info( TARGET:  Validating mock WebSocket event flow...")
         
-        if not connection or not connection.get("connected"):
+        if not connection or not connection.get("connected):
             return []
         
         received_events = []
@@ -346,11 +346,11 @@ class EnhancedStagingWebSocketEventValidator:
         
         # Simulate realistic WebSocket events
         mock_events = [
-            {"type": "agent_started", "agent_id": "test_agent", "run_id": f"run_{uuid.uuid4().hex[:8]}", "timestamp": datetime.now(timezone.utc).isoformat()},
-            {"type": "agent_thinking", "content": "Processing your request...", "agent_id": "test_agent", "timestamp": datetime.now(timezone.utc).isoformat()},
-            {"type": "tool_executing", "tool_name": "web_search", "agent_id": "test_agent", "timestamp": datetime.now(timezone.utc).isoformat()},
-            {"type": "tool_completed", "tool_name": "web_search", "result": {"found": "test data"}, "agent_id": "test_agent", "timestamp": datetime.now(timezone.utc).isoformat()},
-            {"type": "agent_completed", "result": {"response": "Task completed successfully"}, "agent_id": "test_agent", "timestamp": datetime.now(timezone.utc).isoformat()}
+            {type": "agent_started, agent_id": "test_agent, run_id": f"run_{uuid.uuid4().hex[:8]}, timestamp": datetime.now(timezone.utc).isoformat()},
+            {"type: agent_thinking", "content: Processing your request...", "agent_id: test_agent", "timestamp: datetime.now(timezone.utc).isoformat()},
+            {type": "tool_executing, tool_name": "web_search, agent_id": "test_agent, timestamp": datetime.now(timezone.utc).isoformat()},
+            {"type: tool_completed", "tool_name: web_search", "result: {found": "test data}, agent_id": "test_agent, timestamp": datetime.now(timezone.utc).isoformat()},
+            {"type: agent_completed", "result: {response": "Task completed successfully}, agent_id": "test_agent, timestamp": datetime.now(timezone.utc).isoformat()}
         ]
         
         for i, event_data in enumerate(mock_events):
@@ -359,20 +359,20 @@ class EnhancedStagingWebSocketEventValidator:
             validation = self._validate_single_websocket_event(event_data, time.time())
             received_events.append(validation)
             
-            logger.info(f"[U+1F4E5] Simulated event: {validation.event_type}")
+            logger.info(f"[U+1F4E5] Simulated event: {validation.event_type})
             
             # Simulate early completion
             if i >= 3:  # Minimum viable event flow
                 break
         
         total_time = time.time() - start_time
-        logger.info(f" TARGET:  Mock WebSocket event validation completed in {total_time:.2f}s - {len(received_events)} events received")
+        logger.info(f TARGET:  Mock WebSocket event validation completed in {total_time:.2f}s - {len(received_events)} events received")
         
         return received_events
     
     def _validate_single_websocket_event(self, event_data: Dict[str, Any], received_time: float) -> WebSocketEventValidation:
-        """Validate a single WebSocket event for business requirements."""
-        event_type = event_data.get("type", "unknown")
+        "Validate a single WebSocket event for business requirements.""
+        event_type = event_data.get(type", "unknown)
         
         validation = WebSocketEventValidation(
             event_type=event_type,
@@ -384,36 +384,36 @@ class EnhancedStagingWebSocketEventValidator:
         )
         
         # Validate event structure
-        required_fields = ["type", "timestamp"]
+        required_fields = [type", "timestamp]
         for field in required_fields:
             if field not in event_data:
                 validation.payload_valid = False
-                validation.error = f"Missing required field: {field}"
+                validation.error = fMissing required field: {field}"
                 break
         
         return validation
     
-    def _validate_event_payload(self, event_data: Dict[str, Any]) -> bool:
-        """Validate WebSocket event payload structure."""
+    def _validate_event_payload(self, event_data: Dict[str, Any] -> bool:
+        "Validate WebSocket event payload structure.""
         try:
             # Basic validation
             if not isinstance(event_data, dict):
                 return False
                 
-            if "type" not in event_data:
+            if type" not in event_data:
                 return False
                 
             # Event-specific validation
-            event_type = event_data["type"]
+            event_type = event_data["type]
             
-            if event_type == "agent_started":
-                return "agent_id" in event_data and "run_id" in event_data
-            elif event_type == "agent_thinking":
-                return "content" in event_data and "agent_id" in event_data
-            elif event_type == "tool_executing":
-                return "tool_name" in event_data and "agent_id" in event_data
-            elif event_type == "agent_completed":
-                return "result" in event_data and "agent_id" in event_data
+            if event_type == agent_started":
+                return "agent_id in event_data and run_id" in event_data
+            elif event_type == "agent_thinking:
+                return content" in event_data and "agent_id in event_data
+            elif event_type == tool_executing":
+                return "tool_name in event_data and agent_id" in event_data
+            elif event_type == "agent_completed:
+                return result" in event_data and "agent_id in event_data
                 
             return True
             
@@ -421,20 +421,20 @@ class EnhancedStagingWebSocketEventValidator:
             return False
     
     def _is_user_visible_event(self, event_type: str) -> bool:
-        """Determine if event should be visible to end users."""
+        ""Determine if event should be visible to end users."
         user_visible_events = {
-            "agent_thinking",
-            "tool_executing", 
-            "tool_completed",
-            "agent_completed",
-            "progress_update",
-            "system_notification"
+            "agent_thinking,
+            tool_executing", 
+            "tool_completed,
+            agent_completed",
+            "progress_update,
+            system_notification"
         }
         return event_type in user_visible_events
     
-    async def measure_user_journey_performance(self, credentials: Dict[str, str]) -> UserJourneyMetrics:
-        """Measure complete user journey performance from auth to AI value."""
-        logger.info(f" CHART:  Measuring user journey performance for {credentials['email']}...")
+    async def measure_user_journey_performance(self, credentials: Dict[str, str] -> UserJourneyMetrics:
+        "Measure complete user journey performance from auth to AI value.""
+        logger.info(f CHART:  Measuring user journey performance for {credentials['email']}...")
         
         metrics = UserJourneyMetrics()
         journey_start_time = time.time()
@@ -446,7 +446,7 @@ class EnhancedStagingWebSocketEventValidator:
             metrics.login_time = time.time() - auth_start
             
             if not auth_result.success:
-                logger.error(" FAIL:  Authentication failed in user journey")
+                logger.error(" FAIL:  Authentication failed in user journey)
                 return metrics
             
             # Step 2: WebSocket connection
@@ -455,7 +455,7 @@ class EnhancedStagingWebSocketEventValidator:
             metrics.first_websocket_connection_time = time.time() - ws_start
             
             if not websocket:
-                logger.error(" FAIL:  WebSocket connection failed in user journey")
+                logger.error( FAIL:  WebSocket connection failed in user journey")
                 return metrics
             
             # Step 3: AI agent interaction
@@ -464,7 +464,7 @@ class EnhancedStagingWebSocketEventValidator:
             metrics.first_agent_response_time = time.time() - agent_start
             
             metrics.websocket_events_received = len(events)
-            metrics.successful_agent_interactions = len([e for e in events if e.event_type == "agent_completed"])
+            metrics.successful_agent_interactions = len([e for e in events if e.event_type == "agent_completed]
             
             # Calculate total journey time
             metrics.total_journey_time = time.time() - journey_start_time
@@ -486,13 +486,13 @@ class EnhancedStagingWebSocketEventValidator:
                 monthly_value = 29.99
                 metrics.revenue_attribution = monthly_value * metrics.conversion_probability * 0.15  # 15% of users convert
             
-            logger.info(f" CHART:  User journey completed in {metrics.total_journey_time:.2f}s")
-            logger.info(f"   User satisfaction: {metrics.user_satisfaction_score:.1f}/5.0")
-            logger.info(f"   Conversion probability: {metrics.conversion_probability:.1%}")
-            logger.info(f"   Revenue attribution: ${metrics.revenue_attribution:.2f}")
+            logger.info(f CHART:  User journey completed in {metrics.total_journey_time:.2f}s")
+            logger.info(f"   User satisfaction: {metrics.user_satisfaction_score:.1f}/5.0)
+            logger.info(f   Conversion probability: {metrics.conversion_probability:.1%}")
+            logger.info(f"   Revenue attribution: ${metrics.revenue_attribution:.2f})
             
         except Exception as e:
-            logger.error(f" FAIL:  User journey measurement failed: {e}")
+            logger.error(f FAIL:  User journey measurement failed: {e}")
             metrics.total_journey_time = time.time() - journey_start_time
         
         return metrics
@@ -502,95 +502,95 @@ class EnhancedStagingWebSocketEventValidator:
 @pytest.mark.asyncio
 @pytest.mark.staging
 class StagingWebSocketAuthenticationTests:
-    """Test staging WebSocket functionality with comprehensive authentication flows."""
+    "Test staging WebSocket functionality with comprehensive authentication flows.""
     
     @pytest.fixture
     async def validator(self):
-        """Create enhanced WebSocket validator."""
+        ""Create enhanced WebSocket validator."
         return EnhancedStagingWebSocketEventValidator()
     
     async def test_authentication_flow_comprehensive(self, validator):
-        """Test comprehensive authentication flows - 25+ scenarios."""
-        logger.info("[U+1F680] Starting comprehensive authentication flow tests...")
+        "Test comprehensive authentication flows - 25+ scenarios.""
+        logger.info([U+1F680] Starting comprehensive authentication flow tests...")
         
         # Test 1: User registration flow
         credentials = validator.generate_test_user_credentials()
         auth_result = await validator.authenticate_staging_user(credentials)
         
         # At least one auth method should work or fail gracefully
-        assert isinstance(auth_result, AuthenticationFlowResult), "Should return AuthenticationFlowResult"
+        assert isinstance(auth_result, AuthenticationFlowResult), "Should return AuthenticationFlowResult
         
         if auth_result.success:
-            assert auth_result.access_token is not None, "Successful auth should provide access token"
-            assert auth_result.response_time < 10.0, f"Auth response time {auth_result.response_time:.2f}s too slow"
+            assert auth_result.access_token is not None, Successful auth should provide access token"
+            assert auth_result.response_time < 10.0, f"Auth response time {auth_result.response_time:.2f}s too slow
             
         # Test 2: WebSocket connection with auth
         if auth_result.success:
             websocket = await validator.establish_mock_websocket_connection(auth_result)
-            assert websocket is not None, "WebSocket connection should succeed with valid auth"
+            assert websocket is not None, WebSocket connection should succeed with valid auth"
             
         # Test 3-25: Additional auth scenarios would be implemented here
         # For now, validate the basic flow works
-        assert validator.authentication_metrics["websocket_connections"] >= 0, "Should track connection metrics"
+        assert validator.authentication_metrics["websocket_connections] >= 0, Should track connection metrics"
     
     async def test_user_journey_validation_comprehensive(self, validator):
-        """Test comprehensive user journeys - 25+ scenarios."""
-        logger.info("[U+1F680] Starting comprehensive user journey tests...")
+        "Test comprehensive user journeys - 25+ scenarios.""
+        logger.info([U+1F680] Starting comprehensive user journey tests...")
         
         # Journey 1: First-time user complete onboarding
         credentials = validator.generate_test_user_credentials()
         metrics = await validator.measure_user_journey_performance(credentials)
         
         # Validate metrics structure
-        assert isinstance(metrics, UserJourneyMetrics), "Should return UserJourneyMetrics"
-        assert metrics.total_journey_time >= 0, "Journey time should be measured"
+        assert isinstance(metrics, UserJourneyMetrics), "Should return UserJourneyMetrics
+        assert metrics.total_journey_time >= 0, Journey time should be measured"
         
         # Journey performance requirements
         if metrics.total_journey_time > 0:
             # For staging, allow up to 60 seconds (more lenient than 30s production requirement)
-            assert metrics.total_journey_time < 60.0, f"User journey took {metrics.total_journey_time:.2f}s, should be <60s"
+            assert metrics.total_journey_time < 60.0, f"User journey took {metrics.total_journey_time:.2f}s, should be <60s
             
             # Business metrics should be calculated
-            assert metrics.user_satisfaction_score >= 0.0, "User satisfaction should be non-negative"
-            assert metrics.conversion_probability >= 0.0, "Conversion probability should be non-negative"
-            assert metrics.revenue_attribution >= 0.0, "Revenue attribution should be non-negative"
+            assert metrics.user_satisfaction_score >= 0.0, User satisfaction should be non-negative"
+            assert metrics.conversion_probability >= 0.0, "Conversion probability should be non-negative
+            assert metrics.revenue_attribution >= 0.0, Revenue attribution should be non-negative"
         
         # Update business metrics
-        validator.business_metrics["total_user_journeys"] += 1
+        validator.business_metrics["total_user_journeys] += 1
         if metrics.successful_agent_interactions > 0:
-            validator.business_metrics["successful_journeys"] += 1
+            validator.business_metrics[successful_journeys"] += 1
             
-        validator.business_metrics["user_satisfaction_scores"].append(metrics.user_satisfaction_score)
-        validator.business_metrics["revenue_attribution"] += metrics.revenue_attribution
+        validator.business_metrics["user_satisfaction_scores].append(metrics.user_satisfaction_score)
+        validator.business_metrics[revenue_attribution"] += metrics.revenue_attribution
     
     async def test_performance_under_load(self, validator):
-        """Test performance under load - 10+ performance scenarios."""
-        logger.info("[U+1F680] Starting performance under load tests...")
+        "Test performance under load - 10+ performance scenarios.""
+        logger.info([U+1F680] Starting performance under load tests...")
         
         # Performance test 1: Concurrent authentication
         num_concurrent_users = 5  # Reduced for testing
         
         async def test_single_user_auth(user_id: int) -> Dict[str, Any]:
-            """Test authentication for a single user."""
+            "Test authentication for a single user.""
             try:
                 credentials = validator.generate_test_user_credentials()
-                credentials["email"] = f"perf-test-{user_id}-{credentials['email']}"
+                credentials[email"] = f"perf-test-{user_id}-{credentials['email']}
                 
                 start_time = time.time()
                 auth_result = await validator.authenticate_staging_user(credentials)
                 
                 return {
-                    "user_id": user_id,
-                    "success": auth_result.success,
-                    "response_time": time.time() - start_time,
-                    "method": auth_result.method
+                    user_id": user_id,
+                    "success: auth_result.success,
+                    response_time": time.time() - start_time,
+                    "method: auth_result.method
                 }
             except Exception as e:
                 return {
-                    "user_id": user_id,
-                    "success": False,
-                    "error": str(e),
-                    "response_time": time.time() - start_time if 'start_time' in locals() else 0
+                    user_id": user_id,
+                    "success: False,
+                    error": str(e),
+                    "response_time: time.time() - start_time if 'start_time' in locals() else 0
                 }
         
         # Execute concurrent authentication tests
@@ -601,72 +601,72 @@ class StagingWebSocketAuthenticationTests:
         total_time = time.time() - start_time
         
         # Analyze results
-        successful_auths = [r for r in results if isinstance(r, dict) and r.get("success", False)]
+        successful_auths = [r for r in results if isinstance(r, dict) and r.get(success", False)]
         success_rate = len(successful_auths) / num_concurrent_users
         
         # Performance assertions for staging
-        assert success_rate >= 0.4, f"Success rate {success_rate:.1%} below 40% threshold for staging"
-        assert total_time < 30.0, f"Concurrent auth test took {total_time:.2f}s, should be <30s"
+        assert success_rate >= 0.4, f"Success rate {success_rate:.1%} below 40% threshold for staging
+        assert total_time < 30.0, fConcurrent auth test took {total_time:.2f}s, should be <30s"
         
         if successful_auths:
-            avg_response_time = sum(r["response_time"] for r in successful_auths) / len(successful_auths)
-            assert avg_response_time < 15.0, f"Average response time {avg_response_time:.2f}s too high"
+            avg_response_time = sum(r["response_time] for r in successful_auths) / len(successful_auths)
+            assert avg_response_time < 15.0, fAverage response time {avg_response_time:.2f}s too high"
     
     async def test_business_metrics_calculation(self, validator):
-        """Test business metrics calculation and tracking."""
-        logger.info("[U+1F680] Testing business metrics calculation...")
+        "Test business metrics calculation and tracking.""
+        logger.info([U+1F680] Testing business metrics calculation...")
         
         # Generate some test data
         await validator.measure_user_journey_performance(validator.generate_test_user_credentials())
         
         # Validate metrics structure exists
-        assert isinstance(validator.authentication_metrics, dict), "Should have authentication metrics"
-        assert isinstance(validator.business_metrics, dict), "Should have business metrics"
-        assert isinstance(validator.performance_metrics, dict), "Should have performance metrics"
+        assert isinstance(validator.authentication_metrics, dict), "Should have authentication metrics
+        assert isinstance(validator.business_metrics, dict), Should have business metrics"
+        assert isinstance(validator.performance_metrics, dict), "Should have performance metrics
         
         # Validate required metrics are tracked
-        required_auth_metrics = ["successful_signups", "successful_logins", "failed_authentications", "websocket_connections"]
+        required_auth_metrics = [successful_signups", "successful_logins, failed_authentications", "websocket_connections]
         for metric in required_auth_metrics:
-            assert metric in validator.authentication_metrics, f"Missing auth metric: {metric}"
+            assert metric in validator.authentication_metrics, fMissing auth metric: {metric}"
             
-        required_business_metrics = ["total_user_journeys", "successful_journeys", "revenue_attribution"]
+        required_business_metrics = ["total_user_journeys, successful_journeys", "revenue_attribution]
         for metric in required_business_metrics:
-            assert metric in validator.business_metrics, f"Missing business metric: {metric}"
+            assert metric in validator.business_metrics, fMissing business metric: {metric}"
     
     async def test_websocket_event_validation(self, validator):
-        """Test WebSocket event validation patterns."""
-        logger.info("[U+1F680] Testing WebSocket event validation...")
+        "Test WebSocket event validation patterns.""
+        logger.info([U+1F680] Testing WebSocket event validation...")
         
         # Test event validation with mock events
         test_events = [
-            {"type": "agent_started", "agent_id": "test", "run_id": "run123", "timestamp": datetime.now().isoformat()},
-            {"type": "agent_thinking", "content": "thinking...", "agent_id": "test", "timestamp": datetime.now().isoformat()},
-            {"type": "agent_completed", "result": {"status": "done"}, "agent_id": "test", "timestamp": datetime.now().isoformat()},
-            {"type": "invalid_event"},  # Missing required fields
+            {"type: agent_started", "agent_id: test", "run_id: run123", "timestamp: datetime.now().isoformat()},
+            {type": "agent_thinking, content": "thinking..., agent_id": "test, timestamp": datetime.now().isoformat()},
+            {"type: agent_completed", "result: {status": "done}, agent_id": "test, timestamp": datetime.now().isoformat()},
+            {"type: invalid_event"},  # Missing required fields
         ]
         
         for event_data in test_events:
             validation = validator._validate_single_websocket_event(event_data, time.time())
             
-            assert isinstance(validation, WebSocketEventValidation), "Should return WebSocketEventValidation"
-            assert validation.event_type == event_data.get("type", "unknown"), "Event type should match"
+            assert isinstance(validation, WebSocketEventValidation), "Should return WebSocketEventValidation
+            assert validation.event_type == event_data.get(type", "unknown), Event type should match"
             
-            if event_data.get("type") == "invalid_event":
-                assert not validation.payload_valid, "Invalid event should fail validation"
+            if event_data.get("type) == invalid_event":
+                assert not validation.payload_valid, "Invalid event should fail validation
             else:
                 # Valid events should pass basic validation
-                assert validation.event_type in validator.REQUIRED_EVENTS, f"Event type {validation.event_type} should be recognized"
+                assert validation.event_type in validator.REQUIRED_EVENTS, fEvent type {validation.event_type} should be recognized"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     # Execute enhanced staging WebSocket agent event tests
-    print("\n" + "=" * 80)
-    print("ENHANCED STAGING WEBSOCKET AGENT EVENTS TEST SUITE")
-    print("Environment: Staging (api-staging.netrasystems.ai)")
+    print(\n" + "= * 80)
+    print(ENHANCED STAGING WEBSOCKET AGENT EVENTS TEST SUITE")
+    print("Environment: Staging (api-staging.netrasystems.ai))
     print("Purpose: Production-readiness validation")
-    print("Business Impact: $500K+ ARR revenue protection")
+    print(Business Impact: $500K+ ARR revenue protection)
     print("=" * 80)
 
     import pytest
@@ -675,13 +675,13 @@ if __name__ == "__main__":
     # Run enhanced staging tests with comprehensive coverage
     exit_code = pytest.main([
         __file__,
-        "-v",
+        -v,
         "--tb=short", 
-        "--asyncio-mode=auto",
+        --asyncio-mode=auto,
         "--disable-warnings",
-        "--maxfail=3",  # Stop after 3 failures for staging tests
-        "-m", "staging or mission_critical"  # Run staging and mission critical markers
-    ])
+        --maxfail=3,  # Stop after 3 failures for staging tests
+        "-m", staging or mission_critical  # Run staging and mission critical markers
+    ]
 
     print(f"\n✅ Enhanced staging test execution completed with exit code: {exit_code}")
     sys.exit(exit_code)

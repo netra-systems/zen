@@ -1,4 +1,4 @@
-"""
+"
 Test Agent-WebSocket Integration Comprehensive Suite
 
 Business Value Justification (BVJ):
@@ -16,7 +16,7 @@ CRITICAL REQUIREMENTS:
 
 IMPORTANT: This test validates the core infrastructure that enables users to see
 real-time AI problem-solving, which is the primary value proposition of the platform.
-"""
+""
 import asyncio
 import json
 import time
@@ -37,11 +37,11 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 class AgentWebSocketIntegrationTests(BaseIntegrationTest):
-    """Test agent execution with WebSocket event delivery using real services."""
+    ""Test agent execution with WebSocket event delivery using real services."
 
     @pytest.fixture(autouse=True)
     async def setup_test_environment(self, real_services_fixture):
-        """Set up isolated test environment with real services."""
+        "Set up isolated test environment with real services.""
         self.env = get_env()
         self.services = real_services_fixture
         self.ws_utility = None
@@ -61,7 +61,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
             pytest.fail(f'Real WebSocket service not available: {e} - Docker services must be running')
 
     async def async_teardown(self):
-        """Clean up test resources."""
+        ""Clean up test resources."
         if self.ws_utility:
             await self.ws_utility.cleanup()
         await super().async_teardown()
@@ -69,7 +69,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_agent_execution_sends_all_websocket_events(self, real_services_fixture):
-        """
+        "
         Test that REAL agent execution sends all 5 required WebSocket events.
         
         This test validates the core business value: users see real-time agent progress
@@ -77,7 +77,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
         
         CRITICAL: Tests agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
         Uses REAL agent execution with REAL services per CLAUDE.md requirements.
-        """
+        ""
         try:
             authenticated_user = await create_authenticated_user(user_id=self.test_user_id, email=f'{self.test_user_id}@test.example.com')
             auth_token = authenticated_user.token
@@ -107,7 +107,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
             received_events = await client.wait_for_events(expected_events, timeout=30.0)
             for event_type in expected_events:
                 assert event_type in received_events, f'Missing critical WebSocket event: {event_type.value}'
-                assert len(received_events[event_type]) > 0, f'No messages received for event: {event_type.value}'
+                assert len(received_events[event_type] > 0, f'No messages received for event: {event_type.value}'
             all_events = client.received_messages
             event_types = [msg.event_type for msg in all_events]
             assert event_types[0] == WebSocketEventType.AGENT_STARTED, 'agent_started must be first event'
@@ -131,13 +131,13 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_tool_dispatch_integration_with_websocket_events(self, real_services_fixture):
-        """
+        ""
         Test tool execution through WebSocket notifications.
         
         Validates that tool dispatch triggers proper WebSocket events,
         enabling users to see real-time tool usage during agent problem-solving.
-        """
-        user_context = UserExecutionContext(user_id=self.test_user_id, request_id=f'req_{uuid.uuid4().hex[:8]}', thread_id=self.test_thread_id, metadata={'tool_permissions': ['analyze_costs', 'generate_report'], 'user_tier': 'enterprise'})
+        "
+        user_context = UserExecutionContext(user_id=self.test_user_id, request_id=f'req_{uuid.uuid4().hex[:8]}', thread_id=self.test_thread_id, metadata={'tool_permissions': ['analyze_costs', 'generate_report'], 'user_tier': 'enterprise'}
         async with self.ws_utility.connected_client(user_id=self.test_user_id) as client:
             tool_dispatcher = UnifiedToolDispatcher(user_context=user_context)
             ws_bridge = create_agent_websocket_bridge(user_context)
@@ -165,12 +165,12 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_agent_context_factory_isolation(self, real_services_fixture):
-        """
+        "
         Test user context isolation during agent execution.
         
         Validates that multiple users can execute agents concurrently without
         context leakage, ensuring proper multi-user isolation.
-        """
+        ""
         user_contexts = []
         user_clients = []
         for i in range(3):
@@ -194,7 +194,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
             results = await asyncio.gather(*execution_tasks, return_exceptions=True)
             for i, result in enumerate(results):
                 assert not isinstance(result, Exception), f'User {i} execution failed: {result}'
-                assert result['success'], f"User {i} agent execution failed: {result.get('error')}"
+                assert result['success'], fUser {i} agent execution failed: {result.get('error')}"
                 assert result['user_id'] == user_contexts[i].user_id, f'User {i} context isolation failed'
             for i, client in enumerate(user_clients):
                 user_events = client.get_messages_by_type(WebSocketEventType.AGENT_STARTED)
@@ -205,7 +205,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
                 await client.disconnect()
 
     async def _execute_agent_for_user_isolation_test(self, client, user_context: UserExecutionContext, request: str):
-        """Helper method for REAL user isolation testing (no simulation)."""
+        "Helper method for REAL user isolation testing (no simulation).""
         factory = get_agent_instance_factory()
         execution_engine = UserExecutionEngine(user_context=user_context)
         registry = AgentRegistry()
@@ -219,12 +219,12 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_websocket_error_handling_during_agent_execution(self, real_services_fixture):
-        """
+        ""
         Test graceful error handling with WebSocket notifications.
         
         Ensures that agent execution errors are properly communicated through
         WebSocket events, maintaining user experience during failures.
-        """
+        "
         user_context = UserExecutionContext(user_id=self.test_user_id, request_id=f'req_{uuid.uuid4().hex[:8]}', thread_id=self.test_thread_id)
         async with self.ws_utility.connected_client(user_id=self.test_user_id) as client:
             user_session = UserAgentSession(self.test_user_id)
@@ -236,8 +236,8 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
                     await client.send_message(WebSocketEventType.AGENT_STARTED, {'request': scenario['request'], 'test_scenario': scenario['name']}, user_id=self.test_user_id, thread_id=self.test_thread_id)
                     error_event = await client.wait_for_message(event_type=WebSocketEventType.ERROR, timeout=10.0)
                     assert error_event.event_type == WebSocketEventType.ERROR
-                    assert error_event.data.get('error_type'), f"Missing error_type in {scenario['name']}"
-                    assert error_event.data.get('message'), f"Missing error message in {scenario['name']}"
+                    assert error_event.data.get('error_type'), f"Missing error_type in {scenario['name']}
+                    assert error_event.data.get('message'), fMissing error message in {scenario['name']}"
                     assert error_event.user_id == self.test_user_id
                     if 'expected_error_type' in scenario:
                         assert scenario['expected_error_type'] in error_event.data.get('error_type', '')
@@ -247,13 +247,13 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_real_time_progress_updates_during_long_running_tasks(self, real_services_fixture):
-        """
+        "
         Test streaming progress updates during long-running agent tasks.
         
         Validates that users receive timely progress updates during complex
         agent operations, maintaining engagement during longer processing times.
-        """
-        user_context = UserExecutionContext(user_id=self.test_user_id, request_id=f'req_{uuid.uuid4().hex[:8]}', thread_id=self.test_thread_id, metadata={'enable_progress_streaming': True, 'progress_interval': 2.0})
+        ""
+        user_context = UserExecutionContext(user_id=self.test_user_id, request_id=f'req_{uuid.uuid4().hex[:8]}', thread_id=self.test_thread_id, metadata={'enable_progress_streaming': True, 'progress_interval': 2.0}
         async with self.ws_utility.connected_client(user_id=self.test_user_id) as client:
             user_session = UserAgentSession(self.test_user_id)
             ws_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
@@ -303,12 +303,12 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_websocket_event_sequencing_and_ordering(self, real_services_fixture):
-        """
+        ""
         Test that WebSocket events are sent in correct sequence and order.
         
         Ensures proper event ordering which is critical for user experience
         and enables coherent real-time agent interaction display.
-        """
+        "
         user_context = UserExecutionContext(user_id=self.test_user_id, request_id=f'req_{uuid.uuid4().hex[:8]}', thread_id=self.test_thread_id)
         async with self.ws_utility.connected_client(user_id=self.test_user_id) as client:
             factory = get_agent_instance_factory()
@@ -316,7 +316,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
             registry = AgentRegistry()
             agent_result = await registry.execute_agent(agent_type='cost_analysis_agent', user_message='Analyze costs and generate detailed optimization report', user_context=user_context, execution_engine=execution_engine)
             execution_results = {'success': True, 'result': agent_result}
-            assert execution_results['success'], f"Agent execution failed: {execution_results.get('error')}"
+            assert execution_results['success'], f"Agent execution failed: {execution_results.get('error')}
             all_events = client.received_messages
             event_sequence = [(event.event_type, event.timestamp) for event in all_events]
             event_types = [event_type for event_type, _ in event_sequence]
@@ -341,12 +341,12 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.real_services
     @pytest.mark.performance
     async def test_websocket_performance_under_concurrent_load(self, real_services_fixture):
-        """
+        ""
         Test WebSocket performance during concurrent agent executions.
         
         Validates that WebSocket event delivery remains reliable and timely
         under realistic concurrent load (5+ users executing agents simultaneously).
-        """
+        "
         concurrent_users = 5
         user_sessions = []
         performance_metrics = {'total_events': 0, 'avg_response_time': 0.0, 'max_response_time': 0.0, 'event_delivery_success_rate': 0.0, 'errors': []}
@@ -356,11 +356,11 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
                 user_context = UserExecutionContext(user_id=user_id, request_id=f'req_{user_id}_{uuid.uuid4().hex[:8]}', thread_id=f'thread_{user_id}_{uuid.uuid4().hex[:8]}')
                 client = await self.ws_utility.create_authenticated_client(user_id)
                 await client.connect()
-                user_sessions.append({'user_id': user_id, 'user_context': user_context, 'client': client})
+                user_sessions.append({'user_id': user_id, 'user_context': user_context, 'client': client}
             start_time = time.time()
             concurrent_tasks = []
             for session in user_sessions:
-                task = asyncio.create_task(self._measure_websocket_performance_for_user(session['client'], session['user_context'], f"Performance test for {session['user_id']}"))
+                task = asyncio.create_task(self._measure_websocket_performance_for_user(session['client'], session['user_context'], f"Performance test for {session['user_id']}))
                 concurrent_tasks.append(task)
             results = await asyncio.gather(*concurrent_tasks, return_exceptions=True)
             total_time = time.time() - start_time
@@ -372,14 +372,14 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
                 elif result.get('success'):
                     successful_results.append(result)
                 else:
-                    errors.append(f"User {i}: {result.get('error')}")
+                    errors.append(fUser {i}: {result.get('error')}")
             if successful_results:
                 total_events = sum((r.get('event_count', 0) for r in successful_results))
                 response_times = [r.get('avg_response_time', 0) for r in successful_results]
                 avg_response_time = sum(response_times) / len(response_times)
                 max_response_time = max(response_times)
                 success_rate = len(successful_results) / concurrent_users
-                performance_metrics.update({'total_events': total_events, 'avg_response_time': avg_response_time, 'max_response_time': max_response_time, 'event_delivery_success_rate': success_rate, 'total_execution_time': total_time, 'events_per_second': total_events / total_time if total_time > 0 else 0, 'errors': errors})
+                performance_metrics.update({'total_events': total_events, 'avg_response_time': avg_response_time, 'max_response_time': max_response_time, 'event_delivery_success_rate': success_rate, 'total_execution_time': total_time, 'events_per_second': total_events / total_time if total_time > 0 else 0, 'errors': errors}
                 assert success_rate >= 0.8, f'Success rate too low: {success_rate:.2%} (expected >= 80%)'
                 assert avg_response_time <= 3.0, f'Average response time too high: {avg_response_time:.2f}s (expected <= 3s)'
                 assert max_response_time <= 10.0, f'Max response time too high: {max_response_time:.2f}s (expected <= 10s)'
@@ -388,7 +388,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
                 print(f'  - Concurrent Users: {concurrent_users}')
                 print(f'  - Success Rate: {success_rate:.2%}')
                 print(f'  - Total Events: {total_events}')
-                print(f"  - Events/Second: {performance_metrics['events_per_second']:.2f}")
+                print(f"  - Events/Second: {performance_metrics['events_per_second']:.2f})
                 print(f'  - Avg Response Time: {avg_response_time:.2f}s')
                 print(f'  - Max Response Time: {max_response_time:.2f}s')
             else:
@@ -398,10 +398,10 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
                 try:
                     await session['client'].disconnect()
                 except Exception as e:
-                    print(f"Error disconnecting client for {session['user_id']}: {e}")
+                    print(fError disconnecting client for {session['user_id']}: {e}")
 
     async def _measure_websocket_performance_for_user(self, client, user_context: UserExecutionContext, request: str):
-        """Helper method to measure WebSocket performance for a single user using REAL agents."""
+        "Helper method to measure WebSocket performance for a single user using REAL agents."""
         start_time = time.time()
         response_times = []
         try:
@@ -418,7 +418,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
                 response_times.append(max(0, event_response_time))
             return {'success': True, 'user_id': user_context.user_id, 'event_count': len(client.received_messages), 'avg_response_time': sum(response_times) / len(response_times) if response_times else 0, 'max_response_time': max(response_times) if response_times else 0, 'total_execution_time': time.time() - start_time}
         except Exception as e:
-            return {'success': False, 'error': str(e), 'user_id': user_context.user_id, 'partial_event_count': len(getattr(client, 'received_messages', []))}
+            return {'success': False, 'error': str(e), 'user_id': user_context.user_id, 'partial_event_count': len(getattr(client, 'received_messages', [])}
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

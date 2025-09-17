@@ -130,7 +130,7 @@ self, mock_get_service, test_client, mock_agent_service, auth_headers
 service_instances = []
 
 def track_service(*args, **kwargs):
-service = MagicNone  # TODO: Use real service instead of Mock
+    service = MagicNone  # TODO: Use real service instead of Mock
 pass
 service_instances.append(service)
 return service
@@ -144,7 +144,7 @@ request_data = { )
 
     # Make multiple requests
 for _ in range(3):
-test_client.post( )
+    test_client.post( )
 "/agent/stream",
 json=request_data,
 headers=auth_headers
@@ -167,7 +167,7 @@ request_data = { )
 
             # Make multiple streaming requests
 for _ in range(5):
-await async_client.post( )
+    await async_client.post( )
 "/agent/stream",
 json=request_data,
 headers=auth_headers
@@ -182,7 +182,7 @@ assert len(info_calls) <= 7
 
 @pytest.mark.asyncio
     async def test_concurrent_stream_requests(self, async_client, auth_headers):
-"""Test that concurrent streaming requests don't cause registration issues."""
+        """Test that concurrent streaming requests don't cause registration issues."""
 request_data = { )
 "query": "test query",
 "id": "test_id"
@@ -193,9 +193,9 @@ registration_count = {'count': 0}
 original_register = None
 
 def count_registrations(*args, **kwargs):
-registration_count['count'] += 1
+    registration_count['count'] += 1
 if original_register:
-await asyncio.sleep(0)
+    await asyncio.sleep(0)
 return original_register(*args, **kwargs)
 
 with patch('netra_backend.app.agents.supervisor.agent_registry.AgentRegistry.register_default_agents',
@@ -205,7 +205,7 @@ original_register = mock_register.wraps
             # Make concurrent requests
 tasks = []
 for _ in range(10):
-task = async_client.post( )
+    task = async_client.post( )
 "/agent/stream",
 json=request_data,
 headers=auth_headers
@@ -220,7 +220,7 @@ assert registration_count['count'] <= 10
 
 @pytest.mark.e2e
 def test_stream_endpoint_response_structure(self, test_client, auth_headers):
-"""Test that streaming endpoint returns proper response."""
+    """Test that streaming endpoint returns proper response."""
 pass
 request_data = { )
 "query": "test query",
@@ -244,7 +244,7 @@ assert response.status_code == 200
 
     #     @pytest.mark.e2e
 def test_agent_registry_initialization(self, mock_registry_class, test_client, auth_headers):
-"""Test that AgentRegistry is initialized properly."""
+    """Test that AgentRegistry is initialized properly."""
 mock_instance = MagicNone  # TODO: Use real service instead of Mock
 mock_instance._agents_registered = False
 mock_instance.agents = {}
@@ -266,7 +266,7 @@ assert hasattr(mock_instance, '_agents_registered')
 
 @pytest.mark.e2e
 def test_message_endpoint_also_uses_injection(self, test_client, auth_headers):
-"""Test that /message endpoint also uses dependency injection."""
+    """Test that /message endpoint also uses dependency injection."""
 pass
 request_data = { )
 "message": "test message",
@@ -274,7 +274,7 @@ request_data = { )
     
 
 with patch('netra_backend.app.routes.agent_route.get_agent_service') as mock_get_service:
-mock_get_service.return_value = MagicNone  # TODO: Use real service instead of Mock
+    mock_get_service.return_value = MagicNone  # TODO: Use real service instead of Mock
 
 response = test_client.post( )
 "/agent/message",

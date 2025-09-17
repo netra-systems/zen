@@ -14,15 +14,15 @@ pytestmark = pytest.mark.skip(reason="oauth_security module has been removed/ref
 
 # Mock imports to prevent collection errors
 try:
-from auth_service.auth_core.routes.auth_routes import router
-from auth_service.main import app
-from fastapi.testclient import TestClient
+    from auth_service.auth_core.routes.auth_routes import router
+    from auth_service.main import app
+    from fastapi.testclient import TestClient
 except ImportError:
-        # Mock classes if imports fail
-class OAuthSecurityManager:
-    pass
-class TestClient:
-    pass
+    # Mock classes if imports fail
+    class OAuthSecurityManager:
+        pass
+    class TestClient:
+        pass
     router = None
     app = None
 
@@ -32,16 +32,14 @@ class TestOAuthStateValidation:
 
     @pytest.fixture
     def oauth_security(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
         """Create OAuth security manager instance."""
+        # TODO: Initialize real service
         return None  # TODO: Use real service instance  # Use mock since real class doesn"t exist
 
-        @pytest.fixture
+    @pytest.fixture
     def client(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
         """Create test client."""
+        # TODO: Initialize real service
         pass
         return TestClient(app)
 
@@ -155,8 +153,7 @@ class TestOAuthStateValidation:
         with patch('auth_service.auth_core.routes.auth_routes.auth_db.get_session'):
         with patch('auth_service.auth_core.routes.auth_routes._sync_user_to_main_db'):
                                 # Callback with valid state and session
-        response = client.get( )
-        "formatted_string",
+response = client.get("formatted_string")
         cookies={"session_id": session_id}
                                 
 
@@ -173,8 +170,7 @@ class TestOAuthStateValidation:
         with patch('auth_service.auth_core.config.AuthConfig.get_google_client_id', return_value='test-client-id'):
         with patch('auth_service.auth_core.config.AuthConfig.get_google_client_secret', return_value='test-secret'):
             # Callback with invalid state
-        response = client.get( )
-        "formatted_string",
+response = client.get("formatted_string")
         cookies={"session_id": session_id}
             
 
@@ -246,7 +242,7 @@ class TestOAuthStateValidation:
 class TestOAuthFlowIntegration:
     """Integration tests for complete OAuth flow."""
 
-    @pytest.fixture
+    # @pytest.fixture
     async def test_complete_oauth_flow(self):
     """Test complete OAuth flow from initiation to callback."""
     client = TestClient(app)
@@ -273,26 +269,28 @@ class TestOAuthFlowIntegration:
                 # Step 2: Simulate Google OAuth callback
                 # Mock Google's token and user info responses
     with patch('httpx.AsyncClient') as MockClient:
-    mock_client = AsyncNone  # TODO: Use real service instance
+    mock_client = MagicMock()  # TODO: Use real service instance
     MockClient.return_value.__aenter__.return_value = mock_client
 
                     # Mock token exchange
-    mock_token_response = AuthManager()
+    mock_token_response = MagicMock()
     mock_token_response.status_code = 200
-    mock_token_response.json.return_value = { )
-    "access_token": "test-access-token",
-    "expires_in": 3600,
-    "token_type": "Bearer"
+    mock_token_response.json.return_value = {
+        "access_token": "test-access-token",
+        "expires_in": 3600,
+        "token_type": "Bearer"
+    }
                     
 
                     # Mock user info
-    mock_user_response = mock_user_response_instance  # Initialize appropriate service
+    mock_user_response = MagicMock()  # Initialize appropriate service
     mock_user_response.status_code = 200
-    mock_user_response.json.return_value = { )
-    "id": "google-12345",
-    "email": "user@example.com",
-    "name": "Test User",
-    "verified_email": True
+    mock_user_response.json.return_value = {
+        "id": "google-12345",
+        "email": "user@example.com",
+        "name": "Test User",
+        "verified_email": True
+    }
                     
 
     mock_client.post.return_value = mock_token_response
@@ -302,8 +300,8 @@ class TestOAuthFlowIntegration:
     with patch('auth_service.auth_core.routes.auth_routes.auth_db.create_tables'):
     with patch('auth_service.auth_core.routes.auth_routes.auth_db.get_session'):
     with patch('auth_service.auth_core.routes.auth_routes.AuthUserRepository') as MockRepo:
-    mock_repo = mock_repo_instance  # Initialize appropriate service
-    mock_user = mock_user_instance  # Initialize appropriate service
+    mock_repo = MagicMock()  # Initialize appropriate service
+    mock_user = MagicMock()  # Initialize appropriate service
     mock_user.id = "user-id-123"
     mock_user.email = "user@example.com"
     mock_repo.create_oauth_user.return_value = mock_user
@@ -311,8 +309,7 @@ class TestOAuthFlowIntegration:
 
     with patch('auth_service.auth_core.routes.auth_routes._sync_user_to_main_db'):
                                     # Callback with state and session
-    callback_response = client.get( )
-    "formatted_string",
+response = client.get("formatted_string")
     cookies={"session_id": session_id}
                                     
 

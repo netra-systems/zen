@@ -78,14 +78,14 @@ class TestPortConfiguration:
         config = LauncherConfig()
 
     # Test that the default backend port is 8000
-        assert config.backend_port == 8000, "formatted_string"
+        assert config.backend_port == 8000, ""
 
     # Mock BackendStarter dependencies for minimal test
-        mock_services_config = Magic        mock_log_manager = Magic        mock_service_discovery = Magic
+        mock_services_config = MagicMock(); mock_log_manager = MagicMock(); mock_service_discovery = Magic
         starter = BackendStarter(config, mock_services_config, mock_log_manager, mock_service_discovery)
 
     # Verify that the backend configuration uses the expected port
-        assert starter.config.backend_port == 8000, "formatted_string"
+        assert starter.config.backend_port == 8000, ""
 
     def test_frontend_api_config_uses_correct_port(self):
         """Frontend API config must use port 8000 for backend"""
@@ -101,7 +101,7 @@ class TestPortConfiguration:
 
         api_url = mock_get_api_url()
 
-        assert api_url == expected_backend_url, "formatted_string"
+        assert api_url == expected_backend_url, ""
 
     def test_static_ports_are_default(self):
         """Static ports should be the default, not dynamic"""
@@ -288,7 +288,7 @@ mock_connect_with_retry(max_retries=max_retries)
 except:
 pass
 
-assert attempts <= max_retries, "formatted_string"
+assert attempts <= max_retries, ""
 
 
 class TestHealthCheckDeterminism:
@@ -327,7 +327,7 @@ assert check_order == ["postgres", "redis", "clickhouse"], "Checks should run se
     async def test_health_check_handles_concurrent_pool_access(self):
 """Health checks should handle concurrent pool access safely"""
 pass
-mock_pool = Magic        mock_pool.size.return_value = 5
+mock_pool = MagicMock(); mock_pool.size.return_value = 5
 
 async def concurrent_check():
 
@@ -483,7 +483,7 @@ import json
 import tempfile
 
 with tempfile.NamedTemporaryFile(mode='w', suffix='.json') as f:
-discovery_data = { )
+discovery_data = { }
 "backend": {"port": 8000, "url": "http://localhost:8000"},
 "frontend": {"port": 3000, "url": "http://localhost:3000"},
 "auth": {"port": 8081, "url": "http://localhost:8081"}

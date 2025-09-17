@@ -1,4 +1,4 @@
-"""E2E WebSocket Connectivity Tests - CLAUDE.md Compliant
+"E2E WebSocket Connectivity Tests - CLAUDE.md Compliant
 
 CRITICAL E2E tests for WebSocket connectivity with real authentication and services.
 These tests validate core chat functionality without mocks or authentication bypassing.
@@ -15,7 +15,7 @@ ARCHITECTURAL COMPLIANCE:
 - Real execution timing validation (minimum 0.1s)
 - Hard error raising - NO exception swallowing
 - Multi-user isolation testing where applicable
-"""
+""
 import asyncio
 import json
 import time
@@ -30,7 +30,7 @@ from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 class InMemoryWebSocketConnection:
-    """Real in-memory WebSocket connection for E2E testing without external WebSocket server."""
+    ""Real in-memory WebSocket connection for E2E testing without external WebSocket server."
 
     def __init__(self):
         self._connected = True
@@ -41,7 +41,7 @@ class InMemoryWebSocketConnection:
         logger.info('InMemoryWebSocketConnection initialized')
 
     async def send_json(self, message: dict, timeout: float=None):
-        """Send JSON message - real WebSocket manager compatible."""
+        "Send JSON message - real WebSocket manager compatible.""
         self.send_count += 1
         self.timeout_used = timeout
         if not isinstance(message, dict):
@@ -60,26 +60,26 @@ class InMemoryWebSocketConnection:
         message_str = json.dumps(serializable_message)
         self.sent_messages.append(message_str)
         self.received_events.append(serializable_message)
-        logger.info(f"WebSocket send_json #{self.send_count}: {serializable_message.get('type', 'unknown')} (timeout={timeout})")
+        logger.info(fWebSocket send_json #{self.send_count}: {serializable_message.get('type', 'unknown')} (timeout={timeout}")
 
     async def close(self, code: int=1000, reason: str='Normal closure'):
-        """Close WebSocket connection."""
+        "Close WebSocket connection.""
         logger.info(f'WebSocket closing with code {code}: {reason}')
         self._connected = False
 
     @property
     def client_state(self):
-        """WebSocket state property."""
+        ""WebSocket state property."
         return 'CONNECTED' if self._connected else 'DISCONNECTED'
 
 @pytest.mark.e2e
 class WebSocketConnectivityAuthenticatedTests:
-    """CLAUDE.md compliant WebSocket connectivity tests with mandatory authentication."""
+    "CLAUDE.md compliant WebSocket connectivity tests with mandatory authentication.""
 
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_authenticated_websocket_core_connectivity(self):
-        """Test authenticated WebSocket connectivity with real services.
+        ""Test authenticated WebSocket connectivity with real services.
         
         CLAUDE.md COMPLIANCE:
          PASS:  Uses E2EAuthHelper for authentication
@@ -89,7 +89,7 @@ class WebSocketConnectivityAuthenticatedTests:
          PASS:  Multi-user isolation tested
         
         Business Impact: Core chat functionality - $500K+ ARR protection
-        """
+        "
         start_time = time.time()
         env = get_env()
         env.enable_isolation(backup_original=True)
@@ -119,13 +119,13 @@ class WebSocketConnectivityAuthenticatedTests:
                 await asyncio.sleep(0.01)
                 await notifier.send_tool_executing(context1, 'connectivity_test_tool')
                 await asyncio.sleep(0.01)
-                await notifier.send_tool_completed(context1, 'connectivity_test_tool', {'status': 'connected'})
+                await notifier.send_tool_completed(context1, 'connectivity_test_tool', {'status': 'connected'}
                 await asyncio.sleep(0.01)
-                await notifier.send_agent_completed(context1, {'connectivity_test': 'passed'})
+                await notifier.send_agent_completed(context1, {'connectivity_test': 'passed'}
                 await asyncio.sleep(0.1)
                 context2 = AgentExecutionContext(run_id=f'websocket-test-{user2_data.user_id}', thread_id=user2_conn_id, user_id=user2_data.user_id, agent_name='isolation_test_agent', retry_count=0, max_retries=1)
                 await notifier.send_agent_started(context2)
-                await notifier.send_agent_completed(context2, {'isolation_test': 'passed'})
+                await notifier.send_agent_completed(context2, {'isolation_test': 'passed'}
                 await asyncio.sleep(0.1)
             finally:
                 await ws_manager.disconnect_user(user1_data.user_id, user1_ws, user1_conn_id)
@@ -146,13 +146,13 @@ class WebSocketConnectivityAuthenticatedTests:
             assert 'agent_started' in user2_event_types, f'User2 missing agent_started event. Got: {user2_event_types}'
             assert 'agent_completed' in user2_event_types, f'User2 missing agent_completed event. Got: {user2_event_types}'
             for event in user1_events:
-                assert 'type' in event, f"Event missing 'type' field: {event}"
-                assert 'timestamp' in event, f"Event missing 'timestamp' field: {event}"
-                assert 'payload' in event, f"Event missing 'payload' field: {event}"
-                if 'user_id' in event.get('payload', {}):
+                assert 'type' in event, f"Event missing 'type' field: {event}
+                assert 'timestamp' in event, fEvent missing 'timestamp' field: {event}"
+                assert 'payload' in event, f"Event missing 'payload' field: {event}
+                if 'user_id' in event.get('payload', {}:
                     assert event['payload']['user_id'] == user1_data.user_id, f'User isolation violated - wrong user_id in event: {event}'
             for event in user2_events:
-                if 'user_id' in event.get('payload', {}):
+                if 'user_id' in event.get('payload', {}:
                     assert event['payload']['user_id'] == user2_data.user_id, f'User2 isolation violated - wrong user_id in event: {event}'
             logger.info(' PASS:  AUTHENTICATED WebSocket connectivity test PASSED')
             logger.info(f'    CHART:  User1: {len(user1_events)} events, User2: {len(user2_events)} events')
@@ -164,7 +164,7 @@ class WebSocketConnectivityAuthenticatedTests:
     @pytest.mark.asyncio
     @pytest.mark.timeout(25)
     async def test_websocket_message_sequence_validation(self):
-        """Test WebSocket message sequence validation with authenticated users.
+        ""Test WebSocket message sequence validation with authenticated users.
         
         CLAUDE.md COMPLIANCE:
          PASS:  Uses E2EAuthHelper for authentication
@@ -174,7 +174,7 @@ class WebSocketConnectivityAuthenticatedTests:
          PASS:  Validates message ordering and integrity
         
         Business Impact: Message reliability - prevents data loss and corruption
-        """
+        "
         start_time = time.time()
         env = get_env()
         env.enable_isolation(backup_original=True)
@@ -200,13 +200,13 @@ class WebSocketConnectivityAuthenticatedTests:
                 await asyncio.sleep(0.01)
                 await notifier.send_tool_executing(context, 'data_analyzer')
                 await asyncio.sleep(0.01)
-                await notifier.send_tool_completed(context, 'data_analyzer', {'analysis': 'complete', 'patterns': 3})
+                await notifier.send_tool_completed(context, 'data_analyzer', {'analysis': 'complete', 'patterns': 3}
                 await asyncio.sleep(0.01)
                 await notifier.send_agent_thinking(context, 'Phase 2: Processing analysis results...')
                 await asyncio.sleep(0.01)
                 await notifier.send_tool_executing(context, 'pattern_processor')
                 await asyncio.sleep(0.01)
-                await notifier.send_tool_completed(context, 'pattern_processor', {'processed_patterns': 3, 'confidence': 0.95})
+                await notifier.send_tool_completed(context, 'pattern_processor', {'processed_patterns': 3, 'confidence': 0.95}
                 await asyncio.sleep(0.01)
                 await notifier.send_partial_result(context, 'Found 3 patterns with high confidence...')
                 await asyncio.sleep(0.01)
@@ -214,9 +214,9 @@ class WebSocketConnectivityAuthenticatedTests:
                 await asyncio.sleep(0.01)
                 await notifier.send_tool_executing(context, 'recommendation_generator')
                 await asyncio.sleep(0.01)
-                await notifier.send_tool_completed(context, 'recommendation_generator', {'recommendations': ['opt1', 'opt2', 'opt3']})
+                await notifier.send_tool_completed(context, 'recommendation_generator', {'recommendations': ['opt1', 'opt2', 'opt3']}
                 await asyncio.sleep(0.01)
-                await notifier.send_agent_completed(context, {'sequence_test': 'passed', 'total_tools': 3})
+                await notifier.send_agent_completed(context, {'sequence_test': 'passed', 'total_tools': 3}
                 await asyncio.sleep(0.1)
             finally:
                 await ws_manager.disconnect_user(user_data.user_id, ws_conn, conn_id)
@@ -237,15 +237,15 @@ class WebSocketConnectivityAuthenticatedTests:
                 completed_idx = tool_completed_indices[i]
                 assert executing_idx < completed_idx, f'Tool {i}: executing at {executing_idx} should come before completed at {completed_idx}'
             for i, event in enumerate(events):
-                assert 'type' in event, f"Event {i} missing 'type' field: {event}"
-                assert 'timestamp' in event, f"Event {i} missing 'timestamp' field: {event}"
-                assert 'payload' in event, f"Event {i} missing 'payload' field: {event}"
-                if 'user_id' in event.get('payload', {}):
-                    assert event['payload']['user_id'] == user_data.user_id, f"Event {i} has wrong user_id: {event['payload']['user_id']} != {user_data.user_id}"
+                assert 'type' in event, f"Event {i} missing 'type' field: {event}
+                assert 'timestamp' in event, fEvent {i} missing 'timestamp' field: {event}"
+                assert 'payload' in event, f"Event {i} missing 'payload' field: {event}
+                if 'user_id' in event.get('payload', {}:
+                    assert event['payload']['user_id'] == user_data.user_id, fEvent {i} has wrong user_id: {event['payload']['user_id']} != {user_data.user_id}"
             tool_completed_events = [e for e in events if e.get('type') == 'tool_completed']
             assert len(tool_completed_events) == 3, f'Expected 3 tool completed events, got {len(tool_completed_events)}'
             for tool_event in tool_completed_events:
-                tool_result = tool_event.get('payload', {}).get('result', {})
+                tool_result = tool_event.get('payload', {}.get('result', {}
                 assert isinstance(tool_result, dict), f'Tool result should be dict, got {type(tool_result)}'
                 assert len(tool_result) > 0, f'Tool result should not be empty: {tool_result}'
             logger.info(' PASS:  AUTHENTICATED WebSocket message sequence test PASSED')

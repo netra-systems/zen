@@ -209,7 +209,7 @@ class TestRequestScopedAgentExecutor:
 
 @pytest.mark.asyncio
     async def test_execute_agent_success(self, executor_alice, user_context_alice):
-"""Test successful agent execution."""
+        """Test successful agent execution."""
 pass
         # Create test state
 test_state = DeepAgentState( )
@@ -225,11 +225,11 @@ duration=1.5
         
 
 with patch.object(executor_alice._agent_core, 'execute_agent', return_value=mock_result):
-with patch.object(executor_alice._execution_tracker, 'create_execution', return_value="exec_123"):
-with patch.object(executor_alice._execution_tracker, 'start_execution'):
-with patch.object(executor_alice._execution_tracker, 'update_execution_state'):
-with patch.object(executor_alice._execution_tracker, 'heartbeat', return_value=True):
-result = await executor_alice.execute_agent("test_agent", test_state)
+    with patch.object(executor_alice._execution_tracker, 'create_execution', return_value="exec_123"):
+        with patch.object(executor_alice._execution_tracker, 'start_execution'):
+            with patch.object(executor_alice._execution_tracker, 'update_execution_state'):
+                with patch.object(executor_alice._execution_tracker, 'heartbeat', return_value=True):
+                    result = await executor_alice.execute_agent("test_agent", test_state)
 
                             # Verify result
 assert result.success is True
@@ -246,32 +246,32 @@ assert len(metrics['execution_times']) == 1
 
 @pytest.mark.asyncio
     async def test_execute_agent_validation_error(self, executor_alice):
-"""Test agent execution with invalid agent name."""
+        """Test agent execution with invalid agent name."""
 test_state = DeepAgentState(user_request="Test request")
 
                                 # Test with empty agent name (which will fail validation)
 with pytest.raises(AgentExecutorError, match="agent_name must be a non-empty string"):
-await executor_alice.execute_agent("", test_state)  # Empty agent name
+    await executor_alice.execute_agent("", test_state)  # Empty agent name
 
 @pytest.mark.asyncio
     async def test_execute_agent_timeout(self, executor_alice):
-"""Test agent execution timeout handling."""
+        """Test agent execution timeout handling."""
 pass
 test_state = DeepAgentState(user_request="Test request")
 
                                         # Mock agent core to timeout
 async def timeout_execution(*args, **kwargs):
-pass
+    pass
 await asyncio.sleep(2)  # Longer than our test timeout
 await asyncio.sleep(0)
 return AgentExecutionResult(success=True)
 
 with patch.object(executor_alice._agent_core, 'execute_agent', side_effect=timeout_execution):
-with patch.object(executor_alice._execution_tracker, 'create_execution', return_value="exec_123"):
-with patch.object(executor_alice._execution_tracker, 'start_execution'):
-with patch.object(executor_alice._execution_tracker, 'update_execution_state'):
-with patch.object(executor_alice._execution_tracker, 'heartbeat', return_value=True):
-result = await executor_alice.execute_agent("test_agent", test_state, timeout=0.1)
+    with patch.object(executor_alice._execution_tracker, 'create_execution', return_value="exec_123"):
+        with patch.object(executor_alice._execution_tracker, 'start_execution'):
+            with patch.object(executor_alice._execution_tracker, 'update_execution_state'):
+                with patch.object(executor_alice._execution_tracker, 'heartbeat', return_value=True):
+                    result = await executor_alice.execute_agent("test_agent", test_state, timeout=0.1)
 
                         # Verify timeout result
 assert result.success is False
@@ -304,15 +304,15 @@ result_alice = AgentExecutionResult(success=True, state=state_alice, duration=1.
 result_bob = AgentExecutionResult(success=True, state=state_bob, duration=1.5)
 
 with patch.object(executor_alice._agent_core, 'execute_agent', return_value=result_alice):
-with patch.object(executor_bob._agent_core, 'execute_agent', return_value=result_bob):
-with patch.object(executor_alice._execution_tracker, 'create_execution', return_value="exec_alice"):
-with patch.object(executor_bob._execution_tracker, 'create_execution', return_value="exec_bob"):
-with patch.object(executor_alice._execution_tracker, 'start_execution'):
-with patch.object(executor_bob._execution_tracker, 'start_execution'):
-with patch.object(executor_alice._execution_tracker, 'update_execution_state'):
-with patch.object(executor_bob._execution_tracker, 'update_execution_state'):
-with patch.object(executor_alice._execution_tracker, 'heartbeat', return_value=True):
-with patch.object(executor_bob._execution_tracker, 'heartbeat', return_value=True):
+    with patch.object(executor_bob._agent_core, 'execute_agent', return_value=result_bob):
+        with patch.object(executor_alice._execution_tracker, 'create_execution', return_value="exec_alice"):
+            with patch.object(executor_bob._execution_tracker, 'create_execution', return_value="exec_bob"):
+                with patch.object(executor_alice._execution_tracker, 'start_execution'):
+                    with patch.object(executor_bob._execution_tracker, 'start_execution'):
+                        with patch.object(executor_alice._execution_tracker, 'update_execution_state'):
+                            with patch.object(executor_bob._execution_tracker, 'update_execution_state'):
+                                with patch.object(executor_alice._execution_tracker, 'heartbeat', return_value=True):
+                                    with patch.object(executor_bob._execution_tracker, 'heartbeat', return_value=True):
                                                                     # Execute concurrently
 alice_task = executor_alice.execute_agent("agent_alice", state_alice)
 bob_task = executor_bob.execute_agent("agent_bob", state_bob)
@@ -333,22 +333,22 @@ assert alice_metrics['context_id'] != bob_metrics['context_id']
 
 @pytest.mark.asyncio
     async def test_websocket_event_isolation(self, executor_alice, executor_bob):
-"""Test that WebSocket events are sent to the correct user only."""
+        """Test that WebSocket events are sent to the correct user only."""
 test_state = DeepAgentState(user_request="Test request")
 
                                                                         # Mock successful execution
 mock_result = AgentExecutionResult(success=True, state=test_state, duration=1.0)
 
 with patch.object(executor_alice._agent_core, 'execute_agent', return_value=mock_result):
-with patch.object(executor_bob._agent_core, 'execute_agent', return_value=mock_result):
-with patch.object(executor_alice._execution_tracker, 'create_execution', return_value="exec_alice"):
-with patch.object(executor_bob._execution_tracker, 'create_execution', return_value="exec_bob"):
-with patch.object(executor_alice._execution_tracker, 'start_execution'):
-with patch.object(executor_bob._execution_tracker, 'start_execution'):
-with patch.object(executor_alice._execution_tracker, 'update_execution_state'):
-with patch.object(executor_bob._execution_tracker, 'update_execution_state'):
-with patch.object(executor_alice._execution_tracker, 'heartbeat', return_value=True):
-with patch.object(executor_bob._execution_tracker, 'heartbeat', return_value=True):
+    with patch.object(executor_bob._agent_core, 'execute_agent', return_value=mock_result):
+        with patch.object(executor_alice._execution_tracker, 'create_execution', return_value="exec_alice"):
+            with patch.object(executor_bob._execution_tracker, 'create_execution', return_value="exec_bob"):
+                with patch.object(executor_alice._execution_tracker, 'start_execution'):
+                    with patch.object(executor_bob._execution_tracker, 'start_execution'):
+                        with patch.object(executor_alice._execution_tracker, 'update_execution_state'):
+                            with patch.object(executor_bob._execution_tracker, 'update_execution_state'):
+                                with patch.object(executor_alice._execution_tracker, 'heartbeat', return_value=True):
+                                    with patch.object(executor_bob._execution_tracker, 'heartbeat', return_value=True):
                                                                                                                 # Execute for both users
 await executor_alice.execute_agent("test_agent", test_state)
 await executor_bob.execute_agent("test_agent", test_state)
@@ -364,14 +364,14 @@ bob_thread = executor_bob.get_user_context().thread_id
 websocket_manager = alice_emitter._websocket_manager
 sent_threads = set()
 for call in websocket_manager.send_to_thread.call_args_list:
-sent_threads.add(call[0][0])  # First argument is thread_id
+    sent_threads.add(call[0][0])  # First argument is thread_id
 
                                                                                                                     # Should have sent to both threads
 assert len(sent_threads) >= 2  # May have multiple events per execution
 
 @pytest.mark.asyncio
     async def test_dispose_cleanup(self, executor_alice):
-"""Test that dispose properly cleans up resources."""
+        """Test that dispose properly cleans up resources."""
 pass
                                                                                                                         # Verify executor is active
 assert not executor_alice._disposed
@@ -389,15 +389,15 @@ assert len(executor_alice._request_executions) == 0
 
                                                                                                                         # Verify operations fail after disposal
 with pytest.raises(RuntimeError, match="has been disposed"):
-executor_alice.get_metrics()
+    executor_alice.get_metrics()
 
 with pytest.raises(RuntimeError, match="has been disposed"):
-test_state = DeepAgentState()
+    test_state = DeepAgentState()
 await executor_alice.execute_agent("test_agent", test_state)
 
 @pytest.mark.asyncio
     async def test_async_context_manager(self, user_context_alice, event_emitter_alice, mock_agent_registry):
-"""Test async context manager functionality."""
+        """Test async context manager functionality."""
 async with RequestScopedAgentExecutor( )
 user_context_alice, event_emitter_alice, mock_agent_registry
 ) as executor:
@@ -409,7 +409,7 @@ assert 'uptime_seconds' in metrics
 assert executor._disposed
 
 def test_metrics_accuracy(self, executor_alice):
-"""Test that metrics accurately reflect execution state."""
+    """Test that metrics accurately reflect execution state."""
 pass
 initial_metrics = executor_alice.get_metrics()
 
@@ -469,7 +469,7 @@ class TestRequestScopedExecutorFactory:
 
 @pytest.mark.asyncio
     async def test_create_executor_success(self, user_context, event_emitter, mock_agent_registry):
-"""Test successful executor creation via factory."""
+        """Test successful executor creation via factory."""
 pass
 executor = await RequestScopedExecutorFactory.create_executor( )
 user_context, event_emitter, mock_agent_registry
@@ -482,7 +482,7 @@ assert not executor._disposed
 
 @pytest.mark.asyncio
     async def test_create_executor_invalid_dependencies(self, user_context, event_emitter):
-"""Test executor creation with invalid dependencies."""
+        """Test executor creation with invalid dependencies."""
 with pytest.raises(ValueError):  # More flexible error matching
 await RequestScopedExecutorFactory.create_executor( )
 user_context, event_emitter, None  # Invalid registry
@@ -490,7 +490,7 @@ user_context, event_emitter, None  # Invalid registry
 
 @pytest.mark.asyncio
     async def test_create_scoped_executor(self, user_context, event_emitter, mock_agent_registry):
-"""Test scoped executor creation."""
+        """Test scoped executor creation."""
 pass
 executor = await RequestScopedExecutorFactory.create_scoped_executor( )
 user_context, event_emitter, mock_agent_registry
@@ -548,7 +548,7 @@ class TestConvenienceFunctions:
 
 @pytest.mark.asyncio
     async def test_create_request_scoped_executor(self, user_context, event_emitter, mock_agent_registry):
-"""Test the convenience function for creating executors."""
+        """Test the convenience function for creating executors."""
 pass
 executor = await create_request_scoped_executor( )
 user_context, event_emitter, mock_agent_registry
@@ -563,12 +563,12 @@ assert not executor._disposed
 mock_agent_registry):
 """Test the convenience function for creating complete execution stack."""
 with patch('netra_backend.app.services.websocket_event_emitter.WebSocketEventEmitterFactory.create_emitter') as mock_create:
-mock_emitter = Mock(spec=WebSocketEventEmitter)
+    mock_emitter = Mock(spec=WebSocketEventEmitter)
 mock_emitter.get_context.return_value = user_context
 mock_create.return_value = mock_emitter
 
 with patch('netra_backend.app.agents.supervisor.request_scoped_executor.RequestScopedExecutorFactory.create_executor') as mock_executor_create:
-mock_executor = Mock(spec=RequestScopedAgentExecutor)
+    mock_executor = Mock(spec=RequestScopedAgentExecutor)
 mock_executor_create.return_value = mock_executor
 
 executor = await create_full_request_execution_stack( )
@@ -588,7 +588,7 @@ class TestUserIsolationScenarios:
 
 @pytest.mark.asyncio
     async def test_no_cross_user_data_leakage(self):
-"""Test that no data leaks between different user contexts."""
+        """Test that no data leaks between different user contexts."""
         # Create two completely separate user contexts
 context1 = UserExecutionContext.from_request( )
 user_id="isolation_test_user1",
@@ -637,14 +637,14 @@ assert id(executor1._metrics) != id(executor2._metrics)
 
 @pytest.mark.asyncio
     async def test_concurrent_users_no_interference(self):
-"""Test that concurrent operations by different users don't interfere."""
+        """Test that concurrent operations by different users don't interfere."""
 pass
             # Create multiple user contexts
 users = []
 executors = []
 
 for i in range(5):
-context = UserExecutionContext.from_request( )
+    context = UserExecutionContext.from_request( )
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id="formatted_string"
@@ -662,13 +662,13 @@ executors.append(executor)
 
                 # Verify all executors are isolated
 for i in range(len(executors)):
-for j in range(i + 1, len(executors)):
-assert executors[i].get_user_context() != executors[j].get_user_context()
+    for j in range(i + 1, len(executors)):
+        assert executors[i].get_user_context() != executors[j].get_user_context()
 assert executors[i].get_metrics()['context_id'] != executors[j].get_metrics()['context_id']
 
                         # Test concurrent operations
 async def simulate_user_operation(executor, user_id):
-"""Simulate a user operation."""
+    """Simulate a user operation."""
 await asyncio.sleep(0.1)  # Simulate work
 metrics = executor.get_metrics()
 await asyncio.sleep(0)

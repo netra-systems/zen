@@ -204,7 +204,7 @@ class TestIsolationMetricsCollector:
 
 @pytest.mark.asyncio
     async def test_violation_recording(self):
-"""Test isolation violation recording."""
+        """Test isolation violation recording."""
 pass
 user_id = "test_user"
 request_id = "test_req"
@@ -234,12 +234,12 @@ assert violation.description == description
 assert self.collector._violation_counts[violation_type] == 1
 
 def test_concurrent_user_tracking(self):
-"""Test concurrent user count tracking."""
+    """Test concurrent user count tracking."""
 users = ["user1", "user2", "user3"]
 
     # Start requests for different users
 for i, user in enumerate(users):
-self.collector.start_request(user, "formatted_string")
+    self.collector.start_request(user, "formatted_string")
 
         # Verify concurrent users
 assert self.collector.get_concurrent_users() == 3
@@ -256,7 +256,7 @@ self.collector.complete_request("req_1b")
 assert self.collector.get_concurrent_users() == 2  # user1 removed
 
 def test_recent_violations_filtering(self):
-"""Test recent violations filtering by time."""
+    """Test recent violations filtering by time."""
 pass
 now = datetime.now(timezone.utc)
 
@@ -291,7 +291,7 @@ assert len(all_recent) == 2
 
 @pytest.mark.asyncio
     async def test_collection_loop(self):
-"""Test background metrics collection loop."""
+        """Test background metrics collection loop."""
         # Start collection
 await self.collector.start_collection()
 
@@ -324,13 +324,13 @@ class TestIsolationHealthChecker:
 
 @pytest.mark.asyncio
     async def test_health_checker_initialization(self):
-"""Test health checker initializes properly."""
+        """Test health checker initializes properly."""
 assert self.health_checker.check_interval == 1
 assert len(self.health_checker._check_history) == 0
 
 @pytest.mark.asyncio
     async def test_request_isolation_check(self):
-"""Test request isolation health check."""
+        """Test request isolation health check."""
 pass
                 # Mock metrics collector
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
@@ -352,7 +352,7 @@ assert result.metrics["isolation_score"] == 95.5
 
 @pytest.mark.asyncio
     async def test_singleton_violations_check(self):
-"""Test singleton violations health check."""
+        """Test singleton violations health check."""
                     # Mock metrics collector with violations
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
 mock_collector.get_violation_counts.return_value = {"singleton_reuse": 3}
@@ -370,7 +370,7 @@ assert result.alert_required is True
 
 @pytest.mark.asyncio
     async def test_websocket_isolation_check(self):
-"""Test WebSocket isolation health check."""
+        """Test WebSocket isolation health check."""
 pass
                         # Mock metrics collector
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
@@ -383,7 +383,7 @@ self.health_checker._metrics_collector = mock_collector
 
                         # Mock WebSocket connection monitor
 with patch('netra_backend.app.monitoring.isolation_health_checks.get_connection_monitor') as mock_get_monitor:
-websocket = TestWebSocketConnection()
+    websocket = TestWebSocketConnection()
 mock_monitor.get_stats.return_value = {"active_connections": 10}
 mock_get_monitor.return_value = mock_monitor
 
@@ -398,7 +398,7 @@ assert result.alert_required is False
 
 @pytest.mark.asyncio
     async def test_comprehensive_health_check(self):
-"""Test comprehensive health check execution."""
+        """Test comprehensive health check execution."""
                                 # Mock metrics collector
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
 mock_collector.get_isolation_score.return_value = 100.0
@@ -426,7 +426,7 @@ assert health_status.concurrent_users == 5
 
 @pytest.mark.asyncio
     async def test_specific_check_execution(self):
-"""Test running specific health checks."""
+        """Test running specific health checks."""
 pass
                                     # Mock metrics collector for clean state
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
@@ -444,10 +444,10 @@ assert "Unknown health check" in result.message
 
 @pytest.mark.asyncio
     async def test_memory_usage_check(self):
-"""Test memory usage health check."""
+        """Test memory usage health check."""
                                         # Mock psutil for high memory usage
 with patch('netra_backend.app.monitoring.isolation_health_checks.psutil') as mock_psutil:
-websocket = TestWebSocketConnection()  # Real WebSocket implementation
+    websocket = TestWebSocketConnection()  # Real WebSocket implementation
 mock_memory.percent = 85.0
 mock_memory.available = 2 * 1024**3  # 2GB
 mock_psutil.virtual_memory.return_value = mock_memory
@@ -584,7 +584,7 @@ class TestIsolationMonitoringIntegration:
 
 @pytest.mark.asyncio
     async def test_end_to_end_violation_detection(self):
-"""Test end-to-end violation detection and alerting."""
+        """Test end-to-end violation detection and alerting."""
 user_id = "test_user"
 request_id = "test_request"
 
@@ -626,14 +626,14 @@ assert completed_request.isolation_score < 100.0
 
 @pytest.mark.asyncio
     async def test_concurrent_request_isolation(self):
-"""Test isolation monitoring under concurrent requests."""
+        """Test isolation monitoring under concurrent requests."""
 pass
 users = ["formatted_string" for i in range(10)]
 requests = ["formatted_string" for i in range(10)]
 
                     # Start multiple concurrent requests
 for user, request in zip(users, requests):
-self.metrics_collector.start_request(user, request)
+    self.metrics_collector.start_request(user, request)
 
                         # Verify all requests tracked
 assert len(self.metrics_collector._active_requests) == 10
@@ -651,7 +651,7 @@ users[i],
 
                         # Complete all requests
 for i, request in enumerate(requests):
-success = i >= 5  # Last 5 requests succeed
+    success = i >= 5  # Last 5 requests succeed
 self.metrics_collector.complete_request(request, success=success)
 
                             # Verify isolation scores
@@ -659,23 +659,23 @@ completed = list(self.metrics_collector._completed_requests)
 
                             # First 5 should have degraded scores due to violations
 for i in range(5):
-assert completed[i].isolation_score < 100.0
+    assert completed[i].isolation_score < 100.0
 assert completed[i].failure_contained is False
 
                                 # Last 5 should maintain perfect scores
 for i in range(5, 10):
-assert completed[i].isolation_score == 100.0
+    assert completed[i].isolation_score == 100.0
 assert completed[i].failure_contained is True
 
 @pytest.mark.asyncio
     async def test_metrics_and_health_sync(self):
-"""Test synchronization between metrics collection and health checks."""
+        """Test synchronization between metrics collection and health checks."""
                                         # Set up linked components
 self.health_checker._metrics_collector = self.metrics_collector
 
                                         # Start some activity
 for i in range(3):
-self.metrics_collector.start_request("formatted_string", "formatted_string")
+    self.metrics_collector.start_request("formatted_string", "formatted_string")
 
                                             # Record some violations
 await self.metrics_collector.record_isolation_violation( )
@@ -701,7 +701,7 @@ if r.check_name == "websocket_isolation"
 assert websocket_result.severity in [HealthCheckSeverity.CRITICAL, HealthCheckSeverity.ERROR]
 
 def test_dashboard_config_integration(self):
-"""Test dashboard configuration integration with monitoring components."""
+    """Test dashboard configuration integration with monitoring components."""
 pass
     # Get default config
 config = self.config_manager.get_default_config()
@@ -711,7 +711,7 @@ overview_section = next(s for s in config.sections if s.section_id == "overview"
 
     # Test data source mapping
 for widget in overview_section.widgets:
-data_source = self.config_manager.get_widget_data_source(widget)
+    data_source = self.config_manager.get_widget_data_source(widget)
 assert data_source.startswith("/monitoring/isolation/")
 
         # Verify alert widgets point to alerts endpoint
@@ -733,7 +733,7 @@ class TestIsolationMonitoringAPIEndpoints:
 
 @pytest.mark.asyncio
     async def test_isolation_health_endpoint(self, mock_current_user):
-"""Test isolation health API endpoint."""
+        """Test isolation health API endpoint."""
 pass
 from netra_backend.app.routes.monitoring import get_isolation_health
 
@@ -751,7 +751,7 @@ system_uptime_hours=24.5
         
 
 with patch('netra_backend.app.routes.monitoring.get_isolation_health_checker') as mock_get_checker:
-websocket = TestWebSocketConnection()  # Real WebSocket implementation
+    websocket = TestWebSocketConnection()  # Real WebSocket implementation
 mock_checker.get_current_health.return_value = mock_health_status
 mock_get_checker.return_value = mock_checker
 
@@ -766,7 +766,7 @@ assert response.active_requests == 5
 
 @pytest.mark.asyncio
     async def test_isolation_violations_endpoint(self, mock_current_user):
-"""Test isolation violations API endpoint."""
+        """Test isolation violations API endpoint."""
 from netra_backend.app.routes.monitoring import get_isolation_violations
 
                 # Mock violations
@@ -780,7 +780,7 @@ description="Test violation"
                 
 
 with patch('netra_backend.app.routes.monitoring.get_isolation_metrics_collector') as mock_get_collector:
-websocket = TestWebSocketConnection()  # Real WebSocket implementation
+    websocket = TestWebSocketConnection()  # Real WebSocket implementation
 mock_collector.get_recent_violations.return_value = [mock_violation]
 mock_collector.get_violation_counts.return_value = {"singleton_reuse": 1}
 mock_get_collector.return_value = mock_collector
@@ -800,12 +800,12 @@ assert response.violations[0]["violation_type"] == "singleton_reuse"
 
 @pytest.mark.asyncio
     async def test_dashboard_config_endpoint(self, mock_current_user):
-"""Test dashboard configuration API endpoint."""
+        """Test dashboard configuration API endpoint."""
 pass
 from netra_backend.app.routes.monitoring import get_dashboard_config
 
 with patch('netra_backend.app.routes.monitoring.get_dashboard_config_manager') as mock_get_manager:
-websocket = TestWebSocketConnection()  # Real WebSocket implementation
+    websocket = TestWebSocketConnection()  # Real WebSocket implementation
 mock_config = DashboardConfig( )
 dashboard_id="test_dashboard",
 title="Test Dashboard",
@@ -848,13 +848,13 @@ class TestIsolationMonitoringPerformance:
 
 @pytest.mark.asyncio
     async def test_high_volume_request_tracking(self):
-"""Test request tracking performance under high volume."""
+        """Test request tracking performance under high volume."""
 num_requests = 1000
 start_time = time.time()
 
             # Start many requests
 for i in range(num_requests):
-self.collector.start_request("formatted_string", "formatted_string")
+    self.collector.start_request("formatted_string", "formatted_string")
 
 tracking_time = time.time() - start_time
 
@@ -865,21 +865,21 @@ assert len(self.collector._active_requests) == num_requests
                 # Complete requests
 completion_start = time.time()
 for i in range(num_requests):
-self.collector.complete_request("formatted_string")
+    self.collector.complete_request("formatted_string")
 
 completion_time = time.time() - completion_start
 assert completion_time < 2.0  # Less than 2 seconds
 
 @pytest.mark.asyncio
     async def test_violation_recording_performance(self):
-"""Test violation recording performance."""
+        """Test violation recording performance."""
 pass
 num_violations = 500
 start_time = time.time()
 
                         # Record many violations
 for i in range(num_violations):
-await self.collector.record_isolation_violation( )
+    await self.collector.record_isolation_violation( )
 "performance_test",
 IsolationViolationSeverity.WARNING,
 "formatted_string",
@@ -894,14 +894,14 @@ assert recording_time < 0.5  # Less than 500ms
 assert len(self.collector._violations) == num_violations
 
 def test_metrics_collection_memory_usage(self):
-"""Test memory usage during metrics collection."""
+    """Test memory usage during metrics collection."""
 import tracemalloc
 
 tracemalloc.start()
 
     # Generate significant activity
 for i in range(100):
-self.collector.start_request("formatted_string", "formatted_string")
+    self.collector.start_request("formatted_string", "formatted_string")
 self.collector.record_instance_creation_time("formatted_string", float(i))
 
 current, peak = tracemalloc.get_traced_memory()
@@ -947,4 +947,4 @@ timestamp=datetime.now(timezone.utc)
 
     # Integration with existing test framework
 if __name__ == "__main__":
-pytest.main([__file__, "-v", "--tb=short"])
+    pytest.main([__file__, "-v", "--tb=short"])

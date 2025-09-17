@@ -1,4 +1,4 @@
-"""
+"
 MISSION CRITICAL: WebSocket Startup Race Condition Real Testing - CLAUDE.md Compliant
 
 CRITICAL: Tests REAL race conditions in WebSocket startup using authentic concurrent scenarios.
@@ -20,7 +20,7 @@ CLAUDE.md COMPLIANCE:
 CHEATING ON TESTS = ABOMINATION - This tests REAL race conditions only.
 
 Business Value: $500K+ ARR protection by ensuring race conditions don't break user experience.
-"""
+""
 import asyncio
 import json
 import time
@@ -43,7 +43,7 @@ CONCURRENT_CONNECTION_COUNT = 5
 
 @dataclass
 class RaceConditionResult:
-    """Result of a race condition test operation."""
+    ""Result of a race condition test operation."
     success: bool
     timing: float
     error: Optional[str]
@@ -53,7 +53,7 @@ class RaceConditionResult:
     sequence_number: int
 
 class RealRaceConditionTester:
-    """Tests REAL race conditions in WebSocket connections."""
+    "Tests REAL race conditions in WebSocket connections.""
 
     def __init__(self, websocket_url: str):
         self.websocket_url = websocket_url
@@ -62,7 +62,7 @@ class RealRaceConditionTester:
         self.start_time = time.time()
 
     async def create_concurrent_authenticated_connections(self, auth_helper: E2EAuthHelper, count: int) -> List[RaceConditionResult]:
-        """Create multiple REAL authenticated WebSocket connections concurrently."""
+        ""Create multiple REAL authenticated WebSocket connections concurrently."
         logger.info(f'[U+1F3C1] Starting REAL concurrent connection race condition test with {count} connections')
         user_tasks = []
         for i in range(count):
@@ -91,7 +91,7 @@ class RealRaceConditionTester:
         return race_results
 
     async def _attempt_websocket_connection(self, user_data, sequence: int) -> RaceConditionResult:
-        """Attempt a single WebSocket connection as part of race condition test."""
+        "Attempt a single WebSocket connection as part of race condition test.""
         start_time = time.time()
         try:
             extra_headers = {'Authorization': f'Bearer {user_data.auth_token}'}
@@ -104,7 +104,7 @@ class RealRaceConditionTester:
             try:
                 response_str = await asyncio.wait_for(websocket.recv(), timeout=2.0)
                 response = json.loads(response_str) if response_str else {}
-                logger.info(f"[U+1F4E8] Connection {sequence} received response: {response.get('type', 'unknown')}")
+                logger.info(f[U+1F4E8] Connection {sequence} received response: {response.get('type', 'unknown')}")
             except asyncio.TimeoutError:
                 pass
             return RaceConditionResult(success=True, timing=connection_time, error=None, connection_id=str(id(websocket)), user_id=user_data.user_id, operation='concurrent_connection', sequence_number=sequence)
@@ -114,7 +114,7 @@ class RealRaceConditionTester:
             return RaceConditionResult(success=False, timing=connection_time, error=str(e), connection_id=None, user_id=user_data.user_id, operation='concurrent_connection', sequence_number=sequence)
 
     async def test_rapid_reconnection_race(self, auth_helper: E2EAuthHelper, reconnection_count: int=3) -> List[RaceConditionResult]:
-        """Test rapid reconnection scenarios to detect race conditions."""
+        "Test rapid reconnection scenarios to detect race conditions.""
         logger.info(f' CYCLE:  Testing rapid reconnection race conditions with {reconnection_count} cycles')
         user_data = await auth_helper.create_authenticated_user(email_prefix='rapid_reconnection_user', password='RapidReconnect123!', name='Rapid Reconnection Test User')
         results = []
@@ -145,7 +145,7 @@ class RealRaceConditionTester:
         return results
 
     async def test_authentication_state_race(self, auth_helper: E2EAuthHelper, concurrent_auth_attempts: int=3) -> List[RaceConditionResult]:
-        """Test concurrent authentication state changes to detect races."""
+        ""Test concurrent authentication state changes to detect races."
         logger.info(f'[U+1F510] Testing authentication state race conditions with {concurrent_auth_attempts} concurrent attempts')
         user_data = await auth_helper.create_authenticated_user(email_prefix='auth_state_race_user', password='AuthStateRace123!', name='Auth State Race Test User')
         auth_tasks = []
@@ -167,14 +167,14 @@ class RealRaceConditionTester:
         return race_results
 
     async def _test_concurrent_auth_validation(self, user_data, sequence: int) -> RaceConditionResult:
-        """Test concurrent authentication validation."""
+        "Test concurrent authentication validation.""
         start_time = time.time()
         try:
             jwt_secret = AuthConfig.get_jwt_secret()
             jwt_algorithm = AuthConfig.get_jwt_algorithm()
             await asyncio.sleep(0.001 * sequence)
             import jwt
-            payload = jwt.decode(user_data.auth_token, jwt_secret, algorithms=[jwt_algorithm])
+            payload = jwt.decode(user_data.auth_token, jwt_secret, algorithms=[jwt_algorithm]
             assert payload['sub'] == user_data.user_id
             assert payload['email'] == user_data.email
             validation_time = time.time() - start_time
@@ -184,7 +184,7 @@ class RealRaceConditionTester:
             return RaceConditionResult(success=False, timing=validation_time, error=str(e), connection_id=None, user_id=user_data.user_id, operation='concurrent_auth', sequence_number=sequence)
 
     async def cleanup_connections(self):
-        """Cleanup all active connections."""
+        ""Cleanup all active connections."
         logger.info(f'[U+1F9F9] Cleaning up {len(self.active_connections)} active connections')
         cleanup_tasks = []
         for connection in list(self.active_connections):
@@ -199,10 +199,10 @@ class RealRaceConditionTester:
 
 @pytest.mark.e2e
 class WebSocketStartupRaceConditionRealTests(BaseE2ETest):
-    """REAL race condition testing for WebSocket startup scenarios."""
+    "REAL race condition testing for WebSocket startup scenarios.""
 
     def setup_method(self):
-        """Setup method with real services initialization."""
+        ""Setup method with real services initialization."
         super().setup_method()
         self.env = get_env()
         self.env.enable_isolation(backup_original=True)
@@ -214,7 +214,7 @@ class WebSocketStartupRaceConditionRealTests(BaseE2ETest):
         self.race_tester = RealRaceConditionTester(self.websocket_url)
 
     def teardown_method(self):
-        """Cleanup real connections and race tester."""
+        "Cleanup real connections and race tester.""
         try:
             asyncio.run(self.race_tester.cleanup_connections())
         except Exception:
@@ -225,7 +225,7 @@ class WebSocketStartupRaceConditionRealTests(BaseE2ETest):
     @pytest.mark.critical
     @pytest.mark.timeout(90)
     async def test_concurrent_websocket_connections_no_race_conditions(self):
-        """Test that concurrent WebSocket connections don't cause race conditions.
+        ""Test that concurrent WebSocket connections don't cause race conditions.
         
         CLAUDE.md COMPLIANCE:
          PASS:  Tests REAL concurrent connection scenarios
@@ -233,7 +233,7 @@ class WebSocketStartupRaceConditionRealTests(BaseE2ETest):
          PASS:  NO mocks, NO fake race conditions
          PASS:  Execution time validation >= 0.1s
          PASS:  Hard failures for race condition violations
-        """
+        "
         start_time = time.time()
         logger.info('[U+1F680] Testing REAL concurrent WebSocket connection race conditions')
         try:
@@ -260,7 +260,7 @@ class WebSocketStartupRaceConditionRealTests(BaseE2ETest):
                 logger.info(f'   [U+1F4CB] Failure types: {failure_types}')
             success_rate = len(successful_connections) / len(results)
             assert success_rate >= 0.8, f'RACE CONDITION DETECTED: Low success rate {success_rate:.1%} indicates race conditions. Successful: {len(successful_connections)}/{len(results)}'
-            auth_related_failures = [r for r in failed_connections if r.error and any((keyword in r.error.lower() for keyword in ['auth', 'token', 'permission', 'forbidden']))]
+            auth_related_failures = [r for r in failed_connections if r.error and any((keyword in r.error.lower() for keyword in ['auth', 'token', 'permission', 'forbidden'])]
             assert len(auth_related_failures) == 0, f'RACE CONDITION DETECTED: Authentication race conditions: {[r.error for r in auth_related_failures]}'
             if len(successful_connections) > 1:
                 timings = [r.timing for r in successful_connections]
@@ -279,7 +279,7 @@ class WebSocketStartupRaceConditionRealTests(BaseE2ETest):
     @pytest.mark.critical
     @pytest.mark.timeout(60)
     async def test_rapid_reconnection_no_race_conditions(self):
-        """Test that rapid reconnection scenarios don't cause race conditions.
+        "Test that rapid reconnection scenarios don't cause race conditions.
         
         CLAUDE.md COMPLIANCE:
          PASS:  Tests REAL rapid reconnection scenarios
@@ -287,7 +287,7 @@ class WebSocketStartupRaceConditionRealTests(BaseE2ETest):
          PASS:  NO mocks, NO simulated disconnections
          PASS:  Execution time validation >= 0.1s
          PASS:  Hard failures for reconnection race conditions
-        """
+        ""
         start_time = time.time()
         logger.info('[U+1F680] Testing REAL rapid reconnection race conditions')
         try:
@@ -297,7 +297,7 @@ class WebSocketStartupRaceConditionRealTests(BaseE2ETest):
             logger.info(f' CHART:  Rapid reconnection results:')
             logger.info(f'    PASS:  Successful operations: {len(successful_operations)}')
             logger.info(f'    FAIL:  Failed operations: {len(failed_operations)}')
-            reconnection_failures = [r for r in failed_operations if r.error and any((keyword in r.error.lower() for keyword in ['connection', 'already', 'state', 'closed']))]
+            reconnection_failures = [r for r in failed_operations if r.error and any((keyword in r.error.lower() for keyword in ['connection', 'already', 'state', 'closed'])]
             logger.info(f'    CYCLE:  Reconnection-specific failures: {len(reconnection_failures)}')
             success_rate = len(successful_operations) / len(results) if results else 0
             assert success_rate >= 0.7, f'RACE CONDITION DETECTED: Low reconnection success rate {success_rate:.1%} indicates race conditions'
@@ -314,7 +314,7 @@ class WebSocketStartupRaceConditionRealTests(BaseE2ETest):
     @pytest.mark.critical
     @pytest.mark.timeout(45)
     async def test_authentication_state_no_race_conditions(self):
-        """Test that concurrent authentication operations don't cause race conditions.
+        ""Test that concurrent authentication operations don't cause race conditions.
         
         CLAUDE.md COMPLIANCE:  
          PASS:  Tests REAL concurrent authentication scenarios
@@ -322,7 +322,7 @@ class WebSocketStartupRaceConditionRealTests(BaseE2ETest):
          PASS:  NO mocks, NO fake auth states
          PASS:  Execution time validation >= 0.1s
          PASS:  Hard failures for auth race conditions
-        """
+        "
         start_time = time.time()
         logger.info('[U+1F680] Testing REAL authentication state race conditions')
         try:
@@ -340,7 +340,7 @@ class WebSocketStartupRaceConditionRealTests(BaseE2ETest):
                 logger.info(f'   [U+1F510] Auth error types: {auth_error_types}')
             success_rate = len(successful_auths) / len(results) if results else 0
             assert success_rate >= 0.9, f'RACE CONDITION DETECTED: Auth validation race condition detected. Success rate: {success_rate:.1%}'
-            state_corruption_errors = [r for r in failed_auths if r.error and any((keyword in r.error.lower() for keyword in ['corrupt', 'invalid', 'malformed']))]
+            state_corruption_errors = [r for r in failed_auths if r.error and any((keyword in r.error.lower() for keyword in ['corrupt', 'invalid', 'malformed'])]
             assert len(state_corruption_errors) == 0, f'RACE CONDITION DETECTED: Auth state corruption: {[r.error for r in state_corruption_errors]}'
         except Exception as e:
             if 'connection refused' in str(e).lower():

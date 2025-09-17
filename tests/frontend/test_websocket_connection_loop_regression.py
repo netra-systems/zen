@@ -174,7 +174,7 @@ class WebSocketConnectionLoopTest:
 
 @pytest.mark.asyncio
     async def test_websocket_connection_loop_bug():
-'''
+        '''
 Test that reproduces the WebSocket connection loop bug.
 This test SHOULD FAIL with the current implementation,
 demonstrating the bug exists.
@@ -201,7 +201,7 @@ websocket = TestWebSocketConnection()  # Real WebSocket implementation
 connection_results = []
 
 for i, effect in enumerate(effects):
-result = test_harness.simulate_connection_attempt(ws_service_mock, i)
+    result = test_harness.simulate_connection_attempt(ws_service_mock, i)
 connection_results.append(result)
 
                 # Step 6: Measure connection loop rate
@@ -225,14 +225,14 @@ len(test_harness.reconnection_attempts) < len(test_harness.auth_failures), \
 
 @pytest.mark.asyncio
     async def test_websocket_connection_deduplication():
-'''
+        '''
 Test that WebSocket service properly deduplicates rapid connection attempts.
 This test SHOULD FAIL with current implementation.
 '''
 
                     # Mock the WebSocket service
 with patch('frontend.services.webSocketService.WebSocketService') as MockWSService:
-ws_service = MockWSService.return_value
+    ws_service = MockWSService.return_value
 ws_service.websocket = TestWebSocketConnection()
 ws_service.isConnecting = False
 ws_service.state = 'disconnected'
@@ -255,7 +255,7 @@ assert actual_calls == 1, \
 
 @pytest.mark.asyncio
     async def test_websocket_auth_failure_backoff():
-'''
+        '''
 Test that auth failures trigger proper exponential backoff.
 This test SHOULD FAIL with current implementation.
 '''
@@ -265,7 +265,7 @@ reconnect_delays = []
 
                                 # Simulate series of auth failures
 for attempt in range(5):
-result = test_harness.simulate_connection_attempt( )
+    result = test_harness.simulate_connection_attempt( )
 if not result["success"] and result["code"] == 1008:
                                         # Measure time until next reconnect attempt
 reconnect_delay = 0.1 * (2 ** attempt)  # Expected exponential backoff
@@ -274,14 +274,14 @@ await asyncio.sleep(0.01)  # Minimal delay in test
 
                                         # Verify exponential backoff is applied
 for i in range(1, len(reconnect_delays)):
-expected_increase = reconnect_delays[i] > reconnect_delays[i-1]
+    expected_increase = reconnect_delays[i] > reconnect_delays[i-1]
 assert expected_increase, \
 "formatted_string"
 
 
 @pytest.mark.asyncio
     async def test_websocket_provider_effect_coordination():
-'''
+        '''
 Test that WebSocketProvider properly coordinates multiple effects.
 This test SHOULD FAIL with current implementation.
 '''
@@ -290,7 +290,7 @@ This test SHOULD FAIL with current implementation.
 effect_executions = []
 
 def track_effect(effect_name: str):
-pass
+    pass
 effect_executions.append({ ))
 "name": effect_name,
 "timestamp": time.time()
@@ -305,7 +305,7 @@ auth_states = [ )
     
 
 for state in auth_states:
-if state["initialized"] and state["token"]:
+    if state["initialized"] and state["token"]:
             # Both effects trigger (the bug)
 track_effect("main_connection_effect")
 track_effect("token_sync_effect")
@@ -319,7 +319,7 @@ assert len(connection_effects) <= len(auth_states) - 2, \
 
 
 def test_websocket_connection_race_condition():
-'''
+    '''
 Synchronous test for the race condition between auth and connection.
 This test SHOULD FAIL, proving the bug exists.
 '''
@@ -330,9 +330,9 @@ connection_log = []
 lock = threading.Lock()
 
 def connect_websocket(source: str):
-pass
+    pass
 with lock:
-connection_log.append({ ))
+    connection_log.append({ ))
 "source": source,
 "timestamp": time.time(),
 "thread": threading.current_thread().name
@@ -355,11 +355,11 @@ threads.append(t3)
 
         # Start all threads simultaneously (race condition)
 for t in threads:
-t.start()
+    t.start()
 
             # Wait for completion
 for t in threads:
-t.join()
+    t.join()
 
                 # Should have connection coordination, but doesn't
 assert len(connection_log) == 1, \

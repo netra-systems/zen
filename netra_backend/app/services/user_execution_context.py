@@ -1,4 +1,4 @@
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 """UserExecutionContext Service: Comprehensive Request Isolation and Context Management
 
 This module provides the definitive UserExecutionContext implementation for proper
@@ -53,7 +53,7 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
     from fastapi import Request
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class InvalidContextError(Exception):

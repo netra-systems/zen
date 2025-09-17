@@ -43,14 +43,15 @@ from test_framework.fixtures.auth import create_real_jwt_token, create_test_user
 
             # Handle different websockets library versions
 try:
-from websockets import InvalidStatusCode
+    from websockets import InvalidStatusCode
+
 except ImportError:
                     # For newer versions of websockets
 class InvalidStatusCode(WebSocketException):
     def __init__(self, status_code):
         pass
         self.status_code = status_code
-        super().__init__("formatted_string")
+        super().__init__("formatted_string)
 
 
     # ============================================================================
@@ -59,7 +60,7 @@ class InvalidStatusCode(WebSocketException):
 
         @dataclass
 class TestWebSocketAuthResult:
-        """Container for WebSocket authentication test results."""
+        ""Container for WebSocket authentication test results."
         connection_attempted: bool = False
         connection_successful: bool = False
         auth_failure_detected: bool = False
@@ -72,7 +73,7 @@ class TestWebSocketAuthResult:
 
         @dataclass
 class TestWebSocketTimingSuite:
-        """Container for complete timing test suite results."""
+        "Container for complete timing test suite results.""
         no_token_test: Optional[WebSocketAuthTestResult] = None
         null_token_test: Optional[WebSocketAuthTestResult] = None
         race_condition_test: Optional[WebSocketAuthTestResult] = None
@@ -87,20 +88,20 @@ class TestWebSocketTimingSuite:
     # ============================================================================
 
 class TestWebSocketAuthTiminger:
-        """Reproduces WebSocket authentication timing issues during DevLauncher startup."""
+        ""Reproduces WebSocket authentication timing issues during DevLauncher startup."
 
     def __init__(self):
-        """Initialize the WebSocket auth timing tester."""
+        "Initialize the WebSocket auth timing tester.""
         self.test_config = setup_test_environment()
         self.endpoints = self.test_config.endpoints
-        self.test_user = self.test_config.users["free"]
+        self.test_user = self.test_config.users[free"]
         self.connection_timeout = 5.0
         self.auth_timeout = 3.0
 
         @pytest.mark.websocket
         @pytest.mark.auth
     async def test_websocket_connection_without_token(self) -> WebSocketAuthTestResult:
-        """Test #1: WebSocket connection without token fails with error 1008."""
+        "Test #1: WebSocket connection without token fails with error 1008.""
         pass
         result = WebSocketAuthTestResult()
         start_time = time.time()
@@ -119,16 +120,16 @@ class TestWebSocketAuthTiminger:
             # Removed problematic line: async with await asyncio.wait_for(connection_task, timeout=self.connection_timeout) as websocket:
                 # If we reach here, connection succeeded when it should have failed
         result.connection_successful = True
-        result.error_message = "Connection succeeded without token - security vulnerability"
+        result.error_message = Connection succeeded without token - security vulnerability"
 
         except asyncio.TimeoutError:
                     # Connection timeout - could indicate server is not running
-        result.error_message = "Connection timeout - WebSocket server may not be running"
+        result.error_message = "Connection timeout - WebSocket server may not be running
         result.error_code = None
 
         except ConnectionError as e:
                         # Connection refused - expected when server is not running
-        result.error_message = "formatted_string"
+        result.error_message = formatted_string"
         result.error_code = None
 
         except InvalidStatusCode as e:
@@ -139,20 +140,20 @@ class TestWebSocketAuthTiminger:
         result.error_message = str(e)
         else:
         result.error_code = e.status_code
-        result.error_message = "formatted_string"
+        result.error_message = "formatted_string
 
         except WebSocketException as e:
                                         # Check for error 1008 in the exception message
         error_str = str(e).lower()
-        if "1008" in error_str or "authentication required" in error_str:
+        if 1008" in error_str or "authentication required in error_str:
         result.auth_failure_detected = True
         result.error_code = 1008
         result.error_message = str(e)
         else:
-        result.error_message = "formatted_string"
+        result.error_message = formatted_string"
 
         except Exception as e:
-        result.error_message = "formatted_string"
+        result.error_message = "formatted_string
 
         result.response_time_ms = (time.time() - start_time) * 1000
         return result
@@ -160,7 +161,7 @@ class TestWebSocketAuthTiminger:
         @pytest.mark.websocket
         @pytest.mark.auth
     async def test_websocket_connection_with_null_token(self) -> WebSocketAuthTestResult:
-        """Test #2: WebSocket connection with null token handling."""
+        ""Test #2: WebSocket connection with null token handling."
         result = WebSocketAuthTestResult()
         start_time = time.time()
 
@@ -168,14 +169,14 @@ class TestWebSocketAuthTiminger:
         result.connection_attempted = True
 
                                                             # Attempt connection with null/empty token value
-        headers = {"Authorization": "Bearer null"}
+        headers = {"Authorization: Bearer null"}
 
-        async with websockets.connect( )
+        async with websockets.connect()
         self.endpoints.ws_url,
         additional_headers=headers
         ) as websocket:
         result.connection_successful = True
-        result.error_message = "Connection succeeded with null token - vulnerability"
+        result.error_message = "Connection succeeded with null token - vulnerability
 
         except InvalidStatusCode as e:
         if e.status_code in [401, 403]:
@@ -184,19 +185,19 @@ class TestWebSocketAuthTiminger:
         result.error_message = str(e)
         else:
         result.error_code = e.status_code
-        result.error_message = "formatted_string"
+        result.error_message = formatted_string"
 
         except WebSocketException as e:
         error_str = str(e).lower()
-        if "1008" in error_str or "authentication" in error_str:
+        if "1008 in error_str or authentication" in error_str:
         result.auth_failure_detected = True
         result.error_code = 1008
         result.error_message = str(e)
         else:
-        result.error_message = "formatted_string"
+        result.error_message = "formatted_string
 
         except Exception as e:
-        result.error_message = "formatted_string"
+        result.error_message = formatted_string"
 
         result.response_time_ms = (time.time() - start_time) * 1000
         return result
@@ -204,7 +205,7 @@ class TestWebSocketAuthTiminger:
         @pytest.mark.websocket
         @pytest.mark.auth
     async def test_websocket_connection_timing_race(self) -> WebSocketAuthTestResult:
-        """Test #3: Race condition where token becomes available after connection attempt."""
+        "Test #3: Race condition where token becomes available after connection attempt.""
         result = WebSocketAuthTestResult()
         start_time = time.time()
 
@@ -223,72 +224,72 @@ class TestWebSocketAuthTiminger:
         try:
                                                                                                         # Use real JWT token
         real_token = create_real_jwt_token( )
-        user_id="test_user_race_condition",
-        permissions=["read", "write", "websocket"],
-        token_type="access"
+        user_id=test_user_race_condition",
+        permissions=["read, write", "websocket],
+        token_type=access"
                                                                                                         
-        valid_token = "formatted_string"
+        valid_token = "formatted_string
         except (ImportError, ValueError):
-        valid_token = "Bearer valid-token-available-too-late"
+        valid_token = Bearer valid-token-available-too-late"
 
                                                                                                             # Wait for initial connection attempt to complete
         connection_result = await connection_task
 
-        if connection_result["failed_as_expected"]:
+        if connection_result["failed_as_expected]:
         result.auth_failure_detected = True
-        result.error_code = connection_result.get("error_code", 1008)
-        result.error_message = "Race condition: token available after connection failed"
+        result.error_code = connection_result.get(error_code", 1008)
+        result.error_message = "Race condition: token available after connection failed
 
                                                                                                                 # Test recovery with valid token
         recovery_result = await self._test_recovery_connection(valid_token)
-        result.recovery_successful = recovery_result["successful"]
+        result.recovery_successful = recovery_result[successful"]
         else:
-        result.error_message = "Race condition not reproduced correctly"
+        result.error_message = "Race condition not reproduced correctly
 
         except Exception as e:
-        result.error_message = "formatted_string"
+        result.error_message = formatted_string"
 
         result.response_time_ms = (time.time() - start_time) * 1000
         return result
 
     async def _attempt_connection_without_auth(self) -> Dict[str, Any]:
-        """Helper: Attempt WebSocket connection without authentication."""
+        "Helper: Attempt WebSocket connection without authentication.""
         try:
-        async with websockets.connect( )
+        async with websockets.connect()
         self.endpoints.ws_url
         ) as websocket:
-        return {"failed_as_expected": False, "connected": True}
+        return {failed_as_expected": False, "connected: True}
 
         except (InvalidStatusCode, WebSocketException) as e:
-        return { )
-        "failed_as_expected": True,
-        "error_code": getattr(e, 'status_code', 1008),
-        "error_message": str(e)
+        return }
+        failed_as_expected": True,
+        "error_code: getattr(e, 'status_code', 1008),
+        error_message": str(e)
                 
         except Exception as e:
-        return { )
-        "failed_as_expected": True,
-        "error_code": None,
-        "error_message": str(e)
+        return }
+        "failed_as_expected: True,
+        error_code": None,
+        "error_message: str(e)
                     
 
     async def _test_recovery_connection(self, token: str) -> Dict[str, Any]:
-        """Helper: Test WebSocket connection recovery with valid token."""
+        ""Helper: Test WebSocket connection recovery with valid token."
         try:
-        headers = {"Authorization": token}
-        async with websockets.connect( )
+        headers = {"Authorization: token}
+        async with websockets.connect()
         self.endpoints.ws_url,
         additional_headers=headers
         ) as websocket:
-        return {"successful": True}
+        return {successful": True}
 
         except Exception as e:
-        return {"successful": False, "error": str(e)}
+        return {"successful: False, error": str(e)}
 
         @pytest.mark.websocket
         @pytest.mark.auth
     async def test_websocket_origin_none_handling(self) -> WebSocketAuthTestResult:
-        """Test #4: CORS handling when origin header is None."""
+        "Test #4: CORS handling when origin header is None.""
         result = WebSocketAuthTestResult()
         start_time = time.time()
 
@@ -296,42 +297,42 @@ class TestWebSocketAuthTiminger:
         result.connection_attempted = True
 
                         # Simulate missing Origin header (common during DevLauncher startup)
-        headers = { )
-        "Origin": "null",  # This often happens in desktop apps
+        headers = {
+        Origin": "null,  # This often happens in desktop apps
                         # No Authorization header to trigger auth failure
                         
 
-        async with websockets.connect( )
+        async with websockets.connect()
         self.endpoints.ws_url,
         additional_headers=headers
         ) as websocket:
         result.connection_successful = True
-        result.error_message = "Connection succeeded with null Origin - check CORS config"
+        result.error_message = Connection succeeded with null Origin - check CORS config"
 
         except InvalidStatusCode as e:
         if e.status_code in [401, 403]:
         result.auth_failure_detected = True
         result.error_code = e.status_code
-        result.error_message = "formatted_string"
+        result.error_message = "formatted_string
         elif e.status_code == 403:
         result.auth_failure_detected = True
         result.error_code = 403
-        result.error_message = "formatted_string"
+        result.error_message = formatted_string"
         else:
         result.error_code = e.status_code
-        result.error_message = "formatted_string"
+        result.error_message = "formatted_string
 
         except WebSocketException as e:
         error_str = str(e).lower()
-        if "1008" in error_str:
+        if 1008" in error_str:
         result.auth_failure_detected = True
         result.error_code = 1008
-        result.error_message = "formatted_string"
+        result.error_message = "formatted_string
         else:
-        result.error_message = "formatted_string"
+        result.error_message = formatted_string"
 
         except Exception as e:
-        result.error_message = "formatted_string"
+        result.error_message = "formatted_string
 
         result.response_time_ms = (time.time() - start_time) * 1000
         return result
@@ -339,7 +340,7 @@ class TestWebSocketAuthTiminger:
         @pytest.mark.websocket
         @pytest.mark.auth
     async def test_websocket_auth_recovery(self) -> WebSocketAuthTestResult:
-        """Test #5: WebSocket recovery after initial auth failure."""
+        ""Test #5: WebSocket recovery after initial auth failure."
         result = WebSocketAuthTestResult()
         start_time = time.time()
 
@@ -349,9 +350,9 @@ class TestWebSocketAuthTiminger:
                                                                     # Step 1: Initial connection failure (no token)
         initial_failure = await self._attempt_connection_without_auth()
 
-        if initial_failure["failed_as_expected"]:
+        if initial_failure["failed_as_expected]:
         result.auth_failure_detected = True
-        result.error_code = initial_failure.get("error_code", 1008)
+        result.error_code = initial_failure.get(error_code", 1008)
 
                                                                         # Step 2: Wait and retry with valid token (simulates user retry)
         await asyncio.sleep(0.2)  # Brief delay
@@ -359,33 +360,33 @@ class TestWebSocketAuthTiminger:
         valid_token = self._create_mock_token()
         recovery_result = await self._test_recovery_connection(valid_token)
 
-        if recovery_result["successful"]:
+        if recovery_result["successful]:
         result.recovery_successful = True
-        result.error_message = "Recovery successful after initial auth failure"
+        result.error_message = Recovery successful after initial auth failure"
         else:
-        result.error_message = "formatted_string"
+        result.error_message = "formatted_string
         else:
-        result.error_message = "Initial connection should have failed but didn"t"
+        result.error_message = Initial connection should have failed but didn"t"
 
         except Exception as e:
-        result.error_message = "formatted_string"
+        result.error_message = formatted_string
 
         result.response_time_ms = (time.time() - start_time) * 1000
         return result
 
     def _create_mock_token(self) -> str:
-        """Create a real JWT token for testing."""
+        ""Create a real JWT token for testing.""
         try:
         # Use real JWT token creation
         token = create_real_jwt_token( )
-        user_id="test_user_websocket_recovery",
-        permissions=["read", "write", "websocket"],
-        token_type="access"
+        user_id=test_user_websocket_recovery,
+        permissions=["read", write, "websocket"],
+        token_type=access
         
         return "formatted_string"
         except (ImportError, ValueError):
             # Fallback to mock token if real JWT creation fails
-        return "Bearer mock-jwt-token-for-recovery-testing"
+        return Bearer mock-jwt-token-for-recovery-testing
 
 
             # ============================================================================
@@ -396,7 +397,8 @@ class TestWebSocketAuthTiminger:
 @pytest.mark.e2e
 @pytest.mark.critical
     async def test_websocket_connection_without_token():
-'''
+        '''
+
 Test: WebSocket connection without token fails with error 1008
 
 This reproduces the exact issue reported in DevLauncher startup where
@@ -410,40 +412,43 @@ result = await tester.test_websocket_connection_without_token()
 assert result.connection_attempted, "Connection attempt should have been made"
 
                 # Check if this is a service unavailable case (expected in test environment)
-service_unavailable_indicators = [ )
-"Connection refused", "Connection timeout", "Connect call failed",
-"connection failed", "[Errno 10061]", "[Errno 111]"
+service_unavailable_indicators = ]
+Connection refused, "Connection timeout", Connect call failed,
+"connection failed", [Errno 10061], "[Errno 111]"
                 
 
 if any(indicator in result.error_message for indicator in service_unavailable_indicators):
-print("formatted_string")
+    print(formatted_string)
+
 pytest.skip("WebSocket service not available - test requires running WebSocket server")
 
                     # Verify authentication failure was detected (expected behavior)
 assert result.auth_failure_detected or result.error_code is not None, \
-"formatted_string"
+formatted_string
 
                     # Verify error code indicates authentication issue
 if result.error_code:
-assert result.error_code in [401, 403, 1008], \
+    assert result.error_code in [401, 403, 1008], \
+
 "formatted_string"
 
                         # Performance requirement
 assert result.response_time_ms < 10000, \
-"formatted_string"
+formatted_string
 
                         # Security requirement: connection should NOT succeed without token
 assert not result.connection_successful, \
 "Security violation: WebSocket connection succeeded without authentication"
 
-print("formatted_string")
+print(formatted_string)
 
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.critical
     async def test_websocket_connection_with_null_token():
-'''
+        '''
+
 Test: WebSocket connection with token=null handling
 
 Tests the specific case where frontend passes token=null during
@@ -458,29 +463,31 @@ assert result.connection_attempted, "Connection attempt should have been made"
 
                             # Verify null token is properly rejected
 assert result.auth_failure_detected or result.error_code is not None, \
-"formatted_string"
+formatted_string
 
                             # Verify appropriate error handling
 if result.error_code:
-assert result.error_code in [401, 403, 1008], \
+    assert result.error_code in [401, 403, 1008], \
+
 "formatted_string"
 
                                 # Performance requirement
 assert result.response_time_ms < 10000, \
-"formatted_string"
+formatted_string
 
                                 # Security requirement: null token should NOT be accepted
 assert not result.connection_successful, \
 "Security violation: WebSocket accepted null token"
 
-print("formatted_string")
+print(formatted_string)
 
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.critical
     async def test_websocket_connection_timing_race():
-'''
+        '''
+
 Test: Race condition where token becomes available after connection attempt
 
 Simulates the timing issue where DevLauncher WebSocket connection starts
@@ -495,26 +502,29 @@ assert result.connection_attempted, "Race condition test should attempt connecti
 
                                     # Verify initial connection failed as expected
 assert result.auth_failure_detected, \
-"formatted_string"
+formatted_string
 
                                     # Verify recovery is possible when token becomes available
 if result.recovery_successful:
-print("[GOOD] Recovery successful - system handles race condition well")
+    print("[GOOD] Recovery successful - system handles race condition well")
+
 else:
-print("[WARNING] Recovery failed - may indicate persistent connection issues")
+    print([WARNING] Recovery failed - may indicate persistent connection issues)
+
 
                                             # Performance requirement for race condition handling
 assert result.response_time_ms < 15000, \
 "formatted_string"
 
-print("formatted_string")
+print(formatted_string)
 
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.critical
     async def test_websocket_origin_none_handling():
-'''
+        '''
+
 Test: CORS handling when origin header is None
 
 Tests WebSocket behavior with null Origin header, which commonly occurs
@@ -529,7 +539,7 @@ assert result.connection_attempted, "Origin=null test should attempt connection"
 
                                                 # Verify auth failure still occurs with null Origin
 assert result.auth_failure_detected or result.error_code is not None, \
-"formatted_string"
+formatted_string
 
                                                 # Check for appropriate error codes
 if result.error_code:
@@ -540,7 +550,7 @@ assert result.error_code in expected_codes, \
 
                                                     # Performance requirement
 assert result.response_time_ms < 10000, \
-"formatted_string"
+formatted_string
 
 print("formatted_string")
 
@@ -549,7 +559,8 @@ print("formatted_string")
 @pytest.mark.e2e
 @pytest.mark.critical
     async def test_websocket_auth_recovery():
-'''
+        '''
+
 Test: WebSocket recovery after initial auth failure
 
 Tests the ability to establish WebSocket connection after initial
@@ -560,16 +571,18 @@ tester = WebSocketAuthTimingTester()
 result = await tester.test_websocket_auth_recovery()
 
                                                         # Verify initial auth failure occurred
-assert result.connection_attempted, "Recovery test should attempt initial connection"
+assert result.connection_attempted, Recovery test should attempt initial connection
 assert result.auth_failure_detected, \
 "formatted_string"
 
                                                         # Check recovery capability
 if result.recovery_successful:
-print("[EXCELLENT] WebSocket recovery works - good user experience")
+    print([EXCELLENT] WebSocket recovery works - good user experience)
+
 else:
-print("[CONCERN] WebSocket recovery failed - may impact user experience")
-print("formatted_string")
+    print("[CONCERN] WebSocket recovery failed - may impact user experience")
+
+print(formatted_string)
 
                                                                 # Performance requirement for recovery flow
 assert result.response_time_ms < 20000, \
@@ -577,7 +590,7 @@ assert result.response_time_ms < 20000, \
 
                                                                 # At minimum, initial failure should be detected correctly
 assert result.error_code in [401, 403, 1008] if result.error_code else True, \
-"formatted_string"
+formatted_string
 
 print("formatted_string")
 
@@ -586,7 +599,8 @@ print("formatted_string")
 @pytest.mark.e2e
 @pytest.mark.critical
     async def test_complete_websocket_auth_timing_suite():
-'''
+        '''
+
 Test: Complete WebSocket authentication timing test suite
 
 Runs all timing-related authentication tests to provide comprehensive
@@ -607,48 +621,53 @@ suite_result.recovery_test = await tester.test_websocket_auth_recovery()
 
                                                                         # Analyze results for vulnerabilities
 if suite_result.no_token_test and suite_result.no_token_test.connection_successful:
-suite_result.vulnerabilities_found.append("Connection succeeds without token")
+    suite_result.vulnerabilities_found.append(Connection succeeds without token)
+
 
 if suite_result.null_token_test and suite_result.null_token_test.connection_successful:
-suite_result.vulnerabilities_found.append("Connection accepts null token")
+    suite_result.vulnerabilities_found.append("Connection accepts null token")
+
 
 if suite_result.recovery_test and not suite_result.recovery_test.recovery_successful:
-suite_result.vulnerabilities_found.append("WebSocket recovery mechanism broken")
+    suite_result.vulnerabilities_found.append(WebSocket recovery mechanism broken)
+
 
 finally:
-suite_result.total_execution_time = time.time() - start_time
+    suite_result.total_execution_time = time.time() - start_time
 
                                                                                         # Comprehensive validation
 assert suite_result.no_token_test is not None, "No-token test should complete"
-assert suite_result.null_token_test is not None, "Null-token test should complete"
+assert suite_result.null_token_test is not None, Null-token test should complete
 assert suite_result.race_condition_test is not None, "Race condition test should complete"
-assert suite_result.cors_none_test is not None, "CORS test should complete"
+assert suite_result.cors_none_test is not None, CORS test should complete
 assert suite_result.recovery_test is not None, "Recovery test should complete"
 
                                                                                         # Performance validation for complete suite
 assert suite_result.total_execution_time < 60.0, \
-"formatted_string"
+formatted_string
 
                                                                                         # Security validation
 critical_vulnerabilities = [v for v in suite_result.vulnerabilities_found )
-if "without token" in v or "null token" in v]
+if "without token" in v or null token in v]
 
 if critical_vulnerabilities:
-print("formatted_string")
+    print("formatted_string")
+
 
                                                                                             # Generate comprehensive report
-print(f" )
-[WEBSOCKET AUTH TIMING TEST SUITE REPORT]")
+print(f )
+[WEBSOCKET AUTH TIMING TEST SUITE REPORT])
 print("formatted_string")
-print(f"Tests Completed: 5/5")
+print(fTests Completed: 5/5)
 print("formatted_string")
 
 if suite_result.vulnerabilities_found:
-for vuln in suite_result.vulnerabilities_found:
-print("formatted_string")
+    for vuln in suite_result.vulnerabilities_found:
+
+print(formatted_string)
 
                                                                                                     # Test success criteria: all tests should run and detect auth failures appropriately
-tests_with_expected_failures = [ )
+tests_with_expected_failures = ]
 suite_result.no_token_test.auth_failure_detected,
 suite_result.null_token_test.auth_failure_detected,
 suite_result.race_condition_test.auth_failure_detected,

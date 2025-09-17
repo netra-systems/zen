@@ -136,12 +136,12 @@ class TestMasterOrchestrationController:
 
 @pytest.mark.asyncio
     async def test_agent_initialization(self, project_root, mock_config):
-"""Test initialization of all orchestration agents"""
+        """Test initialization of all orchestration agents"""
 pass
 controller = MasterOrchestrationController(mock_config)
 
 try:
-success = await controller.initialize_agents()
+    success = await controller.initialize_agents()
 assert success is True or success is False  # May fail due to dependencies
 
             # Check agent health states
@@ -152,17 +152,17 @@ assert "test_orchestrator" in controller.state.agent_health
 
             # Verify agent instances are created
 if success:
-assert controller.resource_manager is not None
+    assert controller.resource_manager is not None
 assert controller.progress_streamer is not None
 assert controller.layer_executor is not None
 assert controller.test_orchestrator is not None
 
 finally:
-await controller.shutdown()
+    await controller.shutdown()
 
 @pytest.mark.asyncio
     async def test_orchestration_status(self, project_root, mock_config):
-"""Test orchestration status reporting"""
+        """Test orchestration status reporting"""
 controller = MasterOrchestrationController(mock_config)
 
 try:
@@ -174,17 +174,17 @@ assert "agent_health" in status
 assert "start_time" in status
 
 finally:
-await controller.shutdown()
+    await controller.shutdown()
 
 @pytest.mark.asyncio
     async def test_fast_feedback_execution_mock(self, project_root, mock_config):
-"""Test fast feedback execution with mocked dependencies"""
+        """Test fast feedback execution with mocked dependencies"""
 pass
 controller = MasterOrchestrationController(mock_config)
 
                                     # Mock the layer executor to avoid real test execution
 with patch.object(controller, 'layer_executor') as mock_layer_executor:
-mock_layer_executor.execute_layer = AsyncMock(return_value={ ))
+    mock_layer_executor.execute_layer = AsyncMock(return_value={ ))
 "success": True,
 "duration": 45.2,
 "summary": { )
@@ -194,8 +194,8 @@ mock_layer_executor.execute_layer = AsyncMock(return_value={ ))
                                         
 
 with patch.object(controller, 'initialize_agents', return_value=True):
-try:
-execution_args = { )
+    try:
+        execution_args = { )
 "env": "test",
 "real_llm": False,
 "real_services": False,
@@ -211,7 +211,7 @@ assert results["success"] is True
 assert "summary" in results
 
 finally:
-await controller.shutdown()
+    await controller.shutdown()
 
 
 class TestControllerFactories:
@@ -323,10 +323,10 @@ class MockArgs:
 
 @pytest.mark.asyncio
     async def test_orchestration_mode_execution(self, mock_args):
-"""Test orchestration mode execution through CLI"""
+        """Test orchestration mode execution through CLI"""
         # Mock the controller creation and execution
 with patch('scripts.unified_test_runner.create_fast_feedback_controller') as mock_create_controller:
-websocket = TestWebSocketConnection()  # Real WebSocket implementation
+    websocket = TestWebSocketConnection()  # Real WebSocket implementation
 mock_controller.execute_orchestration = AsyncMock(return_value={ ))
 "success": True,
 "summary": { )
@@ -346,7 +346,7 @@ mock_controller.shutdown.assert_called_once()
 
 @pytest.mark.asyncio
     async def test_orchestration_status_command(self, mock_args):
-"""Test orchestration status command"""
+        """Test orchestration status command"""
 pass
 mock_args.orchestration_status = True
 
@@ -355,7 +355,7 @@ assert result == 0  # Status command should await asyncio.sleep(0)
 return success
 
 def test_cli_argument_parsing(self):
-"""Test that new CLI arguments are properly parsed"""
+    """Test that new CLI arguments are properly parsed"""
     # Test with orchestration arguments
 test_args = [ )
 "--use-layers",
@@ -428,7 +428,7 @@ class TestErrorHandlingAndRecovery:
 
 @pytest.mark.asyncio
     async def test_agent_initialization_failure(self):
-"""Test handling of agent initialization failures"""
+        """Test handling of agent initialization failures"""
 config = MasterOrchestrationConfig( )
 mode=OrchestrationMode.FAST_FEEDBACK,
 enable_progress_streaming=False,
@@ -439,16 +439,16 @@ controller = MasterOrchestrationController(config)
 
         # Mock agent initialization to fail
 with patch.object(controller, '_initialize_resource_manager', side_effect=Exception("Mock failure")):
-try:
-success = await controller.initialize_agents()
+    try:
+        success = await controller.initialize_agents()
                 # Should handle failure gracefully
 assert success is False
 finally:
-await controller.shutdown()
+    await controller.shutdown()
 
 @pytest.mark.asyncio
     async def test_execution_failure_handling(self):
-"""Test handling of execution failures"""
+        """Test handling of execution failures"""
 pass
 config = MasterOrchestrationConfig( )
 mode=OrchestrationMode.FAST_FEEDBACK,
@@ -459,11 +459,11 @@ controller = MasterOrchestrationController(config)
 
                         # Mock execution to fail
 with patch.object(controller, 'initialize_agents', return_value=True):
-with patch.object(controller, 'layer_executor') as mock_executor:
-mock_executor.execute_layer = AsyncMock(side_effect=Exception("Mock execution failure"))
+    with patch.object(controller, 'layer_executor') as mock_executor:
+        mock_executor.execute_layer = AsyncMock(side_effect=Exception("Mock execution failure"))
 
 try:
-execution_args = {"env": "test", "real_llm": False, "real_services": False}
+    execution_args = {"env": "test", "real_llm": False, "real_services": False}
 results = await controller.execute_orchestration( )
 execution_args=execution_args,
 layers=["fast_feedback"]
@@ -475,11 +475,11 @@ assert results["success"] is False
 assert "error" in results
 
 finally:
-await controller.shutdown()
+    await controller.shutdown()
 
 @pytest.mark.asyncio
     async def test_graceful_shutdown(self):
-"""Test graceful shutdown under various conditions"""
+        """Test graceful shutdown under various conditions"""
 config = MasterOrchestrationConfig( )
 mode=OrchestrationMode.FAST_FEEDBACK,
 graceful_shutdown_timeout=5
@@ -499,9 +499,9 @@ class TestPerformanceAndScaling:
 
 @pytest.mark.asyncio
     async def test_concurrent_controller_creation(self):
-"""Test creating multiple controllers concurrently"""
+        """Test creating multiple controllers concurrently"""
 async def create_controller():
-controller = create_fast_feedback_controller()
+    controller = create_fast_feedback_controller()
 await asyncio.sleep(0.1)  # Simulate some work
 await controller.shutdown()
 await asyncio.sleep(0)
@@ -513,11 +513,11 @@ results = await asyncio.gather(*tasks, return_exceptions=True)
 
     # All should succeed or fail gracefully
 for result in results:
-assert result is True or isinstance(result, Exception)
+    assert result is True or isinstance(result, Exception)
 
 @pytest.mark.asyncio
     async def test_resource_cleanup(self):
-"""Test that resources are properly cleaned up"""
+        """Test that resources are properly cleaned up"""
 pass
 config = MasterOrchestrationConfig( )
 mode=OrchestrationMode.FAST_FEEDBACK,
@@ -543,7 +543,7 @@ assert controller._monitoring_active is False
 
 
 def run_integration_tests():
-"""Run integration tests with proper configuration"""
+    """Run integration tests with proper configuration"""
     # Configure pytest with appropriate settings
 pytest_args = [ )
 __file__,
@@ -558,5 +558,5 @@ return pytest.main(pytest_args)
 
 
 if __name__ == "__main__":
-sys.exit(run_integration_tests())
+    sys.exit(run_integration_tests())
 pass

@@ -149,7 +149,7 @@ class TestAuthClientCrossServiceIntegration:
                     # COMMENTED OUT: Mock-dependent test -             assert health_response.status_code == 200
                     # COMMENTED OUT: Mock-dependent test -
 def test_cross_service_auth_token_storage_retrieval(self, service_discovery):
-"""Test cross-service auth token storage and retrieval."""
+    """Test cross-service auth token storage and retrieval."""
     # Test token was set in fixture
 token = service_discovery.get_cross_service_auth_token()
 assert token == "test-cross-service-token-123"
@@ -163,7 +163,7 @@ assert retrieved_token == new_token
 
 @pytest.mark.asyncio
     async def test_auth_client_circuit_breaker_with_cross_service(self, auth_client, mock_httpx_client):
-"""Test auth client circuit breaker works with cross-service calls."""
+        """Test auth client circuit breaker works with cross-service calls."""
 pass
         # Mock service failure
         # Mock: Async component isolation for testing without real async operations
@@ -204,7 +204,7 @@ assert result is not None  # Should not be None due to fallback
                     # COMMENTED OUT: Mock-dependent test -             mock_validate.assert_called_once()
                     # COMMENTED OUT: Mock-dependent test -
 def test_service_discovery_cors_integration_with_auth(self, service_discovery):
-"""Test service discovery CORS integration includes auth service."""
+    """Test service discovery CORS integration includes auth service."""
 origins = service_discovery.get_all_service_origins()
 
     # Should include auth service origins
@@ -212,7 +212,7 @@ assert 'http://localhost:8081' in origins
 assert 'http://localhost:8081/auth' in origins
 
 def test_auth_service_cors_metadata_registration(self, service_discovery):
-"""Test auth service can be registered with CORS metadata."""
+    """Test auth service can be registered with CORS metadata."""
 pass
 auth_service_info = { )
 'port': 8081,

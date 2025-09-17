@@ -135,7 +135,7 @@ class TestLandingPageAuthFlows:
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_landing_page_google_oauth_flow(self, auth_service, mock_oauth_response):
-"""Test complete Google OAuth flow from landing page."""
+        """Test complete Google OAuth flow from landing page."""
         # 1. User clicks "Sign in with Google" on landing page
 oauth_url = auth_service.get_google_oauth_url( )
 redirect_uri="https://staging.netrasystems.ai/auth/callback"
@@ -167,7 +167,7 @@ assert "refresh_token" in user_data
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_landing_page_jwt_validation_flow(self, auth_service, jwt_secret):
-"""Test JWT creation and validation for landing page auth."""
+        """Test JWT creation and validation for landing page auth."""
 pass
             # Create test user data
 user_data = { )
@@ -192,7 +192,7 @@ assert "iat" in decoded
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_landing_page_to_dashboard_flow(self, auth_service, user_service):
-"""Test complete flow from landing page to dashboard access."""
+        """Test complete flow from landing page to dashboard access."""
                 # 1. User arrives at landing page (unauthenticated)
 is_authenticated = await auth_service.check_authentication(token=None)
 assert is_authenticated is False
@@ -223,7 +223,7 @@ assert is_authorized is True
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_landing_page_multi_provider_flow(self, auth_service):
-"""Test authentication with multiple OAuth providers."""
+        """Test authentication with multiple OAuth providers."""
 pass
 providers = ["google", "github", "microsoft"]
 
@@ -236,11 +236,11 @@ redirect_uri="formatted_string"
 
                         # Verify correct provider URL
 if provider == "google":
-assert "accounts.google.com" in oauth_url
+    assert "accounts.google.com" in oauth_url
 elif provider == "github":
-assert "github.com/login/oauth" in oauth_url
+    assert "github.com/login/oauth" in oauth_url
 elif provider == "microsoft":
-assert "login.microsoftonline.com" in oauth_url
+    assert "login.microsoftonline.com" in oauth_url
 
                                     # Verify required parameters
 assert "client_id=" in oauth_url
@@ -250,7 +250,7 @@ assert "scope=" in oauth_url
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_landing_page_refresh_token_flow(self, auth_service, jwt_secret):
-"""Test refresh token flow for expired sessions."""
+        """Test refresh token flow for expired sessions."""
                                         # Create initial token with short expiry
 user_data = { )
 "user_id": "123456",
@@ -273,7 +273,7 @@ await asyncio.sleep(2)
 
                                         # Token should be expired
 with pytest.raises(jwt.ExpiredSignatureError):
-auth_service.validate_jwt_token(short_token, jwt_secret)
+    auth_service.validate_jwt_token(short_token, jwt_secret)
 
                                             # Use refresh token to get new access token
 refresh_token = auth_service.create_refresh_token(user_data, jwt_secret)
@@ -286,7 +286,7 @@ assert decoded["user_id"] == user_data["user_id"]
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_landing_page_logout_flow(self, auth_service, user_service):
-"""Test logout flow from authenticated state."""
+        """Test logout flow from authenticated state."""
 pass
                                                 # Create authenticated session
 user_data = { )
@@ -309,7 +309,7 @@ assert is_active is False
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_landing_page_remember_me_flow(self, auth_service):
-"""Test 'Remember Me' functionality for persistent sessions."""
+        """Test 'Remember Me' functionality for persistent sessions."""
 user_data = { )
 "user_id": "123456",
 "email": "test@example.com"
@@ -340,7 +340,7 @@ assert expiry_diff >= 29  # At least 29 days difference
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_landing_page_first_time_user_flow(self, auth_service, user_service):
-"""Test first-time user registration and onboarding flow."""
+        """Test first-time user registration and onboarding flow."""
 pass
                                                         # New user OAuth data
 new_user_data = { )
@@ -371,7 +371,7 @@ assert user["redirect_to"] == "/onboarding"
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_landing_page_returning_user_flow(self, auth_service, user_service):
-"""Test returning user authentication flow."""
+        """Test returning user authentication flow."""
                                                             # Existing user data
 existing_user_data = { )
 "user_id": "existing_user_123",

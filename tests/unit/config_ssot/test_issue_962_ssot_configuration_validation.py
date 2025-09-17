@@ -168,7 +168,7 @@ class TestIssue962SSotConfigurationValidation(SSotBaseTestCase):
         except Exception as e:
             pytest.fail(f"SSOT FUNCTIONALITY FAILURE: SSOT configuration not working: {e}")
 
-    def _check_file_for_base_imports(self, file_path: Path) -> List[Tuple[str, str]]:
+    def _check_file_for_base_imports(self, file_path: Path, root_path: Path) -> List[Tuple[str, str]]:
         """Check a file for forbidden base configuration imports."""
         violations = []
 
@@ -186,13 +186,13 @@ class TestIssue962SSotConfigurationValidation(SSotBaseTestCase):
                             "netra_backend.app.core.configuration.base" in node.module):
                             # Found forbidden import
                             import_line = f"from {node.module} import {', '.join([alias.name for alias in node.names])}"
-                            violations.append((str(file_path.relative_to(self.netra_backend_root)), import_line))
+                            violations.append((str(file_path.relative_to(root_path)), import_line))
 
             except SyntaxError:
                 # File has syntax errors, skip AST parsing and use string matching
                 for line_num, line in enumerate(content.splitlines(), 1):
                     if "from netra_backend.app.core.configuration.base import" in line:
-                        violations.append((str(file_path.relative_to(self.netra_backend_root)), line.strip()))
+                        violations.append((str(file_path.relative_to(root_path)), line.strip()))
 
         except Exception:
             # Skip files that can't be read
