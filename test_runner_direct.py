@@ -10,6 +10,7 @@ import asyncio
 import traceback
 import time
 from pathlib import Path
+from shared.isolated_environment import IsolatedEnvironment
 
 # Setup project path
 project_root = Path(__file__).parent
@@ -18,9 +19,10 @@ sys.path.insert(0, str(project_root))
 def setup_environment():
     """Setup test environment for staging execution"""
     
-    # Ensure staging environment is set
-    os.environ["ENVIRONMENT"] = "staging"
-    os.environ["PYTEST_CURRENT_TEST"] = "test_runner_direct"
+    # Ensure staging environment is set using SSOT IsolatedEnvironment
+    env = IsolatedEnvironment()
+    env.set("ENVIRONMENT", "staging", "test_runner_direct")
+    env.set("PYTEST_CURRENT_TEST", "test_runner_direct", "test_runner_direct")
     
     # Load staging configuration if available
     staging_env_file = project_root / "config" / "staging.env"
@@ -35,8 +37,8 @@ def setup_environment():
                     key, value = line.split('=', 1)
                     key = key.strip()
                     value = value.strip().strip('"').strip("'")
-                    if key not in os.environ:
-                        os.environ[key] = value
+                    if not env.get(key):
+                        env.set(key, value, "staging_env_file")
     
     print("✅ Environment configured for staging testing")
 
