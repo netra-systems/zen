@@ -15,7 +15,7 @@ import os
 import logging
 import threading
 import time
-from typing import Dict, List, Optional, Set, Tuple, Any
+from typing import Dict, List, Optional, Set, Tuple, Any, Callable
 from enum import Enum
 from dataclasses import dataclass
 from datetime import datetime
@@ -53,6 +53,8 @@ class ConfigRule:
     # Legacy support fields
     legacy_info: Optional['LegacyConfigInfo'] = None
     replacement_vars: Optional[List[str]] = None
+    # Service-specific filtering
+    service_filter: Optional[Callable[[Callable[[str, str], Optional[str]]], bool]] = None
 
 
 @dataclass
@@ -171,6 +173,51 @@ class LegacyConfigMarker:
         """Check if a legacy variable can be auto-constructed from components."""
         config = cls.LEGACY_VARIABLES.get(legacy_var, {})
         return config.get("auto_construct", False)
+
+
+def _is_backend_service(env_getter: Callable[[str, str], Optional[str]]) -> bool:
+    """
+    Check if the current service is the backend service.
+
+    Auth service doesn't need AI/LLM capabilities (GEMINI_API_KEY).
+    Only backend service requires it for agent operations.
+    """
+    # Check K_SERVICE (Cloud Run service name) - this is most reliable
+    k_service = env_getter("K_SERVICE", "")
+    if k_service:
+        # Service names in Cloud Run
+        if "auth" in k_service.lower():
+            return False
+        if "backend" in k_service.lower():
+            return True
+
+    # Check import context - if auth_service module is imported, it's auth service
+    import sys
+    if 'auth_service' in sys.modules or 'auth_service.main' in sys.modules:
+        return False
+    if 'netra_backend' in sys.modules or 'netra_backend.app' in sys.modules:
+        return True
+
+    # Check working directory
+    import os
+    cwd = os.getcwd()
+    if 'auth_service' in cwd:
+        return False
+    if 'netra_backend' in cwd:
+        return True
+
+    # Check SERVICE_ID as last resort (currently both services share same ID - bug)
+    service_id = env_getter("SERVICE_ID", "")
+    if service_id:
+        # Currently both use "netra-backend" so this is unreliable
+        # Only use if it explicitly says "auth"
+        if "auth" in service_id.lower() and "backend" not in service_id.lower():
+            return False
+
+    # Default to False for auth service safety
+    # Auth service doesn't need GEMINI_API_KEY, so safer to not require it
+    # Backend will have K_SERVICE set properly
+    return k_service != "" and "backend" in k_service.lower()
 
 
 class CentralConfigurationValidator:
@@ -295,7 +342,9 @@ class CentralConfigurationValidator:
             environments={Environment.STAGING, Environment.PRODUCTION},
             min_length=10,
             forbidden_values={"", "your-api-key", "AIzaSy-placeholder"},
-            error_message="GEMINI_API_KEY required in staging/production. Cannot be placeholder value."
+            error_message="GEMINI_API_KEY required in staging/production. Cannot be placeholder value.",
+            # Only required for backend service - auth service doesn't need AI/LLM capabilities
+            service_filter=lambda env: _is_backend_service(env)
         ),
         
         # OAuth Configuration (HIGH PRIORITY) - SSOT for all environments
@@ -747,8 +796,14 @@ class CentralConfigurationValidator:
     
     def _validate_single_requirement(self, rule: ConfigRule, environment: Environment) -> None:
         """Validate a single configuration requirement."""
+        # Check service filter if present
+        if rule.service_filter and not rule.service_filter(self.env_getter):
+            # This rule doesn't apply to the current service, skip it
+            logger.debug(f"Skipping {rule.env_var} validation - not required for this service")
+            return
+
         value = self.env_getter(rule.env_var)
-        
+
         # CRITICAL FIX: Enhanced JWT secret validation
         # The central validator MUST detect missing JWT secrets properly
         # NOTE: Legacy fallback removed to enforce strict environment-specific JWT secrets

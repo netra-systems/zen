@@ -30,9 +30,34 @@ _setup_paths()
 # NOW import shared modules after paths are set
 from shared.isolated_environment import get_env
 from netra_backend.app.core.project_utils import get_project_root as _get_project_root
-from netra_backend.app.core.environment_context.cloud_environment_detector import (
-    get_cloud_environment_detector, CloudPlatform
-)
+
+# CRITICAL: Import CloudEnvironmentDetector with comprehensive error handling
+try:
+    from netra_backend.app.core.environment_context.cloud_environment_detector import (
+        get_cloud_environment_detector, CloudPlatform
+    )
+except ImportError as e:
+    import sys
+    print(f"CRITICAL IMPORT ERROR: CloudEnvironmentDetector import failed: {e}", file=sys.stderr)
+    print(f"Python path: {sys.path}", file=sys.stderr)
+    print(f"Current working directory: {Path.cwd()}", file=sys.stderr)
+    print(f"Module file location: {__file__}", file=sys.stderr)
+
+    # Try to provide more diagnostic information
+    try:
+        import netra_backend.app.core.environment_context
+        print(f"environment_context package found: {netra_backend.app.core.environment_context}", file=sys.stderr)
+
+        import os
+        detector_path = Path(__file__).parent / "core" / "environment_context" / "cloud_environment_detector.py"
+        print(f"CloudEnvironmentDetector file exists: {detector_path.exists()}", file=sys.stderr)
+        if detector_path.exists():
+            print(f"File size: {detector_path.stat().st_size} bytes", file=sys.stderr)
+    except Exception as diag_error:
+        print(f"Diagnostic information gathering failed: {diag_error}", file=sys.stderr)
+
+    # Re-raise the original import error to fail startup cleanly
+    raise RuntimeError(f"CRITICAL: CloudEnvironmentDetector import failed in startup_module.py: {e}") from e
 
 from fastapi import FastAPI
 
