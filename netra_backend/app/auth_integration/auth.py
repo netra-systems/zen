@@ -25,6 +25,7 @@ See: CRITICAL_AUTH_ARCHITECTURE.md for full details
 # Create auth-specific logger
 import logging
 import time
+from collections import defaultdict
 from datetime import timedelta
 from typing import Annotated, Dict, Optional, Any
 
@@ -1014,151 +1015,8 @@ auth_manager = BackendAuthIntegration()
 # Backward compatibility alias for integration tests
 AuthIntegrationService = BackendAuthIntegration  # Tests expect this name
 
-# Export auth_manager for Issue #485 compatibility
-__all__ = [
-    "auth_client",
-    "get_current_user",
-    "get_optional_user",
-    "get_auth_client",
-    "get_auth_handler",  # Deployment compatibility alias
-    "generate_access_token",
-    "BackendAuthIntegration",
-    "AuthValidationResult",
-    "TokenRefreshResult",
-    "auth_manager",  # Issue #485 fix: Missing import
-    "unified_auth_client",  # Issue #762 Phase 2: Backward compatibility alias
-    "AuthIntegrationService",  # Backward compatibility for tests
-    "check_auth_service_health"  # P0 Action 4: Auth service health check
-]
-
-# Issue #762 Phase 2 Remediation: Add backward compatibility alias
-unified_auth_client = auth_client
-
-# Deployment compatibility alias for get_auth_handler
-get_auth_handler = get_auth_client
-                    valid=False,
-                    error="invalid_authorization_header",
-                    user_id=None,
-                    email=None
-                )
-            
-            token = authorization_header.split("Bearer ")[1].strip()
-            
-            # Use auth interface if available (for advanced testing)
-            if self.auth_interface:
-                verification = await self.auth_interface.verify_jwt_token(token)
-                if verification.valid:
-                    return AuthValidationResult(
-                        valid=True,
-                        user_id=verification.user_id,
-                        email=verification.claims.get("email"),
-                        claims=verification.claims
-                    )
-                else:
-                    return AuthValidationResult(
-                        valid=False,
-                        error=verification.error,
-                        user_id=None,
-                        email=None
-                    )
-            
-            # Use standard auth client (production path)
-            validation_result = await self.auth_client.validate_token_jwt(token)
-            
-            if validation_result and validation_result.get("valid"):
-                return AuthValidationResult(
-                    valid=True,
-                    user_id=validation_result.get("user_id"),
-                    email=validation_result.get("email"),
-                    claims=validation_result
-                )
-            else:
-                return AuthValidationResult(
-                    valid=False,
-                    error="token_validation_failed",
-                    user_id=None,
-                    email=None
-                )
-                
-        except Exception as e:
-            logger.error(f"Token validation error: {e}")
-            return AuthValidationResult(
-                valid=False,
-                error=f"validation_exception: {str(e)}",
-                user_id=None,
-                email=None
-            )
-    
-    async def refresh_user_token(self, refresh_token: str):
-        """
-        Refresh a user's access token using refresh token.
-        
-        Args:
-            refresh_token: The refresh token to use
-            
-        Returns:
-            Token refresh result with new tokens
-        """
-        try:
-            # Use auth interface if available (for advanced testing)
-            if self.auth_interface:
-                refresh_result = await self.auth_interface.refresh_access_token(refresh_token)
-                return TokenRefreshResult(
-                    success=refresh_result.success,
-                    new_access_token=refresh_result.new_access_token if refresh_result.success else None,
-                    new_refresh_token=refresh_result.new_refresh_token if refresh_result.success else None,
-                    error=refresh_result.error if not refresh_result.success else None
-                )
-            
-            # Use auth client for production
-            # Note: This would require implementing refresh_token method in AuthServiceClient
-            # For now, return a placeholder implementation
-            logger.warning("Token refresh not implemented in production auth client - this is a test integration feature")
-            return TokenRefreshResult(
-                success=False,
-                new_access_token=None,
-                new_refresh_token=None,
-                error="refresh_not_implemented_in_production"
-            )
-            
-        except Exception as e:
-            logger.error(f"Token refresh error: {e}")
-            return TokenRefreshResult(
-                success=False,
-                new_access_token=None,
-                new_refresh_token=None,
-                error=f"refresh_exception: {str(e)}"
-            )
-
-
-class AuthValidationResult:
-    """Result of authentication token validation"""
-    
-    def __init__(self, valid: bool, user_id: str = None, email: str = None, 
-                 claims: Dict = None, error: str = None):
-        self.valid = valid
-        self.user_id = user_id
-        self.email = email
-        self.claims = claims or {}
-        self.error = error
-
-
-class TokenRefreshResult:
-    """Result of token refresh operation"""
-    
-    def __init__(self, success: bool, new_access_token: str = None, 
-                 new_refresh_token: str = None, error: str = None):
-        self.success = success
-        self.new_access_token = new_access_token
-        self.new_refresh_token = new_refresh_token
-        self.error = error
-
-
-# Issue #485 fix: Create auth_manager instance for test infrastructure access
-auth_manager = BackendAuthIntegration()
-
-# Backward compatibility alias for integration tests
-AuthIntegrationService = BackendAuthIntegration  # Tests expect this name
+# Issue #1176 Phase 3: AuthService alias for import compatibility
+AuthService = BackendAuthIntegration  # Alias for expected AuthService import
 
 # Export auth_manager for Issue #485 compatibility
 __all__ = [
@@ -1169,6 +1027,7 @@ __all__ = [
     "get_auth_handler",  # Deployment compatibility alias
     "generate_access_token",
     "BackendAuthIntegration",
+    "AuthService",  # Issue #1176 Phase 3: Add AuthService to exports
     "AuthValidationResult",
     "TokenRefreshResult",
     "auth_manager",  # Issue #485 fix: Missing import

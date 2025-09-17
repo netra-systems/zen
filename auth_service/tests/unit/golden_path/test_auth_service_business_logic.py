@@ -19,6 +19,9 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional
 from unittest.mock import Mock, MagicMock, patch
 
+# Import SSOT base test case
+from test_framework.ssot.base_test_case import SSotBaseTestCase
+
 # Import auth service business logic components
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.models.auth_models import User, UserCreate, UserLogin, TokenResponse
@@ -26,7 +29,7 @@ from auth_service.auth_core.database.repository import AuthUserRepository
 
 
 @pytest.mark.unit
-class AuthServiceBusinessLogicTests:
+class AuthServiceBusinessLogicTests(SSotBaseTestCase):
     """Test auth service core business logic for golden path scenarios."""
 
     def test_user_registration_business_rules(self):
@@ -386,7 +389,7 @@ class AuthServiceBusinessLogicTests:
 
 
 @pytest.mark.unit  
-class AuthServiceErrorHandlingBusinessContinuityTests:
+class AuthServiceErrorHandlingBusinessContinuityTests(SSotBaseTestCase):
     """Test auth service error handling maintains business continuity."""
 
     def test_database_unavailable_business_fallback(self):
