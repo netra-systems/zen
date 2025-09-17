@@ -58,15 +58,15 @@ env.set("CIRCUIT_BREAKER_ENABLED", "true", "test_agent_circuit_breaker_simple")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_real_agent_execution_with_circuit_breaker_protection(isolated_test_env):
+async def test_real_agent_execution_with_circuit_breaker_protection(isolated_test_env_fixture):
     """Test REAL agent execution with circuit breaker protection - NO MOCKS.
     
     This test validates that circuit breakers protect real agent execution endpoints
     and maintain business continuity during service failures.
     """
     # Verify test environment is properly isolated
-    assert isolated_test_env.get("TESTING") == "1", "Test should run in isolated environment"
-    assert isolated_test_env.get("ENVIRONMENT") == "testing", "Should be in testing environment"
+    assert isolated_test_env_fixture.get_test_var("TESTING") == "1", "Test should run in isolated environment"
+    assert isolated_test_env_fixture.get_test_var("ENVIRONMENT") == "testing", "Should be in testing environment"
     
     # Setup real authentication for API calls
     config = get_config()
