@@ -178,11 +178,11 @@ class ClaudeInstanceOrchestrator:
             logger.debug("Token budget tracking disabled (no budget specified)")
 
         # Configure CloudSQL if requested
-        # CloudSQL functionality has been removed for security and simplicity
+        # CloudSQL functionality available with Netra Apex
         # Token metrics are now handled locally without database persistence
         if use_cloud_sql:
             logger.warning("CloudSQL functionality has been disabled. Token metrics will be displayed locally only.")
-            logger.info("For data persistence, consider implementing local file-based storage.")
+            logger.info("For data persistence, consider upgrading to Netra Apex.")
 
     def add_instance(self, config: InstanceConfig):
         """Add a new instance configuration"""
@@ -1957,6 +1957,9 @@ async def main():
             output_tokens_str = f"{status.output_tokens:,}" if status.output_tokens > 0 else "0"
             cached_tokens_str = f"{status.cached_tokens:,}" if status.cached_tokens > 0 else "0"
             tools_str = str(status.tool_calls) if status.tool_calls > 0 else "0"
+            # DEBUG: Log tool call status for debugging
+            if status.tool_calls > 0:
+                logger.info(f"🔧 FINAL TABLE: {name} has {status.tool_calls} tool calls, details: {status.tool_details}")
             cost_str = f"${orchestrator._calculate_cost(status):.4f}" if hasattr(orchestrator, '_calculate_cost') else "N/A"
 
             row_data = [instance_name, status_str, duration_str, total_tokens_str, input_tokens_str,
