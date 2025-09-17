@@ -2,7 +2,7 @@
   "instances": [
     {
       "command": "/gitcommitgardener; gruop and commit",
-      "name": "git-commit-gardener",
+      "name": "/gitcommitgardener",
       "description": "Maintains git commit hygiene and standards",
       "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
       "permission_mode": "acceptEdits",
