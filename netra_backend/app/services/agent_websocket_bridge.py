@@ -180,11 +180,56 @@ class AgentWebSocketBridge(MonitorableComponent):
     @property
     def user_id(self) -> Optional[str]:
         """User ID property for backward compatibility with tests and AgentWebSocketBridge interface.
-        
+
         Returns user_id from user_context if available, None otherwise.
         This property provides compatibility for code expecting a direct user_id attribute.
         """
         return self.user_context.user_id if self.user_context else None
+
+    def configure(self, connection_pool=None, agent_registry=None, health_monitor=None) -> None:
+        """Configure the WebSocket bridge with runtime dependencies.
+
+        This method allows post-initialization configuration of the bridge with
+        external dependencies like connection pools, agent registries, and health monitors.
+        This supports the factory pattern used in smd.py and dependencies.py.
+
+        Args:
+            connection_pool: WebSocket connection pool for managing connections
+            agent_registry: Agent registry for agent lifecycle management
+            health_monitor: Health monitor for tracking bridge health status
+        """
+        if connection_pool is not None:
+            self.connection_pool = connection_pool
+            logger.debug(
+                f"[U+2699][U+FE0F] WEBSOCKET_BRIDGE_CONFIG: Connection pool configured for bridge. "
+                f"User_context: {self.user_context.user_id[:8] if self.user_context else 'system'}..., "
+                f"Business_context: Connection pooling ready for reliable WebSocket management"
+            )
+
+        if agent_registry is not None:
+            self.agent_registry = agent_registry
+            logger.debug(
+                f"[U+2699][U+FE0F] WEBSOCKET_BRIDGE_CONFIG: Agent registry configured for bridge. "
+                f"User_context: {self.user_context.user_id[:8] if self.user_context else 'system'}..., "
+                f"Business_context: Agent coordination ready for event-driven execution"
+            )
+
+        if health_monitor is not None:
+            self.health_monitor = health_monitor
+            logger.debug(
+                f"[U+2699][U+FE0F] WEBSOCKET_BRIDGE_CONFIG: Health monitor configured for bridge. "
+                f"User_context: {self.user_context.user_id[:8] if self.user_context else 'system'}..., "
+                f"Business_context: Health monitoring ready for proactive issue detection"
+            )
+
+        logger.info(
+            f"[U+2713] WEBSOCKET_BRIDGE_CONFIGURED: Agent WebSocket bridge configuration complete. "
+            f"Components: connection_pool={connection_pool is not None}, "
+            f"agent_registry={agent_registry is not None}, "
+            f"health_monitor={health_monitor is not None}, "
+            f"Business_context: Bridge ready for reliable agent-WebSocket integration"
+        )
+
     def _initialize_configuration(self) -> None:
         """Initialize bridge configuration."""
         self.config = IntegrationConfig()
