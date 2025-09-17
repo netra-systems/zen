@@ -66,7 +66,7 @@ def require_docker_services() -> None:
 
 
 def require_docker_services_smart() -> None:
-    Smart Docker services requirement with Windows Docker bypass and mock WebSocket server support.
+    """Smart Docker services requirement with Windows Docker bypass and mock WebSocket server support.
 
     ENHANCED for Issue #860: Windows WebSocket connection failure resolution.
     Business Impact: Protects $500K+ ARR validation coverage with Windows development support.
@@ -80,7 +80,7 @@ def require_docker_services_smart() -> None:
     6. Load staging configuration from .env.staging.e2e
     7. Validate staging environment health with proper URLs
     8. Configure test environment for staging/mock validation with all 5 WebSocket events
-""
+    """
     import platform
 
     try:
