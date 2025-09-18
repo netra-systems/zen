@@ -89,19 +89,19 @@ class Issue450RedisImportPatternBaseline(SSotAsyncTestCase):
 
             # Validate count matches issue description (55+ files)
             if len(files_found) < 55:
-                print(f"⚠️  Found {len(files_found)} files, expected 55+")
+                print(f"WARNING️  Found {len(files_found)} files, expected 55+")
             else:
-                print(f"✅ Found {len(files_found)} files, matches issue scope")
+                print(f"CHECK Found {len(files_found)} files, matches issue scope")
 
             return files_found
 
         except Exception as e:
-            print(f"❌ Failed to scan for deprecated imports: {e}")
+            print(f"X Failed to scan for deprecated imports: {e}")
             return []
 
     def test_ssot_redis_import_accessibility(self):
         """Validate SSOT Redis import is accessible and functional."""
-        print("\n✅ Testing SSOT Redis import accessibility...")
+        print("\nCHECK Testing SSOT Redis import accessibility...")
 
         try:
             # Test import works
@@ -109,7 +109,7 @@ class Issue450RedisImportPatternBaseline(SSotAsyncTestCase):
 
             # Validate it's the correct type
             self.assertIsNotNone(redis_manager, "Redis manager should not be None")
-            print(f"✅ SSOT Redis import successful: {type(redis_manager).__name__}")
+            print(f"CHECK SSOT Redis import successful: {type(redis_manager).__name__}")
 
             # Test basic functionality (if possible without environment setup)
             self.assertTrue(hasattr(redis_manager, 'get_client'),
@@ -118,11 +118,11 @@ class Issue450RedisImportPatternBaseline(SSotAsyncTestCase):
             return True
 
         except ImportError as e:
-            print(f"❌ SSOT Redis import failed: {e}")
+            print(f"X SSOT Redis import failed: {e}")
             return False
         except Exception as e:
             # Non-critical errors (like missing environment variables) are acceptable
-            print(f"⚠️  SSOT import works but environment issue: {e}")
+            print(f"WARNING️  SSOT import works but environment issue: {e}")
             return True
 
     def test_measure_test_collection_performance_baseline(self):
@@ -175,18 +175,18 @@ class Issue450RedisImportPatternBaseline(SSotAsyncTestCase):
 
             # Validate reasonable performance (should be under 2 minutes for now)
             if collection_time > 120:
-                print(f"⚠️  WARNING: Test collection time ({collection_time:.2f}s) exceeds 120s")
+                print(f"WARNING️  WARNING: Test collection time ({collection_time:.2f}s) exceeds 120s")
                 print("    This confirms Issue #489 performance problem")
             else:
-                print(f"✅ Test collection performance acceptable: {collection_time:.2f}s")
+                print(f"CHECK Test collection performance acceptable: {collection_time:.2f}s")
 
             return collection_time, collected_count
 
         except subprocess.TimeoutExpired:
-            print("❌ Test collection timed out after 3 minutes - confirms Issue #489")
+            print("X Test collection timed out after 3 minutes - confirms Issue #489")
             return 180.0, 0
         except Exception as e:
-            print(f"❌ Test collection measurement failed: {e}")
+            print(f"X Test collection measurement failed: {e}")
             return None, 0
 
     def test_mission_critical_redis_tests_baseline(self):
@@ -200,7 +200,7 @@ class Issue450RedisImportPatternBaseline(SSotAsyncTestCase):
             test_path = project_root / test_file
 
             if not test_path.exists():
-                print(f"⚠️  Test file not found: {test_file}")
+                print(f"WARNING️  Test file not found: {test_file}")
                 continue
 
             print(f"🧪 Testing: {test_file}")
@@ -216,10 +216,10 @@ class Issue450RedisImportPatternBaseline(SSotAsyncTestCase):
                 )
 
                 if result.returncode == 0:
-                    print(f"✅ PASS: {test_file}")
+                    print(f"CHECK PASS: {test_file}")
                     passing_tests.append(test_file)
                 else:
-                    print(f"❌ FAIL: {test_file}")
+                    print(f"X FAIL: {test_file}")
                     if result.stderr:
                         print(f"   Error: {result.stderr[:200]}...")
                     failing_tests.append(test_file)
@@ -232,8 +232,8 @@ class Issue450RedisImportPatternBaseline(SSotAsyncTestCase):
                 failing_tests.append(test_file)
 
         print(f"\n📊 Mission Critical Test Results:")
-        print(f"   ✅ Passing: {len(passing_tests)}")
-        print(f"   ❌ Failing: {len(failing_tests)}")
+        print(f"   CHECK Passing: {len(passing_tests)}")
+        print(f"   X Failing: {len(failing_tests)}")
 
         # Store baseline results
         self.baseline_passing_tests = passing_tests
@@ -263,7 +263,7 @@ class Issue450RedisImportPatternBaseline(SSotAsyncTestCase):
             feasible = False
 
         if collection_time and collection_time > 120:
-            print(f"✅ Confirms Issue #489: Test collection slow ({collection_time:.2f}s)")
+            print(f"CHECK Confirms Issue #489: Test collection slow ({collection_time:.2f}s)")
 
         if len(passing_tests) == 0:
             issues.append("No mission critical tests passing - high risk migration")
@@ -271,19 +271,19 @@ class Issue450RedisImportPatternBaseline(SSotAsyncTestCase):
         # Generate migration report
         print(f"\n📋 MIGRATION FEASIBILITY REPORT:")
         print(f"   🎯 Files to migrate: {len(deprecated_files)}")
-        print(f"   ✅ SSOT import accessible: {ssot_accessible}")
+        print(f"   CHECK SSOT import accessible: {ssot_accessible}")
         print(f"   ⏱️  Current collection time: {collection_time:.2f}s" if collection_time else "   ⏱️  Collection time: Not measured")
         print(f"   🧪 Baseline tests passing: {len(passing_tests)}")
         print(f"   📊 Migration feasible: {'YES' if feasible else 'NO'}")
 
         if issues:
-            print(f"   ⚠️  Issues identified:")
+            print(f"   WARNING️  Issues identified:")
             for issue in issues:
                 print(f"      - {issue}")
 
         # Check migration is feasible
         if not feasible:
-            print(f"❌ Migration not feasible due to: {issues}")
+            print(f"X Migration not feasible due to: {issues}")
 
         print(f"\n🚀 READY FOR REDIS IMPORT PATTERN MIGRATION!")
 
@@ -310,9 +310,9 @@ if __name__ == "__main__":
 
     try:
         result = test_case.test_validate_migration_feasibility()
-        print("\n✅ Baseline validation complete!")
+        print("\nCHECK Baseline validation complete!")
         print(f"📊 Migration feasibility: {result['feasible']}")
 
     except Exception as e:
-        print(f"\n❌ Baseline validation failed: {e}")
+        print(f"\nX Baseline validation failed: {e}")
         sys.exit(1)

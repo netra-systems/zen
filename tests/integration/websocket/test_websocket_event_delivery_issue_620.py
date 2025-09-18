@@ -120,8 +120,8 @@ class WebSocketEventDeliveryIssue620Tests(BaseIntegrationTest):
         for critical_event in self.CRITICAL_EVENTS:
             assert critical_event in event_types, f"Critical WebSocket event missing: {critical_event}"
         
-        print(f"✅ UserExecutionEngine delivered all {len(self.CRITICAL_EVENTS)} critical WebSocket events")
-        print(f"   Events delivered: {' → '.join(event_types)}")
+        print(f"CHECK UserExecutionEngine delivered all {len(self.CRITICAL_EVENTS)} critical WebSocket events")
+        print(f"   Events delivered: {' -> '.join(event_types)}")
         
         return captured_events
     
@@ -203,7 +203,7 @@ class WebSocketEventDeliveryIssue620Tests(BaseIntegrationTest):
             method = getattr(engine.websocket_bridge, method_name)
             assert callable(method), f"{method_name} should be callable"
         
-        print("✅ Issue #565 compatibility bridge preserves WebSocket event delivery capabilities")
+        print("CHECK Issue #565 compatibility bridge preserves WebSocket event delivery capabilities")
         
         return engine
     
@@ -298,8 +298,8 @@ class WebSocketEventDeliveryIssue620Tests(BaseIntegrationTest):
         timestamp_deltas = [timestamps[i+1] - timestamps[i] for i in range(len(timestamps)-1)]
         assert all(delta.total_seconds() >= 0 for delta in timestamp_deltas), "Timestamps should be increasing"
         
-        print("✅ WebSocket events delivered in correct sequence with proper timing")
-        print(f"   Sequence: {' → '.join(event_types)}")
+        print("CHECK WebSocket events delivered in correct sequence with proper timing")
+        print(f"   Sequence: {' -> '.join(event_types)}")
         
         return event_sequence
     
@@ -445,8 +445,8 @@ class WebSocketEventDeliveryIssue620Tests(BaseIntegrationTest):
                 assert event['agent_name'] == "triage_agent"
                 assert event['final_result']['success'] is True
         
-        print("✅ WebSocket events contain required content and proper structure")
-        print("✅ All events include user context for proper isolation")
+        print("CHECK WebSocket events contain required content and proper structure")
+        print("CHECK All events include user context for proper isolation")
         
         return captured_events
     
@@ -543,7 +543,7 @@ class WebSocketEventDeliveryIssue620Tests(BaseIntegrationTest):
         assert 'agent_started' in error_types, "Should have agent_started error"
         assert 'tool_executing' in error_types, "Should have tool_executing error"
         
-        print("✅ WebSocket event delivery handles errors gracefully")
+        print("CHECK WebSocket event delivery handles errors gracefully")
         print(f"   Errors handled: {len(error_events)}, Successes: {len(success_events)}")
         
         return {'errors': error_events, 'successes': success_events}
@@ -640,9 +640,9 @@ class WebSocketEventDeliveryIssue620Tests(BaseIntegrationTest):
         assert any(user1_content), "User 1 should have user 1 specific content"
         assert any(user2_content), "User 2 should have user 2 specific content"
         
-        print("✅ WebSocket events properly isolated between users")
+        print("CHECK WebSocket events properly isolated between users")
         print(f"   User 1 events: {len(user1_events)}, User 2 events: {len(user2_events)}")
-        print("✅ No cross-user contamination detected")
+        print("CHECK No cross-user contamination detected")
         
         return {'user1_events': user1_events, 'user2_events': user2_events}
 
@@ -671,7 +671,7 @@ class WebSocketEventValidationRegressionPreventionTests(BaseIntegrationTest):
             method = getattr(AgentWebSocketBridge, method_name)
             assert callable(method), f"{method_name} should be callable"
         
-        print("✅ AgentWebSocketBridge has all required methods for Golden Path")
+        print("CHECK AgentWebSocketBridge has all required methods for Golden Path")
         
         return required_methods
     
@@ -746,7 +746,7 @@ class WebSocketEventValidationRegressionPreventionTests(BaseIntegrationTest):
         for event in new_style_events:
             assert len(event['kwargs']) > 0, "New style calls should have additional kwargs"
         
-        print("✅ WebSocket events maintain backwards compatibility")
+        print("CHECK WebSocket events maintain backwards compatibility")
         print(f"   Old style calls: {len(old_style_events)}, New style calls: {len(new_style_events)}")
         
         return bridge.received_events
@@ -762,45 +762,45 @@ if __name__ == "__main__":
         try:
             # Test SSOT WebSocket event delivery
             events = await test_instance.test_websocket_events_delivered_via_user_execution_engine()
-            print(f"✅ SSOT WebSocket events test: {len(events)} events captured")
+            print(f"CHECK SSOT WebSocket events test: {len(events)} events captured")
             
         except Exception as e:
-            print(f"⚠️  SSOT WebSocket test failed: {e}")
+            print(f"WARNING️  SSOT WebSocket test failed: {e}")
         
         try:
             # Test compatibility bridge
             engine = await test_instance.test_websocket_events_delivered_via_compatibility_bridge()
-            print("✅ Compatibility bridge WebSocket test passed")
+            print("CHECK Compatibility bridge WebSocket test passed")
             
         except Exception as e:
-            print(f"⚠️  Compatibility bridge test failed: {e}")
+            print(f"WARNING️  Compatibility bridge test failed: {e}")
         
         try:
             # Test event sequence
             sequence = await test_instance.test_websocket_event_sequence_validation()
-            print(f"✅ Event sequence test: {len(sequence)} events in correct order")
+            print(f"CHECK Event sequence test: {len(sequence)} events in correct order")
             
         except Exception as e:
-            print(f"⚠️  Event sequence test failed: {e}")
+            print(f"WARNING️  Event sequence test failed: {e}")
         
         try:
             # Test user isolation
             isolation_result = await test_instance.test_websocket_event_user_isolation()
             user1_count = len(isolation_result['user1_events'])
             user2_count = len(isolation_result['user2_events'])
-            print(f"✅ User isolation test: User1={user1_count}, User2={user2_count} events")
+            print(f"CHECK User isolation test: User1={user1_count}, User2={user2_count} events")
             
         except Exception as e:
-            print(f"⚠️  User isolation test failed: {e}")
+            print(f"WARNING️  User isolation test failed: {e}")
         
         print("\n" + "="*80)
         print("📊 WEBSOCKET EVENT DELIVERY TEST SUMMARY")
         print("="*80)
-        print("✅ WebSocket event delivery test suite created and functional")
-        print("✅ Tests cover all 5 critical Golden Path events")
-        print("✅ SSOT UserExecutionEngine and compatibility bridge both tested")
-        print("✅ Event sequence, content validation, and user isolation covered")
-        print("✅ Error handling and backwards compatibility tested")
+        print("CHECK WebSocket event delivery test suite created and functional")
+        print("CHECK Tests cover all 5 critical Golden Path events")
+        print("CHECK SSOT UserExecutionEngine and compatibility bridge both tested")
+        print("CHECK Event sequence, content validation, and user isolation covered")
+        print("CHECK Error handling and backwards compatibility tested")
         print("📈 Ready to validate WebSocket functionality for Issue #620")
         
     if __name__ == "__main__":

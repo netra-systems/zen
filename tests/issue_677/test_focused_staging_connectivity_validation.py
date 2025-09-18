@@ -65,27 +65,27 @@ class FocusedStagingConnectivityValidationTests(SSotAsyncTestCase):
                     response_time = time.time() - start_time
                     status_code = response.status
                     if status_code == 200:
-                        logger.info(f'✅ STAGING HEALTHY: Status {status_code}, Response time: {response_time:.2f}s')
+                        logger.info(f'CHECK STAGING HEALTHY: Status {status_code}, Response time: {response_time:.2f}s')
                         health_data = await response.text()
                         logger.info(f'Health response: {health_data[:200]}...')
                         assert True, 'Staging environment is healthy and accessible'
                     elif status_code == 503:
-                        logger.warning(f'⚠️  STAGING UNAVAILABLE: Status 503 - Service Unavailable, Response time: {response_time:.2f}s')
+                        logger.warning(f'WARNING️  STAGING UNAVAILABLE: Status 503 - Service Unavailable, Response time: {response_time:.2f}s')
                         response_text = await response.text()
                         logger.warning(f'503 Response: {response_text[:200]}...')
                         pytest.skip(f'Staging environment unavailable (Status 503) - confirms Issue #677 root cause')
                     else:
-                        logger.warning(f'⚠️  STAGING UNEXPECTED STATUS: {status_code}, Response time: {response_time:.2f}s')
+                        logger.warning(f'WARNING️  STAGING UNEXPECTED STATUS: {status_code}, Response time: {response_time:.2f}s')
                         response_text = await response.text()
                         logger.warning(f'Unexpected response: {response_text[:200]}...')
                         pytest.skip(f'Staging environment returning unexpected status: {status_code}')
             except asyncio.TimeoutError:
                 response_time = time.time() - start_time
-                logger.error(f'❌ STAGING TIMEOUT: Health check timeout after {response_time:.2f}s')
+                logger.error(f'X STAGING TIMEOUT: Health check timeout after {response_time:.2f}s')
                 pytest.skip(f'Staging environment timeout - confirms Issue #677 connectivity issues')
             except aiohttp.ClientError as e:
                 response_time = time.time() - start_time
-                logger.error(f'❌ STAGING CONNECTION ERROR: {e}, Time: {response_time:.2f}s')
+                logger.error(f'X STAGING CONNECTION ERROR: {e}, Time: {response_time:.2f}s')
                 pytest.skip(f'Staging environment connection error: {e}')
 
     @pytest.mark.unit
@@ -118,12 +118,12 @@ class FocusedStagingConnectivityValidationTests(SSotAsyncTestCase):
         assert adjusted_execution_pass, f"Adjusted execution threshold should pass: {avg_execution_time:.2f}s <= {self.adjusted_sla_thresholds['execution_max_seconds']}s"
         threshold_fixes = []
         if not original_connection_pass:
-            threshold_fixes.append(f"Connection: {self.current_sla_thresholds['connection_max_seconds']}s → {self.adjusted_sla_thresholds['connection_max_seconds']}s")
+            threshold_fixes.append(f"Connection: {self.current_sla_thresholds['connection_max_seconds']}s -> {self.adjusted_sla_thresholds['connection_max_seconds']}s")
         if not original_first_event_pass:
-            threshold_fixes.append(f"First Event: {self.current_sla_thresholds['first_event_max_seconds']}s → {self.adjusted_sla_thresholds['first_event_max_seconds']}s")
+            threshold_fixes.append(f"First Event: {self.current_sla_thresholds['first_event_max_seconds']}s -> {self.adjusted_sla_thresholds['first_event_max_seconds']}s")
         if not original_execution_pass:
-            threshold_fixes.append(f"Execution: {self.current_sla_thresholds['execution_max_seconds']}s → {self.adjusted_sla_thresholds['execution_max_seconds']}s")
-        logger.info(f'✅ RESOLUTION VALIDATED: Threshold adjustments would resolve Issue #677')
+            threshold_fixes.append(f"Execution: {self.current_sla_thresholds['execution_max_seconds']}s -> {self.adjusted_sla_thresholds['execution_max_seconds']}s")
+        logger.info(f'CHECK RESOLUTION VALIDATED: Threshold adjustments would resolve Issue #677')
         logger.info(f'Required adjustments: {threshold_fixes}')
 
     @pytest.mark.integration
@@ -144,19 +144,19 @@ class FocusedStagingConnectivityValidationTests(SSotAsyncTestCase):
                     response_time = time.time() - start_time
                     status_code = response.status
                     if status_code == 200:
-                        logger.info(f'✅ WEBSOCKET ENDPOINT ACCESSIBLE: Status {status_code}, Response time: {response_time:.2f}s')
+                        logger.info(f'CHECK WEBSOCKET ENDPOINT ACCESSIBLE: Status {status_code}, Response time: {response_time:.2f}s')
                         assert True, 'WebSocket endpoint domain is accessible'
                     elif status_code == 503:
-                        logger.warning(f'⚠️  WEBSOCKET ENDPOINT UNAVAILABLE: Status 503 - Service Unavailable')
+                        logger.warning(f'WARNING️  WEBSOCKET ENDPOINT UNAVAILABLE: Status 503 - Service Unavailable')
                         pytest.skip(f'WebSocket endpoint service unavailable (Status 503)')
                     else:
-                        logger.warning(f'⚠️  WEBSOCKET ENDPOINT STATUS: {status_code}')
+                        logger.warning(f'WARNING️  WEBSOCKET ENDPOINT STATUS: {status_code}')
                         pytest.skip(f'WebSocket endpoint returning status: {status_code}')
             except asyncio.TimeoutError:
-                logger.error(f'❌ WEBSOCKET ENDPOINT TIMEOUT: Timeout after {time.time() - start_time:.2f}s')
+                logger.error(f'X WEBSOCKET ENDPOINT TIMEOUT: Timeout after {time.time() - start_time:.2f}s')
                 pytest.skip(f'WebSocket endpoint timeout - infrastructure issue')
             except aiohttp.ClientError as e:
-                logger.error(f'❌ WEBSOCKET ENDPOINT ERROR: {e}')
+                logger.error(f'X WEBSOCKET ENDPOINT ERROR: {e}')
                 pytest.skip(f'WebSocket endpoint connection error: {e}')
 
     @pytest.mark.integration
@@ -176,22 +176,22 @@ class FocusedStagingConnectivityValidationTests(SSotAsyncTestCase):
                     response_time = time.time() - start_time
                     status_code = response.status
                     if status_code == 200:
-                        logger.info(f'✅ AUTH SERVICE HEALTHY: Status {status_code}, Response time: {response_time:.2f}s')
+                        logger.info(f'CHECK AUTH SERVICE HEALTHY: Status {status_code}, Response time: {response_time:.2f}s')
                         assert True, 'Authentication service is accessible and healthy'
                     elif status_code in [401, 403]:
-                        logger.info(f'✅ AUTH SERVICE RUNNING: Status {status_code} (expected for health endpoint)')
+                        logger.info(f'CHECK AUTH SERVICE RUNNING: Status {status_code} (expected for health endpoint)')
                         assert True, 'Authentication service is running'
                     elif status_code == 503:
-                        logger.warning(f'⚠️  AUTH SERVICE UNAVAILABLE: Status 503 - Service Unavailable')
+                        logger.warning(f'WARNING️  AUTH SERVICE UNAVAILABLE: Status 503 - Service Unavailable')
                         pytest.skip(f'Authentication service unavailable (Status 503)')
                     else:
-                        logger.warning(f'⚠️  AUTH SERVICE STATUS: {status_code}')
+                        logger.warning(f'WARNING️  AUTH SERVICE STATUS: {status_code}')
                         pytest.skip(f'Authentication service returning unexpected status: {status_code}')
             except asyncio.TimeoutError:
-                logger.error(f'❌ AUTH SERVICE TIMEOUT: Timeout after {time.time() - start_time:.2f}s')
+                logger.error(f'X AUTH SERVICE TIMEOUT: Timeout after {time.time() - start_time:.2f}s')
                 pytest.skip(f'Authentication service timeout - infrastructure issue')
             except aiohttp.ClientError as e:
-                logger.error(f'❌ AUTH SERVICE ERROR: {e}')
+                logger.error(f'X AUTH SERVICE ERROR: {e}')
                 pytest.skip(f'Authentication service connection error: {e}')
 
     @pytest.mark.unit
@@ -218,7 +218,7 @@ class FocusedStagingConnectivityValidationTests(SSotAsyncTestCase):
         resolution_options = root_cause_analysis['resolution_options']
         assert len(resolution_options) >= 3, 'Should have multiple resolution options'
         recommended_option = max(resolution_options, key=lambda x: x['success_probability'] * (1 if x['effort'] == 'Minimal' else 0.8 if x['effort'] == 'Low' else 0.5))
-        logger.info(f"✅ ROOT CAUSE CONFIRMED: {root_cause_analysis['primary_cause']}")
+        logger.info(f"CHECK ROOT CAUSE CONFIRMED: {root_cause_analysis['primary_cause']}")
         logger.info(f"📊 RECOMMENDED RESOLUTION: {recommended_option['option']} - {recommended_option['description']}")
         logger.info(f"🎯 SUCCESS PROBABILITY: {recommended_option['success_probability']:.0%}, EFFORT: {recommended_option['effort']}")
         assert recommended_option['success_probability'] >= 0.9, 'Recommended resolution should have high success probability'

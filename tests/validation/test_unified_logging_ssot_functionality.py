@@ -47,7 +47,7 @@ class TestUnifiedLoggingSSOTFunctionality(SSotBaseTestCase):
             logger.info("SSOT logging test message")
             logger.debug("SSOT debug test message")
 
-            print("✅ SSOT unified logging functionality confirmed")
+            print("CHECK SSOT unified logging functionality confirmed")
 
         except ImportError as e:
             pytest.skip(f"SSOT unified logging not yet implemented: {e}")
@@ -76,7 +76,7 @@ class TestUnifiedLoggingSSOTFunctionality(SSotBaseTestCase):
                 for method in required_methods:
                     assert hasattr(logger, method), f"Logger missing {method} method"
 
-            print("✅ SSOT unified logging interface consistency confirmed")
+            print("CHECK SSOT unified logging interface consistency confirmed")
 
         except ImportError:
             pytest.skip("SSOT unified logging not yet implemented")
@@ -102,7 +102,7 @@ class TestUnifiedLoggingSSOTFunctionality(SSotBaseTestCase):
             assert hasattr(logger, 'level'), "Logger should have level property"
             assert hasattr(logger, 'handlers'), "Logger should have handlers property"
 
-            print("✅ SSOT unified logging configuration confirmed")
+            print("CHECK SSOT unified logging configuration confirmed")
 
         except ImportError:
             pytest.skip("SSOT unified logging not yet implemented")
@@ -129,7 +129,7 @@ class TestUnifiedLoggingSSOTFunctionality(SSotBaseTestCase):
             websocket_logger.error("WebSocket connection failed")
 
             # Verify all operations succeeded without exceptions
-            print("✅ SSOT unified logging WebSocket integration confirmed")
+            print("CHECK SSOT unified logging WebSocket integration confirmed")
 
         except ImportError:
             pytest.skip("SSOT unified logging not yet implemented")

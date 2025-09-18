@@ -75,7 +75,7 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
                 fChat functionality requires complete routing interface.
             )
         
-        self.logger.info(✓ Canonical MessageRouter found and has required interface")"
+        self.logger.info(CHECK Canonical MessageRouter found and has required interface")"
 
     def test_agent_compatibility_import(self):
         Verify the compatibility import works correctly."
@@ -96,8 +96,8 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
         except ImportError as e:
             self.fail(fCOMPATIBILITY IMPORT BROKEN: {e})
         
-        self.logger.info(✓ Agent compatibility import working correctly)"
-        self.logger.info(✓ Agent compatibility import working correctly)""
+        self.logger.info(CHECK Agent compatibility import working correctly)"
+        self.logger.info(CHECK Agent compatibility import working correctly)""
 
 
     def test_message_router_interface_works(self):
@@ -125,7 +125,7 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
         except Exception as e:
             self.fail(fROUTER INTERFACE ERROR: {e}")"
         
-        self.logger.info(✓ MessageRouter interface working correctly)
+        self.logger.info(CHECK MessageRouter interface working correctly)
 
     def test_no_duplicate_message_router_imports(self):
         ""Verify no imports try to use old/duplicate MessageRouter locations.""
@@ -171,7 +171,7 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
                 (\n  ... if len(duplicate_imports) > 10 else ")"
             )
         
-        self.logger.info(✓ No duplicate MessageRouter imports detected)
+        self.logger.info(CHECK No duplicate MessageRouter imports detected)
 
     def test_websocket_integration_uses_correct_router(self):
         Test that WebSocket integration uses the correct MessageRouter.""
@@ -195,7 +195,7 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
         except Exception as e:
             self.fail(fWEBSOCKET INTEGRATION ERROR: {e})
         
-        self.logger.info(✓ WebSocket integration using correct router")"
+        self.logger.info(CHECK WebSocket integration using correct router")"
 
     def test_no_competing_message_router_classes(self):
         Test that no competing MessageRouter class definitions exist."
@@ -265,8 +265,8 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
                 fGolden Path requires canonical router.
             )
         
-        self.logger.info(✓ Only canonical MessageRouter class exists)"
-        self.logger.info(✓ Only canonical MessageRouter class exists)""
+        self.logger.info(CHECK Only canonical MessageRouter class exists)"
+        self.logger.info(CHECK Only canonical MessageRouter class exists)""
 
 
     def _should_skip_file(self, file_path: Path) -> bool:

@@ -461,11 +461,11 @@ class Issue1181GoldenPathMessageRoutingE2ETests(BaseE2ETest):
     def _document_golden_path_success(self, events: List[Dict[str, Any]], response: Dict[str, Any]) -> None:
         """Document Golden Path success metrics."""
         print(f"\n--- Golden Path Success Validation ---")
-        print(f"✅ WebSocket Events Delivered: {len(events)}")
-        print(f"✅ AI Response Received: {'Yes' if response else 'No'}")
-        print(f"✅ Golden Path Status: OPERATIONAL")
-        print(f"✅ Business Value: Chat functionality delivering AI insights")
-        print(f"✅ Message Routing: Consolidated router supporting Golden Path")
+        print(f"CHECK WebSocket Events Delivered: {len(events)}")
+        print(f"CHECK AI Response Received: {'Yes' if response else 'No'}")
+        print(f"CHECK Golden Path Status: OPERATIONAL")
+        print(f"CHECK Business Value: Chat functionality delivering AI insights")
+        print(f"CHECK Message Routing: Consolidated router supporting Golden Path")
 
     def _document_event_delivery_validation(self, results: Dict[str, Any]) -> None:
         """Document event delivery validation results."""
@@ -474,12 +474,12 @@ class Issue1181GoldenPathMessageRoutingE2ETests(BaseE2ETest):
         print(f"Delivered Events: {results['delivered_events']}")
         if results['missing_events']:
             print(f"Missing Events: {results['missing_events']}")
-        print(f"All Critical Events Delivered: {'✅' if results['all_critical_events_delivered'] else '❌'}")
+        print(f"All Critical Events Delivered: {'CHECK' if results['all_critical_events_delivered'] else 'X'}")
 
     def _document_user_isolation_validation(self, results: Dict[str, Any]) -> None:
         """Document user isolation validation results."""
         print(f"\n--- User Isolation Validation ---")
-        print(f"Isolation Maintained: {'✅' if results['isolation_maintained'] else '❌'}")
+        print(f"Isolation Maintained: {'CHECK' if results['isolation_maintained'] else 'X'}")
         print(f"User 1 Events: {results['user1_event_count']}")
         print(f"User 2 Events: {results['user2_event_count']}")
         if results['violations']:
@@ -497,7 +497,7 @@ class Issue1181GoldenPathMessageRoutingE2ETests(BaseE2ETest):
         print(f"Success Rate: {success_rate:.1f}%")
         
         for result in results:
-            status = "✅" if result["success"] else "❌"
+            status = "CHECK" if result["success"] else "X"
             print(f"  {status} {result['scenario']}")
             if not result["success"]:
                 print(f"    Error: {result.get('error', 'Unknown')}")

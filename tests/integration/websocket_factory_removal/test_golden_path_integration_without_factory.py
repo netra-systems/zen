@@ -2,7 +2,7 @@
 
 CRITICAL MISSION: End-to-end validation that Golden Path chat functionality works without factory.
 
-PURPOSE: Validate that the complete Golden Path user flow (login → AI responses)
+PURPOSE: Validate that the complete Golden Path user flow (login -> AI responses)
 continues to work correctly after WebSocket Manager Factory removal. This test
 protects $500K+ ARR by ensuring chat functionality remains operational.
 
@@ -64,7 +64,7 @@ class GoldenPathIntegrationWithoutFactoryTests(SSotAsyncTestCase):
                 self.assertIsNotNone(user_context)
                 self.assertEqual(user_context.user_id, self.test_user_id)
                 self.assertEqual(user_context.websocket_client_id, self.test_websocket_client_id)
-                logger.info('✅ Golden Path authentication flow successful without factory')
+                logger.info('CHECK Golden Path authentication flow successful without factory')
         except Exception as e:
             self.fail(f'GOLDEN PATH AUTH FAILURE: Authentication flow broken: {e}')
 
@@ -87,7 +87,7 @@ class GoldenPathIntegrationWithoutFactoryTests(SSotAsyncTestCase):
             critical_attributes = ['user_context', 'websocket_client_id']
             for attr in critical_attributes:
                 self.assertTrue(hasattr(websocket_manager, attr) or hasattr(websocket_manager.user_context, attr), f'Critical WebSocket attribute missing: {attr}')
-            logger.info('✅ Golden Path WebSocket initialization successful without factory')
+            logger.info('CHECK Golden Path WebSocket initialization successful without factory')
         except Exception as e:
             self.fail(f'WEBSOCKET INIT FAILURE: WebSocket initialization broken: {e}')
 
@@ -111,7 +111,7 @@ class GoldenPathIntegrationWithoutFactoryTests(SSotAsyncTestCase):
                 self.assertIn(component, execution_context, f'Missing critical execution component: {component}')
             self.assertEqual(execution_context['user_context'].user_id, self.test_user_id)
             self.assertEqual(execution_context['websocket_manager'].user_context.user_id, self.test_user_id)
-            logger.info('✅ Golden Path agent execution integration successful')
+            logger.info('CHECK Golden Path agent execution integration successful')
         except Exception as e:
             self.fail(f'AGENT INTEGRATION FAILURE: Agent execution integration broken: {e}')
 
@@ -144,7 +144,7 @@ class GoldenPathIntegrationWithoutFactoryTests(SSotAsyncTestCase):
                 self.assertEqual(event['user_id'], self.test_user_id)
                 self.assertEqual(event['websocket_client_id'], self.test_websocket_client_id)
                 self.assertIn(event['event_type'], critical_events)
-            logger.info('✅ Golden Path WebSocket events delivery successful')
+            logger.info('CHECK Golden Path WebSocket events delivery successful')
         except Exception as e:
             self.fail(f'WEBSOCKET EVENTS FAILURE: Event delivery broken: {e}')
 
@@ -152,8 +152,8 @@ class GoldenPathIntegrationWithoutFactoryTests(SSotAsyncTestCase):
         """
         TEST 4E: Validate complete Golden Path flow works without factory
         
-        Tests the complete end-to-end Golden Path flow: User authentication →
-        WebSocket connection → Agent execution → AI response delivery.
+        Tests the complete end-to-end Golden Path flow: User authentication ->
+        WebSocket connection -> Agent execution -> AI response delivery.
         """
         logger.info('Testing complete Golden Path end-to-end flow without factory...')
         try:
@@ -172,7 +172,7 @@ class GoldenPathIntegrationWithoutFactoryTests(SSotAsyncTestCase):
             self.assertEqual(flow_components['websocket_connection'].user_context.user_id, self.test_user_id)
             self.assertEqual(flow_components['agent_request']['user_id'], self.test_user_id)
             self.assertEqual(flow_components['ai_response']['user_id'], self.test_user_id)
-            logger.info('✅ Complete Golden Path end-to-end flow successful without factory')
+            logger.info('CHECK Complete Golden Path end-to-end flow successful without factory')
         except Exception as e:
             self.fail(f'END-TO-END FLOW FAILURE: Complete Golden Path broken: {e}')
 
@@ -203,7 +203,7 @@ class GoldenPathIntegrationWithoutFactoryTests(SSotAsyncTestCase):
                 user_id = session['user_context'].user_id
                 self.assertNotIn(user_id, user_ids, f'User ID collision detected: {user_id}')
                 user_ids.add(user_id)
-            logger.info(f'✅ Golden Path performance: {performance_time:.3f}s for 20 sessions')
+            logger.info(f'CHECK Golden Path performance: {performance_time:.3f}s for 20 sessions')
         except Exception as e:
             self.fail(f'PERFORMANCE TEST FAILURE: Golden Path performance degraded: {e}')
 if __name__ == '__main__':

@@ -63,7 +63,7 @@ async def test_nacis_core():
             model = cascade.get_model_for_task(task)
             print(f"  {task}: {model} ({expected})")
 
-        print("✓ PASS: Model Cascade working correctly")
+        print("CHECK PASS: Model Cascade working correctly")
 
     except Exception as e:
         print(f"✗ FAIL: Model Cascade error: {e}")
@@ -95,7 +95,7 @@ async def test_nacis_core():
             decision = "Use cache" if should_cache else "Compute new"
             print(f"  {intent} ({confidence}): {decision} ({description})")
 
-        print("✓ PASS: Confidence Manager working correctly")
+        print("CHECK PASS: Confidence Manager working correctly")
 
     except Exception as e:
         print(f"✗ FAIL: Confidence Manager error: {e}")
@@ -127,7 +127,7 @@ async def test_nacis_core():
             for step in plan.steps:
                 print(f"    - {step}")
 
-        print("✓ PASS: Execution Planner working correctly")
+        print("CHECK PASS: Execution Planner working correctly")
 
     except Exception as e:
         print(f"✗ FAIL: Execution Planner error: {e}")
@@ -163,7 +163,7 @@ async def test_nacis_core():
             if text != cleaned:
                 print(f"  Cleaned: \"{cleaned[:40]}...\"")
 
-        print("✓ PASS: Input Guardrails working correctly")
+        print("CHECK PASS: Input Guardrails working correctly")
 
     except Exception as e:
         print(f"✗ FAIL: Input Guardrails error: {e}")
@@ -215,7 +215,7 @@ async def test_nacis_core():
             print(f"  Score: {score:.2f}")
             print()
 
-        print("✓ PASS: Reliability Scorer working correctly")
+        print("CHECK PASS: Reliability Scorer working correctly")
 
     except Exception as e:
         print(f"✗ FAIL: Reliability Scorer error: {e}")
@@ -267,7 +267,7 @@ async def test_nacis_core():
             if result.get("disclaimers"):
                 print(f"  Disclaimers: {', '.join(result['disclaimers'])}")
 
-        print("✓ PASS: Output Validators working correctly")
+        print("CHECK PASS: Output Validators working correctly")
 
     except Exception as e:
         print(f"✗ FAIL: Output Validators error: {e}")
@@ -277,7 +277,7 @@ async def test_nacis_core():
     print("SUMMARY")
     print("="*60)
     print('''
-✓ PASS: NACIS Core Components Tested Successfully!
+CHECK PASS: NACIS Core Components Tested Successfully!
 
 Components Validated:
 1. Model Cascade (CLQT) - Working

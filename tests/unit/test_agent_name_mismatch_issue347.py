@@ -72,9 +72,9 @@ class AgentNameMismatchUnitTests(SSotAsyncTestCase):
         expected_registered_names = ["triage", "data", "optimization", "actions", "reporting"]
         for name in expected_registered_names:
             if name in registered_names:
-                print(f"✅ Agent '{name}' is registered as expected")
+                print(f"CHECK Agent '{name}' is registered as expected")
             else:
-                print(f"❌ Agent '{name}' is NOT registered (may cause issues)")
+                print(f"X Agent '{name}' is NOT registered (may cause issues)")
     
     async def test_apex_optimizer_name_expectation_fails(self):
         """Test 2: Demonstrate that expected names like 'apex_optimizer' fail.
@@ -132,12 +132,12 @@ class AgentNameMismatchUnitTests(SSotAsyncTestCase):
         for expected_name in database_expected_names:
             self.assertNotIn(expected_name, registered_names,
                            f"Database expects '{expected_name}' but it's not registered in agent registry")
-            print(f"❌ Mismatch: Database/tests expect '{expected_name}' but it's not in registry")
+            print(f"X Mismatch: Database/tests expect '{expected_name}' but it's not in registry")
         
         for actual_name in registry_actual_names:
             self.assertIn(actual_name, registered_names,
                          f"Registry correctly has '{actual_name}' but tests may not expect this name")
-            print(f"✅ Registry has '{actual_name}' but tests might look for different names")
+            print(f"CHECK Registry has '{actual_name}' but tests might look for different names")
         
         # This demonstrates the core issue: mismatch between expected and actual names
         print("\n🚨 Issue #347 Summary:")

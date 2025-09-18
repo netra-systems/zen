@@ -89,8 +89,8 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
             for module_path, class_name, source_file in non_canonical_factories
         ]
         
-        logger.warning(f❌ SSOT VIOLATION: Found {len(non_canonical_factories)} non-canonical factory classes)
-        logger.info(f✅ CANONICAL: Found {len(canonical_factories)} canonical factory classes")"
+        logger.warning(fX SSOT VIOLATION: Found {len(non_canonical_factories)} non-canonical factory classes)
+        logger.info(fCHECK CANONICAL: Found {len(canonical_factories)} canonical factory classes")"
         
         # Store detailed violation information
         for module_path, class_name, source_file in non_canonical_factories:
@@ -179,7 +179,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
     
     def test_validate_canonical_factory_accessibility(self):
         "Validate that canonical factory is accessible and properly configured - SHOULD PASS."
-        logger.info(✅ CANONICAL VALIDATION: Verifying canonical ExecutionEngineFactory accessibility")"
+        logger.info(CHECK CANONICAL VALIDATION: Verifying canonical ExecutionEngineFactory accessibility")"
         
         # Test canonical factory import
         try:
@@ -190,7 +190,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
             canonical_import_success = True
         except ImportError as e:
             canonical_import_success = False
-            logger.error(f❌ CANONICAL IMPORT FAILED: {e})
+            logger.error(fX CANONICAL IMPORT FAILED: {e})
         
         # Test factory function availability
         factory_function_available = False
@@ -198,18 +198,18 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
             try:
                 # Check if function exists and is callable
                 factory_function_available = callable(get_execution_engine_factory)
-                logger.info(f✅ CANONICAL FUNCTION: get_execution_engine_factory is callable)
+                logger.info(fCHECK CANONICAL FUNCTION: get_execution_engine_factory is callable)
             except Exception as e:
-                logger.error(f"❌ CANONICAL FUNCTION ERROR: {e})"
+                logger.error(f"X CANONICAL FUNCTION ERROR: {e})"
         
         # Test factory class availability
         factory_class_available = False
         if canonical_import_success:
             try:
                 factory_class_available = inspect.isclass(ExecutionEngineFactory)
-                logger.info(f✅ CANONICAL CLASS: ExecutionEngineFactory is available as class")"
+                logger.info(fCHECK CANONICAL CLASS: ExecutionEngineFactory is available as class")"
             except Exception as e:
-                logger.error(f❌ CANONICAL CLASS ERROR: {e})
+                logger.error(fX CANONICAL CLASS ERROR: {e})
         
         # This test should PASS - canonical factory should be accessible
         self.assertTrue(
@@ -231,7 +231,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
             fSSOT factory class required for proper instantiation.
         )
         
-        logger.info(✅ CANONICAL VALIDATION COMPLETE: ExecutionEngineFactory SSOT is accessible)
+        logger.info(CHECK CANONICAL VALIDATION COMPLETE: ExecutionEngineFactory SSOT is accessible)
     
     def test_comprehensive_factory_ssot_violation_report(self):
         "Generate comprehensive factory SSOT violation report - SHOULD INITIALLY FAIL."
@@ -266,7 +266,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         
         # Log detailed violations
         for i, violation in enumerate(self.ssot_factory_violations[:15], 1):
-            logger.info(f    {i:"2d"}. ❌ {violation}")"
+            logger.info(f    {i:"2d"}. X {violation}")"
         
         if len(self.ssot_factory_violations) > 15:
             logger.info(f    ... and {len(self.ssot_factory_violations) - 15} more factory violations)

@@ -137,7 +137,7 @@ class MultiUserIsolationValidationTests(SSotBaseIntegrationTest):
                     self.assertNotEqual(id(manager1), id(manager2),
                         f"WebSocket managers should have different object IDs")
 
-        print(f"✅ Successfully created {len(managers)} isolated WebSocket managers")
+        print(f"CHECK Successfully created {len(managers)} isolated WebSocket managers")
 
     def test_concurrent_user_context_isolation(self):
         """
@@ -196,7 +196,7 @@ class MultiUserIsolationValidationTests(SSotBaseIntegrationTest):
         self.assertEqual(len(set(thread_ids)), self.num_test_users,
             "Thread IDs should remain unique across concurrent operations")
 
-        print(f"✅ Concurrent user context isolation validated for {self.num_test_users} users")
+        print(f"CHECK Concurrent user context isolation validated for {self.num_test_users} users")
 
     def test_websocket_event_delivery_isolation(self):
         """
@@ -267,7 +267,7 @@ class MultiUserIsolationValidationTests(SSotBaseIntegrationTest):
                         if other_event_type in user_event_types:
                             self.fail(f"User {i} incorrectly received event {other_event_type} from another user")
 
-        print("✅ WebSocket event delivery isolation validated")
+        print("CHECK WebSocket event delivery isolation validated")
 
     def test_memory_isolation_prevention(self):
         """
@@ -328,7 +328,7 @@ class MultiUserIsolationValidationTests(SSotBaseIntegrationTest):
                     self.assertNotEqual(actual_data['user_id'], other_user_id,
                         f"Manager for {session.user_id} should not contain data for {other_user_id}")
 
-        print("✅ Memory and state isolation validated between users")
+        print("CHECK Memory and state isolation validated between users")
 
     def test_high_concurrency_isolation_stress(self):
         """
@@ -399,7 +399,7 @@ class MultiUserIsolationValidationTests(SSotBaseIntegrationTest):
         self.assertGreater(success_rate, 0.95,
             f"High concurrency success rate should be >95%, got {success_rate:.2%}")
 
-        print(f"✅ High concurrency isolation stress test passed: {successful_operations}/{total_operations} operations successful")
+        print(f"CHECK High concurrency isolation stress test passed: {successful_operations}/{total_operations} operations successful")
 
     def test_user_context_validation_integration(self):
         """
@@ -430,7 +430,7 @@ class MultiUserIsolationValidationTests(SSotBaseIntegrationTest):
                 if i != j:
                     self.assertIsNot(manager1, manager2)
 
-        print("✅ User context validation integration with SSOT helpers successful")
+        print("CHECK User context validation integration with SSOT helpers successful")
 
 
 if __name__ == '__main__':

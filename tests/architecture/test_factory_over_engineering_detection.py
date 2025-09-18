@@ -168,7 +168,7 @@ class FactoryOverEngineeringDetectionTests(SSotBaseTestCase):
         self.assertLess(
             len(discovered_files),
             20,
-            f"❌ OVER-ENGINEERING DETECTED: Found {len(discovered_files)} factory files. "
+            f"X OVER-ENGINEERING DETECTED: Found {len(discovered_files)} factory files. "
             f"Expected <20 for a healthy architecture. This demonstrates the scope of factory over-engineering."
         )
 
@@ -254,8 +254,8 @@ class FactoryOverEngineeringDetectionTests(SSotBaseTestCase):
                 continue
 
         print(f"\n📊 COMPLEXITY ANALYSIS RESULTS:")
-        print(f"  ✅ Simple factories: {len(complexity_analysis['simple'])}")
-        print(f"  ⚠️  Moderate factories: {len(complexity_analysis['moderate'])}")
+        print(f"  CHECK Simple factories: {len(complexity_analysis['simple'])}")
+        print(f"  WARNING️  Moderate factories: {len(complexity_analysis['moderate'])}")
         print(f"  🔴 Complex factories: {len(complexity_analysis['complex'])}")
         print(f"  💀 Over-engineered factories: {len(complexity_analysis['over_engineered'])}")
         print(f"  📈 Total factories analyzed: {total_factories}")
@@ -280,7 +280,7 @@ class FactoryOverEngineeringDetectionTests(SSotBaseTestCase):
         self.assertLessEqual(
             over_engineered_count,
             5,
-            f"❌ OVER-ENGINEERING DETECTED: Found {over_engineered_count} over-engineered factories. "
+            f"X OVER-ENGINEERING DETECTED: Found {over_engineered_count} over-engineered factories. "
             f"Expected ≤5 for healthy architecture. These factories are candidates for removal."
         )
 
@@ -331,7 +331,7 @@ class FactoryOverEngineeringDetectionTests(SSotBaseTestCase):
         self.assertLessEqual(
             len(single_use_candidates),
             3,
-            f"❌ SINGLE-USE OVER-ENGINEERING DETECTED: Found {len(single_use_candidates)} single-use factories. "
+            f"X SINGLE-USE OVER-ENGINEERING DETECTED: Found {len(single_use_candidates)} single-use factories. "
             f"Expected ≤3 for efficient architecture. These factories can be replaced with direct instantiation."
         )
 
@@ -371,14 +371,14 @@ class FactoryOverEngineeringDetectionTests(SSotBaseTestCase):
 
         print(f"📊 BUSINESS VALUE ANALYSIS:")
         print(f"  💼 Total factories analyzed: {len(all_factories)}")
-        print(f"  ❌ Unjustified factories: {len(unjustified_factories)}")
-        print(f"  ✅ Justified factories: {len(all_factories) - len(unjustified_factories)}")
+        print(f"  X Unjustified factories: {len(unjustified_factories)}")
+        print(f"  CHECK Justified factories: {len(all_factories) - len(unjustified_factories)}")
 
         print(f"\n🚨 FACTORIES WITHOUT CLEAR BUSINESS JUSTIFICATION:")
         for i, factory in enumerate(unjustified_factories[:12]):
             print(f"  {i+1}. {factory['class_name']} ({factory['file']})")
             print(f"     🎯 Business value score: {factory['business_value_score']}/10")
-            print(f"     ❌ Issues: {', '.join(factory['justification_issues'])}")
+            print(f"     X Issues: {', '.join(factory['justification_issues'])}")
 
         # Store for later phases
         self.over_engineering_candidates = unjustified_factories
@@ -387,7 +387,7 @@ class FactoryOverEngineeringDetectionTests(SSotBaseTestCase):
         self.assertLessEqual(
             len(unjustified_factories),
             5,
-            f"❌ BUSINESS VALUE GAP DETECTED: Found {len(unjustified_factories)} factories without clear business justification. "
+            f"X BUSINESS VALUE GAP DETECTED: Found {len(unjustified_factories)} factories without clear business justification. "
             f"Expected ≤5 for value-driven architecture. These factories are prime candidates for removal."
         )
 
@@ -432,7 +432,7 @@ class FactoryOverEngineeringDetectionTests(SSotBaseTestCase):
         print(f"  🗑️  Immediate removal: {len(removal_recommendations['immediate_removal'])}")
         print(f"  🔄 Consolidation candidates: {len(removal_recommendations['consolidation_candidates'])}")
         print(f"  ♻️  Refactor candidates: {len(removal_recommendations['refactor_candidates'])}")
-        print(f"  ✅ Preserve essential: {len(removal_recommendations['preserve_essential'])}")
+        print(f"  CHECK Preserve essential: {len(removal_recommendations['preserve_essential'])}")
 
         print(f"\n🗑️ IMMEDIATE REMOVAL CANDIDATES (Top 10):")
         for i, rec in enumerate(removal_recommendations['immediate_removal'][:10]):
@@ -463,7 +463,7 @@ class FactoryOverEngineeringDetectionTests(SSotBaseTestCase):
         self.assertGreaterEqual(
             total_removal_candidates,
             10,
-            f"✅ ACTIONABLE RECOMMENDATIONS: Found {total_removal_candidates} factories for removal/consolidation. "
+            f"CHECK ACTIONABLE RECOMMENDATIONS: Found {total_removal_candidates} factories for removal/consolidation. "
             f"This provides substantial architectural simplification opportunities."
         )
 

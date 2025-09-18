@@ -96,7 +96,7 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
         logger.info(f'Phase timeline: {phase_timeline}')
         if gaps:
             for gap in gaps:
-                logger.error(f'⚠️  Coordination gap: {gap}')
+                logger.error(f'WARNING️  Coordination gap: {gap}')
         self.assertTrue(coordination_exists, f'EXPECTED FAILURE: No coordination mechanism between startup manager and WebSocket. Found {len(gaps)} coordination gaps: {gaps}. This causes 1011 errors when clients connect before WebSocket is ready.')
 
     async def test_websocket_readiness_validation_integration(self):
@@ -134,7 +134,7 @@ class WebSocketStartupCoordinationTests(SSotAsyncTestCase):
         logger.info(f'Actual order: {dependency_order}')
         logger.info(f'Order violations: {len(order_violations)}')
         for violation in order_violations:
-            logger.error(f'⚠️  Order violation: {violation}')
+            logger.error(f'WARNING️  Order violation: {violation}')
         self.assertEqual(len(order_violations), 0, f'EXPECTED FAILURE: Dependencies not initialized in correct order. Found {len(order_violations)} violations: {order_violations}. This causes WebSocket initialization failures and 1011 errors.')
 
     async def test_health_check_websocket_integration(self):

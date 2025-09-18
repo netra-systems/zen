@@ -66,7 +66,7 @@ class AgentStatePersistenceE2ETests(BaseE2ETest):
             self.user_states[user.user_id] = {'conversation_history': [], 'agent_memory': {}, 'session_data': {}, 'persistent_context': {}}
             self.session_continuity[user.user_id] = {'sessions': [], 'cross_session_data': {}, 'state_transitions': []}
             self.state_persistence_logs[user.user_id] = []
-        self.logger.info(f'✅ PASS: State persistence test environment ready - {len(self.test_users)} users authenticated')
+        self.logger.info(f'CHECK PASS: State persistence test environment ready - {len(self.test_users)} users authenticated')
 
     async def test_cross_request_state_continuity(self):
         """
@@ -97,7 +97,7 @@ class AgentStatePersistenceE2ETests(BaseE2ETest):
         assert 'previous_session_data' in second_context or 'prior_context' in second_context, 'Second session missing reference to first'
         accumulated_items = third_context.get('accumulated_knowledge', [])
         assert len(accumulated_items) >= 2, f'Expected accumulated knowledge from multiple sessions, got {len(accumulated_items)}'
-        self.logger.info(f'✅ PASS: Cross-request state continuity validated successfully')
+        self.logger.info(f'CHECK PASS: Cross-request state continuity validated successfully')
         self.logger.info(f'📊 Sessions completed: {len(all_sessions)}')
         self.logger.info(f'🧠 Context evolution stages: {len(context_evolution)}')
         self.logger.info(f'📚 Accumulated knowledge items: {len(accumulated_items)}')
@@ -143,7 +143,7 @@ class AgentStatePersistenceE2ETests(BaseE2ETest):
         all_unique_secrets = [r['unique_data']['user_secret'] for r in isolation_results if isinstance(r, dict) and r.get('success')]
         unique_secrets_count = len(set(all_unique_secrets))
         assert unique_secrets_count == len(self.test_users), f'Expected {len(self.test_users)} unique secrets, got {unique_secrets_count}'
-        self.logger.info(f'✅ PASS: Multi-user state isolation validated successfully')
+        self.logger.info(f'CHECK PASS: Multi-user state isolation validated successfully')
         self.logger.info(f'👥 Users tested: {successful_users}')
         self.logger.info(f'🔒 Users with isolated state: {isolated_users}')
         self.logger.info(f'🚫 Cross-contamination detected: {contamination_detected} (MUST BE ZERO)')
@@ -186,10 +186,10 @@ class AgentStatePersistenceE2ETests(BaseE2ETest):
                 recovered_spend = recovered_metrics['cost_metrics'].get('monthly_spend', 0)
                 expected_spend = expected_metrics['cost_metrics'].get('monthly_spend', 0)
                 assert recovered_spend == expected_spend, f'Cost data integrity lost: {recovered_spend} != {expected_spend}'
-        self.logger.info(f'✅ PASS: State recovery after interruption validated successfully')
+        self.logger.info(f'CHECK PASS: State recovery after interruption validated successfully')
         self.logger.info(f'📊 Recovery completeness: {recovery_completeness * 100:.1f}%')
         self.logger.info(f'🔧 Components recovered: {len(recovered_components)}/{len(expected_components)}')
-        self.logger.info(f'✅ State integrity validated: {state_integrity_check}')
+        self.logger.info(f'CHECK State integrity validated: {state_integrity_check}')
 
     async def test_state_cleanup_and_memory_management(self):
         """
@@ -230,7 +230,7 @@ class AgentStatePersistenceE2ETests(BaseE2ETest):
         inaccessible_sessions = verification_data.get('inaccessible_sessions', [])
         inaccessible_rate = len(inaccessible_sessions) / len(session_ids[:3]) if len(session_ids) > 0 else 0
         assert inaccessible_rate >= 0.6, f'Expected at least 60% of sessions to be cleaned up, got {inaccessible_rate * 100:.1f}%'
-        self.logger.info(f'✅ PASS: State cleanup and memory management validated')
+        self.logger.info(f'CHECK PASS: State cleanup and memory management validated')
         self.logger.info(f"📊 Sessions created: {cleanup_metrics['sessions_created']}")
         self.logger.info(f"🧹 Sessions cleaned: {cleanup_metrics['sessions_cleaned']}")
         self.logger.info(f'💾 Memory reduction: {memory_reduction_percent:.1f}%' if 'memory_reduction_percent' in locals() else 'Memory tracking unavailable')

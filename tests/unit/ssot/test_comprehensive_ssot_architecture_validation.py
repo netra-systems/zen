@@ -479,7 +479,7 @@ class ComprehensiveSSOTArchitectureValidationTests(SSotAsyncTestCase):
 
         if compliance_failures:
             failure_message = [
-                f"❌ COMPREHENSIVE SSOT BRIDGE PATTERN VALIDATION FAILED ❌",
+                f"X COMPREHENSIVE SSOT BRIDGE PATTERN VALIDATION FAILED X",
                 f"",
                 f"Overall SSOT Compliance: {overall_score:.1f}% (Target: {self.compliance_targets['overall_ssot_compliance']}%)",
                 f"Total Violations Detected: {total_violations}",
@@ -492,14 +492,14 @@ class ComprehensiveSSOTArchitectureValidationTests(SSotAsyncTestCase):
             for dimension, score in dimension_scores.items():
                 target = self.ssot_validation_dimensions[dimension]["target_score"]
                 weight = self.ssot_validation_dimensions[dimension]["weight"]
-                status = "✅" if score >= target else "❌"
+                status = "CHECK" if score >= target else "X"
                 failure_message.append(f"{status} {dimension.replace('_', ' ').title()}: {score:.1f}% "
                                      f"(target: {target:.0f}%, weight: {weight:.0%})")
 
             failure_message.append(f"")
             failure_message.append(f"COMPLIANCE FAILURES:")
             for failure in compliance_failures:
-                failure_message.append(f"❌ {failure}")
+                failure_message.append(f"X {failure}")
 
             failure_message.append(f"")
             failure_message.append(f"VIOLATION ANALYSIS BY SEVERITY:")
@@ -521,10 +521,10 @@ class ComprehensiveSSOTArchitectureValidationTests(SSotAsyncTestCase):
                 failure_message.append(f"")
                 failure_message.append(f"AGENTS WITH DIRECT WEBSOCKET ACCESS:")
                 for agent_file in bridge_compliance["direct_access_violations"][:10]:  # Show first 10
-                    failure_message.append(f"   ❌ {agent_file}")
+                    failure_message.append(f"   X {agent_file}")
                 if len(bridge_compliance["direct_access_violations"]) > 10:
                     remaining = len(bridge_compliance["direct_access_violations"]) - 10
-                    failure_message.append(f"   ❌ ... and {remaining} more agents")
+                    failure_message.append(f"   X ... and {remaining} more agents")
 
             failure_message.extend([
                 f"",
@@ -570,10 +570,10 @@ class ComprehensiveSSOTArchitectureValidationTests(SSotAsyncTestCase):
         self.record_metric("comprehensive_ssot_compliance_achieved", True)
 
         print("🏆 COMPREHENSIVE SSOT BRIDGE PATTERN VALIDATION COMPLETE")
-        print(f"✅ Overall SSOT Compliance: {overall_score:.1f}%")
-        print(f"✅ Bridge Pattern Coverage: {dimension_scores['bridge_pattern_enforcement']:.1f}%")
-        print(f"✅ Total Violations: {total_violations}")
-        print("✅ All SSOT compliance targets achieved")
+        print(f"CHECK Overall SSOT Compliance: {overall_score:.1f}%")
+        print(f"CHECK Bridge Pattern Coverage: {dimension_scores['bridge_pattern_enforcement']:.1f}%")
+        print(f"CHECK Total Violations: {total_violations}")
+        print("CHECK All SSOT compliance targets achieved")
 
     def test_system_wide_websocket_ssot_architecture_integrity(self):
         """
@@ -625,7 +625,7 @@ class ComprehensiveSSOTArchitectureValidationTests(SSotAsyncTestCase):
 
         if overall_integrity_score < target_integrity_score or total_integrity_violations > 5:
             failure_message = [
-                f"❌ SYSTEM-WIDE WEBSOCKET SSOT ARCHITECTURE INTEGRITY FAILED ❌",
+                f"X SYSTEM-WIDE WEBSOCKET SSOT ARCHITECTURE INTEGRITY FAILED X",
                 f"",
                 f"Overall Architecture Integrity: {overall_integrity_score:.1f}% (Target: {target_integrity_score:.1f}%)",
                 f"Total Integrity Violations: {total_integrity_violations}",
@@ -636,16 +636,16 @@ class ComprehensiveSSOTArchitectureValidationTests(SSotAsyncTestCase):
             ]
 
             for check_name, score in integrity_scores.items():
-                status = "✅" if score >= 95.0 else "❌"
+                status = "CHECK" if score >= 95.0 else "X"
                 failure_message.append(f"{status} {check_name.replace('_', ' ').title()}: {score:.1f}%")
 
             if integrity_violations:
                 failure_message.append(f"")
                 failure_message.append(f"INTEGRITY VIOLATIONS:")
                 for violation in integrity_violations[:15]:  # Show first 15
-                    failure_message.append(f"❌ {violation}")
+                    failure_message.append(f"X {violation}")
                 if len(integrity_violations) > 15:
-                    failure_message.append(f"❌ ... and {len(integrity_violations) - 15} more violations")
+                    failure_message.append(f"X ... and {len(integrity_violations) - 15} more violations")
 
             failure_message.extend([
                 f"",
@@ -687,9 +687,9 @@ class ComprehensiveSSOTArchitectureValidationTests(SSotAsyncTestCase):
 
         # Success state
         self.record_metric("architecture_integrity_achieved", True)
-        print("✅ SYSTEM-WIDE WEBSOCKET SSOT ARCHITECTURE INTEGRITY ACHIEVED")
-        print(f"✅ Overall Integrity: {overall_integrity_score:.1f}%")
-        print(f"✅ Integrity Violations: {total_integrity_violations}")
+        print("CHECK SYSTEM-WIDE WEBSOCKET SSOT ARCHITECTURE INTEGRITY ACHIEVED")
+        print(f"CHECK Overall Integrity: {overall_integrity_score:.1f}%")
+        print(f"CHECK Integrity Violations: {total_integrity_violations}")
 
     def _validate_ssot_file_structure(self) -> Dict[str, Any]:
         """Validate SSOT file structure integrity."""
@@ -864,7 +864,7 @@ class ComprehensiveSSOTArchitectureValidationTests(SSotAsyncTestCase):
         # Master validation requirements (100% completion required)
         if master_validation_score < 100.0 or total_remaining_issues > 0:
             failure_message = [
-                f"❌ MASTER SSOT REMEDIATION VALIDATION FAILED ❌",
+                f"X MASTER SSOT REMEDIATION VALIDATION FAILED X",
                 f"",
                 f"Master Validation Score: {master_validation_score:.1f}% (Required: 100%)",
                 f"Passed Validations: {passed_validations}/{total_validations}",
@@ -876,16 +876,16 @@ class ComprehensiveSSOTArchitectureValidationTests(SSotAsyncTestCase):
             ]
 
             for validation_name, result in master_validation_checklist.items():
-                status = "✅ COMPLETE" if result["passed"] else "❌ INCOMPLETE"
+                status = "CHECK COMPLETE" if result["passed"] else "X INCOMPLETE"
                 failure_message.append(f"{status} {validation_name.replace('_', ' ').title()}")
 
             if remaining_issues:
                 failure_message.append(f"")
                 failure_message.append(f"REMAINING ISSUES TO RESOLVE:")
                 for issue in remaining_issues[:20]:  # Show first 20
-                    failure_message.append(f"❌ {issue}")
+                    failure_message.append(f"X {issue}")
                 if len(remaining_issues) > 20:
-                    failure_message.append(f"❌ ... and {len(remaining_issues) - 20} more issues")
+                    failure_message.append(f"X ... and {len(remaining_issues) - 20} more issues")
 
             failure_message.extend([
                 f"",
@@ -943,9 +943,9 @@ class ComprehensiveSSOTArchitectureValidationTests(SSotAsyncTestCase):
         self.record_metric("master_ssot_remediation_complete", True)
 
         print("🏆 MASTER SSOT REMEDIATION VALIDATION COMPLETE")
-        print(f"✅ Master Validation Score: {master_validation_score:.1f}%")
-        print(f"✅ All Validations Passed: {passed_validations}/{total_validations}")
-        print("✅ SSOT architecture remediation SUCCESS - Issue #1070 RESOLVED")
+        print(f"CHECK Master Validation Score: {master_validation_score:.1f}%")
+        print(f"CHECK All Validations Passed: {passed_validations}/{total_validations}")
+        print("CHECK SSOT architecture remediation SUCCESS - Issue #1070 RESOLVED")
 
     def _validate_bridge_pattern_completion(self) -> Dict[str, Any]:
         """Validate bridge pattern remediation completion."""

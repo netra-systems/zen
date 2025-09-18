@@ -24,13 +24,56 @@ import { motion } from 'framer-motion';
 
 const AdminPage: NextPage = () => {
   authService.useAuth(); // Authentication check only
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
 
   return (
     <AuthGuard>
       <div className="container mx-auto p-6 space-y-6">
         <AdminHeader />
-        <AdminQuickStats />
-        <AdminDashboard />
+
+        {/* Navigation Tabs */}
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'dashboard'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Shield className="w-4 h-4" />
+                <span>Dashboard</span>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('websocket-auth')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'websocket-auth'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Wifi className="w-4 h-4" />
+                <span>WebSocket Auth Monitor</span>
+              </div>
+            </button>
+          </nav>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'dashboard' && (
+          <>
+            <AdminQuickStats />
+            <AdminDashboard />
+          </>
+        )}
+
+        {activeTab === 'websocket-auth' && (
+          <WebSocketAuthMonitor />
+        )}
       </div>
     </AuthGuard>
   );

@@ -165,7 +165,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
         # Log violation breakdown for tracking
         self._log_mission_critical_violation_summary(production_violations)
 
-        self.assertLog(✅ MISSION CRITICAL: Production violation limits PASSED")"
+        self.assertLog(CHECK MISSION CRITICAL: Production violation limits PASSED")"
 
     def test_no_new_critical_violations(self):
         """
@@ -198,8 +198,8 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
             fNew violations: {[f'{v.file_path}:{v.line_number} - {v.description}' for v in new_violations]}
         )
 
-        self.assertLog(✅ MISSION CRITICAL: No new critical violations PASSED)"
-        self.assertLog(✅ MISSION CRITICAL: No new critical violations PASSED)""
+        self.assertLog(CHECK MISSION CRITICAL: No new critical violations PASSED)"
+        self.assertLog(CHECK MISSION CRITICAL: No new critical violations PASSED)""
 
 
     def test_websocket_factory_elimination_compliance(self):
@@ -237,8 +237,8 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
             fViolations: {[f'{v.file_path}:{v.line_number}' for v in production_factory_violations]}
         )
 
-        self.assertLog(✅ MISSION CRITICAL: WebSocket factory elimination PASSED)"
-        self.assertLog(✅ MISSION CRITICAL: WebSocket factory elimination PASSED)""
+        self.assertLog(CHECK MISSION CRITICAL: WebSocket factory elimination PASSED)"
+        self.assertLog(CHECK MISSION CRITICAL: WebSocket factory elimination PASSED)""
 
 
     def test_golden_path_import_compliance(self):
@@ -277,8 +277,8 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
             fViolations: {[f'{v.file_path}:{v.line_number}' for v in golden_path_violations]}
         )
 
-        self.assertLog(✅ MISSION CRITICAL: Golden Path import compliance PASSED)"
-        self.assertLog(✅ MISSION CRITICAL: Golden Path import compliance PASSED)""
+        self.assertLog(CHECK MISSION CRITICAL: Golden Path import compliance PASSED)"
+        self.assertLog(CHECK MISSION CRITICAL: Golden Path import compliance PASSED)""
 
 
     async def test_business_continuity_protection(self):
@@ -308,8 +308,8 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
                     continuity_failures.append(component)
                     self.assertLog(f🚨 Business continuity failure: {component})
                 else:
-                    self.assertLog(f✅ Business continuity OK: {component})"
-                    self.assertLog(f✅ Business continuity OK: {component})""
+                    self.assertLog(fCHECK Business continuity OK: {component})"
+                    self.assertLog(fCHECK Business continuity OK: {component})""
 
 
             except Exception as e:
@@ -324,7 +324,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
             fThis indicates SSOT changes broke critical functionality.
         )
 
-        self.assertLog(✅ MISSION CRITICAL: Business continuity protection PASSED)
+        self.assertLog(CHECK MISSION CRITICAL: Business continuity protection PASSED)
 
     def test_user_isolation_integrity(self):
     """"
@@ -351,7 +351,7 @@ class TestSSotProductionCompliance(SSotAsyncTestCase):
 
         )
 
-        self.assertLog(✅ MISSION CRITICAL: User isolation integrity PASSED)
+        self.assertLog(CHECK MISSION CRITICAL: User isolation integrity PASSED)
 
     # Comprehensive scanning methods
 

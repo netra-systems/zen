@@ -157,17 +157,17 @@ class LoudWebSocketFailureValidator:
 
                 # If we reach here, the failure was silent (BAD)
                 result['silent_failures'].append(failure_type)
-                logger.error(f"❌ {failure_type} was SILENT - this is critical!)"
+                logger.error(f"X {failure_type} was SILENT - this is critical!)"
 
             except (WebSocketConnectionError, RuntimeError) as e:
                 # Good! The failure was loud
                 result['loud_failures'].append(failure_type)
-                logger.info(f✅ {failure_type} was LOUD: {e}")"
+                logger.info(fCHECK {failure_type} was LOUD: {e}")"
 
             except Exception as e:
                 # Any other exception is also considered loud
                 result['loud_failures'].append(failure_type)
-                logger.info(f✅ {failure_type} was LOUD (unexpected exception): {e})
+                logger.info(fCHECK {failure_type} was LOUD (unexpected exception): {e})
 
             # Reset for next test
             self.test_connection.should_fail = False
@@ -216,19 +216,19 @@ class LoudWebSocketFailureValidator:
 
                 # If we reach here, the failure was silent (BAD)
                 result['silent_failures'].append(failure_type)
-                logger.error(f❌ {failure_type} was SILENT - this is critical!)"
-                logger.error(f❌ {failure_type} was SILENT - this is critical!)""
+                logger.error(fX {failure_type} was SILENT - this is critical!)"
+                logger.error(fX {failure_type} was SILENT - this is critical!)""
 
 
             except (WebSocketSendError, WebSocketTimeoutError, RuntimeError) as e:
                 # Good! The failure was loud
                 result['loud_failures'].append(failure_type)
-                logger.info(f"✅ {failure_type} was LOUD: {e})"
+                logger.info(f"CHECK {failure_type} was LOUD: {e})"
 
             except Exception as e:
                 # Any other exception is also considered loud
                 result['loud_failures'].append(failure_type)
-                logger.info(f✅ {failure_type} was LOUD (unexpected exception): {e})
+                logger.info(fCHECK {failure_type} was LOUD (unexpected exception): {e})
 
             # Reset for next test
             self.test_connection.should_fail = False
@@ -272,19 +272,19 @@ class LoudWebSocketFailureValidator:
 
             # If we reach here, the failure was silent (BAD)
             result['silent_failures'].append('auth_failure')
-            logger.error(❌ Authentication failure was SILENT - this is critical!)"
-            logger.error(❌ Authentication failure was SILENT - this is critical!)""
+            logger.error(X Authentication failure was SILENT - this is critical!)"
+            logger.error(X Authentication failure was SILENT - this is critical!)""
 
 
         except WebSocketAuthenticationError as e:
             # Good! The failure was loud
             result['loud_failures'].append('auth_failure')
-            logger.info(f"✅ Authentication failure was LOUD: {e})"
+            logger.info(f"CHECK Authentication failure was LOUD: {e})"
 
         except Exception as e:
             # Any other exception is also considered loud
             result['loud_failures'].append('auth_failure')
-            logger.info(f✅ Authentication failure was LOUD (unexpected exception): {e})
+            logger.info(fCHECK Authentication failure was LOUD (unexpected exception): {e})
 
         # Success if failure was loud
         result['success') = len(result['silent_failures') == 0
@@ -323,14 +323,14 @@ class LoudWebSocketFailureValidator:
             # Check if we can detect the silent failure
             if send_result is False:
                 result['detection_methods'].append('return_value_checking')
-                logger.info(✅ Silent failure detected via return value)
+                logger.info(CHECK Silent failure detected via return value)
             else:
-                logger.warning(⚠️ Could not detect silent failure via return value)"
-                logger.warning(⚠️ Could not detect silent failure via return value)""
+                logger.warning(WARNING️ Could not detect silent failure via return value)"
+                logger.warning(WARNING️ Could not detect silent failure via return value)""
 
 
         except Exception as e:
-            logger.info(f"✅ Exception raised instead of silent failure: {e})"
+            logger.info(f"CHECK Exception raised instead of silent failure: {e})"
 
         # Test method 2: Message count verification
         class CountingConnection:
@@ -351,7 +351,7 @@ class LoudWebSocketFailureValidator:
 
         if counting_connection.sent_count == initial_count:
             result['detection_methods'].append('message_count_verification')
-            logger.info(✅ Silent failure detected via message count)
+            logger.info(CHECK Silent failure detected via message count)
 
         result['success') = len(result['detection_methods') > 0
         return result
@@ -380,16 +380,16 @@ class LoudWebSocketFailureValidator:
                 test_results[test_name] = result
 
                 if result.get('success', False):
-                    logger.info(f✅ {test_name}: PASSED)"
-                    logger.info(f✅ {test_name}: PASSED)""
+                    logger.info(fCHECK {test_name}: PASSED)"
+                    logger.info(fCHECK {test_name}: PASSED)""
 
                 else:
-                    logger.error(f"❌ {test_name}: FAILED)"
+                    logger.error(f"X {test_name}: FAILED)"
                     if 'silent_failures' in result and result['silent_failures']:
                         logger.error(f   Silent failures detected: {result['silent_failures']})
 
             except Exception as e:
-                logger.error(f❌ {test_name}: EXCEPTION - {e})
+                logger.error(fX {test_name}: EXCEPTION - {e})
                 test_results[test_name] = {
                     'test_name': test_name,
                     'success': False,
@@ -422,12 +422,12 @@ class LoudWebSocketFailureValidator:
             for failure in self.test_results['failures_silent']:
                 logger.error(f"  - {failure}: Users will not know when this fails)"
         else:
-            logger.info(f\n✅ All failures are LOUD - users will always know when something breaks!)
+            logger.info(f\nCHECK All failures are LOUD - users will always know when something breaks!)
 
         # Test-by-test breakdown
         logger.info(f\n📋 TEST BREAKDOWN:)
         for test_name, result in test_results.items():
-            status = ✅ PASS" if result.get('success', False) else ❌ FAIL"
+            status = CHECK PASS" if result.get('success', False) else X FAIL"
             logger.info(f  {status}: {test_name})
 
         # Overall assessment

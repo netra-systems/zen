@@ -180,7 +180,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
                 app.state = MagicMock()
                 orchestrator = StartupOrchestrator(app)
 
-                # ✅ ISSUE #601 FIX: Mock validation phases to prevent deadlock
+                # CHECK ISSUE #601 FIX: Mock validation phases to prevent deadlock
                 async def mock_lightweight_phase():
                     "Lightweight mock phase with minimal memory footprint."
                     await asyncio.sleep(0.1)  # Minimal async delay
@@ -200,10 +200,10 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
                 orchestrator._phase6_websocket_setup = mock_lightweight_phase
                 orchestrator._phase7_finalization = mock_lightweight_phase
                 
-                # ✅ CRITICAL FIX: Mock the validation method that causes deadlock
+                # CHECK CRITICAL FIX: Mock the validation method that causes deadlock
                 orchestrator._run_comprehensive_validation = mock_validation_fix
 
-                # ✅ FIX: Add timeout protection to prevent infinite hangs
+                # CHECK FIX: Add timeout protection to prevent infinite hangs
                 start_time = time.time()
                 await asyncio.wait_for(orchestrator.initialize_system(), timeout=30.0)
                 end_time = time.time()
@@ -229,7 +229,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
             except ImportError:
                 pytest.skip(Required modules not available)
 
-        # ✅ MEMORY LEAK VALIDATION: Analyze memory growth across cycles
+        # CHECK MEMORY LEAK VALIDATION: Analyze memory growth across cycles
         final_memory = process.memory_info().rss
         total_memory_increase = final_memory - initial_memory
         
@@ -257,7 +257,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
                 fMEMORY LEAK DETECTED: Max per-cycle growth {max_growth_per_cycle / 1024 / 1024:.2f}MB exceeds {max_allowed_per_cycle / 1024 / 1024}MB limit""
 
             
-            print(f✅ MEMORY LEAK PREVENTION VALIDATED:)
+            print(fCHECK MEMORY LEAK PREVENTION VALIDATED:)
             print(f   - Startup cycles: {startup_cycles}"")
             print(f   - Total memory increase: {total_memory_increase / 1024 / 1024:."2f"}MB)
             print(f   - Average per-cycle growth: {avg_growth_per_cycle / 1024 / 1024:."2f"}MB"")
@@ -298,7 +298,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
         orchestrator._phase6_websocket_setup = create_timed_phase("WEBSOCKET, 0.1)"
         orchestrator._phase7_finalization = create_timed_phase(FINALIZATION, 0.1)
         
-        # ✅ CRITICAL FIX: Mock validation to prevent hanging
+        # CHECK CRITICAL FIX: Mock validation to prevent hanging
         async def mock_validation():
             start_time = time.time()
             app.state.startup_complete = True
@@ -321,7 +321,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
             max_allowed = 1.0  # 1 second max per phase
             assert duration < max_allowed, "fPhase {phase} took too long: {duration}s"
         
-        print(f✅ TIMEOUT PREVENTION VALIDATED:"")
+        print(fCHECK TIMEOUT PREVENTION VALIDATED:"")
         print(f   - Total startup time: {total_duration:."3f"}s)
         for phase, duration in phase_durations.items():
             print(f   - {phase}: {duration:."3f"}s"")
@@ -409,7 +409,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
             fConcurrent startup memory increase too high: {memory_increase / 1024 / 1024:.2f}MB""
 
         
-        print(f"✅ CONCURRENT STARTUP ISOLATION VALIDATED:))"
+        print(f"CHECK CONCURRENT STARTUP ISOLATION VALIDATED:))"
         print(f   - Concurrent instances: {concurrent_instances})"
         print(f   - Concurrent instances: {concurrent_instances})"
         print(f"   - Successful instances: {successful_instances}))"
@@ -486,7 +486,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
         assert thread_increase <= max_allowed_thread_increase, \
             f"Thread leak detected: {thread_increase} new threads created"
         
-        print(f✅ RESOURCE CLEANUP VALIDATED:")"
+        print(fCHECK RESOURCE CLEANUP VALIDATED:")"
         print(f   - Cleanup test scenarios: {len(resource_cleanup_tests)}")"
         print(f   - Successful scenarios: {successful_cleanup_tests}")"
         print(f   - Thread count increase: {thread_increase})
@@ -514,7 +514,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
             app.state = MagicMock()
             orchestrator = StartupOrchestrator(app)
             
-            # ✅ CRITICAL: This is the exact fix for Issue #601
+            # CHECK CRITICAL: This is the exact fix for Issue #601
             # Mock the validation method that was causing deadlock
             validation_called = False
             
@@ -537,7 +537,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
             orchestrator._phase6_websocket_setup = quick_phase
             orchestrator._phase7_finalization = quick_phase
             
-            # ✅ THE CRITICAL FIX: Mock the method that causes deadlock
+            # CHECK THE CRITICAL FIX: Mock the method that causes deadlock
             orchestrator._run_comprehensive_validation = strategic_validation_mock
             
             # Time the execution to verify no hanging
@@ -581,7 +581,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
                 assert test['startup_complete'], fRun {test['test_run']} startup not completed"
                 assert test['fix_applied'], f"Run {test['test_run']} fix not properly applied"
         
-        print(f✅ ISSUE #601 FIX VERIFICATION COMPLETED:)
+        print(fCHECK ISSUE #601 FIX VERIFICATION COMPLETED:)
         print(f"   - Test runs: {len(validation_fix_tests)})"
         print(f   - Successful runs: {successful_runs})
         print(f"   - Average duration: {sum(t['duration'] for t in validation_fix_tests if t.get('success')) / successful_runs:."3f"}s)"
@@ -631,13 +631,13 @@ if __name__ == __main__:
     print(fErrors: {len(result.errors)}")"
     
     if result.wasSuccessful():
-        print(✅ SUCCESS: Issue #601 fix working - no more startup hangs!)
-        print(✅ Memory leak prevention validated"")
-        print(✅ Strategic validation mocking effective)"
-        print(✅ Strategic validation mocking effective)""
+        print(CHECK SUCCESS: Issue #601 fix working - no more startup hangs!)
+        print(CHECK Memory leak prevention validated"")
+        print(CHECK Strategic validation mocking effective)"
+        print(CHECK Strategic validation mocking effective)""
 
     else:
-        print(❌ FAILURE: Issue #601 fix needs refinement")"
+        print(X FAILURE: Issue #601 fix needs refinement")"
         if result.failures:
             print(Failures:")"
             for test, error in result.failures:

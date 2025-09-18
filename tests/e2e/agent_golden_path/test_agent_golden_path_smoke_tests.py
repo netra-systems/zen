@@ -120,7 +120,7 @@ class AgentGoldenPathSmokeTests(SSotAsyncTestCase):
         if not response_received:
             print(f'[SMOKE] WARNING: No response received, but pipeline accepts messages')
         self.assertLess(total_time, 30.0, f'SMOKE FAILURE: Test took {total_time:.2f}s, exceeds 30s limit')
-        print(f'[SMOKE] ✓ Basic message pipeline validated in {total_time:.2f}s')
+        print(f'[SMOKE] CHECK Basic message pipeline validated in {total_time:.2f}s')
 
     async def test_critical_websocket_events_delivery_smoke(self):
         """
@@ -173,7 +173,7 @@ class AgentGoldenPathSmokeTests(SSotAsyncTestCase):
         print(f'[SMOKE] Events test completed in {total_time:.2f}s')
         self.assertTrue(event_delivery_working, f'SMOKE FAILURE: WebSocket event delivery not working. Users cannot see real-time agent progress. Events received: {events_received}. Time: {total_time:.2f}s')
         self.assertLess(total_time, 30.0, f'SMOKE FAILURE: Events test took {total_time:.2f}s, exceeds 30s limit')
-        print(f'[SMOKE] ✓ WebSocket events delivery validated in {total_time:.2f}s')
+        print(f'[SMOKE] CHECK WebSocket events delivery validated in {total_time:.2f}s')
 
     async def test_user_isolation_smoke(self):
         """
@@ -230,7 +230,7 @@ class AgentGoldenPathSmokeTests(SSotAsyncTestCase):
         self.assertTrue(concurrent_connections_working, f'SMOKE FAILURE: Concurrent user connections not working. Multi-user capability is broken. Time: {total_time:.2f}s')
         self.assertTrue(isolation_successful, f'SMOKE FAILURE: User isolation not validated. Multi-tenant security may be compromised. Time: {total_time:.2f}s')
         self.assertLess(total_time, 30.0, f'SMOKE FAILURE: Isolation test took {total_time:.2f}s, exceeds 30s limit')
-        print(f'[SMOKE] ✓ User isolation validated in {total_time:.2f}s')
+        print(f'[SMOKE] CHECK User isolation validated in {total_time:.2f}s')
 
     async def test_infrastructure_reliability_smoke(self):
         """
@@ -286,7 +286,7 @@ class AgentGoldenPathSmokeTests(SSotAsyncTestCase):
         reliability_score = sum([timeout_control_working, graceful_failure_working, connection_recovery_working])
         self.assertGreater(reliability_score, 0, f'SMOKE FAILURE: No reliability mechanisms working. Infrastructure is unstable. Timeout: {timeout_control_working}, Graceful: {graceful_failure_working}, Recovery: {connection_recovery_working}. Time: {total_time:.2f}s')
         self.assertLess(total_time, 30.0, f'SMOKE FAILURE: Reliability test took {total_time:.2f}s, exceeds 30s limit')
-        print(f'[SMOKE] ✓ Infrastructure reliability validated in {total_time:.2f}s (score: {reliability_score}/3)')
+        print(f'[SMOKE] CHECK Infrastructure reliability validated in {total_time:.2f}s (score: {reliability_score}/3)')
 
     def _is_service_unavailable_error(self, error: Exception) -> bool:
         """Check if error indicates service unavailability rather than test failure."""
@@ -353,9 +353,9 @@ class AgentGoldenPathSmokeStagingTests(SSotAsyncTestCase):
         self.assertTrue(staging_connection_working, f'STAGING FAILURE: Cannot connect to staging WebSocket. Staging environment is down or misconfigured. Time: {total_time:.2f}s')
         self.assertLess(total_time, 30.0, f'STAGING FAILURE: Test took {total_time:.2f}s, exceeds 30s limit')
         if e2e_headers_working:
-            print(f'[STAGING-SMOKE] ✓ Staging connection with E2E optimization validated in {total_time:.2f}s')
+            print(f'[STAGING-SMOKE] CHECK Staging connection with E2E optimization validated in {total_time:.2f}s')
         else:
-            print(f'[STAGING-SMOKE] ✓ Staging connection validated in {total_time:.2f}s (E2E optimization may need review)')
+            print(f'[STAGING-SMOKE] CHECK Staging connection validated in {total_time:.2f}s (E2E optimization may need review)')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

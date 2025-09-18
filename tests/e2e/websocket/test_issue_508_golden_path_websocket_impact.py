@@ -7,7 +7,7 @@ CRITICAL BUSINESS IMPACT TESTS:
 - Business Impact: $500K+ ARR at risk from broken WebSocket chat functionality
 
 GOLDEN PATH VALIDATION:
-1. User login → WebSocket connection → AI response flow BROKEN
+1. User login -> WebSocket connection -> AI response flow BROKEN
 2. Real-time agent event delivery BROKEN  
 3. WebSocket authentication and authorization BROKEN
 4. Chat interface WebSocket functionality BROKEN
@@ -16,7 +16,7 @@ BUSINESS CRITICAL SCENARIOS:
 - User authentication via WebSocket query parameters fails
 - Agent WebSocket event delivery fails
 - Real-time chat functionality is completely broken
-- Golden Path: user login → AI response flow is interrupted
+- Golden Path: user login -> AI response flow is interrupted
 
 SUCCESS CRITERIA:
 - Tests MUST demonstrate complete Golden Path failure due to this bug
@@ -60,7 +60,7 @@ class Issue508GoldenPathWebSocketFailureTests(SSotAsyncTestCase):
         BUSINESS CRITICAL: Golden Path user authentication via WebSocket completely fails
         
         This test proves that users cannot authenticate through WebSocket connections,
-        breaking the entire Golden Path: user login → AI response flow
+        breaking the entire Golden Path: user login -> AI response flow
         """
         golden_path_auth_url = 'ws://localhost:8000/ws/chat?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMTIzIiwiZXhwIjoxNjk0NTE1MjAwfQ.signature&user_id=123&subscription_tier=enterprise'
         mock_websocket = Mock(spec=WebSocket)
@@ -74,13 +74,13 @@ class Issue508GoldenPathWebSocketFailureTests(SSotAsyncTestCase):
             This simulates the authentication flow that fails due to the bug
             """
             try:
-                auth_context = {'connection_id': 'golden-path-auth-123', 'websocket_url': str(mock_websocket.url), 'path': mock_websocket.url.path, 'query_params': dict(mock_websocket.url.query_params) if mock_websocket.url.query_params else {}, 'user_journey': 'login → websocket → ai_response', 'business_tier': 'enterprise', 'arr_value': '$500K+', 'authentication_status': 'FAILED'}
+                auth_context = {'connection_id': 'golden-path-auth-123', 'websocket_url': str(mock_websocket.url), 'path': mock_websocket.url.path, 'query_params': dict(mock_websocket.url.query_params) if mock_websocket.url.query_params else {}, 'user_journey': 'login -> websocket -> ai_response', 'business_tier': 'enterprise', 'arr_value': '$500K+', 'authentication_status': 'FAILED'}
                 jwt_token = auth_context['query_params'].get('token')
                 user_id = auth_context['query_params'].get('user_id')
                 subscription_tier = auth_context['query_params'].get('subscription_tier')
                 return {'authenticated': True, 'user_id': user_id, 'subscription_tier': subscription_tier, 'jwt_token': jwt_token}
             except AttributeError as e:
-                return {'authenticated': False, 'error': str(e), 'business_impact': 'Golden Path user login → AI response flow BROKEN', 'revenue_impact': '$500K+ ARR at risk'}
+                return {'authenticated': False, 'error': str(e), 'business_impact': 'Golden Path user login -> AI response flow BROKEN', 'revenue_impact': '$500K+ ARR at risk'}
         with pytest.raises(AttributeError) as exc_info:
             auth_result = simulate_golden_path_authentication()
         assert "'URL' object has no attribute 'query_params'" in str(exc_info.value)
@@ -241,7 +241,7 @@ class Issue508GoldenPathBusinessScenariosTests(SSotAsyncTestCase):
             New startup customer trying Netra for the first time
             """
             try:
-                onboarding_context = {'connection_id': 'startup-onboarding-123', 'websocket_url': str(mock_websocket.url), 'path': mock_websocket.url.path, 'query_params': dict(mock_websocket.url.query_params) if mock_websocket.url.query_params else {}, 'customer_journey': 'trial_signup → first_chat → FAILURE', 'customer_type': 'startup', 'plan': 'trial', 'first_session': True, 'onboarding_status': 'FAILED'}
+                onboarding_context = {'connection_id': 'startup-onboarding-123', 'websocket_url': str(mock_websocket.url), 'path': mock_websocket.url.path, 'query_params': dict(mock_websocket.url.query_params) if mock_websocket.url.query_params else {}, 'customer_journey': 'trial_signup -> first_chat -> FAILURE', 'customer_type': 'startup', 'plan': 'trial', 'first_session': True, 'onboarding_status': 'FAILED'}
                 trial_token = onboarding_context['query_params'].get('token')
                 organization = onboarding_context['query_params'].get('org')
                 first_session = onboarding_context['query_params'].get('first_session')
@@ -271,7 +271,7 @@ class Issue508GoldenPathBusinessScenariosTests(SSotAsyncTestCase):
             Existing customer attempting to expand team usage
             """
             try:
-                expansion_context = {'connection_id': 'mid-market-expansion-789', 'websocket_url': str(mock_websocket.url), 'path': mock_websocket.url.path, 'query_params': dict(mock_websocket.url.query_params) if mock_websocket.url.query_params else {}, 'customer_journey': 'existing → expansion_attempt → FAILURE', 'customer_type': 'mid_market', 'expansion_type': 'team_growth', 'new_seats': 5, 'expansion_value': '$25K ARR', 'expansion_status': 'BLOCKED'}
+                expansion_context = {'connection_id': 'mid-market-expansion-789', 'websocket_url': str(mock_websocket.url), 'path': mock_websocket.url.path, 'query_params': dict(mock_websocket.url.query_params) if mock_websocket.url.query_params else {}, 'customer_journey': 'existing -> expansion_attempt -> FAILURE', 'customer_type': 'mid_market', 'expansion_type': 'team_growth', 'new_seats': 5, 'expansion_value': '$25K ARR', 'expansion_status': 'BLOCKED'}
                 expansion_token = expansion_context['query_params'].get('token')
                 new_team_size = expansion_context['query_params'].get('new_team_members')
                 return {'expansion_successful': True, 'additional_arr': '$25K', 'customer_satisfaction': 'high', 'future_expansion_likely': True}

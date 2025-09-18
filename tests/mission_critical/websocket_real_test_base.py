@@ -109,15 +109,15 @@ def require_docker_services_smart() -> None:
 
         # Phase 1: Fast Docker availability check ("2s" timeout)
         if manager.is_docker_available_fast():
-            logger.info("✅ Docker available - validating service health")
+            logger.info("CHECK Docker available - validating service health")
 
             # Phase 1.5: Service health pre-validation (Issue #773)
             if validate_local_service_health_fast():
-                logger.info("✅ Local services healthy - proceeding with local validation")
-                logger.info("✅ Local services healthy - proceeding with local validation")
+                logger.info("CHECK Local services healthy - proceeding with local validation")
+                logger.info("CHECK Local services healthy - proceeding with local validation")
                 return
             else:
-                logger.warning("⚠️ Docker available but services unhealthy - falling back to staging/mock")
+                logger.warning("WARNING️ Docker available but services unhealthy - falling back to staging/mock")
 
         # Phase 2: Enhanced staging environment fallback activation (Issues #680, #773, #860)
         logger.warning("🔄 Docker unavailable or unhealthy - activating enhanced fallback (Issues #680, #773, #860)")
@@ -130,7 +130,7 @@ def require_docker_services_smart() -> None:
             env.load_from_file(staging_env_file, source="staging_e2e_config")
             env.load_from_file(staging_env_file, source="staging_e2e_config")
         else:
-            logger.warning("⚠️ No .env.staging.e2e file found - using environment fallbacks")
+            logger.warning("WARNING️ No .env.staging.e2e file found - using environment fallbacks")
 
         # Get staging configuration with enhanced defaults
         staging_enabled = env.get("USE_STAGING_FALLBACK", "true").lower() == "true"  # Default true
@@ -143,10 +143,10 @@ def require_docker_services_smart() -> None:
             logger.warning("🪟 Windows platform + staging disabled - trying mock WebSocket server fallback")
             try:
                 asyncio.run(setup_mock_websocket_environment())
-                logger.info("✅ Mock WebSocket server fallback configured successfully)"
+                logger.info("CHECK Mock WebSocket server fallback configured successfully)"
                 return
             except Exception as mock_error:
-                logger.error(f"❌ Mock WebSocket server fallback failed: {mock_error}")
+                logger.error(f"X Mock WebSocket server fallback failed: {mock_error}")
                 # Continue to staging attempt
 
         if not staging_enabled:
@@ -160,12 +160,12 @@ def require_docker_services_smart() -> None:
                     import os
                     os.environ["DOCKER_BYPASS"] = "true"
                     asyncio.run(setup_mock_websocket_environment())
-                    logger.info("✅ Windows mock server last resort successful")
+                    logger.info("CHECK Windows mock server last resort successful")
                     return
                 except Exception as final_error:
-                    logger.error(f"❌ Windows mock server last resort failed: {final_error}")
+                    logger.error(f"X Windows mock server last resort failed: {final_error}")
 
-            pytest.skip("❌ Docker unavailable, staging fallback disabled, and no mock server available. Enable with USE_STAGING_FALLBACK=true or set DOCKER_BYPASS=true")
+            pytest.skip("X Docker unavailable, staging fallback disabled, and no mock server available. Enable with USE_STAGING_FALLBACK=true or set DOCKER_BYPASS=true")
 
         logger.info(f"🌐 Staging WebSocket URL: {staging_websocket_url}")
         logger.info(f"🌐 Staging Base URL: {staging_base_url}")
@@ -178,22 +178,22 @@ def require_docker_services_smart() -> None:
         staging_healthy = validate_staging_environment_health(staging_websocket_url)
         if not staging_healthy:
             if is_windows:
-                logger.warning("⚠️ Staging environment health check failed on Windows - trying mock server fallback")
+                logger.warning("WARNING️ Staging environment health check failed on Windows - trying mock server fallback")
                 try:
                     asyncio.run(setup_mock_websocket_environment())
-                    logger.info("✅ Mock WebSocket server fallback after staging failure")
-                    logger.info("✅ Mock WebSocket server fallback after staging failure")
-                    logger.info("✅ Mock WebSocket server fallback after staging failure")
-                    logger.info("✅ Mock WebSocket server fallback after staging failure")
+                    logger.info("CHECK Mock WebSocket server fallback after staging failure")
+                    logger.info("CHECK Mock WebSocket server fallback after staging failure")
+                    logger.info("CHECK Mock WebSocket server fallback after staging failure")
+                    logger.info("CHECK Mock WebSocket server fallback after staging failure")
                     return
                 except Exception as mock_fallback_error:
-                    logger.error(f"❌ Mock server fallback after staging failure: {mock_fallback_error}")
+                    logger.error(f"X Mock server fallback after staging failure: {mock_fallback_error}")
 
-            logger.warning("⚠️ Staging environment health check failed - proceeding anyway for development testing")
+            logger.warning("WARNING️ Staging environment health check failed - proceeding anyway for development testing")
 
         # Phase 4: Configure test environment for staging with full configuration
         setup_staging_test_environment(staging_websocket_url, staging_base_url, staging_auth_url)
-        logger.info("✅ Successfully configured enhanced staging environment fallback - tests will proceed")
+        logger.info("CHECK Successfully configured enhanced staging environment fallback - tests will proceed")
 
         # Phase 5: Set permissive test mode for development but enable strict WebSocket event validation
         import os
@@ -214,7 +214,7 @@ def require_docker_services_smart() -> None:
         os.environ["CLOUD_RUN_COMPATIBLE"] = "true"
 
     except Exception as e:
-        logger.error(f"❌ ISSUES #680, #773: Enhanced smart Docker check failed: {e}")
+        logger.error(f"X ISSUES #680, #773: Enhanced smart Docker check failed: {e}")
         pytest.skip(f"Neither Docker nor staging environment available: {e}")
 
 
@@ -338,7 +338,7 @@ def validate_local_service_health_fast() -> bool:
                 logger.warning(fService {service} failed health check - falling back to staging)
                 return False
                 
-        logger.info("✅ All critical services passed health check)"
+        logger.info("CHECK All critical services passed health check)"
         return True
         
     except Exception as e:
@@ -414,10 +414,10 @@ def setup_staging_test_environment(websocket_url: str, base_url: str = None, aut
     logger.info(f"   🌐 Backend URL: {base_url})"
     logger.info(f   🔐 Auth URL: {auth_url}")"
     logger.info(f   🔧 API URL: {base_url}/api)
-    logger.info(f   ✅ WebSocket Event Validation: Enabled)"
-    logger.info(f   ✅ WebSocket Event Validation: Enabled)"
-    logger.info(f   ✅ WebSocket Event Validation: Enabled)"
-    logger.info(f   ✅ WebSocket Event Validation: Enabled)"
+    logger.info(f   CHECK WebSocket Event Validation: Enabled)"
+    logger.info(f   CHECK WebSocket Event Validation: Enabled)"
+    logger.info(f   CHECK WebSocket Event Validation: Enabled)"
+    logger.info(f   CHECK WebSocket Event Validation: Enabled)"
     logger.info(f"   ⏱️  Event Timeout: "30s", Connection Timeout: "15s", Retries: 3)"
 
 # Always require Docker for real tests
@@ -500,7 +500,7 @@ def _get_environment_websocket_url() -> str:
     # Priority 1: Explicit TEST_WEBSOCKET_URL override
     test_websocket_url = env.get('TEST_WEBSOCKET_URL', None)
     if test_websocket_url:
-        logger.info(f✅ Priority 1: Using TEST_WEBSOCKET_URL: {test_websocket_url})
+        logger.info(fCHECK Priority 1: Using TEST_WEBSOCKET_URL: {test_websocket_url})
         return test_websocket_url
 
     # Priority 2: Staging services (Issue #420 alignment)
@@ -510,13 +510,13 @@ def _get_environment_websocket_url() -> str:
     use_staging_fallback = env.get('USE_STAGING_FALLBACK', 'false').lower() == 'true'
 
     if staging_websocket_url and (use_staging_services or staging_env or use_staging_fallback):
-        logger.info(f✅ Priority 2: Using staging WebSocket URL: {staging_websocket_url})
+        logger.info(fCHECK Priority 2: Using staging WebSocket URL: {staging_websocket_url})
         return staging_websocket_url
 
     # Priority 3: Check for E2E environment variables
     e2e_websocket_url = env.get('E2E_WEBSOCKET_URL', None)
     if e2e_websocket_url:
-        logger.info(f✅ Priority 3: Using E2E WebSocket URL: {e2e_websocket_url}")"
+        logger.info(fCHECK Priority 3: Using E2E WebSocket URL: {e2e_websocket_url}")"
         return e2e_websocket_url
 
     # Priority 4: Windows Docker bypass detection with mock server
@@ -531,10 +531,10 @@ def _get_environment_websocket_url() -> str:
 
         # Test if mock server is responsive
         if _test_websocket_connectivity(mock_websocket_url):
-            logger.info(f✅ Priority 4: Using mock WebSocket server: {mock_websocket_url})
+            logger.info(fCHECK Priority 4: Using mock WebSocket server: {mock_websocket_url})
             return mock_websocket_url
         else:
-            logger.warning(f"⚠️ Mock WebSocket server not available at {mock_websocket_url})")
+            logger.warning(f"WARNING️ Mock WebSocket server not available at {mock_websocket_url})")
 
     # Priority 5: Derive from backend URL (fallback)
     backend_url = _get_environment_backend_url()
@@ -544,7 +544,7 @@ def _get_environment_websocket_url() -> str:
     if not websocket_url.endswith('/ws'):
         websocket_url = f{websocket_url}/ws""
 
-    logger.warning(f⚠️ Priority 5: Fallback to derived URL: {websocket_url})
+    logger.warning(fWARNING️ Priority 5: Fallback to derived URL: {websocket_url})
     return websocket_url
 
 
@@ -848,13 +848,13 @@ async def setup_mock_websocket_environment() -> None:
         logger.info(🎯 Mock WebSocket environment configured successfully)
         logger.info(f"   📡 WebSocket URL: {server_url})"
         logger.info(f   🔧 Test Mode: mock_websocket")"
-        logger.info(f   ✅ All 5 agent events supported)
+        logger.info(f   CHECK All 5 agent events supported)
 
     except Exception as e:
-        logger.error(f❌ Failed to set up mock WebSocket environment: {e})"
-        logger.error(f❌ Failed to set up mock WebSocket environment: {e})"
-        logger.error(f❌ Failed to set up mock WebSocket environment: {e})"
-        logger.error(f❌ Failed to set up mock WebSocket environment: {e})""
+        logger.error(fX Failed to set up mock WebSocket environment: {e})"
+        logger.error(fX Failed to set up mock WebSocket environment: {e})"
+        logger.error(fX Failed to set up mock WebSocket environment: {e})"
+        logger.error(fX Failed to set up mock WebSocket environment: {e})""
 
         raise
 

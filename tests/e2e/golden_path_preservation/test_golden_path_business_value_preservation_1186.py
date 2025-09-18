@@ -141,11 +141,11 @@ class TestGoldenPathBusinessValuePreservation(BaseE2ETest):
                 assert thread is not None, "Thread not persisted correctly"
                 assert len(thread.messages) > 0, "No messages saved to thread"
 
-                print(f"✅ Golden Path journey completed successfully in {journey_duration:.2f}s")
+                print(f"CHECK Golden Path journey completed successfully in {journey_duration:.2f}s")
                 print(f"💰 Generated ${result['cost_savings']['monthly_amount']:,} in monthly savings recommendations")
 
         except Exception as e:
-            self.fail(f"❌ GOLDEN PATH FAILURE: Complete user journey failed: {e}")
+            self.fail(f"X GOLDEN PATH FAILURE: Complete user journey failed: {e}")
 
     @pytest.mark.mission_critical
     async def test_multi_user_isolation_business_continuity(self, real_services, real_llm):
@@ -244,10 +244,10 @@ class TestGoldenPathBusinessValuePreservation(BaseE2ETest):
             assert success_rate >= self.business_value_thresholds["agent_completion_rate"], \
                 f"Multi-user success rate {success_rate:.1f}% below threshold {self.business_value_thresholds['agent_completion_rate']}%"
 
-            print(f"✅ Multi-user isolation successful: {successful_journeys}/{concurrent_users} users completed ({success_rate:.1f}%)")
+            print(f"CHECK Multi-user isolation successful: {successful_journeys}/{concurrent_users} users completed ({success_rate:.1f}%)")
 
         except Exception as e:
-            self.fail(f"❌ MULTI-USER ISOLATION FAILURE: {e}")
+            self.fail(f"X MULTI-USER ISOLATION FAILURE: {e}")
 
     @pytest.mark.e2e
     @pytest.mark.real_llm
@@ -332,10 +332,10 @@ class TestGoldenPathBusinessValuePreservation(BaseE2ETest):
             assert avg_first_response <= 5.0, \
                 f"Average first response time {avg_first_response:.2f}s exceeds 5s threshold"
 
-            print(f"✅ Performance preserved: Avg completion {avg_completion_time:.2f}s, first response {avg_first_response:.2f}s")
+            print(f"CHECK Performance preserved: Avg completion {avg_completion_time:.2f}s, first response {avg_first_response:.2f}s")
 
         except Exception as e:
-            self.fail(f"❌ PERFORMANCE PRESERVATION FAILURE: {e}")
+            self.fail(f"X PERFORMANCE PRESERVATION FAILURE: {e}")
 
     @pytest.mark.mission_critical
     async def test_websocket_event_delivery_ssot_compliance(self, real_services, real_llm):
@@ -405,10 +405,10 @@ class TestGoldenPathBusinessValuePreservation(BaseE2ETest):
                 assert event_delivery_rate >= self.business_value_thresholds["websocket_event_delivery"], \
                     f"WebSocket event delivery rate {event_delivery_rate:.1f}% below threshold {self.business_value_thresholds['websocket_event_delivery']}%"
 
-                print(f"✅ WebSocket events delivered: {len(delivered_events)} events, 100% of required events")
+                print(f"CHECK WebSocket events delivered: {len(delivered_events)} events, 100% of required events")
 
         except Exception as e:
-            self.fail(f"❌ WEBSOCKET EVENT DELIVERY FAILURE: {e}")
+            self.fail(f"X WEBSOCKET EVENT DELIVERY FAILURE: {e}")
 
     async def teardown_method(self, method):
         """Clean up after each test method"""

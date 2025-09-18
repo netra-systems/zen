@@ -72,7 +72,7 @@ class AuthenticationServiceSSOTComplianceTests(SSotAsyncTestCase):
                             deprecated_imports_found.append(alias.name)
             if deprecated_imports_found:
                 self.fail(f'SSOT VIOLATION: Authentication service still uses deprecated factory imports: {deprecated_imports_found}. Migration to SSOT patterns incomplete.')
-            logger.info('✅ No deprecated factory imports found in authentication service')
+            logger.info('CHECK No deprecated factory imports found in authentication service')
         except Exception as e:
             self.fail(f'AUTHENTICATION TEST FAILURE: Unable to validate factory usage: {e}')
 
@@ -95,7 +95,7 @@ class AuthenticationServiceSSOTComplianceTests(SSotAsyncTestCase):
                 user_context = UserExecutionContext(user_id=self.test_user_id, websocket_client_id='test_auth_validation_client')
                 self.assertIsNotNone(user_context)
                 self.assertEqual(user_context.user_id, self.test_user_id)
-                logger.info('✅ Authentication service user context creation via SSOT successful')
+                logger.info('CHECK Authentication service user context creation via SSOT successful')
         except Exception as e:
             self.fail(f'AUTH SSOT FAILURE: User context creation failed: {e}')
 
@@ -115,7 +115,7 @@ class AuthenticationServiceSSOTComplianceTests(SSotAsyncTestCase):
             self.assertIsNotNone(fallback_context)
             self.assertEqual(fallback_context.user_id, fallback_user_id)
             self.assertIsNotNone(fallback_context.websocket_client_id)
-            logger.info('✅ Authentication fallback mechanisms work without factory')
+            logger.info('CHECK Authentication fallback mechanisms work without factory')
         except Exception as e:
             self.fail(f'AUTH FALLBACK FAILURE: Fallback context creation failed: {e}')
 
@@ -132,12 +132,12 @@ class AuthenticationServiceSSOTComplianceTests(SSotAsyncTestCase):
             try:
                 module = __import__(import_path, fromlist=[''])
                 self.assertIsNotNone(module)
-                logger.debug(f'✅ Successfully imported: {import_path}')
+                logger.debug(f'CHECK Successfully imported: {import_path}')
             except ImportError as e:
                 self.fail(f'CIRCULAR IMPORT: Failed to import {import_path}: {e}')
             except Exception as e:
                 self.fail(f'IMPORT ERROR: Unexpected error importing {import_path}: {e}')
-        logger.info('✅ No circular imports detected in authentication service')
+        logger.info('CHECK No circular imports detected in authentication service')
 
     async def test_authentication_service_websocket_integration_ssot(self):
         """
@@ -155,7 +155,7 @@ class AuthenticationServiceSSOTComplianceTests(SSotAsyncTestCase):
             self.assertIsNotNone(websocket_manager)
             self.assertEqual(websocket_manager.user_context.user_id, self.test_user_id)
             self.assertIsNotNone(websocket_manager.user_context.websocket_client_id)
-            logger.info('✅ Authentication + WebSocket integration via SSOT successful')
+            logger.info('CHECK Authentication + WebSocket integration via SSOT successful')
         except Exception as e:
             self.fail(f'AUTH WEBSOCKET INTEGRATION FAILURE: Integration failed: {e}')
 
@@ -181,7 +181,7 @@ class AuthenticationServiceSSOTComplianceTests(SSotAsyncTestCase):
             final_memory = process.memory_info().rss
             memory_growth = final_memory - initial_memory
             self.assertLess(memory_growth, 50 * 1024 * 1024, f'Excessive memory growth: {memory_growth} bytes')
-            logger.info(f'✅ Memory efficient context creation: {memory_growth} bytes growth')
+            logger.info(f'CHECK Memory efficient context creation: {memory_growth} bytes growth')
         except Exception as e:
             self.fail(f'MEMORY EFFICIENCY TEST FAILURE: {e}')
 if __name__ == '__main__':

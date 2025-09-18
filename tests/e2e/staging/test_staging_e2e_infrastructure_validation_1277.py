@@ -64,7 +64,7 @@ class TestStagingE2EInfrastructureValidation(BaseE2ETest):
                     assert endpoint.url.startswith("wss://")
                     assert "staging.netrasystems.ai" in endpoint.url
 
-            print(f"✓ RealServicesManager initialized for staging with {len(endpoints)} endpoints")
+            print(f"CHECK RealServicesManager initialized for staging with {len(endpoints)} endpoints")
 
         finally:
             # Restore original environment
@@ -102,7 +102,7 @@ class TestStagingE2EInfrastructureValidation(BaseE2ETest):
             environment = manager._get_current_environment()
             assert environment == "staging"
 
-        print(f"✓ Project root detection reliable across {len(managers)} instances on staging")
+        print(f"CHECK Project root detection reliable across {len(managers)} instances on staging")
 
     @pytest.mark.e2e
     @pytest.mark.staging_remote
@@ -147,7 +147,7 @@ class TestStagingE2EInfrastructureValidation(BaseE2ETest):
         assert database_endpoint is not None
         assert "staging" in database_endpoint.url.lower() or "localhost" in database_endpoint.url
 
-        print("✓ All staging service endpoints configured correctly")
+        print("CHECK All staging service endpoints configured correctly")
 
     @pytest.mark.e2e
     @pytest.mark.staging_remote
@@ -184,7 +184,7 @@ class TestStagingE2EInfrastructureValidation(BaseE2ETest):
             healthy_services = [name for name, status in services.items() if status.get("healthy", False)]
             unhealthy_services = [name for name, status in services.items() if not status.get("healthy", False)]
 
-            print(f"✓ Health checks executed - {len(healthy_services)} healthy, {len(unhealthy_services)} unhealthy")
+            print(f"CHECK Health checks executed - {len(healthy_services)} healthy, {len(unhealthy_services)} unhealthy")
 
             # At least some services should respond (even if not all are healthy)
             responded_services = [name for name, status in services.items()
@@ -197,7 +197,7 @@ class TestStagingE2EInfrastructureValidation(BaseE2ETest):
             if "Cannot detect project root" in str(e):
                 pytest.fail(f"Project root detection failed on staging: {e}")
             else:
-                print(f"⚠ Health check issues on staging (acceptable): {e}")
+                print(f"WARNING Health check issues on staging (acceptable): {e}")
 
         finally:
             await manager.cleanup()
@@ -239,7 +239,7 @@ class TestStagingE2EInfrastructureValidation(BaseE2ETest):
             endpoints = manager.service_endpoints
             assert len(endpoints) > 0
 
-            print(f"✓ Test case {i+1}: Environment detection robust with {env_vars}")
+            print(f"CHECK Test case {i+1}: Environment detection robust with {env_vars}")
 
     @pytest.mark.e2e
     @pytest.mark.staging_remote
@@ -276,7 +276,7 @@ class TestStagingE2EInfrastructureValidation(BaseE2ETest):
                 endpoints = manager.service_endpoints
                 assert len(endpoints) > 0, f"Manager {i} has no endpoints"
 
-            print(f"✓ {len(managers)} concurrent managers all consistent on staging")
+            print(f"CHECK {len(managers)} concurrent managers all consistent on staging")
 
         finally:
             # Cleanup all managers
@@ -312,13 +312,13 @@ class TestStagingE2EInfrastructureValidation(BaseE2ETest):
             assert "total_time_ms" in metrics
             assert "parallel_execution" in metrics
 
-            print("✓ Circuit breaker and advanced features work on staging")
+            print("CHECK Circuit breaker and advanced features work on staging")
 
         except Exception as e:
             if "Cannot detect project root" in str(e):
                 pytest.fail(f"Project root detection failed in circuit breaker test: {e}")
             else:
-                print(f"⚠ Circuit breaker test issues on staging (acceptable): {e}")
+                print(f"WARNING Circuit breaker test issues on staging (acceptable): {e}")
 
         finally:
             await manager.cleanup()
@@ -363,13 +363,13 @@ class TestStagingE2EInfrastructureValidation(BaseE2ETest):
 
             assert rapid_checks_time < 60.0, f"3 rapid health checks took {rapid_checks_time:.1f}s"
 
-            print(f"✓ Staging performance: init={init_time:.2f}s, health={health_check_time:.2f}s")
+            print(f"CHECK Staging performance: init={init_time:.2f}s, health={health_check_time:.2f}s")
 
         except Exception as e:
             if "Cannot detect project root" in str(e):
                 pytest.fail(f"Project root detection failed in performance test: {e}")
             else:
-                print(f"⚠ Performance test issues on staging: {e}")
+                print(f"WARNING Performance test issues on staging: {e}")
 
         finally:
             await manager.cleanup()
@@ -411,7 +411,7 @@ class TestStagingE2ERegressionPrevention:
         # Should be able to create health checker
         assert manager.health_checker is not None
 
-        print("✓ Original Issue #1277 scenario now works on staging environment")
+        print("CHECK Original Issue #1277 scenario now works on staging environment")
 
     @pytest.mark.e2e
     @pytest.mark.staging_remote
@@ -452,7 +452,7 @@ class TestStagingE2ERegressionPrevention:
         staging_endpoints = [ep for ep in endpoints if "staging.netrasystems.ai" in ep.url]
         assert len(staging_endpoints) > 0, "No staging endpoints configured"
 
-        print("✓ Staging infrastructure independent of claude.md files")
+        print("CHECK Staging infrastructure independent of claude.md files")
 
     @pytest.mark.e2e
     @pytest.mark.staging_remote
@@ -501,7 +501,7 @@ class TestStagingE2ERegressionPrevention:
             total_time = sum(duration for _, duration in operations)
             assert total_time < 5.0, f"Total operations took {total_time:.2f}s, should be under 5s"
 
-            print(f"✓ No performance regression on staging - total time: {total_time:.2f}s")
+            print(f"CHECK No performance regression on staging - total time: {total_time:.2f}s")
 
         finally:
             await manager.cleanup()
@@ -539,13 +539,13 @@ class TestStagingE2ERegressionPrevention:
                 assert manager.project_root is not None
                 endpoints = manager.service_endpoints
                 assert len(endpoints) > 0
-                print(f"✓ Robust error handling for scenario: {scenario}")
+                print(f"CHECK Robust error handling for scenario: {scenario}")
 
             except Exception as e:
                 if "Cannot detect project root" in str(e):
                     pytest.fail(f"Project root detection failed in error scenario {scenario}: {e}")
                 else:
                     # Other errors are acceptable in error scenarios
-                    print(f"⚠ Expected error in scenario {scenario}: {e}")
+                    print(f"WARNING Expected error in scenario {scenario}: {e}")
 
             await manager.cleanup()

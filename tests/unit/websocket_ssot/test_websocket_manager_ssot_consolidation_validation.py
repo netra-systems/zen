@@ -266,7 +266,7 @@ class WebSocketManagerSSOTConsolidationValidationTests(SSotBaseTestCase):
                         'module': getattr(attribute, '__module__', 'unknown'),
                         'qualname': getattr(attribute, '__qualname__', 'unknown')
                     }
-                    logger.info(f"✓ {import_key}: {type(attribute)} from {getattr(attribute, '__module__', 'unknown')}")
+                    logger.info(f"CHECK {import_key}: {type(attribute)} from {getattr(attribute, '__module__', 'unknown')}")
                 else:
                     failed_imports[import_key] = f"Attribute '{attribute_name}' not found in module"
                     logger.warning(f"✗ {import_key}: Attribute not found")

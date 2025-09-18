@@ -15,9 +15,9 @@ This test validates that Issue #757 has been successfully resolved by confirming
 4. Golden Path configuration access works consistently
 
 **EXPECTED BEHAVIOR:**
-- ✅ **CURRENT STATE:** Test PASSES - deprecated manager successfully removed
-- ✅ **SSOT COMPLIANCE:** Only canonical configuration manager accessible
-- ✅ **GOLDEN PATH:** Consistent configuration access across system
+- CHECK **CURRENT STATE:** Test PASSES - deprecated manager successfully removed
+- CHECK **SSOT COMPLIANCE:** Only canonical configuration manager accessible
+- CHECK **GOLDEN PATH:** Consistent configuration access across system
 """
 
 import pytest
@@ -35,7 +35,7 @@ class Issue757ConfigurationManagerResolutionTests(SSotBaseTestCase):
         with pytest.raises(ModuleNotFoundError):
             from netra_backend.app.config import get_configuration_manager
 
-        print("✅ ISSUE #757 SUCCESS: Deprecated configuration manager properly inaccessible")
+        print("CHECK ISSUE #757 SUCCESS: Deprecated configuration manager properly inaccessible")
 
     def test_canonical_ssot_configuration_manager_works(self):
         """Test that canonical SSOT configuration manager is working properly."""
@@ -51,7 +51,7 @@ class Issue757ConfigurationManagerResolutionTests(SSotBaseTestCase):
         environment = config_manager.get_environment_name()
         assert environment in ['development', 'testing', 'staging', 'production']
 
-        print("✅ ISSUE #757 SUCCESS: Canonical SSOT configuration manager fully functional")
+        print("CHECK ISSUE #757 SUCCESS: Canonical SSOT configuration manager fully functional")
 
     def test_no_configuration_import_conflicts(self):
         """Test that there are no configuration import conflicts."""
@@ -70,7 +70,7 @@ class Issue757ConfigurationManagerResolutionTests(SSotBaseTestCase):
         # Should have same environment
         assert config1.environment == config2.environment
 
-        print("✅ ISSUE #757 SUCCESS: No configuration import conflicts detected")
+        print("CHECK ISSUE #757 SUCCESS: No configuration import conflicts detected")
 
     def test_golden_path_configuration_consistency(self):
         """Test that Golden Path configuration access is consistent."""
@@ -91,7 +91,7 @@ class Issue757ConfigurationManagerResolutionTests(SSotBaseTestCase):
         # Should have consistent values
         assert environment in ['development', 'testing', 'staging', 'production']
 
-        print("✅ ISSUE #757 SUCCESS: Golden Path configuration access is consistent")
+        print("CHECK ISSUE #757 SUCCESS: Golden Path configuration access is consistent")
 
     def test_ssot_compliance_validation(self):
         """Test that SSOT compliance is maintained - single source of truth."""
@@ -113,4 +113,4 @@ class Issue757ConfigurationManagerResolutionTests(SSotBaseTestCase):
 
         assert manager_id1 == manager_id2, "Configuration manager should be singleton"
 
-        print("✅ ISSUE #757 SUCCESS: SSOT compliance validated - single configuration source")
+        print("CHECK ISSUE #757 SUCCESS: SSOT compliance validated - single configuration source")

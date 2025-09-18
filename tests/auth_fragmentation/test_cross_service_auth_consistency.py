@@ -72,7 +72,7 @@ class CrossServiceAuthenticationConsistencyTests(SSotAsyncTestCase):
                     assert scenario.expected_error in str(backend_result.error), f'Scenario {scenario.name}: Error mismatch'
                 extracted_token = scenario.token.replace('Bearer ', '') if scenario.token.startswith('Bearer ') else scenario.token
                 mock_validate.assert_called_once_with(extracted_token)
-        logger.info('✅ Auth service and backend authentication consistency verified')
+        logger.info('CHECK Auth service and backend authentication consistency verified')
 
     async def test_authentication_header_processing_standardization(self):
         """
@@ -95,7 +95,7 @@ class CrossServiceAuthenticationConsistencyTests(SSotAsyncTestCase):
                 result = await self.backend_auth.validate_request_token(test_case['header'])
                 assert result.valid is False
                 assert result.error == 'invalid_authorization_header'
-        logger.info('✅ Authentication header processing standardization verified')
+        logger.info('CHECK Authentication header processing standardization verified')
 
     async def test_user_context_propagation_consistency(self):
         """
@@ -116,7 +116,7 @@ class CrossServiceAuthenticationConsistencyTests(SSotAsyncTestCase):
             assert result.claims['role'] == test_user_context['role']
             assert 'permissions' in result.claims
             assert result.claims['permissions'] == test_user_context['permissions']
-        logger.info('✅ User context propagation consistency verified')
+        logger.info('CHECK User context propagation consistency verified')
 
     async def test_error_handling_consistency_across_services(self):
         """
@@ -138,7 +138,7 @@ class CrossServiceAuthenticationConsistencyTests(SSotAsyncTestCase):
                 assert result.valid is False
                 assert result.user_id is None
                 assert scenario['expected_error_type'] in result.error
-        logger.info('✅ Error handling consistency across services verified')
+        logger.info('CHECK Error handling consistency across services verified')
 
     async def test_authentication_timeout_consistency(self):
         """
@@ -154,7 +154,7 @@ class CrossServiceAuthenticationConsistencyTests(SSotAsyncTestCase):
             assert result.valid is False
             assert 'validation_exception' in result.error
             assert 'timeout' in result.error.lower() or 'Auth service timeout' in result.error
-        logger.info('✅ Authentication timeout consistency verified')
+        logger.info('CHECK Authentication timeout consistency verified')
 
     async def test_jwt_claims_consistency_across_services(self):
         """
@@ -173,7 +173,7 @@ class CrossServiceAuthenticationConsistencyTests(SSotAsyncTestCase):
             assert result.claims['role'] == standard_claims['role']
             assert result.claims['permissions'] == standard_claims['permissions']
             assert result.claims['organization_id'] == standard_claims['organization_id']
-        logger.info('✅ JWT claims consistency across services verified')
+        logger.info('CHECK JWT claims consistency across services verified')
 
     async def test_authentication_performance_consistency(self):
         """
@@ -201,7 +201,7 @@ class CrossServiceAuthenticationConsistencyTests(SSotAsyncTestCase):
         if min_time > 0:
             time_ratio = max_time / min_time
             assert time_ratio < 10, f'Performance inconsistent: {time_ratio:.1f}x variation'
-        logger.info(f'✅ Authentication performance consistent: {avg_time:.3f}s average, {time_ratio:.1f}x variation')
+        logger.info(f'CHECK Authentication performance consistent: {avg_time:.3f}s average, {time_ratio:.1f}x variation')
 
 class CrossServiceAuthenticationFragmentationDetectionTests(SSotAsyncTestCase):
     """
@@ -240,7 +240,7 @@ class CrossServiceAuthenticationFragmentationDetectionTests(SSotAsyncTestCase):
         except ImportError:
             pass
         assert len(service_boundaries) > 0, 'No authentication service boundaries found'
-        logger.info(f'✅ Identified {len(service_boundaries)} authentication service boundaries: {list(service_boundaries.keys())}')
+        logger.info(f'CHECK Identified {len(service_boundaries)} authentication service boundaries: {list(service_boundaries.keys())}')
 
     async def test_verify_single_auth_service_dependency(self):
         """
@@ -258,7 +258,7 @@ class CrossServiceAuthenticationFragmentationDetectionTests(SSotAsyncTestCase):
         for method_name in required_methods:
             assert hasattr(auth_client, method_name), f'Auth client missing {method_name}'
             assert callable(getattr(auth_client, method_name)), f'{method_name} not callable'
-        logger.info('✅ Single auth service dependency verified across all services')
+        logger.info('CHECK Single auth service dependency verified across all services')
 
     async def test_detect_authentication_configuration_fragmentation(self):
         """
@@ -276,7 +276,7 @@ class CrossServiceAuthenticationFragmentationDetectionTests(SSotAsyncTestCase):
             if value:
                 config_sources.append(config_key)
         assert env is not None, 'Environment access not available'
-        logger.info(f'✅ Authentication configuration sources identified: {config_sources}')
+        logger.info(f'CHECK Authentication configuration sources identified: {config_sources}')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

@@ -30,7 +30,7 @@ class TestIssue1021FixValidation(SSotAsyncTestCase):
                 self.sent_messages.append(message)
                 print(f"📤 CAPTURED: {json.dumps(message, indent=2)}")
             except json.JSONDecodeError as e:
-                print(f"❌ JSON DECODE ERROR: {e}")
+                print(f"X JSON DECODE ERROR: {e}")
                 print(f"   Raw data: {data}")
 
         return type('MockWebSocket', (), {
@@ -87,7 +87,7 @@ class TestIssue1021FixValidation(SSotAsyncTestCase):
             frontend_tool_name = message['payload']['tool_name']
             self.assertEqual(frontend_tool_name, 'aws_cost_analyzer',
                            "Frontend must be able to access payload.tool_name")
-            print(f"   ✅ Frontend access successful: payload.tool_name = {frontend_tool_name}")
+            print(f"   CHECK Frontend access successful: payload.tool_name = {frontend_tool_name}")
         except KeyError:
             self.fail("Frontend cannot access payload.tool_name - fix incomplete")
 
@@ -96,7 +96,7 @@ class TestIssue1021FixValidation(SSotAsyncTestCase):
         for field in expected_root_fields:
             self.assertIn(field, message, f"Message must have '{field}' at root level")
 
-        print(f"   ✅ PAYLOAD WRAPPER FIX VALIDATED!")
+        print(f"   CHECK PAYLOAD WRAPPER FIX VALIDATED!")
 
     async def test_multiple_event_types_have_payload(self):
         """Test that all event types now use payload wrapper."""
@@ -146,7 +146,7 @@ class TestIssue1021FixValidation(SSotAsyncTestCase):
                     self.assertEqual(payload[key], value,
                                    f"{event_type} payload.{key} must equal {value}")
 
-        print(f"   ✅ All {len(test_events)} event types use payload wrapper!")
+        print(f"   CHECK All {len(test_events)} event types use payload wrapper!")
 
     async def test_frontend_compatibility_simulation(self):
         """Simulate frontend processing to ensure compatibility."""
@@ -213,8 +213,8 @@ class TestIssue1021FixValidation(SSotAsyncTestCase):
         self.assertNotEqual(result['tool_name'], 'unknown-tool',
                            "Frontend should not fall back to 'unknown-tool'")
 
-        print(f"   ✅ Frontend compatibility confirmed!")
-        print(f"   ✅ Issue #1021 structural mismatch RESOLVED!")
+        print(f"   CHECK Frontend compatibility confirmed!")
+        print(f"   CHECK Issue #1021 structural mismatch RESOLVED!")
 
 if __name__ == '__main__':
     import sys

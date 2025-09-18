@@ -201,7 +201,7 @@ from netra_backend.app.websocket_core.event_validator import (
         if failed_imports:
             error_msg = "Configuration import consistency failures:\n"
             for failure in failed_imports:
-                error_msg += f"  ❌ {failure}\n"
+                error_msg += f"  X {failure}\n"
             pytest.fail(error_msg)
     
     def test_test_framework_ssot_imports(self):
@@ -238,7 +238,7 @@ from netra_backend.app.websocket_core.event_validator import (
         if failed_imports:
             error_msg = "SSOT test framework import failures:\n"
             for failure in failed_imports:
-                error_msg += f"  ❌ {failure}\n"
+                error_msg += f"  X {failure}\n"
             pytest.fail(error_msg)
     
     def test_staging_configuration_alignment(self):
@@ -369,12 +369,12 @@ from netra_backend.app.websocket_core.event_validator import (
                     assert hasattr(category, 'priority'), f"Category {category_name} missing priority attribute"
                     assert isinstance(category.priority, CategoryPriority), f"Category {category_name} has invalid priority type"
             
-            print("✅ Fix 1 VALIDATED: Category processing logic working correctly")
+            print("CHECK Fix 1 VALIDATED: Category processing logic working correctly")
             
         except ImportError as e:
-            pytest.fail(f"❌ Fix 1 FAILED: Import error in category system: {e}")
+            pytest.fail(f"X Fix 1 FAILED: Import error in category system: {e}")
         except Exception as e:
-            pytest.fail(f"❌ Fix 1 FAILED: Category processing error: {e}")
+            pytest.fail(f"X Fix 1 FAILED: Category processing error: {e}")
 
     def test_fix_2_docker_compose_path_configuration(self):
         """
@@ -411,10 +411,10 @@ from netra_backend.app.websocket_core.event_validator import (
                 compose_file = docker_manager._get_compose_file()
                 assert compose_file is not None, "UnifiedDockerManager failed to detect compose file"
                 assert Path(compose_file).exists(), f"Detected compose file does not exist: {compose_file}"
-                print(f"✅ Detected compose file: {compose_file}")
+                print(f"CHECK Detected compose file: {compose_file}")
             except RuntimeError as e:
                 # This is expected if no compose files are available, but we should set environment variables
-                print(f"⚠️ Docker compose detection error: {e}")
+                print(f"WARNING️ Docker compose detection error: {e}")
                 
                 # Set environment variable to help with compose file detection
                 if compose_files_found:
@@ -426,9 +426,9 @@ from netra_backend.app.websocket_core.event_validator import (
                     try:
                         compose_file = docker_manager._get_compose_file()
                         assert compose_file is not None, "UnifiedDockerManager failed to use DOCKER_COMPOSE_PATH"
-                        print(f"✅ Compose file detection working with DOCKER_COMPOSE_PATH: {compose_file}")
+                        print(f"CHECK Compose file detection working with DOCKER_COMPOSE_PATH: {compose_file}")
                     except Exception as retry_error:
-                        pytest.fail(f"❌ Fix 2 FAILED: Still cannot detect compose file after setting DOCKER_COMPOSE_PATH: {retry_error}")
+                        pytest.fail(f"X Fix 2 FAILED: Still cannot detect compose file after setting DOCKER_COMPOSE_PATH: {retry_error}")
             
             # Set default COMPOSE_FILE for test infrastructure
             if "COMPOSE_FILE" not in os.environ and compose_files_found:
@@ -438,12 +438,12 @@ from netra_backend.app.websocket_core.event_validator import (
                 os.environ["COMPOSE_FILE"] = default_compose
                 print(f"🔧 Set COMPOSE_FILE environment variable to: {default_compose}")
             
-            print("✅ Fix 2 VALIDATED: Docker compose path configuration working correctly")
+            print("CHECK Fix 2 VALIDATED: Docker compose path configuration working correctly")
             
         except ImportError as e:
-            pytest.fail(f"❌ Fix 2 FAILED: Import error in Docker manager: {e}")
+            pytest.fail(f"X Fix 2 FAILED: Import error in Docker manager: {e}")
         except Exception as e:
-            pytest.fail(f"❌ Fix 2 FAILED: Docker compose configuration error: {e}")
+            pytest.fail(f"X Fix 2 FAILED: Docker compose configuration error: {e}")
 
     def test_fix_3_real_websocket_test_config_availability(self):
         """
@@ -506,13 +506,13 @@ from netra_backend.app.websocket_core.event_validator import (
             
             assert critical_events.issubset(config.required_agent_events), f"Missing critical events: {critical_events - config.required_agent_events}"
             
-            print("✅ Fix 3 VALIDATED: RealWebSocketTestConfig class working correctly")
+            print("CHECK Fix 3 VALIDATED: RealWebSocketTestConfig class working correctly")
             print(f"   📊 Config: timeout={config.connection_timeout}s, retries={config.max_retries}, events={len(config.required_agent_events)}")
             
         except ImportError as e:
-            pytest.fail(f"❌ Fix 3 FAILED: Import error for RealWebSocketTestConfig: {e}")
+            pytest.fail(f"X Fix 3 FAILED: Import error for RealWebSocketTestConfig: {e}")
         except Exception as e:
-            pytest.fail(f"❌ Fix 3 FAILED: RealWebSocketTestConfig validation error: {e}")
+            pytest.fail(f"X Fix 3 FAILED: RealWebSocketTestConfig validation error: {e}")
 
     def test_issue_1197_comprehensive_remediation_validation(self):
         """
@@ -554,14 +554,14 @@ from netra_backend.app.websocket_core.event_validator import (
             # WebSocket config should be compatible with Docker environment
             assert websocket_config.docker_startup_timeout > 0, "WebSocket config incompatible with Docker"
             
-            print("✅ ISSUE #1197 FULLY REMEDIATED: All three fixes validated and integrated successfully")
-            print("   🎯 Fix 1: Category processing logic ✓")
-            print("   🐳 Fix 2: Docker compose path configuration ✓") 
-            print("   🔌 Fix 3: RealWebSocketTestConfig availability ✓")
-            print("   🔗 Cross-component integration ✓")
+            print("CHECK ISSUE #1197 FULLY REMEDIATED: All three fixes validated and integrated successfully")
+            print("   🎯 Fix 1: Category processing logic CHECK")
+            print("   🐳 Fix 2: Docker compose path configuration CHECK") 
+            print("   🔌 Fix 3: RealWebSocketTestConfig availability CHECK")
+            print("   🔗 Cross-component integration CHECK")
             
         except Exception as e:
-            pytest.fail(f"❌ ISSUE #1197 REMEDIATION INCOMPLETE: Integration test failed: {e}")
+            pytest.fail(f"X ISSUE #1197 REMEDIATION INCOMPLETE: Integration test failed: {e}")
 
 
 # Test execution metadata

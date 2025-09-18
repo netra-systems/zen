@@ -23,7 +23,7 @@ CRITICAL: These tests must demonstrate actual context persistence and conversati
 No mocking conversation state or bypassing context validation allowed.
 
 GitHub Issue: #861 Agent Golden Path Messages Test Creation - STEP 1
-Coverage Target: 0.9% → 25% improvement (Priority Scenario #2)
+Coverage Target: 0.9% -> 25% improvement (Priority Scenario #2)
 """
 import asyncio
 import pytest
@@ -185,7 +185,7 @@ class MultiTurnConversationE2ETests(SSotAsyncTestCase):
             assert any((elem in turn2_lower for elem in ['prompt', 'optimization', 'customer support'])), f'Turn 2 should specifically address prompt optimization for customer support. Response: {turn2_response[:200]}...'
             assert len(turn2_response) >= 150, f'Turn 2 response should be detailed follow-up: {len(turn2_response)} chars'
             assert context_analysis['coherence_score'] >= 0.3, f"Context coherence too low: {context_analysis['context_coherence_score']:.2f} (conversation should build upon previous context)"
-            self.logger.info('✅ Basic two-turn context persistence validated')
+            self.logger.info('CHECK Basic two-turn context persistence validated')
         finally:
             await websocket.close()
 
@@ -255,7 +255,7 @@ class MultiTurnConversationE2ETests(SSotAsyncTestCase):
             referenced = [term for term in should_reference if term in turn5_lower]
             assert len(referenced) >= 3, f'Final turn should synthesize conversation context. Referenced: {referenced} of {should_reference}'
             assert context_analysis['context_coherence_score'] >= 0.4, f"Complex conversation coherence insufficient: {context_analysis['context_coherence_score']:.2f}. Multi-turn conversations require strong context continuity."
-            self.logger.info('✅ Complex multi-turn conversation building validated')
+            self.logger.info('CHECK Complex multi-turn conversation building validated')
         finally:
             await websocket.close()
 
@@ -331,7 +331,7 @@ class MultiTurnConversationE2ETests(SSotAsyncTestCase):
             final_references = [elem for elem in synthesis_elements if elem in final_response]
             assert len(final_references) >= 4, f'Final synthesis should reference comprehensive conversation context. Found: {final_references} of {synthesis_elements}'
             assert context_analysis['context_coherence_score'] >= 0.5, f"Cross-agent context coherence insufficient: {context_analysis['context_coherence_score']:.2f}. Different agents must share conversation memory effectively."
-            self.logger.info('✅ Cross-agent conversation memory validated')
+            self.logger.info('CHECK Cross-agent conversation memory validated')
         finally:
             await websocket.close()
 
@@ -409,7 +409,7 @@ class MultiTurnConversationE2ETests(SSotAsyncTestCase):
             integrated = [elem.lower() for elem in integration_elements if elem.lower() in turn5_lower]
             assert len(integrated) >= 4, f'Turn 5 should integrate both main and branch contexts. Integrated: {integrated}'
             assert context_analysis['context_coherence_score'] >= 0.45, f"Branching conversation coherence insufficient: {context_analysis['context_coherence_score']:.2f}. Complex conversation flows require strong context management."
-            self.logger.info('✅ Conversation branching and context recovery validated')
+            self.logger.info('CHECK Conversation branching and context recovery validated')
         finally:
             await websocket.close()
 if __name__ == '__main__':

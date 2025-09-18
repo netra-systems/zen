@@ -112,7 +112,7 @@ class MissionCriticalWebSocketValidator:
 
         for event in self.REQUIRED_EVENTS:
             count = self.event_counts.get(event, 0)
-            status = "✓ PASS:" if count > 0 else "✗ FAIL:"
+            status = "CHECK PASS:" if count > 0 else "✗ FAIL:"
             report.append(f"  {status} {event} ({count} times))"
 
         if failures:

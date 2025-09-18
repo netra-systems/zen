@@ -60,9 +60,9 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
 
             # Log success for debugging
             print(f\n=== SSOT VALIDATION SUCCESS ===)
-            print(f"✓ SSOT module importable: {ssot_module_path})"
-            print(f✓ SSOT class available: {ssot_class_name})
-            print(f"✓ Class type valid: {type(supervisor_class)})"
+            print(f"CHECK SSOT module importable: {ssot_module_path})"
+            print(fCHECK SSOT class available: {ssot_class_name})
+            print(f"CHECK Class type valid: {type(supervisor_class)})"
             print(=*40)
 
         except ImportError as e:
@@ -86,8 +86,8 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
 
             # Log inheritance chain for debugging
             print(f\n=== SSOT INHERITANCE VALIDATION ==="")
-            print(f✓ SSOT class MRO: {[cls.__name__ for cls in mro]})
-            print(f✓ BaseAgent inheritance: {base_agent_in_mro}"")
+            print(fCHECK SSOT class MRO: {[cls.__name__ for cls in mro]})
+            print(fCHECK BaseAgent inheritance: {base_agent_in_mro}"")
             print(=*45)"
             print(=*45)""
 
@@ -119,7 +119,7 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
 
             # Log method validation results
             print(f\n=== SSOT METHOD VALIDATION ===)
-            print(f✓ Present methods: {present_methods}"")
+            print(fCHECK Present methods: {present_methods}"")
             if missing_methods:
                 print(f✗ Missing methods: {missing_methods})
             print(="*35)"
@@ -158,7 +158,7 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
                     fSSOT FAILURE: {self.ssot_class_name} should be instantiable""
                 )
 
-                print(f✓ SSOT class is callable: {callable(supervisor_class)})
+                print(fCHECK SSOT class is callable: {callable(supervisor_class)})
                 print(=*45")"
 
             except Exception as instantiation_error:
@@ -194,8 +194,8 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
                             if self.ssot_module_path in content:
                                 ssot_usage_found = True
                                 print(f"\n=== FACTORY SSOT VALIDATION ===))"
-                                print(f✓ Factory uses SSOT: {factory_module_path})"
-                                print(f✓ Factory uses SSOT: {factory_module_path})"
+                                print(fCHECK Factory uses SSOT: {factory_module_path})"
+                                print(fCHECK Factory uses SSOT: {factory_module_path})"
                                 print("=*35)"
                                 break
 
@@ -242,7 +242,7 @@ class SupervisorAgentSSOTValidationTests(SSotBaseTestCase):
             print(f"\n=== WEBSOCKET SSOT VALIDATION ===))"
             print(fWebSocket modules using SSOT: {len(ssot_websocket_usage)})
             for module in ssot_websocket_usage:
-                print(f"✓ {module})"
+                print(f"CHECK {module})"
             print(=*40)
 
             # This is informational - WebSocket integration should use SSOT

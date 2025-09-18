@@ -304,7 +304,7 @@ class Issue1116GoldenPathMultiUserTests(SSotAsyncTestCase):
             f"Failed authentications prevent comprehensive contamination testing. " \
             f"Failures: {failed_auths}"
         
-        print("✅ PASS: Perfect Golden Path authentication isolation on GCP staging")
+        print("CHECK PASS: Perfect Golden Path authentication isolation on GCP staging")
     
     @pytest.mark.asyncio
     async def test_concurrent_golden_path_websocket_chat_contamination_STAGING(self):
@@ -519,7 +519,7 @@ class Issue1116GoldenPathMultiUserTests(SSotAsyncTestCase):
             f"WebSocket contamination events: {len(self.websocket_contamination_events)}. " \
             f"Enterprise customers receive other customers' sensitive chat responses in production staging!"
         
-        print("✅ PASS: Perfect Golden Path WebSocket chat isolation on GCP staging")
+        print("CHECK PASS: Perfect Golden Path WebSocket chat isolation on GCP staging")
     
     @pytest.mark.asyncio
     async def test_end_to_end_golden_path_multi_user_isolation_COMPREHENSIVE_STAGING(self):
@@ -628,7 +628,7 @@ class Issue1116GoldenPathMultiUserTests(SSotAsyncTestCase):
             f"Revenue at Risk: $500K+ ARR. " \
             f"PRODUCTION DEPLOYMENT BLOCKED: Golden Path contamination prevents enterprise deployment!"
         
-        print("✅ PASS: Perfect Golden Path multi-user isolation achieved on GCP staging")
+        print("CHECK PASS: Perfect Golden Path multi-user isolation achieved on GCP staging")
     
     def teardown_method(self, method):
         """Clean up E2E staging test environment and log comprehensive Golden Path evidence."""

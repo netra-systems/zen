@@ -2,7 +2,7 @@
 Staging-specific integration tests for Issue 1184.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Mission Critical Infrastructure
+- Segment: ALL (Free -> Enterprise) - Mission Critical Infrastructure
 - Business Goal: Validate WebSocket infrastructure in production-like GCP staging environment
 - Value Impact: Ensures staging environment accurately validates production deployments
 - Strategic Impact: Protects $500K+ ARR by preventing deployment of broken WebSocket infrastructure
@@ -57,7 +57,7 @@ class StagingWebSocketInfrastructureTests(SSotAsyncTestCase):
         for attr in staging_required_attrs:
             assert hasattr(manager, attr), f"Manager missing required staging attribute: {attr}"
 
-        logger.info("✅ WebSocket manager staging compatibility validated")
+        logger.info("CHECK WebSocket manager staging compatibility validated")
 
     async def test_staging_websocket_event_delivery_reliability(self):
         """
@@ -116,7 +116,7 @@ class StagingWebSocketInfrastructureTests(SSotAsyncTestCase):
             # In staging, at least manager creation should work (even if events don't deliver)
             assert total_attempts > 0, "No event delivery attempts made in staging"
 
-        logger.info("✅ Staging WebSocket event delivery reliability tested")
+        logger.info("CHECK Staging WebSocket event delivery reliability tested")
 
     async def test_staging_websocket_multi_user_isolation(self):
         """
@@ -156,7 +156,7 @@ class StagingWebSocketInfrastructureTests(SSotAsyncTestCase):
             manager2 = get_websocket_manager(user_context=user_context)
             assert manager1 is manager2, f"Same user should get same manager in staging: {user_context['user_id']}"
 
-        logger.info("✅ Staging multi-user isolation validated")
+        logger.info("CHECK Staging multi-user isolation validated")
 
     async def test_staging_websocket_performance_characteristics(self):
         """
@@ -200,7 +200,7 @@ class StagingWebSocketInfrastructureTests(SSotAsyncTestCase):
         unique_managers = len(set(id(m) for m in managers))
         assert unique_managers == 20, f"Expected 20 unique managers, got {unique_managers} (memory efficiency issue)"
 
-        logger.info("✅ Staging WebSocket performance characteristics validated")
+        logger.info("CHECK Staging WebSocket performance characteristics validated")
 
     async def _safe_emit_event(self, manager, method_name, event_type, data):
         """
@@ -264,4 +264,4 @@ class StagingWebSocketInfrastructureTests(SSotAsyncTestCase):
         manager3 = get_websocket_manager(user_context=different_context)
         assert manager3 is not manager1, "Different users should get different managers"
 
-        logger.info("✅ Staging WebSocket manager registry behavior validated")
+        logger.info("CHECK Staging WebSocket manager registry behavior validated")

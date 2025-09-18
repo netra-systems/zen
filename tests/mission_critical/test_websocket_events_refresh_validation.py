@@ -263,8 +263,8 @@ class WebSocketEventValidation:
 
             print(f"📊 Events after refresh: {len(required_after)}")
             print(f"🔄 Session restore detected: {has_session_restore}")
-            print(f"❌ Missing before: {missing_before}")
-            print(f"❌ Missing after: {missing_after}")
+            print(f"X Missing before: {missing_before}")
+            print(f"X Missing after: {missing_after}")
 
             self.test_results['events_captured'][test_name] = {
                 'before': list(required_before),
@@ -279,7 +279,7 @@ class WebSocketEventValidation:
                 raise AssertionError(f"Insufficient events after refresh: {len(required_after)}/5")
 
         except Exception as e:
-            print(f"❌ Error in {test_name}: {e}")
+            print(f"X Error in {test_name}: {e}")
             self.test_results['failed'] += 1
             return False
         finally:
@@ -292,7 +292,7 @@ class WebSocketEventValidation:
         print(f"🏭 Testing: {test_name}")
 
         if not self.websocket_factory:
-            print("⚠️ WebSocket factory not available, skipping test")
+            print("WARNING️ WebSocket factory not available, skipping test")
             self.test_results['total'] += 1
             self.test_results['passed'] += 1  # Pass since dependency is missing
             return True
@@ -370,7 +370,7 @@ class WebSocketEventValidation:
 
             print(f"📊 Events before refresh: {events_before}")
             print(f"📊 Events after refresh: {len(events_after)}")
-            print(f"✅ Found after refresh: {found_after_refresh}")
+            print(f"CHECK Found after refresh: {found_after_refresh}")
             print(f"📋 All event types: {all_event_types}")
 
             # Clean up
@@ -384,7 +384,7 @@ class WebSocketEventValidation:
                 raise AssertionError(f"No completion events after refresh: {found_after_refresh}")
 
         except Exception as e:
-            print(f"❌ Factory test error: {e}")
+            print(f"X Factory test error: {e}")
             self.test_results['failed'] += 1
             return False
         finally:
@@ -408,7 +408,7 @@ class WebSocketEventValidation:
             try:
                 await test_func()
             except Exception as e:
-                print(f"❌ Factory test failed: {e}")
+                print(f"X Factory test failed: {e}")
                 self.test_results['failed'] += 1
                 self.test_results['total'] += 1
 
@@ -426,7 +426,7 @@ class WebSocketEventValidation:
             try:
                 await test_func(page)
             except Exception as e:
-                print(f"❌ Browser test failed: {e}")
+                print(f"X Browser test failed: {e}")
                 self.test_results['failed'] += 1
                 self.test_results['total'] += 1
             finally:
@@ -452,7 +452,7 @@ class WebSocketEventValidation:
 
         if self.test_results['missing_events']:
             print()
-            print("⚠️ MISSING REQUIRED EVENTS:")
+            print("WARNING️ MISSING REQUIRED EVENTS:")
             for missing in self.test_results['missing_events']:
                 print(f"  {missing['test']}: {missing['missing']}")
 
@@ -473,7 +473,7 @@ class WebSocketEventValidation:
         if missing_required:
             print(f"  Missing: {missing_required}")
         else:
-            print("  ✅ All required events captured!")
+            print("  CHECK All required events captured!")
 
         # Factory pattern compliance
         factory_events = set()
@@ -490,7 +490,7 @@ class WebSocketEventValidation:
             if factory_missing:
                 print(f"  Missing: {factory_missing}")
             else:
-                print("  ✅ All factory events working correctly!")
+                print("  CHECK All factory events working correctly!")
 
         # Determine overall status
         factory_events = set()
@@ -502,19 +502,19 @@ class WebSocketEventValidation:
 
         if self.test_results['failed'] == 0 and not missing_required and not factory_missing:
             print()
-            print("✅ ALL VALIDATIONS PASSED - WebSocket events working correctly!")
-            print("  ✅ Browser tests passed")
-            print("  ✅ Factory tests passed")
-            print("  ✅ All required events validated")
+            print("CHECK ALL VALIDATIONS PASSED - WebSocket events working correctly!")
+            print("  CHECK Browser tests passed")
+            print("  CHECK Factory tests passed")
+            print("  CHECK All required events validated")
         elif missing_required or factory_missing:
             all_missing = missing_required | factory_missing
-            print(f"❌ CRITICAL EVENTS MISSING: {all_missing}")
+            print(f"X CRITICAL EVENTS MISSING: {all_missing}")
             if missing_required:
                 print(f"  Browser missing: {missing_required}")
             if factory_missing:
                 print(f"  Factory missing: {factory_missing}")
         else:
-            print("⚠️ Some tests failed but events are working")
+            print("WARNING️ Some tests failed but events are working")
 
         return self.test_results
 

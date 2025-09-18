@@ -3,7 +3,7 @@
 Golden Path Protection Tests for JWT SSOT Migration
 
 This test suite ensures that SSOT consolidation of JWT validation does NOT break
-the critical Golden Path user flow: login → websocket auth → agent response.
+the critical Golden Path user flow: login -> websocket auth -> agent response.
 
 MISSION: Issue #670 - JWT validation scattered across services
 GOLDEN PATH: Protect $500K+ ARR functionality during SSOT consolidation

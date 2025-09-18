@@ -208,7 +208,7 @@ class UserExecutionContextFactoryMethodsTests:
         # Simulate the fixed create_user_context method
         def create_user_context_fixed() -> UserExecutionContext:
             """Fixed version of create_user_context from failing test."""
-            return UserExecutionContext.from_request(  # ✅ FIXED: was create_for_user
+            return UserExecutionContext.from_request(  # CHECK FIXED: was create_for_user
                 user_id="test_user",
                 thread_id="test_thread",
                 run_id="test_run"

@@ -53,22 +53,22 @@ class UserContextContaminationTests(SSotAsyncTestCase):
             logger.info(f'User 2 result: {result2}')
             contamination_detected = self._check_for_contamination(result1, result2, user1_context, user2_context)
             if contamination_detected:
-                logger.error('❌ CRITICAL SECURITY VIOLATION: User data contamination detected')
+                logger.error('X CRITICAL SECURITY VIOLATION: User data contamination detected')
                 pytest.fail("CRITICAL SECURITY VIOLATION: User data contamination detected between sessions. User 1's sensitive data appeared in User 2's results or vice versa. This represents a severe security breach affecting $500K+ ARR customer data.")
             else:
-                logger.info('✅ USER ISOLATION: No contamination detected')
+                logger.info('CHECK USER ISOLATION: No contamination detected')
         except ImportError:
-            logger.info('✅ MIGRATION SUCCESS: Deprecated ExecutionEngine not available')
+            logger.info('CHECK MIGRATION SUCCESS: Deprecated ExecutionEngine not available')
             await self._test_user_execution_engine_isolation(user1_context, user2_context)
         except Exception as e:
             logger.error(f'Error during contamination test: {e}')
             contamination_detected = True
         websocket_contamination = await self._check_websocket_event_contamination(user1_context, user2_context, mock_websocket_bridge)
         if websocket_contamination:
-            logger.error('❌ WEBSOCKET CONTAMINATION: Events sent to wrong user')
+            logger.error('X WEBSOCKET CONTAMINATION: Events sent to wrong user')
             pytest.fail('CRITICAL WEBSOCKET CONTAMINATION: WebSocket events delivered to wrong user. This breaks real-time chat isolation and compromises user experience.')
         else:
-            logger.info('✅ WEBSOCKET ISOLATION: Events properly isolated')
+            logger.info('CHECK WEBSOCKET ISOLATION: Events properly isolated')
 
     async def test_concurrent_user_state_isolation(self):
         """REPRODUCTION TEST: Concurrent users share state inappropriately.
@@ -128,7 +128,7 @@ class UserContextContaminationTests(SSotAsyncTestCase):
         elif contamination_found:
             pytest.fail('UNEXPECTED ISOLATION FAILURE: UserExecutionEngine failed to provide isolation')
         else:
-            logger.info('✅ CONCURRENT USER ISOLATION: All users properly isolated')
+            logger.info('CHECK CONCURRENT USER ISOLATION: All users properly isolated')
 
     async def test_memory_state_sharing_vulnerability(self):
         """REPRODUCTION TEST: Memory state sharing between user sessions.
@@ -148,12 +148,12 @@ class UserContextContaminationTests(SSotAsyncTestCase):
             engine2 = UserExecutionEngine(mock_registry, mock_websocket_bridge, user2_context)
             user1_history_visible = await self._check_history_visibility(engine2, 'USER1_HISTORY_DATA')
             if user1_history_visible:
-                logger.error('❌ MEMORY STATE VULNERABILITY: User1 history visible to User2')
+                logger.error('X MEMORY STATE VULNERABILITY: User1 history visible to User2')
                 pytest.fail("MEMORY STATE VULNERABILITY: User execution history shared between users. User 1's execution history is visible to User 2's engine instance. This creates privacy violations and data leakage.")
             else:
-                logger.info('✅ MEMORY ISOLATION: User history properly isolated')
+                logger.info('CHECK MEMORY ISOLATION: User history properly isolated')
         except ImportError:
-            logger.info('✅ MIGRATION SUCCESS: Deprecated ExecutionEngine not available')
+            logger.info('CHECK MIGRATION SUCCESS: Deprecated ExecutionEngine not available')
             await self._test_user_execution_engine_memory_isolation(user1_context, user2_context)
 
     def _create_mock_registry(self):
@@ -231,7 +231,7 @@ class UserContextContaminationTests(SSotAsyncTestCase):
         engine2 = UserExecutionEngine(user2_context, mock_agent_factory2, mock_websocket_emitter2)
         assert engine1 != engine2, 'UserExecutionEngine instances should be separate'
         assert engine1.context != engine2.context, 'User contexts should be separate'
-        logger.info('✅ UserExecutionEngine provides proper instance isolation')
+        logger.info('CHECK UserExecutionEngine provides proper instance isolation')
 
     async def _populate_engine_state(self, engine, user_context, history_data):
         """Populate engine with user-specific state."""
@@ -256,7 +256,7 @@ class UserContextContaminationTests(SSotAsyncTestCase):
         assert hasattr(engine1, 'context'), 'Engine1 should have user context'
         assert hasattr(engine2, 'context'), 'Engine2 should have user context'
         assert engine1.context.user_id != engine2.context.user_id, 'Contexts should be different'
-        logger.info('✅ UserExecutionEngine provides proper memory isolation')
+        logger.info('CHECK UserExecutionEngine provides proper memory isolation')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

@@ -239,7 +239,7 @@ class WebSocketManagerSSOTImportConsolidationTests(SSotBaseTestCase):
             result.class_type = type(instance)
             result.instance_hash = hash(str(instance))
 
-            logger.debug(f"✓ Successfully imported and created: {import_path.import_statement}")
+            logger.debug(f"CHECK Successfully imported and created: {import_path.import_statement}")
             logger.debug(f"  Instance ID: {result.instance_id}")
             logger.debug(f"  Instance type: {result.class_type}")
 
@@ -285,7 +285,7 @@ class WebSocketManagerSSOTImportConsolidationTests(SSotBaseTestCase):
         instance_details = {}
 
         for result in successful_imports:
-            print(f"✓ {result.import_path.import_statement}")
+            print(f"CHECK {result.import_path.import_statement}")
             print(f"  Type: {result.class_type}")
             print(f"  Deprecated: {result.import_path.is_deprecated}")
             print(f"  Factory: {result.import_path.is_factory}")
@@ -327,7 +327,7 @@ class WebSocketManagerSSOTImportConsolidationTests(SSotBaseTestCase):
         # EXPECTED FAILURE CONDITION (before SSOT fix)
         # If we have multiple unique types, this indicates SSOT fragmentation
         if len(unique_types) > 1:
-            print("❌ SSOT VIOLATION DETECTED: Multiple WebSocket Manager types found!")
+            print("X SSOT VIOLATION DETECTED: Multiple WebSocket Manager types found!")
             print("This indicates import chaos that needs SSOT consolidation.")
             print()
             print("DISCOVERED TYPES:")
@@ -346,7 +346,7 @@ class WebSocketManagerSSOTImportConsolidationTests(SSotBaseTestCase):
             )
 
         # EXPECTED SUCCESS CONDITION (after SSOT fix)
-        print("✅ SSOT CONSOLIDATION VALIDATED: All imports return same underlying type!")
+        print("CHECK SSOT CONSOLIDATION VALIDATED: All imports return same underlying type!")
 
         # Verify at least one canonical path works
         self.assertGreater(
@@ -411,7 +411,7 @@ class WebSocketManagerSSOTImportConsolidationTests(SSotBaseTestCase):
 
         # CRITICAL VALIDATION: All instances should be of the same type after SSOT consolidation
         if len(unique_types) > 1:
-            print("❌ INSTANCE TYPE FRAGMENTATION DETECTED!")
+            print("X INSTANCE TYPE FRAGMENTATION DETECTED!")
             print("Different import paths are creating instances of different types.")
             print("This violates SSOT principles and can cause runtime errors.")
             print()
@@ -423,7 +423,7 @@ class WebSocketManagerSSOTImportConsolidationTests(SSotBaseTestCase):
                 f"instances of the same underlying type. Types found: {list(unique_types)}"
             )
 
-        print("✅ INSTANCE TYPE CONSISTENCY VALIDATED!")
+        print("CHECK INSTANCE TYPE CONSISTENCY VALIDATED!")
         print("All import paths create instances of the same SSOT type.")
 
         # Verify we have at least one working instance
@@ -479,7 +479,7 @@ class WebSocketManagerSSOTImportConsolidationTests(SSotBaseTestCase):
             deprecated_results.append(result)
 
             if result.success:
-                print(f"✓ DEPRECATED (working): {path.import_statement}")
+                print(f"CHECK DEPRECATED (working): {path.import_statement}")
                 print(f"  Type: {result.class_type}")
             else:
                 print(f"✗ DEPRECATED (broken): {path.import_statement}")
@@ -493,7 +493,7 @@ class WebSocketManagerSSOTImportConsolidationTests(SSotBaseTestCase):
             current_results.append(result)
 
             if result.success:
-                print(f"✓ CURRENT (working): {path.import_statement}")
+                print(f"CHECK CURRENT (working): {path.import_statement}")
                 print(f"  Type: {result.class_type}")
             else:
                 print(f"✗ CURRENT (broken): {path.import_statement}")
@@ -510,7 +510,7 @@ class WebSocketManagerSSOTImportConsolidationTests(SSotBaseTestCase):
             current_types = set(r.class_type for r in working_current)
 
             if deprecated_types != current_types:
-                print("❌ BACKWARDS COMPATIBILITY VIOLATION!")
+                print("X BACKWARDS COMPATIBILITY VIOLATION!")
                 print("Deprecated import paths return different types than current paths.")
                 print(f"Deprecated types: {deprecated_types}")
                 print(f"Current types: {current_types}")
@@ -523,7 +523,7 @@ class WebSocketManagerSSOTImportConsolidationTests(SSotBaseTestCase):
                     f"After SSOT consolidation, all paths should return the same type."
                 )
 
-            print("✅ BACKWARDS COMPATIBILITY VALIDATED!")
+            print("CHECK BACKWARDS COMPATIBILITY VALIDATED!")
             print("Deprecated import paths correctly redirect to SSOT implementation.")
 
         # Ensure at least some current paths work

@@ -80,7 +80,7 @@ class DeprecationMigrationValidationTests(SSotBaseTestCase):
                 test_success = self._test_import_in_isolation(canonical_import)
                 
                 if test_success:
-                    print(f"    ✓ Import successful")
+                    print(f"    CHECK Import successful")
                     working_imports += 1
                     self.test_results['working_migrations'] += 1
                 else:
@@ -297,14 +297,14 @@ print(result)
             from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.websocket_core.event_validation_framework import get_websocket_validator
             readiness_checks['canonical_imports_functional'] = True
-            print("  ✓ Canonical imports functional")
+            print("  CHECK Canonical imports functional")
         except Exception as e:
             print(f"  ✗ Canonical imports failed: {e}")
         
         # Check 2: Migration paths documented
         migration_doc_exists = (self.project_root / "docs" / "SSOT_IMPORT_REGISTRY.md").exists()
         readiness_checks['migration_paths_documented'] = migration_doc_exists
-        print(f"  {'✓' if migration_doc_exists else '✗'} Migration paths documented")
+        print(f"  {'CHECK' if migration_doc_exists else '✗'} Migration paths documented")
         
         # Check 3: No circular dependencies (basic check)
         try:
@@ -312,20 +312,20 @@ print(result)
             import netra_backend.app.websocket_core.websocket_manager
             import netra_backend.app.websocket_core.event_validation_framework
             readiness_checks['no_circular_dependencies'] = True
-            print("  ✓ No obvious circular dependencies")
+            print("  CHECK No obvious circular dependencies")
         except Exception as e:
             print(f"  ✗ Potential circular dependency: {e}")
         
         # Check 4: Test coverage for migration
         test_files = list(self.project_root.glob("tests/**/test_*deprecation*.py"))
         readiness_checks['test_coverage_adequate'] = len(test_files) > 0
-        print(f"  {'✓' if len(test_files) > 0 else '✗'} Test coverage for deprecation migration")
+        print(f"  {'CHECK' if len(test_files) > 0 else '✗'} Test coverage for deprecation migration")
         
         readiness_score = sum(readiness_checks.values()) / len(readiness_checks)
         print(f"\n📊 SSOT Consolidation Readiness: {readiness_score:.1%}")
         
         for check, status in readiness_checks.items():
-            print(f"  {check}: {'✓' if status else '✗'}")
+            print(f"  {check}: {'CHECK' if status else '✗'}")
         
         # Should be at least 75% ready for Phase 2
         self.assertGreaterEqual(

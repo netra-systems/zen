@@ -84,12 +84,12 @@ class WebSocketFactoryPatternEnforcementTests(SSotBaseTestCase):
         # This assertion SHOULD FAIL before SSOT consolidation
         self.assertEqual(
             len(deprecated_violations), 0,
-            f"❌ PRE-CONSOLIDATION FAILURE (EXPECTED): Found {len(deprecated_violations)} "
+            f"X PRE-CONSOLIDATION FAILURE (EXPECTED): Found {len(deprecated_violations)} "
             f"deprecated factory patterns that must be eliminated during SSOT consolidation. "
             f"This test should PASS after consolidation is complete."
         )
         
-        print("✅ Zero deprecated factory patterns detected - SSOT consolidation successful!")
+        print("CHECK Zero deprecated factory patterns detected - SSOT consolidation successful!")
         self.record_metric("deprecated_violations", len(deprecated_violations))
 
     def test_unified_factory_pattern_enforcement(self):
@@ -123,12 +123,12 @@ class WebSocketFactoryPatternEnforcementTests(SSotBaseTestCase):
         
         if missing_patterns:
             self.fail(
-                f"❌ PRE-CONSOLIDATION FAILURE (EXPECTED): Missing unified SSOT patterns: "
+                f"X PRE-CONSOLIDATION FAILURE (EXPECTED): Missing unified SSOT patterns: "
                 f"{missing_patterns}. This test should PASS after consolidation implements "
                 f"the unified factory pattern."
             )
         
-        print("✅ Unified SSOT factory patterns properly implemented!")
+        print("CHECK Unified SSOT factory patterns properly implemented!")
         self.record_metric("ssot_patterns_found", len(ssot_pattern_coverage))
         self.record_metric("required_patterns_complete", len(required_patterns))
 
@@ -153,13 +153,13 @@ class WebSocketFactoryPatternEnforcementTests(SSotBaseTestCase):
                     violations.append(f"{source_path}: {methods}")
             
             self.fail(
-                f"❌ PRE-CONSOLIDATION FAILURE (EXPECTED): Found {len(factory_method_sources)} "
+                f"X PRE-CONSOLIDATION FAILURE (EXPECTED): Found {len(factory_method_sources)} "
                 f"factory method sources, expected {expected_factory_sources} after consolidation.\n"
                 f"Multiple factory sources detected:\n" + "\n".join(f"  - {v}" for v in violations) +
                 f"\n\nThis test should PASS after SSOT consolidation eliminates duplicate factory methods."
             )
         
-        print(f"✅ Factory methods consolidated into {len(factory_method_sources)} source(s)!")
+        print(f"CHECK Factory methods consolidated into {len(factory_method_sources)} source(s)!")
         self.record_metric("factory_sources", len(factory_method_sources))
 
     def test_compatibility_layer_elimination(self):
@@ -179,13 +179,13 @@ class WebSocketFactoryPatternEnforcementTests(SSotBaseTestCase):
                 violation_summary.append(f"{file_path}: {layers}")
             
             self.fail(
-                f"❌ PRE-CONSOLIDATION FAILURE (EXPECTED): Found {len(compatibility_violations)} "
+                f"X PRE-CONSOLIDATION FAILURE (EXPECTED): Found {len(compatibility_violations)} "
                 f"files with compatibility layers that should be eliminated after consolidation.\n"
                 f"Compatibility layers detected:\n" + "\n".join(f"  - {v}" for v in violation_summary) +
                 f"\n\nThis test should PASS after SSOT consolidation removes compatibility layers."
             )
         
-        print("✅ Compatibility layers successfully eliminated!")
+        print("CHECK Compatibility layers successfully eliminated!")
         self.record_metric("compatibility_violations", len(compatibility_violations))
 
     def _scan_for_deprecated_patterns(self) -> Dict[str, List[str]]:
@@ -344,7 +344,7 @@ class WebSocketFactoryPatternEnforcementTests(SSotBaseTestCase):
 
     def _report_deprecated_violations(self, violations: Dict[str, List[str]]):
         """Report deprecated pattern violations with detailed information."""
-        print("\n❌ DEPRECATED FACTORY PATTERN VIOLATIONS DETECTED:")
+        print("\nX DEPRECATED FACTORY PATTERN VIOLATIONS DETECTED:")
         print("=" * 80)
         
         total_files = len(violations)
@@ -363,8 +363,8 @@ class WebSocketFactoryPatternEnforcementTests(SSotBaseTestCase):
         
         print("\n" + "=" * 80)
         print("🎯 SSOT CONSOLIDATION REQUIRED:")
-        print("   ✅ Replace get_websocket_manager_factory() with get_websocket_manager()")
-        print("   ✅ Replace WebSocketManagerFactory with direct WebSocketManager usage")
-        print("   ✅ Eliminate compatibility wrapper functions")
-        print("   ✅ Consolidate all factory methods into single SSOT implementation")
+        print("   CHECK Replace get_websocket_manager_factory() with get_websocket_manager()")
+        print("   CHECK Replace WebSocketManagerFactory with direct WebSocketManager usage")
+        print("   CHECK Eliminate compatibility wrapper functions")
+        print("   CHECK Consolidate all factory methods into single SSOT implementation")
         print("=" * 80)

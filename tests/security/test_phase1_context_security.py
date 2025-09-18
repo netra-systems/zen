@@ -561,14 +561,14 @@
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: edge_case_inputs = [ )
     # Unicode and encoding edge cases
-    # REMOVED_SYNTAX_ERROR: ("user_\x00null", "thread_123", "run_456"),  # Null bytes
+    # REMOVED_SYNTAX_ERROR: ("user_\\\100null", "thread_123", "run_456"),  # Null bytes
     # REMOVED_SYNTAX_ERROR: ("user_ )
     # REMOVED_SYNTAX_ERROR: \r\twhitespace", "thread_123", "run_456"),  # Control chars
     # REMOVED_SYNTAX_ERROR: ("user_[U+1F680]emoji", "thread_123", "run_456"),  # Unicode emoji
     # REMOVED_SYNTAX_ERROR: ("user_" + "a" * 1000, "thread_123", "run_456"),  # Very long input
 
     # String manipulation edge cases
-    # REMOVED_SYNTAX_ERROR: ("user_123", "thread_\x00", "run_456"),  # Null in thread_id
+    # REMOVED_SYNTAX_ERROR: ("user_123", "thread_\\\100", "run_456"),  # Null in thread_id
     # REMOVED_SYNTAX_ERROR: ("user_123", "thread_456", "run_\r )
     # REMOVED_SYNTAX_ERROR: "),  # CRLF injection attempt
     # REMOVED_SYNTAX_ERROR: ("user_123", "thread_456", "run_" + "\t" * 100),  # Tab flooding

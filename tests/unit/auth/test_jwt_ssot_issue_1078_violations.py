@@ -335,7 +335,7 @@ class JWTSSOTIssue1078ViolationsTests(SSotBaseTestCase):
             ]
             
             for func_name, files in functions_found.items():
-                violation_details.append(f"  ⚠️  Function '{func_name}' in:")
+                violation_details.append(f"  WARNING️  Function '{func_name}' in:")
                 for file_path in files:
                     violation_details.append(f"    - {file_path}")
                 violation_details.append("")

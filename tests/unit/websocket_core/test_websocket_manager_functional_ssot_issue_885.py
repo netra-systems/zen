@@ -73,7 +73,7 @@ class TestWebSocketManagerFunctionalSSOT(SSotBaseTestCase):
             self.assertIsNotNone(user_context,
                                 "User context should be created")
 
-            print("✓ Unified interface provides functional SSOT access")
+            print("CHECK Unified interface provides functional SSOT access")
 
         except Exception as e:
             self.fail(f"Unified interface functionality failed: {e}")
@@ -116,7 +116,7 @@ class TestWebSocketManagerFunctionalSSOT(SSotBaseTestCase):
         self.assertTrue(import_consolidation,
                        "Architectural diversity should consolidate through imports")
 
-        print("✓ Architectural diversity supports SSOT through clear separation of concerns")
+        print("CHECK Architectural diversity supports SSOT through clear separation of concerns")
 
     def _analyze_architectural_purposes(self) -> Dict[str, str]:
         """Analyze what architectural purpose each file serves"""
@@ -213,7 +213,7 @@ class TestWebSocketManagerFunctionalSSOT(SSotBaseTestCase):
             self.assertTrue(isolation_achieved,
                            "Factory pattern should achieve user isolation")
 
-            print("✓ Factory pattern serves legitimate user isolation requirement")
+            print("CHECK Factory pattern serves legitimate user isolation requirement")
 
         except Exception as e:
             self.fail(f"Factory pattern test failed: {e}")
@@ -259,7 +259,7 @@ class TestWebSocketManagerFunctionalSSOT(SSotBaseTestCase):
             self.assertTrue(consistency,
                            "Multiple access patterns should provide consistent behavior")
 
-        print(f"✓ Functional SSOT achieved via {len(successful_patterns)} access patterns")
+        print(f"CHECK Functional SSOT achieved via {len(successful_patterns)} access patterns")
 
     def _test_multiple_access_patterns(self) -> Dict[str, bool]:
         """Test multiple ways to access WebSocket functionality"""
@@ -371,10 +371,10 @@ class TestWebSocketManagerFunctionalSSOT(SSotBaseTestCase):
             self.assertTrue(compliance,
                            "Implementations should comply with contracts")
 
-            print("✓ Protocol interfaces define contracts honored by implementations")
+            print("CHECK Protocol interfaces define contracts honored by implementations")
         else:
             # No protocol files is also valid architecture
-            print("✓ No protocol contracts required for this implementation")
+            print("CHECK No protocol contracts required for this implementation")
 
     def _analyze_contract_definition(self, file_path: Path) -> Dict[str, Any]:
         """Analyze whether file defines contracts"""
@@ -457,7 +457,7 @@ class TestWebSocketManagerFunctionalSSOT(SSotBaseTestCase):
         self.assertTrue(user_simplicity,
                        "Users should have simple import paths")
 
-        print("✓ Import consolidation achieves SSOT access through unified interface")
+        print("CHECK Import consolidation achieves SSOT access through unified interface")
 
     def _analyze_import_consolidation(self) -> Dict[str, bool]:
         """Analyze import consolidation patterns"""
@@ -552,7 +552,7 @@ class TestWebSocketManagerArchitecturalPatterns(SSotBaseTestCase):
         self.assertTrue(maintainability_benefits,
                        "Separation should provide maintainability benefits")
 
-        print("✓ Separation of concerns represents good architecture")
+        print("CHECK Separation of concerns represents good architecture")
 
     def _analyze_separation_of_concerns(self) -> Dict[str, Any]:
         """Analyze how concerns are separated across files"""
@@ -624,10 +624,10 @@ class TestWebSocketManagerArchitecturalPatterns(SSotBaseTestCase):
             self.assertTrue(enables_polymorphism,
                            "Protocols should enable polymorphism")
 
-            print("✓ Protocol patterns provide legitimate architectural benefits")
+            print("CHECK Protocol patterns provide legitimate architectural benefits")
         else:
             # Not having protocols is also valid
-            print("✓ No protocol patterns used (also valid architecture)")
+            print("CHECK No protocol patterns used (also valid architecture)")
 
     def _analyze_protocol_pattern_usage(self) -> Dict[str, bool]:
         """Analyze how protocol patterns are used"""
@@ -682,9 +682,9 @@ class TestWebSocketManagerArchitecturalPatterns(SSotBaseTestCase):
                                 f"Factory {pattern_name} should provide clear value")
 
         if factory_patterns:
-            print(f"✓ {len(factory_patterns)} factory patterns provide business value")
+            print(f"CHECK {len(factory_patterns)} factory patterns provide business value")
         else:
-            print("✓ No factory patterns used (valid architectural choice)")
+            print("CHECK No factory patterns used (valid architectural choice)")
 
     def _identify_factory_patterns(self) -> Dict[str, Dict[str, str]]:
         """Identify factory patterns and their business justification"""
@@ -753,10 +753,10 @@ if __name__ == "__main__":
     print("WEBSOCKET MANAGER FUNCTIONAL SSOT BEHAVIORAL TESTS")
     print(f"{'='*80}")
     print("Validation Results:")
-    print("  ✓ Tests prove WebSocket Manager achieves functional SSOT")
-    print("  ✓ Architectural diversity supports unified behavior")
-    print("  ✓ Factory patterns serve legitimate business requirements")
-    print("  ✓ Interface patterns provide architectural benefits")
+    print("  CHECK Tests prove WebSocket Manager achieves functional SSOT")
+    print("  CHECK Architectural diversity supports unified behavior")
+    print("  CHECK Factory patterns serve legitimate business requirements")
+    print("  CHECK Interface patterns provide architectural benefits")
     print(f"{'='*80}")
 
     sys.exit(0 if result.wasSuccessful() else 1)

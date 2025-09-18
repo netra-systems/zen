@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Critical Golden Path infrastructure - WebSocket events deliver AI value to users
 
 This module tests the COMPLETE Agent-to-WebSocket event sequence integration covering:
-1. Complete 5-event sequence validation (agent_started → agent_thinking → tool_executing → tool_completed → agent_completed)
+1. Complete 5-event sequence validation (agent_started -> agent_thinking -> tool_executing -> tool_completed -> agent_completed)
 2. Event timing and sequencing integrity during real agent execution
 3. Event data accuracy and consistency across the execution pipeline
 4. WebSocket event delivery reliability under various execution scenarios

@@ -96,7 +96,7 @@ class JWTDelegationSSoTComplianceTests(BaseIntegrationTest):
         
         # SUCCESS CASE: Method doesn't exist (SSOT compliant)
         logger.info(
-            "✅ ISSUE #1195 COMPLIANCE: GCPAuthContextMiddleware._decode_jwt_context() method not found - SSOT compliant"
+            "CHECK ISSUE #1195 COMPLIANCE: GCPAuthContextMiddleware._decode_jwt_context() method not found - SSOT compliant"
         )
 
     @pytest.mark.ssot_compliance
@@ -173,13 +173,13 @@ class JWTDelegationSSoTComplianceTests(BaseIntegrationTest):
         elif not has_auth_service_delegation:
             # WARNING: Unclear delegation pattern
             logger.warning(
-                f"⚠️ ISSUE #1195 WARNING: Messages route JWT validation delegation pattern unclear. "
+                f"WARNING️ ISSUE #1195 WARNING: Messages route JWT validation delegation pattern unclear. "
                 f"Manual verification recommended. Analysis: {analysis_result}"
             )
         else:
             # SUCCESS: Proper delegation detected
             logger.info(
-                f"✅ ISSUE #1195 COMPLIANCE: Messages route JWT validation appears to delegate to auth service properly"
+                f"CHECK ISSUE #1195 COMPLIANCE: Messages route JWT validation appears to delegate to auth service properly"
             )
 
     @pytest.mark.ssot_compliance
@@ -261,13 +261,13 @@ class JWTDelegationSSoTComplianceTests(BaseIntegrationTest):
         elif not has_explicit_delegation:
             # WARNING: Delegation not clearly visible 
             logger.warning(
-                f"⚠️ ISSUE #1195 WARNING: WebSocket context extractor delegation patterns not clearly visible. "
+                f"WARNING️ ISSUE #1195 WARNING: WebSocket context extractor delegation patterns not clearly visible. "
                 f"Manual verification recommended. Analysis: {analysis_result}"
             )
         else:
             # SUCCESS: Explicit delegation found, no local operations
             logger.info(
-                f"✅ ISSUE #1195 COMPLIANCE: WebSocket context extractor shows explicit auth service delegation"
+                f"CHECK ISSUE #1195 COMPLIANCE: WebSocket context extractor shows explicit auth service delegation"
             )
 
     @pytest.mark.ssot_compliance
@@ -312,11 +312,11 @@ class JWTDelegationSSoTComplianceTests(BaseIntegrationTest):
                     f"Methods found: {jwt_related_methods}. JWT secrets must be auth service exclusive."
                 )
             else:
-                logger.info("✅ ISSUE #1195 COMPLIANCE: Backend does not manage JWT secrets directly")
+                logger.info("CHECK ISSUE #1195 COMPLIANCE: Backend does not manage JWT secrets directly")
                 
         except ImportError as e:
             # Expected: Backend shouldn't have JWT secret management
-            logger.info(f"✅ ISSUE #1195 COMPLIANCE: Backend JWT secret management not found (ImportError: {e})")
+            logger.info(f"CHECK ISSUE #1195 COMPLIANCE: Backend JWT secret management not found (ImportError: {e})")
 
     @pytest.mark.ssot_compliance 
     @pytest.mark.jwt_delegation
@@ -355,9 +355,9 @@ class JWTDelegationSSoTComplianceTests(BaseIntegrationTest):
                 validate_method = getattr(auth_client, 'validate_token')
                 if asyncio.iscoroutinefunction(validate_method):
                     # Good: Async method suggests network call to auth service
-                    logger.info("✅ ISSUE #1195 COMPLIANCE: Auth client validate_token is async (suggests service delegation)")
+                    logger.info("CHECK ISSUE #1195 COMPLIANCE: Auth client validate_token is async (suggests service delegation)")
                 else:
-                    logger.warning("⚠️ ISSUE #1195 WARNING: Auth client validate_token is sync (may indicate local operations)")
+                    logger.warning("WARNING️ ISSUE #1195 WARNING: Auth client validate_token is sync (may indicate local operations)")
             
             analysis_result = {
                 "auth_client_available": True,
@@ -369,7 +369,7 @@ class JWTDelegationSSoTComplianceTests(BaseIntegrationTest):
             logger.info(f"📊 ISSUE #1195 ANALYSIS: Auth service SSOT analysis: {analysis_result}")
             
             if not missing_methods:
-                logger.info("✅ ISSUE #1195 COMPLIANCE: Auth service provides complete JWT delegation interface")
+                logger.info("CHECK ISSUE #1195 COMPLIANCE: Auth service provides complete JWT delegation interface")
             
         except ImportError as e:
             pytest.fail(
@@ -458,7 +458,7 @@ class JWTDelegationSSoTComplianceTests(BaseIntegrationTest):
                 f"Backend must not import JWT libraries directly. Violations: {violations}"
             )
         else:
-            logger.info("✅ ISSUE #1195 COMPLIANCE: No direct JWT library imports found in backend")
+            logger.info("CHECK ISSUE #1195 COMPLIANCE: No direct JWT library imports found in backend")
 
     def teardown_method(self):
         """Teardown for each test method."""

@@ -167,7 +167,7 @@ class GCPWebSocketASGITests:
                     response_data = json.loads(response)
                     assert response_data.get('status') == 'success', f'Error recovery failed for scenario: {scenario_name}'
                     recovery_success_count += 1
-                    print(f'✓ Error recovery successful for scenario: {scenario_name}')
+                    print(f'CHECK Error recovery successful for scenario: {scenario_name}')
             except websockets.ConnectionClosedError:
                 print(f'✗ Connection failed for scenario {scenario_name} - ASGI error likely')
             except asyncio.TimeoutError:
@@ -195,7 +195,7 @@ class GCPWebSocketASGITests:
                 assert response_data.get('environment') == 'gcp_cloud_run', 'GCP environment detection failed'
                 assert response_data.get('headers_processed') is True, 'GCP headers not processed correctly'
                 assert response_data.get('query_params_extracted') is True, 'GCP query parameters not extracted correctly'
-                print('✓ GCP-specific ASGI scope handling validated')
+                print('CHECK GCP-specific ASGI scope handling validated')
         except Exception as e:
             if 'query_params' in str(e):
                 pytest.fail(f'GCP-specific ASGI scope error: {e}')
@@ -224,7 +224,7 @@ class WebSocketASGIRecoveryTests:
             response = await asyncio.wait_for(websocket.recv(), timeout=5)
             response_data = json.loads(response)
             assert response_data is not None, 'System should recover after ASGI errors'
-            print('✓ WebSocket system recovered after potential ASGI errors')
+            print('CHECK WebSocket system recovered after potential ASGI errors')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

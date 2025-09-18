@@ -111,16 +111,16 @@ def print_summary_report(results: Dict[str, Any]):
 
     print(f"\nDETAILED RESULTS:")
     for test_file, result in results.items():
-        status = "✅ PASS" if result.get('success') else "❌ FAIL"
+        status = "CHECK PASS" if result.get('success') else "X FAIL"
         print(f"  {status} {test_file}")
 
         if not result.get('success'):
             if result.get('file_missing'):
-                print(f"    → File not found")
+                print(f"    -> File not found")
             elif result.get('exception'):
-                print(f"    → Exception: {result['exception']}")
+                print(f"    -> Exception: {result['exception']}")
             else:
-                print(f"    → Return code: {result['returncode']}")
+                print(f"    -> Return code: {result['returncode']}")
 
     print(f"\nEXPECTED BEHAVIOR:")
     print(f"  - Tests should FAIL with current fragmentation (proving problem exists)")

@@ -338,7 +338,7 @@ def test_execution_engine_usage_patterns():
     
     # Broken imports are a separate but related violation
     if broken_imports:
-        print(f"⚠️  RELATED ISSUE: {len(broken_imports)} broken import paths found")
+        print(f"WARNING️  RELATED ISSUE: {len(broken_imports)} broken import paths found")
 
 
 @pytest.mark.unit
@@ -450,24 +450,24 @@ if __name__ == "__main__":
     
     try:
         test_only_one_execution_engine_exists()
-        print("✅ Single execution engine test PASSED")
+        print("CHECK Single execution engine test PASSED")
     except AssertionError as e:
-        print(f"❌ Single execution engine test FAILED: {e}")
+        print(f"X Single execution engine test FAILED: {e}")
     
     try:
         test_execution_engine_factory_consolidation()
-        print("✅ Factory consolidation test PASSED")
+        print("CHECK Factory consolidation test PASSED")
     except AssertionError as e:
-        print(f"❌ Factory consolidation test FAILED: {e}")
+        print(f"X Factory consolidation test FAILED: {e}")
         
     try:
         test_execution_engine_usage_patterns() 
-        print("✅ Usage patterns test PASSED")
+        print("CHECK Usage patterns test PASSED")
     except AssertionError as e:
-        print(f"❌ Usage patterns test FAILED: {e}")
+        print(f"X Usage patterns test FAILED: {e}")
         
     try:
         test_supervisor_agent_execution_engine_usage()
-        print("✅ Supervisor usage test PASSED")
+        print("CHECK Supervisor usage test PASSED")
     except AssertionError as e:
-        print(f"❌ Supervisor usage test FAILED: {e}")
+        print(f"X Supervisor usage test FAILED: {e}")

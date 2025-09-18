@@ -107,12 +107,12 @@ class Issue639GetEnvSignatureBugTests(SSotAsyncTestCase):
                         'env_key': env_key,
                         'default': default_value
                     })
-                    logger.info(f"✅ REPRODUCED EXPECTED ERROR: {error_msg}")
+                    logger.info(f"CHECK REPRODUCED EXPECTED ERROR: {error_msg}")
                 else:
-                    logger.error(f"❌ UNEXPECTED TypeError: {error_msg}")
+                    logger.error(f"X UNEXPECTED TypeError: {error_msg}")
                     raise
             except Exception as e:
-                logger.error(f"❌ UNEXPECTED ERROR TYPE: {type(e).__name__}: {e}")
+                logger.error(f"X UNEXPECTED ERROR TYPE: {type(e).__name__}: {e}")
                 raise
         
         # Store results for analysis
@@ -124,7 +124,7 @@ class Issue639GetEnvSignatureBugTests(SSotAsyncTestCase):
             f"This indicates the bug may already be fixed or the test pattern is incorrect."
         )
         
-        logger.info(f"✅ SUCCESSFULLY REPRODUCED {len(signature_errors_found)} get_env signature errors")
+        logger.info(f"CHECK SUCCESSFULLY REPRODUCED {len(signature_errors_found)} get_env signature errors")
         
         # Log detailed error analysis
         for error in signature_errors_found:
@@ -171,10 +171,10 @@ class Issue639GetEnvSignatureBugTests(SSotAsyncTestCase):
                     'type': type(result).__name__
                 })
                 
-                logger.info(f"✅ CORRECT USAGE: get_env().get('{env_key}', '{default_value}') = '{result}'")
+                logger.info(f"CHECK CORRECT USAGE: get_env().get('{env_key}', '{default_value}') = '{result}'")
                 
             except Exception as e:
-                logger.error(f"❌ UNEXPECTED ERROR with correct usage: {type(e).__name__}: {e}")
+                logger.error(f"X UNEXPECTED ERROR with correct usage: {type(e).__name__}: {e}")
                 raise
         
         # ASSERTION: All correct patterns should work
@@ -182,7 +182,7 @@ class Issue639GetEnvSignatureBugTests(SSotAsyncTestCase):
             f"Expected 6 successful retrievals with correct usage, got {len(successful_retrievals)}"
         )
         
-        logger.info(f"✅ VALIDATED {len(successful_retrievals)} correct get_env() usage patterns")
+        logger.info(f"CHECK VALIDATED {len(successful_retrievals)} correct get_env() usage patterns")
 
     @pytest.mark.integration
     @pytest.mark.issue_639
@@ -211,13 +211,13 @@ class Issue639GetEnvSignatureBugTests(SSotAsyncTestCase):
             assert hasattr(staging_test, 'staging_config'), "staging_config should be set after setup"
             assert 'base_url' in staging_test.staging_config, "base_url should be in staging_config"
             
-            logger.info("✅ STAGING TEST INITIALIZATION SUCCEEDED - Bug may be fixed")
+            logger.info("CHECK STAGING TEST INITIALIZATION SUCCEEDED - Bug may be fixed")
             
         except TypeError as e:
             # This is the expected error with current buggy code
             error_msg = str(e)
             if "takes 0 positional arguments but" in error_msg:
-                logger.info(f"✅ REPRODUCED EXPECTED INITIALIZATION ERROR: {error_msg}")
+                logger.info(f"CHECK REPRODUCED EXPECTED INITIALIZATION ERROR: {error_msg}")
                 
                 # Store error for analysis
                 self.config_validation_results['initialization_error'] = error_msg
@@ -227,10 +227,10 @@ class Issue639GetEnvSignatureBugTests(SSotAsyncTestCase):
                     f"Staging test initialization failed as expected due to get_env signature bug: {error_msg}"
                 )
             else:
-                logger.error(f"❌ UNEXPECTED TypeError: {error_msg}")
+                logger.error(f"X UNEXPECTED TypeError: {error_msg}")
                 raise
         except Exception as e:
-            logger.error(f"❌ UNEXPECTED ERROR TYPE during initialization: {type(e).__name__}: {e}")
+            logger.error(f"X UNEXPECTED ERROR TYPE during initialization: {type(e).__name__}: {e}")
             raise
 
     @pytest.mark.integration
@@ -268,19 +268,19 @@ class Issue639GetEnvSignatureBugTests(SSotAsyncTestCase):
             value = env.get(secret_key)
             if value is None or value == "":
                 missing_secrets.append(secret_key)
-                logger.warning(f"❌ MISSING REQUIRED SECRET: {secret_key}")
+                logger.warning(f"X MISSING REQUIRED SECRET: {secret_key}")
             else:
                 present_secrets.append(secret_key)
-                logger.info(f"✅ PRESENT SECRET: {secret_key} (length: {len(str(value))})")
+                logger.info(f"CHECK PRESENT SECRET: {secret_key} (length: {len(str(value))})")
         
         # Check optional secrets
         for secret_key in optional_staging_secrets:
             value = env.get(secret_key)
             if value is None or value == "":
-                logger.info(f"⚠️ OPTIONAL SECRET MISSING: {secret_key}")
+                logger.info(f"WARNING️ OPTIONAL SECRET MISSING: {secret_key}")
             else:
                 present_secrets.append(secret_key)
-                logger.info(f"✅ PRESENT OPTIONAL SECRET: {secret_key} (length: {len(str(value))})")
+                logger.info(f"CHECK PRESENT OPTIONAL SECRET: {secret_key} (length: {len(str(value))})")
         
         # Store results for analysis
         self.config_validation_results['missing_secrets'] = missing_secrets
@@ -293,7 +293,7 @@ class Issue639GetEnvSignatureBugTests(SSotAsyncTestCase):
         
         # This test documents current state but doesn't fail
         # (staging environment may legitimately be missing some secrets in development)
-        logger.info("✅ STAGING SECRETS AVAILABILITY CHECK COMPLETED")
+        logger.info("CHECK STAGING SECRETS AVAILABILITY CHECK COMPLETED")
 
     @pytest.mark.integration
     @pytest.mark.issue_639
@@ -324,13 +324,13 @@ class Issue639GetEnvSignatureBugTests(SSotAsyncTestCase):
                 method = getattr(staging_test, method_name)
                 if callable(method):
                     available_methods.append(method_name)
-                    logger.info(f"✅ AVAILABLE METHOD: {method_name}")
+                    logger.info(f"CHECK AVAILABLE METHOD: {method_name}")
                 else:
                     missing_methods.append(f"{method_name} (not callable)")
-                    logger.warning(f"❌ NOT CALLABLE: {method_name}")
+                    logger.warning(f"X NOT CALLABLE: {method_name}")
             else:
                 missing_methods.append(method_name)
-                logger.warning(f"❌ MISSING METHOD: {method_name}")
+                logger.warning(f"X MISSING METHOD: {method_name}")
         
         # Store results
         self.config_validation_results['available_test_methods'] = available_methods
@@ -342,7 +342,7 @@ class Issue639GetEnvSignatureBugTests(SSotAsyncTestCase):
             f"Missing: {missing_methods}"
         )
         
-        logger.info(f"✅ ALL 3 GOLDEN PATH STAGING TEST METHODS ARE AVAILABLE")
+        logger.info(f"CHECK ALL 3 GOLDEN PATH STAGING TEST METHODS ARE AVAILABLE")
 
     def teardown_method(self, method):
         """Cleanup and result summary."""
@@ -440,7 +440,7 @@ class Issue639StagingConfigurationValidationTests(SSotAsyncTestCase):
                 f"URL {url_key} has invalid format: {validation['value']}"
             )
         
-        logger.info("✅ ALL STAGING URL CONFIGURATIONS HAVE VALID FORMAT")
+        logger.info("CHECK ALL STAGING URL CONFIGURATIONS HAVE VALID FORMAT")
 
     @pytest.mark.integration
     @pytest.mark.issue_639
@@ -500,7 +500,7 @@ class Issue639StagingConfigurationValidationTests(SSotAsyncTestCase):
                     f"Required authentication config {auth_key} is invalid"
                 )
         
-        logger.info("✅ STAGING AUTHENTICATION CONFIGURATION VALIDATION PASSED")
+        logger.info("CHECK STAGING AUTHENTICATION CONFIGURATION VALIDATION PASSED")
 
     def teardown_method(self, method):
         """Cleanup and configuration results summary."""

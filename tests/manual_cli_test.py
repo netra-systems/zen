@@ -15,7 +15,7 @@ def test_cli_help():
     orchestrator_path = scripts_path / "claude-instance-orchestrator.py"
 
     if not orchestrator_path.exists():
-        print(f"❌ Script not found: {orchestrator_path}")
+        print(f"X Script not found: {orchestrator_path}")
         return False
 
     try:

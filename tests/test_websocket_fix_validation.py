@@ -19,7 +19,7 @@ async def test_working_websocket_endpoint():
     
     try:
         async with websockets.connect(url, close_timeout=10) as ws:
-            print("✅ Connected successfully to /websocket!")
+            print("CHECK Connected successfully to /websocket!")
             
             # Test ping/pong
             ping_message = {"type": "ping", "timestamp": time.time()}
@@ -62,8 +62,8 @@ async def test_working_websocket_endpoint():
                         break
                 
                 print(f"\n📊 Summary:")
-                print(f"   - Connection: ✅ SUCCESS")
-                print(f"   - Message sending: ✅ SUCCESS") 
+                print(f"   - Connection: CHECK SUCCESS")
+                print(f"   - Message sending: CHECK SUCCESS") 
                 print(f"   - Events received: {len(events_received)}")
                 print(f"   - Duration: {time.time() - listen_start:.2f}s")
                 
@@ -71,7 +71,7 @@ async def test_working_websocket_endpoint():
                     print("🎯 FRONTEND CONNECTIVITY CONFIRMED!")
                     print("   The /websocket endpoint is fully functional for chat.")
                 else:
-                    print("⚠️  PARTIAL SUCCESS:")
+                    print("WARNING️  PARTIAL SUCCESS:")
                     print("   Connection works, but no agent events received.")
                     print("   This could be due to backend processing or agent issues.")
                 
@@ -82,7 +82,7 @@ async def test_working_websocket_endpoint():
                 return True, []  # Connection worked even without response
         
     except Exception as e:
-        print(f"❌ Connection failed: {e}")
+        print(f"X Connection failed: {e}")
         return False, []
 
 async def test_broken_websocket_endpoint():
@@ -99,14 +99,14 @@ async def test_broken_websocket_endpoint():
             return True, []
     except websockets.InvalidStatus as e:
         if "500" in str(e):
-            print("❌ Confirmed: /ws returns HTTP 500 (server error)")
+            print("X Confirmed: /ws returns HTTP 500 (server error)")
         elif "404" in str(e):
-            print("❌ Confirmed: /ws returns HTTP 404 (not found)")
+            print("X Confirmed: /ws returns HTTP 404 (not found)")
         else:
-            print(f"❌ /ws error: {e}")
+            print(f"X /ws error: {e}")
         return False, []
     except Exception as e:
-        print(f"❌ /ws connection failed: {e}")
+        print(f"X /ws connection failed: {e}")
         return False, []
 
 async def generate_frontend_fix_recommendation():
@@ -121,9 +121,9 @@ async def generate_frontend_fix_recommendation():
     print()
     print("REQUIRED CHANGE:")
     print("Update frontend WebSocket URL from:")
-    print("  ❌ wss://api.staging.netrasystems.ai/ws")
+    print("  X wss://api.staging.netrasystems.ai/ws")
     print("to:")
-    print("  ✅ wss://api.staging.netrasystems.ai/websocket")
+    print("  CHECK wss://api.staging.netrasystems.ai/websocket")
     print()
     print("FILES TO UPDATE:")
     print("- Frontend WebSocket client configuration")
@@ -158,10 +158,10 @@ async def main():
     
     if working_success and not broken_success:
         print("🎯 DIAGNOSIS CONFIRMED:")
-        print("   - /websocket endpoint: ✅ WORKING")  
-        print("   - /ws endpoint: ❌ BROKEN")
+        print("   - /websocket endpoint: CHECK WORKING")  
+        print("   - /ws endpoint: X BROKEN")
         print("   - Frontend needs to use /websocket instead of /ws")
-        print("\n✅ ISSUE #488 ROOT CAUSE IDENTIFIED AND SOLUTION PROVIDED")
+        print("\nCHECK ISSUE #488 ROOT CAUSE IDENTIFIED AND SOLUTION PROVIDED")
     else:
         print("❓ Unexpected results - further investigation needed")
 

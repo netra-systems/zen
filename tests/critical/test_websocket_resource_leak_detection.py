@@ -382,12 +382,12 @@ class WebSocketResourceLeakDetectionTests(SSotAsyncTestCase):
     def create_test_user_context(self, user_id: str = None, **kwargs) -> UserExecutionContext:
         """Create test user context with unique IDs."""
         if user_id is None:
-            # Generate a numeric suffix to match test-user-\d+ pattern
+            # Generate a numeric suffix to match test-user-\\\1+ pattern
             import random
             numeric_suffix = random.randint(10000, 99999)
             user_id = f"test-user-{numeric_suffix}"
         
-        # Ensure user_id matches test patterns (test-user-\d+)
+        # Ensure user_id matches test patterns (test-user-\\\1+)
         if not user_id.startswith('test-user-') or not user_id.split('-')[-1].isdigit():
             import random
             numeric_suffix = random.randint(10000, 99999)
@@ -410,7 +410,7 @@ class WebSocketResourceLeakDetectionTests(SSotAsyncTestCase):
         if connection_id is None:
             connection_id = f"conn-{str(uuid.uuid4())[:8]}"
         
-        # Ensure user_id matches test patterns (test-user-\d+)
+        # Ensure user_id matches test patterns (test-user-\\\1+)
         if not user_id.startswith('test-user-') or not user_id.split('-')[-1].isdigit():
             import random
             numeric_suffix = random.randint(10000, 99999)

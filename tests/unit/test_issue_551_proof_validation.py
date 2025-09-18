@@ -105,15 +105,15 @@ if __name__ == "__main__":
     
     try:
         from test_framework.base_integration_test import BaseIntegrationTest
-        print("✅ SUCCESS: test_framework.base_integration_test imported successfully")
+        print("CHECK SUCCESS: test_framework.base_integration_test imported successfully")
         
         # Run a simple instantiation test
         instance = BaseIntegrationTest()
-        print("✅ SUCCESS: BaseIntegrationTest instantiated successfully")
+        print("CHECK SUCCESS: BaseIntegrationTest instantiated successfully")
         
         print("🎉 ISSUE #551 RESOLUTION CONFIRMED: Imports work from subdirectory!")
         
     except ImportError as e:
-        print(f"❌ FAILURE: Import failed with error: {e}")
+        print(f"X FAILURE: Import failed with error: {e}")
         print("🚨 ISSUE #551 NOT RESOLVED: Imports still failing from subdirectory")
         exit(1)

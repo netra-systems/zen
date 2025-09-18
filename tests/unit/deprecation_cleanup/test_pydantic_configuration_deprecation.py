@@ -17,7 +17,7 @@ Test Purpose:
 3. Provide guidance for migration to modern Pydantic v2 patterns
 
 Priority 1 patterns targeted:
-- `class Config:` → `model_config = ConfigDict(...)` migration
+- `class Config:` -> `model_config = ConfigDict(...)` migration
 - Deprecated BaseModel configuration patterns
 - Legacy Pydantic field validation patterns
 
@@ -383,7 +383,7 @@ class PydanticMigrationGuidanceTests(SSotBaseTestCase):
     @pytest.mark.unit
     def test_migration_to_model_config_pattern(self):
         """
-        Test migration guidance: `class Config:` → `model_config = ConfigDict(...)`.
+        Test migration guidance: `class Config:` -> `model_config = ConfigDict(...)`.
 
         This test demonstrates the correct migration path and should PASS.
         """
@@ -432,7 +432,7 @@ class PydanticMigrationGuidanceTests(SSotBaseTestCase):
     @pytest.mark.unit
     def test_migration_to_field_validator_pattern(self):
         """
-        Test migration guidance: `@validator` → `@field_validator`.
+        Test migration guidance: `@validator` -> `@field_validator`.
 
         This test demonstrates the correct validation migration path and should PASS.
         """
@@ -626,7 +626,7 @@ if __name__ == "__main__":
     print("=" * 60)
 
     # Note: These tests are designed to FAIL initially to prove reproduction
-    print("⚠️  WARNING: These tests are designed to FAIL initially")
+    print("WARNING️  WARNING: These tests are designed to FAIL initially")
     print("   This proves that deprecated Pydantic patterns are reproduced")
     print("   After remediation, tests should pass")
     print("=" * 60)

@@ -102,7 +102,7 @@ class Issue1176ServiceAuthBreakdownUnitTests(BaseIntegrationTest):
                 
             except (TokenInvalidError, AuthenticationError) as e:
                 # EXPECTED FAILURE: This reproduces the production breakdown
-                logger.error("✅ REPRODUCTION SUCCESS: Service user authentication failed")
+                logger.error("CHECK REPRODUCTION SUCCESS: Service user authentication failed")
                 logger.error(f"   Service User: {service_user_id}")
                 logger.error(f"   Error: {e}")
                 logger.error("   ISSUE #1176: Service user type detection broken")
@@ -157,7 +157,7 @@ class Issue1176ServiceAuthBreakdownUnitTests(BaseIntegrationTest):
                 
         except AuthenticationError as e:
             # EXPECTED FAILURE: Reproduces service bypass breakdown
-            logger.error("✅ REPRODUCTION SUCCESS: Service authentication bypass failed")
+            logger.error("CHECK REPRODUCTION SUCCESS: Service authentication bypass failed")
             logger.error(f"   Service Context Path: {service_context.path}")
             logger.error(f"   Authentication Error: {e}")
             logger.error("   ISSUE #1176: Service users forced through regular auth flow")
@@ -206,7 +206,7 @@ class Issue1176ServiceAuthBreakdownUnitTests(BaseIntegrationTest):
         
         if not is_service_request:
             # EXPECTED FAILURE: Service header detection broken
-            logger.error("✅ REPRODUCTION SUCCESS: Service header detection failed")
+            logger.error("CHECK REPRODUCTION SUCCESS: Service header detection failed")
             logger.error("   Service Headers Present:")
             for key, value in service_headers.items():
                 if key.startswith("X-"):
@@ -259,7 +259,7 @@ class Issue1176ServiceAuthBreakdownUnitTests(BaseIntegrationTest):
                     error_msg = validation_result.get("error", "unknown_error")
                     
                     # EXPECTED FAILURE: Reproduces auth service breakdown
-                    logger.error("✅ REPRODUCTION SUCCESS: Auth client service validation breakdown")
+                    logger.error("CHECK REPRODUCTION SUCCESS: Auth client service validation breakdown")
                     logger.error(f"   Service Token: {service_token[:20]}...")
                     logger.error(f"   Validation Error: {error_msg}")
                     logger.error("   ISSUE #1176: Auth service rejecting all service tokens")
@@ -308,7 +308,7 @@ class Issue1176ServiceAuthBreakdownUnitTests(BaseIntegrationTest):
         
         if not validation_result.valid:
             # EXPECTED FAILURE: WebSocket service authentication broken
-            logger.error("✅ REPRODUCTION SUCCESS: WebSocket service authentication breakdown")
+            logger.error("CHECK REPRODUCTION SUCCESS: WebSocket service authentication breakdown")
             logger.error(f"   Service Connection ID: {service_connection_id}")
             logger.error(f"   Service User ID: {service_user_id}")
             logger.error(f"   Validation Error: {validation_result.error_message}")
@@ -377,7 +377,7 @@ class Issue1176ServiceDetectionLogicTests(BaseIntegrationTest):
         
         if service_detection_failures:
             # EXPECTED FAILURE: Service pattern detection broken
-            logger.error("✅ REPRODUCTION SUCCESS: Service user ID pattern detection failure")
+            logger.error("CHECK REPRODUCTION SUCCESS: Service user ID pattern detection failure")
             logger.error("   Pattern Detection Failures:")
             for failure in service_detection_failures:
                 logger.error(f"     User ID: {failure['user_id']}")
@@ -468,7 +468,7 @@ class Issue1176AuthenticationCascadeFailuresTests(BaseIntegrationTest):
         
         if auth_failures:
             # EXPECTED FAILURE: Authentication cascade breakdown
-            logger.error("✅ REPRODUCTION SUCCESS: Authentication cascade failure")
+            logger.error("CHECK REPRODUCTION SUCCESS: Authentication cascade failure")
             logger.error(f"   Service User: {service_request_context['user_id']}")
             logger.error(f"   Cascade Failures: {auth_failures}")
             logger.error("   ISSUE #1176: Service auth breakdown causes cascading failures")

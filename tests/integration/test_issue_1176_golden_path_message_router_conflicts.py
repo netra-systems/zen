@@ -44,7 +44,7 @@ class GoldenPathMessageRouterConflictsTests(BaseIntegrationTest):
         
         Root Cause: Multiple MessageRouter implementations exist in system,
         and different components select different routers causing message routing
-        inconsistencies that break Golden Path user → AI response flow.
+        inconsistencies that break Golden Path user -> AI response flow.
         """
         # Set up Golden Path scenario: user sends message, expects AI response
         websocket_manager = WebSocketManager()

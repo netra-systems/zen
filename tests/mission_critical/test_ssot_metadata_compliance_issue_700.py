@@ -132,8 +132,8 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
             )
 
         # If no violations found, this means the issue was already fixed
-        logger.info(✅ No metadata bypass violations found in synthetic_data_sub_agent.py)"
-        logger.info(✅ No metadata bypass violations found in synthetic_data_sub_agent.py)""
+        logger.info(CHECK No metadata bypass violations found in synthetic_data_sub_agent.py)"
+        logger.info(CHECK No metadata bypass violations found in synthetic_data_sub_agent.py)""
 
 
     def test_detect_optimizations_agent_metadata_bypass_violations(self):
@@ -165,7 +165,7 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
             )
 
         # If no violations found, this means the issue was already fixed
-        logger.info(✅ No metadata bypass violations found in optimizations_core_sub_agent.py)
+        logger.info(CHECK No metadata bypass violations found in optimizations_core_sub_agent.py)
 
     def test_comprehensive_agent_metadata_ssot_compliance_scan(self):
         "Comprehensive scan of ALL agent files for metadata SSOT violations"
@@ -225,7 +225,7 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
         assert 'value' in param_names, store_metadata_result must accept 'value' parameter""
 
 
-        logger.info("✅ BaseAgent.store_metadata_result method exists with correct signature)"
+        logger.info("CHECK BaseAgent.store_metadata_result method exists with correct signature)"
 
     async def test_store_metadata_result_properly_stores_data(self):
         Validates store_metadata_result method correctly stores metadata""
@@ -258,7 +258,7 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
         assert test_key in context.metadata, "fKey '{test_key}' should be in context.metadata"
         assert context.metadata[test_key] == test_value, "Stored value should match input"
 
-        logger.info(✅ store_metadata_result correctly stores metadata)
+        logger.info(CHECK store_metadata_result correctly stores metadata)
 
     async def test_store_metadata_result_handles_serialization(self):
         Validates store_metadata_result handles JSON serialization properly""
@@ -299,7 +299,7 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
         assert isinstance(stored_data, (dict, str)), Data should be stored as dict or serialized string""
 
 
-        logger.info("✅ store_metadata_result handles serialization correctly)"
+        logger.info("CHECK store_metadata_result handles serialization correctly)"
 
     # ========================================================================
     # C. INTEGRATION WORKFLOW TESTS - Agent Coordination with SSOT
@@ -353,8 +353,8 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
         assert context.metadata[processed_result"][input_count] == 100"
         assert context.metadata[processed_result][processed_count] == 200
 
-        logger.info(✅ Agent-to-agent metadata flow works with SSOT methods)"
-        logger.info(✅ Agent-to-agent metadata flow works with SSOT methods)""
+        logger.info(CHECK Agent-to-agent metadata flow works with SSOT methods)"
+        logger.info(CHECK Agent-to-agent metadata flow works with SSOT methods)""
 
 
     async def test_websocket_events_access_ssot_stored_metadata(self):
@@ -391,8 +391,8 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
         assert websocket_data["status] == completed"
         assert websocket_data[data] == websocket_test
 
-        logger.info(✅ WebSocket events can access SSOT-stored metadata)"
-        logger.info(✅ WebSocket events can access SSOT-stored metadata)""
+        logger.info(CHECK WebSocket events can access SSOT-stored metadata)"
+        logger.info(CHECK WebSocket events can access SSOT-stored metadata)""
 
 
     # ========================================================================
@@ -438,7 +438,7 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
         if hasattr(context, 'audit_metadata'):
             assert len(context.audit_metadata) >= 0, "Audit metadata should be tracked"
 
-        logger.info(✅ Metadata changes via SSOT method are properly tracked")"
+        logger.info(CHECK Metadata changes via SSOT method are properly tracked")"
 
     # ========================================================================
     # HELPER METHODS - Static Analysis and Compliance Scanning

@@ -101,8 +101,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
             for module_path, class_name in non_canonical_classes
         ]
         
-        logger.warning(f❌ SSOT VIOLATION: Found {len(non_canonical_classes)} non-canonical ExecutionEngine classes)
-        logger.info(f✅ CANONICAL: Found {len(canonical_classes)} canonical ExecutionEngine classes)
+        logger.warning(fX SSOT VIOLATION: Found {len(non_canonical_classes)} non-canonical ExecutionEngine classes)
+        logger.info(fCHECK CANONICAL: Found {len(canonical_classes)} canonical ExecutionEngine classes)
         
         # EXPECTED TO FAIL: Multiple execution engine classes indicate fragmentation
         self.assertGreater(
@@ -219,8 +219,8 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
         logger.info(f  Canonical Status: {violation_summary['canonical_status']['status']})
         
         for violation in self.ssot_violations[:10]:  # Log first 10 violations
-            logger.info(f    ❌ {violation})"
-            logger.info(f    ❌ {violation})""
+            logger.info(f    X {violation})"
+            logger.info(f    X {violation})""
 
         
         if len(self.ssot_violations) > 10:

@@ -170,7 +170,7 @@ REMEDIATION: Fix DeepAgentState SSOT violations to ensure consistent state propa
                     # User ID should be consistent
                     if prev_state.get('user_id') != curr_state.get('user_id'):
                         state_consistency_violations.append(
-                            f"User ID inconsistency: {prev_event_type}[{prev_index}]={prev_state.get('user_id')} → {curr_event_type}[{curr_index}]={curr_state.get('user_id')}"
+                            f"User ID inconsistency: {prev_event_type}[{prev_index}]={prev_state.get('user_id')} -> {curr_event_type}[{curr_index}]={curr_state.get('user_id')}"
                         )
 
                     # Thread ID should be consistent
@@ -179,7 +179,7 @@ REMEDIATION: Fix DeepAgentState SSOT violations to ensure consistent state propa
 
                     if prev_thread != curr_thread:
                         state_consistency_violations.append(
-                            f"Thread ID inconsistency: {prev_event_type}[{prev_index}]={prev_thread} → {curr_event_type}[{curr_index}]={curr_thread}"
+                            f"Thread ID inconsistency: {prev_event_type}[{prev_index}]={prev_thread} -> {curr_event_type}[{curr_index}]={curr_thread}"
                         )
 
                 # Critical events should have state data
@@ -201,7 +201,7 @@ REMEDIATION: Fix DeepAgentState SSOT violations to ensure consistent state propa
 
 State inconsistencies detected in WebSocket events:
 
-{''.join(f"  ❌ {violation}" for violation in violations)}
+{''.join(f"  X {violation}" for violation in violations)}
 
 Events processed: {len(events)}
 Events with state: {len(event_states)}
@@ -284,7 +284,7 @@ SECURITY RISK: State leakage between user WebSocket connections.
 Cross-user data contamination found:
 
 {''.join(f"  🔒 SECURITY BREACH: {violation}" for violation in contamination_violations)}
-{''.join(f"  ⚠️  DATA MISSING: {violation}" for violation in user2_data_missing)}
+{''.join(f"  WARNING️  DATA MISSING: {violation}" for violation in user2_data_missing)}
 
 User 1 ID: {user1_id}
 User 2 ID: {user2_id}
@@ -412,7 +412,7 @@ IMMEDIATE ACTION: Fix DeepAgentState SSOT violations to prevent data leakage.
 
         report_lines.append("STATE VIOLATIONS DETECTED:")
         for violation in violations:
-            report_lines.append(f"  ❌ {violation}")
+            report_lines.append(f"  X {violation}")
 
         report_lines.append("\nSTATE TRACKING SUMMARY:")
         for stage_name, state in execution_states:

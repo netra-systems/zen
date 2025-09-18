@@ -445,7 +445,7 @@ class OrchestrationDuplicationValidationTests(SSotBaseTestCase):
     def generate_violation_report(self, violations: List[OrchestrationViolation) -> str:
         Generate detailed report of orchestration duplication violations.""
         if not violations:
-            return ✅ NO VIOLATIONS FOUND - All orchestration uses SSOT patterns
+            return CHECK NO VIOLATIONS FOUND - All orchestration uses SSOT patterns
             
         report_lines = [
             f🚨 CRITICAL VIOLATIONS FOUND: {len(violations)} orchestration duplication violations,

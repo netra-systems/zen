@@ -129,9 +129,9 @@ class AgentPerformanceConcurrencyTester:
                     else:
                         response = await client.get(url)
                         assert response.status_code == 200, f'Service {service_name} not available at {url}: {response.status_code}'
-                        logger.info(f'✅ Service {service_name} available at {url}')
+                        logger.info(f'CHECK Service {service_name} available at {url}')
             except Exception as e:
-                logger.error(f'❌ Service {service_name} not available at {url}: {e}')
+                logger.error(f'X Service {service_name} not available at {url}: {e}')
 
     async def setup(self):
         """Initialize test environment with real services."""
@@ -320,10 +320,10 @@ class AgentPerformanceConcurrencyTester:
             if validation.throughput_requests_per_second:
                 report.append(f'  - Throughput: {validation.throughput_requests_per_second:.2f} requests/second')
             report.append('\nConcurrency Validation:')
-            report.append(f'  ✓ Concurrent execution achieved: {validation.concurrent_execution_achieved}')
-            report.append(f'  ✓ User isolation maintained: {validation.user_isolation_maintained}')
-            report.append(f'  ✓ Resource limits respected: {validation.resource_limits_respected}')
-            report.append(f'  ✓ WebSocket stability maintained: {validation.websocket_stability_maintained}')
+            report.append(f'  CHECK Concurrent execution achieved: {validation.concurrent_execution_achieved}')
+            report.append(f'  CHECK User isolation maintained: {validation.user_isolation_maintained}')
+            report.append(f'  CHECK Resource limits respected: {validation.resource_limits_respected}')
+            report.append(f'  CHECK WebSocket stability maintained: {validation.websocket_stability_maintained}')
             report.append(f'  - Performance degradation ratio: {validation.performance_degradation:.2f}')
             if validation.user_metrics:
                 report.append(f'\nIndividual User Analysis:')

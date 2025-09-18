@@ -208,37 +208,37 @@ async def main():
         
         print(f"\n📊 Overall Status: {results['overall_status']}")
         print(f"📝 Assessment: {results['assessment']}")
-        print(f"✅ Tests Passed: {results['summary']['passed']}/{results['summary']['total_tests']}")
+        print(f"CHECK Tests Passed: {results['summary']['passed']}/{results['summary']['total_tests']}")
         
-        print(f"\n🏥 Health Endpoint: {'✅ PASS' if results['tests']['health_endpoint']['success'] else '❌ FAIL'}")
+        print(f"\n🏥 Health Endpoint: {'CHECK PASS' if results['tests']['health_endpoint']['success'] else 'X FAIL'}")
         if results['tests']['health_endpoint']['success']:
             print(f"   Status: {results['tests']['health_endpoint']['response_data']['status']}")
         else:
             print(f"   Error: {results['tests']['health_endpoint']['error']}")
         
-        print(f"\n🔌 WebSocket Basic: {'✅ PASS' if results['tests']['websocket_basic']['success'] else '❌ FAIL'}")
+        print(f"\n🔌 WebSocket Basic: {'CHECK PASS' if results['tests']['websocket_basic']['success'] else 'X FAIL'}")
         if not results['tests']['websocket_basic']['success']:
             print(f"   Error: {results['tests']['websocket_basic']['error']}")
             print(f"   Type: {results['tests']['websocket_basic'].get('error_type', 'Unknown')}")
         
-        print(f"\n📡 WebSocket Headers: {'✅ PASS' if results['tests']['websocket_headers']['success'] else '❌ FAIL'}")
+        print(f"\n📡 WebSocket Headers: {'CHECK PASS' if results['tests']['websocket_headers']['success'] else 'X FAIL'}")
         if not results['tests']['websocket_headers']['success']:
             print(f"   Error: {results['tests']['websocket_headers']['error']}")
         elif results['tests']['websocket_headers'].get('message_sent'):
-            print(f"   Message Sent: ✅")
-            print(f"   Response Received: {'✅' if results['tests']['websocket_headers'].get('response_received') else '⚠️ Timeout'}")
+            print(f"   Message Sent: CHECK")
+            print(f"   Response Received: {'CHECK' if results['tests']['websocket_headers'].get('response_received') else 'WARNING️ Timeout'}")
         
         print("\n" + "="*80)
         print("🎯 REMEDIATION STATUS:")
         if results["overall_status"] == "SIGNIFICANT_IMPROVEMENT":
-            print("✅ SUCCESS: Environment variables deployment resolved the core issues!")
+            print("CHECK SUCCESS: Environment variables deployment resolved the core issues!")
             print("   • Backend service is healthy and responding")
             print("   • WebSocket infrastructure is operational")
             print("   • Ready for business value validation")
         elif results["overall_status"] == "PARTIAL_SUCCESS":
-            print("⚠️  PARTIAL: Some issues resolved, further configuration needed")
+            print("WARNING️  PARTIAL: Some issues resolved, further configuration needed")
         else:
-            print("❌ BLOCKED: Additional investigation required")
+            print("X BLOCKED: Additional investigation required")
         
         print("="*80)
         

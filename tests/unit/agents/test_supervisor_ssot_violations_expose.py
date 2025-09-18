@@ -41,7 +41,7 @@ class SupervisorSSotViolationsExposeTests:
         try:
             from netra_backend.app.agents.supervisor_ssot import SupervisorAgent as SSotSupervisor
             imported_classes.append(("supervisor_ssot", SSotSupervisor))
-            logger.info(f"✓ Imported SupervisorAgent from supervisor_ssot: {SSotSupervisor}")
+            logger.info(f"CHECK Imported SupervisorAgent from supervisor_ssot: {SSotSupervisor}")
         except ImportError as e:
             import_errors.append(("supervisor_ssot", str(e)))
             logger.warning(f"✗ Failed to import from supervisor_ssot: {e}")
@@ -49,7 +49,7 @@ class SupervisorSSotViolationsExposeTests:
         try:
             from netra_backend.app.agents.supervisor_ssot import SupervisorAgent as ConsolidatedSupervisor
             imported_classes.append(("supervisor_consolidated", ConsolidatedSupervisor))
-            logger.info(f"✓ Imported SupervisorAgent from supervisor_consolidated: {ConsolidatedSupervisor}")
+            logger.info(f"CHECK Imported SupervisorAgent from supervisor_consolidated: {ConsolidatedSupervisor}")
         except ImportError as e:
             import_errors.append(("supervisor_consolidated", str(e)))
             logger.warning(f"✗ Failed to import from supervisor_consolidated: {e}")
@@ -71,10 +71,10 @@ class SupervisorSSotViolationsExposeTests:
                 pytest.fail(f"SSOT VIOLATION: {len(imported_classes)} different SupervisorAgent classes found. "
                            f"Expected: 1 SSOT class. Found: {[(name, cls.__module__) for name, cls in imported_classes]}")
             else:
-                logger.info("✓ Same class object - potential alias (less critical)")
+                logger.info("CHECK Same class object - potential alias (less critical)")
                 
         elif len(imported_classes) == 1:
-            logger.info(f"✓ Only one SupervisorAgent found: {imported_classes[0][0]}")
+            logger.info(f"CHECK Only one SupervisorAgent found: {imported_classes[0][0]}")
         else:
             pytest.fail(f"CRITICAL: No SupervisorAgent classes could be imported. Errors: {import_errors}")
 
@@ -135,7 +135,7 @@ class SupervisorSSotViolationsExposeTests:
                        f"implement WebSocket events. Expected: 1 SSOT implementation. "
                        f"Found: {[(name, methods) for name, methods in websocket_methods]}")
         else:
-            logger.info("✓ Only one supervisor implements WebSocket events")
+            logger.info("CHECK Only one supervisor implements WebSocket events")
 
     def test_supervisor_user_context_pattern_conflicts_SHOULD_FAIL(self):
         """FAILING test - Shows different UserExecutionContext handling patterns
@@ -225,7 +225,7 @@ class SupervisorSSotViolationsExposeTests:
                            f"have different execution patterns. Expected: 1 unified SSOT pattern. "
                            f"Conflicts: {significant_differences}")
         else:
-            logger.info("✓ Only one supervisor execution pattern found")
+            logger.info("CHECK Only one supervisor execution pattern found")
 
 
 @pytest.mark.unit
@@ -239,7 +239,7 @@ class TestSupervisorSSotValidationTests:
         Currently SKIPPED: Will be enabled after SSOT remediation.
         After remediation: Will pass when only one SupervisorAgent exists.
         """
-        logger.info("✅ VALIDATING: Only one SupervisorAgent import exists")
+        logger.info("CHECK VALIDATING: Only one SupervisorAgent import exists")
         
         # This test will validate that only one SupervisorAgent can be imported
         # and that it's the correct SSOT implementation
@@ -247,7 +247,7 @@ class TestSupervisorSSotValidationTests:
         try:
             # Should import successfully from the SSOT location
             from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-            logger.info(f"✓ Successfully imported SSOT SupervisorAgent: {SupervisorAgent}")
+            logger.info(f"CHECK Successfully imported SSOT SupervisorAgent: {SupervisorAgent}")
             
             # Should fail or be aliased from consolidated location
             try:
@@ -255,12 +255,12 @@ class TestSupervisorSSotValidationTests:
                 
                 # If this succeeds, they should be the same object (alias)
                 if SupervisorAgent is ConsolidatedAgent:
-                    logger.info("✓ Consolidated import is proper alias to SSOT")
+                    logger.info("CHECK Consolidated import is proper alias to SSOT")
                 else:
                     pytest.fail("REGRESSION: Different SupervisorAgent objects still exist")
                     
             except ImportError:
-                logger.info("✓ Consolidated supervisor properly removed/aliased")
+                logger.info("CHECK Consolidated supervisor properly removed/aliased")
                 
         except ImportError as e:
             pytest.fail(f"CRITICAL: Cannot import SSOT SupervisorAgent: {e}")
@@ -272,7 +272,7 @@ class TestSupervisorSSotValidationTests:
         Currently SKIPPED: Will be enabled after SSOT remediation.
         After remediation: Will pass when unified WebSocket events exist.
         """
-        logger.info("✅ VALIDATING: Unified WebSocket event emission")
+        logger.info("CHECK VALIDATING: Unified WebSocket event emission")
         
         # Import the SSOT SupervisorAgent
         from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
@@ -287,7 +287,7 @@ class TestSupervisorSSotValidationTests:
         for method_name in required_event_methods:
             assert hasattr(SupervisorAgent, method_name), f"Missing required WebSocket method: {method_name}"
             
-        logger.info("✓ All required WebSocket event methods present in SSOT SupervisorAgent")
+        logger.info("CHECK All required WebSocket event methods present in SSOT SupervisorAgent")
 
     @pytest.mark.skip("Will be enabled after SSOT remediation")
     def test_supervisor_consistent_user_isolation_WILL_PASS(self):
@@ -296,7 +296,7 @@ class TestSupervisorSSotValidationTests:
         Currently SKIPPED: Will be enabled after SSOT remediation.  
         After remediation: Will pass when consistent UserExecutionContext exists.
         """
-        logger.info("✅ VALIDATING: Consistent UserExecutionContext pattern")
+        logger.info("CHECK VALIDATING: Consistent UserExecutionContext pattern")
         
         # Import the SSOT SupervisorAgent
         from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
@@ -313,7 +313,7 @@ class TestSupervisorSSotValidationTests:
         assert hasattr(SupervisorAgent, 'create'), "SSOT SupervisorAgent missing factory 'create' method"
         assert callable(getattr(SupervisorAgent, 'create')), "SSOT SupervisorAgent 'create' is not callable"
         
-        logger.info("✓ SSOT SupervisorAgent has proper UserExecutionContext pattern")
+        logger.info("CHECK SSOT SupervisorAgent has proper UserExecutionContext pattern")
 
 
 # Additional utility for test execution analysis

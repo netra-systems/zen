@@ -257,7 +257,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCa
         # REMOVED_SYNTAX_ERROR: content = script_path.read_text(encoding='utf-8', errors='ignore')
 
         # FAILING ASSERTION: Should not use shell: true without proper escaping
-        # REMOVED_SYNTAX_ERROR: shell_usage_pattern = r'spawn\([^)]*shell:\s*true'
+        # REMOVED_SYNTAX_ERROR: shell_usage_pattern = r'spawn\\\1[^)]*shell:\\\1*true'
         # REMOVED_SYNTAX_ERROR: shell_matches = re.findall(shell_usage_pattern, content, re.MULTILINE | re.DOTALL)
 
         # REMOVED_SYNTAX_ERROR: self.assertEqual(len(shell_matches), 0,

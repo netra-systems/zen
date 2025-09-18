@@ -198,9 +198,9 @@ class SSotImportComplianceValidator:
             str: Formatted compliance report
         """
         if not self.violations:
-            return "✅ SSOT Import Compliance: All scanned files are compliant"
+            return "CHECK SSOT Import Compliance: All scanned files are compliant"
 
-        report = "❌ SSOT Import Compliance Violations Detected\n"
+        report = "X SSOT Import Compliance Violations Detected\n"
         report += "=" * 50 + "\n\n"
 
         # Group violations by type
@@ -277,7 +277,7 @@ class SSotImportComplianceTests(SSotBaseTestCase):
             self.assertTrue(violation_count > 0,
                 "Expected to find deprecated import patterns for initial test validation")
         else:
-            print("\n✅ No SSOT import violations detected - excellent!")
+            print("\nCHECK No SSOT import violations detected - excellent!")
 
     def test_specific_deprecated_patterns_detected(self):
         """
@@ -314,7 +314,7 @@ def test_function():
             self.assertGreater(len(deprecated_usage_violations), 0,
                 "Should detect deprecated factory usage pattern")
 
-            print(f"✅ Pattern detection working: found {len(violations)} violations in test content")
+            print(f"CHECK Pattern detection working: found {len(violations)} violations in test content")
 
         finally:
             # Clean up temp file
@@ -350,7 +350,7 @@ def test_function():
             self.assertEqual(len(violations), 0,
                 f"Canonical patterns should not trigger violations, but found: {violations}")
 
-            print("✅ Canonical patterns correctly recognized as compliant")
+            print("CHECK Canonical patterns correctly recognized as compliant")
 
         finally:
             # Clean up temp file
@@ -377,10 +377,10 @@ def test_function():
             self.assertIn("Recommended:", report)
             self.assertIn("File:", report)
             self.assertIn("violations", report.lower())
-            print("✅ Generated actionable compliance report with specific remediation guidance")
+            print("CHECK Generated actionable compliance report with specific remediation guidance")
         else:
             self.assertIn("compliant", report.lower())
-            print("✅ Generated clean compliance report - no violations found")
+            print("CHECK Generated clean compliance report - no violations found")
 
     def test_ssot_import_registry_validation(self):
         """
@@ -402,7 +402,7 @@ def test_function():
         self.assertTrue(expected_types.issubset(deprecated_pattern_types),
             f"Should detect key deprecated pattern types: {expected_types}")
 
-        print("✅ SSOT Import Registry validation patterns are correctly configured")
+        print("CHECK SSOT Import Registry validation patterns are correctly configured")
 
 
 if __name__ == '__main__':

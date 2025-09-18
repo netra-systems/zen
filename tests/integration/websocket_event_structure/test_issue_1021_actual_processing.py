@@ -45,7 +45,7 @@ class TestIssue1021ActualProcessing(unittest.TestCase):
         self.assertEqual(frontend_tool_name, "aws_cost_analyzer",
                         "Frontend should be able to access tool_name via payload.tool_name")
 
-        print(f"✅ FIXED: Backend now emits: {result}")
+        print(f"CHECK FIXED: Backend now emits: {result}")
 
     def test_tool_completed_event_processing(self):
         """Test that tool_completed events are wrapped in payload structure."""
@@ -170,7 +170,7 @@ class TestIssue1021ActualProcessing(unittest.TestCase):
                        f"Frontend processing should succeed. Got: {frontend_result}")
         self.assertEqual(frontend_result["tool_name"], "aws_cost_analyzer")
 
-        print(f"✅ COMPATIBILITY VERIFIED: Frontend can now process backend events")
+        print(f"CHECK COMPATIBILITY VERIFIED: Frontend can now process backend events")
 
 
 if __name__ == '__main__':

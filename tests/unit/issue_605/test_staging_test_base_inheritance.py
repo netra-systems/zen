@@ -497,7 +497,7 @@ class StagingTestBaseInheritanceTests(SSotBaseTestCase):
             logger.info(f"unified methods: {sorted(unified_methods)}")
             
             if unified_has_critical and unified_has_base_critical:
-                logger.info("✅ UnifiedE2ETestBase successfully provides all critical methods")
+                logger.info("CHECK UnifiedE2ETestBase successfully provides all critical methods")
                 assert True, f"UnifiedE2ETestBase provides compatibility: {compatibility_analysis}"
             else:
                 missing_critical = []

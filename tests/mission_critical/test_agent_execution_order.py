@@ -266,32 +266,32 @@ if __name__ == __main__":"
 
     try:
         test_instance.test_sufficient_data_workflow_order()
-        print(✅ Sufficient data workflow order test passed)
+        print(CHECK Sufficient data workflow order test passed)
 
         test_instance.test_insufficient_data_workflow_order()
-        print(✅ Insufficient data workflow order test passed"")
+        print(CHECK Insufficient data workflow order test passed"")
 
         test_instance.test_no_optimization_without_data()
-        print(✅ No optimization without data test passed)"
-        print(✅ No optimization without data test passed)""
+        print(CHECK No optimization without data test passed)"
+        print(CHECK No optimization without data test passed)""
 
 
         test_instance.test_workflow_step_creation()
-        print(✅ Workflow step creation test passed")"
+        print(CHECK Workflow step creation test passed")"
 
         test_instance.test_dependency_graph_validation()
-        print(✅ Dependency graph validation test passed")"
+        print(CHECK Dependency graph validation test passed")"
 
         test_instance.test_execution_order_consistency()
-        print(✅ Execution order consistency test passed)
+        print(CHECK Execution order consistency test passed)
 
         test_instance.test_critical_business_logic_order()
-        print("✅ Critical business logic order test passed)"
+        print("CHECK Critical business logic order test passed)"
 
         print(\n🎉 All agent execution order tests passed!)"
         print(\n🎉 All agent execution order tests passed!)""
 
 
     except Exception as e:
-        print(f"❌ Test failed: {e})"
+        print(f"X Test failed: {e})"
         sys.exit(1")"

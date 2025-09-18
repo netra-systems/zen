@@ -434,9 +434,9 @@ class SingletonTestHelpers:
         self.test_results.append(result)
 
         if success:
-            logger.info(f"✅ {test_name} PASSED - User isolation is working correctly")
+            logger.info(f"CHECK {test_name} PASSED - User isolation is working correctly")
         else:
-            logger.error(f"❌ {test_name} FAILED - User isolation issues detected")
+            logger.error(f"X {test_name} FAILED - User isolation issues detected")
 
         return result
 
@@ -468,15 +468,15 @@ class SingletonTestHelpers:
 
         if failed_tests == 0:
             logger.info("🎉 ALL ISOLATION TESTS PASSED!")
-            logger.info("✅ Singleton removal is complete and effective")
-            logger.info("✅ User contexts are properly isolated")
-            logger.info("✅ No data leakage between concurrent users")
+            logger.info("CHECK Singleton removal is complete and effective")
+            logger.info("CHECK User contexts are properly isolated")
+            logger.info("CHECK No data leakage between concurrent users")
         else:
             logger.error("🚨 ISOLATION ISSUES DETECTED!")
 
             for result in results:
                 if not result.success:
-                    logger.error(f"\n❌ {result.test_name}:")
+                    logger.error(f"\nX {result.test_name}:")
                     if result.data_leakage_detected:
                         logger.error(f"  Data leakage: {len(result.isolation_violations)} violations")
                     if result.memory_leaks_detected:

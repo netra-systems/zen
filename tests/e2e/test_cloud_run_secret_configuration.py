@@ -123,7 +123,7 @@ class CloudRunSecretValidator:
             if issues:
                 all_issues[service_type] = issues
             else:
-                print(f"  ✓ {service_type} service configuration is valid")
+                print(f"  CHECK {service_type} service configuration is valid")
 
         return len(all_issues) == 0, all_issues
 

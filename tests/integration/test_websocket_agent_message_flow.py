@@ -73,7 +73,7 @@ class WebSocketAgentMessageFlowTests(SSotAsyncTestCase):
     P0 Critical Integration Tests for WebSocket Agent Message Flow.
 
     This test class validates the complete WebSocket integration during agent message processing:
-    User Message → Real-time WebSocket Events → Agent Processing → Response Delivery
+    User Message -> Real-time WebSocket Events -> Agent Processing -> Response Delivery
 
     Tests protect $500K+ ARR chat functionality by validating:
     - Real WebSocket connections and event delivery during chat

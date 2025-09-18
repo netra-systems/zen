@@ -517,7 +517,7 @@ class GoldenPathStagingTests(SSotAsyncTestCase):
                     
                     if response.status_code == 200:
                         tested_services.append(service_name)
-                        self.logger.info(f"✓ {service_name} service healthy")
+                        self.logger.info(f"CHECK {service_name} service healthy")
                     else:
                         failed_services.append(f"{service_name}:{response.status_code}")
                         self.logger.error(f"✗ {service_name} service unhealthy: {response.status_code}")

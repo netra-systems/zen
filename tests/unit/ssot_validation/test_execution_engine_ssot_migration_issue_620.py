@@ -47,7 +47,7 @@ class ExecutionEngineSSotMigrationIssue620Tests(BaseIntegrationTest):
         # Verify it has the compatibility bridge for Issue #565
         assert hasattr(UserExecutionEngine, 'create_from_legacy'), "Missing Issue #565 compatibility bridge method"
         
-        print("✅ UserExecutionEngine confirmed as SSOT implementation")
+        print("CHECK UserExecutionEngine confirmed as SSOT implementation")
     
     async def test_deprecated_execution_engine_delegates_to_ssot(self):
         """Test that deprecated ExecutionEngine properly delegates to UserExecutionEngine."""
@@ -73,7 +73,7 @@ class ExecutionEngineSSotMigrationIssue620Tests(BaseIntegrationTest):
         assert delegation_info['compatibility_mode'] is True, "Should report compatibility mode"
         assert delegation_info['migration_issue'] == "#565", "Should reference Issue #565"
         
-        print("✅ Deprecated ExecutionEngine properly delegates via Issue #565 compatibility bridge")
+        print("CHECK Deprecated ExecutionEngine properly delegates via Issue #565 compatibility bridge")
     
     @pytest.mark.asyncio
     async def test_execution_engine_automatic_delegation(self):
@@ -127,7 +127,7 @@ class ExecutionEngineSSotMigrationIssue620Tests(BaseIntegrationTest):
         assert delegation_info['migration_issue'] == "#565"
         assert 'migration_guide' in delegation_info
         
-        print("✅ ExecutionEngine automatic delegation is properly configured")
+        print("CHECK ExecutionEngine automatic delegation is properly configured")
     
     async def test_execution_engine_consolidated_should_be_redirect(self):
         """Test that execution_engine_consolidated.py should be converted to redirect."""
@@ -141,15 +141,15 @@ class ExecutionEngineSSotMigrationIssue620Tests(BaseIntegrationTest):
             
             # If it's more than 50 lines, it's still a full implementation
             if len(source_lines) > 50:
-                print("⚠️  WARNING: execution_engine_consolidated.py still contains full implementation")
+                print("WARNING️  WARNING: execution_engine_consolidated.py still contains full implementation")
                 print(f"   Should be converted to simple import redirect (currently {len(source_lines)} lines)")
                 # This is a known issue, so we'll mark it as expected for now
                 assert len(source_lines) > 500, "execution_engine_consolidated.py should be converted to redirect"
             else:
-                print("✅ execution_engine_consolidated.py has been converted to redirect")
+                print("CHECK execution_engine_consolidated.py has been converted to redirect")
                 
         except ImportError:
-            print("✅ execution_engine_consolidated.py has been removed (ideal)")
+            print("CHECK execution_engine_consolidated.py has been removed (ideal)")
     
     async def test_no_import_conflicts_between_execution_engines(self):
         """Test that importing different execution engines doesn't cause conflicts."""
@@ -164,7 +164,7 @@ class ExecutionEngineSSotMigrationIssue620Tests(BaseIntegrationTest):
         assert hasattr(ExecutionEngine, 'is_compatibility_mode'), "ExecutionEngine should have compatibility mode"
         assert hasattr(UserExecutionEngine, 'create_from_legacy'), "UserExecutionEngine should have compatibility bridge"
         
-        print("✅ No import conflicts between execution engines")
+        print("CHECK No import conflicts between execution engines")
     
     async def test_factory_creates_user_execution_engine_ssot(self):
         """Test that factory methods create UserExecutionEngine instances."""
@@ -190,7 +190,7 @@ class ExecutionEngineSSotMigrationIssue620Tests(BaseIntegrationTest):
         # Note: We test the factory pattern, actual creation may require more setup
         assert hasattr(factory, 'create_execution_engine'), "Factory should have create_execution_engine method"
         
-        print("✅ Factory is configured to create UserExecutionEngine SSOT instances")
+        print("CHECK Factory is configured to create UserExecutionEngine SSOT instances")
     
     async def test_deprecated_imports_work_via_compatibility_bridge(self):
         """Test that deprecated import patterns work via Issue #565 compatibility bridge."""
@@ -217,7 +217,7 @@ class ExecutionEngineSSotMigrationIssue620Tests(BaseIntegrationTest):
             issue_565_mentioned = any("#565" in msg or "Issue #565" in msg for msg in warning_messages)
             assert issue_565_mentioned, "Deprecation warning should mention Issue #565 migration"
         
-        print("✅ Deprecated imports work with proper warnings via Issue #565 compatibility bridge")
+        print("CHECK Deprecated imports work with proper warnings via Issue #565 compatibility bridge")
     
     async def test_ssot_execution_engine_has_required_interface_methods(self):
         """Test that SSOT UserExecutionEngine implements all required interface methods."""
@@ -243,7 +243,7 @@ class ExecutionEngineSSotMigrationIssue620Tests(BaseIntegrationTest):
             method = getattr(UserExecutionEngine, method_name)
             assert callable(method), f"UserExecutionEngine.{method_name} should be callable"
         
-        print("✅ UserExecutionEngine implements all required interface methods")
+        print("CHECK UserExecutionEngine implements all required interface methods")
     
     async def test_user_execution_context_integration(self):
         """Test that UserExecutionEngine properly integrates with UserExecutionContext."""
@@ -268,7 +268,7 @@ class ExecutionEngineSSotMigrationIssue620Tests(BaseIntegrationTest):
         # Verify it has methods to work with user context
         assert hasattr(UserExecutionEngine, 'get_user_context'), "Should have get_user_context method"
         
-        print("✅ UserExecutionEngine properly integrates with UserExecutionContext")
+        print("CHECK UserExecutionEngine properly integrates with UserExecutionContext")
 
 
 @pytest.mark.unit
@@ -295,7 +295,7 @@ class ExecutionEngineImportPatternsTests(BaseIntegrationTest):
             ssot_warnings = [w for w in deprecation_warnings if "user_execution_engine" in str(w.message)]
             assert len(ssot_warnings) == 0, "SSOT import should not generate deprecation warnings"
         
-        print("✅ SSOT import pattern works without warnings")
+        print("CHECK SSOT import pattern works without warnings")
     
     async def test_legacy_import_pattern_compatibility(self):
         """Test that legacy import patterns work but issue appropriate warnings."""
@@ -309,7 +309,7 @@ class ExecutionEngineImportPatternsTests(BaseIntegrationTest):
             deprecation_warnings = [warning for warning in w if issubclass(warning.category, DeprecationWarning)]
             assert len(deprecation_warnings) > 0, "Legacy import should issue deprecation warning"
         
-        print("✅ Legacy import patterns work with proper deprecation warnings")
+        print("CHECK Legacy import patterns work with proper deprecation warnings")
 
 
 @pytest.mark.unit
@@ -354,7 +354,7 @@ class Issue565CompatibilityBridgeTests(BaseIntegrationTest):
         assert compat_info['migration_issue'] == '#565'
         assert compat_info['created_via'] == 'create_from_legacy'
         
-        print("✅ Issue #565 compatibility bridge creates UserExecutionEngine successfully")
+        print("CHECK Issue #565 compatibility bridge creates UserExecutionEngine successfully")
     
     async def test_compatibility_bridge_anonymous_user_creation(self):
         """Test that compatibility bridge creates anonymous user context when none provided."""
@@ -387,7 +387,7 @@ class Issue565CompatibilityBridgeTests(BaseIntegrationTest):
         assert compat_info['is_anonymous_user'] is True
         assert compat_info['security_risk'] is True
         
-        print("✅ Compatibility bridge creates anonymous user context when none provided")
+        print("CHECK Compatibility bridge creates anonymous user context when none provided")
 
 
 @pytest.mark.unit
@@ -408,20 +408,20 @@ class SSotComplianceValidationTests(BaseIntegrationTest):
         # Verify ExecutionEngine is primarily a compatibility wrapper
         assert hasattr(ExecutionEngine, 'is_compatibility_mode'), "ExecutionEngine should be compatibility wrapper"
         
-        print(f"✅ SSOT verified: UserExecutionEngine has {len(user_engine_methods)} public methods")
-        print("✅ ExecutionEngine confirmed as compatibility wrapper")
+        print(f"CHECK SSOT verified: UserExecutionEngine has {len(user_engine_methods)} public methods")
+        print("CHECK ExecutionEngine confirmed as compatibility wrapper")
     
     async def test_migration_completion_status(self):
         """Test the overall completion status of the SSOT migration."""
         # This test documents the current migration status for Issue #620
         
         migration_status = {
-            'user_execution_engine_ssot': True,  # ✅ SSOT implementation exists
-            'compatibility_bridge_issue_565': True,  # ✅ Compatibility bridge working
-            'execution_engine_delegation': True,  # ✅ Delegates to SSOT
-            'execution_engine_consolidated_redirect': False,  # ❌ Still full implementation
-            'import_cleanup_complete': False,  # ❌ Still has deprecated imports
-            'golden_path_validated': False,  # ❌ Needs validation
+            'user_execution_engine_ssot': True,  # CHECK SSOT implementation exists
+            'compatibility_bridge_issue_565': True,  # CHECK Compatibility bridge working
+            'execution_engine_delegation': True,  # CHECK Delegates to SSOT
+            'execution_engine_consolidated_redirect': False,  # X Still full implementation
+            'import_cleanup_complete': False,  # X Still has deprecated imports
+            'golden_path_validated': False,  # X Needs validation
         }
         
         completed_items = sum(migration_status.values())
@@ -434,11 +434,11 @@ class SSotComplianceValidationTests(BaseIntegrationTest):
         completed = [k for k, v in migration_status.items() if v]
         pending = [k for k, v in migration_status.items() if not v]
         
-        print("✅ Completed:")
+        print("CHECK Completed:")
         for item in completed:
             print(f"   - {item}")
             
-        print("❌ Pending:")
+        print("X Pending:")
         for item in pending:
             print(f"   - {item}")
         
@@ -458,8 +458,8 @@ class SSotComplianceValidationTests(BaseIntegrationTest):
             'zero_deprecated_imports': False,  # Still has ~180+ deprecated imports
             'golden_path_tests_pass': None,  # Cannot test without staging/Docker
             'websocket_events_working': None,  # Cannot test without staging/Docker
-            'user_execution_engine_ssot': True,  # ✅ SSOT exists and working
-            'compatibility_bridge_working': True,  # ✅ Issue #565 bridge functional
+            'user_execution_engine_ssot': True,  # CHECK SSOT exists and working
+            'compatibility_bridge_working': True,  # CHECK Issue #565 bridge functional
         }
         
         testable_items = {k: v for k, v in definition_of_done.items() if v is not None}
@@ -472,8 +472,8 @@ class SSotComplianceValidationTests(BaseIntegrationTest):
         assert definition_of_done['user_execution_engine_ssot'], "SSOT must be functional"
         assert definition_of_done['compatibility_bridge_working'], "Compatibility bridge must work"
         
-        print("✅ Core SSOT infrastructure is functional")
-        print("⚠️  Infrastructure tests (Golden Path, WebSocket) require staging/Docker environment")
+        print("CHECK Core SSOT infrastructure is functional")
+        print("WARNING️  Infrastructure tests (Golden Path, WebSocket) require staging/Docker environment")
         
         return definition_of_done
 
@@ -494,10 +494,10 @@ if __name__ == "__main__":
         print("\n" + "="*80)
         print("📊 ISSUE #620 SSOT MIGRATION TEST SUMMARY")
         print("="*80)
-        print("✅ UserExecutionEngine confirmed as SSOT")
-        print("✅ Issue #565 compatibility bridge working")
-        print("⚠️  execution_engine_consolidated.py needs conversion to redirect")
-        print("⚠️  Golden Path validation requires staging/Docker environment")
+        print("CHECK UserExecutionEngine confirmed as SSOT")
+        print("CHECK Issue #565 compatibility bridge working")
+        print("WARNING️  execution_engine_consolidated.py needs conversion to redirect")
+        print("WARNING️  Golden Path validation requires staging/Docker environment")
         print("📈 Overall migration progress: Good foundation, needs completion")
         
     if __name__ == "__main__":

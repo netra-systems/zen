@@ -125,17 +125,17 @@ class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
                 removed_patterns = total_patterns - len(deprecated_exports_found)
                 validation_result.compliance_percentage = removed_patterns / total_patterns * 100
                 if validation_result.migration_success:
-                    logger.info('✅ Canonical imports deprecated export removal: SUCCESS')
+                    logger.info('CHECK Canonical imports deprecated export removal: SUCCESS')
                 else:
-                    logger.error(f'❌ Found {len(deprecated_exports_found)} deprecated exports still present')
+                    logger.error(f'X Found {len(deprecated_exports_found)} deprecated exports still present')
                     for export in deprecated_exports_found:
                         logger.error(f'   - {export}')
             except Exception as e:
-                logger.error(f'❌ Failed to analyze canonical imports: {e}')
+                logger.error(f'X Failed to analyze canonical imports: {e}')
                 validation_result.remaining_issues.append(f'Analysis failed: {e}')
                 validation_result.migration_success = False
         else:
-            logger.error('❌ canonical_imports.py not found')
+            logger.error('X canonical_imports.py not found')
             validation_result.remaining_issues.append('canonical_imports.py missing')
             validation_result.migration_success = False
         self.migration_results.append(validation_result)
@@ -181,14 +181,14 @@ class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
                         if has_deprecated_imports and has_ssot_imports:
                             mixed_pattern_files.append({'file': file_rel_path, 'deprecated_patterns': deprecated_matches, 'ssot_patterns': ssot_matches)
                             import_analysis.mixed_pattern_files += 1
-                            logger.warning(f'⚠️ MIXED PATTERNS: {file_rel_path}')
+                            logger.warning(f'WARNING️ MIXED PATTERNS: {file_rel_path}')
                         elif has_deprecated_imports:
                             deprecated_import_files.append({'file': file_rel_path, 'deprecated_patterns': deprecated_matches)
                             import_analysis.deprecated_pattern_files += 1
-                            logger.error(f'❌ DEPRECATED PATTERNS: {file_rel_path}')
+                            logger.error(f'X DEPRECATED PATTERNS: {file_rel_path}')
                         elif has_ssot_imports:
                             import_analysis.ssot_compliant_files += 1
-                            logger.debug(f'✅ SSOT COMPLIANT: {file_rel_path}')
+                            logger.debug(f'CHECK SSOT COMPLIANT: {file_rel_path}')
                     except (UnicodeDecodeError, PermissionError):
                         continue
         total_violations = import_analysis.deprecated_pattern_files + import_analysis.mixed_pattern_files
@@ -240,7 +240,7 @@ class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
                                 initialization_patterns[pattern_name].append(file_rel_path)
                         if len(file_patterns) > 1:
                             pattern_violations.append({'file': file_rel_path, 'patterns': file_patterns)
-                            logger.warning(f'⚠️ MULTIPLE PATTERNS: {file_rel_path} uses {file_patterns}')
+                            logger.warning(f'WARNING️ MULTIPLE PATTERNS: {file_rel_path} uses {file_patterns}')
                     except (UnicodeDecodeError, PermissionError):
                         continue
         validation_result.post_migration_violations = len(pattern_violations)
@@ -336,7 +336,7 @@ class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
 
             overall_violations = 0
             for result in self.migration_results:
-                status = '✅ PASS' if result.migration_success else '❌ FAIL'
+                status = 'CHECK PASS' if result.migration_success else 'X FAIL'
                 logger.info(f'  {result.validation_name}: {status}')
                 logger.info(f'    Post-migration violations: {result.post_migration_violations}')
                 logger.info(f'    Compliance: {result.compliance_percentage:."1f"}%')""
@@ -347,9 +347,9 @@ class Issue989WebSocketSSOTMigrationValidationTests(SSotBaseTestCase):
                     for issue in result.remaining_issues[:3]:
                         logger.warning(f'      - {issue}')
             if successful_validations == total_validations:
-                logger.info('🎉 ✅ SSOT MIGRATION COMPLETE - All validations PASSED')
+                logger.info('🎉 CHECK SSOT MIGRATION COMPLETE - All validations PASSED')
             else:
-                logger.error(f'❌ SSOT MIGRATION INCOMPLETE - {overall_violations} total violations remain')
+                logger.error(f'X SSOT MIGRATION INCOMPLETE - {overall_violations} total violations remain')
         super().teardown_method(method)
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

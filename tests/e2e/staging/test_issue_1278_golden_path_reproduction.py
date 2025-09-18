@@ -148,7 +148,7 @@ class TestIssue1278GoldenPathReproduction(SSotAsyncTestCase):
             ])
 
             pytest.fail(
-                f"✅ ISSUE #1278 REPRODUCED: {len(failed_steps)} golden path steps failed:\n"
+                f"CHECK ISSUE #1278 REPRODUCED: {len(failed_steps)} golden path steps failed:\n"
                 f"{failure_details}\n"
                 f"Successful steps: {golden_path_steps}\n"
                 "This confirms complete golden path breakdown from Issue #1278."
@@ -266,7 +266,7 @@ class TestIssue1278GoldenPathReproduction(SSotAsyncTestCase):
             ])
 
             pytest.fail(
-                f"✅ ISSUE #1278 REPRODUCED: {len(chat_failures)} chat features failed:\n"
+                f"CHECK ISSUE #1278 REPRODUCED: {len(chat_failures)} chat features failed:\n"
                 f"{chat_failure_details}\n"
                 f"Working features: {chat_functionality_steps}\n"
                 "This confirms $500K+ ARR chat functionality breakdown from Issue #1278."
@@ -282,7 +282,7 @@ class TestIssue1278GoldenPathReproduction(SSotAsyncTestCase):
         """
         FAILING TEST: Reproduce load balancer backend unhealthy status.
 
-        From Issue #1278: "Load Balancer Health: ❌ BACKEND UNHEALTHY"
+        From Issue #1278: "Load Balancer Health: X BACKEND UNHEALTHY"
         This test SHOULD FAIL demonstrating load balancer cannot reach healthy backends.
         """
         load_balancer_checks = []
@@ -346,7 +346,7 @@ class TestIssue1278GoldenPathReproduction(SSotAsyncTestCase):
             ])
 
             pytest.fail(
-                f"✅ ISSUE #1278 REPRODUCED: {len(unhealthy_backends)} backend routes unhealthy:\n"
+                f"CHECK ISSUE #1278 REPRODUCED: {len(unhealthy_backends)} backend routes unhealthy:\n"
                 f"{unhealthy_details}\n"
                 f"Healthy routes: {load_balancer_checks}\n"
                 "This confirms load balancer backend unhealthy status from Issue #1278."
@@ -424,7 +424,7 @@ class TestIssue1278GoldenPathReproduction(SSotAsyncTestCase):
             ])
 
             pytest.fail(
-                f"✅ ISSUE #1278 REPRODUCED: {len(startup_failures)} container startup failures:\n"
+                f"CHECK ISSUE #1278 REPRODUCED: {len(startup_failures)} container startup failures:\n"
                 f"{startup_failure_details}\n"
                 f"Successful indicators: {startup_indicators}\n"
                 "This confirms container startup failure pattern from Issue #1278."
@@ -508,7 +508,7 @@ class TestIssue1278GoldenPathReproduction(SSotAsyncTestCase):
             ])
 
             pytest.fail(
-                f"✅ ISSUE #1278 REPRODUCED: {len(platform_outages)}/{total_functions} customer functions down ({outage_percentage:.1f}% outage):\n"
+                f"CHECK ISSUE #1278 REPRODUCED: {len(platform_outages)}/{total_functions} customer functions down ({outage_percentage:.1f}% outage):\n"
                 f"{outage_details}\n"
                 f"Working functions: {customer_functions}\n"
                 "This confirms complete platform outage affecting $500K+ ARR from Issue #1278."

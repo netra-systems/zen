@@ -79,7 +79,7 @@ class TestImprovedSSOTComplianceScoring(SSotBaseTestCase):
         # Log dramatic improvement for stakeholder visibility
         self._log_compliance_improvement(old_score_data, improved_score_data)
 
-        print(f"✓ Validation fix improves compliance by {improvement:.1f}%")
+        print(f"CHECK Validation fix improves compliance by {improvement:.1f}%")
 
     def _calculate_old_validation_compliance(self) -> Dict[str, Any]:
         """Calculate compliance using old (false positive prone) validation"""
@@ -204,7 +204,7 @@ class TestImprovedSSOTComplianceScoring(SSotBaseTestCase):
         self.assertGreater(len(insights), 0,
                           "Should provide actionable architectural insights")
 
-        print(f"✓ WebSocket Manager functional SSOT recognized with {component_compliance:.1f}% compliance")
+        print(f"CHECK WebSocket Manager functional SSOT recognized with {component_compliance:.1f}% compliance")
 
     def _analyze_websocket_components_with_improved_validation(self) -> Dict[str, Any]:
         """Analyze WebSocket components using improved validation"""
@@ -300,7 +300,7 @@ class TestImprovedSSOTComplianceScoring(SSotBaseTestCase):
         # Log stakeholder confidence metrics
         self._log_stakeholder_confidence_metrics(reliability_analysis, accuracy_analysis, actionability_analysis)
 
-        print("✓ Compliance metrics restore stakeholder confidence")
+        print("CHECK Compliance metrics restore stakeholder confidence")
 
     def _test_compliance_metric_reliability(self) -> Dict[str, float]:
         """Test reliability (consistency) of compliance metrics"""
@@ -464,7 +464,7 @@ class TestImprovedSSOTComplianceScoring(SSotBaseTestCase):
         # Log quantified impact
         self._log_false_positive_elimination_impact(impact_analysis)
 
-        print(f"✓ False positive elimination improves compliance by {score_improvement:.1f}%")
+        print(f"CHECK False positive elimination improves compliance by {score_improvement:.1f}%")
 
     def _measure_false_positive_elimination_impact(self) -> Dict[str, Any]:
         """Measure quantified impact of false positive elimination"""
@@ -534,11 +534,11 @@ if __name__ == "__main__":
     print("IMPROVED SSOT COMPLIANCE SCORING VALIDATION COMPLETE")
     print(f"{'='*80}")
     print("Key Findings:")
-    print("  ✓ Improved validation dramatically increases compliance scores")
-    print("  ✓ False positive elimination restores stakeholder confidence")
-    print("  ✓ Metrics accurately reflect actual system architecture quality")
-    print("  ✓ WebSocket Manager functional SSOT properly recognized")
-    print("  ✓ Architectural patterns validated as legitimate, not violations")
+    print("  CHECK Improved validation dramatically increases compliance scores")
+    print("  CHECK False positive elimination restores stakeholder confidence")
+    print("  CHECK Metrics accurately reflect actual system architecture quality")
+    print("  CHECK WebSocket Manager functional SSOT properly recognized")
+    print("  CHECK Architectural patterns validated as legitimate, not violations")
     print(f"")
     print("Business Impact:")
     print("  • Eliminates false positive waste in engineering time")

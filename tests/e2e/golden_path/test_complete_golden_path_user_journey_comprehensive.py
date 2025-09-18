@@ -132,7 +132,7 @@ class CompleteGoldenPathUserJourneyComprehensiveTests(SSotAsyncTestCase):
             'user_id': user_data.get('user_id'), 
             'business_value': 'User onboarded and ready for value delivery'
         }
-        print(f"✅ PASS:  User authenticated: {user_data.get('email')}")
+        print(f"CHECK PASS:  User authenticated: {user_data.get('email')}")
         print(f"🆔 User ID: {user_data.get('user_id')}")
         print(f'⏱️ Stage 1 Duration: {time.time() - stage_1_start:.2f}s')
 
@@ -164,7 +164,7 @@ class CompleteGoldenPathUserJourneyComprehensiveTests(SSotAsyncTestCase):
             'connection_established': True, 
             'business_value': 'Real-time chat interface ready for AI interaction'
         }
-        print(f'✅ PASS:  WebSocket connected: {self.websocket_url}')
+        print(f'CHECK PASS:  WebSocket connected: {self.websocket_url}')
         print(f'📡 Connection test successful')
         print(f'⏱️ Stage 2 Duration: {time.time() - stage_2_start:.2f}s')
 
@@ -199,11 +199,11 @@ class CompleteGoldenPathUserJourneyComprehensiveTests(SSotAsyncTestCase):
                         events_by_type.add(event_type)
                         print(f'📡 Event received: {event_type}')
                         if all((event in events_by_type for event in self.GOLDEN_PATH_EVENTS)):
-                            print(f'✅ PASS:  All critical events received!')
+                            print(f'CHECK PASS:  All critical events received!')
                             break
             except Exception as event_error:
                 # Don't hide event collection errors - they indicate real problems
-                print(f'❌ Event collection error: {event_error}')
+                print(f'X Event collection error: {event_error}')
                 continue
         
         agent_processing_time = time.time() - stage_3_start
@@ -219,7 +219,7 @@ class CompleteGoldenPathUserJourneyComprehensiveTests(SSotAsyncTestCase):
             'critical_events': list(events_by_type.intersection(self.GOLDEN_PATH_EVENTS)), 
             'business_value': 'AI agent successfully processed user request with full event visibility'
         }
-        print(f'✅ PASS:  AI agent processing complete')
+        print(f'CHECK PASS:  AI agent processing complete')
         print(f'📊 Events received: {len(agent_events)}')
         print(f'🎯 Critical events: {len(events_by_type.intersection(self.GOLDEN_PATH_EVENTS))}/5')
         print(f'⏱️ Stage 3 Duration: {agent_processing_time:.2f}s')
@@ -258,7 +258,7 @@ class CompleteGoldenPathUserJourneyComprehensiveTests(SSotAsyncTestCase):
             'tool_results': len(tool_results), 
             'business_value': 'Tools executed to analyze data and generate insights'
         }
-        print(f'✅ PASS:  Tool execution analysis complete')
+        print(f'CHECK PASS:  Tool execution analysis complete')
         print(f'🔧 Tools executed: {len(tools_executed)}')
         print(f'📊 Tool results: {len(tool_results)}')
         print(f'⏱️ Stage 4 Duration: {time.time() - stage_4_start:.2f}s')
@@ -309,8 +309,8 @@ class CompleteGoldenPathUserJourneyComprehensiveTests(SSotAsyncTestCase):
             'business_value': 'Measurable business value delivered to user'
         }
         
-        print(f'✅ PASS:  Business value delivery validated')
-        print(f"💰 Cost savings identified: {'✅ PASS' if cost_savings_identified else '❌ FAIL'}")
+        print(f'CHECK PASS:  Business value delivery validated')
+        print(f"💰 Cost savings identified: {'CHECK PASS' if cost_savings_identified else 'X FAIL'}")
         print(f'🎯 Value indicators: {len(business_value_delivered)}')
         print(f'📋 Actionable insights: {len(actionable_insights)}')
         print(f'📊 Business value score: {business_value_score}')
@@ -351,8 +351,8 @@ class CompleteGoldenPathUserJourneyComprehensiveTests(SSotAsyncTestCase):
             'followup_response_received': conversation_continuity, 
             'business_value': 'Conversation continuity enables ongoing user engagement'
         }
-        print(f'✅ PASS:  Conversation persistence tested')
-        print(f"🔄 Follow-up response: {'✅ PASS' if conversation_continuity else '❌ FAIL'}")
+        print(f'CHECK PASS:  Conversation persistence tested')
+        print(f"🔄 Follow-up response: {'CHECK PASS' if conversation_continuity else 'X FAIL'}")
         print(f'⏱️ Stage 6 Duration: {time.time() - stage_6_start:.2f}s')
 
         # FINAL VALIDATION
@@ -373,11 +373,11 @@ class CompleteGoldenPathUserJourneyComprehensiveTests(SSotAsyncTestCase):
         
         print(f'\n📊 GOLDEN PATH COMPLETION ANALYSIS:')
         print(f'🎯 Total Duration: {total_golden_path_time:.2f}s')
-        print(f'✅ Stages Completed: {completed_stages}/{total_stages} ({completion_rate:.1%})')
+        print(f'CHECK Stages Completed: {completed_stages}/{total_stages} ({completion_rate:.1%})')
         print(f'🚨 Critical Success Rate: {critical_success_rate:.1%}')
         
         for stage_name, stage_data in self.journey_stages.items():
-            status = '✅ PASS' if stage_data.get('completed') else '❌ FAIL'
+            status = 'CHECK PASS' if stage_data.get('completed') else 'X FAIL'
             duration = stage_data.get('duration', 0)
             print(f'  {status}: {stage_name}: {duration:.2f}s')
             if not stage_data.get('completed') and stage_data.get('error'):
@@ -397,7 +397,7 @@ class CompleteGoldenPathUserJourneyComprehensiveTests(SSotAsyncTestCase):
         print(f'🚀 Complete User Journey: VALIDATED')
         print(f'⚡ Performance: {total_golden_path_time:.2f}s')
         print(f'🎯 Success Rate: {completion_rate:.1%}')
-        print(f'✅ AI-Powered Value Delivery: PROVEN')
+        print(f'CHECK AI-Powered Value Delivery: PROVEN')
         
         await WebSocketTestHelpers.close_test_connection(connection)
         self.active_connections.remove(connection)
@@ -463,7 +463,7 @@ class CompleteGoldenPathUserJourneyComprehensiveTests(SSotAsyncTestCase):
                 'within_time_limit': scenario_duration <= scenario['max_duration']
             })
             scenario_results.append(result)
-            print(f'✅ PASS:  Scenario completed: {scenario_duration:.2f}s')
+            print(f'CHECK PASS:  Scenario completed: {scenario_duration:.2f}s')
             print(f"📈 Business value: {result.get('business_value_delivered', False)}")
         
         total_scenarios_time = time.time() - scenarios_start
@@ -480,7 +480,7 @@ class CompleteGoldenPathUserJourneyComprehensiveTests(SSotAsyncTestCase):
         
         print(f'\n📊 GOLDEN PATH SCENARIOS ANALYSIS:')
         print(f'🎯 Scenarios Tested: {total_scenarios}')
-        print(f'✅ Success Rate: {success_rate:.1%}')
+        print(f'CHECK Success Rate: {success_rate:.1%}')
         print(f'💰 Business Value Rate: {business_value_rate:.1%}')
         print(f'⏱️ Total Time: {total_scenarios_time:.2f}s')
         

@@ -59,7 +59,7 @@ class TestImportConsolidationIntegration(BaseIntegrationTest):
             try:
                 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
                 import_success_metrics["canonical_import"] = True
-                print("✓ Canonical UserExecutionEngine import successful")
+                print("CHECK Canonical UserExecutionEngine import successful")
             except ImportError as e:
                 import_success_metrics["canonical_import"] = False
                 self.fail(f"Canonical UserExecutionEngine import failed: {e}")
@@ -69,7 +69,7 @@ class TestImportConsolidationIntegration(BaseIntegrationTest):
                 from netra_backend.app.services.user_execution_context import UserExecutionContext
                 from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
                 import_success_metrics["dependencies_import"] = True
-                print("✓ Dependency imports successful")
+                print("CHECK Dependency imports successful")
             except ImportError as e:
                 import_success_metrics["dependencies_import"] = False
                 self.fail(f"Dependency imports failed: {e}")
@@ -89,7 +89,7 @@ class TestImportConsolidationIntegration(BaseIntegrationTest):
                 )
 
                 import_success_metrics["instance_creation"] = True
-                print("✓ UserExecutionEngine instantiation with real services successful")
+                print("CHECK UserExecutionEngine instantiation with real services successful")
 
             except Exception as e:
                 import_success_metrics["instance_creation"] = False
@@ -108,7 +108,7 @@ class TestImportConsolidationIntegration(BaseIntegrationTest):
                     f"Expected module path with user_execution_engine, got {engine_module}"
 
                 import_success_metrics["runtime_validation"] = True
-                print("✓ Runtime validation successful")
+                print("CHECK Runtime validation successful")
 
             except Exception as e:
                 import_success_metrics["runtime_validation"] = False
@@ -122,10 +122,10 @@ class TestImportConsolidationIntegration(BaseIntegrationTest):
             assert len(failed_operations) == 0, \
                 f"Import consolidation failed for operations: {failed_operations}"
 
-            print("✅ Real service import compatibility validated")
+            print("CHECK Real service import compatibility validated")
 
         except Exception as e:
-            self.fail(f"❌ REAL SERVICE IMPORT COMPATIBILITY FAILURE: {e}")
+            self.fail(f"X REAL SERVICE IMPORT COMPATIBILITY FAILURE: {e}")
 
     @pytest.mark.integration
     async def test_import_path_performance_impact(self, real_services_fixture):
@@ -149,7 +149,7 @@ class TestImportConsolidationIntegration(BaseIntegrationTest):
                 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
                 import_time = time.time() - import_start_time
                 performance_metrics["canonical_import_time"] = import_time
-                print(f"✓ Canonical import time: {import_time:.4f}s")
+                print(f"CHECK Canonical import time: {import_time:.4f}s")
             except ImportError as e:
                 self.fail(f"Canonical import failed: {e}")
 
@@ -168,7 +168,7 @@ class TestImportConsolidationIntegration(BaseIntegrationTest):
 
                 instantiation_time = time.time() - instantiation_start_time
                 performance_metrics["instantiation_time"] = instantiation_time
-                print(f"✓ Instantiation time: {instantiation_time:.4f}s")
+                print(f"CHECK Instantiation time: {instantiation_time:.4f}s")
 
             except Exception as e:
                 self.fail(f"Instantiation performance test failed: {e}")
@@ -194,7 +194,7 @@ class TestImportConsolidationIntegration(BaseIntegrationTest):
                 performance_metrics["multiple_instantiation_time"] = multiple_instantiation_time
                 performance_metrics["instances_created"] = len(instances)
 
-                print(f"✓ Multiple instantiation time: {multiple_instantiation_time:.4f}s for {len(instances)} instances")
+                print(f"CHECK Multiple instantiation time: {multiple_instantiation_time:.4f}s for {len(instances)} instances")
 
             except Exception as e:
                 self.fail(f"Multiple instantiation performance test failed: {e}")
@@ -212,10 +212,10 @@ class TestImportConsolidationIntegration(BaseIntegrationTest):
             # Record metrics
             self.import_metrics["performance_metrics"] = performance_metrics
 
-            print("✅ Import consolidation performance impact within acceptable thresholds")
+            print("CHECK Import consolidation performance impact within acceptable thresholds")
 
         except Exception as e:
-            self.fail(f"❌ IMPORT PERFORMANCE IMPACT ASSESSMENT FAILURE: {e}")
+            self.fail(f"X IMPORT PERFORMANCE IMPACT ASSESSMENT FAILURE: {e}")
 
     @pytest.mark.integration
     async def test_legacy_import_deprecation_warnings(self, real_services_fixture):
@@ -224,7 +224,7 @@ class TestImportConsolidationIntegration(BaseIntegrationTest):
 
         Validates that legacy import paths show appropriate deprecation warnings
         """
-        print("\n⚠️ IMPORT CONSOLIDATION INTEGRATION TEST 3: Legacy import deprecation warnings...")
+        print("\nWARNING️ IMPORT CONSOLIDATION INTEGRATION TEST 3: Legacy import deprecation warnings...")
 
         try:
             # Test deprecated import paths that should show warnings
@@ -265,10 +265,10 @@ class TestImportConsolidationIntegration(BaseIntegrationTest):
             # Record metrics
             self.import_metrics["deprecation_warnings"] = deprecation_warnings_working
 
-            print("✅ Legacy import deprecation handling validated")
+            print("CHECK Legacy import deprecation handling validated")
 
         except Exception as e:
-            self.fail(f"❌ LEGACY IMPORT DEPRECATION TEST FAILURE: {e}")
+            self.fail(f"X LEGACY IMPORT DEPRECATION TEST FAILURE: {e}")
 
     @pytest.mark.integration
     async def test_service_integration_preservation(self, real_services_fixture):
@@ -335,10 +335,10 @@ class TestImportConsolidationIntegration(BaseIntegrationTest):
             assert len(failed_integrations) == 0, \
                 f"Service integration failures: {failed_integrations}"
 
-            print("✅ Service integration preservation validated")
+            print("CHECK Service integration preservation validated")
 
         except Exception as e:
-            self.fail(f"❌ SERVICE INTEGRATION PRESERVATION FAILURE: {e}")
+            self.fail(f"X SERVICE INTEGRATION PRESERVATION FAILURE: {e}")
 
     def _create_mock_user_context(self, db, redis, user_id: str = "test_user"):
         """Create mock UserExecutionContext that works with real services"""
@@ -401,7 +401,7 @@ if __name__ == '__main__':
     print("=" * 80)
     print("🎯 Focus: Import consolidation compatibility with real PostgreSQL and Redis")
     print("📊 Goal: Ensure import consolidation doesn't break service integration")
-    print("✅ Validation: Real service compatibility, performance, deprecation warnings")
+    print("CHECK Validation: Real service compatibility, performance, deprecation warnings")
     print("=" * 80)
 
     pytest.main([__file__, "-v", "--tb=short"])

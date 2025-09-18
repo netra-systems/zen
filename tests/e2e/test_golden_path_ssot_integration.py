@@ -1,7 +1,7 @@
 """
 Golden Path SSOT Integration E2E Tests - ISSUE #1060
 
-PURPOSE: End-to-end SSOT compliance for login → AI response flow
+PURPOSE: End-to-end SSOT compliance for login -> AI response flow
 These tests are designed to FAIL initially, proving current Golden Path SSOT violations exist.
 
 MISSION: Validate Golden Path SSOT architectural compliance for $500K+ ARR protection
@@ -11,7 +11,7 @@ Expected Initial Behavior: ALL TESTS FAIL - proving Golden Path SSOT violations 
 After remediation: All tests should PASS confirming SSOT compliance in end-to-end flow
 
 Test Strategy:
-1. Validate login → WebSocket handshake uses same JWT authority
+1. Validate login -> WebSocket handshake uses same JWT authority
 2. Confirm WebSocket events flow through single manager
 3. Detect authentication inconsistencies in Golden Path
 4. Validate architectural SSOT compliance end-to-end

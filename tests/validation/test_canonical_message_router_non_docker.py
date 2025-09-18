@@ -84,7 +84,7 @@ class TestCanonicalMessageRouterSSOT:
         assert SSOT_INFO['issue'] == '#994'
         assert SSOT_INFO['phase'] == 'Phase 1 - Consolidation'
 
-        print(f"✅ SSOT Import Validation: {SSOT_INFO['canonical_class']}")
+        print(f"CHECK SSOT Import Validation: {SSOT_INFO['canonical_class']}")
 
     def test_legacy_import_compatibility(self):
         """Test that legacy imports work but show deprecation warnings"""
@@ -104,7 +104,7 @@ class TestCanonicalMessageRouterSSOT:
             assert isinstance(router, CanonicalMessageRouter)
             assert isinstance(legacy_router, CanonicalMessageRouter)
 
-        print("✅ Legacy Import Compatibility: Warnings shown, canonical implementation returned")
+        print("CHECK Legacy Import Compatibility: Warnings shown, canonical implementation returned")
 
     def test_factory_pattern_isolation(self):
         """Test that factory pattern creates isolated instances"""
@@ -123,7 +123,7 @@ class TestCanonicalMessageRouterSSOT:
         assert router2.user_context.get('user_id') == 'user2'
         assert router3.user_context == {}
 
-        print("✅ Factory Pattern Isolation: Multiple isolated instances created")
+        print("CHECK Factory Pattern Isolation: Multiple isolated instances created")
 
     @pytest.mark.asyncio
     async def test_connection_registration(self):
@@ -164,7 +164,7 @@ class TestCanonicalMessageRouterSSOT:
         assert stats['active_connections'] == 3
         assert stats['users_with_connections'] == 2
 
-        print("✅ Connection Registration: All connections registered and tracked correctly")
+        print("CHECK Connection Registration: All connections registered and tracked correctly")
 
     @pytest.mark.asyncio
     async def test_routing_strategies(self, sample_websocket_message):
@@ -201,7 +201,7 @@ class TestCanonicalMessageRouterSSOT:
         broadcast_destinations = await router.route_message(sample_websocket_message, broadcast_context)
         assert len(broadcast_destinations) == 3  # all connections
 
-        print("✅ Routing Strategies: USER_SPECIFIC, SESSION_SPECIFIC, BROADCAST_ALL working correctly")
+        print("CHECK Routing Strategies: USER_SPECIFIC, SESSION_SPECIFIC, BROADCAST_ALL working correctly")
 
     @pytest.mark.asyncio
     async def test_connection_cleanup(self):
@@ -231,7 +231,7 @@ class TestCanonicalMessageRouterSSOT:
         stats = router.get_stats()
         assert stats['active_connections'] == 0
 
-        print("✅ Connection Cleanup: Unregistration and timeout cleanup working correctly")
+        print("CHECK Connection Cleanup: Unregistration and timeout cleanup working correctly")
 
     def test_websocket_event_types_compatibility(self):
         """Test that WebSocket event types are properly supported"""
@@ -259,7 +259,7 @@ class TestCanonicalMessageRouterSSOT:
             assert message.type == event_type
             assert message.payload is not None
 
-        print("✅ WebSocket Event Types: All 5 critical events supported")
+        print("CHECK WebSocket Event Types: All 5 critical events supported")
 
     def test_performance_no_regression(self):
         """Test that SSOT consolidation doesn't introduce performance regression"""
@@ -277,7 +277,7 @@ class TestCanonicalMessageRouterSSOT:
         # Test routing performance
         asyncio.run(self._test_routing_performance(router))
 
-        print(f"✅ Performance: 100 routers created in {creation_time:.3f}s")
+        print(f"CHECK Performance: 100 routers created in {creation_time:.3f}s")
 
     async def _test_routing_performance(self, router):
         """Helper method to test routing performance"""
@@ -326,7 +326,7 @@ class TestCanonicalMessageRouterSSOT:
         initial_errors = router.get_stats()['routing_errors']
         assert isinstance(initial_errors, int)
 
-        print("✅ Error Handling: Router handles invalid strategies gracefully")
+        print("CHECK Error Handling: Router handles invalid strategies gracefully")
 
     def test_ssot_consolidation_complete(self):
         """Test that SSOT consolidation is properly implemented"""
@@ -346,7 +346,7 @@ class TestCanonicalMessageRouterSSOT:
         # Test SSOT metadata
         assert SSOT_INFO['business_value'] == '$500K+ ARR Golden Path protection'
 
-        print("✅ SSOT Consolidation: Canonical implementation active, legacy compatibility maintained")
+        print("CHECK SSOT Consolidation: Canonical implementation active, legacy compatibility maintained")
 
 
 def test_integration_golden_path_simulation():
@@ -408,7 +408,7 @@ def test_integration_golden_path_simulation():
     result = asyncio.run(simulate_golden_path())
     assert result is True
 
-    print("✅ Golden Path Simulation: All 5 critical WebSocket events routed successfully")
+    print("CHECK Golden Path Simulation: All 5 critical WebSocket events routed successfully")
 
 
 if __name__ == "__main__":

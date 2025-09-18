@@ -133,7 +133,7 @@ class SSOTTestInfrastructureViolationsTests(SSotBaseTestCase):
                 fUnauthorized conftest.py files:\n + \n.join(violation_details) + \n\n""
 
                 fAUTHORIZED SSOT CONFTEST FILES:\n + 
-                \n.join(f"  ✓ {auth} for auth in self.authorized_conftest_files) + \n\n"
+                \n.join(f"  CHECK {auth} for auth in self.authorized_conftest_files) + \n\n"
                 fREMEDIATION:\n
                 f1. Move fixtures to appropriate SSOT conftest file\n
                 f"2. Remove duplicate conftest.py files\n"
@@ -346,7 +346,7 @@ SSOT TEST INFRASTRUCTURE VIOLATIONS REPORT
 ==========================================
 
 TOTAL VIOLATIONS: {total_violations}
-TARGET REDUCTION: {total_violations} violations → 0 violations
+TARGET REDUCTION: {total_violations} violations -> 0 violations
 
 VIOLATIONS BY TYPE:
     {self._format_violation_counts(violation_by_type)}

@@ -42,7 +42,7 @@ class SessionMiddlewareGCPInstallationTests(SSotBaseTestCase):
         assert session_middleware_found, f"SessionMiddleware not found in middleware stack. Found: {middleware_stack}"
 
         # Log for debugging
-        print(f"✅ SessionMiddleware found in middleware stack: {middleware_stack}")
+        print(f"CHECK SessionMiddleware found in middleware stack: {middleware_stack}")
 
     def test_session_middleware_order_validation(self):
         """Verify SessionMiddleware is installed BEFORE auth middleware.
@@ -75,7 +75,7 @@ class SessionMiddlewareGCPInstallationTests(SSotBaseTestCase):
             assert session_middleware_pos < auth_middleware_pos, \
                 f"SessionMiddleware (pos {session_middleware_pos}) must come before auth middleware (pos {auth_middleware_pos})"
 
-        print(f"✅ SessionMiddleware correctly positioned at index {session_middleware_pos}")
+        print(f"CHECK SessionMiddleware correctly positioned at index {session_middleware_pos}")
 
     def test_session_middleware_secret_key_configuration(self):
         """Verify SECRET_KEY is properly configured from environment.
@@ -110,7 +110,7 @@ class SessionMiddlewareGCPInstallationTests(SSotBaseTestCase):
             # Verify the request was successful (no SessionMiddleware errors)
             assert response.status_code in [200, 404], f"Request failed with status {response.status_code}: {response.text}"
 
-        print("✅ SessionMiddleware SECRET_KEY configuration validated")
+        print("CHECK SessionMiddleware SECRET_KEY configuration validated")
 
     def test_session_middleware_gcp_environment_compatibility(self):
         """Test middleware works with GCP Cloud Run environment variables.
@@ -140,7 +140,7 @@ class SessionMiddlewareGCPInstallationTests(SSotBaseTestCase):
             # Should not fail due to SessionMiddleware issues
             assert response.status_code in [200, 404], f"GCP environment request failed: {response.status_code} - {response.text}"
 
-        print("✅ SessionMiddleware works in simulated GCP Cloud Run environment")
+        print("CHECK SessionMiddleware works in simulated GCP Cloud Run environment")
 
     def test_request_session_access_simulation(self):
         """Test that request.session access works like in gcp_auth_context_middleware.py:160.
@@ -178,7 +178,7 @@ class SessionMiddlewareGCPInstallationTests(SSotBaseTestCase):
             assert data["status"] == "success", f"Session access failed: {data}"
             assert data["session_available"] is True, "Session should be available"
 
-        print("✅ request.session access works correctly (Issue #1127 pattern)")
+        print("CHECK request.session access works correctly (Issue #1127 pattern)")
 
     def test_concurrent_session_access(self):
         """Test concurrent session access to catch race conditions.
@@ -218,4 +218,4 @@ class SessionMiddlewareGCPInstallationTests(SSotBaseTestCase):
         for result in results:
             assert result["status"] == "success", f"Concurrent session access failed: {result}"
 
-        print(f"✅ Concurrent session access successful for {len(results)} requests")
+        print(f"CHECK Concurrent session access successful for {len(results)} requests")

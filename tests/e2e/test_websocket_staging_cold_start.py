@@ -126,7 +126,7 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
             if result.error_code == 1011:
                 logger.error(f'🚨 1011 Error at attempt {result.attempt_number}: {result.error_message}')
             elif not result.success:
-                logger.warning(f'⚠️  Connection failed at attempt {result.attempt_number}: {result.error_message}')
+                logger.warning(f'WARNING️  Connection failed at attempt {result.attempt_number}: {result.error_message}')
         self.assertEqual(error_1011_count, 0, f'EXPECTED FAILURE: Found {error_1011_count} WebSocket 1011 errors during cold start. This demonstrates the issue where clients get 1011 errors when connecting during GCP Cloud Run startup. Total attempts: {len(connection_results)}, Successful: {successful_connections}')
 
     @pytest.mark.staging

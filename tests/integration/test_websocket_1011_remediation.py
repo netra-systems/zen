@@ -174,7 +174,7 @@ class WebSocket1011RemediationTests:
             assert user_context.agent_context[auth_level] == relaxed
             assert "execute_agents in user_context.agent_context[permissions]"
             
-            print(f✅ GCP Load Balancer scenario resolved: {result.auth_method})
+            print(fCHECK GCP Load Balancer scenario resolved: {result.auth_method})
     
     async def test_auth_service_unavailable_scenario(self, websocket_auth_service_down):
         "Test 1011 remediation when auth service is completely down."
@@ -207,7 +207,7 @@ class WebSocket1011RemediationTests:
                 assert user_context.agent_context[auth_level] == emergency
                 assert user_context.agent_context[audit_required] is True""
                 
-                print(f"✅ Auth service down scenario resolved: {result.auth_method})"
+                print(f"CHECK Auth service down scenario resolved: {result.auth_method})"
     
     async def test_circuit_breaker_activation_and_recovery(self, websocket_gcp_staging):
         Test circuit breaker activation during auth failures and subsequent recovery.""
@@ -256,7 +256,7 @@ class WebSocket1011RemediationTests:
             # Should succeed and potentially close the breaker
             assert result.success is True
             
-            print(f✅ Circuit breaker recovery tested: {circuit_breaker.state.value}"")
+            print(fCHECK Circuit breaker recovery tested: {circuit_breaker.state.value}"")
     
     async def test_demo_mode_1011_prevention(self):
         Test demo mode prevents 1011 errors in isolated environments.""
@@ -288,7 +288,7 @@ class WebSocket1011RemediationTests:
             assert execute_agents" in result.user_context.agent_context[permissions]"
             assert chat_access in result.user_context.agent_context[permissions]
             
-            print(f✅ Demo mode 1011 prevention: {result.auth_method}"")
+            print(fCHECK Demo mode 1011 prevention: {result.auth_method}"")
     
     async def test_production_security_boundaries(self, websocket_production_strict):
         Test that production maintains security boundaries despite remediation.""
@@ -318,7 +318,7 @@ class WebSocket1011RemediationTests:
                     assert result.level in [AuthPermissivenessLevel.STRICT, "AuthPermissivenessLevel.RELAXED]"
                     assert result.level != AuthPermissivenessLevel.DEMO
                 
-                print(f✅ Production security maintained: level={result.level.value if result.success else 'failed'})
+                print(fCHECK Production security maintained: level={result.level.value if result.success else 'failed'})
     
     async def test_end_to_end_websocket_integration(self"):"
         "Test end-to-end WebSocket authentication integration."""
@@ -347,7 +347,7 @@ class WebSocket1011RemediationTests:
             assert hasattr(result, "'user_context')"
             assert hasattr(result, "'audit_info')"
             
-            print(f✅ WebSocket SSOT integration: {result.auth_method}")"
+            print(fCHECK WebSocket SSOT integration: {result.auth_method}")"
     
     async def test_comprehensive_1011_prevention_suite(self):
         Comprehensive test of all 1011 prevention mechanisms.""
@@ -405,12 +405,12 @@ class WebSocket1011RemediationTests:
                     if result.success:
                         success_count += 1
                         assert result.level == scenario['expected_level']
-                        print(f  ✅ Success: {result.auth_method})
+                        print(f  CHECK Success: {result.auth_method})
                     else:
-                        print(f"  ❌ Failed: {'; '.join(result.security_warnings)})"
+                        print(f"  X Failed: {'; '.join(result.security_warnings)})"
                         
                 except Exception as e:
-                    print(f  ❌ Exception: {e})
+                    print(f  X Exception: {e})
         
         print(f"\n📊 1011 Prevention Results: {success_count}/{len(test_scenarios)} scenarios successful)"
         
@@ -433,18 +433,18 @@ class MonitoringAndAlertingTests:
             circuit_status = await ssot_router.auth_circuit_breaker_status()
             assert circuit_status[service"] == auth_circuit_breaker"
             assert status in circuit_status
-            print(✅ Circuit breaker health endpoint operational")"
+            print(CHECK Circuit breaker health endpoint operational")"
             
             perm_status = await ssot_router.auth_permissiveness_status()
             assert perm_status[service] == auth_permissiveness
             assert permissiveness_levels in perm_status""
-            print("✅ Permissiveness health endpoint operational)"
+            print("CHECK Permissiveness health endpoint operational)"
             
             health_status = await ssot_router.auth_health_status()
             assert health_status[service] == "auth_health"
             assert remediation" in health_status"
             assert health_status[remediation][websocket_1011_prevention] is True
-            print("✅ Overall health endpoint operational)"
+            print("CHECK Overall health endpoint operational)"
             
         except Exception as e:
             pytest.fail(fHealth endpoints failed during 1011 conditions: {e})
@@ -473,7 +473,7 @@ class MonitoringAndAlertingTests:
         assert fallback_used in result.audit_info""
         assert "environment in result.audit_info"
         
-        print(✅ Audit logging structure validated)""
+        print(CHECK Audit logging structure validated)""
 
 
 # Main test execution
@@ -505,7 +505,7 @@ if __name__ == "__main__:"
             print("  • Security Boundaries: Maintained with audit logging)"
             
         except Exception as e:
-            print(f❌ Test suite failed: {e})""
+            print(fX Test suite failed: {e})""
     
     # Run the test
     asyncio.run(run_comprehensive_test())

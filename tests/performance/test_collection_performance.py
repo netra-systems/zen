@@ -43,7 +43,7 @@ class CollectionPerformanceTestTests(SSotBaseTestCase):
                 "No agent tests were collected"
             )
             
-            print(f"✅ Agent test collection: {collection_time:.2f}s ({len(tests or [])} tests)")
+            print(f"CHECK Agent test collection: {collection_time:.2f}s ({len(tests or [])} tests)")
             
         except Exception as e:
             self.fail(f"Test collection failed: {e}")
@@ -74,7 +74,7 @@ class CollectionPerformanceTestTests(SSotBaseTestCase):
             f"Multi-pattern collection took {collection_time:.2f}s (target: <60s)"
         )
         
-        print(f"✅ Multi-pattern collection: {collection_time:.2f}s ({total_tests} tests)")
+        print(f"CHECK Multi-pattern collection: {collection_time:.2f}s ({total_tests} tests)")
 
 if __name__ == '__main__':
     unittest.main()

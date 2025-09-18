@@ -59,7 +59,7 @@ class AgentRegistrySSotDuplicationTests(SSotBaseTestCase):
             try:
                 module = importlib.import_module(path)
                 self.loaded_registries[path] = module
-                print(f✓ Loaded registry from: {path}")"
+                print(fCHECK Loaded registry from: {path}")"
             except ImportError as e:
                 print(f✗ Failed to load registry from {path}: {e})
                 

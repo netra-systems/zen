@@ -269,7 +269,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         self.record_metric(avg_routing_time_ms, avg_routing_time * 1000)
         self.record_metric(max_routing_time_ms, max_routing_time * 1000)""
         
-        print(f"  ✅ Basic routing pipeline successful - {len(test_events)} events)"
+        print(f"  CHECK Basic routing pipeline successful - {len(test_events)} events)"
         print(f  ⚡ Performance: avg {avg_routing_time * 1000:."1f"}ms, max {max_routing_time * 1000:."1f"}ms)""
 
     @pytest.mark.asyncio
@@ -380,7 +380,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         self.record_metric(concurrent_routing_time_ms, total_routing_time * 1000)
         self.record_metric("events_per_second, events_per_second)"
         
-        print(f  ✅ Multi-user isolation successful - {len(users)} users, {len(all_events)} events)
+        print(f  CHECK Multi-user isolation successful - {len(users)} users, {len(all_events)} events)
         print(f  🚀 Concurrent performance: {events_per_second:."1f"} events/sec")"
         print(f  🛡️ Zero cross-contamination detected")"
 
@@ -466,7 +466,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
             
             assert actual_sequence_id == expected_sequence_id, "fSequence order violation: position {i+1} has sequence_id {actual_sequence_id}, expected {expected_sequence_id}"
             
-            print(f  📋 Order {i+1}: {event_data['type']} (seq: {actual_sequence_id} ✅)""
+            print(f  📋 Order {i+1}: {event_data['type']} (seq: {actual_sequence_id} CHECK)""
         
         # Validate phase progression
         phases = [event["event][data][phase] for event in received_events_sorted]"
@@ -508,7 +508,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         self.record_metric(max_routing_delay_ms, max(routing_delays) * 1000)""
         self.record_metric(tool_pairs_validated", len(tool_pairs))"
         
-        print(f  ✅ Event ordering preserved - {len(ordered_events)} events in correct sequence)
+        print(f  CHECK Event ordering preserved - {len(ordered_events)} events in correct sequence)
         print(f  🕒 Routing with delays: {routing_duration * 1000:."1f"}ms total"")
         print(f  🔧 Tool execution pairs: {len(tool_pairs)} tools properly ordered)
 
@@ -557,7 +557,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
                 primary_events_routed += 1
                 print(f"  📡 Primary: Routed {event.event_type})"
             except Exception as e:
-                print(f  ❌ Primary routing failed: {e})""
+                print(f  X Primary routing failed: {e})""
                 break
         
         # Simulate primary connection failure
@@ -595,7 +595,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
                 backup_events_routed += 1
                 print(f  📡 Backup: Routed {event.event_type}"")
             except Exception as e:
-                print(f  ❌ Failover routing failed: {e})
+                print(f  X Failover routing failed: {e})
         
         # Add connection recovery test
         print(  🔌 Simulating primary connection recovery..."")
@@ -618,7 +618,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
                 recovered_events_routed += 1
                 print(f  📡 Recovered: Routed {event.event_type})
             except Exception as e:
-                print(f  ❌ Recovery routing failed: {e}"")
+                print(f  X Recovery routing failed: {e}"")
         
         # Validate failover behavior
         primary_total_events = len(primary_connection[received_events)
@@ -654,7 +654,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         self.record_metric(recovered_events_routed, recovered_events_routed)
         self.record_metric(failover_success_rate, backup_events_routed / max(len(test_events[2:], 1))""
         
-        print(f  ✅ Connection health and failover successful")"
+        print(f  CHECK Connection health and failover successful")"
         print(f  📊 Event distribution: Primary {primary_total_events}, Backup {backup_total_events})
         print(f  🔄 Failover success rate: {backup_events_routed}/{len(test_events[2:]} = {backup_events_routed/max(len(test_events[2:], 1"):."2f"})"
         print(f  🚀 Recovery success rate: {recovered_events_routed}/{len(recovery_events)} = {recovered_events_routed/max(len(recovery_events), 1):."2f"})""
@@ -791,13 +791,13 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         self.record_metric(load_test_events_per_second, events_per_second)
         self.record_metric(load_test_total_time_ms", total_load_time * 1000)"
         
-        print(f  ✅ Load test successful - {success_rate:.1%} success rate)
+        print(f  CHECK Load test successful - {success_rate:.1%} success rate)
         print(f  🚀 Throughput: {events_per_second:."1f"} events/sec")"
         print(f  ⚡ Performance: avg {avg_routing_time * 1000:."1f"}ms, max {max_routing_time * 1000:."1f"}ms)
         print(f  🕒 Total duration: {total_load_time * 1000:."1f"}ms")"
         
         if failed_routings:
-            print(f  ⚠️ Failures: {len(failed_routings)} events failed routing)
+            print(f  WARNING️ Failures: {len(failed_routings)} events failed routing)
 
 
 if __name__ == __main__:""

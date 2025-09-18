@@ -101,7 +101,7 @@ class WebSocketConnectionReproductionTest:
                     response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
                     print(f"Received response: {response[:100]}...")
                     
-                    print("❌ UNEXPECTED SUCCESS: WebSocket connection working properly")
+                    print("X UNEXPECTED SUCCESS: WebSocket connection working properly")
                     test_result.update({
                         "success": False,  # Failed to reproduce the issue
                         "error_message": "WebSocket connection unexpectedly successful",
@@ -114,7 +114,7 @@ class WebSocketConnectionReproductionTest:
                     })
                     
                 except asyncio.TimeoutError:
-                    print("⚠️  No response received (timeout after 5s)")
+                    print("WARNING️  No response received (timeout after 5s)")
                     test_result.update({
                         "success": True,  # Success at reproducing communication issues
                         "error_message": "WebSocket connected but no response received",
@@ -128,7 +128,7 @@ class WebSocketConnectionReproductionTest:
                     self.error_patterns.append("websocket_communication_timeout")
                     
         except websockets.ConnectionClosed as e:
-            print(f"✅ EXPECTED FAILURE: WebSocket connection closed - {e}")
+            print(f"CHECK EXPECTED FAILURE: WebSocket connection closed - {e}")
             test_result.update({
                 "success": True,  # Success at reproducing connection issues
                 "error_message": f"WebSocket connection closed: {str(e)}",
@@ -141,7 +141,7 @@ class WebSocketConnectionReproductionTest:
             self.error_patterns.append("websocket_connection_closed")
             
         except websockets.InvalidHandshake as e:
-            print(f"✅ EXPECTED FAILURE: WebSocket handshake failed - {e}")
+            print(f"CHECK EXPECTED FAILURE: WebSocket handshake failed - {e}")
             test_result.update({
                 "success": True,  # Success at reproducing handshake issues
                 "error_message": f"WebSocket handshake failed: {str(e)}",
@@ -154,7 +154,7 @@ class WebSocketConnectionReproductionTest:
             self.error_patterns.append("websocket_handshake_failure")
             
         except asyncio.TimeoutError:
-            print(f"✅ EXPECTED FAILURE: WebSocket connection timeout")
+            print(f"CHECK EXPECTED FAILURE: WebSocket connection timeout")
             test_result.update({
                 "success": True,  # Success at reproducing timeout issues
                 "error_message": "WebSocket connection timeout",
@@ -167,7 +167,7 @@ class WebSocketConnectionReproductionTest:
             self.error_patterns.append("websocket_connection_timeout")
             
         except Exception as e:
-            print(f"✅ EXPECTED FAILURE: WebSocket connection error - {str(e)}")
+            print(f"CHECK EXPECTED FAILURE: WebSocket connection error - {str(e)}")
             test_result.update({
                 "success": True,  # Success at reproducing general connection issues
                 "error_message": f"WebSocket connection failed: {str(e)}",
@@ -226,7 +226,7 @@ class WebSocketConnectionReproductionTest:
                             response_data = json.loads(response)
                             
                             if response_data.get("error") or response_data.get("status") == "unauthorized":
-                                print(f"✅ EXPECTED FAILURE: Auth rejected - {response_data}")
+                                print(f"CHECK EXPECTED FAILURE: Auth rejected - {response_data}")
                                 test_result.update({
                                     "success": True,
                                     "error_message": "Authentication properly rejected",
@@ -241,10 +241,10 @@ class WebSocketConnectionReproductionTest:
                                 break
                                 
                         except asyncio.TimeoutError:
-                            print(f"⚠️  No auth response for {auth_test['name']}")
+                            print(f"WARNING️  No auth response for {auth_test['name']}")
                             
                 except Exception as e:
-                    print(f"✅ EXPECTED FAILURE: {auth_test['name']} failed - {str(e)}")
+                    print(f"CHECK EXPECTED FAILURE: {auth_test['name']} failed - {str(e)}")
                     test_result.update({
                         "success": True,
                         "error_message": f"Authentication method failed: {str(e)}",
@@ -265,7 +265,7 @@ class WebSocketConnectionReproductionTest:
                 })
             
         except Exception as e:
-            print(f"✅ EXPECTED ERROR: Authentication test failed - {str(e)}")
+            print(f"CHECK EXPECTED ERROR: Authentication test failed - {str(e)}")
             test_result.update({
                 "success": True,
                 "error_message": f"Authentication test failed: {str(e)}",
@@ -310,10 +310,10 @@ class WebSocketConnectionReproductionTest:
                         ping_timeout=None,
                         **{k: v for k, v in protocol_test.items() if k != 'name'}
                     ) as websocket:
-                        print(f"⚠️  Protocol {protocol_test['name']} connected unexpectedly")
+                        print(f"WARNING️  Protocol {protocol_test['name']} connected unexpectedly")
                         
                 except websockets.NegotiationError as e:
-                    print(f"✅ EXPECTED FAILURE: Protocol negotiation failed - {e}")
+                    print(f"CHECK EXPECTED FAILURE: Protocol negotiation failed - {e}")
                     test_result.update({
                         "success": True,
                         "error_message": f"Protocol negotiation failed: {str(e)}",
@@ -328,10 +328,10 @@ class WebSocketConnectionReproductionTest:
                     break
                     
                 except Exception as e:
-                    print(f"✅ EXPECTED ERROR: {protocol_test['name']} failed - {str(e)}")
+                    print(f"CHECK EXPECTED ERROR: {protocol_test['name']} failed - {str(e)}")
                     
         except Exception as e:
-            print(f"⚠️  Protocol test setup error: {str(e)}")
+            print(f"WARNING️  Protocol test setup error: {str(e)}")
             
         self.test_results.append(test_result)
         return test_result
@@ -413,7 +413,7 @@ async def test_issue_586_websocket_connection_reproduction():
         "No WebSocket error patterns detected. Issue #586 may be resolved or test needs adjustment."
     )
     
-    print(f"\n✅ Successfully reproduced Issue #586 WebSocket connection problems!")
+    print(f"\nCHECK Successfully reproduced Issue #586 WebSocket connection problems!")
     return results
 
 
@@ -426,10 +426,10 @@ if __name__ == "__main__":
         
         print(f"\n🎯 FINAL RESULT:")
         if results["successful_reproductions"] > 0:
-            print(f"✅ Issue #586 REPRODUCED: Found {results['successful_reproductions']} WebSocket failures")
+            print(f"CHECK Issue #586 REPRODUCED: Found {results['successful_reproductions']} WebSocket failures")
             print(f"Error patterns: {', '.join(results['error_patterns_found'])}")
         else:
-            print(f"❌ Issue #586 NOT REPRODUCED: WebSocket service appears healthy")
+            print(f"X Issue #586 NOT REPRODUCED: WebSocket service appears healthy")
             
         return results
     

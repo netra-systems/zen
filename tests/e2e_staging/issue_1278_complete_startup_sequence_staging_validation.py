@@ -75,9 +75,9 @@ class TestCompleteStartupSequenceStagingValidation(BaseIntegrationTest):
 
         Expected behavior:
         - Monitor complete startup sequence in real staging
-        - ✅ Phase 1 (INIT) - Initialization
-        - ✅ Phase 2 (DEPENDENCIES) - Dependencies loaded
-        - ❌ Phase 3 (DATABASE) - Connection timeout (issue reproduction)
+        - CHECK Phase 1 (INIT) - Initialization
+        - CHECK Phase 2 (DEPENDENCIES) - Dependencies loaded
+        - X Phase 3 (DATABASE) - Connection timeout (issue reproduction)
         - Track timing and failure patterns
         """
         logger.info("Testing complete application startup sequence in staging environment")
@@ -137,12 +137,12 @@ class TestCompleteStartupSequenceStagingValidation(BaseIntegrationTest):
         # Expected behavior based on Issue #1278 analysis
         if startup_phases['DATABASE']:
             # If database phase succeeded, infrastructure issue is resolved
-            logger.info("✅ Database connectivity SUCCESS - Infrastructure issue appears resolved")
+            logger.info("CHECK Database connectivity SUCCESS - Infrastructure issue appears resolved")
             self.assertTrue(startup_phases['READY'], "Application should be fully ready")
             self.assertLess(startup_duration, 30.0, "Startup should complete quickly when working")
         else:
             # If database phase failed, reproducing the infrastructure issue
-            logger.warning("❌ Database connectivity FAILED - Reproducing Issue #1278 infrastructure problem")
+            logger.warning("X Database connectivity FAILED - Reproducing Issue #1278 infrastructure problem")
             self.assertTrue(startup_phases['INIT'], "INIT phase should succeed")
             self.assertFalse(startup_phases['DATABASE'], "DATABASE phase should fail (reproducing issue)")
             self.assertGreaterEqual(startup_duration, 30.0, "Should timeout after database connection attempts")
@@ -217,12 +217,12 @@ class TestCompleteStartupSequenceStagingValidation(BaseIntegrationTest):
 
         if successful_attempts:
             # Infrastructure is working
-            logger.info("✅ Cloud SQL VPC connector connectivity SUCCESS")
+            logger.info("CHECK Cloud SQL VPC connector connectivity SUCCESS")
             avg_success_time = sum(r['duration'] for r in successful_attempts) / len(successful_attempts)
             self.assertLess(avg_success_time, 5.0, "Successful connections should be fast")
         else:
             # Infrastructure issue reproduced
-            logger.warning("❌ Cloud SQL VPC connector connectivity FAILED - Issue #1278 reproduced")
+            logger.warning("X Cloud SQL VPC connector connectivity FAILED - Issue #1278 reproduced")
             # Validate that failures are due to timeouts (expected behavior)
             timeout_failures = [r for r in failed_attempts
                                if r['duration'] >= 25.0 or 'timeout' in str(r['error']).lower()]
@@ -303,9 +303,9 @@ class TestCompleteStartupSequenceStagingValidation(BaseIntegrationTest):
             if endpoint == '/health/database':
                 # Database health endpoint should reflect connectivity issues
                 if success_count > 0:
-                    logger.info("✅ Database health endpoint responding - infrastructure may be working")
+                    logger.info("CHECK Database health endpoint responding - infrastructure may be working")
                 else:
-                    logger.warning("❌ Database health endpoint failing - reproducing Issue #1278")
+                    logger.warning("X Database health endpoint failing - reproducing Issue #1278")
                     # Should see appropriate error responses
                     self.assertGreater(error_count + exception_count, 0,
                                       "Database health should show errors during connectivity issues")
@@ -367,12 +367,12 @@ class TestCompleteStartupSequenceStagingValidation(BaseIntegrationTest):
 
         if availability_percentage >= 80:
             # Container is mostly stable
-            logger.info("✅ Container stability GOOD - startup issues may be resolved")
+            logger.info("CHECK Container stability GOOD - startup issues may be resolved")
             self.assertGreaterEqual(availability_percentage, 80,
                                    "Container should be stable when infrastructure is working")
         else:
             # Container instability indicating startup issues
-            logger.warning("❌ Container instability DETECTED - reproducing Issue #1278 startup failures")
+            logger.warning("X Container instability DETECTED - reproducing Issue #1278 startup failures")
             # This indicates the startup failure patterns are being reproduced
             long_response_times = [r for r in availability_results
                                  if r.get('duration', 0) > 30.0]

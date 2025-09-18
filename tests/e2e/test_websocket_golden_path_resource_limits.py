@@ -11,7 +11,7 @@ REPRODUCTION TARGET:
 - Emergency cleanup under actual production conditions
 
 GOLDEN PATH CONTEXT:
-- User login → WebSocket connection → Agent execution → AI response
+- User login -> WebSocket connection -> Agent execution -> AI response
 - Resource exhaustion during peak usage simulation
 - Connection limit enforcement in production-like environment
 

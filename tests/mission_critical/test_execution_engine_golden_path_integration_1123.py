@@ -16,7 +16,7 @@ fragmentation or SSOT violations. After proper SSOT consolidation, this test
 should pass, confirming reliable end-to-end user experience.
 
 TEST STRATEGY:
-    - Test complete user flow: Login → Agent Execution → WebSocket Events → Response
+    - Test complete user flow: Login -> Agent Execution -> WebSocket Events -> Response
 - Validate execution engine properly initialized through SSOT factory
 - Test WebSocket event delivery with SSOT execution engine
 - Ensure Golden Path performance and reliability metrics
@@ -83,28 +83,28 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
             # Step 1: User Authentication (simulated)
             step_results['authentication'] = await self._simulate_user_authentication()
             golden_path_steps.append('authentication')
-            logger.info("✅ Step 1: User authentication completed)"
+            logger.info("CHECK Step 1: User authentication completed)"
             
             # Step 2: SSOT Factory Access
             step_results['factory_access'] = await self._validate_ssot_factory_access()
             golden_path_steps.append('factory_access')
-            logger.info(✅ Step 2: SSOT factory access validated)
+            logger.info(CHECK Step 2: SSOT factory access validated)
             
             # Step 3: Execution Engine Creation
             step_results['engine_creation'] = await self._validate_execution_engine_creation()
             golden_path_steps.append('engine_creation')
-            logger.info("✅ Step 3: Execution engine creation validated)"
+            logger.info("CHECK Step 3: Execution engine creation validated)"
             
             # Step 4: Agent Execution with WebSocket Events
             step_results['agent_execution'] = await self._validate_agent_execution_with_events()
             golden_path_steps.append('agent_execution')
-            logger.info(✅ Step 4: Agent execution with events validated)
+            logger.info(CHECK Step 4: Agent execution with events validated)
             
             # Step 5: Response Delivery
             step_results['response_delivery'] = await self._validate_response_delivery()
             golden_path_steps.append('response_delivery')
-            logger.info(✅ Step 5: Response delivery validated)"
-            logger.info(✅ Step 5: Response delivery validated)""
+            logger.info(CHECK Step 5: Response delivery validated)"
+            logger.info(CHECK Step 5: Response delivery validated)""
 
             
         except Exception as e:
@@ -112,7 +112,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
             failure = fGolden Path step failed: {e}""
 
             self.golden_path_failures.append(failure)
-            logger.error(f❌ GOLDEN PATH FAILURE: {failure})
+            logger.error(fX GOLDEN PATH FAILURE: {failure})
         
         # Validate Golden Path completeness
         expected_steps = ['authentication', 'factory_access', 'engine_creation', 'agent_execution', 'response_delivery']
@@ -131,7 +131,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
             if not step_result.get('success', False):
                 failure = fGolden Path step '{step_name}' failed: {step_result.get('error', 'Unknown error')}""
                 self.golden_path_failures.append(failure)
-                logger.error(f❌ STEP FAILURE: {failure})
+                logger.error(fX STEP FAILURE: {failure})
         
         # EXPECTED TO FAIL if Golden Path is disrupted by factory fragmentation
         self.assertEqual(
@@ -229,7 +229,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
             failure = fWebSocket event delivery failed: {e}""
 
             event_delivery_failures.append(failure)
-            logger.error(f"❌ WEBSOCKET FAILURE: {failure})"
+            logger.error(f"X WEBSOCKET FAILURE: {failure})"
         
         # Validate event delivery
         events_by_type = {}
@@ -247,7 +247,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
         for expected_event in self.expected_events:
             if expected_event not in events_by_type:
                 missing_events.append(expected_event)
-                logger.error(f❌ MISSING EVENT: {expected_event})
+                logger.error(fX MISSING EVENT: {expected_event})
         
         if missing_events:
             failure = f"Missing critical WebSocket events: {missing_events}"
@@ -307,7 +307,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
                         'success': True
                     }
                     
-                    logger.info(f✅ {test_name}: {result} (time: {end_time - start_time:."3f"}s))""
+                    logger.info(fCHECK {test_name}: {result} (time: {end_time - start_time:."3f"}s))""
 
                     
                 except Exception as e:
@@ -319,13 +319,13 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
                     
                     failure = f"Performance test '{test_name}' failed: {e}"
                     performance_violations.append(failure)
-                    logger.error(f❌ PERFORMANCE FAILURE: {failure}")"
+                    logger.error(fX PERFORMANCE FAILURE: {failure}")"
         
         except Exception as e:
             failure = fPerformance testing failed: {e}
             performance_violations.append(failure)
-            logger.error(f❌ PERFORMANCE TEST FAILURE: {failure})"
-            logger.error(f❌ PERFORMANCE TEST FAILURE: {failure})""
+            logger.error(fX PERFORMANCE TEST FAILURE: {failure})"
+            logger.error(fX PERFORMANCE TEST FAILURE: {failure})""
 
         
         # Analyze performance results
@@ -351,7 +351,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
                 if metrics['execution_time'] > threshold:
                     violation = fPerformance threshold exceeded: {test_name} took {metrics['execution_time']:."3f"}s (limit: {threshold}s)""
                     performance_violations.append(violation)
-                    logger.error(f❌ PERFORMANCE VIOLATION: {violation})
+                    logger.error(fX PERFORMANCE VIOLATION: {violation})
         
         # EXPECTED TO FAIL if performance is degraded due to factory fragmentation
         self.assertEqual(
@@ -408,7 +408,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
             [fAgent Execution: {f} for f in self.agent_execution_failures]
         
         for i, failure in enumerate(all_failures[:12], 1):
-            logger.info(f    {i:"2d"}. ❌ {failure}")"
+            logger.info(f    {i:"2d"}. X {failure}")"
         
         if len(all_failures) > 12:
             logger.info(f    ... and {len(all_failures) - 12} more integration failures)

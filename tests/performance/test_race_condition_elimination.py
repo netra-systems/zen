@@ -205,12 +205,12 @@ class RaceConditionEliminationTests(SSotAsyncTestCase):
         print(f"  - Thread Safety Violations: {len(self.thread_safety_violations)}")
 
         if self.race_condition_detected:
-            print("\n❌ RACE CONDITIONS DETECTED:")
+            print("\nX RACE CONDITIONS DETECTED:")
             for race_condition in self.race_condition_detected[-3:]:  # Show last 3
                 print(f"  - {race_condition['type']}: {race_condition['description']}")
 
         if self.data_contamination_events:
-            print("\n❌ DATA CONTAMINATION DETECTED:")
+            print("\nX DATA CONTAMINATION DETECTED:")
             for contamination in self.data_contamination_events[-3:]:  # Show last 3
                 print(f"  - User {contamination['affected_user']}: {contamination['contamination_type']}")
 
@@ -287,7 +287,7 @@ class RaceConditionEliminationTests(SSotAsyncTestCase):
 
         except Exception as e:
             concurrent_duration = time.perf_counter() - concurrent_start
-            print(f"❌ CONCURRENT OPERATION FAILED: {operation_name} - {e}")
+            print(f"X CONCURRENT OPERATION FAILED: {operation_name} - {e}")
             raise
 
     async def _run_sync_in_thread(self, func, *args, **kwargs):
@@ -448,7 +448,7 @@ class RaceConditionEliminationTests(SSotAsyncTestCase):
             f"{RACE_CONDITION_SLA['min_concurrent_success_rate']}% for concurrent connections"
         )
 
-        print(f"✅ CONCURRENT WEBSOCKET TEST: {successful_connections}/{len(results)} connections successful")
+        print(f"CHECK CONCURRENT WEBSOCKET TEST: {successful_connections}/{len(results)} connections successful")
 
     async def _perform_websocket_connection_test(self, user_context: Dict[str, Any]):
         """Perform WebSocket connection test for a single user context."""
@@ -533,7 +533,7 @@ class RaceConditionEliminationTests(SSotAsyncTestCase):
             f"in concurrent agent factory creation"
         )
 
-        print(f"✅ CONCURRENT AGENT FACTORY TEST: {len(results)} factories created, {thread_safety_violations} violations")
+        print(f"CHECK CONCURRENT AGENT FACTORY TEST: {len(results)} factories created, {thread_safety_violations} violations")
 
     async def _perform_agent_factory_creation_test(self, user_context: Dict[str, Any]):
         """Perform agent factory creation test for thread safety validation."""
@@ -628,7 +628,7 @@ class RaceConditionEliminationTests(SSotAsyncTestCase):
             f"detected during concurrent access (should be 1)"
         )
 
-        print(f"✅ CONCURRENT CONFIG ACCESS TEST: {len(results)} users, {len(config_values)} unique config values")
+        print(f"CHECK CONCURRENT CONFIG ACCESS TEST: {len(results)} users, {len(config_values)} unique config values")
 
     async def _perform_configuration_access_test(self, user_context: Dict[str, Any]):
         """Perform configuration access test for consistency validation."""

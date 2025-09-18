@@ -144,10 +144,10 @@ class EnterpriseWebSocketEventMonitor:
             'agent_started': "🚀 USER EXPERIENCE: Agent processing initiated - user knows AI is working",
             'agent_thinking': "🧠 REAL-TIME VALUE: User sees AI reasoning process - builds trust", 
             'tool_executing': "🔧 TRANSPARENCY: User sees tools being used - demonstrates capability",
-            'tool_completed': "✅ PROGRESS UPDATE: Tool results available - user sees progress",
+            'tool_completed': "CHECK PROGRESS UPDATE: Tool results available - user sees progress",
             'agent_completed': "🏁 COMPLETION: Final results ready - user gets value delivery",
             'agent_response': "💬 VALUE DELIVERY: AI response provided - core business value",
-            'error': "⚠️  ISSUE DETECTED: Error occurred - may impact user experience",
+            'error': "WARNING️  ISSUE DETECTED: Error occurred - may impact user experience",
             'connection_established': "🔌 INFRASTRUCTURE: WebSocket connected - foundation ready"
         }
         
@@ -263,7 +263,7 @@ class EnterpriseWebSocketEventMonitor:
         critical_events = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
         for event_type in critical_events:
             count = analysis.events_by_type.get(event_type, 0)
-            status = "✅ DELIVERED" if count > 0 else "❌ MISSING"
+            status = "CHECK DELIVERED" if count > 0 else "X MISSING"
             business_impact = self._get_business_impact(event_type, count > 0)
             report_lines.append(f"  📍 {event_type}: {status} ({count} events) - {business_impact}")
         
@@ -271,10 +271,10 @@ class EnterpriseWebSocketEventMonitor:
         if analysis.missing_required_events:
             report_lines.extend([
                 "",
-                "⚠️  CRITICAL BUSINESS ISSUES:",
+                "WARNING️  CRITICAL BUSINESS ISSUES:",
             ])
             for missing in analysis.missing_required_events:
-                report_lines.append(f"  ❌ Missing: {missing}")
+                report_lines.append(f"  X Missing: {missing}")
         
         if analysis.timing_violations:
             report_lines.extend([
@@ -282,7 +282,7 @@ class EnterpriseWebSocketEventMonitor:
                 "⏰ TIMING ISSUES:",
             ])
             for violation in analysis.timing_violations:
-                report_lines.append(f"  ⚠️  {violation}")
+                report_lines.append(f"  WARNING️  {violation}")
         
         if analysis.content_validation_errors:
             report_lines.extend([
@@ -290,7 +290,7 @@ class EnterpriseWebSocketEventMonitor:
                 "📋 CONTENT VALIDATION ISSUES:",
             ])
             for error in analysis.content_validation_errors[:5]:  # Show first 5 errors
-                report_lines.append(f"  ⚠️  {error}")
+                report_lines.append(f"  WARNING️  {error}")
             
             if len(analysis.content_validation_errors) > 5:
                 report_lines.append(f"  ... and {len(analysis.content_validation_errors) - 5} more issues")
@@ -325,11 +325,11 @@ class EnterpriseWebSocketEventMonitor:
         ])
         
         if analysis.business_value_score >= 90.0:
-            report_lines.append("  ✅ Excellent event delivery - maintains high user engagement")
+            report_lines.append("  CHECK Excellent event delivery - maintains high user engagement")
         elif analysis.business_value_score >= 75.0:
-            report_lines.append("  ✅ Good event delivery - acceptable user experience")
+            report_lines.append("  CHECK Good event delivery - acceptable user experience")
         else:
-            report_lines.append("  ❌ Poor event delivery - risk of user abandonment")
+            report_lines.append("  X Poor event delivery - risk of user abandonment")
             report_lines.append("  🔧 IMMEDIATE ACTION REQUIRED: Investigate WebSocket event system")
         
         if len(analysis.missing_required_events) > 0:
@@ -407,7 +407,7 @@ class RealStagingWebSocketClient:
             self.is_connected = True
             self.event_monitor.connection_established_time = time.time()
             
-            logger.success(f"✅ Connected to staging WebSocket environment")
+            logger.success(f"CHECK Connected to staging WebSocket environment")
             
             # Start message listener
             asyncio.create_task(self._message_listener())
@@ -415,7 +415,7 @@ class RealStagingWebSocketClient:
             return True
             
         except Exception as e:
-            logger.error(f"❌ Failed to connect to staging WebSocket: {e}")
+            logger.error(f"X Failed to connect to staging WebSocket: {e}")
             return False
     
     async def _message_listener(self):
@@ -436,19 +436,19 @@ class RealStagingWebSocketClient:
                     self.event_monitor.record_event(data)
                     
                 except json.JSONDecodeError as e:
-                    logger.warning(f"⚠️  Invalid JSON in WebSocket message: {e}")
+                    logger.warning(f"WARNING️  Invalid JSON in WebSocket message: {e}")
                     
         except websockets.exceptions.ConnectionClosed:
             logger.info("🔌 WebSocket connection closed by server")
             self.is_connected = False
         except Exception as e:
-            logger.error(f"❌ Error in WebSocket message listener: {e}")
+            logger.error(f"X Error in WebSocket message listener: {e}")
             self.is_connected = False
     
     async def send_agent_execution_request(self, message_content: str, agent_type: str = "supervisor") -> bool:
         """Send agent execution request through WebSocket."""
         if not self.is_connected or not self.websocket:
-            logger.error("❌ Cannot send request - WebSocket not connected")
+            logger.error("X Cannot send request - WebSocket not connected")
             return False
         
         try:
@@ -468,7 +468,7 @@ class RealStagingWebSocketClient:
             return True
             
         except Exception as e:
-            logger.error(f"❌ Failed to send agent request: {e}")
+            logger.error(f"X Failed to send agent request: {e}")
             return False
     
     async def wait_for_agent_completion(self, timeout: float = 60.0) -> bool:
@@ -481,7 +481,7 @@ class RealStagingWebSocketClient:
                 return True
             await asyncio.sleep(0.5)
         
-        logger.warning(f"⚠️  Timeout waiting for agent completion after {timeout}s")
+        logger.warning(f"WARNING️  Timeout waiting for agent completion after {timeout}s")
         return False
     
     async def disconnect(self):
@@ -491,7 +491,7 @@ class RealStagingWebSocketClient:
                 await self.websocket.close()
                 logger.info("🔌 WebSocket disconnected")
             except Exception as e:
-                logger.warning(f"⚠️  Error during disconnect: {e}")
+                logger.warning(f"WARNING️  Error during disconnect: {e}")
             finally:
                 self.is_connected = False
 
@@ -576,12 +576,12 @@ class TestWebSocketAgentEventsE2E(SSotAsyncTestCase):
             )
             
             if response.status_code == 200:
-                cls.logger.success("✅ GCP staging environment is accessible")
+                cls.logger.success("CHECK GCP staging environment is accessible")
             else:
-                cls.logger.warning(f"⚠️  Staging health check returned: {response.status_code}")
+                cls.logger.warning(f"WARNING️  Staging health check returned: {response.status_code}")
                 
         except Exception as e:
-            cls.logger.warning(f"⚠️  Could not validate staging environment: {e}")
+            cls.logger.warning(f"WARNING️  Could not validate staging environment: {e}")
     
     def setup_method(self, method=None):
         """Setup for each test method."""
@@ -647,11 +647,11 @@ class TestWebSocketAgentEventsE2E(SSotAsyncTestCase):
             auth_result = await self._authenticate_staging_user()
             
             if not auth_result['success']:
-                pytest.fail(f"❌ CRITICAL: Staging authentication failed - {auth_result['error']}")
+                pytest.fail(f"X CRITICAL: Staging authentication failed - {auth_result['error']}")
             
             user_id = auth_result['user_id']
             auth_token = auth_result['access_token']
-            logger.success(f"✅ Authenticated user: {user_id}")
+            logger.success(f"CHECK Authenticated user: {user_id}")
             
             # Phase 2: WebSocket Connection with Monitoring
             logger.info("🔌 Phase 2: Establishing WebSocket connection with event monitoring...")
@@ -659,9 +659,9 @@ class TestWebSocketAgentEventsE2E(SSotAsyncTestCase):
             
             connection_success = await websocket_client.connect_with_authentication(auth_token, user_id)
             if not connection_success:
-                pytest.fail("❌ CRITICAL: WebSocket connection to staging failed")
+                pytest.fail("X CRITICAL: WebSocket connection to staging failed")
             
-            logger.success("✅ WebSocket connected with event monitoring active")
+            logger.success("CHECK WebSocket connected with event monitoring active")
             
             # Phase 3: Agent Execution with Event Collection
             logger.info("🤖 Phase 3: Executing agent with real-time event collection...")
@@ -673,9 +673,9 @@ class TestWebSocketAgentEventsE2E(SSotAsyncTestCase):
             
             request_sent = await websocket_client.send_agent_execution_request(test_message, "supervisor")
             if not request_sent:
-                pytest.fail("❌ CRITICAL: Could not send agent execution request")
+                pytest.fail("X CRITICAL: Could not send agent execution request")
             
-            logger.success("✅ Agent execution request sent")
+            logger.success("CHECK Agent execution request sent")
             
             # Phase 4: Event Collection and Monitoring
             logger.info("📊 Phase 4: Collecting and monitoring WebSocket events...")
@@ -693,22 +693,22 @@ class TestWebSocketAgentEventsE2E(SSotAsyncTestCase):
             
             # Assert critical business requirements
             assert analysis.total_events >= 3, (
-                f"❌ CRITICAL: Insufficient events received ({analysis.total_events} < 3) "
+                f"X CRITICAL: Insufficient events received ({analysis.total_events} < 3) "
                 "- Users get no feedback"
             )
             
             assert len(analysis.missing_required_events) == 0, (
-                f"❌ CRITICAL: Missing required events - {analysis.missing_required_events} "
+                f"X CRITICAL: Missing required events - {analysis.missing_required_events} "
                 "- Users lack essential feedback"
             )
             
             assert analysis.business_value_score >= 60.0, (
-                f"❌ CRITICAL: Business value score too low ({analysis.business_value_score:.1f}/100) "
+                f"X CRITICAL: Business value score too low ({analysis.business_value_score:.1f}/100) "
                 "- Poor user experience"
             )
             
             assert analysis.is_business_acceptable(), (
-                "❌ CRITICAL: Event delivery does not meet business requirements"
+                "X CRITICAL: Event delivery does not meet business requirements"
             )
             
             # Phase 6: User Experience Validation
@@ -717,7 +717,7 @@ class TestWebSocketAgentEventsE2E(SSotAsyncTestCase):
             # Validate user experience rating
             acceptable_ratings = ['Excellent', 'Good', 'Acceptable']
             assert analysis.user_experience_rating in acceptable_ratings, (
-                f"❌ CRITICAL: Unacceptable user experience rating: {analysis.user_experience_rating}"
+                f"X CRITICAL: Unacceptable user experience rating: {analysis.user_experience_rating}"
             )
             
             # Validate event timing for responsiveness
@@ -726,7 +726,7 @@ class TestWebSocketAgentEventsE2E(SSotAsyncTestCase):
                     self.event_monitor.first_event_time - self.event_monitor.connection_established_time
                 )
                 assert time_to_first_event <= 10.0, (
-                    f"❌ PERFORMANCE: First event too slow ({time_to_first_event:.2f}s > 10s) "
+                    f"X PERFORMANCE: First event too slow ({time_to_first_event:.2f}s > 10s) "
                     "- Poor responsiveness"
                 )
             
@@ -740,7 +740,7 @@ class TestWebSocketAgentEventsE2E(SSotAsyncTestCase):
             logger.success(f"👤 User Experience: {analysis.user_experience_rating}")
             
         except Exception as e:
-            logger.error(f"❌ FATAL ERROR in WebSocket events test: {e}")
+            logger.error(f"X FATAL ERROR in WebSocket events test: {e}")
             raise
     
     async def _authenticate_staging_user(self) -> Dict[str, Any]:
@@ -802,7 +802,7 @@ class TestWebSocketAgentEventsE2E(SSotAsyncTestCase):
             logger.info(f"🧹 Cleaning up test user: {auth_result.get('user_email')}")
             # Could implement user deletion if needed
         except Exception as e:
-            logger.warning(f"⚠️  User cleanup warning: {e}")
+            logger.warning(f"WARNING️  User cleanup warning: {e}")
 
 
 if __name__ == '__main__':

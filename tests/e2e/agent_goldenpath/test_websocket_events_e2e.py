@@ -114,7 +114,7 @@ class WebSocketEventsE2ETests(SSotAsyncTestCase):
             connection_start = time.time()
             websocket = await asyncio.wait_for(websockets.connect(self.__class__.staging_config.urls.websocket_url, additional_headers={'Authorization': f'Bearer {self.access_token}', 'X-Environment': 'staging', 'X-Test-Suite': 'critical-events-validation'}, ssl=ssl_context, ping_interval=30, ping_timeout=10), timeout=20.0)
             connection_time = time.time() - connection_start
-            self.logger.info(f'✅ WebSocket connected in {connection_time:.2f}s')
+            self.logger.info(f'CHECK WebSocket connected in {connection_time:.2f}s')
             test_message = {'type': 'agent_request', 'agent': 'apex_optimizer_agent', 'message': 'Please analyze my AI usage patterns and provide specific cost optimization recommendations. I need you to check current market rates and suggest concrete steps to reduce my $3,000/month OpenAI spend by 25%.', 'thread_id': self.thread_id, 'run_id': self.run_id, 'user_id': self.__class__.test_user_id, 'context': {'test_scenario': 'critical_events_validation', 'requires_tool_usage': True, 'expected_events': self.CRITICAL_EVENTS}}
             message_send_time = time.time()
             await websocket.send(json.dumps(test_message))
@@ -145,7 +145,7 @@ class WebSocketEventsE2ETests(SSotAsyncTestCase):
                     self.logger.warning(f'⏰ Event timeout - no event for 15s (total elapsed: {current_time - message_send_time:.1f}s)')
                     continue
                 except json.JSONDecodeError as e:
-                    self.logger.error(f'❌ Failed to parse WebSocket event: {e}')
+                    self.logger.error(f'X Failed to parse WebSocket event: {e}')
                     continue
             await websocket.close()
             total_events_time = time.time() - events_start_time
@@ -186,7 +186,7 @@ class WebSocketEventsE2ETests(SSotAsyncTestCase):
             assert total_events_time < 180.0, f'Complete event delivery too slow: {total_events_time:.1f}s (max 180s)'
         except Exception as e:
             total_time = time.time() - events_start_time
-            self.logger.error('❌ CRITICAL WEBSOCKET EVENTS FAILURE')
+            self.logger.error('X CRITICAL WEBSOCKET EVENTS FAILURE')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             self.logger.error(f"   Events Received: {len(event_metrics.get('events_received', []))}")
@@ -254,7 +254,7 @@ class WebSocketEventsE2ETests(SSotAsyncTestCase):
                     max_gap = max(timing_data['inter_event_times'])
                     assert max_gap < 30.0, f"Event gap too large for {test_scenario['name']}: {max_gap:.1f}s (max 30s between events)"
                 assert timing_data['total_events'] >= 3, f"Too few events for {test_scenario['name']}: {timing_data['total_events']} (expected ≥3 events)"
-                self.logger.info(f"✅ {test_scenario['name']} timing validation passed:")
+                self.logger.info(f"CHECK {test_scenario['name']} timing validation passed:")
                 self.logger.info(f"   First event: {timing_data['first_event_time']:.1f}s")
                 self.logger.info(f"   Total duration: {timing_data['last_event_time']:.1f}s")
                 self.logger.info(f"   Total events: {timing_data['total_events']}")
@@ -318,7 +318,7 @@ class WebSocketEventsE2ETests(SSotAsyncTestCase):
             assert len(recovery_events) > 0, 'Should receive events after connection recovery'
             recovery_event_types = {event.get('type') for event in recovery_events}
             assert 'agent_started' in recovery_event_types, f'Should receive agent_started after recovery, got: {recovery_event_types}'
-            self.logger.info(f'✅ Connection recovery successful: {len(recovery_events)} events')
+            self.logger.info(f'CHECK Connection recovery successful: {len(recovery_events)} events')
         finally:
             await websocket.close()
         self.logger.info('Testing multiple concurrent event streams')
@@ -355,7 +355,7 @@ class WebSocketEventsE2ETests(SSotAsyncTestCase):
         for stream in successful_streams:
             assert stream['events_count'] > 0, f"Stream {stream['stream_id']} should receive events"
             assert 'agent_started' in stream['event_types'], f"Stream {stream['stream_id']} missing agent_started event"
-        self.logger.info(f'✅ Concurrent streams test: {len(successful_streams)}/{concurrent_streams} successful')
+        self.logger.info(f'CHECK Concurrent streams test: {len(successful_streams)}/{concurrent_streams} successful')
         self.logger.info('🛡️ WebSocket event resilience and recovery tests complete')
 
     async def test_event_data_structure_and_content_validation(self):
@@ -449,11 +449,11 @@ class WebSocketEventsE2ETests(SSotAsyncTestCase):
         users see transparent tool usage that enhances business value delivery.
         
         Tool Integration Event Pipeline:
-        1. agent_started → User knows processing began
-        2. agent_thinking → User sees reasoning process
-        3. tool_executing → User sees specific tool being used
-        4. tool_completed → User sees tool results and outcomes
-        5. agent_completed → User receives final integrated response
+        1. agent_started -> User knows processing began
+        2. agent_thinking -> User sees reasoning process
+        3. tool_executing -> User sees specific tool being used
+        4. tool_completed -> User sees tool results and outcomes
+        5. agent_completed -> User receives final integrated response
         
         DIFFICULTY: Very High (70+ minutes)
         REAL SERVICES: Yes - Complete staging tool integration with WebSocket monitoring
@@ -469,7 +469,7 @@ class WebSocketEventsE2ETests(SSotAsyncTestCase):
             connection_start = time.time()
             websocket = await asyncio.wait_for(websockets.connect(self.__class__.staging_config.urls.websocket_url, additional_headers={'Authorization': f'Bearer {self.access_token}', 'X-Environment': 'staging', 'X-Test-Suite': 'tool-integration-websocket-pipeline', 'X-Tool-Transparency': 'maximum', 'X-Business-Value': 'tool-enhanced-analysis'}, ssl=ssl_context, ping_interval=30, ping_timeout=10), timeout=20.0)
             connection_time = time.time() - connection_start
-            self.logger.info(f'✅ WebSocket connected for tool monitoring in {connection_time:.2f}s')
+            self.logger.info(f'CHECK WebSocket connected for tool monitoring in {connection_time:.2f}s')
             tool_integration_scenario = {'type': 'agent_request', 'agent': 'apex_optimizer_agent', 'message': "I'm evaluating a $500,000 annual AI infrastructure investment for my SaaS company. Please perform a comprehensive analysis using your available tools: \n\nREQUIREMENTS FOR TOOL-BASED ANALYSIS:\n1. Calculate current vs projected costs with different model configurations\n2. Analyze performance trade-offs between GPT-4 and GPT-3.5 usage\n3. Evaluate caching strategies and their ROI impact\n4. Assess scaling requirements for 5x growth scenario\n5. Generate implementation timeline with risk analysis\n\nPlease use your calculation, analysis, and planning tools to provide quantified recommendations with specific data points. I need to see exactly how you're using tools to enhance your analysis quality.", 'thread_id': f'tool_integration_ws_{int(time.time())}', 'run_id': f'tool_ws_run_{int(time.time())}', 'user_id': self.__class__.test_user_id, 'context': {'business_scenario': 'tool_enhanced_analysis', 'expected_tools': ['cost_calculator', 'performance_analyzer', 'roi_calculator', 'timeline_planner'], 'transparency_required': True, 'tool_integration_complexity': 'high'}}
             message_send_start = time.time()
             await websocket.send(json.dumps(tool_integration_scenario))
@@ -552,7 +552,7 @@ class WebSocketEventsE2ETests(SSotAsyncTestCase):
             assert tool_pipeline_metrics['tool_transparency_score'] >= 0.4, f"Tool transparency below business value threshold: {tool_pipeline_metrics['tool_transparency_score']:.2f}"
         except Exception as e:
             total_time = time.time() - tool_pipeline_start_time
-            self.logger.error('❌ TOOL INTEGRATION WEBSOCKET PIPELINE FAILED')
+            self.logger.error('X TOOL INTEGRATION WEBSOCKET PIPELINE FAILED')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             self.logger.error(f"   Tool events collected: {len(tool_pipeline_metrics.get('tool_events_received', []))}")

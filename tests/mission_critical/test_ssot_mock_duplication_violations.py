@@ -263,7 +263,7 @@ SSOT MOCK DUPLICATION VIOLATIONS REPORT
 ======================================
 
 TOTAL VIOLATIONS: {total_violations}
-TARGET REDUCTION: {total_violations} violations → 0 violations
+TARGET REDUCTION: {total_violations} violations -> 0 violations
 
 VIOLATIONS BY TYPE:
     {self._format_violation_counts(violation_by_type)}

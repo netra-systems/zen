@@ -638,7 +638,7 @@ class WebSocketSSOTComplianceValidationTests(SSotAsyncTestCase):
             if metric in performance_metrics:
                 if performance_metrics[metric] <= baseline:
                     performance_passes += 1
-                    logger.info(f"[SUCCESS TEST 1] {metric}: {performance_metrics[metric]} <= {baseline} ✓")
+                    logger.info(f"[SUCCESS TEST 1] {metric}: {performance_metrics[metric]} <= {baseline} CHECK")
                 else:
                     logger.warning(f"[SUCCESS TEST 1] {metric}: {performance_metrics[metric]} > {baseline} ✗")
         

@@ -66,7 +66,7 @@ class MissionCriticalWebSocketJWTSSOTViolationsTests(SSotBaseTestCase):
         3. Direct jwt.decode() calls outside of JWTHandler
         4. Conditional auth service usage creating dual paths
         
-        BUSINESS IMPACT: These violations prevent reliable user login → AI response flow
+        BUSINESS IMPACT: These violations prevent reliable user login -> AI response flow
         
         Expected: FAILURE - P0 SSOT violations detected blocking Golden Path
         After Fix: PASS - Single SSOT delegation path enables Golden Path

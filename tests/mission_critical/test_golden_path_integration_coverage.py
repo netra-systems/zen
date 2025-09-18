@@ -54,7 +54,7 @@ class GoldenPathIntegrationCoverageTests:
 
         Validate complete end-to-end user flow works with service-independent infrastructure.
         
-        This is the ultimate Golden Path test: User login → Agent execution → AI response.
+        This is the ultimate Golden Path test: User login -> Agent execution -> AI response.
         
         CRITICAL: This validates the core business flow that generates $"500K" plus ARR.
         "

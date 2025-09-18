@@ -3,13 +3,13 @@
 SSOT Agent Registry Consolidation Validation Tests
 
 Issue #845: Critical P0 test suite for validating AgentRegistry SSOT consolidation
-Business Impact: $500K+ ARR Golden Path protection (login → AI responses)
+Business Impact: $500K+ ARR Golden Path protection (login -> AI responses)
 
 """
 """
 Tests duplicate AgentRegistry consolidation from:
-- Basic: /netra_backend/app/agents/registry.py (419 lines) → TO BE ELIMINATED
-- Advanced: /netra_backend/app/agents/supervisor/agent_registry.py (1,817 lines) → SSOT TARGET
+- Basic: /netra_backend/app/agents/registry.py (419 lines) -> TO BE ELIMINATED
+- Advanced: /netra_backend/app/agents/supervisor/agent_registry.py (1,817 lines) -> SSOT TARGET
 
 Created: 2025-1-13 - SSOT Gardner agents focus
 Priority: P0 (Critical/Blocking) - Must pass before consolidation
@@ -179,7 +179,7 @@ class AgentRegistrySSoTConsolidationTests(SSotAsyncTestCase):
     "
         CRITICAL: Comprehensive regression test suite
         
-        Business Impact: Ensures Golden Path (login → AI responses) still works
+        Business Impact: Ensures Golden Path (login -> AI responses) still works
         Expected: PASS - all core functionality must be preserved
         "
         "

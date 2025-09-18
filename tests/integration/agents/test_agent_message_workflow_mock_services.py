@@ -10,10 +10,10 @@ Business Value Justification (BVJ):
 
 CRITICAL: These integration tests validate complete agent message workflows using 
 mock services to eliminate Docker dependencies while ensuring comprehensive coverage
-of the golden path user flow: message → agent execution → intelligent response.
+of the golden path user flow: message -> agent execution -> intelligent response.
 
 Test Coverage Focus:
-- Complete message → agent execution → response workflow validation
+- Complete message -> agent execution -> response workflow validation
 - All 5 critical WebSocket events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)
 - Multi-user isolation during concurrent agent message processing
 - Agent message handler service integration and coordination
@@ -184,7 +184,7 @@ class AgentMessageWorkflowMockServicesTests(SSotAsyncTestCase):
                 websocket_manager=mock_websocket_manager
             )
             
-            # Test message workflow: User Message → Agent Processing → Intelligent Response
+            # Test message workflow: User Message -> Agent Processing -> Intelligent Response
             user_message = "I need help optimizing my AI infrastructure for better cost efficiency and performance"
             expected_response_elements = [
                 "cost optimization",
@@ -360,7 +360,7 @@ class AgentMessageWorkflowMockServicesTests(SSotAsyncTestCase):
             self.record_metric("intelligent_response_generated", True)
             self.record_metric("business_value_delivered", True)
             
-            self.logger.info(f"✅ PASS: Complete agent message workflow successful in {total_processing_time:.2f}s")
+            self.logger.info(f"CHECK PASS: Complete agent message workflow successful in {total_processing_time:.2f}s")
             
         finally:
             await mock_websocket_manager.shutdown()
@@ -516,7 +516,7 @@ class AgentMessageWorkflowMockServicesTests(SSotAsyncTestCase):
             self.record_metric("zero_cross_user_leakage", True)
             self.record_metric("multi_user_processing_successful", True)
             
-            self.logger.info("✅ PASS: Multi-user message isolation with mock services successful")
+            self.logger.info("CHECK PASS: Multi-user message isolation with mock services successful")
             
         finally:
             await mock_websocket_manager.shutdown()
@@ -683,7 +683,7 @@ class AgentMessageWorkflowMockServicesTests(SSotAsyncTestCase):
             self.record_metric("helpful_responses_maintained", True)
             self.record_metric("service_reliability_maintained", True)
             
-            self.logger.info("✅ PASS: Agent message error recovery with mock services successful")
+            self.logger.info("CHECK PASS: Agent message error recovery with mock services successful")
             
         finally:
             await mock_websocket_manager.shutdown()
@@ -901,7 +901,7 @@ class AgentMessageWorkflowMockServicesTests(SSotAsyncTestCase):
             self.record_metric("sla_compliance_rate", sla_compliance_rate)
             self.record_metric("performance_sla_validation_successful", True)
             
-            self.logger.info(f"✅ PASS: Agent message performance SLA validation successful (compliance: {sla_compliance_rate:.1%})")
+            self.logger.info(f"CHECK PASS: Agent message performance SLA validation successful (compliance: {sla_compliance_rate:.1%})")
             
         finally:
             await mock_websocket_manager.shutdown()
@@ -1042,7 +1042,7 @@ class AgentMessageWorkflowMockServicesTests(SSotAsyncTestCase):
             self.record_metric("event_ordering_correct", True)
             self.record_metric("websocket_sequencing_successful", True)
             
-            self.logger.info(f"✅ PASS: WebSocket event sequencing and timing successful ({total_sequence_time:.2f}s)")
+            self.logger.info(f"CHECK PASS: WebSocket event sequencing and timing successful ({total_sequence_time:.2f}s)")
             
         finally:
             await mock_websocket_manager.shutdown()

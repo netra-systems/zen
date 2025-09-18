@@ -46,10 +46,10 @@ class UnifiedIdGeneratorAdoptionTests(SSotBaseTestCase):
             uuid4_pattern = 'str\\(uuid\\.uuid4\\(\\)\\)'
             uuid4_usage = re.search(uuid4_pattern, source_code)
             assert uuid4_usage is None, f'MIGRATION INCOMPLETE: auth.py still contains uuid.uuid4() usage. All instances should be replaced with UnifiedIdGenerator patterns.'
-            print(f'\n✅ AUTH SSOT MIGRATION VALIDATION SUCCESS:')
-            print(f'   ✓ UnifiedIdGenerator import found')
-            print(f'   ✓ generate_session_id() usage confirmed')
-            print(f'   ✓ uuid.uuid4() patterns removed')
+            print(f'\nCHECK AUTH SSOT MIGRATION VALIDATION SUCCESS:')
+            print(f'   CHECK UnifiedIdGenerator import found')
+            print(f'   CHECK generate_session_id() usage confirmed')
+            print(f'   CHECK uuid.uuid4() patterns removed')
             print(f'   Status: auth.py successfully migrated to SSOT pattern')
         except ImportError as e:
             pytest.fail(f'Cannot import auth module for post-migration validation: {e}')
@@ -75,10 +75,10 @@ class UnifiedIdGeneratorAdoptionTests(SSotBaseTestCase):
             uuid4_pattern = 'str\\(uuid\\.uuid4\\(\\)\\)'
             uuid4_usage = re.search(uuid4_pattern, source_code)
             assert uuid4_usage is None, f'MIGRATION INCOMPLETE: unified_websocket_auth.py still contains uuid.uuid4() usage at line ~1303.'
-            print(f'\n✅ WEBSOCKET SSOT MIGRATION VALIDATION SUCCESS:')
-            print(f'   ✓ UnifiedIdGenerator import found')
-            print(f'   ✓ generate_connection_id() usage confirmed')
-            print(f'   ✓ uuid.uuid4() patterns removed from line ~1303')
+            print(f'\nCHECK WEBSOCKET SSOT MIGRATION VALIDATION SUCCESS:')
+            print(f'   CHECK UnifiedIdGenerator import found')
+            print(f'   CHECK generate_connection_id() usage confirmed')
+            print(f'   CHECK uuid.uuid4() patterns removed from line ~1303')
             print(f'   Status: WebSocket auth successfully migrated to SSOT pattern')
         except ImportError as e:
             pytest.fail(f'Cannot import WebSocket auth module for post-migration validation: {e}')
@@ -104,10 +104,10 @@ class UnifiedIdGeneratorAdoptionTests(SSotBaseTestCase):
             uuid4_hex_pattern = 'uuid4\\(\\)\\.hex\\[:8\\]'
             uuid4_hex_usage = re.search(uuid4_hex_pattern, source_code)
             assert uuid4_hex_usage is None, f'MIGRATION INCOMPLETE: redis_factory.py still contains uuid4().hex[:8] usage at line ~594.'
-            print(f'\n✅ REDIS FACTORY SSOT MIGRATION VALIDATION SUCCESS:')
-            print(f'   ✓ UnifiedIdGenerator import found')
-            print(f'   ✓ generate_client_id() usage confirmed')
-            print(f'   ✓ uuid4().hex[:8] patterns removed from line ~594')
+            print(f'\nCHECK REDIS FACTORY SSOT MIGRATION VALIDATION SUCCESS:')
+            print(f'   CHECK UnifiedIdGenerator import found')
+            print(f'   CHECK generate_client_id() usage confirmed')
+            print(f'   CHECK uuid4().hex[:8] patterns removed from line ~594')
             print(f'   Status: Redis factory successfully migrated to SSOT pattern')
         except ImportError as e:
             pytest.fail(f'Cannot import Redis factory module for post-migration validation: {e}')
@@ -133,10 +133,10 @@ class UnifiedIdGeneratorAdoptionTests(SSotBaseTestCase):
             uuid4_hex_pattern = 'uuid4\\(\\)\\.hex\\[:8\\]'
             uuid4_hex_usage = re.search(uuid4_hex_pattern, source_code)
             assert uuid4_hex_usage is None, f'MIGRATION INCOMPLETE: clickhouse_factory.py still contains uuid4().hex[:8] usage at line ~522.'
-            print(f'\n✅ CLICKHOUSE FACTORY SSOT MIGRATION VALIDATION SUCCESS:')
-            print(f'   ✓ UnifiedIdGenerator import found')
-            print(f'   ✓ generate_client_id() usage confirmed')
-            print(f'   ✓ uuid4().hex[:8] patterns removed from line ~522')
+            print(f'\nCHECK CLICKHOUSE FACTORY SSOT MIGRATION VALIDATION SUCCESS:')
+            print(f'   CHECK UnifiedIdGenerator import found')
+            print(f'   CHECK generate_client_id() usage confirmed')
+            print(f'   CHECK uuid4().hex[:8] patterns removed from line ~522')
             print(f'   Status: ClickHouse factory successfully migrated to SSOT pattern')
         except ImportError as e:
             pytest.fail(f'Cannot import ClickHouse factory module for post-migration validation: {e}')
@@ -162,10 +162,10 @@ class UnifiedIdGeneratorAdoptionTests(SSotBaseTestCase):
             uuid4_default_pattern = 'Field\\(default_factory=lambda:\\s*str\\(uuid\\.uuid4\\(\\)\\)\\)'
             uuid4_default_usage = re.search(uuid4_default_pattern, source_code)
             assert uuid4_default_usage is None, f'MIGRATION INCOMPLETE: audit_models.py still contains uuid.uuid4() in Field default_factory at line ~41.'
-            print(f'\n✅ AUDIT MODELS SSOT MIGRATION VALIDATION SUCCESS:')
-            print(f'   ✓ UnifiedIdGenerator import found')
-            print(f'   ✓ generate_audit_id() usage confirmed')
-            print(f'   ✓ uuid.uuid4() default_factory patterns removed from line ~41')
+            print(f'\nCHECK AUDIT MODELS SSOT MIGRATION VALIDATION SUCCESS:')
+            print(f'   CHECK UnifiedIdGenerator import found')
+            print(f'   CHECK generate_audit_id() usage confirmed')
+            print(f'   CHECK uuid.uuid4() default_factory patterns removed from line ~41')
             print(f'   Status: Audit models successfully migrated to SSOT pattern')
         except ImportError as e:
             pytest.fail(f'Cannot import audit models module for post-migration validation: {e}')
@@ -197,13 +197,13 @@ class UnifiedIdGeneratorAdoptionTests(SSotBaseTestCase):
         generated_ids = {'session': session_id, 'connection': connection_id, 'redis_client': redis_client_id, 'clickhouse_client': clickhouse_client_id, 'audit': audit_id}
         unique_ids = set(generated_ids.values())
         assert len(unique_ids) == 5, f'UNIQUENESS FAILURE: Generated {len(unique_ids)}/5 unique IDs. IDs: {list(generated_ids.values())}'
-        print(f'\n✅ UNIFIED ID GENERATOR INTEGRATION FUNCTIONALITY SUCCESS:')
-        print(f'   ✓ Session ID:     {session_id}')
-        print(f'   ✓ Connection ID:  {connection_id}')
-        print(f'   ✓ Redis Client:   {redis_client_id}')
-        print(f'   ✓ ClickHouse:     {clickhouse_client_id}')
-        print(f'   ✓ Audit ID:       {audit_id}')
-        print(f'   ✓ All formats valid, all IDs unique')
+        print(f'\nCHECK UNIFIED ID GENERATOR INTEGRATION FUNCTIONALITY SUCCESS:')
+        print(f'   CHECK Session ID:     {session_id}')
+        print(f'   CHECK Connection ID:  {connection_id}')
+        print(f'   CHECK Redis Client:   {redis_client_id}')
+        print(f'   CHECK ClickHouse:     {clickhouse_client_id}')
+        print(f'   CHECK Audit ID:       {audit_id}')
+        print(f'   CHECK All formats valid, all IDs unique')
         print(f'   Status: UnifiedIdGenerator integration fully functional')
 
     def test_cross_component_id_consistency_post_migration(self):
@@ -245,14 +245,14 @@ class UnifiedIdGeneratorAdoptionTests(SSotBaseTestCase):
         assert len(valid_timestamps) == 5, f'TIMESTAMP EXTRACTION FAILURE: Found {len(valid_timestamps)}/5 valid timestamps'
         timestamp_range = max(valid_timestamps) - min(valid_timestamps)
         assert timestamp_range <= 10, f'TIMESTAMP CONSISTENCY FAILURE: {timestamp_range}s range exceeds 10s limit'
-        print(f'\n✅ CROSS-COMPONENT ID CONSISTENCY SUCCESS:')
-        print(f'   ✓ All IDs contain consistent user context')
-        print(f'   ✓ All IDs have valid timestamps within {timestamp_range}s range')
-        print(f'   ✓ Session ID:    {session_id}')
-        print(f'   ✓ Connection:    {connection_id}')
-        print(f'   ✓ Redis:         {redis_client_id}')
-        print(f'   ✓ ClickHouse:    {clickhouse_client_id}')
-        print(f'   ✓ Audit:         {audit_id}')
+        print(f'\nCHECK CROSS-COMPONENT ID CONSISTENCY SUCCESS:')
+        print(f'   CHECK All IDs contain consistent user context')
+        print(f'   CHECK All IDs have valid timestamps within {timestamp_range}s range')
+        print(f'   CHECK Session ID:    {session_id}')
+        print(f'   CHECK Connection:    {connection_id}')
+        print(f'   CHECK Redis:         {redis_client_id}')
+        print(f'   CHECK ClickHouse:    {clickhouse_client_id}')
+        print(f'   CHECK Audit:         {audit_id}')
         print(f'   Status: Cross-component ID consistency validated')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

@@ -75,13 +75,13 @@ class TestSSotCanonicalPatternsValidation(SSotAsyncTestCase):
                 ConnectionLifecycleManager,
             )
 
-            self.assertLog("✅ Canonical imports accessible")
+            self.assertLog("CHECK Canonical imports accessible")
 
             # Test that functions are callable
             self.assertTrue(callable(create_websocket_manager))
             self.assertTrue(callable(ConnectionLifecycleManager))
 
-            self.assertLog("✅ Canonical functions are callable")
+            self.assertLog("CHECK Canonical functions are callable")
 
         except ImportError as e:
             self.fail(f"Canonical imports not accessible: {e}")
@@ -108,12 +108,12 @@ class TestSSotCanonicalPatternsValidation(SSotAsyncTestCase):
             )
 
             self.assertIsNotNone(manager)
-            self.assertLog(f"✅ WebSocket manager created for user {test_user_id}")
+            self.assertLog(f"CHECK WebSocket manager created for user {test_user_id}")
 
             # Validate manager has user isolation
             if hasattr(manager, 'user_id'):
                 self.assertEqual(manager.user_id, test_user_id)
-                self.assertLog("✅ User isolation verified in manager")
+                self.assertLog("CHECK User isolation verified in manager")
 
         except Exception as e:
             self.assertLog(f"Warning: WebSocket manager creation failed: {e}")
@@ -144,7 +144,7 @@ class TestSSotCanonicalPatternsValidation(SSotAsyncTestCase):
                 managers[user_id] = manager
 
             self.assertEqual(len(managers), 3)
-            self.assertLog("✅ Multiple user contexts created successfully")
+            self.assertLog("CHECK Multiple user contexts created successfully")
 
             # Validate isolation between managers
             for user_id, manager in managers.items():
@@ -156,7 +156,7 @@ class TestSSotCanonicalPatternsValidation(SSotAsyncTestCase):
                 for other_manager in other_managers:
                     self.assertIsNot(manager, other_manager)
 
-            self.assertLog("✅ User isolation validated across managers")
+            self.assertLog("CHECK User isolation validated across managers")
 
         except Exception as e:
             self.assertLog(f"Warning: User isolation test failed: {e}")
@@ -194,7 +194,7 @@ class TestSSotCanonicalPatternsValidation(SSotAsyncTestCase):
             self.assertEqual(lifecycle_manager.user_context, user_context)
             self.assertEqual(lifecycle_manager.ws_manager, ws_manager)
 
-            self.assertLog("✅ ConnectionLifecycleManager created successfully")
+            self.assertLog("CHECK ConnectionLifecycleManager created successfully")
 
             # Test connection registration (if supported)
             if hasattr(lifecycle_manager, 'register_connection'):
@@ -203,7 +203,7 @@ class TestSSotCanonicalPatternsValidation(SSotAsyncTestCase):
 
                 try:
                     lifecycle_manager.register_connection(mock_connection)
-                    self.assertLog("✅ Connection registration works")
+                    self.assertLog("CHECK Connection registration works")
                 except Exception as e:
                     self.assertLog(f"Connection registration error (expected during migration): {e}")
 
@@ -243,14 +243,14 @@ class TestSSotCanonicalPatternsValidation(SSotAsyncTestCase):
                         current_warnings = [w for w in warning_list if "deprecat" in str(w.message).lower()]
                         if len(current_warnings) > deprecation_warnings_found:
                             deprecation_warnings_found = len(current_warnings)
-                            self.assertLog(f"✅ Deprecation warning issued for: {import_statement}")
+                            self.assertLog(f"CHECK Deprecation warning issued for: {import_statement}")
                     except ImportError:
                         # Expected for eliminated imports
                         self.assertLog(f"Legacy import eliminated (expected): {import_statement}")
 
                 # Log warning summary
                 if deprecation_warnings_found > 0:
-                    self.assertLog(f"✅ Found {deprecation_warnings_found} deprecation warnings")
+                    self.assertLog(f"CHECK Found {deprecation_warnings_found} deprecation warnings")
                 else:
                     self.assertLog("No deprecation warnings found (legacy patterns may be fully eliminated)")
 
@@ -293,7 +293,7 @@ class TestSSotCanonicalPatternsValidation(SSotAsyncTestCase):
 
             # Validate at least some core functionality exists
             if len(existing_methods) >= 2:
-                self.assertLog("✅ Manager has sufficient protocol compliance")
+                self.assertLog("CHECK Manager has sufficient protocol compliance")
             else:
                 self.assertLog("Warning: Manager has limited protocol compliance (may be expected during migration)")
 
@@ -323,18 +323,18 @@ class TestSSotCanonicalPatternsValidation(SSotAsyncTestCase):
 
             async with self.real_connection_manager.create_connection(connection_config) as connection:
                 self.assertIsNotNone(connection)
-                self.assertLog("✅ Real WebSocket connection created through SSOT patterns")
+                self.assertLog("CHECK Real WebSocket connection created through SSOT patterns")
 
                 # Test basic connectivity
                 if hasattr(connection, 'ping'):
                     await connection.ping()
-                    self.assertLog("✅ WebSocket ping successful")
+                    self.assertLog("CHECK WebSocket ping successful")
 
                 # Test message sending (if supported)
                 if hasattr(connection, 'send_text'):
                     test_message = {"type": "test", "content": "SSOT validation"}
                     await connection.send_text(str(test_message))
-                    self.assertLog("✅ Message sent through SSOT WebSocket connection")
+                    self.assertLog("CHECK Message sent through SSOT WebSocket connection")
 
         except Exception as e:
             self.assertLog(f"Warning: Real WebSocket integration test failed: {e}")

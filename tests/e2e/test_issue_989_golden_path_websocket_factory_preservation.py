@@ -4,17 +4,17 @@ GitHub Issue: #989 WebSocket factory deprecation SSOT violation - get_websocket_
 GitHub Stage: Step 2 - EXECUTE THE TEST PLAN (Golden Path Protection)
 
 BUSINESS VALUE: $500K+ ARR PROTECTION - Ensures WebSocket factory migration doesn't break
-the critical Golden Path where users login → receive AI responses.
+the critical Golden Path where users login -> receive AI responses.
 
 PURPOSE:
 - PROTECT $500K+ ARR Golden Path during WebSocket SSOT migration
-- Validate user login → AI response flow works with BOTH initialization patterns
+- Validate user login -> AI response flow works with BOTH initialization patterns
 - Test user context isolation during WebSocket operations with factory patterns
 - Ensure real-time chat events work regardless of initialization method
 - Create safety nets for business-critical WebSocket functionality
 
 GOLDEN PATH PROTECTION STRATEGY:
-1. Test complete user flow: login → websocket connect → agent execution → AI response
+1. Test complete user flow: login -> websocket connect -> agent execution -> AI response
 2. Validate user isolation with both deprecated and SSOT WebSocket initialization
 3. Test real-time WebSocket events (agent_started, agent_thinking, etc.) with both patterns
 4. Ensure no regression in chat functionality during SSOT migration
@@ -70,7 +70,7 @@ class Issue989GoldenPathWebSocketFactoryPreservationTests(SSotAsyncTestCase):
     """Mission Critical: Issue #989 Golden Path WebSocket Factory Migration Preservation
 
     This test suite ensures that WebSocket factory SSOT migration does not break
-    the critical $500K+ ARR Golden Path user flow: login → AI responses.
+    the critical $500K+ ARR Golden Path user flow: login -> AI responses.
 
     ALL TESTS MUST PASS to ensure business value protection during migration.
     """
@@ -112,25 +112,25 @@ class Issue989GoldenPathWebSocketFactoryPreservationTests(SSotAsyncTestCase):
                 factory_func = get_websocket_manager_factory()
                 websocket_manager = await factory_func(user_context=user_context)
                 test_result.websocket_connection_success = True
-                logger.info('✅ Deprecated factory initialization successful')
+                logger.info('CHECK Deprecated factory initialization successful')
             except ImportError as e:
-                logger.warning(f'⚠️ Deprecated factory already removed: {e}')
+                logger.warning(f'WARNING️ Deprecated factory already removed: {e}')
                 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
                 websocket_manager = await create_websocket_manager(user_context=user_context)
                 test_result.websocket_connection_success = True
             except Exception as e:
-                logger.error(f'❌ Deprecated factory initialization failed: {e}')
+                logger.error(f'X Deprecated factory initialization failed: {e}')
                 test_result.error_details = f'Factory init failed: {e}'
                 test_result.websocket_connection_success = False
             if test_result.websocket_connection_success and websocket_manager:
                 if hasattr(websocket_manager, 'user_context') and websocket_manager.user_context:
                     if websocket_manager.user_context.user_id == user_context.user_id:
                         test_result.user_login_success = True
-                        logger.info('✅ User login context preserved in WebSocket manager')
+                        logger.info('CHECK User login context preserved in WebSocket manager')
                     else:
-                        logger.error(f'❌ User context mismatch: expected {user_context.user_id}, got {websocket_manager.user_context.user_id}')
+                        logger.error(f'X User context mismatch: expected {user_context.user_id}, got {websocket_manager.user_context.user_id}')
                 else:
-                    logger.error('❌ WebSocket manager missing user context')
+                    logger.error('X WebSocket manager missing user context')
             if test_result.websocket_connection_success and websocket_manager:
                 try:
                     critical_events = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
@@ -142,11 +142,11 @@ class Issue989GoldenPathWebSocketFactoryPreservationTests(SSotAsyncTestCase):
                             if hasattr(websocket_manager, 'emit_event') or hasattr(websocket_manager, 'send_event'):
                                 events_successful += 1
                         except Exception as event_error:
-                            logger.warning(f'⚠️ Event {event_type} test failed: {event_error}')
+                            logger.warning(f'WARNING️ Event {event_type} test failed: {event_error}')
                     test_result.websocket_events_delivered = events_successful >= 3
-                    logger.info(f'✅ WebSocket events capability: {events_successful}/{events_tested}')
+                    logger.info(f'CHECK WebSocket events capability: {events_successful}/{events_tested}')
                 except Exception as e:
-                    logger.warning(f'⚠️ WebSocket events test failed: {e}')
+                    logger.warning(f'WARNING️ WebSocket events test failed: {e}')
             if test_result.websocket_connection_success:
                 try:
                     user_context_2 = self.test_users['user_2']
@@ -160,24 +160,24 @@ class Issue989GoldenPathWebSocketFactoryPreservationTests(SSotAsyncTestCase):
                     if websocket_manager_2 and hasattr(websocket_manager_2, 'user_context'):
                         if websocket_manager_2.user_context.user_id != websocket_manager.user_context.user_id:
                             test_result.user_isolation_validated = True
-                            logger.info('✅ User isolation validated - different managers for different users')
+                            logger.info('CHECK User isolation validated - different managers for different users')
                         else:
-                            logger.error('❌ User isolation FAILED - same user context in different managers')
+                            logger.error('X User isolation FAILED - same user context in different managers')
                     else:
-                        logger.warning('⚠️ Could not create second manager for isolation test')
+                        logger.warning('WARNING️ Could not create second manager for isolation test')
                 except Exception as e:
-                    logger.warning(f'⚠️ User isolation test failed: {e}')
+                    logger.warning(f'WARNING️ User isolation test failed: {e}')
             if test_result.websocket_connection_success and test_result.user_login_success:
                 try:
                     if hasattr(websocket_manager, 'user_context') and hasattr(websocket_manager, 'emit_event') or hasattr(websocket_manager, 'send_event'):
                         test_result.ai_response_success = True
-                        logger.info('✅ AI response capability validated')
+                        logger.info('CHECK AI response capability validated')
                     else:
-                        logger.warning('⚠️ AI response capability incomplete')
+                        logger.warning('WARNING️ AI response capability incomplete')
                 except Exception as e:
-                    logger.warning(f'⚠️ AI response test failed: {e}')
+                    logger.warning(f'WARNING️ AI response test failed: {e}')
         except Exception as e:
-            logger.error(f'❌ Golden Path deprecated factory test failed: {e}')
+            logger.error(f'X Golden Path deprecated factory test failed: {e}')
             test_result.error_details = str(e)
         finally:
             test_result.execution_time_seconds = time.time() - start_time
@@ -204,20 +204,20 @@ class Issue989GoldenPathWebSocketFactoryPreservationTests(SSotAsyncTestCase):
                 from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
                 websocket_manager = get_websocket_manager(user_context=user_context)
                 test_result.websocket_connection_success = True
-                logger.info('✅ SSOT direct initialization successful')
+                logger.info('CHECK SSOT direct initialization successful')
             except Exception as e:
-                logger.error(f'❌ SSOT direct initialization failed: {e}')
+                logger.error(f'X SSOT direct initialization failed: {e}')
                 test_result.error_details = f'SSOT init failed: {e}'
                 test_result.websocket_connection_success = False
             if test_result.websocket_connection_success and websocket_manager:
                 if hasattr(websocket_manager, 'user_context') and websocket_manager.user_context:
                     if websocket_manager.user_context.user_id == user_context.user_id:
                         test_result.user_login_success = True
-                        logger.info('✅ User login context preserved in SSOT WebSocket manager')
+                        logger.info('CHECK User login context preserved in SSOT WebSocket manager')
                     else:
-                        logger.error(f'❌ SSOT User context mismatch: expected {user_context.user_id}')
+                        logger.error(f'X SSOT User context mismatch: expected {user_context.user_id}')
                 else:
-                    logger.error('❌ SSOT WebSocket manager missing user context')
+                    logger.error('X SSOT WebSocket manager missing user context')
             if test_result.websocket_connection_success and websocket_manager:
                 try:
                     critical_events = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
@@ -229,11 +229,11 @@ class Issue989GoldenPathWebSocketFactoryPreservationTests(SSotAsyncTestCase):
                             if hasattr(websocket_manager, 'emit_event') or hasattr(websocket_manager, 'send_event'):
                                 events_successful += 1
                         except Exception as event_error:
-                            logger.warning(f'⚠️ SSOT Event {event_type} test failed: {event_error}')
+                            logger.warning(f'WARNING️ SSOT Event {event_type} test failed: {event_error}')
                     test_result.websocket_events_delivered = events_successful >= 3
-                    logger.info(f'✅ SSOT WebSocket events capability: {events_successful}/{events_tested}')
+                    logger.info(f'CHECK SSOT WebSocket events capability: {events_successful}/{events_tested}')
                 except Exception as e:
-                    logger.warning(f'⚠️ SSOT WebSocket events test failed: {e}')
+                    logger.warning(f'WARNING️ SSOT WebSocket events test failed: {e}')
             if test_result.websocket_connection_success:
                 try:
                     user_context_2 = self.test_users['user_2']
@@ -241,24 +241,24 @@ class Issue989GoldenPathWebSocketFactoryPreservationTests(SSotAsyncTestCase):
                     if websocket_manager_2 and hasattr(websocket_manager_2, 'user_context'):
                         if websocket_manager_2.user_context.user_id != websocket_manager.user_context.user_id:
                             test_result.user_isolation_validated = True
-                            logger.info('✅ SSOT User isolation validated')
+                            logger.info('CHECK SSOT User isolation validated')
                         else:
-                            logger.error('❌ SSOT User isolation FAILED')
+                            logger.error('X SSOT User isolation FAILED')
                     else:
-                        logger.warning('⚠️ Could not create second SSOT manager for isolation test')
+                        logger.warning('WARNING️ Could not create second SSOT manager for isolation test')
                 except Exception as e:
-                    logger.warning(f'⚠️ SSOT User isolation test failed: {e}')
+                    logger.warning(f'WARNING️ SSOT User isolation test failed: {e}')
             if test_result.websocket_connection_success and test_result.user_login_success:
                 try:
                     if hasattr(websocket_manager, 'user_context') and (hasattr(websocket_manager, 'emit_event') or hasattr(websocket_manager, 'send_event')):
                         test_result.ai_response_success = True
-                        logger.info('✅ SSOT AI response capability validated')
+                        logger.info('CHECK SSOT AI response capability validated')
                     else:
-                        logger.warning('⚠️ SSOT AI response capability incomplete')
+                        logger.warning('WARNING️ SSOT AI response capability incomplete')
                 except Exception as e:
-                    logger.warning(f'⚠️ SSOT AI response test failed: {e}')
+                    logger.warning(f'WARNING️ SSOT AI response test failed: {e}')
         except Exception as e:
-            logger.error(f'❌ Golden Path SSOT direct test failed: {e}')
+            logger.error(f'X Golden Path SSOT direct test failed: {e}')
             test_result.error_details = str(e)
         finally:
             test_result.execution_time_seconds = time.time() - start_time
@@ -299,9 +299,9 @@ class Issue989GoldenPathWebSocketFactoryPreservationTests(SSotAsyncTestCase):
                         manager = await create_websocket_manager(user_context=user_context)
                         pattern_used = 'factory_compatibility'
                     websocket_managers[user_key] = {'manager': manager, 'context': user_context, 'pattern': pattern_used}
-                    logger.info(f'✅ Created WebSocket manager for {user_key} using {pattern_used}')
+                    logger.info(f'CHECK Created WebSocket manager for {user_key} using {pattern_used}')
                 except Exception as e:
-                    logger.error(f'❌ Failed to create manager for {user_key}: {e}')
+                    logger.error(f'X Failed to create manager for {user_key}: {e}')
                     isolation_test_results['pattern_conflicts'].append(f'{user_key}: {e}')
             user_keys = list(websocket_managers.keys())
             for i, user_key_1 in enumerate(user_keys):
@@ -314,18 +314,18 @@ class Issue989GoldenPathWebSocketFactoryPreservationTests(SSotAsyncTestCase):
                         if manager_1.user_context.user_id == manager_2.user_context.user_id:
                             isolation_violation = f'User ID collision: {user_key_1} and {user_key_2} share user_id'
                             isolation_test_results['isolation_violations'].append(isolation_violation)
-                            logger.error(f'❌ {isolation_violation}')
+                            logger.error(f'X {isolation_violation}')
                             isolation_test_results['overall_isolation_success'] = False
                         if hasattr(manager_1.user_context, 'websocket_client_id') and hasattr(manager_2.user_context, 'websocket_client_id') and (manager_1.user_context.websocket_client_id == manager_2.user_context.websocket_client_id):
                             isolation_violation = f'WebSocket ID collision: {user_key_1} and {user_key_2}'
                             isolation_test_results['isolation_violations'].append(isolation_violation)
-                            logger.error(f'❌ {isolation_violation}')
+                            logger.error(f'X {isolation_violation}')
                             isolation_test_results['overall_isolation_success'] = False
                     else:
-                        logger.warning(f'⚠️ Could not validate isolation between {user_key_1} and {user_key_2}')
-            logger.info(f"✅ Multi-user isolation test completed: {len(isolation_test_results['isolation_violations'])} violations")
+                        logger.warning(f'WARNING️ Could not validate isolation between {user_key_1} and {user_key_2}')
+            logger.info(f"CHECK Multi-user isolation test completed: {len(isolation_test_results['isolation_violations'])} violations")
         except Exception as e:
-            logger.error(f'❌ Multi-user isolation test failed: {e}')
+            logger.error(f'X Multi-user isolation test failed: {e}')
             isolation_test_results['overall_isolation_success'] = False
             isolation_test_results['isolation_violations'].append(f'Test execution failed: {e}')
         assert isolation_test_results['overall_isolation_success'], f"MULTI-USER ISOLATION FAILURE: Found {len(isolation_test_results['isolation_violations'])} isolation violations. Violations: {isolation_test_results['isolation_violations']}. Pattern conflicts: {isolation_test_results['pattern_conflicts']}. SECURITY RISK: User data contamination during WebSocket factory migration."
@@ -340,16 +340,16 @@ class Issue989GoldenPathWebSocketFactoryPreservationTests(SSotAsyncTestCase):
             logger.info(f'  Successful tests: {successful_tests}')
             logger.info(f'  Success rate: {successful_tests / total_tests * 100:.1f}%')
             for result in self.golden_path_results:
-                status = '✅ PASS' if result.overall_success else '❌ FAIL'
+                status = 'CHECK PASS' if result.overall_success else 'X FAIL'
                 logger.info(f'  {result.test_name} ({result.initialization_pattern}): {status}')
                 logger.info(f'    WebSocket: {result.websocket_connection_success}, Login: {result.user_login_success}, Events: {result.websocket_events_delivered}, Isolation: {result.user_isolation_validated}')
                 logger.info(f'    Execution time: {result.execution_time_seconds:.2f}s')
                 if result.error_details:
                     logger.warning(f'    Error: {result.error_details}')
             if successful_tests == total_tests:
-                logger.info('🛡️ ✅ ALL Golden Path tests PASSED - $500K+ ARR protected during migration')
+                logger.info('🛡️ CHECK ALL Golden Path tests PASSED - $500K+ ARR protected during migration')
             else:
-                logger.error(f'🛡️ ❌ {total_tests - successful_tests} Golden Path tests FAILED - BUSINESS RISK!')
+                logger.error(f'🛡️ X {total_tests - successful_tests} Golden Path tests FAILED - BUSINESS RISK!')
         super().teardown_method(method)
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

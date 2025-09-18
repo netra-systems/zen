@@ -6,7 +6,7 @@ E2E TEST ON STAGING - Validates Golden Path with Consolidated Config
 Business Value Justification (BVJ):
 - Segment: Enterprise/Platform - Revenue Protection
 - Business Goal: Golden Path Reliability - Protect $500K+ ARR from config failures
-- Value Impact: End-to-end validation of user login → AI chat with SSOT config
+- Value Impact: End-to-end validation of user login -> AI chat with SSOT config
 - Strategic Impact: Proves SSOT configuration consolidation enables Golden Path success
 
 PURPOSE: E2E test on staging environment validating complete Golden Path functionality
@@ -17,7 +17,7 @@ Test Coverage:
 2. Database connectivity with SSOT database configuration
 3. WebSocket communication with SSOT WebSocket configuration
 4. LLM integration with SSOT LLM configuration
-5. End-to-end user flow: login → AI chat response
+5. End-to-end user flow: login -> AI chat response
 
 CRITICAL: This test validates that SSOT configuration consolidation maintains
 Golden Path functionality worth $500K+ ARR protection.
@@ -148,7 +148,7 @@ class ConfigSSotGoldenPathStagingTests(SSotAsyncTestCase):
 
     async def test_golden_path_end_to_end_user_flow(self, staging_config, test_user_credentials):
         """
-        Test complete Golden Path: user login → AI chat response.
+        Test complete Golden Path: user login -> AI chat response.
 
         This is the critical $500K+ ARR test validating end-to-end functionality
         with SSOT configuration management.

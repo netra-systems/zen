@@ -64,7 +64,7 @@ class LegacyPatternDetectionTests(SSotBaseTestCase):
         # Log expected vs actual for Issue #1097
         expected_legacy_files = 22
         if len(legacy_files) != expected_legacy_files:
-            print(f"\n⚠️  NOTICE: Expected {expected_legacy_files} legacy files, found {len(legacy_files)}")
+            print(f"\nWARNING️  NOTICE: Expected {expected_legacy_files} legacy files, found {len(legacy_files)}")
             print("   This may indicate files have already been migrated or new files added.")
         
         print(f"\n3. Legacy files requiring migration:")
@@ -163,7 +163,7 @@ class LegacyPatternDetectionTests(SSotBaseTestCase):
         
         # For Issue #1097, we expect violations
         if patterns_found["unittest_testcase_inheritance"] > 0:
-            print(f"\n✅ Confirmed: Found {patterns_found['unittest_testcase_inheritance']} files using unittest.TestCase")
+            print(f"\nCHECK Confirmed: Found {patterns_found['unittest_testcase_inheritance']} files using unittest.TestCase")
             print("   These files are the target for Issue #1097 migration.")
         
         print("\n" + "="*60)
@@ -276,7 +276,7 @@ if __name__ == "__main__":
     print("="*60)
     
     if result.wasSuccessful():
-        print("✅ SUCCESS! Legacy pattern detection completed successfully")
+        print("CHECK SUCCESS! Legacy pattern detection completed successfully")
         print("\nNext steps for Issue #1097:")
         print("1. Review detected legacy files")
         print("2. Create SSOT base class capability tests")
@@ -284,7 +284,7 @@ if __name__ == "__main__":
         print("4. Execute batch migration with proper backup")
         print("5. Validate post-migration SSOT compliance")
     else:
-        print("❌ FAILURE! Legacy pattern detection encountered issues")
+        print("X FAILURE! Legacy pattern detection encountered issues")
         if result.failures:
             print("   Failures:")
             for test, traceback in result.failures:

@@ -363,7 +363,7 @@ class TestWebSocketManagerSingleImplementationValidation(SSotBaseTestCase):
             for violation in report.violations_summary:
                 self.logger.error(f"  - {violation}")
         else:
-            self.logger.info("✅ No SSOT violations detected - WebSocket implementation is compliant")
+            self.logger.info("CHECK No SSOT violations detected - WebSocket implementation is compliant")
     
     def teardown_method(self, method=None):
         """Teardown method with metrics recording."""

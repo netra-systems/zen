@@ -1,13 +1,13 @@
 """Phase 3 E2E Tests: Execution Engine Factory Golden Path Validation (Issue #1123)
 
 CRITICAL BUSINESS VALUE: These tests validate the complete Golden Path user flow
-(login → AI response) on staging GCP, protecting $500K+ ARR functionality.
+(login -> AI response) on staging GCP, protecting $500K+ ARR functionality.
 
 EXPECTED BEHAVIOR: All tests in this file should INITIALLY FAIL to demonstrate
 the Golden Path blockage. They will pass after factory fragmentation fixes.
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise)
+- Segment: All (Free -> Enterprise)
 - Business Goal: Ensure complete user value delivery through Golden Path
 - Value Impact: Validates end-to-end $500K+ ARR functionality on real infrastructure
 - Strategic Impact: MISSION CRITICAL for Golden Path user flow
@@ -76,7 +76,7 @@ class ExecutionEngineFactoryGoldenPath1123Tests(SSotAsyncTestCase, RealServicesF
 
         BVJ: All Segments - Ensures complete user value delivery works
         EXPECTED: FAIL - Execution engine factory issues block Golden Path
-        ISSUE: Factory fragmentation prevents users from login → AI response flow
+        ISSUE: Factory fragmentation prevents users from login -> AI response flow
         """
         golden_path_start_time = time.time()
         golden_path_steps = []
@@ -216,7 +216,7 @@ class ExecutionEngineFactoryGoldenPath1123Tests(SSotAsyncTestCase, RealServicesF
             self.fail(f'STAGING WEBSOCKET TEST FAILURE: WebSocket event testing failed after {total_test_time:.2f}s. Error: {str(e)}. Execution engine factory prevents WebSocket functionality on staging.')
 
     async def test_staging_execution_engine_agent_integration_blockage(self):
-        """FAILING TEST: Validate execution engine → agent integration blocked on staging
+        """FAILING TEST: Validate execution engine -> agent integration blocked on staging
 
         BVJ: All Segments - Ensures agent execution works for AI responses
         EXPECTED: FAIL - Execution engine factory blocks agent integration
@@ -259,7 +259,7 @@ class ExecutionEngineFactoryGoldenPath1123Tests(SSotAsyncTestCase, RealServicesF
                 raise
         except Exception as e:
             total_integration_time = time.time() - agent_integration_start
-            self.fail(f"STAGING AGENT INTEGRATION BLOCKED: Execution engine → agent integration failed after {total_integration_time:.2f}s. Error: {str(e)}. Completed steps: {len([s for s in agent_integration_steps if s.get('success', False)])} out of {len(agent_integration_steps)}. Factory fragmentation prevents agent execution on staging.")
+            self.fail(f"STAGING AGENT INTEGRATION BLOCKED: Execution engine -> agent integration failed after {total_integration_time:.2f}s. Error: {str(e)}. Completed steps: {len([s for s in agent_integration_steps if s.get('success', False)])} out of {len(agent_integration_steps)}. Factory fragmentation prevents agent execution on staging.")
 
     async def test_staging_chat_functionality_business_value_blockage(self):
         """FAILING TEST: Validate chat delivers real business value blocked by execution engine

@@ -4,7 +4,7 @@ This test reproduces the critical regression where agent_lifecycle.py still uses
 deprecated DeepAgentState pattern despite migration claims, blocking Golden Path.
 
 CRITICAL BUSINESS IMPACT:
-- $500K+ ARR at risk due to broken user login → AI response flow
+- $500K+ ARR at risk due to broken user login -> AI response flow
 - Cross-user data contamination vulnerability in chat functionality
 - Agent lifecycle management using deprecated patterns
 

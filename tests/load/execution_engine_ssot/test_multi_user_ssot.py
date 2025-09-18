@@ -180,7 +180,7 @@ class MultiUserSSotTests(SSotAsyncTestCase):
         if violations:
             print("   Assignment Violations:")
             for violation in violations[:10]:  # Show first 10
-                print(f"      ❌ {violation}")
+                print(f"      X {violation}")
             if len(violations) > 10:
                 print(f"      ... and {len(violations) - 10} more violations")
 
@@ -188,7 +188,7 @@ class MultiUserSSotTests(SSotAsyncTestCase):
         self.assertGreater(
             len(violations),
             0,
-            f"❌ SSOT VIOLATION: Found {len(violations)} concurrent engine assignment violations. "
+            f"X SSOT VIOLATION: Found {len(violations)} concurrent engine assignment violations. "
             f"All users must be assigned {self.ssot_execution_engine}."
         )
 
@@ -202,13 +202,13 @@ class MultiUserSSotTests(SSotAsyncTestCase):
         if isolation_violations:
             print("   Isolation Violations:")
             for violation in isolation_violations:
-                print(f"      ❌ {violation}")
+                print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - User isolation violations detected
         self.assertGreater(
             len(isolation_violations),
             0,
-            f"❌ SSOT VIOLATION: Found {len(isolation_violations)} user isolation violations. "
+            f"X SSOT VIOLATION: Found {len(isolation_violations)} user isolation violations. "
             "Non-SSOT engines break user isolation boundaries."
         )
 
@@ -222,13 +222,13 @@ class MultiUserSSotTests(SSotAsyncTestCase):
         if event_violations:
             print("   Event Delivery Violations:")
             for violation in event_violations:
-                print(f"      ❌ {violation}")
+                print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - Event delivery violations detected
         self.assertGreater(
             len(event_violations),
             0,
-            f"❌ SSOT VIOLATION: Found {len(event_violations)} concurrent event delivery violations. "
+            f"X SSOT VIOLATION: Found {len(event_violations)} concurrent event delivery violations. "
             "Events must be delivered consistently through SSOT engine."
         )
 
@@ -242,13 +242,13 @@ class MultiUserSSotTests(SSotAsyncTestCase):
         if contention_violations:
             print("   Resource Contention Violations:")
             for violation in contention_violations:
-                print(f"      ❌ {violation}")
+                print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - Resource contention violations detected
         self.assertGreater(
             len(contention_violations),
             0,
-            f"❌ SSOT VIOLATION: Found {len(contention_violations)} resource contention violations. "
+            f"X SSOT VIOLATION: Found {len(contention_violations)} resource contention violations. "
             "Multiple engine types create resource conflicts."
         )
 
@@ -262,13 +262,13 @@ class MultiUserSSotTests(SSotAsyncTestCase):
         if thread_violations:
             print("   Thread Safety Violations:")
             for violation in thread_violations:
-                print(f"      ❌ {violation}")
+                print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - Thread safety violations detected
         self.assertGreater(
             len(thread_violations),
             0,
-            f"❌ SSOT VIOLATION: Found {len(thread_violations)} thread safety violations. "
+            f"X SSOT VIOLATION: Found {len(thread_violations)} thread safety violations. "
             "Multiple engines create thread safety issues."
         )
 

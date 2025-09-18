@@ -23,7 +23,7 @@ CRITICAL: These tests must demonstrate actual error recovery and system resilien
 No mocking error scenarios or bypassing real failure conditions.
 
 GitHub Issue: #861 Agent Golden Path Messages Test Creation - STEP 1
-Coverage Target: 0.9% → 25% improvement (Priority Scenario #5)
+Coverage Target: 0.9% -> 25% improvement (Priority Scenario #5)
 """
 import asyncio
 import pytest
@@ -212,7 +212,7 @@ class CriticalErrorRecoveryE2ETests(SSotAsyncTestCase):
         assert recovery_result.recovery_successful, f'WebSocket recovery should succeed. Recovery failed after {recovery_result.recovery_time:.1f}s. Steps: {recovery_result.recovery_steps}'
         assert recovery_result.user_experience_preserved, f'User experience should be preserved after WebSocket recovery. Users should be able to continue normal operations.'
         assert recovery_result.recovery_time <= 90.0, f'WebSocket recovery took too long: {recovery_result.recovery_time:.1f}s (expected ≤90s for good user experience)'
-        self.logger.info('✅ WebSocket disconnection recovery validated')
+        self.logger.info('CHECK WebSocket disconnection recovery validated')
 
     async def test_agent_timeout_recovery(self):
         """
@@ -293,7 +293,7 @@ class CriticalErrorRecoveryE2ETests(SSotAsyncTestCase):
         assert recovery_result.error_detected, f'Agent timeout should be detected by system. No timeout detection occurred.'
         assert recovery_result.recovery_successful, f'System should recover from agent timeout and remain responsive. Recovery failed. Steps: {recovery_result.recovery_steps}'
         assert recovery_result.user_experience_preserved, f'User experience should be preserved after timeout recovery. System should remain responsive for new requests.'
-        self.logger.info('✅ Agent timeout recovery validated')
+        self.logger.info('CHECK Agent timeout recovery validated')
 
     async def test_malformed_request_handling(self):
         """
@@ -373,7 +373,7 @@ class CriticalErrorRecoveryE2ETests(SSotAsyncTestCase):
         error_types = [r.get('error_type', 'unknown') for r in handled_errors]
         meaningful_errors = [t for t in error_types if t not in ['unknown', 'no_response']]
         assert len(meaningful_errors) >= len(handled_errors) * 0.7, f'Error responses should provide meaningful error types. Meaningful: {len(meaningful_errors)}/{len(handled_errors)}'
-        self.logger.info('✅ Malformed request handling validated')
+        self.logger.info('CHECK Malformed request handling validated')
 
     async def test_system_recovery_under_stress(self):
         """
@@ -469,7 +469,7 @@ class CriticalErrorRecoveryE2ETests(SSotAsyncTestCase):
         assert stress_results['recovery_successful'], f'System should recover after stress conditions are reduced. Post-stress recovery failed.'
         assert stress_results['successful_requests'] > 0, f'System should handle at least some requests under stress. Complete failure detected.'
         assert total_requests >= 8, f'Stress test should generate meaningful request load. Only {total_requests} requests generated.'
-        self.logger.info('✅ System recovery under stress validated')
+        self.logger.info('CHECK System recovery under stress validated')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

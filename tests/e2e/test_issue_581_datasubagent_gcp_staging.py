@@ -3,7 +3,7 @@ E2E Tests for Issue #581: DataSubAgent Workflow on GCP Staging
 
 BUSINESS VALUE:
 - Enterprise/Platform | Golden Path Protection | $500K+ ARR rescue
-- Validates complete user journey: login → data agent request → AI response
+- Validates complete user journey: login -> data agent request -> AI response
 - Tests real GCP Cloud Run deployment with actual agent instantiation
 - Protects critical Golden Path user flow with real infrastructure
 

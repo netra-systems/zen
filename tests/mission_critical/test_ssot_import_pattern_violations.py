@@ -248,9 +248,9 @@ class SSOTImportPatternViolationsTests(SSotBaseTestCase):
                 fViolations found:\n{violation_details}\n\n"
                 f"REMEDIATION: Consult SSOT_IMPORT_REGISTRY.md for correct import paths.\n"
                 fCommon fixes:\n
-                f- netra_backend.app.core.unified_configuration_manager → DOES NOT EXIST\n
-                f- test_framework.base_test_case → test_framework.ssot.base_test_case\n""
-                f- test_framework.mock_agents → test_framework.ssot.mock_factory
+                f- netra_backend.app.core.unified_configuration_manager -> DOES NOT EXIST\n
+                f- test_framework.base_test_case -> test_framework.ssot.base_test_case\n""
+                f- test_framework.mock_agents -> test_framework.ssot.mock_factory
             )
             
     def test_detect_try_except_import_patterns(self):
@@ -337,7 +337,7 @@ SSOT IMPORT PATTERN VIOLATIONS REPORT
 ====================================
 
 TOTAL VIOLATIONS: {total_violations}
-TARGET REDUCTION: {total_violations} violations → 0 violations
+TARGET REDUCTION: {total_violations} violations -> 0 violations
 
 VIOLATIONS BY TYPE:
     {self._format_violation_counts(violation_by_type)}

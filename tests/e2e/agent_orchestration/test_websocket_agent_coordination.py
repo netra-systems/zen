@@ -171,7 +171,7 @@ class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
         # Validate business value - user experience impact
         await self._validate_user_experience_impact(execution_trace)
         
-        logger.info(f"✅ Critical WebSocket events coverage test completed: "
+        logger.info(f"CHECK Critical WebSocket events coverage test completed: "
                    f"events_received={len(execution_trace.critical_events_received)}/5, "
                    f"total_events={len(execution_trace.websocket_events)}")
         
@@ -243,7 +243,7 @@ class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
         # Validate no event interference between agents
         await self._validate_no_agent_event_interference(coordination_traces)
         
-        logger.info(f"✅ Multi-agent WebSocket coordination test completed: "
+        logger.info(f"CHECK Multi-agent WebSocket coordination test completed: "
                    f"agents_coordinated={len(coordination_traces)}")
         
         await websocket.close()
@@ -295,7 +295,7 @@ class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
         # Validate real-time user experience metrics
         await self._validate_realtime_user_experience(realtime_metrics)
         
-        logger.info(f"✅ Real-time WebSocket event delivery test completed: "
+        logger.info(f"CHECK Real-time WebSocket event delivery test completed: "
                    f"avg_latency={realtime_metrics['average_event_latency']:.1f}ms")
         
         await websocket.close()
@@ -384,7 +384,7 @@ class WebSocketAgentCoordinationTests(SSotAsyncTestCase):
         self.assertLess(avg_coordination_time, self.execution_timeout,
                        f"Average concurrent coordination time too high: {avg_coordination_time:.1f}s")
         
-        logger.info(f"✅ Concurrent agent WebSocket coordination test completed: "
+        logger.info(f"CHECK Concurrent agent WebSocket coordination test completed: "
                    f"{len(successful_coordinations)}/{len(concurrent_sessions)} successful")
         
         # Clean up sessions

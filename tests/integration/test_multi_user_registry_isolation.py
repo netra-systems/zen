@@ -9,7 +9,7 @@ EXPECTED BEHAVIOR: Tests should demonstrate current isolation challenges
 and validate that fixes maintain enterprise-grade security standards.
 
 Business Impact:
-- Protects Golden Path: Users login → get AI responses (isolated per user)
+- Protects Golden Path: Users login -> get AI responses (isolated per user)
 - Ensures enterprise customer data security
 - Maintains $500K+ ARR multi-user functionality
 - Validates user session isolation patterns

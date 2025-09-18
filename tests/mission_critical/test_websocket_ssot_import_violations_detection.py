@@ -429,10 +429,10 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
         # This test provides information about target state
         # It helps guide remediation but doesn't fail'
         if ssot_compliance_issues:
-            logger.warning(f⚠️ {len(ssot_compliance_issues)} files need SSOT import migration)
+            logger.warning(fWARNING️ {len(ssot_compliance_issues)} files need SSOT import migration)
         else:
-            logger.info(✅ All WebSocket imports are SSOT compliant)"
-            logger.info(✅ All WebSocket imports are SSOT compliant)""
+            logger.info(CHECK All WebSocket imports are SSOT compliant)"
+            logger.info(CHECK All WebSocket imports are SSOT compliant)""
 
     
     def _categorize_websocket_import(self, import_line: str) -> Optional[str]:
@@ -471,7 +471,7 @@ class WebSocketSSotImportViolationsDetectionTests(SSotBaseTestCase):
             if total_violations > 0:
                 logger.error(f🚨 TOTAL SSOT IMPORT VIOLATIONS: {total_violations})
             else:
-                logger.info(✅ No SSOT import violations detected")"
+                logger.info(CHECK No SSOT import violations detected")"
         
         super().teardown_method(method)
 

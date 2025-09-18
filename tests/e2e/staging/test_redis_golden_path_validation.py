@@ -9,7 +9,7 @@ Expected Results: FAIL - Golden Path broken due to Redis config mismatch
 Tests actual staging deployment with real GCP services.
 
 Business Value: Platform/Mission Critical - $500K+ ARR Golden Path Protection
-The Golden Path user flow (login → chat → AI response) depends on Redis for
+The Golden Path user flow (login -> chat -> AI response) depends on Redis for
 session management and WebSocket functionality.
 
 SSOT Compliance: E2E tests on real staging GCP, no Docker, no mocks.
@@ -148,7 +148,7 @@ class RedisGoldenPathValidationTests(SSotAsyncTestCase):
         """
         Test full Golden Path flow with Redis dependencies (EXPECTED TO FAIL - Issue #1177).
 
-        The complete Golden Path (login → chat → AI response) depends on Redis
+        The complete Golden Path (login -> chat -> AI response) depends on Redis
         for multiple functions. Issue #1177 should break this flow.
         """
         golden_path_steps = []

@@ -73,12 +73,12 @@ class TestBackendAuthServiceCommunicationIssue1278(SSotAsyncTestCase):
                 # 503/500 errors reproduce Issue #1278
                 if response.status_code in [500, 503]:
                     pytest.fail(
-                        f"✅ ISSUE #1278 REPRODUCED: Backend health check failed with {response.status_code}. "
+                        f"CHECK ISSUE #1278 REPRODUCED: Backend health check failed with {response.status_code}. "
                         f"This confirms backend service unavailability. Response: {response.text[:200]}"
                     )
                 else:
                     pytest.fail(
-                        f"✅ ISSUE #1278 PARTIALLY REPRODUCED: Backend returned {response.status_code}, "
+                        f"CHECK ISSUE #1278 PARTIALLY REPRODUCED: Backend returned {response.status_code}, "
                         f"indicating service problems. Response: {response.text[:200]}"
                     )
 
@@ -86,7 +86,7 @@ class TestBackendAuthServiceCommunicationIssue1278(SSotAsyncTestCase):
                 # Timeout reproduces Issue #1278 connectivity problems
                 self.record_metric("backend_health_timeout", True)
                 pytest.fail(
-                    "✅ ISSUE #1278 REPRODUCED: Backend health check timed out. "
+                    "CHECK ISSUE #1278 REPRODUCED: Backend health check timed out. "
                     "This confirms backend service connectivity problems."
                 )
 
@@ -94,7 +94,7 @@ class TestBackendAuthServiceCommunicationIssue1278(SSotAsyncTestCase):
                 # Connection errors reproduce Issue #1278 infrastructure problems
                 self.record_metric("backend_connection_error", str(e))
                 pytest.fail(
-                    f"✅ ISSUE #1278 REPRODUCED: Backend connection failed: {e}. "
+                    f"CHECK ISSUE #1278 REPRODUCED: Backend connection failed: {e}. "
                     "This confirms backend service connectivity failure."
                 )
 
@@ -102,7 +102,7 @@ class TestBackendAuthServiceCommunicationIssue1278(SSotAsyncTestCase):
                 # Any other error indicates service problems
                 self.record_metric("backend_service_error", str(e))
                 pytest.fail(
-                    f"✅ ISSUE #1278 REPRODUCED: Backend service error: {e}. "
+                    f"CHECK ISSUE #1278 REPRODUCED: Backend service error: {e}. "
                     "This confirms backend service problems."
                 )
 
@@ -136,12 +136,12 @@ class TestBackendAuthServiceCommunicationIssue1278(SSotAsyncTestCase):
                 # 503/500 errors reproduce Issue #1278 auth problems
                 if response.status_code in [500, 503]:
                     pytest.fail(
-                        f"✅ ISSUE #1278 REPRODUCED: Auth health check failed with {response.status_code}. "
+                        f"CHECK ISSUE #1278 REPRODUCED: Auth health check failed with {response.status_code}. "
                         f"This confirms auth service unavailability. Response: {response.text[:200]}"
                     )
                 else:
                     pytest.fail(
-                        f"✅ ISSUE #1278 PARTIALLY REPRODUCED: Auth service returned {response.status_code}, "
+                        f"CHECK ISSUE #1278 PARTIALLY REPRODUCED: Auth service returned {response.status_code}, "
                         f"indicating service problems. Response: {response.text[:200]}"
                     )
 
@@ -149,7 +149,7 @@ class TestBackendAuthServiceCommunicationIssue1278(SSotAsyncTestCase):
                 # Timeout reproduces Issue #1278 database timeout cascade
                 self.record_metric("auth_health_timeout", True)
                 pytest.fail(
-                    "✅ ISSUE #1278 REPRODUCED: Auth health check timed out. "
+                    "CHECK ISSUE #1278 REPRODUCED: Auth health check timed out. "
                     "This confirms auth service timeout problems (likely database-related)."
                 )
 
@@ -157,7 +157,7 @@ class TestBackendAuthServiceCommunicationIssue1278(SSotAsyncTestCase):
                 # Connection errors reproduce Issue #1278 infrastructure problems
                 self.record_metric("auth_connection_error", str(e))
                 pytest.fail(
-                    f"✅ ISSUE #1278 REPRODUCED: Auth connection failed: {e}. "
+                    f"CHECK ISSUE #1278 REPRODUCED: Auth connection failed: {e}. "
                     "This confirms auth service connectivity failure."
                 )
 
@@ -165,7 +165,7 @@ class TestBackendAuthServiceCommunicationIssue1278(SSotAsyncTestCase):
                 # Any other error indicates auth service problems
                 self.record_metric("auth_service_error", str(e))
                 pytest.fail(
-                    f"✅ ISSUE #1278 REPRODUCED: Auth service error: {e}. "
+                    f"CHECK ISSUE #1278 REPRODUCED: Auth service error: {e}. "
                     "This confirms auth service problems."
                 )
 
@@ -202,7 +202,7 @@ class TestBackendAuthServiceCommunicationIssue1278(SSotAsyncTestCase):
                 # 503/500 errors reproduce Issue #1278 service communication failure
                 if response.status_code in [500, 503]:
                     pytest.fail(
-                        f"✅ ISSUE #1278 REPRODUCED: Backend-auth integration failed with {response.status_code}. "
+                        f"CHECK ISSUE #1278 REPRODUCED: Backend-auth integration failed with {response.status_code}. "
                         f"This confirms backend cannot communicate with auth service."
                     )
 
@@ -215,7 +215,7 @@ class TestBackendAuthServiceCommunicationIssue1278(SSotAsyncTestCase):
 
                 # Any other status code indicates problems
                 pytest.fail(
-                    f"✅ ISSUE #1278 REPRODUCED: Backend-auth integration returned {response.status_code}, "
+                    f"CHECK ISSUE #1278 REPRODUCED: Backend-auth integration returned {response.status_code}, "
                     f"indicating service communication problems."
                 )
 
@@ -223,7 +223,7 @@ class TestBackendAuthServiceCommunicationIssue1278(SSotAsyncTestCase):
                 # Timeout reproduces Issue #1278 service communication timeout
                 self.record_metric("backend_auth_integration_timeout", True)
                 pytest.fail(
-                    "✅ ISSUE #1278 REPRODUCED: Backend-auth integration timed out. "
+                    "CHECK ISSUE #1278 REPRODUCED: Backend-auth integration timed out. "
                     "This confirms backend cannot reach auth service."
                 )
 
@@ -231,7 +231,7 @@ class TestBackendAuthServiceCommunicationIssue1278(SSotAsyncTestCase):
                 # Connection errors reproduce Issue #1278
                 self.record_metric("backend_auth_integration_connection_error", str(e))
                 pytest.fail(
-                    f"✅ ISSUE #1278 REPRODUCED: Backend-auth integration connection failed: {e}. "
+                    f"CHECK ISSUE #1278 REPRODUCED: Backend-auth integration connection failed: {e}. "
                     "This confirms service communication breakdown."
                 )
 
@@ -239,7 +239,7 @@ class TestBackendAuthServiceCommunicationIssue1278(SSotAsyncTestCase):
                 # Any other error indicates integration problems
                 self.record_metric("backend_auth_integration_error", str(e))
                 pytest.fail(
-                    f"✅ ISSUE #1278 REPRODUCED: Backend-auth integration error: {e}. "
+                    f"CHECK ISSUE #1278 REPRODUCED: Backend-auth integration error: {e}. "
                     "This confirms service integration problems."
                 )
 
@@ -298,7 +298,7 @@ class TestBackendAuthServiceCommunicationIssue1278(SSotAsyncTestCase):
             ])
 
             pytest.fail(
-                f"✅ ISSUE #1278 REPRODUCED: {len(failed_endpoints)} health endpoints failed:\n"
+                f"CHECK ISSUE #1278 REPRODUCED: {len(failed_endpoints)} health endpoints failed:\n"
                 f"{failure_details}\n"
                 "This confirms load balancer cannot reach healthy backends."
             )
@@ -378,7 +378,7 @@ class TestBackendAuthServiceCommunicationIssue1278(SSotAsyncTestCase):
                 ])
 
             pytest.fail(
-                f"✅ ISSUE #1278 REPRODUCED: Service timing problems detected:\n"
+                f"CHECK ISSUE #1278 REPRODUCED: Service timing problems detected:\n"
                 f"{timing_details}\n"
                 "This confirms service startup/health timing issues from Issue #1278."
             )

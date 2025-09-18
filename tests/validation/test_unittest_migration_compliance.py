@@ -427,7 +427,7 @@ class TestUnittestMigrationCompliance(SSotBaseTestCase):
             ]
             
             for directory, stats in directory_stats.items():
-                status = "✓" if stats['compliance_percentage'] >= self.target_ssot_compliance_percentage else "✗"
+                status = "CHECK" if stats['compliance_percentage'] >= self.target_ssot_compliance_percentage else "✗"
                 failure_parts.append(
                     f"  {status} {directory}: {stats['compliance_percentage']:.1f}% "
                     f"({stats['ssot_compliant']}/{stats['classes']} classes, "

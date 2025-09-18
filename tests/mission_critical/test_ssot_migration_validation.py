@@ -116,8 +116,8 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
                 }
 
             # Log status
-            status = ✅ COMPLIANT if is_compliant else ❌ NON-COMPLIANT"
-            status = ✅ COMPLIANT if is_compliant else ❌ NON-COMPLIANT"
+            status = CHECK COMPLIANT if is_compliant else X NON-COMPLIANT"
+            status = CHECK COMPLIANT if is_compliant else X NON-COMPLIANT"
             print(f"{status}: {file_path}))"
             if not is_compliant:
                 print(f  Issues: {'; '.join(violation_details)})
@@ -128,7 +128,7 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
                 'type': 'file_read_error',
                 'details': f"Error reading file: {str(e)}"
             }
-            print(f❌ ERROR: {file_path} - {str(e)}")"
+            print(fX ERROR: {file_path} - {str(e)}")"
 
     def _check_ssot_import(self, content: str) -> bool:
         Check if file imports SSOT base test case.""
@@ -197,7 +197,7 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
                 print(f     Type: {violation['type']}")"
                 print(f     Details: {violation['details']}")"
         else:
-            print(\n✅ ALL FILES ARE SSOT COMPLIANT!")"
+            print(\nCHECK ALL FILES ARE SSOT COMPLIANT!")"
 
         print(-*70)
 

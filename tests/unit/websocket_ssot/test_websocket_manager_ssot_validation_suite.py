@@ -247,15 +247,15 @@ class WebSocketManagerSSOTValidationSuiteTests(SSotBaseTestCase):
                     # Check if failure pattern matches expectations
                     expected_failure_patterns = expected_patterns.get(test_method, [])
                     if self._failure_matches_expected_pattern(result.error_message, expected_failure_patterns):
-                        print(f"✅ EXPECTED FAILURE: {test_method} (failure pattern matches expectations)")
+                        print(f"CHECK EXPECTED FAILURE: {test_method} (failure pattern matches expectations)")
                         result.failure_pattern = "EXPECTED_SSOT_VIOLATION"
                     else:
-                        print(f"⚠️  UNEXPECTED FAILURE PATTERN: {test_method}")
+                        print(f"WARNING️  UNEXPECTED FAILURE PATTERN: {test_method}")
                         result.failure_pattern = "UNEXPECTED_PATTERN"
                 else:
                     # Unexpected failure
                     self.validation_progress.unexpected_failures += 1
-                    print(f"❌ UNEXPECTED FAILURE: {test_method}")
+                    print(f"X UNEXPECTED FAILURE: {test_method}")
 
         # Generate comprehensive validation report
         self._generate_validation_report()
@@ -315,11 +315,11 @@ class WebSocketManagerSSOTValidationSuiteTests(SSotBaseTestCase):
 
             if process.returncode == 0:
                 result.success = True
-                print(f"   ✅ PASSED in {execution_time:.2f}s")
+                print(f"   CHECK PASSED in {execution_time:.2f}s")
             else:
                 result.success = False
                 result.error_message = process.stdout + process.stderr
-                print(f"   ❌ FAILED in {execution_time:.2f}s")
+                print(f"   X FAILED in {execution_time:.2f}s")
                 # Don't print full error here - will be analyzed later
 
         except subprocess.TimeoutExpired:
@@ -382,7 +382,7 @@ class WebSocketManagerSSOTValidationSuiteTests(SSotBaseTestCase):
 
         # Expected failures (normal before SSOT fix)
         if expected_failures:
-            print(f"\n✅ EXPECTED FAILURES (Normal before SSOT fix): {len(expected_failures)}")
+            print(f"\nCHECK EXPECTED FAILURES (Normal before SSOT fix): {len(expected_failures)}")
             for result in expected_failures:
                 test_name = result.test_name.split("::")[-1]
                 print(f"   - {test_name} ({result.execution_time:.2f}s)")
@@ -396,7 +396,7 @@ class WebSocketManagerSSOTValidationSuiteTests(SSotBaseTestCase):
 
         # Unexpected failures (need investigation)
         if unexpected_failures:
-            print(f"\n❌ UNEXPECTED FAILURES (Need investigation): {len(unexpected_failures)}")
+            print(f"\nX UNEXPECTED FAILURES (Need investigation): {len(unexpected_failures)}")
             for result in unexpected_failures:
                 test_name = result.test_name.split("::")[-1]
                 print(f"   - {test_name} ({result.execution_time:.2f}s)")
@@ -407,7 +407,7 @@ class WebSocketManagerSSOTValidationSuiteTests(SSotBaseTestCase):
 
         # Normal passes (expected after SSOT fix)
         if normal_passes:
-            print(f"\n✅ NORMAL PASSES: {len(normal_passes)}")
+            print(f"\nCHECK NORMAL PASSES: {len(normal_passes)}")
 
         # Performance statistics
         total_time = sum(r.execution_time for r in self.test_results)
@@ -424,26 +424,26 @@ class WebSocketManagerSSOTValidationSuiteTests(SSotBaseTestCase):
         # After SSOT fix: All tests should pass
 
         if self.validation_progress.unexpected_failures > 0:
-            print(f"   ❌ VALIDATION ISSUES: {self.validation_progress.unexpected_failures} unexpected failures")
-            print(f"   → These failures need investigation - they don't match expected SSOT violation patterns")
+            print(f"   X VALIDATION ISSUES: {self.validation_progress.unexpected_failures} unexpected failures")
+            print(f"   -> These failures need investigation - they don't match expected SSOT violation patterns")
             self.validation_progress.validation_complete = False
 
         elif self.validation_progress.passed_tests == self.validation_progress.total_tests:
             print(f"   🎉 SSOT CONSOLIDATION COMPLETE!")
-            print(f"   → All validation tests are now passing")
-            print(f"   → WebSocket Manager SSOT consolidation is working correctly")
+            print(f"   -> All validation tests are now passing")
+            print(f"   -> WebSocket Manager SSOT consolidation is working correctly")
             self.validation_progress.validation_complete = True
 
         elif self.validation_progress.expected_failures == self.validation_progress.failed_tests:
             print(f"   ⏳ SSOT CONSOLIDATION PENDING")
-            print(f"   → All failures match expected SSOT violation patterns")
-            print(f"   → Ready for SSOT consolidation implementation")
+            print(f"   -> All failures match expected SSOT violation patterns")
+            print(f"   -> Ready for SSOT consolidation implementation")
             self.validation_progress.validation_complete = False
 
         else:
-            print(f"   ⚠️  MIXED VALIDATION STATE")
-            print(f"   → Some tests passing, some failing as expected")
-            print(f"   → SSOT consolidation may be partially implemented")
+            print(f"   WARNING️  MIXED VALIDATION STATE")
+            print(f"   -> Some tests passing, some failing as expected")
+            print(f"   -> SSOT consolidation may be partially implemented")
             self.validation_progress.validation_complete = False
 
         # Always pass this orchestration test - it's just documenting the state

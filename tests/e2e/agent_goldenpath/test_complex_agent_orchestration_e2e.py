@@ -2,7 +2,7 @@
 E2E Tests for Complex Agent Orchestration - Golden Path Agent Coordination
 
 MISSION CRITICAL: Tests sophisticated agent orchestration scenarios including
-supervisor → specialized agent workflows, agent handoffs, and collaborative
+supervisor -> specialized agent workflows, agent handoffs, and collaborative
 problem-solving that demonstrates the platform's advanced AI capabilities.
 
 Business Value Justification (BVJ):
@@ -15,7 +15,7 @@ Test Strategy:
 - REAL SERVICES: Staging GCP Cloud Run environment only (NO Docker)
 - REAL AUTH: JWT tokens with orchestration permissions
 - REAL WEBSOCKETS: Complex wss:// orchestration event streams
-- REAL AGENTS: Full supervisor → triage → specialist → data helper workflows
+- REAL AGENTS: Full supervisor -> triage -> specialist -> data helper workflows
 - REAL COORDINATION: Actual agent handoffs, context sharing, and collaborative analysis
 - ORCHESTRATION DEPTH: Multi-step workflows with agent specialization and coordination
 
@@ -23,7 +23,7 @@ CRITICAL: These tests must demonstrate actual agent orchestration and collaborat
 No mocking orchestration logic or bypassing agent coordination complexity.
 
 GitHub Issue: #861 Agent Golden Path Messages Test Creation - STEP 1
-Coverage Target: 0.9% → 25% improvement (Priority Scenario #3)
+Coverage Target: 0.9% -> 25% improvement (Priority Scenario #3)
 """
 import asyncio
 import pytest
@@ -134,7 +134,7 @@ class ComplexAgentOrchestrationE2ETests(SSotAsyncTestCase):
             if current_agent != 'unknown':
                 analysis['unique_agents'].add(current_agent)
                 if previous_agent and previous_agent != current_agent:
-                    transition = f'{previous_agent} → {current_agent}'
+                    transition = f'{previous_agent} -> {current_agent}'
                     analysis['agent_transitions'].append(transition)
                     analysis['handoff_events'] += 1
                 previous_agent = current_agent
@@ -210,7 +210,7 @@ class ComplexAgentOrchestrationE2ETests(SSotAsyncTestCase):
             enterprise_elements = ['$5m', 'fortune 500', 'sla', '3 weeks', 'churn']
             addressed_enterprise = [elem for elem in enterprise_elements if elem in response_lower]
             assert len(addressed_enterprise) >= 3, f'Should address enterprise-specific concerns comprehensively. Addressed: {addressed_enterprise} of {enterprise_elements}'
-            self.logger.info('✅ Supervisor to specialist orchestration validated')
+            self.logger.info('CHECK Supervisor to specialist orchestration validated')
         finally:
             await websocket.close()
 
@@ -235,7 +235,7 @@ class ComplexAgentOrchestrationE2ETests(SSotAsyncTestCase):
         self.logger.info('🎭 Testing multi-agent collaborative problem solving')
         websocket = await self._establish_orchestration_websocket()
         try:
-            collaborative_problem = "STRATEGIC CHALLENGE: We're an AI-powered fintech startup (Series B, $50M raised) experiencing explosive growth but facing critical scaling decisions. Current situation: 10K→100K users in 6 months, AI infrastructure costs $200K/month (was $20K), 15% monthly churn due to slow AI responses (3-7s), competitor just launched similar service with 1s response time. Key constraints: $2M runway remaining, regulatory compliance (SOX, PCI-DSS), team of 45 engineers. Decision point: We have 3 options: 1) Optimize current architecture aggressively, 2) Rebuild with new AI stack (6 month delay), 3) Acquire AI optimization company ($15M). This requires: technical feasibility analysis, financial modeling, risk assessment, competitive analysis, and regulatory impact evaluation. Need collaborative AI analysis across all these dimensions to present to board next week."
+            collaborative_problem = "STRATEGIC CHALLENGE: We're an AI-powered fintech startup (Series B, $50M raised) experiencing explosive growth but facing critical scaling decisions. Current situation: 10K->100K users in 6 months, AI infrastructure costs $200K/month (was $20K), 15% monthly churn due to slow AI responses (3-7s), competitor just launched similar service with 1s response time. Key constraints: $2M runway remaining, regulatory compliance (SOX, PCI-DSS), team of 45 engineers. Decision point: We have 3 options: 1) Optimize current architecture aggressively, 2) Rebuild with new AI stack (6 month delay), 3) Acquire AI optimization company ($15M). This requires: technical feasibility analysis, financial modeling, risk assessment, competitive analysis, and regulatory impact evaluation. Need collaborative AI analysis across all these dimensions to present to board next week."
             collaboration_events = await self._send_orchestration_request(websocket, 'supervisor_agent', collaborative_problem, {'collaboration_required': True, 'multi_domain_analysis': True, 'financial_modeling': True, 'risk_assessment': True, 'competitive_analysis': True, 'regulatory_compliance': True, 'board_presentation': True})
             collaboration_analysis = self._analyze_orchestration_flow(collaboration_events)
             final_collaborative_response = self._extract_final_orchestrated_response(collaboration_events)
@@ -264,7 +264,7 @@ class ComplexAgentOrchestrationE2ETests(SSotAsyncTestCase):
             strategic_indicators = ['recommend', 'strategy', 'option', 'decision', 'approach']
             strategic_content = sum((1 for indicator in strategic_indicators if indicator in response_lower))
             assert strategic_content >= 3, f'Collaborative response should provide strategic recommendations. Strategic indicators: {strategic_content}'
-            self.logger.info('✅ Multi-agent collaborative problem solving validated')
+            self.logger.info('CHECK Multi-agent collaborative problem solving validated')
         finally:
             await websocket.close()
 
@@ -317,7 +317,7 @@ class ComplexAgentOrchestrationE2ETests(SSotAsyncTestCase):
             integration_indicators = ['analysis', 'optimization', 'recommendation', 'strategy', 'implementation']
             integration_content = sum((1 for indicator in integration_indicators if indicator in response_lower))
             assert integration_content >= 4, f'Final response should demonstrate integrated analysis from handoffs. Integration indicators: {integration_content}'
-            self.logger.info('✅ Agent handoff with context preservation validated')
+            self.logger.info('CHECK Agent handoff with context preservation validated')
         finally:
             await websocket.close()
 
@@ -372,7 +372,7 @@ class ComplexAgentOrchestrationE2ETests(SSotAsyncTestCase):
             feasibility_indicators = ['feasible', 'achievable', 'realistic', 'constraint', 'limitation']
             feasibility_content = sum((1 for indicator in feasibility_indicators if indicator in response_lower))
             assert feasibility_content >= 2, f'Should demonstrate constraint-aware solution feasibility. Feasibility indicators: {feasibility_content}'
-            self.logger.info('✅ Orchestration under complex constraints validated')
+            self.logger.info('CHECK Orchestration under complex constraints validated')
         finally:
             await websocket.close()
 if __name__ == '__main__':

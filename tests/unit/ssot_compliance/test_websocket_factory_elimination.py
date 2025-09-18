@@ -4,7 +4,7 @@ WebSocket Factory Elimination Unit Test - Issue #1098 Phase 2 Validation
 MISSION: Validate WebSocket factory legacy removal and SSOT compliance.
 
 This test suite scans production code for factory pattern violations and validates
-that Phase 2 production remediation (53 → 16 violations, 69% reduction) is complete.
+that Phase 2 production remediation (53 -> 16 violations, 69% reduction) is complete.
 
 Business Value: Platform/Internal - System Stability & SSOT Compliance
 Ensures clean architecture and prevents factory pattern violations from causing
@@ -113,7 +113,7 @@ class TestWebSocketFactoryElimination(SSotBaseTestCase):
         if violations:
             self._log_violation_details(violations)
 
-        self.assertLog(f"✅ Phase 2 compliance: {violation_count}/{self.PHASE_2_VIOLATION_LIMIT} violations")
+        self.assertLog(f"CHECK Phase 2 compliance: {violation_count}/{self.PHASE_2_VIOLATION_LIMIT} violations")
 
     def test_no_new_websocket_factory_classes(self):
         """
@@ -135,7 +135,7 @@ class TestWebSocketFactoryElimination(SSotBaseTestCase):
             f"All factory classes should be eliminated or moved to compatibility layer."
         )
 
-        self.assertLog(f"✅ No prohibited factory classes found in production code")
+        self.assertLog(f"CHECK No prohibited factory classes found in production code")
 
     def test_canonical_import_compliance(self):
         """
@@ -158,7 +158,7 @@ class TestWebSocketFactoryElimination(SSotBaseTestCase):
         if import_violations:
             self.assertLog(f"Non-canonical imports found: {len(import_violations)} files need updates")
 
-        self.assertLog(f"✅ Import compliance: {len(import_violations)}/{max_allowed_non_canonical} non-canonical imports")
+        self.assertLog(f"CHECK Import compliance: {len(import_violations)}/{max_allowed_non_canonical} non-canonical imports")
 
     def test_legacy_pattern_elimination(self):
         """
@@ -174,7 +174,7 @@ class TestWebSocketFactoryElimination(SSotBaseTestCase):
             f"All legacy patterns should be eliminated in Phase 2."
         )
 
-        self.assertLog(f"✅ No legacy patterns found in production code")
+        self.assertLog(f"CHECK No legacy patterns found in production code")
 
     def test_factory_method_elimination(self):
         """
@@ -200,7 +200,7 @@ class TestWebSocketFactoryElimination(SSotBaseTestCase):
             f"found in production code. Factory methods should be eliminated."
         )
 
-        self.assertLog(f"✅ Factory methods: {len(prohibited_methods)}/{max_allowed_factory_methods} remaining")
+        self.assertLog(f"CHECK Factory methods: {len(prohibited_methods)}/{max_allowed_factory_methods} remaining")
 
     def _scan_production_files_for_factory_violations(self) -> List[FactoryViolation]:
         """

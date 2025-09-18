@@ -151,7 +151,7 @@ class TestImportPathResolution(SSotBaseTestCase):
         if failed_imports:
             error_msg = "Integration test import requirements not met:\n"
             for failure in failed_imports:
-                error_msg += f"  ❌ {failure}\n"
+                error_msg += f"  X {failure}\n"
             error_msg += "\nThese imports must be resolved for Issue #1176 integration tests to run."
             pytest.fail(error_msg)
     
@@ -206,7 +206,7 @@ class TestImportPathResolution(SSotBaseTestCase):
         if failed_imports:
             error_msg = "Test framework SSOT import violations:\n"
             for failure in failed_imports:
-                error_msg += f"  ❌ {failure}\n"
+                error_msg += f"  X {failure}\n"
             pytest.fail(error_msg)
     
     @pytest.mark.parametrize("test_file", [
@@ -287,7 +287,7 @@ class TestImportPathResolution(SSotBaseTestCase):
         if failed_imports:
             error_msg = f"Import failures in {test_file}:\n"
             for failure in failed_imports:
-                error_msg += f"  ❌ {failure}\n"
+                error_msg += f"  X {failure}\n"
             pytest.fail(error_msg)
 
 

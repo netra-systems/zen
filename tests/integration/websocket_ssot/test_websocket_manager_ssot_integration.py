@@ -243,10 +243,10 @@ class WebSocketManagerSSOTIntegrationTests(SSotAsyncTestCase):
             self.manager_instances.append(manager_instance)
 
             if manager_instance.instance is None:
-                print(f"❌ FAILED TO CREATE: {manager_instance.import_path}")
+                print(f"X FAILED TO CREATE: {manager_instance.import_path}")
                 print(f"   Error: {manager_instance.last_error}")
             else:
-                print(f"✅ CREATED: {manager_instance.import_path}")
+                print(f"CHECK CREATED: {manager_instance.import_path}")
                 print(f"   Type: {type(manager_instance.instance)}")
             print()
 
@@ -281,7 +281,7 @@ class WebSocketManagerSSOTIntegrationTests(SSotAsyncTestCase):
         print(f"Total consistency violations: {len(consistency_violations)}")
 
         if consistency_violations:
-            print("\n❌ CROSS-IMPORT CONSISTENCY VIOLATIONS DETECTED:")
+            print("\nX CROSS-IMPORT CONSISTENCY VIOLATIONS DETECTED:")
             for violation in consistency_violations:
                 print(f"   - {violation}")
 
@@ -293,7 +293,7 @@ class WebSocketManagerSSOTIntegrationTests(SSotAsyncTestCase):
                 f"Violations: {consistency_violations[:5]}..."  # Show first 5
             )
 
-        print("✅ CROSS-IMPORT CONSISTENCY VALIDATED!")
+        print("CHECK CROSS-IMPORT CONSISTENCY VALIDATED!")
         print("All WebSocket manager import paths create functionally equivalent instances.")
 
     async def _test_connection_management_consistency(
@@ -497,9 +497,9 @@ class WebSocketManagerSSOTIntegrationTests(SSotAsyncTestCase):
 
             if manager_instance.instance is not None:
                 user_managers[user_id] = manager_instance
-                print(f"✅ Created manager for {user_id}: {manager_instance.import_path}")
+                print(f"CHECK Created manager for {user_id}: {manager_instance.import_path}")
             else:
-                print(f"❌ Failed to create manager for {user_id}: {manager_instance.last_error}")
+                print(f"X Failed to create manager for {user_id}: {manager_instance.last_error}")
 
         if len(user_managers) < 2:
             pytest.fail("Need at least 2 working managers to test multi-user isolation")
@@ -526,7 +526,7 @@ class WebSocketManagerSSOTIntegrationTests(SSotAsyncTestCase):
         print(f"User isolation violations: {len(isolation_violations)}")
 
         if isolation_violations:
-            print("\n❌ MULTI-USER ISOLATION VIOLATIONS DETECTED:")
+            print("\nX MULTI-USER ISOLATION VIOLATIONS DETECTED:")
             for violation in isolation_violations:
                 print(f"   - {violation}")
 
@@ -538,7 +538,7 @@ class WebSocketManagerSSOTIntegrationTests(SSotAsyncTestCase):
                 f"isolated from each other. Violations: {isolation_violations[:3]}..."
             )
 
-        print("✅ MULTI-USER ISOLATION VALIDATED!")
+        print("CHECK MULTI-USER ISOLATION VALIDATED!")
         print("All WebSocket managers properly isolate users from each other.")
 
     async def _test_connection_isolation(self, user_managers: Dict[UserID, WebSocketManagerTestInstance]) -> Dict[str, Any]:

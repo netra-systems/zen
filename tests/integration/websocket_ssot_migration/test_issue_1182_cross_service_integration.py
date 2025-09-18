@@ -95,7 +95,7 @@ class WebSocketCrossServiceIntegrationTests(BaseIntegrationTest):
             from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             from netra_backend.app.core.unified_id_manager import UnifiedIDManager
             
-            logger.info("✓ AgentWebSocketBridge and WebSocketManager imports successful")
+            logger.info("CHECK AgentWebSocketBridge and WebSocketManager imports successful")
             
             # Create WebSocket manager instance
             mock_websocket = AsyncMock()
@@ -134,10 +134,10 @@ class WebSocketCrossServiceIntegrationTests(BaseIntegrationTest):
                         thread_id=thread_id
                     )
                     event_delivery_count += 1
-                    logger.info(f"✓ Event delivery successful: {event_type}")
+                    logger.info(f"CHECK Event delivery successful: {event_type}")
                     
                 except Exception as e:
-                    logger.error(f"❌ Event delivery failed for {event_type}: {e}")
+                    logger.error(f"X Event delivery failed for {event_type}: {e}")
                     integration_result.error_message = f"Event delivery failed: {e}"
                     break
             
@@ -146,7 +146,7 @@ class WebSocketCrossServiceIntegrationTests(BaseIntegrationTest):
             if event_delivery_count == expected_events:
                 integration_result.success = True
                 integration_result.ssot_compliance = True
-                logger.info(f"✓ All {expected_events} events delivered successfully")
+                logger.info(f"CHECK All {expected_events} events delivered successfully")
             else:
                 integration_result.error_message = f"Event delivery incomplete: {event_delivery_count}/{expected_events}"
                 logger.error(integration_result.error_message)
@@ -158,22 +158,22 @@ class WebSocketCrossServiceIntegrationTests(BaseIntegrationTest):
                     'event_delivery_rate': event_delivery_count / expected_events,
                     'connection_count': len(connections) if connections else 0
                 }
-                logger.info(f"✓ WebSocket manager methods accessible through bridge")
+                logger.info(f"CHECK WebSocket manager methods accessible through bridge")
                 
             except Exception as e:
-                logger.error(f"❌ WebSocket manager method call failed: {e}")
+                logger.error(f"X WebSocket manager method call failed: {e}")
                 integration_result.error_message = f"Method call failed: {e}"
                 integration_result.success = False
             
         except ImportError as e:
             integration_result.error_message = f"Import failed: {e}"
             integration_result.success = False
-            logger.error(f"❌ Import failed: {e}")
+            logger.error(f"X Import failed: {e}")
             
         except Exception as e:
             integration_result.error_message = f"Integration test failed: {e}"
             integration_result.success = False
-            logger.error(f"❌ AgentWebSocketBridge integration test failed: {e}")
+            logger.error(f"X AgentWebSocketBridge integration test failed: {e}")
         
         self.integration_results.append(integration_result)
         
@@ -227,7 +227,7 @@ class WebSocketCrossServiceIntegrationTests(BaseIntegrationTest):
             from netra_backend.app.routes.demo_websocket import execute_real_agent_workflow
             from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
-            logger.info("✓ Demo WebSocket service imports successful")
+            logger.info("CHECK Demo WebSocket service imports successful")
             
             # Create mock WebSocket for demo testing
             mock_websocket = AsyncMock()
@@ -281,28 +281,28 @@ class WebSocketCrossServiceIntegrationTests(BaseIntegrationTest):
                         'demo_execution_success': True
                     }
                     
-                    logger.info(f"✓ Demo WebSocket execution successful: {len(sent_messages)} messages sent")
-                    logger.info(f"✓ Message types: {message_types}")
+                    logger.info(f"CHECK Demo WebSocket execution successful: {len(sent_messages)} messages sent")
+                    logger.info(f"CHECK Message types: {message_types}")
                     
                 else:
                     integration_result.error_message = "No messages sent during demo execution"
                     integration_result.success = False
-                    logger.error("❌ No messages sent during demo WebSocket execution")
+                    logger.error("X No messages sent during demo WebSocket execution")
             
             except Exception as e:
                 integration_result.error_message = f"Demo execution failed: {e}"
                 integration_result.success = False
-                logger.error(f"❌ Demo WebSocket execution failed: {e}")
+                logger.error(f"X Demo WebSocket execution failed: {e}")
         
         except ImportError as e:
             integration_result.error_message = f"Demo service import failed: {e}"
             integration_result.success = False
-            logger.error(f"❌ Demo WebSocket service import failed: {e}")
+            logger.error(f"X Demo WebSocket service import failed: {e}")
             
         except Exception as e:
             integration_result.error_message = f"Demo service test failed: {e}"
             integration_result.success = False
-            logger.error(f"❌ Demo WebSocket service test failed: {e}")
+            logger.error(f"X Demo WebSocket service test failed: {e}")
         
         self.integration_results.append(integration_result)
         
@@ -418,16 +418,16 @@ class WebSocketCrossServiceIntegrationTests(BaseIntegrationTest):
                         else:
                             contract_result['return_type_correct'] = True  # Non-async methods
                         
-                        logger.info(f"✓ Contract check for {method_name}: exists={contract_result['exists']}, "
+                        logger.info(f"CHECK Contract check for {method_name}: exists={contract_result['exists']}, "
                                   f"signature={contract_result['signature_correct']}, "
                                   f"return_type={contract_result['return_type_correct']}")
                     else:
                         contract_result['error'] = f"Method {method_name} not found"
-                        logger.error(f"❌ Method {method_name} not found in WebSocketManager")
+                        logger.error(f"X Method {method_name} not found in WebSocketManager")
                         
                 except Exception as e:
                     contract_result['error'] = str(e)
-                    logger.error(f"❌ Contract check failed for {method_name}: {e}")
+                    logger.error(f"X Contract check failed for {method_name}: {e}")
                 
                 interface_contract_results.append(contract_result)
             
@@ -453,12 +453,12 @@ class WebSocketCrossServiceIntegrationTests(BaseIntegrationTest):
                                   if not (result['exists'] and result['signature_correct'] and result['return_type_correct'])]
                 integration_result.error_message = f"Interface contract violations: {failed_contracts}"
             
-            logger.info(f"✓ Interface contract compliance: {contract_compliance_rate:.2%} ({successful_contracts}/{total_contracts})")
+            logger.info(f"CHECK Interface contract compliance: {contract_compliance_rate:.2%} ({successful_contracts}/{total_contracts})")
             
         except Exception as e:
             integration_result.error_message = f"Interface contract testing failed: {e}"
             integration_result.success = False
-            logger.error(f"❌ Interface contract testing failed: {e}")
+            logger.error(f"X Interface contract testing failed: {e}")
         
         self.integration_results.append(integration_result)
         
@@ -476,7 +476,7 @@ class WebSocketCrossServiceIntegrationTests(BaseIntegrationTest):
         
         # Log detailed contract results
         for result in interface_contract_results:
-            status = "✓" if (result['exists'] and result['signature_correct'] and result['return_type_correct']) else "❌"
+            status = "CHECK" if (result['exists'] and result['signature_correct'] and result['return_type_correct']) else "X"
             logger.info(f"   {status} {result['method']}: exists={result['exists']}, "
                        f"signature={result['signature_correct']}, return_type={result['return_type_correct']}")
             if result['error']:

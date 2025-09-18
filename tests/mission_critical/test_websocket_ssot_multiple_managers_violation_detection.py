@@ -153,9 +153,9 @@ class WebSocketSSotMultipleManagersViolationDetectionTests(SSotBaseTestCase):
                         cls = getattr(module, class_name)
                         class_id = f"{cls.__module__}.{cls.__qualname__}"
                         resolved_classes[f"{module_path}.{class_name}"] = class_id
-                        logger.info(f"✓ Issue #1182: Import path {module_path}.{class_name} -> {class_id}")
+                        logger.info(f"CHECK Issue #1182: Import path {module_path}.{class_name} -> {class_id}")
                 except ImportError as e:
-                    logger.warning(f"⚠️ Issue #1182: Import failed {module_path}: {e}")
+                    logger.warning(f"WARNING️ Issue #1182: Import failed {module_path}: {e}")
             
             # Check if all imports resolve to same implementation (SSOT requirement)
             unique_implementations = set(resolved_classes.values())
@@ -165,17 +165,17 @@ class WebSocketSSotMultipleManagersViolationDetectionTests(SSotBaseTestCase):
                 )
                 logger.error(f"🚨 Issue #1182: Import fragmentation detected - {unique_implementations}")
             else:
-                logger.info(f"✓ Issue #1182: All imports resolve to single implementation")
+                logger.info(f"CHECK Issue #1182: All imports resolve to single implementation")
                 
         except Exception as e:
             issue_1182_violations.append(f"Import analysis failed: {e}")
-            logger.error(f"❌ Issue #1182: Import analysis failed: {e}")
+            logger.error(f"X Issue #1182: Import analysis failed: {e}")
         
         # Violation 3: Check for DemoWebSocketBridge compatibility (Issue #1209)
         demo_bridge_violations = []
         try:
             from netra_backend.app.routes.demo_websocket import execute_real_agent_workflow
-            logger.info("✓ Issue #1209: DemoWebSocketBridge imports successfully")
+            logger.info("CHECK Issue #1209: DemoWebSocketBridge imports successfully")
             
             # Test interface compatibility with consolidated manager
             from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
@@ -195,12 +195,12 @@ class WebSocketSSotMultipleManagersViolationDetectionTests(SSotBaseTestCase):
                 )
                 logger.error(f"🚨 Issue #1209: Missing methods for demo bridge: {missing_methods}")
             else:
-                logger.info("✓ Issue #1209: DemoWebSocketBridge interface compatible")
+                logger.info("CHECK Issue #1209: DemoWebSocketBridge interface compatible")
                 
         except ImportError as e:
             demo_bridge_violations.append(f"Demo bridge import failed: {e}")
             issue_1182_violations.append(f"Issue #1209: Demo bridge import failed: {e}")
-            logger.error(f"❌ Issue #1209: Demo bridge import failed: {e}")
+            logger.error(f"X Issue #1209: Demo bridge import failed: {e}")
         
         # Store all Issue #1182 violations for analysis
         self.violation_details['issue_1182_violations'] = issue_1182_violations
@@ -216,7 +216,7 @@ class WebSocketSSotMultipleManagersViolationDetectionTests(SSotBaseTestCase):
             for i, violation in enumerate(issue_1182_violations, 1):
                 logger.error(f"   {i}. {violation}")
         else:
-            logger.info("✅ Issue #1182: No SSOT violations detected - consolidation complete!")
+            logger.info("CHECK Issue #1182: No SSOT violations detected - consolidation complete!")
         
         # CRITICAL: This assertion should FAIL initially (violations exist)
         # After Issue #1182 remediation, this should PASS (violations resolved)
@@ -377,8 +377,8 @@ class WebSocketSSotMultipleManagersViolationDetectionTests(SSotBaseTestCase):
                 # Look for unique classes/functions not in unified_manager
                 unique_patterns = [
                     r'class\s+(?!UnifiedWebSocketManager)\w+',  # Classes other than imports
-                    r'def\s+\w+.*:(?!\s*""")',  # Functions with implementation
-                    r'async def\s+\w+.*:(?!\s*""")'  # Async functions with implementation
+                    r'def\\\1+\\\1+.*:(?!\\\1*""")',  # Functions with implementation
+                    r'async def\\\1+\\\1+.*:(?!\\\1*""")'  # Async functions with implementation
                 ]
                 
                 for pattern in unique_patterns:
@@ -401,11 +401,11 @@ class WebSocketSSotMultipleManagersViolationDetectionTests(SSotBaseTestCase):
         
         # Log consolidation readiness status
         if consolidation_blockers:
-            logger.warning(f"⚠️ Consolidation blockers found: {len(consolidation_blockers)}")
+            logger.warning(f"WARNING️ Consolidation blockers found: {len(consolidation_blockers)}")
             for blocker in consolidation_blockers:
                 logger.warning(f"  - {blocker['issue']}")
         else:
-            logger.info("✅ No consolidation blockers detected - ready for SSOT remediation")
+            logger.info("CHECK No consolidation blockers detected - ready for SSOT remediation")
         
         # This test should provide information but not fail
         # It helps guide the remediation process

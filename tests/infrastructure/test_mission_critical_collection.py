@@ -98,7 +98,7 @@ class MissionCriticalCollectionTests:
             runner_success = False
             stdout_output = ''
             stderr_output = f'Test runner execution failed: {str(e)}'
-        runner_report = f"\nUNIFIED TEST RUNNER MISSION CRITICAL VALIDATION\n==============================================\n\nTest Runner Path: {test_runner_path}\nCollection Success: {('✅ SUCCESS' if runner_success else '❌ FAILED')}\nReturn Code: {(result.returncode if 'result' in locals() else 'N/A')}\n\nSTDOUT OUTPUT:\n{stdout_output[:500]}...\n\nSTDERR OUTPUT:\n{stderr_output[:500]}...\n\nANALYSIS: Unified test runner must successfully collect mission-critical tests.\nBUSINESS IMPACT: Test runner integration required for automated validation.\nSSOT COMPLIANCE: Mission-critical tests must work with SSOT test infrastructure.\n\nNEXT ACTION: Fix issues preventing unified test runner mission-critical collection.\n"
+        runner_report = f"\nUNIFIED TEST RUNNER MISSION CRITICAL VALIDATION\n==============================================\n\nTest Runner Path: {test_runner_path}\nCollection Success: {('CHECK SUCCESS' if runner_success else 'X FAILED')}\nReturn Code: {(result.returncode if 'result' in locals() else 'N/A')}\n\nSTDOUT OUTPUT:\n{stdout_output[:500]}...\n\nSTDERR OUTPUT:\n{stderr_output[:500]}...\n\nANALYSIS: Unified test runner must successfully collect mission-critical tests.\nBUSINESS IMPACT: Test runner integration required for automated validation.\nSSOT COMPLIANCE: Mission-critical tests must work with SSOT test infrastructure.\n\nNEXT ACTION: Fix issues preventing unified test runner mission-critical collection.\n"
         print(runner_report)
         assert runner_success, f'Unified test runner failed for mission-critical category\n{runner_report}'
 

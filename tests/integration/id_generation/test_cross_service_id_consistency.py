@@ -70,12 +70,12 @@ class CrossServiceIdConsistencyTests(SSotBaseTestCase):
         min_timestamp = min(auth_timestamp, backend_conn_timestamp, backend_client_timestamp)
         timestamp_range = max_timestamp - min_timestamp
         assert timestamp_range <= 5, f'CROSS-SERVICE TIMESTAMP CORRELATION FAILURE: {timestamp_range}s range exceeds 5s limit'
-        print(f'\n✅ AUTH-BACKEND ID CORRELATION SUCCESS:')
-        print(f'   ✓ Auth Session:      {auth_session_id}')
-        print(f'   ✓ Backend Connection: {backend_connection_id}')
-        print(f'   ✓ Backend Client:     {backend_redis_client_id}')
-        print(f'   ✓ User context consistent across all services')
-        print(f'   ✓ Timestamp correlation within {timestamp_range}s')
+        print(f'\nCHECK AUTH-BACKEND ID CORRELATION SUCCESS:')
+        print(f'   CHECK Auth Session:      {auth_session_id}')
+        print(f'   CHECK Backend Connection: {backend_connection_id}')
+        print(f'   CHECK Backend Client:     {backend_redis_client_id}')
+        print(f'   CHECK User context consistent across all services')
+        print(f'   CHECK Timestamp correlation within {timestamp_range}s')
         print(f'   Status: Cross-service ID correlation validated')
 
     def test_websocket_auth_integration_id_consistency_post_migration(self):
@@ -116,13 +116,13 @@ class CrossServiceIdConsistencyTests(SSotBaseTestCase):
         all_ids = [auth_session_id, websocket_connection_id, websocket_audit_id]
         unique_ids = set(all_ids)
         assert len(unique_ids) == 3, f'ID UNIQUENESS FAILURE: Generated {len(unique_ids)}/3 unique IDs'
-        print(f'\n✅ WEBSOCKET-AUTH INTEGRATION CONSISTENCY SUCCESS:')
-        print(f'   ✓ Auth Session:    {auth_session_id}')
-        print(f'   ✓ WS Connection:   {websocket_connection_id}')
-        print(f'   ✓ WS Audit:        {websocket_audit_id}')
-        print(f"   ✓ User context consistent: '{auth_user_prefix}'")
-        print(f'   ✓ Service prefixes correct')
-        print(f'   ✓ All IDs unique')
+        print(f'\nCHECK WEBSOCKET-AUTH INTEGRATION CONSISTENCY SUCCESS:')
+        print(f'   CHECK Auth Session:    {auth_session_id}')
+        print(f'   CHECK WS Connection:   {websocket_connection_id}')
+        print(f'   CHECK WS Audit:        {websocket_audit_id}')
+        print(f"   CHECK User context consistent: '{auth_user_prefix}'")
+        print(f'   CHECK Service prefixes correct')
+        print(f'   CHECK All IDs unique')
         print(f'   Status: WebSocket-Auth integration consistency validated')
 
     def test_factory_services_client_id_coordination_post_migration(self):
@@ -175,14 +175,14 @@ class CrossServiceIdConsistencyTests(SSotBaseTestCase):
         assert request_infos[1] == 'factory', f'REQUEST CORRELATION ERROR: {request_infos[1]}'
         unique_client_ids = set(all_client_ids)
         assert len(unique_client_ids) == 4, f'CLIENT ID UNIQUENESS FAILURE: Generated {len(unique_client_ids)}/4 unique IDs'
-        print(f'\n✅ FACTORY SERVICES COORDINATION SUCCESS:')
-        print(f'   ✓ Redis Primary:    {redis_client_id}')
-        print(f'   ✓ ClickHouse Primary: {clickhouse_client_id}')
-        print(f'   ✓ Redis Cache:      {redis_cache_client_id}')
-        print(f'   ✓ ClickHouse Analytics: {clickhouse_analytics_client_id}')
-        print(f'   ✓ Service types: {service_types}')
-        print(f"   ✓ User contexts consistent: '{expected_user_context}'")
-        print(f'   ✓ All {len(unique_client_ids)} client IDs unique')
+        print(f'\nCHECK FACTORY SERVICES COORDINATION SUCCESS:')
+        print(f'   CHECK Redis Primary:    {redis_client_id}')
+        print(f'   CHECK ClickHouse Primary: {clickhouse_client_id}')
+        print(f'   CHECK Redis Cache:      {redis_cache_client_id}')
+        print(f'   CHECK ClickHouse Analytics: {clickhouse_analytics_client_id}')
+        print(f'   CHECK Service types: {service_types}')
+        print(f"   CHECK User contexts consistent: '{expected_user_context}'")
+        print(f'   CHECK All {len(unique_client_ids)} client IDs unique')
         print(f'   Status: Factory services coordination validated')
 
     def test_audit_trail_cross_service_traceability_post_migration(self):
@@ -244,13 +244,13 @@ class CrossServiceIdConsistencyTests(SSotBaseTestCase):
         all_trace_ids = list(trace_chain.values())
         unique_trace_ids = set(all_trace_ids)
         assert len(unique_trace_ids) == len(all_trace_ids), f'TRACE UNIQUENESS FAILURE: Generated {len(unique_trace_ids)}/{len(all_trace_ids)} unique IDs'
-        print(f'\n✅ CROSS-SERVICE AUDIT TRACEABILITY SUCCESS:')
-        print(f'   ✓ Operation sequence traced across {len(trace_chain)} services')
+        print(f'\nCHECK CROSS-SERVICE AUDIT TRACEABILITY SUCCESS:')
+        print(f'   CHECK Operation sequence traced across {len(trace_chain)} services')
         for service, id_string in trace_chain.items():
-            print(f'   ✓ {service:20} -> {id_string}')
-        print(f"   ✓ User context '{expected_user_context}' consistent across all services")
-        print(f'   ✓ Timestamp correlation within {time_range}s window')
-        print(f'   ✓ All {len(unique_trace_ids)} trace IDs unique')
+            print(f'   CHECK {service:20} -> {id_string}')
+        print(f"   CHECK User context '{expected_user_context}' consistent across all services")
+        print(f'   CHECK Timestamp correlation within {time_range}s window')
+        print(f'   CHECK All {len(unique_trace_ids)} trace IDs unique')
         print(f'   Status: Cross-service audit traceability validated')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

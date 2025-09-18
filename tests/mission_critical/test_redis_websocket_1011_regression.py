@@ -20,7 +20,7 @@ CRITICAL ISSUE #849 VALIDATION:
 - Tests race condition scenarios that previously caused failures
 - Verifies chat functionality remains reliable under load
 
-GOLDEN PATH PROTECTION: Users login → get AI responses
+GOLDEN PATH PROTECTION: Users login -> get AI responses
 "
 ""
 

@@ -14,11 +14,11 @@ PURPOSE:
 - Validate no functionality lost in agent WebSocket integration
 
 CRITICAL INTEGRATION POINTS:
-- SupervisorAgent → WebSocketManager event delivery
-- AgentRegistry → WebSocket manager coordination
-- ExecutionEngine → WebSocket event emission
-- UserExecutionContext → WebSocket user isolation
-- Tool execution → WebSocket progress updates
+- SupervisorAgent -> WebSocketManager event delivery
+- AgentRegistry -> WebSocket manager coordination
+- ExecutionEngine -> WebSocket event emission
+- UserExecutionContext -> WebSocket user isolation
+- Tool execution -> WebSocket progress updates
 
 TEST STRATEGY:
 1. Create real agent execution scenarios with WebSocket events
@@ -227,7 +227,7 @@ class WebSocketSSotAgentIntegrationValidationTests(SSotAsyncTestCase):
             self.integration_metrics['agents_executed'] += 1
             self.integration_metrics['websocket_events_delivered'] += actual_events
             
-            logger.info(f"✅ Supervisor agent WebSocket integration successful: "
+            logger.info(f"CHECK Supervisor agent WebSocket integration successful: "
                        f"{actual_events} events in {execution_duration:.2f}s")
             
         except Exception as e:
@@ -305,7 +305,7 @@ class WebSocketSSotAgentIntegrationValidationTests(SSotAsyncTestCase):
             agent_events_count = len([e for e in self.agent_websocket_events if 'agent_' in e.get('prefix', '')])
             self.integration_metrics['websocket_events_delivered'] += agent_events_count
             
-            logger.info(f"✅ Concurrent agents WebSocket isolation successful: "
+            logger.info(f"CHECK Concurrent agents WebSocket isolation successful: "
                        f"{num_agents} agents executed in {concurrent_duration:.2f}s")
             
         except Exception as e:
@@ -384,7 +384,7 @@ class WebSocketSSotAgentIntegrationValidationTests(SSotAsyncTestCase):
             
             self.integration_metrics['websocket_events_delivered'] += len(coordination_events)
             
-            logger.info(f"✅ ExecutionEngine WebSocket coordination successful: "
+            logger.info(f"CHECK ExecutionEngine WebSocket coordination successful: "
                        f"{len(coordination_events)} coordination events")
             
         except Exception as e:
@@ -471,7 +471,7 @@ class WebSocketSSotAgentIntegrationValidationTests(SSotAsyncTestCase):
             
             self.integration_metrics['websocket_events_delivered'] += len(registry_events)
             
-            logger.info(f"✅ AgentRegistry WebSocket coordination successful: "
+            logger.info(f"CHECK AgentRegistry WebSocket coordination successful: "
                        f"{len(registry_events)} registry events")
             
         except Exception as e:
@@ -627,9 +627,9 @@ class WebSocketSSotAgentIntegrationValidationTests(SSotAsyncTestCase):
         logger.info(f"  Integration failures: {self.integration_metrics['integration_failures']}")
         
         if self.integration_metrics['integration_failures'] == 0:
-            logger.info("✅ All agent WebSocket integrations successful")
+            logger.info("CHECK All agent WebSocket integrations successful")
         else:
-            logger.warning(f"⚠️ {self.integration_metrics['integration_failures']} integration failures detected")
+            logger.warning(f"WARNING️ {self.integration_metrics['integration_failures']} integration failures detected")
         
         # Log event type distribution
         if self.agent_websocket_events:

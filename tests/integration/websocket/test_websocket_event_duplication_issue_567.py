@@ -2,7 +2,7 @@
 Test suite for Issue #567: WebSocket Event Delivery Duplication Detection
 
 This test validates that WebSocket events are delivered exactly once per user request
-and that the Golden Path user flow (login → AI responses) works without event duplication.
+and that the Golden Path user flow (login -> AI responses) works without event duplication.
 
 Key areas tested:
 1. Event delivery uniqueness for 5 critical WebSocket events
@@ -118,7 +118,7 @@ class WebSocketEventDuplicationIssue567Tests(SSotAsyncTestCase):
         """
         GOLDEN PATH TEST: End-to-end user flow without event duplication.
         
-        Validates the complete Golden Path user flow (login → AI responses)
+        Validates the complete Golden Path user flow (login -> AI responses)
         works without WebSocket event duplication, protecting business value.
         """
         user_id = 'golden_path_user_567'

@@ -325,7 +325,7 @@ class ComprehensiveWebSocketValidator:
                     }
                     result['timing_metrics'][event_name] = timing
 
-                    logger.info(f"✓ Event {event_name} validated successfully in {timing:."3f"}s)"
+                    logger.info(f"CHECK Event {event_name} validated successfully in {timing:."3f"}s)"
 
                 except Exception as e:
                     result['events_failed'].append(event_name)
@@ -381,12 +381,12 @@ class ComprehensiveWebSocketValidator:
                 results[test_name] = result
 
                 if result.get('success', False):
-                    logger.info(f✅ {test_name}: PASSED)
+                    logger.info(fCHECK {test_name}: PASSED)
                 else:
-                    logger.error(f❌ {test_name}: FAILED")"
+                    logger.error(fX {test_name}: FAILED")"
 
             except Exception as e:
-                logger.error(f❌ {test_name}: EXCEPTION - {e})
+                logger.error(fX {test_name}: EXCEPTION - {e})
                 results[test_name] = {
                     'test_name': test_name,
                     'success': False,
@@ -436,13 +436,13 @@ class ComprehensiveWebSocketValidator:
 
         logger.info(f\n📋 REQUIRED EVENT COVERAGE:)
         for event in self.REQUIRED_EVENTS:
-            status = ✅ PASS" if event in all_events_found else ❌ FAIL"
+            status = CHECK PASS" if event in all_events_found else X FAIL"
             logger.info(f  {status}: {event})
 
         if missing_required_events:
-            logger.error(f\n❌ MISSING REQUIRED EVENTS: {list(missing_required_events)})
+            logger.error(f\nX MISSING REQUIRED EVENTS: {list(missing_required_events)})
         else:
-            logger.info(f\n✅ ALL REQUIRED EVENTS VALIDATED!")"
+            logger.info(f\nCHECK ALL REQUIRED EVENTS VALIDATED!")"
 
         coverage = self.validation_results['event_coverage']['coverage_percentage']
         logger.info(f\n📈 EVENT COVERAGE: {coverage:."1f"}%)""
@@ -452,13 +452,13 @@ class ComprehensiveWebSocketValidator:
         if (self.validation_results['failed_tests') == 0 and
             len(missing_required_events) == 0 and
             coverage >= 100.0):
-            logger.info(f\n🎉 COMPREHENSIVE VALIDATION: ✅ PASSED)
-            logger.info(f"    ✅ All tests passed)"
-            logger.info(f    ✅ All required events validated")"
-            logger.info(f    ✅ 100% event coverage achieved)
+            logger.info(f\n🎉 COMPREHENSIVE VALIDATION: CHECK PASSED)
+            logger.info(f"    CHECK All tests passed)"
+            logger.info(f    CHECK All required events validated")"
+            logger.info(f    CHECK 100% event coverage achieved)
         else:
-            logger.error(f\n🚨 COMPREHENSIVE VALIDATION: ❌ FAILED)"
-            logger.error(f\n🚨 COMPREHENSIVE VALIDATION: ❌ FAILED)""
+            logger.error(f\n🚨 COMPREHENSIVE VALIDATION: X FAILED)"
+            logger.error(f\n🚨 COMPREHENSIVE VALIDATION: X FAILED)""
 
             if missing_required_events:
                 logger.error(f"    Missing events: {list(missing_required_events)})"

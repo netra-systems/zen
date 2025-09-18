@@ -281,7 +281,7 @@ class ConfigurationMigrationGuidanceTests(SSotBaseTestCase):
     @pytest.mark.unit
     def test_migration_from_direct_environ_to_isolated_environment(self):
         """
-        Test migration guidance: Direct os.environ → IsolatedEnvironment.
+        Test migration guidance: Direct os.environ -> IsolatedEnvironment.
 
         This test demonstrates the correct migration path and should PASS.
         """
@@ -303,7 +303,7 @@ class ConfigurationMigrationGuidanceTests(SSotBaseTestCase):
     @pytest.mark.unit
     def test_migration_from_legacy_config_manager_to_ssot(self):
         """
-        Test migration guidance: Legacy config manager → SSOT configuration.
+        Test migration guidance: Legacy config manager -> SSOT configuration.
 
         This test demonstrates the correct migration path and should PASS.
         """
@@ -376,7 +376,7 @@ if __name__ == "__main__":
 
     # Note: These tests are designed to FAIL initially to prove reproduction
     # After deprecation cleanup is complete, they should pass
-    print("⚠️  WARNING: These tests are designed to FAIL initially")
+    print("WARNING️  WARNING: These tests are designed to FAIL initially")
     print("   This proves that deprecated configuration patterns are reproduced")
     print("   After remediation, tests should pass")
     print("=" * 60)

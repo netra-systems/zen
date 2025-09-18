@@ -4,7 +4,7 @@ This test suite validates that WebSocket Manager SSOT consolidation protects the
 Golden Path user flow that generates $"500K" plus ARR from AI chat functionality.
 
 MISSION CRITICAL SCOPE:
-    - Golden Path: User login → AI chat → Real responses
+    - Golden Path: User login -> AI chat -> Real responses
 - Revenue Protection: $"500K" plus ARR chat functionality
 - User Experience: Real-time AI interactions via WebSocket events
 - Business Continuity: Enterprise-grade WebSocket reliability
@@ -430,7 +430,7 @@ class WebSocketSSOTGoldenPathValidationTests(SSotBaseTestCase, unittest.TestCase
             weighted_score = (factor_score * weight) / 100
             golden_path_score += weighted_score
             
-            logger.info(fGolden Path factor '{factor}': {'✓' if factor_healthy else '✗'} ({factor_score:."0f"}%))""
+            logger.info(fGolden Path factor '{factor}': {'CHECK' if factor_healthy else '✗'} ({factor_score:."0f"}%))""
 
         
         # Update final revenue protection status
@@ -467,7 +467,7 @@ class WebSocketSSOTGoldenPathValidationTests(SSotBaseTestCase, unittest.TestCase
         # Log comprehensive Golden Path status
         logger.info("=== Mission Critical: Golden Path Status ===)"
         for factor, status in self.golden_path_status.items():
-            status_icon = ✓ if status else ✗
+            status_icon = CHECK if status else ✗
             logger.info(f{factor}: {status_icon})"
             logger.info(f{factor}: {status_icon})""
 
@@ -478,7 +478,7 @@ class WebSocketSSOTGoldenPathValidationTests(SSotBaseTestCase, unittest.TestCase
             logger.error(f💰 Revenue at risk: ${self.business_metrics['revenue_at_risk']:,} ARR)
             logger.error("🔧 Required action: Issue #1104 SSOT consolidation)"
         else:
-            logger.info(✅ Golden Path revenue protection successful")"
+            logger.info(CHECK Golden Path revenue protection successful")"
 
 
 if __name__ == '__main__':

@@ -266,7 +266,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
                 # Validate event timing
                 self._validate_event_timing(events_received)
                 
-                self.logger.info(✅ All 5 critical events delivered with STRICT auth")"
+                self.logger.info(CHECK All 5 critical events delivered with STRICT auth")"
             else:
                 self.fail(WebSocket connection failed with valid JWT - indicates auth system issues)
                 
@@ -328,7 +328,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
             f"Expected auth-related error, got: {cm.exception}"
         )
         
-        self.logger.info(f✅ Confirmed auth blocking prevents all WebSocket events: {cm.exception}")"
+        self.logger.info(fCHECK Confirmed auth blocking prevents all WebSocket events: {cm.exception}")"
     
     async def test_critical_events_relaxed_auth_not_implemented(self):
         """
@@ -393,7 +393,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
                     self.fail(fRelaxed auth connected but only delivered {len(events_received)}/5 events")"
             else:
                 # Connection failed - this is expected
-                self.logger.info(✅ Relaxed auth correctly failed (not implemented))
+                self.logger.info(CHECK Relaxed auth correctly failed (not implemented))
                 
         except Exception as e:
             # Exception expected because relaxed mode is not implemented
@@ -404,7 +404,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
                 fExpected relaxed auth implementation error, got: {e}""
 
             )
-            self.logger.info(f"✅ Relaxed auth events correctly failed: {e})"
+            self.logger.info(f"CHECK Relaxed auth events correctly failed: {e})"
     
     async def test_critical_events_demo_auth_not_implemented(self):
         
@@ -463,7 +463,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
                     self.fail(fDemo auth connected but only delivered {len(events_received)}/5 events)
             else:
                 # Connection failed - this is expected
-                self.logger.info("✅ Demo auth correctly failed (not implemented))"
+                self.logger.info("CHECK Demo auth correctly failed (not implemented))"
                 
         except Exception as e:
             # Exception expected because demo mode is not implemented
@@ -472,7 +472,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
                 any(indicator in error_message for indicator in ['demo', 'not implemented', 'not found'),
                 fExpected demo auth implementation error, got: {e}
             )
-            self.logger.info(f✅ Demo auth events correctly failed: {e})
+            self.logger.info(fCHECK Demo auth events correctly failed: {e})
     
     async def test_critical_events_emergency_auth_not_implemented(self):
         """"
@@ -533,7 +533,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
                     self.fail(fEmergency auth connected but only delivered {len(events_received)}/5 events)
             else:
                 # Connection failed - this is expected
-                self.logger.info(✅ Emergency auth correctly failed (not implemented))
+                self.logger.info(CHECK Emergency auth correctly failed (not implemented))
                 
         except Exception as e:
             # Exception expected because emergency mode is not implemented
@@ -542,7 +542,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
                 any(indicator in error_message for indicator in ['emergency', 'not implemented', 'not found'),
                 f"Expected emergency auth implementation error, got: {e}"
             )
-            self.logger.info(f✅ Emergency auth events correctly failed: {e}")"
+            self.logger.info(fCHECK Emergency auth events correctly failed: {e}")"
     
     async def test_critical_events_comprehensive_all_auth_modes(self):
         """
@@ -606,7 +606,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
                            f{mode.upper()} auth events should fail (not implemented): {results[mode]})
         
         # Log comprehensive results
-        self.logger.info(f"✅ Critical events auth mode test results: {json.dumps(results, indent=2)})"
+        self.logger.info(f"CHECK Critical events auth mode test results: {json.dumps(results, indent=2)})"
         
         # Calculate total business value protected
         working_modes = sum(1 for result in results.values() if result[success"]"
@@ -619,8 +619,8 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
         
         # This proves how much business value is at risk
         at_risk_modes = total_modes - working_modes
-        self.logger.info(f✅ Business value at risk: {at_risk_modes}/{total_modes} auth modes not working)"
-        self.logger.info(f✅ Business value at risk: {at_risk_modes}/{total_modes} auth modes not working)""
+        self.logger.info(fCHECK Business value at risk: {at_risk_modes}/{total_modes} auth modes not working)"
+        self.logger.info(fCHECK Business value at risk: {at_risk_modes}/{total_modes} auth modes not working)""
 
     
     async def test_event_delivery_timing_all_auth_modes(self):
@@ -671,7 +671,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
                 self.assertLess(first_event_time, 5.0,
                               f{mode} first event too slow: {first_event_time:."2f"}s")"
         
-        self.logger.info(f✅ Event delivery timing results: {json.dumps(timing_results, indent=2)})
+        self.logger.info(fCHECK Event delivery timing results: {json.dumps(timing_results, indent=2)})
     
     async def test_event_content_validation_all_auth_modes(self):
         
@@ -719,7 +719,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
                               f{mode} events missing auth context)""
 
         
-        self.logger.info(f"✅ Event content validation results: {json.dumps(content_results, indent=2)})"
+        self.logger.info(f"CHECK Event content validation results: {json.dumps(content_results, indent=2)})"
     
     # Helper methods for event testing
     
@@ -928,7 +928,7 @@ class WebSocketEventResilienceTests(SSotBaseTestCase):
         working even if authentication becomes less reliable.
 ""
         # This test will fail because graceful auth degradation is not implemented
-        self.logger.info(✅ Event persistence through auth degradation not implemented (expected failure))
+        self.logger.info(CHECK Event persistence through auth degradation not implemented (expected failure))
         
         with self.assertRaises((NotImplementedError, AttributeError)) as cm:
             # Try to import auth degradation handler (doesn't exist)'
@@ -951,8 +951,8 @@ class WebSocketEventResilienceTests(SSotBaseTestCase):
         delivery methods when authentication systems fail.
         
         # This test will fail because event fallback is not implemented
-        self.logger.info(✅ Event delivery fallback not implemented (expected failure))"
-        self.logger.info(✅ Event delivery fallback not implemented (expected failure))""
+        self.logger.info(CHECK Event delivery fallback not implemented (expected failure))"
+        self.logger.info(CHECK Event delivery fallback not implemented (expected failure))""
 
         
         with self.assertRaises((NotImplementedError, AttributeError)) as cm:

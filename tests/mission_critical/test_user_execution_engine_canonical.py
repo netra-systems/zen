@@ -49,7 +49,7 @@ class UserExecutionEngineCanonicalTests(SSotBaseTestCase):
     def test_user_execution_engine_import_availability(self):
         Test UserExecutionEngine can be imported and instantiated."
         Test UserExecutionEngine can be imported and instantiated."
-        logger.info(✅ CANONICAL TEST: Validating UserExecutionEngine import availability")"
+        logger.info(CHECK CANONICAL TEST: Validating UserExecutionEngine import availability")"
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -62,7 +62,7 @@ class UserExecutionEngineCanonicalTests(SSotBaseTestCase):
             self.assertTrue(hasattr(UserExecutionEngine, 'cleanup'), UserExecutionEngine should have cleanup method)""
 
             
-            logger.info("✅ PASS: UserExecutionEngine successfully imported and has required methods)"
+            logger.info("CHECK PASS: UserExecutionEngine successfully imported and has required methods)"
             
         except ImportError as e:
             self.fail(fCANONICAL VIOLATION: Cannot import UserExecutionEngine - {e})
@@ -112,7 +112,7 @@ class UserExecutionEngineCanonicalTests(SSotBaseTestCase):
 
             )
             
-            logger.info(f✅ PASS: UserExecutionEngine implements all {len(required_methods)} required interface methods)
+            logger.info(fCHECK PASS: UserExecutionEngine implements all {len(required_methods)} required interface methods)
             
         except ImportError as e:
             self.fail(fCANONICAL VIOLATION: Cannot validate interface - {e})"
@@ -167,7 +167,7 @@ class UserExecutionEngineCanonicalTests(SSotBaseTestCase):
             result = asyncio.run(test_factory_creation())
             self.assertTrue(result, "Factory should successfully create UserExecutionEngine)"
             
-            logger.info(✅ PASS: ExecutionEngineFactory creates UserExecutionEngine instances)
+            logger.info(CHECK PASS: ExecutionEngineFactory creates UserExecutionEngine instances)
             
         except Exception as e:
             self.canonical_violations.append(fFactory creation test failed: {e})
@@ -272,7 +272,7 @@ class UserExecutionEngineCanonicalTests(SSotBaseTestCase):
             self.assertTrue(result, User isolation should work properly)""
 
             
-            logger.info("✅ PASS: UserExecutionEngine provides proper user isolation)"
+            logger.info("CHECK PASS: UserExecutionEngine provides proper user isolation)"
             
         except Exception as e:
             self.canonical_violations.append(fUser isolation test failed: {e})
@@ -334,7 +334,7 @@ class UserExecutionEngineCanonicalTests(SSotBaseTestCase):
             result = asyncio.run(test_websocket_integration())
             self.assertTrue(result, WebSocket integration should work")"
             
-            logger.info(✅ PASS: UserExecutionEngine WebSocket integration works)
+            logger.info(CHECK PASS: UserExecutionEngine WebSocket integration works)
             
         except Exception as e:
             self.integration_issues.append(fWebSocket integration failed: {e})"
@@ -399,8 +399,8 @@ class UserExecutionEngineCanonicalTests(SSotBaseTestCase):
             result = asyncio.run(test_resource_management())
             self.assertTrue(result, Resource management should work)
             
-            logger.info(✅ PASS: UserExecutionEngine resource management works)"
-            logger.info(✅ PASS: UserExecutionEngine resource management works)""
+            logger.info(CHECK PASS: UserExecutionEngine resource management works)"
+            logger.info(CHECK PASS: UserExecutionEngine resource management works)""
 
             
         except Exception as e:
@@ -442,7 +442,7 @@ class UserExecutionEngineCanonicalTests(SSotBaseTestCase):
             f"Found {canonical_summary['total_issues']} issues requiring resolution."
         )
         
-        logger.info(✅ SUCCESS: UserExecutionEngine is complete canonical SSOT implementation")"
+        logger.info(CHECK SUCCESS: UserExecutionEngine is complete canonical SSOT implementation")"
 
 
 if __name__ == '__main__':

@@ -82,7 +82,7 @@ class TestUserExecutionEngineConstructorDependencyInjection(unittest.TestCase):
 
         self.assertTrue(
             has_required_deps,
-            f"❌ CONSTRUCTOR VALIDATION FAILURE: UserExecutionEngine constructor does not require expected dependencies.\n"
+            f"X CONSTRUCTOR VALIDATION FAILURE: UserExecutionEngine constructor does not require expected dependencies.\n"
             f"Expected required parameters: {expected_required_params}\n"
             f"Actual required parameters: {actual_required_params}\n"
             f"Issue #1186 Phase 4 requires: UserExecutionEngine(context, agent_factory, websocket_emitter)\n"
@@ -113,7 +113,7 @@ class TestUserExecutionEngineConstructorDependencyInjection(unittest.TestCase):
         # This test should FAIL if parameterless instantiation is allowed
         self.assertFalse(
             parameterless_allowed,
-            f"❌ CONSTRUCTOR VALIDATION FAILURE: UserExecutionEngine allows parameterless instantiation.\n"
+            f"X CONSTRUCTOR VALIDATION FAILURE: UserExecutionEngine allows parameterless instantiation.\n"
             f"Issue #1186 Phase 4 requires constructor enhancement to prevent singleton violations.\n"
             f"Expected: UserExecutionEngine(context, agent_factory, websocket_emitter)\n"
             f"This should enforce proper dependency injection and user isolation."
@@ -158,19 +158,19 @@ class TestUserExecutionEngineConstructorDependencyInjection(unittest.TestCase):
             self.assertIsNot(
                 engine1,
                 engine2,
-                "❌ USER ISOLATION FAILURE: UserExecutionEngine instances should be completely separate."
+                "X USER ISOLATION FAILURE: UserExecutionEngine instances should be completely separate."
             )
 
             # Validate that instances don't share internal state
             self.assertNotEqual(
                 id(engine1),
                 id(engine2),
-                "❌ USER ISOLATION FAILURE: UserExecutionEngine instances have same memory address."
+                "X USER ISOLATION FAILURE: UserExecutionEngine instances have same memory address."
             )
 
         except Exception as e:
             self.fail(
-                f"❌ CONSTRUCTOR VALIDATION FAILURE: Could not create UserExecutionEngine with proper dependencies.\n"
+                f"X CONSTRUCTOR VALIDATION FAILURE: Could not create UserExecutionEngine with proper dependencies.\n"
                 f"Error: {e}\n"
                 f"Issue #1186 Phase 4 requires constructor to accept (context, agent_factory, websocket_emitter)."
             )
@@ -204,19 +204,19 @@ class TestUserExecutionEngineConstructorDependencyInjection(unittest.TestCase):
             # Validate factory integration
             self.assertIsNotNone(
                 engine,
-                "❌ FACTORY PATTERN FAILURE: Could not create UserExecutionEngine with factory dependencies."
+                "X FACTORY PATTERN FAILURE: Could not create UserExecutionEngine with factory dependencies."
             )
 
             # Test that the engine can be used (basic smoke test)
             # Note: This is a constructor test, so we're only validating instantiation
             self.assertTrue(
                 hasattr(engine, '__class__'),
-                "❌ FACTORY PATTERN FAILURE: UserExecutionEngine instance not properly created."
+                "X FACTORY PATTERN FAILURE: UserExecutionEngine instance not properly created."
             )
 
         except Exception as e:
             self.fail(
-                f"❌ FACTORY PATTERN FAILURE: UserExecutionEngine constructor failed with factory patterns.\n"
+                f"X FACTORY PATTERN FAILURE: UserExecutionEngine constructor failed with factory patterns.\n"
                 f"Error: {e}\n"
                 f"Issue #1186 Phase 4 requires proper integration with AgentInstanceFactory and WebSocketEmitter."
             )
@@ -257,7 +257,7 @@ class TestUserExecutionEngineConstructorDependencyInjection(unittest.TestCase):
         self.assertEqual(
             len(type_annotation_issues),
             0,
-            f"❌ TYPE ANNOTATION ISSUES: UserExecutionEngine constructor has type annotation issues.\n"
+            f"X TYPE ANNOTATION ISSUES: UserExecutionEngine constructor has type annotation issues.\n"
             f"Issues found:\n" + '\n'.join([f"  - {issue}" for issue in type_annotation_issues]) + "\n"
             f"Issue #1186 Phase 4 requires proper type hints for dependency injection."
         )
@@ -295,7 +295,7 @@ class TestConstructorDependencyInjectionMetrics(unittest.TestCase):
             self.assertEqual(
                 actual_value,
                 expected_value,
-                f"❌ EXPECTED COMPLIANCE FAILURE: {metric} = {actual_value}, expected {expected_value}. "
+                f"X EXPECTED COMPLIANCE FAILURE: {metric} = {actual_value}, expected {expected_value}. "
                 f"Issue #1186 Phase 4 requires constructor enhancement for dependency injection."
             )
 
@@ -312,7 +312,7 @@ class TestConstructorDependencyInjectionMetrics(unittest.TestCase):
         # This test validates singleton prevention
         self.assertTrue(
             singleton_prevention['prevents_singletons'],
-            f"❌ SINGLETON PREVENTION FAILURE: Constructor does not prevent singleton violations.\n"
+            f"X SINGLETON PREVENTION FAILURE: Constructor does not prevent singleton violations.\n"
             f"Issues found: {singleton_prevention['issues']}\n"
             f"Issue #1186 Phase 4 requires constructor to enforce user isolation and prevent singletons."
         )
@@ -411,7 +411,7 @@ class TestConstructorDependencyInjectionMetrics(unittest.TestCase):
 if __name__ == '__main__':
     print("🚨 Issue #1186 UserExecutionEngine Constructor Dependency Injection - Validation Tests")
     print("=" * 80)
-    print("✅ INFO: These tests validate the constructor enhancement from Issue #1186 Phase 4")
+    print("CHECK INFO: These tests validate the constructor enhancement from Issue #1186 Phase 4")
     print("🔧 Previous: UserExecutionEngine() (no arguments)")
     print("🔧 Current: UserExecutionEngine(context, agent_factory, websocket_emitter)")
     print("🎯 Goal: Enforce proper dependency injection and prevent singleton violations")

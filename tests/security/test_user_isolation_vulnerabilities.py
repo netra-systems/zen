@@ -599,7 +599,7 @@ class UserIsolationVulnerabilitiesTests(SSotAsyncTestCase):
 
         for issue in critical_security_issues:
             if metrics.get(issue, False):
-                print(f"  ⚠️  SECURITY VULNERABILITY CONFIRMED: {issue}")
+                print(f"  WARNING️  SECURITY VULNERABILITY CONFIRMED: {issue}")
 
         # Business impact assessment
         regulatory_violations = metrics.get("regulatory_violations_detected", [])

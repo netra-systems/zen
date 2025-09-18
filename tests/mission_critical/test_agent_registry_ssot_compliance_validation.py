@@ -9,7 +9,7 @@ These tests validate the FIXED state after SSOT consolidation.
 EXPECTED INITIAL RESULT: ALL TESTS FAIL (waiting for fixes)
 AFTER SSOT FIXES: ALL TESTS PASS (proving compliance achieved)
 
-Golden Path Restored: Users login → AI agents process requests → Users receive AI responses
+Golden Path Restored: Users login -> AI agents process requests -> Users receive AI responses
 
 Created: 2025-9-14 - SSOT Test Plan Step 2
 Priority: P0 Critical - Golden Path validation
@@ -369,7 +369,7 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
             compliance_score += 1
-            compliance_details.append(✓ SSOT AgentRegistry import successful")"
+            compliance_details.append(CHECK SSOT AgentRegistry import successful")"
             self.record_metric(ssot_import_check, PASS)
         except ImportError:
             compliance_details.append("✗ SSOT AgentRegistry import failed)"
@@ -383,8 +383,8 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
             
             if Registry1 is Registry2:
                 compliance_score += 1
-                compliance_details.append(✓ No duplicate AgentRegistry classes)"
-                compliance_details.append(✓ No duplicate AgentRegistry classes)"
+                compliance_details.append(CHECK No duplicate AgentRegistry classes)"
+                compliance_details.append(CHECK No duplicate AgentRegistry classes)"
                 self.record_metric("duplicate_class_check, PASS)"
             else:
                 compliance_details.append(✗ Duplicate AgentRegistry classes exist)
@@ -407,7 +407,7 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
             
             if has_essential:
                 compliance_score += 1
-                compliance_details.append("✓ Essential AgentRegistry interface methods present)"
+                compliance_details.append("CHECK Essential AgentRegistry interface methods present)"
                 self.record_metric(interface_consistency_check, PASS)
             else:
                 compliance_details.append(✗ Missing essential AgentRegistry interface methods")"
@@ -429,7 +429,7 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
             
             if has_websocket_support:
                 compliance_score += 1
-                compliance_details.append(✓ WebSocket integration present)
+                compliance_details.append(CHECK WebSocket integration present)
                 self.record_metric(websocket_integration_check, PASS")"
             else:
                 compliance_details.append("✗ Missing WebSocket integration)"

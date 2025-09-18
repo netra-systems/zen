@@ -79,10 +79,10 @@ class WebSocketSendAfterCloseStagingE2ETests(SSotAsyncTestCase):
                 try:
                     websocket = await websockets.connect(websocket_url, timeout=10, ping_interval=20, ping_timeout=10)
                     websocket_connections[user_id] = {'websocket': websocket, 'user': user, 'connected_at': time.time()}
-                    logger.info(f'✅ Connected {user_id} to staging WebSocket')
+                    logger.info(f'CHECK Connected {user_id} to staging WebSocket')
                 except Exception as e:
                     connection_errors.append(f'Failed to connect {user_id}: {e}')
-                    logger.error(f'❌ WebSocket connection failed for {user_id}: {e}')
+                    logger.error(f'X WebSocket connection failed for {user_id}: {e}')
             if not websocket_connections:
                 pytest.skip('No WebSocket connections established to staging')
             golden_path_messages = [{'type': 'start_agent_flow', 'agent': 'supervisor', 'request': 'Analyze business optimization opportunities', 'priority': 'high'}, {'type': 'request_data', 'data_type': 'business_metrics'}, {'type': 'analyze_optimization', 'scope': 'revenue_growth'}, {'type': 'generate_recommendations', 'count': 5}]
@@ -244,10 +244,10 @@ class WebSocketSendAfterCloseStagingE2ETests(SSotAsyncTestCase):
                 return None
             websocket_url = f"{self.staging_config['websocket_url']}?token={auth_token}"
             websocket = await websockets.connect(websocket_url, timeout=10, ping_interval=20, ping_timeout=10, additional_headers={'User-Agent': f'NetraApex-E2E-Test/{user_id}'})
-            logger.info(f'✅ Established staging connection for {user_id}')
+            logger.info(f'CHECK Established staging connection for {user_id}')
             return websocket
         except Exception as e:
-            logger.error(f"❌ Failed to establish staging connection for {user['user_id']}: {e}")
+            logger.error(f"X Failed to establish staging connection for {user['user_id']}: {e}")
             return None
 
     async def _send_message_to_staging_websocket(self, websocket, message):

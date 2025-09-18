@@ -271,7 +271,7 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
         self.validation_results = validations
         self.compliance_report = report
 
-        logger.info("✅ SSOT WebSocketNotifier validation passed)"
+        logger.info("CHECK SSOT WebSocketNotifier validation passed)"
 
     def test_websocket_notifier_critical_events_work(self):
         Test that critical WebSocket events work with canonical implementation.""
@@ -305,7 +305,7 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
 
                 )
 
-            logger.info("✅ WebSocketNotifier critical methods validated)"
+            logger.info("CHECK WebSocketNotifier critical methods validated)"
 
         except ImportError as e:
             pytest.fail(fFailed to import canonical WebSocketNotifier: {e})
@@ -336,7 +336,7 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
                     fWebSocketNotifier.__init__ must accept {param} parameter for user isolation
                 )
 
-            logger.info("✅ WebSocketNotifier user isolation integrity validated)"
+            logger.info("CHECK WebSocketNotifier user isolation integrity validated)"
 
         except Exception as e:
             pytest.fail(fWebSocketNotifier user isolation validation failed: {e})
@@ -363,7 +363,7 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
             assert WebSocketNotifier is not None, WebSocketNotifier import returned None""
 
 
-            logger.info(✅ WebSocketNotifier circular dependency validation passed)
+            logger.info(CHECK WebSocketNotifier circular dependency validation passed)
 
         except Exception as e:
             pytest.fail(fWebSocketNotifier circular dependency test failed: {e}")"
@@ -409,7 +409,7 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
             "Golden Path must be protected by SSOT compliance"
         )
 
-        logger.info(✅ SSOT compliance metrics validation passed)
+        logger.info(CHECK SSOT compliance metrics validation passed)
 
         return metrics
 

@@ -35,34 +35,34 @@ async def demo_golden_path_validation():
         test_env = env.get('PATH', 'default_value')
         emergency_mode = env.get('EMERGENCY_ALLOW_NO_DATABASE', 'false') == 'true'
 
-        print(f"  ✅ IsolatedEnvironment: Working correctly")
+        print(f"  CHECK IsolatedEnvironment: Working correctly")
         print(f"  📊 Emergency mode status: {emergency_mode}")
         print(f"  🔧 Environment access: Functional")
 
     except Exception as e:
-        print(f"  ❌ Environment Management: {e}")
+        print(f"  X Environment Management: {e}")
 
     # Test 2: WebSocket Components
     print("\n🔗 Test 2: WebSocket Components")
     try:
         from netra_backend.app.websocket_core.websocket_manager import _UnifiedWebSocketManagerImplementation
 
-        print(f"  ✅ WebSocket Manager: Import successful")
+        print(f"  CHECK WebSocket Manager: Import successful")
         print(f"  📡 WebSocket Events: Ready for validation")
 
     except Exception as e:
-        print(f"  ❌ WebSocket Components: {e}")
+        print(f"  X WebSocket Components: {e}")
 
     # Test 3: Agent System
     print("\n🤖 Test 3: Agent System")
     try:
         from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
 
-        print(f"  ✅ SupervisorAgent: Import successful")
+        print(f"  CHECK SupervisorAgent: Import successful")
         print(f"  🎯 Agent pipeline: Ready for testing")
 
     except Exception as e:
-        print(f"  ❌ Agent System: {e}")
+        print(f"  X Agent System: {e}")
 
     # Test 4: Test Framework
     print("\n🧪 Test 4: Test Framework")
@@ -70,11 +70,11 @@ async def demo_golden_path_validation():
         from test_framework.ssot.base_test_case import SSotAsyncTestCase
         from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 
-        print(f"  ✅ SSOT Test Framework: Available")
+        print(f"  CHECK SSOT Test Framework: Available")
         print(f"  🔧 WebSocket Test Utility: Ready")
 
     except Exception as e:
-        print(f"  ❌ Test Framework: {e}")
+        print(f"  X Test Framework: {e}")
 
     # Test 5: Validation Suite Structure
     print("\n📋 Test 5: Validation Suite Structure")
@@ -92,9 +92,9 @@ async def demo_golden_path_validation():
         file_path = os.path.join(base_path, test_file)
         if os.path.exists(file_path):
             file_size = os.path.getsize(file_path)
-            print(f"  ✅ {test_file}: {file_size:,} bytes")
+            print(f"  CHECK {test_file}: {file_size:,} bytes")
         else:
-            print(f"  ❌ {test_file}: Missing")
+            print(f"  X {test_file}: Missing")
 
     # Test 6: Business Value Simulation
     print("\n💼 Test 6: Business Value Simulation")
@@ -111,14 +111,14 @@ async def demo_golden_path_validation():
     print("\n" + "=" * 60)
     print("🎯 Golden Path Validation Demo Results")
     print("=" * 60)
-    print("✅ Environment Management: Working")
-    print("✅ WebSocket Components: Available")
-    print("✅ Agent System: Ready")
-    print("✅ Test Framework: Functional")
-    print("✅ Validation Suite: Complete")
-    print("✅ Business Value Testing: Ready")
-    print("✅ WebSocket Events Testing: Ready")
-    print("✅ Emergency Mode Testing: Ready")
+    print("CHECK Environment Management: Working")
+    print("CHECK WebSocket Components: Available")
+    print("CHECK Agent System: Ready")
+    print("CHECK Test Framework: Functional")
+    print("CHECK Validation Suite: Complete")
+    print("CHECK Business Value Testing: Ready")
+    print("CHECK WebSocket Events Testing: Ready")
+    print("CHECK Emergency Mode Testing: Ready")
     print("\n🚀 Status: READY FOR COMPREHENSIVE VALIDATION")
     print("💰 Business Impact: $500K+ ARR PROTECTED")
     print("=" * 60)
@@ -145,9 +145,9 @@ async def simulate_business_value_test():
     print(f"  🎯 Average Business Value: {avg_score:.1%}")
 
     if avg_score >= 0.8:
-        print("  ✅ Business value meets 90% platform value requirement")
+        print("  CHECK Business value meets 90% platform value requirement")
     else:
-        print("  ⚠️ Business value needs improvement")
+        print("  WARNING️ Business value needs improvement")
 
 
 async def simulate_websocket_events_test():
@@ -165,7 +165,7 @@ async def simulate_websocket_events_test():
     # Simulate event delivery testing
     for i, event in enumerate(critical_events):
         await asyncio.sleep(0.1)  # Simulate processing time
-        print(f"    ✅ Event {i+1}/5: {event} - Delivery validated")
+        print(f"    CHECK Event {i+1}/5: {event} - Delivery validated")
 
     print("  🎯 All 5 critical events: Ready for validation")
 
@@ -185,7 +185,7 @@ async def simulate_emergency_mode_test():
         await asyncio.sleep(0.1)  # Simulate testing time
         print(f"    📊 {scenario}: {score:.1%} functionality retained")
 
-    print("  ✅ Emergency mode: Compatible with golden path")
+    print("  CHECK Emergency mode: Compatible with golden path")
 
 
 def main():

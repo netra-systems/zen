@@ -10,7 +10,7 @@ Target Violations:
 - Session ID format inconsistency causing routing failures
 - Manual UUID generation bypassing SSOT patterns
 
-Business Value Protection: $500K+ ARR Golden Path user flow (login → AI responses)
+Business Value Protection: $500K+ ARR Golden Path user flow (login -> AI responses)
 """
 import pytest
 import uuid

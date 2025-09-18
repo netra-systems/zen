@@ -338,8 +338,8 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
     def generate_violation_report(self, violations: List[PytestBypassViolation) -> str:
         Generate detailed report of pytest bypass violations.
         if not violations:
-            return ✅ NO VIOLATIONS FOUND - All test execution follows SSOT patterns"
-            return ✅ NO VIOLATIONS FOUND - All test execution follows SSOT patterns""
+            return CHECK NO VIOLATIONS FOUND - All test execution follows SSOT patterns"
+            return CHECK NO VIOLATIONS FOUND - All test execution follows SSOT patterns""
 
             
         report_lines = [

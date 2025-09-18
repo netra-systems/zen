@@ -104,15 +104,15 @@ class UserExecutionEngineSecurityFixes565Tests(unittest.TestCase):
             assert engine2.user_context.user_id == "user2_secure", \
                 "SECURITY FAIL: Engine 2 should only see user2 data"
             
-            print("✅ SECURITY VALIDATION PASSED:")
-            print("   ✅ Engines are isolated instances")
-            print("   ✅ User contexts are properly separated")
-            print("   ✅ No data contamination detected")
+            print("CHECK SECURITY VALIDATION PASSED:")
+            print("   CHECK Engines are isolated instances")
+            print("   CHECK User contexts are properly separated")
+            print("   CHECK No data contamination detected")
             
             return True
             
         except Exception as e:
-            print(f"❌ Security validation failed: {e}")
+            print(f"X Security validation failed: {e}")
             self.fail(f"User data isolation validation failed: {e}")
 
     def test_02_websocket_event_isolation_validation(self):
@@ -154,15 +154,15 @@ class UserExecutionEngineSecurityFixes565Tests(unittest.TestCase):
             assert engine1.user_context.user_id != engine2.user_context.user_id, \
                 "SECURITY FAIL: WebSocket bridges should be isolated per user"
             
-            print("✅ SECURITY VALIDATION PASSED:")
-            print("   ✅ WebSocket bridges are isolated per user")
-            print("   ✅ No cross-delivery risk detected")
-            print("   ✅ Event isolation properly implemented")
+            print("CHECK SECURITY VALIDATION PASSED:")
+            print("   CHECK WebSocket bridges are isolated per user")
+            print("   CHECK No cross-delivery risk detected")
+            print("   CHECK Event isolation properly implemented")
             
             return True
             
         except Exception as e:
-            print(f"❌ WebSocket isolation validation failed: {e}")
+            print(f"X WebSocket isolation validation failed: {e}")
             self.fail(f"WebSocket event isolation validation failed: {e}")
 
     def test_03_memory_isolation_validation(self):
@@ -203,15 +203,15 @@ class UserExecutionEngineSecurityFixes565Tests(unittest.TestCase):
             assert engine1.user_context.user_id != engine2.user_context.user_id, \
                 "SECURITY FAIL: User IDs should be isolated"
             
-            print("✅ SECURITY VALIDATION PASSED:")
-            print("   ✅ Memory is properly isolated between users")
-            print("   ✅ User contexts have different memory addresses")
-            print("   ✅ No memory leak risk detected")
+            print("CHECK SECURITY VALIDATION PASSED:")
+            print("   CHECK Memory is properly isolated between users")
+            print("   CHECK User contexts have different memory addresses")
+            print("   CHECK No memory leak risk detected")
             
             return True
             
         except Exception as e:
-            print(f"❌ Memory isolation validation failed: {e}")
+            print(f"X Memory isolation validation failed: {e}")
             self.fail(f"Memory isolation validation failed: {e}")
 
     def test_04_factory_isolation_validation(self):
@@ -252,15 +252,15 @@ class UserExecutionEngineSecurityFixes565Tests(unittest.TestCase):
                         assert engine1.user_context.user_id != engine2.user_context.user_id, \
                             f"SECURITY FAIL: Engines {i} and {j} should have different user IDs"
             
-            print("✅ SECURITY VALIDATION PASSED:")
-            print("   ✅ Factory creates unique instances per user")
-            print("   ✅ No instance sharing detected")
-            print("   ✅ Proper isolation implemented")
+            print("CHECK SECURITY VALIDATION PASSED:")
+            print("   CHECK Factory creates unique instances per user")
+            print("   CHECK No instance sharing detected")
+            print("   CHECK Proper isolation implemented")
             
             return True
             
         except Exception as e:
-            print(f"❌ Factory isolation validation failed: {e}")
+            print(f"X Factory isolation validation failed: {e}")
             self.fail(f"Factory isolation validation failed: {e}")
 
     def test_05_comprehensive_security_validation(self):
@@ -287,23 +287,23 @@ class UserExecutionEngineSecurityFixes565Tests(unittest.TestCase):
             try:
                 validation_test()
                 passed_validations += 1
-                print(f"✅ {validation_name}: PASSED")
+                print(f"CHECK {validation_name}: PASSED")
             except Exception as e:
-                print(f"❌ {validation_name}: FAILED - {e}")
+                print(f"X {validation_name}: FAILED - {e}")
         
         print("\n" + "="*84)
         if passed_validations == total_validations:
             print("🛡️ ALL SECURITY VALIDATIONS PASSED")
             print("="*84)
-            print("✅ UserExecutionEngine SSOT properly isolates users")
-            print("✅ No data contamination or cross-access detected")
-            print("✅ Issue #565 security vulnerabilities ELIMINATED")
-            print(f"✅ Security validation rate: {passed_validations}/{total_validations} (100%)")
+            print("CHECK UserExecutionEngine SSOT properly isolates users")
+            print("CHECK No data contamination or cross-access detected")
+            print("CHECK Issue #565 security vulnerabilities ELIMINATED")
+            print(f"CHECK Security validation rate: {passed_validations}/{total_validations} (100%)")
         else:
             print("🚨 SECURITY VALIDATION FAILURES DETECTED")
             print("="*84)
-            print(f"❌ Security validation rate: {passed_validations}/{total_validations}")
-            print("❌ Additional security work required")
+            print(f"X Security validation rate: {passed_validations}/{total_validations}")
+            print("X Additional security work required")
             
         print("\nRECOMMENDATION: UserExecutionEngine SSOT migration is working correctly")
         print("="*84)

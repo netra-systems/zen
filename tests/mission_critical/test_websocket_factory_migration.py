@@ -21,7 +21,7 @@ VALIDATION STRATEGY:
 3. POST-MIGRATION: Tests validate successful remediation and functionality
 
 BUSINESS IMPACT:
-    These tests protect the Golden Path (users login → get AI responses) during
+    These tests protect the Golden Path (users login -> get AI responses) during
 the migration process, ensuring zero business downtime.
 
 

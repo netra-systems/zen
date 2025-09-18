@@ -2,7 +2,7 @@
 Cross-System Integration Tests: Agent-WebSocket Coordination
 
 Business Value Justification (BVJ):
-- Segment: All customer tiers (Free → Enterprise)
+- Segment: All customer tiers (Free -> Enterprise)
 - Business Goal: Retention/Stability - Real-time agent feedback drives 90% of platform value
 - Value Impact: Ensures reliable agent-to-user communication for substantive AI interactions
 - Revenue Impact: $500K+ ARR dependency on WebSocket event delivery for chat functionality

@@ -121,7 +121,7 @@ class WebSocketEventDeliveryFragmentationFailuresTests(SSotAsyncTestCase):
             
             # Test Manager1 event delivery completeness
             if len(manager1_delivered_events) != expected_event_count:
-                logger.error(f"❌ EVENT DELIVERY FAILURE: Manager1 delivered {len(manager1_delivered_events)}/{expected_event_count} events")
+                logger.error(f"X EVENT DELIVERY FAILURE: Manager1 delivered {len(manager1_delivered_events)}/{expected_event_count} events")
                 missing_events = [e['event'] for e in critical_events if e['event'] not in [d['event'] for d in manager1_delivered_events]]
                 logger.error(f"Missing events from Manager1: {missing_events}")
                 
@@ -135,7 +135,7 @@ class WebSocketEventDeliveryFragmentationFailuresTests(SSotAsyncTestCase):
             
             # Test Manager2 event delivery completeness
             if len(manager2_delivered_events) != expected_event_count:
-                logger.error(f"❌ EVENT DELIVERY FAILURE: Manager2 delivered {len(manager2_delivered_events)}/{expected_event_count} events")
+                logger.error(f"X EVENT DELIVERY FAILURE: Manager2 delivered {len(manager2_delivered_events)}/{expected_event_count} events")
                 missing_events = [e['event'] for e in critical_events if e['event'] not in [d['event'] for d in manager2_delivered_events]]
                 logger.error(f"Missing events from Manager2: {missing_events}")
                 
@@ -149,10 +149,10 @@ class WebSocketEventDeliveryFragmentationFailuresTests(SSotAsyncTestCase):
             # Test event delivery consistency between managers
             await self._validate_event_delivery_consistency(manager1_delivered_events, manager2_delivered_events)
             
-            logger.info("✅ Event delivery consistency test PASSED - all managers delivered events reliably")
+            logger.info("CHECK Event delivery consistency test PASSED - all managers delivered events reliably")
             
         except Exception as e:
-            logger.error(f"❌ EVENT DELIVERY FRAGMENTATION TEST FAILED: {e}")
+            logger.error(f"X EVENT DELIVERY FRAGMENTATION TEST FAILED: {e}")
             raise
     
     async def _create_mock_websocket_connection(self):
@@ -236,9 +236,9 @@ class WebSocketEventDeliveryFragmentationFailuresTests(SSotAsyncTestCase):
                     'timestamp': time.time(),
                     'manager_type': type(manager).__name__
                 })
-                logger.debug(f"✅ Event {event_name} delivered successfully via {type(manager).__name__}")
+                logger.debug(f"CHECK Event {event_name} delivered successfully via {type(manager).__name__}")
             else:
-                logger.error(f"❌ Event {event_name} NOT delivered via {type(manager).__name__}")
+                logger.error(f"X Event {event_name} NOT delivered via {type(manager).__name__}")
                 
         except Exception as e:
             logger.error(f"Failed to send event {event_name} via {type(manager)}: {e}")
@@ -253,7 +253,7 @@ class WebSocketEventDeliveryFragmentationFailuresTests(SSotAsyncTestCase):
         manager2_event_names = {e['event'] for e in manager2_events}
         
         if manager1_event_names != manager2_event_names:
-            logger.error("❌ EVENT CONSISTENCY FAILURE: Managers delivered different event sets")
+            logger.error("X EVENT CONSISTENCY FAILURE: Managers delivered different event sets")
             manager1_only = manager1_event_names - manager2_event_names
             manager2_only = manager2_event_names - manager1_event_names
             
@@ -278,11 +278,11 @@ class WebSocketEventDeliveryFragmentationFailuresTests(SSotAsyncTestCase):
                 # Allow for reasonable timing differences (up to 1 second)
                 if time_diff > 1.0:
                     logger.warning(
-                        f"⚠️ TIMING INCONSISTENCY: Event {event_name} timing differs by {time_diff:.2f}s "
+                        f"WARNING️ TIMING INCONSISTENCY: Event {event_name} timing differs by {time_diff:.2f}s "
                         f"between managers. This may indicate delivery path differences."
                     )
         
-        logger.info("✅ Event delivery consistency validated between managers")
+        logger.info("CHECK Event delivery consistency validated between managers")
     
     async def test_event_deduplication_with_fragmented_managers(self):
         """
@@ -333,7 +333,7 @@ class WebSocketEventDeliveryFragmentationFailuresTests(SSotAsyncTestCase):
             
             # CRITICAL DEDUPLICATION TEST: Should receive event only once despite two managers
             if len(agent_thinking_events) > 1:
-                logger.error("❌ EVENT DUPLICATION DETECTED: Same event delivered multiple times!")
+                logger.error("X EVENT DUPLICATION DETECTED: Same event delivered multiple times!")
                 for i, event in enumerate(agent_thinking_events):
                     logger.error(f"Duplicate #{i+1}: {event}")
                 
@@ -344,17 +344,17 @@ class WebSocketEventDeliveryFragmentationFailuresTests(SSotAsyncTestCase):
                     f"and potential confusion in $500K+ ARR chat interactions."
                 )
             elif len(agent_thinking_events) == 0:
-                logger.error("❌ EVENT DELIVERY FAILURE: No events received despite sending through both managers!")
+                logger.error("X EVENT DELIVERY FAILURE: No events received despite sending through both managers!")
                 pytest.fail(
                     f"EVENT DELIVERY FAILURE: No events delivered despite sending through two managers. "
                     f"SSOT Violation: Fragmented managers failed to deliver events. "
                     f"Business Impact: Users miss critical chat updates, breaking Golden Path experience."
                 )
             
-            logger.info("✅ Event deduplication working properly - no duplicate events detected")
+            logger.info("CHECK Event deduplication working properly - no duplicate events detected")
             
         except Exception as e:
-            logger.error(f"❌ EVENT DEDUPLICATION TEST FAILED: {e}")
+            logger.error(f"X EVENT DEDUPLICATION TEST FAILED: {e}")
             raise
     
     async def test_event_ordering_consistency_across_managers(self):
@@ -420,7 +420,7 @@ class WebSocketEventDeliveryFragmentationFailuresTests(SSotAsyncTestCase):
             expected_sequence = list(range(1, len(ordered_events) + 1))
             
             if sequences != expected_sequence:
-                logger.error("❌ EVENT ORDERING FAILURE: Events received out of order!")
+                logger.error("X EVENT ORDERING FAILURE: Events received out of order!")
                 logger.error(f"Expected sequence: {expected_sequence}")
                 logger.error(f"Received sequence: {sequences}")
                 
@@ -432,10 +432,10 @@ class WebSocketEventDeliveryFragmentationFailuresTests(SSotAsyncTestCase):
                     f"confusing users and degrading $500K+ ARR chat experience quality."
                 )
             
-            logger.info("✅ Event ordering maintained consistently across managers")
+            logger.info("CHECK Event ordering maintained consistently across managers")
             
         except Exception as e:
-            logger.error(f"❌ EVENT ORDERING TEST FAILED: {e}")
+            logger.error(f"X EVENT ORDERING TEST FAILED: {e}")
             raise
 
     def teardown_method(self, method):

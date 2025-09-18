@@ -380,7 +380,7 @@ class ExecutionEngineConsolidationIntegrationTests(SSotAsyncTestCase):
         for pattern, result in compatibility_results.items():
             if result.get('import_success'):
                 methods_count = len(result.get('methods', []))
-                print(f"  {pattern}: Import ✓, Instantiation {'✓' if result.get('instantiation_success') else '✗'}, Methods: {methods_count}")
+                print(f"  {pattern}: Import CHECK, Instantiation {'CHECK' if result.get('instantiation_success') else '✗'}, Methods: {methods_count}")
             else:
                 print(f"  {pattern}: Import ✗ - {result.get('error')}")
 

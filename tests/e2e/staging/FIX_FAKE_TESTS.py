@@ -33,7 +33,7 @@ class FakeTestDetector:
         (r'print\(["\'].*\[INFO\].*validated', 'Print validation without testing'),
         
         # Missing network calls
-        (r'async def test_.*\(self\):\s*\n\s*""".*"""\s*\n\s*[^a]', 'Async test with no await'),
+        (r'async def test_.*\\\1self\\\1:\\\1*\n\\\1*""".*"""\\\1*\n\\\1*[^a]', 'Async test with no await'),
     ]
     
     REAL_PATTERNS = [

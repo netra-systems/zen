@@ -575,7 +575,7 @@ class DemoWebSocketComprehensiveTests(SSotAsyncTestCase):
         # 4. No authentication was required (Free segment access)
         # This is validated by the fact that the function runs without auth checks
         
-        print("✅ Demo WebSocket business value validation passed:")
+        print("CHECK Demo WebSocket business value validation passed:")
         print(f"   - All {len(required_events)} events emitted for real-time UX")
         print(f"   - Business indicators found: {found_indicators}")
         print(f"   - Response length: {len(response_text)} characters")

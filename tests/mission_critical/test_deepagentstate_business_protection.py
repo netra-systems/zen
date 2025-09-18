@@ -314,10 +314,10 @@ SINGLE SOURCE OF TRUTH VIOLATIONS DETECTED:
 {violation_report}
 
 DEPLOYMENT REQUIREMENTS:
-  ✅ Single DeepAgentState definition (SSOT)
-  ❌ No duplicate class definitions
-  ✅ All production files use SSOT imports
-  ❌ Deprecated imports removed
+  CHECK Single DeepAgentState definition (SSOT)
+  X No duplicate class definitions
+  CHECK All production files use SSOT imports
+  X Deprecated imports removed
 
 BUSINESS IMPACT:
   - SSOT violations cause system instability

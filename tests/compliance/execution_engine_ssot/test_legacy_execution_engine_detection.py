@@ -53,7 +53,7 @@ class LegacyExecutionEngineDetectionTests(SSotBaseTestCase):
         print(f"   Expected Violations: {len(self.expected_legacy_engines)}")
 
         if legacy_engines_found:
-            print(f"\n❌ LEGACY ENGINES DETECTED (VIOLATIONS):")
+            print(f"\nX LEGACY ENGINES DETECTED (VIOLATIONS):")
             for engine in sorted(legacy_engines_found):
                 print(f"   - {engine}")
 
@@ -61,7 +61,7 @@ class LegacyExecutionEngineDetectionTests(SSotBaseTestCase):
         self.assertGreater(
             len(legacy_engines_found),
             0,
-            f"❌ SSOT VIOLATION: Found {len(legacy_engines_found)} legacy execution engines. "
+            f"X SSOT VIOLATION: Found {len(legacy_engines_found)} legacy execution engines. "
             f"Only {self.ssot_execution_engine} should exist."
         )
 
@@ -70,7 +70,7 @@ class LegacyExecutionEngineDetectionTests(SSotBaseTestCase):
         self.assertGreater(
             len(expected_found),
             5,  # Should find at least 5 expected violations
-            f"❌ Expected to detect at least 5 violations, but only found {len(expected_found)}: {expected_found}"
+            f"X Expected to detect at least 5 violations, but only found {len(expected_found)}: {expected_found}"
         )
 
     def test_execution_engine_file_count_validation_fails(self):
@@ -90,7 +90,7 @@ class LegacyExecutionEngineDetectionTests(SSotBaseTestCase):
         self.assertGreater(
             len(engine_files),
             1,  # Should find more than just UserExecutionEngine
-            f"❌ SSOT VIOLATION: Found {len(engine_files)} execution engine files. "
+            f"X SSOT VIOLATION: Found {len(engine_files)} execution engine files. "
             "Only user_execution_engine.py should contain implementations."
         )
 
@@ -108,16 +108,16 @@ class LegacyExecutionEngineDetectionTests(SSotBaseTestCase):
                 print(f"   {rel_path}:")
                 for class_name in classes:
                     if class_name != self.ssot_execution_engine:
-                        print(f"   ❌ {class_name} (VIOLATION)")
+                        print(f"   X {class_name} (VIOLATION)")
                         violation_count += 1
                     else:
-                        print(f"   ✅ {class_name} (SSOT)")
+                        print(f"   CHECK {class_name} (SSOT)")
 
         # TEST SHOULD FAIL NOW - Multiple class definitions found
         self.assertGreater(
             violation_count,
             0,
-            f"❌ SSOT VIOLATION: Found {violation_count} non-SSOT execution engine classes. "
+            f"X SSOT VIOLATION: Found {violation_count} non-SSOT execution engine classes. "
             f"Only {self.ssot_execution_engine} should be implemented."
         )
 
@@ -131,13 +131,13 @@ class LegacyExecutionEngineDetectionTests(SSotBaseTestCase):
         if inheritance_violations:
             print("   Inheritance Violations:")
             for violation in inheritance_violations:
-                print(f"   ❌ {violation}")
+                print(f"   X {violation}")
 
         # TEST SHOULD FAIL NOW - Inheritance violations found
         self.assertGreater(
             len(inheritance_violations),
             0,
-            f"❌ SSOT VIOLATION: Found {len(inheritance_violations)} inheritance violations. "
+            f"X SSOT VIOLATION: Found {len(inheritance_violations)} inheritance violations. "
             "All engines should inherit from UserExecutionEngine SSOT pattern."
         )
 

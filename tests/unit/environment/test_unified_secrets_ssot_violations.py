@@ -148,7 +148,7 @@ class UnifiedSecretsSSOTViolationsTests(BaseUnitTest):
                 
         except Exception as e:
             # Document any exceptions as part of violation analysis
-            print(f"⚠️  Exception during set_secret violation test: {str(e)}")
+            print(f"WARNING️  Exception during set_secret violation test: {str(e)}")
             raise
         finally:
             env.disable_isolation()

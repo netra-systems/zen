@@ -382,8 +382,8 @@ class MultipleBaseTestCaseConsolidationTests(SSotBaseTestCase):
     def generate_violation_report(self, violations: List[BaseTestCaseViolation) -> str:
         "Generate detailed report of BaseTestCase inheritance violations."
         if not violations:
-            return ✅ NO VIOLATIONS FOUND - All test classes use SSOT BaseTestCase patterns"
-            return ✅ NO VIOLATIONS FOUND - All test classes use SSOT BaseTestCase patterns""
+            return CHECK NO VIOLATIONS FOUND - All test classes use SSOT BaseTestCase patterns"
+            return CHECK NO VIOLATIONS FOUND - All test classes use SSOT BaseTestCase patterns""
 
             
         report_lines = [

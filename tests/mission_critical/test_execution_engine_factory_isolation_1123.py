@@ -76,7 +76,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
             factory = await get_execution_engine_factory()
             
         except Exception as e:
-            logger.error(f❌ FACTORY IMPORT FAILED: {e}")"
+            logger.error(fX FACTORY IMPORT FAILED: {e}")"
             self.fail(fCannot import canonical ExecutionEngineFactory: {e})
         
         # Create engines for multiple users
@@ -115,10 +115,10 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
                     engine_ids.add(engine.engine_id)
                     user_ids.add(engine.get_user_context().user_id)
                     
-                    logger.info(f✅ Created engine {engine.engine_id} for user {context.user_id}")"
+                    logger.info(fCHECK Created engine {engine.engine_id} for user {context.user_id}")"
             
         except Exception as e:
-            logger.error(f❌ ENGINE CREATION FAILED: {e})
+            logger.error(fX ENGINE CREATION FAILED: {e})
             self.isolation_violations.append(fEngine creation failed: {e})"
             self.isolation_violations.append(fEngine creation failed: {e})""
 
@@ -139,14 +139,14 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
         if unique_engine_ids != expected_engines:
             violation = fEngine ID collision: Expected {expected_engines} unique IDs, got {unique_engine_ids}
             self.isolation_violations.append(violation)
-            logger.error(f"❌ ISOLATION VIOLATION: {violation})"
+            logger.error(f"X ISOLATION VIOLATION: {violation})"
         
         if unique_user_ids != expected_engines:
             violation = fUser context collision: Expected {expected_engines} unique users, got {unique_user_ids}"
             violation = fUser context collision: Expected {expected_engines} unique users, got {unique_user_ids}""
 
             self.isolation_violations.append(violation)
-            logger.error(f❌ ISOLATION VIOLATION: {violation})
+            logger.error(fX ISOLATION VIOLATION: {violation})
         
         # Check for shared references (potential isolation breach)
         for i, engine1 in enumerate(engines):
@@ -156,7 +156,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
                     violation = fShared engine reference: engines {i} and {j} are the same object""
 
                     self.isolation_violations.append(violation)
-                    logger.error(f"❌ ISOLATION VIOLATION: {violation})"
+                    logger.error(f"X ISOLATION VIOLATION: {violation})"
         
         # EXPECTED TO FAIL if isolation is compromised
         self.assertEqual(
@@ -243,7 +243,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
             execution_results = await asyncio.gather(*tasks, return_exceptions=True)
             
         except Exception as e:
-            logger.error(f❌ CONCURRENT EXECUTION FAILED: {e})
+            logger.error(fX CONCURRENT EXECUTION FAILED: {e})
             concurrent_failures.append({'error': fConcurrent execution failed: {e))
         
         # Analyze execution results for isolation violations
@@ -271,14 +271,14 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
             if user_data in user_data_seen:
                 violation = f"User data collision: {user_data} seen multiple times"
                 self.isolation_violations.append(violation)
-                logger.error(f❌ ISOLATION VIOLATION: {violation})
+                logger.error(fX ISOLATION VIOLATION: {violation})
             user_data_seen.add(user_data)
             
             # Check for engine ID collision
             if engine_id in engine_ids_seen:
                 violation = fEngine ID collision: {engine_id} used multiple times
                 self.isolation_violations.append(violation)
-                logger.error(f❌ ISOLATION VIOLATION: {violation}")"
+                logger.error(fX ISOLATION VIOLATION: {violation}")"
             engine_ids_seen.add(engine_id)
         
         self.concurrent_execution_failures = concurrent_failures
@@ -308,7 +308,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
             factory = await get_execution_engine_factory()
             
         except Exception as e:
-            logger.error(f❌ FACTORY IMPORT FAILED: {e})
+            logger.error(fX FACTORY IMPORT FAILED: {e})
             self.fail(fCannot import canonical ExecutionEngineFactory: {e}")"
         
         # Test memory bounds for multiple users
@@ -349,7 +349,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
                                f"(limit: {user_memory_limit / 1024 / 1024:."1f"}MB))"
             
             except Exception as e:
-                logger.error(f❌ MEMORY TEST FAILED for user {context.user_id}: {e}")"
+                logger.error(fX MEMORY TEST FAILED for user {context.user_id}: {e}")"
                 self.memory_violations.append(fMemory test failed for {context.user_id}: {e})
         
         # Analyze memory usage patterns
@@ -370,14 +370,14 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
         if users_exceeding_limits:
             violation = fMemory limit violations: {len(users_exceeding_limits)} users exceeded limits""
             self.memory_violations.append(violation)
-            logger.error(f❌ MEMORY VIOLATION: {violation})
+            logger.error(fX MEMORY VIOLATION: {violation})
         
         # Check for unbounded global growth (should scale linearly, not exponentially)
         expected_max_global = len(user_memory_usage) * 10 * 1024 * 1024  # Max per user * user count
         if total_global_memory > expected_max_global:
             violation = fUnbounded global memory growth: {total_global_memory / 1024 / 1024:."1f"}MB exceeds expected {expected_max_global / 1024 / 1024:."1f"}MB
             self.memory_violations.append(violation)
-            logger.error(f"❌ MEMORY VIOLATION: {violation})"
+            logger.error(f"X MEMORY VIOLATION: {violation})"
         
         # EXPECTED TO FAIL if memory bounds are not properly enforced
         self.assertEqual(
@@ -435,7 +435,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
             [fConcurrent: {f} for f in self.concurrent_execution_failures]
         
         for i, violation in enumerate(all_violations[:10], 1):
-            logger.info(f    {i:"2d"}. ❌ {violation})
+            logger.info(f    {i:"2d"}. X {violation})
         
         if len(all_violations) > 10:
             logger.info(f"    ... and {len(all_violations) - 10} more isolation violations)"

@@ -169,7 +169,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         self.assertIn(multi-user state contamination, error_message)"
         self.assertIn("create_agent_instance_factory(user_context), error_message)"
         
-        logger.info(✅ PASS: Deprecated singleton factory correctly raises security error)
+        logger.info(CHECK PASS: Deprecated singleton factory correctly raises security error)
 
     async def test_ssot_factory_provides_user_isolation(self):
     """"
@@ -219,7 +219,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         self.assertFalse(agent1.has_cross_user_contamination(user1))
         self.assertFalse(agent2.has_cross_user_contamination(user2"))"
         
-        logger.info(✅ PASS: SSOT factory provides proper user isolation)
+        logger.info(CHECK PASS: SSOT factory provides proper user isolation)
 
     async def test_concurrent_user_execution_isolation(self):
         """
@@ -297,7 +297,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         
         self.assertFalse(contamination_detected, "No cross-user contamination should be detected)"
         
-        logger.info(✅ PASS: Concurrent user executions remain properly isolated)
+        logger.info(CHECK PASS: Concurrent user executions remain properly isolated)
 
     async def test_factory_memory_isolation(self):
     """"
@@ -351,7 +351,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         self.assertEqual(metrics1['total_instances_created'], 1)
         self.assertEqual(metrics2['total_instances_created'], 1)
         
-        logger.info(✅ PASS: Factory instances have proper memory isolation)
+        logger.info(CHECK PASS: Factory instances have proper memory isolation)
 
     async def test_user_context_binding_validation(self):
     """"
@@ -386,7 +386,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         error_message = str(context.exception)
         self.assertIn("UserExecutionContext is required, error_message)"
         
-        logger.info(✅ PASS: User context binding is properly validated)
+        logger.info(CHECK PASS: User context binding is properly validated)
 
     async def test_resource_cleanup_isolation(self):
     """"
@@ -435,8 +435,8 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         # Verify user2's contamination marker unchanged'
         self.assertFalse(agent2.has_cross_user_contamination('cleanup_user2'))
         
-        logger.info(✅ PASS: Resource cleanup maintains proper isolation)"
-        logger.info(✅ PASS: Resource cleanup maintains proper isolation)""
+        logger.info(CHECK PASS: Resource cleanup maintains proper isolation)"
+        logger.info(CHECK PASS: Resource cleanup maintains proper isolation)""
 
 
     async def test_golden_path_contamination_prevention(self):
@@ -503,8 +503,8 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
         self.assertFalse(alice_result['agent_instance'].has_cross_user_contamination('golden_alice'))
         self.assertFalse(bob_result['agent_instance'].has_cross_user_contamination('golden_bob'))
         
-        logger.info(✅ PASS: Golden Path maintains perfect user isolation)"
-        logger.info(✅ PASS: Golden Path maintains perfect user isolation)""
+        logger.info(CHECK PASS: Golden Path maintains perfect user isolation)"
+        logger.info(CHECK PASS: Golden Path maintains perfect user isolation)""
 
 
     async def test_performance_isolation_under_load(self):
@@ -576,7 +576,7 @@ class TestGoldenPathPhase2UserIsolationViolations(SSotAsyncTestCase):
                 logger.error(f  - {error})
             self.fail(f"Contamination detected under load: {len(contamination_errors)} errors)"
         
-        logger.info(f✅ PASS: Isolation maintained under load ({concurrent_users} users, {executions_per_user} executions each)")"
+        logger.info(fCHECK PASS: Isolation maintained under load ({concurrent_users} users, {executions_per_user} executions each)")"
 
 
 if __name__ == '__main__':

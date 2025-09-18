@@ -4,7 +4,7 @@ Redis GCP Staging Validation Test Suite - End-to-End
 BUSINESS VALUE JUSTIFICATION:
 - Segment: Platform/Production
 - Business Goal: Production Chat Reliability (90% of platform value)
-- Value Impact: Validates complete golden path: users login → get AI responses
+- Value Impact: Validates complete golden path: users login -> get AI responses
 - Strategic Impact: Protects $500K+ ARR by ensuring staging matches production behavior
 
 This test suite validates the complete Redis integration in GCP staging environment:
@@ -144,7 +144,7 @@ class TestRedisGCPStagingValidation(SSotAsyncTestCase):
     
     async def test_complete_chat_workflow_with_staging_redis(self):
         """Test complete chat workflow using staging Redis backend."""
-        # Simulate complete golden path: user login → agent execution → AI response
+        # Simulate complete golden path: user login -> agent execution -> AI response
         
         # 1. User session setup
         user_id = f"staging_user_{uuid.uuid4().hex[:8]}"

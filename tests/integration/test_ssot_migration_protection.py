@@ -185,7 +185,7 @@ class SSotMigrationProtectionTests(SSotAsyncTestCase):
         mock_agent = self.mock_factory.create_agent_mock()
         mock_websocket = self.mock_factory.create_websocket_mock()
 
-        # Simulate critical business flow: user → websocket → agent → results
+        # Simulate critical business flow: user -> websocket -> agent -> results
         mock_user.id = 1
         mock_user.subscription = 'enterprise'
 

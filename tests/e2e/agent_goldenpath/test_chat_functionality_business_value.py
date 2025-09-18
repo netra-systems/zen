@@ -82,14 +82,14 @@ class ChatFunctionalityBusinessValueTests(SSotAsyncTestCase):
         self.logger.info(f'  User experience score: {user_experience_score * 100:.1f}%')
         self.logger.info(f"  Protected revenue tiers: {revenue_protected['protected_tiers']}")
         for result in business_value_results:
-            status = '✅' if result['success'] else '❌'
+            status = 'CHECK' if result['success'] else 'X'
             tier = result['business_tier']
             response_time = result.get('response_time_seconds', 0)
             self.logger.info(f"  {status} {result['scenario_name']} ({tier}): {response_time:.2f}s response time")
         min_revenue_protection = 0.85
         min_user_experience = 0.8
         if overall_success and revenue_protected['score'] >= min_revenue_protection and (user_experience_score >= min_user_experience):
-            self.logger.info(f'✅ GOLDEN PATH PROTECTED: Chat functionality business value maintained')
+            self.logger.info(f'CHECK GOLDEN PATH PROTECTED: Chat functionality business value maintained')
             self.logger.info(f"   Revenue Protection: {revenue_protected['score'] * 100:.1f}%")
             self.logger.info(f'   User Experience: {user_experience_score * 100:.1f}%')
         else:
@@ -341,10 +341,10 @@ class ChatFunctionalityBusinessValueTests(SSotAsyncTestCase):
                 journey_success = False
         self.logger.info('Golden Path user journey protection analysis:')
         for result in journey_results:
-            status = '✅' if result['success'] else '❌'
+            status = 'CHECK' if result['success'] else 'X'
             self.logger.info(f"  {status} {result['step']}: {result['business_impact']}")
         if journey_success:
-            self.logger.info('✅ GOLDEN PATH PROTECTED: Complete user journey functionality maintained')
+            self.logger.info('CHECK GOLDEN PATH PROTECTED: Complete user journey functionality maintained')
         else:
             failed_steps = [r['step'] for r in journey_results if not r['success']]
             self.fail(f'GOLDEN PATH VIOLATION: User journey protection compromised at steps: {failed_steps}. This indicates MessageRouter SSOT changes are breaking the complete customer experience, directly threatening business value delivery and revenue generation.')

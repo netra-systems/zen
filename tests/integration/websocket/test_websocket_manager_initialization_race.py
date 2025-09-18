@@ -109,8 +109,8 @@ class WebSocketManagerInitializationRaceTests(SSotAsyncTestCase):
             f"ISSUE #1104: WebSocket Manager race conditions detected in concurrent initialization!\n\n" +
             f"RACE CONDITION ANALYSIS:\n" +
             f"📊 Total concurrent tests: {race_detection_results['total_concurrent_tests']}\n" +
-            f"✅ Successful initializations: {race_detection_results['successful_initializations']}\n" +
-            f"❌ Failed initializations: {race_detection_results['failed_initializations']}\n" +
+            f"CHECK Successful initializations: {race_detection_results['successful_initializations']}\n" +
+            f"X Failed initializations: {race_detection_results['failed_initializations']}\n" +
             f"🏁 Race conditions detected: {race_detection_results['race_conditions_detected']}\n" +
             f"⏱️ Timing inconsistencies: {race_detection_results['timing_inconsistencies']}\n" +
             f"🔄 Manager instance conflicts: {race_detection_results['manager_instance_conflicts']}\n" +
@@ -213,14 +213,14 @@ class WebSocketManagerInitializationRaceTests(SSotAsyncTestCase):
             f"🔒 Isolation violations: {isolation_test_results['isolation_violations']}\n" +
             f"💧 Context leakage detected: {isolation_test_results['context_leakage_detected']}\n" +
             f"⚔️ Concurrent user conflicts: {isolation_test_results['concurrent_user_conflicts']}\n" +
-            f"❌ Factory errors: {len(isolation_test_results['factory_initialization_errors'])}\n\n" +
+            f"X Factory errors: {len(isolation_test_results['factory_initialization_errors'])}\n\n" +
             f"ISOLATION FAILURES:\n" +
             "\n".join([f"  - {error}" for error in isolation_test_results['factory_initialization_errors'][:3]]) +
             f"\n\nISOLATION REQUIREMENTS:\n" +
-            f"✅ Each user context must have isolated WebSocket manager\n" +
-            f"✅ No shared state between concurrent users\n" +
-            f"✅ Factory pattern must prevent context leakage\n" +
-            f"❌ Multiple import paths break isolation guarantees\n\n" +
+            f"CHECK Each user context must have isolated WebSocket manager\n" +
+            f"CHECK No shared state between concurrent users\n" +
+            f"CHECK Factory pattern must prevent context leakage\n" +
+            f"X Multiple import paths break isolation guarantees\n\n" +
             f"ISOLATION RISKS:\n" +
             f"- User data crossover in WebSocket events\n" +
             f"- Security violations through shared contexts\n" +
@@ -298,20 +298,20 @@ class WebSocketManagerInitializationRaceTests(SSotAsyncTestCase):
             f"SINGLETON BEHAVIOR ANALYSIS:\n" +
             f"📥 Import attempts: {singleton_test_results['import_attempts']}\n" +
             f"🏷️ Unique manager instances: {unique_instances_count}\n" +
-            f"❌ Singleton violations: {singleton_test_results['singleton_violations']}\n" +
+            f"X Singleton violations: {singleton_test_results['singleton_violations']}\n" +
             f"🔄 Import inconsistencies: {singleton_test_results['import_inconsistencies']}\n" +
             f"⚔️ Manager type conflicts: {singleton_test_results['manager_type_conflicts']}\n\n" +
             f"IMPORT SCENARIO RESULTS:\n" +
             "\n".join([
-                f"  {s['name']}: {'✅ SUCCESS' if s['import_success'] else '❌ FAILED'}"
+                f"  {s['name']}: {'CHECK SUCCESS' if s['import_success'] else 'X FAILED'}"
                 + (f" (Type: {s.get('manager_type', 'Unknown')})" if s['import_success'] else f" ({s.get('import_error', 'Unknown error')})")
                 for s in import_scenarios
             ]) +
             f"\n\nSINGLETON REQUIREMENTS:\n" +
-            f"✅ Single WebSocket manager instance across all imports\n" +
-            f"✅ Consistent manager type regardless of import path\n" +
-            f"✅ No duplicate initialization\n" +
-            f"❌ Multiple import paths create separate instances\n\n" +
+            f"CHECK Single WebSocket manager instance across all imports\n" +
+            f"CHECK Consistent manager type regardless of import path\n" +
+            f"CHECK No duplicate initialization\n" +
+            f"X Multiple import paths create separate instances\n\n" +
             f"SINGLETON VIOLATION RISKS:\n" +
             f"- Multiple WebSocket managers competing for resources\n" +
             f"- Inconsistent event delivery behavior\n" +
@@ -578,10 +578,10 @@ class WebSocketManagerInitializationRaceTests(SSotAsyncTestCase):
                 for user_id, data in user_event_tracking.items()
             ]) +
             f"\n\nEVENT CONSISTENCY REQUIREMENTS:\n" +
-            f"✅ 100% event delivery rate expected\n" +
-            f"✅ No event duplication allowed\n" +
-            f"✅ No events lost due to race conditions\n" +
-            f"❌ Multiple WebSocket managers cause delivery failures\n\n" +
+            f"CHECK 100% event delivery rate expected\n" +
+            f"CHECK No event duplication allowed\n" +
+            f"CHECK No events lost due to race conditions\n" +
+            f"X Multiple WebSocket managers cause delivery failures\n\n" +
             f"RACE CONDITION IMPACTS:\n" +
             f"- Users don't see agent progress updates\n" +
             f"- WebSocket events delivered to wrong users\n" +

@@ -82,7 +82,7 @@ class EnvironmentViolationDetectionTests(SSotBaseTestCase):
         self.record_metric("compliant_files_found", len(compliant_files))
 
         # Log compliant patterns found
-        print(f"\n✅ Found {len(compliant_files)} files using SSOT environment patterns:")
+        print(f"\nCHECK Found {len(compliant_files)} files using SSOT environment patterns:")
         for i, file_info in enumerate(compliant_files[:5]):  # Show first 5
             print(f"  {i+1}. {file_info['file']} - Uses: {', '.join(file_info['patterns'])}")
 

@@ -142,13 +142,13 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 await engine1.cleanup()
                 await engine2.cleanup()
                 
-                logger.info(✅ PASS: User state isolation working correctly")"
+                logger.info(CHECK PASS: User state isolation working correctly")"
                 return True
                 
             except Exception as e:
                 self.isolation_violations.append(fState isolation test failed: {e})
-                logger.error(f❌ FAIL: User state isolation broken - {e})"
-                logger.error(f❌ FAIL: User state isolation broken - {e})""
+                logger.error(fX FAIL: User state isolation broken - {e})"
+                logger.error(fX FAIL: User state isolation broken - {e})""
 
                 return False
         
@@ -283,7 +283,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
             self.assertEqual(total_operations, user_count * operations_per_user, All operations should complete)""
 
             
-            logger.info(f✅ PASS: Concurrent operations completed - {successful_users} users, {total_operations} operations")"
+            logger.info(fCHECK PASS: Concurrent operations completed - {successful_users} users, {total_operations} operations")"
             return True
         
         result = asyncio.run(test_concurrency())
@@ -382,12 +382,12 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 await engine1.cleanup()
                 await engine2.cleanup()
                 
-                logger.info(f✅ PASS: WebSocket event routing isolated - User1: {len(user1_events)} events, User2: {len(user2_events)} events")"
+                logger.info(fCHECK PASS: WebSocket event routing isolated - User1: {len(user1_events)} events, User2: {len(user2_events)} events")"
                 return True
                 
             except Exception as e:
                 self.isolation_violations.append(fWebSocket isolation test failed: {e})
-                logger.error(f❌ FAIL: WebSocket event routing isolation broken - {e})
+                logger.error(fX FAIL: WebSocket event routing isolation broken - {e})
                 return False
         
         result = asyncio.run(test_websocket_isolation())
@@ -470,13 +470,13 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 await engine1.cleanup()
                 await engine2.cleanup()
                 
-                logger.info(✅ PASS: Resource limits isolation working correctly")"
+                logger.info(CHECK PASS: Resource limits isolation working correctly")"
                 return True
                 
             except Exception as e:
                 self.resource_leaks.append(fResource isolation test failed: {e})
-                logger.error(f❌ FAIL: Resource limits isolation broken - {e})"
-                logger.error(f❌ FAIL: Resource limits isolation broken - {e})""
+                logger.error(fX FAIL: Resource limits isolation broken - {e})"
+                logger.error(fX FAIL: Resource limits isolation broken - {e})""
 
                 return False
         
@@ -555,12 +555,12 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 # Verify that each engine's cleanup didn't affect others (while they were active)
                 # This tests that cleanup is properly isolated
                 
-                logger.info("✅ PASS: Memory isolation and cleanup working correctly)"
+                logger.info("CHECK PASS: Memory isolation and cleanup working correctly)"
                 return True
                 
             except Exception as e:
                 self.resource_leaks.append(fMemory isolation test failed: {e})
-                logger.error(f"❌ FAIL: Memory isolation and cleanup broken - {e})"
+                logger.error(f"X FAIL: Memory isolation and cleanup broken - {e})"
                 return False
         
         result = asyncio.run(test_memory_isolation())
@@ -603,7 +603,7 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
             f"Found {isolation_summary['total_issues']} issues: {all_issues}"
         )
         
-        logger.info(✅ SUCCESS: UserExecutionEngine isolation working correctly")"
+        logger.info(CHECK SUCCESS: UserExecutionEngine isolation working correctly")"
 
 
 if __name__ == '__main__':

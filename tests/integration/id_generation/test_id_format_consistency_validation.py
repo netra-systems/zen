@@ -57,9 +57,9 @@ class IdFormatConsistencyValidationTests(SSotBaseTestCase):
         session_id_strings = [sid for sid, _, _ in generated_session_ids]
         unique_session_ids = set(session_id_strings)
         assert len(unique_session_ids) == len(session_id_strings), f'SESSION UNIQUENESS FAILURE: Generated {len(unique_session_ids)}/{len(session_id_strings)} unique IDs'
-        print(f'\n✅ SESSION ID FORMAT CONSISTENCY SUCCESS:')
+        print(f'\nCHECK SESSION ID FORMAT CONSISTENCY SUCCESS:')
         for session_id, user_id, request_id in generated_session_ids:
-            print(f'   ✓ {user_id} -> {session_id}')
+            print(f'   CHECK {user_id} -> {session_id}')
         print(f'   Status: All session IDs follow consistent SSOT format')
 
     def test_connection_id_format_consistency_post_migration(self):
@@ -94,9 +94,9 @@ class IdFormatConsistencyValidationTests(SSotBaseTestCase):
         connection_id_strings = [cid for cid, _, _ in generated_connection_ids]
         unique_connection_ids = set(connection_id_strings)
         assert len(unique_connection_ids) == len(connection_id_strings), f'CONNECTION UNIQUENESS FAILURE: Generated {len(unique_connection_ids)}/{len(connection_id_strings)} unique IDs'
-        print(f'\n✅ CONNECTION ID FORMAT CONSISTENCY SUCCESS:')
+        print(f'\nCHECK CONNECTION ID FORMAT CONSISTENCY SUCCESS:')
         for connection_id, user_id, session_id in generated_connection_ids:
-            print(f'   ✓ {user_id} -> {connection_id}')
+            print(f'   CHECK {user_id} -> {connection_id}')
         print(f'   Status: All connection IDs follow consistent SSOT format')
 
     def test_client_id_format_consistency_post_migration(self):
@@ -132,9 +132,9 @@ class IdFormatConsistencyValidationTests(SSotBaseTestCase):
         client_id_strings = [cid for cid, _, _, _ in generated_client_ids]
         unique_client_ids = set(client_id_strings)
         assert len(unique_client_ids) == len(client_id_strings), f'CLIENT UNIQUENESS FAILURE: Generated {len(unique_client_ids)}/{len(client_id_strings)} unique IDs'
-        print(f'\n✅ CLIENT ID FORMAT CONSISTENCY SUCCESS:')
+        print(f'\nCHECK CLIENT ID FORMAT CONSISTENCY SUCCESS:')
         for client_id, service, user_id, request_id in generated_client_ids:
-            print(f'   ✓ {service}:{user_id} -> {client_id}')
+            print(f'   CHECK {service}:{user_id} -> {client_id}')
         print(f'   Status: All client IDs follow consistent SSOT format')
 
     def test_audit_id_format_consistency_post_migration(self):
@@ -170,9 +170,9 @@ class IdFormatConsistencyValidationTests(SSotBaseTestCase):
         audit_id_strings = [aid for aid, _, _, _ in generated_audit_ids]
         unique_audit_ids = set(audit_id_strings)
         assert len(unique_audit_ids) == len(audit_id_strings), f'AUDIT UNIQUENESS FAILURE: Generated {len(unique_audit_ids)}/{len(audit_id_strings)} unique IDs'
-        print(f'\n✅ AUDIT ID FORMAT CONSISTENCY SUCCESS:')
+        print(f'\nCHECK AUDIT ID FORMAT CONSISTENCY SUCCESS:')
         for audit_id, record_type, user_id, resource_id in generated_audit_ids:
-            print(f'   ✓ {record_type}:{user_id} -> {audit_id}')
+            print(f'   CHECK {record_type}:{user_id} -> {audit_id}')
         print(f'   Status: All audit IDs follow consistent SSOT format')
 
     def test_cross_format_compatibility_validation(self):
@@ -233,12 +233,12 @@ class IdFormatConsistencyValidationTests(SSotBaseTestCase):
             random_components[id_type] = random_comp
             assert len(random_comp) == 8, f"RANDOM COMPONENT INCOMPATIBILITY: {id_type} random component '{random_comp}' not 8 chars"
             assert re.match('^[a-f0-9]{8}$', random_comp), f"RANDOM COMPONENT FORMAT: {id_type} component '{random_comp}' not valid hex"
-        print(f'\n✅ CROSS-FORMAT COMPATIBILITY SUCCESS:')
-        print(f'   ✓ All ID types have consistent prefix patterns')
-        print(f'   ✓ All timestamps within {timestamp_range}s range')
-        print(f'   ✓ All random components are 8-char hex format')
+        print(f'\nCHECK CROSS-FORMAT COMPATIBILITY SUCCESS:')
+        print(f'   CHECK All ID types have consistent prefix patterns')
+        print(f'   CHECK All timestamps within {timestamp_range}s range')
+        print(f'   CHECK All random components are 8-char hex format')
         for id_type, id_string in all_ids.items():
-            print(f'   ✓ {id_type:15} -> {id_string}')
+            print(f'   CHECK {id_type:15} -> {id_string}')
         print(f'   Status: Cross-format compatibility validated for correlation queries')
 
     def test_format_migration_regression_prevention(self):
@@ -279,12 +279,12 @@ class IdFormatConsistencyValidationTests(SSotBaseTestCase):
             component_counts[prefix].add(count)
         for prefix, counts in component_counts.items():
             assert len(counts) == 1, f'COMPONENT COUNT REGRESSION: {prefix} has inconsistent component counts: {counts}'
-        print(f'\n✅ FORMAT MIGRATION REGRESSION PREVENTION SUCCESS:')
-        print(f'   ✓ All {len(all_ids_flat)} generated IDs match stable patterns')
-        print(f'   ✓ No ID collisions across {len(stability_test_cases)} test cases')
-        print(f'   ✓ Consistent component counts for each ID type')
+        print(f'\nCHECK FORMAT MIGRATION REGRESSION PREVENTION SUCCESS:')
+        print(f'   CHECK All {len(all_ids_flat)} generated IDs match stable patterns')
+        print(f'   CHECK No ID collisions across {len(stability_test_cases)} test cases')
+        print(f'   CHECK Consistent component counts for each ID type')
         for prefix, counts in component_counts.items():
-            print(f'   ✓ {prefix}: {list(counts)[0]} components consistently')
+            print(f'   CHECK {prefix}: {list(counts)[0]} components consistently')
         print(f'   Status: Migration maintains format stability and prevents regressions')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

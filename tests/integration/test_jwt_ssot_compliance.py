@@ -13,7 +13,7 @@ BUSINESS VALUE: Enterprise/Platform - System Integration & Security Architecture
 - Validates multi-user JWT isolation via auth service
 - Tests WebSocket auth integration with auth service
 
-EXPECTED STATUS: FAIL (before SSOT refactor) → PASS (after SSOT refactor)
+EXPECTED STATUS: FAIL (before SSOT refactor) -> PASS (after SSOT refactor)
 
 These tests validate SSOT compliance through integration scenarios:
 1. End-to-end JWT validation through auth service
@@ -103,7 +103,7 @@ class JwtSsotComplianceIntegrationTests(SSotAsyncTestCase):
                     )
                     
                     assert result.id == "test_user_123"
-                    logger.info("✓ JWT validation properly delegated to auth service")
+                    logger.info("CHECK JWT validation properly delegated to auth service")
                     
                 except Exception as e:
                     # If this fails, backend might have local JWT validation bypassing auth service
@@ -127,7 +127,7 @@ class JwtSsotComplianceIntegrationTests(SSotAsyncTestCase):
             # Should fail properly without local JWT fallback
             assert exc_info.value.status_code == 401
             assert mock_validate.called
-            logger.info("✓ Invalid JWT properly rejected via auth service")
+            logger.info("CHECK Invalid JWT properly rejected via auth service")
 
     @pytest.mark.asyncio 
     async def test_websocket_auth_integration_delegates_to_auth_service(self):
@@ -169,7 +169,7 @@ class JwtSsotComplianceIntegrationTests(SSotAsyncTestCase):
                 )
                 
                 assert result is not None
-                logger.info("✓ WebSocket auth properly delegated to auth service")
+                logger.info("CHECK WebSocket auth properly delegated to auth service")
                 
             except Exception as e:
                 # Check if this is due to local validation fallback
@@ -268,7 +268,7 @@ class JwtSsotComplianceIntegrationTests(SSotAsyncTestCase):
                         "Backend may be caching/sharing JWT state improperly."
                     )
                     
-                    logger.info("✓ Multi-user JWT isolation properly maintained via auth service")
+                    logger.info("CHECK Multi-user JWT isolation properly maintained via auth service")
                     
                 except Exception as e:
                     pytest.fail(
@@ -309,7 +309,7 @@ class JwtSsotComplianceIntegrationTests(SSotAsyncTestCase):
             )
             
             # Should not succeed (which would indicate local fallback)
-            logger.info("✓ Auth service error properly propagated without local fallback")
+            logger.info("CHECK Auth service error properly propagated without local fallback")
         
         # Test auth service returns error response  
         with patch.object(AuthServiceClient, 'validate_token') as mock_validate:
@@ -325,7 +325,7 @@ class JwtSsotComplianceIntegrationTests(SSotAsyncTestCase):
             )
             
             assert mock_validate.called
-            logger.info("✓ Auth service error response properly propagated")
+            logger.info("CHECK Auth service error response properly propagated")
 
     @pytest.mark.asyncio
     async def test_no_backend_jwt_secrets_in_integration_flow(self):
@@ -400,7 +400,7 @@ class JwtSsotComplianceIntegrationTests(SSotAsyncTestCase):
                                     "SSOT VIOLATION: jwt.encode called during backend integration - should delegate to auth service"
                                 )
                                 
-                                logger.info("✓ Backend integration flow uses no JWT secrets or operations")
+                                logger.info("CHECK Backend integration flow uses no JWT secrets or operations")
                                 
                             except Exception as e:
                                 if "JWT decode should not be called" in str(e) or "JWT encode should not be called" in str(e):

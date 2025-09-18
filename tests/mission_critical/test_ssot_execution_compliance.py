@@ -140,7 +140,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
                 f1. Import: from test_framework.ssot.base_test_case import SSotBaseTestCase\n"
                 f1. Import: from test_framework.ssot.base_test_case import SSotBaseTestCase\n""
 
-                f2. Change: class MyTest(unittest.TestCase) → class MyTest(SSotBaseTestCase)\n
+                f2. Change: class MyTest(unittest.TestCase) -> class MyTest(SSotBaseTestCase)\n
                 f3. Update setUp/tearDown to setup_method/teardown_method patterns\n\n"
                 f3. Update setUp/tearDown to setup_method/teardown_method patterns\n\n"
                 f"BUSINESS IMPACT: Non-SSOT test patterns create infrastructure debt and instability"

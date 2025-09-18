@@ -113,10 +113,10 @@ class Issue1186SSotComplianceArchitectureValidationTests(unittest.TestCase):
 
         for component_name, result in consistency_results.items():
             if result['consistent']:
-                symbol = "✓"
+                symbol = "CHECK"
                 status = "CONSISTENT"
             elif result['class_available']:
-                symbol = "⚠️"
+                symbol = "WARNING️"
                 status = "PATH_MISMATCH"
             else:
                 symbol = "✗"
@@ -132,7 +132,7 @@ class Issue1186SSotComplianceArchitectureValidationTests(unittest.TestCase):
         self.assertGreaterEqual(consistency_ratio, self.ssot_compliance_thresholds['import_consistency'],
                               f"SSOT consistency {consistency_ratio:.2%} below threshold {self.ssot_compliance_thresholds['import_consistency']:.2%}")
 
-        print("✅ SSOT import pattern consistency validation passed")
+        print("CHECK SSOT import pattern consistency validation passed")
 
     def test_architectural_violation_prevention_validation(self):
         """Test prevention of architectural violations in consolidated patterns.
@@ -230,13 +230,13 @@ class Issue1186SSotComplianceArchitectureValidationTests(unittest.TestCase):
 
         for result in violation_results:
             if result['status'] == 'COMPLIANT':
-                symbol = "✓"
+                symbol = "CHECK"
             elif result['status'] == 'VIOLATION':
                 symbol = "✗"
             elif result['status'] == 'ERROR':
-                symbol = "❌"
+                symbol = "X"
             else:
-                symbol = "⚠️"
+                symbol = "WARNING️"
 
             severity_symbol = "🔴" if result['severity'] == 'HIGH' else "🟡" if result['severity'] == 'MEDIUM' else "🟢"
 
@@ -250,7 +250,7 @@ class Issue1186SSotComplianceArchitectureValidationTests(unittest.TestCase):
         self.assertEqual(high_severity_violations, 0,
                         f"High-severity architectural violations detected: {high_severity_violations}")
 
-        print("✅ Architectural violation prevention validation passed")
+        print("CHECK Architectural violation prevention validation passed")
 
     def test_consolidated_vs_fragmented_pattern_verification(self):
         """Test consolidated patterns vs fragmented patterns verification.
@@ -346,7 +346,7 @@ class Issue1186SSotComplianceArchitectureValidationTests(unittest.TestCase):
         # Report pattern verification results
         print(f"🔄 Consolidated Pattern Availability: {available_consolidated}/{total_consolidated}")
         for component, analysis in consolidated_analysis.items():
-            symbol = "✓" if analysis['available'] else "✗"
+            symbol = "CHECK" if analysis['available'] else "✗"
             print(f"  {symbol} {component}: {'AVAILABLE' if analysis['available'] else 'MISSING'}")
             print(f"      Path: {analysis['import_path']}")
             print(f"      Import time: {analysis['import_time']:.3f}s")
@@ -354,9 +354,9 @@ class Issue1186SSotComplianceArchitectureValidationTests(unittest.TestCase):
         print(f"🗑️  Deprecated Pattern Cleanup: {properly_deprecated}/{total_deprecated}")
         for path, analysis in deprecated_analysis.items():
             if analysis['status'] in ['PROPERLY_REMOVED', 'PROPERLY_BLOCKED']:
-                symbol = "✓"
+                symbol = "CHECK"
             else:
-                symbol = "⚠️"
+                symbol = "WARNING️"
             print(f"  {symbol} {path}: {analysis['status']}")
             if analysis['available']:
                 print(f"      Import time: {analysis['import_time']:.3f}s")
@@ -369,7 +369,7 @@ class Issue1186SSotComplianceArchitectureValidationTests(unittest.TestCase):
         self.assertGreater(consolidation_ratio, 0.5,
                           f"Consolidation ratio {consolidation_ratio:.2%} below 50% threshold")
 
-        print("✅ Consolidated vs fragmented pattern verification passed")
+        print("CHECK Consolidated vs fragmented pattern verification passed")
 
     def test_ssot_compliance_comprehensive_validation(self):
         """Test comprehensive SSOT compliance across all architectural aspects.
@@ -427,7 +427,7 @@ class Issue1186SSotComplianceArchitectureValidationTests(unittest.TestCase):
         print(f"   Compliant checks: {compliant_checks}/{len(compliance_checks)}")
 
         for check in compliance_checks:
-            symbol = "✓" if check['compliant'] else "✗"
+            symbol = "CHECK" if check['compliant'] else "✗"
             print(f"  {symbol} {check['check']}: {check['score']:.2%} (threshold: {check['threshold']:.2%})")
 
         # Validate overall compliance
@@ -437,7 +437,7 @@ class Issue1186SSotComplianceArchitectureValidationTests(unittest.TestCase):
         self.assertGreaterEqual(compliant_checks, len(compliance_checks) // 2,
                               f"Only {compliant_checks}/{len(compliance_checks)} compliance checks passed")
 
-        print("✅ SSOT compliance comprehensive validation passed")
+        print("CHECK SSOT compliance comprehensive validation passed")
 
     def _check_circular_dependencies(self) -> Dict[str, Any]:
         """Check for circular dependencies in import patterns."""

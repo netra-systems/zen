@@ -3,21 +3,21 @@
 JWT Golden Path Protection Tests
 
 PURPOSE: These tests FAIL when JWT changes break the $"500K" plus ARR Golden Path
-user flow (Login → JWT → Chat). Tests will PASS after SSOT refactor.
+user flow (Login -> JWT -> Chat). Tests will PASS after SSOT refactor.
 
 MISSION CRITICAL: Protects $"500K" plus ARR Golden Path by ensuring JWT integration
 maintains end-to-end user authentication and chat functionality.
 
 BUSINESS VALUE: Enterprise/Platform - Revenue Protection & Customer Experience
-- Ensures login → chat flow works end-to-end with JWT
+- Ensures login -> chat flow works end-to-end with JWT
 - Protects WebSocket authentication with JWT tokens
 - Validates multi-user JWT isolation in chat scenarios
 - Tests complete Golden Path user journey with JWT
 
-EXPECTED STATUS: FAIL (before SSOT refactor) → PASS (after SSOT refactor)
+EXPECTED STATUS: FAIL (before SSOT refactor) -> PASS (after SSOT refactor)
 
 These tests protect Golden Path business value by:
-    1. End-to-end JWT authentication flow (Login → Chat)
+    1. End-to-end JWT authentication flow (Login -> Chat)
 2. WebSocket JWT authentication for real-time chat
 3. Multi-user JWT isolation in chat scenarios
 4. Golden Path error handling with JWT failures
@@ -55,7 +55,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
     After SSOT refactor, all tests should PASS.
     
     CRITICAL: These tests protect $"500K" plus ARR by ensuring JWT authentication
-    works end-to-end in the Golden Path (Login → Chat → AI Response).
+    works end-to-end in the Golden Path (Login -> Chat -> AI Response).
 "
 ""
 
@@ -79,10 +79,10 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
         AFTER SSOT: PASS - Clean JWT delegation enables Golden Path
         
         This test validates the complete Golden Path user journey:
-        1. User login → JWT token
-        2. JWT token → Backend authentication
-        3. Backend auth → WebSocket connection
-        4. WebSocket → Chat functionality
+        1. User login -> JWT token
+        2. JWT token -> Backend authentication
+        3. Backend auth -> WebSocket connection
+        4. WebSocket -> Chat functionality
 ""
         golden_path_violations = []
         
@@ -105,8 +105,8 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                             data = await resp.json()
                             jwt_token = data.get(access_token)
                             login_success = True
-                            logger.info(✓ Golden Path: Login successful via auth service)"
-                            logger.info(✓ Golden Path: Login successful via auth service)""
+                            logger.info(CHECK Golden Path: Login successful via auth service)"
+                            logger.info(CHECK Golden Path: Login successful via auth service)""
 
                         
             except Exception as e:
@@ -119,7 +119,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                     email=golden_path_test@example.com","
                     permissions=[read, write, chat]"
                     permissions=[read, write, chat]"
-                logger.info(✓ Golden Path: Fallback test JWT created")"
+                logger.info(CHECK Golden Path: Fallback test JWT created")"
             
             # STEP 2: Backend Authentication with JWT (Critical for Golden Path)
             backend_auth_success = False
@@ -136,7 +136,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                     if response.status_code == 200:
                         user_data = response.json()
                         backend_auth_success = True
-                        logger.info(✓ Golden Path: Backend authentication successful")"
+                        logger.info(CHECK Golden Path: Backend authentication successful")"
                     else:
                         golden_path_violations.append(
                             fBackend JWT authentication failed: {response.status_code} - {response.text}
@@ -170,7 +170,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                     )
                     
                     websocket_success = True
-                    logger.info("✓ Golden Path: WebSocket connection successful)"
+                    logger.info("CHECK Golden Path: WebSocket connection successful)"
                     
                     # STEP 4: Chat Functionality Test (Golden Path Business Value)
                     try:
@@ -190,7 +190,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                         # Validate chat response structure
                         if type in response_data and content in response_data:
                             chat_ready = True
-                            logger.info("✓ Golden Path: Chat functionality working)"
+                            logger.info("CHECK Golden Path: Chat functionality working)"
                         else:
                             golden_path_violations.append(Chat response missing required fields)
                         
@@ -233,7 +233,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                     fViolations:\n{violation_summary}
                 )
             else:
-                logger.info(✓ GOLDEN PATH SUCCESS: Complete JWT flow working end-to-end")"
+                logger.info(CHECK GOLDEN PATH SUCCESS: Complete JWT flow working end-to-end")"
                 
         except Exception as e:
             pytest.fail(
@@ -404,7 +404,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                     f"Violations:\n{violation_summary}"
                 )
             else:
-                logger.info(✓ JWT ISOLATION SUCCESS: Multi-user Golden Path working correctly")"
+                logger.info(CHECK JWT ISOLATION SUCCESS: Multi-user Golden Path working correctly")"
                 
         except Exception as e:
             pytest.fail(
@@ -537,7 +537,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                         websockets.InvalidStatusCode,
                         asyncio.TimeoutError):
                     # Expected rejections - this is correct behavior
-                    logger.info(f✓ {scenario_name}: WebSocket correctly rejected invalid JWT)
+                    logger.info(fCHECK {scenario_name}: WebSocket correctly rejected invalid JWT)
                     
                 except Exception as e:
                     # Unexpected errors indicate poor error handling
@@ -564,7 +564,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                 faffecting $"500K" plus ARR customer experience. Violations:\n{violation_summary}""
             )
         else:
-            logger.info(✓ JWT ERROR HANDLING SUCCESS: Graceful error handling preserves Golden Path)
+            logger.info(CHECK JWT ERROR HANDLING SUCCESS: Graceful error handling preserves Golden Path)
 
     @pytest.mark.asyncio
     async def test_jwt_performance_golden_path_impact(self):
@@ -747,7 +747,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                 fViolations:\n{violation_summary}
             )
         else:
-            logger.info(✓ JWT PERFORMANCE SUCCESS: Fast JWT operations maintain Golden Path speed")"
+            logger.info(CHECK JWT PERFORMANCE SUCCESS: Fast JWT operations maintain Golden Path speed")"
 
     def _create_expired_jwt_token(self) -> str:
         Create an expired JWT token for testing error handling."

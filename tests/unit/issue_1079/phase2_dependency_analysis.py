@@ -40,7 +40,7 @@ class DependencyAnalysisTest(unittest.TestCase):
         print(f"Checking path: {expected_path}")
 
         if expected_path.exists():
-            print(f"✓ File exists at: {expected_path}")
+            print(f"CHECK File exists at: {expected_path}")
 
             # Analyze the file's imports
             try:
@@ -101,7 +101,7 @@ class DependencyAnalysisTest(unittest.TestCase):
 
                     # Check for Agent class specifically
                     if 'Agent' in classes:
-                        print(f"  ✓ Agent class found in {file_path}")
+                        print(f"  CHECK Agent class found in {file_path}")
                     else:
                         print(f"  ✗ Agent class NOT found in {file_path}")
 
@@ -198,7 +198,7 @@ class DependencyAnalysisTest(unittest.TestCase):
 
                 total_time = time.time() - start_time
 
-                print(f"  ✓ Import successful:")
+                print(f"  CHECK Import successful:")
                 print(f"    Total time: {total_time:.3f}s")
                 print(f"    Exec time: {load_time:.3f}s")
 
@@ -210,7 +210,7 @@ class DependencyAnalysisTest(unittest.TestCase):
 
                 # Check for timeout risk
                 if total_time > 5.0:
-                    print(f"  ⚠️  SLOW IMPORT: {total_time:.3f}s (timeout risk)")
+                    print(f"  WARNING️  SLOW IMPORT: {total_time:.3f}s (timeout risk)")
 
             except Exception as e:
                 duration = time.time() - start_time
@@ -244,14 +244,14 @@ class DependencyAnalysisTest(unittest.TestCase):
                     print(f"  ✗ Spec not found")
                     continue
 
-                print(f"  ✓ Spec found: {spec}")
+                print(f"  CHECK Spec found: {spec}")
                 print(f"    Origin: {spec.origin}")
                 print(f"    Loader: {type(spec.loader).__name__}")
 
                 if spec.origin:
                     origin_path = Path(spec.origin)
                     if origin_path.exists():
-                        print(f"    ✓ File exists: {origin_path}")
+                        print(f"    CHECK File exists: {origin_path}")
                         file_size = origin_path.stat().st_size
                         print(f"    File size: {file_size} bytes")
                     else:
@@ -326,7 +326,7 @@ class DependencyAnalysisTest(unittest.TestCase):
                 print(f"    {i+1}. {' -> '.join(cycle)}")
                 self.circular_patterns.append(cycle)
         else:
-            print(f"  ✓ No circular import patterns detected")
+            print(f"  CHECK No circular import patterns detected")
 
     def tearDown(self):
         """Report dependency analysis results"""

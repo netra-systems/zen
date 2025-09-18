@@ -57,12 +57,12 @@ class WebSocketHealthValidator:
                     results["backend_response_time"] = time.time() - start_time
                     results["backend_health"] = response.status == 200
                     if response.status == 200:
-                        logger.info(f"✅ Backend health: OK ({response.status}) - {results['backend_response_time']:.3f}s")
+                        logger.info(f"CHECK Backend health: OK ({response.status}) - {results['backend_response_time']:.3f}s")
                     else:
-                        logger.error(f"❌ Backend health: FAILED ({response.status})")
+                        logger.error(f"X Backend health: FAILED ({response.status})")
                         results["errors"].append(f"Backend health returned {response.status}")
             except Exception as e:
-                logger.error(f"❌ Backend health check failed: {e}")
+                logger.error(f"X Backend health check failed: {e}")
                 results["errors"].append(f"Backend health exception: {str(e)}")
             
             # Test auth health
@@ -72,12 +72,12 @@ class WebSocketHealthValidator:
                     results["auth_response_time"] = time.time() - start_time
                     results["auth_health"] = response.status == 200
                     if response.status == 200:
-                        logger.info(f"✅ Auth service health: OK ({response.status}) - {results['auth_response_time']:.3f}s")
+                        logger.info(f"CHECK Auth service health: OK ({response.status}) - {results['auth_response_time']:.3f}s")
                     else:
-                        logger.error(f"❌ Auth service health: FAILED ({response.status})")
+                        logger.error(f"X Auth service health: FAILED ({response.status})")
                         results["errors"].append(f"Auth service health returned {response.status}")
             except Exception as e:
-                logger.error(f"❌ Auth service health check failed: {e}")
+                logger.error(f"X Auth service health check failed: {e}")
                 results["errors"].append(f"Auth service health exception: {str(e)}")
         
         return results
@@ -111,7 +111,7 @@ class WebSocketHealthValidator:
             ) as websocket:
                 results["connection_successful"] = True
                 results["handshake_time"] = time.time() - start_time
-                logger.info(f"✅ WebSocket connection successful - handshake: {results['handshake_time']:.3f}s")
+                logger.info(f"CHECK WebSocket connection successful - handshake: {results['handshake_time']:.3f}s")
                 
                 # Try to send a simple ping
                 await websocket.send(json.dumps({"type": "ping", "timestamp": time.time()}))
@@ -127,9 +127,9 @@ class WebSocketHealthValidator:
             results["close_code"] = e.code
             results["error_message"] = str(e)
             if e.code == 1008:  # Policy violation (auth failure)
-                logger.warning(f"⚠️ WebSocket closed with auth failure (code 1008): {e}")
+                logger.warning(f"WARNING️ WebSocket closed with auth failure (code 1008): {e}")
             else:
-                logger.error(f"❌ WebSocket closed unexpectedly (code {e.code}): {e}")
+                logger.error(f"X WebSocket closed unexpectedly (code {e.code}): {e}")
             
         except websockets.InvalidStatusCode as e:
             results["error_code"] = e.status_code
@@ -137,11 +137,11 @@ class WebSocketHealthValidator:
             if e.status_code == 500:
                 logger.error(f"🚨 WebSocket returned HTTP 500 - this is the issue we're investigating!")
             else:
-                logger.error(f"❌ WebSocket returned HTTP {e.status_code}: {e}")
+                logger.error(f"X WebSocket returned HTTP {e.status_code}: {e}")
                 
         except Exception as e:
             results["error_message"] = str(e)
-            logger.error(f"❌ WebSocket connection failed: {e}")
+            logger.error(f"X WebSocket connection failed: {e}")
         
         return results
     
@@ -251,10 +251,10 @@ async def main():
         print("📋 VALIDATION SUMMARY:")
         print("-" * 30)
         overall = results["overall_health"]
-        print(f"Backend Health: {'✅ OK' if overall['backend_healthy'] else '❌ FAILED'}")
-        print(f"Auth Service Health: {'✅ OK' if overall['auth_healthy'] else '❌ FAILED'}")
-        print(f"WebSocket Reachable: {'✅ YES' if overall['websocket_reachable'] else '❌ NO'}")
-        print(f"Critical 500 Errors: {'🚨 YES' if overall['critical_500_errors'] else '✅ NO'}")
+        print(f"Backend Health: {'CHECK OK' if overall['backend_healthy'] else 'X FAILED'}")
+        print(f"Auth Service Health: {'CHECK OK' if overall['auth_healthy'] else 'X FAILED'}")
+        print(f"WebSocket Reachable: {'CHECK YES' if overall['websocket_reachable'] else 'X NO'}")
+        print(f"Critical 500 Errors: {'🚨 YES' if overall['critical_500_errors'] else 'CHECK NO'}")
         print()
         
         # Print recommendations
@@ -279,14 +279,14 @@ async def main():
             print("\n🚨 CRITICAL: WebSocket 500 errors detected - immediate attention required")
             sys.exit(1)
         elif not overall["websocket_reachable"]:
-            print("\n⚠️ WARNING: WebSocket not fully reachable - investigation needed") 
+            print("\nWARNING️ WARNING: WebSocket not fully reachable - investigation needed") 
             sys.exit(2)
         else:
-            print("\n✅ WebSocket health validation completed successfully")
+            print("\nCHECK WebSocket health validation completed successfully")
             sys.exit(0)
             
     except Exception as e:
-        logger.error(f"❌ Validation failed with exception: {e}")
+        logger.error(f"X Validation failed with exception: {e}")
         print(f"\n💥 Validation script failed: {e}")
         sys.exit(3)
 

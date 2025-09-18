@@ -306,9 +306,9 @@ class TestMessageHandlerMigrationValidation:
                 # Determine overall success
                 if not validation_results:
                     golden_path_metrics["success"] = True
-                    logger.info("✅ Post-migration Golden Path validation PASSED")
+                    logger.info("CHECK Post-migration Golden Path validation PASSED")
                 else:
-                    logger.error(f"❌ Golden Path validation failures: {validation_results}")
+                    logger.error(f"X Golden Path validation failures: {validation_results}")
                     pytest.fail(f"Post-migration Golden Path validation failed: {validation_results}")
 
         except Exception as e:
@@ -467,8 +467,8 @@ class TestMessageHandlerMigrationValidation:
                     logger.warning("No SSOT indicators found - migration may not be complete")
 
                 unique_ssot_indicators = list(set(ssot_indicators_found))
-                logger.info(f"✅ SSOT indicators confirmed: {unique_ssot_indicators}")
-                logger.info("✅ Legacy handler removal validation PASSED")
+                logger.info(f"CHECK SSOT indicators confirmed: {unique_ssot_indicators}")
+                logger.info("CHECK Legacy handler removal validation PASSED")
 
         except Exception as e:
             logger.error(f"Legacy handler removal validation exception: {e}")
@@ -653,7 +653,7 @@ class TestMessageHandlerMigrationValidation:
                 if avg_response_time > max_response_time:
                     pytest.fail(f"SSOT performance too slow: {avg_response_time:.2f}s > {max_response_time}s")
 
-                logger.info(f"✅ SSOT handler full functionality validation PASSED - {len(ssot_test_results)} tests successful")
+                logger.info(f"CHECK SSOT handler full functionality validation PASSED - {len(ssot_test_results)} tests successful")
 
         except Exception as e:
             logger.error(f"SSOT functionality validation exception: {e}")
@@ -862,7 +862,7 @@ class TestMessageHandlerMigrationValidation:
 
             performance_benchmarks["overall_performance_score"] = performance_score
 
-            logger.info(f"✅ Performance parity validation PASSED - Score: {performance_score}/100")
+            logger.info(f"CHECK Performance parity validation PASSED - Score: {performance_score}/100")
 
         except Exception as e:
             logger.error(f"Performance validation exception: {e}")
@@ -1103,7 +1103,7 @@ class TestMessageHandlerMigrationValidation:
                 logger.error(f"Security validation failures: {security_issues}")
                 pytest.fail(f"Security posture degraded - issues: {security_issues}")
 
-            logger.info(f"✅ Security posture validation PASSED - Score: {security_score}/100")
+            logger.info(f"CHECK Security posture validation PASSED - Score: {security_score}/100")
 
         except Exception as e:
             logger.error(f"Security validation exception: {e}")
@@ -1317,7 +1317,7 @@ class TestMessageHandlerMigrationValidation:
                     logger.error(f"Error handling robustness failures: {failed_error_handling}")
                     pytest.fail(f"Error handling not robust - issues: {failed_error_handling}")
 
-                logger.info(f"✅ Error handling robustness validation PASSED - {len(error_handling_results)} scenarios tested")
+                logger.info(f"CHECK Error handling robustness validation PASSED - {len(error_handling_results)} scenarios tested")
 
         except Exception as e:
             logger.error(f"Error handling validation exception: {e}")
@@ -1539,7 +1539,7 @@ class TestMessageHandlerMigrationValidation:
                 logger.error(f"Memory leak elimination validation failures: {memory_issues}")
                 pytest.fail(f"Memory leaks detected - issues: {memory_issues}")
 
-            logger.info(f"✅ Memory leak elimination validation PASSED - Score: {memory_score}/100")
+            logger.info(f"CHECK Memory leak elimination validation PASSED - Score: {memory_score}/100")
 
         except Exception as e:
             logger.error(f"Memory leak validation exception: {e}")

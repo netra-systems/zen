@@ -93,7 +93,7 @@ class TestRedisVpcConnectivityIssue1177(SSotAsyncTestCase):
         self.assertIn("6379", redis_url,
                       "Redis URL should contain correct port")
 
-        logger.info(f"✅ VPC Redis URL validation passed: {redis_url}")
+        logger.info(f"CHECK VPC Redis URL validation passed: {redis_url}")
 
     async def test_redis_connection_through_vpc_connector(self):
         """Test Redis connection works through VPC connector."""
@@ -124,7 +124,7 @@ class TestRedisVpcConnectivityIssue1177(SSotAsyncTestCase):
         # Clean up
         await self.redis_manager.delete(test_key)
 
-        logger.info("✅ Redis VPC connectivity test passed")
+        logger.info("CHECK Redis VPC connectivity test passed")
 
     async def test_redis_error_handling_for_vpc_failures(self):
         """Test Redis error handling for VPC connection failures."""
@@ -153,7 +153,7 @@ class TestRedisVpcConnectivityIssue1177(SSotAsyncTestCase):
 
             await test_manager.shutdown()
 
-        logger.info("✅ Redis VPC error handling test passed")
+        logger.info("CHECK Redis VPC error handling test passed")
 
     async def test_circuit_breaker_for_vpc_failures(self):
         """Test circuit breaker pattern for VPC connection failures."""
@@ -177,7 +177,7 @@ class TestRedisVpcConnectivityIssue1177(SSotAsyncTestCase):
         reset_circuit_status = reset_status["circuit_breaker"]
         self.assertIn("state", reset_circuit_status, "Circuit breaker should have state after reset")
 
-        logger.info("✅ Redis VPC circuit breaker test passed")
+        logger.info("CHECK Redis VPC circuit breaker test passed")
 
     async def test_redis_reconnection_capabilities(self):
         """Test automatic reconnection for VPC connection drops."""
@@ -198,7 +198,7 @@ class TestRedisVpcConnectivityIssue1177(SSotAsyncTestCase):
         status = self.redis_manager.get_status()
         self.assertIsInstance(status, dict, "Status should be available after reinitialize")
 
-        logger.info("✅ Redis VPC reconnection test passed")
+        logger.info("CHECK Redis VPC reconnection test passed")
 
     async def test_redis_auth_service_compatibility(self):
         """Test Redis auth service methods work through VPC."""
@@ -225,7 +225,7 @@ class TestRedisVpcConnectivityIssue1177(SSotAsyncTestCase):
             delete_result = await self.redis_manager.delete_session(session_id)
             self.assertTrue(delete_result, "Session deletion should succeed")
 
-            logger.info("✅ Redis auth service VPC compatibility test passed")
+            logger.info("CHECK Redis auth service VPC compatibility test passed")
         else:
             # In test environment without Redis, this is expected
             logger.warning("Redis not available - auth service compatibility test skipped")
@@ -254,7 +254,7 @@ class TestRedisVpcConnectivityIssue1177(SSotAsyncTestCase):
             f"Redis URL should be VPC-accessible: {redis_url}"
         )
 
-        logger.info("✅ VPC firewall rules validation test passed")
+        logger.info("CHECK VPC firewall rules validation test passed")
 
     async def test_user_cache_manager_vpc_compatibility(self):
         """Test user cache operations work through VPC connector."""
@@ -283,7 +283,7 @@ class TestRedisVpcConnectivityIssue1177(SSotAsyncTestCase):
             clear_result = await cache_manager.clear_user_cache(user_id, cache_key)
             self.assertTrue(clear_result, "User cache clear should succeed")
 
-            logger.info("✅ User cache manager VPC compatibility test passed")
+            logger.info("CHECK User cache manager VPC compatibility test passed")
         else:
             # In test environment without Redis, this is expected
             logger.warning("Redis not available - user cache VPC test skipped")
@@ -322,7 +322,7 @@ class TestRedisVpcConnectivityIntegration(TestRedisVpcConnectivityIssue1177):
         # Step 6: Validate firewall rules configuration
         await self.test_vpc_firewall_rules_validation()
 
-        logger.info("✅ Full VPC connectivity workflow test completed successfully")
+        logger.info("CHECK Full VPC connectivity workflow test completed successfully")
 
 
 if __name__ == "__main__":
@@ -344,10 +344,10 @@ if __name__ == "__main__":
             await suite.test_redis_reconnection_capabilities()
             await suite.test_vpc_firewall_rules_validation()
 
-            print("✅ All Redis VPC connectivity tests passed!")
+            print("CHECK All Redis VPC connectivity tests passed!")
 
         except Exception as e:
-            print(f"❌ Test failed: {e}")
+            print(f"X Test failed: {e}")
             return 1
         finally:
             await suite.asyncTearDown()

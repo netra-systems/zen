@@ -8,7 +8,7 @@ Business Impact: $"500K" plus ARR Golden Path user flow protection
 These tests MUST FAIL initially to prove SSOT violations exist.
 After SSOT fixes are implemented, these tests should PASS.
 
-Golden Path Blocked: Users login → AI agents process requests → Users receive AI responses
+Golden Path Blocked: Users login -> AI agents process requests -> Users receive AI responses
 
 EXPECTED RESULT: ALL TESTS FAIL (proving violations exist)
 

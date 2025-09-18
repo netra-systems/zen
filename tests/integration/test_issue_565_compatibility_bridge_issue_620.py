@@ -61,7 +61,7 @@ class Issue565CompatibilityBridgeIntegrationTests(BaseIntegrationTest):
         assert delegation_info['migration_issue'] == '#565'
         assert delegation_info['delegation_active'] is True
         
-        print("✅ Legacy ExecutionEngine successfully creates UserExecutionEngine via compatibility bridge")
+        print("CHECK Legacy ExecutionEngine successfully creates UserExecutionEngine via compatibility bridge")
     
     @pytest.mark.asyncio
     async def test_legacy_execution_engine_execute_agent_delegation(self):
@@ -115,7 +115,7 @@ class Issue565CompatibilityBridgeIntegrationTests(BaseIntegrationTest):
         assert delegation_info['delegation_active'] is True
         assert 'migration_guide' in delegation_info
         
-        print("✅ Legacy ExecutionEngine properly sets up delegation for execute_agent")
+        print("CHECK Legacy ExecutionEngine properly sets up delegation for execute_agent")
     
     async def test_compatibility_bridge_preserves_websocket_functionality(self):
         """Test that WebSocket functionality works through compatibility bridge."""
@@ -155,7 +155,7 @@ class Issue565CompatibilityBridgeIntegrationTests(BaseIntegrationTest):
         delegation_info = engine.get_delegation_info()
         assert 'websocket_bridge_type' in delegation_info
         
-        print("✅ Compatibility bridge preserves WebSocket functionality")
+        print("CHECK Compatibility bridge preserves WebSocket functionality")
     
     async def test_compatibility_bridge_user_context_handling(self):
         """Test that compatibility bridge correctly handles user context scenarios."""
@@ -197,7 +197,7 @@ class Issue565CompatibilityBridgeIntegrationTests(BaseIntegrationTest):
         assert with_context_info['has_user_context'] is True
         assert without_context_info['has_user_context'] is False
         
-        print("✅ Compatibility bridge correctly handles both user context scenarios")
+        print("CHECK Compatibility bridge correctly handles both user context scenarios")
     
     @pytest.mark.asyncio
     async def test_compatibility_bridge_execution_stats_delegation(self):
@@ -226,7 +226,7 @@ class Issue565CompatibilityBridgeIntegrationTests(BaseIntegrationTest):
         # Should include delegation info
         assert 'delegation_info' in stats or stats.get('delegation_active') is True
         
-        print("✅ Compatibility bridge properly delegates execution statistics")
+        print("CHECK Compatibility bridge properly delegates execution statistics")
     
     async def test_compatibility_bridge_shutdown_delegation(self):
         """Test that shutdown works through compatibility bridge."""
@@ -247,7 +247,7 @@ class Issue565CompatibilityBridgeIntegrationTests(BaseIntegrationTest):
         # Test shutdown delegation (should not raise exception)
         await engine.shutdown()
         
-        print("✅ Compatibility bridge shutdown works correctly")
+        print("CHECK Compatibility bridge shutdown works correctly")
 
 
 @pytest.mark.integration
@@ -294,7 +294,7 @@ class CompatibilityBridgeAPICompatibilityTests(BaseIntegrationTest):
         for prop_name in expected_properties:
             assert hasattr(engine, prop_name), f"ExecutionEngine should have {prop_name} property"
         
-        print("✅ All expected legacy API methods available through compatibility bridge")
+        print("CHECK All expected legacy API methods available through compatibility bridge")
     
     async def test_string_representation_compatibility(self):
         """Test that string representations work correctly."""
@@ -320,7 +320,7 @@ class CompatibilityBridgeAPICompatibilityTests(BaseIntegrationTest):
         assert isinstance(repr_str, str), "repr() should return string"
         assert 'compatibility_mode=True' in str_repr or 'delegation' in str_repr, "Should indicate compatibility mode"
         
-        print("✅ String representations work correctly through compatibility bridge")
+        print("CHECK String representations work correctly through compatibility bridge")
 
 
 @pytest.mark.integration
@@ -349,7 +349,7 @@ class CompatibilityBridgeWarningsTests(BaseIntegrationTest):
             has_migration_info = any("#565" in msg or "UserExecutionEngine" in msg for msg in warning_messages)
             assert has_migration_info, "Warning should mention Issue #565 or UserExecutionEngine migration"
         
-        print("✅ Proper deprecation warnings issued on ExecutionEngine creation")
+        print("CHECK Proper deprecation warnings issued on ExecutionEngine creation")
     
     async def test_migration_guidance_in_warnings(self):
         """Test that deprecation warnings provide clear migration guidance."""
@@ -377,7 +377,7 @@ class CompatibilityBridgeWarningsTests(BaseIntegrationTest):
             else:
                 assert len(migration_guide) > 0, "Migration guide should have content"
         
-        print("✅ Clear migration guidance provided in compatibility bridge")
+        print("CHECK Clear migration guidance provided in compatibility bridge")
 
 
 @pytest.mark.integration
@@ -402,7 +402,7 @@ class CompatibilityBridgeErrorHandlingTests(BaseIntegrationTest):
             delegation_info = engine.get_delegation_info()
             assert 'registry_type' in delegation_info
         
-        print("✅ Compatibility bridge handles invalid registry gracefully")
+        print("CHECK Compatibility bridge handles invalid registry gracefully")
     
     async def test_invalid_websocket_bridge_handling(self):
         """Test handling of invalid WebSocket bridge in compatibility bridge."""
@@ -421,7 +421,7 @@ class CompatibilityBridgeErrorHandlingTests(BaseIntegrationTest):
             delegation_info = engine.get_delegation_info()
             assert 'websocket_bridge_type' in delegation_info
         
-        print("✅ Compatibility bridge handles invalid WebSocket bridge gracefully")
+        print("CHECK Compatibility bridge handles invalid WebSocket bridge gracefully")
 
 
 @pytest.mark.integration
@@ -475,7 +475,7 @@ class CompatibilityBridgeRealWorldScenariosTests(BaseIntegrationTest):
         assert engine1.is_compatibility_mode(), "Engine 1 should be in compatibility mode"
         assert engine2.is_compatibility_mode(), "Engine 2 should be in compatibility mode"
         
-        print("✅ Multiple engine creation maintains proper user isolation")
+        print("CHECK Multiple engine creation maintains proper user isolation")
     
     async def test_sequential_operations_through_bridge(self):
         """Test sequential operations through the compatibility bridge."""
@@ -515,7 +515,7 @@ class CompatibilityBridgeRealWorldScenariosTests(BaseIntegrationTest):
         # Clean shutdown
         await engine.shutdown()
         
-        print("✅ Sequential operations work correctly through compatibility bridge")
+        print("CHECK Sequential operations work correctly through compatibility bridge")
 
 
 if __name__ == "__main__":
@@ -539,11 +539,11 @@ if __name__ == "__main__":
         print("\n" + "="*80)
         print("📊 ISSUE #565 COMPATIBILITY BRIDGE TEST SUMMARY")
         print("="*80)
-        print("✅ Compatibility bridge creates UserExecutionEngine correctly")
-        print("✅ All legacy API methods work through delegation")
-        print("✅ Proper deprecation warnings with migration guidance")
-        print("✅ User isolation maintained across multiple engines")
-        print("✅ Error handling works gracefully")
+        print("CHECK Compatibility bridge creates UserExecutionEngine correctly")
+        print("CHECK All legacy API methods work through delegation")
+        print("CHECK Proper deprecation warnings with migration guidance")
+        print("CHECK User isolation maintained across multiple engines")
+        print("CHECK Error handling works gracefully")
         print("📈 Issue #565 compatibility bridge is fully functional")
         
     if __name__ == "__main__":

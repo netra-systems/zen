@@ -462,7 +462,7 @@ if __name__ == '__main__':
         for test in sync_tests:
             try:
                 test()
-                print(f"✓ {test.__name__}")
+                print(f"CHECK {test.__name__}")
             except AssertionError as e:
                 print(f"✗ {test.__name__}: {e}")
             except Exception as e:
@@ -471,7 +471,7 @@ if __name__ == '__main__':
         # Run async tests
         try:
             await test_instance.test_websocket_manager_creation_patterns_async()
-            print(f"✓ test_websocket_manager_creation_patterns_async")
+            print(f"CHECK test_websocket_manager_creation_patterns_async")
         except AssertionError as e:
             print(f"✗ test_websocket_manager_creation_patterns_async: {e}")
         except Exception as e:

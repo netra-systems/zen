@@ -202,13 +202,13 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                 self.assertTrue(all_users_received_events, All users should receive their events)
                 self.assertFalse(cross_user_contamination, No cross-user event contamination should occur")"
                 
-                logger.info(✅ PASS: User-specific event delivery working correctly)
+                logger.info(CHECK PASS: User-specific event delivery working correctly)
                 return True
                 
             except Exception as e:
                 self.routing_violations.append(fEvent delivery test failed: {e})"
                 self.routing_violations.append(fEvent delivery test failed: {e})"
-                logger.error(f"❌ FAIL: User-specific event delivery broken - {e})"
+                logger.error(f"X FAIL: User-specific event delivery broken - {e})"
                 return False
         
         result = asyncio.run(test_event_delivery())
@@ -346,7 +346,7 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
             self.assertEqual(total_events_sent, expected_total_events, fAll {expected_total_events} events should be sent)
             self.assertTrue(performance_ok, fEvent throughput should be adequate (got {events_per_second:."1f"} events/sec)")"
             
-            logger.info(f✅ PASS: Concurrent events handled - {total_events_sent} events in {total_time:."3f"}s ({events_per_second:."1f"} events/sec))""
+            logger.info(fCHECK PASS: Concurrent events handled - {total_events_sent} events in {total_time:."3f"}s ({events_per_second:."1f"} events/sec))""
 
             return True
         
@@ -494,12 +494,12 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                 # Validate overall integrity
                 self.assertFalse(data_corruption_found, "No data corruption should be found)"
                 
-                logger.info(f✅ PASS: Data integrity maintained - {len(captured_events)} events validated)
+                logger.info(fCHECK PASS: Data integrity maintained - {len(captured_events)} events validated)
                 return True
                 
             except Exception as e:
                 self.event_delivery_issues.append(fData integrity test failed: {e})
-                logger.error(f❌ FAIL: WebSocket event data integrity broken - {e}")"
+                logger.error(fX FAIL: WebSocket event data integrity broken - {e}")"
                 return False
         
         result = asyncio.run(test_data_integrity())
@@ -604,12 +604,12 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                 # Validate ordering
                 self.assertEqual(len(ordering_violations), 0, fEvent ordering violations: {ordering_violations})
                 
-                logger.info(f✅ PASS: Event ordering maintained - {len(ordered_events)} events in correct sequence)
+                logger.info(fCHECK PASS: Event ordering maintained - {len(ordered_events)} events in correct sequence)
                 return True
                 
             except Exception as e:
                 self.routing_violations.append(fEvent ordering test failed: {e}")"
-                logger.error(f❌ FAIL: WebSocket event ordering broken - {e})
+                logger.error(fX FAIL: WebSocket event ordering broken - {e})
                 return False
         
         result = asyncio.run(test_event_ordering())
@@ -660,7 +660,7 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
             fPerformance Risk: {routing_summary['performance_risk']}
         )
         
-        logger.info(✅ SUCCESS: WebSocket events routing working correctly through UserExecutionEngine")"
+        logger.info(CHECK SUCCESS: WebSocket events routing working correctly through UserExecutionEngine")"
 
 
 if __name__ == '__main__':

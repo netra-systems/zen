@@ -14,7 +14,7 @@ CRITICAL COVERAGE GAPS ADDRESSED:
 - Multi-User WebSocket Message Isolation Testing
 - Real-time Agent Progress Event Delivery
 
-PHASE 1 TARGET: Improve coverage from 10.92% → 25%+ through comprehensive WebSocket message flow testing
+PHASE 1 TARGET: Improve coverage from 10.92% -> 25%+ through comprehensive WebSocket message flow testing
 
 TEST INFRASTRUCTURE:
     - Real staging service connections (NO mocks for integration tests)

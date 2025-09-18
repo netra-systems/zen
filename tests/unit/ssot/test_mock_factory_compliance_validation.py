@@ -92,7 +92,7 @@ class SSOTMockFactoryComplianceTests(SSotBaseTestCase):
                 f"SSotMockFactory.{method_name} is not callable"
             )
 
-        self.logger.info(f"✅ All {len(required_methods)} required mock factory methods available")
+        self.logger.info(f"CHECK All {len(required_methods)} required mock factory methods available")
 
     def test_validate_agent_mock_compliance(self):
         """
@@ -248,7 +248,7 @@ class SSOTMockFactoryComplianceTests(SSotBaseTestCase):
             )
 
             self.logger.info(
-                f"✅ {result['name']}: "
+                f"CHECK {result['name']}: "
                 f"{result['additional_attrs']} additional attributes, "
                 f"fully compatible"
             )

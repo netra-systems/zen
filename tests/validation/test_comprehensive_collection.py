@@ -463,7 +463,7 @@ else:
         with open('issue_1041_validation_summary.json', 'w') as f:
             json.dump(summary, f, indent=2)
 
-        print(f"✅ Issue #1041 Fix Validation COMPLETE")
+        print(f"CHECK Issue #1041 Fix Validation COMPLETE")
         print(f"📊 Summary saved to issue_1041_validation_summary.json")
         print(f"🚀 Pytest collection is now reliable and fast")
         print(f"💼 Business Value: $500K+ ARR protected through testing reliability")

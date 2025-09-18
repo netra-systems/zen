@@ -64,7 +64,7 @@ class Issue601ValidationFixTests:
         app.state = MagicMock()
         orchestrator = StartupOrchestrator(app)
 
-        # ✅ ISSUE #601 FIX: Strategic mocking to prevent validation deadlock
+        # CHECK ISSUE #601 FIX: Strategic mocking to prevent validation deadlock
         validation_mocked = False
         
         async def mock_validation_method():
@@ -101,7 +101,7 @@ class Issue601ValidationFixTests:
             assert validation_mocked, Validation method was not called""
             assert app.state.startup_complete, "Startup completion flag not set"
             
-            print(f✅ Issue #601 Fix Validated - Duration: {duration:."3f"}s")"
+            print(fCHECK Issue #601 Fix Validated - Duration: {duration:."3f"}s")"
             
         except asyncio.TimeoutError:
             pytest.fail(ISSUE #601 NOT FIXED: Test still hangs despite strategic mocking)
@@ -163,7 +163,7 @@ class Issue601ValidationFixTests:
         assert total_increase < max_allowed_increase, \
             fMemory leak detected: {total_increase / 1024 / 1024:."2f"}MB increase""
 
-        print(f✅ Memory leak detection works with fix - Total increase: {total_increase / 1024 / 1024:."2f"}MB)""
+        print(fCHECK Memory leak detection works with fix - Total increase: {total_increase / 1024 / 1024:."2f"}MB)""
 
 
     @pytest.mark.asyncio
@@ -201,7 +201,7 @@ class Issue601ValidationFixTests:
         duration = time.time() - start_time
         assert duration >= 2.5, fShould have timed out, but completed in {duration}s""
         
-        print(f✅ Original hang scenario reproduced - timed out after {duration:."3f"}s)""
+        print(fCHECK Original hang scenario reproduced - timed out after {duration:."3f"}s)""
 
 
 
@@ -220,8 +220,8 @@ if __name__ == __main__:""
     result = runner.run(suite)
     
     if result.wasSuccessful():
-        print(✅ Issue #601 fix validation PASSED)
+        print(CHECK Issue #601 fix validation PASSED)
     else:
-        print(❌ Issue #601 fix validation FAILED"")"
-        print(❌ Issue #601 fix validation FAILED"")""
+        print(X Issue #601 fix validation FAILED"")"
+        print(X Issue #601 fix validation FAILED"")""
 

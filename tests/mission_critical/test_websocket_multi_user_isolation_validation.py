@@ -251,7 +251,7 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
             )
             self.isolation_metrics.append(metrics)
             
-            logger.info(f✅ User context isolation validation PASSED)
+            logger.info(fCHECK User context isolation validation PASSED)
             logger.info(f"   Users tested: {len(users)})"
             logger.info(f   Events sent: {metrics.total_events_sent}")"
             logger.info(f   Events received: {metrics.total_events_received})
@@ -547,7 +547,7 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
             )
             self.isolation_metrics.append(metrics)
             
-            logger.info(f✅ Concurrent user validation PASSED)
+            logger.info(fCHECK Concurrent user validation PASSED)
             logger.info(f   Concurrent users: {len(successful_users)})"
             logger.info(f   Concurrent users: {len(successful_users)})"
             logger.info(f"   Events processed: {total_events_received})"
@@ -649,11 +649,11 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
             # Validate sequences are independent
             assert sequence_a != sequence_b, "User sequences should be independent"
             
-            logger.info(f✅ Cross-user contamination detection test PASSED)
+            logger.info(fCHECK Cross-user contamination detection test PASSED)
             logger.info(f   User A events: {len(user_a.events_received)}")"
             logger.info(f   User B events: {len(user_b.events_received)})
             logger.info(f   Contamination detected: {contamination_detected})
-            logger.info(f"   Both sequences isolated: ✓)"
+            logger.info(f"   Both sequences isolated: CHECK)"
             
         except AssertionError:
             # Re-raise assertion errors to fail the test properly

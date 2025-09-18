@@ -5,7 +5,7 @@ PURPOSE: End-to-end testing of WebSocket Manager fragmentation impact on Golden 
 BUSINESS IMPACT:
 - Priority: P0 CRITICAL
 - Impact: $500K+ ARR Golden Path functionality
-- User Flow: Login → AI responses (core business value)
+- User Flow: Login -> AI responses (core business value)
 - Events at Risk: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
 
 E2E TEST OBJECTIVES:
@@ -84,7 +84,7 @@ class WebSocketManagerGoldenPathFragmentationE2ETests(SSotAsyncTestCase):
 
     async def test_golden_path_complete_user_flow_e2e(self):
         """
-        GOLDEN PATH E2E: Test complete user login → AI response flow with WebSocket events.
+        GOLDEN PATH E2E: Test complete user login -> AI response flow with WebSocket events.
 
         EXPECTED TO FAIL: Fragmented managers cause Golden Path event delivery failures
         EXPECTED TO PASS: SSOT manager ensures reliable Golden Path user experience
@@ -119,7 +119,7 @@ class WebSocketManagerGoldenPathFragmentationE2ETests(SSotAsyncTestCase):
                                             logger.info(f'Received Golden Path event: {event_type}')
                                             if all((event in received_events for event in self.GOLDEN_PATH_EVENTS)):
                                                 golden_path_success = True
-                                                logger.info('✅ All Golden Path events received successfully!')
+                                                logger.info('CHECK All Golden Path events received successfully!')
                                                 break
                                     except json.JSONDecodeError as e:
                                         logger.warning(f'Invalid JSON received: {e}')

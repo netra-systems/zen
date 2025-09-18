@@ -73,7 +73,7 @@ class WebSocketUserIsolationVerificationTests(BaseIntegrationTest, unittest.Test
         self.assertIsNot(state1, state2,
             "Execution states must be independent objects")
 
-        print("✅ Basic user context isolation verified")
+        print("CHECK Basic user context isolation verified")
 
     @pytest.mark.integration
     async def test_websocket_connection_isolation(self):
@@ -112,12 +112,12 @@ class WebSocketUserIsolationVerificationTests(BaseIntegrationTest, unittest.Test
                 except asyncio.TimeoutError:
                     pass  # Expected - no message should be received
 
-            print("✅ WebSocket connection isolation verified")
+            print("CHECK WebSocket connection isolation verified")
 
         except ImportError:
             self.skipTest("WebSocket test utilities not available")
         except Exception as e:
-            print(f"⚠️  WebSocket isolation test limited: {e}")
+            print(f"WARNING️  WebSocket isolation test limited: {e}")
 
     @pytest.mark.integration
     async def test_concurrent_user_session_isolation(self):
@@ -167,7 +167,7 @@ class WebSocketUserIsolationVerificationTests(BaseIntegrationTest, unittest.Test
             self.assertEqual(actual_index, expected_index,
                 f"User {i} metadata should be isolated and correct")
 
-        print("✅ Concurrent user session isolation verified")
+        print("CHECK Concurrent user session isolation verified")
 
     @pytest.mark.integration
     async def test_user_data_contamination_prevention(self):
@@ -219,7 +219,7 @@ class WebSocketUserIsolationVerificationTests(BaseIntegrationTest, unittest.Test
         self.assertNotIn("CONFIDENTIAL_ENTERPRISE_DATA", str(free_user.metadata),
             "Free user should not have enterprise data")
 
-        print("✅ User data contamination prevention verified")
+        print("CHECK User data contamination prevention verified")
 
     @pytest.mark.integration
     async def test_session_state_isolation_integrity(self):
@@ -271,7 +271,7 @@ class WebSocketUserIsolationVerificationTests(BaseIntegrationTest, unittest.Test
         self.assertEqual(updated_user2_task, original_user2_task,
             "User2 state should not be affected by user1 changes")
 
-        print("✅ Session state isolation integrity verified")
+        print("CHECK Session state isolation integrity verified")
 
     @pytest.mark.integration
     async def test_memory_isolation_between_users(self):
@@ -347,7 +347,7 @@ class WebSocketUserIsolationVerificationTests(BaseIntegrationTest, unittest.Test
             self.assertFalse(sig['has_large_data'],
                 f"New user {i} should not have old user's data")
 
-        print("✅ Memory isolation between users verified")
+        print("CHECK Memory isolation between users verified")
 
     @pytest.mark.integration
     async def test_ssot_consolidation_isolation_preservation(self):
@@ -378,7 +378,7 @@ class WebSocketUserIsolationVerificationTests(BaseIntegrationTest, unittest.Test
             self.test_users.extend([user1, user2])
 
             isolation_guarantees['user_context_separation'] = user1.user_id != user2.user_id
-            print("✓ User context separation preserved")
+            print("CHECK User context separation preserved")
         except Exception as e:
             print(f"✗ User context separation failed: {e}")
 
@@ -394,7 +394,7 @@ class WebSocketUserIsolationVerificationTests(BaseIntegrationTest, unittest.Test
 
             user_ids = [u.user_id for u in concurrent_users]
             isolation_guarantees['concurrent_session_safety'] = len(set(user_ids)) == len(user_ids)
-            print("✓ Concurrent session safety preserved")
+            print("CHECK Concurrent session safety preserved")
         except Exception as e:
             print(f"✗ Concurrent session safety failed: {e}")
 
@@ -404,7 +404,7 @@ class WebSocketUserIsolationVerificationTests(BaseIntegrationTest, unittest.Test
                 state1 = self.test_users[0].get_execution_state()
                 state2 = self.test_users[1].get_execution_state()
                 isolation_guarantees['session_state_integrity'] = state1 is not state2
-                print("✓ Session state integrity preserved")
+                print("CHECK Session state integrity preserved")
         except Exception as e:
             print(f"✗ Session state integrity failed: {e}")
 
@@ -413,7 +413,7 @@ class WebSocketUserIsolationVerificationTests(BaseIntegrationTest, unittest.Test
 
         print(f"\n=== Isolation Preservation Results ===")
         for guarantee, preserved in isolation_guarantees.items():
-            status = "✅ PRESERVED" if preserved else "❌ VIOLATED"
+            status = "CHECK PRESERVED" if preserved else "X VIOLATED"
             print(f"  {guarantee}: {status}")
 
         print(f"Overall preservation score: {preservation_score:.2f}")
@@ -422,4 +422,4 @@ class WebSocketUserIsolationVerificationTests(BaseIntegrationTest, unittest.Test
         self.assertGreaterEqual(preservation_score, 1.0,
             "SSOT consolidation must preserve ALL isolation guarantees")
 
-        print("✅ SSOT consolidation isolation preservation verified")
+        print("CHECK SSOT consolidation isolation preservation verified")

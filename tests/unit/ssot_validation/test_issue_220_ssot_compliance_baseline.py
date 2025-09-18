@@ -280,7 +280,7 @@ class Issue220SSOTViolationAnalysisTests(SSotBaseTestCase):
         # Log successful imports
         print(f"\nCritical SSOT Import Status:")
         for import_path, result in import_results.items():
-            status = "✅ PASS" if result['importable'] else "❌ FAIL"
+            status = "CHECK PASS" if result['importable'] else "X FAIL"
             print(f"  {import_path}: {status}")
     
     def test_factory_pattern_availability(self):
@@ -319,7 +319,7 @@ class Issue220SSOTViolationAnalysisTests(SSotBaseTestCase):
         # Log factory status
         print(f"\nFactory Pattern Availability:")
         for factory_path, result in factory_results.items():
-            status = "✅ PASS" if result.get('available') and result.get('callable') else "❌ FAIL"
+            status = "CHECK PASS" if result.get('available') and result.get('callable') else "X FAIL"
             print(f"  {factory_path}: {status}")
 
 

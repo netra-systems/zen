@@ -148,7 +148,7 @@ class TestImportTimingImprovement(SSotBaseTestCase):
         assert len(slow_imports) == 0, \
             f"Canonical imports too slow: {slow_imports}. Max acceptable: {max_acceptable_time}s"
 
-        print(f"\n✅ Canonical import baseline established")
+        print(f"\nCHECK Canonical import baseline established")
 
     @pytest.mark.performance
     @pytest.mark.import_timing
@@ -171,11 +171,11 @@ class TestImportTimingImprovement(SSotBaseTestCase):
             try:
                 test_time = self._measure_single_import_time(import_stmt)
                 if test_time > 10.0:  # Timeout protection
-                    print(f"  ⚠️ Import timed out: {test_time:.2f}s")
+                    print(f"  WARNING️ Import timed out: {test_time:.2f}s")
                     continue
                 working_fragmented_imports.append(import_stmt)
             except Exception as e:
-                print(f"  ❌ Import failed: {str(e)}")
+                print(f"  X Import failed: {str(e)}")
                 fragmented_timings[import_name] = {
                     "error": str(e),
                     "import_works": False
@@ -209,7 +209,7 @@ class TestImportTimingImprovement(SSotBaseTestCase):
 
                 except Exception as e:
                     failures += 1
-                    print(f"  ⚠️ Iteration {iteration} failed: {str(e)}")
+                    print(f"  WARNING️ Iteration {iteration} failed: {str(e)}")
 
             if timings:
                 # Calculate statistics
@@ -244,14 +244,14 @@ class TestImportTimingImprovement(SSotBaseTestCase):
                     "failure_rate": 1.0,
                     "import_works": False
                 }
-                print(f"  ❌ All iterations failed")
+                print(f"  X All iterations failed")
 
         self.timing_results["fragmented"] = fragmented_timings
 
         # Analyze performance impact
         self._analyze_performance_impact()
 
-        print(f"\n✅ Fragmented import performance measured")
+        print(f"\nCHECK Fragmented import performance measured")
 
     @pytest.mark.performance
     @pytest.mark.race_conditions
@@ -285,14 +285,14 @@ class TestImportTimingImprovement(SSotBaseTestCase):
             )
             race_condition_results["fragmented"] = fragmented_races
         else:
-            print("⚠️ No working fragmented imports to test for race conditions")
+            print("WARNING️ No working fragmented imports to test for race conditions")
 
         self.race_condition_results = race_condition_results
 
         # Analyze race condition frequency
         self._analyze_race_conditions()
 
-        print(f"\n✅ Race condition testing completed")
+        print(f"\nCHECK Race condition testing completed")
 
     def _test_concurrent_imports(self, import_statements: List[str], category: str) -> Dict[str, Any]:
         """Test concurrent imports for race conditions"""
@@ -466,7 +466,7 @@ class TestImportTimingImprovement(SSotBaseTestCase):
         fragmented_metrics = self.timing_results.get("fragmented", {})
 
         if not canonical_metrics:
-            print("⚠️ No canonical metrics available for comparison")
+            print("WARNING️ No canonical metrics available for comparison")
             return
 
         # Calculate average canonical import time
@@ -494,9 +494,9 @@ class TestImportTimingImprovement(SSotBaseTestCase):
 
             # Validate against claimed 26.81x impact
             if performance_ratio > 5.0:
-                print(f"⚠️ Significant performance degradation detected: {performance_ratio:.2f}x")
+                print(f"WARNING️ Significant performance degradation detected: {performance_ratio:.2f}x")
             else:
-                print(f"✅ Performance degradation within acceptable limits")
+                print(f"CHECK Performance degradation within acceptable limits")
 
         # Report working vs broken imports
         working_fragmented = sum(
@@ -525,9 +525,9 @@ class TestImportTimingImprovement(SSotBaseTestCase):
 
             race_freq = results.get('race_condition_frequency', 0)
             if race_freq > 0.05:  # >5% race condition frequency
-                print(f"  ⚠️ High race condition frequency detected")
+                print(f"  WARNING️ High race condition frequency detected")
             else:
-                print(f"  ✅ Race condition frequency within acceptable limits")
+                print(f"  CHECK Race condition frequency within acceptable limits")
 
     @pytest.mark.performance
     def test_post_consolidation_performance_validation(self):
@@ -595,7 +595,7 @@ class TestImportTimingImprovement(SSotBaseTestCase):
         assert len(high_race_categories) == 0, \
             f"Race condition frequency too high: {high_race_categories} exceed {max_acceptable_race_frequency:.1%} limit"
 
-        print(f"✅ Post-consolidation performance targets met")
+        print(f"CHECK Post-consolidation performance targets met")
 
 
 if __name__ == "__main__":

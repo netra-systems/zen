@@ -93,8 +93,8 @@ class WebSocketManagerSSotComplianceTests(SSotBaseTestCase):
             f"TOTAL VIOLATIONS: {total_violations} across {len(consolidation_violations)} files\n\n" +
             self._format_consolidation_report(consolidation_violations) +
             f"\n\nSSOT CONSOLIDATION REQUIREMENTS:\n" +
-            f"✅ REQUIRED: {self.SSOT_IMPORT_PATTERNS['unified_manager_alias']}\n" +
-            f"❌ PROHIBITED: All legacy websocket_manager imports\n\n" +
+            f"CHECK REQUIRED: {self.SSOT_IMPORT_PATTERNS['unified_manager_alias']}\n" +
+            f"X PROHIBITED: All legacy websocket_manager imports\n\n" +
             f"BUSINESS IMPACT:\n" +
             f"- Import fragmentation causes race conditions\n" +
             f"- Multiple WebSocket manager instances created\n" +
@@ -130,9 +130,9 @@ class WebSocketManagerSSotComplianceTests(SSotBaseTestCase):
             f"LEGACY IMPORT VIOLATIONS:\n" +
             self._format_legacy_violations_report(legacy_violations) +
             f"\n\nPROHIBITED PATTERNS:\n" +
-            "\n".join([f"❌ {pattern}" for pattern in self.PROHIBITED_IMPORT_PATTERNS.values()]) +
+            "\n".join([f"X {pattern}" for pattern in self.PROHIBITED_IMPORT_PATTERNS.values()]) +
             f"\n\nREQUIRED SSOT PATTERN:\n" +
-            f"✅ {self.SSOT_IMPORT_PATTERNS['unified_manager_alias']}\n\n" +
+            f"CHECK {self.SSOT_IMPORT_PATTERNS['unified_manager_alias']}\n\n" +
             f"CRITICAL IMPACT:\n" +
             f"- Legacy imports create separate WebSocket manager instances\n" +
             f"- Race conditions during initialization\n" +
@@ -169,10 +169,10 @@ class WebSocketManagerSSotComplianceTests(SSotBaseTestCase):
             f"SSOT COMPLIANCE ANALYSIS:\n" +
             self._format_ssot_compliance_report(ssot_compliance) +
             f"\n\nSSOT REQUIREMENTS:\n" +
-            f"✅ Use unified_manager import with WebSocketManager alias\n" +
-            f"✅ Import exactly once per file (no duplicate imports)\n" +
-            f"✅ Use consistent alias naming (WebSocketManager)\n" +
-            f"❌ No websocket_manager legacy imports allowed\n\n" +
+            f"CHECK Use unified_manager import with WebSocketManager alias\n" +
+            f"CHECK Import exactly once per file (no duplicate imports)\n" +
+            f"CHECK Use consistent alias naming (WebSocketManager)\n" +
+            f"X No websocket_manager legacy imports allowed\n\n" +
             f"COMPLIANCE BENEFITS:\n" +
             f"- Single source of truth for WebSocket manager\n" +
             f"- Consistent initialization patterns\n" +
@@ -251,8 +251,8 @@ class WebSocketManagerSSotComplianceTests(SSotBaseTestCase):
             f"ALIAS CONSISTENCY ANALYSIS:\n" +
             self._format_alias_analysis_report(alias_analysis) +
             f"\n\nREQUIRED ALIAS CONSISTENCY:\n" +
-            f"✅ Standard alias: WebSocketManager (from UnifiedWebSocketManager)\n" +
-            f"❌ Inconsistent aliases cause import confusion\n\n" +
+            f"CHECK Standard alias: WebSocketManager (from UnifiedWebSocketManager)\n" +
+            f"X Inconsistent aliases cause import confusion\n\n" +
             f"INCONSISTENCY RISKS:\n" +
             f"- Developer confusion about correct import\n" +
             f"- Multiple aliases for same functionality\n" +
@@ -448,7 +448,7 @@ class WebSocketManagerSSotComplianceTests(SSotBaseTestCase):
         for file_path, file_violations in violations.items():
             report_lines.append(f"📁 FILE: {file_path}")
             for line_num, violation_type, line in file_violations:
-                report_lines.append(f"  ❌ Line {line_num} [{violation_type}]: {line}")
+                report_lines.append(f"  X Line {line_num} [{violation_type}]: {line}")
             report_lines.append("")
         
         return "\n".join(report_lines)
@@ -460,7 +460,7 @@ class WebSocketManagerSSotComplianceTests(SSotBaseTestCase):
         for file_path, file_violations in violations.items():
             report_lines.append(f"📁 {file_path}:")
             for line_num, pattern_type, line in file_violations:
-                report_lines.append(f"  ❌ Line {line_num} [{pattern_type}]: {line}")
+                report_lines.append(f"  X Line {line_num} [{pattern_type}]: {line}")
             report_lines.append("")
         
         return "\n".join(report_lines)
@@ -470,7 +470,7 @@ class WebSocketManagerSSotComplianceTests(SSotBaseTestCase):
         report_lines = []
         
         for file_path, status in compliance.items():
-            compliance_icon = "✅" if status['is_compliant'] else "❌"
+            compliance_icon = "CHECK" if status['is_compliant'] else "X"
             report_lines.append(f"{compliance_icon} {file_path}: {'COMPLIANT' if status['is_compliant'] else 'NON-COMPLIANT'}")
             
             if not status['is_compliant']:
@@ -478,10 +478,10 @@ class WebSocketManagerSSotComplianceTests(SSotBaseTestCase):
                     report_lines.append(f"    - {issue}")
             
             if status['ssot_imports_found']:
-                report_lines.append(f"    ✅ SSOT imports: {', '.join(status['ssot_imports_found'])}")
+                report_lines.append(f"    CHECK SSOT imports: {', '.join(status['ssot_imports_found'])}")
             
             if status['legacy_imports_found']:
-                report_lines.append(f"    ❌ Legacy imports: {', '.join(status['legacy_imports_found'])}")
+                report_lines.append(f"    X Legacy imports: {', '.join(status['legacy_imports_found'])}")
             
             report_lines.append("")
         
@@ -492,7 +492,7 @@ class WebSocketManagerSSotComplianceTests(SSotBaseTestCase):
         report_lines = []
         
         for module_path, analysis in status.items():
-            frag_icon = "❌" if analysis['has_fragmentation'] else "✅"
+            frag_icon = "X" if analysis['has_fragmentation'] else "CHECK"
             report_lines.append(f"{frag_icon} {module_path}:")
             report_lines.append(f"    SSOT imports: {analysis['ssot_imports']}")
             report_lines.append(f"    Legacy imports: {analysis['legacy_imports']}")
@@ -512,13 +512,13 @@ class WebSocketManagerSSotComplianceTests(SSotBaseTestCase):
         
         for file_path, aliases in analysis.items():
             unique_aliases = list(set(aliases))
-            consistency_icon = "✅" if len(unique_aliases) <= 1 else "❌"
+            consistency_icon = "CHECK" if len(unique_aliases) <= 1 else "X"
             report_lines.append(f"{consistency_icon} {file_path}:")
             
             if aliases:
                 report_lines.append(f"    Aliases found: {', '.join(aliases)}")
                 if len(unique_aliases) > 1:
-                    report_lines.append(f"    ⚠️ Inconsistent aliases: {', '.join(unique_aliases)}")
+                    report_lines.append(f"    WARNING️ Inconsistent aliases: {', '.join(unique_aliases)}")
             else:
                 report_lines.append("    No WebSocket Manager aliases found")
             

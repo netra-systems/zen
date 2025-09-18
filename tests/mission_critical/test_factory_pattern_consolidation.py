@@ -78,8 +78,8 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
             for file_path, class_name, _ in duplicate_factories
         ]
         
-        logger.warning(f❌ FACTORY DUPLICATION: Found {len(duplicate_factories)} duplicate factory implementations)
-        logger.info(f"✅ CANONICAL: Found {len(canonical_factories)} canonical factory implementations)"
+        logger.warning(fX FACTORY DUPLICATION: Found {len(duplicate_factories)} duplicate factory implementations)
+        logger.info(f"CHECK CANONICAL: Found {len(canonical_factories)} canonical factory implementations)"
         
         # EXPECTED TO FAIL: Multiple factory implementations indicate fragmentation
         self.assertGreater(
@@ -92,7 +92,7 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
     
     def test_validate_canonical_factory_functionality(self):
         "Validate canonical ExecutionEngineFactory functionality works correctly."
-        logger.info(✅ CANONICAL FACTORY TEST: Validating ExecutionEngineFactory functionality)
+        logger.info(CHECK CANONICAL FACTORY TEST: Validating ExecutionEngineFactory functionality)
         
         try:
             from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
@@ -172,7 +172,7 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
             result = asyncio.run(test_factory_creation())
             self.assertTrue(result, Factory functionality test should pass)
             
-            logger.info(✅ PASS: ExecutionEngineFactory functionality works correctly")"
+            logger.info(CHECK PASS: ExecutionEngineFactory functionality works correctly")"
             
         except Exception as e:
             self.factory_violations.append(fFactory functionality test failed: {e})
@@ -283,7 +283,7 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
             self.assertTrue(result, Factory lifecycle test should pass)""
 
             
-            logger.info("✅ PASS: ExecutionEngineFactory lifecycle management works properly)"
+            logger.info("CHECK PASS: ExecutionEngineFactory lifecycle management works properly)"
             
         except Exception as e:
             self.factory_violations.append(fFactory lifecycle test failed: {e})
@@ -355,8 +355,8 @@ class FactoryPatternConsolidationTests(SSotBaseTestCase):
             result = asyncio.run(test_integration())
             self.assertTrue(result, Factory integration test should pass)
             
-            logger.info(✅ PASS: ExecutionEngineFactory integration patterns work correctly)"
-            logger.info(✅ PASS: ExecutionEngineFactory integration patterns work correctly)""
+            logger.info(CHECK PASS: ExecutionEngineFactory integration patterns work correctly)"
+            logger.info(CHECK PASS: ExecutionEngineFactory integration patterns work correctly)""
 
             
         except Exception as e:

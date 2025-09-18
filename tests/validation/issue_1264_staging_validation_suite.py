@@ -2,7 +2,7 @@
 Issue #1264 Staging Validation Suite - PostgreSQL Configuration Validation
 
 CRITICAL P0 VALIDATION: Comprehensive validation framework for when the infrastructure
-team fixes the Cloud SQL MySQL→PostgreSQL misconfiguration in Issue #1264.
+team fixes the Cloud SQL MySQL->PostgreSQL misconfiguration in Issue #1264.
 
 This validation suite provides immediate, comprehensive testing that can be executed
 as soon as the infrastructure fix is applied to validate the resolution.
@@ -678,7 +678,7 @@ class TestIssue1264StagingValidation(SSotAsyncTestCase):
             test_name = result_details['test']
             success = result_details['success']
             exec_time = result_details['execution_time']
-            status_symbol = "✓" if success else "❌"
+            status_symbol = "CHECK" if success else "X"
             print(f"  {status_symbol} {test_name}: {exec_time:.2f}s")
             if not success and result_details.get('error'):
                 print(f"    Error: {result_details['error']}")
@@ -728,11 +728,11 @@ if __name__ == "__main__":
         # Validate environment
         current_env = validator.env.get('ENVIRONMENT', 'development')
         if current_env.lower() != 'staging':
-            print(f"❌ Environment validation failed: Not in staging (current: {current_env})")
+            print(f"X Environment validation failed: Not in staging (current: {current_env})")
             print("   Set ENVIRONMENT=staging to run validation")
             sys.exit(1)
 
-        print(f"✓ Environment validated: {current_env}")
+        print(f"CHECK Environment validated: {current_env}")
 
         # Run comprehensive validation
         try:
@@ -742,11 +742,11 @@ if __name__ == "__main__":
             print(f"VALIDATION RESULTS - {health_status.timestamp}")
             print(f"=" * 80)
 
-            print(f"Overall Health: {'✓ HEALTHY' if health_status.overall_health else '❌ UNHEALTHY'}")
-            print(f"Database Connectivity: {'✓' if health_status.database_connectivity else '❌'} ({health_status.connection_time:.2f}s)")
-            print(f"Health Endpoint: {'✓' if health_status.health_endpoint_status else '❌'}")
-            print(f"WebSocket Connectivity: {'✓' if health_status.websocket_connectivity else '❌'}")
-            print(f"Golden Path Status: {'✓' if health_status.golden_path_status else '❌'}")
+            print(f"Overall Health: {'CHECK HEALTHY' if health_status.overall_health else 'X UNHEALTHY'}")
+            print(f"Database Connectivity: {'CHECK' if health_status.database_connectivity else 'X'} ({health_status.connection_time:.2f}s)")
+            print(f"Health Endpoint: {'CHECK' if health_status.health_endpoint_status else 'X'}")
+            print(f"WebSocket Connectivity: {'CHECK' if health_status.websocket_connectivity else 'X'}")
+            print(f"Golden Path Status: {'CHECK' if health_status.golden_path_status else 'X'}")
 
             issue_status = health_status.details.get('issue_1264_resolution_status', 'UNKNOWN')
             print(f"\nIssue #1264 Status: {issue_status}")
@@ -756,7 +756,7 @@ if __name__ == "__main__":
                 print(f"   Infrastructure fix successful - PostgreSQL configuration working")
                 sys.exit(0)
             else:
-                print(f"\n❌ VALIDATION FAILED: Issue #1264 not yet resolved")
+                print(f"\nX VALIDATION FAILED: Issue #1264 not yet resolved")
                 print(f"   Infrastructure fix still required")
 
                 # Print failure details

@@ -345,7 +345,7 @@ class WebSocketManagerCanonicalInterfaceTests(SSotBaseTestCase):
                     error_message=str(e)
                 )
                 self.interface_analyses.append(error_analysis)
-                print(f"❌ FAILED TO IMPORT: {import_path}")
+                print(f"X FAILED TO IMPORT: {import_path}")
                 print(f"   Error: {str(e)}")
                 print()
 
@@ -370,7 +370,7 @@ class WebSocketManagerCanonicalInterfaceTests(SSotBaseTestCase):
             for canonical_name, canonical_sig in canonical_interface.items():
                 if canonical_name not in analysis.methods:
                     missing_methods.append(canonical_name)
-                    print(f"   ❌ MISSING METHOD: {canonical_name}")
+                    print(f"   X MISSING METHOD: {canonical_name}")
                 else:
                     # Compare signatures
                     actual_sig = analysis.methods[canonical_name]
@@ -378,7 +378,7 @@ class WebSocketManagerCanonicalInterfaceTests(SSotBaseTestCase):
                     if mismatches:
                         signature_mismatches.extend(mismatches)
                         for mismatch in mismatches:
-                            print(f"   ⚠️  SIGNATURE MISMATCH: {mismatch}")
+                            print(f"   WARNING️  SIGNATURE MISMATCH: {mismatch}")
 
             if missing_methods:
                 missing_methods_by_import[analysis.import_path] = missing_methods
@@ -395,7 +395,7 @@ class WebSocketManagerCanonicalInterfaceTests(SSotBaseTestCase):
         print(f"Interface violations found: {len(interface_violations)}")
 
         if interface_violations:
-            print("\n❌ INTERFACE VIOLATIONS DETECTED:")
+            print("\nX INTERFACE VIOLATIONS DETECTED:")
             for violation in interface_violations:
                 print(f"   - {violation}")
 
@@ -412,7 +412,7 @@ class WebSocketManagerCanonicalInterfaceTests(SSotBaseTestCase):
                 f"should expose the same canonical interface. Violations: {interface_violations}"
             )
 
-        print("✅ CANONICAL INTERFACE CONSISTENCY VALIDATED!")
+        print("CHECK CANONICAL INTERFACE CONSISTENCY VALIDATED!")
         print("All import paths expose the same canonical interface methods.")
 
     def _compare_method_signatures(self, canonical: MethodSignature, actual: MethodSignature) -> List[str]:
@@ -503,9 +503,9 @@ class WebSocketManagerCanonicalInterfaceTests(SSotBaseTestCase):
             if len(method_implementations) == 0:
                 violation = f"{method_name}: NOT FOUND in any implementation"
                 signature_violations.append(violation)
-                print(f"   ❌ {violation}")
+                print(f"   X {violation}")
             elif len(method_implementations) == 1:
-                print(f"   ⚠️  Only found in 1 implementation - need SSOT consolidation")
+                print(f"   WARNING️  Only found in 1 implementation - need SSOT consolidation")
             else:
                 # Compare all implementations for consistency
                 signatures = list(method_implementations.values())
@@ -517,7 +517,7 @@ class WebSocketManagerCanonicalInterfaceTests(SSotBaseTestCase):
                         import_paths = list(method_implementations.keys())
                         violation = f"{method_name}: signature mismatch between {import_paths[0]} and {import_paths[i]}: {mismatches}"
                         signature_violations.append(violation)
-                        print(f"   ❌ {violation}")
+                        print(f"   X {violation}")
 
             print()
 
@@ -525,7 +525,7 @@ class WebSocketManagerCanonicalInterfaceTests(SSotBaseTestCase):
         print(f"Signature violations found: {len(signature_violations)}")
 
         if signature_violations:
-            print("\n❌ CRITICAL METHOD SIGNATURE VIOLATIONS:")
+            print("\nX CRITICAL METHOD SIGNATURE VIOLATIONS:")
             for violation in signature_violations:
                 print(f"   - {violation}")
 
@@ -537,7 +537,7 @@ class WebSocketManagerCanonicalInterfaceTests(SSotBaseTestCase):
                 f"across all implementations after SSOT consolidation. Violations: {signature_violations}"
             )
 
-        print("✅ CRITICAL METHOD SIGNATURE CONSISTENCY VALIDATED!")
+        print("CHECK CRITICAL METHOD SIGNATURE CONSISTENCY VALIDATED!")
 
     def _format_signature(self, sig: MethodSignature) -> str:
         """Format a method signature for display."""
@@ -584,9 +584,9 @@ class WebSocketManagerCanonicalInterfaceTests(SSotBaseTestCase):
             missing = required_methods - available_methods
             if missing:
                 missing_methods.extend(missing)
-                print(f"   ❌ Missing {len(missing)} required methods: {missing}")
+                print(f"   X Missing {len(missing)} required methods: {missing}")
             else:
-                print(f"   ✅ All {len(required_methods)} required methods present")
+                print(f"   CHECK All {len(required_methods)} required methods present")
 
             extra_methods = available_methods - required_methods
             if extra_methods:
@@ -603,7 +603,7 @@ class WebSocketManagerCanonicalInterfaceTests(SSotBaseTestCase):
         print(f"Completeness violations: {len(completeness_violations)}")
 
         if completeness_violations:
-            print("\n❌ INTERFACE COMPLETENESS VIOLATIONS:")
+            print("\nX INTERFACE COMPLETENESS VIOLATIONS:")
             for violation in completeness_violations:
                 print(f"   - {violation}")
 
@@ -615,7 +615,7 @@ class WebSocketManagerCanonicalInterfaceTests(SSotBaseTestCase):
                 f"Violations: {completeness_violations}"
             )
 
-        print("✅ INTERFACE COMPLETENESS VALIDATED!")
+        print("CHECK INTERFACE COMPLETENESS VALIDATED!")
         print("All implementations expose the complete canonical interface.")
 
     def teardown_method(self, method):

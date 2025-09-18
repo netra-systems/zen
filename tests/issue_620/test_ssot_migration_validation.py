@@ -34,10 +34,10 @@ class SSotMigrationValidationTests(SSotAsyncTestCase):
         - After Migration: PASS - All imports point to UserExecutionEngine
         - Before Migration: FAIL - Multiple import sources exist
         """
-        logger.info('✅ VALIDATION TEST: Testing single ExecutionEngine import source')
+        logger.info('CHECK VALIDATION TEST: Testing single ExecutionEngine import source')
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-            logger.info('✅ UserExecutionEngine import successful')
+            logger.info('CHECK UserExecutionEngine import successful')
         except ImportError as e:
             pytest.fail(f'MIGRATION INCOMPLETE: UserExecutionEngine not available: {e}')
         deprecated_import_working = False
@@ -48,7 +48,7 @@ class SSotMigrationValidationTests(SSotAsyncTestCase):
             deprecated_import_working = True
             logger.info('Deprecated ExecutionEngine import still available')
         except ImportError:
-            logger.info('✅ Deprecated ExecutionEngine import removed (expected after migration)')
+            logger.info('CHECK Deprecated ExecutionEngine import removed (expected after migration)')
         if deprecated_import_working and execution_engine_class:
             if hasattr(execution_engine_class, '__name__'):
                 class_name = execution_engine_class.__name__
@@ -59,11 +59,11 @@ class SSotMigrationValidationTests(SSotAsyncTestCase):
                     if not hasattr(execution_engine_class, '_migration_issue'):
                         pytest.fail(f'MIGRATION INCOMPLETE: ExecutionEngine ({class_name} from {module_name}) is not UserExecutionEngine or compatibility wrapper')
                     else:
-                        logger.info('✅ ExecutionEngine is compatibility wrapper for migration')
+                        logger.info('CHECK ExecutionEngine is compatibility wrapper for migration')
                 else:
-                    logger.info('✅ ExecutionEngine properly aliased to UserExecutionEngine')
+                    logger.info('CHECK ExecutionEngine properly aliased to UserExecutionEngine')
         self._validate_import_consistency()
-        logger.info('✅ SSOT VALIDATION: Single ExecutionEngine import source confirmed')
+        logger.info('CHECK SSOT VALIDATION: Single ExecutionEngine import source confirmed')
 
     async def test_user_context_isolation_after_migration(self):
         """VALIDATION TEST: UserExecutionEngine provides complete user isolation.
@@ -71,7 +71,7 @@ class SSotMigrationValidationTests(SSotAsyncTestCase):
         This test validates that after migration, user contexts are completely isolated
         with no data contamination between concurrent users.
         """
-        logger.info('✅ VALIDATION TEST: Testing user context isolation after migration')
+        logger.info('CHECK VALIDATION TEST: Testing user context isolation after migration')
         user_contexts = []
         for i in range(5):
             context = UserExecutionContext(user_id=f'isolated_user_{i}', thread_id=f'thread_{i}', run_id=f'run_{i}', request_id=f'req_{i}', audit_metadata={f'user_{i}_secret': f'CONFIDENTIAL_USER_{i}_DATA', f'user_{i}_account': f'ACCOUNT_{i}_SENSITIVE_INFO', 'user_index': i, 'isolation_test': True})
@@ -112,7 +112,7 @@ class SSotMigrationValidationTests(SSotAsyncTestCase):
                         isolation_validated = False
         if not isolation_validated:
             pytest.fail('MIGRATION VALIDATION FAILED: User isolation not achieved after migration. UserExecutionEngine failed to provide complete user context isolation.')
-        logger.info('✅ USER ISOLATION VALIDATED: Complete user context isolation achieved')
+        logger.info('CHECK USER ISOLATION VALIDATED: Complete user context isolation achieved')
 
     async def test_legacy_constructor_compatibility(self):
         """VALIDATION TEST: Legacy constructor calls work with UserExecutionEngine.
@@ -120,7 +120,7 @@ class SSotMigrationValidationTests(SSotAsyncTestCase):
         This test validates that the migration maintains backward compatibility
         for existing ExecutionEngine constructor calls.
         """
-        logger.info('✅ VALIDATION TEST: Testing legacy constructor compatibility')
+        logger.info('CHECK VALIDATION TEST: Testing legacy constructor compatibility')
         user_context = UserExecutionContext(user_id='compatibility_test_user', thread_id='compatibility_thread', run_id='compatibility_run', request_id='compatibility_req', audit_metadata={'compatibility_test': True})
         mock_registry = Mock()
         mock_websocket_bridge = Mock()
@@ -138,7 +138,7 @@ class SSotMigrationValidationTests(SSotAsyncTestCase):
                 compat_info = engine.get_compatibility_info()
                 assert compat_info['compatibility_mode'], 'Compatibility mode not reported'
                 assert compat_info['migration_needed'], 'Migration need not reported'
-            logger.info('✅ Legacy constructor compatibility validated')
+            logger.info('CHECK Legacy constructor compatibility validated')
         except ImportError as e:
             pytest.fail(f'MIGRATION VALIDATION FAILED: UserExecutionEngine not available: {e}')
         except Exception as e:
@@ -148,13 +148,13 @@ class SSotMigrationValidationTests(SSotAsyncTestCase):
             engine = UserExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
             if hasattr(engine, '_delegation_active'):
                 assert engine._delegation_active, 'Delegation not active'
-                logger.info('✅ Deprecated ExecutionEngine delegates to UserExecutionEngine')
+                logger.info('CHECK Deprecated ExecutionEngine delegates to UserExecutionEngine')
             elif isinstance(engine, UserExecutionEngine):
-                logger.info('✅ Deprecated ExecutionEngine is UserExecutionEngine')
+                logger.info('CHECK Deprecated ExecutionEngine is UserExecutionEngine')
             else:
                 pytest.fail(f'MIGRATION INCOMPLETE: Deprecated ExecutionEngine ({type(engine)}) neither delegates nor is UserExecutionEngine')
         except ImportError:
-            logger.info('✅ Deprecated ExecutionEngine removed (expected after complete migration)')
+            logger.info('CHECK Deprecated ExecutionEngine removed (expected after complete migration)')
 
     def test_method_signature_compatibility(self):
         """VALIDATION TEST: Method signatures remain compatible after migration.
@@ -162,7 +162,7 @@ class SSotMigrationValidationTests(SSotAsyncTestCase):
         This test validates that UserExecutionEngine maintains API compatibility
         with the original ExecutionEngine interface.
         """
-        logger.info('✅ VALIDATION TEST: Testing method signature compatibility')
+        logger.info('CHECK VALIDATION TEST: Testing method signature compatibility')
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
         except ImportError as e:
@@ -181,7 +181,7 @@ class SSotMigrationValidationTests(SSotAsyncTestCase):
             legacy_params = list(legacy_sig.parameters.keys())
             if 'registry' not in legacy_params or 'websocket_bridge' not in legacy_params:
                 pytest.fail(f'LEGACY COMPATIBILITY FAILED: create_from_legacy missing required parameters. Found: {legacy_params}, Expected: registry, websocket_bridge')
-        logger.info('✅ Method signature compatibility validated')
+        logger.info('CHECK Method signature compatibility validated')
 
     async def test_execution_functionality_equivalence(self):
         """VALIDATION TEST: UserExecutionEngine provides equivalent functionality.
@@ -189,7 +189,7 @@ class SSotMigrationValidationTests(SSotAsyncTestCase):
         This test validates that UserExecutionEngine can execute agents
         with the same functionality as the original ExecutionEngine.
         """
-        logger.info('✅ VALIDATION TEST: Testing execution functionality equivalence')
+        logger.info('CHECK VALIDATION TEST: Testing execution functionality equivalence')
         user_context = UserExecutionContext(user_id='functionality_test_user', thread_id='functionality_thread', run_id='functionality_run', request_id='functionality_req', audit_metadata={'functionality_test': True})
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -215,11 +215,11 @@ class SSotMigrationValidationTests(SSotAsyncTestCase):
             logger.info(f'Execution stats available: {list(stats.keys())}')
         if hasattr(engine, 'cleanup'):
             await engine.cleanup()
-            logger.info('✅ Cleanup functionality available')
+            logger.info('CHECK Cleanup functionality available')
         elif hasattr(engine, 'shutdown'):
             await engine.shutdown()
-            logger.info('✅ Shutdown functionality available')
-        logger.info('✅ Execution functionality equivalence validated')
+            logger.info('CHECK Shutdown functionality available')
+        logger.info('CHECK Execution functionality equivalence validated')
 
     def test_ssot_compliance_metrics(self):
         """VALIDATION TEST: SSOT compliance metrics meet requirements.
@@ -227,7 +227,7 @@ class SSotMigrationValidationTests(SSotAsyncTestCase):
         This test validates that the migration achieves the required
         SSOT compliance metrics.
         """
-        logger.info('✅ VALIDATION TEST: Testing SSOT compliance metrics')
+        logger.info('CHECK VALIDATION TEST: Testing SSOT compliance metrics')
         compliance_metrics = {'single_execution_engine_class': False, 'no_duplicate_implementations': False, 'consistent_import_resolution': False, 'user_isolation_capability': False, 'backward_compatibility': False}
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -262,7 +262,7 @@ class SSotMigrationValidationTests(SSotAsyncTestCase):
         failed_metrics = [metric for metric, passed in compliance_metrics.items() if not passed]
         if failed_metrics:
             pytest.fail(f'SSOT COMPLIANCE FAILED: {len(failed_metrics)} metrics failed: {failed_metrics}. Migration incomplete - SSOT requirements not met.')
-        logger.info('✅ All SSOT compliance metrics passed')
+        logger.info('CHECK All SSOT compliance metrics passed')
 
     def _validate_import_consistency(self):
         """Validate that ExecutionEngine imports are consistent across codebase."""
@@ -284,7 +284,7 @@ class SSotMigrationValidationTests(SSotAsyncTestCase):
         if deprecated_available:
             if not hasattr(deprecated_class, '_migration_issue') and deprecated_class != UserExecutionEngine:
                 pytest.fail(f'IMPORT CONSISTENCY FAILED: Deprecated ExecutionEngine exists but is not compatible. Class: {deprecated_class}, Module: {deprecated_class.__module__}')
-        logger.info('✅ Import consistency validated')
+        logger.info('CHECK Import consistency validated')
 
     async def _execute_isolated_validation_agent(self, engine, user_context, test_data):
         """Execute agent for isolation validation."""
@@ -303,7 +303,7 @@ class UserExecutionEngineSpecificTests(SSotAsyncTestCase):
 
     async def test_user_execution_engine_constructor(self):
         """VALIDATION TEST: UserExecutionEngine constructor works correctly."""
-        logger.info('✅ VALIDATION TEST: UserExecutionEngine constructor')
+        logger.info('CHECK VALIDATION TEST: UserExecutionEngine constructor')
         user_context = UserExecutionContext(user_id='constructor_test_user', thread_id='constructor_thread', run_id='constructor_run', request_id='constructor_req', audit_metadata={'constructor_test': True})
         mock_agent_factory = Mock()
         mock_websocket_emitter = Mock()
@@ -316,7 +316,7 @@ class UserExecutionEngineSpecificTests(SSotAsyncTestCase):
             if hasattr(engine, 'get_user_context'):
                 retrieved_context = engine.get_user_context()
                 assert retrieved_context == user_context, 'get_user_context() returns wrong context'
-            logger.info('✅ UserExecutionEngine constructor validated')
+            logger.info('CHECK UserExecutionEngine constructor validated')
         except ImportError as e:
             pytest.fail(f'VALIDATION FAILED: UserExecutionEngine not available: {e}')
         except Exception as e:
@@ -324,7 +324,7 @@ class UserExecutionEngineSpecificTests(SSotAsyncTestCase):
 
     async def test_user_execution_engine_isolation_features(self):
         """VALIDATION TEST: UserExecutionEngine isolation features."""
-        logger.info('✅ VALIDATION TEST: UserExecutionEngine isolation features')
+        logger.info('CHECK VALIDATION TEST: UserExecutionEngine isolation features')
         context1 = UserExecutionContext(user_id='isolation_user_1', thread_id='thread_1', run_id='run_1', audit_metadata={'user': 1, 'secret': 'USER1_SECRET'})
         context2 = UserExecutionContext(user_id='isolation_user_2', thread_id='thread_2', run_id='run_2', audit_metadata={'user': 2, 'secret': 'USER2_SECRET'})
         try:
@@ -340,7 +340,7 @@ class UserExecutionEngineSpecificTests(SSotAsyncTestCase):
             assert engine1.context.user_id != engine2.context.user_id, 'User IDs should be different'
             if hasattr(engine1, 'context') and hasattr(engine2, 'context'):
                 assert engine1.context.audit_metadata['secret'] != engine2.context.audit_metadata['secret'], 'User secrets should be isolated'
-            logger.info('✅ UserExecutionEngine isolation features validated')
+            logger.info('CHECK UserExecutionEngine isolation features validated')
         except ImportError as e:
             pytest.fail(f'VALIDATION FAILED: UserExecutionEngine not available: {e}')
         except Exception as e:

@@ -756,7 +756,7 @@ if __name__ == __main__:
         -m, staging or mission_critical  # Run staging and mission critical markers
     ]
 
-    print(f"\n✅ Enhanced staging test execution completed with exit code: {exit_code})"
+    print(f"\nCHECK Enhanced staging test execution completed with exit code: {exit_code})"
     sys.exit(exit_code")"
 
 )))))))

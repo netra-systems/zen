@@ -10,7 +10,7 @@ MISSION CRITICAL: Protect $500K+ ARR by ensuring WebSocket migration maintains:
 2. Security guarantees (auth/authorization preserved)
 3. Memory safety (no resource leaks)
 4. Event delivery reliability (all 5 critical events)
-5. Golden Path preservation (login → AI response flow)
+5. Golden Path preservation (login -> AI response flow)
 """
 
 import pytest

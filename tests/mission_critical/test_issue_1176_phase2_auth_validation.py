@@ -3,7 +3,7 @@
 Issue #1176 Phase 2: Authentication Stabilization and Infrastructure Validation
 
 This test validates the complete authentication flow without Docker dependencies,
-ensuring the Golden Path (users login → get AI responses) works correctly.
+ensuring the Golden Path (users login -> get AI responses) works correctly.
 
 CRITICAL MISSION: Prove authentication system stability for the Golden Path.
 
@@ -95,7 +95,7 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
             )
 
         self.execution_context.end_test()
-        logger.info(f"✅ Issue #1176 Phase 2: Tests completed in {test_duration:.3f}s with {self.tests_executed} operations)"
+        logger.info(f"CHECK Issue #1176 Phase 2: Tests completed in {test_duration:.3f}s with {self.tests_executed} operations)"
         super().tearDown()
 
     def _track_test_execution(self, operation_name: str):
@@ -121,9 +121,9 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
 
         # Service credentials are required for auth service communication
         if not service_id:
-            logger.warning(⚠️ SERVICE_ID not configured - auth service communication may fail)
+            logger.warning(WARNING️ SERVICE_ID not configured - auth service communication may fail)
         if not service_secret:
-            logger.warning(⚠️ SERVICE_SECRET not configured - auth service communication may fail")"
+            logger.warning(WARNING️ SERVICE_SECRET not configured - auth service communication may fail")"
 
     async def test_auth_service_health_check(self):
         Test auth service health check functionality."
@@ -144,7 +144,7 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
         if health_status.get("fallback_available):"
             logger.info(🔄 Auth service fallback endpoint available)
         if health_status.get("error):"
-            logger.warning(f⚠️ Auth service health error: {health_status['error']})
+            logger.warning(fWARNING️ Auth service health error: {health_status['error']})
 
     async def test_backend_auth_integration_initialization(self):
         Test BackendAuthIntegration initializes correctly.""
@@ -192,7 +192,7 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
                 if should_be_valid:
                     logger.info(f📝 Valid format failed auth service validation (expected): {e}")"
                 else:
-                    logger.debug(f✅ Invalid format properly rejected: {e})
+                    logger.debug(fCHECK Invalid format properly rejected: {e})
 
     async def test_auth_service_connectivity_patterns(self):
         Test auth service connectivity and error patterns.""
@@ -238,8 +238,8 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
             validation_result = await _validate_token_with_auth_service(test_token.replace("Bearer , ))"
 
             if validation_result and validation_result.get(valid):
-                logger.info(✅ Auth service validation succeeded unexpectedly)"
-                logger.info(✅ Auth service validation succeeded unexpectedly)"
+                logger.info(CHECK Auth service validation succeeded unexpectedly)"
+                logger.info(CHECK Auth service validation succeeded unexpectedly)"
                 self.assertTrue(validation_result["valid], Valid token should be accepted)"
             else:
                 logger.info(📝 Auth service validation failed as expected (service unavailable))
@@ -301,21 +301,21 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
 
         # Validate critical configuration
         if not auth_config[AUTH_SERVICE_URL]:
-            logger.warning("⚠️ AUTH_SERVICE_URL not configured)"
+            logger.warning("WARNING️ AUTH_SERVICE_URL not configured)"
 
         if not auth_config[SERVICE_ID]:
-            logger.warning(⚠️ SERVICE_ID not configured - auth service communication will fail)"
-            logger.warning(⚠️ SERVICE_ID not configured - auth service communication will fail)"
+            logger.warning(WARNING️ SERVICE_ID not configured - auth service communication will fail)"
+            logger.warning(WARNING️ SERVICE_ID not configured - auth service communication will fail)"
 
         if not auth_config[SERVICE_SECRET"]:"
-            logger.warning(⚠️ SERVICE_SECRET not configured - auth service communication will fail)
+            logger.warning(WARNING️ SERVICE_SECRET not configured - auth service communication will fail)
 
     async def test_golden_path_auth_requirements(self):
         ""Test authentication requirements for the Golden Path."
         self._track_test_execution(golden_path_auth_requirements)"
         self._track_test_execution(golden_path_auth_requirements)"
 
-        # Golden Path: users login → get AI responses
+        # Golden Path: users login -> get AI responses
         # This requires working authentication for:
         # 1. User login/token generation
         # 2. Token validation for API requests
@@ -326,19 +326,19 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
 
         # Test 1: Auth service client availability
         auth_available = self.auth_client is not None
-        logger.info(f  1. Auth service client: {'✅' if auth_available else '❌'})
+        logger.info(f  1. Auth service client: {'CHECK' if auth_available else 'X'})
         self.assertTrue(auth_available, Auth service client must be available for Golden Path)"
         self.assertTrue(auth_available, Auth service client must be available for Golden Path)"
 
         # Test 2: Backend integration availability
         backend_integration_available = self.backend_auth is not None
-        logger.info(f"  2. Backend auth integration: {'✅' if backend_integration_available else '❌'})"
+        logger.info(f"  2. Backend auth integration: {'CHECK' if backend_integration_available else 'X'})"
         self.assertTrue(backend_integration_available, Backend auth integration must be available)
 
         # Test 3: Configuration completeness
         env = get_env()
         config_complete = bool(env.get(SERVICE_ID) and env.get(SERVICE_SECRET"))"
-        logger.info(f"  3. Service credentials: {'✅' if config_complete else '⚠️'})"
+        logger.info(f"  3. Service credentials: {'CHECK' if config_complete else 'WARNING️'})"
         if not config_complete:
             logger.warning(    Service credentials incomplete - may impact Golden Path)
 
@@ -346,17 +346,17 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
         try:
             health_status = await check_auth_service_health()
             auth_healthy = health_status.get(status) in [healthy", degraded]"
-            logger.info(f  4. Auth service health: {'✅' if auth_healthy else '❌'})
+            logger.info(f  4. Auth service health: {'CHECK' if auth_healthy else 'X'})
         except Exception as e:
-            logger.info(f"  4. Auth service health: ❌ ({e})"
+            logger.info(f"  4. Auth service health: X ({e})"
             auth_healthy = False
 
         # Golden Path assessment
         golden_path_ready = auth_available and backend_integration_available
-        logger.info(f🏆 Golden Path auth readiness: {'✅' if golden_path_ready else '⚠️'}")"
+        logger.info(f🏆 Golden Path auth readiness: {'CHECK' if golden_path_ready else 'WARNING️'}")"
 
         if not golden_path_ready:
-            logger.warning(⚠️ Golden Path may be impacted by auth configuration issues)
+            logger.warning(WARNING️ Golden Path may be impacted by auth configuration issues)
 
         # Always pass the test - this is validation, not blocking
         self.assertTrue(True, Golden Path validation completed")"
@@ -375,7 +375,7 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
         self.assertGreater(current_duration, 0.5,
                           Test execution should take measurable time")"
 
-        logger.info(f✅ Phase 1 anti-recursive validation: {self.tests_executed} tests executed in {current_duration:.3f}s)
+        logger.info(fCHECK Phase 1 anti-recursive validation: {self.tests_executed} tests executed in {current_duration:.3f}s)
 
 
 # Issue #1176 Phase 2: Standalone test execution
@@ -426,10 +426,10 @@ if __name__ == __main__:
                 try:
                     print(f"\n🧪 Running {test_name}...))"
                     await test_method(")"
-                    print(f✅ {test_name} PASSED)
+                    print(fCHECK {test_name} PASSED)
                     test_results.append((test_name, "PASSED, None))"
                 except Exception as e:
-                    print(f❌ {test_name} FAILED: {e})
+                    print(fX {test_name} FAILED: {e})
                     test_results.append((test_name, "FAILED, str(e)))"
 
         finally:
@@ -455,21 +455,21 @@ if __name__ == __main__:
         print(f   Failed: {failed_count})"
         print(f   Failed: {failed_count})"
         print(f"   Duration: {standalone_duration:.3f}s))"
-        print(f   Execution: {'✅ REAL' if standalone_duration > 0.1 else '❌ FAKE'})"
-        print(f   Execution: {'✅ REAL' if standalone_duration > 0.1 else '❌ FAKE'})"
+        print(f   Execution: {'CHECK REAL' if standalone_duration > 0.1 else 'X FAKE'})"
+        print(f   Execution: {'CHECK REAL' if standalone_duration > 0.1 else 'X FAKE'})"
 
         # Issue #1176 Phase 1 validation
         if standalone_duration < 0.1:
-            print("❌ ISSUE #1176 PHASE 1 VIOLATION: Test completed too quickly - fake execution detected)"
+            print("X ISSUE #1176 PHASE 1 VIOLATION: Test completed too quickly - fake execution detected)"
             sys.exit(1)
 
         if len(results) == 0:
-            print(❌ ISSUE #1176 PHASE 1 VIOLATION: No tests executed - anti-recursive fix failed")"
+            print(X ISSUE #1176 PHASE 1 VIOLATION: No tests executed - anti-recursive fix failed")"
             sys.exit(1)
 
         # Exit with appropriate code
         sys.exit(0 if failed_count == 0 else 1)
 
     except Exception as e:
-        print(f"❌ Test execution failed: {e})"
+        print(f"X Test execution failed: {e})"
         sys.exit(1")"

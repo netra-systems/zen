@@ -138,7 +138,7 @@ class TestWebSocketSSOTComplianceMissionCritical(SSotAsyncTestCase):
         if len(manager_mode_locations) > 1:
             violation = f"CRITICAL: Multiple WebSocketManagerMode enums found: {manager_mode_locations}"
             violations.append(violation)
-            print(f"   ❌ {violation}")
+            print(f"   X {violation}")
 
         # Check for multiple _UnifiedWebSocketManagerImplementation classes
         implementation_locations = []
@@ -158,7 +158,7 @@ class TestWebSocketSSOTComplianceMissionCritical(SSotAsyncTestCase):
         if len(implementation_locations) > 1:
             violation = f"CRITICAL: Multiple _UnifiedWebSocketManagerImplementation classes found: {implementation_locations}"
             violations.append(violation)
-            print(f"   ❌ {violation}")
+            print(f"   X {violation}")
 
         # Check for multiple WebSocketManagerFactory classes
         factory_locations = []
@@ -178,10 +178,10 @@ class TestWebSocketSSOTComplianceMissionCritical(SSotAsyncTestCase):
         if len(factory_locations) > 1:
             violation = f"CRITICAL: Multiple WebSocketManagerFactory classes found: {factory_locations}"
             violations.append(violation)
-            print(f"   ❌ {violation}")
+            print(f"   X {violation}")
 
         if not violations:
-            print("   ✅ No manager duplication violations detected")
+            print("   CHECK No manager duplication violations detected")
 
         return violations
 
@@ -210,7 +210,7 @@ class TestWebSocketSSOTComplianceMissionCritical(SSotAsyncTestCase):
         if canonical_imports_missing:
             violation = f"CRITICAL: Canonical imports not available: {canonical_imports_missing}"
             violations.append(violation)
-            print(f"   ❌ {violation}")
+            print(f"   X {violation}")
 
         # Test for fragmented import paths
         fragmented_imports = []
@@ -232,10 +232,10 @@ class TestWebSocketSSOTComplianceMissionCritical(SSotAsyncTestCase):
         if fragmented_imports:
             violation = f"CRITICAL: Fragmented import paths detected: {fragmented_imports}"
             violations.append(violation)
-            print(f"   ❌ {violation}")
+            print(f"   X {violation}")
 
         if not violations:
-            print("   ✅ No import path fragmentation violations detected")
+            print("   CHECK No import path fragmentation violations detected")
 
         return violations
 
@@ -264,7 +264,7 @@ class TestWebSocketSSOTComplianceMissionCritical(SSotAsyncTestCase):
             if factory_sources_available > 1:
                 violation = f"CRITICAL: Multiple factory sources available ({factory_sources_available}), risking user isolation"
                 violations.append(violation)
-                print(f"   ❌ {violation}")
+                print(f"   X {violation}")
 
             # Test for shared state risks
             try:
@@ -284,7 +284,7 @@ class TestWebSocketSSOTComplianceMissionCritical(SSotAsyncTestCase):
                 if shared_state_risks:
                     violation = f"CRITICAL: Potential shared state attributes detected: {shared_state_risks}"
                     violations.append(violation)
-                    print(f"   ❌ {violation}")
+                    print(f"   X {violation}")
 
             except ImportError:
                 pass
@@ -292,10 +292,10 @@ class TestWebSocketSSOTComplianceMissionCritical(SSotAsyncTestCase):
         except Exception as e:
             violation = f"CRITICAL: User isolation test failed with error: {e}"
             violations.append(violation)
-            print(f"   ❌ {violation}")
+            print(f"   X {violation}")
 
         if not violations:
-            print("   ✅ No user isolation violations detected")
+            print("   CHECK No user isolation violations detected")
 
         return violations
 
@@ -341,15 +341,15 @@ class TestWebSocketSSOTComplianceMissionCritical(SSotAsyncTestCase):
                     if method_diff:
                         violation = f"CRITICAL: Connection management interface inconsistency: {method_diff}"
                         violations.append(violation)
-                        print(f"   ❌ {violation}")
+                        print(f"   X {violation}")
 
         except Exception as e:
             violation = f"CRITICAL: Connection management test failed with error: {e}"
             violations.append(violation)
-            print(f"   ❌ {violation}")
+            print(f"   X {violation}")
 
         if not violations:
-            print("   ✅ No connection management violations detected")
+            print("   CHECK No connection management violations detected")
 
         return violations
 
@@ -364,8 +364,8 @@ class TestWebSocketSSOTComplianceMissionCritical(SSotAsyncTestCase):
             for i, violation in enumerate(self.ssot_violations, 1):
                 print(f"   {i}. {violation}")
         else:
-            print("✅ NO SSOT VIOLATIONS DETECTED")
-            print("⚠️  WARNING: If Issue #885 is unresolved, this may indicate test failure")
+            print("CHECK NO SSOT VIOLATIONS DETECTED")
+            print("WARNING️  WARNING: If Issue #885 is unresolved, this may indicate test failure")
 
         print(f"\n📊 COMPLIANCE METRICS:")
         print(f"   Total Violations: {len(self.ssot_violations)}")
@@ -437,7 +437,7 @@ if __name__ == '__main__':
     print("MISSION CRITICAL: ISSUE #885 WEBSOCKET SSOT COMPLIANCE TEST")
     print("=" * 80)
     print("🚨 CRITICAL: This test MUST FAIL to expose SSOT violations.")
-    print("⚠️  If this test PASSES, verify Issue #885 remediation is complete.")
+    print("WARNING️  If this test PASSES, verify Issue #885 remediation is complete.")
     print("📋 This test validates WebSocket subsystem SSOT compliance.")
     print("💰 Business Impact: Prevents cascade failures affecting $500K+ ARR")
     print("=" * 80)

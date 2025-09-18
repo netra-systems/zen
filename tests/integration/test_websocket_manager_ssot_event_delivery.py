@@ -499,7 +499,7 @@ class WebSocketManagerSSOTEventDeliveryTests(SSotAsyncTestCase, unittest.TestCas
                 fINTEGRATION FAILURE: Load test performance insufficient. 
                 fSSOT: {ssot_success_rate:."1f"}%, Legacy: {legacy_success_rate:."1f"}% 
                 f(requires {min_success_rate}%+). ""
-                fLoad consistency: {'✓' if load_consistency else '✗'}. 
+                fLoad consistency: {'CHECK' if load_consistency else '✗'}. 
                 fIssue #1104 import fragmentation causes performance degradation under load. 
                 f"This impacts scalability for Enterprise customers."
             )

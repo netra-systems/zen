@@ -199,7 +199,7 @@ class FactorySSotViolationsTests(SSotBaseTestCase):
         self.assertLessEqual(
             len(actual_duplicates),
             2,
-            f"❌ SSOT VIOLATION DETECTED: Found {len(actual_duplicates)} duplicate factory signature groups "
+            f"X SSOT VIOLATION DETECTED: Found {len(actual_duplicates)} duplicate factory signature groups "
             f"with {total_duplicates} total duplicate instances. Expected ≤2 for SSOT compliance."
         )
 
@@ -284,7 +284,7 @@ class FactorySSotViolationsTests(SSotBaseTestCase):
         self.assertLessEqual(
             len(inconsistent_imports),
             3,
-            f"❌ IMPORT PATH FRAGMENTATION DETECTED: Found {len(inconsistent_imports)} inconsistent factory import patterns. "
+            f"X IMPORT PATH FRAGMENTATION DETECTED: Found {len(inconsistent_imports)} inconsistent factory import patterns. "
             f"Expected ≤3 for SSOT compliance. This indicates factory import path fragmentation."
         )
 
@@ -357,7 +357,7 @@ class FactorySSotViolationsTests(SSotBaseTestCase):
         self.assertLessEqual(
             len(competing_implementations),
             3,
-            f"❌ COMPETING PATTERNS DETECTED: Found {len(competing_implementations)} factory purposes with competing implementations. "
+            f"X COMPETING PATTERNS DETECTED: Found {len(competing_implementations)} factory purposes with competing implementations. "
             f"Expected ≤3 for SSOT compliance. These should be consolidated to single implementations."
         )
 
@@ -454,7 +454,7 @@ class FactorySSotViolationsTests(SSotBaseTestCase):
         self.assertLessEqual(
             total_violations,
             5,
-            f"❌ INHERITANCE HIERARCHY VIOLATIONS DETECTED: Found {len(deep_hierarchy_violations)} deep hierarchies "
+            f"X INHERITANCE HIERARCHY VIOLATIONS DETECTED: Found {len(deep_hierarchy_violations)} deep hierarchies "
             f"and {len(duplicate_base_violations)} duplicate base patterns. Expected ≤5 total for SSOT compliance."
         )
 
@@ -540,7 +540,7 @@ class FactorySSotViolationsTests(SSotBaseTestCase):
             recommended = unification['recommended_implementation']
             rel_path = Path(recommended['file']).relative_to(self.project_root) if self.project_root in Path(recommended['file']).parents else recommended['file']
             print(f"  {i+1}. {unification['purpose']}")
-            print(f"     ✅ Keep: {recommended['service']} -> {rel_path}")
+            print(f"     CHECK Keep: {recommended['service']} -> {rel_path}")
             print(f"     🔄 Deprecate {len(unification['alternatives_to_deprecate'])} alternatives")
             print(f"     💰 Benefit: {unification['unification_benefit']}")
 
@@ -563,7 +563,7 @@ class FactorySSotViolationsTests(SSotBaseTestCase):
         self.assertGreaterEqual(
             total_consolidations,
             5,
-            f"✅ SSOT CONSOLIDATION OPPORTUNITIES: Found {total_consolidations} consolidation opportunities. "
+            f"CHECK SSOT CONSOLIDATION OPPORTUNITIES: Found {total_consolidations} consolidation opportunities. "
             f"This provides substantial SSOT compliance improvements."
         )
 

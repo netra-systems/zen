@@ -136,7 +136,7 @@ class WebSocketJWTAuthenticationCrisisTests(SSotAsyncTestCase):
         """
         Test Golden Path WebSocket flow blocked by JWT configuration.
         
-        Golden Path: User login → Agent starts → WebSocket events → AI response
+        Golden Path: User login -> Agent starts -> WebSocket events -> AI response
         Blockage Point: WebSocket authentication fails due to missing JWT secret
         """
         mock_env = self._mock_staging_environment()

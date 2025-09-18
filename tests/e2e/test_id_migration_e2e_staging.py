@@ -18,10 +18,10 @@ Test Strategy:
 - Focus on business-critical workflows that generate revenue
 
 Critical E2E Workflows Under Test:
-- User registration → Authentication → Chat session → Agent execution
-- WebSocket connection → Agent streaming → Real-time updates → Session cleanup
-- Multi-user concurrent usage → Resource isolation → Performance consistency
-- Error recovery → System resilience → Data integrity
+- User registration -> Authentication -> Chat session -> Agent execution
+- WebSocket connection -> Agent streaming -> Real-time updates -> Session cleanup
+- Multi-user concurrent usage -> Resource isolation -> Performance consistency
+- Error recovery -> System resilience -> Data integrity
 
 CLAUDE.MD Compliance:
 - GCP staging environment testing only (no Docker)

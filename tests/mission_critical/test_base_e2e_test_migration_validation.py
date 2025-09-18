@@ -64,8 +64,8 @@ class TestBaseE2ETestMigrationValidation(SSotAsyncTestCase):
                 f1. Replace 'from tests.test_framework.base_test_case import BaseE2ETest' with ""
 
                 f'from test_framework.ssot.base_test_case import SSotAsyncTestCase'\n
-                f2. Update class inheritance: 'class YourTest(BaseE2ETest)' → 'class YourTest(SSotAsyncTestCase)'\n"
-                f2. Update class inheritance: 'class YourTest(BaseE2ETest)' → 'class YourTest(SSotAsyncTestCase)'\n"
+                f2. Update class inheritance: 'class YourTest(BaseE2ETest)' -> 'class YourTest(SSotAsyncTestCase)'\n"
+                f2. Update class inheritance: 'class YourTest(BaseE2ETest)' -> 'class YourTest(SSotAsyncTestCase)'\n"
                 f"3. Update async test methods to follow SSOT patterns\n"
                 f4. Remove direct os.environ usage if present\n\n
                 fMIGRATION PROGRESS: {len(base_e2e_imports)} files remaining
@@ -221,11 +221,11 @@ DETAILED METRICS:
 - Files with import violations: {import_violating}
 
 MIGRATION TARGETS:
-    - Legacy imports: {legacy_imports} → 0 (TARGET)
-- SSOT compliance: {ssot_compliance:."1f"}% → 100% (TARGET)""
+    - Legacy imports: {legacy_imports} -> 0 (TARGET)
+- SSOT compliance: {ssot_compliance:."1f"}% -> 100% (TARGET)""
 
-- Environment violations: {environ_violating} → 0 (TARGET)
-- Import violations: {import_violating} → 0 (TARGET)
+- Environment violations: {environ_violating} -> 0 (TARGET)
+- Import violations: {import_violating} -> 0 (TARGET)
 
 NEXT ACTIONS:
     1. Migrate {legacy_imports} files from BaseE2ETest to SSotAsyncTestCase
@@ -246,7 +246,7 @@ NEXT ACTIONS:
             self.fail(fMigration not complete. Current status:\n{report}")"
         
         # Log success when migration is complete
-        print(f✅ MIGRATION COMPLETE: All E2E tests successfully migrated to SSOT patterns.\n{report})
+        print(fCHECK MIGRATION COMPLETE: All E2E tests successfully migrated to SSOT patterns.\n{report})
 
     # Helper methods
     

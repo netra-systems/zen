@@ -581,7 +581,7 @@ if __name__ == '__main__':
     print(🚨 Mission Critical: SSOT Consolidation Golden Path Protection)"
     print(=" * 80)"
     print(🔥 CRITICAL: These tests protect $"500K" plus ARR during SSOT consolidation")"
-    print(⚠️  Any test failure BLOCKS deployment and requires immediate fix)
+    print(WARNING️  Any test failure BLOCKS deployment and requires immediate fix)
     print("📊 These tests validate business-critical functionality preservation)"
     print(= * 80)"
     print(= * 80)""

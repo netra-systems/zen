@@ -325,7 +325,7 @@ class ImportSSotValidationTests(SSotBaseTestCase):
         for category, violations in violation_categories.items():
             logger.info(f"  {category}: {len(violations)} violations")
             for violation in violations[:2]:  # Show first 2 per category
-                logger.info(f"    ❌ {violation}")
+                logger.info(f"    X {violation}")
         
         # EXPECTED TO FAIL: Comprehensive violations should be detected
         self.assertGreater(

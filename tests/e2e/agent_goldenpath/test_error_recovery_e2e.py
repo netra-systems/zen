@@ -176,11 +176,11 @@ class ErrorRecoveryE2ETests(SSotAsyncTestCase):
             websocket = await asyncio.wait_for(websockets.connect(self.__class__.staging_config.urls.websocket_url, additional_headers={'Authorization': f'Bearer {self.access_token}', 'X-Environment': 'staging', 'X-Test-Suite': 'error-recovery-e2e', 'X-Error-Testing': 'enabled'}, ssl=ssl_context, ping_interval=30, ping_timeout=10), timeout=25.0)
             connection_time = time.time() - connection_start
             recovery_metrics.append({'metric': 'websocket_connection_time', 'value': connection_time, 'timestamp': time.time(), 'success': True})
-            self.logger.info(f'✅ WebSocket connected for error testing in {connection_time:.2f}s')
+            self.logger.info(f'CHECK WebSocket connected for error testing in {connection_time:.2f}s')
             scenario_results = []
             for scenario_name, scenario_config in self.__class__.error_scenarios.items():
                 scenario_start = time.time()
-                self.logger.info(f'⚠️ Testing error scenario: {scenario_name}')
+                self.logger.info(f'WARNING️ Testing error scenario: {scenario_name}')
                 error_message = self._create_error_scenario_message(scenario_name)
                 error_events = []
                 try:
@@ -214,15 +214,15 @@ class ErrorRecoveryE2ETests(SSotAsyncTestCase):
                                 recovery_events.append(event)
                                 event_type = event.get('type', 'unknown')
                                 if event_type == 'agent_completed':
-                                    self.logger.info(f'✅ Recovery successful for {scenario_name}')
+                                    self.logger.info(f'CHECK Recovery successful for {scenario_name}')
                                     break
                                 elif 'error' in event_type.lower():
-                                    self.logger.warning(f'⚠️ Recovery error for {scenario_name}: {event}')
+                                    self.logger.warning(f'WARNING️ Recovery error for {scenario_name}: {event}')
                                     break
                             except asyncio.TimeoutError:
                                 continue
                     except Exception as recovery_error:
-                        self.logger.error(f'❌ Recovery attempt failed for {scenario_name}: {recovery_error}')
+                        self.logger.error(f'X Recovery attempt failed for {scenario_name}: {recovery_error}')
                 scenario_duration = time.time() - scenario_start
                 recovery_validation = self._validate_error_recovery(scenario_name, error_events, recovery_events)
                 scenario_results.append({'scenario': scenario_name, 'duration': scenario_duration, 'error_events': len(error_events), 'recovery_events': len(recovery_events), 'recovery_validation': recovery_validation, 'success': recovery_validation['recovery_score'] >= 0.6})
@@ -257,7 +257,7 @@ class ErrorRecoveryE2ETests(SSotAsyncTestCase):
                 self.logger.info(f"   {result['scenario']}: Score {validation['recovery_score']:.2f}, Recovery {validation['recovery_successful']}, Duration {result['duration']:.1f}s")
         except Exception as e:
             total_time = time.time() - error_recovery_start_time
-            self.logger.error(f'❌ COMPREHENSIVE ERROR RECOVERY FAILED')
+            self.logger.error(f'X COMPREHENSIVE ERROR RECOVERY FAILED')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             self.logger.error(f'   Recovery metrics collected: {len(recovery_metrics)}')
@@ -331,10 +331,10 @@ class ErrorRecoveryE2ETests(SSotAsyncTestCase):
                         recovery_events.append(event)
                         event_type = event.get('type', 'unknown')
                         if event_type == 'agent_completed':
-                            self.logger.info('✅ Recovery processing completed successfully')
+                            self.logger.info('CHECK Recovery processing completed successfully')
                             break
                         if 'error' in event_type.lower():
-                            self.logger.warning(f'⚠️ Error during recovery: {event}')
+                            self.logger.warning(f'WARNING️ Error during recovery: {event}')
                     except asyncio.TimeoutError:
                         continue
                 await recovery_websocket.close()
@@ -358,7 +358,7 @@ class ErrorRecoveryE2ETests(SSotAsyncTestCase):
             self.logger.info(f'   Recovery Successful: {recovery_successful}')
         except Exception as e:
             total_time = time.time() - network_test_start_time
-            self.logger.error(f'❌ NETWORK INTERRUPTION RESILIENCE FAILED')
+            self.logger.error(f'X NETWORK INTERRUPTION RESILIENCE FAILED')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             raise AssertionError(f'Network resilience validation failed after {total_time:.1f}s: {e}. Poor network resilience affects platform reliability and user experience.')

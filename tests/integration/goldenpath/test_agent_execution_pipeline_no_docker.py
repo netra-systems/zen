@@ -234,7 +234,7 @@ class GoldenPathAgentExecutionNonDockerTests(SSotAsyncTestCase):
             self.record_metric("websocket_events_sent", mock_websocket.send.call_count)
             self.record_metric("agent_execution_successful", True)
             
-            self.logger.info(f"✅ PASS: Complete agent execution with real LLM successful in {execution_time:.2f}s")
+            self.logger.info(f"CHECK PASS: Complete agent execution with real LLM successful in {execution_time:.2f}s")
             
         finally:
             await websocket_manager.shutdown()
@@ -355,7 +355,7 @@ class GoldenPathAgentExecutionNonDockerTests(SSotAsyncTestCase):
             self.record_metric("final_context_size", final_context_size)
             self.record_metric("state_persistence_successful", True)
             
-            self.logger.info("✅ PASS: Agent state persistence during execution successful")
+            self.logger.info("CHECK PASS: Agent state persistence during execution successful")
             
         finally:
             await websocket_manager.shutdown()
@@ -435,7 +435,7 @@ class GoldenPathAgentExecutionNonDockerTests(SSotAsyncTestCase):
                                 execution_context
                             )
                         
-                        self.logger.info(f"✓ Invalid agent type properly rejected")
+                        self.logger.info(f"CHECK Invalid agent type properly rejected")
                         
                     elif scenario.get("simulate_timeout"):
                         # Test timeout scenario
@@ -449,7 +449,7 @@ class GoldenPathAgentExecutionNonDockerTests(SSotAsyncTestCase):
                             with self.expect_exception(asyncio.TimeoutError):
                                 await asyncio.wait_for(asyncio.sleep(2), timeout=0.1)
                             
-                            self.logger.info(f"✓ Timeout handling working correctly")
+                            self.logger.info(f"CHECK Timeout handling working correctly")
                             
                         except asyncio.TimeoutError:
                             # Expected timeout - verify error handling
@@ -469,7 +469,7 @@ class GoldenPathAgentExecutionNonDockerTests(SSotAsyncTestCase):
                         
                         except ValueError as ve:
                             self.assertIn("malformed", str(ve).lower())
-                            self.logger.info(f"✓ Malformed request properly handled: {ve}")
+                            self.logger.info(f"CHECK Malformed request properly handled: {ve}")
                     
                     # Verify error notifications sent via WebSocket
                     if mock_websocket.send.called:
@@ -485,13 +485,13 @@ class GoldenPathAgentExecutionNonDockerTests(SSotAsyncTestCase):
                         
                         # Don't require error events for every scenario, but log them
                         if error_events:
-                            self.logger.info(f"✓ Error events sent for {scenario['name']}: {len(error_events)}")
+                            self.logger.info(f"CHECK Error events sent for {scenario['name']}: {len(error_events)}")
                         
                         mock_websocket.send.reset_mock()
                 
                 except Exception as e:
                     # Error handling should be graceful
-                    self.logger.info(f"✓ Error scenario '{scenario['name']}' handled: {e}")
+                    self.logger.info(f"CHECK Error scenario '{scenario['name']}' handled: {e}")
                     
                 # Verify system remains stable after error
                 try:
@@ -506,7 +506,7 @@ class GoldenPathAgentExecutionNonDockerTests(SSotAsyncTestCase):
             self.record_metric("error_handling_successful", True)
             self.record_metric("system_stability_maintained", True)
             
-            self.logger.info("✅ PASS: Agent error handling in integration context successful")
+            self.logger.info("CHECK PASS: Agent error handling in integration context successful")
             
         finally:
             await websocket_manager.shutdown()
@@ -686,7 +686,7 @@ class GoldenPathAgentExecutionNonDockerTests(SSotAsyncTestCase):
             self.record_metric("event_delivery_successful", True)
             self.increment_websocket_events(len(sent_events))
             
-            self.logger.info(f"✅ PASS: WebSocket event delivery during execution successful - {len(sent_events)} events sent")
+            self.logger.info(f"CHECK PASS: WebSocket event delivery during execution successful - {len(sent_events)} events sent")
             
         finally:
             await websocket_manager.shutdown()
@@ -743,7 +743,7 @@ class GoldenPathAgentExecutionNonDockerTests(SSotAsyncTestCase):
             )
             await websocket_manager.add_connection(connection_info)
             
-            # Define multi-step workflow: Triage → Data Helper → APEX Optimizer
+            # Define multi-step workflow: Triage -> Data Helper -> APEX Optimizer
             workflow_steps = [
                 {
                     "step": 1,
@@ -864,7 +864,7 @@ class GoldenPathAgentExecutionNonDockerTests(SSotAsyncTestCase):
             self.record_metric("workflow_events_sent", len(workflow_events))
             self.record_metric("multi_step_workflow_successful", True)
             
-            self.logger.info(f"✅ PASS: Multi-step agent workflow integration successful in {total_workflow_time:.2f}s")
+            self.logger.info(f"CHECK PASS: Multi-step agent workflow integration successful in {total_workflow_time:.2f}s")
             
         finally:
             await websocket_manager.shutdown()

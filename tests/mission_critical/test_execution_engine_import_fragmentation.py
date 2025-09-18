@@ -15,7 +15,7 @@ EXPECTED INITIAL STATE: FAIL (proving fragmentation exists)
 EXPECTED POST-CONSOLIDATION STATE: PASS (single canonical import)
 
 Business Impact: $"500K" plus ARR depends on Golden Path stability
-Critical Path: User login → AI response flow requires stable imports
+Critical Path: User login -> AI response flow requires stable imports
 "
 ""
 
@@ -290,7 +290,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
 
         Validate that fragmented imports don't break Golden Path'
 
-        Tests critical user flow: login → agent execution → response
+        Tests critical user flow: login -> agent execution -> response
         "
         ""
 
@@ -327,7 +327,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         # CRITICAL: Canonical import MUST work for Golden Path
         assert canonical_import_works, ()
             GOLDEN PATH BROKEN: Canonical UserExecutionEngine import failed. 
-            "This breaks the core user flow: login → agent execution → response."
+            "This breaks the core user flow: login -> agent execution -> response."
         )
 
         # VALIDATION: Some deprecated imports should fail (proving cleanup needed)

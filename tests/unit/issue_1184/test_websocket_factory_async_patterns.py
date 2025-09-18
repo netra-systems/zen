@@ -2,7 +2,7 @@
 Additional tests for Issue #1184 - WebSocket Factory Async Pattern Validation
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Infrastructure
+- Segment: ALL (Free -> Enterprise) - Infrastructure
 - Business Goal: Validate async/sync factory patterns work correctly
 - Value Impact: Ensures correct async/await usage in WebSocket factory creation
 - Strategic Impact: Prevents async/await compatibility issues in staging/production
@@ -49,25 +49,25 @@ class WebSocketFactoryAsyncPatternsTests(SSotAsyncTestCase):
             # This should be an async function that can be awaited
             async_manager = await create_websocket_manager(user_context=user_context)
             assert async_manager is not None, "Async create_websocket_manager failed"
-            logger.info("✅ Async create_websocket_manager works correctly")
+            logger.info("CHECK Async create_websocket_manager works correctly")
             
         except ImportError:
             logger.info("ℹ️ Async create_websocket_manager not available, skipping async test")
         except Exception as e:
-            logger.error(f"❌ Async create_websocket_manager failed: {e}")
+            logger.error(f"X Async create_websocket_manager failed: {e}")
             pytest.fail(f"Async create_websocket_manager compatibility issue: {e}")
 
         # Test 2: Synchronous get_websocket_manager (baseline)
         sync_manager = get_websocket_manager(user_context=user_context)
         assert sync_manager is not None, "Sync get_websocket_manager failed"
-        logger.info("✅ Sync get_websocket_manager works correctly")
+        logger.info("CHECK Sync get_websocket_manager works correctly")
 
         # Test 3: Validate both create same type of object (if async version exists)
         try:
             if 'async_manager' in locals():
                 assert type(async_manager) == type(sync_manager), \
                     "Async and sync factory methods should create same type"
-                logger.info("✅ Async and sync factories create compatible objects")
+                logger.info("CHECK Async and sync factories create compatible objects")
         except NameError:
             pass  # async_manager not created, skip comparison
 
@@ -101,7 +101,7 @@ class WebSocketFactoryAsyncPatternsTests(SSotAsyncTestCase):
                         # Option 1: Use sync get_websocket_manager directly (RECOMMENDED)
                         self._websocket_manager = get_websocket_manager(user_context=self.user_context)
                         self._websocket_manager_created = True
-                        logger.info("✅ Using sync get_websocket_manager directly")
+                        logger.info("CHECK Using sync get_websocket_manager directly")
                         
                     except Exception as e:
                         logger.error(f"Failed to create WebSocket manager: {e}")
@@ -118,7 +118,7 @@ class WebSocketFactoryAsyncPatternsTests(SSotAsyncTestCase):
         assert hasattr(manager, 'user_context'), "Manager missing user_context"
         assert manager.user_context == user_context, "User context not preserved"
         
-        logger.info("✅ Internal async wrapper pattern works correctly")
+        logger.info("CHECK Internal async wrapper pattern works correctly")
 
     @pytest.mark.issue_1184
     async def test_websocket_manager_module_loading_compatibility(self):
@@ -142,7 +142,7 @@ class WebSocketFactoryAsyncPatternsTests(SSotAsyncTestCase):
             assert manager2 is not None, "Canonical import pattern failed"
             # Should be same instance due to user registry
             assert manager1 is manager2, "Different import patterns should yield same manager"
-            logger.info("✅ Canonical import pattern works correctly")
+            logger.info("CHECK Canonical import pattern works correctly")
         except ImportError:
             logger.info("ℹ️ Canonical import pattern not available")
         
@@ -151,11 +151,11 @@ class WebSocketFactoryAsyncPatternsTests(SSotAsyncTestCase):
             from netra_backend.app.websocket_core.canonical_imports import get_websocket_manager_factory
             factory = get_websocket_manager_factory()
             assert factory is not None, "Factory import pattern failed"
-            logger.info("✅ Factory import pattern works correctly")
+            logger.info("CHECK Factory import pattern works correctly")
         except ImportError:
             logger.info("ℹ️ Factory import pattern not available")
 
-        logger.info("✅ Module loading compatibility validated")
+        logger.info("CHECK Module loading compatibility validated")
 
     @pytest.mark.issue_1184
     async def test_websocket_manager_concurrent_async_sync_mixed_usage(self):
@@ -212,7 +212,7 @@ class WebSocketFactoryAsyncPatternsTests(SSotAsyncTestCase):
                 if i != j:
                     assert manager1 is not manager2, f"Manager isolation failed between {i} and {j}"
         
-        logger.info("✅ Mixed async/sync concurrent usage validated")
+        logger.info("CHECK Mixed async/sync concurrent usage validated")
 
     @pytest.mark.issue_1184
     @pytest.mark.mission_critical
@@ -288,4 +288,4 @@ class WebSocketFactoryAsyncPatternsTests(SSotAsyncTestCase):
                 if isinstance(result, dict):
                     logger.warning(f"Failed result: {result.get('error')}")
         
-        logger.info(f"✅ Staging async compatibility validated: {success_rate:.1%} success rate")
+        logger.info(f"CHECK Staging async compatibility validated: {success_rate:.1%} success rate")

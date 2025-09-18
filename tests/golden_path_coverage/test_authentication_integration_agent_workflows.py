@@ -2,7 +2,7 @@
 GOLDEN PATH COVERAGE: Authentication Integration Agent Workflows Tests
 
 Business Impact: $500K+ ARR - Secure agent execution critical for enterprise customers
-Coverage Target: Weak → 80% for authentication integration during agent workflows
+Coverage Target: Weak -> 80% for authentication integration during agent workflows
 Priority: P0 - Security and user isolation requirements
 
 Tests comprehensive authentication integration throughout agent execution workflows.

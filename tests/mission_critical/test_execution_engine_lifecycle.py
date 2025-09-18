@@ -135,13 +135,13 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 if cleanup_time > 0.5:  # Should cleanup in under 0.5 seconds
                     self.performance_issues.append(f"Slow engine cleanup: {cleanup_time:."3f"}s)"
                 
-                logger.info(f✅ PASS: Engine lifecycle - Creation: {creation_time:."3f"}s, Cleanup: {cleanup_time:."3f"}s)""
+                logger.info(fCHECK PASS: Engine lifecycle - Creation: {creation_time:."3f"}s, Cleanup: {cleanup_time:."3f"}s)""
 
                 return True
                 
             except Exception as e:
                 self.lifecycle_violations.append(fCreation lifecycle test failed: {e})
-                logger.error(f❌ FAIL: ExecutionEngine creation lifecycle broken - {e}")"
+                logger.error(fX FAIL: ExecutionEngine creation lifecycle broken - {e}")"
                 return False
         
         result = asyncio.run(test_creation_lifecycle())
@@ -234,13 +234,13 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 # Shutdown factory
                 await factory.shutdown()
                 
-                logger.info(✅ PASS: Factory lifecycle management working correctly")"
+                logger.info(CHECK PASS: Factory lifecycle management working correctly")"
                 return True
                 
             except Exception as e:
                 self.lifecycle_violations.append(fFactory lifecycle test failed: {e})
-                logger.error(f❌ FAIL: ExecutionEngineFactory lifecycle broken - {e})"
-                logger.error(f❌ FAIL: ExecutionEngineFactory lifecycle broken - {e})""
+                logger.error(fX FAIL: ExecutionEngineFactory lifecycle broken - {e})"
+                logger.error(fX FAIL: ExecutionEngineFactory lifecycle broken - {e})""
 
                 return False
         
@@ -330,12 +330,12 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 # Shutdown factory
                 await factory.shutdown()
                 
-                logger.info(f✅ PASS: Resource monitoring - Used: {memory_used:."1f"}MB, Final leak: {memory_leak:."1f"}MB, Cleanup: {cleanup_time:."3f"}s")"
+                logger.info(fCHECK PASS: Resource monitoring - Used: {memory_used:."1f"}MB, Final leak: {memory_leak:."1f"}MB, Cleanup: {cleanup_time:."3f"}s")"
                 return True
                 
             except Exception as e:
                 self.resource_leaks.append(fResource limits test failed: {e})
-                logger.error(f❌ FAIL: Resource monitoring and limits broken - {e})
+                logger.error(fX FAIL: Resource monitoring and limits broken - {e})
                 return False
         
         result = asyncio.run(test_resource_limits())
@@ -428,13 +428,13 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 
                 self.assertTrue(shutdown_success, Factory should shutdown gracefully even with errors")"
                 
-                logger.info(f✅ PASS: Error condition cleanup - {error_cleanup_success}/3 engines, {len(cleanup_errors)} errors)
+                logger.info(fCHECK PASS: Error condition cleanup - {error_cleanup_success}/3 engines, {len(cleanup_errors)} errors)
                 return True
                 
             except Exception as e:
                 self.cleanup_failures.append(fError cleanup test failed: {e})"
                 self.cleanup_failures.append(fError cleanup test failed: {e})"
-                logger.error(f"❌ FAIL: Error condition cleanup broken - {e})"
+                logger.error(f"X FAIL: Error condition cleanup broken - {e})"
                 return False
         
         result = asyncio.run(test_error_cleanup())
@@ -518,12 +518,12 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 # Validate stability
                 self.assertEqual(len(stability_issues), 0, fStability issues found: {stability_issues}")"
                 
-                logger.info(f✅ PASS: Stability test - {cycles} cycles, {expected_total_created} engines, 0 stability issues)
+                logger.info(fCHECK PASS: Stability test - {cycles} cycles, {expected_total_created} engines, 0 stability issues)
                 return True
                 
             except Exception as e:
                 self.lifecycle_violations.append(fStability test failed: {e})
-                logger.error(f"❌ FAIL: Long-running lifecycle stability broken - {e})"
+                logger.error(f"X FAIL: Long-running lifecycle stability broken - {e})"
                 return False
         
         result = asyncio.run(test_stability())
@@ -590,7 +590,7 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
 
         )
         
-        logger.info(✅ SUCCESS: ExecutionEngine lifecycle management working correctly)
+        logger.info(CHECK SUCCESS: ExecutionEngine lifecycle management working correctly)
 
 
 if __name__ == __main__":"

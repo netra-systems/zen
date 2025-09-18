@@ -242,7 +242,7 @@ class GoldenPathAgentEventsIntegrationTests(SSotAsyncTestCase):
             self.event_validator.record_event(event)
             self.captured_events.append(event)
             
-            print(f"  ✅ Event {i+1}: {event.event_type} - Valid")
+            print(f"  CHECK Event {i+1}: {event.event_type} - Valid")
             
             # Add small delay to simulate real timing
             await asyncio.sleep(0.1)
@@ -277,7 +277,7 @@ class GoldenPathAgentEventsIntegrationTests(SSotAsyncTestCase):
         self.record_metric("business_value_score", sequence_validation.business_value_score)
         self.record_metric("critical_events_received", len(expected_events))
         
-        print("  ✅ Complete golden path event sequence validation successful")
+        print("  CHECK Complete golden path event sequence validation successful")
         print(f"  📊 Business value score: {sequence_validation.business_value_score}/100")
 
     @pytest.mark.asyncio
@@ -348,7 +348,7 @@ class GoldenPathAgentEventsIntegrationTests(SSotAsyncTestCase):
             processing_time = time.time() - start_time
             event_processing_times.append(processing_time)
             
-            print(f"  ✅ Thinking stage {i+1}: {event.data['thinking_stage']} ({event.data['completion_percentage']}% complete)")
+            print(f"  CHECK Thinking stage {i+1}: {event.data['thinking_stage']} ({event.data['completion_percentage']}% complete)")
             
             # Simulate real-time delivery timing
             await asyncio.sleep(0.2)
@@ -367,7 +367,7 @@ class GoldenPathAgentEventsIntegrationTests(SSotAsyncTestCase):
         self.record_metric("avg_processing_time_ms", avg_processing_time * 1000)
         self.record_metric("total_thinking_content_length", sum(len(event.data["message"]) for event in self.captured_events))
         
-        print(f"  ✅ Real-time thinking delivery successful - {len(thinking_events)} progressive updates")
+        print(f"  CHECK Real-time thinking delivery successful - {len(thinking_events)} progressive updates")
         print(f"  ⚡ Average processing time: {avg_processing_time * 1000:.1f}ms")
 
     @pytest.mark.asyncio
@@ -483,7 +483,7 @@ class GoldenPathAgentEventsIntegrationTests(SSotAsyncTestCase):
             results = completed_ws_event.data["results"]
             assert len(results) > 0, "Tool results must not be empty"
             
-            print(f"  ✅ Completed: {tool_info['tool_name']} - {len(results)} result fields")
+            print(f"  CHECK Completed: {tool_info['tool_name']} - {len(results)} result fields")
             
             current_time_offset += tool_info["execution_time"] + 1
         
@@ -509,7 +509,7 @@ class GoldenPathAgentEventsIntegrationTests(SSotAsyncTestCase):
         self.record_metric("tool_execution_pairs", len(tool_execution_pairs))
         self.record_metric("total_tools_executed", len(tool_execution_pairs))
         
-        print(f"  ✅ Tool execution event wrapping successful - {len(tool_execution_pairs)} tools properly wrapped")
+        print(f"  CHECK Tool execution event wrapping successful - {len(tool_execution_pairs)} tools properly wrapped")
 
     @pytest.mark.asyncio  
     async def test_user_message_to_agent_execution_flow(self):
@@ -675,7 +675,7 @@ class GoldenPathAgentEventsIntegrationTests(SSotAsyncTestCase):
         self.record_metric("user_message_length", len(user_message["content"]))
         self.record_metric("final_response_length", len(final_response))
         
-        print(f"  ✅ Complete user message flow successful - {len(flow_events)} events in {flow_duration * 1000:.1f}ms")
+        print(f"  CHECK Complete user message flow successful - {len(flow_events)} events in {flow_duration * 1000:.1f}ms")
         print(f"  💎 Business value delivered: {len(deliverables)} actionable deliverables")
 
     @pytest.mark.asyncio
@@ -794,7 +794,7 @@ class GoldenPathAgentEventsIntegrationTests(SSotAsyncTestCase):
         self.record_metric("concurrent_processing_time_ms", processing_time * 1000)
         self.record_metric("events_per_user", len(user_event_sequences[user_contexts[0].user_id]))
         
-        print(f"  ✅ User isolation successful - {len(user_contexts)} users, {len(self.captured_events)} total events")
+        print(f"  CHECK User isolation successful - {len(user_contexts)} users, {len(self.captured_events)} total events")
         print(f"  ⚡ Concurrent processing: {processing_time * 1000:.1f}ms")
         print(f"  🛡️ Zero cross-contamination detected")
 
@@ -939,7 +939,7 @@ class GoldenPathAgentEventsIntegrationTests(SSotAsyncTestCase):
                 assert "recovery_action" in event.data, "Error event must specify recovery action"
                 assert "user_impact" in event.data, "Error event must explain user impact"
                 
-                print(f"  ⚠️ Error detected: {event.data['error_type']} - Recovery: {event.data['recovery_action']}")
+                print(f"  WARNING️ Error detected: {event.data['error_type']} - Recovery: {event.data['recovery_action']}")
                 
             elif "recovery" in event.data.get("message", "").lower() or event.data.get("recovery_mode"):
                 recovery_count += 1
@@ -980,7 +980,7 @@ class GoldenPathAgentEventsIntegrationTests(SSotAsyncTestCase):
         self.record_metric("completion_despite_errors", 1)
         self.record_metric("error_recovery_ratio", recovery_count / max(error_count, 1))
         
-        print(f"  ✅ Error recovery successful - {error_count} errors, {recovery_count} recovery actions")
+        print(f"  CHECK Error recovery successful - {error_count} errors, {recovery_count} recovery actions")
         print(f"  🛡️ Graceful degradation maintained user experience")
         print(f"  📊 Recovery ratio: {recovery_count}/{error_count} = {recovery_count/error_count:.1f}")
 

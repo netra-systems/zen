@@ -1,7 +1,7 @@
 """
 E2E Staging Test for Issue #567: Golden Path WebSocket Event Validation
 
-End-to-end test that validates the Golden Path user flow (login → AI responses)
+End-to-end test that validates the Golden Path user flow (login -> AI responses)
 works correctly on GCP staging environment without WebSocket event duplication.
 
 This test runs against real staging services to validate business-critical functionality.

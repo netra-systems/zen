@@ -150,7 +150,7 @@ class WebSocketSSotUnifiedBehaviorValidationTests(SSotAsyncTestCase):
             # Validate event delivery order and timing
             await self._validate_event_delivery_quality(event_results)
             
-            logger.info("✅ Unified manager successfully handles all critical events")
+            logger.info("CHECK Unified manager successfully handles all critical events")
             
         except Exception as e:
             pytest.fail(f"CRITICAL: Unified WebSocket manager validation failed: {e}")
@@ -214,7 +214,7 @@ class WebSocketSSotUnifiedBehaviorValidationTests(SSotAsyncTestCase):
                 f"BUSINESS IMPACT: Users may see other users' data or experience cross-contamination."
             )
             
-            logger.info("✅ Unified manager maintains proper user isolation")
+            logger.info("CHECK Unified manager maintains proper user isolation")
             
         except Exception as e:
             pytest.fail(f"CRITICAL: User isolation validation failed: {e}")
@@ -293,7 +293,7 @@ class WebSocketSSotUnifiedBehaviorValidationTests(SSotAsyncTestCase):
                 f"BUSINESS IMPACT: Users experience slow response times."
             )
             
-            logger.info(f"✅ Performance validation passed: {successful_events}/{expected_events} events, "
+            logger.info(f"CHECK Performance validation passed: {successful_events}/{expected_events} events, "
                        f"{performance_degradation:.1f}x degradation")
             
         except Exception as e:
@@ -367,7 +367,7 @@ class WebSocketSSotUnifiedBehaviorValidationTests(SSotAsyncTestCase):
                 f"BUSINESS IMPACT: Users don't receive complete AI responses."
             )
             
-            logger.info("✅ Unified manager preserves complete Golden Path functionality")
+            logger.info("CHECK Unified manager preserves complete Golden Path functionality")
             
         except Exception as e:
             pytest.fail(f"CRITICAL: Golden Path compatibility validation failed: {e}")
@@ -506,9 +506,9 @@ class WebSocketSSotUnifiedBehaviorValidationTests(SSotAsyncTestCase):
             logger.info(f"  Critical events covered: {unique_event_types}/{len(self.critical_websocket_events)}")
             
             if unique_event_types == len(self.critical_websocket_events):
-                logger.info("✅ All critical WebSocket events successfully validated")
+                logger.info("CHECK All critical WebSocket events successfully validated")
             else:
-                logger.warning(f"⚠️ Missing critical events: {set(self.critical_websocket_events) - set(event['event_type'] for event in self.delivered_events)}")
+                logger.warning(f"WARNING️ Missing critical events: {set(self.critical_websocket_events) - set(event['event_type'] for event in self.delivered_events)}")
         
         super().teardown_method(method)
 

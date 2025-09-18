@@ -291,7 +291,7 @@ async def test_latency_baseline():
 
     # Validate requirements
     p99_passed = p99 < 50.0
-    print(f✓ P99 latency baseline validated: {p99_passed})
+    print(fCHECK P99 latency baseline validated: {p99_passed})
 
     return latencies
 
@@ -332,7 +332,7 @@ async def test_throughput_baseline():
 
     # Validate requirements
     throughput_passed = throughput > 1000.0
-    print(f✓ Throughput baseline validated: {throughput_passed})
+    print(fCHECK Throughput baseline validated: {throughput_passed})
 
     return throughput
 
@@ -373,7 +373,7 @@ async def test_connection_establishment():
 
     # Validate requirements
     connection_passed = p99_time < 500.0
-    print(f✓ Connection time baseline validated: {connection_passed}")"
+    print(fCHECK Connection time baseline validated: {connection_passed}")"
 
     return connection_times
 
@@ -451,9 +451,9 @@ async def test_concurrent_users():
     throughput_passed = overall_throughput > 200.0
     user_passed = num_users >= 25
 
-    print(f✓ P99 latency validated: {p99_passed}")"
-    print(f✓ Concurrent throughput validated: {throughput_passed})
-    print(f✓ User count validated: {user_passed})
+    print(fCHECK P99 latency validated: {p99_passed}")"
+    print(fCHECK Concurrent throughput validated: {throughput_passed})
+    print(fCHECK User count validated: {user_passed})
 
     return all_latencies, overall_throughput
 
@@ -523,10 +523,10 @@ async def test_comprehensive_performance():
         all_passed = all([p99_passed, throughput_passed, connection_passed, memory_passed)
 
         if all_passed:
-            print(\n✓ ALL PERFORMANCE REQUIREMENTS PASSED!")"
+            print(\nCHECK ALL PERFORMANCE REQUIREMENTS PASSED!")"
             print(WebSocket bridge ready for production with 25+ concurrent users")"
         else:
-            print(\n❌ SOME PERFORMANCE REQUIREMENTS FAILED!)
+            print(\nX SOME PERFORMANCE REQUIREMENTS FAILED!)
             print(Performance optimization required before production)
 
         return metrics

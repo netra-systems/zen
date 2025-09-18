@@ -260,7 +260,7 @@ def main():
     print("\n=== RECOMMENDATIONS ===")
     
     if total_occurrences > 0:
-        print("✅ PROCEED WITH MODERNIZATION:")
+        print("CHECK PROCEED WITH MODERNIZATION:")
         print("  - Found deprecated datetime.now(UTC) usage that should be modernized")
         print(f"  - {total_occurrences} occurrences across {total_files} files need updating")
         print(f"  - Estimated effort: {effort_hours:.1f} hours")

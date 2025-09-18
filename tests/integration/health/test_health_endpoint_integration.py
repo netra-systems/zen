@@ -127,7 +127,7 @@ class HealthEndpointIntegrationTests(SSotAsyncTestCase):
                 )
 
                 # This confirms the issue exists in both local and staging
-                print(f"✓ Confirmed malformed f-string error: {error_message}")
+                print(f"CHECK Confirmed malformed f-string error: {error_message}")
 
     def test_health_endpoint_with_mock_database_url_none(self):
         """Integration test simulating the exact conditions that trigger the f-string error."""

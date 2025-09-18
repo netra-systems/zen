@@ -163,7 +163,7 @@ class AdvancedErrorRecoveryE2ETests(SSotAsyncTestCase):
             assert recovery_result['success'], f"Recovery request should succeed after error. Error events: {recovery_result['error_events']}"
             assert len(recovery_result['critical_events']) >= 2, f"Recovery should deliver critical events. Got: {recovery_result['critical_events']}"
             assert recovery_result['events_count'] >= 3, f"Recovery should generate adequate events: {recovery_result['events_count']}"
-            self.logger.info('✅ Invalid agent type error recovery validated')
+            self.logger.info('CHECK Invalid agent type error recovery validated')
         finally:
             await websocket.close()
 
@@ -225,7 +225,7 @@ class AdvancedErrorRecoveryE2ETests(SSotAsyncTestCase):
                 if 'result' in scenario:
                     result = scenario['result']
                     assert result['total_time'] < 20.0, f"Malformed request handling should be quick for {scenario['scenario']}: {result['total_time']:.1f}s"
-            self.logger.info('✅ Malformed request error recovery validated')
+            self.logger.info('CHECK Malformed request error recovery validated')
         finally:
             await websocket.close()
 
@@ -284,7 +284,7 @@ class AdvancedErrorRecoveryE2ETests(SSotAsyncTestCase):
             recovery_events = recovery_result['events']
             has_meaningful_response = any((len(str(event.get('data', {}))) > 50 for event in recovery_events if event.get('type') == 'agent_completed'))
             assert has_meaningful_response, f'Recovery should deliver meaningful response content'
-            self.logger.info('✅ Network interruption recovery validated')
+            self.logger.info('CHECK Network interruption recovery validated')
         finally:
             try:
                 await websocket2.close()
@@ -357,7 +357,7 @@ class AdvancedErrorRecoveryE2ETests(SSotAsyncTestCase):
                 assert result.get('total_time', 0) < 25.0, f"Error handling should be quick for {invalid_result['scenario_type']}: {result.get('total_time', 0):.1f}s"
         assert len(exception_scenarios) == 0, f'Should not have connection exceptions during concurrent errors: {exception_scenarios}'
         assert total_time < 60.0, f'Concurrent error handling should complete in reasonable time: {total_time:.2f}s'
-        self.logger.info(f'✅ Concurrent error scenarios validated:')
+        self.logger.info(f'CHECK Concurrent error scenarios validated:')
         self.logger.info(f'   Valid Success Rate: {valid_success_rate:.1%}')
         self.logger.info(f'   System Stability: No exceptions')
         self.logger.info(f'   Performance: {total_time:.1f}s')

@@ -98,14 +98,14 @@ class WebSocketManagerFactorySsotConsolidationTests(SSotAsyncTestCase):
                             f"and affect $500K+ ARR enterprise customer requirements."
                         )
                 
-                logger.info("✅ SSOT COMPLIANCE: Factory creates instances of consistent type")
+                logger.info("CHECK SSOT COMPLIANCE: Factory creates instances of consistent type")
             
             # CRITICAL SSOT TEST 2: Instances should be properly isolated (different objects)
             instance_ids = set(id(instance) for _, _, instance in factory_instances)
             expected_unique_instances = len(factory_instances)
             
             if len(instance_ids) != expected_unique_instances:
-                logger.error(f"❌ FACTORY ISOLATION FAILURE: Expected {expected_unique_instances} unique instances, got {len(instance_ids)}")
+                logger.error(f"X FACTORY ISOLATION FAILURE: Expected {expected_unique_instances} unique instances, got {len(instance_ids)}")
                 
                 # Log instance sharing details
                 for i, (user_name, context, instance) in enumerate(factory_instances):
@@ -119,15 +119,15 @@ class WebSocketManagerFactorySsotConsolidationTests(SSotAsyncTestCase):
                     f"and data contamination risks in enterprise multi-tenant environment."
                 )
             
-            logger.info(f"✅ FACTORY ISOLATION VALIDATED: {len(instance_ids)} unique instances for {len(factory_instances)} users")
+            logger.info(f"CHECK FACTORY ISOLATION VALIDATED: {len(instance_ids)} unique instances for {len(factory_instances)} users")
             
             # CRITICAL SSOT TEST 3: User context isolation validation
             await self._validate_user_context_isolation(factory_instances)
             
-            logger.info("✅ FACTORY PATTERN CONSOLIDATION VALIDATED")
+            logger.info("CHECK FACTORY PATTERN CONSOLIDATION VALIDATED")
             
         except Exception as e:
-            logger.error(f"❌ FACTORY CONSOLIDATION VALIDATION FAILED: {e}")
+            logger.error(f"X FACTORY CONSOLIDATION VALIDATION FAILED: {e}")
             raise
     
     async def _validate_user_context_isolation(self, factory_instances):
@@ -193,7 +193,7 @@ class WebSocketManagerFactorySsotConsolidationTests(SSotAsyncTestCase):
                         f"Business Impact: Enterprise data isolation completely compromised."
                     )
                 
-                logger.info(f"✅ {user_name} factory instance properly isolated")
+                logger.info(f"CHECK {user_name} factory instance properly isolated")
                 
             except Exception as e:
                 logger.error(f"User context isolation validation failed for {user_name}: {e}")
@@ -271,13 +271,13 @@ class WebSocketManagerFactorySsotConsolidationTests(SSotAsyncTestCase):
                     'instance_type': type(manager_instance),
                     'instance_id': id(manager_instance)
                 }
-                logger.info(f"✅ Factory test case '{case_name}' succeeded: {type(manager_instance)}")
+                logger.info(f"CHECK Factory test case '{case_name}' succeeded: {type(manager_instance)}")
             except Exception as e:
                 factory_results[case_name] = {
                     'success': False,
                     'error': str(e)
                 }
-                logger.error(f"❌ Factory test case '{case_name}' failed: {e}")
+                logger.error(f"X Factory test case '{case_name}' failed: {e}")
         
         # CRITICAL SSOT TEST: All factory calls should succeed
         failed_cases = [name for name, result in factory_results.items() if not result['success']]
@@ -301,7 +301,7 @@ class WebSocketManagerFactorySsotConsolidationTests(SSotAsyncTestCase):
                         f"SSOT Violation: Factory should create consistent types regardless of parameters."
                     )
         
-        logger.info("✅ Factory method consistency validated")
+        logger.info("CHECK Factory method consistency validated")
     
     async def test_factory_concurrent_instantiation(self):
         """
@@ -363,7 +363,7 @@ class WebSocketManagerFactorySsotConsolidationTests(SSotAsyncTestCase):
             unique_instance_ids = set(instance_ids)
             
             if len(unique_instance_ids) != len(results):
-                logger.error(f"❌ CONCURRENT ISOLATION FAILURE: {len(unique_instance_ids)} unique instances for {len(results)} requests")
+                logger.error(f"X CONCURRENT ISOLATION FAILURE: {len(unique_instance_ids)} unique instances for {len(results)} requests")
                 
                 # Find shared instances
                 from collections import Counter
@@ -380,10 +380,10 @@ class WebSocketManagerFactorySsotConsolidationTests(SSotAsyncTestCase):
                     f"compromising data isolation in enterprise environment."
                 )
             
-            logger.info(f"✅ Concurrent instantiation validated: {len(unique_instance_ids)} unique instances")
+            logger.info(f"CHECK Concurrent instantiation validated: {len(unique_instance_ids)} unique instances")
             
         except Exception as e:
-            logger.error(f"❌ CONCURRENT INSTANTIATION TEST FAILED: {e}")
+            logger.error(f"X CONCURRENT INSTANTIATION TEST FAILED: {e}")
             raise
     
     async def test_factory_parameter_validation_consistency(self):
@@ -442,7 +442,7 @@ class WebSocketManagerFactorySsotConsolidationTests(SSotAsyncTestCase):
             
             if should_fail and not result['failed']:
                 logger.warning(
-                    f"⚠️ VALIDATION INCONSISTENCY: Case '{case_name}' should have failed but succeeded. "
+                    f"WARNING️ VALIDATION INCONSISTENCY: Case '{case_name}' should have failed but succeeded. "
                     f"This may indicate loose validation that could accept invalid parameters."
                 )
             elif not should_fail and result['failed']:
@@ -453,7 +453,7 @@ class WebSocketManagerFactorySsotConsolidationTests(SSotAsyncTestCase):
                     f"Business Impact: Overly strict validation breaks existing integrations."
                 )
         
-        logger.info("✅ Factory parameter validation consistency validated")
+        logger.info("CHECK Factory parameter validation consistency validated")
 
     def teardown_method(self, method):
         """Clean up test environment."""

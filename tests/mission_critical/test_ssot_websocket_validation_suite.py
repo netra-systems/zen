@@ -339,9 +339,9 @@ class SsotWebSocketValidationSuite:
         print(f\nTEST SUMMARY:"")
         ts = summary['test_summary']
         print(f  Total Tests: {ts['total_tests']})
-        print(f  ✅ Passed: {ts['passed']}"")
-        print(f  ❌ Failed: {ts['failed']})
-        print(f  ⚠️ Expected Failures: {ts['expected_failures']}"")
+        print(f  CHECK Passed: {ts['passed']}"")
+        print(f  X Failed: {ts['failed']})
+        print(f  WARNING️ Expected Failures: {ts['expected_failures']}"")
         print(f  🚨 Errors: {ts['errors']})
         
         print(f\nBUSINESS IMPACT ASSESSMENT:"")
@@ -361,7 +361,7 @@ class SsotWebSocketValidationSuite:
         
         print(f\nDETAILED RESULTS:)
         for result in summary['detailed_results']:
-            status_icon = {passed": "✅, failed: ❌, expected_failure: "⚠️, error: 🚨}"
+            status_icon = {passed": "CHECK, failed: X, expected_failure: "WARNING️, error: 🚨}"
             icon = status_icon.get(result['status'], ❓)
             print(f"  {icon} {result['test_file']}: {result['status']} ({result['duration']:."2f"}s))"
             if result['error_message']:
@@ -397,12 +397,12 @@ async def main():
 
         return 1
     elif business_impact['impact_level'] == MEDIUM":"
-        print(\n⚠️ MEDIUM BUSINESS IMPACT - MONITOR CLOSELY)"
-        print(\n⚠️ MEDIUM BUSINESS IMPACT - MONITOR CLOSELY)""
+        print(\nWARNING️ MEDIUM BUSINESS IMPACT - MONITOR CLOSELY)"
+        print(\nWARNING️ MEDIUM BUSINESS IMPACT - MONITOR CLOSELY)""
 
         return 0
     else:
-        print(\n✅ LOW BUSINESS IMPACT - VALIDATION SUCCESSFUL")"
+        print(\nCHECK LOW BUSINESS IMPACT - VALIDATION SUCCESSFUL")"
         return 0
 
 

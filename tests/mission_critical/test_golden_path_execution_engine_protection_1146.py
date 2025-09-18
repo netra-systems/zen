@@ -4,13 +4,13 @@ Business Value Justification:
     - Segment: Platform/Business Critical
 - Business Goal: Protect $"500K" plus ARR Golden Path functionality  
 - Value Impact: Ensures execution engine consolidation doesn't break end-to-end user flow'
-- Strategic Impact: Critical protection for login → AI response flow that delivers 90% platform value
+- Strategic Impact: Critical protection for login -> AI response flow that delivers 90% platform value
 
 CRITICAL MISSION: NEW 20% SSOT VALIDATION TESTS
-This test protects the Golden Path user flow (login → get AI responses) from being broken
+This test protects the Golden Path user flow (login -> get AI responses) from being broken
 by execution engine consolidation, ensuring UserExecutionEngine maintains all WebSocket events.
 
-Test Scope: Golden Path protection during 12→1 execution engine consolidation
+Test Scope: Golden Path protection during 12->1 execution engine consolidation
 Priority: P0 - Mission Critical - Protects core business value
 Docker: NO DEPENDENCIES - Integration non-docker only
 NEW TEST: Part of 20% new validation tests for Issue #1146
@@ -118,7 +118,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
 
     async def test_golden_path_complete_user_flow_execution_engine(self):
         CRITICAL: Validate complete Golden Path flow through single UserExecutionEngine.""
-        # Simulate complete Golden Path: User Login → Agent Selection → AI Response
+        # Simulate complete Golden Path: User Login -> Agent Selection -> AI Response
         golden_path_steps = [
             {
                 'step': 'triage_agent',
@@ -233,7 +233,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
             fGolden Path failed steps: {failed_steps})
         
         # Log Golden Path success
-        print(f"✅ GOLDEN PATH PROTECTED: Complete user flow successful through UserExecutionEngine)"
+        print(f"CHECK GOLDEN PATH PROTECTED: Complete user flow successful through UserExecutionEngine)"
         print(f   Total duration: {total_duration:."2f"}s)
         print(f"   Steps completed: {len(golden_path_results)})"
         print(f   Business value: $"500K" plus ARR flow maintained)
@@ -332,7 +332,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                         f"Issue #1146: UserExecutionEngine must emit all 5 critical events"
                     )
                 
-                # Validate event order (started → thinking → tool events → completed)
+                # Validate event order (started -> thinking -> tool events -> completed)
                 event_order = [event[0] for event in self.websocket_events_received]
                 
                 # Basic order validation
@@ -343,9 +343,9 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                     self.assertLess(started_index, completed_index,
                         agent_started must come before agent_completed)
                 
-                print(f✅ ALL 5 CRITICAL WEBSOCKET EVENTS VALIDATED:)
+                print(fCHECK ALL 5 CRITICAL WEBSOCKET EVENTS VALIDATED:)
                 print(f   Events received: {len(events_received")})"
-                print(f   Event sequence: {' → '.join(event_order)})
+                print(f   Event sequence: {' -> '.join(event_order)})
                 print(f   Golden Path user experience: MAINTAINED"")
 
     async def test_golden_path_multi_user_isolation_execution_engine(self):
@@ -480,7 +480,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                 for event_name, event_time in user_events:
                     self.assertIn(event_name, ['agent_started', 'agent_thinking', 'agent_completed')
             
-            print(f✅ MULTI-USER GOLDEN PATH PROTECTED:)
+            print(fCHECK MULTI-USER GOLDEN PATH PROTECTED:)
             print(f"   Concurrent users: {concurrent_users})"
             print(f   Total duration: {total_duration:."2f"}s)
             print(f"   All users successful: {len(successful_users)}/{concurrent_users})"
@@ -608,7 +608,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
             
             self.fail(\n.join(error_msg))
         
-        print(f✅ GOLDEN PATH ERROR HANDLING VALIDATED:"")
+        print(fCHECK GOLDEN PATH ERROR HANDLING VALIDATED:"")
         print(f   Scenarios tested: {len(error_scenarios)})
         print(f   Graceful handling: {len([r for r in error_handling_results if r['handled_gracefully']]}"")
         print(f   User experience: PROTECTED)

@@ -201,20 +201,20 @@ class FactorySSotCompliancePhase2Tests(SSotBaseTestCase):
         essential_user_factories = [f for f in ssot_compliance_results if f['preservation_required']]
         over_engineered_user_factories = [f for f in ssot_compliance_results if not f['preservation_required']]
 
-        print(f"\n✅ ESSENTIAL USER ISOLATION FACTORIES (PRESERVE):")
+        print(f"\nCHECK ESSENTIAL USER ISOLATION FACTORIES (PRESERVE):")
         for i, factory in enumerate(essential_user_factories):
             rel_path = self._get_relative_path(factory['file'])
             print(f"  {i+1}. {factory['name']} ({rel_path})")
             print(f"     🎯 SSOT compliance: {factory['ssot_compliance_score']}/10")
             print(f"     💼 Business critical: {factory['business_critical']}")
-            print(f"     ✅ Action: PRESERVE - Essential for multi-user security")
+            print(f"     CHECK Action: PRESERVE - Essential for multi-user security")
 
-        print(f"\n❌ OVER-ENGINEERED USER FACTORIES (REMOVE):")
+        print(f"\nX OVER-ENGINEERED USER FACTORIES (REMOVE):")
         for i, factory in enumerate(over_engineered_user_factories):
             rel_path = self._get_relative_path(factory['file'])
             print(f"  {i+1}. {factory['name']} ({rel_path})")
             print(f"     🎯 SSOT compliance: {factory['ssot_compliance_score']}/10")
-            print(f"     ❌ Violations: {', '.join(factory['ssot_violations'])}")
+            print(f"     X Violations: {', '.join(factory['ssot_violations'])}")
             print(f"     🗑️  Action: REMOVE - Fails SSOT compliance")
 
         self.ssot_analysis['user_isolation'] = {
@@ -228,7 +228,7 @@ class FactorySSotCompliancePhase2Tests(SSotBaseTestCase):
         self.assertEqual(
             len(failing_essential),
             0,
-            f"✅ USER ISOLATION SSOT COMPLIANCE: All {len(essential_user_factories)} essential user isolation factories "
+            f"CHECK USER ISOLATION SSOT COMPLIANCE: All {len(essential_user_factories)} essential user isolation factories "
             f"must pass SSOT compliance. Found {len(failing_essential)} failing SSOT compliance tests. "
             f"This is CRITICAL for $500K+ ARR multi-user security."
         )
@@ -272,8 +272,8 @@ class FactorySSotCompliancePhase2Tests(SSotBaseTestCase):
                     'duplicates_to_remove': duplicate_analysis['duplicates_to_remove']
                 })
 
-                print(f"     ❌ SSOT VIOLATION: {len(factories)} competing implementations")
-                print(f"     ✅ Canonical: {duplicate_analysis['canonical_candidate']['name']}")
+                print(f"     X SSOT VIOLATION: {len(factories)} competing implementations")
+                print(f"     CHECK Canonical: {duplicate_analysis['canonical_candidate']['name']}")
                 print(f"     🗑️  Remove: {len(duplicate_analysis['duplicates_to_remove'])} duplicates")
             else:
                 # Single implementation - check SSOT compliance
@@ -286,7 +286,7 @@ class FactorySSotCompliancePhase2Tests(SSotBaseTestCase):
                         'factory': factory,
                         'compliance_score': compliance['score']
                     })
-                    print(f"     ✅ SSOT COMPLIANT: {factory['name']}")
+                    print(f"     CHECK SSOT COMPLIANT: {factory['name']}")
                 else:
                     ssot_violations.append({
                         'service': service,
@@ -294,7 +294,7 @@ class FactorySSotCompliancePhase2Tests(SSotBaseTestCase):
                         'violation_type': 'non_compliant_implementation',
                         'compliance_issues': compliance['issues']
                     })
-                    print(f"     ❌ SSOT NON-COMPLIANT: {compliance['issues']}")
+                    print(f"     X SSOT NON-COMPLIANT: {compliance['issues']}")
 
         print(f"\n🚨 WEBSOCKET SSOT CONSOLIDATION REQUIRED:")
         for violation in ssot_violations:
@@ -312,7 +312,7 @@ class FactorySSotCompliancePhase2Tests(SSotBaseTestCase):
         self.assertLessEqual(
             total_violations,
             1,
-            f"❌ WEBSOCKET FACTORY SSOT VIOLATIONS: Found {total_violations} services with SSOT violations. "
+            f"X WEBSOCKET FACTORY SSOT VIOLATIONS: Found {total_violations} services with SSOT violations. "
             f"Expected ≤1 for SSOT compliance. WebSocket factories must be consolidated to single implementations per service."
         )
 
@@ -352,20 +352,20 @@ class FactorySSotCompliancePhase2Tests(SSotBaseTestCase):
             else:
                 over_engineered_db_factories.append(factory_analysis)
 
-        print(f"\n✅ ESSENTIAL DATABASE FACTORIES (PRESERVE):")
+        print(f"\nCHECK ESSENTIAL DATABASE FACTORIES (PRESERVE):")
         for i, factory in enumerate(essential_db_factories):
             rel_path = self._get_relative_path(factory['file'])
             print(f"  {i+1}. {factory['name']} ({rel_path})")
             print(f"     💼 Business value: {factory['business_value_score']}/10")
             print(f"     🎯 SSOT compliance: {factory['ssot_compliance_score']}/10")
-            print(f"     ✅ Justification: {factory['value_justification']}")
+            print(f"     CHECK Justification: {factory['value_justification']}")
 
-        print(f"\n❌ OVER-ENGINEERED DATABASE FACTORIES (REMOVE):")
+        print(f"\nX OVER-ENGINEERED DATABASE FACTORIES (REMOVE):")
         for i, factory in enumerate(over_engineered_db_factories):
             rel_path = self._get_relative_path(factory['file'])
             print(f"  {i+1}. {factory['name']} ({rel_path})")
             print(f"     💼 Business value: {factory['business_value_score']}/10")
-            print(f"     ❌ SSOT violations: {', '.join(factory['ssot_violations'])}")
+            print(f"     X SSOT violations: {', '.join(factory['ssot_violations'])}")
 
         self.ssot_analysis['database_factories'] = {
             'essential_factories': essential_db_factories,
@@ -378,7 +378,7 @@ class FactorySSotCompliancePhase2Tests(SSotBaseTestCase):
         self.assertEqual(
             len(failing_essential_db),
             0,
-            f"✅ DATABASE FACTORY SSOT COMPLIANCE: All {len(essential_db_factories)} essential database factories "
+            f"CHECK DATABASE FACTORY SSOT COMPLIANCE: All {len(essential_db_factories)} essential database factories "
             f"pass SSOT compliance. This ensures reliable database access patterns."
         )
 
@@ -419,20 +419,20 @@ class FactorySSotCompliancePhase2Tests(SSotBaseTestCase):
             else:
                 ssot_violation_auth_factories.append(auth_factory_result)
 
-        print(f"\n✅ SSOT COMPLIANT AUTH FACTORIES:")
+        print(f"\nCHECK SSOT COMPLIANT AUTH FACTORIES:")
         for i, factory in enumerate(ssot_compliant_auth_factories):
             rel_path = self._get_relative_path(factory['file'])
             print(f"  {i+1}. {factory['name']} ({rel_path})")
             print(f"     🛡️  Security compliance: {factory['security_compliance_score']}/10")
             print(f"     🎯 SSOT compliance: {factory['ssot_compliance_score']}/10")
-            print(f"     ✅ Status: PRESERVE - Security critical and SSOT compliant")
+            print(f"     CHECK Status: PRESERVE - Security critical and SSOT compliant")
 
-        print(f"\n❌ SSOT VIOLATION AUTH FACTORIES:")
+        print(f"\nX SSOT VIOLATION AUTH FACTORIES:")
         for i, factory in enumerate(ssot_violation_auth_factories):
             rel_path = self._get_relative_path(factory['file'])
             print(f"  {i+1}. {factory['name']} ({rel_path})")
             print(f"     🛡️  Security compliance: {factory['security_compliance_score']}/10")
-            print(f"     ❌ SSOT violations: {', '.join(factory['ssot_violations'])}")
+            print(f"     X SSOT violations: {', '.join(factory['ssot_violations'])}")
             print(f"     🔧 Action: FIX SSOT compliance or consolidate")
 
         self.ssot_analysis['auth_factories'] = {
@@ -444,7 +444,7 @@ class FactorySSotCompliancePhase2Tests(SSotBaseTestCase):
         self.assertEqual(
             len(ssot_violation_auth_factories),
             0,
-            f"✅ AUTH FACTORY SSOT COMPLIANCE: All {len(auth_factories)} auth token factories "
+            f"CHECK AUTH FACTORY SSOT COMPLIANCE: All {len(auth_factories)} auth token factories "
             f"must maintain SSOT compliance for security. Found {len(ssot_violation_auth_factories)} "
             f"with SSOT violations that must be fixed."
         )
@@ -480,10 +480,10 @@ class FactorySSotCompliancePhase2Tests(SSotBaseTestCase):
         for i, violation in enumerate(standardization_violations[:5]):
             print(f"  {i+1}. {violation['module']}")
             print(f"     🔄 {len(violation['patterns'])} different import patterns")
-            print(f"     ✅ Canonical: {violation['canonical_pattern']}")
+            print(f"     CHECK Canonical: {violation['canonical_pattern']}")
             print(f"     📄 Files affected: {violation['files_affected']}")
 
-        print(f"\n✅ STANDARDIZED IMPORT RECOMMENDATIONS:")
+        print(f"\nCHECK STANDARDIZED IMPORT RECOMMENDATIONS:")
         for violation in standardization_violations[:3]:
             print(f"  📦 {violation['module']}")
             print(f"     🎯 Use: {violation['canonical_pattern']}")
@@ -493,7 +493,7 @@ class FactorySSotCompliancePhase2Tests(SSotBaseTestCase):
         self.assertLessEqual(
             len(standardization_violations),
             2,
-            f"✅ FACTORY IMPORT STANDARDIZATION: Found {len(standardization_violations)} import path "
+            f"CHECK FACTORY IMPORT STANDARDIZATION: Found {len(standardization_violations)} import path "
             f"standardization violations. Expected ≤2 for SSOT compliance. "
             f"Import paths must be consistent across the codebase."
         )

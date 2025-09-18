@@ -353,7 +353,7 @@ def test_critical_websocket_events_coverage():
     
     print(f"\n🔍 CRITICAL WEBSOCKET EVENT COVERAGE:")
     for event, count in event_coverage.items():
-        status = "✅" if count > 0 else "❌"
+        status = "CHECK" if count > 0 else "X"
         print(f"  {status} {event}: {count} implementations")
     
     # All 5 critical events must be present
@@ -372,7 +372,7 @@ def test_critical_websocket_events_coverage():
     ]
     
     if under_implemented_events:
-        print(f"⚠️  UNDER-IMPLEMENTED EVENTS: {under_implemented_events} (may indicate fragility)")
+        print(f"WARNING️  UNDER-IMPLEMENTED EVENTS: {under_implemented_events} (may indicate fragility)")
 
 
 @pytest.mark.unit
@@ -473,30 +473,30 @@ if __name__ == "__main__":
     
     try:
         test_single_websocket_manager_exists()
-        print("✅ Single WebSocket manager test PASSED")
+        print("CHECK Single WebSocket manager test PASSED")
     except AssertionError as e:
-        print(f"❌ Single WebSocket manager test FAILED: {e}")
+        print(f"X Single WebSocket manager test FAILED: {e}")
     
     try:
         test_websocket_event_delivery_consolidation()
-        print("✅ Event delivery consolidation test PASSED")
+        print("CHECK Event delivery consolidation test PASSED")
     except AssertionError as e:
-        print(f"❌ Event delivery consolidation test FAILED: {e}")
+        print(f"X Event delivery consolidation test FAILED: {e}")
         
     try:
         test_websocket_routing_conflict_detection()
-        print("✅ Routing conflict detection test PASSED")
+        print("CHECK Routing conflict detection test PASSED")
     except AssertionError as e:
-        print(f"❌ Routing conflict detection test FAILED: {e}")
+        print(f"X Routing conflict detection test FAILED: {e}")
         
     try:
         test_critical_websocket_events_coverage()
-        print("✅ Critical events coverage test PASSED")
+        print("CHECK Critical events coverage test PASSED")
     except AssertionError as e:
-        print(f"❌ Critical events coverage test FAILED: {e}")
+        print(f"X Critical events coverage test FAILED: {e}")
         
     try:
         test_websocket_execution_engine_integration()
-        print("✅ WebSocket-ExecutionEngine integration test PASSED")
+        print("CHECK WebSocket-ExecutionEngine integration test PASSED")
     except AssertionError as e:
-        print(f"❌ WebSocket-ExecutionEngine integration test FAILED: {e}")
+        print(f"X WebSocket-ExecutionEngine integration test FAILED: {e}")

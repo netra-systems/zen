@@ -13,7 +13,7 @@ addressing critical gaps identified in the integration test analysis:
 
 1. API Compatibility Issues: Fixed websocket_manager vs websocket_bridge parameter mismatch
 2. WebSocket Event Integration: Comprehensive tracking of all 5 critical events
-3. Complete Golden Path Flow: End-to-end user message → agent processing → response
+3. Complete Golden Path Flow: End-to-end user message -> agent processing -> response
 4. Error Recovery Experience: Agent error scenarios and user experience validation
 5. Real Service Integration: Tests against GCP staging environment (no Docker dependency)
 
@@ -753,7 +753,7 @@ class AgentGoldenPathComprehensiveMessagesTests(SSotAsyncTestCase):
             
             # Event details
             for event in result.events_received:
-                print(f"    - {event.event_type} at {event.timestamp:.2f}s (timing: {'✓' if event.timing_valid else '✗'})")
+                print(f"    - {event.event_type} at {event.timestamp:.2f}s (timing: {'CHECK' if event.timing_valid else '✗'})")
         
         if validation_result.recommendations:
             print(f"\n[GOLDEN PATH RECOMMENDATIONS]")

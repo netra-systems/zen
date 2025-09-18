@@ -76,7 +76,7 @@ class MultiUserMessageIsolationTests(SSotAsyncTestCase):
     P0 Critical Integration Tests for Multi-User Message Isolation.
 
     This test class validates complete user isolation during concurrent message processing:
-    Multiple Users → Isolated Processing → No Cross-Contamination
+    Multiple Users -> Isolated Processing -> No Cross-Contamination
 
     Tests protect $500K+ ARR enterprise functionality by validating:
     - Complete message isolation between concurrent users

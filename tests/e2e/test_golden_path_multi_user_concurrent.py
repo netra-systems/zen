@@ -2,7 +2,7 @@
 E2E tests for Issue #1116: Golden Path Multi-User Concurrent Vulnerability
 
 PURPOSE: Prove that the complete Golden Path user flow fails with concurrent users
-- Test complete user login → chat → AI response flow with real services
+- Test complete user login -> chat -> AI response flow with real services
 - Demonstrate WebSocket authentication and agent response contamination  
 - Verify end-to-end user isolation in realistic production scenarios
 

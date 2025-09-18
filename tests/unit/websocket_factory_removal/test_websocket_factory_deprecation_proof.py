@@ -60,9 +60,9 @@ class WebSocketFactoryDeprecationProofTests(SSotAsyncTestCase):
             factory_module = importlib.import_module(self.factory_module_path)
             self.assertIsNotNone(factory_module, 'Factory module should exist before removal')
             self.assertTrue(hasattr(factory_module, 'create_defensive_user_execution_context'), 'Critical factory function missing')
-            logger.warning('⚠️  FACTORY STILL EXISTS - Removal not yet complete')
+            logger.warning('WARNING️  FACTORY STILL EXISTS - Removal not yet complete')
         except ImportError:
-            self.fail('✅ FACTORY REMOVAL COMPLETE: Factory module no longer importable. This test failure proves successful factory removal.')
+            self.fail('CHECK FACTORY REMOVAL COMPLETE: Factory module no longer importable. This test failure proves successful factory removal.')
 
     async def test_factory_functions_migrated_to_ssot_equivalents(self):
         """
@@ -82,7 +82,7 @@ class WebSocketFactoryDeprecationProofTests(SSotAsyncTestCase):
                     test_instance = ssot_class(user_id=self.test_user_id, websocket_client_id='test_factory_migration')
                     self.assertIsNotNone(test_instance)
                     self.assertEqual(test_instance.user_id, self.test_user_id)
-                logger.info(f'✅ SSOT equivalent verified for {factory_function}')
+                logger.info(f'CHECK SSOT equivalent verified for {factory_function}')
             except Exception as e:
                 self.fail(f'SSOT MIGRATION FAILURE: {factory_function} -> {ssot_info}: {e}')
 
@@ -99,13 +99,13 @@ class WebSocketFactoryDeprecationProofTests(SSotAsyncTestCase):
             try:
                 module = importlib.import_module(module_path)
                 self.assertIsNotNone(module, f'Module {module_path} failed to import')
-                logger.debug(f'✅ No dead factory imports in {module_path}')
+                logger.debug(f'CHECK No dead factory imports in {module_path}')
             except ImportError as e:
                 if 'websocket_manager_factory' in str(e):
                     self.fail(f'DEAD IMPORT: {module_path} still attempts to import from removed factory: {e}')
                 else:
                     raise
-        logger.info('✅ No dead factory imports detected')
+        logger.info('CHECK No dead factory imports detected')
 
     async def test_system_performance_improvement_without_factory(self):
         """
@@ -127,7 +127,7 @@ class WebSocketFactoryDeprecationProofTests(SSotAsyncTestCase):
             direct_creation_time = end_time - start_time
             self.assertEqual(len(contexts), 100)
             self.assertLess(direct_creation_time, 1.0, f'Direct creation too slow: {direct_creation_time:.3f}s')
-            logger.info(f'✅ Performance test: {direct_creation_time:.3f}s for 100 contexts')
+            logger.info(f'CHECK Performance test: {direct_creation_time:.3f}s for 100 contexts')
         except Exception as e:
             self.fail(f'PERFORMANCE TEST FAILURE: {e}')
 
@@ -163,7 +163,7 @@ class WebSocketFactoryDeprecationProofTests(SSotAsyncTestCase):
             manager = WebSocketManager(user_context=context)
             self.assertIsNotNone(context)
             self.assertIsNotNone(manager)
-            logger.info('✅ SSOT alternatives fully functional')
+            logger.info('CHECK SSOT alternatives fully functional')
         except Exception as e:
             self.fail(f'SSOT FUNCTIONALITY FAILURE: {e}')
 
@@ -187,7 +187,7 @@ class WebSocketFactoryDeprecationProofTests(SSotAsyncTestCase):
             required_methods = ['send_event', 'close_connection', 'is_connected']
             for method in required_methods:
                 self.assertTrue(hasattr(websocket_manager, method) or hasattr(websocket_manager, method.replace('_', '')), f'WebSocket manager missing critical method: {method}')
-            logger.info('✅ Golden Path functionality preserved without factory')
+            logger.info('CHECK Golden Path functionality preserved without factory')
         except Exception as e:
             self.fail(f'GOLDEN PATH FAILURE: Critical functionality broken: {e}')
 if __name__ == '__main__':

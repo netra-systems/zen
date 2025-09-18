@@ -9,7 +9,7 @@ MISSION CRITICAL: These tests must detect docker-compose integration issues
 WITHOUT requiring Docker to be running or functional.
 
 Business Impact: $500K+ ARR Golden Path depends on working Docker infrastructure
-Critical Context: Issue #1082 escalated P2→P1 due to mission-critical test blocking
+Critical Context: Issue #1082 escalated P2->P1 due to mission-critical test blocking
 
 Test Strategy: These tests are designed to FAIL initially to prove they detect real issues
 """

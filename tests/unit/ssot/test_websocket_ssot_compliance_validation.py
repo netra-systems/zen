@@ -357,7 +357,7 @@ class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
         # Canonical import enforcement requires 100% canonical usage
         if non_canonical_instances > 0 or canonical_import_ratio < 1.0:
             failure_message = [
-                f"❌ WEBSOCKET CANONICAL IMPORT PATTERNS NOT ENFORCED ❌",
+                f"X WEBSOCKET CANONICAL IMPORT PATTERNS NOT ENFORCED X",
                 f"",
                 f"Canonical Import Ratio: {canonical_import_ratio:.1%} (Target: 100%)",
                 f"Canonical Imports: {canonical_instances} instances across {canonical_files} files",
@@ -384,18 +384,18 @@ class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
             failure_message.append(f"CANONICAL IMPORTS IN USE:")
 
             for file_path, matches in canonical_usage.items():
-                failure_message.append(f"✅ {file_path}: {len(matches)} canonical imports")
+                failure_message.append(f"CHECK {file_path}: {len(matches)} canonical imports")
 
             failure_message.extend([
                 f"",
                 f"🔧 CANONICAL IMPORT REMEDIATION:",
                 f"",
-                f"❌ ELIMINATE NON-CANONICAL IMPORTS:",
+                f"X ELIMINATE NON-CANONICAL IMPORTS:",
                 f"   from netra_backend.app.websocket_core.websocket_manager_factory import *",
                 f"   from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager",
                 f"   import websocket_factory",
                 f"",
-                f"✅ USE CANONICAL SSOT IMPORTS:",
+                f"CHECK USE CANONICAL SSOT IMPORTS:",
                 f"   from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
                 f"   from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager",
                 f"   from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry",
@@ -418,9 +418,9 @@ class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
 
         # Success state
         self.record_metric("canonical_imports_enforced", True)
-        print("✅ WEBSOCKET CANONICAL IMPORT PATTERNS ENFORCED")
-        print(f"✅ Canonical Import Ratio: {canonical_import_ratio:.1%}")
-        print(f"✅ Canonical Imports: {canonical_instances} instances")
+        print("CHECK WEBSOCKET CANONICAL IMPORT PATTERNS ENFORCED")
+        print(f"CHECK Canonical Import Ratio: {canonical_import_ratio:.1%}")
+        print(f"CHECK Canonical Imports: {canonical_instances} instances")
 
     def test_websocket_ssot_factory_pattern_compliance(self):
         """
@@ -500,7 +500,7 @@ class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
 
         if compliance_violations:
             failure_message = [
-                f"❌ WEBSOCKET SSOT FACTORY PATTERN COMPLIANCE FAILED ❌",
+                f"X WEBSOCKET SSOT FACTORY PATTERN COMPLIANCE FAILED X",
                 f"",
                 f"SSOT Factory Compliance: {ssot_factory_compliance:.1%} (Target: 100%)",
                 f"Canonical Factory Usage: {canonical_factory_instances} instances",
@@ -512,7 +512,7 @@ class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
             ]
 
             for violation in compliance_violations:
-                failure_message.append(f"❌ {violation}")
+                failure_message.append(f"X {violation}")
 
             if non_ssot_factory_usage:
                 failure_message.append(f"")
@@ -532,29 +532,29 @@ class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
                 failure_message.append(f"")
                 failure_message.append(f"MISSING SSOT FILES:")
                 for missing_file in missing_ssot_files:
-                    failure_message.append(f"❌ {missing_file}")
+                    failure_message.append(f"X {missing_file}")
 
             failure_message.extend([
                 f"",
                 f"🔧 SSOT FACTORY PATTERN REMEDIATION:",
                 f"",
                 f"1. Consolidate factory patterns:",
-                f"   ❌ Multiple factory files and classes",
-                f"   ✅ Single canonical factory: create_agent_websocket_bridge()",
+                f"   X Multiple factory files and classes",
+                f"   CHECK Single canonical factory: create_agent_websocket_bridge()",
                 f"",
                 f"2. Eliminate non-SSOT factory usage:",
-                f"   ❌ WebSocketManagerFactory(), get_websocket_manager_factory()",
-                f"   ✅ AgentRegistry() with bridge pattern",
+                f"   X WebSocketManagerFactory(), get_websocket_manager_factory()",
+                f"   CHECK AgentRegistry() with bridge pattern",
                 f"",
                 f"3. Ensure SSOT file structure:",
-                f"   ✅ netra_backend/app/websocket_core/websocket_manager.py",
-                f"   ✅ netra_backend/app/agents/supervisor/agent_registry.py",
-                f"   ✅ netra_backend/app/services/agent_websocket_bridge.py",
+                f"   CHECK netra_backend/app/websocket_core/websocket_manager.py",
+                f"   CHECK netra_backend/app/agents/supervisor/agent_registry.py",
+                f"   CHECK netra_backend/app/services/agent_websocket_bridge.py",
                 f"",
                 f"4. Bridge pattern SSOT compliance:",
-                f"   ✅ User isolation through AgentRegistry bridge",
-                f"   ✅ No direct WebSocket manager instantiation in agents",
-                f"   ✅ Consistent factory usage across all services",
+                f"   CHECK User isolation through AgentRegistry bridge",
+                f"   CHECK No direct WebSocket manager instantiation in agents",
+                f"   CHECK Consistent factory usage across all services",
                 f"",
                 f"🎯 SSOT FACTORY SUCCESS CRITERIA:",
                 f"• 100% SSOT factory compliance",
@@ -567,9 +567,9 @@ class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
 
         # Success state
         self.record_metric("ssot_factory_compliance_achieved", True)
-        print("✅ WEBSOCKET SSOT FACTORY PATTERN COMPLIANCE ACHIEVED")
-        print(f"✅ SSOT Factory Compliance: {ssot_factory_compliance:.1%}")
-        print(f"✅ Factory Files: {factory_proliferation_count}")
+        print("CHECK WEBSOCKET SSOT FACTORY PATTERN COMPLIANCE ACHIEVED")
+        print(f"CHECK SSOT Factory Compliance: {ssot_factory_compliance:.1%}")
+        print(f"CHECK Factory Files: {factory_proliferation_count}")
 
     def test_service_websocket_dependency_isolation(self):
         """
@@ -645,7 +645,7 @@ class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
         # Service isolation compliance requires 100% compliance
         if service_isolation_ratio < 1.0 or total_violations > 0:
             failure_message = [
-                f"❌ SERVICE WEBSOCKET DEPENDENCY ISOLATION FAILED ❌",
+                f"X SERVICE WEBSOCKET DEPENDENCY ISOLATION FAILED X",
                 f"",
                 f"Service Isolation: {service_isolation_ratio:.1%} (Target: 100%)",
                 f"Compliant Services: {compliant_services}/{total_services}",
@@ -657,7 +657,7 @@ class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
             ]
 
             for service_name, analysis in service_analysis.items():
-                status = "✅ COMPLIANT" if analysis['compliant'] else "❌ NON-COMPLIANT"
+                status = "CHECK COMPLIANT" if analysis['compliant'] else "X NON-COMPLIANT"
                 failure_message.append(f"")
                 failure_message.append(f"📦 Service: {service_name} - {status}")
 
@@ -667,31 +667,31 @@ class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
                 if analysis['forbidden_import_violations']:
                     failure_message.append(f"   Forbidden Import Violations:")
                     for file_path, matches in analysis['forbidden_import_violations'][:3]:  # Show first 3
-                        failure_message.append(f"     ❌ {file_path}: {len(matches)} violations")
+                        failure_message.append(f"     X {file_path}: {len(matches)} violations")
 
                 if analysis['dependency_violations']:
                     failure_message.append(f"   Dependency Violations:")
                     for file_path, matches in analysis['dependency_violations'][:3]:  # Show first 3
-                        failure_message.append(f"     ❌ {file_path}: {len(matches)} violations")
+                        failure_message.append(f"     X {file_path}: {len(matches)} violations")
 
             failure_message.extend([
                 f"",
                 f"🔧 SERVICE ISOLATION REMEDIATION:",
                 f"",
                 f"1. netra_backend service (WebSocket allowed):",
-                f"   ✅ Can import from netra_backend.app.websocket_core",
-                f"   ✅ Can use AgentRegistry bridge pattern",
-                f"   ❌ Should not create duplicate WebSocket implementations",
+                f"   CHECK Can import from netra_backend.app.websocket_core",
+                f"   CHECK Can use AgentRegistry bridge pattern",
+                f"   X Should not create duplicate WebSocket implementations",
                 f"",
                 f"2. auth_service (WebSocket forbidden):",
-                f"   ❌ Must not import from netra_backend.app.websocket_core",
-                f"   ✅ Should use only auth-specific functionality",
-                f"   ✅ Communication with netra_backend via API/events only",
+                f"   X Must not import from netra_backend.app.websocket_core",
+                f"   CHECK Should use only auth-specific functionality",
+                f"   CHECK Communication with netra_backend via API/events only",
                 f"",
                 f"3. shared service (WebSocket forbidden):",
-                f"   ❌ Must not import from netra_backend.app.websocket_core",
-                f"   ✅ Should provide only shared utilities",
-                f"   ✅ No business logic dependencies",
+                f"   X Must not import from netra_backend.app.websocket_core",
+                f"   CHECK Should provide only shared utilities",
+                f"   CHECK No business logic dependencies",
                 f"",
                 f"📋 ISOLATION ENFORCEMENT STEPS:",
                 f"1. Remove cross-service WebSocket imports",
@@ -710,9 +710,9 @@ class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
 
         # Success state
         self.record_metric("service_isolation_achieved", True)
-        print("✅ SERVICE WEBSOCKET DEPENDENCY ISOLATION ACHIEVED")
-        print(f"✅ Service Isolation: {service_isolation_ratio:.1%}")
-        print(f"✅ Compliant Services: {compliant_services}/{total_services}")
+        print("CHECK SERVICE WEBSOCKET DEPENDENCY ISOLATION ACHIEVED")
+        print(f"CHECK Service Isolation: {service_isolation_ratio:.1%}")
+        print(f"CHECK Compliant Services: {compliant_services}/{total_services}")
 
     def test_websocket_ssot_architecture_consistency_validation(self):
         """
@@ -830,7 +830,7 @@ class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
 
         if failed_requirements:
             failure_message = [
-                f"❌ WEBSOCKET SSOT ARCHITECTURE CONSISTENCY VALIDATION FAILED ❌",
+                f"X WEBSOCKET SSOT ARCHITECTURE CONSISTENCY VALIDATION FAILED X",
                 f"",
                 f"Overall Consistency Score: {overall_consistency_score:.1f}% (Target: ≥90%)",
                 f"",
@@ -852,7 +852,7 @@ class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
             ]
 
             for requirement in failed_requirements:
-                failure_message.append(f"❌ {requirement}")
+                failure_message.append(f"X {requirement}")
 
             failure_message.extend([
                 f"",
@@ -893,9 +893,9 @@ class WebSocketSSOTComplianceValidationTests(SSotBaseTestCase):
         self.record_metric("websocket_ssot_architecture_consistent", True)
 
         print("🏆 WEBSOCKET SSOT ARCHITECTURE CONSISTENCY VALIDATION COMPLETE")
-        print(f"✅ Overall Consistency Score: {overall_consistency_score:.1f}%")
-        print("✅ All consistency requirements satisfied")
-        print("✅ WebSocket SSOT compliance remediation COMPLETE")
+        print(f"CHECK Overall Consistency Score: {overall_consistency_score:.1f}%")
+        print("CHECK All consistency requirements satisfied")
+        print("CHECK WebSocket SSOT compliance remediation COMPLETE")
 
     def teardown_method(self, method=None):
         """Clean up after WebSocket SSOT compliance validation tests."""

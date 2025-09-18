@@ -414,8 +414,8 @@ class MockConsistencyValidationTests(SSotBaseTestCase):
         for mock_type, results in consistency_results.items():
             consistency_report += f"{mock_type.upper()} MOCK CONSISTENCY:\n"
             consistency_report += f"- Instances Tested: {results['instances_tested']}\n"
-            consistency_report += f"- Interface Consistent: {'✅' if results['interface_consistency'] else '❌'}\n"
-            consistency_report += f"- Async/Sync Consistent: {'✅' if results['async_consistency'] else '❌'}\n"
+            consistency_report += f"- Interface Consistent: {'CHECK' if results['interface_consistency'] else 'X'}\n"
+            consistency_report += f"- Async/Sync Consistent: {'CHECK' if results['async_consistency'] else 'X'}\n"
 
             if results['missing_attributes']:
                 consistency_report += f"- Missing Attributes: {', '.join(results['missing_attributes'])}\n"

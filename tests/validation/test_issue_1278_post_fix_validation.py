@@ -67,7 +67,7 @@ class TestIssue1278PostFixValidation(SSotAsyncTestCase):
             assert connection_time < self.healthy_connection_time, \
                 f"Database connection took {connection_time:.1f}s - should be <{self.healthy_connection_time}s when healthy"
 
-            self.logger.info(f"✅ Issue #1278 RESOLVED: Database connectivity restored in {connection_time:.1f}s")
+            self.logger.info(f"CHECK Issue #1278 RESOLVED: Database connectivity restored in {connection_time:.1f}s")
 
             # Additional health checks
             await self._validate_database_operations_performance(database_manager)
@@ -86,32 +86,32 @@ class TestIssue1278PostFixValidation(SSotAsyncTestCase):
         """Validate Golden Path is fully operational after Issue #1278 fix."""
         self.logger.info("Validating Golden Path functionality after Issue #1278 fix")
 
-        # Test complete user flow: login → AI response
+        # Test complete user flow: login -> AI response
         golden_path_start = time.time()
 
         # Step 1: Backend health check
         self.logger.info("Step 1: Validating backend health...")
         backend_healthy = await self._verify_backend_health()
         assert backend_healthy, "Backend should be healthy after Issue #1278 fix"
-        self.logger.info("✓ Backend health validated")
+        self.logger.info("CHECK Backend health validated")
 
         # Step 2: Authentication flow
         self.logger.info("Step 2: Validating authentication...")
         auth_working = await self._verify_authentication()
         assert auth_working, "Authentication should work after Issue #1278 fix"
-        self.logger.info("✓ Authentication validated")
+        self.logger.info("CHECK Authentication validated")
 
         # Step 3: WebSocket connectivity
         self.logger.info("Step 3: Validating WebSocket connectivity...")
         websocket_working = await self._verify_websocket_connectivity()
         assert websocket_working, "WebSocket should work after Issue #1278 fix"
-        self.logger.info("✓ WebSocket connectivity validated")
+        self.logger.info("CHECK WebSocket connectivity validated")
 
         # Step 4: Agent execution pipeline
         self.logger.info("Step 4: Validating agent execution pipeline...")
         agent_pipeline_working = await self._verify_agent_execution()
         assert agent_pipeline_working, "Agent pipeline should work after Issue #1278 fix"
-        self.logger.info("✓ Agent execution pipeline validated")
+        self.logger.info("CHECK Agent execution pipeline validated")
 
         # Step 5: End-to-end timing validation
         golden_path_time = time.time() - golden_path_start
@@ -137,7 +137,7 @@ class TestIssue1278PostFixValidation(SSotAsyncTestCase):
         performance_results['database_operation'] = db_time
 
         assert db_time < 5.0, f"Database operations took {db_time:.1f}s - should be <5s"
-        self.logger.info(f"✓ Database operations: {db_time:.1f}s")
+        self.logger.info(f"CHECK Database operations: {db_time:.1f}s")
 
         # Test 2: Agent responses should be timely
         self.logger.info("Testing agent response time...")
@@ -148,7 +148,7 @@ class TestIssue1278PostFixValidation(SSotAsyncTestCase):
 
         assert agent_time < self.healthy_response_time, \
             f"Agent response took {agent_time:.1f}s - should be <{self.healthy_response_time}s"
-        self.logger.info(f"✓ Agent response: {agent_time:.1f}s")
+        self.logger.info(f"CHECK Agent response: {agent_time:.1f}s")
 
         # Test 3: WebSocket events should be responsive
         self.logger.info("Testing WebSocket event performance...")
@@ -158,7 +158,7 @@ class TestIssue1278PostFixValidation(SSotAsyncTestCase):
         performance_results['websocket_events'] = websocket_time
 
         assert websocket_time < 2.0, f"WebSocket events took {websocket_time:.1f}s - should be <2s"
-        self.logger.info(f"✓ WebSocket events: {websocket_time:.1f}s")
+        self.logger.info(f"CHECK WebSocket events: {websocket_time:.1f}s")
 
         # Test 4: Service startup should be fast
         self.logger.info("Testing service startup performance...")
@@ -169,7 +169,7 @@ class TestIssue1278PostFixValidation(SSotAsyncTestCase):
 
         assert startup_time < self.healthy_startup_time, \
             f"Service startup took {startup_time:.1f}s - should be <{self.healthy_startup_time}s"
-        self.logger.info(f"✓ Service startup: {startup_time:.1f}s")
+        self.logger.info(f"CHECK Service startup: {startup_time:.1f}s")
 
         # Overall performance summary
         total_performance_time = sum(performance_results.values())
@@ -178,7 +178,7 @@ class TestIssue1278PostFixValidation(SSotAsyncTestCase):
             self.logger.info(f"  {operation}: {duration:.1f}s")
         self.logger.info(f"  Total: {total_performance_time:.1f}s")
 
-        self.logger.info("✅ Issue #1278 RESOLVED: Performance meets SLA requirements")
+        self.logger.info("CHECK Issue #1278 RESOLVED: Performance meets SLA requirements")
 
     @pytest.mark.post_fix_validation
     @pytest.mark.infrastructure
@@ -194,28 +194,28 @@ class TestIssue1278PostFixValidation(SSotAsyncTestCase):
         vpc_health = await self._check_vpc_connector_health()
         infrastructure_health['vpc_connector'] = vpc_health
         assert vpc_health['healthy'], f"VPC connector should be healthy: {vpc_health.get('error', 'Unknown issue')}"
-        self.logger.info("✓ VPC connector healthy")
+        self.logger.info("CHECK VPC connector healthy")
 
         # Test 2: Cloud SQL connectivity
         self.logger.info("Checking Cloud SQL connectivity...")
         sql_health = await self._check_cloud_sql_health()
         infrastructure_health['cloud_sql'] = sql_health
         assert sql_health['healthy'], f"Cloud SQL should be healthy: {sql_health.get('error', 'Unknown issue')}"
-        self.logger.info("✓ Cloud SQL connectivity healthy")
+        self.logger.info("CHECK Cloud SQL connectivity healthy")
 
         # Test 3: Load balancer health
         self.logger.info("Checking load balancer health...")
         lb_health = await self._check_load_balancer_health()
         infrastructure_health['load_balancer'] = lb_health
         assert lb_health['healthy'], f"Load balancer should be healthy: {lb_health.get('error', 'Unknown issue')}"
-        self.logger.info("✓ Load balancer healthy")
+        self.logger.info("CHECK Load balancer healthy")
 
         # Test 4: Service mesh connectivity
         self.logger.info("Checking service mesh connectivity...")
         mesh_health = await self._check_service_mesh_health()
         infrastructure_health['service_mesh'] = mesh_health
         assert mesh_health['healthy'], f"Service mesh should be healthy: {mesh_health.get('error', 'Unknown issue')}"
-        self.logger.info("✓ Service mesh healthy")
+        self.logger.info("CHECK Service mesh healthy")
 
         # Overall infrastructure health score
         healthy_components = sum(1 for health in infrastructure_health.values() if health.get('healthy', False))
@@ -226,7 +226,7 @@ class TestIssue1278PostFixValidation(SSotAsyncTestCase):
 
         assert health_score >= 95.0, f"Infrastructure health should be >=95%, got {health_score:.1f}%"
 
-        self.logger.info("✅ Issue #1278 RESOLVED: Infrastructure health fully restored")
+        self.logger.info("CHECK Issue #1278 RESOLVED: Infrastructure health fully restored")
 
     @pytest.mark.post_fix_validation
     @pytest.mark.stress_test
@@ -295,7 +295,7 @@ class TestIssue1278PostFixValidation(SSotAsyncTestCase):
         assert stress_test_results['timeout_requests'] == 0, \
             f"Should have 0 timeouts, got {stress_test_results['timeout_requests']}"
 
-        self.logger.info("✅ Issue #1278 RESOLVED: System resilient under load")
+        self.logger.info("CHECK Issue #1278 RESOLVED: System resilient under load")
 
     # Helper methods for post-fix validation
 
@@ -312,7 +312,7 @@ class TestIssue1278PostFixValidation(SSotAsyncTestCase):
             assert operation_time < 2.0, \
                 f"Database {operation} took {operation_time:.1f}s - should be <2s"
 
-            self.logger.info(f"✓ Database {operation}: {operation_time:.1f}s")
+            self.logger.info(f"CHECK Database {operation}: {operation_time:.1f}s")
 
     async def _verify_backend_health(self):
         """Verify backend health after fix."""

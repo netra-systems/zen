@@ -196,7 +196,7 @@ class StagingWebSocketJWTIntegrationTests(SSotAsyncTestCase):
         """
         Test Golden Path JWT validation in staging environment.
         
-        Golden Path: User login → WebSocket authentication → Agent events → AI response
+        Golden Path: User login -> WebSocket authentication -> Agent events -> AI response
         Critical Point: WebSocket authentication requires JWT configuration
         """
         from shared.jwt_secret_manager import get_unified_jwt_secret

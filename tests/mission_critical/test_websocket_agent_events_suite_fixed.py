@@ -147,7 +147,7 @@ class WebSocketAgentEventsUnifiedTests(SSotAsyncTestCase):
     MISSION CRITICAL: WebSocket Agent Events Tests with Unified Schema
     
     Business Value: $500K+ ARR Golden Path Protection using unified event schema
-    Critical Path: WebSocket Events → Agent Integration → Chat Functionality
+    Critical Path: WebSocket Events -> Agent Integration -> Chat Functionality
     
     Issue #984 Fix: Uses unified event schema to prevent test/production mismatches
     that were causing 5/8 mission critical tests to fail due to missing fields.
@@ -253,7 +253,7 @@ class WebSocketAgentEventsUnifiedTests(SSotAsyncTestCase):
         MISSION CRITICAL: Test unified WebSocket event schema prevents Issue #984.
         
         BVJ: $500K+ ARR protection - validates schema compliance for core chat functionality
-        Critical Path: Unified Schema → Event Validation → Test/Production Consistency
+        Critical Path: Unified Schema -> Event Validation -> Test/Production Consistency
         
         Issue #984 Fix: This test ensures tool_name and results fields are present
         in tool events, preventing the test/production schema mismatch.
@@ -312,7 +312,7 @@ class WebSocketAgentEventsUnifiedTests(SSotAsyncTestCase):
         
         if not success:
             error_details = "\\n".join([
-                "❌ CRITICAL: Unified Schema Validation FAILED",
+                "X CRITICAL: Unified Schema Validation FAILED",
                 f"Events generated: {len(validator.events)}",
                 f"Event types: {list(validator.event_counts.keys())}",
                 f"Required events: {validator.REQUIRED_EVENTS}",
@@ -340,7 +340,7 @@ class WebSocketAgentEventsUnifiedTests(SSotAsyncTestCase):
         assert validator.event_counts.get("tool_completed", 0) >= 1, "Missing tool_completed event"
         assert validator.event_counts.get("agent_completed", 0) >= 1, "Missing agent_completed event"
         
-        print(f"✅ Unified Schema Validation PASSED - {len(validator.events)} events validated")
+        print(f"CHECK Unified Schema Validation PASSED - {len(validator.events)} events validated")
     
     @pytest.mark.mission_critical
     @pytest.mark.business_critical
@@ -349,7 +349,7 @@ class WebSocketAgentEventsUnifiedTests(SSotAsyncTestCase):
         MISSION CRITICAL: Test tool events have required fields - Issue #984 fix.
         
         BVJ: System reliability - prevents test failures due to missing fields
-        Critical Path: Tool Events → Required Fields → Schema Compliance
+        Critical Path: Tool Events -> Required Fields -> Schema Compliance
         
         This test specifically validates the Issue #984 fix where tool_name and
         results fields were missing from tool events, causing test/production mismatches.
@@ -400,7 +400,7 @@ class WebSocketAgentEventsUnifiedTests(SSotAsyncTestCase):
         assert "savings_potential" in results, "results missing savings_potential"
         assert results["savings_potential"] > 0, "savings_potential should be positive"
         
-        print(f"✅ Tool Events Required Fields Validation PASSED - Issue #984 fix verified")
+        print(f"CHECK Tool Events Required Fields Validation PASSED - Issue #984 fix verified")
 
 
 # Test execution entry point

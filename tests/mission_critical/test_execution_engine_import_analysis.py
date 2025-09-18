@@ -212,7 +212,7 @@ class ExecutionEngineImportAnalysisTests(SSotBaseTestCase):
 
             )
         else:
-            logger.info("✅ All ExecutionEngine imports can be resolved)"
+            logger.info("CHECK All ExecutionEngine imports can be resolved)"
     
     def test_comprehensive_import_analysis_report(self):
         Generate comprehensive import analysis report - SHOULD INITIALLY FAIL.""

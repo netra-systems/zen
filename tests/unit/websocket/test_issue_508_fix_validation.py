@@ -13,7 +13,7 @@ BUSINESS IMPACT VALIDATION:
 
 FIX IMPLEMENTED:
 - Added: from starlette.datastructures import QueryParams
-- Changed: websocket.url.query_params → QueryParams(websocket.url.query)
+- Changed: websocket.url.query_params -> QueryParams(websocket.url.query)
 - Location: netra_backend/app/routes/websocket_ssot.py:355
 """
 import pytest
@@ -92,7 +92,7 @@ class Issue508FixValidationTests(SSotAsyncTestCase):
         BUSINESS VALIDATION: Golden Path functionality restored
         
         This validates that the fix enables the Golden Path user flow:
-        users login → get AI responses via WebSocket
+        users login -> get AI responses via WebSocket
         """
         golden_path_url = URL('ws://localhost:8000/ws/chat?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9&user_id=prod_user_123&session_id=session_abc&mode=chat')
         golden_path_context = {'connection_id': 'golden-path-connection', 'websocket_url': str(golden_path_url), 'path': golden_path_url.path, 'query_params': dict(QueryParams(golden_path_url.query)) if golden_path_url.query else {}, 'golden_path_stage': 'connection_initiation', 'business_value': '$500K+ ARR', 'critical_events': ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']}

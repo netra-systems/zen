@@ -740,10 +740,10 @@ if __name__ == __main__:
             # Simple validation
             if (report['test_summary')['reconnection_success_rate') >= 70.0 and
                 report['message_metrics']['message_loss_rate'] <= 20.0):
-                print("✅ Standalone chaos test PASSED)"
+                print("CHECK Standalone chaos test PASSED)"
                 return 0
             else:
-                print(❌ Standalone chaos test FAILED")"
+                print(X Standalone chaos test FAILED")"
                 return 1
 
         finally:

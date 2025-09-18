@@ -14,7 +14,7 @@ Business Value Justification (BVJ):
 
 This test suite validates:
 1. Real service startup timing with environment-optimized timeouts
-2. Service dependency chain coordination (Database → Redis → Auth → Agent → WebSocket)
+2. Service dependency chain coordination (Database -> Redis -> Auth -> Agent -> WebSocket)
 3. Race condition prevention maintained across all environments
 4. Golden Path chat functionality preservation during environment-specific optimizations
 """

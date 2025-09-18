@@ -734,7 +734,7 @@ if __name__ == "__main__":
     # Run interface compatibility failure tests
     print("🔍 Running Interface Compatibility FAILURE Tests for Issue #1099")
     print("=" * 70)
-    print("⚠️  WARNING: These tests DELIBERATELY FAIL to demonstrate interface conflicts")
+    print("WARNING️  WARNING: These tests DELIBERATELY FAIL to demonstrate interface conflicts")
     print("=" * 70)
     
     # These tests are expected to fail - we want to see the failures
@@ -747,11 +747,11 @@ if __name__ == "__main__":
     ])
     
     if exit_code != 0:
-        print("\n✅ INTERFACE COMPATIBILITY FAILURES DEMONSTRATED")
+        print("\nCHECK INTERFACE COMPATIBILITY FAILURES DEMONSTRATED")
         print("Tests failed as expected, proving interface incompatibilities exist")
         print("These failures justify the need for careful migration planning")
     else:
-        print("\n❌ UNEXPECTED: Tests passed when they should have failed")
+        print("\nX UNEXPECTED: Tests passed when they should have failed")
         print("This suggests interface compatibility issues may not exist")
         print("Re-examine the migration requirements")
     

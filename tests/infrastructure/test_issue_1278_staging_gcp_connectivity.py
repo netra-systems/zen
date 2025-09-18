@@ -80,10 +80,10 @@ class TestIssue1278StagingGCPConnectivity(SSotAsyncTestCase):
                     assert content['status'] == 'healthy', \
                         f"Service not healthy: {content}"
             
-            logger.info("✅ Staging backend health endpoint accessible")
+            logger.info("CHECK Staging backend health endpoint accessible")
             
         except Exception as e:
-            logger.error(f"❌ Staging backend health endpoint failed: {e}")
+            logger.error(f"X Staging backend health endpoint failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: Backend health check failure - {e}")
     
@@ -122,10 +122,10 @@ class TestIssue1278StagingGCPConnectivity(SSotAsyncTestCase):
             assert result == 1, "Database query failed"
             
             await connection.close()
-            logger.info("✅ Staging database connection successful")
+            logger.info("CHECK Staging database connection successful")
             
         except Exception as e:
-            logger.error(f"❌ Staging database connection failed: {e}")
+            logger.error(f"X Staging database connection failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: Database connection failure - {e}")
     
@@ -158,10 +158,10 @@ class TestIssue1278StagingGCPConnectivity(SSotAsyncTestCase):
                 response = await asyncio.wait_for(websocket.recv(), timeout=5)
                 logger.info(f"WebSocket response: {response}")
                 
-            logger.info("✅ Staging WebSocket endpoint accessible")
+            logger.info("CHECK Staging WebSocket endpoint accessible")
             
         except Exception as e:
-            logger.error(f"❌ Staging WebSocket endpoint failed: {e}")
+            logger.error(f"X Staging WebSocket endpoint failed: {e}")
             # This failure is EXPECTED for Issue #1278  
             raise AssertionError(f"Issue #1278 reproduction: WebSocket connectivity failure - {e}")
     
@@ -199,10 +199,10 @@ class TestIssue1278StagingGCPConnectivity(SSotAsyncTestCase):
             await redis.delete(test_key)
             await redis.close()
             
-            logger.info("✅ Staging Redis connectivity successful")
+            logger.info("CHECK Staging Redis connectivity successful")
             
         except Exception as e:
-            logger.error(f"❌ Staging Redis connectivity failed: {e}")
+            logger.error(f"X Staging Redis connectivity failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: Redis VPC connectivity failure - {e}")
     
@@ -249,10 +249,10 @@ class TestIssue1278StagingGCPConnectivity(SSotAsyncTestCase):
                             assert domain in common_name or '*.netrasystems.ai' in common_name, \
                                 f"Domain {domain} not found in certificate"
             
-            logger.info("✅ Staging SSL certificate validation passed")
+            logger.info("CHECK Staging SSL certificate validation passed")
             
         except Exception as e:
-            logger.error(f"❌ Staging SSL certificate validation failed: {e}")
+            logger.error(f"X Staging SSL certificate validation failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: SSL certificate validation failure - {e}")
     
@@ -298,10 +298,10 @@ class TestIssue1278StagingGCPConnectivity(SSotAsyncTestCase):
                                 assert header in response.headers, \
                                     f"Missing CORS header: {header}"
             
-            logger.info("✅ Staging load balancer configuration passed")
+            logger.info("CHECK Staging load balancer configuration passed")
             
         except Exception as e:
-            logger.error(f"❌ Staging load balancer configuration failed: {e}")
+            logger.error(f"X Staging load balancer configuration failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: Load balancer configuration failure - {e}")
     
@@ -344,10 +344,10 @@ class TestIssue1278StagingGCPConnectivity(SSotAsyncTestCase):
                         # Reverse DNS might not be configured, that's okay
                         logger.warning(f"No reverse DNS for IP {ip}")
             
-            logger.info("✅ Staging service discovery DNS resolution passed")
+            logger.info("CHECK Staging service discovery DNS resolution passed")
             
         except Exception as e:
-            logger.error(f"❌ Staging service discovery DNS failed: {e}")
+            logger.error(f"X Staging service discovery DNS failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: DNS/service discovery failure - {e}")
 

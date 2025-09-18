@@ -3,7 +3,7 @@
 Business Value Justification:
 - Segment: Platform/Integration
 - Business Goal: Validate complete consolidation success
-- Value Impact: Ensures 12→1 execution engine consolidation maintains system functionality
+- Value Impact: Ensures 12->1 execution engine consolidation maintains system functionality
 - Strategic Impact: Comprehensive validation that SSOT consolidation works end-to-end
 
 CRITICAL MISSION: NEW 20% SSOT VALIDATION TESTS
@@ -193,7 +193,7 @@ class ExecutionEngineConsolidationValidation1146Tests(SSotAsyncTestCase):
             self.fail("\n".join(error_msg))
         
         # Success summary
-        print(f"✅ CONSOLIDATION VALIDATION PASSED:")
+        print(f"CHECK CONSOLIDATION VALIDATION PASSED:")
         print(f"   Former engines validated: {len(former_engine_responsibilities)}")
         print(f"   Total tests passed: {total_tests - total_failures}/{total_tests}")
         print(f"   UserExecutionEngine handles all former responsibilities")
@@ -289,7 +289,7 @@ class ExecutionEngineConsolidationValidation1146Tests(SSotAsyncTestCase):
         avg_times = [r.get('average_time', 0) for r in performance_results.values() if 'average_time' in r]
         overall_avg = sum(avg_times) / len(avg_times) if avg_times else 0
         
-        print(f"✅ PERFORMANCE VALIDATION PASSED:")
+        print(f"CHECK PERFORMANCE VALIDATION PASSED:")
         print(f"   Benchmarks tested: {len(performance_benchmarks)}")
         print(f"   Overall average time: {overall_avg:.3f}s")
         print(f"   All benchmarks within acceptable limits")
@@ -394,7 +394,7 @@ class ExecutionEngineConsolidationValidation1146Tests(SSotAsyncTestCase):
         total_components = len(system_components)
         successful_components = len([r for r in integration_results.values() if r['integration_status'] == 'PASS'])
         
-        print(f"✅ INTEGRATION VALIDATION COMPLETED:")
+        print(f"CHECK INTEGRATION VALIDATION COMPLETED:")
         print(f"   Components tested: {total_components}")
         print(f"   Successful integrations: {successful_components}/{total_components}")
         print(f"   UserExecutionEngine successfully integrates with system")

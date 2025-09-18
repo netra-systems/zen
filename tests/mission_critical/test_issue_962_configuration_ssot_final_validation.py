@@ -159,9 +159,9 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         )
 
         # SUCCESS: Issue #962 fully resolved
-        print(f"\n✅ MISSION CRITICAL SUCCESS: Issue #962 FULLY RESOLVED)"
-        print(f✅ Zero configuration SSOT violations remaining)
-        print(f"✅ Production deployment gate: PASS))"
+        print(f"\nCHECK MISSION CRITICAL SUCCESS: Issue #962 FULLY RESOLVED)"
+        print(fCHECK Zero configuration SSOT violations remaining)
+        print(f"CHECK Production deployment gate: PASS))"
 
     async def test_golden_path_configuration_stability_end_to_end(self"):"
         
@@ -204,13 +204,13 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
                 golden_path_results[step_name] = success
 
                 if success:
-                    print(f✅ {step_name}: PASS)
+                    print(fCHECK {step_name}: PASS)
                 else:
-                    print(f❌ {step_name}: FAIL"")
+                    print(fX {step_name}: FAIL"")
                     golden_path_failures.append(f{step_name}: Failed validation)
 
             except Exception as e:
-                print(f❌ {step_name}: EXCEPTION - {e}")"
+                print(fX {step_name}: EXCEPTION - {e}")"
                 golden_path_results[step_name] = False
                 golden_path_failures.append(f{step_name}: Exception - {e})
 
@@ -241,9 +241,9 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         )
 
         # SUCCESS: Golden Path works perfectly
-        print(f\n✅ MISSION CRITICAL SUCCESS: Golden Path 100% stable with SSOT configuration)"
-        print(f\n✅ MISSION CRITICAL SUCCESS: Golden Path 100% stable with SSOT configuration)"
-        print(f"✅ $"500K" plus ARR Golden Path fully protected from configuration failures))"
+        print(f\nCHECK MISSION CRITICAL SUCCESS: Golden Path 100% stable with SSOT configuration)"
+        print(f\nCHECK MISSION CRITICAL SUCCESS: Golden Path 100% stable with SSOT configuration)"
+        print(f"CHECK $"500K" plus ARR Golden Path fully protected from configuration failures))"
 
     async def test_authentication_configuration_eliminates_race_conditions(self):
         
@@ -283,14 +283,14 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
                 race_condition_results[test_name] = no_race_condition
 
                 if no_race_condition:
-                    print(f"✅ {test_name}: No race condition detected))"
+                    print(f"CHECK {test_name}: No race condition detected))"
                 else:
-                    print(f❌ {test_name}: Race condition detected)"
-                    print(f❌ {test_name}: Race condition detected)"
+                    print(fX {test_name}: Race condition detected)"
+                    print(fX {test_name}: Race condition detected)"
                     race_condition_failures.append(f"{test_name}: Race condition exists)"
 
             except Exception as e:
-                print(f❌ {test_name}: TEST ERROR - {e})
+                print(fX {test_name}: TEST ERROR - {e})
                 race_condition_results[test_name] = False
                 race_condition_failures.append(f"{test_name}: Test error - {e})"
 
@@ -319,8 +319,8 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         )
 
         # SUCCESS: All race conditions eliminated
-        print(f\n✅ MISSION CRITICAL SUCCESS: All authentication race conditions eliminated")"
-        print(f✅ Golden Path authentication now predictable and reliable)
+        print(f\nCHECK MISSION CRITICAL SUCCESS: All authentication race conditions eliminated")"
+        print(fCHECK Golden Path authentication now predictable and reliable)
 
     # HELPER METHODS FOR MISSION CRITICAL VALIDATION
 

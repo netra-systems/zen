@@ -263,7 +263,7 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
         # Log assessment results
         print(f\nE2E STAGING RESILIENCE ASSESSMENT:)
         for component, working in resilience_assessment.items():
-            status = ✅ RESILIENT" if working else ❌ IMPACTED"
+            status = CHECK RESILIENT" if working else X IMPACTED"
             print(f  {component}: {status})
 
         # CRITICAL: User experience must remain intact

@@ -6,10 +6,10 @@ ISSUE #1090: SSOT-incomplete-migration-websocket-manager-import-fragmentation
 This test detects usage of deprecated factory pattern vs direct SSOT instantiation.
 
 KEY VIOLATION PATTERNS:
-❌ Factory Pattern: WebSocketManagerFactory.create_websocket_manager()
-❌ Factory Import: from websocket_manager_factory import create_websocket_manager
-✅ Direct SSOT: WebSocketManager(user_context=context)
-✅ SSOT Helper: get_websocket_manager(user_context=context)
+X Factory Pattern: WebSocketManagerFactory.create_websocket_manager()
+X Factory Import: from websocket_manager_factory import create_websocket_manager
+CHECK Direct SSOT: WebSocketManager(user_context=context)
+CHECK SSOT Helper: get_websocket_manager(user_context=context)
 
 PURPOSE:
 - FAILS if deprecated factory patterns are detected in active use
@@ -486,7 +486,7 @@ if __name__ == '__main__':
         for test in sync_tests:
             try:
                 test()
-                print(f"✓ {test.__name__}")
+                print(f"CHECK {test.__name__}")
             except AssertionError as e:
                 print(f"✗ {test.__name__}: {e}")
             except Exception as e:
@@ -501,7 +501,7 @@ if __name__ == '__main__':
         for test in async_tests:
             try:
                 await test()
-                print(f"✓ {test.__name__}")
+                print(f"CHECK {test.__name__}")
             except AssertionError as e:
                 print(f"✗ {test.__name__}: {e}")
             except Exception as e:

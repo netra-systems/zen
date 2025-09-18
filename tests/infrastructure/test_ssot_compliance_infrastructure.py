@@ -333,7 +333,7 @@ if __name__ == "__main__":
                 try:
                     print(f"  Running {test_method}...")
                     getattr(test_instance, test_method)()
-                    print(f"  ✓ {test_method} PASSED")
+                    print(f"  CHECK {test_method} PASSED")
                     total_passed += 1
                 except Exception as e:
                     print(f"  ✗ {test_method} FAILED: {e}")

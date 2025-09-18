@@ -215,7 +215,7 @@ class TestGoldenPathStagingWebSocketRouting:
         pong = await staging_client.websocket.ping()
         await asyncio.wait_for(pong, timeout=5.0)
 
-        print("✅ Staging WebSocket Connection: Connected and authenticated")
+        print("CHECK Staging WebSocket Connection: Connected and authenticated")
 
     @pytest.mark.asyncio
     async def test_golden_path_agent_workflow_staging(self, staging_client):
@@ -259,7 +259,7 @@ class TestGoldenPathStagingWebSocketRouting:
             if event_type in event_types
         ]
 
-        print(f"✅ Staging Golden Path Events: Received {len(received_critical_events)}/5 critical events")
+        print(f"CHECK Staging Golden Path Events: Received {len(received_critical_events)}/5 critical events")
         print(f"   Events received: {received_critical_events}")
         print(f"   All events: {event_types}")
 
@@ -295,7 +295,7 @@ class TestGoldenPathStagingWebSocketRouting:
         event_ids = [f"{event.event_type}_{event.sequence_number}" for event in events]
         assert len(event_ids) == len(set(event_ids)), "Duplicate events detected"
 
-        print(f"✅ Staging Message Routing Consistency: {len(events)} events in correct order")
+        print(f"CHECK Staging Message Routing Consistency: {len(events)} events in correct order")
 
     @pytest.mark.asyncio
     async def test_websocket_connection_recovery_staging(self, staging_client):
@@ -329,7 +329,7 @@ class TestGoldenPathStagingWebSocketRouting:
         # Verify we can still receive events
         events = await staging_client.listen_for_events(timeout_seconds=10.0)
 
-        print(f"✅ Staging Connection Recovery: Reconnected and received {len(events)} events")
+        print(f"CHECK Staging Connection Recovery: Reconnected and received {len(events)} events")
 
     @pytest.mark.asyncio
     async def test_user_isolation_staging(self, staging_client):
@@ -361,7 +361,7 @@ class TestGoldenPathStagingWebSocketRouting:
             unique_user_ids = set(user_ids_in_events)
             assert len(unique_user_ids) <= 1, f"Multiple user IDs in events: {unique_user_ids}"
 
-        print(f"✅ Staging User Isolation: Consistent user context in {len(events)} events")
+        print(f"CHECK Staging User Isolation: Consistent user context in {len(events)} events")
 
 
 def test_canonical_message_router_staging_compatibility():
@@ -390,7 +390,7 @@ def test_canonical_message_router_staging_compatibility():
     assert 'routing_errors' in stats
     assert 'active_connections' in stats
 
-    print("✅ Staging Compatibility: CanonicalMessageRouter ready for staging deployment")
+    print("CHECK Staging Compatibility: CanonicalMessageRouter ready for staging deployment")
 
 
 if __name__ == "__main__":

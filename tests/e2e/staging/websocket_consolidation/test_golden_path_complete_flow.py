@@ -2,7 +2,7 @@
 E2E Staging Test: Golden Path Complete Flow Validation
 
 This test is designed to FAIL initially, proving that the complete Golden Path
-user flow (users login → get AI responses) is broken due to SSOT violations.
+user flow (users login -> get AI responses) is broken due to SSOT violations.
 
 Business Impact:
 - Complete Golden Path user flow broken
@@ -64,7 +64,7 @@ class GoldenPathCompleteFlowTests(SSotAsyncTestCase):
         """
         CRITICAL BUSINESS TEST: Prove complete Golden Path user flow fails
 
-        Expected Result: FAIL - Users cannot complete login → AI response flow
+        Expected Result: FAIL - Users cannot complete login -> AI response flow
         Business Impact: $500K+ ARR - Core platform functionality completely broken
         """
         if not self._staging_available():

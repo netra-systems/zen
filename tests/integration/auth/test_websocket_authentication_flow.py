@@ -6,7 +6,7 @@ Issues: #463 (Frontend WebSocket auth), #465 (Token management), #426 cluster
 Approach: Mock auth services, test real coordination patterns
 
 MISSION CRITICAL: These tests validate the complete authentication flow that enables
-the Golden Path user workflow (Login → WebSocket → AI Response) without Docker.
+the Golden Path user workflow (Login -> WebSocket -> AI Response) without Docker.
 
 Business Impact: Authentication enables $500K+ ARR user access to AI chat functionality
 """

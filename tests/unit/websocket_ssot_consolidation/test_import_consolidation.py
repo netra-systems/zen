@@ -203,7 +203,7 @@ class WebSocketImportConsolidationTests(SSotBaseTestCase, unittest.TestCase):
 
         # This measures current risk that SSOT consolidation would reduce
         if total_risk_indicators > 0:
-            print("⚠️  Circular dependency risks detected - SSOT consolidation would help")
+            print("WARNING️  Circular dependency risks detected - SSOT consolidation would help")
 
     @pytest.mark.unit
     def test_import_path_consistency_analysis(self):

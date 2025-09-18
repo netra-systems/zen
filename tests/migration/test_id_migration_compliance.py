@@ -383,9 +383,9 @@ class IDMigrationComplianceEnhancedTests(SSotAsyncTestCase):
             if progress['compliance_score'] < 0.5:
                 print('🚨 CRITICAL: Migration requires immediate attention')
             elif progress['compliance_score'] < 0.8:
-                print('⚠️  WARNING: Migration progressing but needs focus')
+                print('WARNING️  WARNING: Migration progressing but needs focus')
             else:
-                print('✅ GOOD: Migration making strong progress')
+                print('CHECK GOOD: Migration making strong progress')
         super().tearDown()
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

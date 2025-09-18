@@ -81,18 +81,18 @@ class Issue544StagingEnvironmentConnectivityTests:
             logger.info(fStaging backend health response: {response.status_code}")"
             
             if response.status_code == 200:
-                logger.info(✅ Staging backend accessible - viable Docker alternative)
+                logger.info(CHECK Staging backend accessible - viable Docker alternative)
                 health_data = response.json() if response.headers.get('content-type', '').startswith('application/json') else {}
                 logger.info(fHealth "data": {"health_data"}")"
             else:
-                logger.warning(f⚠️ Staging backend health check failed: {response.status_code})
+                logger.warning(fWARNING️ Staging backend health check failed: {response.status_code})
                 pytest.skip(fStaging backend not healthy: {response.status_code})
                 
         except requests.RequestException as e:
-            logger.error(f"❌ Staging backend not accessible: {e})"
+            logger.error(f"X Staging backend not accessible: {e})"
             pytest.skip(fStaging backend connection failed: {e}")"
         except Exception as e:
-            logger.error(f❌ Unexpected error checking staging backend: {e})
+            logger.error(fX Unexpected error checking staging backend: {e})
             pytest.skip(fStaging backend check error: {e})"
             pytest.skip(fStaging backend check error: {e})""
 
@@ -113,16 +113,16 @@ class Issue544StagingEnvironmentConnectivityTests:
             logger.info(f"Staging auth service response: {response.status_code})"
             
             if response.status_code == 200:
-                logger.info(✅ Staging auth service accessible)
+                logger.info(CHECK Staging auth service accessible)
             else:
-                logger.warning(f⚠️ Staging auth service not fully healthy: {response.status_code})
+                logger.warning(fWARNING️ Staging auth service not fully healthy: {response.status_code})
                 # Don't skip - auth issues might be configuration, not connectivity'
                 
         except requests.RequestException as e:
-            logger.warning(f⚠️ Staging auth service not accessible: {e}")"
+            logger.warning(fWARNING️ Staging auth service not accessible: {e}")"
             # Don't skip - auth service might not be required for basic WebSocket tests'
         except Exception as e:
-            logger.warning(f⚠️ Staging auth check error: {e})
+            logger.warning(fWARNING️ Staging auth check error: {e})
     
     @pytest.mark.asyncio
     async def test_staging_websocket_connectivity(self):
@@ -143,7 +143,7 @@ class Issue544StagingEnvironmentConnectivityTests:
                 ping_interval=20,
                 ping_timeout=10
             ) as websocket:
-                logger.info("✅ WebSocket connection to staging established)"
+                logger.info("CHECK WebSocket connection to staging established)"
                 
                 # Test basic ping/pong
                 ping_message = {"type": ping, timestamp": time.time()}"
@@ -152,20 +152,20 @@ class Issue544StagingEnvironmentConnectivityTests:
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=5)
                     logger.info(fWebSocket response received: {response[:100]}...)
-                    logger.info(✅ Staging WebSocket is responsive)
+                    logger.info(CHECK Staging WebSocket is responsive)
                 except asyncio.TimeoutError:
-                    logger.warning("⚠️ WebSocket connection made but no response to ping)"
+                    logger.warning("WARNING️ WebSocket connection made but no response to ping)"
                     # Don't fail - connection itself is the important part'
                 
         except websockets.exceptions.ConnectionClosed as e:
-            logger.error(f❌ Staging WebSocket connection closed: {e})
+            logger.error(fX Staging WebSocket connection closed: {e})
             pytest.skip(fStaging WebSocket not accessible: {e})
         except asyncio.TimeoutError:
-            logger.error(❌ Staging WebSocket connection timed out")"
+            logger.error(X Staging WebSocket connection timed out")"
             pytest.skip(Staging WebSocket connection timeout)
         except Exception as e:
-            logger.error(f❌ Staging WebSocket connection failed: {e})"
-            logger.error(f❌ Staging WebSocket connection failed: {e})"
+            logger.error(fX Staging WebSocket connection failed: {e})"
+            logger.error(fX Staging WebSocket connection failed: {e})"
             pytest.skip(f"Staging WebSocket error: {e})"
     
     @pytest.mark.asyncio
@@ -217,7 +217,7 @@ class Issue544StagingEnvironmentConnectivityTests:
                             event_type = event_data.get('type', '')
                             if event_type in ['agent_started', 'agent_thinking', 'tool_executing', 
                                            'tool_completed', 'agent_completed']:
-                                logger.info(f"✅ Mission critical event received via staging: {event_type})"
+                                logger.info(f"CHECK Mission critical event received via staging: {event_type})"
                             
                         except asyncio.TimeoutError:
                             # No immediate response - continue listening
@@ -232,15 +232,15 @@ class Issue544StagingEnvironmentConnectivityTests:
                 logger.info(fTotal events received from staging: {len(received_events)})
                 
                 if received_events:
-                    logger.info(✅ Staging environment can deliver WebSocket events")"
-                    logger.info(✅ ISSUE #544 SOLUTION: Staging environment is viable Docker alternative)
+                    logger.info(CHECK Staging environment can deliver WebSocket events")"
+                    logger.info(CHECK ISSUE #544 SOLUTION: Staging environment is viable Docker alternative)
                 else:
                     logger.info(ℹ️ No events received - staging may require authentication or specific configuration)"
                     logger.info(ℹ️ No events received - staging may require authentication or specific configuration)"
-                    logger.info("✅ Basic WebSocket connectivity confirmed - staging is accessible)"
+                    logger.info("CHECK Basic WebSocket connectivity confirmed - staging is accessible)"
                 
         except Exception as e:
-            logger.error(f❌ Staging agent event simulation failed: {e})
+            logger.error(fX Staging agent event simulation failed: {e})
             pytest.skip(f"Staging event simulation error: {e})"
     
     def test_staging_fallback_configuration_validation(self):
@@ -262,16 +262,16 @@ class Issue544StagingEnvironmentConnectivityTests:
             if not value or value == NOT_SET":"
                 missing_config.append(key)
             else:
-                logger.info(f✅ {key}: {value})
+                logger.info(fCHECK {key}: {value})
         
         if missing_config:
-            logger.warning(f⚠️ Missing staging configuration: {missing_config})
+            logger.warning(fWARNING️ Missing staging configuration: {missing_config})
             logger.info("To enable staging fallback for Issue #544, configure:)"
             for key in missing_config:
                 default_value = self.staging_config.get(key, )
                 logger.info(f  export {key}='{default_value}')
         else:
-            logger.info(✅ All staging configuration present")"
+            logger.info(CHECK All staging configuration present")"
         
         # Test staging fallback environment variable
         fallback_enabled = self.env.get(USE_STAGING_FALLBACK, false).lower() == true"
@@ -346,10 +346,10 @@ class Issue544StagingPerformanceValidationTests:
             logger.info(f"Average staging response time: {avg_response_time:."2f"}s)"
             
             if avg_response_time < 10:
-                logger.info(✅ Staging performance acceptable for test validation)
+                logger.info(CHECK Staging performance acceptable for test validation)
             else:
-                logger.warning(⚠️ Staging performance slow but usable for validation)"
-                logger.warning(⚠️ Staging performance slow but usable for validation)""
+                logger.warning(WARNING️ Staging performance slow but usable for validation)"
+                logger.warning(WARNING️ Staging performance slow but usable for validation)""
 
         
         # Test always passes - it's informational'
@@ -413,15 +413,15 @@ class Issue544StagingPerformanceValidationTests:
                     logger.info(f  Max: {max_latency:."3f"}s")"
                     
                     if avg_latency < 5:
-                        logger.info(✅ Staging WebSocket latency acceptable for testing)
+                        logger.info(CHECK Staging WebSocket latency acceptable for testing)
                     else:
-                        logger.warning(⚠️ Staging WebSocket latency high but usable")"
+                        logger.warning(WARNING️ Staging WebSocket latency high but usable")"
                 else:
-                    logger.warning(⚠️ No latency measurements - WebSocket may not be responsive)
+                    logger.warning(WARNING️ No latency measurements - WebSocket may not be responsive)
                 
         except Exception as e:
-            logger.error(f❌ Staging WebSocket latency test failed: {e})"
-            logger.error(f❌ Staging WebSocket latency test failed: {e})"
+            logger.error(fX Staging WebSocket latency test failed: {e})"
+            logger.error(fX Staging WebSocket latency test failed: {e})"
             pytest.skip(f"Staging WebSocket latency test error: {e})"
 
 

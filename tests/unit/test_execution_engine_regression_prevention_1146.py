@@ -4,7 +4,7 @@ Business Value Justification:
 - Segment: Platform/Development 
 - Business Goal: Prevent regression to multiple execution engines
 - Value Impact: Blocks creation of new execution engines that would fragment SSOT pattern
-- Strategic Impact: Ensures 12→1 consolidation remains stable and prevents future violations
+- Strategic Impact: Ensures 12->1 consolidation remains stable and prevents future violations
 
 CRITICAL MISSION: NEW 20% SSOT VALIDATION TESTS
 This test prevents regression back to multiple execution engine patterns by detecting
@@ -344,7 +344,7 @@ class ExecutionEngineRegressionPrevention1146Tests(SSotBaseTestCase):
                 line_lower = line.lower()
                 
                 # Look for execution engine related entries
-                if 'execution_engine' in line_lower and '✅' in line:  # Active entries
+                if 'execution_engine' in line_lower and 'CHECK' in line:  # Active entries
                     # Skip if it's clearly UserExecutionEngine
                     if 'user_execution_engine' not in line_lower:
                         execution_engine_entries.append({

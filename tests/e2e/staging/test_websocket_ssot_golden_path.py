@@ -3,7 +3,7 @@ E2E Staging Golden Path Test Suite - WebSocket SSOT Migration Validation
 
 MISSION: Final validation of complete user experience in real GCP staging environment
 PROTECTS: $500K+ ARR user flow through production-like infrastructure testing
-SCOPE: Complete Golden Path - login → WebSocket → AI agent responses
+SCOPE: Complete Golden Path - login -> WebSocket -> AI agent responses
 
 This is Test 4/4 in the comprehensive SSOT WebSocket migration test suite.
 Tests run against actual GCP staging deployment with real infrastructure.
@@ -85,7 +85,7 @@ class WebSocketSSoTGoldenPathStagingTests(SSotAsyncTestCase):
                 response = await client.get(f"{cls.staging_auth_url}/health")
                 assert response.status_code == 200, f"Staging auth service unhealthy: {response.status_code}"
                 
-                cls.logger.info("✅ Staging environment validation successful")
+                cls.logger.info("CHECK Staging environment validation successful")
                 
         except Exception as e:
             pytest.skip(f"Staging environment not accessible: {e}")
@@ -136,11 +136,11 @@ class WebSocketSSoTGoldenPathStagingTests(SSotAsyncTestCase):
             assert connect_time < self.max_websocket_connect_time, \
                 f"Staging WebSocket connection too slow: {connect_time:.2f}s"
             
-            self.logger.info(f"✅ Staging WebSocket connected in {connect_time:.2f}s")
+            self.logger.info(f"CHECK Staging WebSocket connected in {connect_time:.2f}s")
             return websocket
             
         except Exception as e:
-            self.logger.error(f"❌ Staging WebSocket connection failed: {e}")
+            self.logger.error(f"X Staging WebSocket connection failed: {e}")
             raise AssertionError(f"Failed to connect to staging WebSocket: {e}")
     
     async def _send_ai_request_staging(self, websocket, request_data: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -178,10 +178,10 @@ class WebSocketSSoTGoldenPathStagingTests(SSotAsyncTestCase):
         missing_events = required_events - events_received
         
         if missing_events:
-            self.logger.warning(f"⚠️ Missing WebSocket events in staging: {missing_events}")
+            self.logger.warning(f"WARNING️ Missing WebSocket events in staging: {missing_events}")
         
         total_time = time.time() - start_time
-        self.logger.info(f"✅ Staging AI request completed in {total_time:.2f}s with {len(responses)} events")
+        self.logger.info(f"CHECK Staging AI request completed in {total_time:.2f}s with {len(responses)} events")
         
         return responses
     
@@ -227,7 +227,7 @@ class WebSocketSSoTGoldenPathStagingTests(SSotAsyncTestCase):
         E2E TEST: Complete user journey in staging GCP environment
         
         MISSION: Validate full Golden Path protecting $500K+ ARR
-        SCOPE: Login → WebSocket connection → AI agent request → Real AI response
+        SCOPE: Login -> WebSocket connection -> AI agent request -> Real AI response
         VALIDATION: Complete user experience works end-to-end in staging
         
         This test validates the entire revenue-generating user flow
@@ -237,11 +237,11 @@ class WebSocketSSoTGoldenPathStagingTests(SSotAsyncTestCase):
         
         # Step 1: Authenticate user in staging
         auth_headers = await self._authenticate_staging_user()
-        self.logger.info("✅ Step 1: User authenticated in staging")
+        self.logger.info("CHECK Step 1: User authenticated in staging")
         
         # Step 2: Establish WebSocket connection to staging
         websocket = await self._establish_staging_websocket(auth_headers)
-        self.logger.info("✅ Step 2: WebSocket connected to staging")
+        self.logger.info("CHECK Step 2: WebSocket connected to staging")
         
         try:
             # Step 3: Send AI request for real agent response
@@ -255,14 +255,14 @@ class WebSocketSSoTGoldenPathStagingTests(SSotAsyncTestCase):
             }
             
             responses = await self._send_ai_request_staging(websocket, ai_request)
-            self.logger.info(f"✅ Step 3: AI request completed with {len(responses)} events")
+            self.logger.info(f"CHECK Step 3: AI request completed with {len(responses)} events")
             
             # Step 4: Validate response quality
             quality_score = self._validate_ai_response_quality(responses)
             assert quality_score >= self.min_ai_response_quality_score, \
                 f"AI response quality too low: {quality_score} < {self.min_ai_response_quality_score}"
             
-            self.logger.info(f"✅ Step 4: AI response quality validated: {quality_score:.2f}")
+            self.logger.info(f"CHECK Step 4: AI response quality validated: {quality_score:.2f}")
             
             # Step 5: Validate all critical events received
             event_types = {response.get('type') for response in responses if response.get('type')}
@@ -271,7 +271,7 @@ class WebSocketSSoTGoldenPathStagingTests(SSotAsyncTestCase):
             for event in required_events:
                 assert event in event_types, f"Missing critical event: {event}"
             
-            self.logger.info("✅ Step 5: All critical WebSocket events validated")
+            self.logger.info("CHECK Step 5: All critical WebSocket events validated")
             
             # SUCCESS: Complete Golden Path works in staging
             self.logger.info("🎉 GOLDEN PATH STAGING VALIDATION SUCCESS: Complete user journey validated")
@@ -317,7 +317,7 @@ class WebSocketSSoTGoldenPathStagingTests(SSotAsyncTestCase):
                     'stable': True
                 })
                 
-                self.logger.info(f"✅ Connection {attempt + 1}: Stable in {connect_time:.2f}s")
+                self.logger.info(f"CHECK Connection {attempt + 1}: Stable in {connect_time:.2f}s")
                 
             except Exception as e:
                 connection_results.append({
@@ -326,7 +326,7 @@ class WebSocketSSoTGoldenPathStagingTests(SSotAsyncTestCase):
                     'stable': False,
                     'error': str(e)
                 })
-                self.logger.warning(f"⚠️ Connection {attempt + 1}: Unstable - {e}")
+                self.logger.warning(f"WARNING️ Connection {attempt + 1}: Unstable - {e}")
                 
             finally:
                 await websocket.close()
@@ -405,7 +405,7 @@ class WebSocketSSoTGoldenPathStagingTests(SSotAsyncTestCase):
                     'event_count': len(responses)
                 })
                 
-                self.logger.info(f"✅ {test_case['name']}: Quality {quality_score:.2f}, Time {response_time:.2f}s")
+                self.logger.info(f"CHECK {test_case['name']}: Quality {quality_score:.2f}, Time {response_time:.2f}s")
             
             # Validate overall AI quality in staging
             avg_quality = sum(result['quality_score'] for result in quality_results) / len(quality_results)
@@ -565,7 +565,7 @@ class WebSocketSSoTGoldenPathStagingTests(SSotAsyncTestCase):
                     'events_per_second': len(responses) / total_time if total_time > 0 else 0
                 })
                 
-                self.logger.info(f"✅ Iteration {iteration + 1}: {total_time:.2f}s, {len(responses)} events")
+                self.logger.info(f"CHECK Iteration {iteration + 1}: {total_time:.2f}s, {len(responses)} events")
             
             # Calculate performance statistics
             avg_total_time = sum(m['total_time'] for m in performance_metrics) / len(performance_metrics)
@@ -658,7 +658,7 @@ class WebSocketSSoTGoldenPathStagingTests(SSotAsyncTestCase):
         
         # Log detailed validation results
         for component, result in validation_results.items():
-            status_emoji = "✅" if result['status'] == 'PASS' else "❌"
+            status_emoji = "CHECK" if result['status'] == 'PASS' else "X"
             self.logger.info(f"{status_emoji} {component}: {result['message']}")
         
         # Final validation requirements
@@ -751,9 +751,9 @@ if __name__ == "__main__":
     staging_url = env.get('STAGING_BASE_URL')
     
     if not staging_url:
-        print("❌ STAGING_BASE_URL not configured")
+        print("X STAGING_BASE_URL not configured")
         print("💡 Configure staging environment variables to run tests")
         sys.exit(1)
     
-    print(f"✅ Staging environment configured: {staging_url}")
+    print(f"CHECK Staging environment configured: {staging_url}")
     print("🧪 Run with: pytest -v tests/e2e/staging/test_websocket_ssot_golden_path.py")

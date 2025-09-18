@@ -19,7 +19,7 @@ def test_reproduce_issue_622_failing_method_call():
     error_message = str(exc_info.value)
     assert 'create_authenticated_test_user' in error_message
     assert 'E2EAuthHelper' in error_message or 'object has no attribute' in error_message
-    print(f'✅ Successfully reproduced Issue #622 error: {error_message}')
+    print(f'CHECK Successfully reproduced Issue #622 error: {error_message}')
 
 def test_working_method_exists():
     """Confirm the actual working method exists."""
@@ -28,7 +28,7 @@ def test_working_method_exists():
     method = getattr(auth_helper, 'create_authenticated_user')
     assert callable(method)
     assert asyncio.iscoroutinefunction(method)
-    print('✅ Confirmed create_authenticated_user method exists and is callable')
+    print('CHECK Confirmed create_authenticated_user method exists and is callable')
 
 def test_missing_method_confirmed():
     """Confirm the missing method doesn't exist."""
@@ -36,7 +36,7 @@ def test_missing_method_confirmed():
     missing_method_exists = hasattr(auth_helper, 'create_authenticated_test_user')
     if missing_method_exists:
         pytest.fail('Method create_authenticated_test_user exists - Issue #622 may already be fixed')
-    print('✅ Confirmed create_authenticated_test_user method is missing (expected for Issue #622)')
+    print('CHECK Confirmed create_authenticated_test_user method is missing (expected for Issue #622)')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

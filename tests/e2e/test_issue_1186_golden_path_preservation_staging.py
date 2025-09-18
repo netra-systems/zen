@@ -11,7 +11,7 @@ Business Value Justification:
 - Strategic Impact: Validates enterprise-grade multi-user agent execution post-consolidation
 
 CRITICAL TEST COVERAGE:
-1. Golden Path User Flow - Login → AI Response (post-SSOT)
+1. Golden Path User Flow - Login -> AI Response (post-SSOT)
 2. All 5 WebSocket Events - Real-time user feedback with consolidated engine
 3. Multi-User Isolation - SSOT consolidation maintains user separation
 4. Agent Execution Performance - Consolidated engine performance validation

@@ -108,7 +108,7 @@ class StagingConfigurationE2ETest(unittest.TestCase):
                 f"This would prevent $500K+ ARR functionality from working."
             )
         
-        print(f"✅ All {len(self.golden_path_secrets)} Golden Path secrets properly mapped in staging")
+        print(f"CHECK All {len(self.golden_path_secrets)} Golden Path secrets properly mapped in staging")
     
     def test_staging_configuration_validation_passes(self):
         """
@@ -122,7 +122,7 @@ class StagingConfigurationE2ETest(unittest.TestCase):
         is_valid, errors = validate_secret_mappings(self.environment)
         
         # Log validation results
-        status = "✅ VALID" if is_valid else "⚠️ ISSUES"
+        status = "CHECK VALID" if is_valid else "WARNING️ ISSUES"
         print(f"Staging validation: {status} ({len(errors)} validation messages)")
         
         if errors:
@@ -145,7 +145,7 @@ class StagingConfigurationE2ETest(unittest.TestCase):
                 f"This blocks $500K+ ARR Golden Path protection: {'; '.join(critical_errors)}"
             )
         
-        print(f"✅ Staging configuration validation acceptable for Golden Path protection")
+        print(f"CHECK Staging configuration validation acceptable for Golden Path protection")
     
     def test_oauth_configuration_completeness_staging(self):
         """
@@ -197,7 +197,7 @@ class StagingConfigurationE2ETest(unittest.TestCase):
                 f"{', '.join(missing_auth_oauth)}. This blocks user authentication for $500K+ ARR."
             )
         
-        print(f"✅ OAuth configuration complete for both backend and auth service in staging")
+        print(f"CHECK OAuth configuration complete for both backend and auth service in staging")
     
     def test_jwt_configuration_consistency_staging(self):
         """
@@ -245,12 +245,12 @@ class StagingConfigurationE2ETest(unittest.TestCase):
         unique_gsm_names = set(gsm_names)
         
         if len(unique_gsm_names) > 1:
-            print(f"⚠️ JWT secrets map to different GSM secrets: {dict(found_jwt_secrets)}")
+            print(f"WARNING️ JWT secrets map to different GSM secrets: {dict(found_jwt_secrets)}")
             print("This may cause authentication inconsistencies")
         else:
-            print(f"✅ JWT secrets consistently mapped to: {list(unique_gsm_names)[0]}")
+            print(f"CHECK JWT secrets consistently mapped to: {list(unique_gsm_names)[0]}")
         
-        print(f"✅ JWT configuration sufficient for staging Golden Path authentication")
+        print(f"CHECK JWT configuration sufficient for staging Golden Path authentication")
     
     def test_database_configuration_staging(self):
         """
@@ -294,9 +294,9 @@ class StagingConfigurationE2ETest(unittest.TestCase):
             )
         
         if missing_db_secrets:
-            print(f"⚠️ Non-critical database secrets missing: {', '.join(missing_db_secrets)}")
+            print(f"WARNING️ Non-critical database secrets missing: {', '.join(missing_db_secrets)}")
         
-        print(f"✅ Critical database configuration available for staging Golden Path")
+        print(f"CHECK Critical database configuration available for staging Golden Path")
     
     @unittest.skipIf(not ISOLATED_ENV_AVAILABLE, "IsolatedEnvironment not available")
     def test_environment_isolation_staging(self):
@@ -333,10 +333,10 @@ class StagingConfigurationE2ETest(unittest.TestCase):
                 production_staging_leaks.append(f"{secret} -> {gsm_name}")
         
         if production_staging_leaks:
-            print(f"⚠️ Production references staging secrets: {'; '.join(production_staging_leaks[:3])}")
+            print(f"WARNING️ Production references staging secrets: {'; '.join(production_staging_leaks[:3])}")
             print("This should be addressed before production deployment")
         
-        print(f"✅ Environment isolation properly maintained for staging")
+        print(f"CHECK Environment isolation properly maintained for staging")
     
     def test_mission_critical_configuration_end_to_end(self):
         """
@@ -351,7 +351,7 @@ class StagingConfigurationE2ETest(unittest.TestCase):
         try:
             mappings = get_secret_mappings(self.environment)
             self.assertGreater(len(mappings), 0, "Should retrieve secret mappings")
-            print(f"✅ Step 1: Retrieved {len(mappings)} secret mappings")
+            print(f"CHECK Step 1: Retrieved {len(mappings)} secret mappings")
         except Exception as e:
             self.fail(f"STEP 1 FAILED: Cannot retrieve secret mappings: {e}")
         
@@ -360,7 +360,7 @@ class StagingConfigurationE2ETest(unittest.TestCase):
             is_valid, errors = validate_secret_mappings(self.environment)
             self.assertIsInstance(is_valid, bool, "Should return validation status")
             self.assertIsInstance(errors, list, "Should return error list")
-            print(f"✅ Step 2: Configuration validation completed ({len(errors)} messages)")
+            print(f"CHECK Step 2: Configuration validation completed ({len(errors)} messages)")
         except Exception as e:
             self.fail(f"STEP 2 FAILED: Cannot validate secret mappings: {e}")
         
@@ -370,13 +370,13 @@ class StagingConfigurationE2ETest(unittest.TestCase):
             if secret in mappings:
                 gsm_name = mappings[secret]
                 if gsm_name and not gsm_name.isspace():
-                    golden_path_status.append(f"✅ {secret}")
+                    golden_path_status.append(f"CHECK {secret}")
                 else:
-                    golden_path_status.append(f"❌ {secret} (empty)")
+                    golden_path_status.append(f"X {secret} (empty)")
             else:
-                golden_path_status.append(f"❌ {secret} (missing)")
+                golden_path_status.append(f"X {secret} (missing)")
         
-        failed_secrets = [status for status in golden_path_status if '❌' in status]
+        failed_secrets = [status for status in golden_path_status if 'X' in status]
         
         if failed_secrets:
             self.fail(
@@ -384,7 +384,7 @@ class StagingConfigurationE2ETest(unittest.TestCase):
                 f"This blocks $500K+ ARR functionality: {'; '.join(failed_secrets)}"
             )
         
-        print(f"✅ Step 3: All {len(self.golden_path_secrets)} Golden Path secrets validated")
+        print(f"CHECK Step 3: All {len(self.golden_path_secrets)} Golden Path secrets validated")
         
         # Summary
         total_errors = len([e for e in errors if 'critical' in e.lower()])

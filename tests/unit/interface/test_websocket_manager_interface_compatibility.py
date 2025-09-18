@@ -216,33 +216,33 @@ if __name__ == "__main__":
 
         try:
             await test_instance.test_unified_websocket_manager_import_from_unified_manager()
-            print("✅ test_unified_websocket_manager_import_from_unified_manager PASSED")
+            print("CHECK test_unified_websocket_manager_import_from_unified_manager PASSED")
         except Exception as e:
-            print(f"❌ test_unified_websocket_manager_import_from_unified_manager FAILED: {e}")
+            print(f"X test_unified_websocket_manager_import_from_unified_manager FAILED: {e}")
 
         try:
             await test_instance.test_websocket_manager_import_from_websocket_manager_module()
-            print("✅ test_websocket_manager_import_from_websocket_manager_module PASSED")
+            print("CHECK test_websocket_manager_import_from_websocket_manager_module PASSED")
         except Exception as e:
-            print(f"❌ test_websocket_manager_import_from_websocket_manager_module FAILED: {e}")
+            print(f"X test_websocket_manager_import_from_websocket_manager_module FAILED: {e}")
 
         try:
             await test_instance.test_manager_class_consistency_validation()
-            print("✅ test_manager_class_consistency_validation PASSED")
+            print("CHECK test_manager_class_consistency_validation PASSED")
         except Exception as e:
-            print(f"❌ test_manager_class_consistency_validation FAILED: {e}")
+            print(f"X test_manager_class_consistency_validation FAILED: {e}")
 
         try:
             await test_instance.test_websocket_manager_factory_pattern_interface()
-            print("✅ test_websocket_manager_factory_pattern_interface PASSED")
+            print("CHECK test_websocket_manager_factory_pattern_interface PASSED")
         except Exception as e:
-            print(f"❌ test_websocket_manager_factory_pattern_interface FAILED: {e}")
+            print(f"X test_websocket_manager_factory_pattern_interface FAILED: {e}")
 
         try:
             await test_instance.test_websocket_manager_constructor_interface()
-            print("✅ test_websocket_manager_constructor_interface PASSED")
+            print("CHECK test_websocket_manager_constructor_interface PASSED")
         except Exception as e:
-            print(f"❌ test_websocket_manager_constructor_interface FAILED: {e}")
+            print(f"X test_websocket_manager_constructor_interface FAILED: {e}")
 
         await test_instance.asyncTearDown()
 

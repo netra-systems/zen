@@ -136,7 +136,7 @@ class WebSocketLegacyImportDetectionTests:
                 f"🚨 LEGACY IMPORT VIOLATIONS DETECTED (Issue #1128)\n"
                 f"Found {len(legacy_violations)} files with {sum(len(v) for v in legacy_violations.values())} legacy imports:\n"
                 f"{violation_report}\n\n"
-                f"❌ These imports bypass SSOT WebSocket factory patterns\n"
+                f"X These imports bypass SSOT WebSocket factory patterns\n"
                 f"💰 Business Impact: $500K+ ARR chat functionality at risk\n"
                 f"🔧 Action Required: Replace with canonical SSOT import patterns"
             )
@@ -157,7 +157,7 @@ class WebSocketLegacyImportDetectionTests:
         # Verify websocket_manager.py exists
         websocket_manager_path = codebase_root / "netra_backend" / "app" / "websocket_core" / "websocket_manager.py"
         assert websocket_manager_path.exists(), (
-            f"❌ Canonical WebSocket manager not found at {websocket_manager_path}\n"
+            f"X Canonical WebSocket manager not found at {websocket_manager_path}\n"
             f"🔧 Required for SSOT WebSocket import patterns"
         )
 
@@ -174,7 +174,7 @@ class WebSocketLegacyImportDetectionTests:
 
         except ImportError as e:
             pytest.fail(
-                f"❌ Canonical import failed: {e}\n"
+                f"X Canonical import failed: {e}\n"
                 f"🔧 SSOT WebSocket patterns not properly implemented"
             )
 
@@ -200,7 +200,7 @@ class WebSocketLegacyImportDetectionTests:
                 missing_files.append(required_file)
 
         assert not missing_files, (
-            f"❌ Missing required SSOT WebSocket files: {missing_files}\n"
+            f"X Missing required SSOT WebSocket files: {missing_files}\n"
             f"📁 Expected in: {websocket_core_path}\n"
             f"🔧 Required for proper SSOT WebSocket factory patterns"
         )
@@ -219,7 +219,7 @@ class WebSocketLegacyImportDetectionTests:
                 found_legacy_files.append(legacy_file)
 
         if found_legacy_files:
-            print(f"⚠️  Legacy files detected (may need consolidation): {found_legacy_files}")
+            print(f"WARNING️  Legacy files detected (may need consolidation): {found_legacy_files}")
 
     def test_websocket_import_fragmentation_scope(self, codebase_root):
         """

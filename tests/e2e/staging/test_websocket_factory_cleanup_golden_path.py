@@ -5,7 +5,7 @@ Purpose: Validate complete Golden Path user flow functionality after legacy fact
 cleanup using real staging environment and full system integration.
 
 This test suite validates:
-1. Complete Golden Path user flow (login → AI response)
+1. Complete Golden Path user flow (login -> AI response)
 2. Real WebSocket connections with staging environment
 3. All 5 business-critical events in production-like environment
 4. End-to-end AI response delivery through SSOT WebSocket infrastructure
@@ -88,7 +88,7 @@ class TestWebSocketFactoryCleanupGoldenPath(SSotAsyncTestCase):
         super().teardown_method(method)
 
     async def test_golden_path_user_flow_complete(self):
-        """Test complete Golden Path: login → WebSocket connect → AI response → events delivered."""
+        """Test complete Golden Path: login -> WebSocket connect -> AI response -> events delivered."""
 
         # PHASE 1: Authentication (Real staging auth)
         auth_token = await self._authenticate_with_staging()

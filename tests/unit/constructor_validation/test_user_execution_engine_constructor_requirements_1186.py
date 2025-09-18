@@ -64,7 +64,7 @@ class UserExecutionEngineConstructorRequirementsTests(unittest.TestCase):
         self.assertEqual(
             violation_count,
             0,
-            f"❌ BASELINE VIOLATION: Found {violation_count} constructor dependency injection violations. "
+            f"X BASELINE VIOLATION: Found {violation_count} constructor dependency injection violations. "
             f"Mission critical infrastructure requires all dependencies to be mandatory.\n"
             f"Required dependencies: {', '.join(self.required_dependencies)}\n"
             f"Violations detected:\n"
@@ -84,7 +84,7 @@ class UserExecutionEngineConstructorRequirementsTests(unittest.TestCase):
             user_execution_engine_class = self._find_user_execution_engine_class()
             
             if user_execution_engine_class is None:
-                self.fail("❌ CRITICAL: Cannot locate UserExecutionEngine class for testing")
+                self.fail("X CRITICAL: Cannot locate UserExecutionEngine class for testing")
             
             # Test parameterless instantiation
             parameterless_allowed = self._test_parameterless_instantiation(user_execution_engine_class)
@@ -99,7 +99,7 @@ class UserExecutionEngineConstructorRequirementsTests(unittest.TestCase):
             # This test should FAIL if parameterless instantiation is allowed
             self.assertFalse(
                 parameterless_allowed,
-                f"❌ BASELINE VIOLATION: UserExecutionEngine allows parameterless instantiation. "
+                f"X BASELINE VIOLATION: UserExecutionEngine allows parameterless instantiation. "
                 f"Mission critical security requires all constructor parameters to be mandatory.\n"
                 f"This creates enterprise security vulnerabilities and violates dependency injection principles."
             )
@@ -107,7 +107,7 @@ class UserExecutionEngineConstructorRequirementsTests(unittest.TestCase):
         except Exception as e:
             # Expected in baseline - class may not be importable
             print(f"   - Import/instantiation analysis: {str(e)}")
-            self.fail(f"❌ BASELINE VIOLATION: UserExecutionEngine constructor validation failed: {str(e)}")
+            self.fail(f"X BASELINE VIOLATION: UserExecutionEngine constructor validation failed: {str(e)}")
         
     def test_03_user_context_isolation_enforcement_validation(self):
         """
@@ -131,7 +131,7 @@ class UserExecutionEngineConstructorRequirementsTests(unittest.TestCase):
         self.assertEqual(
             violation_count,
             0,
-            f"❌ BASELINE VIOLATION: Found {violation_count} user context isolation violations. "
+            f"X BASELINE VIOLATION: Found {violation_count} user context isolation violations. "
             f"Enterprise multi-user deployment requires strict user context isolation.\n"
             f"Context isolation violations:\n"
             + '\n'.join([f"  - {path}: {violation}" for path, violation in context_isolation_violations])
@@ -159,7 +159,7 @@ class UserExecutionEngineConstructorRequirementsTests(unittest.TestCase):
         self.assertEqual(
             violation_count,
             0,
-            f"❌ BASELINE VIOLATION: Found {violation_count} direct instantiation violations. "
+            f"X BASELINE VIOLATION: Found {violation_count} direct instantiation violations. "
             f"SSOT architecture requires factory-only instantiation patterns.\n"
             f"Direct instantiation violations:\n"
             + '\n'.join([f"  - {path}: {violation}" for path, violation in direct_instantiation_violations])
@@ -187,7 +187,7 @@ class UserExecutionEngineConstructorRequirementsTests(unittest.TestCase):
         self.assertEqual(
             inconsistency_count,
             0,
-            f"❌ BASELINE VIOLATION: Found {inconsistency_count} constructor signature inconsistencies. "
+            f"X BASELINE VIOLATION: Found {inconsistency_count} constructor signature inconsistencies. "
             f"SSOT requires uniform constructor signatures across all implementations.\n"
             f"Signature inconsistencies:\n"
             + '\n'.join([f"  - {path}: {inconsistency}" for path, inconsistency in signature_inconsistencies])
@@ -430,7 +430,7 @@ class UserExecutionEngineConstructorRequirementsTests(unittest.TestCase):
 if __name__ == '__main__':
     print("🚨 Issue #1186 UserExecutionEngine Constructor Requirements - Baseline Detection")
     print("=" * 80)
-    print("⚠️  WARNING: These tests are DESIGNED TO FAIL to establish baseline metrics")
+    print("WARNING️  WARNING: These tests are DESIGNED TO FAIL to establish baseline metrics")
     print("📊 Expected: 5 test failures showing constructor requirement violations")
     print("🎯 Goal: Baseline measurement for mission critical infrastructure validation")
     print("💰 Impact: Enables enterprise-grade dependency injection for $500K+ ARR")

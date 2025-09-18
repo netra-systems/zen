@@ -99,7 +99,7 @@ class StagingAuth403ReproductionTest:
             frontend_response = await staging_client.get(f"{STAGING_FRONTEND_URL}")
             assert frontend_response.status_code in [200, 301, 302], f"Frontend not accessible: {frontend_response.status_code}"
             
-            logger.info("✅ Staging environment connectivity verified")
+            logger.info("CHECK Staging environment connectivity verified")
             
         except httpx.ConnectError as e:
             pytest.skip(f"Cannot connect to staging environment: {e}")
@@ -141,7 +141,7 @@ class StagingAuth403ReproductionTest:
             
             assert access_token is not None, "Login succeeded but no access token received"
             
-            logger.info(f"✅ User login successful - token received: {access_token[:20]}...")
+            logger.info(f"CHECK User login successful - token received: {access_token[:20]}...")
             
             # Step 2: Make authenticated API call - this is where Issue #501 manifests
             auth_headers = {

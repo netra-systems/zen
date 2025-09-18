@@ -4,13 +4,13 @@ Business Value Justification:
     - Segment: Platform/Internal
 - Business Goal: Stability & System Integrity 
 - Value Impact: Prevents execution engine duplication cascade failures affecting $"500K" plus ARR
-- Strategic Impact: Ensures 12 execution engines → 1 UserExecutionEngine consolidation remains stable
+- Strategic Impact: Ensures 12 execution engines -> 1 UserExecutionEngine consolidation remains stable
 
 CRITICAL MISSION: NEW 20% SSOT VALIDATION TESTS
 This test detects violations of SSOT execution engine consolidation and prevents
 regression back to multiple execution engine patterns that destabilize Golden Path.
 
-Test Scope: SSOT violation detection for 12→1 execution engine consolidation
+Test Scope: SSOT violation detection for 12->1 execution engine consolidation
 Priority: P0 - Mission Critical  
 Docker: NO DEPENDENCIES - Unit/Integration non-docker only
 NEW TEST: Part of 20% new validation tests for Issue #1146
@@ -159,7 +159,7 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
         if forbidden_imports_found:
             error_msg = [SSOT VIOLATION: Forbidden execution engine imports found in production code:]
             for violation in forbidden_imports_found:
-                error_msg.append(f"  - {violation['file']}:{violation['line']} → {violation['forbidden_class']} ({violation['reason']})"
+                error_msg.append(f"  - {violation['file']}:{violation['line']} -> {violation['forbidden_class']} ({violation['reason']})"
                 error_msg.append(f    Code: {violation['content'][:100]}...")"
             error_msg.append(f\nIssue #1146: All execution engine imports must use UserExecutionEngine)
             error_msg.append(fGolden Path Impact: Multiple engines cause user isolation failures)"

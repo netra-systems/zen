@@ -2,7 +2,7 @@
 Integration Test: SSOT Auth-WebSocket-Agent Golden Path
 ISSUE #1176 REMEDIATION: Comprehensive validation of unified authentication pathway
 
-Business Impact: $500K+ ARR - Validates complete user login → AI response flow
+Business Impact: $500K+ ARR - Validates complete user login -> AI response flow
 Technical Impact: Integration test for SSOT auth consolidation and Golden Path restoration
 
 GOLDEN PATH FLOW TESTED:
@@ -102,16 +102,16 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             # Try to receive response (may timeout if no handler, but connection should work)
             try:
                 response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                logger.info(f✅ SSOT Auth: Received response - connection functional)
+                logger.info(fCHECK SSOT Auth: Received response - connection functional)
             except asyncio.TimeoutError:
-                logger.info(✅ SSOT Auth: No immediate response (expected) - connection established)
+                logger.info(CHECK SSOT Auth: No immediate response (expected) - connection established)
             
             await websocket.close()
             
-            logger.info(f"✅ SSOT jwt-auth subprotocol authentication SUCCESS for {test_email})"
+            logger.info(f"CHECK SSOT jwt-auth subprotocol authentication SUCCESS for {test_email})"
             
         except Exception as e:
-            pytest.fail(f❌ SSOT jwt-auth subprotocol authentication FAILED: {str(e)}")"
+            pytest.fail(fX SSOT jwt-auth subprotocol authentication FAILED: {str(e)}")"
     
     async def test_ssot_auth_authorization_header_fallback(self):
 """Empty docstring."""
@@ -153,16 +153,16 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             # Connection should work (response optional)
             try:
                 response = await asyncio.wait_for(websocket.recv(), timeout=3.0)
-                logger.info("✅ SSOT Auth: Authorization header response received)"
+                logger.info("CHECK SSOT Auth: Authorization header response received)"
             except asyncio.TimeoutError:
-                logger.info(✅ SSOT Auth: Authorization header connection established)
+                logger.info(CHECK SSOT Auth: Authorization header connection established)
             
             await websocket.close()
             
-            logger.info(f✅ SSOT Authorization header authentication SUCCESS for {test_email})
+            logger.info(fCHECK SSOT Authorization header authentication SUCCESS for {test_email})
             
         except Exception as e:
-            logger.warning(f⚠️ SSOT Authorization header authentication failed (may be stripped): {str(e)}")"
+            logger.warning(fWARNING️ SSOT Authorization header authentication failed (may be stripped): {str(e)}")"
             # Don't fail test - this is expected in GCP environments'
     
     async def test_ssot_auth_query_parameter_gcp_workaround(self):
@@ -204,16 +204,16 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             # Validate connection works
             try:
                 response = await asyncio.wait_for(websocket.recv(), timeout=3.0)
-                logger.info(✅ SSOT Auth: Query parameter response received)
+                logger.info(CHECK SSOT Auth: Query parameter response received)
             except asyncio.TimeoutError:
-                logger.info(✅ SSOT Auth: Query parameter connection established")"
+                logger.info(CHECK SSOT Auth: Query parameter connection established")"
             
             await websocket.close()
             
-            logger.info(f✅ SSOT query parameter authentication SUCCESS for {test_email})
+            logger.info(fCHECK SSOT query parameter authentication SUCCESS for {test_email})
             
         except Exception as e:
-            pytest.fail(f❌ SSOT query parameter authentication FAILED: {str(e)})
+            pytest.fail(fX SSOT query parameter authentication FAILED: {str(e)})
     
     async def test_ssot_auth_e2e_bypass_testing_environment(self):
     """
@@ -253,21 +253,21 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             # E2E bypass should work in test environment
             try:
                 response = await asyncio.wait_for(websocket.recv(), timeout=3.0)
-                logger.info(✅ SSOT Auth: E2E bypass response received")"
+                logger.info(CHECK SSOT Auth: E2E bypass response received")"
             except asyncio.TimeoutError:
-                logger.info(✅ SSOT Auth: E2E bypass connection established)
+                logger.info(CHECK SSOT Auth: E2E bypass connection established)
             
             await websocket.close()
             
-            logger.info(f✅ SSOT E2E bypass authentication SUCCESS for {test_user_id})""
+            logger.info(fCHECK SSOT E2E bypass authentication SUCCESS for {test_user_id})""
             
         except Exception as e:
-            logger.warning(f"⚠️ SSOT E2E bypass failed (may be disabled): {str(e)})"
+            logger.warning(f"WARNING️ SSOT E2E bypass failed (may be disabled): {str(e)})"
             # Don't fail test - E2E bypass may be disabled in some environments'
     
     async def test_complete_golden_path_with_ssot_auth(self):
         
-        Test complete Golden Path: Authentication → WebSocket → Agent → Response.
+        Test complete Golden Path: Authentication -> WebSocket -> Agent -> Response.
         
         CRITICAL: This tests the complete user value journey with SSOT authentication.
 ""
@@ -330,14 +330,14 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
                     if event_type == 'agent_completed':
                         agent_response_complete = True
                         agent_result = event_data.get('result') or event_data.get('content')
-                        logger.info(f✅ Golden Path: Agent completed with result length: {len(str(agent_result)) if agent_result else 0}")"
+                        logger.info(fCHECK Golden Path: Agent completed with result length: {len(str(agent_result)) if agent_result else 0}")"
                 
                 except asyncio.TimeoutError:
                     if time.time() - event_start_time >= event_timeout:
                         break
                     continue
                 except json.JSONDecodeError as e:
-                    logger.warning(f⚠️ Golden Path: Invalid JSON in response: {e})
+                    logger.warning(fWARNING️ Golden Path: Invalid JSON in response: {e})
                     continue
             
             await websocket.close()
@@ -364,9 +364,9 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             if auth_success and websocket_success and events_success:
                 logger.info(f🎉 GOLDEN PATH SUCCESS: Complete flow working with SSOT authentication")"
                 if not response_success:
-                    logger.warning(f⚠️ Agent response incomplete but core flow functional)
+                    logger.warning(fWARNING️ Agent response incomplete but core flow functional)
                 if not performance_success:
-                    logger.warning(f⚠️ Performance slower than target ({total_duration:.1f}s > 45s))
+                    logger.warning(fWARNING️ Performance slower than target ({total_duration:.1f}s > 45s))
             else:
                 failure_reasons = []
                 if not auth_success:
@@ -376,10 +376,10 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
                 if not events_success:
                     failure_reasons.append(fInsufficient events ({len(received_events)} < 3))
                 
-                pytest.fail(f❌ GOLDEN PATH FAILED: {', '.join(failure_reasons)}")"
+                pytest.fail(fX GOLDEN PATH FAILED: {', '.join(failure_reasons)}")"
         
         except Exception as e:
-            pytest.fail(f❌ GOLDEN PATH CRITICAL FAILURE: {str(e)})
+            pytest.fail(fX GOLDEN PATH CRITICAL FAILURE: {str(e)})
     
     async def test_ssot_auth_error_logging_validation(self):
         
@@ -402,11 +402,11 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             
             # If this succeeds, there's a problem with validation'
             await websocket.close()
-            pytest.fail(❌ Invalid token was accepted - authentication validation not working)
+            pytest.fail(X Invalid token was accepted - authentication validation not working)
             
         except Exception as e:
             # This exception is expected - invalid token should be rejected
-            logger.info(f✅ SSOT Auth: Invalid token correctly rejected - {str(e)})""
+            logger.info(fCHECK SSOT Auth: Invalid token correctly rejected - {str(e)})""
             
             # Check that error contains useful information
             error_str = str(e).lower()
@@ -416,7 +416,7 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             
             assert has_useful_info, "fError message should contain authentication details: {str(e)}"
             
-        logger.info(✅ SSOT auth error logging validation PASSED)
+        logger.info(CHECK SSOT auth error logging validation PASSED)
 
 
 @pytest.mark.integration
@@ -464,7 +464,7 @@ class TestSSotAuthMethodPriority(SSotAsyncTestCase):
         query_param_result = auth_instance._extract_jwt_from_query_params(mock_websocket)
         assert query_param_result == test_token, "Query parameter should be extracted"
         
-        logger.info(✅ SSOT authentication method priority order VALIDATED)""
+        logger.info(CHECK SSOT authentication method priority order VALIDATED)""
 
 
 if __name__ == __main__":"

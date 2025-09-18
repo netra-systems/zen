@@ -109,10 +109,10 @@ class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
             # CRITICAL ISOLATION TEST 3: Verify concurrent operations maintain isolation
             await self._verify_concurrent_isolation_integrity(enterprise_connections)
             
-            logger.info("✅ BULLETPROOF USER ISOLATION VALIDATED - SSOT manager provides enterprise-grade security")
+            logger.info("CHECK BULLETPROOF USER ISOLATION VALIDATED - SSOT manager provides enterprise-grade security")
             
         except Exception as e:
-            logger.error(f"❌ ENHANCED USER ISOLATION VALIDATION FAILED: {e}")
+            logger.error(f"X ENHANCED USER ISOLATION VALIDATION FAILED: {e}")
             raise
     
     async def _create_enterprise_connection(self, user_context):
@@ -154,7 +154,7 @@ class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
                 # Verify tenant isolation
                 conn_tenant = getattr(conn, 'tenant_id', None)
                 if conn_tenant != user_context_i.tenant_id:
-                    logger.error(f"❌ TENANT ISOLATION BREACH: Manager for {user_context_i.tenant_id} sees connection from {conn_tenant}")
+                    logger.error(f"X TENANT ISOLATION BREACH: Manager for {user_context_i.tenant_id} sees connection from {conn_tenant}")
                     pytest.fail(
                         f"TENANT ISOLATION VIOLATION: {user_context_i.tenant_id} manager can access "
                         f"{conn_tenant} tenant data. "
@@ -166,7 +166,7 @@ class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
                 # Verify user isolation within tenant
                 conn_user_id = getattr(conn, 'user_id', None)
                 if conn_user_id != user_context_i.user_id:
-                    logger.error(f"❌ USER ISOLATION BREACH: Manager for {user_context_i.user_id} sees connection from {conn_user_id}")
+                    logger.error(f"X USER ISOLATION BREACH: Manager for {user_context_i.user_id} sees connection from {conn_user_id}")
                     pytest.fail(
                         f"USER ISOLATION VIOLATION: {user_context_i.user_id} manager can access "
                         f"{conn_user_id} user data. "
@@ -182,7 +182,7 @@ class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
                 for key, expected_value in expected_sensitive_data.items():
                     actual_value = conn_sensitive_data.get(key)
                     if actual_value != expected_value:
-                        logger.error(f"❌ SENSITIVE DATA MISMATCH: Expected {key}={expected_value}, got {actual_value}")
+                        logger.error(f"X SENSITIVE DATA MISMATCH: Expected {key}={expected_value}, got {actual_value}")
                         pytest.fail(
                             f"SENSITIVE DATA ISOLATION FAILURE: {user_context_i.tenant_id} manager "
                             f"has incorrect sensitive data for key '{key}'. "
@@ -190,7 +190,7 @@ class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
                             f"Business Impact: Incorrect sensitive data access creates security vulnerabilities."
                         )
             
-            logger.info(f"✅ Complete data isolation verified for {user_context_i.tenant_id}")
+            logger.info(f"CHECK Complete data isolation verified for {user_context_i.tenant_id}")
     
     async def _verify_enhanced_security_boundaries(self, enterprise_connections):
         """Verify enhanced security boundaries beyond basic isolation."""
@@ -206,7 +206,7 @@ class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
                         other_tenant_connections = await self._get_manager_connections(manager_i, user_context_j.user_id)
                         
                         if other_tenant_connections:
-                            logger.error(f"❌ CROSS-TENANT ACCESS VIOLATION: {user_context_i.tenant_id} manager accessed {user_context_j.tenant_id} connections")
+                            logger.error(f"X CROSS-TENANT ACCESS VIOLATION: {user_context_i.tenant_id} manager accessed {user_context_j.tenant_id} connections")
                             pytest.fail(
                                 f"CROSS-TENANT SECURITY BREACH: {user_context_i.tenant_id} manager "
                                 f"can access {user_context_j.tenant_id} connections. "
@@ -215,11 +215,11 @@ class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
                                 f"violating regulatory compliance and affecting $500K+ ARR contracts."
                             )
                         
-                        logger.debug(f"✅ {user_context_i.tenant_id} properly blocked from {user_context_j.tenant_id}")
+                        logger.debug(f"CHECK {user_context_i.tenant_id} properly blocked from {user_context_j.tenant_id}")
                         
                     except Exception as e:
                         # Expected behavior - cross-tenant access should fail
-                        logger.debug(f"✅ Cross-tenant access properly blocked: {e}")
+                        logger.debug(f"CHECK Cross-tenant access properly blocked: {e}")
                         
                     # CRITICAL SECURITY TEST: Attempt to add connection to wrong manager (should fail or isolate)
                     try:
@@ -243,9 +243,9 @@ class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
                         
                     except Exception as e:
                         # Expected behavior - should properly reject or isolate
-                        logger.debug(f"✅ Cross-tenant connection properly handled: {e}")
+                        logger.debug(f"CHECK Cross-tenant connection properly handled: {e}")
             
-            logger.info(f"✅ Enhanced security boundaries verified for {user_context_i.tenant_id}")
+            logger.info(f"CHECK Enhanced security boundaries verified for {user_context_i.tenant_id}")
     
     async def _verify_concurrent_isolation_integrity(self, enterprise_connections):
         """Verify isolation integrity under concurrent operations stress test."""
@@ -313,10 +313,10 @@ class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
                             f"security vulnerabilities that affect $500K+ ARR enterprise contracts."
                         )
                 
-                logger.info(f"✅ {user_context.tenant_id} maintained isolation integrity under concurrent load")
+                logger.info(f"CHECK {user_context.tenant_id} maintained isolation integrity under concurrent load")
             
         except Exception as e:
-            logger.error(f"❌ CONCURRENT ISOLATION INTEGRITY TEST FAILED: {e}")
+            logger.error(f"X CONCURRENT ISOLATION INTEGRITY TEST FAILED: {e}")
             raise
     
     async def _get_manager_connections(self, manager, user_id):
@@ -379,9 +379,9 @@ class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
         
         try:
             await enterprise_manager.add_connection(secure_connection)
-            logger.info("✅ Enterprise manager accepts connections with security metadata")
+            logger.info("CHECK Enterprise manager accepts connections with security metadata")
         except Exception as e:
-            logger.error(f"❌ SECURITY METADATA HANDLING FAILURE: {e}")
+            logger.error(f"X SECURITY METADATA HANDLING FAILURE: {e}")
             pytest.fail(
                 f"ENTERPRISE SECURITY FAILURE: Manager cannot handle security metadata. "
                 f"SSOT Violation: Consolidated manager lacks enterprise security features. "
@@ -399,7 +399,7 @@ class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
         audit_support = hasattr(enterprise_manager, 'audit_log') or hasattr(enterprise_manager, 'log_security_event')
         
         if audit_support:
-            logger.info("✅ Enterprise manager provides audit logging capability")
+            logger.info("CHECK Enterprise manager provides audit logging capability")
         else:
             logger.info("ℹ️ Audit logging may be handled at infrastructure level")
         
@@ -435,7 +435,7 @@ class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
         except Exception as e:
             # Expected - security boundary properly enforced
             security_boundary_enforced = True
-            logger.info(f"✅ Security boundary properly enforced: {e}")
+            logger.info(f"CHECK Security boundary properly enforced: {e}")
         
         if not security_boundary_enforced:
             pytest.fail(
@@ -444,7 +444,7 @@ class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
                 f"Business Impact: Enterprise security model compromised, violating $500K+ ARR contracts."
             )
         
-        logger.info("✅ Enterprise-grade security validation completed")
+        logger.info("CHECK Enterprise-grade security validation completed")
     
     async def test_ssot_performance_under_enterprise_load(self):
         """
@@ -508,14 +508,14 @@ class EnhancedUserIsolationWithSsotManagerTests(SSotAsyncTestCase):
             # Performance validation
             expected_max_time = 10.0  # Maximum acceptable time for load scenario
             if load_time > expected_max_time:
-                logger.warning(f"⚠️ PERFORMANCE CONCERN: Load scenario took {load_time:.2f}s (expected < {expected_max_time}s)")
+                logger.warning(f"WARNING️ PERFORMANCE CONCERN: Load scenario took {load_time:.2f}s (expected < {expected_max_time}s)")
             else:
-                logger.info(f"✅ Performance acceptable: Load scenario completed in {load_time:.2f}s")
+                logger.info(f"CHECK Performance acceptable: Load scenario completed in {load_time:.2f}s")
             
-            logger.info("✅ SSOT manager performance validated under enterprise load")
+            logger.info("CHECK SSOT manager performance validated under enterprise load")
             
         except Exception as e:
-            logger.error(f"❌ ENTERPRISE LOAD PERFORMANCE TEST FAILED: {e}")
+            logger.error(f"X ENTERPRISE LOAD PERFORMANCE TEST FAILED: {e}")
             raise
 
     def teardown_method(self, method):

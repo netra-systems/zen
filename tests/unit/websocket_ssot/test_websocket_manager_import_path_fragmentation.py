@@ -88,9 +88,9 @@ class WebSocketManagerImportPathFragmentationTests(SSotBaseTestCase):
                 f"This proves import path fragmentation exists, violating SSOT principles. "
                 f"Business Impact: User isolation failures affecting $500K+ ARR chat functionality."
             )
-            logger.info("✅ Primary and compatibility paths return same class - SSOT compliant")
+            logger.info("CHECK Primary and compatibility paths return same class - SSOT compliant")
         except AssertionError as e:
-            logger.error(f"❌ SSOT FRAGMENTATION CONFIRMED: {e}")
+            logger.error(f"X SSOT FRAGMENTATION CONFIRMED: {e}")
             raise
         
         # Test 2: All paths should reference the same underlying implementation
@@ -100,9 +100,9 @@ class WebSocketManagerImportPathFragmentationTests(SSotBaseTestCase):
                 f"This indicates the alias system is not properly consolidating to SSOT. "
                 f"Business Impact: Different manager instances cause user data contamination."
             )
-            logger.info("✅ Primary and unified paths return same class - SSOT compliant")
+            logger.info("CHECK Primary and unified paths return same class - SSOT compliant")
         except AssertionError as e:
-            logger.error(f"❌ ALIAS FRAGMENTATION CONFIRMED: {e}")
+            logger.error(f"X ALIAS FRAGMENTATION CONFIRMED: {e}")
             raise
             
         # Test 3: Compatibility path should reference unified implementation
@@ -112,9 +112,9 @@ class WebSocketManagerImportPathFragmentationTests(SSotBaseTestCase):
                 f"This proves the compatibility layer is not properly aliasing to SSOT implementation. "
                 f"Business Impact: Legacy imports create separate instances, breaking user isolation."
             )
-            logger.info("✅ Compatibility and unified paths return same class - SSOT compliant")
+            logger.info("CHECK Compatibility and unified paths return same class - SSOT compliant")
         except AssertionError as e:
-            logger.error(f"❌ COMPATIBILITY FRAGMENTATION CONFIRMED: {e}")
+            logger.error(f"X COMPATIBILITY FRAGMENTATION CONFIRMED: {e}")
             raise
     
     def test_instance_creation_consistency_across_paths(self):
@@ -180,13 +180,13 @@ class WebSocketManagerImportPathFragmentationTests(SSotBaseTestCase):
                         f"Direct instance method {method_name} is not callable"
                     )
                 
-                logger.info("✅ Instance consistency verified across import paths")
+                logger.info("CHECK Instance consistency verified across import paths")
                 
             # Run async test
             asyncio.run(test_factory_consistency())
             
         except Exception as e:
-            logger.error(f"❌ INSTANCE CREATION FRAGMENTATION: {e}")
+            logger.error(f"X INSTANCE CREATION FRAGMENTATION: {e}")
             pytest.fail(f"Instance creation inconsistency detected: {e}")
             
     def test_module_identity_verification(self):
@@ -220,9 +220,9 @@ class WebSocketManagerImportPathFragmentationTests(SSotBaseTestCase):
                 f"unified_manager.UnifiedWebSocketManager ({id(manager_class_3)}). "
                 f"Expected: websocket_manager.WebSocketManager should be alias to UnifiedWebSocketManager."
             )
-            logger.info("✅ Primary module correctly aliases to unified implementation")
+            logger.info("CHECK Primary module correctly aliases to unified implementation")
         except AssertionError as e:
-            logger.error(f"❌ PRIMARY MODULE ALIASING FAILURE: {e}")
+            logger.error(f"X PRIMARY MODULE ALIASING FAILURE: {e}")
             raise
             
         try:
@@ -231,9 +231,9 @@ class WebSocketManagerImportPathFragmentationTests(SSotBaseTestCase):
                 f"unified_manager.UnifiedWebSocketManager ({id(manager_class_3)}). "
                 f"Expected: manager.WebSocketManager should be alias to UnifiedWebSocketManager."
             )
-            logger.info("✅ Compatibility module correctly aliases to unified implementation")
+            logger.info("CHECK Compatibility module correctly aliases to unified implementation")
         except AssertionError as e:
-            logger.error(f"❌ COMPATIBILITY MODULE ALIASING FAILURE: {e}")
+            logger.error(f"X COMPATIBILITY MODULE ALIASING FAILURE: {e}")
             raise
 
     def teardown_method(self, method):

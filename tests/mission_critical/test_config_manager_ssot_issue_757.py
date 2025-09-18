@@ -15,8 +15,8 @@ These tests are DESIGNED TO FAIL until Issue #667 Configuration Manager SSOT con
 Each test reproduces a specific SSOT violation that causes real system failures.
 
 **EXPECTED BEHAVIOR:**
-- ❌ **CURRENT STATE:** Tests FAIL due to SSOT violations (configuration manager duplication)
-- ✅ **POST-FIX STATE:** Tests PASS after deprecated manager removal and SSOT consolidation
+- X **CURRENT STATE:** Tests FAIL due to SSOT violations (configuration manager duplication)
+- CHECK **POST-FIX STATE:** Tests PASS after deprecated manager removal and SSOT consolidation
 
 **SSOT VIOLATIONS TESTED:**
 1. Configuration Manager Import Conflicts - Multiple managers cause import errors
@@ -99,8 +99,8 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
         - Import conflicts cause startup failures
 
         **EXPECTED RESULT:**
-        - ❌ CURRENT: Test FAILS due to import conflicts and SSOT violations
-        - ✅ POST-FIX: Test PASSES after deprecated manager removal
+        - X CURRENT: Test FAILS due to import conflicts and SSOT violations
+        - CHECK POST-FIX: Test PASSES after deprecated manager removal
 "
 ""
 
@@ -191,8 +191,8 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
         - System startup becomes unreliable
 
         **EXPECTED RESULT:**
-        - ❌ CURRENT: Test FAILS due to race conditions and inconsistent state
-        - ✅ POST-FIX: Test PASSES with consistent configuration loading
+        - X CURRENT: Test FAILS due to race conditions and inconsistent state
+        - CHECK POST-FIX: Test PASSES with consistent configuration loading
 "
 ""
 
@@ -352,8 +352,8 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
         - Inconsistent environment variable access patterns
 
         **EXPECTED RESULT:**
-        - ❌ CURRENT: Test FAILS due to environment access SSOT violations
-        - ✅ POST-FIX: Test PASSES with consistent IsolatedEnvironment usage
+        - X CURRENT: Test FAILS due to environment access SSOT violations
+        - CHECK POST-FIX: Test PASSES with consistent IsolatedEnvironment usage
 "
 ""
 
@@ -473,8 +473,8 @@ class ConfigManagerSSotViolationsIssue757Tests(SSotBaseTestCase):
         - JWT token validation fails due to key mismatch
 
         **EXPECTED RESULT:**
-        - ❌ CURRENT: Test FAILS due to JWT configuration inconsistencies
-        - ✅ POST-FIX: Test PASSES with consistent JWT configuration
+        - X CURRENT: Test FAILS due to JWT configuration inconsistencies
+        - CHECK POST-FIX: Test PASSES with consistent JWT configuration
 ""
         auth_failures = []
         jwt_config_inconsistencies = []

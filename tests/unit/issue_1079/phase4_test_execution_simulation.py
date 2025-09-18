@@ -76,7 +76,7 @@ class TestExecutionSimulation(unittest.TestCase):
                     # Test if module can be discovered
                     spec = importlib.util.find_spec(module_name)
                     if spec:
-                        print(f"      ✓ Module discoverable")
+                        print(f"      CHECK Module discoverable")
                         discovered_modules.append(module_name)
                     else:
                         print(f"      ✗ Module not discoverable")
@@ -156,7 +156,7 @@ class TestExecutionSimulation(unittest.TestCase):
                         self.execution_failures.append(f"{test_name}: {result.get('error', 'Unknown')}")
 
                     if duration > 10.0:
-                        print(f"    ⚠️  Long execution time: {duration:.3f}s")
+                        print(f"    WARNING️  Long execution time: {duration:.3f}s")
                         self.timeout_events.append(f"{test_name}: {duration:.3f}s")
 
                 except concurrent.futures.TimeoutError:
@@ -223,7 +223,7 @@ class TestExecutionSimulation(unittest.TestCase):
             print(f"  Memory after: {final_memory:.2f} MB (growth: +{memory_growth:.2f} MB)")
 
             if memory_growth > 50:  # 50MB growth threshold
-                print(f"  ⚠️  Significant memory growth detected")
+                print(f"  WARNING️  Significant memory growth detected")
                 self.memory_issues.append(f"Attempt {attempt + 1}: +{memory_growth:.2f} MB")
 
         # Check for overall memory trend
@@ -232,7 +232,7 @@ class TestExecutionSimulation(unittest.TestCase):
             print(f"\nTotal memory growth: {total_growth:.2f} MB")
 
             if total_growth > 100:  # 100MB total growth threshold
-                print("⚠️  Excessive total memory growth detected")
+                print("WARNING️  Excessive total memory growth detected")
                 self.memory_issues.append(f"Total growth: +{total_growth:.2f} MB")
 
     def test_simulate_test_isolation_failures(self):
@@ -257,7 +257,7 @@ class TestExecutionSimulation(unittest.TestCase):
             try:
                 # This might pollute sys.modules
                 import netra_backend.app.core.configuration.base
-                print(f"  ✓ Configuration import successful")
+                print(f"  CHECK Configuration import successful")
             except Exception as e:
                 print(f"  ✗ Configuration import failed: {e}")
                 self.isolation_failures.append(f"Test {test_num + 1}: config import")
@@ -268,7 +268,7 @@ class TestExecutionSimulation(unittest.TestCase):
             print(f"  New modules in sys.modules: {len(new_modules)}")
 
             if len(new_modules) > 20:  # Threshold for module pollution
-                print(f"  ⚠️  Excessive module pollution detected")
+                print(f"  WARNING️  Excessive module pollution detected")
                 self.isolation_failures.append(f"Test {test_num + 1}: module pollution ({len(new_modules)} modules)")
 
             # Simulate incomplete cleanup (not restoring sys.path)
@@ -283,7 +283,7 @@ class TestExecutionSimulation(unittest.TestCase):
         sys.path = original_sys_path
 
         if len(total_new_modules) > 50:
-            print("⚠️  Significant test isolation failure detected")
+            print("WARNING️  Significant test isolation failure detected")
             self.isolation_failures.append(f"Total isolation failure: {len(total_new_modules)} modules")
 
     def test_reproduce_217_second_timeout(self):
@@ -315,7 +315,7 @@ class TestExecutionSimulation(unittest.TestCase):
             try:
                 result = future.result(timeout=timeout_limit)
                 duration = time.time() - start_time
-                print(f"✓ Import completed: {result} ({duration:.3f}s)")
+                print(f"CHECK Import completed: {result} ({duration:.3f}s)")
 
             except concurrent.futures.TimeoutError:
                 duration = time.time() - start_time
@@ -366,7 +366,7 @@ class TestExecutionSimulation(unittest.TestCase):
         effective_fixes = []
         for fix_name, result in fix_results.items():
             if result['status'] == 'success' and result['duration'] < 5.0:
-                print(f"  ✓ {fix_name}: Effective ({result['duration']:.3f}s)")
+                print(f"  CHECK {fix_name}: Effective ({result['duration']:.3f}s)")
                 effective_fixes.append(fix_name)
             else:
                 print(f"  ✗ {fix_name}: Not effective ({result.get('duration', 0):.3f}s)")
@@ -452,7 +452,7 @@ class TestExecutionSimulation(unittest.TestCase):
                        len(self.memory_issues) + len(self.isolation_failures))
 
         if total_issues > 0:
-            print(f"\n✓ SUCCESS: Reproduced Issue #1079 conditions ({total_issues} issues detected)")
+            print(f"\nCHECK SUCCESS: Reproduced Issue #1079 conditions ({total_issues} issues detected)")
             print("  This confirms the test execution problems described in the issue")
         else:
             print(f"\n✗ FAILURE: Could not reproduce Issue #1079 conditions")

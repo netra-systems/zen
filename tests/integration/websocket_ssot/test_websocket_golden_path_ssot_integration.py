@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Prevents user-facing errors that destroy chat functionality and user confidence
 
 CRITICAL PURPOSE: Test Golden Path integration with SSOT WebSocket Manager consolidation.
-These tests validate that the core user flow (login → AI responses) works reliably
+These tests validate that the core user flow (login -> AI responses) works reliably
 after WebSocket Manager SSOT consolidation.
 
 GOLDEN PATH EVENTS TESTED:

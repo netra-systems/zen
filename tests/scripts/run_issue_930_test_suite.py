@@ -161,7 +161,7 @@ class Issue930TestRunner:
 
     def print_test_result(self, result: Dict[str, Any]) -> None:
         """Print formatted test result."""
-        status = "✅ PASSED" if result['success'] else "❌ FAILED"
+        status = "CHECK PASSED" if result['success'] else "X FAILED"
         print(f"\n{status} - {result['file']} ({result['duration']:.2f}s)")
         print(f"Summary: {result['summary']}")
 
@@ -225,7 +225,7 @@ class Issue930TestRunner:
             if result['failed_tests']:
                 print(f"\n{result['category'].upper()} - {result['file']}:")
                 for test in result['failed_tests']:
-                    print(f"  ❌ {test}")
+                    print(f"  X {test}")
 
         print(f"\nEXPECTED FAILURES (Tests designed to expose Issue #930 root causes):")
         expected_failure_patterns = [
@@ -248,7 +248,7 @@ class Issue930TestRunner:
 
         print(f"  Found {len(found_expected_failures)} expected failure tests:")
         for failure in found_expected_failures:
-            print(f"    ✓ {failure}")
+            print(f"    CHECK {failure}")
 
         print(f"\nRECOMMENDED NEXT STEPS:")
         print(f"  1. Review failed tests to understand JWT configuration root causes")

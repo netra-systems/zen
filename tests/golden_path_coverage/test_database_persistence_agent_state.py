@@ -2,7 +2,7 @@
 GOLDEN PATH COVERAGE: Database Persistence Agent State Tests
 
 Business Impact: $500K+ ARR - State persistence critical for conversation continuity
-Coverage Target: 0% → 75% for database persistence during agent execution
+Coverage Target: 0% -> 75% for database persistence during agent execution
 Priority: P0 - Data integrity and user experience continuity
 
 Tests comprehensive database persistence of agent state across the 3-tier

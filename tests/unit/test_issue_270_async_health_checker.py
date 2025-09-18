@@ -279,11 +279,11 @@ class Issue270BusinessValueValidationTests:
         print(f'  Average Parallel Time: {avg_parallel:.2f}ms')
         print(f'  Average Sequential Time: {avg_sequential:.2f}ms')
         if performance_ratio >= 1.35:
-            print(f'  ✅ EXCEEDS original business target of 1.35x')
+            print(f'  CHECK EXCEEDS original business target of 1.35x')
         elif performance_ratio >= 1.2:
-            print(f'  ✅ MEETS minimum business target of 1.2x')
+            print(f'  CHECK MEETS minimum business target of 1.2x')
         else:
-            print(f'  ❌ FAILS to meet minimum business target')
+            print(f'  X FAILS to meet minimum business target')
 
     def test_zero_breaking_changes_validation(self):
         """Test that zero breaking changes were introduced."""
@@ -296,8 +296,8 @@ class Issue270BusinessValueValidationTests:
         for api in new_apis:
             assert hasattr(manager, api), f'New capability missing: {api} method not found'
             assert callable(getattr(manager, api)), f'New capability broken: {api} not callable'
-        print(f'✅ Zero breaking changes validated - all {len(existing_apis)} existing APIs preserved')
-        print(f'✅ New capabilities validated - all {len(new_apis)} new APIs available')
+        print(f'CHECK Zero breaking changes validated - all {len(existing_apis)} existing APIs preserved')
+        print(f'CHECK New capabilities validated - all {len(new_apis)} new APIs available')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

@@ -279,7 +279,7 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
 
         )
         
-        logger.info(f✅ Event delivery latency validation PASSED for thread {thread_id})
+        logger.info(fCHECK Event delivery latency validation PASSED for thread {thread_id})
         logger.info(f   Events processed: {len(validated_events)})"
         logger.info(f   Events processed: {len(validated_events)})"
         logger.info(f"   Average latency: {avg_latency:."1f"}ms)"
@@ -433,7 +433,7 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
         )
         self.timing_metrics.append(metrics)
         
-        logger.info(f✅ Event gap timing validation PASSED for thread {thread_id})
+        logger.info(fCHECK Event gap timing validation PASSED for thread {thread_id})
         logger.info(f"   Event gaps measured: {len(event_gaps)})"
         logger.info(f   Average gap: {avg_gap:."1f"}ms")"
         logger.info(f   Maximum gap: {max_gap:."1f"}ms)
@@ -571,7 +571,7 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
         
         self.performance_samples.append(total_sequence_duration_ms)
         
-        logger.info(f"✅ End-to-end sequence timing validation PASSED for thread {thread_id})"
+        logger.info(f"CHECK End-to-end sequence timing validation PASSED for thread {thread_id})"
         logger.info(f   Total sequence duration: {total_sequence_duration_ms:."1f"}ms)
         logger.info(f   Events processed: {len(validated_events)})
         logger.info(f   Events per second: {events_per_second:."2f"}")"

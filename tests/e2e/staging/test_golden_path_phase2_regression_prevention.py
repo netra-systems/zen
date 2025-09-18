@@ -7,7 +7,7 @@ This E2E test validates the complete Golden Path user flow to prevent regression
 during SSOT MessageRouter Phase 2 migration.
 
 CRITICAL PURPOSE:
-- Tests complete user login → AI response flow end-to-end
+- Tests complete user login -> AI response flow end-to-end
 - Validates all 5 WebSocket events are delivered correctly
 - Ensures agent execution and meaningful responses work
 - Protects against proxy removal breaking message routing
@@ -339,7 +339,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_complete_golden_path_user_flow(self):
         """
-        Test complete Golden Path user flow: Login → Send Message → Agent Response → User Receives Result.
+        Test complete Golden Path user flow: Login -> Send Message -> Agent Response -> User Receives Result.
         
         CRITICAL: This validates the core $500K+ ARR user journey.
         Must pass both before and after MessageRouter proxy removal.
@@ -361,7 +361,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
             # Step 1: Establish authenticated WebSocket connection
             print("[STEP 1] Establishing authenticated WebSocket connection...")
             websocket, auth_headers = await self.create_authenticated_websocket_connection(user_id)
-            print(f"✓ WebSocket connected in {self.metrics.connection_time:.3f}s")
+            print(f"CHECK WebSocket connected in {self.metrics.connection_time:.3f}s")
             
             # Step 2: Send user message
             print("[STEP 2] Sending user message...")
@@ -377,7 +377,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
             
             await websocket.send(json.dumps(user_message))
             message_sent_time = time.time()
-            print(f"✓ User message sent at {message_sent_time - self.test_start_time:.3f}s")
+            print(f"CHECK User message sent at {message_sent_time - self.test_start_time:.3f}s")
             
             # Step 3: Wait for all critical WebSocket events
             print("[STEP 3] Waiting for critical WebSocket events...")
@@ -398,7 +398,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
             assert len(missing_events) == 0, f"Missing critical WebSocket events: {missing_events}"
             assert len(events) >= 5, f"Expected at least 5 events, got {len(events)}"
             
-            print(f"✓ All critical WebSocket events received ({len(events)} total)")
+            print(f"CHECK All critical WebSocket events received ({len(events)} total)")
             
             # Step 4: Validate agent response quality
             print("[STEP 4] Validating agent response quality...")
@@ -426,8 +426,8 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
             business_indicators = validator.extract_business_value_indicators(str(agent_response))
             assert len(business_indicators) >= 2, f"Must include business value indicators, found: {business_indicators}"
             
-            print(f"✓ Agent response quality validated (score: {quality_score}/100)")
-            print(f"✓ Business value indicators: {business_indicators}")
+            print(f"CHECK Agent response quality validated (score: {quality_score}/100)")
+            print(f"CHECK Business value indicators: {business_indicators}")
             
             # Step 5: Validate timing performance
             print("[STEP 5] Validating performance requirements...")
@@ -442,7 +442,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
             total_time = time.time() - self.test_start_time
             assert total_time <= 240.0, f"Golden Path flow too slow: {total_time:.3f}s"
             
-            print(f"✓ Performance requirements met (total: {total_time:.3f}s)")
+            print(f"CHECK Performance requirements met (total: {total_time:.3f}s)")
             
             # Mark successful completion
             self.metrics.message_routing_successful = True
@@ -454,7 +454,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
             
         except Exception as e:
             self.metrics.errors_encountered.append(str(e))
-            print(f"\n❌ GOLDEN PATH FLOW FAILED: {e}")
+            print(f"\nX GOLDEN PATH FLOW FAILED: {e}")
             raise
         
         finally:
@@ -536,7 +536,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
                 completed_idx = event_types.index('agent_completed')
                 assert completed_idx == len(event_types) - 1 or completed_idx == len(event_types) - 2, "agent_completed should be final or second-to-last event"
             
-            print(f"✓ Event sequence validated: {event_types}")
+            print(f"CHECK Event sequence validated: {event_types}")
             
         finally:
             if websocket:
@@ -573,7 +573,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
                 })
                 websockets_list.append(websocket)
             
-            print(f"✓ Created {num_users} concurrent connections")
+            print(f"CHECK Created {num_users} concurrent connections")
             
             # Send unique messages from each user
             for i, context in enumerate(user_contexts):
@@ -588,7 +588,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
                 
                 await context['websocket'].send(json.dumps(message))
                 context['messages_sent'].append(message)
-                print(f"✓ User {i} message sent")
+                print(f"CHECK User {i} message sent")
             
             # Collect responses for each user
             collection_tasks = []
@@ -635,12 +635,12 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
                 spending_pattern = str(i*1000+5000)
                 assert spending_pattern in responses_text or any(spending_pattern in str(event) for event in events), f"User {i} response should reference their unique spending amount"
                 
-                print(f"✓ User {i} isolation validated ({len(events)} events)")
+                print(f"CHECK User {i} isolation validated ({len(events)} events)")
             
             self.metrics.user_isolation_validated = True
             self.metrics.concurrent_users_supported = num_users
             
-            print(f"✓ Concurrent user isolation validated for {num_users} users")
+            print(f"CHECK Concurrent user isolation validated for {num_users} users")
             
         finally:
             # Clean up all connections
@@ -671,9 +671,9 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
             
             try:
                 await websocket.send(malformed_message)
-                print("✓ Malformed message sent")
+                print("CHECK Malformed message sent")
             except Exception as e:
-                print(f"✓ Malformed message rejected as expected: {e}")
+                print(f"CHECK Malformed message rejected as expected: {e}")
             
             # Test 2: Send message with missing required fields
             incomplete_message = {
@@ -682,7 +682,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
             }
             
             await websocket.send(json.dumps(incomplete_message))
-            print("✓ Incomplete message sent")
+            print("CHECK Incomplete message sent")
             
             # Test 3: Send valid message and ensure system still works
             valid_message = {
@@ -694,7 +694,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
             }
             
             await websocket.send(json.dumps(valid_message))
-            print("✓ Valid recovery message sent")
+            print("CHECK Valid recovery message sent")
             
             # Wait for response to valid message
             recovery_events = []
@@ -720,7 +720,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
             # Check for error handling events
             error_events = [event for event in recovery_events if 'error' in event.get('type', '').lower()]
             
-            print(f"✓ System recovery validated ({len(recovery_events)} events, {len(error_events)} error events)")
+            print(f"CHECK System recovery validated ({len(recovery_events)} events, {len(error_events)} error events)")
             
         finally:
             if websocket:
@@ -798,7 +798,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
                 
                 performance_runs.append(run_metrics)
                 
-                print(f"✓ Run {run+1}: conn={connection_time:.3f}s, first={first_event_time:.3f}s, complete={completion_time:.3f}s")
+                print(f"CHECK Run {run+1}: conn={connection_time:.3f}s, first={first_event_time:.3f}s, complete={completion_time:.3f}s")
                 
             finally:
                 if websocket:
@@ -819,7 +819,7 @@ class GoldenPathPhase2RegressionPreventionTests(SSotAsyncTestCase):
         assert avg_first_event <= 20.0, f"First event baseline too slow: {avg_first_event:.3f}s"
         assert avg_completion <= 120.0, f"Completion baseline too slow: {avg_completion:.3f}s"
         
-        print(f"\n✓ PERFORMANCE BASELINE ESTABLISHED:")
+        print(f"\nCHECK PERFORMANCE BASELINE ESTABLISHED:")
         print(f"   Average Connection: {avg_connection:.3f}s")
         print(f"   Average First Event: {avg_first_event:.3f}s")
         print(f"   Average Completion: {avg_completion:.3f}s")

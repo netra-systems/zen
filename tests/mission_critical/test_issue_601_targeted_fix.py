@@ -85,7 +85,7 @@ class Issue601TargetedFixTests:
             app.state = MagicMock()
             orchestrator = StartupOrchestrator(app)
 
-            # ✅ CRITICAL FIX: Mock ALL the problematic methods that cause hanging
+            # CHECK CRITICAL FIX: Mock ALL the problematic methods that cause hanging
             # This is the strategic mocking approach for Issue #601
             async def quick_mock_phase():
                 await asyncio.sleep(0.1)
@@ -105,7 +105,7 @@ class Issue601TargetedFixTests:
             orchestrator._phase6_websocket_setup = quick_mock_phase
             orchestrator._phase7_finalization = quick_mock_phase
 
-            # ✅ THE CRITICAL FIX: Mock the validation methods that cause deadlock
+            # CHECK THE CRITICAL FIX: Mock the validation methods that cause deadlock
             orchestrator._run_comprehensive_validation = mock_validation_that_prevents_hang
             orchestrator._run_critical_path_validation = quick_mock_phase
             orchestrator._validate_database_schema = quick_mock_phase
@@ -298,11 +298,11 @@ if __name__ == __main__:
     result = runner.run(suite)
     
     if result.wasSuccessful():
-        print("✅ Issue #601 targeted fix validation PASSED)"
-        print(✅ Strategic mocking approach works)"
-        print(✅ Strategic mocking approach works)"
-        print("✅ Memory leak detection preserved)"
+        print("CHECK Issue #601 targeted fix validation PASSED)"
+        print(CHECK Strategic mocking approach works)"
+        print(CHECK Strategic mocking approach works)"
+        print("CHECK Memory leak detection preserved)"
     else:
-        print(❌ Issue #601 targeted fix validation FAILED")"
+        print(X Issue #601 targeted fix validation FAILED")"
         for test, error in result.failures + result.errors:
             print(f"  - {test}: {error[:200]}..."")"

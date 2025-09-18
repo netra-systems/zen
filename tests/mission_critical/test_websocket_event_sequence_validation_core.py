@@ -11,7 +11,7 @@ Business Value Justification:
 
 CRITICAL TEST SCOPE:
     This test file focuses on the most fundamental validation scenarios:
-    1. Complete 5-event sequence validation (agent_started → agent_thinking → tool_executing → tool_completed → agent_completed)
+    1. Complete 5-event sequence validation (agent_started -> agent_thinking -> tool_executing -> tool_completed -> agent_completed)
 2. Event order enforcement and validation
 3. Event content structure validation
 4. Missing event detection and failure reporting
@@ -134,7 +134,7 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
         CRITICAL: Test that all 5 required WebSocket events are delivered in sequence.
         
         This test validates the core chat functionality sequence:
-        agent_started → agent_thinking → tool_executing → tool_completed → agent_completed
+        agent_started -> agent_thinking -> tool_executing -> tool_completed -> agent_completed
         
         DESIGNED TO FAIL INITIALLY: This test will fail if any of the 5 events are missing,
         proving that the validation is working correctly.
@@ -221,7 +221,7 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
                 f"Sequence not marked as complete. Status: {sequence_status}"
             )
             
-            logger.info(f✅ Complete 5-event sequence validation PASSED for thread {thread_id})
+            logger.info(fCHECK Complete 5-event sequence validation PASSED for thread {thread_id})
             logger.info(f   Events received: {len(received_event_types)})
             logger.info(f   Total duration: {total_duration_ms:."1f"}ms")"
             logger.info(f   Validation errors: {len(validation_errors)})
@@ -475,7 +475,7 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
         )
         self.test_results.append(test_result)
         
-        logger.info(f✅ Missing event detection test PASSED for thread {thread_id})
+        logger.info(fCHECK Missing event detection test PASSED for thread {thread_id})
         logger.info(f"   Correctly detected missing events: {missing_events})"
         logger.info(f   Total events processed: {len(validated_events)}")"
 
@@ -594,7 +594,7 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
             f"Error messages: {validation_errors_detected}"
         )
         
-        logger.info(f✅ Event content structure validation test PASSED)
+        logger.info(fCHECK Event content structure validation test PASSED)
         logger.info(f   Validation errors detected: {len(validation_errors_detected)})
         logger.info(f   Critical events detected: {critical_events_detected}")"
         logger.info(f   Error types found: {list(set([e.split(':')[0] for e in validation_errors_detected])})
@@ -667,7 +667,7 @@ class WebSocketEventSequenceValidationCoreTests(SSotAsyncTestCase):
             fExpected warnings for events with invalid timestamps, but none were found.
         )
         
-        logger.info(f"✅ Event timing validation test PASSED)"
+        logger.info(f"CHECK Event timing validation test PASSED)"
         logger.info(f   Timing warnings detected: {len(timing_warnings_detected)}")"
         logger.info(f   Warning examples: {timing_warnings_detected[:2]})
 

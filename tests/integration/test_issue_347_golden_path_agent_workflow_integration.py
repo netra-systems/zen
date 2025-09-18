@@ -49,12 +49,12 @@ class Issue347GoldenPathAgentWorkflowIntegrationTests(SSotAsyncTestCase):
             # Try to create real LLM manager
             cls.llm_manager = LLMManager()
             cls.using_real_llm = True
-            print("✅ Using real LLM manager for integration testing")
+            print("CHECK Using real LLM manager for integration testing")
         except Exception as e:
             # Fallback to mock if real services unavailable
             cls.llm_manager = Mock(spec=LLMManager)
             cls.using_real_llm = False
-            print(f"⚠️ Using mock LLM manager: {e}")
+            print(f"WARNING️ Using mock LLM manager: {e}")
         
         # Create test user contexts for Golden Path workflows
         cls.golden_path_users = {
@@ -105,7 +105,7 @@ class Issue347GoldenPathAgentWorkflowIntegrationTests(SSotAsyncTestCase):
         
         user_context = self.golden_path_users["primary_user"]
         
-        # Define Golden Path workflow: user message → triage → optimization → actions → response
+        # Define Golden Path workflow: user message -> triage -> optimization -> actions -> response
         golden_path_workflow = [
             ("triage", "Analyze user request and determine next steps"),
             ("optimization", "Generate optimization recommendations"),
@@ -147,10 +147,10 @@ class Issue347GoldenPathAgentWorkflowIntegrationTests(SSotAsyncTestCase):
                 user_agent = await self.registry.get_user_agent(user_context.user_id, agent_name)
                 if user_agent is not None:
                     workflow_results[agent_name]["stored_in_session"] = True
-                    print(f"      ✅ Agent '{agent_name}' created and stored in user session")
+                    print(f"      CHECK Agent '{agent_name}' created and stored in user session")
                 else:
                     workflow_results[agent_name]["stored_in_session"] = False
-                    print(f"      ⚠️ Agent '{agent_name}' creation completed but not stored (factory pattern)")
+                    print(f"      WARNING️ Agent '{agent_name}' creation completed but not stored (factory pattern)")
                 
             except Exception as e:
                 workflow_results[agent_name] = {
@@ -161,7 +161,7 @@ class Issue347GoldenPathAgentWorkflowIntegrationTests(SSotAsyncTestCase):
                     "error": str(e),
                     "description": description
                 }
-                print(f"      ❌ Agent '{agent_name}' workflow failed: {e}")
+                print(f"      X Agent '{agent_name}' workflow failed: {e}")
                 
                 # For Golden Path, we should not fail completely on agent creation issues
                 # but we should ensure the registry recognizes the correct names
@@ -187,7 +187,7 @@ class Issue347GoldenPathAgentWorkflowIntegrationTests(SSotAsyncTestCase):
         session_metrics = user_session.get_metrics()
         
         print(f"      User session metrics: {session_metrics}")
-        print(f"✅ Golden Path workflow completed with correct agent naming")
+        print(f"CHECK Golden Path workflow completed with correct agent naming")
         
         return workflow_results
     
@@ -221,14 +221,14 @@ class Issue347GoldenPathAgentWorkflowIntegrationTests(SSotAsyncTestCase):
                     "result": result,
                     "success": True
                 }
-                print(f"   ✅ User {user_id} workflow completed: {agent_sequence}")
+                print(f"   CHECK User {user_id} workflow completed: {agent_sequence}")
             except Exception as e:
                 concurrent_results[user_id] = {
                     "agent_sequence": agent_sequence,
                     "error": str(e),
                     "success": False
                 }
-                print(f"   ❌ User {user_id} workflow failed: {e}")
+                print(f"   X User {user_id} workflow failed: {e}")
         
         # Verify user isolation
         for user_id, user_result in concurrent_results.items():
@@ -247,7 +247,7 @@ class Issue347GoldenPathAgentWorkflowIntegrationTests(SSotAsyncTestCase):
         self.assertEqual(registry_health.get('status'), 'healthy',
                         "Registry should remain healthy after concurrent workflows")
         
-        print(f"✅ Concurrent Golden Path workflows completed with proper isolation")
+        print(f"CHECK Concurrent Golden Path workflows completed with proper isolation")
         
         return concurrent_results
     
@@ -325,7 +325,7 @@ class Issue347GoldenPathAgentWorkflowIntegrationTests(SSotAsyncTestCase):
                     "websocket_integration": True
                 }
                 
-                print(f"      ✅ '{agent_name}' agent created with WebSocket integration")
+                print(f"      CHECK '{agent_name}' agent created with WebSocket integration")
                 
             except Exception as e:
                 websocket_test_results[agent_name] = {
@@ -333,7 +333,7 @@ class Issue347GoldenPathAgentWorkflowIntegrationTests(SSotAsyncTestCase):
                     "error": str(e),
                     "websocket_integration": False
                 }
-                print(f"      ❌ '{agent_name}' WebSocket integration failed: {e}")
+                print(f"      X '{agent_name}' WebSocket integration failed: {e}")
                 
                 # Even if creation fails, registry should recognize the name
                 self.assertTrue(self.registry.has(agent_name),
@@ -344,7 +344,7 @@ class Issue347GoldenPathAgentWorkflowIntegrationTests(SSotAsyncTestCase):
         session_metrics = user_session.get_metrics()
         
         print(f"   User session WebSocket status: {session_metrics.get('has_websocket_bridge', False)}")
-        print(f"✅ Golden Path WebSocket integration tested with correct agent names")
+        print(f"CHECK Golden Path WebSocket integration tested with correct agent names")
         
         return websocket_test_results
     
@@ -360,7 +360,7 @@ class Issue347GoldenPathAgentWorkflowIntegrationTests(SSotAsyncTestCase):
             ("optimization_agent", "Should fail - incorrect name")
         ]
         
-        print(f"\n❌ Issue #347 - Golden Path error handling test:")
+        print(f"\nX Issue #347 - Golden Path error handling test:")
         print(f"   Testing workflow with incorrect agent names...")
         
         error_handling_results = {}
@@ -397,14 +397,14 @@ class Issue347GoldenPathAgentWorkflowIntegrationTests(SSotAsyncTestCase):
                     "error_message": str(e),
                     "graceful_failure": True
                 }
-                print(f"      ✅ '{agent_name}' correctly failed with: {type(e).__name__}")
+                print(f"      CHECK '{agent_name}' correctly failed with: {type(e).__name__}")
         
         # Verify registry remains healthy after error handling
         registry_health = self.registry.get_registry_health()
         self.assertEqual(registry_health.get('status'), 'healthy',
                         "Registry should remain healthy after handling incorrect names")
         
-        print(f"✅ Golden Path properly handles incorrect agent names")
+        print(f"CHECK Golden Path properly handles incorrect agent names")
         
         return error_handling_results
     
@@ -422,7 +422,7 @@ class Issue347GoldenPathAgentWorkflowIntegrationTests(SSotAsyncTestCase):
             user_context=user_context
         )
         
-        print(f"   ✅ Normal agent creation completed")
+        print(f"   CHECK Normal agent creation completed")
         
         # Test registry health and recovery mechanisms
         registry_health = self.registry.get_registry_health()
@@ -434,7 +434,7 @@ class Issue347GoldenPathAgentWorkflowIntegrationTests(SSotAsyncTestCase):
         self.assertEqual(reset_result.get('status'), 'reset_complete',
                         "User agent reset should complete successfully")
         
-        print(f"   ✅ User session reset completed: {reset_result}")
+        print(f"   CHECK User session reset completed: {reset_result}")
         
         # Test agent creation after reset
         recovery_agent = await self.registry.create_agent_for_user(
@@ -443,14 +443,14 @@ class Issue347GoldenPathAgentWorkflowIntegrationTests(SSotAsyncTestCase):
             user_context=user_context
         )
         
-        print(f"   ✅ Agent creation after reset completed")
+        print(f"   CHECK Agent creation after reset completed")
         
         # Verify registry health after recovery
         final_health = self.registry.get_registry_health()
         self.assertEqual(final_health.get('status'), 'healthy',
                         "Registry should be healthy after recovery operations")
         
-        print(f"✅ Golden Path registry recovery works with correct agent naming")
+        print(f"CHECK Golden Path registry recovery works with correct agent naming")
         
         return {
             "initial_health": initial_health,
@@ -528,20 +528,20 @@ class Issue347GoldenPathFactoryPatternTests(SSotAsyncTestCase):
                     "agent_created": agent is not None
                 }
                 
-                print(f"      ✅ Factory creation for '{agent_name}' completed")
+                print(f"      CHECK Factory creation for '{agent_name}' completed")
                 
             except Exception as e:
                 factory_test_results[agent_name] = {
                     "factory_creation": "failed", 
                     "error": str(e)
                 }
-                print(f"      ❌ Factory creation for '{agent_name}' failed: {e}")
+                print(f"      X Factory creation for '{agent_name}' failed: {e}")
                 
                 # Registry should still recognize the name
                 self.assertTrue(self.registry.has(agent_name),
                                f"Registry should recognize '{agent_name}' even if factory creation fails")
         
-        print(f"✅ Factory pattern integration works with correct agent names")
+        print(f"CHECK Factory pattern integration works with correct agent names")
         
         return factory_test_results
 

@@ -100,10 +100,10 @@ class WebSocketEventReliabilitySsotImprovementTests(SSotAsyncTestCase):
             # CRITICAL DELIVERY TEST 3: Test event delivery under stress conditions
             await self._test_stress_event_delivery_reliability(reliability_managers)
             
-            logger.info("✅ 100% EVENT DELIVERY GUARANTEE VALIDATED - SSOT manager ensures bulletproof delivery")
+            logger.info("CHECK 100% EVENT DELIVERY GUARANTEE VALIDATED - SSOT manager ensures bulletproof delivery")
             
         except Exception as e:
-            logger.error(f"❌ EVENT DELIVERY RELIABILITY VALIDATION FAILED: {e}")
+            logger.error(f"X EVENT DELIVERY RELIABILITY VALIDATION FAILED: {e}")
             raise
     
     async def _create_event_tracking_connection(self, user_context):
@@ -211,9 +211,9 @@ class WebSocketEventReliabilitySsotImprovementTests(SSotAsyncTestCase):
                     
                     if event_delivered:
                         user_delivered_events.append(event_name)
-                        logger.debug(f"✅ Critical event {event_name} delivered to {user_context.user_id}")
+                        logger.debug(f"CHECK Critical event {event_name} delivered to {user_context.user_id}")
                     else:
-                        logger.error(f"❌ CRITICAL EVENT DELIVERY FAILURE: {event_name} not delivered to {user_context.user_id}")
+                        logger.error(f"X CRITICAL EVENT DELIVERY FAILURE: {event_name} not delivered to {user_context.user_id}")
                         pytest.fail(
                             f"CRITICAL EVENT DELIVERY FAILURE: {event_name} event not delivered to user {user_context.user_id}. "
                             f"SSOT Violation: Consolidated manager failed to guarantee delivery for critical Golden Path event. "
@@ -222,7 +222,7 @@ class WebSocketEventReliabilitySsotImprovementTests(SSotAsyncTestCase):
                         )
                         
                 except Exception as e:
-                    logger.error(f"❌ CRITICAL EVENT SENDING FAILURE: {event_name} to {user_context.user_id}: {e}")
+                    logger.error(f"X CRITICAL EVENT SENDING FAILURE: {event_name} to {user_context.user_id}: {e}")
                     pytest.fail(f"CRITICAL EVENT SENDING FAILURE: Cannot send {event_name} event: {e}")
             
             # CRITICAL GUARANTEE TEST: All critical events must be delivered
@@ -236,7 +236,7 @@ class WebSocketEventReliabilitySsotImprovementTests(SSotAsyncTestCase):
                     f"and affecting $500K+ ARR from incomplete user experience."
                 )
             
-            logger.info(f"✅ 100% critical event delivery guaranteed for {user_context.user_id}")
+            logger.info(f"CHECK 100% critical event delivery guaranteed for {user_context.user_id}")
     
     async def _send_tracked_event(self, manager, event_name, event_data, user_id):
         """Send event through manager with comprehensive tracking."""
@@ -302,13 +302,13 @@ class WebSocketEventReliabilitySsotImprovementTests(SSotAsyncTestCase):
                     
                     if confirmation_received:
                         confirmations_received.append(event_name)
-                        logger.debug(f"✅ Confirmation received for {event_name} to {user_context.user_id}")
+                        logger.debug(f"CHECK Confirmation received for {event_name} to {user_context.user_id}")
                     else:
-                        logger.error(f"❌ CONFIRMATION FAILURE: No confirmation for {event_name} to {user_context.user_id}")
+                        logger.error(f"X CONFIRMATION FAILURE: No confirmation for {event_name} to {user_context.user_id}")
                         # Note: This is a warning rather than failure since confirmation system may be implementation-dependent
                         
                 except Exception as e:
-                    logger.error(f"❌ CONFIRMATION TRACKING FAILURE: {event_name} to {user_context.user_id}: {e}")
+                    logger.error(f"X CONFIRMATION TRACKING FAILURE: {event_name} to {user_context.user_id}: {e}")
             
             # Report confirmation tracking results
             confirmation_rate = len(confirmations_received) / len(confirmation_events) * 100
@@ -316,7 +316,7 @@ class WebSocketEventReliabilitySsotImprovementTests(SSotAsyncTestCase):
             
             # For enterprise-grade reliability, high confirmation rates are expected
             if confirmation_rate < 80.0:
-                logger.warning(f"⚠️ LOW CONFIRMATION RATE: {confirmation_rate:.1f}% for {user_context.user_id}")
+                logger.warning(f"WARNING️ LOW CONFIRMATION RATE: {confirmation_rate:.1f}% for {user_context.user_id}")
     
     def _check_event_confirmation(self, user_id, confirmation_id):
         """Check if event confirmation was received for a specific event."""
@@ -412,10 +412,10 @@ class WebSocketEventReliabilitySsotImprovementTests(SSotAsyncTestCase):
                     f"and user experience during peak usage, impacting $500K+ ARR scalability."
                 )
             
-            logger.info(f"✅ Stress event delivery reliability validated: {delivery_rate:.1f}% delivery rate")
+            logger.info(f"CHECK Stress event delivery reliability validated: {delivery_rate:.1f}% delivery rate")
             
         except Exception as e:
-            logger.error(f"❌ STRESS EVENT DELIVERY TEST FAILED: {e}")
+            logger.error(f"X STRESS EVENT DELIVERY TEST FAILED: {e}")
             raise
     
     async def test_event_ordering_and_sequencing_reliability(self):
@@ -473,7 +473,7 @@ class WebSocketEventReliabilitySsotImprovementTests(SSotAsyncTestCase):
             
             if actual_sequence != expected_sequence:
                 sequence_correct = False
-                logger.error(f"❌ SEQUENCE ERROR: Position {i} has sequence {actual_sequence}, expected {expected_sequence}")
+                logger.error(f"X SEQUENCE ERROR: Position {i} has sequence {actual_sequence}, expected {expected_sequence}")
                 break
         
         if not sequence_correct:
@@ -484,7 +484,7 @@ class WebSocketEventReliabilitySsotImprovementTests(SSotAsyncTestCase):
                 f"confusing users and degrading $500K+ ARR chat experience quality."
             )
         
-        logger.info(f"✅ Event ordering reliability validated: {len(delivered_ordered_events)} events in correct sequence")
+        logger.info(f"CHECK Event ordering reliability validated: {len(delivered_ordered_events)} events in correct sequence")
     
     async def test_event_delivery_recovery_mechanisms(self):
         """
@@ -532,16 +532,16 @@ class WebSocketEventReliabilitySsotImprovementTests(SSotAsyncTestCase):
             normal_delivered = self._verify_event_delivered(recovery_user.user_id, normal_event['event'], normal_event['data']['recovery_id'])
             
             if normal_delivered:
-                logger.info("✅ Normal event delivery working before recovery test")
+                logger.info("CHECK Normal event delivery working before recovery test")
             else:
-                logger.warning("⚠️ Normal event delivery may not be working - recovery test may be inconclusive")
+                logger.warning("WARNING️ Normal event delivery may not be working - recovery test may be inconclusive")
             
             # Note: Actual recovery mechanism testing would depend on the specific implementation
             # This test validates that the framework supports recovery testing
-            logger.info("✅ Event delivery recovery mechanism framework validated")
+            logger.info("CHECK Event delivery recovery mechanism framework validated")
             
         except Exception as e:
-            logger.error(f"❌ RECOVERY MECHANISM TEST FAILED: {e}")
+            logger.error(f"X RECOVERY MECHANISM TEST FAILED: {e}")
             raise
     
     async def _failing_websocket_send_json(self, data):

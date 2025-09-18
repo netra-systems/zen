@@ -1,7 +1,7 @@
 """
 E2E Tests for Agent Message Pipeline - Golden Path Core Flow
 
-MISSION CRITICAL: Tests the complete user message → agent response pipeline
+MISSION CRITICAL: Tests the complete user message -> agent response pipeline
 in staging GCP environment. This is the core of the Golden Path user journey
 representing 90% of platform business value ($500K+ ARR).
 
@@ -15,7 +15,7 @@ Test Strategy:
 - REAL SERVICES: Staging GCP Cloud Run environment only (NO Docker)
 - REAL AUTH: JWT tokens via staging auth service
 - REAL WEBSOCKETS: wss:// connections to staging backend
-- REAL AGENTS: Complete supervisor → triage → APEX agent orchestration
+- REAL AGENTS: Complete supervisor -> triage -> APEX agent orchestration
 - REAL LLMS: Actual LLM calls for authentic agent responses
 - REAL PERSISTENCE: Chat history saved to staging databases
 
@@ -24,7 +24,7 @@ No mocking, bypassing, or 0-second test completions allowed.
 
 GitHub Issue: #1059 Agent Golden Path Messages E2E Test Creation - Phase 1
 ENHANCEMENT: Business value validation, multi-agent orchestration, response quality >0.7 threshold
-Target Coverage: 15% → 35% improvement
+Target Coverage: 15% -> 35% improvement
 """
 import asyncio
 import pytest
@@ -51,7 +51,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
     """
     E2E tests for the complete agent message pipeline in staging GCP.
     
-    Tests the core Golden Path: User Message → Agent Processing → AI Response
+    Tests the core Golden Path: User Message -> Agent Processing -> AI Response
     
     ENHANCED PHASE 1 (Issue #1059): Business value validation, multi-agent
     orchestration, and response quality scoring with >0.7 threshold.
@@ -119,14 +119,14 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
 
     async def test_complete_user_message_to_agent_response_flow(self):
         """
-        Test complete user message → agent response pipeline in staging GCP.
+        Test complete user message -> agent response pipeline in staging GCP.
         
         GOLDEN PATH CORE: This is the fundamental user journey that must work.
         
         Flow:
         1. User sends message via WebSocket
         2. Backend routes to supervisor agent
-        3. Supervisor orchestrates triage → APEX agents
+        3. Supervisor orchestrates triage -> APEX agents
         4. Agent processes with real LLM calls
         5. Response sent back via WebSocket
         
@@ -142,7 +142,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
             self.thread_id = f'message_pipeline_test_{int(time.time())}'
             self.run_id = f'run_{self.thread_id}'
             self.access_token = self.__class__.auth_helper.create_test_jwt_token(user_id=self.__class__.test_user_id, email=self.__class__.test_user_email, exp_minutes=60)
-        self.logger.info('🎯 Testing complete user message → agent response pipeline')
+        self.logger.info('🎯 Testing complete user message -> agent response pipeline')
         try:
             ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False
@@ -151,7 +151,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
             websocket = await asyncio.wait_for(websockets.connect(self.__class__.staging_config.urls.websocket_url, additional_headers={'Authorization': f'Bearer {self.access_token}', 'X-Environment': 'staging', 'X-Test-Suite': 'agent-pipeline-e2e'}, ssl=ssl_context, ping_interval=30, ping_timeout=10), timeout=20.0)
             connection_time = time.time() - connection_start
             pipeline_events.append({'event': 'websocket_connected', 'timestamp': time.time(), 'duration': connection_time, 'success': True})
-            self.logger.info(f'✅ WebSocket connected to staging in {connection_time:.2f}s')
+            self.logger.info(f'CHECK WebSocket connected to staging in {connection_time:.2f}s')
             user_message = {'type': 'agent_request', 'agent': 'supervisor_agent', 'message': 'I need help optimizing my AI costs. My current spend is $2,000/month on GPT-4 calls, and I want to reduce costs by 30% without sacrificing quality. Can you analyze my usage patterns and suggest specific optimizations?', 'thread_id': self.thread_id, 'run_id': self.run_id, 'user_id': self.__class__.test_user_id, 'context': {'test_scenario': 'golden_path_message_pipeline', 'expected_agents': ['supervisor_agent', 'triage_agent', 'apex_optimizer_agent'], 'expected_duration': '30-60s'}}
             message_send_start = time.time()
             await websocket.send(json.dumps(user_message))
@@ -229,7 +229,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
             assert len(quality_evaluation['business_indicators']) >= 1, f"Response lacks expected business value indicators: {quality_evaluation['business_indicators']}"
         except Exception as e:
             total_time = time.time() - pipeline_start_time
-            self.logger.error(f'❌ GOLDEN PATH MESSAGE PIPELINE FAILED')
+            self.logger.error(f'X GOLDEN PATH MESSAGE PIPELINE FAILED')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             self.logger.error(f'   Events collected: {len(pipeline_events)}')
@@ -273,7 +273,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
                         event_type = event.get('type', 'unknown')
                         if 'error' in event_type.lower():
                             received_error = True
-                            self.logger.info(f'✅ Received expected error: {event_type}')
+                            self.logger.info(f'CHECK Received expected error: {event_type}')
                             break
                     except asyncio.TimeoutError:
                         break
@@ -284,7 +284,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
                     recovery_response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                     recovery_event = json.loads(recovery_response)
                     assert recovery_event.get('type') != 'error', f"System should recover after {scenario['name']} error"
-                    self.logger.info(f"✅ System recovered successfully after {scenario['name']}")
+                    self.logger.info(f"CHECK System recovered successfully after {scenario['name']}")
             self.logger.info('🛡️ All error handling scenarios passed')
         finally:
             await websocket.close()
@@ -364,7 +364,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
             self.logger.info(f'📊 Performance metrics:')
             self.logger.info(f'   Average duration: {avg_duration:.1f}s')
             self.logger.info(f'   Max duration: {max_duration:.1f}s')
-        self.logger.info('✅ Concurrent user processing validation complete')
+        self.logger.info('CHECK Concurrent user processing validation complete')
 
     async def test_large_message_handling(self):
         """
@@ -416,14 +416,14 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
                 assert response_content and len(response_content) > 50, f"Should receive substantive response for {test_case['name']} (got {(len(response_content) if response_content else 0)} chars)"
                 expected_min_response_length = min(200, message_length // 10)
                 assert len(response_content) >= expected_min_response_length, f"Response too short for {test_case['name']}: {len(response_content)} chars (expected ≥{expected_min_response_length})"
-                self.logger.info(f"✅ {test_case['name']}: {case_duration:.1f}s, response: {len(response_content)} chars")
+                self.logger.info(f"CHECK {test_case['name']}: {case_duration:.1f}s, response: {len(response_content)} chars")
             self.logger.info('📏 Large message handling tests completed successfully')
         finally:
             await websocket.close()
 
     async def test_multi_agent_orchestration_flow_validation(self):
         """
-        Test complete multi-agent orchestration: Supervisor → Triage → APEX flow.
+        Test complete multi-agent orchestration: Supervisor -> Triage -> APEX flow.
         
         PHASE 1 ENHANCEMENT (Issue #1059): Validates the multi-agent coordination
         that delivers superior business value through specialized agent expertise.
@@ -512,7 +512,7 @@ class AgentMessagePipelineE2ETests(SSotAsyncTestCase):
             assert quality_evaluation['overall_quality_score'] >= self.__class__.QUALITY_THRESHOLD_HIGH, f"Multi-agent orchestration quality insufficient: {quality_evaluation['overall_quality_score']:.3f}"
         except Exception as e:
             total_time = time.time() - orchestration_start_time
-            self.logger.error('❌ MULTI-AGENT ORCHESTRATION FAILED')
+            self.logger.error('X MULTI-AGENT ORCHESTRATION FAILED')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             self.logger.error(f"   Events collected: {len(orchestration_metrics.get('coordination_events', []))}")

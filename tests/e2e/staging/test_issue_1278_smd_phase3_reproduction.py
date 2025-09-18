@@ -94,7 +94,7 @@ class TestStagingInfrastructureReproduction(BaseE2ETest):
     @pytest.mark.e2e
     async def test_golden_path_pipeline_offline_validation(self):
         """Test Golden Path pipeline offline during startup failures - SHOULD FAIL."""
-        # Test the core Golden Path: users login → get AI responses
+        # Test the core Golden Path: users login -> get AI responses
         
         staging_api_url = "https://staging.netrasystems.ai"
         

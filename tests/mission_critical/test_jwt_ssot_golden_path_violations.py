@@ -462,7 +462,7 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         CRITICAL TEST - DESIGNED TO FAIL
 
         Test complete Golden Path authentication flow with JWT SSOT violations.
-        Violations should break the critical user journey: login → websocket → agent → response.
+        Violations should break the critical user journey: login -> websocket -> agent -> response.
 
         CRITICAL VIOLATIONS:
         1. Authentication inconsistencies prevent WebSocket connection
@@ -598,7 +598,7 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
             f\n🚨 MISSION CRITICAL GOLDEN PATH BREAKDOWN:\n
             f{'='*80}\n
             fBUSINESS IMPACT: $"500K" plus ARR Golden Path broken by JWT violations\n""
-            fUSER IMPACT: Users cannot complete login → AI response journey\n
+            fUSER IMPACT: Users cannot complete login -> AI response journey\n
             fCOMPLETION RATE: {completion_rate}% (Target: 100%)\n
             f"{'='*80}\n"
             fGOLDEN PATH FAILURES:\n" +"

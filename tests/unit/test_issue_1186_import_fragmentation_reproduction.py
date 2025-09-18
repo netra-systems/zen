@@ -51,7 +51,7 @@ class UserExecutionEngineImportFragmentationTests(unittest.TestCase):
         self.assertLess(
             len(fragmented_imports), 
             5, 
-            f"❌ EXPECTED FAILURE: Found {len(fragmented_imports)} fragmented UserExecutionEngine imports. "
+            f"X EXPECTED FAILURE: Found {len(fragmented_imports)} fragmented UserExecutionEngine imports. "
             f"This indicates severe import path fragmentation violating SSOT principles:\n"
             + '\n'.join([f"  - {path}: {pattern}" for path, pattern in fragmented_imports[:10]])
             + (f"\n  ... and {len(fragmented_imports) - 10} more" if len(fragmented_imports) > 10 else "")
@@ -71,7 +71,7 @@ class UserExecutionEngineImportFragmentationTests(unittest.TestCase):
         self.assertEqual(
             len(singleton_violations),
             0,
-            f"❌ EXPECTED FAILURE: Found {len(singleton_violations)} singleton violations in UserExecutionEngine usage. "
+            f"X EXPECTED FAILURE: Found {len(singleton_violations)} singleton violations in UserExecutionEngine usage. "
             f"This prevents proper user isolation required for enterprise deployment:\n"
             + '\n'.join([f"  - {path}: {violation}" for path, violation in singleton_violations[:5]])
             + (f"\n  ... and {len(singleton_violations) - 5} more" if len(singleton_violations) > 5 else "")
@@ -92,7 +92,7 @@ class UserExecutionEngineImportFragmentationTests(unittest.TestCase):
         self.assertLessEqual(
             len(unique_patterns),
             1,
-            f"❌ EXPECTED FAILURE: Found {len(unique_patterns)} different import patterns for UserExecutionEngine. "
+            f"X EXPECTED FAILURE: Found {len(unique_patterns)} different import patterns for UserExecutionEngine. "
             f"SSOT requires exactly 1 canonical pattern. Found patterns:\n"
             + '\n'.join([f"  - '{pattern}' used in {len(files)} files" for pattern, files in import_patterns.items()])
         )
@@ -111,7 +111,7 @@ class UserExecutionEngineImportFragmentationTests(unittest.TestCase):
         self.assertLessEqual(
             len(factory_patterns),
             1,
-            f"❌ EXPECTED FAILURE: Found {len(factory_patterns)} different factory patterns for UserExecutionEngine. "
+            f"X EXPECTED FAILURE: Found {len(factory_patterns)} different factory patterns for UserExecutionEngine. "
             f"SSOT requires exactly 1 canonical factory. Found factories:\n"
             + '\n'.join([f"  - {path}: {factory_type}" for path, factory_type in factory_patterns])
         )
@@ -130,7 +130,7 @@ class UserExecutionEngineImportFragmentationTests(unittest.TestCase):
         self.assertEqual(
             len(boundary_violations),
             0,
-            f"❌ EXPECTED FAILURE: Found {len(boundary_violations)} service boundary violations. "
+            f"X EXPECTED FAILURE: Found {len(boundary_violations)} service boundary violations. "
             f"Each service should have independent UserExecutionEngine access:\n"
             + '\n'.join([f"  - {service}: {violation}" for service, violation in boundary_violations])
         )
@@ -318,7 +318,7 @@ class UserExecutionEngineUserIsolationViolationsTests(unittest.TestCase):
         self.assertEqual(
             len(shared_state_violations),
             0,
-            f"❌ EXPECTED FAILURE: Found {len(shared_state_violations)} shared state violations. "
+            f"X EXPECTED FAILURE: Found {len(shared_state_violations)} shared state violations. "
             f"These prevent proper user isolation required for enterprise deployment:\n"
             + '\n'.join([f"  - {path}: {violation}" for path, violation in shared_state_violations[:5]])
         )
@@ -337,7 +337,7 @@ class UserExecutionEngineUserIsolationViolationsTests(unittest.TestCase):
         self.assertEqual(
             len(global_contamination),
             0,
-            f"❌ EXPECTED FAILURE: Found {len(global_contamination)} global variable contamination issues. "
+            f"X EXPECTED FAILURE: Found {len(global_contamination)} global variable contamination issues. "
             f"These cause user session bleeding and security vulnerabilities:\n"
             + '\n'.join([f"  - {path}: {contamination}" for path, contamination in global_contamination])
         )
@@ -419,7 +419,7 @@ class UserExecutionEngineUserIsolationViolationsTests(unittest.TestCase):
 if __name__ == '__main__':
     print("🚨 Issue #1186 UserExecutionEngine SSOT Consolidation - Phase 1 Reproduction Tests")
     print("=" * 80)
-    print("⚠️  WARNING: These tests are DESIGNED TO FAIL to demonstrate current problems")
+    print("WARNING️  WARNING: These tests are DESIGNED TO FAIL to demonstrate current problems")
     print("📊 Expected: 7 test failures exposing import fragmentation and user isolation violations")
     print("🎯 Goal: Baseline measurement before SSOT consolidation implementation")
     print("=" * 80)

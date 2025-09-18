@@ -3,7 +3,7 @@ Golden Path End-to-End Validation Tests for Issue #1176
 =======================================================
 
 MISSION CRITICAL: These tests validate the complete Golden Path user journey on staging:
-User login → AI responses flow protecting $500K+ ARR chat functionality.
+User login -> AI responses flow protecting $500K+ ARR chat functionality.
 
 TARGET: Real staging environment validation at *.staging.netrasystems.ai
 - Auth Service: https://auth.staging.netrasystems.ai

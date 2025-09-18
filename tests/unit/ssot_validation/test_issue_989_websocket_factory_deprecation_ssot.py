@@ -4,7 +4,7 @@ GitHub Issue: #989 WebSocket factory deprecation SSOT violation - get_websocket_
 GitHub Stage: Step 2 - EXECUTE THE TEST PLAN
 
 BUSINESS VALUE: $500K+ ARR - Detects deprecated factory patterns that threaten Golden Path
-WHERE users login → receive AI responses through proper WebSocket initialization.
+WHERE users login -> receive AI responses through proper WebSocket initialization.
 
 PURPOSE:
 - THIS TEST MUST INITIALLY FAIL to prove SSOT violation exists
@@ -149,11 +149,11 @@ class Issue989WebSocketFactoryDeprecationSSoTTests(SSotBaseTestCase):
                         if pattern.lower() in line_lower:
                             warnings_analysis['warning_count'] += 1
                             warnings_analysis['deprecation_warnings_found'] = True
-                            logger.info(f'✅ Deprecation warning found: {line_num}: {line.strip()}')
+                            logger.info(f'CHECK Deprecation warning found: {line_num}: {line.strip()}')
                     for pattern in ssot_redirect_patterns:
                         if pattern in line:
                             warnings_analysis['ssot_redirects_found'] = True
-                            logger.info(f'✅ SSOT redirect found: {line_num}: {line.strip()}')
+                            logger.info(f'CHECK SSOT redirect found: {line_num}: {line.strip()}')
                 module_warning_found = 'warnings.warn(' in content and 'DEPRECATED' in content
                 warnings_analysis['module_warning_found'] = module_warning_found
             except Exception as e:
@@ -164,7 +164,7 @@ class Issue989WebSocketFactoryDeprecationSSoTTests(SSotBaseTestCase):
         self.violation_details['deprecation_warnings_analysis'] = warnings_analysis
         has_proper_deprecation = warnings_analysis['deprecation_warnings_found'] and warnings_analysis['ssot_redirects_found'] and (warnings_analysis['warning_count'] >= 1)
         if not has_proper_deprecation:
-            logger.warning(f'⚠️ Incomplete deprecation implementation in websocket_manager_factory.py')
+            logger.warning(f'WARNING️ Incomplete deprecation implementation in websocket_manager_factory.py')
             logger.warning(f"  Warnings found: {warnings_analysis['deprecation_warnings_found']}")
             logger.warning(f"  SSOT redirects found: {warnings_analysis['ssot_redirects_found']}")
             logger.warning(f"  Warning count: {warnings_analysis['warning_count']}")
@@ -199,10 +199,10 @@ class Issue989WebSocketFactoryDeprecationSSoTTests(SSotBaseTestCase):
                                 logger.error(f'🚨 MIXED PATTERNS: {file_rel_path}')
                             elif has_deprecated:
                                 pattern_analysis.deprecated_pattern_files.append(file_rel_path)
-                                logger.warning(f'⚠️ DEPRECATED PATTERN: {file_rel_path}')
+                                logger.warning(f'WARNING️ DEPRECATED PATTERN: {file_rel_path}')
                             elif has_current:
                                 pattern_analysis.current_pattern_files.append(file_rel_path)
-                                logger.info(f'✅ CURRENT PATTERN: {file_rel_path}')
+                                logger.info(f'CHECK CURRENT PATTERN: {file_rel_path}')
                     except (UnicodeDecodeError, PermissionError):
                         continue
         if pattern_analysis.total_websocket_files > 0:
@@ -253,11 +253,11 @@ class Issue989WebSocketFactoryDeprecationSSoTTests(SSotBaseTestCase):
         logger.info(f"  Compliance issues: {len(target_state_analysis['compliance_issues'])}")
         logger.info(f"  Target compliance achieved: {target_state_analysis['target_compliance_achieved']}")
         if not target_state_analysis['target_compliance_achieved']:
-            logger.warning('⚠️ Target SSOT compliance state not yet achieved')
+            logger.warning('WARNING️ Target SSOT compliance state not yet achieved')
             for issue in target_state_analysis['compliance_issues']:
                 logger.warning(f'  Issue: {issue}')
         else:
-            logger.info('✅ Target SSOT compliance state achieved')
+            logger.info('CHECK Target SSOT compliance state achieved')
 
     def teardown_method(self, method):
         """Clean up and log Issue #989 SSOT violation detection results."""
@@ -279,13 +279,13 @@ class Issue989WebSocketFactoryDeprecationSSoTTests(SSotBaseTestCase):
                     logger.warning(f'  Pattern fragmentation: {deprecated_count} deprecated, {mixed_count} mixed')
                 elif violation_type == 'deprecation_warnings_analysis' and isinstance(details, dict):
                     warnings_found = details.get('deprecation_warnings_found', False)
-                    status = '✅ Compliant' if warnings_found else '⚠️ Missing warnings'
+                    status = 'CHECK Compliant' if warnings_found else 'WARNING️ Missing warnings'
                     logger.info(f'  Deprecation warnings: {status}')
             if total_violations > 0:
                 logger.error(f'🚨 ISSUE #989 TOTAL VIOLATIONS: {total_violations} ({critical_violations} critical)')
                 logger.error('   These violations MUST be resolved to achieve SSOT compliance')
             else:
-                logger.info('✅ Issue #989: No SSOT violations detected')
+                logger.info('CHECK Issue #989: No SSOT violations detected')
         super().teardown_method(method)
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

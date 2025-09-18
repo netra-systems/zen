@@ -237,9 +237,9 @@ class TestAgentRegistrySSotViolations(SSotBaseTestCase):
         print(f"Import violations: {len(self.import_violations)}")
 
         if hasattr(self, '_outcome') and self._outcome.errors:
-            print("❌ Test detected SSOT violations - THIS IS EXPECTED initially")
+            print("X Test detected SSOT violations - THIS IS EXPECTED initially")
         else:
-            print("✅ No SSOT violations detected")
+            print("CHECK No SSOT violations detected")
 
 
 if __name__ == '__main__':

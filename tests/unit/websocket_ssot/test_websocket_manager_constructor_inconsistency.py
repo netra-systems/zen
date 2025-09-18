@@ -78,9 +78,9 @@ class WebSocketManagerConstructorInconsistencyTests(SSotBaseTestCase):
                 f"Business Impact: Factory pattern cannot reliably instantiate managers, "
                 f"causing user isolation failures in $500K+ ARR chat functionality."
             )
-            logger.info("✅ Alias and unified constructors have identical signatures")
+            logger.info("CHECK Alias and unified constructors have identical signatures")
         except AssertionError as e:
-            logger.error(f"❌ ALIAS CONSTRUCTOR INCONSISTENCY: {e}")
+            logger.error(f"X ALIAS CONSTRUCTOR INCONSISTENCY: {e}")
             raise
             
         try:
@@ -92,9 +92,9 @@ class WebSocketManagerConstructorInconsistencyTests(SSotBaseTestCase):
                 f"Business Impact: Legacy import paths cannot instantiate managers consistently, "
                 f"breaking user isolation and affecting enterprise customers."
             )
-            logger.info("✅ Compatibility and unified constructors have identical signatures")
+            logger.info("CHECK Compatibility and unified constructors have identical signatures")
         except AssertionError as e:
-            logger.error(f"❌ COMPATIBILITY CONSTRUCTOR INCONSISTENCY: {e}")
+            logger.error(f"X COMPATIBILITY CONSTRUCTOR INCONSISTENCY: {e}")
             raise
     
     def test_constructor_parameter_validation(self):
@@ -132,18 +132,18 @@ class WebSocketManagerConstructorInconsistencyTests(SSotBaseTestCase):
             # Test unified manager (baseline)
             unified_instance = UnifiedManager(**test_parameters)
             instances.append(('UnifiedManager', unified_instance))
-            logger.info("✅ UnifiedWebSocketManager instantiated successfully")
+            logger.info("CHECK UnifiedWebSocketManager instantiated successfully")
         except Exception as e:
-            logger.error(f"❌ UnifiedWebSocketManager instantiation failed: {e}")
+            logger.error(f"X UnifiedWebSocketManager instantiation failed: {e}")
             pytest.fail(f"Baseline unified manager instantiation failed: {e}")
             
         try:
             # Test alias manager (should work identically) 
             alias_instance = ManagerAlias(**test_parameters)
             instances.append(('ManagerAlias', alias_instance))
-            logger.info("✅ WebSocketManager (alias) instantiated successfully")
+            logger.info("CHECK WebSocketManager (alias) instantiated successfully")
         except Exception as e:
-            logger.error(f"❌ ALIAS CONSTRUCTOR FAILURE: WebSocketManager alias instantiation failed: {e}")
+            logger.error(f"X ALIAS CONSTRUCTOR FAILURE: WebSocketManager alias instantiation failed: {e}")
             logger.error(f"This indicates the alias is not properly configured for SSOT compliance")
             pytest.fail(f"Alias constructor inconsistency: {e}")
             
@@ -151,9 +151,9 @@ class WebSocketManagerConstructorInconsistencyTests(SSotBaseTestCase):
             # Test compatibility manager (should work identically)
             compatibility_instance = CompatibilityManager(**test_parameters)
             instances.append(('CompatibilityManager', compatibility_instance))
-            logger.info("✅ WebSocketManager (compatibility) instantiated successfully")  
+            logger.info("CHECK WebSocketManager (compatibility) instantiated successfully")  
         except Exception as e:
-            logger.error(f"❌ COMPATIBILITY CONSTRUCTOR FAILURE: Compatibility manager instantiation failed: {e}")
+            logger.error(f"X COMPATIBILITY CONSTRUCTOR FAILURE: Compatibility manager instantiation failed: {e}")
             logger.error(f"This indicates the compatibility layer has different constructor requirements")
             pytest.fail(f"Compatibility constructor inconsistency: {e}")
         
@@ -168,9 +168,9 @@ class WebSocketManagerConstructorInconsistencyTests(SSotBaseTestCase):
                         f"SSOT Violation: All constructors should create instances of the same type. "
                         f"Business Impact: Different instance types break polymorphism and user isolation."
                     )
-                    logger.info(f"✅ {name} creates correct instance type")
+                    logger.info(f"CHECK {name} creates correct instance type")
                 except AssertionError as e:
-                    logger.error(f"❌ INSTANCE TYPE MISMATCH: {e}")
+                    logger.error(f"X INSTANCE TYPE MISMATCH: {e}")
                     raise
     
     def test_factory_function_parameter_consistency(self):
@@ -202,12 +202,12 @@ class WebSocketManagerConstructorInconsistencyTests(SSotBaseTestCase):
                     mode=WebSocketManagerMode.UNIFIED
                 )
                 assert manager_with_context is not None, "Factory should return manager with user context"
-                logger.info("✅ Factory function works with user context")
+                logger.info("CHECK Factory function works with user context")
                 
                 # Test factory without user context (should handle gracefully)
                 manager_without_context = get_websocket_manager()
                 assert manager_without_context is not None, "Factory should handle missing user context gracefully"
-                logger.info("✅ Factory function handles missing user context")
+                logger.info("CHECK Factory function handles missing user context")
                 
                 # Test that both instances have consistent types
                 assert type(manager_with_context) == type(manager_without_context), (
@@ -216,10 +216,10 @@ class WebSocketManagerConstructorInconsistencyTests(SSotBaseTestCase):
                     f"SSOT Violation: Factory should create consistent instance types. "
                     f"Business Impact: Unpredictable manager behavior affects user isolation."
                 )
-                logger.info("✅ Factory creates consistent instance types")
+                logger.info("CHECK Factory creates consistent instance types")
                 
             except Exception as e:
-                logger.error(f"❌ FACTORY FUNCTION INCONSISTENCY: {e}")
+                logger.error(f"X FACTORY FUNCTION INCONSISTENCY: {e}")
                 pytest.fail(f"Factory function parameter inconsistency: {e}")
         
         # Run async test
@@ -259,10 +259,10 @@ class WebSocketManagerConstructorInconsistencyTests(SSotBaseTestCase):
                 # Attempt invalid instantiation
                 constructor(**invalid_parameters)
                 error_behaviors.append((name, 'no_error', None))
-                logger.warning(f"⚠️ {name} accepted invalid parameters - potential validation issue")
+                logger.warning(f"WARNING️ {name} accepted invalid parameters - potential validation issue")
             except Exception as e:
                 error_behaviors.append((name, type(e).__name__, str(e)))
-                logger.info(f"✅ {name} properly rejected invalid parameters: {type(e).__name__}")
+                logger.info(f"CHECK {name} properly rejected invalid parameters: {type(e).__name__}")
         
         # Verify all constructors handle errors consistently
         if len(error_behaviors) >= 2:
@@ -278,9 +278,9 @@ class WebSocketManagerConstructorInconsistencyTests(SSotBaseTestCase):
                         f"Business Impact: Unpredictable error behavior complicates debugging and "
                         f"error recovery in production, affecting system reliability."
                     )
-                    logger.info(f"✅ {name} has consistent error handling with {baseline_name}")
+                    logger.info(f"CHECK {name} has consistent error handling with {baseline_name}")
                 except AssertionError as e:
-                    logger.error(f"❌ ERROR HANDLING INCONSISTENCY: {e}")
+                    logger.error(f"X ERROR HANDLING INCONSISTENCY: {e}")
                     raise
 
     def teardown_method(self, method):

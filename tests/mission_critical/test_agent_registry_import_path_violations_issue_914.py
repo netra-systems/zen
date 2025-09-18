@@ -80,7 +80,7 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
                 if hasattr(module, class_name):
                     agent_registry_class = getattr(module, class_name)
                     successful_imports.append((import_path, agent_registry_class))
-                    print(f✓ Successfully imported: {import_path}")"
+                    print(fCHECK Successfully imported: {import_path}")"
                 else:
                     failed_imports.append((import_path, fModule has no {class_name}))
                     print(f✗ No {class_name} in module: {module_path}"")
