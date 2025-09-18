@@ -259,15 +259,15 @@ class SSotBehavioralConsistencyTests(SSotBaseTestCase):
 
             # Test SSOT configuration
             try:
-                from netra_backend.app.core.configuration.base import ConfigurationManager
+                from netra_backend.app.config import get_config
                 config_sources.append('SSOT_config_manager')
             except ImportError:
                 pass
 
-            # Test legacy configuration
+            # Test legacy configuration patterns (should not exist)
             try:
-                from netra_backend.app.config import get_config
-                config_sources.append('legacy_get_config')
+                from netra_backend.app.core.configuration.base import ConfigurationManager  # type: ignore
+                config_sources.append('legacy_config_patterns')
             except ImportError:
                 pass
 

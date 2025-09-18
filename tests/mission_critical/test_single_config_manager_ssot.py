@@ -328,8 +328,8 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
 
         # Import SSOT manager
         try:
-            from netra_backend.app.core.configuration.base import UnifiedConfigManager
-            manager = UnifiedConfigManager()
+            from netra_backend.app.config import config_manager
+            manager = config_manager
         except ImportError as e:
             pytest.fail(f"Cannot import SSOT config manager: {str(e)})"
 

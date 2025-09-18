@@ -165,6 +165,79 @@ def fix_invalid_syntax(content: str) -> str:
         line = lines[i]
         original_line = line
 
+        # ENHANCED FIXES - Issue #1332 specific patterns
+
+        # Fix missing quotes around variables
+        line = re.sub(r'\brun_id=pipeline_run_001\b', 'run_id="pipeline_run_001"', line)
+        line = re.sub(r'\buser_id=concurrent_user_002\b', 'user_id="concurrent_user_002"', line)
+        line = re.sub(r'\brun_id=concurrent_run_002\b', 'run_id="concurrent_run_002"', line)
+
+        # Fix malformed f-string patterns
+        line = re.sub(r'f"([^"]*"[^"]*)', r'f"\1"', line)
+        line = re.sub(r'# Act: Execute pipeline with f"low logging', '# Act: Execute pipeline with flow logging', line)
+
+        # Fix comment syntax errors in docstrings
+        line = re.sub(r'\bConf"igure\b', 'Configure', line)
+        line = re.sub(r'\bAssert: Verif"y\b', 'Assert: Verify', line)
+        line = re.sub(r'\bCreate larger pipeline f"or\b', 'Create larger pipeline for', line)
+
+        # Fix quote mismatches in docstrings
+        if line.strip().startswith('"""') and line.count('"') == 4:
+            line = line.replace('"""', '"""', 1)
+
+        # Fix incomplete function definitions
+        if line.strip() == '"' and i > 0 and lines[i-1].strip().startswith('async def '):
+            line = '        """'
+
+        # Fix string concatenation errors
+        line = re.sub(r'\+ \\n""', '+ "\\n"', line)
+        line = re.sub(r'agent_response_content \+= final_response \+ "', 'agent_response_content += final_response + "\\n"', line)
+
+        # Fix malformed dictionary syntax
+        line = re.sub(r'\{type: ([^,}]+)', r'{"type": \1', line)
+        line = re.sub(r'user_id": ([^,}"]+),"', r'"user_id": "\1",', line)
+        line = re.sub(r'"content: ([^"]+)', r'"content": "\1"', line)
+
+        # Fix f-string issues
+        line = re.sub(r'f"([^"]*user_{uuid.uuid4\(\).hex\[:8\]}[^"]*)', r'f"test_user_{uuid.uuid4().hex[:8]}"', line)
+        line = re.sub(r'ftest_thread_\{uuid.uuid4\(\).hex\[:8\]\}"', r'f"test_thread_{uuid.uuid4().hex[:8]}"', line)
+
+        # Fix assertion string errors
+        line = re.sub(r'assert ([^,]+), "([^"]*)("[^"]*")', r'assert \1, "\2\3"', line)
+        line = re.sub(r'WebSocket manager creation failed', '"WebSocket manager creation failed"', line)
+        line = re.sub(r'WebSocket manager missing user emission capability', '"WebSocket manager missing user emission capability"', line)
+
+        # Fix logger calls
+        line = re.sub(r'logger.info\(f"([^"]*\))([^)]*)$', r'logger.info(f"\1")', line)
+        line = re.sub(r'logger.info\( PASS: ([^"]*)")$', r'logger.info("PASS: \1")', line)
+
+        # Fix incomplete type annotations
+        line = re.sub(r'emitter=user_context, # Placeholder', 'emitter=user_context,  # Placeholder', line)
+
+        # Fix malformed string assignments
+        line = re.sub(r'agent_response_content = $', 'agent_response_content = ""', line)
+        line = re.sub(r'complete_response_content = $', 'complete_response_content = ""', line)
+
+        # Fix class/function syntax
+        if line.strip().startswith('""') and not line.strip().startswith('"""'):
+            # Check if this should be a docstring
+            if i > 0 and (lines[i-1].strip().endswith(':') or 'def ' in lines[i-1] or 'class ' in lines[i-1]):
+                line = line.replace('""', '"""', 1)
+                # Find closing and fix it too
+                for j in range(i+1, min(len(lines), i+20)):
+                    if lines[j].strip().endswith('""') and not lines[j].strip().endswith('"""'):
+                        lines[j] = lines[j].replace('""', '"""')
+                        break
+
+        # Fix missing import closing parentheses
+        if line.strip().endswith('(') and 'import' in line and i + 1 < len(lines):
+            next_line = lines[i + 1].strip()
+            if next_line and not next_line.startswith(("   ", "\t")) and not next_line.endswith(')'):
+                line = line.rstrip() + ')'
+
+        # Fix method parameter issues
+        line = re.sub(r'async def ([^(]+)\(self\):$', r'async def \1(self):', line)
+
         # CRITICAL FIX: Lone quote pattern (most common issue - 85%+ of errors)
         # Pattern: Line starts with just '"' - this is the primary syntax error
         if line.strip() == '"' and i < 10:  # Usually in first few lines
@@ -330,6 +403,29 @@ def fix_invalid_syntax(content: str) -> str:
             next_line = lines[i + 1] if i + 1 < len(lines) else ""
             if 'def test_' in next_line and not next_line.strip().startswith('def test_'):
                 line = line.replace('@pytest.fixture', '# @pytest.fixture')
+
+        # FINAL COMPREHENSIVE FIXES for Issue #1332
+
+        # Fix multi-line string issues
+        if line.count('"') % 2 != 0 and not line.strip().startswith('#'):
+            # Odd number of quotes - likely unterminated string
+            if line.strip().endswith('"') and not line.strip().endswith('"""'):
+                # Check if it should be a multi-line string
+                if 'f"' in line and '{' in line:
+                    # This is likely an f-string that needs completion
+                    line = line.rstrip() + '"'
+
+        # Fix incomplete exception handling
+        if 'except Exception as e:' in line and i + 1 < len(lines):
+            next_line = lines[i + 1] if i + 1 < len(lines) else ""
+            if not next_line.strip() or not next_line.startswith('    '):
+                # Add a pass statement
+                lines.insert(i + 1, '            pass')
+
+        # Fix missing colons in control structures
+        if re.match(r'\s*(if|elif|else|try|except|finally|for|while|with|def|class)\s+.*[^:]$', line.strip()):
+            if not line.strip().endswith(':') and 'import' not in line:
+                line = line.rstrip() + ':'
 
         fixed_lines.append(line)
         i += 1

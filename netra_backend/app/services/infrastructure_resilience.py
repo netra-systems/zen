@@ -27,6 +27,7 @@ SSOT Compliance:
 import asyncio
 from shared.logging.unified_logging_ssot import get_logger
 import time
+from sqlalchemy import text
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Dict, Any, Optional, List, Callable, Set, Tuple
@@ -361,7 +362,7 @@ class InfrastructureResilienceManager:
             # Simple connection test with timeout
             start_time = time.time()
             async with manager.get_session() as session:
-                result = await session.execute("SELECT 1")
+                result = await session.execute(text("SELECT 1"))
                 await result.fetchone()
 
             connection_time = time.time() - start_time

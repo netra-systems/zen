@@ -5,6 +5,7 @@ Database Health Checks Module
 import asyncio
 from datetime import UTC, datetime
 from typing import Dict, List, Optional
+from sqlalchemy import text
 
 from netra_backend.app.logging_config import central_logger
 
@@ -195,7 +196,7 @@ class DatabaseHealthChecker:
         try:
             if self.session:
                 # Try to execute a simple query
-                await self.session.execute("SELECT 1")
+                await self.session.execute(text("SELECT 1"))
             
             response_time = (time.time() - start_time) * 1000  # Convert to ms
             

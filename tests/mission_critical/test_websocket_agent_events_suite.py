@@ -548,7 +548,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         await pipeline_executor.execute_pipeline(
             pipeline=self.test_pipeline_steps,
             user_context=self.test_user_context,
-            run_id=pipeline_run_001,
+            run_id="pipeline_run_001",
             context={"user_id": "pipeline_user_001", "thread_id": "pipeline_thread_001"},
             db_session=self.mock_db_session  # Session passed as parameter
         )
@@ -899,11 +899,11 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     @pytest.mark.unit
     @pytest.mark.performance
     async def test_pipeline_execution_performance_characteristics(self):
-        
+        """
         Test pipeline execution performance characteristics.
-        
+
         BVJ: Platform performance - ensures pipeline execution meets timing requirements
-""
+        """
         # Arrange: Create PipelineExecutor
         pipeline_executor = PipelineExecutor(
             engine=self.mock_execution_engine,
@@ -1009,9 +1009,9 @@ class AgentWebSocketIntegrationEnhancedTests:
         tool_dispatcher = await agent_registry.create_enhanced_tool_dispatcher(user_context)
         
         # Verify WebSocket integration in tool dispatcher
-        assert hasattr(tool_dispatcher, '_websocket_notifier'), Tool dispatcher missing WebSocket notifier""
+        assert hasattr(tool_dispatcher, '_websocket_notifier'), "Tool dispatcher missing WebSocket notifier"
         
-        logger.info( PASS:  AgentRegistry WebSocket integration validated)
+        logger.info("PASS: AgentRegistry WebSocket integration validated")
 
     @pytest.mark.asyncio 
     @pytest.mark.critical
@@ -1043,7 +1043,7 @@ class AgentWebSocketIntegrationEnhancedTests:
         
         # Verify integration
         assert hasattr(execution_engine, '_websocket_notifier'), "Execution engine missing WebSocket notifier"
-        assert execution_engine._websocket_notifier is websocket_notifier, WebSocket notifier reference mismatch
+        assert execution_engine._websocket_notifier is websocket_notifier, "WebSocket notifier reference mismatch"
         
         # Test agent context creation with WebSocket integration
         agent_context = AgentExecutionContext(
@@ -1099,15 +1099,15 @@ class AgentWebSocketIntegrationEnhancedTests:
         captured_events = []
         
         async def mock_event_sender(event_type: str, event_data: dict):
-            captured_events.append({type: event_type, data: event_data}
+            captured_events.append({"type": event_type, "data": event_data})
         
         websocket_notifier.send_event = mock_event_sender
         
         # Execute tool with WebSocket event capture
         try:
             await enhanced_tool_engine.execute_tool_with_websocket_events(
-                tool_name="test_tool,"
-                parameters={query: test query},
+                tool_name="test_tool",
+                parameters={"query": "test query"},
                 context=user_context
             )
         except Exception as e:
@@ -1126,10 +1126,11 @@ class AgentWebSocketIntegrationEnhancedTests:
     @pytest.mark.critical
     # @require_docker_services()  # Temporarily disabled - GCP integration regression
     async def test_unified_websocket_manager_agent_coordination(self):
-        Test UnifiedWebSocketManager coordination with agent systems."
-        
+        """
+        Test UnifiedWebSocketManager coordination with agent systems.
+
         Business Value: Validates the central WebSocket management coordination with agents.
-        "
+        """
         config = RealWebSocketTestConfig()
         context = create_test_context()
         
@@ -1137,7 +1138,7 @@ class AgentWebSocketIntegrationEnhancedTests:
         websocket_manager = await create_websocket_manager()
         
         # Verify manager is properly initialized
-        assert websocket_manager is not None, WebSocket manager creation failed
+        assert websocket_manager is not None, "WebSocket manager creation failed"
         
         # Test user context integration
         user_id = f"test_user_{uuid.uuid4().hex[:8]}

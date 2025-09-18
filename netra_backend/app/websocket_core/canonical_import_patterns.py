@@ -17,6 +17,11 @@ from typing import Any, Optional, Dict, Union
 import warnings
 from functools import wraps
 
+# Import logger for deprecation warnings
+from shared.logging.unified_logging_ssot import get_logger
+
+logger = get_logger(__name__)
+
 # Import the actual implementation
 from netra_backend.app.websocket_core.unified_manager import (
     _UnifiedWebSocketManagerImplementation,

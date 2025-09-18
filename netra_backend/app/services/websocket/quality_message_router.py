@@ -39,13 +39,16 @@ from netra_backend.app.services.user_execution_context import create_defensive_u
 logger = central_logger.get_logger(__name__)
 
 # === SSOT CONSOLIDATION COMPLETE ===
-# QualityMessageRouter has been completely removed to achieve true SSOT compliance
-# All code must use: from netra_backend.app.websocket_core.handlers import MessageRouter
+# QualityMessageRouter is now a direct reference to MessageRouter for SSOT compliance
+# Both import paths return the SAME class object (not instance)
 
-# CRITICAL: No QualityMessageRouter or MessageRouter exports from this module
-# This ensures only one MessageRouter implementation is accessible system-wide
+from netra_backend.app.websocket_core.handlers import MessageRouter
 
-logger.info("QualityMessageRouter → MessageRouter SSOT migration adapter established - Issue #1067 Phase 1")
+# SSOT COMPLIANCE: Export QualityMessageRouter as direct reference to MessageRouter class
+# This maintains backward compatibility while ensuring true SSOT (same class object)
+QualityMessageRouter = MessageRouter
+
+logger.info("QualityMessageRouter → MessageRouter SSOT consolidation complete - Issue #1067 Phase 1")
 
 
 # === LEGACY IMPLEMENTATION (PRESERVED FOR REFERENCE) ===

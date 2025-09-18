@@ -10,6 +10,7 @@ import platform
 import asyncio
 from typing import Any, Dict, List, Optional
 from datetime import datetime, timezone
+from sqlalchemy import text
 
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
@@ -221,7 +222,7 @@ async def check_dependencies(
         
         start = time.time()
         async with get_db() as session:
-            result = await session.execute("SELECT version()")
+            result = await session.execute(text("SELECT version()"))
             version = result.scalar()
         latency = (time.time() - start) * 1000
         
