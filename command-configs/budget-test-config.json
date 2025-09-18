@@ -1,0 +1,27 @@
+{
+  "instances": [
+    {
+      "command": "/tdd",
+      "name": "tdd-with-budget",
+      "description": "Test-driven development workflow with budget from config",
+      "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json",
+      "session_id": null,
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": ["/clear"]
+    }
+  ],
+  "budget": {
+    "overall_budget": 50000,
+    "enforcement_mode": "warn",
+    "disable_visuals": false,
+    "command_budgets": {
+      "/tdd": 10000,
+      "/analyze-repository": 15000,
+      "/debug-error": 8000,
+      "/test-real": 5000
+    }
+  }
+}

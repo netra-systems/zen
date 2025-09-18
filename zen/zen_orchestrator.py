@@ -1994,6 +1994,9 @@ async def main():
 
     args = parser.parse_args()
 
+    # Initialize config budget settings (will be populated if config file is loaded)
+    config_budget_settings = {}
+
     # Determine workspace directory with better Mac compatibility
     if args.workspace:
         workspace = Path(args.workspace).expanduser().resolve()
@@ -2017,6 +2020,42 @@ async def main():
     
     logger.info(f"Using workspace: {workspace}")
 
+    # Load instance configurations FIRST to extract budget settings
+    if args.config and args.config.exists():
+        logger.info(f"Loading config from {args.config}")
+        with open(args.config) as f:
+            config_data = json.load(f)
+        instances = [InstanceConfig(**inst) for inst in config_data["instances"]]
+
+        # Extract budget configuration from config file
+        budget_config = config_data.get("budget", {})
+        if budget_config:
+            config_budget_settings = budget_config
+            logger.info(f"Loaded budget configuration from config file: {budget_config}")
+    else:
+        logger.info("Using default instance configurations")
+        instances = create_default_instances(args.output_format)
+
+    # Determine final budget settings - CLI args override config file
+    final_overall_budget = args.overall_token_budget
+    final_enforcement_mode = args.budget_enforcement_mode
+    final_enable_visuals = not args.disable_budget_visuals
+
+    # Use config file values if CLI args weren't provided
+    if final_overall_budget is None and "overall_budget" in config_budget_settings:
+        final_overall_budget = config_budget_settings["overall_budget"]
+        logger.info(f"Using overall budget from config file: {final_overall_budget}")
+
+    if args.budget_enforcement_mode == "warn" and "enforcement_mode" in config_budget_settings:
+        # Only use config if user didn't explicitly set CLI arg (default is "warn")
+        final_enforcement_mode = config_budget_settings["enforcement_mode"]
+        logger.info(f"Using enforcement mode from config file: {final_enforcement_mode}")
+
+    if not args.disable_budget_visuals and "disable_visuals" in config_budget_settings:
+        # Only use config if user didn't explicitly disable visuals
+        final_enable_visuals = not config_budget_settings["disable_visuals"]
+        logger.info(f"Using budget visuals setting from config file: {final_enable_visuals}")
+
     # Initialize orchestrator with console output settings
     max_lines = 0 if args.quiet else args.max_console_lines
     orchestrator = ClaudeInstanceOrchestrator(
@@ -2027,25 +2066,36 @@ async def main():
         status_report_interval=args.status_report_interval,
         use_cloud_sql=args.use_cloud_sql,
         quiet=args.quiet,
-        overall_token_budget=args.overall_token_budget,
-        budget_enforcement_mode=args.budget_enforcement_mode,
-        enable_budget_visuals=not args.disable_budget_visuals
+        overall_token_budget=final_overall_budget,
+        budget_enforcement_mode=final_enforcement_mode,
+        enable_budget_visuals=final_enable_visuals
     )
 
-    # Process per-command budgets
-    if orchestrator.budget_manager and args.command_budget:
-        for budget_str in args.command_budget:
+    # Process per-command budgets from config file first, then CLI args (CLI overrides config)
+    if orchestrator.budget_manager:
+        # Load command budgets from config file
+        config_command_budgets = config_budget_settings.get("command_budgets", {})
+        for command_name, limit in config_command_budgets.items():
             try:
-                command_name, limit = budget_str.split('=', 1)
-                # Keep command name as is - don't let it be expanded as path
-                command_name = command_name.strip()
                 orchestrator.budget_manager.set_command_budget(command_name, int(limit))
-                logger.info(f"🎯 BUDGET SET: {command_name} = {limit} tokens")
+                logger.info(f"🎯 CONFIG BUDGET SET: {command_name} = {limit} tokens")
+            except (ValueError, TypeError) as e:
+                logger.error(f"Invalid command budget in config file: '{command_name}={limit}': {e}")
 
-                # DEBUG: Log all budget keys after setting
-                logger.debug(f"📋 ALL BUDGET KEYS: {list(orchestrator.budget_manager.command_budgets.keys())}")
-            except ValueError:
-                logger.error(f"Invalid format for --command-budget: '{budget_str}'. Use '/command=limit'.")
+        # Load command budgets from CLI args (these override config file)
+        if args.command_budget:
+            for budget_str in args.command_budget:
+                try:
+                    command_name, limit = budget_str.split('=', 1)
+                    # Keep command name as is - don't let it be expanded as path
+                    command_name = command_name.strip()
+                    orchestrator.budget_manager.set_command_budget(command_name, int(limit))
+                    logger.info(f"🎯 CLI BUDGET SET: {command_name} = {limit} tokens (overrides config)")
+
+                    # DEBUG: Log all budget keys after setting
+                    logger.debug(f"📋 ALL BUDGET KEYS: {list(orchestrator.budget_manager.command_budgets.keys())}")
+                except ValueError:
+                    logger.error(f"Invalid format for --command-budget: '{budget_str}'. Use '/command=limit'.")
 
     # Handle command inspection modes
     if args.list_commands:
@@ -2077,16 +2127,6 @@ async def main():
         else:
             print("Command not found or is a built-in command")
         return
-
-    # Load instance configurations
-    if args.config and args.config.exists():
-        logger.info(f"Loading config from {args.config}")
-        with open(args.config) as f:
-            config_data = json.load(f)
-        instances = [InstanceConfig(**inst) for inst in config_data["instances"]]
-    else:
-        logger.info("Using default instance configurations")
-        instances = create_default_instances(args.output_format)
 
     # Add instances to orchestrator
     for instance in instances:

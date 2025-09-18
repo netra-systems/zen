@@ -14,7 +14,11 @@ class TokenBudgetManager:
 
     def set_command_budget(self, command_name: str, limit: int):
         """Sets the token budget for a specific command."""
-        if command_name not in self.command_budgets:
+        if command_name in self.command_budgets:
+            # Preserve existing usage when updating budget limit
+            existing_usage = self.command_budgets[command_name].used
+            self.command_budgets[command_name] = CommandBudgetInfo(limit=limit, used=existing_usage)
+        else:
             self.command_budgets[command_name] = CommandBudgetInfo(limit=limit)
 
     def record_usage(self, command_name: str, tokens: int):
