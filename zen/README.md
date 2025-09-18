@@ -27,7 +27,6 @@ Surprisingly, the duration that a command ran and it's presumed difficulty, ofte
 
 The market is moving quickly, codex is getting better and other Code CLIs are coming. How effective a code factory is matters. This V1 alpha is just the start of codifying code CLI dev practices and progressing from alchemy to engineering.
 
-Our intent is for Zen to remain OSS.
 Commercial users who wish to may seemlessly use Zen with Netra Apex (Commercial Product) for the most effective usage and control of business AI spend.
 
 
@@ -88,16 +87,16 @@ python -m zen_orchestrator --help
 
 ## Expected questions
 
-1. Do I have to use /commands?
+### 1. Do I have to use /commands?
 No. You can just put your string query (prompt) and it works the same.
 It does seem to be a best practice though to version controlled `/commands`.
 
-2. Does this replace using Claude command directly?
+### 2. Does this replace using Claude command directly?
 No. At least not yet fully.
 As we primarily using structured commands, internally we see 80%+ of our usage through Zen.
 Ad hoc questions or validating if a command is working as expected for now is better through Claude directly.
 
-3. What does this assume?
+### 3. What does this assume?
 - You have claude code installed, authenticated, and configured already.
 
 ## Known Issues and Solutions
@@ -117,7 +116,7 @@ For more details, see [Cross-Platform Compatibility](docs/CROSS_PLATFORM_COMPATI
 - - e.g. if your have your model set to Opus and don't change it per command in Zen, then all
 Claude Zen instances use Opus.
 
-4. How do I know if it's working?
+### 4. How do I know if it's working?
 - Each command returns fairly clear overall statuses.
 - Budget states etc. are logged.
 - You can also see the duration and token usage.
@@ -127,10 +126,10 @@ Claude Zen instances use Opus.
 and notification system for most work. This means regardless of where Zen is running
 you can see the results wherever you access git. This is as easy as adding `gh` instructions (the cli + token assumed to be present) to your commands.
 
-5. Data privacy?
+### 5. Data privacy?
 At this moment no data is collected. Our intent is to add an optional system where non-PII usage data is sent to Netra for exclusively aggregated metadata level use to help make our spend management system better. (So you can get more from your AI spend!)
 
-6. What about the UI/UX?
+## 6. What about the UI/UX?
 There is a time and a place for wanting to have multiple windows and git trees open.
 Zen's intent is the opposite: make running `n` code clis more peaceful.
 Why activate your "giga-brain" when you can run one command instead?
