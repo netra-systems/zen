@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
     - Segment: Platform/Internal - Developer Experience & Test Infrastructure
 - Business Goal: Test Infrastructure Stability & Developer Productivity
 - Value Impact: Enables 3 critical integration test suites to collect and execute
-- Strategic Impact: Maintains test coverage protecting $"500K" plus ARR chat functionality
+- Strategic Impact: Maintains test coverage protecting $""500K"" plus ARR chat functionality
 
 This test suite validates the WebSocketTestManager alias fix for Issue #971.
 Tests ensure that adding the alias resolves import errors while maintaining

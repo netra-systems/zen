@@ -18,7 +18,6 @@ class TestWebSocketConnection:
         self._closed = True"""
         self._closed = True"""
 """
-"""
         """Get all sent messages.""""""
         """Get all sent messages.""""""
         return self.messages_sent.copy()"""
@@ -31,7 +30,7 @@ class TestWebSocketConnection:
         This is a P0 CRITICAL test - these events are currently missing in production.
 
         Business Value Justification (BVJ):
-        1. Segment: All customer tiers ($"120K"+ MRR protection)
+        1. Segment: All customer tiers ($""120K""+ MRR protection)
         2. Business Goal: Ensure real-time WebSocket event reliability
         3. Value Impact: Validates core product functionality - agent lifecycle tracking
         4. Revenue Impact: Prevents churn from poor real-time experience
@@ -86,9 +85,9 @@ from shared.isolated_environment import get_env"""
 """
 """
         """UI layer categorization for event timing validation."""
-        FAST = "fast      # 0-"100ms": agent_started, tool_executing"
-        MEDIUM = "medium  # "100ms"-"1s": agent_thinking, partial_result"
-        SLOW = "slow      # "1s"+: agent_completed, final_report"
+        FAST = "fast      # 0-""100ms"": agent_started, tool_executing"
+        MEDIUM = "medium  # ""100ms""-""1s"": agent_thinking, partial_result"
+        SLOW = "slow      # ""1s""+: agent_completed, final_report"
 
 
         @dataclass
@@ -233,9 +232,9 @@ EVENT_UI_LAYERS = {"agent_started": UILayer.FAST,, "tool_executing": UILayer.FAS
 
         # Define timing constraints by UI layer
         timing_constraints = { )
-        UILayer.FAST: (0, 100),      # 0-"100ms"
-        UILayer.MEDIUM: (100, 1000), # "100ms"-"1s"
-        UILayer.SLOW: (1000, 30000)  # "1s"-"30s" (test timeout)
+        UILayer.FAST: (0, 100),      # 0-""100ms""
+        UILayer.MEDIUM: (100, 1000), # ""100ms""-""1s""
+        UILayer.SLOW: (1000, 30000)  # ""1s""-""30s"" (test timeout)
         
 
         min_time, max_time = timing_constraints.get(timing.ui_layer, (0, 30000))"""

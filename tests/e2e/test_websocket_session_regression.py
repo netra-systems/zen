@@ -301,7 +301,7 @@ class TestAgentPerformanceRegression:
     try:
     result = await asyncio.wait_for( )
     handler.handle_message("perf_user, None, message),"
-    timeout=5.0  # Should complete much faster than "20s"
+    timeout=5.0  # Should complete much faster than ""20s""
             
     elapsed = time.time() - start_time
 

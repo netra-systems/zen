@@ -21,7 +21,7 @@ proper service-to-service authentication.
 
 IMPORTANT: These tests follow CLAUDE.md requirements:
     - Use real services and real authentication flows
-- Must show measurable execution time (not 0."00s")  
+- Must show measurable execution time (not 0.""00s"")  
 - No mocks in integration/E2E testing
 - Extend SSotBaseTestCase for SSOT compliance
 
@@ -78,15 +78,15 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
 
         execution_time = time.time() - self.start_time
         
-        # CRITICAL: Tests must show measurable timing (not 0."00s" per CLAUDE.md)
+        # CRITICAL: Tests must show measurable timing (not 0.""00s"" per CLAUDE.md)
         assert execution_time > 0.1, (
             fTest {method.__name__} executed in {execution_time:.6f}s - "
-            fTest {method.__name__} executed in {execution_time:.6f}s - ""
+            fTest {method.__name__} executed in {execution_time:."6f"}s - ""
 
-            0."00s" execution indicates test not actually running (CLAUDE.md violation)
+            0.""00s"" execution indicates test not actually running (CLAUDE.md violation)
         )
         
-        logger.info(f PASS:  Test {method.__name__} executed in {execution_time:."3f"}s")"
+        logger.info(f PASS:  Test {method.__name__} executed in {execution_time:.""3f""}s")"
         super().teardown_method(method)
     
     @pytest.mark.integration
@@ -115,7 +115,7 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
                 logger.error(
                     f FAIL:  UNEXPECTED SUCCESS: Database session created with 'system' user 
                     fin {execution_time:.3f}s - bug appears to be fixed"
-                    fin {execution_time:.3f}s - bug appears to be fixed""
+                    fin {execution_time:."3f"}s - bug appears to be fixed""
 
                 )
                 
@@ -136,7 +136,7 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
             
             if "not authenticated in error_message or 403 in error_message:"
                 logger.info(
-                    f PASS:  REPRODUCED: Expected authentication failure in {execution_time:."3f"}s: {e}""
+                    f PASS:  REPRODUCED: Expected authentication failure in {execution_time:.""3f""}s: {e}""
 
                 )
                 
@@ -190,7 +190,7 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
             service_headers = auth_client._get_service_auth_headers()
             execution_time = time.time() - test_start
             
-            logger.info(fService headers generated in {execution_time:."3f"}s: {service_headers})""
+            logger.info(fService headers generated in {execution_time:.""3f""}s: {service_headers})""
 
             
             # Validate headers are missing or invalid (demonstrating the issue)
@@ -243,7 +243,7 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
                         
         except Exception as e:
             execution_time = time.time() - test_start
-            logger.info(fService auth test completed in {execution_time:."3f"}s with error: {e})""
+            logger.info(fService auth test completed in {execution_time:.""3f""}s with error: {e})""
 
             
             # Re-raise to show the reproduction
@@ -288,7 +288,7 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
             is_service_request = hasattr(middleware, '_is_service_request') and middleware._is_service_request(mock_request)
             execution_time = time.time() - test_start
             
-            logger.info(fMiddleware service detection in {execution_time:."3f"}s: {is_service_request}")"
+            logger.info(fMiddleware service detection in {execution_time:.""3f""}s: {is_service_request}")"
             
             if is_service_request and not mock_request.headers.get(X-Service-ID):
                 self.record_metric(middleware_service_auth_validation", {"
@@ -307,7 +307,7 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
             else:
                 # Middleware not detecting or not rejecting properly
                 execution_time = time.time() - test_start
-                logger.warning(fMiddleware behavior unclear after {execution_time:."3f"}s)""
+                logger.warning(fMiddleware behavior unclear after {execution_time:.""3f""}s)""
 
                 
                 # This could indicate the middleware logic needs investigation
@@ -319,7 +319,7 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
         except Exception as e:
             execution_time = time.time() - test_start
             logger.info(fMiddleware test completed in {execution_time:.3f}s: {e})"
-            logger.info(fMiddleware test completed in {execution_time:.3f}s: {e})""
+            logger.info(fMiddleware test completed in {execution_time:."3f"}s: {e})""
 
             
             # Expected behavior - middleware should reject
@@ -370,7 +370,7 @@ class SystemUserAuthReproductionTests(SSotBaseTestCase):
             Configuration source: "IsolatedEnvironment"
         }
         
-        logger.info(fService credentials diagnostic completed in {execution_time:."3f"}s: {diagnostic_info}")"
+        logger.info(fService credentials diagnostic completed in {execution_time:.""3f""}s: {diagnostic_info}")"
         
         # This test always passes - it's just diagnostic'
         # The actual reproduction tests above will demonstrate the failures

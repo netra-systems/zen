@@ -445,7 +445,7 @@ class PerformanceTests(ActionsToMeetGoalsGoldenPatternTests):
             await agent.execute_core_logic(execution_context)
         
         execution_time = time.time() - start_time
-        assert execution_time < 5.0, f"Execution should be fast, took {execution_time:."2f"}s"
+        assert execution_time < 5.0, f"Execution should be fast, took {execution_time:.""2f""}s"
 
     @pytest.mark.asyncio
     async def test_websocket_event_efficiency(self, agent, execution_context):
@@ -465,7 +465,7 @@ class PerformanceTests(ActionsToMeetGoalsGoldenPatternTests):
         await agent.execute_core_logic(execution_context)
         event_time = time.time() - start_time
         
-        assert event_time < 2.0, f"WebSocket events should be efficient, took {event_time:."2f"}s"
+        assert event_time < 2.0, f"WebSocket events should be efficient, took {event_time:.""2f""}s"
 
 
 # Run the tests

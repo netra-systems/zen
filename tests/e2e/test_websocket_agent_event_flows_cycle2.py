@@ -351,6 +351,6 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
         # Business requirement: Platform handles concurrent load efficiently
         assert total_execution_time < 120, f"Total concurrent execution too slow: {total_execution_time}s"
         
-        print(fE2E Load Test Results: {len(successful_sessions)}/{len(users)} users successful in {total_execution_time:."1f"}s")"
+        print(fE2E Load Test Results: {len(successful_sessions)}/{len(users)} users successful in {total_execution_time:.""1f""}s")"
 
 )))))

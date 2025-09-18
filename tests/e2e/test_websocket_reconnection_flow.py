@@ -338,7 +338,7 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
         baseline_duration = time.time() - baseline_start
         assert len(baseline_events) > 0, "'Baseline performance test should complete'"
         assert any((e.get('type') == 'agent_completed' for e in baseline_events)), "'Baseline should complete'"
-        logger.info(f' PASS:  Baseline performance: {baseline_duration:."2f"}s')""
+        logger.info(f' PASS:  Baseline performance: {baseline_duration:.""2f""}s')""
 
         await self.simulate_connection_drop(websocket_connection)
         reconnected_websocket = await self.establish_reconnection(auth_user, delay_seconds=1.0)
@@ -349,22 +349,22 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
         reconnection_duration = time.time() - reconnection_start
         assert len(reconnection_events) > 0, "'Post-reconnection performance test should complete'"
         assert any((e.get('type') == 'agent_completed' for e in reconnection_events)), "'Reconnection test should complete'"
-        logger.info(f' PASS:  Post-reconnection performance: {reconnection_duration:."2f"}s')""
+        logger.info(f' PASS:  Post-reconnection performance: {reconnection_duration:.""2f""}s')""
 
         performance_ratio = reconnection_duration / baseline_duration
         performance_degradation = (reconnection_duration - baseline_duration) / baseline_duration * 100
         logger.info(f' CHART:  Performance comparison:')
-        logger.info(f'   Baseline: {baseline_duration:."2f"}s')""
+        logger.info(f'   Baseline: {baseline_duration:.""2f""}s')""
 
-        logger.info(f'   Post-reconnection: {reconnection_duration:."2f"}s')""
+        logger.info(f'   Post-reconnection: {reconnection_duration:.""2f""}s')""
 
-        logger.info(f'   Ratio: {performance_ratio:."2f"}x')
-        logger.info(f'   Degradation: {performance_degradation:+."1f"}%')
-        assert performance_ratio < 1.5, "f'Significant performance degradation after reconnection: {performance_ratio:."2f"}x (max: 1."5x")'"
-        assert baseline_duration < 30.0, "f'Baseline too slow: {baseline_duration:."2f"}s'"
-        assert reconnection_duration < 45.0, "f'Post-reconnection too slow: {reconnection_duration:."2f"}s'"
+        logger.info(f'   Ratio: {performance_ratio:.""2f""}x')
+        logger.info(f'   Degradation: {performance_degradation:+.""1f""}%')
+        assert performance_ratio < 1.5, "f'Significant performance degradation after reconnection: {performance_ratio:.""2f""}x (max: 1.""5x"")'"
+        assert baseline_duration < 30.0, "f'Baseline too slow: {baseline_duration:.""2f""}s'"
+        assert reconnection_duration < 45.0, "f'Post-reconnection too slow: {reconnection_duration:.""2f""}s'"
         logger.info(' CELEBRATION:  RECONNECTION PERFORMANCE IMPACT TEST PASSED')
-        logger.info(f'    LIGHTNING:  Performance Ratio: {performance_ratio:."2f"}x (acceptable)')""
+        logger.info(f'    LIGHTNING:  Performance Ratio: {performance_ratio:.""2f""}x (acceptable)')""
 
         logger.info(f'   [U+1F4C8] Performance Consistency: VERIFIED')
         logger.info(f'    PASS:  User Experience: MAINTAINED')

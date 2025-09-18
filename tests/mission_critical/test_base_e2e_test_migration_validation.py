@@ -90,7 +90,7 @@ class TestBaseE2ETestMigrationValidation(SSotAsyncTestCase):
                 fSSOT COMPLIANCE VIOLATION: Found {len(non_compliant_files)} E2E test files not using SSotAsyncTestCase.\n
                 f"Non-compliant files:\n{files_list}\n\n"
                 fCOMPLIANCE STATUS: {compliance_percentage:.1f}% ({len(ssot_compliant_files)}/{len(e2e_test_files)} files)\n"
-                fCOMPLIANCE STATUS: {compliance_percentage:.1f}% ({len(ssot_compliant_files)}/{len(e2e_test_files)} files)\n""
+                fCOMPLIANCE STATUS: {compliance_percentage:."1f"}% ({len(ssot_compliant_files)}/{len(e2e_test_files)} files)\n""
 
                 fTARGET: 100% SSOT compliance required\n\n
                 fACTION REQUIRED:\n"
@@ -108,7 +108,7 @@ class TestBaseE2ETestMigrationValidation(SSotAsyncTestCase):
         self.assertEqual(
             len(non_compliant_files), 0,
             fAll E2E test files must use SSotAsyncTestCase. ""
-            fCurrent compliance: {compliance_percentage:."1f")% ({compliant_files)/{total_files)""
+            fCurrent compliance: {compliance_percentage:.""1f"")% ({compliant_files)/{total_files)""
 
         )
 
@@ -208,9 +208,9 @@ class TestBaseE2ETestMigrationValidation(SSotAsyncTestCase):
 BASETEST TO SSOT MIGRATION STATUS REPORT
 =========================================
 
-OVERALL PROGRESS: {migration_progress:."1f"}%""
+OVERALL PROGRESS: {migration_progress:.""1f""}%""
 
-SSOT COMPLIANCE: {ssot_compliance:."1f"}%""
+SSOT COMPLIANCE: {ssot_compliance:.""1f""}%""
 
 
 DETAILED METRICS:
@@ -222,7 +222,7 @@ DETAILED METRICS:
 
 MIGRATION TARGETS:
     - Legacy imports: {legacy_imports} -> 0 (TARGET)
-- SSOT compliance: {ssot_compliance:."1f"}% -> 100% (TARGET)""
+- SSOT compliance: {ssot_compliance:.""1f""}% -> 100% (TARGET)""
 
 - Environment violations: {environ_violating} -> 0 (TARGET)
 - Import violations: {import_violating} -> 0 (TARGET)

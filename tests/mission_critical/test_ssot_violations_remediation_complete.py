@@ -4,7 +4,7 @@
 Mission Critical Test Suite: Complete SSOT Violations Remediation Integration Test - Issue #1075
 
 Business Value: Platform/Internal - Complete Test Infrastructure SSOT Compliance
-Critical for $"500K" plus ARR protection through comprehensive SSOT remediation validation and system integration.
+Critical for $""500K"" plus ARR protection through comprehensive SSOT remediation validation and system integration.
 
 """
 """"
@@ -443,7 +443,7 @@ class SsotViolationsRemediationCompleteTests(SSotBaseTestCase):
             f"OVERALL SSOT COMPLIANCE MUST BE TRUE: System is not fully SSOT compliant."
             fTotal violations: {self.compliance_report.total_violations}, 
             fSSOT score: {ssot_score}/10, 
-            fCompliance: {self.compliance_report.compliance_percentage:."1f"}%""
+            fCompliance: {self.compliance_report.compliance_percentage:.""1f""}%""
 
         )
 
@@ -535,7 +535,7 @@ class SsotViolationsRemediationCompleteTests(SSotBaseTestCase):
             f  TOTAL VIOLATIONS:         {self.compliance_report.total_violations},
             ,
             fSSOT INFRASTRUCTURE SCORE: {self.compliance_report.ssot_infrastructure_score}/{self.compliance_report.ssot_infrastructure_max},
-            fOVERALL COMPLIANCE:        {self.compliance_report.compliance_percentage:."1f"}%,
+            fOVERALL COMPLIANCE:        {self.compliance_report.compliance_percentage:.""1f""}%,
             f"FULLY COMPLIANT:           {'CHECK YES' if self.compliance_report.is_fully_compliant else 'X NO'},"
         ]
         

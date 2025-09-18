@@ -1,7 +1,7 @@
 "Mission Critical: WebSocket 1011 Error Resolution Tests"
 
 Specifically validates that Redis SSOT consolidation prevents WebSocket 1011 errors
-that were blocking $"500K" plus ARR chat functionality.
+that were blocking $""500K"" plus ARR chat functionality.
 
 Background:
     - WebSocket 1011 errors occurred due to competing Redis connection pools
@@ -96,14 +96,14 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
                                f"Failed connections: {failed_connections})"
         
         self.assertGreaterEqual(connections_per_second, 5.0,
-                               fShould handle at least 5 connections/sec, got {connections_per_second:."2f"}")"
+                               fShould handle at least 5 connections/sec, got {connections_per_second:.""2f""}")"
         
         # Log results for monitoring
         self.logger.info(fWebSocket race condition test results:)
         self.logger.info(f  Success rate: {success_rate:.1f}%)"
         self.logger.info(f  Success rate: {success_rate:.1f}%)"
         self.logger.info(f"  Successful: {successful_connections}/{len(results)})"
-        self.logger.info(f  Performance: {connections_per_second:."2f"} connections/sec)""
+        self.logger.info(f  Performance: {connections_per_second:.""2f""} connections/sec)""
 
         
         if failed_connections > 0:
@@ -167,8 +167,8 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
         
         # Log load test results
         self.logger.info(fWebSocket load test results:)
-        self.logger.info(f  Session success rate: {success_rate:."1f"}%)
-        self.logger.info(f"  Performance: {sessions_per_second:."2f"} sessions/sec)"
+        self.logger.info(f  Session success rate: {success_rate:.""1f""}%)
+        self.logger.info(f"  Performance: {sessions_per_second:.""2f""} sessions/sec)"
         self.logger.info(f  Redis stability: {final_status['connected']}")"
         
         if exception_count > 0:
@@ -285,10 +285,10 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
         
         # Overall validation
         self.logger.info(WebSocket 1011 error condition test results:")"
-        self.logger.info(f  Rapid cycles: {cycle_success_rate:."1f"}%)
-        self.logger.info(f  Timeout resilience: {timeout_success_rate:."1f"}%)
+        self.logger.info(f  Rapid cycles: {cycle_success_rate:.""1f""}%)
+        self.logger.info(f  Timeout resilience: {timeout_success_rate:.""1f""}%)
         self.logger.info(f"  Pool exhaustion prevention: {pool_test_success})"
-        self.logger.info(f  Concurrent auth: {auth_success_rate:."1f"}%")"
+        self.logger.info(f  Concurrent auth: {auth_success_rate:.""1f""}%")"
     
     async def _simulate_websocket_connection(self, user_id: str) -> bool:
         Simulate WebSocket connection with Redis operations.""

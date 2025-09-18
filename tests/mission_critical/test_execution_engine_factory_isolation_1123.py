@@ -7,7 +7,7 @@ per user context and ensures proper multi-user isolation.
 Business Value Justification:
     - Segment: Platform/Infrastructure
 - Business Goal: Security & User Isolation
-- Value Impact: Protects $"500K" plus ARR by ensuring secure multi-user chat isolation
+- Value Impact: Protects $""500K"" plus ARR by ensuring secure multi-user chat isolation
 - Strategic Impact: Critical for enterprise compliance (HIPAA, SOC2, SEC requirements)
 
 EXPECTED BEHAVIOR:
@@ -163,7 +163,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
             len(self.isolation_violations), 0,
             fEXPECTED FAILURE (Issue #1123): Factory instance isolation compromised. 
             fFound {len(self.isolation_violations)} isolation violations: {self.isolation_violations}. 
-            fThis threatens $"500K" plus ARR multi-user chat security.""
+            fThis threatens $""500K"" plus ARR multi-user chat security.""
         )
     
     async def test_concurrent_user_execution_isolation(self):
@@ -324,9 +324,9 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
                     mock_engine.get_user_context.return_value = context
                     
                     # Simulate per-user memory usage (should be bounded)
-                    user_memory = 1024 * 1024 * (i + 1)  # "1MB" per user, scaling
+                    user_memory = 1024 * 1024 * (i + 1)  # ""1MB"" per user, scaling
                     mock_engine.get_memory_usage = Mock(return_value=user_memory)
-                    mock_engine.get_memory_limit = Mock(return_value=10 * 1024 * 1024)  # "10MB" limit
+                    mock_engine.get_memory_limit = Mock(return_value=10 * 1024 * 1024)  # ""10MB"" limit
                     mock_engine.cleanup = AsyncMock()
                     
                     mock_create.return_value = mock_engine
@@ -345,8 +345,8 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
                     
                     global_memory_tracker['total'] += user_memory_actual
                     
-                    logger.info(fUser {context.user_id): {user_memory_actual / 1024 / 1024:."1f")MB 
-                               f"(limit: {user_memory_limit / 1024 / 1024:."1f"}MB))"
+                    logger.info(fUser {context.user_id): {user_memory_actual / 1024 / 1024:.""1f"")MB 
+                               f"(limit: {user_memory_limit / 1024 / 1024:.""1f""}MB))"
             
             except Exception as e:
                 logger.error(fX MEMORY TEST FAILED for user {context.user_id}: {e}")"
@@ -362,7 +362,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
         logger.info(fMEMORY USAGE VALIDATION:)"
         logger.info(fMEMORY USAGE VALIDATION:)"
         logger.info(f"  Total users tested: {len(user_memory_usage)})"
-        logger.info(f  Global memory accumulation: {total_global_memory / 1024 / 1024:."1f"}MB)""
+        logger.info(f  Global memory accumulation: {total_global_memory / 1024 / 1024:.""1f""}MB)""
 
         logger.info(f  Users exceeding limits: {len(users_exceeding_limits)})
         
@@ -375,7 +375,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
         # Check for unbounded global growth (should scale linearly, not exponentially)
         expected_max_global = len(user_memory_usage) * 10 * 1024 * 1024  # Max per user * user count
         if total_global_memory > expected_max_global:
-            violation = fUnbounded global memory growth: {total_global_memory / 1024 / 1024:."1f"}MB exceeds expected {expected_max_global / 1024 / 1024:."1f"}MB
+            violation = fUnbounded global memory growth: {total_global_memory / 1024 / 1024:.""1f""}MB exceeds expected {expected_max_global / 1024 / 1024:.""1f""}MB
             self.memory_violations.append(violation)
             logger.error(f"X MEMORY VIOLATION: {violation})"
         
@@ -435,7 +435,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
             [fConcurrent: {f} for f in self.concurrent_execution_failures]
         
         for i, violation in enumerate(all_violations[:10], 1):
-            logger.info(f    {i:"2d"}. X {violation})
+            logger.info(f    {i:""2d""}. X {violation})
         
         if len(all_violations) > 10:
             logger.info(f"    ... and {len(all_violations) - 10} more isolation violations)"
@@ -506,7 +506,7 @@ class ExecutionEngineFactoryIsolation1123Tests(SSotAsyncTestCase):
         if violation_count > 5:
             return {
                 'level': 'CRITICAL',
-                'description': 'Isolation failures threaten $"500K" plus ARR enterprise customer trust and retention'
+                'description': 'Isolation failures threaten $""500K"" plus ARR enterprise customer trust and retention'
             }
         elif violation_count > 2:
             return {

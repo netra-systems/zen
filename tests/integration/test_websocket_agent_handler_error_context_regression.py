@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
     - Segment: ALL (Free  ->  Enterprise) - Error handling affects all user tiers during critical failures
 - Business Goal: Maintain conversation continuity even during system errors and recovery scenarios  
 - Value Impact: CRITICAL - Prevents conversation context loss during error conditions and retry scenarios
-- Strategic/Revenue Impact: $"750K"+ ARR at risk - Error scenarios must maintain user experience integrity
+- Strategic/Revenue Impact: $""750K""+ ARR at risk - Error scenarios must maintain user experience integrity
 
 CRITICAL BUSINESS CONTEXT:
     Error handling paths in WebSocket agent handlers are critical to business continuity because:
@@ -627,7 +627,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
         
         print(f" PASS:  CRITICAL: Agent timeout preserved enterprise analysis context)"
         print(f PASS:  BUSINESS CONTINUITY: Complex analysis retryable after timeout)
-        print(f" CHART:  Timeout handled in {timeout_duration:."3f"}s)"
+        print(f" CHART:  Timeout handled in {timeout_duration:.""3f""}s)"
 
     @pytest.mark.integration
     @pytest.mark.critical
@@ -1045,20 +1045,20 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
         max_context_lookup = max(context_lookup_times)
         
         # Performance thresholds (business requirements)
-        max_acceptable_error_processing = 0.5  # "500ms" max per error
-        max_acceptable_context_lookup = 0.1    # "100ms" max for context lookup
+        max_acceptable_error_processing = 0.5  # ""500ms"" max per error
+        max_acceptable_context_lookup = 0.1    # ""100ms"" max for context lookup
         
         # PERFORMANCE VALIDATION: Error handling must not degrade context performance
         assert avg_error_processing < max_acceptable_error_processing, \
-            fError processing too slow: {avg_error_processing:."3f"}s avg (max acceptable: {max_acceptable_error_processing}s)""
+            fError processing too slow: {avg_error_processing:.""3f""}s avg (max acceptable: {max_acceptable_error_processing}s)""
 
         
         assert avg_context_lookup < max_acceptable_context_lookup, \
-            fContext lookup too slow during errors: {avg_context_lookup:."3f"}s avg (max acceptable: {max_acceptable_context_lookup}s)""
+            fContext lookup too slow during errors: {avg_context_lookup:.""3f""}s avg (max acceptable: {max_acceptable_context_lookup}s)""
 
         
         assert max_error_processing < 1.0, \
-            f"Slowest error processing too slow: {max_error_processing:."3f"}s (max acceptable: 1."0s")"
+            f"Slowest error processing too slow: {max_error_processing:.""3f""}s (max acceptable: 1.""0s"")"
         
         # Track performance metrics for business impact
         self.error_tracking[performance_during_errors").append({"
@@ -1072,10 +1072,10 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
         }
         
         print(f\n PASS:  PERFORMANCE: Error handling meets business performance requirements)
-        print(f CHART:  Average error processing: {avg_error_processing*1000:."1f"}ms")"
-        print(f CHART:  Average context lookup: {avg_context_lookup*1000:."1f"}ms)
-        print(f CHART:  Max error processing: {max_error_processing*1000:."1f"}ms") "
-        print(f CHART:  Max context lookup: {max_context_lookup*1000:."1f"}ms)
+        print(f CHART:  Average error processing: {avg_error_processing*1000:.""1f""}ms")"
+        print(f CHART:  Average context lookup: {avg_context_lookup*1000:.""1f""}ms)
+        print(f CHART:  Max error processing: {max_error_processing*1000:.""1f""}ms") "
+        print(f CHART:  Max context lookup: {max_context_lookup*1000:.""1f""}ms)
         print(f TARGET:  Iterations tested: {num_performance_iterations}")"
 
     @pytest.mark.integration

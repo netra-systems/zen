@@ -163,7 +163,7 @@
     # REMOVED_SYNTAX_ERROR: {"user_id": "user2", "key": "user:admin:secret", "expected_namespace": "user:user2:user:admin:secret"},
     # REMOVED_SYNTAX_ERROR: {"user_id": "user3", "key": "system:global", "expected_namespace": "user:user3:system:global"},
     # Try null bytes and other injection attempts
-    # REMOVED_SYNTAX_ERROR: {"user_id": "user4", "key": "key\\\100admin", "expected_namespace": "user:user4:key\\\100admin"},
+    # REMOVED_SYNTAX_ERROR: {"user_id": "user4", "key": "key\\\\\100admin", "expected_namespace": "user:user4:key\\\\\100admin"},
     # REMOVED_SYNTAX_ERROR: {"user_id": "user5", "key": "key )
     # REMOVED_SYNTAX_ERROR: EVAL_malicious", "expected_namespace": "user:user5:key
     # REMOVED_SYNTAX_ERROR: EVAL_malicious"},
@@ -447,7 +447,7 @@
     # REMOVED_SYNTAX_ERROR: {"key": "../admin/config", "value": "malicious_config"},
     # REMOVED_SYNTAX_ERROR: {"key": "user:admin:secret", "value": "stolen_admin_data"},
     # REMOVED_SYNTAX_ERROR: {"key": "EVAL_redis_command", "value": "malicious_script"},
-    # REMOVED_SYNTAX_ERROR: {"key": "user\\\100admin", "value": "null_byte_injection"},
+    # REMOVED_SYNTAX_ERROR: {"key": "user\\\\\100admin", "value": "null_byte_injection"},
     
 
     # REMOVED_SYNTAX_ERROR: for scenario in malicious_scenarios:

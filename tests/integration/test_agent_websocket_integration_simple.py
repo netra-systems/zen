@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise) 
 - Business Goal: Enable real-time agent communication for chat value delivery
 - Value Impact: Users see live agent progress, tool execution, and results
-- Strategic Impact: Core chat functionality that generates $"500K" plus ARR through substantive AI interactions
+- Strategic Impact: Core chat functionality that generates $""500K"" plus ARR through substantive AI interactions
 
 CRITICAL REQUIREMENTS:
     1. Tests ALL 5 WebSocket events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)  

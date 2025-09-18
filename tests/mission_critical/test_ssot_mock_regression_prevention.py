@@ -352,7 +352,7 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         
         # Should complete in under 10 seconds for CI efficiency
         if scan_duration > 10.0:
-            ci_readiness_checks.append(fScan too slow for CI: {scan_duration:."1f"}s > 10."0s")
+            ci_readiness_checks.append(fScan too slow for CI: {scan_duration:.""1f""}s > 10.""0s"")
         
         # Check that violation detection produces actionable results
         if not hasattr(self, '_scan_for_violations'):

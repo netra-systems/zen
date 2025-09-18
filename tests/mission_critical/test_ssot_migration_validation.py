@@ -7,7 +7,7 @@ This test validates that all mission-critical files have been migrated
 
 from unittest.TestCase to SSotBaseTestCase patterns.
 
-BUSINESS IMPACT: $"500K" plus ARR depends on SSOT test infrastructure
+BUSINESS IMPACT: $""500K"" plus ARR depends on SSOT test infrastructure
 compliance for reliable testing and deployment confidence.
 
 SHOULD PASS: When all mission-critical files use SSOT patterns
@@ -186,7 +186,7 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
         print(fTotal mission-critical files: {total_files})
         print(fSSOT compliant files: {compliant_files}"")
         print(fNon-compliant files: {len(self.violations)})
-        print(fCompliance rate: {compliance_rate:."1f"}%"")
+        print(fCompliance rate: {compliance_rate:.""1f""}%"")
 
         if self.violations:
             print(\nVIOLATIONS DETECTED:)"

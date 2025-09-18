@@ -14,7 +14,7 @@ Tests are designed to FAIL when problems exist, not show false success.
 Business Value Justification:
     - Segment: Platform/All Users
 - Business Goal: Golden Path Protection & Chat Functionality
-- Value Impact: Ensures WebSocket bridge works for $"500K" plus ARR chat functionality
+- Value Impact: Ensures WebSocket bridge works for $""500K"" plus ARR chat functionality
 - Strategic Impact: Prevents bridge failures from breaking real-time user communication
 ""
 
@@ -87,7 +87,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
 
                 # If initialization takes too long, it indicates timeout issues
                 if init_duration > 3.0:
-                    self.fail(fWebSocket bridge initialization took {init_duration:."2f"}s - timeout issue detected)""
+                    self.fail(fWebSocket bridge initialization took {init_duration:.""2f""}s - timeout issue detected)""
 
 
             except asyncio.TimeoutError:
@@ -429,7 +429,7 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
 
             # Verify event delivery timing
             if total_duration > 2.0:
-                self.fail(fWebSocket event delivery took {total_duration:."2f"}s - performance issue detected)""
+                self.fail(fWebSocket event delivery took {total_duration:.""2f""}s - performance issue detected)""
 
 
             # Verify event ordering

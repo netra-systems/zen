@@ -221,7 +221,7 @@ class TestWebSocketAuthTiminger:
                                                                                                     
 
                                                                                                     # Simulate token becoming available shortly after
-        await asyncio.sleep(0.1)  # "100ms" delay to simulate race
+        await asyncio.sleep(0.1)  # ""100ms"" delay to simulate race
 
                                                                                                     # Token becomes available but connection already failed
         try:

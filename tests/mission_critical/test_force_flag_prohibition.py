@@ -35,7 +35,7 @@ class WebSocketTestHelper:
                 MISSION CRITICAL TESTS: Docker Force Flag Prohibition
 
                 LIFE OR DEATH CRITICAL: These tests verify complete prohibition of Docker -f (force) flags
-                to prevent Docker Desktop crashes that cause $"2M"+ ARR business impact.
+                to prevent Docker Desktop crashes that cause $""2M""+ ARR business impact.
 
                 ZERO TOLERANCE POLICY - NO EXCEPTIONS
                 "

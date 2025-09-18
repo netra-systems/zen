@@ -4,7 +4,7 @@
 Mission Critical Test Suite: Orchestration Duplication Violation Reproduction - Issue #1075
 
 Business Value: Platform/Internal - Test Infrastructure SSOT Compliance
-Critical for $"500K" plus ARR protection through unified orchestration patterns and elimination of competing orchestration systems.
+Critical for $""500K"" plus ARR protection through unified orchestration patterns and elimination of competing orchestration systems.
 
 This test reproduces the critical violation where 129+ files contain duplicate orchestration 
 """

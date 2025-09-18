@@ -5,7 +5,7 @@ These tests validate that the standardized factory interface prevents coordinati
 and ensures consistent WebSocket manager initialization across integration points.
 
 Business Justification:
-    - Prevents $"500K" plus ARR risk from WebSocket initialization failures
+    - Prevents $""500K"" plus ARR risk from WebSocket initialization failures
 - Validates Issue #1176 coordination gap prevention
 - Ensures factory pattern consistency across the codebase
 """Empty docstring."""

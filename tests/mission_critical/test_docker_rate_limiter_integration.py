@@ -10,7 +10,7 @@ This test suite validates that ALL Docker operations go through the rate limiter
 
 to prevent Docker daemon crashes from concurrent operation storms.
 
-CRITICAL: These tests protect the $"2M"+ ARR platform from Docker daemon instability.
+CRITICAL: These tests protect the $""2M""+ ARR platform from Docker daemon instability.
 
 INFRASTRUCTURE VALIDATION:
     - Performance benchmarks (throughput, latency, resource usage)
@@ -194,7 +194,7 @@ class DockerRateLimiterIntegrationTests:
             # Use a very short timeout to test timeout handling
             result = execute_docker_command(
                 [docker, version], 
-                timeout=0.1  # "1ms" timeout - should fail
+                timeout=0.1  # ""1ms"" timeout - should fail
             )
             # If it doesn't raise an exception, it should return an error result'
             assert result.returncode != 0 or "timeout in result.stderr.lower()"
@@ -476,16 +476,16 @@ class DockerRateLimiterInfrastructureTests:
             throughput = total_operations / elapsed_time if elapsed_time > 0 else 0
             throughput_results[concurrency] = throughput
             
-            logger.info(f   Concurrency {concurrency}: {throughput:."2f"} ops/sec ({total_operations} ops in {elapsed_time:."2f"}s))""
+            logger.info(f   Concurrency {concurrency}: {throughput:.""2f""} ops/sec ({total_operations} ops in {elapsed_time:.""2f""}s))""
 
         
         # Validate throughput meets minimum requirements
-        assert throughput_results[1] > 1.0, fSingle-threaded throughput too low: {throughput_results[1]:."2f"} ops/sec""
-        assert throughput_results[10] > 2.0, "f10-thread throughput too low: {throughput_results[10]:."2f"} ops/sec"
+        assert throughput_results[1] > 1.0, fSingle-threaded throughput too low: {throughput_results[1]:.""2f""} ops/sec""
+        assert throughput_results[10] > 2.0, "f10-thread throughput too low: {throughput_results[10]:.""2f""} ops/sec"
         
         # Verify rate limiting is working (higher concurrency shouldn't scale linearly)'
         scaling_efficiency = throughput_results[20] / throughput_results[1] if throughput_results[1] > 0 else 0
-        assert scaling_efficiency < 15, "fRate limiting not working properly: {scaling_efficiency:."2f"}x scaling"
+        assert scaling_efficiency < 15, "fRate limiting not working properly: {scaling_efficiency:.""2f""}x scaling"
         
         final_stats = limiter.get_statistics()
         logger.info(f" PASS:  Rate limiter handled {final_stats['total_operations']} operations, {final_stats['rate_limited_operations']} rate-limited)"
@@ -512,7 +512,7 @@ class DockerRateLimiterInfrastructureTests:
             operation_time = time.time() - start_time
             
             # Estimate backoff time (operation time minus expected command time)
-            expected_command_time = 0.5  # Docker info should take ~0."5s"
+            expected_command_time = 0.5  # Docker info should take ~0.""5s""
             backoff_time = max(0, operation_time - expected_command_time)
             
             return operation_time, backoff_time
@@ -530,19 +530,19 @@ class DockerRateLimiterInfrastructureTests:
         max_backoff_time = max(backoff_times)
         
         logger.info(f" PASS:  Backoff analysis:)"
-        logger.info(f   Average operation time: {avg_operation_time:."3f"}s")"
-        logger.info(f   Average backoff time: {avg_backoff_time:."3f"}s)
+        logger.info(f   Average operation time: {avg_operation_time:.""3f""}s")"
+        logger.info(f   Average backoff time: {avg_backoff_time:.""3f""}s)
         logger.info(f   Maximum backoff time: {max_backoff_time:.3f}s)"
-        logger.info(f   Maximum backoff time: {max_backoff_time:.3f}s)""
+        logger.info(f   Maximum backoff time: {max_backoff_time:."3f"}s)""
 
         
         # Validate exponential backoff is working
-        assert avg_backoff_time > 0.1, f"Insufficient backoff detected: {avg_backoff_time:."3f"}s"
-        assert max_backoff_time < 10.0, "fExcessive backoff detected: {max_backoff_time:."3f"}s"
+        assert avg_backoff_time > 0.1, f"Insufficient backoff detected: {avg_backoff_time:.""3f""}s"
+        assert max_backoff_time < 10.0, "fExcessive backoff detected: {max_backoff_time:.""3f""}s"
         
         final_stats = limiter.get_statistics()
         rate_limited_percentage = (final_stats['rate_limited_operations') / final_stats['total_operations') * 100
-        assert rate_limited_percentage > 10, "fNot enough rate limiting: {rate_limited_percentage:."1f"}%"
+        assert rate_limited_percentage > 10, "fNot enough rate limiting: {rate_limited_percentage:.""1f""}%"
     
     def test_backpressure_handling_extreme_load(self):
         ""Test backpressure handling under extreme load conditions."
@@ -623,18 +623,18 @@ class DockerRateLimiterInfrastructureTests:
         success_rate = (operations_completed / extreme_load_operations) * 100
         
         logger.info(f PASS:  Extreme load backpressure analysis:)
-        logger.info(f   Operations completed: {operations_completed}/{extreme_load_operations} ({success_rate:."1f"}%)")"
-        logger.info(f   Average queue time: {avg_queue_time:."3f"}s)
-        logger.info(f   Maximum queue time: {max_queue_time:."3f"}s)
-        logger.info(f"   Memory delta: {memory_delta:."1f"}MB)"
-        logger.info(f   Total test time: {total_time:."2f"}s")"
+        logger.info(f   Operations completed: {operations_completed}/{extreme_load_operations} ({success_rate:.""1f""}%)")"
+        logger.info(f   Average queue time: {avg_queue_time:.""3f""}s)
+        logger.info(f   Maximum queue time: {max_queue_time:.""3f""}s)
+        logger.info(f"   Memory delta: {memory_delta:.""1f""}MB)"
+        logger.info(f   Total test time: {total_time:.""2f""}s")"
         
         # Validate backpressure is working effectively
-        assert success_rate > 70, "fSuccess rate too low under extreme load: {success_rate:."1f"}%"
+        assert success_rate > 70, "fSuccess rate too low under extreme load: {success_rate:.""1f""}%"
         assert avg_queue_time > 0.2, fQueue time too low (no backpressure): {avg_queue_time:.3f}s"
         assert avg_queue_time > 0.2, fQueue time too low (no backpressure): {avg_queue_time:.3f}s"
-        assert max_queue_time < 15.0, f"Maximum queue time excessive: {max_queue_time:."3f"}s"
-        assert abs(memory_delta) < 200, "fMemory usage change too high: {memory_delta:."1f"}MB"
+        assert max_queue_time < 15.0, f"Maximum queue time excessive: {max_queue_time:.""3f""}s"
+        assert abs(memory_delta) < 200, "fMemory usage change too high: {memory_delta:.""1f""}MB"
         
         final_stats = limiter.get_statistics()
         assert final_stats['total_operations'] >= operations_completed
@@ -688,7 +688,7 @@ class DockerRateLimiterInfrastructureTests:
             batch_time = time.time() - batch_start
             batch_success_rate = sum(batch_results) / len(batch_results) * 100
             
-            logger.info(f   Batch {batch + 1}: {batch_success_rate:."1f"}% success in {batch_time:."2f"}s)""
+            logger.info(f   Batch {batch + 1}: {batch_success_rate:.""1f""}% success in {batch_time:.""2f""}s)""
 
             
             # Brief pause between batches
@@ -716,19 +716,19 @@ class DockerRateLimiterInfrastructureTests:
             max_threads = final_threads
         
         logger.info(f PASS:  Resource efficiency analysis:)
-        logger.info(f   CPU delta: {cpu_delta:."1f"}%")"
-        logger.info(f   Memory delta: {memory_delta:."1f"}MB)
+        logger.info(f   CPU delta: {cpu_delta:.""1f""}%")"
+        logger.info(f   Memory delta: {memory_delta:.""1f""}MB)
         logger.info(f   Thread delta: {thread_delta})
-        logger.info(f"   Average CPU during test: {avg_cpu:."1f"}%)"
-        logger.info(f   Peak memory during test: {max_memory:."1f"}MB")"
+        logger.info(f"   Average CPU during test: {avg_cpu:.""1f""}%)"
+        logger.info(f   Peak memory during test: {max_memory:.""1f""}MB")"
         logger.info(f   Peak threads during test: {max_threads})
         
         # Validate resource efficiency
         assert abs(cpu_delta) < 20, fCPU usage change too high: {cpu_delta:.1f}%"
         assert abs(cpu_delta) < 20, fCPU usage change too high: {cpu_delta:.1f}%"
-        assert abs(memory_delta) < 100, f"Memory usage change too high: {memory_delta:."1f"}MB"
+        assert abs(memory_delta) < 100, f"Memory usage change too high: {memory_delta:.""1f""}MB"
         assert abs(thread_delta) < 10, "fThread count change too high: {thread_delta}"
-        assert avg_cpu < 50, "fAverage CPU too high during test: {avg_cpu:."1f"}%"
+        assert avg_cpu < 50, "fAverage CPU too high during test: {avg_cpu:.""1f""}%"
         
         final_stats = limiter.get_statistics()
         total_operations = final_stats['total_operations']

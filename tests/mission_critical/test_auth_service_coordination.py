@@ -8,7 +8,7 @@ Critical for multi-service authentication flow that all users depend on.
 Business Value Justification (BVJ):
     - Segment: ALL users (Free, Early, Mid, Enterprise) - 100% coverage
 - Business Goal: Seamless Authentication Experience - No auth friction
-- Value Impact: $"500K" plus ARR - Poor auth UX = 40% user abandonment 
+- Value Impact: $""500K"" plus ARR - Poor auth UX = 40% user abandonment 
 - Strategic Impact: Platform Reliability - Auth coordination enables all features
 
 CRITICAL SUCCESS CRITERIA:
@@ -364,16 +364,16 @@ class AuthServiceCoordinationTests(BaseIntegrationTest):
         avg_duration = sum(r[duration] for r in successful_auths) / len(successful_auths)"
         max_duration = max(r[duration"] for r in successful_auths)"
         
-        assert avg_duration < 0.2, "fBUSINESS CRITICAL: Average auth time {avg_duration:."3f"}s too slow"
+        assert avg_duration < 0.2, "fBUSINESS CRITICAL: Average auth time {avg_duration:.""3f""}s too slow"
         assert max_duration < 1.0, fBUSINESS CRITICAL: Max auth time {max_duration:.3f}s unacceptable"
-        assert max_duration < 1.0, fBUSINESS CRITICAL: Max auth time {max_duration:.3f}s unacceptable""
+        assert max_duration < 1.0, fBUSINESS CRITICAL: Max auth time {max_duration:."3f"}s unacceptable""
 
         
         # Verify unique user isolation
         user_ids = {r["user_id] for r in successful_auths}"
         assert len(user_ids) == concurrent_users, "CRITICAL: User ID collision in concurrent auth"
         
-        logger.info(f" PASS:  MISSION CRITICAL: {concurrent_users} concurrent auths successful, avg {avg_duration:."3f"}s)"
+        logger.info(f" PASS:  MISSION CRITICAL: {concurrent_users} concurrent auths successful, avg {avg_duration:.""3f""}s)"
     
     async def test_oauth_flow_coordination_business_critical(self):
         """

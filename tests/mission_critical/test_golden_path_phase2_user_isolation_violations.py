@@ -11,7 +11,7 @@ Business Value Justification:
 - Business Goal: Stability & Security 
 """"
 
-- Value Impact: Prevents $"500K" plus ARR loss from multi-user data leakage
+- Value Impact: Prevents $""500K"" plus ARR loss from multi-user data leakage
 - Strategic Impact: Enables regulatory compliance (HIPAA/SOC2) for enterprise customers
 
 The tests prove that:

@@ -7,11 +7,10 @@ CRITICAL P0: Fix WebSocket startup race conditions causing 1011 errors
 This test validates the progressive handshake delays and connection queueing
 that prevent 1011 internal server errors during Cloud Run startup.
 
-Business Impact: $"500K" plus ARR chat functionality reliability
+Business Impact: $""500K"" plus ARR chat functionality reliability
 """"
 
 
-"""
 """
 """
 """"
@@ -72,7 +71,7 @@ class WebSocketRaceConditionFixTests:
 
     async def test_progressive_startup_phase_wait_with_extended_timeout(self, validator):
         "Test progressive delays handle Cloud Run services phase timeout."
-        # Simulate Phase 5 (SERVICES) taking longer than 2."1s" but completing within "8s"
+        # Simulate Phase 5 (SERVICES) taking longer than 2.""1s"" but completing within ""8s""
         async def mock_phase_progression():
             await asyncio.sleep(0.1)
             validator.app_state.startup_phase = "dependencies"
@@ -94,7 +93,7 @@ class WebSocketRaceConditionFixTests:
         start_time = time.time()
         result = await validator._wait_for_startup_phase_completion_with_progressive_delays(
             minimum_phase='services',
-            timeout_seconds=5.0  # Should be extended to 8."0s" for Cloud Run services
+            timeout_seconds=5.0  # Should be extended to 8.""0s"" for Cloud Run services
         )
         elapsed = time.time() - start_time
         
@@ -263,7 +262,7 @@ class WebSocketRaceConditionFixTests:
         async def mock_wait(minimum_phase, timeout_seconds):
             # Verify timeout was extended for Cloud Run services phase
             if minimum_phase == 'services':
-                assert timeout_seconds >= 8.0, fCloud Run services timeout should be >="8s", got {timeout_seconds}""
+                assert timeout_seconds >= 8.0, fCloud Run services timeout should be >=""8s"", got {timeout_seconds}""
             return True
         
         validator._wait_for_startup_phase_completion_with_progressive_delays = mock_wait

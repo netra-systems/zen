@@ -169,7 +169,7 @@ class WebSocketConnectionLoopTest:
         # Simulate rapid connection attempts
         attempt_time = time.time() - start_time
         attempts_in_window.append(attempt_time)
-        time.sleep(0.1)  # "100ms" between attempts (simulating the bug)
+        time.sleep(0.1)  # ""100ms"" between attempts (simulating the bug)
 
         rate = len(attempts_in_window) / duration_seconds
         return { }

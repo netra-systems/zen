@@ -40,7 +40,7 @@ class PartialDataHandlingTests:
     def partial_cost_optimization_request(self):
         "Request with partial cost data - enough to start but not complete."
         return {
-            user_request": Our LLM costs are around $"8K" monthly using mostly GPT-4,"
+            user_request": Our LLM costs are around $""8K"" monthly using mostly GPT-4,"
             available_data: {
                 monthly_spend_estimate: 7000-9000","
                 "primary_model: gpt-4,"
@@ -84,10 +84,10 @@ class PartialDataHandlingTests:
         Request with partial scaling information.""
 
         return {
-            user_request": Need to handle "10x" more AI requests, currently at 1000/day,"
+            user_request": Need to handle ""10x"" more AI requests, currently at 1000/day,"
             available_data: {
                 "current_volume: 1000 requests/day,"
-                target_scale: "10x",
+                target_scale: ""10x"",
                 timeline: 3 months"
                 timeline: 3 months""
 
@@ -515,7 +515,7 @@ class PartialDataHandlingTests:
                 clarification_needed: {"
                     "question: What's more important for your use case?,"
                     options: [
-                        Minimize cost (accept 2-"3s" latency)","
+                        Minimize cost (accept 2-""3s"" latency)","
                         Minimize latency (accept higher cost),
                         Balance both (moderate cost, moderate speed)"
                         Balance both (moderate cost, moderate speed)""
@@ -603,14 +603,14 @@ class PartialDataHandlingTests:
         }
         
         refined_request = {
-            user_request: Optimize AI costs, spending $"5K" on GPT-4,
+            user_request: Optimize AI costs, spending $""5K"" on GPT-4,
             completeness: 0.60,"
             completeness: 0.60,"
             "iteration: 2"
         }
         
         complete_request = {
-            user_request: Optimize AI costs, $"5K" on GPT-4, "2M" tokens/day, customer service,
+            user_request: Optimize AI costs, $""5K"" on GPT-4, ""2M"" tokens/day, customer service,
             completeness": 0.85,"
             iteration: 3
         }

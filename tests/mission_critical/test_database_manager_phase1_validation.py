@@ -1,5 +1,5 @@
-"""
-"""
+""""
+
 Phase 1 Validation Tests for DatabaseManager Cleanup
 ===============================================
 
@@ -7,13 +7,14 @@ Purpose: Establish baseline functionality before removing duplicate DatabaseMana
 CRITICAL: These tests must pass before proceeding with Phase 2 (removal)
 
 Created: 2025-9-14 for DatabaseManager cleanup test plan
-"""
-"""
+""""
+
 
 """
 """
 """
-"""
+""""
+
 import asyncio
 import pytest
 from unittest.mock import Mock, patch, AsyncMock
@@ -36,14 +37,16 @@ class DatabaseManagerPhase1BaselineTests:
 
     def test_database_manager_instantiation(self):
         Verify DatabaseManager can be instantiated."
-        Verify DatabaseManager can be instantiated."
+        Verify DatabaseManager can be instantiated.""
+
         with patch('netra_backend.app.core.config.get_config') as mock_config:
             # Mock configuration
             mock_config_obj = Mock()
             mock_config_obj.database = Mock()
             mock_config_obj.database.postgres = Mock()
             mock_config_obj.database.postgres.url = postgresql://test:test@localhost/test"
-            mock_config_obj.database.postgres.url = postgresql://test:test@localhost/test"
+            mock_config_obj.database.postgres.url = postgresql://test:test@localhost/test""
+
             mock_config_obj.database.clickhouse = Mock()
             mock_config_obj.database.clickhouse.url = clickhouse://localhost:8123/test
             mock_config.return_value = mock_config_obj
@@ -63,7 +66,8 @@ class DatabaseManagerPhase1BaselineTests:
             mock_config_obj.database.postgres.url = postgresql://test:test@localhost/test
             mock_config_obj.database.clickhouse = Mock()
             mock_config_obj.database.clickhouse.url = clickhouse://localhost:8123/test"
-            mock_config_obj.database.clickhouse.url = clickhouse://localhost:8123/test"
+            mock_config_obj.database.clickhouse.url = clickhouse://localhost:8123/test""
+
             mock_config.return_value = mock_config_obj
             
             manager = DatabaseManager()

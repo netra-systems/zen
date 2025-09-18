@@ -8,7 +8,7 @@ This validates that authenticated users receive proper WebSocket events during a
 Business Value Justification (BVJ):
     - Segment: ALL users (Free, Early, Mid, Enterprise) - 100% of chat users
 - Business Goal: Seamless Real-time Chat Experience - Core value delivery
-- Value Impact: $"500K" plus ARR - Chat is 90% of our customer value delivery
+- Value Impact: $""500K"" plus ARR - Chat is 90% of our customer value delivery
 - Strategic Impact: Platform Foundation - WebSocket + Auth enables all AI interactions
 
 CRITICAL SUCCESS CRITERIA:
@@ -311,7 +311,7 @@ class WebSocketAuthEventsTests(SSotAsyncTestCase):
                 if len(timeline) > 1:
                     time_span = timeline[-1] - timeline[0]
                     assert time_span > 0, "CRITICAL: Events delivered out of order"
-                    assert time_span < 30, f"CRITICAL: Agent execution took {time_span:."1f"}s - too slow for chat UX"
+                    assert time_span < 30, f"CRITICAL: Agent execution took {time_span:.""1f""}s - too slow for chat UX"
                 
         except Exception as e:
             pytest.fail(fMISSION CRITICAL: Agent events with WebSocket auth failed - {str(e)}")"
@@ -672,10 +672,10 @@ class WebSocketAuthPerformanceTests(SSotAsyncTestCase):
             
             assert avg_duration < 1.0, fBUSINESS CRITICAL: Average WebSocket auth {avg_duration:.3f}s too slow"
             assert avg_duration < 1.0, fBUSINESS CRITICAL: Average WebSocket auth {avg_duration:.3f}s too slow"
-            assert max_duration < 3.0, "fBUSINESS CRITICAL: Max WebSocket auth {max_duration:."3f"}s unacceptable"
+            assert max_duration < 3.0, "fBUSINESS CRITICAL: Max WebSocket auth {max_duration:.""3f""}s unacceptable"
             
             logger.info(f PASS:  MISSION CRITICAL: {len(successful_connections)} concurrent WebSocket auths, avg {avg_duration:.3f}s)"
-            logger.info(f PASS:  MISSION CRITICAL: {len(successful_connections)} concurrent WebSocket auths, avg {avg_duration:.3f}s)""
+            logger.info(f PASS:  MISSION CRITICAL: {len(successful_connections)} concurrent WebSocket auths, avg {avg_duration:."3f"}s)""
 
             
         finally:

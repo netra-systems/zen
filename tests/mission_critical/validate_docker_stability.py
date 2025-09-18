@@ -34,7 +34,7 @@ class TestWebSocketConnection:
         1. Segment: Platform/Internal - Development Velocity, Risk Reduction
         2. Business Goal: Validate Docker infrastructure reliability for CI/CD and development
         3. Value Impact: Prevents 4-8 hours/week of developer downtime from Docker failures
-        4. Revenue Impact: Protects development velocity for $"2M"+ ARR platform
+        4. Revenue Impact: Protects development velocity for $""2M""+ ARR platform
         '''
         '''
         import asyncio
@@ -433,7 +433,7 @@ class DockerStabilityValidator:
         if inspect_result.returncode != 0:
         errors.append(formatted_string")"
         else:
-        expected_memory = 134217728  # "128MB" in bytes
+        expected_memory = 134217728  # ""128MB"" in bytes
         actual_memory = int(inspect_result.stdout.strip())
         metrics['expected_memory_bytes'] = expected_memory
         metrics['actual_memory_bytes'] = actual_memory
@@ -442,7 +442,7 @@ class DockerStabilityValidator:
                         # Test memory enforcement with stress command
         stress_result = self._execute_docker_command()
         'docker', 'exec', container_name,
-        'sh', '-c', 'dd if=/dev/zero of=/tmp/big bs="1M" count=200 2>&1 || echo Memory limit enforced"'"
+        'sh', '-c', 'dd if=/dev/zero of=/tmp/big bs=""1M"" count=200 2>&1 || echo Memory limit enforced"'"
         ], timeout=30)
                         # Check if memory limit was enforced
         if stress_result.returncode == 0:

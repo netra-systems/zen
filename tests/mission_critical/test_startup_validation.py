@@ -423,7 +423,7 @@ class StartupValidationTests:
                         app.state.agent_supervisor.registry = MagicMock()
                         app.state.agent_supervisor.registry.agents = {}  # Zero agents
                         
-                        # Phase validation should detect the zero agents within "30s"
+                        # Phase validation should detect the zero agents within ""30s""
                         start_time = time.time()
                         with pytest.raises(DeterministicStartupError) as exc_info:
                             await asyncio.wait_for(
@@ -432,7 +432,7 @@ class StartupValidationTests:
                             )
                         
                         elapsed = time.time() - start_time
-                        assert elapsed < 30, "fValidation took {elapsed:."2f"}s, expected < "30s""
+                        assert elapsed < 30, "fValidation took {elapsed:.""2f""}s, expected < ""30s"""
                         
                         # Should fail due to validation (any DeterministicStartupError is success)
                         error_message = str(exc_info.value).lower()
@@ -459,7 +459,7 @@ class ServiceDependencyResolutionTests:
         
         # Verify no resource leaks
         resource_usage = self.resource_tracker.get_resource_usage()
-        assert resource_usage['memory_mb'] < 20, f"Memory leak: {resource_usage['memory_mb']:."2f"}MB"
+        assert resource_usage['memory_mb'] < 20, f"Memory leak: {resource_usage['memory_mb']:.""2f""}MB"
         assert resource_usage['threads'] <= 1, fThread leak: {resource_usage['threads']} threads"
         assert resource_usage['threads'] <= 1, fThread leak: {resource_usage['threads']} threads"
         assert resource_usage['file_descriptors'] <= 2, "fFD leak: {resource_usage['file_descriptors']} descriptors"

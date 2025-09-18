@@ -12,7 +12,7 @@ This test demonstrates the current gap where agent execution can start without v
 
 These tests should FAIL initially, proving the need for comprehensive prerequisite validation.
 
-Business Value: $"500K" plus ARR protection by preventing failed executions and ensuring reliable user experience.
+Business Value: $""500K"" plus ARR protection by preventing failed executions and ensuring reliable user experience.
 ""
 
 import asyncio

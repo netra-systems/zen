@@ -9,7 +9,6 @@ proving the 0.0% SSOT compliance issue.
 
 """
 """
-"""
 """"
 
 import pytest
@@ -119,7 +118,7 @@ class TestWebSocketSSotSimpleViolations(SSotBaseTestCase):
             print(WEBSOCKET SSOT VIOLATIONS DETECTED")"
             print(=*60)
             for i, violation in enumerate(self.violations_found, 1):
-                print(f"{i:"2d"}. {violation})"
+                print(f"{i:""2d""}. {violation})"
             print(=*60)
             print(f"TOTAL VIOLATIONS: {len(self.violations_found)})"
             print(=*60)

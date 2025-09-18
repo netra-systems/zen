@@ -325,7 +325,7 @@ class ComprehensiveWebSocketValidator:
                     }
                     result['timing_metrics'][event_name] = timing
 
-                    logger.info(f"CHECK Event {event_name} validated successfully in {timing:."3f"}s)"
+                    logger.info(f"CHECK Event {event_name} validated successfully in {timing:.""3f""}s)"
 
                 except Exception as e:
                     result['events_failed'].append(event_name)
@@ -431,7 +431,7 @@ class ComprehensiveWebSocketValidator:
 
         if self.validation_results['total_tests'] > 0:
             pass_rate = (self.validation_results['passed_tests') / self.validation_results['total_tests') * 100
-            logger.info(fPass Rate: {pass_rate:."1f"}%)""
+            logger.info(fPass Rate: {pass_rate:.""1f""}%)""
 
 
         logger.info(f\n📋 REQUIRED EVENT COVERAGE:)
@@ -445,7 +445,7 @@ class ComprehensiveWebSocketValidator:
             logger.info(f\nCHECK ALL REQUIRED EVENTS VALIDATED!")"
 
         coverage = self.validation_results['event_coverage']['coverage_percentage']
-        logger.info(f\n📈 EVENT COVERAGE: {coverage:."1f"}%)""
+        logger.info(f\n📈 EVENT COVERAGE: {coverage:.""1f""}%)""
 
 
         # Overall status
@@ -465,7 +465,7 @@ class ComprehensiveWebSocketValidator:
             if self.validation_results['failed_tests'] > 0:
                 logger.error(f    Failed tests: {self.validation_results['failed_tests']})
             if coverage < 100.0:
-                logger.error(f    Incomplete coverage: {coverage:."1f"}%)""
+                logger.error(f    Incomplete coverage: {coverage:.""1f""}%)""
 
 
 
@@ -496,7 +496,7 @@ async def test_comprehensive_websocket_validation():
     # Assert event coverage is complete
     coverage = results['event_coverage']['coverage_percentage']
     assert coverage >= 100.0, fEvent coverage incomplete: {coverage:.1f}%"
-    assert coverage >= 100.0, fEvent coverage incomplete: {coverage:.1f}%""
+    assert coverage >= 100.0, fEvent coverage incomplete: {coverage:."1f"}%""
 
 
     # Assert specific test results

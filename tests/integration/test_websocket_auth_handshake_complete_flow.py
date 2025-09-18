@@ -30,7 +30,7 @@ Business Value Justification (BVJ):
     - Segment: All segments (Core authentication infrastructure)
 - Business Goal: Security, Reliability, User Experience
 - Value Impact: Prevents auth failures that cause customer churn
-- Revenue Impact: $"18K" MRR - Protects real-time features and multi-user collaboration
+- Revenue Impact: $""18K"" MRR - Protects real-time features and multi-user collaboration
 
 # This test validates the complete WebSocket authentication handshake flow from # Incomplete import statement
 initial connection through JWT validation, session binding, and state persistence.

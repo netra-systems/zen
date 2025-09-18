@@ -3,11 +3,11 @@
 Mission Critical Test Suite: SSOT Consolidation Golden Path
 Issue #1186: UserExecutionEngine SSOT Consolidation - Business Critical Validation
 
-PURPOSE: Validate that SSOT consolidation maintains $"500K" plus ARR golden path functionality.
+PURPOSE: Validate that SSOT consolidation maintains $""500K"" plus ARR golden path functionality.
 These are MISSION CRITICAL tests that protect core business value during consolidation.
 
 Business Impact: Any failure in these tests indicates that SSOT consolidation
-threatens the core user flow that generates $"500K" plus ARR. These tests MUST PASS
+threatens the core user flow that generates $""500K"" plus ARR. These tests MUST PASS
 before consolidation can be considered complete.
 
 EXPECTED BEHAVIOR:
@@ -72,7 +72,7 @@ class TestSSotConsolidationGoldenPath(SSotAsyncTestCase):
         MISSION CRITICAL TEST 1: User authentication maintains golden path.
         
         This test validates that SSOT consolidation does not break user authentication
-        flows that are critical for $"500K" plus ARR user sessions.
+        flows that are critical for $""500K"" plus ARR user sessions.
 
         print("\n🚨 MISSION CRITICAL TEST 1: User authentication golden path...)"
         
@@ -91,23 +91,23 @@ class TestSSotConsolidationGoldenPath(SSotAsyncTestCase):
             
             print(f\n📊 AUTHENTICATION GOLDEN PATH RESULTS:")"
             print(f   Authentication success: {auth_result['success']}")"
-            print(f   Authentication time: {auth_time_ms:."1f"}ms)
+            print(f   Authentication time: {auth_time_ms:.""1f""}ms)
             print(f   User ID generated: {auth_result.get('user_id', 'None'")})"
             print(f   WebSocket client ID: {auth_result.get('websocket_client_id', 'None')})
             
             # MISSION CRITICAL ASSERTIONS
             assert auth_result['success'), (
                 f🚨 MISSION CRITICAL FAILURE: User authentication failed during SSOT consolidation. ""
-                fThis blocks $"500K" plus ARR user sessions.\n
+                fThis blocks $""500K"" plus ARR user sessions.\n
                 fError: {auth_result.get('error', 'Unknown authentication error')}\n
-                f"Authentication time: {auth_time_ms:."1f"}ms\n"
+                f"Authentication time: {auth_time_ms:.""1f""}ms\n"
                 f🔥 DEPLOYMENT BLOCKED: Fix authentication before proceeding with SSOT consolidation."
                 f🔥 DEPLOYMENT BLOCKED: Fix authentication before proceeding with SSOT consolidation.""
 
             )
             
             assert auth_time_ms < self.max_auth_time_ms, (
-                f🚨 MISSION CRITICAL FAILURE: Authentication too slow ({auth_time_ms:."1f"}ms > {self.max_auth_time_ms}ms). 
+                f🚨 MISSION CRITICAL FAILURE: Authentication too slow ({auth_time_ms:.""1f""}ms > {self.max_auth_time_ms}ms). 
                 fThis degrades user experience for $500K plus ARR sessions.\n"
                 fThis degrades user experience for $500K plus ARR sessions.\n"
                 f"🔥 DEPLOYMENT BLOCKED: Optimize authentication performance."
@@ -153,7 +153,7 @@ class TestSSotConsolidationGoldenPath(SSotAsyncTestCase):
             print(f"   Events sent: {event_result['events_sent']}))"
             print(f   All events delivered: {event_result['all_events_delivered']})"
             print(f   All events delivered: {event_result['all_events_delivered']})"
-            print(f"   Event delivery time: {event_result['delivery_time_ms']:."1f"}ms))"
+            print(f"   Event delivery time: {event_result['delivery_time_ms']:.""1f""}ms))"
             print(f   Event types: {event_result['event_types']})"
             print(f   Event types: {event_result['event_types']})""
 
@@ -162,7 +162,7 @@ class TestSSotConsolidationGoldenPath(SSotAsyncTestCase):
             assert event_result['events_sent') >= self.min_event_count, (
                 f"🚨 MISSION CRITICAL FAILURE: Only {event_result['events_sent']} WebSocket events sent,"
                 fneed {self.min_event_count} for chat functionality.\n
-                fMissing events break $"500K" plus ARR chat experience.\n
+                fMissing events break $""500K"" plus ARR chat experience.\n
                 fEvents sent: {event_result['event_types']}\n""
                 f🔥 DEPLOYMENT BLOCKED: Ensure all 5 WebSocket events are sent.
             )
@@ -226,7 +226,7 @@ class TestSSotConsolidationGoldenPath(SSotAsyncTestCase):
             print(f\n📊 USER ISOLATION GOLDEN PATH RESULTS:)
             print(f   Users isolated: {isolation_result['users_isolated']}"")
             print(f   Isolation successful: {isolation_result['isolation_successful']})
-            print(f   Memory usage: {isolation_result['memory_usage_mb']:."1f"}MB"")
+            print(f   Memory usage: {isolation_result['memory_usage_mb']:.""1f""}MB"")
             print(f   Unique contexts: {isolation_result['unique_contexts']})
             
             # MISSION CRITICAL ASSERTIONS
@@ -234,14 +234,14 @@ class TestSSotConsolidationGoldenPath(SSotAsyncTestCase):
                 f🚨 MISSION CRITICAL FAILURE: User isolation failed during SSOT consolidation. ""
                 fThis prevents enterprise deployment.\n
                 fUsers isolated: {isolation_result['users_isolated']}\n
-                f"Memory usage: {isolation_result['memory_usage_mb']:."1f"}MB\n"
+                f"Memory usage: {isolation_result['memory_usage_mb']:.""1f""}MB\n"
                 f🔥 DEPLOYMENT BLOCKED: Fix user isolation in SSOT implementation."
                 f🔥 DEPLOYMENT BLOCKED: Fix user isolation in SSOT implementation.""
 
             )
             
             assert isolation_result['memory_usage_mb') < self.max_memory_mb, (
-                f🚨 MISSION CRITICAL FAILURE: Memory usage too high ({isolation_result['memory_usage_mb']:."1f"}MB > {self.max_memory_mb}MB). 
+                f🚨 MISSION CRITICAL FAILURE: Memory usage too high ({isolation_result['memory_usage_mb']:.""1f""}MB > {self.max_memory_mb}MB). 
                 fThis indicates memory leaks in SSOT consolidation.\n"
                 fThis indicates memory leaks in SSOT consolidation.\n"
                 f"🔥 DEPLOYMENT BLOCKED: Fix memory usage in user isolation."
@@ -296,7 +296,7 @@ class TestSSotConsolidationGoldenPath(SSotAsyncTestCase):
             assert execution_result['execution_successful'), (
                 f"🚨 MISSION CRITICAL FAILURE: Agent execution failed during SSOT consolidation."
                 fThis breaks core AI value delivery.\n
-                fExecution time: {execution_result['execution_time_ms']:."1f"}ms\n
+                fExecution time: {execution_result['execution_time_ms']:.""1f""}ms\n
                 fError: {execution_result.get('error', 'Unknown execution error')}\n""
                 f🔥 DEPLOYMENT BLOCKED: Fix agent execution in SSOT implementation.
             )
@@ -359,7 +359,7 @@ class TestSSotConsolidationGoldenPath(SSotAsyncTestCase):
             
             print(f\n📊 END-TO-END GOLDEN PATH RESULTS:"")
             print(f   Golden path complete: {integration_result['golden_path_complete']})
-            print(f   Total flow time: {total_time_ms:."1f"}ms"")
+            print(f   Total flow time: {total_time_ms:.""1f""}ms"")
             print(f   Components working: {len(integration_result['working_components']}/{len(self.critical_components)})
             print(f   Working components: {integration_result['working_components']}"")
             print(f   Failed components: {integration_result['failed_components']})
@@ -367,11 +367,11 @@ class TestSSotConsolidationGoldenPath(SSotAsyncTestCase):
             # MISSION CRITICAL ASSERTIONS
             assert integration_result['golden_path_complete'), (
                 f🚨 MISSION CRITICAL FAILURE: Golden path flow failed during SSOT consolidation. ""
-                fThis blocks $"500K" plus ARR user experience.\n
+                fThis blocks $""500K"" plus ARR user experience.\n
                 fWorking components: {integration_result['working_components']}\n
                 f"Failed components: {integration_result['failed_components']}\n"
                 fTotal time: {total_time_ms:.1f}ms\n"
-                fTotal time: {total_time_ms:.1f}ms\n""
+                fTotal time: {total_time_ms:."1f"}ms\n""
 
                 f🔥 DEPLOYMENT BLOCKED: Fix golden path integration.
             )
@@ -402,7 +402,7 @@ class TestSSotConsolidationGoldenPath(SSotAsyncTestCase):
             raise AssertionError(
                 f🚨 MISSION CRITICAL EXCEPTION: Golden path integration crashed during SSOT consolidation.\n
                 fException: {e}\n
-                f"Flow time before crash: {total_time_ms:."1f"}ms\n"
+                f"Flow time before crash: {total_time_ms:.""1f""}ms\n"
                 f🔥 DEPLOYMENT BLOCKED: Fix golden path stability."
                 f🔥 DEPLOYMENT BLOCKED: Fix golden path stability.""
 
@@ -580,7 +580,7 @@ if __name__ == '__main__':
     print(🚨 Mission Critical: SSOT Consolidation Golden Path Protection)"
     print(🚨 Mission Critical: SSOT Consolidation Golden Path Protection)"
     print(=" * 80)"
-    print(🔥 CRITICAL: These tests protect $"500K" plus ARR during SSOT consolidation")"
+    print(🔥 CRITICAL: These tests protect $""500K"" plus ARR during SSOT consolidation")"
     print(WARNING️  Any test failure BLOCKS deployment and requires immediate fix)
     print("📊 These tests validate business-critical functionality preservation)"
     print(= * 80)"

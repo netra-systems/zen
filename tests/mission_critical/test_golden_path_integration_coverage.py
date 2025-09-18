@@ -4,7 +4,7 @@ Phase 3: Golden Path Business Value Validation for Issue #862
 
 Business Value Justification (BVJ):
     - Segment: Platform/Core - Golden Path Protection
-- Business Goal: Validate $"500K" plus ARR Golden Path functionality through service-independent integration tests
+- Business Goal: Validate $""500K"" plus ARR Golden Path functionality through service-independent integration tests
 - Value Impact: Comprehensive validation that core business functionality works end-to-end
 - Strategic Impact: Ensure chat functionality (90% of platform value) is protected by integration tests
 
@@ -17,7 +17,7 @@ This module validates Golden Path business functionality after Issue #862 fixes:
 4. End-to-end user flow from login to AI response works with service-independent infrastructure
 5. Business value delivery is measurable and validated through integration tests
 
-CRITICAL: These tests validate that $"500K" plus ARR business functionality works correctly.
+CRITICAL: These tests validate that $""500K"" plus ARR business functionality works correctly.
 "
 ""
 
@@ -40,7 +40,7 @@ class GoldenPathIntegrationCoverageTests:
     Test class to validate Golden Path business value through integration tests.
     
     This validates that the service-independent infrastructure protects and enables
-    comprehensive testing of core business functionality worth $"500K" plus ARR.
+    comprehensive testing of core business functionality worth $""500K"" plus ARR.
 "
 ""
 
@@ -56,7 +56,7 @@ class GoldenPathIntegrationCoverageTests:
         
         This is the ultimate Golden Path test: User login -> Agent execution -> AI response.
         
-        CRITICAL: This validates the core business flow that generates $"500K" plus ARR.
+        CRITICAL: This validates the core business flow that generates $""500K"" plus ARR.
         "
         ""
 
@@ -298,7 +298,7 @@ class GoldenPathIntegrationCoverageTests:
             assert len(recommendations['prioritized_actions') >= 3, "At least 3 actionable recommendations required"
             
             # Validate execution performance
-            assert execution_time < 30.0, "fEnd-to-end execution too slow: {execution_time:."2f"}s (max: "30s")"
+            assert execution_time < 30.0, "fEnd-to-end execution too slow: {execution_time:.""2f""}s (max: ""30s"")"
             
             # PHASE 5: Validate User Context Isolation
             exec_info = test_instance.get_execution_info()
@@ -426,7 +426,7 @@ class GoldenPathIntegrationCoverageTests:
                 delivery_time = time.time() - start_time
                 
                 # Validate event delivery performance (critical for user experience)
-                assert delivery_time < 0.1, f"Event delivery too slow: {delivery_time:."3f"}s for {event['type']}"
+                assert delivery_time < 0.1, f"Event delivery too slow: {delivery_time:.""3f""}s for {event['type']}"
                 
                 event_delivery_results.append({
                     'event_type': event['type'],
@@ -448,7 +448,7 @@ class GoldenPathIntegrationCoverageTests:
             
             avg_delivery_time = sum(result['delivery_time'] for result in event_delivery_results) / total_events
             assert avg_delivery_time < 0.5, \
-                fAverage event delivery time {avg_delivery_time:."3f"}s too slow for real-time UX""
+                fAverage event delivery time {avg_delivery_time:.""3f""}s too slow for real-time UX""
 
             
             await test_instance.asyncTearDown()
@@ -499,8 +499,8 @@ class GoldenPathIntegrationCoverageTests:
             
             # Multi-Agent Business Value Workflow
             business_scenario = {
-                'customer_request': 'Our company spends $"500K" annually on cloud infrastructure. We need comprehensive optimization across AWS, Azure, and GCP with ROI analysis.',
-                'expected_outcome': 'Multi-cloud optimization strategy with $"150K"+ annual savings',
+                'customer_request': 'Our company spends $""500K"" annually on cloud infrastructure. We need comprehensive optimization across AWS, Azure, and GCP with ROI analysis.',
+                'expected_outcome': 'Multi-cloud optimization strategy with $""150K""+ annual savings',
                 'business_criticality': 'high',
                 'complexity': 'enterprise_level'
             }
@@ -731,7 +731,7 @@ class GoldenPathIntegrationCoverageTests:
         """
         ""
 
-        Validate that service-independent infrastructure protects $"500K" plus ARR business value.
+        Validate that service-independent infrastructure protects $""500K"" plus ARR business value.
         
         This meta-test validates that the infrastructure changes successfully protect
         business functionality rather than introducing new risks.
@@ -839,7 +839,7 @@ class GoldenPathIntegrationCoverageTests:
         )
         
         assert business_value_protected, \
-            Service-independent infrastructure does not adequately protect $"500K" plus ARR business value
+            Service-independent infrastructure does not adequately protect $""500K"" plus ARR business value
 
 
 class GoldenPathPerformanceRequirementsTests:
@@ -848,7 +848,7 @@ class GoldenPathPerformanceRequirementsTests:
     Test class to validate Golden Path performance requirements are met.
     
     This ensures the service-independent infrastructure meets performance
-    requirements for production use with $"500K" plus ARR business workloads.
+    requirements for production use with $""500K"" plus ARR business workloads.
     
     
     @pytest.mark.integration
@@ -888,7 +888,7 @@ class GoldenPathPerformanceRequirementsTests:
             
             performance_results['test_initialization'] = initialization_time
             assert initialization_time <= performance_requirements['test_initialization'], \
-                fTest initialization too slow: {initialization_time:."2f"}s (max: {performance_requirements['test_initialization']}s)""
+                fTest initialization too slow: {initialization_time:.""2f""}s (max: {performance_requirements['test_initialization']}s)""
 
             
             # Test 2: Service Detection Performance
@@ -900,7 +900,7 @@ class GoldenPathPerformanceRequirementsTests:
             
             performance_results['service_detection'] = service_detection_time
             assert service_detection_time <= performance_requirements['service_detection'], \
-                fService detection too slow: {service_detection_time:."3f"}s (max: {performance_requirements['service_detection']}s)""
+                fService detection too slow: {service_detection_time:.""3f""}s (max: {performance_requirements['service_detection']}s)""
             
             # Test 3: Execution Strategy Performance
             start_time = time.time()
@@ -909,7 +909,7 @@ class GoldenPathPerformanceRequirementsTests:
             
             performance_results['execution_strategy'] = strategy_time
             assert strategy_time <= performance_requirements['execution_strategy'], \
-                fExecution strategy too slow: {strategy_time:."3f"}s (max: {performance_requirements['execution_strategy']}s)""
+                fExecution strategy too slow: {strategy_time:.""3f""}s (max: {performance_requirements['execution_strategy']}s)""
 
             
             # Test 4: WebSocket Event Performance
@@ -928,7 +928,7 @@ class GoldenPathPerformanceRequirementsTests:
                 performance_results['websocket_events'] = event_time
                 
                 assert event_time <= performance_requirements['websocket_events'], \
-                    fWebSocket event too slow: {event_time:."3f"}s (max: {performance_requirements['websocket_events']}s)""
+                    fWebSocket event too slow: {event_time:.""3f""}s (max: {performance_requirements['websocket_events']}s)""
 
             
             # Test 5: Business Value Calculation Performance
@@ -944,7 +944,7 @@ class GoldenPathPerformanceRequirementsTests:
             
             performance_results['business_value_calculation'] = business_value_time
             assert business_value_time <= performance_requirements['business_value_calculation'], \
-                fBusiness value calculation too slow: {business_value_time:."3f"}s (max: {performance_requirements['business_value_calculation']}s)""
+                fBusiness value calculation too slow: {business_value_time:.""3f""}s (max: {performance_requirements['business_value_calculation']}s)""
 
             
             await test_instance.asyncTearDown()
@@ -954,7 +954,7 @@ class GoldenPathPerformanceRequirementsTests:
             max_total_response_time = 5.0  # Maximum 5 seconds for complete workflow
             
             assert total_response_time <= max_total_response_time, \
-                fTotal response time too slow: {total_response_time:."2f"}s (max: {max_total_response_time}s)
+                fTotal response time too slow: {total_response_time:.""2f""}s (max: {max_total_response_time}s)
             
             logger.info(fGolden Path performance requirements VALIDATED: {performance_results}")"
             
@@ -1003,7 +1003,7 @@ class GoldenPathPerformanceRequirementsTests:
                 
                 # Validate per-user performance
                 assert user_initialization_time <= max_per_user_initialization_time, \
-                    fUser {user_id} initialization too slow: {user_initialization_time:."2f"}s""
+                    fUser {user_id} initialization too slow: {user_initialization_time:.""2f""}s""
 
             
             total_initialization_time = time.time() - start_time
@@ -1015,7 +1015,7 @@ class GoldenPathPerformanceRequirementsTests:
             
             assert avg_initialization_time <= max_per_user_initialization_time, \
                 fAverage initialization time too slow: {avg_initialization_time:.2f}s"
-                fAverage initialization time too slow: {avg_initialization_time:.2f}s""
+                fAverage initialization time too slow: {avg_initialization_time:."2f"}s""
 
             
             # Validate user isolation

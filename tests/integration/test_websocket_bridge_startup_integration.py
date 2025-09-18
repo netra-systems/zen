@@ -450,7 +450,7 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         test_results[success_rate] = success_rate
         test_results[overall_status] = "PASSED if success_rate == 100 else FAILED"
         
-        logger.info(f\n[U+1F3C1] Test Suite Complete: {test_results['passed_tests']}/{test_results['total_tests']} tests passed ({success_rate:."1f"}%))
+        logger.info(f\n[U+1F3C1] Test Suite Complete: {test_results['passed_tests']}/{test_results['total_tests']} tests passed ({success_rate:.""1f""}%))
         
         if test_results[overall_status] == "PASSED:"
             logger.info( CELEBRATION:  ALL INTEGRATION TESTS PASSED - WebSocket bridge startup flow is working correctly")"
@@ -498,7 +498,7 @@ if __name__ == __main__:
         
         print(f\n CHART:  INTEGRATION TEST RESULTS:")"
         print(fOverall Status: {results['overall_status']}")"
-        print(fSuccess Rate: {results['success_rate']:."1f"}%")"
+        print(fSuccess Rate: {results['success_rate']:.""1f""}%")"
         print(fTests: {results['passed_tests']}/{results['total_tests']} passed")"
         
         if results['overall_status'] == 'FAILED':

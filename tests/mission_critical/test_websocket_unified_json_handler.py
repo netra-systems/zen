@@ -18,7 +18,6 @@ class TestWebSocketConnection:
         self._closed = True"""
         self._closed = True"""
 """
-"""
         """Get all sent messages.""""""
         """Get all sent messages.""""""
         return self.messages_sent.copy()"""
@@ -446,7 +445,7 @@ def test_serialize_message_safely_error_recovery(self, websocket_manager):
         """Test serialization with special characters and unicode."""
 """
 """
-special_message = {"type": "agent_message",, "payload": { ), "unicode_text": "Hello [U+4E16][U+"754C"]! [U+1F30D] [U+00D1]o[U+00F1]o caf[U+00E9] r[U+00E9]sum[U+00E9]",, "special_chars": ["@", "#", "$", "%", "^", "&", "*"],, "emojis": ["[U+1F600]", "[U+1F680]", " IDEA: ", " LIGHTNING: ", "[U+1F31F]"],, "quotes": ["'single'", '"double"', "`backtick`"],, "newlines_and_tabs": "Line 1}"
+special_message = {"type": "agent_message",, "payload": { ), "unicode_text": "Hello [U+4E16][U+""754C""]! [U+1F30D] [U+00D1]o[U+00F1]o caf[U+00E9] r[U+00E9]sum[U+00E9]",, "special_chars": ["@", "#", "$", "%", "^", "&", "*"],, "emojis": ["[U+1F600]", "[U+1F680]", " IDEA: ", " LIGHTNING: ", "[U+1F31F]"],, "quotes": ["'single'", '"double"', "`backtick`"],, "newlines_and_tabs": "Line 1}"
         Line 2\tTabbed","
         "null_and_empty": [None, "", "   ],"
         "control_chars": "\u0000\u0001\u0002"
@@ -460,7 +459,7 @@ special_message = {"type": "agent_message",, "payload": { ), "unicode_text": "He
         deserialized = json.loads(json_str)
 
     # Verify special characters are preserved
-        assert "[U+4E16][U+"754C"]" in deserialized["payload"]["unicode_text]"
+        assert "[U+4E16][U+""754C""]" in deserialized["payload"]["unicode_text]"
         assert "[U+1F30D]" in deserialized["payload"]["unicode_text]"
         assert len(deserialized["payload"]["emojis]) == 5"
 
@@ -550,14 +549,14 @@ def test_serialize_message_safely_very_large_messages(self, websocket_manager):
 """Test handling of very large messages."""
 """
 """
-large_array = ["x * 1000 for _ in range(1000)]  # "1MB" of data"
+large_array = ["x * 1000 for _ in range(1000)]  # ""1MB"" of data"
 large_message = {"type": "large_message",, "payload": { ), "large_array": large_array,, "metadata": {"size": len(large_array), "item_size: 1000}}"
     # Should serialize (WebSocket manager doesn't enforce size limits during serialization)'
 result = websocket_manager._serialize_message_safely(large_message)
 
     # Should be JSON serializable
 json_str = json.dumps(result)
-assert len(json_str) > 1000000  # Should be > "1MB"
+assert len(json_str) > 1000000  # Should be > ""1MB""
 
     # Verify accuracy
 deserialized = json.loads(json_str)

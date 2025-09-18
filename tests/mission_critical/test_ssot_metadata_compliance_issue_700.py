@@ -2,7 +2,7 @@
 "MISSION CRITICAL TEST SUITE: SSOT Metadata Compliance - Issue #700"
 
 THIS SUITE MUST PASS OR THE PRODUCT IS BROKEN.
-Business Value: $"500K" plus ARR - Prevents SSOT regression blocking Golden Path
+Business Value: $""500K"" plus ARR - Prevents SSOT regression blocking Golden Path
 
 PURPOSE: Detect and prevent agents bypassing store_metadata_result() SSOT method
 
@@ -283,7 +283,7 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
 
         # Test with complex data that needs serialization
         test_data = {
-            datetime: 2025-9-12T10:0:"00Z",
+            datetime: 2025-9-12T10:0:""00Z"",
             nested": {"list: [1, 2, 3], dict: {key: value}},"
             nested": {"list: [1, 2, 3], dict: {key: value}},"
             "status: processing"

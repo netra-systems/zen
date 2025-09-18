@@ -3,7 +3,7 @@
 WebSocket Event Typo Prevention - Mission Critical Tests
 
 Business Value Justification (BVJ):
-    - Segment: Platform/Internal - $"500K" plus ARR Revenue Protection
+    - Segment: Platform/Internal - $""500K"" plus ARR Revenue Protection
 - Business Goal: Prevent silent failures that block revenue-generating chat interactions  
 - Value Impact: Bulletproof typo detection for 5 critical events delivering 90% of platform value
 - Strategic Impact: MISSION CRITICAL - These tests protect the primary revenue stream
@@ -73,7 +73,7 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
 
     Mission Critical Tests for WebSocket Event Typo Prevention.
     
-    These tests protect $"500K" plus ARR by ensuring event name typos are detected
+    These tests protect $""500K"" plus ARR by ensuring event name typos are detected
     and handled appropriately to prevent revenue-impacting silent failures.
     
     Focus: Comprehensive typo detection, business impact assessment, performance.
@@ -282,7 +282,7 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
         
         self.assertEqual(total_typos_detected, total_typos_tested,
                         fALL typos must be detected! Detected {total_typos_detected}/{total_typos_tested} ({detection_rate:.1f}%))"
-                        fALL typos must be detected! Detected {total_typos_detected}/{total_typos_tested} ({detection_rate:.1f}%))""
+                        fALL typos must be detected! Detected {total_typos_detected}/{total_typos_tested} ({detection_rate:."1f"}%))""
 
         
         # Record comprehensive metrics
@@ -541,8 +541,8 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
         # PERFORMANCE ASSERTIONS
         self.assertLess(baseline_avg_ms, 1.0, fBaseline validation should be under 1ms, got {baseline_avg_ms:.3f}ms)"
         self.assertLess(baseline_avg_ms, 1.0, fBaseline validation should be under 1ms, got {baseline_avg_ms:.3f}ms)"
-        self.assertLess(typo_avg_ms, 2.0, f"Typo validation should be under "2ms", got {typo_avg_ms:."3f"}ms)"
-        self.assertLess(performance_impact, 100.0, fTypo validation overhead should be under 100%, got {performance_impact:."1f"}%)""
+        self.assertLess(typo_avg_ms, 2.0, f"Typo validation should be under ""2ms"", got {typo_avg_ms:.""3f""}ms)"
+        self.assertLess(performance_impact, 100.0, fTypo validation overhead should be under 100%, got {performance_impact:.""1f""}%)""
 
         
         # Record performance metrics
@@ -778,7 +778,7 @@ class WebSocketEventTypoPreventionTests(SSotAsyncTestCase):
         
         # MISSION CRITICAL ASSERTION: 100% detection required for revenue protection
         self.assertEqual(detection_rate, 100.0, 
-                        fMISSION CRITICAL: 100% typo detection required for revenue protection. Got {detection_rate:."1f"}%")"
+                        fMISSION CRITICAL: 100% typo detection required for revenue protection. Got {detection_rate:.""1f""}%")"
                         
         return report
         
@@ -899,7 +899,7 @@ class WebSocketEventTypoProductionSimulationTests(SSotAsyncTestCase):
         # Performance and detection assertions
         self.assertGreater(detection_rate, 90.0, fShould detect >90% of typos in high traffic, got {detection_rate:.1f}%)"
         self.assertGreater(detection_rate, 90.0, fShould detect >90% of typos in high traffic, got {detection_rate:.1f}%)"
-        self.assertLess(avg_performance, 2.0, f"Average validation should be under "2ms", got {avg_performance:."3f"}ms)"
+        self.assertLess(avg_performance, 2.0, f"Average validation should be under ""2ms"", got {avg_performance:.""3f""}ms)"
         
         # Record load test metrics
         self.record_metric(load_test_events, events_processed)

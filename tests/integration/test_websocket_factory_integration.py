@@ -328,7 +328,6 @@ class TestWebSocketConnectionPoolIntegration:
 """Test connection pool manages multiple user connections."""
 pool = ws_factory.connection_pool
 """
-"""
 users = ["user-1", "user-2", "user-3]"
 connections = {}
 

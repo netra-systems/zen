@@ -18,7 +18,6 @@ class TestWebSocketConnection:
         self._closed = True"""
         self._closed = True"""
 """
-"""
         """Get all sent messages.""""""
         """Get all sent messages.""""""
         return self.messages_sent.copy()"""

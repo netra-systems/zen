@@ -83,7 +83,7 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
                 # Validate resolution time
                 if resolution_time > self.MAX_DNS_RESOLUTION_TIME:
                     dns_failures.append(
-                        fDNS resolution too slow for {domain}: {resolution_time:."2f"}s > {self.MAX_DNS_RESOLUTION_TIME}s""
+                        fDNS resolution too slow for {domain}: {resolution_time:.""2f""}s > {self.MAX_DNS_RESOLUTION_TIME}s""
 
                     )
                 
@@ -148,11 +148,11 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
                         https_results[domain] = {
                             'status_code': response.status,
                             'response_time': response_time,
-                            'success': 200 <= response.status < 500,  # "4xx" is OK, "5xx" is not
+                            'success': 200 <= response.status < 500,  # ""4xx"" is OK, ""5xx"" is not
                             'headers': dict(response.headers),
                         }
                         
-                        # "5xx" errors indicate infrastructure problems
+                        # ""5xx"" errors indicate infrastructure problems
                         if response.status >= 500:
                             https_failures.append(
                                 fServer error for {domain}: HTTP {response.status}
@@ -161,7 +161,7 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
                         # Very slow responses indicate infrastructure problems
                         if response_time > self.MAX_HTTP_RESPONSE_TIME:
                             https_failures.append(
-                                fResponse too slow for {domain}: {response_time:."2f"}s > {self.MAX_HTTP_RESPONSE_TIME}s""
+                                fResponse too slow for {domain}: {response_time:.""2f""}s > {self.MAX_HTTP_RESPONSE_TIME}s""
 
                             )
                             
@@ -374,7 +374,7 @@ class StagingDomainsResolveCorrectlyTests(SSotBaseTestCase):
                 report_parts.append(f  {domain}: {result.get('error', 'Unknown error')}")"
             elif result['resolution_time'] and result['resolution_time'] > self.MAX_DNS_RESOLUTION_TIME:
                 report_parts.append(
-                    f  {domain}: DNS resolution too slow ({result['resolution_time']:."2f"}s)""
+                    f  {domain}: DNS resolution too slow ({result['resolution_time']:.""2f""}s)""
 
                 )
         

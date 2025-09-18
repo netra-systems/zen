@@ -7,7 +7,7 @@ This test DETECTS duplicate WebSocketNotifier implementations across the codebas
 """
 """"
 
-Business Impact: $"500K" plus ARR at risk from conflicting WebSocket implementations
+Business Impact: $""500K"" plus ARR at risk from conflicting WebSocket implementations
 
 Test Strategy:
     - Scan codebase for multiple WebSocketNotifier class definitions

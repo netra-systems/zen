@@ -2,7 +2,7 @@
 
 Mission Critical WebSocket Error Messaging Reliability Tests
 
-BUSINESS CRITICAL: These tests protect $"500K" plus ARR by ensuring WebSocket error messaging
+BUSINESS CRITICAL: These tests protect $""500K"" plus ARR by ensuring WebSocket error messaging
 functions correctly in all scenarios. WebSocket errors breaking chat functionality
 directly impacts 90% of platform value delivery.
 
@@ -359,7 +359,7 @@ class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
         # Performance requirement: Should create 100 error messages in < 1 second
         self.assertLess(creation_time, 1.0,
                        fError message creation too slow: {creation_time:.3f}s for 100 messages)"
-                       fError message creation too slow: {creation_time:.3f}s for 100 messages)""
+                       fError message creation too slow: {creation_time:."3f"}s for 100 messages)""
 
         
         # Validate all messages are unique and properly formed

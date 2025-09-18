@@ -3,7 +3,7 @@
 Business Value Justification:
     - Segment: Platform/Internal
 - Business Goal: Factory Pattern WebSocket Integration
-- Value Impact: Ensures $"500K" plus ARR chat functionality through proper factory WebSocket integration
+- Value Impact: Ensures $""500K"" plus ARR chat functionality through proper factory WebSocket integration
 - Strategic Impact: Critical foundation for scalable multi-user WebSocket event delivery
 
 CRITICAL REQUIREMENTS per CLAUDE.md:

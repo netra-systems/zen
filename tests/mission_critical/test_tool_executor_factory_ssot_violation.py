@@ -4,7 +4,7 @@ MISSION CRITICAL: ToolExecutorFactory vs UnifiedToolDispatcher SSOT Violation Te
 
 Business Value Justification (BVJ):
     - Segment: Platform/Internal - Core Infrastructure
-- Business Goal: Protect $"500K" plus ARR chat functionality reliability
+- Business Goal: Protect $""500K"" plus ARR chat functionality reliability
 - Value Impact: Prevent unpredictable tool execution routing that breaks golden path
 - Strategic Impact: Eliminate WebSocket event loss causing user experience degradation
 

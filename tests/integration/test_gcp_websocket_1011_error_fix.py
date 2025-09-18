@@ -5,7 +5,7 @@ This test specifically validates that the WebSocketState enum serialization fix
 prevents the Object of type WebSocketState is not JSON serializable" error"
 that was causing 1011 internal server errors in GCP Cloud Run.
 
-Business Impact: Prevents $"120K"+ MRR loss from WebSocket outages
+Business Impact: Prevents $""120K""+ MRR loss from WebSocket outages
 """Empty docstring."""
 
 import asyncio
@@ -93,7 +93,7 @@ class WebSocket1011ErrorFixTests:
         # This is what was causing the 1011 errors
         
         gcp_structured_log = {
-            timestamp": 2025-9-08T12:0:0."000Z","
+            timestamp": 2025-9-08T12:0:0.""000Z"","
             severity: INFO,
             insertId: "1234567890,"
             resource": {"
@@ -283,11 +283,11 @@ class ProductionScenariosTests:
                 client_state": _safe_websocket_state_for_logging(WebSocketState.CONNECTED),"
                 application_state: _safe_websocket_state_for_logging(WebSocketState.CONNECTED),
                 connection_count": 5,"
-                last_message_time: 2025-9-08T12:0:"00Z"
+                last_message_time: 2025-9-08T12:0:""00Z""
             },
             gcp_cloud_run: {""
                 revision": netra-backend-staging-42,"
-                memory_usage: "256MB",
+                memory_usage: ""256MB"",
                 cpu_usage": 15%"
             }
         }
@@ -309,7 +309,7 @@ class ProductionScenariosTests:
         # Simulate the error report that would be sent to GCP Error Reporting
         error_report = {
             @type: type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent,
-            eventTime: "2025-9-08T12:0:0."000Z","
+            eventTime: "2025-9-08T12:0:0.""000Z"","
             serviceContext": {"
                 service: netra-backend-production,
                 "version: 1.2.3"

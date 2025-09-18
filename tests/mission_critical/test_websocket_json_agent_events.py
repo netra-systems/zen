@@ -303,7 +303,7 @@ connection_id=test_user_context['connection_id']
                 
 
 tool_name = cost_analyzer_tool
-tool_input = {query: "analyze costs, period: "30d"}"
+tool_input = {query: "analyze costs, period: ""30d""}"
 
 await emitter.notify_tool_executing(TestAgent, test_user_context['run_id'], tool_name, tool_input)
 await asyncio.sleep(0.1)
@@ -324,7 +324,7 @@ deserialized = json.loads(json_str)
 
 assert deserialized["event_type] == tool_executing"
 assert deserialized[data][tool_name] == tool_name
-assert deserialized[data][tool_input"][period] == "30d""
+assert deserialized[data][tool_input"][period] == ""30d"""
 assert timestamp in deserialized
 
 await emitter.cleanup()
@@ -511,7 +511,7 @@ connection_id=test_user_context['connection_id']
                                                 
 
                                                 # Message with various special characters and unicode
-special_thinking = "Hello [U+1F31F] Special chars: [U+00E1][U+00E9][U+"00ED"][U+00F3][U+"00FA"] [U+00F1] [U+00E7][U+00C7] [U+4E2D][U+6587] pucck[U+438][U+439] [U+627][U+644][U+639][U+631][U+628][U+"064A"][U+629]"
+special_thinking = "Hello [U+1F31F] Special chars: [U+00E1][U+00E9][U+""00ED""][U+00F3][U+""00FA""] [U+00F1] [U+00E7][U+00C7] [U+4E2D][U+6587] pucck[U+438][U+439] [U+627][U+644][U+639][U+631][U+628][U+""064A""][U+629]"
 
 await emitter.notify_agent_thinking(TestAgent, test_user_context['run_id'], special_thinking)
 await asyncio.sleep(0.1)
@@ -642,8 +642,8 @@ connection_id=test_user_context['connection_id']
 
                                                                             # Create large tool result
 large_result = {
-"analysis: x * 10000,  # "10KB" of data"
-detailed_recommendations: [rec_ + y * 1000 for _ in range(50)],  # "50KB" more
+"analysis: x * 10000,  # ""10KB"" of data"
+detailed_recommendations: [rec_ + y * 1000 for _ in range(50)],  # ""50KB"" more
 metadata: {"
 metadata: {"
 "size: large,"

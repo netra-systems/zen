@@ -561,7 +561,7 @@ class ClickHouseLoggingRegressionPreventionTests:
             assert avg_time_per_call < 0.1, (
                 fLOGGING PERFORMANCE: Error handling took {avg_time_per_call:.3f}s per call, "
                 fLOGGING PERFORMANCE: Error handling took {avg_time_per_call:.3f}s per call, "
-                f"should be under 0."1s". Logging fix may have introduced performance regression."
+                f"should be under 0.""1s"". Logging fix may have introduced performance regression."
             )
     
     @contextmanager

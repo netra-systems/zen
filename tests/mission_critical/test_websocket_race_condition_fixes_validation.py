@@ -10,7 +10,7 @@ This test validates that the five-whys root cause analysis fixes are working pro
 4. Environment-aware service discovery
 5. Enhanced retry mechanisms
 
-Business Impact: $"500K" plus ARR protection through reliable WebSocket authentication.
+Business Impact: $""500K"" plus ARR protection through reliable WebSocket authentication.
 "
 ""
 
@@ -125,7 +125,7 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
                                    fShould apply Cloud Run stabilization delay of at least {base_delay}s)
             
             logger.info(f PASS:  Cloud Run handshake stabilization applied: {elapsed:.3f}s)"
-            logger.info(f PASS:  Cloud Run handshake stabilization applied: {elapsed:.3f}s)""
+            logger.info(f PASS:  Cloud Run handshake stabilization applied: {elapsed:."3f"}s)""
 
     
     @pytest.mark.asyncio
@@ -202,7 +202,7 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
         mock_auth_result.error = Transient auth failure
         
         with patch.object(self.authenticator._auth_service, 'authenticate_websocket') as mock_auth:
-            # First 2 calls fail with retryable error, "3rd" succeeds
+            # First 2 calls fail with retryable error, ""3rd"" succeeds
             mock_auth.side_effect = [
                 (mock_auth_result, None),  # First failure
                 (mock_auth_result, None),  # Second failure  
@@ -219,10 +219,10 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
             self.assertEqual(mock_auth.call_count, 3, Should attempt retry after transient failures)""
 
             
-            # Should have applied retry delays (at least 0."2s" for 2 retries)
+            # Should have applied retry delays (at least 0.""2s"" for 2 retries)
             self.assertGreater(elapsed, 0.15, "Should apply progressive retry delays)"
             
-            logger.info(f PASS:  Progressive retry working: {mock_auth.call_count} attempts in {elapsed:."3f"}s)""
+            logger.info(f PASS:  Progressive retry working: {mock_auth.call_count} attempts in {elapsed:.""3f""}s)""
 
     
     @pytest.mark.asyncio
@@ -408,7 +408,7 @@ class WebSocketRaceConditionFixesValidationTests(SSotAsyncTestCase):
             self.assertGreater(elapsed, 0.5, Should apply race condition timing protections)""
 
             
-            logger.info(f" PASS:  Full authentication flow with race protection: {elapsed:."3f"}s)"
+            logger.info(f" PASS:  Full authentication flow with race protection: {elapsed:.""3f""}s)"
 
 
 def test_race_condition_fixes_integration():
@@ -439,7 +439,7 @@ def test_race_condition_fixes_integration():
         # Check that max_retries is increased and retry_delays are progressive
         circuit_breaker = authenticator._circuit_breaker
         assert circuit_breaker['failure_threshold'] == 3, "fShould have sensitive threshold (3), got {circuit_breaker['failure_threshold']}"
-        assert circuit_breaker['reset_timeout'] == 15.0, f"Should have fast reset ("15s"), got {circuit_breaker['reset_timeout']}"
+        assert circuit_breaker['reset_timeout'] == 15.0, f"Should have fast reset (""15s""), got {circuit_breaker['reset_timeout']}"
         assert 'cloud_run_backoff' in circuit_breaker, Should have Cloud Run specific backoff"
         assert 'cloud_run_backoff' in circuit_breaker, Should have Cloud Run specific backoff""
 

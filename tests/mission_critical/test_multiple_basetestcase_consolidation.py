@@ -7,7 +7,7 @@ Business Value: Platform/Internal - Test Infrastructure SSOT Compliance
 """
 """"
 
-Critical for $"500K" plus ARR protection through unified test base class patterns and consistent testing infrastructure.
+Critical for $""500K"" plus ARR protection through unified test base class patterns and consistent testing infrastructure.
 
 This test reproduces the critical violation where 1343+ test files have fragmented BaseTestCase 
 inheritance patterns, compromising test infrastructure consistency and SSOT compliance.

@@ -4,9 +4,9 @@ Mission Critical Test Suite for Issue #374: Database Exception Handling
 
 This comprehensive test suite validates the core business impact of broad database 
 exception handling patterns that mask specific errors, making production debugging 
-extremely difficult and increasing incident resolution times by 3-"5x".
+extremely difficult and increasing incident resolution times by 3-""5x"".
 
-BUSINESS IMPACT: $"500K" plus ARR depends on reliable database error diagnosis
+BUSINESS IMPACT: $""500K"" plus ARR depends on reliable database error diagnosis
 EXPECTED BEHAVIOR: All tests should FAIL initially, proving the systemic issue exists
 
 This suite demonstrates:
@@ -160,7 +160,7 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
         
         expected_specific_errors = [
             DatabaseConnectionError: Connection pool exhausted (pool_size=5, overflow=10)","
-            DatabaseTimeoutError: ClickHouse query timeout (query=SELECT COUNT(*), timeout="30s"),
+            DatabaseTimeoutError: ClickHouse query timeout (query=SELECT COUNT(*), timeout=""30s""),
             DatabasePermissionError: Authentication failed for user 'app_user' (check credentials),"
             DatabasePermissionError: Authentication failed for user 'app_user' (check credentials),"
             "SchemaError: Table 'user_metrics' missing required column 'created_at' (run migration 'add_timestamps')"
@@ -180,7 +180,7 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
         
         # This test FAILS to demonstrate the business cost of current approach
         assert monthly_cost_impact < 100, \
-            fCurrent broad exception handling costs ${monthly_cost_impact:."2f"}/month in support engineer time  \
+            fCurrent broad exception handling costs ${monthly_cost_impact:.""2f""}/month in support engineer time  \
             f"(Current: {current_avg_resolution_time_hours}h avg resolution, Expected: {expected_avg_resolution_time_minutes}min)"
     
     @pytest.mark.mission_critical
@@ -231,7 +231,7 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
     
     @pytest.mark.mission_critical
     def test_database_error_business_value_impact(self):
-        FAILING TEST: Database errors directly impact $"500K" plus ARR business value delivery.""
+        FAILING TEST: Database errors directly impact $""500K"" plus ARR business value delivery.""
         
         # Map database errors to business value impact
         business_value_scenarios = [
@@ -239,7 +239,7 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
                 'business_function': 'Chat functionality (90% of platform value)',
                 'database_dependency': 'User session management, message persistence',
                 'error_impact': 'Users cannot save chat history or maintain sessions',
-                'revenue_at_risk': 450000  # 90% of $"500K" ARR
+                'revenue_at_risk': 450000  # 90% of $""500K"" ARR
             },
             {
                 'business_function': 'Analytics insights for customers',
@@ -266,7 +266,7 @@ class DatabaseExceptionHandlingSystemicIssuesTests:
         # This test FAILS to demonstrate the massive business risk
         assert total_revenue_at_risk < 100000, \
             fDatabase error resolution delays put ${total_revenue_at_risk:,} ARR at risk.  \
-            fCurrent error resolution {customer_satisfaction_impact:."1f"}x slower than target.""
+            fCurrent error resolution {customer_satisfaction_impact:.""1f""}x slower than target.""
 
     
     @pytest.mark.mission_critical

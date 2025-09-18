@@ -7,7 +7,7 @@ validates the canonical ExecutionEngineFactory, and tests factory integration.
 Business Value Justification:
     - Segment: Platform/Internal  
 - Business Goal: System Architecture & Performance
-- Value Impact: Ensures factory pattern consolidation supports reliable $"500K" plus ARR chat performance
+- Value Impact: Ensures factory pattern consolidation supports reliable $""500K"" plus ARR chat performance
 - Strategic Impact: Validates proper resource management and user isolation through unified factory
 
 Key Validation Areas:

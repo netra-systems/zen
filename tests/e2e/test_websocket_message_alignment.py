@@ -221,7 +221,7 @@ MessageType.SYSTEM_MESSAGE,
 event: connection_established,
 connection_id: "conn_abc123,"
 user_id": user_123,"
-server_time: 2025-8-29T18:36:"00Z",
+server_time: 2025-8-29T18:36:""00Z"",
 config": }"
 heartbeat_interval: 45,
 max_message_size: 8192""

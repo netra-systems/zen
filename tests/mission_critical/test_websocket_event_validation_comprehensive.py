@@ -4,7 +4,7 @@
 MISSION CRITICAL TEST SUITE: Comprehensive WebSocket Event Validation
 =====================================================================
 
-Business Value: $"500K" plus ARR - CRITICAL validation of WebSocket events that deliver AI value
+Business Value: $""500K"" plus ARR - CRITICAL validation of WebSocket events that deliver AI value
 
 COMPREHENSIVE COVERAGE:
     - Event Sequence Validation (5 critical events in correct order)
@@ -178,7 +178,7 @@ class ComprehensiveEventValidator:
         
         # Critical business value issues
         if business_result.business_value_score < 0.5:
-            issues.append(fBUSINESS: Value score {business_result.business_value_score:."2f"} below threshold)""
+            issues.append(fBUSINESS: Value score {business_result.business_value_score:.""2f""} below threshold)""
 
         
         if business_result.conversion_potential.probability < 0.2:
@@ -416,7 +416,7 @@ class ComprehensiveWebSocketEventValidationTests:
         # Verify content quality
         content_info = summary[validation_summary][content]
         assert content_info[average_business_score] >= 0.6, fContent business score {content_info['average_business_score']:.2f} below threshold"
-        assert content_info[average_business_score] >= 0.6, fContent business score {content_info['average_business_score']:.2f} below threshold""
+        assert content_info[average_business_score] >= 0.6, fContent business score {content_info['average_business_score']:."2f"} below threshold""
 
         
         # Verify timing performance
@@ -538,14 +538,14 @@ class ComprehensiveWebSocketEventValidationTests:
             
             # Good timing - short delays
             if i < len(fast_events) - 1:
-                await asyncio.sleep(0.2)  # "200ms" delay
+                await asyncio.sleep(0.2)  # ""200ms"" delay
         
         total_time = time.time() - start_time
         
         # Should pass timing validation
         timing_summary = validator.timing_validator.get_performance_summary()
         assert timing_summary[user_engagement_preserved], "Good timing should preserve user engagement"
-        assert timing_summary[performance_score"] >= 0.7, fPerformance score {timing_summary['performance_score']:."2f"} too low for good timing"
+        assert timing_summary[performance_score"] >= 0.7, fPerformance score {timing_summary['performance_score']:.""2f""} too low for good timing"
         
         # Now test slow timing that compromises engagement
         slow_validator = ComprehensiveEventValidator(user_id, f{session_id}_slow, free)
@@ -634,7 +634,7 @@ class ComprehensiveWebSocketEventValidationTests:
             result = validator.validate_event(event)
             
             # Should have high content quality
-            assert result[content_business_score] >= 0.6, f"High-quality content should score >= 0.6, got {result['content_business_score']:."2f"}"
+            assert result[content_business_score] >= 0.6, f"High-quality content should score >= 0.6, got {result['content_business_score']:.""2f""}"
         
         # Test low-quality content that should fail
         low_quality_validator = ComprehensiveEventValidator(user_id, f{session_id}_low, "free)"
@@ -773,13 +773,13 @@ class ComprehensiveWebSocketEventValidationTests:
         final_elapsed = time.time() - test_start_time
         
         # Assert test actually took time (preventing 0-second execution)
-        assert final_elapsed >= 0.1, f"Test completed in {final_elapsed:."3f"}s - this indicates 0-second execution which is forbidden"
+        assert final_elapsed >= 0.1, f"Test completed in {final_elapsed:.""3f""}s - this indicates 0-second execution which is forbidden"
         
         # Verify validator actually processed events
         summary = validator.get_comprehensive_summary()
         assert summary[validation_summary][sequence][total_sequences] > 0, "Validator should have processed events"
         
-        logger.info(f PASS:  Zero-second execution prevention working - test took {final_elapsed:."3f"}s")"
+        logger.info(f PASS:  Zero-second execution prevention working - test took {final_elapsed:.""3f""}s")"
     
     async def test_performance_under_concurrent_load(self, backend_url):
         Test event validation performance under concurrent load.""
@@ -859,13 +859,13 @@ class ComprehensiveWebSocketEventValidationTests:
                     logger.warning(fClient {i} validation issue: {e})
             
             # Verify performance characteristics
-            assert load_duration < 30.0, "fConcurrent load test took {load_duration:."1f"}s - too slow"
+            assert load_duration < 30.0, "fConcurrent load test took {load_duration:.""1f""}s - too slow"
             
             # Verify isolation between clients
             user_ids = {v.user_id for v in updated_validators}
             assert len(user_ids) == num_clients, f"Expected {num_clients} unique users, got {len(user_ids)}"
             
-            logger.info(f PASS:  Performance under concurrent load test passed - {num_clients} clients in {load_duration:."1f"}s")"
+            logger.info(f PASS:  Performance under concurrent load test passed - {num_clients} clients in {load_duration:.""1f""}s")"
             
         finally:
             # Clean up all clients

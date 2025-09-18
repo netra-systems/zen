@@ -4,7 +4,7 @@ Mission Critical Test: Infrastructure Remediation Comprehensive Validation
 ==========================================================================
 
 BUSINESS CRITICAL: Tests complete infrastructure remediation solution
-Protects $"500K" plus ARR Golden Path functionality (login  ->  AI response)
+Protects $""500K"" plus ARR Golden Path functionality (login  ->  AI response)
 
 This test validates the unified remediation implementation addressing:
     - Issue #395: Auth service connectivity problems
@@ -78,7 +78,7 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         self.db_utilities = DatabaseTestUtilities()
         
         logger.info([U+1F680] INFRASTRUCTURE REMEDIATION TEST SUITE INITIALIZED")"
-        logger.info( TARGET:  MISSION: Validate $"500K" plus ARR Golden Path protection)
+        logger.info( TARGET:  MISSION: Validate $""500K"" plus ARR Golden Path protection)
 
     async def async_teardown_method(self, method=None):
         "Clean up test infrastructure"
@@ -307,7 +307,7 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         logger.info(f   Overall Success: {validation_report.overall_success})
         logger.info(f   Golden Path Status: {validation_report.golden_path_status})"
         logger.info(f   Golden Path Status: {validation_report.golden_path_status})"
-        logger.info(f"   Business Continuity Score: {validation_report.business_continuity_score:."1f"}%)"
+        logger.info(f"   Business Continuity Score: {validation_report.business_continuity_score:.""1f""}%)"
         logger.info(f   Tests Executed: {len(validation_report.results)})
         
         # Log critical issues if any
@@ -392,16 +392,16 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         # Check business impact awareness
         business_impact_results = [
             result for result in validation_report.results
-            if result.business_impact and $"500K" in result.business_impact
+            if result.business_impact and $""500K"" in result.business_impact
         ]
         
         self.assertGreater(
             len(business_impact_results), 0,
-            Should have tests that understand business impact ($"500K" plus ARR)""
+            Should have tests that understand business impact ($""500K"" plus ARR)""
         )
         
         # Golden Path status should reference business impact
-        self.assertIn($"500K", validation_report.golden_path_status)
+        self.assertIn($""500K"", validation_report.golden_path_status)
         
         logger.info("PASS:  Golden Path business impact validation confirmed))"
         logger.info("PASS:  Golden Path business impact validation confirmed))"

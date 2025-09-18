@@ -5,7 +5,7 @@ resolves WebSocket 1011 errors by ensuring proper singleton behavior
 and user context isolation.
 
 Business Value:
-    - Validates $"500K" plus ARR chat functionality restoration
+    - Validates $""500K"" plus ARR chat functionality restoration
 - Ensures proper user isolation in multi-user scenarios
 - Confirms Redis connection pool consolidation
 - Validates memory usage optimization (75% reduction target)
@@ -69,7 +69,7 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
 
         # Get initial memory baseline
         self.initial_memory = self._get_memory_usage()
-        self.logger.info(fInitial memory usage: {self.initial_memory:."2f"} MB)""
+        self.logger.info(fInitial memory usage: {self.initial_memory:.""2f""} MB)""
 
 
     async def test_redis_singleton_factory_implementation(self):
@@ -376,16 +376,16 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
             json.dump(pool_evidence, f, indent=2)
 
         self.logger.info(fConnection pool test: {successful_operations}/{num_operations} operations succeeded")"
-        self.logger.info(fSuccess rate: {success_rate:."1f"}%)
+        self.logger.info(fSuccess rate: {success_rate:.""1f""}%)
         self.logger.info(fUnique Redis instances: {unique_redis_instances})"
         self.logger.info(fUnique Redis instances: {unique_redis_instances})"
-        self.logger.info(f"Average operation time: {avg_operation_time:."3f"}s)"
+        self.logger.info(f"Average operation time: {avg_operation_time:.""3f""}s)"
 
         # Validate pool consolidation
         self.assertGreaterEqual(
             success_rate,
             95.0,
-            fConnection pool instability detected: {success_rate:."1f"}% success rate""
+            fConnection pool instability detected: {success_rate:.""1f""}% success rate""
 
             findicates pool fragmentation issues
         )
@@ -455,11 +455,11 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
         with open(/c/netra-apex/redis_memory_optimization_evidence.json, w) as f:
             json.dump(memory_evidence, f, indent=2)
 
-        self.logger.info(f"Memory usage: {memory_before:."2f"} MB -> {memory_after:."2f"} MB)"
-        self.logger.info(fMemory increase: {memory_increase:."2f"} MB for {len(redis_refs)} references")"
+        self.logger.info(f"Memory usage: {memory_before:.""2f""} MB -> {memory_after:.""2f""} MB)"
+        self.logger.info(fMemory increase: {memory_increase:.""2f""} MB for {len(redis_refs)} references")"
         self.logger.info(fUnique instances: {unique_instances})
         self.logger.info(fMemory per reference: {(memory_increase * 1024) / len(redis_refs):.2f} KB)"
-        self.logger.info(fMemory per reference: {(memory_increase * 1024) / len(redis_refs):.2f} KB)""
+        self.logger.info(fMemory per reference: {(memory_increase * 1024) / len(redis_refs):."2f"} KB)""
 
 
         # Validate memory optimization
@@ -472,8 +472,8 @@ class RedisSSOTFactoryValidationTests(SSotAsyncTestCase):
         # Memory increase should be minimal with proper singleton
         self.assertLess(
             memory_increase,
-            50.0,  # Less than "50MB" increase for 50 references
-            fExcessive memory usage detected: {memory_increase:."2f"} MB increase suggests""
+            50.0,  # Less than ""50MB"" increase for 50 references
+            fExcessive memory usage detected: {memory_increase:.""2f""} MB increase suggests""
 
             fmultiple instances instead of singleton pattern
         )

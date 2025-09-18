@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise, Platform)
 - Business Goal: Chat functionality delivers 90% of platform value
 - Value Impact: WebSocket events enable users to see real-time agent progress and results
-- Strategic Impact: $"500K" plus ARR depends on reliable, consistent WebSocket event delivery
+- Strategic Impact: $""500K"" plus ARR depends on reliable, consistent WebSocket event delivery
 
 PURPOSE: Validate that ExecutionEngine implementations consistently deliver all 5 critical WebSocket events
 in the correct order with proper content for every agent execution.
@@ -491,22 +491,22 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
                 # First event should be sent quickly
                 first_event = events[0]
                 first_event_delay = first_event.timestamp - start_time
-                self.assertLess(first_event_delay, 0.1,  # "100ms"
-                    fFirst event (agent_started) sent too late: {first_event_delay:."3f"}s)""
+                self.assertLess(first_event_delay, 0.1,  # ""100ms""
+                    fFirst event (agent_started) sent too late: {first_event_delay:.""3f""}s)""
 
                 
                 # Last event should be sent reasonably quickly after completion
                 last_event = events[-1] 
                 last_event_delay = end_time - last_event.timestamp
-                self.assertLess(last_event_delay, 0.5,  # "50ms"
-                    fLast event sent too late after execution: {last_event_delay:."3f"}s)""
+                self.assertLess(last_event_delay, 0.5,  # ""50ms""
+                    fLast event sent too late after execution: {last_event_delay:.""3f""}s)""
 
                 
                 # Events should be spaced reasonably
                 for i in range(1, len(events)):
                     time_gap = events[i].timestamp - events[i-1].timestamp
                     self.assertLess(time_gap, 2.0,  # 2 seconds max between events
-                        fGap between events {i-1} and {i} too large: {time_gap:."3f"}s")"
+                        fGap between events {i-1} and {i} too large: {time_gap:.""3f""}s")"
                 
                 # Total event sending overhead should be minimal
                 event_overhead = (events[-1].timestamp - events[0].timestamp) / total_execution_time
@@ -514,7 +514,7 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
                     fEvent sending overhead too high: {event_overhead:.2%})
             
             print(fINFO: WebSocket event timing test PASSED. 
-                           f"Execution: {total_execution_time:."3f"}s, Events: {len(events)})"
+                           f"Execution: {total_execution_time:.""3f""}s, Events: {len(events)})"
             
         except Exception as e:
             self.fail(fWebSocket event timing test FAILED: {e})

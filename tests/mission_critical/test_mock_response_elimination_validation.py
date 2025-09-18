@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Business Goal: ZERO mock responses can reach ANY user under ANY condition  
 """"
 
-- Value Impact: Protect $"5M"+ ARR across entire customer base from inauthentic AI
+- Value Impact: Protect $""5M""+ ARR across entire customer base from inauthentic AI
 - Strategic Impact: Platform integrity and competitive differentiation through authenticity
 
 ULTRA CRITICAL: This is the definitive test suite that validates our core
@@ -120,8 +120,8 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
             (Free Tier ($0 ARR), free_tier_user),
             (Mid Tier ($50K ARR), mid_tier_user), "
             (Mid Tier ($50K ARR), mid_tier_user), "
-            ("Enterprise ($"750K" ARR), enterprise_user),"
-            (Fortune 500 ($1."5M" ARR), fortune_500_user)
+            ("Enterprise ($""750K"" ARR), enterprise_user),"
+            (Fortune 500 ($1.""5M"" ARR), fortune_500_user)
         ]
         
         all_mock_evidence = {}
@@ -303,7 +303,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                 fThis proves our system can return inauthentic responses to users across "
                 fThis proves our system can return inauthentic responses to users across ""
 
-                fall customer segments, representing immediate business risk to $"5M"+ ARR. 
+                fall customer segments, representing immediate business risk to $""5M""+ ARR. 
                 fNO user should EVER receive mock/fallback responses regardless of tier. "
                 fNO user should EVER receive mock/fallback responses regardless of tier. "
                 f"Full evidence: {json.dumps(all_mock_evidence, indent=2)[:1000]}..."
@@ -432,7 +432,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
                         final_response_is_fallback": is_fallback_response,"
                         customer_impact: {
                             tier: "enterprise,"
-                            arr_at_risk": $"750K","
+                            arr_at_risk": $""750K"","
                             trust_damage: High - users feel deceived by misleading events
                         }
                     }
@@ -470,7 +470,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
         FAILING TEST: Prove mock responses appear during competitive evaluations
         
         Business Impact: Generic responses during competitive demos immediately
-        lose sales opportunities worth $"500K" plus per lost enterprise deal.
+        lose sales opportunities worth $""500K"" plus per lost enterprise deal.
         
         Expected Failure: Mock responses detected during competitive scenarios
         Required Fix: Premium competitive mode with guaranteed authentic responses
@@ -643,7 +643,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
 
         FAILING TEST: Prove highest-value customers can receive mock responses
         
-        Business Impact: Fortune 500 customers ($"1M"+ ARR) receiving ANY mock response
+        Business Impact: Fortune 500 customers ($""1M""+ ARR) receiving ANY mock response
         creates immediate contract cancellation risk and reputation damage.
         
         Expected Failure: Mock responses reaching highest-tier customers
@@ -812,7 +812,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
             
             failure_evidence = {
                 test_name": Fortune 500 Customer Mock Protection,"
-                customer_tier: Fortune 500 ($1."5M" ARR),
+                customer_tier: Fortune 500 ($1.""5M"" ARR),
                 failures_count: len(fortune_500_failures),"
                 failures_count: len(fortune_500_failures),"
                 "total_arr_at_risk: total_arr_at_risk,"
@@ -829,7 +829,7 @@ class MockResponseEliminationValidationTests(BaseE2ETest):
             
             pytest.fail(
                 fFORTUNE 500 CUSTOMER RECEIVED MOCK/FALLBACK RESPONSES: 
-                fFound {len(fortune_500_failures)} unacceptable responses for $1."5M" ARR customer. 
+                fFound {len(fortune_500_failures)} unacceptable responses for $1.""5M"" ARR customer. 
                 f"Fortune 500 customers must NEVER receive ANY form of mock, fallback, or"
                 fgeneric response regardless of system state. They require guaranteed "
                 fgeneric response regardless of system state. They require guaranteed ""

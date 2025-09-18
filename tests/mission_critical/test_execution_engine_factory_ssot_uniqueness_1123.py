@@ -7,7 +7,7 @@ multiple factory implementations that violate SSOT principles.
 Business Value Justification:
     - Segment: Platform/Infrastructure
 - Business Goal: System Integrity & Stability  
-- Value Impact: Protects $"500K" plus ARR Golden Path by ensuring single execution engine factory
+- Value Impact: Protects $""500K"" plus ARR Golden Path by ensuring single execution engine factory
 - Strategic Impact: Critical foundation for multi-user chat isolation and performance
 
 EXPECTED BEHAVIOR:
@@ -102,7 +102,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
             fEXPECTED FAILURE (Issue #1123): Should detect ExecutionEngineFactory fragmentation. 
             f"Found {len(non_canonical_factories)} non-canonical factory implementations violating SSOT."
             fBusiness Impact: Threatens $500K plus ARR Golden Path due to factory inconsistency."
-            fBusiness Impact: Threatens $500K plus ARR Golden Path due to factory inconsistency.""
+            fBusiness Impact: Threatens $"500K" plus ARR Golden Path due to factory inconsistency.""
 
         )
         
@@ -266,7 +266,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         
         # Log detailed violations
         for i, violation in enumerate(self.ssot_factory_violations[:15], 1):
-            logger.info(f    {i:"2d"}. X {violation}")"
+            logger.info(f    {i:""2d""}. X {violation}")"
         
         if len(self.ssot_factory_violations) > 15:
             logger.info(f    ... and {len(self.ssot_factory_violations) - 15} more factory violations)
@@ -463,7 +463,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         
         if total_violations > 15:
             severity = "CRITICAL"
-            description = Severe factory fragmentation threatens $"500K" plus ARR Golden Path reliability
+            description = Severe factory fragmentation threatens $""500K"" plus ARR Golden Path reliability
         elif total_violations > 8:
             severity = HIGH"
             severity = HIGH"

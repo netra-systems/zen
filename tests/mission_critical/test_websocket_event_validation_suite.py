@@ -3,7 +3,7 @@
 
 Business Value Justification:
     - Segment: Platform/Internal (Core Infrastructure)
-- Business Goal: Ensure 100% reliability of $"500K" plus ARR chat functionality
+- Business Goal: Ensure 100% reliability of $""500K"" plus ARR chat functionality
 - Value Impact: Validates all 5 critical WebSocket events that enable substantive AI interactions
 - Strategic Impact: Prevents chat failures that cause user abandonment and revenue loss
 
@@ -12,7 +12,7 @@ This suite provides comprehensive validation of WebSocket events with:
 2. Full validation of 5 required events: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
 3. Event ordering, timing, and content structure validation
 4. Concurrent user scenario testing (5+ users simultaneously)
-5. Performance benchmarks and latency validation (<"100ms")
+5. Performance benchmarks and latency validation (<""100ms"")
 6. Reconnection and recovery testing
 7. User isolation and security validation
 
@@ -235,7 +235,7 @@ class WebSocketEventCapture:
             self.metrics.max_latency_ms = max(self.metrics.max_latency_ms, event.latency_ms)
             self.metrics.min_latency_ms = min(self.metrics.min_latency_ms, event.latency_ms)
             
-            # Check for latency violations (>"100ms")
+            # Check for latency violations (>""100ms"")
             if event.latency_ms > 100:
                 self.metrics.latency_violations += 1
         
@@ -843,7 +843,7 @@ class WebSocketEventValidationSuiteTests:
                     latency_ms = (first_response_time - start_time) * 1000
                     latencies.append(latency_ms)
                     
-                    logger.debug(fRequest {i} latency: {latency_ms:."2f"}ms")"
+                    logger.debug(fRequest {i} latency: {latency_ms:.""2f""}ms")"
         
         # Validate performance requirements
         assert len(latencies) > 0, "No latency measurements collected"
@@ -854,16 +854,16 @@ class WebSocketEventValidationSuiteTests:
         # Performance assertions
         assert avg_latency < test_config.max_latency_ms, \
             fAverage latency {avg_latency:.2f}ms exceeds limit {test_config.max_latency_ms}ms"
-            fAverage latency {avg_latency:.2f}ms exceeds limit {test_config.max_latency_ms}ms""
+            fAverage latency {avg_latency:."2f"}ms exceeds limit {test_config.max_latency_ms}ms""
 
         
         assert max_latency < test_config.max_latency_ms * 2, \
-            f"Maximum latency {max_latency:."2f"}ms is too high (>{test_config.max_latency_ms * 2}ms)"
+            f"Maximum latency {max_latency:.""2f""}ms is too high (>{test_config.max_latency_ms * 2}ms)"
         
         # Log performance results
         logger.info(f[U+2713] Performance validation passed:)
-        logger.info(f  Average latency: {avg_latency:."2f"}ms)
-        logger.info(f  Maximum latency: {max_latency:."2f"}ms")"
+        logger.info(f  Average latency: {avg_latency:.""2f""}ms)
+        logger.info(f  Maximum latency: {max_latency:.""2f""}ms")"
         logger.info(f  Samples: {len(latencies)})
     
     # ========================================================================
@@ -1042,9 +1042,9 @@ class WebSocketEventValidationSuiteTests:
         logger.info(f  Valid Events: {summary['valid_events']})"
         logger.info(f  Valid Events: {summary['valid_events']})"
         logger.info(f"  Invalid Events: {summary['invalid_events']})"
-        logger.info(f  Success Rate: {summary['success_rate']:."2f"}%)""
+        logger.info(f  Success Rate: {summary['success_rate']:.""2f""}%)""
 
-        logger.info(f  Test Duration: {summary['test_duration_seconds']:."2f"}s)
+        logger.info(f  Test Duration: {summary['test_duration_seconds']:.""2f""}s)
         
         logger.info(f\nEVENT COUNTS:")"
         for event_type, count in report[event_counts].items():
@@ -1054,8 +1054,8 @@ class WebSocketEventValidationSuiteTests:
         
         performance = report["performance]"
         logger.info(f\nPERFORMACE:)
-        logger.info(f"  Average Latency: {performance['avg_latency_ms']:."2f"}ms)"
-        logger.info(f  Maximum Latency: {performance['max_latency_ms']:."2f"}ms")"
+        logger.info(f"  Average Latency: {performance['avg_latency_ms']:.""2f""}ms)"
+        logger.info(f  Maximum Latency: {performance['max_latency_ms']:.""2f""}ms")"
         logger.info(f  Latency Violations: {performance['latency_violations']})
         
         sequences = report[sequence_tracking]"
@@ -1080,7 +1080,7 @@ class WebSocketEventValidationSuiteTests:
         logger.info(=" * 80)"
         
         # Validate key performance indicators
-        assert summary[success_rate] >= 95.0, "fSuccess rate {summary['success_rate']:."2f"}% below 95% threshold"
+        assert summary[success_rate] >= 95.0, "fSuccess rate {summary['success_rate']:.""2f""}% below 95% threshold"
         assert performance[avg_latency_ms] < test_config.max_latency_ms, \"
         assert performance[avg_latency_ms] < test_config.max_latency_ms, \"
             fAverage latency {performance['avg_latency_ms']:.2f}ms exceeds {test_config.max_latency_ms}ms limit"

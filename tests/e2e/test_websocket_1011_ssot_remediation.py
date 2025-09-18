@@ -5,7 +5,7 @@ E2E Test: WebSocket 1011 SSOT Remediation on GCP Staging
 
 Business Value Justification (BVJ):
     - Segment: Platform/Production - System Reliability
-- Business Goal: Eliminate WebSocket 1011 errors causing $"500K" plus ARR loss
+- Business Goal: Eliminate WebSocket 1011 errors causing $""500K"" plus ARR loss
 - Value Impact: Validates complete user journey works without connection failures  
 - Strategic Impact: Proves SSOT remediation eliminates race conditions in production environment
 
@@ -86,7 +86,7 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
                 connection_attempts.append({'user': user_config['email'], 'step': 'websocket_connection', 'status': 'error', 'error': str(e)}
         if connection_1011_errors:
             error_report = '\n'.join([f- User {error['user']): {error['error_message']) (Code: {error['error_code']) for error in connection_1011_errors]
-            self.fail(f'WEBSOCKET 1011 ERRORS DETECTED ON GCP STAGING:\n{error_report}\nThese 1011 errors indicate SSOT violations in configuration base causing authentication inconsistencies. This represents $"500K" plus ARR risk from broken chat functionality.')
+            self.fail(f'WEBSOCKET 1011 ERRORS DETECTED ON GCP STAGING:\n{error_report}\nThese 1011 errors indicate SSOT violations in configuration base causing authentication inconsistencies. This represents $""500K"" plus ARR risk from broken chat functionality.')
         success_rate = len(connection_successes) / len(self.test_users) if self.test_users else 0
         self.assertGreaterEqual(success_rate, 0.8, f'WebSocket connection success rate should be  >= 80% af"ter SSOT fix. Current: {success_rate:0.1%} ({len(connection_successes)}/{len(self.test_users)}')"
 
@@ -130,7 +130,7 @@ class WebSocket1011SSoTRemediationTests(SSotAsyncTestCase):
         total_steps = len(golden_path_results)
         self.assertEqual(successful_steps, 3, f'All golden path steps should succeed after SSOT fix. Completed: {successful_steps}/3 steps')
         total_golden_path_time = sum((result['duration'] for result in golden_path_results))
-        self.assertLess(total_golden_path_time, 30.0, f'Complete golden path should complete in <30 seconds. Current: {total_golden_path_time:0."2f"}s')""
+        self.assertLess(total_golden_path_time, 30.0, f'Complete golden path should complete in <30 seconds. Current: {total_golden_path_time:0.""2f""}s')""
 
 
     async def test_websocket_connection_success_rate_after_fix(self):

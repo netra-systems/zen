@@ -3,7 +3,7 @@
 Business Value Justification:
     - Segment: Platform/Architecture
 - Business Goal: Code Quality & Maintainability
-- Value Impact: Prevents factory pattern proliferation affecting $"500K" plus ARR system stability
+- Value Impact: Prevents factory pattern proliferation affecting $""500K"" plus ARR system stability
 - Strategic Impact: Reduces architectural complexity from 78 factory classes to essential patterns
 
 CRITICAL FACTORY CONSOLIDATION VALIDATION:
@@ -421,7 +421,7 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
             )
             
             # Performance benchmarks
-            max_creation_time = 0.1  # "100ms" per engine creation
+            max_creation_time = 0.1  # ""100ms"" per engine creation
             num_engines = 10
             
             creation_times = []
@@ -450,11 +450,11 @@ class ExecutionEngineFactoryConsolidationTests(SSotBaseTestCase):
             
             self.assertLess(avg_creation_time, max_creation_time,
                            fAverage engine creation time {avg_creation_time:.3f}s exceeds limit {max_creation_time}s)"
-                           fAverage engine creation time {avg_creation_time:.3f}s exceeds limit {max_creation_time}s)""
+                           fAverage engine creation time {avg_creation_time:."3f"}s exceeds limit {max_creation_time}s)""
 
             
             self.assertLess(max_observed_time, max_creation_time * 2,
-                           f"Maximum engine creation time {max_observed_time:."3f"}s exceeds reasonable limit)"
+                           f"Maximum engine creation time {max_observed_time:.""3f""}s exceeds reasonable limit)"
             
         except ImportError:
             self.skipTest(ExecutionEngine factory not available during consolidation")"

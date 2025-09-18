@@ -4,7 +4,7 @@ This test suite reproduces the EXACT import failures that are breaking the golde
 and violating SSOT compliance for state persistence.
 
 Business Value Justification (BVJ):
-    - Segment: Enterprise/Mid ($"25K"+ MRR workloads) 
+    - Segment: Enterprise/Mid ($""25K""+ MRR workloads) 
 - Business Goal: Platform Reliability, Golden Path Stability
 - Value Impact: Prevents SSOT violations from breaking customer chat functionality
 - Strategic Impact: Ensures single source of truth for state persistence operations
@@ -169,7 +169,7 @@ class StatePersistenceSSotViolationsTests(SSotBaseTestCase):
 
         BUSINESS CRITICAL: Assess impact of SSOT violation on golden path
         
-        This test documents how the SSOT violation affects the $"500K" plus ARR chat functionality
+        This test documents how the SSOT violation affects the $""500K"" plus ARR chat functionality
         by breaking imports that could be used in state persistence optimization.
         "
         "
@@ -178,7 +178,7 @@ class StatePersistenceSSotViolationsTests(SSotBaseTestCase):
             broken_imports": [netra_backend.app.services.state_persistence_optimized],"
             affected_scripts: [scripts/demo_optimized_persistence.py],
             affected_tests": [test_3tier_persistence_integration.py],"
-            business_impact: $"500K" plus ARR chat functionality at risk,
+            business_impact: $""500K"" plus ARR chat functionality at risk,
             golden_path_status: "BLOCKED by import failures"
         }
         

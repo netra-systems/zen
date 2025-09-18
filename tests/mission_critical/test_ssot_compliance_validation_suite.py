@@ -4,7 +4,7 @@
 SSOT Compliance Validation Test Suite - Issue #1075 Implementation
 Tests designed to FAIL initially and detect the specific SSOT violations identified in the analysis.
 
-CRITICAL BUSINESS IMPACT: These tests protect $"500K" plus ARR by ensuring SSOT architectural compliance.
+CRITICAL BUSINESS IMPACT: These tests protect $""500K"" plus ARR by ensuring SSOT architectural compliance.
 Violations detected lead to system instability, development inefficiency, and technical debt accumulation.
 
 Test Implementation Strategy:
@@ -395,7 +395,7 @@ class TestSsotComplianceValidationSuite(SSotBaseTestCase):
     SSOT Compliance Validation Test Suite
 
     These tests are designed to FAIL initially and detect specific SSOT violations.
-    Business Value: Protects $"500K" plus ARR by ensuring architectural compliance.
+    Business Value: Protects $""500K"" plus ARR by ensuring architectural compliance.
 "
 ""
 
@@ -636,7 +636,7 @@ class TestSsotComplianceValidationSuite(SSotBaseTestCase):
         compliance_percentage = max(0, 100 - (total_violations / 10))  # Rough calculation
         self.record_metric(estimated_compliance_percentage, compliance_percentage)
 
-        print(fEstimated SSOT Compliance: {compliance_percentage:."1f"}%"")
+        print(fEstimated SSOT Compliance: {compliance_percentage:.""1f""}%"")
         print(fBusiness Risk Level: {'CRITICAL' if compliance_percentage < 70 else 'HIGH' if compliance_percentage < 85 else 'MEDIUM'})
         print()
 

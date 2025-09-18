@@ -59,10 +59,10 @@
 
     # Patterns to search for message types
     # REMOVED_SYNTAX_ERROR: patterns = [ )
-    # REMOVED_SYNTAX_ERROR: r'["\'](type)["\']:\\\1*["\']([\\\1_]+)["\']',  # {"type": "message_type"}
-    # REMOVED_SYNTAX_ERROR: r'MessageType\\\1([\\\1_]+)',  # MessageType.USER_MESSAGE
-    # REMOVED_SYNTAX_ERROR: r'message_type\\\1*==?\\\1*["\']([\\\1_]+)["\']',  # message_type == "user"
-    # REMOVED_SYNTAX_ERROR: r'\\\1type\\\1*==?\\\1*["\']([\\\1_]+)["\']',  # msg.type == "agent"
+    # REMOVED_SYNTAX_ERROR: r'["\'](type)["\']:\\\\\1*["\']([\\\\\1_]+)["\']',  # {"type": "message_type"}
+    # REMOVED_SYNTAX_ERROR: r'MessageType\\\\\1([\\\\\1_]+)',  # MessageType.USER_MESSAGE
+    # REMOVED_SYNTAX_ERROR: r'message_type\\\\\1*==?\\\\\1*["\']([\\\\\1_]+)["\']',  # message_type == "user"
+    # REMOVED_SYNTAX_ERROR: r'\\\\\1type\\\\\1*==?\\\\\1*["\']([\\\\\1_]+)["\']',  # msg.type == "agent"
     
 
     # Common message types found in typical WebSocket systems

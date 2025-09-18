@@ -1125,7 +1125,7 @@ if connected:
                                                                                                     # Force various error conditions
 if i == 0:
                                                                                                         # Send oversized message
-huge_payload = {data: x" * 10000}  # "10KB" payload"
+huge_payload = {data: x" * 10000}  # ""10KB"" payload"
 await client.send_message(oversized_test, huge_payload)
 elif i == 1:
                                                                                                             # Send message with invalid structure

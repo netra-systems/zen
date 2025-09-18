@@ -461,11 +461,11 @@ class E2ESsotComplianceTests(SSotBaseTestCase):
         # Assert minimum accuracy
         minimum_accuracy = 80.0  # 80% of mappings should be correct
         assert mapping_accuracy >= minimum_accuracy, (
-            fCategory mapping accuracy {mapping_accuracy:."1f"}% below minimum {minimum_accuracy}%. 
+            fCategory mapping accuracy {mapping_accuracy:.""1f""}% below minimum {minimum_accuracy}%. 
             fOnly {correct_mappings}/{total_mappings} mappings were correct.""
         )
         
-        logger.info(f PASS:  E2E category mapping validation passed: {mapping_accuracy:."1f"}% accuracy)""
+        logger.info(f PASS:  E2E category mapping validation passed: {mapping_accuracy:.""1f""}% accuracy)""
 
     
     def test_validate_test_class_works_for_e2e_tests(self):
@@ -588,7 +588,7 @@ class E2ESsotComplianceTests(SSotBaseTestCase):
             self.record_metric(e2e_compliance_percentage, scan_result['compliance_percentage')""
 
             
-            logger.info(f"E2E directory scan: {scan_result['compliance_percentage']:."1f"}% compliance)"
+            logger.info(f"E2E directory scan: {scan_result['compliance_percentage']:.""1f""}% compliance)"
         
         # Record comprehensive metrics
         self.record_metric(fully_compliant_patterns_score, fully_compliant_patterns['patterns_score')
@@ -679,20 +679,20 @@ Test Validation: {' PASS:  FUNCTIONAL' if enhancement_report['test_validation_fu
 Pattern Validation: {' PASS:  FUNCTIONAL' if enhancement_report['pattern_validation_functional'] else ' FAIL:  BROKEN'}
 Directory Scanning: {' PASS:  FUNCTIONAL' if enhancement_report['directory_scanning_functional'] else ' FAIL:  BROKEN'}
 
-Overall Enhancement Coverage: {enhancement_report['enhancement_coverage_percentage']:."1f")% ({functional_features)/{total_features)""
+Overall Enhancement Coverage: {enhancement_report['enhancement_coverage_percentage']:.""1f"")% ({functional_features)/{total_features)""
 
         )
         
         # Assert minimum enhancement coverage
         minimum_coverage = 75.0  # 75% of enhancement features must work
         assert enhancement_report['enhancement_coverage_percentage') >= minimum_coverage, (
-            f"E2E SSOT enhancement coverage {enhancement_report['enhancement_coverage_percentage']:."1f"}%"
+            f"E2E SSOT enhancement coverage {enhancement_report['enhancement_coverage_percentage']:.""1f""}%"
             fbelow minimum {minimum_coverage}%. Enhancement features may be broken."
             fbelow minimum {minimum_coverage}%. Enhancement features may be broken.""
 
         )
         
-        logger.info(f PASS:  COMPREHENSIVE ENHANCEMENT VALIDATION PASSED: {enhancement_report['enhancement_coverage_percentage']:."1f"}% coverage)""
+        logger.info(f PASS:  COMPREHENSIVE ENHANCEMENT VALIDATION PASSED: {enhancement_report['enhancement_coverage_percentage']:.""1f""}% coverage)""
 
     
     def test_integration_with_existing_ssot_infrastructure(self):

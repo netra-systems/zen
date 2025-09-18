@@ -377,8 +377,8 @@ class WebSocketSSotMultipleManagersViolationDetectionTests(SSotBaseTestCase):
                 # Look for unique classes/functions not in unified_manager
                 unique_patterns = [
                     r'class\s+(?!UnifiedWebSocketManager)\w+',  # Classes other than imports
-                    r'def\\\1+\\\1+.*:(?!\\\1*""")',  # Functions with implementation
-                    r'async def\\\1+\\\1+.*:(?!\\\1*""")'  # Async functions with implementation
+                    r'def\\\\\1+\\\\\1+.*:(?!\\\\\1*""")',  # Functions with implementation
+                    r'async def\\\\\1+\\\\\1+.*:(?!\\\\\1*""")'  # Async functions with implementation
                 ]
                 
                 for pattern in unique_patterns:

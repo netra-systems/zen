@@ -3,7 +3,7 @@
 
 Business Value Justification:
     - Segment: Platform/Internal (Mission Critical Infrastructure)
-- Business Goal: Ensure $"500K" plus ARR chat functionality scales under production load
+- Business Goal: Ensure $""500K"" plus ARR chat functionality scales under production load
 - Value Impact: Validates WebSocket performance under concurrent user scenarios
 - Strategic Impact: Prevents system collapse under high load that causes revenue loss
 
@@ -80,8 +80,8 @@ class StressTestConfig:
     
     # Performance thresholds
     max_connection_time_ms: float = 5000.0  # 5 seconds to establish
-    max_message_latency_ms: float = 200.0   # "200ms" max latency
-    max_memory_growth_mb: float = 500.0     # "500MB" max memory growth
+    max_message_latency_ms: float = 200.0   # ""200ms"" max latency
+    max_memory_growth_mb: float = 500.0     # ""500MB"" max memory growth
     min_throughput_msgs_sec: float = 10.0   # 10 messages/sec minimum
     
     # Resilience testing
@@ -237,7 +237,7 @@ class StressTestMonitor:
             latency_stats = {
                 "avg_ms: statistics.mean(self.message_latencies),"
                 median_ms: statistics.median(self.message_latencies),
-                "p95_ms: statistics.quantiles(self.message_latencies, n=20)[18],  # "95th" percentile"
+                "p95_ms: statistics.quantiles(self.message_latencies, n=20)[18],  # ""95th"" percentile"
                 max_ms: max(self.message_latencies),
                 min_ms: min(self.message_latencies)"
                 min_ms: min(self.message_latencies)""
@@ -552,7 +552,7 @@ class WebSocketStressTestRunner:
                 current_memory = psutil.virtual_memory().used
                 memory_samples.append(current_memory)
                 
-                logger.info(fCycle {cycle + 1} memory: {current_memory / (1024*1024):."1f"} MB)""
+                logger.info(fCycle {cycle + 1} memory: {current_memory / (1024*1024):.""1f""} MB)""
 
                 
                 # Brief pause between cycles
@@ -731,9 +731,9 @@ class WebSocketStressValidationTests:
         logger.info(f[U+2713] Concurrent connection stress test passed:)"
         logger.info(f[U+2713] Concurrent connection stress test passed:)"
         logger.info(f"  Successful connections: {result['connections_successful']}/{result['connections_requested']})"
-        logger.info(f  Connection success rate: {result['connection_success_rate']:."1f"}%)""
+        logger.info(f  Connection success rate: {result['connection_success_rate']:.""1f""}%)""
 
-        logger.info(f  Memory growth: {memory_growth:."1f"}MB)""
+        logger.info(f  Memory growth: {memory_growth:.""1f""}MB)""
 
     
     @requires_docker
@@ -750,7 +750,7 @@ class WebSocketStressValidationTests:
         # Validate throughput
         throughput = performance[messages"][throughput_msgs_sec]"
         assert throughput >= stress_config.min_throughput_msgs_sec, \
-            fThroughput {throughput:."1f"} msgs/sec below minimum {stress_config.min_throughput_msgs_sec}""
+            fThroughput {throughput:.""1f""} msgs/sec below minimum {stress_config.min_throughput_msgs_sec}""
 
         
         # Validate latency
@@ -760,24 +760,24 @@ class WebSocketStressValidationTests:
 
             assert avg_latency <= stress_config.max_message_latency_ms, \
                 fAverage latency {avg_latency:.1f}ms exceeds {stress_config.max_message_latency_ms}ms"
-                fAverage latency {avg_latency:.1f}ms exceeds {stress_config.max_message_latency_ms}ms""
+                fAverage latency {avg_latency:."1f"}ms exceeds {stress_config.max_message_latency_ms}ms""
 
             
             p95_latency = performance[messages][latency_stats]["p95_ms]"
             assert p95_latency <= stress_config.max_message_latency_ms * 2, \
-                f95th percentile latency {p95_latency:."1f"}ms exceeds {stress_config.max_message_latency_ms * 2}ms""
+                f95th percentile latency {p95_latency:.""1f""}ms exceeds {stress_config.max_message_latency_ms * 2}ms""
 
         
         # Validate message success rate
         message_success_rate = performance[messages][success_rate_percent"]"
         assert message_success_rate >= 95.0, \
-            f"Message success rate {message_success_rate:."1f"}% below 95%"
+            f"Message success rate {message_success_rate:.""1f""}% below 95%"
         
         logger.info(f[U+2713] Message throughput stress test passed:)
-        logger.info(f  Throughput: {throughput:."1f"} msgs/sec)
-        logger.info(f  Message success rate: {message_success_rate:."1f"}%")"
+        logger.info(f  Throughput: {throughput:.""1f""} msgs/sec)
+        logger.info(f  Message success rate: {message_success_rate:.""1f""}%")"
         if performance[messages][latency_stats]:
-            logger.info(f  Average latency: {avg_latency:."1f"}ms)""
+            logger.info(f  Average latency: {avg_latency:.""1f""}ms)""
 
     
     @requires_docker
@@ -793,7 +793,7 @@ class WebSocketStressValidationTests:
         # Validate memory growth is within acceptable limits
         memory_growth = result[memory_growth_mb"]"
         assert memory_growth <= stress_config.max_memory_growth_mb, \
-            fMemory growth {memory_growth:."1f"}MB exceeds limit {stress_config.max_memory_growth_mb}MB""
+            fMemory growth {memory_growth:.""1f""}MB exceeds limit {stress_config.max_memory_growth_mb}MB""
 
         
         # Check that memory growth is not linear (indicating a leak)
@@ -814,13 +814,13 @@ class WebSocketStressValidationTests:
             # Check for excessive final memory growth
             final_growth_rate = growth_trend[-1] if growth_trend else 0
             assert final_growth_rate <= 50.0, \
-                fFinal cycle memory growth {final_growth_rate:."1f"}MB indicates potential leak
+                fFinal cycle memory growth {final_growth_rate:.""1f""}MB indicates potential leak
         
         logger.info(f"[U+2713] Memory leak test passed:)"
         logger.info(f  Cycles completed: {result['cycles_completed']}")"
-        logger.info(f  Memory growth: {memory_growth:."1f"}MB)
+        logger.info(f  Memory growth: {memory_growth:.""1f""}MB)
         logger.info(f  Final memory: {result['final_memory_mb']:.1f}MB)"
-        logger.info(f  Final memory: {result['final_memory_mb']:.1f}MB)""
+        logger.info(f  Final memory: {result['final_memory_mb']:."1f"}MB)""
 
     
     @requires_docker
@@ -835,7 +835,7 @@ class WebSocketStressValidationTests:
         reconnection_success_rate = result[reconnection_success_rate]
         assert reconnection_success_rate >= 80.0, \
             fReconnection success rate {reconnection_success_rate:.1f}% below 80%"
-            fReconnection success rate {reconnection_success_rate:.1f}% below 80%""
+            fReconnection success rate {reconnection_success_rate:."1f"}% below 80%""
 
         
         # Validate that at least some connections were dropped (test is working)
@@ -845,7 +845,7 @@ class WebSocketStressValidationTests:
         logger.info(f  Connections dropped: {result['connections_dropped']})"
         logger.info(f  Connections dropped: {result['connections_dropped']})"
         logger.info(f"  Reconnection attempts: {result['reconnection_attempts']})"
-        logger.info(f  Reconnection success rate: {reconnection_success_rate:."1f"}%)""
+        logger.info(f  Reconnection success rate: {reconnection_success_rate:.""1f""}%)""
 
     
     @requires_docker
@@ -869,26 +869,26 @@ class WebSocketStressValidationTests:
             
             # Validate system remained stable during extended test
             assert result["connection_success_rate] >= 85.0, \"
-                fExtended load test connection success rate {result['connection_success_rate']:."1f"}% below 85%""
+                fExtended load test connection success rate {result['connection_success_rate']:.""1f""}% below 85%""
 
             
             # Validate memory didn't grow excessively'
             memory_growth = performance[memory][growth_mb"]"
             assert memory_growth <= stress_config.max_memory_growth_mb * 1.5, \
-                f"Extended test memory growth {memory_growth:."1f"}MB exceeds limit"
+                f"Extended test memory growth {memory_growth:.""1f""}MB exceeds limit"
             
             # Validate CPU usage remained reasonable
             avg_cpu = performance[resource_usage][avg_cpu_percent]
             assert avg_cpu <= 80.0, \
                 fAverage CPU usage {avg_cpu:.1f}% too high during extended test"
-                fAverage CPU usage {avg_cpu:.1f}% too high during extended test""
+                fAverage CPU usage {avg_cpu:."1f"}% too high during extended test""
 
             
             logger.info(f"[U+2713] Extended load endurance test passed:)"
-            logger.info(f  Test duration: {performance['duration_seconds']:."1f"} seconds)
-            logger.info(f  Connection success rate: {result['connection_success_rate']:."1f"}%)
-            logger.info(f  Memory growth: {memory_growth:."1f"}MB")"
-            logger.info(f  Average CPU: {avg_cpu:."1f"}%)""
+            logger.info(f  Test duration: {performance['duration_seconds']:.""1f""} seconds)
+            logger.info(f  Connection success rate: {result['connection_success_rate']:.""1f""}%)
+            logger.info(f  Memory growth: {memory_growth:.""1f""}MB")"
+            logger.info(f  Average CPU: {avg_cpu:.""1f""}%)""
 
             
         finally:
@@ -958,9 +958,9 @@ class WebSocketStressValidationTests:
         logger.info(" PASS:  COMPREHENSIVE STRESS VALIDATION PASSED)"
         logger.info(= * 60)
         logger.info("STRESS TEST SUMMARY:)"
-        logger.info(f  Connection Success Rate: {comprehensive_results['connection_stress']['connection_success_rate']:."1f"}%)
-        logger.info(f  Memory Growth: {comprehensive_results['memory_test']['memory_growth_mb']:."1f"}MB)
-        logger.info(f  Reconnection Success: {comprehensive_results['resilience_test']['reconnection_success_rate']:."1f"}%")"
+        logger.info(f  Connection Success Rate: {comprehensive_results['connection_stress']['connection_success_rate']:.""1f""}%)
+        logger.info(f  Memory Growth: {comprehensive_results['memory_test']['memory_growth_mb']:.""1f""}MB)
+        logger.info(f  Reconnection Success: {comprehensive_results['resilience_test']['reconnection_success_rate']:.""1f""}%")"
         logger.info(= * 60)
 
 

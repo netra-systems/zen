@@ -195,7 +195,7 @@ class InsufficientDataHandlingTests:
                         },
                         {
                             category: Scale Optimization,
-                            description": Handle "10x" more requests efficiently,"
+                            description": Handle ""10x"" more requests efficiently,"
                             next_question: What's your current request volume?'
                         },
                         {
@@ -423,7 +423,7 @@ class InsufficientDataHandlingTests:
 
                             {
                                 q": Estimated monthly AI spend?,"
-                                format: Range is fine (e.g., $"5K"-"10K"),
+                                format: Range is fine (e.g., $""5K""-""10K""),
                                 why": Baseline for savings calculation"
                             },
                             {
@@ -702,7 +702,7 @@ Quick Win Opportunities (check if interested):
                     hook: "Most companies waste 40-60% of their AI budget unnecessarily,"
                     social_proof": {"
                         statistics: 87% of our users reduce costs within 2 weeks,
-                        testimonial: 'Saved $"15K" in the first month' - TechStartup CEO","
+                        testimonial: 'Saved $""15K"" in the first month' - TechStartup CEO","
                         "logos: [Company A, Company B, Company C]"
                     },
                     "urgency_creation: {"
@@ -900,7 +900,7 @@ Quick Win Opportunities (check if interested):
 
                     },
                     "motivation: {"
-                        peer_comparison: Companies like yours save $5-"15K" monthly,
+                        peer_comparison: Companies like yours save $5-""15K"" monthly,
                         quick_win": Most users see first savings within 48 hours,"
                         support: We guide you through every step
                     },

@@ -897,7 +897,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         avg_time_per_creation = total_time / len(successful_creations) if successful_creations else float('inf')
         
         # Should create agents reasonably quickly (less than 1 second per agent on average)
-        assert avg_time_per_creation < 1.0, fAgent creation too slow: {avg_time_per_creation:."2f"}s per agent""
+        assert avg_time_per_creation < 1.0, fAgent creation too slow: {avg_time_per_creation:.""2f""}s per agent""
         
         # Verify no race conditions - all users should have their agents
         monitoring_report = await self.agent_registry.monitor_all_users()
@@ -909,7 +909,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
             for error in failed_creations[:3]:  # Log first few errors
                 self.logger.warning(fCreation error: {error})
         
-        self.logger.info(f PASS:  Concurrent performance validated: {len(successful_creations)}/{len(tasks)} agents created in {total_time:."2f"}s)""
+        self.logger.info(f PASS:  Concurrent performance validated: {len(successful_creations)}/{len(tasks)} agents created in {total_time:.""2f""}s)""
 
     
     @pytest.mark.integration
@@ -982,7 +982,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         event_delivery_rate = total_events_sent / expected_total_events if expected_total_events > 0 else 0
         
         assert event_delivery_rate >= 0.9, fEvent delivery rate too low: {event_delivery_rate:.2%}""
-        assert events_per_second >= 50, "fEvent throughput too low: {events_per_second:."1f"} events/second"
+        assert events_per_second >= 50, "fEvent throughput too low: {events_per_second:.""1f""} events/second"
         
         # Validate all events were captured
         total_received_events = len([e for e in self.websocket_events 
@@ -993,11 +993,11 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         
         # Validate throughput meets business requirements for real-time experience
         if events_per_second < 50:
-            self.logger.warning(fWebSocket throughput below optimal: {events_per_second:."1f"} events/second")"
+            self.logger.warning(fWebSocket throughput below optimal: {events_per_second:.""1f""} events/second")"
         if event_delivery_rate < 0.95:
             self.logger.warning(fEvent delivery rate concerning: {event_delivery_rate:.1%})
             
-        self.logger.info(f PASS:  WebSocket throughput validated: {events_per_second:."1f"} events/second, {event_delivery_rate:.1%} delivery rate)""
+        self.logger.info(f PASS:  WebSocket throughput validated: {events_per_second:.""1f""} events/second, {event_delivery_rate:.1%} delivery rate)""
 
     
     # ===================== BUSINESS VALUE VALIDATION TESTS =====================
@@ -1713,7 +1713,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                     Establish monitoring and optimization governance""
                 ],
                 comprehensive_integration_success: True,
-                total_business_value": $102,0 annual savings with 6."8x" ROI"
+                total_business_value": $102,0 annual savings with 6.""8x"" ROI"
             }
             
             await bridge.emit_agent_completed(result=final_comprehensive_result)

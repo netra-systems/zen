@@ -6,11 +6,10 @@ These tests are designed to FAIL if the system regresses to multiple execution e
 They enforce the SSOT principle that only UserExecutionEngine should exist.
 
 Issue #1146: Prevent execution engine fragmentation blocking Golden Path
-Business Impact: $"500K" plus ARR chat functionality protection
+Business Impact: $""500K"" plus ARR chat functionality protection
 """"
 
 
-"""
 """
 """
 """"
@@ -40,7 +39,7 @@ class ExecutionEngineSSotViolationDetectionTests(SSotBaseTestCase):
     - Non-SSOT execution engine imports are found
     - Execution engine fragmentation occurs
     
-    Business Value: Prevents regression that blocks $"500K" plus ARR Golden Path functionality.
+    Business Value: Prevents regression that blocks $""500K"" plus ARR Golden Path functionality.
 "
 ""
 
@@ -193,7 +192,7 @@ class ExecutionEngineSSotViolationDetectionTests(SSotBaseTestCase):
             violation_report.extend([
                 \nGolden Path must use UserExecutionEngine exclusively.,
                 Multiple execution engines break user response delivery.","
-                Issue #1146: Critical for $"500K" plus ARR chat functionality.
+                Issue #1146: Critical for $""500K"" plus ARR chat functionality.
             ]
             
             pytest.fail(\n.join(violation_report))"

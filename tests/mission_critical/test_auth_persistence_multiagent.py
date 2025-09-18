@@ -12,7 +12,6 @@ Tests that authentication context is properly maintained across:
 
 """
 """
-"""
 """"
 
 import asyncio

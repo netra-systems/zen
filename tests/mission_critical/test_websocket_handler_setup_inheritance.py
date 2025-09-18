@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
     - Segment: Platform/Internal - Critical for ALL customer segments
 - Business Goal: Prevent inheritance-related test failures that could mask revenue-impacting bugs
 - Value Impact: Ensures proper test initialization so revenue-critical WebSocket functionality is properly validated
-- Strategic Impact: CRITICAL - Improper test inheritance can lead to undetected bugs in $"500K" plus ARR chat functionality
+- Strategic Impact: CRITICAL - Improper test inheritance can lead to undetected bugs in $""500K"" plus ARR chat functionality
 
 CURRENT ISSUE DETECTION:
     Test classes like TestTypingHandler don't call super().setup_method() while others like TestConnectionHandler do.'
@@ -81,7 +81,7 @@ class InheritanceAnalysisReport:
             f  Total test classes analyzed: {self.total_test_classes}\n
             f  Violations found: {self.violations_found}\n
             f  Compliant classes: {len(self.compliant_classes)}\n""
-            f  Violation rate: {(self.violations_found / max(1, self.total_test_classes)) * 100:."1f"}%""
+            f  Violation rate: {(self.violations_found / max(1, self.total_test_classes)) * 100:.""1f""}%""
 
         )
 

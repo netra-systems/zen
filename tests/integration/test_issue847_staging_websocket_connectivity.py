@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
     - Segment: Platform Infrastructure (affects all customer segments)
 - Business Goal: Stability - Validate staging WebSocket connectivity
 - Value Impact: Ensures staging environment can serve as fallback for WebSocket connections
-- Revenue Impact: Protects $"500K" plus ARR by validating staging environment availability
+- Revenue Impact: Protects $""500K"" plus ARR by validating staging environment availability
 
 ROOT CAUSE: Need to validate that staging WebSocket endpoints are accessible and functional
 

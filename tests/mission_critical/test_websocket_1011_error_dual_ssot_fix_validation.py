@@ -5,7 +5,7 @@ MISSION CRITICAL TEST: WebSocket 1011 Error Dual SSOT Fix Validation
 
 ISSUE #301: Validates the fix for WebSocket 1011 errors caused by dual SSOT ID systems.
 
-BUSINESS IMPACT: $"500K" plus ARR protection - ensures WebSocket connections don't fail due to'
+BUSINESS IMPACT: $""500K"" plus ARR protection - ensures WebSocket connections don't fail due to'
 resource cleanup issues when UnifiedIDManager and UnifiedIdGenerator create different
 ID patterns for the same user session.
 
@@ -101,12 +101,12 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
                         'error': result['error']
                     }
         
-        # CRITICAL: All scenarios must succeed to prevent $"500K" plus ARR loss
+        # CRITICAL: All scenarios must succeed to prevent $""500K"" plus ARR loss
         success_rate = (success_count / total_scenarios) * 100
         self.assertEqual(success_count, total_scenarios, 
                         fWebSocket 1011 fix failed in {total_scenarios - success_count} scenarios. "
                         fWebSocket 1011 fix failed in {total_scenarios - success_count} scenarios. "
-                        f"Success rate: {success_rate:."1f"}%. Failed scenarios: {self.failed_cleanups})"
+                        f"Success rate: {success_rate:.""1f""}%. Failed scenarios: {self.failed_cleanups})"
         
     def test_websocket_resource_cleanup_pattern_matching(self):
         pass
@@ -156,7 +156,7 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
                 'user_id': 'enterprise_customer_001',
                 'session_duration_minutes': 45,
                 'agent_switches': 5,
-                'expected_revenue_impact': 1500  # $1."5K" per session for enterprise
+                'expected_revenue_impact': 1500  # $1.""5K"" per session for enterprise
             },
             {
                 'name': 'Mid-Tier Customer Optimization Workflow', 
@@ -189,7 +189,7 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
         
         # Validate overall business impact protection
         self.assertGreater(total_protected_revenue, 2000, 
-                          Protected revenue should exceed $"2K" for test scenarios)
+                          Protected revenue should exceed $""2K"" for test scenarios)
         
     def test_dual_ssot_performance_impact_on_critical_path(self):
         """"
@@ -214,9 +214,9 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
         
         # Performance requirements for critical path
         self.assertLess(performance_benchmarks['connection_time'), 1.0, 
-                       WebSocket connection time exceeds "1s" for 100 connections)
+                       WebSocket connection time exceeds ""1s"" for 100 connections)
         self.assertLess(performance_benchmarks['cleanup_time'), 0.5,
-                       WebSocket cleanup time exceeds 0."5s" for 100 cleanups")"
+                       WebSocket cleanup time exceeds 0.""5s"" for 100 cleanups")"
                        
         # Log performance for monitoring
         print(fPerformance Benchmarks: {performance_benchmarks})

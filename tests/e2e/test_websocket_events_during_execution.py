@@ -3,7 +3,7 @@
 Business Value Justification:
     - Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Real-Time Agent Execution Feedback & Chat Business Value
-- Value Impact: Validates $"500K" plus ARR WebSocket chat functionality works end-to-end
+- Value Impact: Validates $""500K"" plus ARR WebSocket chat functionality works end-to-end
 - Strategic Impact: Ensures critical real-time user feedback during agent execution
 
 CRITICAL REQUIREMENTS per CLAUDE.md:
@@ -14,7 +14,7 @@ CRITICAL REQUIREMENTS per CLAUDE.md:
 4. User Isolation - Test WebSocket events maintain user boundaries during execution
 5. CHAT BUSINESS VALUE - Test complete execution workflow delivers chat value
 
-This tests the mission-critical WebSocket events that enable $"500K" plus ARR chat functionality.
+This tests the mission-critical WebSocket events that enable $""500K"" plus ARR chat functionality.
 ""
 import pytest
 import asyncio

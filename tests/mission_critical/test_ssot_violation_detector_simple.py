@@ -12,7 +12,6 @@ After remediation, the test should PASS.
 
 """
 """
-"""
 """"
 
 import asyncio

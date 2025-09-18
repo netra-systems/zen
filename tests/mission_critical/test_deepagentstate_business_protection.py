@@ -2,7 +2,7 @@
 
 MISSION CRITICAL TESTS: DeepAgentState Business Value Protection (Issue #871)
 
-These tests protect the $"500K" plus ARR business value by ensuring DeepAgentState SSOT violations
+These tests protect the $""500K"" plus ARR business value by ensuring DeepAgentState SSOT violations
 don't compromise critical user experiences. Tests MUST PASS for deployment approval.'
 
 Tests will FAIL initially due to SSOT violations affecting business-critical functionality.
@@ -28,11 +28,11 @@ from test_framework.websocket_helpers import WebSocketTestClient
 
 
 class DeepAgentStateBusinessProtectionTests(SSotAsyncTestCase):
-    "MISSION CRITICAL: Protecting $"500K" plus ARR from DeepAgentState SSOT violations"
+    "MISSION CRITICAL: Protecting $""500K"" plus ARR from DeepAgentState SSOT violations"
 
     def setup_method(self, method):
         super().setup_method(method)
-        # Enterprise customers represent $"500K" plus ARR
+        # Enterprise customers represent $""500K"" plus ARR
         self.enterprise_customers = [
             {"id: enterprise-alpha", mrr: 15000, tier: Enterprise},"
             {"id: enterprise-alpha", mrr: 15000, tier: Enterprise},"
@@ -48,7 +48,7 @@ class DeepAgentStateBusinessProtectionTests(SSotAsyncTestCase):
         
         MISSION CRITICAL: Enterprise customers must have perfect data isolation
 
-        BUSINESS IMPACT: $"500K" plus ARR at risk from data breach
+        BUSINESS IMPACT: $""500K"" plus ARR at risk from data breach
         DEPLOYMENT BLOCKER: This test failing prevents all deployments
 ""
         # Execute enterprise customer scenarios concurrently
@@ -153,7 +153,7 @@ IMMEDIATE ACTION REQUIRED: Fix Issue #871 DeepAgentState SSOT violations
                 # Send high-value customer request
                 await client.send_json({
                     type: agent_request","
-                    "message: Optimize our $"2M" annual cloud spend,"
+                    "message: Optimize our $""2M"" annual cloud spend,"
                     customer_id: high_value_customer[id],
                     "priority: enterprise"
                 }

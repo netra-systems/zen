@@ -4,7 +4,7 @@ Business Value Justification (BVJ):
     - Segment: ALL (Free  ->  Enterprise) - Chat is the primary value delivery mechanism
 - Business Goal: Preserve conversation continuity in multi-turn chat interactions
 - Value Impact: CRITICAL - Prevents conversation history loss and broken user experience
-- Strategic/Revenue Impact: $"500K" plus ARR at risk - Chat experience is core product differentiation
+- Strategic/Revenue Impact: $""500K"" plus ARR at risk - Chat experience is core product differentiation
 
 CRITICAL REGRESSION PREVENTION:
     This test validates that WebSocket message handlers maintain conversation continuity by:
@@ -402,7 +402,7 @@ class WebSocketMessageHandlerContextRegressionTests:
         
         # Context reuse should not cause significant performance degradation
         assert avg_processing_time < 0.5, \
-            fMessage processing too slow: {avg_processing_time:."3f"}s average""
+            fMessage processing too slow: {avg_processing_time:.""3f""}s average""
 
         
         # Validate context consistency across performance test
@@ -415,8 +415,8 @@ class WebSocketMessageHandlerContextRegressionTests:
             Performance test broke thread context consistency
         
         print(f"\nPerformance Metrics:)"
-        print(fBaseline context creation: {baseline_time:."4f"}s)
-        print(f"Average message processing: {avg_processing_time:."4f"}s)"
+        print(fBaseline context creation: {baseline_time:.""4f""}s)
+        print(f"Average message processing: {avg_processing_time:.""4f""}s)"
         print(fMessages processed: {len(message_processing_times")})"
 
     @pytest.mark.integration

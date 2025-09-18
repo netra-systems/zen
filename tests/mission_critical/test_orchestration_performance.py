@@ -12,7 +12,7 @@ workloads with 100+ services and millions of requests.
 Critical Performance Test Areas:
     1. Load balancing algorithms and distribution fairness
 2. Automatic failover detection and recovery times
-3. High-throughput request processing ("1M"+ RPS)
+3. High-throughput request processing (""1M""+ RPS)
 4. Auto-scaling trigger accuracy and response times
 5. Circuit breaker performance and recovery
 6. Health check propagation efficiency
@@ -22,15 +22,15 @@ Critical Performance Test Areas:
 10. Latency optimization and SLA compliance
 
 Business Value: Ensures the orchestration system can handle enterprise
-traffic loads while maintaining sub-"100ms" response times and 99.9% uptime.
+traffic loads while maintaining sub-""100ms"" response times and 99.9% uptime.
 Critical for securing enterprise customers with strict SLA requirements.
 
 PERFORMANCE TARGETS:
-    - Load balancing: <"5ms" overhead per request
+    - Load balancing: <""5ms"" overhead per request
 - Failover detection: <10 seconds
 - Auto-scaling: <30 seconds response time
-- Circuit breaker: <"1ms" decision time
-- Health checks: <"500ms" propagation
+- Circuit breaker: <""1ms"" decision time
+- Health checks: <""500ms"" propagation
 '''
 '''
 
@@ -159,7 +159,7 @@ class TestLoadBalancingPerformance:
     
 
         performance_results = {}
-        request_count = 10000  # "10K" requests per algorithm
+        request_count = 10000  # ""10K"" requests per algorithm
 
         for algorithm in algorithms_to_test:
         algorithm_start = time.perf_counter()
@@ -347,7 +347,7 @@ class TestLoadBalancingPerformance:
         break
         elif scenario[failure_type] == "connection_refused:"
                             # Immediate detection
-        if detection_time >= 0.1:  # "100ms" detection
+        if detection_time >= 0.1:  # ""100ms"" detection
         break
         elif scenario[failure_type"] == response_timeout:"
                                 # Response timeout detection
@@ -702,7 +702,7 @@ class TestHighThroughputPerformance:
 
 
     def test_million_request_throughput(self):
-        "CRITICAL: Test system performance with "1M"+ requests."
+        "CRITICAL: Test system performance with ""1M""+ requests."
     # High-throughput test configuration
         throughput_configs = [
         {"name: burst_load", total_requests: 100000, duration_seconds: 10, pattern: burst"},"
@@ -715,7 +715,7 @@ class TestHighThroughputPerformance:
         for i in range(20):  # 20 backend services
         backend = {
         id: formatted_string,
-        "capacity_rps: random.randint(5000, 15000),  # "5K"-"15K" RPS capacity"
+        "capacity_rps: random.randint(5000, 15000),  # ""5K""-""15K"" RPS capacity"
         current_load: 0,
         response_time_ms: random.uniform(10, 50),"
         response_time_ms: random.uniform(10, 50),"
@@ -744,7 +744,7 @@ class TestHighThroughputPerformance:
 
         # High-throughput load generation simulation
         requests_sent = 0
-        sample_interval = 0.1  # "100ms" sampling
+        sample_interval = 0.1  # ""100ms"" sampling
         samples = int(duration / sample_interval)
 
         for sample_num in range(samples):

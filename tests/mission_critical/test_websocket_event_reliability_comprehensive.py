@@ -9,7 +9,7 @@ factory pattern architecture for complete user isolation:
 - User experience validation with factory pattern
 - Event usefulness scoring per isolated user context
 
-Business Value: $"500K" plus ARR - Prevents chat UI appearing broken
+Business Value: $""500K"" plus ARR - Prevents chat UI appearing broken
 This is MISSION CRITICAL infrastructure that must NEVER regress.
 '''
 '''
@@ -75,12 +75,12 @@ class EventQuality(Enum):
 class EventTiming(Enum):
     Event timing classifications."
     Event timing classifications."
-    IMMEDIATE = immediate"     # < "100ms""
-    FAST = fast              # "100ms" - "1s"
-    ACCEPTABLE = acceptable"   # "1s" - "3s""
-    SLOW = slow              # "3s" - "5s"
+    IMMEDIATE = immediate"     # < ""100ms"""
+    FAST = fast              # ""100ms"" - ""1s""
+    ACCEPTABLE = acceptable"   # ""1s"" - ""3s"""
+    SLOW = slow              # ""3s"" - ""5s""
     TOO_SLOW = too_slow      # > 5s"
-    TOO_SLOW = too_slow      # > 5s""
+    TOO_SLOW = too_slow      # > "5s"""
 
 
 
@@ -810,7 +810,7 @@ user_ids = [formatted_string for i in range(concurrent_users)]
 
                                                 # Configure some users with reliability issues
 for i, user_id in enumerate(user_ids):
-    if i % 4 == 0:  # Every "4th" user has reliability issues
+    if i % 4 == 0:  # Every ""4th"" user has reliability issues
 self.test_harness.mock_pool.configure_reliability_issues( )
 user_id, failure_rate=0.1, latency_ms=50
                                                     
@@ -1090,7 +1090,7 @@ PASS:  Connection Pool Reliability Statistics
 
 Critical Metrics Monitored:
     - Per-user event content usefulness scores
-- Per-user silent period detection (>"5s" gaps)
+- Per-user silent period detection (>""5s"" gaps)
 - User journey completeness with isolation
 - Recovery time from failures per user
 - Content quality distribution across users
@@ -1098,9 +1098,9 @@ Critical Metrics Monitored:
 
 Reliability Standards:
     - Per-user content quality average:  >= 3.5/5.0
-- Per-user maximum silent period:  <= 8."0s"
+- Per-user maximum silent period:  <= 8.""0s""
 - User confidence level: Medium/High (isolated)
-- Edge case recovery:  <= 10."0s" per user
+- Edge case recovery:  <= 10.""0s"" per user
 - Event completion rate: 100% per user
 - User isolation: NEVER broken
 
@@ -1108,7 +1108,7 @@ Business Impact:
     - Prevents broken chat UI experience per user
 - Ensures user confidence in isolated contexts
 - Validates real-time feedback quality per session
-- Protects $"500K" plus ARR from degradation
+- Protects $""500K"" plus ARR from degradation
 - Factory pattern enables 25+ concurrent users
 '''
 '''

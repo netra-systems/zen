@@ -287,7 +287,7 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
     def tearDown(self):
         Tear down with metrics collection and mock detection.""
         duration = time.time() - self.start_time
-        logger.info(fSSOT isolation test {self._testMethodName} took {duration:."2f"}s)""
+        logger.info(fSSOT isolation test {self._testMethodName} took {duration:.""2f""}s)""
 
         
         # Verify no mocks were used (CRITICAL)
@@ -394,16 +394,16 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
         max_execution_time = 20.0  # Allow 20 seconds for 12 users
         self.assertLess(execution_time, max_execution_time,
                        fSSOT concurrent operations too slow: {execution_time:.2f}s)"
-                       fSSOT concurrent operations too slow: {execution_time:.2f}s)""
+                       fSSOT concurrent operations too slow: {execution_time:."2f"}s)""
 
         
-        # Memory usage should be reasonable (allow "100MB" increase)
+        # Memory usage should be reasonable (allow ""100MB"" increase)
         memory_increase = final_memory - initial_memory
         self.assertLess(memory_increase, 100,
-                       f"SSOT framework excessive memory usage: {memory_increase:."1f"}MB)"
+                       f"SSOT framework excessive memory usage: {memory_increase:.""1f""}MB)"
         
         logger.info(f[U+2713] SSOT Framework isolation test: {num_users) users, 
-                   f{execution_time:."2f"}s, {memory_increase:."1f"}MB increase)""
+                   f{execution_time:.""2f""}s, {memory_increase:.""1f""}MB increase)""
 
     
     def test_database_session_per_user_ssot_operations(self):
@@ -912,11 +912,11 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
                     
                     # Check for performance violations
                     if total_time > 5.0:  # Max 5 seconds per user
-                        performance_violations.append(fUser {user_id} too slow: {total_time:."2f"}s)""
+                        performance_violations.append(fUser {user_id} too slow: {total_time:.""2f""}s)""
 
                     
-                    if metrics['memory_increase'] > 50:  # Max "50MB" per user
-                        performance_violations.append(fUser {user_id} excessive memory: {metrics['memory_increase']:."1f"}MB)
+                    if metrics['memory_increase'] > 50:  # Max ""50MB"" per user
+                        performance_violations.append(fUser {user_id} excessive memory: {metrics['memory_increase']:.""1f""}MB)
                     
                     return f"perfuser_{user_id}_success, metrics"
                     
@@ -965,19 +965,19 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
             avg_throughput = sum(throughputs) / len(throughputs) if throughputs else 0
             
             # Performance should be reasonable
-            self.assertLess(avg_time, 3.0, f"Average user time too high: {avg_time:."2f"}s)"
-            self.assertLess(max_time, 8.0, fMax user time too high: {max_time:."2f"}s")"
-            self.assertLess(total_memory_increase, 200, fTotal memory increase too high: {total_memory_increase:."1f"}MB)
+            self.assertLess(avg_time, 3.0, f"Average user time too high: {avg_time:.""2f""}s)"
+            self.assertLess(max_time, 8.0, fMax user time too high: {max_time:.""2f""}s")"
+            self.assertLess(total_memory_increase, 200, fTotal memory increase too high: {total_memory_increase:.""1f""}MB)
             self.assertLess(test_total_time, 30.0, fTotal test time too high: {test_total_time:.2f}s)"
-            self.assertLess(test_total_time, 30.0, fTotal test time too high: {test_total_time:.2f}s)""
+            self.assertLess(test_total_time, 30.0, fTotal test time too high: {test_total_time:."2f"}s)""
 
             
             if throughputs:
-                self.assertGreater(avg_throughput, 0.5, f"Average throughput too low: {avg_throughput:."2f"} ops/sec)"
+                self.assertGreater(avg_throughput, 0.5, f"Average throughput too low: {avg_throughput:.""2f""} ops/sec)"
         
         logger.info(f[U+2713] Performance monitoring: {num_users) users, 
-                   favg: {avg_time:."2f"}s, max: {max_time:."2f"}s, 
-                   fmemory: {total_memory_increase:."1f"}MB")"
+                   favg: {avg_time:.""2f""}s, max: {max_time:.""2f""}s, 
+                   fmemory: {total_memory_increase:.""1f""}MB")"
     
     def test_ssot_compliance_validation_with_isolation(self):
         pass
@@ -1029,7 +1029,7 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
                         compliance_violations.extend([fCheck {check_id): {v) for v in violations]
                     
                     if compliance_time > 2.0:  # Should be fast
-                        compliance_violations.append(fCheck {check_id} too slow: {compliance_time:."2f"}s)
+                        compliance_violations.append(fCheck {check_id} too slow: {compliance_time:.""2f""}s)
                     
                     return fcompliance_{check_id}_success", compliance_result"
                     
@@ -1081,13 +1081,13 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
             max_compliance_time = max(compliance_times)
             
             self.assertLess(avg_compliance_time, 1.0,
-                           fAverage compliance check too slow: {avg_compliance_time:."2f"}s)""
+                           fAverage compliance check too slow: {avg_compliance_time:.""2f""}s)""
 
             self.assertLess(max_compliance_time, 3.0,
-                           fMax compliance check too slow: {max_compliance_time:."2f"}s)
+                           fMax compliance check too slow: {max_compliance_time:.""2f""}s)
         
         logger.info(f[U+2713] SSOT compliance validation: {num_concurrent_checks) concurrent checks, ""
-                   f"avg: {avg_compliance_time:."2f"}s)"
+                   f"avg: {avg_compliance_time:.""2f""}s)"
 
 
 if __name__ == '__main__':

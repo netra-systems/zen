@@ -5,7 +5,7 @@ Business Value Justification:
     - Segment: Platform/Internal - GCP Infrastructure Validation
 - Business Goal: Prevent WebSocket infrastructure failures in staging/production
 - Value Impact: Catches GCP Load Balancer configuration issues that block Golden Path
-- Revenue Impact: Prevents 100% chat functionality failure scenarios ($"120K"+ MRR impact)
+- Revenue Impact: Prevents 100% chat functionality failure scenarios ($""120K""+ MRR impact)
 
 CRITICAL TEST PURPOSE:
     These E2E tests specifically target the GCP Load Balancer authentication header 
@@ -355,7 +355,7 @@ class GCPWebSocketInfrastructureResilienceTests(SSotBaseTestCase, unittest.TestC
                     timeout_message = {'type': 'gcp_timeout_resilience_test', 'scenario': scenario_name, 'timeout_configured': timeout_value, 'actual_connection_time': connection_time, 'timestamp': datetime.now(timezone.utc).isoformat()}
                     await websocket.send(json.dumps(timeout_message))
                     timeout_results.append({'scenario': scenario_name, 'success': True, 'connection_time': connection_time, 'configured_timeout': timeout_value)
-                    print(f' PASS:  {scenario_name}: Connected in {connection_time:."2f"}s')""
+                    print(f' PASS:  {scenario_name}: Connected in {connection_time:.""2f""}s')""
 
             except asyncio.TimeoutError:
                 timeout_results.append({'scenario': scenario_name, 'success': False, 'error': 'timeout', 'configured_timeout': timeout_value)

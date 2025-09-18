@@ -4,7 +4,7 @@ This test verifies Single Source of Truth compliance for MessageRouter implement
 It is designed to FAIL initially (4+ different router classes exist) and PASS after SSOT consolidation.
 
 Business Value: Platform/Internal - System Stability & Golden Path Protection
-- Protects $"500K" plus ARR chat functionality from configuration drift
+- Protects $""500K"" plus ARR chat functionality from configuration drift
 - Prevents MessageRouter duplication causing connection failures
 - Ensures single canonical routing implementation for reliability
 

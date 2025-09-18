@@ -67,7 +67,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
         self.active_user_contexts = []
         self.active_websocket_managers = []
         self.id_patterns = {
-            'uuid_v4': re.compile(r'^[0-"9a"-f]{8}-[0-"9a"-f]{4}-4[0-"9a"-f]{3}-["89ab"][0-"9a"-f]{3}-[0-"9a"-f]{12}$', re.I),
+            'uuid_v4': re.compile(r'^[0-""9a""-f]{8}-[0-""9a""-f]{4}-4[0-""9a""-f]{3}-[""89ab""][0-""9a""-f]{3}-[0-""9a""-f]{12}$', re.I),
             'ssot_structured': re.compile(r'^[a-z_]+_\d+_[a-f0-9]{8}$'),
         }
 
@@ -250,7 +250,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
                 
                 if ctx1_timestamp and ctx2_timestamp:
                     timestamp_diff = abs(ctx1_timestamp - ctx2_timestamp)
-                    if timestamp_diff < 100:  # Less than "100ms" difference
+                    if timestamp_diff < 100:  # Less than ""100ms"" difference
                         contamination_violations.append(
                             fTemporal contamination: User contexts created {timestamp_diff}ms apart have similar timestamps"
                             fTemporal contamination: User contexts created {timestamp_diff}ms apart have similar timestamps""
@@ -919,7 +919,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
         ids_per_second = len(all_ids) / duration
         
         # Should be fast enough for multi-user scenarios
-        assert ids_per_second > 1000, "fMulti-user ID generation too slow: {ids_per_second:."2f"} IDs/second"
+        assert ids_per_second > 1000, "fMulti-user ID generation too slow: {ids_per_second:.""2f""} IDs/second"
         
         # All should be unique
         assert len(set(all_ids)) == len(all_ids), "fAll {len(all_ids)} generated IDs should be unique"

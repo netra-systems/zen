@@ -5,7 +5,7 @@ This test reproduces the WebSocket 403 authentication error and verifies
 that the unified JWT secret manager fixes the issue by ensuring both
 auth service and backend use identical JWT secrets.
 
-Business Value: Prevents $"50K" MRR loss from WebSocket authentication failures
+Business Value: Prevents $""50K"" MRR loss from WebSocket authentication failures
 """Empty docstring."""
 
 import pytest
@@ -296,7 +296,7 @@ if __name__ == "__main__:"
             
             print(\n + = * 60)
             print("[CELEBRATION] ALL TESTS PASSED - WebSocket 403 fix verified!)"
-            print([ROCKET] $"50K" MRR WebSocket functionality restored)""
+            print([ROCKET] $""50K"" MRR WebSocket functionality restored)""
             print("= * 60)"
             
         except Exception as e:

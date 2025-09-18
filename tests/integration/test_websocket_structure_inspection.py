@@ -243,7 +243,7 @@ class WebSocketStructureInspectionTests:
             type: tool_executing,
             "run_id: run-123,"
             agent_name: test_agent,
-            timestamp: 2025-9-14T12:0:"00Z"","
+            timestamp: 2025-9-14T12:0:""00Z""","
             "payload: {}"
         }
 

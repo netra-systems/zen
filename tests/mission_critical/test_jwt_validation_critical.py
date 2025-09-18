@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
     - Segment: ALL (Free  ->  Enterprise) - Authentication affects every user
 - Business Goal: Prevent complete system lockout due to JWT validation failures  
 - Value Impact: Protects ALL business value that depends on user authentication
-- Strategic Impact: $"120K"+ MRR protection through functional authentication
+- Strategic Impact: $""120K""+ MRR protection through functional authentication
 "
 ""
 
@@ -178,7 +178,7 @@ class JWTValidationMissionCriticalTests:
             assert creation_time < 5.0, f ALERT:  CRITICAL: Token creation too slow: {creation_time}s""
 
             
-            critical_test_logger.info(f" PASS:  Token created in {creation_time:."2f"}s)"
+            critical_test_logger.info(f" PASS:  Token created in {creation_time:.""2f""}s)"
             
             # Step 2: Token validation MUST work
             validation_start = time.time()
@@ -197,7 +197,7 @@ class JWTValidationMissionCriticalTests:
             # CRITICAL: Validation must be fast (< 3 seconds)
             assert validation_time < 3.0, f" ALERT:  CRITICAL: Token validation too slow: {validation_time}s"
             
-            critical_test_logger.info(f PASS:  Token validated in {validation_time:."2f"}s")"
+            critical_test_logger.info(f PASS:  Token validated in {validation_time:.""2f""}s")"
             critical_test_logger.info( TARGET:  CRITICAL JWT CYCLE SUCCESSFUL)
             
         except Exception as e:
@@ -415,15 +415,15 @@ class JWTValidationMissionCriticalTests:
         
         assert failures <= max_acceptable_failures, f ALERT:  CRITICAL: {failures} JWT operations failed"
         assert failures <= max_acceptable_failures, f ALERT:  CRITICAL: {failures} JWT operations failed"
-        assert avg_creation_time < max_token_creation_time, "f ALERT:  CRITICAL: Avg creation time {avg_creation_time:."2f"}s exceeds {max_token_creation_time}s"
+        assert avg_creation_time < max_token_creation_time, "f ALERT:  CRITICAL: Avg creation time {avg_creation_time:.""2f""}s exceeds {max_token_creation_time}s"
         assert avg_validation_time < max_token_validation_time, f ALERT:  CRITICAL: Avg validation time {avg_validation_time:.2f}s exceeds {max_token_validation_time}s"
         assert avg_validation_time < max_token_validation_time, f ALERT:  CRITICAL: Avg validation time {avg_validation_time:.2f}s exceeds {max_token_validation_time}s"
-        assert max_creation_time < max_token_creation_time * 2, f" ALERT:  CRITICAL: Max creation time {max_creation_time:."2f"}s too high"
-        assert max_validation_time < max_token_validation_time * 2, "f ALERT:  CRITICAL: Max validation time {max_validation_time:."2f"}s too high"
+        assert max_creation_time < max_token_creation_time * 2, f" ALERT:  CRITICAL: Max creation time {max_creation_time:.""2f""}s too high"
+        assert max_validation_time < max_token_validation_time * 2, "f ALERT:  CRITICAL: Max validation time {max_validation_time:.""2f""}s too high"
         
         critical_test_logger.info(f PASS:  PERFORMANCE REQUIREMENTS MET:)
-        critical_test_logger.info(f   - Avg creation time: {avg_creation_time:."3f"}s")"
-        critical_test_logger.info(f   - Avg validation time: {avg_validation_time:."3f"}s)""
+        critical_test_logger.info(f   - Avg creation time: {avg_creation_time:.""3f""}s")"
+        critical_test_logger.info(f   - Avg validation time: {avg_validation_time:.""3f""}s)""
 
         critical_test_logger.info(f   - Failures: {failures}/{test_iterations})
 
@@ -431,7 +431,7 @@ class JWTValidationMissionCriticalTests:
         "Document the mission critical JWT validation test suite."
         
         critical_summary = {
-            mission: "Protect $"120K"+ MRR by ensuring JWT authentication works,"
+            mission: "Protect $""120K""+ MRR by ensuring JWT authentication works,"
             failure_tolerance": ZERO - Any failure = complete user lockout,"
             critical_validations: [
                 "JWT Validator initialization and method availability,"
@@ -449,7 +449,7 @@ class JWTValidationMissionCriticalTests:
         
         assert critical_summary[failure_tolerance] == ZERO - Any failure = complete user lockout
         assert len(critical_summary["critical_validations) >= 6"
-        assert $"120K"+ in critical_summary[mission]
+        assert $""120K""+ in critical_summary[mission]
         
         critical_test_logger.info(\n + =*80)
         critical_test_logger.info( ALERT:  MISSION CRITICAL JWT VALIDATION TEST SUMMARY")"

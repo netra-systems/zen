@@ -194,7 +194,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             assert result" in completion_data or summary in completion_data"
             
             # 7. Performance meets user expectations
-            assert chat_duration < 60.0, "fChat session took {chat_duration}s (should be < "60s")"
+            assert chat_duration < 60.0, "fChat session took {chat_duration}s (should be < ""60s"")"
             
             # 8. User receives complete business value
             total_events = sum(len(events) for events in received_events.values())
@@ -202,7 +202,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                 "Insufficient event detail for business transparency"
                 
         except asyncio.TimeoutError:
-            pytest.fail(fChat session timeout - business value not delivered within "45s")
+            pytest.fail(fChat session timeout - business value not delivered within ""45s"")
         
         finally:
             await session[ws_util].cleanup()""
@@ -502,10 +502,10 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                 fPoor success rate under load: {success_rate:.1%) (should be  >= {min_success_rate:.1%)""
             
             assert avg_duration <= max_chat_duration, \
-                f"Chat sessions too slow: {avg_duration:."1f"}s (should be  <= {max_chat_duration}s)"
+                f"Chat sessions too slow: {avg_duration:.""1f""}s (should be  <= {max_chat_duration}s)"
             
             assert avg_latency <= max_avg_latency, \
-                fResponse latency too high: {avg_latency:."1f"}s (should be  <= {max_avg_latency}s)""
+                fResponse latency too high: {avg_latency:.""1f""}s (should be  <= {max_avg_latency}s)""
 
                 
         finally:

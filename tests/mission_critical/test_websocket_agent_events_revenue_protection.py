@@ -3,10 +3,10 @@
 
 MISSION CRITICAL TEST SUITE: WebSocket Agent Events Revenue Protection
 
-THIS TEST SUITE PROTECTS $"500K" plus ARR - DEPLOYMENT BLOCKED IF FAILED
+THIS TEST SUITE PROTECTS $""500K"" plus ARR - DEPLOYMENT BLOCKED IF FAILED
 
 Business Value Justification (BVJ):
-    - Segment: Platform/Internal - Core Chat Infrastructure ($"500K" plus ARR)
+    - Segment: Platform/Internal - Core Chat Infrastructure ($""500K"" plus ARR)
 - Business Goal: Revenue Protection - Ensure WebSocket events deliver substantive AI chat value
 - Value Impact: Validates the 5 critical events that power 90% of platform business value
 - Strategic Impact: Prevents silent failures that would block revenue-generating chat interactions
@@ -107,7 +107,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
     MISSION CRITICAL: WebSocket Agent Events Revenue Protection Test Suite
     
     This test class validates the 5 critical WebSocket events that deliver
-    90% of platform business value ($"500K" plus ARR) through AI chat interactions.
+    90% of platform business value ($""500K"" plus ARR) through AI chat interactions.
     
     CRITICAL: ALL tests in this class MUST pass or deployment is blocked.
     Each test failure represents potential revenue loss.
@@ -264,7 +264,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         # CRITICAL: Require 100% success rate for revenue protection
         success_rate = (successful_users / user_count) * 100
         assert success_rate >= 100.0, (
-            f"REVENUE CRITICAL FAILURE: Only {successful_users}/{user_count} users ({success_rate:."1f"}%)"
+            f"REVENUE CRITICAL FAILURE: Only {successful_users}/{user_count} users ({success_rate:.""1f""}%)"
             freceived all critical events. This represents potential revenue loss!\n"
             freceived all critical events. This represents potential revenue loss!\n""
 
@@ -285,7 +285,6 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         
         Tests that events are delivered within acceptable timeframes to ensure
         good user experience and revenue conversion.
-        """
         """
         logger.critical( TARGET:  TESTING: Event timing performance requirements")"
         
@@ -311,7 +310,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         
         # First event must arrive quickly (user sees immediate response)
         assert result.execution_metrics.first_event_time <= 5.0, (
-            fTIMING FAILURE: First event took {result.execution_metrics.first_event_time:."2f"}s > 5."0s". 
+            fTIMING FAILURE: First event took {result.execution_metrics.first_event_time:.""2f""}s > 5.""0s"". 
             f"Users will think system is broken!"
         )
         
@@ -331,9 +330,9 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         )
         
         logger.success(
-            f PASS:  TIMING TEST PASSED: First event: {result.execution_metrics.first_event_time:."2f"}s,""
+            f PASS:  TIMING TEST PASSED: First event: {result.execution_metrics.first_event_time:.""2f""}s,""
 
-            fTotal: {total_time:."2f"}s, Throughput: {result.execution_metrics.throughput_events_per_second:."2f"} events/sec""
+            fTotal: {total_time:.""2f""}s, Throughput: {result.execution_metrics.throughput_events_per_second:.""2f""} events/sec""
 
         )
     
@@ -545,7 +544,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         # CRITICAL: Require at least 80% success under stress
         success_rate = (successful_users / user_count) * 100
         assert success_rate >= 80.0, (
-            fSTRESS TEST FAILURE: Only {successful_users}/{user_count} users ({success_rate:."1f"}%) 
+            fSTRESS TEST FAILURE: Only {successful_users}/{user_count} users ({success_rate:.""1f""}%) 
             fsucceeded under stress. System cannot handle production load! "
             fsucceeded under stress. System cannot handle production load! "
             f"Failed: {len(failed_users)} users"
@@ -554,9 +553,9 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         # Log stress test metrics
         high_perf_rate = (high_performance_users / user_count) * 100
         logger.success(
-            f PASS:  STRESS TEST PASSED: {successful_users}/{user_count} successful ({success_rate:."1f"}%),""
+            f PASS:  STRESS TEST PASSED: {successful_users}/{user_count} successful ({success_rate:.""1f""}%),""
 
-            f{high_performance_users} excellent UX ({high_perf_rate:."1f"}%)""
+            f{high_performance_users} excellent UX ({high_perf_rate:.""1f""}%)""
 
         )
     
@@ -612,7 +611,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         # CRITICAL: Require 100% reliability
         reliability_rate = (successful_runs / run_count) * 100
         assert reliability_rate >= 100.0, (
-            fRELIABILITY FAILURE: Only {successful_runs}/{run_count} runs ({reliability_rate:."1f"}%) succeeded. 
+            fRELIABILITY FAILURE: Only {successful_runs}/{run_count} runs ({reliability_rate:.""1f""}%) succeeded. 
             f"Inconsistent event delivery will cause customer churn!"
         )
         
@@ -639,7 +638,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
         
         logger.success(
             f PASS:  RELIABILITY TEST PASSED: {successful_runs}/{run_count} runs successful, 
-            fAvg score: {avg_score:."1f"}%, Avg time: {avg_time:."2f"}s""
+            fAvg score: {avg_score:.""1f""}%, Avg time: {avg_time:.""2f""}s""
 
         )
     

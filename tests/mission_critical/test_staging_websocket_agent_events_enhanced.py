@@ -4,7 +4,7 @@
 MISSION CRITICAL TEST SUITE: Enhanced Staging WebSocket Agent Events - COMPREHENSIVE AUTH & USER JOURNEYS
 =====================================================================================================
 
-Business Value: $"500K" plus ARR - Core chat functionality must work in production-like environment
+Business Value: $""500K"" plus ARR - Core chat functionality must work in production-like environment
 
 COMPREHENSIVE COVERAGE:
     - 25+ Authentication Flow Tests with WebSocket Integration
@@ -200,13 +200,13 @@ class EnhancedStagingWebSocketEventValidator:
         # Try registration first
         registration_result = await self._attempt_user_registration(credentials)
         if registration_result.success:
-            logger.info(f" PASS:  User registration successful in {registration_result.response_time:."2f"}s)"
+            logger.info(f" PASS:  User registration successful in {registration_result.response_time:.""2f""}s)"
             return registration_result
         
         # Try login if registration failed (user might already exist)
         login_result = await self._attempt_user_login(credentials)
         if login_result.success:
-            logger.info(f PASS:  User login successful in {login_result.response_time:."2f"}s)""
+            logger.info(f PASS:  User login successful in {login_result.response_time:.""2f""}s)""
 
             return login_result
         
@@ -407,7 +407,7 @@ class EnhancedStagingWebSocketEventValidator:
         
         total_time = time.time() - start_time
         logger.info(f TARGET:  Mock WebSocket event validation completed in {total_time:.2f}s - {len(received_events)} events received)"
-        logger.info(f TARGET:  Mock WebSocket event validation completed in {total_time:.2f}s - {len(received_events)} events received)""
+        logger.info(f TARGET:  Mock WebSocket event validation completed in {total_time:."2f"}s - {len(received_events)} events received)""
 
         
         return received_events
@@ -537,10 +537,10 @@ class EnhancedStagingWebSocketEventValidator:
                 monthly_value = 29.99
                 metrics.revenue_attribution = monthly_value * metrics.conversion_probability * 0.15  # 15% of users convert
             
-            logger.info(f CHART:  User journey completed in {metrics.total_journey_time:."2f"}s)
-            logger.info(f"   User satisfaction: {metrics.user_satisfaction_score:."1f"}/5.0)"
+            logger.info(f CHART:  User journey completed in {metrics.total_journey_time:.""2f""}s)
+            logger.info(f"   User satisfaction: {metrics.user_satisfaction_score:.""1f""}/5.0)"
             logger.info(f   Conversion probability: {metrics.conversion_probability:.1%}")"
-            logger.info(f   Revenue attribution: ${metrics.revenue_attribution:."2f"})""
+            logger.info(f   Revenue attribution: ${metrics.revenue_attribution:.""2f""})""
 
             
         except Exception as e:
@@ -577,7 +577,7 @@ class StagingWebSocketAuthenticationTests:
         
         if auth_result.success:
             assert auth_result.access_token is not None, "Successful auth should provide access token"
-            assert auth_result.response_time < 10.0, "fAuth response time {auth_result.response_time:."2f"}s too slow"
+            assert auth_result.response_time < 10.0, "fAuth response time {auth_result.response_time:.""2f""}s too slow"
             
         # Test 2: WebSocket connection with auth
         if auth_result.success:
@@ -602,8 +602,8 @@ class StagingWebSocketAuthenticationTests:
         
         # Journey performance requirements
         if metrics.total_journey_time > 0:
-            # For staging, allow up to 60 seconds (more lenient than "30s" production requirement)
-            assert metrics.total_journey_time < 60.0, "fUser journey took {metrics.total_journey_time:."2f"}s, should be <"60s""
+            # For staging, allow up to 60 seconds (more lenient than ""30s"" production requirement)
+            assert metrics.total_journey_time < 60.0, "fUser journey took {metrics.total_journey_time:.""2f""}s, should be <""60s"""
             
             # Business metrics should be calculated
             assert metrics.user_satisfaction_score >= 0.0, User satisfaction should be non-negative""
@@ -669,12 +669,12 @@ class StagingWebSocketAuthenticationTests:
         # Performance assertions for staging
         assert success_rate >= 0.4, "fSuccess rate {success_rate:.1%} below 40% threshold for staging"
         assert total_time < 30.0, fConcurrent auth test took {total_time:.2f}s, should be <30s"
-        assert total_time < 30.0, fConcurrent auth test took {total_time:.2f}s, should be <30s""
+        assert total_time < 30.0, fConcurrent auth test took {total_time:."2f"}s, should be <"30s"""
 
         
         if successful_auths:
             avg_response_time = sum(r["response_time] for r in successful_auths) / len(successful_auths)"
-            assert avg_response_time < 15.0, "fAverage response time {avg_response_time:."2f"}s too high"
+            assert avg_response_time < 15.0, "fAverage response time {avg_response_time:.""2f""}s too high"
     
     async def test_business_metrics_calculation(self, validator):
         "Test business metrics calculation and tracking."
@@ -739,7 +739,7 @@ if __name__ == __main__:
     print(ENHANCED STAGING WEBSOCKET AGENT EVENTS TEST SUITE)
     print("Environment: Staging (api-staging.netrasystems.ai))"
     print(Purpose: Production-readiness validation)
-    print(Business Impact: $"500K" plus ARR revenue protection")"
+    print(Business Impact: $""500K"" plus ARR revenue protection")"
     print("= * 80)"
 
     import pytest

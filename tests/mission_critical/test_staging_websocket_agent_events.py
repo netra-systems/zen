@@ -4,7 +4,7 @@
 MISSION CRITICAL TEST SUITE: Staging WebSocket Agent Events
 
 THIS SUITE VALIDATES WEBSOCKET FUNCTIONALITY IN STAGING ENVIRONMENT.
-Business Value: "500K"+ ARR - Core chat functionality must work in production-like environment
+Business Value: ""500K""+ ARR - Core chat functionality must work in production-like environment
 
 This test suite:
     1. Connects to real staging WebSocket endpoint (wss://api.staging.netrasystems.ai/ws)
@@ -149,7 +149,7 @@ class StagingWebSocketEventValidator:
         duration = self.events[-1].timestamp - self.events[0].timestamp
         # More lenient timing for staging due to cold starts and network latency
         if duration > 120:  # 2 minute timeout for staging
-            self.errors.append(f"Agent flow took too long in staging: {duration:."2f"}s)"
+            self.errors.append(f"Agent flow took too long in staging: {duration:.""2f""}s)"
             return False
 
         return True
@@ -180,7 +180,7 @@ class StagingWebSocketEventValidator:
             fStatus: {'PASS - STAGING READY' if is_valid else 'FAIL - STAGING ISSUES'},"
             f"Total Events: {len(self.events)},"
             fUnique Types: {len(self.event_counts)},
-            fDuration: {(self.events[-1].timestamp - self.events[0].timestamp) if len(self.events) > 1 else 0:."2f"}s,
+            fDuration: {(self.events[-1].timestamp - self.events[0].timestamp) if len(self.events) > 1 else 0:.""2f""}s,
             ","
             Event Coverage:
         ]
@@ -310,7 +310,7 @@ class StagingWebSocketFlowTests:
         assert is_valid, f"Staging WebSocket validation failed: {failures}"
 
         logger.info("PASS: Agent flow completed successfully in staging:")
-        logger.info(f"  - Duration: {flow_result['duration']:."2f"}s")
+        logger.info(f"  - Duration: {flow_result['duration']:.""2f""}s")
         logger.info(f"  - Events: {flow_result['total_events']}")
         logger.info(f"  - Types: {flow_result['event_types']}")
 
@@ -405,13 +405,13 @@ class StagingWebSocketFlowTests:
         duration = time.time() - start_time
         messages_per_second = successful_sends / duration
 
-        logger.info(f"Staging WebSocket performance: {successful_sends}/{message_count} messages in {duration:."2f"}s)"
-        logger.info(f"Throughput: {messages_per_second:.1f} messages/second")""
+        logger.info(f"Staging WebSocket performance: {successful_sends}/{message_count} messages in {duration:.""2f""}s)"
+        logger.info(f"Throughput: {messages_per_second:."1f"} messages/second")""
 
 
         # Performance assertions (lenient for staging)
         assert successful_sends >= message_count * 0.9, f"Too many failed sends: {successful_sends}/{message_count}"
-        assert messages_per_second > 10, f"Throughput too low: {messages_per_second:."1f"} msg/s"
+        assert messages_per_second > 10, f"Throughput too low: {messages_per_second:.""1f""} msg/s"
 
         logger.info("PASS: Staging WebSocket performance acceptable")
 

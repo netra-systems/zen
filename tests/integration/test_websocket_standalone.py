@@ -6,7 +6,7 @@ Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise) 
 - Business Goal: Enable real-time agent communication for chat value delivery
 - Value Impact: Users see live agent progress, tool execution, and results
-- Strategic Impact: Core chat functionality that generates $"500K" plus ARR
+- Strategic Impact: Core chat functionality that generates $""500K"" plus ARR
 
 MISSION CRITICAL: Tests the 5 WebSocket events that enable substantive AI chat value:
     1. agent_started - User sees agent began processing
@@ -113,19 +113,19 @@ class WebSocketStandaloneTest:
                     response = await asyncio.wait_for(websocket.recv(), timeout=3.0)
                     response_data = json.loads(response) if response else {}
                     
-                    result = fConnected in {connection_time:."3f"}s, received: {type(response_data).__name__}
+                    result = fConnected in {connection_time:.""3f""}s, received: {type(response_data).__name__}
                     logger.info(f" PASS:  {test_name} - {result})"
                     return True, result
                     
                 except asyncio.TimeoutError:
                     # Connection successful even without specific response
-                    result = fConnected in {connection_time:."3f"}s (no response, but connection OK)""
+                    result = fConnected in {connection_time:.""3f""}s (no response, but connection OK)""
                     logger.info(f PASS:  {test_name} - {result})
                     return True, result
                     
         except ConnectionRefusedError:
             error_msg = fConnection refused - WebSocket service not running on {url}""
-            logger.warning(f"[U+"23ED"][U+FE0F]  {test_name} - SKIPPED: {error_msg})"
+            logger.warning(f"[U+""23ED""][U+FE0F]  {test_name} - SKIPPED: {error_msg})"
             self.results[summary][skipped] += 1
             return None, error_msg  # None indicates skip
             
@@ -456,11 +456,11 @@ class WebSocketStandaloneTest:
         logger.info(fTotal Tests: {total})
         logger.info(f PASS:  Passed: {passed})
         logger.info(f FAIL:  Failed: {failed}")"
-        logger.info(f[U+"23ED"][U+FE0F]  Skipped: {skipped})
+        logger.info(f[U+""23ED""][U+FE0F]  Skipped: {skipped})
         
         if total > 0:
             success_rate = (passed / total) * 100
-            logger.info(f[U+1F4C8] Success Rate: {success_rate:."1f"}%)""
+            logger.info(f[U+1F4C8] Success Rate: {success_rate:.""1f""}%)""
 
         
         # Detailed Results
@@ -473,7 +473,7 @@ class WebSocketStandaloneTest:
             self.results[agent_event_flow_tests]
         
         for test_info in all_tests:
-            status_icon =  PASS: " if test_info["result] else  FAIL:  if test_info[result] is False else [U+"23ED"][U+FE0F]""
+            status_icon =  PASS: " if test_info["result] else  FAIL:  if test_info[result] is False else [U+""23ED""][U+FE0F]""
             logger.info(f"{status_icon} {test_info['test']}: {test_info['message']})"
         
         # Business Value Summary
@@ -483,7 +483,7 @@ class WebSocketStandaloneTest:
         if failed == 0:
             logger.info( CELEBRATION:  WebSocket infrastructure ready for chat value delivery!")"
             logger.info( FIRE:  Critical agent events (agent_started, tool_executing, etc.) validated)
-            logger.info([U+1F4B0] System ready to support $"500K" plus ARR chat functionality")"
+            logger.info([U+1F4B0] System ready to support $""500K"" plus ARR chat functionality")"
         else:
             logger.info( WARNING: [U+FE0F]  WebSocket infrastructure has issues that may impact chat value)
             logger.info( ALERT:  Critical agent event delivery may be compromised)""

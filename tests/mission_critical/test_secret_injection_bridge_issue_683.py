@@ -5,7 +5,7 @@ Test Secret Injection Bridge for Issue #683
 This test reproduces the secret injection bridge gaps between SecretConfig and GCP deployment
 that cause staging environment configuration validation failures.
 
-Business Impact: Protects $"500K" plus ARR staging validation pipeline
+Business Impact: Protects $""500K"" plus ARR staging validation pipeline
 Priority: P0 - Mission Critical
 
 Issue #683: Staging environment configuration validation failures

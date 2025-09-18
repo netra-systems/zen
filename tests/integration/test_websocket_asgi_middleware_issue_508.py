@@ -64,7 +64,7 @@ class WebSocketASGIMiddlewareTests:
     @pytest.mark.asyncio
     async def test_asgi_scope_passthrough_safety(self, middleware):
         Test safe ASGI scope passthrough when URL objects are malformed - WILL FAIL.""
-        problematic_scope = {'type': 'websocket', 'scheme': 'wss', 'path': '/ws', 'query_string': b'token=special%"20chars"&param=value', 'headers': [], 'server': ('staging.netrasystems.ai', 443), 'client': ('10.0.0.1', 45678)}
+        problematic_scope = {'type': 'websocket', 'scheme': 'wss', 'path': '/ws', 'query_string': b'token=special%""20chars""&param=value', 'headers': [], 'server': ('staging.netrasystems.ai', 443), 'client': ('10.0.0.1', 45678)}
         receive = AsyncMock()
         send = AsyncMock()
         try:
@@ -112,7 +112,7 @@ class WebSocketASGIMiddlewareTests:
     @pytest.mark.asyncio
     async def test_websocket_error_recovery_in_middleware(self, middleware):
         Test WebSocket error recovery when ASGI scope errors occur - WILL FAIL INITIALLY.""
-        error_prone_scope = {'type': 'websocket', 'path': '/ws', 'query_string': b'complex%"2Bquery"=value%"20with"%"20spaces"'}
+        error_prone_scope = {'type': 'websocket', 'path': '/ws', 'query_string': b'complex%""2Bquery""=value%""20with""%""20spaces""'}
         receive = AsyncMock()
         send = AsyncMock()
         middleware.app = AsyncMock()

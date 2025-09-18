@@ -1,7 +1,7 @@
 '''
 '''
 MISSION CRITICAL: Docker Edge Cases & Failure Recovery Test Suite
-BUSINESS IMPACT: PROTECTS $"2M"+ ARR FROM DOCKER EDGE CASE FAILURES
+BUSINESS IMPACT: PROTECTS $""2M""+ ARR FROM DOCKER EDGE CASE FAILURES
 
 This test suite covers every possible Docker edge case and failure scenario.
 It validates our infrastructure can handle the most extreme and unusual Docker situations.
@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
     1. Segment: Platform/Internal - Risk Reduction & Reliability
 2. Business Goal: Ensure zero downtime from Docker edge cases and unexpected failures
 3. Value Impact: Prevents catastrophic Docker failures that could halt development
-4. Revenue Impact: Protects $"2M"+ ARR platform from infrastructure edge case failures
+4. Revenue Impact: Protects $""2M""+ ARR platform from infrastructure edge case failures
 
 CRITICAL COVERAGE:
     - Orphaned container cleanup and recovery
@@ -961,10 +961,10 @@ class TestResourceLimitBoundaries:
         logger.info("[U+1F9E0] Testing memory limit boundary conditions)"
 
         boundary_tests = [
-        ('tiny_memory', '"16m"'),      # Very small memory limit
-        ('small_memory', '"32m"'),     # Small but reasonable
-        ('normal_memory', '"128m"'),   # Normal size
-        ('large_memory', '"512m"'),    # Larger allocation
+        ('tiny_memory', '""16m""'),      # Very small memory limit
+        ('small_memory', '""32m""'),     # Small but reasonable
+        ('normal_memory', '""128m""'),   # Normal size
+        ('large_memory', '""512m""'),    # Larger allocation
     
 
         successful_deployments = 0
@@ -1092,8 +1092,8 @@ class TestResourceLimitBoundaries:
     # Test with containers that create varying amounts of data
         storage_tests = [
         ('no_storage', None, 'echo minimal storage test'),
-        ('small_files', '"50m"', 'dd if=/dev/zero of=/tmp/small_file bs="1M" count=10'),
-        ('medium_files', '"100m"', 'dd if=/dev/zero of=/tmp/medium_file bs="1M" count=25'),
+        ('small_files', '""50m""', 'dd if=/dev/zero of=/tmp/small_file bs=""1M"" count=10'),
+        ('medium_files', '""100m""', 'dd if=/dev/zero of=/tmp/medium_file bs=""1M"" count=25'),
     
 
         successful_storage_tests = 0

@@ -1131,11 +1131,11 @@ async def run_single_test(test_name: str):
             
             # Verify complete journey timing (CRITICAL for user experience)
             total_time = time.time() - start_time
-            assert total_time < 30.0, f"Complete journey took too long: {total_time:."2f"}s (must be < "30s")"
+            assert total_time < 30.0, f"Complete journey took too long: {total_time:.""2f""}s (must be < ""30s"")"
             
-            logger.critical(fSUCCESSFUL COMPLETE USER JOURNEY: {total_time:."2f"}s")"
+            logger.critical(fSUCCESSFUL COMPLETE USER JOURNEY: {total_time:.""2f""}s")"
             for step in journey_timeline:
-                logger.critical(f  {step['step']}: {step['time']:."2f"}s)""
+                logger.critical(f  {step['step']}: {step['time']:.""2f""}s)""
 
                 
         except Exception as e:
@@ -1226,15 +1226,15 @@ async def run_single_test(test_name: str):
         
         logger.critical(fCONCURRENT AUTH RESULTS:")"
         logger.critical(f  Success rate: {success_rate:.2%} ({success_count}/{concurrent_users})
-        logger.critical(f  Average auth time: {avg_auth_time:."3f"}s)
-        logger.critical(f"  P95 auth time: {p95_auth_time:."3f"}s)"
+        logger.critical(f  Average auth time: {avg_auth_time:.""3f""}s)
+        logger.critical(f"  P95 auth time: {p95_auth_time:.""3f""}s)"
         
         # Critical business requirements
         assert success_rate >= 0.95, fSuccess rate too low: {success_rate:.2%} (must be  >= 95%)" 
         assert success_rate >= 0.95, fSuccess rate too low: {success_rate:.2%} (must be  >= 95%)" 
-        assert avg_auth_time < 2.0, "fAverage auth time too slow: {avg_auth_time:."3f"}s (must be <"2s")"
+        assert avg_auth_time < 2.0, "fAverage auth time too slow: {avg_auth_time:.""3f""}s (must be <""2s"")"
         assert p95_auth_time < 5.0, fP95 auth time too slow: {p95_auth_time:.3f}s (must be <5s)"
-        assert p95_auth_time < 5.0, fP95 auth time too slow: {p95_auth_time:.3f}s (must be <5s)""
+        assert p95_auth_time < 5.0, fP95 auth time too slow: {p95_auth_time:."3f"}s (must be <"5s")""
 
     
     async def test_11_multi_device_session_management(self):
@@ -1371,7 +1371,7 @@ async def run_single_test(test_name: str):
                     token_used": initial if not refresh_completed else refreshed"
                 }
                 
-                await asyncio.sleep(0.5)  # "500ms" between messages
+                await asyncio.sleep(0.5)  # ""500ms"" between messages
         
         async def trigger_token_refresh():
             "Trigger token refresh mid-conversation."
@@ -1659,7 +1659,7 @@ async def run_single_test(test_name: str):
         logger.critical(Session security timeline:)""
 
         for event in security_timeline:
-            logger.critical(f  {event['event']}: {event['time']:."3f"}s")"
+            logger.critical(f  {event['event']}: {event['time']:.""3f""}s")"
     
     # =============================================================================
     # NEW USER JOURNEY TESTING METHODS
@@ -1754,11 +1754,11 @@ async def run_single_test(test_name: str):
         
         # Critical business requirement: onboarding under 5 minutes
         assert total_onboarding_time < 300, \
-            fOnboarding too slow: {total_onboarding_time:."2f"}s (must be < "300s")
+            fOnboarding too slow: {total_onboarding_time:.""2f""}s (must be < ""300s"")
         
-        logger.critical(f"Onboarding completed in {total_onboarding_time:."2f"}s)"
+        logger.critical(f"Onboarding completed in {total_onboarding_time:.""2f""}s)"
         for step in onboarding_steps:
-            logger.critical(f  {step['step']}: {step['start']:."2f"}s")"
+            logger.critical(f  {step['step']}: {step['start']:.""2f""}s")"
     
     async def test_17_power_user_workflow_validation(self):
         """
@@ -2079,19 +2079,19 @@ async def run_single_test(test_name: str):
         logger.critical(fEXTREME LOAD TEST RESULTS:)
         logger.critical(f  Total attempts: {performance_metrics['total_attempts']}")"
         logger.critical(f  Success rate: {success_rate:.2%})
-        logger.critical(f  Auth rate: {auth_rate:."1f"}/sec)
-        logger.critical(f"  Avg auth time: {avg_auth_time:."3f"}s)"
-        logger.critical(f  P95 auth time: {p95_auth_time:."3f"}s")"
-        logger.critical(f  P99 auth time: {p99_auth_time:."3f"}s)
+        logger.critical(f  Auth rate: {auth_rate:.""1f""}/sec)
+        logger.critical(f"  Avg auth time: {avg_auth_time:.""3f""}s)"
+        logger.critical(f  P95 auth time: {p95_auth_time:.""3f""}s")"
+        logger.critical(f  P99 auth time: {p99_auth_time:.""3f""}s)
         logger.critical(f  Error breakdown: {performance_metrics['error_types']})"
         logger.critical(f  Error breakdown: {performance_metrics['error_types']})""
 
         
         # Critical performance requirements for revenue scaling
         assert success_rate >= 0.99, f"Success rate too low under load: {success_rate:.2%} (must be  >= 99%)"
-        assert auth_rate >= 50, "fAuth rate too low: {auth_rate:."1f"}/sec (must be  >= 50/sec)"
-        assert avg_auth_time < 1.0, "fAvg auth time too slow: {avg_auth_time:."3f"}s (must be <"1s")"
-        assert p95_auth_time < 2.0, fP95 auth time too slow: {p95_auth_time:."3f"}s (must be <"2s")""
+        assert auth_rate >= 50, "fAuth rate too low: {auth_rate:.""1f""}/sec (must be  >= 50/sec)"
+        assert avg_auth_time < 1.0, "fAvg auth time too slow: {avg_auth_time:.""3f""}s (must be <""1s"")"
+        assert p95_auth_time < 2.0, fP95 auth time too slow: {p95_auth_time:.""3f""}s (must be <""2s"")""
     
     async def test_20_memory_leak_detection_during_auth_load(self):
 
@@ -2188,13 +2188,13 @@ async def run_single_test(test_name: str):
         
         logger.critical(f"MEMORY LEAK DETECTION RESULTS:)"
         logger.critical(f  Authentication count: {authentication_count}")"
-        logger.critical(f  Initial memory: {initial_memory:."2f"} MB)
+        logger.critical(f  Initial memory: {initial_memory:.""2f""} MB)
         logger.critical(f  Final memory: {final_memory:.2f} MB)"
         logger.critical(f  Final memory: {final_memory:.2f} MB)"
-        logger.critical(f"  Peak memory: {peak_memory:."2f"} MB)"
-        logger.critical(f  Memory growth: {memory_growth:."2f"} MB)""
+        logger.critical(f"  Peak memory: {peak_memory:.""2f""} MB)"
+        logger.critical(f  Memory growth: {memory_growth:.""2f""} MB)""
 
-        logger.critical(f  Growth per auth: {growth_rate_per_auth:."6f"} MB)""
+        logger.critical(f  Growth per auth: {growth_rate_per_auth:.""6f""} MB)""
 
         
         # Memory leak detection thresholds
@@ -2202,16 +2202,16 @@ async def run_single_test(test_name: str):
         max_growth_per_auth = 0.1  # MB per authentication
         
         assert memory_growth < max_acceptable_growth, \
-            fExcessive memory growth detected: {memory_growth:."2f"} MB (max {max_acceptable_growth} MB)""
+            fExcessive memory growth detected: {memory_growth:.""2f""} MB (max {max_acceptable_growth} MB)""
         
         assert growth_rate_per_auth < max_growth_per_auth, \
-            fMemory leak per auth detected: {growth_rate_per_auth:."6f"} MB (max {max_growth_per_auth} MB)""
+            fMemory leak per auth detected: {growth_rate_per_auth:.""6f""} MB (max {max_growth_per_auth} MB)""
 
         
         # Check for memory usage spikes
         memory_spike_threshold = initial_memory * 2  # 100% increase threshold
         assert peak_memory < memory_spike_threshold, \
-            fMemory spike detected: {peak_memory:."2f"} MB (threshold {memory_spike_threshold:."2f"} MB)""
+            fMemory spike detected: {peak_memory:.""2f""} MB (threshold {memory_spike_threshold:.""2f""} MB)""
 
     
     async def test_21_enterprise_multi_tenant_isolation(self):
@@ -2269,9 +2269,9 @@ async def run_single_test(test_name: str):
         
         # Test that tokens cannot access other tenant resources
         total_time = time.time() - start_time
-        assert total_time < 15, "fEnterprise multi-tenant flow too slow: {total_time:."2f"}s"
+        assert total_time < 15, "fEnterprise multi-tenant flow too slow: {total_time:.""2f""}s"
         
-        logger.critical(fEnterprise multi-tenant isolation test completed in {total_time:."2f"}s")"
+        logger.critical(fEnterprise multi-tenant isolation test completed in {total_time:.""2f""}s")"
 
     async def test_22_api_key_authentication_flow(self):
 
@@ -2310,9 +2310,9 @@ async def run_single_test(test_name: str):
                 assert backend_auth.get(success", False), API key backend auth failed"
         
         total_time = time.time() - start_time
-        assert total_time < 20, "fAPI key authentication flow too slow: {total_time:."2f"}s"
+        assert total_time < 20, "fAPI key authentication flow too slow: {total_time:.""2f""}s"
         
-        logger.critical(f"API key authentication flow completed in {total_time:."2f"}s)"
+        logger.critical(f"API key authentication flow completed in {total_time:.""2f""}s)"
 
     async def test_23_mobile_app_authentication_simulation(self):
         """
@@ -2362,9 +2362,9 @@ async def run_single_test(test_name: str):
             background_persistence = await self._test_background_token_persistence(login_result.get("data, {})"
         
         total_time = time.time() - start_time
-        assert total_time < 25, "fMobile authentication simulation too slow: {total_time:."2f"}s"
+        assert total_time < 25, "fMobile authentication simulation too slow: {total_time:.""2f""}s"
         
-        logger.critical(f"Mobile authentication simulation completed in {total_time:."2f"}s)"
+        logger.critical(f"Mobile authentication simulation completed in {total_time:.""2f""}s)"
 
     async def test_24_cross_platform_session_synchronization(self):
         """
@@ -2434,9 +2434,9 @@ async def run_single_test(test_name: str):
             assert sync_test.get(synchronized", False), Session synchronization failed"
         
         total_time = time.time() - start_time
-        assert total_time < 30, "fCross-platform session sync too slow: {total_time:."2f"}s"
+        assert total_time < 30, "fCross-platform session sync too slow: {total_time:.""2f""}s"
         
-        logger.critical(f"Cross-platform session synchronization completed in {total_time:."2f"}s)"
+        logger.critical(f"Cross-platform session synchronization completed in {total_time:.""2f""}s)"
 
     async def test_25_security_incident_response_authentication(self):
         """
@@ -2499,9 +2499,9 @@ async def run_single_test(test_name: str):
                     fSecurity recovery failed for: {scenario['type']}
         
         total_time = time.time() - start_time
-        assert total_time < 45, f"Security incident response test too slow: {total_time:."2f"}s"
+        assert total_time < 45, f"Security incident response test too slow: {total_time:.""2f""}s"
         
-        logger.critical(fSecurity incident response authentication completed in {total_time:."2f"}s")"
+        logger.critical(fSecurity incident response authentication completed in {total_time:.""2f""}s")"
     
     # =============================================================================
     # HELPER METHODS FOR COMPREHENSIVE TESTING

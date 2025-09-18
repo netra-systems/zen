@@ -1,4 +1,5 @@
-"""
+""""
+
 Standalone WebSocket Bridge Performance Test - Clean Version (Windows Compatible)
 
 This test validates the performance test infrastructure and generates
@@ -8,14 +9,15 @@ a baseline performance report without requiring the full application stack.
 - Segment: Platform
 - Goal: Stability & Performance validation
 - Value Impact: Ensures WebSocket infrastructure can handle 25+ concurrent users
-- Revenue Impact: Protects "500K" ARR by preventing performance degradation
+- Revenue Impact: Protects ""500K"" ARR by preventing performance degradation
 
 **Critical Requirements:**
-- P99 latency < "50ms" (real-time user experience)
+- P99 latency < ""50ms"" (real-time user experience)
 - Throughput > 1000 events/second (scalability)
-- Connection time < "500ms" (quick user engagement)
+- Connection time < ""500ms"" (quick user engagement)
 - Support 25+ concurrent users (business growth)
-"""
+""""
+
 
 
 import asyncio
@@ -270,10 +272,10 @@ async def test_latency_baseline():
     p99 = statistics.quantiles(latencies, n=100)[98]
     avg = statistics.mean(latencies)
 
-    print(fLatency Results: P50={p50:."2f"}ms, P90={p90:."2f"}ms, P95={p95:."2f"}ms, P99={p99:."2f"}ms, Avg={avg:."2f"}ms")"
+    print(fLatency Results: P50={p50:.""2f""}ms, P90={p90:.""2f""}ms, P95={p95:.""2f""}ms, P99={p99:.""2f""}ms, Avg={avg:.""2f""}ms")"
     print(fSamples: {num_samples})
-    print(fP99 Requirement (< "50ms""): {'PASS' if p99 < 50.0 else 'FAIL'})"
-    print(fP95 Performance (< "30ms"): {'PASS' if p95 < 30.0 else 'FAIL'})
+    print(fP99 Requirement (< ""50ms"""): {'PASS' if p99 < 50.0 else 'FAIL'})"
+    print(fP95 Performance (< ""30ms""): {'PASS' if p95 < 30.0 else 'FAIL'})
     print("")
 
     # Validate requirements
@@ -313,8 +315,8 @@ async def test_throughput_baseline():
     duration = end_time - start_time
     throughput = num_events / duration
 
-    print(fThroughput: {throughput:."2f"} events/second")"
-    print(fDuration: {duration:."2f"} seconds)
+    print(fThroughput: {throughput:.""2f""} events/second")"
+    print(fDuration: {duration:.""2f""} seconds)
     print(fEvents: {num_events}")"
 
     # Validate requirements
@@ -352,7 +354,7 @@ async def test_connection_establishment():
     p95_time = statistics.quantiles(connection_times, n=20)[18] if len(connection_times) >= 20 else max(connection_times)
     p99_time = statistics.quantiles(connection_times, n=100)[98] if len(connection_times) >= 100 else max(connection_times)
 
-    print(fConnection Times: Avg={avg_time:."2f"}ms, P95={p95_time:."2f"}ms, P99={p99_time:."2f"}ms)
+    print(fConnection Times: Avg={avg_time:.""2f""}ms, P95={p95_time:.""2f""}ms, P99={p99_time:.""2f""}ms)
     print(fConnections: {num_connections}"")
     print()"
     print()""
@@ -429,9 +431,9 @@ async def test_concurrent_users():
     print(f"Concurrent Users: {num_users}))"
     print(fEvents per User: {events_per_user})
     print(fTotal Events: {total_events})
-    print(fTotal Duration: {total_duration:."2f"}s")"
-    print(f"Overall Throughput: {overall_throughput:."2f"} events/s))"
-    print(fConcurrent Latency: P50={p50:."2f"}ms, P95={p95:."2f"}ms, P99={p99:."2f"}ms, Avg={avg_latency:."2f"}ms)
+    print(fTotal Duration: {total_duration:.""2f""}s")"
+    print(f"Overall Throughput: {overall_throughput:.""2f""} events/s))"
+    print(fConcurrent Latency: P50={p50:.""2f""}ms, P95={p95:.""2f""}ms, P99={p99:.""2f""}ms, Avg={avg_latency:.""2f""}ms)
     print("")
     # Validate requirements
     p99_passed = p99 < 50.0
@@ -487,12 +489,12 @@ async def test_comprehensive_performance():
         print(\nCOMPREHENSIVE PERFORMANCE BASELINE RESULTS:")"
         print("= * 60)"
         print(fPerformance Summary:)
-        print(f  P50 Latency: {metrics.p50_latency:."2f"}ms)
-        print(f  P90 Latency: {metrics.p90_latency:."2f"}ms")"
-        print(f"  P95 Latency: {metrics.p95_latency:."2f"}ms))"
-        print(f  P99 Latency: {metrics.p99_latency:."2f"}ms [CRITICAL])
-        print(f  Max Throughput: {metrics.throughput:."2f"} events/s [CRITICAL])
-        print(f  Avg Connection Time: {metrics.avg_connection_time:."2f"}ms")"
+        print(f  P50 Latency: {metrics.p50_latency:.""2f""}ms)
+        print(f  P90 Latency: {metrics.p90_latency:.""2f""}ms")"
+        print(f"  P95 Latency: {metrics.p95_latency:.""2f""}ms))"
+        print(f  P99 Latency: {metrics.p99_latency:.""2f""}ms [CRITICAL])
+        print(f  Max Throughput: {metrics.throughput:.""2f""} events/s [CRITICAL])
+        print(f  Avg Connection Time: {metrics.avg_connection_time:.""2f""}ms")"
         print("")
         # Critical requirement validation
         print(CRITICAL REQUIREMENTS VALIDATION:)
@@ -501,10 +503,10 @@ async def test_comprehensive_performance():
         connection_passed = metrics.avg_connection_time < 500.0
         memory_passed = (final_memory - initial_memory) < 200.0
 
-        print(f  P99 Latency < "50ms": {'PASS' if p99_passed else 'FAIL'} ({metrics.p99_latency:."2f"}ms))
-        print(f  Throughput > 1000/s: {'PASS' if throughput_passed else 'FAIL'} ({metrics.throughput:."2f"}/s)")"
-        print(f"  Connection < "500ms": {'PASS' if connection_passed else 'FAIL'} ({metrics.avg_connection_time:."2f"}ms)))"
-        print(f  Memory Growth < "200MB": {'PASS' if memory_passed else 'FAIL'} ({final_memory - initial_memory:."2f"}MB))""
+        print(f  P99 Latency < ""50ms"": {'PASS' if p99_passed else 'FAIL'} ({metrics.p99_latency:.""2f""}ms))
+        print(f  Throughput > 1000/s: {'PASS' if throughput_passed else 'FAIL'} ({metrics.throughput:.""2f""}/s)")"
+        print(f"  Connection < ""500ms"": {'PASS' if connection_passed else 'FAIL'} ({metrics.avg_connection_time:.""2f""}ms)))"
+        print(f  Memory Growth < ""200MB"": {'PASS' if memory_passed else 'FAIL'} ({final_memory - initial_memory:.""2f""}MB))""
 
 
         all_passed = all([p99_passed, throughput_passed, connection_passed, memory_passed)
@@ -534,45 +536,45 @@ def generate_performance_report(metrics: PerformanceMetrics) -> str:
     report = f'''# WebSocket Bridge Performance Baseline Report'
 
 **Generated:** {datetime.now(timezone.utc).isoformat()}
-**Test Duration:** {metrics.test_duration:."2f"} seconds""
+**Test Duration:** {metrics.test_duration:.""2f""} seconds""
 
 **Total Events:** {metrics.total_events}
 
 ## Executive Summary
 
 This report validates the WebSocket bridge performance against critical business requirements:
-    - **P99 Latency:** {p99_pass} ({metrics.p99_latency:."2f"}ms < "50ms")
-- **Throughput:** {throughput_pass} ({metrics.throughput:."2f"} > 1000 events/s)""
+    - **P99 Latency:** {p99_pass} ({metrics.p99_latency:.""2f""}ms < ""50ms"")
+- **Throughput:** {throughput_pass} ({metrics.throughput:.""2f""} > 1000 events/s)""
 
-- **Connection Time:** {connection_pass} ({metrics.avg_connection_time:."2f"}ms < "500ms")
+- **Connection Time:** {connection_pass} ({metrics.avg_connection_time:.""2f""}ms < ""500ms"")
 
 ## Detailed Performance Metrics
 
 ### Latency Distribution
-- **P50 (Median):** {metrics.p50_latency:."2f"}ms""
+- **P50 (Median):** {metrics.p50_latency:.""2f""}ms""
 
-- **P90:** {metrics.p90_latency:."2f"}ms""
+- **P90:** {metrics.p90_latency:.""2f""}ms""
 
-- **P95:** {metrics.p95_latency:."2f"}ms""
+- **P95:** {metrics.p95_latency:.""2f""}ms""
 
-- **P99:** {metrics.p99_latency:."2f"}ms [CRITICAL REQUIREMENT]""
+- **P99:** {metrics.p99_latency:.""2f""}ms [CRITICAL REQUIREMENT]""
 
-- **Average:** {metrics.avg_latency:."2f"}ms""
+- **Average:** {metrics.avg_latency:.""2f""}ms""
 
 
 ### Throughput Performance
-- **Overall Throughput:** {metrics.throughput:."2f"} events/second [CRITICAL REQUIREMENT]""
+- **Overall Throughput:** {metrics.throughput:.""2f""} events/second [CRITICAL REQUIREMENT]""
 
 
 ### Connection Performance
-- **Average Connection Time:** {metrics.avg_connection_time:."2f"}ms""
+- **Average Connection Time:** {metrics.avg_connection_time:.""2f""}ms""
 
-- **Connection Requirement:** < "500ms"
+- **Connection Requirement:** < ""500ms""
 
 ### Resource Utilization
-- **Average CPU Usage:** {metrics.avg_cpu_usage:."2f"}%""
+- **Average CPU Usage:** {metrics.avg_cpu_usage:.""2f""}%""
 
-- **Average Memory Usage:** {metrics.avg_memory_usage:."2f"}MB""
+- **Average Memory Usage:** {metrics.avg_memory_usage:.""2f""}MB""
 
 
 ## Business Impact

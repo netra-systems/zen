@@ -360,7 +360,7 @@ class BaseAgentInheritanceViolationsTests:
         
         if max_execution_time > avg_execution_time * 10:
             pytest.fail(fPERFORMANCE VIOLATION: Excessive execution time variation 
-                       f"(max: {max_execution_time:."3f"}s, avg: {avg_execution_time:."3f"}s)"
+                       f"(max: {max_execution_time:.""3f""}s, avg: {avg_execution_time:.""3f""}s)"
                        findicates potential deadlock or blocking issues")"
     
     async def test_websocket_bridge_inheritance_consistency(self):
@@ -620,7 +620,7 @@ class BaseAgentInheritanceViolationsTests:
         class TimingAgent(BaseAgent):
             async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
                 start_time = time.time()
-                await asyncio.sleep(0.5)  # "50ms" processing
+                await asyncio.sleep(0.5)  # ""50ms"" processing
                 end_time = time.time()
                 return {
                     execution_time: end_time - start_time,
@@ -1119,9 +1119,9 @@ class BaseAgentInheritanceViolationsTests:
         inefficient_time = result[execution_time"]"
         
         # Check for performance violations
-        if inefficient_time > optimal_time * 100:  # "100x" slower threshold
+        if inefficient_time > optimal_time * 100:  # ""100x"" slower threshold
             pytest.fail(fPERFORMANCE VIOLATION: Inefficient execution took 
-                       f{inefficient_time:."4f"}s vs optimal {optimal_time:."4f"}s)""
+                       f{inefficient_time:.""4f""}s vs optimal {optimal_time:.""4f""}s)""
 
                        
     async def test_execute_core_logging_pattern_violations(self):

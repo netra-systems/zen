@@ -11,7 +11,7 @@ CRITICAL BUSINESS IMPACT: Test infrastructure fragmentation causes:
 """
 """"
 
-- Risk to $"500K" plus ARR from unreliable test coverage
+- Risk to $""500K"" plus ARR from unreliable test coverage
 
 This test is designed to FAIL initially to prove the massive fragmentation exists.
 Expected: 6,96+ duplicate test implementations across the codebase.
@@ -346,7 +346,7 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
             print(f"\n=== TEST BASE CLASS FRAGMENTATION ({len(duplicates)} duplicate types) ===))"
             print(fTotal duplicate instances: {base_class_analysis['total_duplicate_count']})"
             print(fTotal duplicate instances: {base_class_analysis['total_duplicate_count']})"
-            print(f"Fragmentation score: {base_class_analysis['fragmentation_score']:."2f"}))"
+            print(f"Fragmentation score: {base_class_analysis['fragmentation_score']:.""2f""}))"
             print()
 
             # Show most fragmented base classes
@@ -409,7 +409,7 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
         if mock_duplicates:
             print(f\n=== MOCK IMPLEMENTATION FRAGMENTATION ({len(mock_duplicates)} duplicate types) ===")"
             print(fTotal mock duplicates: {mock_analysis['total_mock_duplicates']}")"
-            print(fMock fragmentation score: {mock_analysis['mock_fragmentation_score']:."2f"})""
+            print(fMock fragmentation score: {mock_analysis['mock_fragmentation_score']:.""2f""})""
 
             print()
 
@@ -568,12 +568,12 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
         print(fCOMPREHENSIVE TEST INFRASTRUCTURE FRAGMENTATION REPORT")"
         print(f{'='*80}")"
         print(fTotal Duplicate Instances: {fragmentation_metrics['total_duplicate_instances']}")"
-        print(fCompliance Percentage: {fragmentation_metrics['compliance_percentage']:."1f"}%")"
-        print(fBusiness Risk Score: {fragmentation_metrics['business_risk_score']:."1f"}/100)
+        print(fCompliance Percentage: {fragmentation_metrics['compliance_percentage']:.""1f""}%")"
+        print(fBusiness Risk Score: {fragmentation_metrics['business_risk_score']:.""1f""}/100)
         print("")
         print(Fragmentation Breakdown:")"
-        print(f  Base Class Fragmentation: {fragmentation_metrics['base_class_fragmentation']:."2f"}")"
-        print(f  Mock Implementation Fragmentation: {fragmentation_metrics['mock_fragmentation']:."2f"}")"
+        print(f  Base Class Fragmentation: {fragmentation_metrics['base_class_fragmentation']:.""2f""}")"
+        print(f  Mock Implementation Fragmentation: {fragmentation_metrics['mock_fragmentation']:.""2f""}")"
         print(f  Execution Pattern Fragmentation: {fragmentation_metrics['execution_fragmentation']}")"
         print(f  Configuration Fragmentation: {fragmentation_metrics['config_fragmentation']}")"
         print()
@@ -594,7 +594,7 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
             risk_level = MEDIUM""
 
         print(fRisk Level: {risk_level})
-        print(fEstimated Remediation Effort: {fragmentation_metrics['total_duplicate_instances'] * 0.25:."1f"} hours")"
+        print(fEstimated Remediation Effort: {fragmentation_metrics['total_duplicate_instances'] * 0.25:.""1f""} hours")"
         print()
 
         # This should validate massive fragmentation
@@ -607,7 +607,7 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
         # Check if compliance is significantly negative (indicating massive over-duplication)
         self.assertLess(
             fragmentation_metrics['compliance_percentage'], -100,
-            f"Expected severely negative compliance percentage but got {fragmentation_metrics['compliance_percentage']:."1f"}%."
+            f"Expected severely negative compliance percentage but got {fragmentation_metrics['compliance_percentage']:.""1f""}%."
             fThis should indicate massive test infrastructure fragmentation."
             fThis should indicate massive test infrastructure fragmentation.""
 
@@ -616,7 +616,7 @@ class TestSsotTestInfrastructureFragmentation(SSotBaseTestCase):
         # Validate business risk is high
         self.assertGreater(
             fragmentation_metrics['business_risk_score'], 20,
-            fExpected high business risk score but got {fragmentation_metrics['business_risk_score']:."1f"}. 
+            fExpected high business risk score but got {fragmentation_metrics['business_risk_score']:.""1f""}. 
             fFragmentation should pose significant business risk."
             fFragmentation should pose significant business risk.""
 

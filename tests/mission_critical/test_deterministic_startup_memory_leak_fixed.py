@@ -6,7 +6,7 @@ Business Value Justification (BVJ):
     - Segment: Platform/Internal (enabling all segments)
 - Business Goal: Ensure zero memory leaks during deterministic startup sequences
 - Value Impact: Prevents memory-related crashes and ensures stable service initialization
-- Revenue Impact: Critical - memory leaks cause service degradation affecting $"500K" plus ARR
+- Revenue Impact: Critical - memory leaks cause service degradation affecting $""500K"" plus ARR
 
 ISSUE #601 FIX: Strategic validation mocking to prevent infinite hangs during 
 `_run_comprehensive_validation()` while preserving actual memory leak detection logic.
@@ -245,23 +245,23 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
             max_growth_per_cycle = max(memory_per_cycle)
             
             # Memory leak detection thresholds
-            max_allowed_total_increase = 50 * 1024 * 1024  # "50MB" total
-            max_allowed_per_cycle = 10 * 1024 * 1024      # "10MB" per cycle
+            max_allowed_total_increase = 50 * 1024 * 1024  # ""50MB"" total
+            max_allowed_per_cycle = 10 * 1024 * 1024      # ""10MB"" per cycle
             
             # Validate memory leak prevention
             assert total_memory_increase < max_allowed_total_increase, \
-                f"MEMORY LEAK DETECTED: Total increase {total_memory_increase / 1024 / 1024:."2f"}MB exceeds {max_allowed_total_increase / 1024 / 1024}MB limit"
+                f"MEMORY LEAK DETECTED: Total increase {total_memory_increase / 1024 / 1024:.""2f""}MB exceeds {max_allowed_total_increase / 1024 / 1024}MB limit"
             
             assert max_growth_per_cycle < max_allowed_per_cycle, \
                 fMEMORY LEAK DETECTED: Max per-cycle growth {max_growth_per_cycle / 1024 / 1024:.2f}MB exceeds {max_allowed_per_cycle / 1024 / 1024}MB limit"
-                fMEMORY LEAK DETECTED: Max per-cycle growth {max_growth_per_cycle / 1024 / 1024:.2f}MB exceeds {max_allowed_per_cycle / 1024 / 1024}MB limit""
+                fMEMORY LEAK DETECTED: Max per-cycle growth {max_growth_per_cycle / 1024 / 1024:."2f"}MB exceeds {max_allowed_per_cycle / 1024 / 1024}MB limit""
 
             
             print(fCHECK MEMORY LEAK PREVENTION VALIDATED:)
             print(f   - Startup cycles: {startup_cycles}"")
-            print(f   - Total memory increase: {total_memory_increase / 1024 / 1024:."2f"}MB)
-            print(f   - Average per-cycle growth: {avg_growth_per_cycle / 1024 / 1024:."2f"}MB"")
-            print(f   - Max per-cycle growth: {max_growth_per_cycle / 1024 / 1024:."2f"}MB)""
+            print(f   - Total memory increase: {total_memory_increase / 1024 / 1024:.""2f""}MB)
+            print(f   - Average per-cycle growth: {avg_growth_per_cycle / 1024 / 1024:.""2f""}MB"")
+            print(f   - Max per-cycle growth: {max_growth_per_cycle / 1024 / 1024:.""2f""}MB)""
 
 
     @pytest.mark.asyncio
@@ -322,9 +322,9 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
             assert duration < max_allowed, "fPhase {phase} took too long: {duration}s"
         
         print(fCHECK TIMEOUT PREVENTION VALIDATED:"")
-        print(f   - Total startup time: {total_duration:."3f"}s)
+        print(f   - Total startup time: {total_duration:.""3f""}s)
         for phase, duration in phase_durations.items():
-            print(f   - {phase}: {duration:."3f"}s"")
+            print(f   - {phase}: {duration:.""3f""}s"")
 
     @pytest.mark.asyncio
     async def test_concurrent_startup_memory_isolation(self):
@@ -402,11 +402,11 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
         # Validate memory usage for concurrent instances
         memory_after = psutil.Process().memory_info().rss
         memory_increase = memory_after - memory_before
-        max_allowed_concurrent_increase = 100 * 1024 * 1024  # "100MB" for all instances
+        max_allowed_concurrent_increase = 100 * 1024 * 1024  # ""100MB"" for all instances
         
         assert memory_increase < max_allowed_concurrent_increase, \
             fConcurrent startup memory increase too high: {memory_increase / 1024 / 1024:.2f}MB"
-            fConcurrent startup memory increase too high: {memory_increase / 1024 / 1024:.2f}MB""
+            fConcurrent startup memory increase too high: {memory_increase / 1024 / 1024:."2f"}MB""
 
         
         print(f"CHECK CONCURRENT STARTUP ISOLATION VALIDATED:))"
@@ -414,7 +414,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
         print(f   - Concurrent instances: {concurrent_instances})"
         print(f"   - Successful instances: {successful_instances}))"
         print(f   - Memory increase: {memory_increase / 1024 / 1024:.2f}MB)"
-        print(f   - Memory increase: {memory_increase / 1024 / 1024:.2f}MB)""
+        print(f   - Memory increase: {memory_increase / 1024 / 1024:."2f"}MB)""
 
 
     @pytest.mark.asyncio
@@ -584,7 +584,7 @@ class DeterministicStartupMemoryLeakPreventionTests(SSotAsyncTestCase):
         print(fCHECK ISSUE #601 FIX VERIFICATION COMPLETED:)
         print(f"   - Test runs: {len(validation_fix_tests)})"
         print(f   - Successful runs: {successful_runs})
-        print(f"   - Average duration: {sum(t['duration'] for t in validation_fix_tests if t.get('success')) / successful_runs:."3f"}s)"
+        print(f"   - Average duration: {sum(t['duration'] for t in validation_fix_tests if t.get('success')) / successful_runs:.""3f""}s)"
         print(f   - Strategic validation mocking: WORKING)
         print(f"   - Deadlock prevention: VALIDATED)"
 
@@ -603,7 +603,7 @@ if __name__ == __main__:
     print(="*80)"
     print(Testing strategic validation mocking to prevent deadlocks...)"
     print(Testing strategic validation mocking to prevent deadlocks...)"
-    print(Business Impact: $"500K" plus ARR platform reliability validation")"
+    print(Business Impact: $""500K"" plus ARR platform reliability validation")"
     print(=*80")"
     
     # Configure logging

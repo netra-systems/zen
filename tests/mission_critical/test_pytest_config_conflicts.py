@@ -12,7 +12,7 @@ Root Cause Analysis:
 - Deprecated collect_ignore configuration patterns
 - Plugin loading conflicts from conftest.py wildcard imports
 
-Business Impact: HIGH - Blocking $"500K" plus ARR validation through Mission Critical tests
+Business Impact: HIGH - Blocking $""500K"" plus ARR validation through Mission Critical tests
 Priority: P0 - Must resolve to protect business value
 "
 ""

@@ -186,7 +186,7 @@ class WebSocketComprehensiveE2ETests:
         
         # CLAUDE.md Compliance: Validate execution time (prevent 0-second execution)
         execution_time = time.time() - start_time
-        assert execution_time >= 0.1, f"E2E test executed too quickly: {execution_time:."3f"}s - indicates mocked behavior"
+        assert execution_time >= 0.1, f"E2E test executed too quickly: {execution_time:.""3f""}s - indicates mocked behavior"
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -222,7 +222,7 @@ class WebSocketComprehensiveE2ETests:
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
-        assert execution_time >= 0.1, fE2E test executed too quickly: {execution_time:."3f"}s - indicates mocked behavior""
+        assert execution_time >= 0.1, fE2E test executed too quickly: {execution_time:.""3f""}s - indicates mocked behavior""
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -264,7 +264,7 @@ class WebSocketComprehensiveE2ETests:
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
-        assert execution_time >= 0.1, "fE2E test executed too quickly: {execution_time:."3f"}s - indicates mocked behavior"
+        assert execution_time >= 0.1, "fE2E test executed too quickly: {execution_time:.""3f""}s - indicates mocked behavior"
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -300,7 +300,7 @@ class WebSocketComprehensiveE2ETests:
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
-        assert execution_time >= 0.1, "fE2E test executed too quickly: {execution_time:."3f"}s - indicates mocked behavior"
+        assert execution_time >= 0.1, "fE2E test executed too quickly: {execution_time:.""3f""}s - indicates mocked behavior"
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -330,7 +330,7 @@ class WebSocketComprehensiveE2ETests:
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
-        assert execution_time >= 0.1, "fE2E test executed too quickly: {execution_time:."3f"}s - indicates mocked behavior"
+        assert execution_time >= 0.1, "fE2E test executed too quickly: {execution_time:.""3f""}s - indicates mocked behavior"
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -368,7 +368,7 @@ class WebSocketComprehensiveE2ETests:
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
-        assert execution_time >= 2.0, "fE2E test should allow broadcast processing time: {execution_time:."3f"}s"
+        assert execution_time >= 2.0, "fE2E test should allow broadcast processing time: {execution_time:.""3f""}s"
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -399,7 +399,7 @@ class WebSocketComprehensiveE2ETests:
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
-        assert execution_time >= 0.1, "fE2E test executed too quickly: {execution_time:."3f"}s - indicates mocked behavior"
+        assert execution_time >= 0.1, "fE2E test executed too quickly: {execution_time:.""3f""}s - indicates mocked behavior"
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -438,7 +438,7 @@ class WebSocketComprehensiveE2ETests:
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
-        assert execution_time >= 3.0, f"E2E test should allow message processing time: {execution_time:."3f"}s"
+        assert execution_time >= 3.0, f"E2E test should allow message processing time: {execution_time:.""3f""}s"
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -486,7 +486,7 @@ class WebSocketComprehensiveE2ETests:
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
-        assert execution_time >= 2.0, "fE2E test should allow rate limiting processing time: {execution_time:."3f"}s"
+        assert execution_time >= 2.0, "fE2E test should allow rate limiting processing time: {execution_time:.""3f""}s"
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -528,7 +528,7 @@ class WebSocketComprehensiveE2ETests:
         
         # CLAUDE.md Compliance: Validate execution time
         execution_time = time.time() - start_time
-        assert execution_time >= 8.0, fE2E test should wait for token expiry: {execution_time:."3f"}s""
+        assert execution_time >= 8.0, fE2E test should wait for token expiry: {execution_time:.""3f""}s""
 
 """"
 

@@ -9,7 +9,7 @@ Business Value Justification:
     - Segment: Platform/Internal - Critical Infrastructure
 - Business Goal: Prevent WebSocket 1011 errors that block user interactions
 - Value Impact: Ensures reliable WebSocket connectivity for chat functionality
-- Revenue Impact: Prevents loss of $"120K"+ MRR from WebSocket failures
+- Revenue Impact: Prevents loss of $""120K""+ MRR from WebSocket failures
 
 Root Cause Analysis:
     1. UserExecutionContext validation failures in websocket_manager_factory.py (lines 66-115)

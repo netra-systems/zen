@@ -7,7 +7,7 @@ in real service integration without Docker dependencies.
 Business Value Justification:
     - Segment: Platform/Infrastructure
 - Goal: Stability - Identify and reproduce HTTP 500 WebSocket errors  
-- Impact: Protects $"500K" plus ARR chat functionality from connection failures
+- Impact: Protects $""500K"" plus ARR chat functionality from connection failures
 - Revenue Impact: Prevents WebSocket service degradation affecting customer chat
 """Empty docstring."""
 import asyncio

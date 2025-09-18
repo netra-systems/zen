@@ -5,7 +5,7 @@ Business Value Justification:
     - Segment: Platform/Internal - Testing Infrastructure
 - Business Goal: Validate SSOT compliance and eliminate authentication chaos
 - Value Impact: Prevents regression to duplicate authentication paths
-- Revenue Impact: Ensures $"120K"+ MRR remains unblocked by maintaining working WebSocket auth
+- Revenue Impact: Ensures $""120K""+ MRR remains unblocked by maintaining working WebSocket auth
 
 This test suite validates that:
     1. All WebSocket authentication uses SSOT unified authentication service

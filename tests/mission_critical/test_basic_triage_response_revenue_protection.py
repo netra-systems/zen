@@ -3,13 +3,13 @@
 Mission Critical Tests for Basic Triage & Response Revenue Protection - Issue #135
 
 BUSINESS VALUE JUSTIFICATION (BVJ):
-    - Segment: All tiers - $"500K" plus ARR protection
+    - Segment: All tiers - $""500K"" plus ARR protection
 - Business Goal: Validate revenue-critical triage processing prevents business loss
 - Value Impact: Mission-critical validation of core chat functionality that generates 90% of platform value
 - Revenue Protection: Ensure triage failures don't block revenue-generating user interactions'
 
 PURPOSE: Mission-critical validation of basic triage and response processing
-that protects $"500K" plus ARR chat functionality. These tests validate the core
+that protects $""500K"" plus ARR chat functionality. These tests validate the core
 business value delivery mechanism that customers depend on.
 
 KEY COVERAGE:
@@ -92,7 +92,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
     revenue-generating user interactions and that business continuity
     is maintained even under adverse conditions.
     
-    CRITICAL: These tests protect $"500K" plus ARR by ensuring chat functionality
+    CRITICAL: These tests protect $""500K"" plus ARR by ensuring chat functionality
     delivers value to customers even when technical issues occur.
 "
 ""
@@ -166,7 +166,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_enterprise_customer_revenue_protection(self):
         
-        Test revenue protection for enterprise customers ($"5K"/month value).
+        Test revenue protection for enterprise customers ($""5K""/month value).
         
         Business Impact: Enterprise customers generate highest revenue and
         have strictest SLA requirements. Failures directly impact business.
@@ -190,13 +190,13 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
             content: "URGENT: Need immediate cost optimization analysis for our production ML infrastructure."
             
             Current Setup:
-            - "50x" A100 GPUs ($"45K"/month)
+            - ""50x"" A100 GPUs ($""45K""/month)
             - Multi-region deployment (US, EU, APAC)
             - 24/7 operations critical to business
             - Current utilization: 68%
             
             Requirements:
-            - Reduce costs by 25% ($"11K"/month savings)
+            - Reduce costs by 25% ($""11K""/month savings)
             - Maintain 99.99% uptime SLA
             - Zero downtime migration
             - Results needed within 1 hour for board meeting
@@ -447,9 +447,9 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
         revenue_protection_rate = 1.0 - (total_revenue_at_risk / total_potential_revenue)
         
         # Validate acceptable business continuity
-        assert tier_protection_rate >= 0.75, f"Too many tiers unprotected: {tier_protection_rate:."2f"}"
+        assert tier_protection_rate >= 0.75, f"Too many tiers unprotected: {tier_protection_rate:.""2f""}"
         assert revenue_protection_rate >= 0.80, fToo much revenue at risk: {revenue_protection_rate:.2f}"
-        assert revenue_protection_rate >= 0.80, fToo much revenue at risk: {revenue_protection_rate:.2f}""
+        assert revenue_protection_rate >= 0.80, fToo much revenue at risk: {revenue_protection_rate:."2f"}""
 
         
         self.record_metric(multi_tier_protection_rate, tier_protection_rate)
@@ -625,7 +625,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
         total_revenue_at_risk = sum(r.revenue_at_risk for r in continuity_results)
         
         # Business continuity requirements
-        assert continuity_rate >= 0.5, "fBusiness continuity rate too low: {continuity_rate:."2f"}"
+        assert continuity_rate >= 0.5, "fBusiness continuity rate too low: {continuity_rate:.""2f""}"
         assert total_revenue_at_risk <= 2000.0, "fToo much revenue at risk from failures: ${total_revenue_at_risk}"
         
         self.record_metric("business_continuity_rate, continuity_rate)"
@@ -751,7 +751,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
             self.total_revenue_at_risk += revenue_impact
         
         # SLA compliance requirements for business protection
-        assert sla_compliance_rate >= 0.8, fSLA compliance too low: {sla_compliance_rate:."2f"}""
+        assert sla_compliance_rate >= 0.8, fSLA compliance too low: {sla_compliance_rate:.""2f""}""
         
         self.record_metric(sla_p95_response_time, p95_response_time)
         self.record_metric(sla_success_rate, success_rate)"
@@ -836,8 +836,8 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
         avg_satisfaction_score = sum(r[satisfaction_score] for r in satisfaction_results) / len(satisfaction_results)
         
         # Customer satisfaction requirements for revenue protection
-        assert satisfaction_protection_rate >= 0.7, fCustomer satisfaction protection too low: {satisfaction_protection_rate:."2f"}""
-        assert avg_satisfaction_score >= 0.6, "fAverage satisfaction score too low: {avg_satisfaction_score:."2f"}"
+        assert satisfaction_protection_rate >= 0.7, fCustomer satisfaction protection too low: {satisfaction_protection_rate:.""2f""}""
+        assert avg_satisfaction_score >= 0.6, "fAverage satisfaction score too low: {avg_satisfaction_score:.""2f""}"
         
         self.record_metric(customer_satisfaction_protection_rate, satisfaction_protection_rate)
         self.record_metric("avg_customer_satisfaction_score, avg_satisfaction_score)"
@@ -872,7 +872,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
         Test comprehensive revenue protection across all business dimensions.
         
         Business Impact: Final validation that all revenue protection
-        mechanisms work together to safeguard $"500K" plus ARR.
+        mechanisms work together to safeguard $""500K"" plus ARR.
 "
 ""
 
@@ -938,7 +938,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
             overall_protection_rate = protection_score / total_dimensions
             
             # MISSION CRITICAL: Must protect majority of revenue dimensions
-            assert overall_protection_rate >= 0.8, "fRevenue protection insufficient: {overall_protection_rate:."2f"}"
+            assert overall_protection_rate >= 0.8, "fRevenue protection insufficient: {overall_protection_rate:.""2f""}"
             assert self.total_revenue_at_risk <= 1000.0, fToo much revenue at risk: ${self.total_revenue_at_risk}"
             assert self.total_revenue_at_risk <= 1000.0, fToo much revenue at risk: ${self.total_revenue_at_risk}""
 
@@ -973,11 +973,11 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
         
         # Generate business impact report
         print(f"\n=== MISSION CRITICAL REVENUE PROTECTION REPORT - Issue #135 ===)"
-        print(fTest Duration: {total_test_time:."3f"}s)
-        print(f"Total Potential Annual Revenue: ${total_potential_annual_revenue:,."2f"})"
-        print(fRevenue at Risk: ${self.total_revenue_at_risk * 12:,."2f"})
+        print(fTest Duration: {total_test_time:.""3f""}s)
+        print(f"Total Potential Annual Revenue: ${total_potential_annual_revenue:,.""2f""})"
+        print(fRevenue at Risk: ${self.total_revenue_at_risk * 12:,.""2f""})
         print(f"Customers Affected: {self.customers_affected})"
-        print(fBusiness Continuity Score: {final_business_continuity_score:."1f"}%)""
+        print(fBusiness Continuity Score: {final_business_continuity_score:.""1f""}%)""
 
         
         # Calculate revenue protection rate

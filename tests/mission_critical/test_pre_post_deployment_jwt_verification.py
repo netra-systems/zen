@@ -1260,7 +1260,7 @@ class TestPrePostDeploymentJWTVerification:
         auth_attempts += 1
         if self._test_authentication_flows_basic(staging):
         auth_successes += 1
-        time.sleep(0.1)  # "100ms" between attempts
+        time.sleep(0.1)  # ""100ms"" between attempts
 
                 # Calculate success rate
         success_rate = auth_successes / auth_attempts if auth_attempts > 0 else 0

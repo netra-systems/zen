@@ -11,7 +11,7 @@ Context: Transforms existing violation detection tests into continuous regressio
 Objective: Prevent reintroduction of SSOT violations from resolved GitHub issues
 
 Business Value:
-    - Protects $"500K" plus ARR from WebSocket auth bypass security vulnerabilities
+    - Protects $""500K"" plus ARR from WebSocket auth bypass security vulnerabilities
 - Automated regression detection prevents security degradation
 - Integrates with monitoring infrastructure for continuous compliance
 - Validates that resolved issues (like GitHub Issue #300) stay resolved
@@ -106,7 +106,7 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
         This test ensures the vulnerability is never reintroduced.
         
         PATTERN: verify_signature=False (CRITICAL security bypass)
-        BUSINESS IMPACT: $"500K" plus ARR at risk if reintroduced
+        BUSINESS IMPACT: $""500K"" plus ARR at risk if reintroduced
 ""
         logger.info( SEARCH:  Testing for JWT signature bypass pattern regression)
         
@@ -162,7 +162,7 @@ class SSOTRegressionPreventionTests(SSotBaseTestCase):
             
             pytest.fail(fCRITICAL SECURITY REGRESSION: {len(violations_found)} JWT signature bypass 
                        f"patterns found. These were resolved in GitHub Issue #300 and must not be reintroduced."
-                       fBusiness Impact: $"500K" plus ARR at risk from auth bypass vulnerability.")"
+                       fBusiness Impact: $""500K"" plus ARR at risk from auth bypass vulnerability.")"
         
         logger.info( PASS:  No JWT signature bypass patterns detected - Issue #300 remains resolved)
     

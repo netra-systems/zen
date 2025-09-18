@@ -39,11 +39,11 @@ class WebSocketTestHelper:
 
 MISSION CRITICAL: Circuit Breaker Cascade Failure Stress Tests
 
-Business Value: Prevents $"100K"+ ARR loss from cascading service failures
+Business Value: Prevents $""100K""+ ARR loss from cascading service failures
 Critical Requirements:
     - Circuit breakers must prevent cascade failures across all services
 - Recovery must be automatic and coordinated 
-- Performance impact <"5ms" overhead under normal load
+- Performance impact <""5ms"" overhead under normal load
 - 99.9% availability protection during partial service failures
 
 This suite tests the most difficult failure scenarios that could bring down
@@ -521,7 +521,7 @@ class CircuitBreakerStressTester:
             memory_increase_mb: final_memory - initial_memory,"
             "memory_samples: memory_samples,"
             iterations: iterations,
-            "memory_leak_detected: final_memory - initial_memory > 10  # "10MB" threshold"
+            "memory_leak_detected: final_memory - initial_memory > 10  # ""10MB"" threshold"
         }
     
     async def performance_overhead_test(self, requests: int = 1000) -> Dict[str, Any]:
@@ -555,7 +555,7 @@ class CircuitBreakerStressTester:
             overhead_per_request_ms: overhead_ms,
             requests_tested: requests,"
             requests_tested: requests,"
-            overhead_acceptable": overhead_ms < 5.0  # Must be <"5ms" per CLAUDE.md"
+            overhead_acceptable": overhead_ms < 5.0  # Must be <""5ms"" per CLAUDE.md"
         }
 
 
@@ -617,7 +617,7 @@ async def test_circuit_breaker_prevents_cascade_failures(circuit_breaker_stress_
     
     # CRITICAL ASSERTIONS: Circuit breakers must prevent total system failure
     assert result["success_rate] > 0.3, \
-        fSuccess rate too low: {result['success_rate']:."2f"}. Circuit breakers failed to protect system.""
+        fSuccess rate too low: {result['success_rate']:.""2f""}. Circuit breakers failed to protect system.""
 
     
     # At least some circuit breakers should be open (protecting services)
@@ -631,7 +631,7 @@ async def test_circuit_breaker_prevents_cascade_failures(circuit_breaker_stress_
         Too many tasks failed - cascade failure not properly contained""
 
     
-    logger.info(fCascade prevention test: {result['success_rate']:."2f") success rate, 
+    logger.info(fCascade prevention test: {result['success_rate']:.""2f"") success rate, 
                 f{len(open_breakers)} breakers opened)"
                 f{len(open_breakers)} breakers opened)""
 
@@ -680,11 +680,11 @@ async def test_circuit_breaker_recovery_coordination(circuit_breaker_stress_test
     
     # Recovery should improve success rate over time
     assert recovery_result[success_rate"] > 0.6, \"
-        fRecovery success rate too low: {recovery_result['success_rate']:."2f"}""
+        fRecovery success rate too low: {recovery_result['success_rate']:.""2f""}""
 
     
     logger.info(fRecovery test: {len(closed_breakers_final)}/{len(initial_states)} breakers recovered, 
-                f"{recovery_result['success_rate']:."2f"} success rate)"
+                f"{recovery_result['success_rate']:.""2f""} success rate)"
 
 
 @pytest.mark.asyncio
@@ -706,12 +706,12 @@ async def test_high_concurrency_circuit_breaker_performance(circuit_breaker_stre
     assert result[test_duration] < 60.0, \"
     assert result[test_duration] < 60.0, \"
         fTest took too long: {result['test_duration']:.2f}s. Performance degradation detected."
-        fTest took too long: {result['test_duration']:.2f}s. Performance degradation detected.""
+        fTest took too long: {result['test_duration']:."2f"}s. Performance degradation detected.""
 
     
     # System should maintain reasonable success rate under high load
     assert result[success_rate] > 0.4, \
-        fSuccess rate under high load too low: {result['success_rate']:."2f"}""
+        fSuccess rate under high load too low: {result['success_rate']:.""2f""}""
     
     # At least 80% of concurrent tasks should complete (not hang)
     completion_rate = (result[successful_tasks) + result[failed_tasks) / result[concurrent_requests)"
@@ -719,7 +719,7 @@ async def test_high_concurrency_circuit_breaker_performance(circuit_breaker_stre
 
     assert completion_rate > 0.8, \
         fToo many tasks hung: {completion_rate:.2f} completion rate"
-        fToo many tasks hung: {completion_rate:.2f} completion rate""
+        fToo many tasks hung: {completion_rate:."2f"} completion rate""
 
     
     # Check individual task performance
@@ -727,11 +727,11 @@ async def test_high_concurrency_circuit_breaker_performance(circuit_breaker_stre
     if sample_results:
         avg_task_success_rate = statistics.mean([r.get(success_rate", 0) for r in sample_results]"
         assert avg_task_success_rate > 0.3, \
-            fIndividual task success rate too low: {avg_task_success_rate:."2f"}""
+            fIndividual task success rate too low: {avg_task_success_rate:.""2f""}""
 
     
     logger.info(fHigh concurrency test: {result['concurrent_requests']) tasks, 
-                f"{result['success_rate']:."2f"} success rate, {completion_rate:."2f"} completion rate)"
+                f"{result['success_rate']:.""2f""} success rate, {completion_rate:.""2f""} completion rate)"
 
 
 @pytest.mark.asyncio
@@ -746,22 +746,22 @@ async def test_memory_leak_prevention_circuit_breakers(circuit_breaker_stress_te
     
     # CRITICAL MEMORY ASSERTIONS
     assert not memory_result["memory_leak_detected], \"
-        fMemory leak detected: {memory_result['memory_increase_mb']:."2f"}MB increase over {memory_result['iterations']} iterations
+        fMemory leak detected: {memory_result['memory_increase_mb']:.""2f""}MB increase over {memory_result['iterations']} iterations
     
     assert memory_result[memory_increase_mb] < 50, \"
     assert memory_result[memory_increase_mb] < 50, \"
         fMemory usage increased too much: {memory_result['memory_increase_mb']:.2f}MB"
-        fMemory usage increased too much: {memory_result['memory_increase_mb']:.2f}MB""
+        fMemory usage increased too much: {memory_result['memory_increase_mb']:."2f"}MB""
 
     
     # Memory should be relatively stable across samples
     if len(memory_result[memory_samples) > 5:
         memory_variance = statistics.variance(memory_result[memory_samples")"
         assert memory_variance < 100, \
-            fMemory usage too volatile: {memory_variance:."2f"} variance""
+            fMemory usage too volatile: {memory_variance:.""2f""} variance""
 
     
-    logger.info(fMemory leak test: {memory_result['memory_increase_mb']:."2f")MB increase over 
+    logger.info(fMemory leak test: {memory_result['memory_increase_mb']:.""2f"")MB increase over 
                 f"{memory_result['iterations']} iterations - {' PASS:  PASSED' if not memory_result['memory_leak_detected'] else ' FAIL:  FAILED'})"
 
 
@@ -769,31 +769,31 @@ async def test_memory_leak_prevention_circuit_breakers(circuit_breaker_stress_te
 @pytest.mark.critical
 @pytest.mark.timeout(30)
 async def test_circuit_breaker_performance_overhead(circuit_breaker_stress_tester):
-    "CRITICAL: Ensure circuit breaker overhead is <"5ms" as required by CLAUDE.md."
+    "CRITICAL: Ensure circuit breaker overhead is <""5ms"" as required by CLAUDE.md."
     tester = circuit_breaker_stress_tester
     
     # Run performance overhead test
     perf_result = await tester.performance_overhead_test(requests=1000)
     
-    # CRITICAL PERFORMANCE REQUIREMENT: <"5ms" overhead
+    # CRITICAL PERFORMANCE REQUIREMENT: <""5ms"" overhead
     assert perf_result["overhead_acceptable], \"
-        fCircuit breaker overhead too high: {perf_result['overhead_per_request_ms']:."3f"}ms (must be <"5ms")
+        fCircuit breaker overhead too high: {perf_result['overhead_per_request_ms']:.""3f""}ms (must be <""5ms"")
     
     assert perf_result[overhead_per_request_ms] < 5.0, \"
     assert perf_result[overhead_per_request_ms] < 5.0, \"
         fPerformance requirement violated: {perf_result['overhead_per_request_ms']:.3f}ms overhead per request"
-        fPerformance requirement violated: {perf_result['overhead_per_request_ms']:.3f}ms overhead per request""
+        fPerformance requirement violated: {perf_result['overhead_per_request_ms']:."3f"}ms overhead per request""
 
     
     # Overhead should be minimal compared to baseline
     overhead_ratio = perf_result[circuit_breaker_time_seconds] / perf_result[baseline_time_seconds]
     assert overhead_ratio < 1.5, \
-        f"Circuit breaker adds too much overhead: {overhead_ratio:."2f"}x baseline time"
+        f"Circuit breaker adds too much overhead: {overhead_ratio:.""2f""}x baseline time"
     
     logger.info(fPerformance overhead test: {perf_result['overhead_per_request_ms']:.3f)ms per request "
-    logger.info(fPerformance overhead test: {perf_result['overhead_per_request_ms']:.3f)ms per request ""
+    logger.info(fPerformance overhead test: {perf_result['overhead_per_request_ms']:."3f")ms per request ""
 
-                f({overhead_ratio:."2f"}x baseline) - {' PASS:  PASSED' if perf_result['overhead_acceptable'] else ' FAIL:  FAILED'})""
+                f({overhead_ratio:.""2f""}x baseline) - {' PASS:  PASSED' if perf_result['overhead_acceptable'] else ' FAIL:  FAILED'})""
 
 
 
@@ -825,7 +825,7 @@ async def test_simultaneous_service_failures_isolation(circuit_breaker_stress_te
     
     # System should maintain partial functionality
     assert result[success_rate] > 0.2, \
-        fSystem completely failed: {result['success_rate']:."2f"} success rate during simultaneous failures""
+        fSystem completely failed: {result['success_rate']:.""2f""} success rate during simultaneous failures""
     
     # Some requests should still succeed (healthy services working)
     assert result[successful_tasks] > 0, \
@@ -835,10 +835,10 @@ async def test_simultaneous_service_failures_isolation(circuit_breaker_stress_te
     
     # Failure should be contained (not 100% failure)
     assert result["success_rate] < 0.9, \
-        fSuccess rate too high: {result['success_rate']:."2f"} - failures not properly simulated
+        fSuccess rate too high: {result['success_rate']:.""2f""} - failures not properly simulated
     
     logger.info(f"Simultaneous failures test: {len(open_or_half_open)"
-                f{result['success_rate']:."2f"} success rate maintained")"
+                f{result['success_rate']:.""2f""} success rate maintained")"
 
 
 @pytest.mark.asyncio
@@ -1487,7 +1487,7 @@ async def test_execute_core_circuit_breaker_timing():
         execution_time = result[timing"][execution_time]"
         
         assert execution_time < test_case[expected_max_time], \
-            fExecution time {execution_time:."3f"}s exceeded limit {test_case['expected_max_time']}s for {test_case['run_id']}
+            fExecution time {execution_time:.""3f""}s exceeded limit {test_case['expected_max_time']}s for {test_case['run_id']}
         
         assert result[timing"][circuit_state] == closed, \"
             Circuit should remain closed for successful operations"
@@ -1505,7 +1505,7 @@ async def test_execute_core_circuit_breaker_timing():
     fail_time = fail_result[timing][execution_time]
     
     # Failure should be fast (not waiting for timeout)
-    assert fail_time < 0.1, f"Failure handling should be fast: {fail_time:."3f"}s"
+    assert fail_time < 0.1, f"Failure handling should be fast: {fail_time:.""3f""}s"
     
     logger.info( PASS:  Execute core circuit breaker timing validated")"
 

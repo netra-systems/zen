@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 '''MISSION CRITICAL: Bulletproof WebSocket Chat Event Tests'
 
-Business Value: $"500K" plus ARR - Core chat functionality is KING
+Business Value: $""500K"" plus ARR - Core chat functionality is KING
 Tests: Comprehensive real-world scenarios with extreme robustness
 
 This test suite ensures:
@@ -10,7 +10,7 @@ This test suite ensures:
 3. Error conditions are handled gracefully
 4. Concurrent users work correctly with complete isolation
 5. Reconnection preserves state per user
-6. Performance meets <"2s" response requirement
+6. Performance meets <""2s"" response requirement
 7. Factory pattern provides complete user isolation
 '''
 '''

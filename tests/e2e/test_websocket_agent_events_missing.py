@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise)  
 - Business Goal: Ensure users receive all 5 critical WebSocket events during agent execution
 - Value Impact: WebSocket events provide real-time progress and transparency in AI interactions
-- Strategic Impact: Core chat experience that drives $"500K" plus ARR and user trust
+- Strategic Impact: Core chat experience that drives $""500K"" plus ARR and user trust
 
 CRITICAL: This E2E test reproduces the missing WebSocket events issue identified
 in the Five Whys Root Cause Analysis. All e2e tests MUST use authentication per CLAUDE.md.
@@ -396,7 +396,7 @@ class WebSocketAgentEventsMissingTests(BaseE2ETest):
         
         Business Impact Analysis:
         - Missing events  ->  No progress visibility  ->  User frustration  ->  Churn
-        - Real-time updates are core value proposition for $"500K" plus ARR
+        - Real-time updates are core value proposition for $""500K"" plus ARR
         - User trust depends on transparency during AI processing
         ""
         # CRITICAL: Use authenticated user for business value testing
@@ -519,10 +519,10 @@ class WebSocketAgentEventsMissingTests(BaseE2ETest):
                         fBUSINESS VALUE DESTROYED (E2E): Missing WebSocket events damage user experience. 
                         fBusiness Impact: {business_impact}. 
                         f"Events missing: {events_expected - events_received}. "
-                        fExperience score: {experience_score}/{max_possible_score} ({experience_score/max_possible_score*100:."1f"}%). ""
+                        fExperience score: {experience_score}/{max_possible_score} ({experience_score/max_possible_score*100:.""1f""}%). ""
                         fTransparency score: {transparency_score}%. 
                         fTrust score: {trust_score}%. ""
-                        f"This directly impacts $"500K" plus ARR through poor user experience. "
+                        f"This directly impacts $""500K"" plus ARR through poor user experience. "
                         fUsers cannot see AI processing progress, reducing trust and satisfaction.
                     )
                 

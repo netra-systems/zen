@@ -14,7 +14,7 @@ BUSINESS IMPACT:
 - Revenue Impact: Prevents user churn from unreliable AI interactions
 
 EXPECTED BEHAVIOR:
-    - SHOULD FAIL: Different timeout thresholds across health monitors ("10s" vs "30s" vs "60s")
+    - SHOULD FAIL: Different timeout thresholds across health monitors (""10s"" vs ""30s"" vs ""60s"")
 - SHOULD FAIL: Multiple implementations create conflicting death detection logic
 - SHOULD FAIL: Performance overhead from multiple concurrent monitors
 
@@ -79,7 +79,7 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
 
         REPRODUCTION TEST: Expose different death detection thresholds across implementations.
         
-        Expected to FAIL: Shows "10s" vs "30s" vs "60s" timeout inconsistencies.
+        Expected to FAIL: Shows ""10s"" vs ""30s"" vs ""60s"" timeout inconsistencies.
         After SSOT fix: Should have single consistent threshold.
 "
 "
@@ -91,15 +91,15 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
             last_heartbeat=last_heartbeat,
             execution_context={"test: True}"
         
-        # This SHOULD detect death ("12s" > "10s" threshold)
+        # This SHOULD detect death (""12s"" > ""10s"" threshold)
         self.assertTrue(
             core_death_detected, 
-            Core monitor should detect death after "12s" (>"10s" threshold)
+            Core monitor should detect death after ""12s"" (>""10s"" threshold)
         )
         
         # If dev monitors are available, test their different thresholds
         if DEV_MONITORS_AVAILABLE:
-            # Dev launcher health monitors have different grace periods ("30s", "90s")
+            # Dev launcher health monitors have different grace periods (""30s"", ""90s"")
             # This exposes the SSOT violation - different components use different thresholds
             
             dev_status = DevHealthStatus(
@@ -109,14 +109,14 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
                 grace_period_seconds=30  # Different threshold!
             )
             
-            # Grace period of "30s" means agent wouldn't be considered dead at "12s"'
+            # Grace period of ""30s"" means agent wouldn't be considered dead at ""12s""'
             time_in_grace = 12  # seconds since start
             grace_period_over = time_in_grace > 30
             
             # This exposes the violation: core monitor says dead, dev monitor says alive
             self.assertFalse(
                 grace_period_over,
-                "SSOT VIOLATION EXPOSED: Dev monitor uses "30s", core uses "10s""
+                "SSOT VIOLATION EXPOSED: Dev monitor uses ""30s"", core uses ""10s"""
             )
             
             # Record the violation for analysis
@@ -254,12 +254,12 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
             }
             
             # This SHOULD FAIL to expose the performance violation
-            if theoretical_overhead > 0.1:  # If total time would exceed "100ms"
+            if theoretical_overhead > 0.1:  # If total time would exceed ""100ms""
                 self.fail(
                     fSSOT VIOLATION: Multiple monitors create performance overhead. ""
-                    fCore monitor: {performance_analysis['core_monitor_time']:."4f"}s, 
+                    fCore monitor: {performance_analysis['core_monitor_time']:.""4f""}s, 
                     fTheoretical total with {performance_analysis['simulated_monitors']} monitors: 
-                    f"{performance_analysis['theoretical_total_time']:."4f"}s"
+                    f"{performance_analysis['theoretical_total_time']:.""4f""}s"
                     f({performance_analysis['overhead_multiplier']}x overhead)"
                     f({performance_analysis['overhead_multiplier']}x overhead)""
 
@@ -268,7 +268,7 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
         # Even with just core monitor, record baseline for comparison
         self.assertLess(
             core_monitor_time, 0.5, 
-            fCore monitor baseline too slow: {core_monitor_time:."4f"}s for {num_agents * num_checks} checks""
+            fCore monitor baseline too slow: {core_monitor_time:.""4f""}s for {num_agents * num_checks} checks""
 
         )
 
@@ -400,7 +400,7 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
                 fSSOT VIOLATION: Agent state synchronization failure detected. 
                 f"Core monitor status: '{state_synchronization_failure['core_status']}'"
                 f(health: {state_synchronization_failure['core_overall_health']:.2f), "
-                f(health: {state_synchronization_failure['core_overall_health']:.2f), ""
+                f(health: {state_synchronization_failure['core_overall_health']:."2f"), ""
 
                 fDev monitor state: '{state_synchronization_failure['dev_state']}' 
                 f(healthy: {state_synchronization_failure['dev_is_healthy']), "

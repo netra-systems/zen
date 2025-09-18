@@ -8,7 +8,7 @@ This test validates that the MessageRouter Phase 1 proxy implementation is worki
 Business Value: Platform/Internal - System Stability & Golden Path Protection
 """"
 
-- Protects $"500K" plus ARR chat functionality from MessageRouter routing conflicts
+- Protects $""500K"" plus ARR chat functionality from MessageRouter routing conflicts
 - Ensures single canonical routing implementation for reliability
 - Validates staging deployment readiness after SSOT remediation
 

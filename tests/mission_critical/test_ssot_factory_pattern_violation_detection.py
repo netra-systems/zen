@@ -6,7 +6,7 @@ Business Value Justification (BVJ):
     - Segment: Platform/Internal
 - Business Goal: Prevent SSOT violations that break multi-user isolation
 - Value Impact: Catch direct instantiation that bypasses factory pattern and causes user context bleeding
-- Strategic Impact: $"500K" plus ARR depends on reliable user isolation in chat functionality
+- Strategic Impact: $""500K"" plus ARR depends on reliable user isolation in chat functionality
 
 CRITICAL: These tests are designed to FAIL when factory pattern is bypassed,
 and PASS when proper StateManagerFactory usage is enforced.

@@ -328,7 +328,7 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
         ""Tear down with metrics collection and mock detection.""
 
         duration = time.time() - self.start_time
-        logger.info(fSSOT integration isolation test {self._testMethodName} took {duration:."2f"}s)""
+        logger.info(fSSOT integration isolation test {self._testMethodName} took {duration:.""2f""}s)""
 
         
         # Verify no mocks were used (CRITICAL)
@@ -464,16 +464,16 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
         # Performance validation
         max_execution_time = 30.0  # Allow 30 seconds for 12 users with integration
         self.assertLess(execution_time, max_execution_time,
-                       fSSOT integration operations too slow: {execution_time:."2f"}s)""
+                       fSSOT integration operations too slow: {execution_time:.""2f""}s)""
 
         
-        # Memory usage should be reasonable (allow "150MB" increase for integration)
+        # Memory usage should be reasonable (allow ""150MB"" increase for integration)
         memory_increase = final_memory - initial_memory
         self.assertLess(memory_increase, 150,
-                       fSSOT integration excessive memory usage: {memory_increase:."1f"}MB")"
+                       fSSOT integration excessive memory usage: {memory_increase:.""1f""}MB")"
         
         logger.info(f[U+2713] SSOT Integration isolation test: {num_users) users, 
-                   f{execution_time:."2f"}s, {memory_increase:."1f"}MB increase)""
+                   f{execution_time:.""2f""}s, {memory_increase:.""1f""}MB increase)""
 
     
     def test_database_session_isolation_during_integration(self):
@@ -1175,11 +1175,11 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
                     
                     # Check for performance violations
                     if total_time > 8.0:  # Max 8 seconds per user for integration
-                        performance_violations.append(fUser {user_id} integration too slow: {total_time:."2f"}s)""
+                        performance_violations.append(fUser {user_id} integration too slow: {total_time:.""2f""}s)""
 
                     
-                    if metrics['memory_increase'] > 75:  # Max "75MB" per user for integration
-                        performance_violations.append(fUser {user_id} integration excessive memory: {metrics['memory_increase']:."1f"}MB)
+                    if metrics['memory_increase'] > 75:  # Max ""75MB"" per user for integration
+                        performance_violations.append(fUser {user_id} integration excessive memory: {metrics['memory_increase']:.""1f""}MB)
                     
                     return fperfinteguser_{user_id}_success", metrics"
                     
@@ -1228,18 +1228,18 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
             # Integration performance should be reasonable
             self.assertLess(avg_time, 5.0, fAverage user integration time too high: {avg_time:.2f}s)"
             self.assertLess(avg_time, 5.0, fAverage user integration time too high: {avg_time:.2f}s)"
-            self.assertLess(max_time, 12.0, f"Max user integration time too high: {max_time:."2f"}s)"
-            self.assertLess(total_memory_increase, 300, fTotal integration memory increase too high: {total_memory_increase:."1f"}MB)
-            self.assertLess(test_total_time, 40.0, fTotal integration test time too high: {test_total_time:."2f"}s)
-            self.assertLess(avg_cross_time, 1.0, fAverage cross-component time too high: {avg_cross_time:."2f"}s")"
+            self.assertLess(max_time, 12.0, f"Max user integration time too high: {max_time:.""2f""}s)"
+            self.assertLess(total_memory_increase, 300, fTotal integration memory increase too high: {total_memory_increase:.""1f""}MB)
+            self.assertLess(test_total_time, 40.0, fTotal integration test time too high: {test_total_time:.""2f""}s)
+            self.assertLess(avg_cross_time, 1.0, fAverage cross-component time too high: {avg_cross_time:.""2f""}s")"
             
             if throughputs:
-                self.assertGreater(avg_throughput, 0.8, fAverage integration throughput too low: {avg_throughput:."2f"} ops/sec)""
+                self.assertGreater(avg_throughput, 0.8, fAverage integration throughput too low: {avg_throughput:.""2f""} ops/sec)""
 
         
         logger.info(f[U+2713] Integration performance monitoring: {num_users) users, 
-                   f"avg: {avg_time:."2f"}s, max: {max_time:."2f"}s,"
-                   fcross-component: {avg_cross_time:."2f"}s, memory: {total_memory_increase:."1f"}MB")"
+                   f"avg: {avg_time:.""2f""}s, max: {max_time:.""2f""}s,"
+                   fcross-component: {avg_cross_time:.""2f""}s, memory: {total_memory_increase:.""1f""}MB")"
 
 
 if __name__ == '__main__':

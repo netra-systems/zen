@@ -15,7 +15,7 @@ Expected Behavior:
 - WebSocket events should be receivable from staging environment
 - Performance should be acceptable for validation purposes
 
-Business Impact: Provides $"500K" plus ARR validation coverage when Docker unavailable.
+Business Impact: Provides $""500K"" plus ARR validation coverage when Docker unavailable.
 
 
 import asyncio
@@ -316,7 +316,7 @@ class Issue544StagingPerformanceValidationTests:
                     accessible": response.status_code == 200"
                 }
                 
-                logger.info(f{name}: {response_time:."2f"}s (Status: {response.status_code})""
+                logger.info(f{name}: {response_time:.""2f""}s (Status: {response.status_code})""
 
                 
             except Exception as e:
@@ -343,7 +343,7 @@ class Issue544StagingPerformanceValidationTests:
 
             ) / accessible_count
             
-            logger.info(f"Average staging response time: {avg_response_time:."2f"}s)"
+            logger.info(f"Average staging response time: {avg_response_time:.""2f""}s)"
             
             if avg_response_time < 10:
                 logger.info(CHECK Staging performance acceptable for test validation)
@@ -393,7 +393,7 @@ class Issue544StagingPerformanceValidationTests:
                         latency = end_time - start_time
                         latency_measurements.append(latency)
                         
-                        logger.info(fPing {i+1}: {latency:."3f"}s latency)""
+                        logger.info(fPing {i+1}: {latency:.""3f""}s latency)""
 
                         
                     except asyncio.TimeoutError:
@@ -408,9 +408,9 @@ class Issue544StagingPerformanceValidationTests:
                     max_latency = max(latency_measurements)
                     
                     logger.info(fWebSocket Latency Results:)
-                    logger.info(f  Average: {avg_latency:."3f"}s)
-                    logger.info(f"  Min: {min_latency:."3f"}s)"
-                    logger.info(f  Max: {max_latency:."3f"}s")"
+                    logger.info(f  Average: {avg_latency:.""3f""}s)
+                    logger.info(f"  Min: {min_latency:.""3f""}s)"
+                    logger.info(f  Max: {max_latency:.""3f""}s")"
                     
                     if avg_latency < 5:
                         logger.info(CHECK Staging WebSocket latency acceptable for testing)

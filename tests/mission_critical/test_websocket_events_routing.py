@@ -7,7 +7,7 @@ event delivery and prevents cross-user event leakage.
 Business Value Justification:
     - Segment: Platform/Internal  
 - Business Goal: User Experience & Security
-- Value Impact: Ensures real-time chat events reach correct users for $"500K" plus ARR operations
+- Value Impact: Ensures real-time chat events reach correct users for $""500K"" plus ARR operations
 - Strategic Impact: Validates WebSocket integration in SSOT ExecutionEngine consolidation
 
 Key Validation Areas:
@@ -338,15 +338,15 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
             # Performance validation
             if events_per_second < 100:  # Should handle at least 100 events/sec
                 performance_ok = False
-                self.performance_issues.append(f"Low event throughput: {events_per_second:."1f"} events/sec)"
+                self.performance_issues.append(f"Low event throughput: {events_per_second:.""1f""} events/sec)"
             
             # Validate results
             expected_total_events = user_count * events_per_user
             self.assertEqual(successful_users, user_count, fAll {user_count} users should complete successfully)
             self.assertEqual(total_events_sent, expected_total_events, fAll {expected_total_events} events should be sent)
-            self.assertTrue(performance_ok, fEvent throughput should be adequate (got {events_per_second:."1f"} events/sec)")"
+            self.assertTrue(performance_ok, fEvent throughput should be adequate (got {events_per_second:.""1f""} events/sec)")"
             
-            logger.info(fCHECK PASS: Concurrent events handled - {total_events_sent} events in {total_time:."3f"}s ({events_per_second:."1f"} events/sec))""
+            logger.info(fCHECK PASS: Concurrent events handled - {total_events_sent} events in {total_time:.""3f""}s ({events_per_second:.""1f""} events/sec))""
 
             return True
         

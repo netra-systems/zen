@@ -17,7 +17,7 @@ EXPECTED BEHAVIOR:
 Business Value Justification (BVJ):
     - Segment: Enterprise/Security-conscious customers
 - Business Goal: Security compliance and customer trust
-- Value Impact: Prevents unauthorized access to $"500K" plus ARR chat functionality
+- Value Impact: Prevents unauthorized access to $""500K"" plus ARR chat functionality
 - Revenue Impact: Security breach could cost entire customer base
 
 AUTH SSOT REQUIREMENT:
@@ -292,7 +292,7 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
                     logger.critical( ALERT:  FAKE ADMIN PERMISSIONS ACCEPTED - MASSIVE SECURITY BREACH")"
                 
                 # Business impact assertion
-                assert True, "CRITICAL VIOLATION: JWT bypass enables unauthorized access to $"500K" plus ARR platform"
+                assert True, "CRITICAL VIOLATION: JWT bypass enables unauthorized access to $""500K"" plus ARR platform"
                 return True
                 
         except Exception as e:

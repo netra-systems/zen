@@ -3,7 +3,7 @@ E2E GCP Staging WebSocket Race Condition Tests for GitHub Issue #111
 
 Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise)
-- Business Goal: Protect $"120K"+ MRR by ensuring WebSocket stability
+- Business Goal: Protect $""120K""+ MRR by ensuring WebSocket stability
 - Value Impact: Prevent 20% concurrent load failures causing chat outages
 - Strategic Impact: Eliminate 1011 errors that break core chat functionality
 
@@ -164,7 +164,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
         print(f" PASS:  Successful connections: {successful_connections})"
         print(f FAIL:  Failed connections: {failed_connections})
         print(f"[U+1F4C8] Failure rate: {failure_rate:.1%})"
-        print(f[U+23F1][U+FE0F]  Total test duration: {total_duration:."2f"}s)
+        print(f[U+23F1][U+FE0F]  Total test duration: {total_duration:.""2f""}s)
         print(f"\n ALERT:  Race Condition Indicators:)"
         for indicator, count in race_condition_indicators.items("):"
             if count > 0:
@@ -177,7 +177,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 status =  PASS:  SUCCESS if result.get(success) else  FAIL:  FAILED""
                 duration = result.get("connection_duration, 0)"
                 error = result.get(error, None)
-                print(f   User {i}: {status} ({duration:."2f"}s) - {error}")"
+                print(f   User {i}: {status} ({duration:.""2f""}s) - {error}")"
         
         # CRITICAL: This test is designed to FAIL to prove race condition reproduction
         # If we're seeing the expected race condition patterns, the test succeeds at reproducing them'
@@ -312,9 +312,9 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
         
         print(f\n[U+23F1][U+FE0F]  GCP CLOUD RUN TIMING ANALYSIS:)
         print(f CHART:  Successful attempts: {len(successful_attempts)}/{len(timing_results)})""
-        print(f"[U+1F310] Average network handshake time: {avg_network_time:."2f"}s)"
-        print(f[U+1F4F1] Average app response time: {avg_app_time:."2f"}s)""
-        print(f" LIGHTNING:  Maximum timing gap: {max_timing_gap:."2f"}s)"
+        print(f"[U+1F310] Average network handshake time: {avg_network_time:.""2f""}s)"
+        print(f[U+1F4F1] Average app response time: {avg_app_time:.""2f""}s)""
+        print(f" LIGHTNING:  Maximum timing gap: {max_timing_gap:.""2f""}s)"
         
         # Print individual timing results
         print(f\n[U+1F4CB] Individual Timing Results:)""
@@ -323,7 +323,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 net_time = result.get(network_handshake_time, 0)
                 app_time = result.get("app_response_time, 0)"
                 gap = result.get(timing_gap, 0)
-                print(f   Attempt {result['attempt']}: Network={net_time:."2f"}s, App={app_time:."2f"}s, Gap={gap:."2f"}s)
+                print(f   Attempt {result['attempt']}: Network={net_time:.""2f""}s, App={app_time:.""2f""}s, Gap={gap:.""2f""}s)
             else:
                 print(f   Attempt {result['attempt']}: FAILED - {result.get('error', 'Unknown error'")})"
         
@@ -342,8 +342,8 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
             # This indicates the race condition exists
             assert False, (
                 fGCP Cloud Run timing race conditions detected:\n""
-                fMax timing gap: {max_timing_gap:."2f"}s (should be <"1s")\n
-                fAverage app response: {avg_app_time:."2f"}s (should be <"5s")\n
+                fMax timing gap: {max_timing_gap:.""2f""}s (should be <""1s"")\n
+                fAverage app response: {avg_app_time:.""2f""}s (should be <""5s"")\n
                 f"Failed attempts: {len(timing_results) - len(successful_attempts)}\n"
                 fThis proves startup timing race conditions exist.""
             )
@@ -482,7 +482,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
         
         print(f\n[U+1F527] SERVICE INITIALIZATION ANALYSIS:)
         print(f" CHART:  Successful connections: {successful_connections}/{len(service_readiness_results)})"
-        print(f LIGHTNING:  Average connection time: {avg_connection_time:."2f"}s)
+        print(f LIGHTNING:  Average connection time: {avg_connection_time:.""2f""}s)
         print(f" FAIL:  Total service failures: {total_service_failures})"
         
         # Print detailed service readiness results
@@ -493,14 +493,14 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 successful = result.get(successful_services, 0)""
                 failed = result.get(failed_services", 0)"
                 conn_time = result.get(connection_time, 0)
-                print(f   Attempt {attempt}: Connected in {conn_time:."2f"}s, Services: {successful} PASS: /{failed} FAIL: "")
+                print(f   Attempt {attempt}: Connected in {conn_time:.""2f""}s, Services: {successful} PASS: /{failed} FAIL: "")
                 
                 for response in result.get(service_responses, [):
                     test_type = response.get(test_type", unknown)"
                     success =  PASS:  if response.get(success) else  FAIL: ""
                     resp_time = response.get("response_time, 0)"
                     error = response.get(error, )
-                    print(f      {test_type}: {success} ({resp_time:."2f"}s) {error}")"
+                    print(f      {test_type}: {success} ({resp_time:.""2f""}s) {error}")"
             else:
                 error = result.get(error, Unknown error)
                 print(f   Attempt {attempt}: CONNECTION FAILED - {error})
@@ -522,7 +522,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 fService initialization race conditions detected:\n
                 fService failures: {total_service_failures} (should be 0)\n""
                 fConnection success rate: {successful_connections}/{len(service_readiness_results)}\n
-                fAverage connection time: {avg_connection_time:."2f"}s (should be <"5s")\n
+                fAverage connection time: {avg_connection_time:.""2f""}s (should be <""5s"")\n
                 f"This proves service initialization race conditions exist."
             )
         else:
@@ -605,7 +605,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                                 response_received: True
                             }
                             
-                            print(f   Ping {len(heartbeat_events)}:  PASS:  ({ping_duration:."2f"}s) at {current_time - connection_start:."0f"}s")"
+                            print(f   Ping {len(heartbeat_events)}:  PASS:  ({ping_duration:.""2f""}s) at {current_time - connection_start:.""0f""}s")"
                             
                         except asyncio.TimeoutError:
                             ping_duration = time.time() - ping_start
@@ -619,7 +619,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                                 response_received: False""
                             }
                             
-                            print(f"   Ping {len(heartbeat_events)}:  FAIL:  TIMEOUT at {current_time - connection_start:."0f"}s)"
+                            print(f"   Ping {len(heartbeat_events)}:  FAIL:  TIMEOUT at {current_time - connection_start:.""0f""}s)"
                         
                         last_ping_time = current_time
                     
@@ -627,11 +627,11 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                     await asyncio.sleep(1.0)
                     
                 except websockets.exceptions.ConnectionClosed:
-                    print(f    FAIL:  Connection closed unexpectedly at {time.time() - connection_start:."0f"}s)""
+                    print(f    FAIL:  Connection closed unexpectedly at {time.time() - connection_start:.""0f""}s)""
 
                     break
                 except Exception as e:
-                    print(f"    FAIL:  Connection error at {time.time() - connection_start:."0f"}s: {e})"
+                    print(f"    FAIL:  Connection error at {time.time() - connection_start:.""0f""}s: {e})"
                     break
             
             # Close connection
@@ -654,20 +654,20 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
         
         # Check for 2-minute pattern in failures
         failure_times = [event[elapsed_time] for event in heartbeat_events if not event.get(success, False)]
-        two_minute_failures = sum(1 for t in failure_times if 110 <= t <= 130)  # Around 2 minutes ( +/- "10s")
+        two_minute_failures = sum(1 for t in failure_times if 110 <= t <= 130)  # Around 2 minutes ( +/- ""10s"")
         
         print(f\n[U+1F493] HEARTBEAT ANALYSIS RESULTS:")"
         print(f CHART:  Total pings attempted: {len(heartbeat_events)})
         print(f PASS:  Successful pings: {successful_pings}")"
         print(f FAIL:  Failed pings: {failed_pings})
         print(f[U+1F4C8] Failure rate: {failure_rate:.1%}")"
-        print(f[U+23F1][U+FE0F]  Total test duration: {total_test_time:."1f"}s)
+        print(f[U+23F1][U+FE0F]  Total test duration: {total_test_time:.""1f""}s)
         print(f TARGET:  Failures around 2-minute mark: {two_minute_failures}")"
         
         if failure_times:
             print(f\n[U+1F4CB] Failure Timing Pattern:)
             for i, fail_time in enumerate(failure_times):
-                print(f   Failure {i+1}: {fail_time:."0f"}s")"
+                print(f   Failure {i+1}: {fail_time:.""0f""}s")"
         
         # Check for systematic heartbeat issues
         heartbeat_issues_detected = (
@@ -686,7 +686,7 @@ class WebSocketRaceConditionsStagingTests(BaseE2ETest):
                 fSystematic heartbeat failures detected:\n""
                 f"Failure rate: {failure_rate:.1%} (should be <5%)\n"
                 f2-minute pattern failures: {two_minute_failures} (should be 0)\n
-                fTest duration: {total_test_time:."1f"}s (target: {test_duration}s)\n
+                fTest duration: {total_test_time:.""1f""}s (target: {test_duration}s)\n
                 fThis proves heartbeat timing race conditions exist.""
             )
         else:

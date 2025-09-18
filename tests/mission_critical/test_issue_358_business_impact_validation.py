@@ -5,7 +5,7 @@ Mission Critical Tests for Issue #358: Business Impact Validation
 """"
 
 CRITICAL ISSUE: Complete system lockout preventing users from accessing AI responses
-BUSINESS IMPACT: $"500K" plus ARR at risk due to complete Golden Path failure
+BUSINESS IMPACT: $""500K"" plus ARR at risk due to complete Golden Path failure
 
 These tests are MISSION CRITICAL and DESIGNED TO FAIL to prove that business-critical
 functionality is completely broken, validating the revenue and customer impact of
@@ -20,7 +20,7 @@ Test Categories:
 Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise, Platform)
 - Business Goal: Revenue Protection & Business Continuity
-- Value Impact: Validate $"500K" plus ARR functionality and customer experience
+- Value Impact: Validate $""500K"" plus ARR functionality and customer experience
 - Strategic Impact: Prove business-critical systems are operational
 
 REQUIREMENTS per CLAUDE.md:
@@ -106,7 +106,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
     These tests validate that business-critical functionality is completely broken,
     proving the revenue and customer impact through concrete business scenarios.
     
-    CRITICAL: These tests MUST NEVER be skipped - they protect $"500K" plus ARR.
+    CRITICAL: These tests MUST NEVER be skipped - they protect $""500K"" plus ARR.
     "
     ""
 
@@ -145,7 +145,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         (user sends message -> gets AI response) is completely broken.
         
         CRITICAL BUSINESS IMPACT:
-        - $"500K" plus ARR functionality completely inaccessible
+        - $""500K"" plus ARR functionality completely inaccessible
         - Primary value delivery mechanism broken
         - Revenue-generating user interactions fail 100% 
         - No working path for users to receive AI value
@@ -256,7 +256,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                     segment for f in revenue_flow_failures 
                     for segment in f[user_segments_affected]),"
                     for segment in f[user_segments_affected]),"
-                revenue_generation_rate": f{((len(critical_revenue_flows) - len(revenue_flow_failures)) / len(critical_revenue_flows)) * 100:."1f"}%,"
+                revenue_generation_rate": f{((len(critical_revenue_flows) - len(revenue_flow_failures)) / len(critical_revenue_flows)) * 100:.""1f""}%,"
                 business_continuity: FAILED if len(revenue_flow_failures) >= 2 else DEGRADED"
                 business_continuity: FAILED if len(revenue_flow_failures) >= 2 else DEGRADED""
 
@@ -266,7 +266,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
                 f"MISSION CRITICAL REVENUE GENERATION FAILURE: Revenue-generating user flows"
                 fcompletely broken. Analysis: {revenue_impact_analysis}. 
                 fFlow Failures: {revenue_flow_failures}. 
-                fBusiness Impact: ${revenue_impact_analysis['total_arr_at_risk']:,."0f"} ARR at risk, ""
+                fBusiness Impact: ${revenue_impact_analysis['total_arr_at_risk']:,.""0f""} ARR at risk, ""
                 fcustomer segments affected: {revenue_impact_analysis['unique_customer_segments_affected']}, 
                 fprimary value delivery mechanism non-functional, revenue generation completely blocked. 
                 f"BUSINESS EMERGENCY: Immediate escalation required - complete revenue generation failure."
@@ -684,7 +684,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         return {
             "operation_successful: operation_successful,"
             broken_dependencies: broken_dependencies,
-            "dependency_failure_rate: f{(len(broken_dependencies) / len(dependencies)) * 100:."1f"}%"
+            "dependency_failure_rate: f{(len(broken_dependencies) / len(dependencies)) * 100:.""1f""}%"
         }
 
     @pytest.mark.mission_critical
@@ -772,7 +772,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         total_impact_score = sum(impact_factors.values()) / len(impact_factors)
         
         business_impact_summary = {
-            total_impact_score": f{total_impact_score:."1f"}/100 (CRITICAL),"
+            total_impact_score": f{total_impact_score:.""1f""}/100 (CRITICAL),"
             business_emergency_confirmed: True,
             immediate_action_required: True,"
             immediate_action_required: True,"
@@ -789,7 +789,7 @@ class Issue358BusinessImpactValidationTests(SSotAsyncTestCase):
         
         logger.critical(f"COMPLETE BUSINESS IMPACT ASSESSMENT: {business_impact_summary})"
         logger.critical(fEXECUTIVE SUMMARY: Issue #358 causes complete business emergency with 
-                       f$"500K" plus ARR at risk, all customer segments affected, revenue generation 
+                       f$""500K"" plus ARR at risk, all customer segments affected, revenue generation 
                        fcompletely blocked, customer experience failed, business continuity ""
                        fcompromised. IMMEDIATE C-LEVEL ESCALATION REQUIRED.)
         

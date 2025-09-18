@@ -6,7 +6,7 @@ MISSION CRITICAL: SSOT Test Execution Compliance Validation
 CRITICAL MISSION: Detect and prevent fragmented test execution patterns that bypass
 the unified test runner and violate SSOT testing infrastructure.
 
-BUSINESS VALUE: Protects $"500K" plus ARR Golden Path functionality by ensuring all tests
+BUSINESS VALUE: Protects $""500K"" plus ARR Golden Path functionality by ensuring all tests
 follow SSOT patterns and preventing test infrastructure fragmentation.
 
 TARGET VIOLATIONS:
@@ -58,7 +58,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
     MISSION CRITICAL: Test SSOT execution compliance across all test files.
     
     This test suite MUST detect violations where test files bypass the unified
-    test runner or use non-SSOT patterns, protecting the $"500K" plus ARR Golden Path.
+    test runner or use non-SSOT patterns, protecting the $""500K"" plus ARR Golden Path.
 ""
     
     def setup_method(self, method):
@@ -110,7 +110,7 @@ class SSOTExecutionComplianceTests(SSotBaseTestCase):
                 f1. Remove direct test execution calls from test files\n""
                 f2. Execute tests through: python tests/unified_test_runner.py\n
                 f3. Use SSOT test execution patterns only\n\n
-                f"BUSINESS IMPACT: Fragmented test execution threatens $"500K" plus ARR Golden Path stability"
+                f"BUSINESS IMPACT: Fragmented test execution threatens $""500K"" plus ARR Golden Path stability"
             )
     
     def test_all_test_classes_inherit_from_ssot_base_test_case(self):

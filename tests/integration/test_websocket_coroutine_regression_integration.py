@@ -7,7 +7,7 @@ Tests WebSocket endpoint behavior with real authentication and environment detec
 CRITICAL ISSUE: GitHub Issue #133
 - Problem: 'coroutine' object has no attribute 'get' error in WebSocket endpoint  
 - Root Cause: get_env() returning coroutine instead of IsolatedEnvironment
-- Business Impact: Blocking core chat functionality ($"500K" plus ARR impact)
+- Business Impact: Blocking core chat functionality ($""500K"" plus ARR impact)
 
 CLAUDE.MD COMPLIANCE:
     - Integration tests use real authentication (NO MOCKS for auth)

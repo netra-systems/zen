@@ -1,9 +1,9 @@
 '''WebSocket UI Timing Layer Validation Tests.'
 
 Tests UI layer timing requirements per SPEC/websocket_communication.xml:
-    - Fast Layer: 0-"100ms" (immediate feedback)
-- Medium Layer: "100ms"-"1s" (progressive updates)
-- Slow Layer: "1s"+ (final results)
+    - Fast Layer: 0-""100ms"" (immediate feedback)
+- Medium Layer: ""100ms""-""1s"" (progressive updates)
+- Slow Layer: ""1s""+ (final results)
 
 Business Value: Ensures responsive user experience through proper event timing,
 preventing user perception of system slowness or unresponsiveness.
@@ -56,7 +56,7 @@ class TestWebSocketUITiming:
 
         @pytest.mark.e2e
     async def test_fast_layer_timing_compliance(self, websocket_client):
-        Test Fast Layer events arrive within 0-"100ms" for immediate feedback.""
+        Test Fast Layer events arrive within 0-""100ms"" for immediate feedback.""
                 # Fast layer events per SPEC/websocket_communication.xml
         fast_layer_events = {agent_started, tool_executing}
 
@@ -94,14 +94,14 @@ class TestWebSocketUITiming:
         except (asyncio.TimeoutError, json.JSONDecodeError):
         continue
 
-                                    # Validate Fast Layer timing (0-"100ms")
+                                    # Validate Fast Layer timing (0-""100ms"")
         assert len(fast_events_timing) > 0, "No fast layer events received for timing validation"
 
         for event_timing in fast_events_timing:
         latency = event_timing[latency_ms"]"
         event_type = event_timing[event_type]
 
-                                        # Fast Layer requirement:  <= "100ms"
+                                        # Fast Layer requirement:  <= ""100ms""
         assert latency <= 100.0, "( )"
         formatted_string""
         f"This impacts immediate user feedback perception."
@@ -154,21 +154,21 @@ class TestWebSocketUITiming:
         except (asyncio.TimeoutError, json.JSONDecodeError):
         continue
 
-                                                                    # Validate Medium Layer timing ("100ms"-"1000ms")
+                                                                    # Validate Medium Layer timing (""100ms""-""1000ms"")
         if len(medium_events_timing) > 0:  # Only validate if events were received
         for event_timing in medium_events_timing:
         latency = event_timing["latency_ms]"
         event_type = event_timing[event_type]
 
-                                                                        # Medium Layer requirement: "100ms"  <=  latency  <=  "1000ms"
+                                                                        # Medium Layer requirement: ""100ms""  <=  latency  <=  ""1000ms""
         assert 100.0 <= latency <= 1000.0, "( )"
         "formatted_string"
-        f(expected 100-"1000ms"). This impacts progressive update perception.
+        f(expected 100-""1000ms""). This impacts progressive update perception.
                                                                         
 
         @pytest.mark.e2e
     async def test_slow_layer_timing_compliance(self, websocket_client):
-        Test Slow Layer events arrive after "1s" for final results.""
+        Test Slow Layer events arrive after ""1s"" for final results.""
                                                                             # Slow layer events per spec
         slow_layer_events = {agent_completed, final_report}
 
@@ -206,17 +206,17 @@ class TestWebSocketUITiming:
         except (asyncio.TimeoutError, json.JSONDecodeError):
         continue
 
-                                                                                                # Validate Slow Layer timing ( >= "1000ms")
+                                                                                                # Validate Slow Layer timing ( >= ""1000ms"")
         assert len(slow_events_timing) > 0, No slow layer events received for timing validation""
 
         for event_timing in slow_events_timing:
         latency = event_timing["latency_ms]"
         event_type = event_timing[event_type]
 
-                                                                                                    # Slow Layer requirement:  >= "1000ms" (indicates substantial work)
+                                                                                                    # Slow Layer requirement:  >= ""1000ms"" (indicates substantial work)
         assert latency >= 1000.0, "( )"
         "formatted_string"
-        f(expected  >= "1000ms"). This may indicate insufficient processing depth.
+        f(expected  >= ""1000ms""). This may indicate insufficient processing depth.
                                                                                                     
 
         @pytest.mark.e2e
@@ -225,12 +225,12 @@ class TestWebSocketUITiming:
         pass
                                                                                                         # Expected layer assignments per SPEC/websocket_communication.xml
         expected_layers = {
-        agent_started: fast,      # 0-"100ms"
-        tool_executing": fast,     # 0-"100ms""
-        agent_thinking: medium,   # "100ms"-"1s"
-        partial_result: "medium,   # "100ms"-"1s""
-        agent_completed": slow,    # "1s"+"
-        final_report: slow        # "1s"+
+        agent_started: fast,      # 0-""100ms""
+        tool_executing": fast,     # 0-""100ms"""
+        agent_thinking: medium,   # ""100ms""-""1s""
+        partial_result: "medium,   # ""100ms""-""1s"""
+        agent_completed": slow,    # ""1s""+"
+        final_report: slow        # ""1s""+
                                                                                                         
 
                                                                                                         # Trigger comprehensive workflow

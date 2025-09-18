@@ -2,7 +2,7 @@
 "MISSION CRITICAL: DatabaseManager SSOT Function Violations Test Suite"
 
 THIS SUITE REPRODUCES GITHUB ISSUE #204 - WEBSOCKET FACTORY SESSION FACTORY FAILURES
-Business Value: $"500K" plus ARR - WebSocket connections depend on database session creation
+Business Value: $""500K"" plus ARR - WebSocket connections depend on database session creation
 
 CRITICAL VIOLATIONS TO DETECT:
     1. Missing `get_db_session_factory` function blocking WebSocket connections (GitHub Issue #204)

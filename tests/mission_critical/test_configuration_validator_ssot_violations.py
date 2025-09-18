@@ -11,7 +11,7 @@ These tests demonstrate the problem by showing inconsistent behavior across
 4. netra_backend/app/core/configuration/validator.py (Config Duplicate - 311 lines)
 
 CRITICAL: These tests PASS initially (showing violations exist) and will FAIL after SSOT consolidation.
-Business Impact: OAuth authentication failures threaten $"500K" plus ARR
+Business Impact: OAuth authentication failures threaten $""500K"" plus ARR
 "
 ""
 

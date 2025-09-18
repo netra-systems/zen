@@ -2,7 +2,7 @@
 
 Business Value Justification:
     - Segment: Platform/Business Critical
-- Business Goal: Protect $"500K" plus ARR Golden Path functionality  
+- Business Goal: Protect $""500K"" plus ARR Golden Path functionality  
 - Value Impact: Ensures execution engine consolidation doesn't break end-to-end user flow'
 - Strategic Impact: Critical protection for login -> AI response flow that delivers 90% platform value
 
@@ -136,7 +136,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                 'step': 'apex_optimizer_agent',
                 'description': 'Generate AI optimization recommendations', 
                 'expected_output': 'Actionable recommendations produced',
-                'business_impact': 'User receives valuable AI insights ($"500K" plus ARR value)'
+                'business_impact': 'User receives valuable AI insights ($""500K"" plus ARR value)'
             }
         ]
         
@@ -208,7 +208,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                 # Validate step performance (critical for user experience)
                 max_acceptable_time = 3.0  # 3 seconds max per step
                 self.assertLess(step_duration, max_acceptable_time,
-                    fGolden Path step {step_num} too slow: {step_duration:."2f"}s (max: {max_acceptable_time}s)")"
+                    fGolden Path step {step_num} too slow: {step_duration:.""2f""}s (max: {max_acceptable_time}s)")"
                 
                 golden_path_results.append({
                     'step': step_num,
@@ -224,7 +224,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
         max_total_time = 10.0  # 10 seconds max for complete flow
         
         self.assertLess(total_duration, max_total_time,
-            fComplete Golden Path too slow: {total_duration:."2f"}s (max: {max_total_time}s))""
+            fComplete Golden Path too slow: {total_duration:.""2f""}s (max: {max_total_time}s))""
 
         
         # Validate all steps completed successfully
@@ -234,9 +234,9 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
         
         # Log Golden Path success
         print(f"CHECK GOLDEN PATH PROTECTED: Complete user flow successful through UserExecutionEngine)"
-        print(f   Total duration: {total_duration:."2f"}s)
+        print(f   Total duration: {total_duration:.""2f""}s)
         print(f"   Steps completed: {len(golden_path_results)})"
-        print(f   Business value: $"500K" plus ARR flow maintained)
+        print(f   Business value: $""500K"" plus ARR flow maintained)
 
     async def test_golden_path_websocket_events_all_five_critical_events(self):
         "CRITICAL: Validate all 5 critical WebSocket events for Golden Path user experience."
@@ -467,7 +467,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
             max_acceptable_concurrent_time = 5.0  # 5 seconds for all users
             self.assertLess(total_duration, max_acceptable_concurrent_time,
                 fConcurrent Golden Path too slow: {total_duration:.2f}s)"
-                fConcurrent Golden Path too slow: {total_duration:.2f}s)""
+                fConcurrent Golden Path too slow: {total_duration:."2f"}s)""
 
             
             # Validate each user received their own WebSocket events
@@ -482,7 +482,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
             
             print(fCHECK MULTI-USER GOLDEN PATH PROTECTED:)
             print(f"   Concurrent users: {concurrent_users})"
-            print(f   Total duration: {total_duration:."2f"}s)
+            print(f   Total duration: {total_duration:.""2f""}s)
             print(f"   All users successful: {len(successful_users)}/{concurrent_users})"
             print(f   User isolation: MAINTAINED)
             

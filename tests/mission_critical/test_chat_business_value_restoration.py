@@ -183,7 +183,7 @@ class ChatBusinessValueRestorationTests(SSotBaseTestCase):
         
         # CRITICAL: Validate test actually connected to real services
         if execution_time < 1.0:
-            pytest.fail(f" ALERT:  CRITICAL: Mission critical test {method.__name__) executed in {execution_time:."3f")s."
+            pytest.fail(f" ALERT:  CRITICAL: Mission critical test {method.__name__) executed in {execution_time:.""3f"")s."
                       fThis indicates the test did not connect to real services or was mocked.)
         
         # Analyze business value
@@ -198,8 +198,8 @@ class ChatBusinessValueRestorationTests(SSotBaseTestCase):
         }
         
         logger.info(f CHART:  Mission critical test results for {method.__name__}:)
-        logger.info(f   [U+23F1][U+FE0F] Execution time: {execution_time:."3f"}s")"
-        logger.info(f   [U+1F4B0] Business value score: {business_value_score:."2f"}/1.0)""
+        logger.info(f   [U+23F1][U+FE0F] Execution time: {execution_time:.""3f""}s")"
+        logger.info(f   [U+1F4B0] Business value score: {business_value_score:.""2f""}/1.0)""
 
         logger.info(f   [U+1F4C8] Analysis: {analysis})
     
@@ -320,7 +320,7 @@ class ChatBusinessValueRestorationTests(SSotBaseTestCase):
             # 5. Must achieve minimum business value score
             business_score = analysis['business_value_score']
             if business_score < 0.7:  # 70% threshold for business value
-                pytest.fail(f"BUSINESS VALUE INSUFFICIENT: Score {business_score:."2f"}/1.0 - chat not delivering value)"
+                pytest.fail(f"BUSINESS VALUE INSUFFICIENT: Score {business_score:.""2f""}/1.0 - chat not delivering value)"
             
             # Step 6: Validate response quality
             final_events = [e for e in self.event_capture.events if e['type'] == 'agent_completed']
@@ -338,7 +338,7 @@ class ChatBusinessValueRestorationTests(SSotBaseTestCase):
                 if not any(indicator in final_response.lower() for indicator in business_indicators):
                     logger.warning( WARNING: [U+FE0F] Response may not contain substantial business value)
             
-            logger.info(f CELEBRATION:  BUSINESS VALUE RESTORED: Chat functionality working with score {business_score:."2f"}/1.0")"
+            logger.info(f CELEBRATION:  BUSINESS VALUE RESTORED: Chat functionality working with score {business_score:.""2f""}/1.0")"
             
         except ConnectionClosedError as e:
             logger.error(f FAIL:  Chat connection failed: {e})
@@ -524,7 +524,7 @@ class ChatBusinessValueRestorationTests(SSotBaseTestCase):
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
         concurrent_time = time.time() - concurrent_start
-        logger.info(f"[U+23F1][U+FE0F] Concurrent chat sessions completed in {concurrent_time:."3f"}s)"
+        logger.info(f"[U+23F1][U+FE0F] Concurrent chat sessions completed in {concurrent_time:.""3f""}s)"
         
         # Analyze concurrent results
         successful_sessions = 0
@@ -556,7 +556,7 @@ class ChatBusinessValueRestorationTests(SSotBaseTestCase):
         logger.info(f    PASS:  Successful sessions: {successful_sessions}/{num_concurrent_users})
         logger.info(f    FAIL:  Registry conflicts: {registry_conflicts})"
         logger.info(f    FAIL:  Registry conflicts: {registry_conflicts})"
-        logger.info(f"   [U+1F4B0] Average business value: {total_business_value/max(1, successful_sessions):."2f"})"
+        logger.info(f"   [U+1F4B0] Average business value: {total_business_value/max(1, successful_sessions):.""2f""})"
         logger.info(f    ALERT:  Total errors: {len(all_errors)})
         
         # CRITICAL BUSINESS VALUE VALIDATIONS:
@@ -574,7 +574,7 @@ class ChatBusinessValueRestorationTests(SSotBaseTestCase):
         # 3. Average business value should be acceptable
         avg_business_value = total_business_value / max(1, successful_sessions)
         if successful_sessions > 0 and avg_business_value < 0.6:
-            pytest.fail(fMULTI-USER BUSINESS VALUE LOW: Average score {avg_business_value:."2f"}/1.0)""
+            pytest.fail(fMULTI-USER BUSINESS VALUE LOW: Average score {avg_business_value:.""2f""}/1.0)""
 
         
         # 4. All errors should be analyzed
@@ -642,16 +642,16 @@ class ChatBusinessValueRestorationTests(SSotBaseTestCase):
         avg_total = sum(m['total_time'] for m in performance_metrics) / len(performance_metrics)
         
         logger.info(f CHART:  Performance metrics:")"
-        logger.info(f    LIGHTNING:  Average connect time: {avg_connect:."3f"}s)
-        logger.info(f   [U+1F4AC] Average response time: {avg_response:."3f"}s)
-        logger.info(f"   [U+23F1][U+FE0F] Average total time: {avg_total:."3f"}s)"
+        logger.info(f    LIGHTNING:  Average connect time: {avg_connect:.""3f""}s)
+        logger.info(f   [U+1F4AC] Average response time: {avg_response:.""3f""}s)
+        logger.info(f"   [U+23F1][U+FE0F] Average total time: {avg_total:.""3f""}s)"
         
         # Performance thresholds
         if avg_connect > 5.0:
-            pytest.fail(fPERFORMANCE REGRESSION: Connection time too slow ({avg_connect:."3f"}s)")"
+            pytest.fail(fPERFORMANCE REGRESSION: Connection time too slow ({avg_connect:.""3f""}s)")"
         
         if avg_response > 15.0:
-            pytest.fail(fPERFORMANCE REGRESSION: Response time too slow ({avg_response:."3f"}s))""
+            pytest.fail(fPERFORMANCE REGRESSION: Response time too slow ({avg_response:.""3f""}s))""
 
         
         if any(m['response_time'] >= 10.0 for m in performance_metrics):

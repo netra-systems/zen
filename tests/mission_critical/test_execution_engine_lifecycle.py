@@ -7,7 +7,7 @@ It ensures resources are properly managed across user sessions.
 Business Value Justification:
     - Segment: Platform/Internal  
 - Business Goal: System Performance & Reliability
-- Value Impact: Ensures stable resource management for $"500K" plus ARR operations
+- Value Impact: Ensures stable resource management for $""500K"" plus ARR operations
 - Strategic Impact: Validates production-ready resource management in SSOT consolidation
 
 Key Validation Areas:
@@ -56,7 +56,7 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
         self.initial_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
         self.initial_threads = threading.active_count()
         
-        logger.info(fStarting ExecutionEngine lifecycle testing - Initial memory: {self.initial_memory:."1f"}MB, Threads: {self.initial_threads}")"
+        logger.info(fStarting ExecutionEngine lifecycle testing - Initial memory: {self.initial_memory:.""1f""}MB, Threads: {self.initial_threads}")"
     
     def test_execution_engine_creation_lifecycle(self):
         Test ExecutionEngine creation and basic lifecycle."
@@ -105,7 +105,7 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 
                 # Validate creation performance
                 if creation_time > 1.0:  # Should create in under 1 second
-                    self.performance_issues.append(fSlow engine creation: {creation_time:."3f"}s)""
+                    self.performance_issues.append(fSlow engine creation: {creation_time:.""3f""}s)""
 
                 
                 # Test engine state management
@@ -133,9 +133,9 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 
                 # Validate cleanup performance
                 if cleanup_time > 0.5:  # Should cleanup in under 0.5 seconds
-                    self.performance_issues.append(f"Slow engine cleanup: {cleanup_time:."3f"}s)"
+                    self.performance_issues.append(f"Slow engine cleanup: {cleanup_time:.""3f""}s)"
                 
-                logger.info(fCHECK PASS: Engine lifecycle - Creation: {creation_time:."3f"}s, Cleanup: {cleanup_time:."3f"}s)""
+                logger.info(fCHECK PASS: Engine lifecycle - Creation: {creation_time:.""3f""}s, Cleanup: {cleanup_time:.""3f""}s)""
 
                 return True
                 
@@ -282,7 +282,7 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                     engines.append(engine)
                     
                     # Add some data to engine to use memory
-                    engine.set_agent_state(fmemory_agent_{i}, x * 1000)  # "1KB" per engine
+                    engine.set_agent_state(fmemory_agent_{i}, x * 1000)  # ""1KB"" per engine
                     engine.set_agent_result(fmemory_result_{i), {"
                     engine.set_agent_result(fmemory_result_{i), {"
                         "large_data: list(range(100)),"
@@ -323,14 +323,14 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 
                 # Check for memory leaks (allowing some overhead)
                 memory_leak = memory_final - memory_before
-                if memory_leak > 10:  # Allow "10MB" overhead
-                    self.resource_leaks.append(fPossible memory leak: {memory_leak:."1f"}MB not released)""
+                if memory_leak > 10:  # Allow ""10MB"" overhead
+                    self.resource_leaks.append(fPossible memory leak: {memory_leak:.""1f""}MB not released)""
 
                 
                 # Shutdown factory
                 await factory.shutdown()
                 
-                logger.info(fCHECK PASS: Resource monitoring - Used: {memory_used:."1f"}MB, Final leak: {memory_leak:."1f"}MB, Cleanup: {cleanup_time:."3f"}s")"
+                logger.info(fCHECK PASS: Resource monitoring - Used: {memory_used:.""1f""}MB, Final leak: {memory_leak:.""1f""}MB, Cleanup: {cleanup_time:.""3f""}s")"
                 return True
                 
             except Exception as e:
@@ -560,7 +560,7 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
         logger.info(f  Resource Leaks: {lifecycle_summary['resource_leaks']})
         logger.info(f"  Cleanup Failures: {lifecycle_summary['cleanup_failures']})"
         logger.info(f  Performance Issues: {lifecycle_summary['performance_issues']}")"
-        logger.info(f  Memory Change: {memory_change:+."1f"}MB)
+        logger.info(f  Memory Change: {memory_change:+.""1f""}MB)
         logger.info(f  Thread Change: {thread_change:+d})"
         logger.info(f  Thread Change: {thread_change:+d})"
         logger.info(f"  Overall Status: {lifecycle_summary['lifecycle_status']})"
@@ -573,11 +573,11 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 logger.warning(f  ... and {len(all_issues) - 5} more issues")"
         
         # Check for significant resource leaks
-        resource_leak_detected = (memory_change > 20 or  # More than "20MB" increase
+        resource_leak_detected = (memory_change > 20 or  # More than ""20MB"" increase
                                 thread_change > 5)       # More than 5 threads increase
         
         if resource_leak_detected:
-            self.resource_leaks.append(fSignificant resource leak: {memory_change:+."1f"}MB, {thread_change:+d} threads)""
+            self.resource_leaks.append(fSignificant resource leak: {memory_change:+.""1f""}MB, {thread_change:+d} threads)""
 
         
         # This test should PASS if lifecycle management works correctly
@@ -586,7 +586,7 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
             fExecutionEngine lifecycle management should work correctly. 
             f"Found {lifecycle_summary['total_issues']} issues."
             fResource changes: {memory_change:+.1f}MB, {thread_change:+d} threads"
-            fResource changes: {memory_change:+.1f}MB, {thread_change:+d} threads""
+            fResource changes: {memory_change:+."1f"}MB, {thread_change:+d} threads""
 
         )
         

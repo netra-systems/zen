@@ -5,7 +5,7 @@ BUSINESS VALUE JUSTIFICATION:
     - Segment: Platform/Internal  
 - Business Goal: Chat Functionality Reliability (90% of platform value)
 - Value Impact: Validates Redis + WebSocket integration for real-time agent events
-- Strategic Impact: Prevents WebSocket 1011 errors that break $"500K" plus ARR chat functionality
+- Strategic Impact: Prevents WebSocket 1011 errors that break $""500K"" plus ARR chat functionality
 
 This test suite validates:
     1. WebSocket events properly use Redis for state management

@@ -151,7 +151,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
         # Validate test actually executed
         execution_time = time.time() - self.test_start_times.get(method.__name__, time.time())
         if execution_time < 0.1:
-            pytest.fail(f ALERT:  MISSION CRITICAL FAILURE: Test {method.__name__} executed too fast ({execution_time:."3f"}s). 
+            pytest.fail(f ALERT:  MISSION CRITICAL FAILURE: Test {method.__name__} executed too fast ({execution_time:.""3f""}s). 
                       f"Mission critical tests MUST validate real business functionality.)"
         
         # Log mission critical results
@@ -304,7 +304,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
             logger.info( CELEBRATION:  MISSION CRITICAL SUCCESS: Chat functionality validated!)"
             logger.info( CELEBRATION:  MISSION CRITICAL SUCCESS: Chat functionality validated!)"
             logger.info(f" CHART:  Events received: {list(self.event_capture.event_types_received)})"
-            logger.info(f[U+23F1][U+FE0F] Total execution time: {time.time() - start_time:."2f"}s)
+            logger.info(f[U+23F1][U+FE0F] Total execution time: {time.time() - start_time:.""2f""}s)
             logger.info([U+1F4BC] BUSINESS VALUE CONFIRMED: Users can successfully chat with AI agents)"
             logger.info([U+1F4BC] BUSINESS VALUE CONFIRMED: Users can successfully chat with AI agents)""
 
@@ -544,7 +544,7 @@ class ChatFunctionalityWithToolRegistryFixesTests(SSotBaseTestCase):
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
         execution_time = time.time() - start_time
-        logger.info(f"[U+23F1][U+FE0F] Concurrent sessions completed in {execution_time:."3f"}s)"
+        logger.info(f"[U+23F1][U+FE0F] Concurrent sessions completed in {execution_time:.""3f""}s)"
         
         # Analyze results
         successful_sessions = 0
@@ -737,20 +737,20 @@ class ToolRegistryBusinessValueValidationTests(SSotBaseTestCase):
         avg_response_time = sum(response_times) / len(response_times)
         
         logger.info(f CHART:  Performance analysis:)
-        logger.info(f"   Average connection time: {avg_connect_time:."3f"}s)"
-        logger.info(f   Average response time: {avg_response_time:."3f"}s")"
+        logger.info(f"   Average connection time: {avg_connect_time:.""3f""}s)"
+        logger.info(f   Average response time: {avg_response_time:.""3f""}s")"
         
         # Performance thresholds (adjust based on business requirements)
         max_connect_time = 20.0  # 20 seconds max for staging
         max_response_time = 15.0  # 15 seconds max response time
         
         if avg_connect_time > max_connect_time:
-            pytest.fail(fPERFORMANCE REGRESSION: Connection time {avg_connect_time:."3f"}s exceeds {max_connect_time}s)""
+            pytest.fail(fPERFORMANCE REGRESSION: Connection time {avg_connect_time:.""3f""}s exceeds {max_connect_time}s)""
 
             
         if avg_response_time > max_response_time:
             pytest.fail(fPERFORMANCE REGRESSION: Response time {avg_response_time:.3f}s exceeds {max_response_time}s)"
-            pytest.fail(fPERFORMANCE REGRESSION: Response time {avg_response_time:.3f}s exceeds {max_response_time}s)""
+            pytest.fail(fPERFORMANCE REGRESSION: Response time {avg_response_time:."3f"}s exceeds {max_response_time}s)""
 
             
         logger.info(" CELEBRATION:  MISSION CRITICAL SUCCESS: No performance regression detected!)"

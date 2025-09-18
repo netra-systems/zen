@@ -1,5 +1,5 @@
-"""
-"""
+""""
+
 Issue #1176 Phase 2: Authentication Stabilization and Infrastructure Validation
 
 This test validates the complete authentication flow without Docker dependencies,
@@ -8,22 +8,23 @@ ensuring the Golden Path (users login -> get AI responses) works correctly.
 CRITICAL MISSION: Prove authentication system stability for the Golden Path.
 
 Test Goals:
-1. Validate JWT validation and session management
+    1. Validate JWT validation and session management
 2. Test user context and authentication flow
 3. Verify auth service integration without Docker
 4. Ensure auth system supports Golden Path requirements
 5. Validate Phase 1 anti-recursive fixes work correctly
 
 Expected Behavior:
-- Real test execution (not 0.00s fake success)
+    - Real test execution (not 0."00s" fake success)
 - Actual authentication validation
 - Real service integration testing
 - No bypassing or mocking of critical paths
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import asyncio
 import logging
 import time
@@ -50,13 +51,15 @@ logger = logging.getLogger(__name__)
 
 class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
     "
-    "
+    ""
+
     Issue #1176 Phase 2: Authentication Stabilization Tests
 
     This test class validates the authentication system without Docker,
     ensuring the Golden Path authentication flow works correctly.
 "
-"
+""
+
 
     def setUp(self):
         "Set up test environment with execution context validation."
@@ -81,11 +84,12 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
         # Issue #1176 Phase 1 validation: Ensure we executed real tests
         test_duration = time.time() - self.test_start_time
 
-        if test_duration < 0.1:  # Less than 100ms indicates fake execution
+        if test_duration < 0.1:  # Less than "100ms" indicates fake execution
             raise AssertionError(
-                fISSUE #1176 PHASE 1 VIOLATION: Test completed in {test_duration:.3f}s, 
+                fISSUE #1176 PHASE 1 VIOLATION: Test completed in {test_duration:."3f"}s, 
                 findicating fake execution or bypassed testing. Tests must take time to execute real operations."
-                findicating fake execution or bypassed testing. Tests must take time to execute real operations."
+                findicating fake execution or bypassed testing. Tests must take time to execute real operations.""
+
             )
 
         if self.tests_executed == 0:
@@ -95,7 +99,7 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
             )
 
         self.execution_context.end_test()
-        logger.info(f"CHECK Issue #1176 Phase 2: Tests completed in {test_duration:.3f}s with {self.tests_executed} operations)"
+        logger.info(f"CHECK Issue #1176 Phase 2: Tests completed in {test_duration:."3f"}s with {self.tests_executed} operations)"
         super().tearDown()
 
     def _track_test_execution(self, operation_name: str):
@@ -110,7 +114,8 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
         # Validate AuthServiceClient initialization
         self.assertIsNotNone(self.auth_client, AuthServiceClient should be initialized)
         self.assertIsNotNone(self.auth_client.settings, AuthServiceClient settings should be configured)"
-        self.assertIsNotNone(self.auth_client.settings, AuthServiceClient settings should be configured)"
+        self.assertIsNotNone(self.auth_client.settings, AuthServiceClient settings should be configured)""
+
 
         # Check service credentials configuration
         env = get_env()
@@ -138,7 +143,8 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
         self.assertIn(endpoint, health_status, Health status should include endpoint field)
 
         logger.info(f🏥 Auth service health: {health_status['status']} at {health_status['endpoint']})"
-        logger.info(f🏥 Auth service health: {health_status['status']} at {health_status['endpoint']})"
+        logger.info(f🏥 Auth service health: {health_status['status']} at {health_status['endpoint']})""
+
 
         # Log health details for debugging
         if health_status.get("fallback_available):"
@@ -155,7 +161,8 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
         self.assertIsNotNone(self.backend_auth.auth_client, BackendAuthIntegration should have auth_client)
 
         logger.info(🔧 BackendAuthIntegration initialized successfully)"
-        logger.info(🔧 BackendAuthIntegration initialized successfully)"
+        logger.info(🔧 BackendAuthIntegration initialized successfully)""
+
 
     async def test_token_validation_request_format(self):
         "Test token validation request formatting."
@@ -204,7 +211,8 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
         connectivity_duration = time.time() - connectivity_start
 
         logger.info(f🌐 Auth service connectivity: {is_connected} (took {connectivity_duration:.3f}s))"
-        logger.info(f🌐 Auth service connectivity: {is_connected} (took {connectivity_duration:.3f}s))"
+        logger.info(f🌐 Auth service connectivity: {is_connected} (took {connectivity_duration:.3f}s))""
+
 
         # Validate connectivity check timing
         self.assertGreater(connectivity_duration, 0.1,
@@ -256,7 +264,8 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
     async def test_user_context_isolation(self):
         "Test user context isolation for multi-user scenarios."
         self._track_test_execution(user_context_isolation)"
-        self._track_test_execution(user_context_isolation)"
+        self._track_test_execution(user_context_isolation)""
+
 
         # Test user context with different user scenarios
         test_users = [
@@ -305,7 +314,8 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
 
         if not auth_config[SERVICE_ID]:
             logger.warning(WARNING️ SERVICE_ID not configured - auth service communication will fail)"
-            logger.warning(WARNING️ SERVICE_ID not configured - auth service communication will fail)"
+            logger.warning(WARNING️ SERVICE_ID not configured - auth service communication will fail)""
+
 
         if not auth_config[SERVICE_SECRET"]:"
             logger.warning(WARNING️ SERVICE_SECRET not configured - auth service communication will fail)
@@ -313,7 +323,8 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
     async def test_golden_path_auth_requirements(self):
         ""Test authentication requirements for the Golden Path."
         self._track_test_execution(golden_path_auth_requirements)"
-        self._track_test_execution(golden_path_auth_requirements)"
+        self._track_test_execution(golden_path_auth_requirements)""
+
 
         # Golden Path: users login -> get AI responses
         # This requires working authentication for:
@@ -328,7 +339,8 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
         auth_available = self.auth_client is not None
         logger.info(f  1. Auth service client: {'CHECK' if auth_available else 'X'})
         self.assertTrue(auth_available, Auth service client must be available for Golden Path)"
-        self.assertTrue(auth_available, Auth service client must be available for Golden Path)"
+        self.assertTrue(auth_available, Auth service client must be available for Golden Path)""
+
 
         # Test 2: Backend integration availability
         backend_integration_available = self.backend_auth is not None
@@ -375,12 +387,14 @@ class TestIssue1176Phase2AuthValidation(SSotAsyncTestCase):
         self.assertGreater(current_duration, 0.5,
                           Test execution should take measurable time")"
 
-        logger.info(fCHECK Phase 1 anti-recursive validation: {self.tests_executed} tests executed in {current_duration:.3f}s)
+        logger.info(fCHECK Phase 1 anti-recursive validation: {self.tests_executed} tests executed in {current_duration:."3f"}s)""
+
 
 
 # Issue #1176 Phase 2: Standalone test execution
 if __name__ == __main__:
-    """
+    """"
+
     Standalone execution for Issue #1176 Phase 2 validation.
 
     This ensures the test can be run independently to validate
@@ -390,7 +404,8 @@ if __name__ == __main__:
 
     print(🚀 Issue #1176 Phase 2: Authentication Stabilization Test"")
     print(= * 60)"
-    print(= * 60)"
+    print(= * 60)""
+
 
     # Track standalone execution
     standalone_start = time.time()
@@ -454,9 +469,10 @@ if __name__ == __main__:
         print(f"   Passed: {passed_count}))"
         print(f   Failed: {failed_count})"
         print(f   Failed: {failed_count})"
-        print(f"   Duration: {standalone_duration:.3f}s))"
+        print(f"   Duration: {standalone_duration:."3f"}s))"
         print(f   Execution: {'CHECK REAL' if standalone_duration > 0.1 else 'X FAKE'})"
-        print(f   Execution: {'CHECK REAL' if standalone_duration > 0.1 else 'X FAKE'})"
+        print(f   Execution: {'CHECK REAL' if standalone_duration > 0.1 else 'X FAKE'})""
+
 
         # Issue #1176 Phase 1 validation
         if standalone_duration < 0.1:

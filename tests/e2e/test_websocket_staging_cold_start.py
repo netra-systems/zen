@@ -157,7 +157,7 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
         logger.info(f'Failed connections: {len(failed_connections)}')
         logger.info(f'Timeout-related failures: {len(timeout_failures)}')
         if timeout_failures:
-            failure_descriptions = [f{r['description']}: {r['actual_duration']:."1f"}s" for r in timeout_failures]"
+            failure_descriptions = [f{r['description']}: {r['actual_duration']:.""1f""}s" for r in timeout_failures]"
             self.assertEqual(len(timeout_failures), 0, f'EXPECTED FAILURE: WebSocket handshake timeouts during startup. Timeout failures: {failure_descriptions}. This contributes to 1011 errors when clients cannot complete handshake before service is ready.')
 
     @pytest.mark.staging
@@ -177,7 +177,7 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
             websocket_result = await self._attempt_single_websocket_connection(timeout=5.0)
             correlation_point = {'timestamp': time.time() - start_time, 'health_healthy': health_result.get('healthy', False), 'health_status_code': health_result.get('status_code'), 'websocket_success': websocket_result.success, 'websocket_error_code': websocket_result.error_code, 'health_response_time': health_result.get('response_time'), 'websocket_handshake_time': websocket_result.handshake_duration}
             health_websocket_correlation.append(correlation_point)
-            logger.debug(fHealth/WebSocket correlation at {correlation_point['timestamp']:."1f"}s: Health={correlation_point['health_healthy']}, WebSocket={correlation_point['websocket_success']})""
+            logger.debug(fHealth/WebSocket correlation at {correlation_point['timestamp']:.""1f""}s: Health={correlation_point['health_healthy']}, WebSocket={correlation_point['websocket_success']})""
 
             await asyncio.sleep(check_interval)
         problematic_points = []
@@ -188,7 +188,7 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
         logger.info(f'Total correlation points: {len(health_websocket_correlation)}')
         logger.info(f'Problematic points (health OK, WebSocket 1011): {len(problematic_points)}')
         for point in problematic_points:
-            logger.error(f"🚨 Health check OK but WebSocket 1011 at {point['timestamp']:."1f"}s)"
+            logger.error(f"🚨 Health check OK but WebSocket 1011 at {point['timestamp']:.""1f""}s)"
         self.assertEqual(len(problematic_points), 0, fEXPECTED FAILURE: Found {len(problematic_points)} cases where health check passed but WebSocket returned 1011 errors. This demonstrates lack of coordination between health checks and WebSocket readiness, causing load balancers to route traffic to instances that aren't ready for WebSocket connections.")'"
 
     @pytest.mark.staging
@@ -224,7 +224,7 @@ class WebSocketStagingColdStartTests(SSotAsyncTestCase):
                 error_1011_count += 1
             else:
                 other_errors += 1
-        logger.info(f'Concurrent connection results (duration: {total_duration:."2f"}s):')""
+        logger.info(f'Concurrent connection results (duration: {total_duration:.""2f""}s):')""
 
         logger.info(f'  Successful: {successful_connections}/{concurrent_attempts}')
         logger.info(f'  1011 errors: {error_1011_count}')

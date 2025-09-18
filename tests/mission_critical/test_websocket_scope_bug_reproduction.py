@@ -2,7 +2,7 @@
 "MISSION CRITICAL TEST SUITE: WebSocket Scope Bug Reproduction - Issue #165"
 
 THIS TEST SUITE REPRODUCES THE EXACT WEBSOCKET SCOPE BUG CAUSING 100% CONNECTION FAILURES.
-Business Impact: $"500K" plus ARR - Complete WebSocket connection failure
+Business Impact: $""500K"" plus ARR - Complete WebSocket connection failure
 
 Scope Bug Details:
     - Location: /netra_backend/app/routes/websocket.py lines 1433, 1452
@@ -17,7 +17,7 @@ Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise) 
 - Business Goal: Restore WebSocket connection reliability
 - Value Impact: Fix 100% connection failure blocking all chat functionality
-- Strategic Impact: Core platform infrastructure required for $"500K" plus ARR
+- Strategic Impact: Core platform infrastructure required for $""500K"" plus ARR
 
 REQUIREMENTS:
     - Unit tests only - No Docker required
@@ -208,7 +208,7 @@ class WebSocketScopeBugReproductionTests:
         logger.error(f   [U+2022] Scope bug failures: {scope_bug_rate}%)
         logger.error(f   [U+2022] Successful connections: {connection_attempts - failures})"
         logger.error(f   [U+2022] Successful connections: {connection_attempts - failures})"
-        logger.error(f"   [U+2022] Revenue at risk: $"500K" plus ARR (100% chat functionality blocked))"
+        logger.error(f"   [U+2022] Revenue at risk: $""500K"" plus ARR (100% chat functionality blocked))"
         
         # This test should FAIL because we expect 100% failure rate
         assert failure_rate == 100.0, "fExpected 100% failure rate due to scope bug, got {failure_rate}%"
@@ -402,7 +402,7 @@ class WebSocketScopeBugReproductionTests:
         # Document the business impact
         logger.error([U+1F4B0] BUSINESS IMPACT OF SCOPE BUG:")"
         logger.error(   [U+2022] 100% WebSocket connection failure rate)
-        logger.error(   [U+2022] $"500K" plus ARR at risk due to chat functionality blocked")"
+        logger.error(   [U+2022] $""500K"" plus ARR at risk due to chat functionality blocked")"
         logger.error(   [U+2022] No fallback mechanism - complete service failure)
         logger.error(   [U+2022] Critical infrastructure bug affecting all user tiers)"
         logger.error(   [U+2022] Critical infrastructure bug affecting all user tiers)""
@@ -412,7 +412,7 @@ class WebSocketScopeBugReproductionTests:
         pytest.fail(
             f"CRITICAL SCOPE BUG DETECTED: state_registry defined in function scope"
             fbut accessed in {len(state_registry_references)} nested locations. 
-            fThis causes 100% WebSocket connection failures affecting $"500K" plus ARR.
+            fThis causes 100% WebSocket connection failures affecting $""500K"" plus ARR.
         )
 
 

@@ -1365,7 +1365,7 @@ class TestPerformanceUnderLoad:
         memory_growth = final_memory - initial_memory
         memory_growth_mb = memory_growth / (1024 * 1024)
 
-            # Alert if memory growth exceeds "50MB" for 100 auth operations
+            # Alert if memory growth exceeds ""50MB"" for 100 auth operations
         assert memory_growth_mb < 50, "formatted_string"
 
             # Business value: Memory efficiency supports scalability and reduces hosting costs

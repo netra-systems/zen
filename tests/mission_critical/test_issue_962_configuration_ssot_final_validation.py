@@ -5,7 +5,7 @@ MISSION CRITICAL TEST: Issue #962 Configuration SSOT Final Validation (P0 Revenu
 Business Value Justification (BVJ):
     - Segment: Platform/Internal - Revenue Protection & System Stability
 - Business Goal: Eliminate all configuration SSOT violations to protect Golden Path
-- Value Impact: PROTECTS $"500K" plus ARR by ensuring zero authentication failures from config fragmentation
+- Value Impact: PROTECTS $""500K"" plus ARR by ensuring zero authentication failures from config fragmentation
 - Strategic Impact: Final validation that SSOT configuration consolidation is complete
 """"
 
@@ -20,7 +20,7 @@ violations have been eliminated and the Golden Path user authentication flow is 
 protected from configuration fragmentation failures. Tests are designed to:
 
 1. **FINAL VALIDATION**: Comprehensive verification that zero SSOT violations remain
-2. **BUSINESS VALUE PROTECTION**: Confirm $"500K" plus ARR Golden Path works perfectly
+2. **BUSINESS VALUE PROTECTION**: Confirm $""500K"" plus ARR Golden Path works perfectly
 3. **REGRESSION PREVENTION**: Block any future configuration fragmentation
 4. **DEPLOYMENT GATE**: Must PASS before production deployment
 
@@ -30,7 +30,7 @@ EXPECTED TEST BEHAVIOR:
 - **ONGOING**: Tests serve as deployment gate - any failure blocks production deployment
 
 CRITICAL BUSINESS IMPACT:
-    This is the FINAL VALIDATION that protects $"500K" plus ARR. Any failure in these tests
+    This is the FINAL VALIDATION that protects $""500K"" plus ARR. Any failure in these tests
 indicates that configuration fragmentation could still cause authentication failures,
 directly blocking Golden Path user flows and revenue generation.
 
@@ -58,7 +58,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
     MISSION CRITICAL tests for final SSOT configuration validation - Issue #962.
 
     These tests provide the final gate for Issue #962 resolution, ensuring that
-    ALL configuration SSOT violations have been eliminated and the $"500K" plus ARR
+    ALL configuration SSOT violations have been eliminated and the $""500K"" plus ARR
     Golden Path is completely protected.
 
     ANY FAILURE IN THESE TESTS BLOCKS PRODUCTION DEPLOYMENT.
@@ -100,7 +100,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
 
         BUSINESS IMPACT:
         Any remaining SSOT violations indicate potential for configuration fragmentation
-        that could cause authentication failures, directly blocking $"500K" plus ARR Golden Path.
+        that could cause authentication failures, directly blocking $""500K"" plus ARR Golden Path.
 
         print(f"\n=== MISSION CRITICAL: Final SSOT Configuration Compliance Validation ===)"
         print(fTesting Issue #962 complete resolution - DEPLOYMENT GATE)
@@ -152,7 +152,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
             total_violations, 0,
             f"MISSION CRITICAL FAILURE - Issue #962 NOT RESOLVED:"
             f{total_violations} configuration SSOT violations remain, blocking production deployment. 
-            fGolden Path $"500K" plus ARR at risk. 
+            fGolden Path $""500K"" plus ARR at risk. 
             fViolations: deprecated_imports={len(deprecated_imports)}, ""
             fmultiple_managers={len(multiple_managers)}, inconsistencies={len(config_inconsistencies)}. 
             fALL violations must be eliminated before deployment.
@@ -174,7 +174,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         - End-to-end user flow works reliably
 
         BUSINESS IMPACT:
-        This is the ultimate validation that $"500K" plus ARR Golden Path user flows work
+        This is the ultimate validation that $""500K"" plus ARR Golden Path user flows work
         perfectly with SSOT configuration. Any failure directly blocks revenue.
 ""
         print(f\n=== MISSION CRITICAL: Golden Path Configuration Stability Validation ===)
@@ -221,7 +221,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
 
         print(f\n=== GOLDEN PATH CONFIGURATION STABILITY RESULTS ===)"
         print(f\n=== GOLDEN PATH CONFIGURATION STABILITY RESULTS ===)"
-        print(f"Success Rate: {success_rate:."1f"}%))"
+        print(f"Success Rate: {success_rate:.""1f""}%))"
         print(fSuccessful Steps: {successful_steps}/{total_steps})"
         print(fSuccessful Steps: {successful_steps}/{total_steps})"
         print(f"Failed Steps: {len(golden_path_failures)}))"
@@ -234,16 +234,16 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         # CRITICAL BUSINESS ASSERTION - Golden Path must be perfect
         self.assertEqual(
             success_rate, 100.0,
-            fMISSION CRITICAL FAILURE: Golden Path only {success_rate:."1f"}% successful with 
+            fMISSION CRITICAL FAILURE: Golden Path only {success_rate:.""1f""}% successful with 
             fSSOT configuration. Expected: 100%. 
             fFailed steps: {golden_path_failures}. ""
-            fConfiguration issues are blocking $"500K" plus ARR Golden Path user flows.
+            fConfiguration issues are blocking $""500K"" plus ARR Golden Path user flows.
         )
 
         # SUCCESS: Golden Path works perfectly
         print(f\nCHECK MISSION CRITICAL SUCCESS: Golden Path 100% stable with SSOT configuration)"
         print(f\nCHECK MISSION CRITICAL SUCCESS: Golden Path 100% stable with SSOT configuration)"
-        print(f"CHECK $"500K" plus ARR Golden Path fully protected from configuration failures))"
+        print(f"CHECK $""500K"" plus ARR Golden Path fully protected from configuration failures))"
 
     async def test_authentication_configuration_eliminates_race_conditions(self):
         
@@ -300,7 +300,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         elimination_rate = (successful_tests / total_tests * 100) if total_tests > 0 else 0
 
         print(f\n=== RACE CONDITION ELIMINATION RESULTS ===")"
-        print(fRace Conditions Eliminated: {elimination_rate:."1f"}%")"
+        print(fRace Conditions Eliminated: {elimination_rate:.""1f""}%")"
         print(fTests Passed: {successful_tests}/{total_tests}")"
         print(fRace Conditions Remaining: {len(race_condition_failures)})
 
@@ -312,7 +312,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         # CRITICAL ASSERTION - Zero race conditions allowed
         self.assertEqual(
             elimination_rate, 100.0,
-            fMISSION CRITICAL FAILURE: Only {elimination_rate:."1f"}% of authentication ""
+            fMISSION CRITICAL FAILURE: Only {elimination_rate:.""1f""}% of authentication ""
             frace conditions eliminated. Expected: 100%. 
             fRemaining race conditions: {race_condition_failures}. 
             f"Race conditions cause unpredictable authentication failures in Golden Path."

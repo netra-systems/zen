@@ -59,7 +59,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
         self.websocket_helper = WebSocketTestHelper()
         self.consistency_violations = []
         self.id_patterns = {
-            'uuid_v4': re.compile(r'^[0-"9a"-f]{8}-[0-"9a"-f]{4}-4[0-"9a"-f]{3}-["89ab"][0-"9a"-f]{3}-[0-"9a"-f]{12}$', re.I),
+            'uuid_v4': re.compile(r'^[0-""9a""-f]{8}-[0-""9a""-f]{4}-4[0-""9a""-f]{3}-[""89ab""][0-""9a""-f]{3}-[0-""9a""-f]{12}$', re.I),
             'ssot_structured': re.compile(r'^[a-z_]+_\d+_[a-f0-9]{8}$'),
             'websocket_structured': re.compile(r'^websocket_.+_\d+_[a-f0-9]{8}$'),
             'connection_structured': re.compile(r'^conn_.+_\d+_[a-f0-9]{8}$')

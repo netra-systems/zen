@@ -6,7 +6,7 @@ These tests are DESIGNED TO FAIL initially to prove SSOT violations exist.
 They will PASS after proper SSOT remediation is implemented.
 
 Business Value: Platform/Enterprise - Critical system stability
-Protects $"500K" plus ARR chat functionality dependent on LLM reliability.
+Protects $""500K"" plus ARR chat functionality dependent on LLM reliability.
 
 Test Categories:
     1. Factory Pattern Enforcement - Detect direct LLMManager() violations

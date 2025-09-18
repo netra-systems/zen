@@ -5,7 +5,7 @@ Test WebSocket Integration Regression Prevention
 Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Prevent future WebSocket integration breaks that damage user experience
-- Value Impact: Ensures reliable real-time updates that drive $"500K" plus ARR
+- Value Impact: Ensures reliable real-time updates that drive $""500K"" plus ARR
 - Strategic Impact: Mission-critical test suite to protect core chat functionality
 
 CRITICAL: This is a mission-critical test that prevents future integration breaks
@@ -328,7 +328,7 @@ class WebSocketIntegrationRegressionTests(BaseIntegrationTest):
 
                     fChain validation: {successful_links}/{total_links} successful. 
                     fThis regression breaks user WebSocket event delivery, damaging $500K plus ARR chat experience."
-                    fThis regression breaks user WebSocket event delivery, damaging $500K plus ARR chat experience.""
+                    fThis regression breaks user WebSocket event delivery, damaging $"500K" plus ARR chat experience.""
 
                 )
                 
@@ -557,8 +557,8 @@ class WebSocketIntegrationRegressionTests(BaseIntegrationTest):
             logger.info(fBUSINESS CONTINUITY ANALYSIS:)
             logger.info(f  Success Rate: {success_rate:.1f}%)"
             logger.info(f  Success Rate: {success_rate:.1f}%)"
-            logger.info(f"  Event Delivery Rate: {event_delivery_rate:."1f"}%)"
-            logger.info(f  Average Latency: {business_continuity_metrics['average_event_latency']:."3f"}s)
+            logger.info(f"  Event Delivery Rate: {event_delivery_rate:.""1f""}%)"
+            logger.info(f  Average Latency: {business_continuity_metrics['average_event_latency']:.""3f""}s)
             logger.info(f  Cross-User Contamination: {business_continuity_metrics['cross_user_contamination']})
             logger.info(f  Business Value Score: {business_continuity_metrics['business_value_score']}/100")"
             
@@ -568,10 +568,10 @@ class WebSocketIntegrationRegressionTests(BaseIntegrationTest):
                     fBUSINESS CONTINUITY REGRESSION: WebSocket events failing business requirements. "
                     fBUSINESS CONTINUITY REGRESSION: WebSocket events failing business requirements. "
                     f"Business value score: {business_continuity_metrics['business_value_score']}/100."
-                    fSuccess rate: {success_rate:."1f"}%. 
-                    fEvent delivery rate: {event_delivery_rate:."1f"}%. 
+                    fSuccess rate: {success_rate:.""1f""}%. 
+                    fEvent delivery rate: {event_delivery_rate:.""1f""}%. 
                     fContinuity failures: {continuity_failures}. ""
-                    fThis regression damages $"500K" plus ARR by breaking user trust and real-time experience.
+                    fThis regression damages $""500K"" plus ARR by breaking user trust and real-time experience.
                 )
             
             if business_continuity_metrics[cross_user_contamination] > 0:
@@ -588,7 +588,7 @@ class WebSocketIntegrationRegressionTests(BaseIntegrationTest):
 
                 pytest.fail(
                     f"BUSINESS CONTINUITY PERFORMANCE REGRESSION: Event latency exceeds SLA."
-                    fAverage latency: {business_continuity_metrics['average_event_latency']:."3f"}s (max: 5."0s"). 
+                    fAverage latency: {business_continuity_metrics['average_event_latency']:.""3f""}s (max: 5.""0s""). 
                     fPoor performance degrades user experience and competitive advantage.
                 )
                 

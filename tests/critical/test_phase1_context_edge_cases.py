@@ -179,12 +179,12 @@
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: unicode_edge_cases = [ )
-    # REMOVED_SYNTAX_ERROR: "user_\\\10000null",        # Null character
-    # REMOVED_SYNTAX_ERROR: "user_\\\1FFFDreplacement", # Unicode replacement character
-    # REMOVED_SYNTAX_ERROR: "user_\\\10010FFFFmax",     # Maximum Unicode code point
-    # REMOVED_SYNTAX_ERROR: "user_\\\1200Bzero_width", # Zero-width space
-    # REMOVED_SYNTAX_ERROR: "user_\\\1FEFFbom",         # Byte order mark
-    # REMOVED_SYNTAX_ERROR: "user_\\\1001Fcontrol",     # Control character
+    # REMOVED_SYNTAX_ERROR: "user_\\\\\10000null",        # Null character
+    # REMOVED_SYNTAX_ERROR: "user_\\\\\1FFFDreplacement", # Unicode replacement character
+    # REMOVED_SYNTAX_ERROR: "user_\\\\\10010FFFFmax",     # Maximum Unicode code point
+    # REMOVED_SYNTAX_ERROR: "user_\\\\\1200Bzero_width", # Zero-width space
+    # REMOVED_SYNTAX_ERROR: "user_\\\\\1FEFFbom",         # Byte order mark
+    # REMOVED_SYNTAX_ERROR: "user_\\\\\1001Fcontrol",     # Control character
     
 
     # REMOVED_SYNTAX_ERROR: for unicode_str in unicode_edge_cases:

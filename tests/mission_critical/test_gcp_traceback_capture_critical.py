@@ -40,7 +40,7 @@ def lazy_import(module_path: str, component: str = None):
 
 Business Value Justification (BVJ):
     - Segment: Enterprise - Mission Critical Production Reliability
-- Business Goal: Ensure zero production debugging blind spots for $"500K" plus ARR platform
+- Business Goal: Ensure zero production debugging blind spots for $""500K"" plus ARR platform
 - Value Impact: Prevents complete production incident response failures 
 - Strategic Impact: Foundation for enterprise SLA compliance and 24/7 support commitments
 

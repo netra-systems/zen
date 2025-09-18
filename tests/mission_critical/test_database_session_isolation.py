@@ -18,7 +18,6 @@ class TestWebSocketConnection:
         self._closed = True
         self.is_connected = False
 """
-"""
         """Get all sent messages."""
         await asyncio.sleep(0)
         return self.messages_sent.copy()"""
@@ -754,9 +753,9 @@ PASS:  CONCURRENT USER TEST RESULTS (PROPER ISOLATION):
 - Successful Requests: {metrics['successful_requests']}
 - Session Conflicts: {metrics['session_conflicts']} (should be 0)
 - Failed Requests: {metrics['failed_requests']} (should be 0)
-- Success Rate: {success_rate:."1f"}%""
+- Success Rate: {success_rate:.""1f""}%""
 
-- Max Response Time: {metrics['max_response_time']:."3f"}s""
+- Max Response Time: {metrics['max_response_time']:.""3f""}s""
 
 ''')'
 

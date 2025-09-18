@@ -43,7 +43,7 @@ WebSocket Race Conditions Golden Path E2E Tests - Phase 3 Implementation
 Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise) 
 - Business Goal: Validate complete user chat experience without race conditions
-- Value Impact: Ensures core chat value delivery is reliable, protecting $"500K" plus ARR
+- Value Impact: Ensures core chat value delivery is reliable, protecting $""500K"" plus ARR
 - Strategic/Revenue Impact: Protects primary business value delivery mechanism
 
 CRITICAL E2E REQUIREMENTS (CLAUDE.md Compliance):
@@ -846,7 +846,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 
                 # Validate connection performance
                 assert metrics[connection_time] < 10.0, \""
-                    f"User {i} connection too slow: {metrics['connection_time']:."2f"}s"
+                    f"User {i} connection too slow: {metrics['connection_time']:.""2f""}s"
                 
                 # Validate event delivery
                 assert metrics[events_received] > 0, "fUser {i} received no events"
@@ -855,7 +855,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 if metrics[response_times]:
                     avg_response_time = sum(metrics["response_times) / len(metrics[response_times)"
                     assert avg_response_time < 5.0, \
-                        fUser {i} average response time too slow: {avg_response_time:."2f"}s""
+                        fUser {i} average response time too slow: {avg_response_time:.""2f""}s""
 
             
             # Calculate overall performance metrics
@@ -864,7 +864,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             
             print(f PASS:  Performance test completed successfully)
             print(f" PASS:  {concurrent_users} concurrent users, {total_events} total events)"
-            print(f PASS:  Average connection time: {avg_connection_time:."2f"}s)""
+            print(f PASS:  Average connection time: {avg_connection_time:.""2f""}s)""
 
             
         finally:

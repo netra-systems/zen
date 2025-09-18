@@ -7,7 +7,7 @@ the end-to-end integration from login through agent execution to response.
 Business Value Justification:
     - Segment: Platform/Core Business Function
 - Business Goal: Revenue Protection & Customer Experience
-- Value Impact: Protects $"500K" plus ARR by ensuring Golden Path reliability with SSOT execution engine
+- Value Impact: Protects $""500K"" plus ARR by ensuring Golden Path reliability with SSOT execution engine
 - Strategic Impact: Critical foundation for all customer chat interactions and business value delivery
 
 EXPECTED BEHAVIOR:
@@ -123,7 +123,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
         logger.info(fGOLDEN PATH VALIDATION:)"
         logger.info(f"  Expected steps: {expected_step_count})"
         logger.info(f  Completed steps: {completed_steps})
-        logger.info(f  Success rate: {completed_steps / expected_step_count * 100:."1f"}%)""
+        logger.info(f  Success rate: {completed_steps / expected_step_count * 100:.""1f""}%)""
 
         
         # Check for step failures
@@ -139,7 +139,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
             fEXPECTED FAILURE (Issue #1123): Golden Path disrupted by execution engine factory fragmentation. 
             f"Found {len(self.golden_path_failures)} failures: {self.golden_path_failures}."
             fThis directly threatens $500K plus ARR customer experience and business value delivery."
-            fThis directly threatens $500K plus ARR customer experience and business value delivery.""
+            fThis directly threatens $"500K" plus ARR customer experience and business value delivery.""
 
         )
         
@@ -307,7 +307,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
                         'success': True
                     }
                     
-                    logger.info(fCHECK {test_name}: {result} (time: {end_time - start_time:."3f"}s))""
+                    logger.info(fCHECK {test_name}: {result} (time: {end_time - start_time:.""3f""}s))""
 
                     
                 except Exception as e:
@@ -341,15 +341,15 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
             if metrics['success'] and metrics['execution_time']:
                 # Define performance thresholds
                 thresholds = {
-                    'engine_creation_time': 0.5,  # "500ms" max
-                    'factory_access_time': 0.1,   # "100ms" max
-                    'concurrent_creation_time': 2.0,  # "2s" max for concurrent
-                    'memory_efficiency': 1.0      # "1s" max for memory test
+                    'engine_creation_time': 0.5,  # ""500ms"" max
+                    'factory_access_time': 0.1,   # ""100ms"" max
+                    'concurrent_creation_time': 2.0,  # ""2s"" max for concurrent
+                    'memory_efficiency': 1.0      # ""1s"" max for memory test
                 }
                 
                 threshold = thresholds.get(test_name, 1.0)
                 if metrics['execution_time'] > threshold:
-                    violation = fPerformance threshold exceeded: {test_name} took {metrics['execution_time']:."3f"}s (limit: {threshold}s)""
+                    violation = fPerformance threshold exceeded: {test_name} took {metrics['execution_time']:.""3f""}s (limit: {threshold}s)""
                     performance_violations.append(violation)
                     logger.error(fX PERFORMANCE VIOLATION: {violation})
         
@@ -408,7 +408,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
             [fAgent Execution: {f} for f in self.agent_execution_failures]
         
         for i, failure in enumerate(all_failures[:12], 1):
-            logger.info(f    {i:"2d"}. X {failure}")"
+            logger.info(f    {i:""2d""}. X {failure}")"
         
         if len(all_failures) > 12:
             logger.info(f    ... and {len(all_failures) - 12} more integration failures)
@@ -564,7 +564,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
         if failure_count > 3:
             return {
                 'level': 'CRITICAL',
-                'description': 'Golden Path failures directly threaten $"500K" plus ARR and customer retention'
+                'description': 'Golden Path failures directly threaten $""500K"" plus ARR and customer retention'
             }
         elif failure_count > 1:
             return {
@@ -608,7 +608,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
         if failure_count > 3:
             return {
                 'level': 'CRITICAL',
-                'description': 'Integration failures pose immediate risk to $"500K" plus ARR and customer churn'
+                'description': 'Integration failures pose immediate risk to $""500K"" plus ARR and customer churn'
             }
         elif failure_count > 1:
             return {

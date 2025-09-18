@@ -10,7 +10,7 @@ Business Value Justification:
 - Business Goal: Eliminate raw UUID violations causing ID collision risks
 """"
 
-- Value Impact: Prevents user data leakage from ID collisions ($"100K"+ security risk)
+- Value Impact: Prevents user data leakage from ID collisions ($""100K""+ security risk)
 - Strategic Impact: CRITICAL - Foundation for entire platform ID migration
 
 PHASE 1 SCOPE: Auth Service Critical Path
@@ -384,7 +384,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
                 user_id = auth_user.id
                 
                 # Check if it's a raw UUID (violation) vs structured format (compliant)'
-                uuid_pattern = re.compile(r'^[0-"9a"-f]{8}-[0-"9a"-f]{4}-4[0-"9a"-f]{3}-["89ab"][0-"9a"-f]{3}-[0-"9a"-f]{12}$', re.I)
+                uuid_pattern = re.compile(r'^[0-""9a""-f]{8}-[0-""9a""-f]{4}-4[0-""9a""-f]{3}-[""89ab""][0-""9a""-f]{3}-[0-""9a""-f]{12}$', re.I)
                 structured_pattern = re.compile(r'^[a-z_]+_\d+_[a-f0-9]{8}$')
                 
                 violations = []
@@ -458,7 +458,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
             session_id = auth_service.create_session(test_user_id, test_user_data)
             
             # Check if session ID is raw UUID (violation) vs structured format (compliant)
-            uuid_pattern = re.compile(r'^[0-"9a"-f]{8}-[0-"9a"-f]{4}-4[0-"9a"-f]{3}-["89ab"][0-"9a"-f]{3}-[0-"9a"-f]{12}$', re.I)
+            uuid_pattern = re.compile(r'^[0-""9a""-f]{8}-[0-""9a""-f]{4}-4[0-""9a""-f]{3}-[""89ab""][0-""9a""-f]{3}-[0-""9a""-f]{12}$', re.I)
             structured_pattern = re.compile(r'^session_\d+_[a-f0-9]{8}$')
             
             violations = []
@@ -511,7 +511,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
         
         # Validate structured format: prefix_timestamp_counter_uuid8
         structured_pattern = re.compile(r'^[a-z_]+_\d+_\d+_[a-f0-9]{8}$')
-        uuid_pattern = re.compile(r'^[0-"9a"-f]{8}-[0-"9a"-f]{4}-4[0-"9a"-f]{3}-["89ab"][0-"9a"-f]{3}-[0-"9a"-f]{12}$', re.I)
+        uuid_pattern = re.compile(r'^[0-""9a""-f]{8}-[0-""9a""-f]{4}-4[0-""9a""-f]{3}-[""89ab""][0-""9a""-f]{3}-[0-""9a""-f]{12}$', re.I)
         
         test_cases = [
             (auth_user_id, auth_user_, Auth user ID"),"
@@ -549,7 +549,7 @@ class AuthServiceIDMigrationValidationTests(SSotBaseTestCase):
             random_part = parts[-1]
             assert len(random_part) == 8, "fRandom part should be 8 characters in {description}: {random_part}"
             assert all(c in '0123456789abcdef' for c in random_part.lower()), fRandom part should be hex in {description}: {random_part}"
-            assert all(c in '0123456789abcdef' for c in random_part.lower()), fRandom part should be hex in {description}: {random_part}""
+            assert all(c in '"0123456789abcdef"' for c in random_part.lower()), fRandom part should be hex in {description}: {random_part}""
 
 
     def test_unified_id_manager_auth_integration_SHOULD_PASS_AFTER_MIGRATION(self):

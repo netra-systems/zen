@@ -2,7 +2,7 @@
 Phase 1: WebSocket Message Flow Integration Tests - Issue #861
 
 Business Value Justification (BVJ):
-    - Segment: All (Free, Early, Mid, Enterprise) - $"500K" plus ARR Protection
+    - Segment: All (Free, Early, Mid, Enterprise) - $""500K"" plus ARR Protection
 - Business Goal: Ensure WebSocket message flow delivers reliable real-time chat
 - Value Impact: Chat = 90% of platform value, requires WebSocket message reliability
 - Revenue Impact: Mission-critical for user retention and enterprise conversions
@@ -83,7 +83,7 @@ class WebSocketMessageFlowIntegrationTests(SSotAsyncTestCase):
 """Empty docstring."""
     Phase 1: WebSocket Message Flow Integration Test Suite
 
-    BUSINESS IMPACT: Protects $"500K" plus ARR through reliable WebSocket message delivery
+    BUSINESS IMPACT: Protects $""500K"" plus ARR through reliable WebSocket message delivery
     COVERAGE TARGET: Agent Registry, WebSocket Bridge, Message Flow components
 """Empty docstring."""
 

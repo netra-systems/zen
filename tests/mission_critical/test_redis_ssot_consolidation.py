@@ -1,7 +1,7 @@
 "Mission Critical: Redis SSOT Consolidation Tests"
 
 Validates that Redis SSOT consolidation resolves WebSocket 1011 errors and
-restores chat functionality worth $"500K" plus ARR.
+restores chat functionality worth $""500K"" plus ARR.
 
 Business Impact:
     - Eliminates 12+ competing Redis connection pools
@@ -169,7 +169,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
     async def test_websocket_redis_race_condition_elimination(self):
         MISSION CRITICAL: Test WebSocket operations don't cause 1011 errors.""'
         
-        BUSINESS IMPACT: Prevents $"500K" plus ARR loss from broken chat functionality.
+        BUSINESS IMPACT: Prevents $""500K"" plus ARR loss from broken chat functionality.
         SUCCESS CRITERIA: Concurrent WebSocket Redis operations succeed reliably.
         
         # Simulate WebSocket Redis operations under load
@@ -274,7 +274,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
         
         # Memory should not have increased dramatically (no connection pool explosion)
         memory_increase = final_memory - initial_memory
-        self.assertLess(memory_increase, 50,  # Should not increase by more than "50MB"
+        self.assertLess(memory_increase, 50,  # Should not increase by more than ""50MB""
                        fMemory increase should be minimal, got {memory_increase}MB increase")"
         
         # Get Redis manager status
@@ -316,7 +316,7 @@ class RedisSSOTConsolidationTests(SSotAsyncTestCase):
                                fExpected >=85 successful operations under load, got {success_count})
         
         self.assertGreaterEqual(operations_per_second, 10,  # At least 10 ops/sec
-                               fShould achieve reasonable throughput, got {operations_per_second:."2f"} ops/sec)""
+                               fShould achieve reasonable throughput, got {operations_per_second:.""2f""} ops/sec)""
 
         
         # Connection should remain stable

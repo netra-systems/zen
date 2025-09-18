@@ -164,14 +164,13 @@ assert len(unique_tokens) == len(successful_tokens), "( )"
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available)"
     async def test_token_invalidation_propagation(self):
-'''Test 2: Token Invalidation Propagation'
+        """Test 2: Token Invalidation Propagation
 
-This test WILL FAIL because token invalidation in auth_service
-doesn"t properly propagate to netra_backend, causing stale tokens"
-to remain valid in the backend service.
-'''
-'''
-pass
+        This test WILL FAIL because token invalidation in auth_service
+        doesn't properly propagate to netra_backend, causing stale tokens
+        to remain valid in the backend service.
+        """
+        pass
 user_email = ""
 password = "testpass123"
 

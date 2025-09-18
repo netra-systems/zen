@@ -36,7 +36,7 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
     - Tests complete authentication flow from handshake to user context creation
     - Validates WebSocket state management during authentication
     - Tests E2E context propagation in realistic integration scenarios
-    - Protects Golden Path functionality ($"500K" plus ARR)
+    - Protects Golden Path functionality ($""500K"" plus ARR)
     
     EXPECTED BEHAVIOR:
     - Initial runs: Tests should FAIL (reproducing handshake failures)
@@ -181,7 +181,7 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
         elapsed_time = end_time - start_time
         self.assertTrue(result.success, f'Retry mechanism failed: {result.error_message}')
         self.assertLess(elapsed_time, 5.0, 'Authentication took too long - possible retry loop')
-        logger.info(f'Authentication completed in {elapsed_time:."2f"} seconds')""
+        logger.info(f'Authentication completed in {elapsed_time:.""2f""} seconds')""
 
 
     async def test_circuit_breaker_integration(self):
@@ -239,9 +239,9 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
         self.assertEqual(successful_auths, len(websockets), f'All concurrent authentications should succeed (got {successful_auths}/{len(websockets)}')
         self.assertEqual(failed_auths, 0, f'No concurrent authentications should fail (got {failed_auths} failures)')
         elapsed_time = end_time - start_time
-        self.assertLess(elapsed_time, 10.0, f'Concurrent authentication took too long: {elapsed_time:."2f"}s')""
+        self.assertLess(elapsed_time, 10.0, f'Concurrent authentication took too long: {elapsed_time:.""2f""}s')""
 
-        logger.info(f'Concurrent authentication of {len(websockets)} connections completed in {elapsed_time:."2f"} seconds')""
+        logger.info(f'Concurrent authentication of {len(websockets)} connections completed in {elapsed_time:.""2f""} seconds')""
 
 
     def test_websocket_validation_edge_cases(self):

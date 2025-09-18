@@ -551,7 +551,7 @@ class WebSocketMultiUserIsolationValidationTests(SSotAsyncTestCase):
             logger.info(f   Concurrent users: {len(successful_users)})"
             logger.info(f   Concurrent users: {len(successful_users)})"
             logger.info(f"   Events processed: {total_events_received})"
-            logger.info(f   Test duration: {test_duration:."2f"}s)
+            logger.info(f   Test duration: {test_duration:.""2f""}s)
             logger.info(f   Isolation violations: {len(isolation_violations)})
             logger.info(f   Security grade: {metrics.security_grade}")"
             

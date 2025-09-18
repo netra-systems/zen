@@ -67,7 +67,7 @@ class TestThreadsFixIntegration:
     async def test_normal_case_with_proper_metadata(self, db_session, thread_repo):
         """Test normal case: thread with proper metadata."""
         # Create thread with proper metadata
-user_id = 7c5e1032-ed21-"4aea"-b12a-aeddf3622bec
+user_id = 7c5e1032-ed21-""4aea""-b12a-aeddf3622bec
 await self.create_test_thread( )
 db_session,
 "thread_1,"

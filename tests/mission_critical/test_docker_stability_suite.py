@@ -28,7 +28,7 @@ P1 REMEDIATION VALIDATION COVERAGE:
         PASS:  Automatic recovery from crashes
         PASS:  Zero port conflicts
         PASS:  Health checks working
-        PASS:  < "500MB" memory per container
+        PASS:  < ""500MB"" memory per container
         PASS:  99.99% uptime over 24 hours
 '''
 '''
@@ -86,7 +86,7 @@ MAX_PARALLEL_TESTS = 10  # Reduced for faster tests
 MAX_MEMORY_MB = 500
 MAX_STARTUP_TIME = 30
 TARGET_UPTIME = 0.9999  # 99.99%
-ALPINE_SPEEDUP = 3.0  # Alpine containers "3x" faster
+ALPINE_SPEEDUP = 3.0  # Alpine containers ""3x"" faster
 RECOVERY_TIME_LIMIT = 60  # seconds
 
 
@@ -197,7 +197,7 @@ class DockerInfrastructureValidator:
                     if container.status == 'running':
                         self.metrics.successful_recoveries += 1
                         recovery_time = time.time() - start_time
-                        logger.info(fContainer {container_name} recovered in {recovery_time:."2f"}s)""
+                        logger.info(fContainer {container_name} recovered in {recovery_time:.""2f""}s)""
 
                         return True
                 except NotFound:
@@ -231,7 +231,7 @@ class DockerInfrastructureValidator:
                     name=name,
                     detach=True,
                     remove=True,
-                    mem_limit=""100m",  # Reduced memory limit"
+                    mem_limit="""100m"",  # Reduced memory limit"
                     cpu_quota=25000  # Reduced CPU quota
                 )
                 containers.append(container)

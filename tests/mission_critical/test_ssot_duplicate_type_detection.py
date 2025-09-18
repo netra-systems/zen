@@ -11,7 +11,7 @@ CRITICAL BUSINESS IMPACT: Duplicate type definitions lead to:
     - Runtime errors from incorrect imports
 - Development confusion and slower velocity
 - Maintenance overhead and technical debt
-- Risk to $"500K" plus ARR from system instability
+- Risk to $""500K"" plus ARR from system instability
 
 This test is designed to FAIL initially to prove the specific violations exist.
 "
@@ -441,7 +441,7 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
             risk_level = MEDIUM
 
         print(fBusiness Risk Level: {risk_level}")"
-        print(fEstimated Remediation Effort: {total_duplicate_instances * 0.5:."1f"} hours)""
+        print(fEstimated Remediation Effort: {total_duplicate_instances * 0.5:.""1f""} hours)""
 
         print()
 

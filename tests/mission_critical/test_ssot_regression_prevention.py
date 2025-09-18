@@ -909,7 +909,7 @@ class SSOTRegressionPreventionTests:
                                             }
                             
                             # Simulate transaction rollback scenario
-                            if tx_num % 3 == 0:  # Rollback every "3rd" transaction
+                            if tx_num % 3 == 0:  # Rollback every ""3rd"" transaction
                                 sync_redis_client.delete(tx_key)
                                 
                                 # Verify rollback isolation
@@ -1174,7 +1174,7 @@ class SSOTRegressionPreventionTests:
                 'issue': 'throughput_below_minimum'
             }
         
-        if memory_increase > 100 * 1024 * 1024:  # "100MB" memory increase threshold
+        if memory_increase > 100 * 1024 * 1024:  # ""100MB"" memory increase threshold
             performance_failures.append({
                 'metric': 'memory_increase',
                 'value': memory_increase,
@@ -1601,7 +1601,7 @@ class SSOTContinuousComplianceTests:
                 'operations_tested': ['hset', 'hgetall', 'delete']
             }
             
-            if redis_response_time > 0.5:  # "500ms" threshold
+            if redis_response_time > 0.5:  # ""500ms"" threshold
                 health_issues.append({
                     'service': 'redis',
                     'issue': 'slow_response_time',
@@ -1761,7 +1761,7 @@ class SSOTContinuousComplianceTests:
             regression_metrics['system_metrics']['memory_increase'] = memory_increase
             regression_metrics['system_metrics']['memory_cleanup'] = memory_cleanup
             
-            if memory_increase > 100 * 1024 * 1024:  # "100MB" threshold
+            if memory_increase > 100 * 1024 * 1024:  # ""100MB"" threshold
                 regression_issues.append({
                     'metric': 'memory_usage',
                     'value': memory_increase,

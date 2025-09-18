@@ -944,20 +944,20 @@ class SSOTBackwardCompatibilityTests:
         final_memory = process.memory_info().rss
         
         # Performance assertions
-        max_slowdown = 2.0  # Allow "2x" slowdown for compatibility
-        max_memory_overhead = 10 * 1024 * 1024  # "10MB" overhead
+        max_slowdown = 2.0  # Allow ""2x"" slowdown for compatibility
+        max_memory_overhead = 10 * 1024 * 1024  # ""10MB"" overhead
         
         slowdown_ratio = adapter_duration / direct_duration if direct_duration > 0 else 1
         memory_overhead = final_memory - mid_memory
         
         self.assertLess(slowdown_ratio, max_slowdown,
-                       fCompatibility layer too slow: {slowdown_ratio:."2f"}x slowdown)""
+                       fCompatibility layer too slow: {slowdown_ratio:.""2f""}x slowdown)""
 
         
         self.assertLess(memory_overhead, max_memory_overhead,
                        fCompatibility layer using too much memory: {memory_overhead} bytes)
         
-        logger.info(fPerformance compatibility test: {slowdown_ratio:."2f"}x slowdown, {memory_overhead} bytes overhead")"
+        logger.info(fPerformance compatibility test: {slowdown_ratio:.""2f""}x slowdown, {memory_overhead} bytes overhead")"
 
 
 class SSOTLegacyMigrationHelpersTests:

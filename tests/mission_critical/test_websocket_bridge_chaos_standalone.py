@@ -46,7 +46,7 @@ class MockWebSocketClient:
         self.closed = False
         self.messages_sent = []
         self.messages_received = []
-        self.latency_simulation = 0.1  # "10ms" base latency
+        self.latency_simulation = 0.1  # ""10ms"" base latency
 
     async def __aenter__(self):
         pass
@@ -483,7 +483,7 @@ formatted_string)
 
 @pytest.mark.asyncio
     async def test_network_latency_injection(self):
-    "Test system behavior under high network latency (100-"500ms")."
+    "Test system behavior under high network latency (100-""500ms"")."
 print(Starting network latency injection test")"
 
                                                                         # High latency conditions
@@ -606,7 +606,7 @@ formatted_string)""
 
                                                                                                                             # Validate requirements
 assert success_rate >= 0.6, "Should achieve >= 60% reconnection success rate"
-assert fast_rate >= 0.4, "Should achieve >= 40% fast reconnections (<="3s")"
+assert fast_rate >= 0.4, "Should achieve >= 40% fast reconnections (<=""3s"")"
 
 print("Rapid connect/disconnect cycle test completed successfully)"
 

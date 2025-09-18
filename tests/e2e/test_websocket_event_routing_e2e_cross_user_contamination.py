@@ -321,9 +321,9 @@ class WebSocketE2ECrossUserContaminationTests(SSotBaseTestCase):
         self.test_metrics.record_custom('avg_auth_time', avg_auth_time)
         self.test_metrics.record_custom('total_contamination_incidents', len(self.contamination_incidents))
         if avg_connection_time > 5.0:
-            self.test_metrics.record_custom('performance_warning', 'Connection time >"5s" - possible resource contention')
+            self.test_metrics.record_custom('performance_warning', 'Connection time >""5s"" - possible resource contention')
         if avg_auth_time > 2.0:
-            self.test_metrics.record_custom('performance_warning', 'Auth time >"2s" - possible shared state issues')
+            self.test_metrics.record_custom('performance_warning', 'Auth time >""2s"" - possible shared state issues')
         self.test_metrics.record_custom('contamination_incidents_detected', self.contamination_incidents)
 
     async def asyncTearDown(self):

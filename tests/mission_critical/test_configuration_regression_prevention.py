@@ -14,7 +14,6 @@ Based on CRITICAL_CONFIG_REGRESSION_AUDIT_REPORT.md findings.
 
 """
 """
-"""
 """"
 
 import os

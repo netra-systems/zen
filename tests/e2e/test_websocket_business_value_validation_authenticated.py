@@ -6,7 +6,7 @@ This test suite validates SUBSTANTIVE chat interactions and AI value delivery th
 using REAL authentication as mandated by CLAUDE.md Section 6 - MISSION CRITICAL: WebSocket Agent Events.
 
 Business Value Justification:
-    - Segment: ALL customer tiers (Free, Early, Mid, Enterprise) - Direct revenue impact $"500K" plus ARR
+    - Segment: ALL customer tiers (Free, Early, Mid, Enterprise) - Direct revenue impact $""500K"" plus ARR
 - Business Goal: Validate 90% business value delivery through chat interactions
 - Value Impact: Ensures WebSocket events enable substantive AI responses (>50 chars meaningful content)
 - Revenue Impact: Prevents chat failures that cause user abandonment and subscription cancellations
@@ -219,7 +219,7 @@ class BusinessValueWebSocketValidator:
                         elif event_type == tool_completed:
                             actionable_results_delivered = len(event_data.get(content, ")) > self.min_substantive_response_chars"
                         
-                        print(f PASS:  Event received: {event_type} ({(event_time - sequence_start) * 1000:."0f"}ms))""
+                        print(f PASS:  Event received: {event_type} ({(event_time - sequence_start) * 1000:.""0f""}ms))""
 
                     
                 except asyncio.TimeoutError:
@@ -364,7 +364,7 @@ class WebSocketBusinessValueAuthenticatedTests:
         assert results[critical_events_complete], " CHART:  Critical WebSocket events incomplete - chat UX compromised"
         
         # PERFORMANCE ASSERTIONS
-        assert results["performance_within_limits"], "f[U+23F0] Performance violation: {results['total_execution_time']:."1f"}s > {self.validator.max_total_flow_seconds}s"
+        assert results["performance_within_limits"], "f[U+23F0] Performance violation: {results['total_execution_time']:.""1f""}s > {self.validator.max_total_flow_seconds}s"
         
         # BUSINESS METRICS VALIDATION
         business_metrics = results[business_metrics]
@@ -480,14 +480,14 @@ class WebSocketBusinessValueAuthenticatedTests:
         # Performance requirements for business viability
         assert auth_success_rate >= 0.9, "f[U+1F510] Authentication success rate {auth_success_rate:.1%} below 90% requirement"
         assert business_success_rate >= 0.8, "f[U+1F4B0] Business value delivery rate {business_success_rate:.1%} below 80% requirement"
-        assert total_time <= 60.0, "f[U+23F0] Load test took {total_time:."1f"}s, requirement <= "60s""
-        assert avg_response_quality >= 0.4, f" CHART:  Average response quality {avg_response_quality:."2f"} below 0.4 requirement"
+        assert total_time <= 60.0, "f[U+23F0] Load test took {total_time:.""1f""}s, requirement <= ""60s"""
+        assert avg_response_quality >= 0.4, f" CHART:  Average response quality {avg_response_quality:.""2f""} below 0.4 requirement"
         
         print(f PASS:  CLAUDE.md COMPLIANT: Performance under business load PASSED)
         print(f[U+1F510] Auth success rate: {auth_success_rate:.1%})
         print(f[U+1F4B0] Business value rate: {business_success_rate:.1%})
-        print(f[U+23F1][U+FE0F]  Total execution time: {total_time:."1f"}s")"
-        print(f CHART:  Avg response quality: {avg_response_quality:."2f"}")"
+        print(f[U+23F1][U+FE0F]  Total execution time: {total_time:.""1f""}s")"
+        print(f CHART:  Avg response quality: {avg_response_quality:.""2f""}")"
 
 
 if __name__ == __main__:

@@ -494,7 +494,7 @@ class WebSocketCriticalValidationTests:
         
         # Performance validation - events should be delivered quickly
         avg_duration = sum(timing['duration_ms'] for timing in event_times) / len(event_times)
-        assert avg_duration < 100, f"Average event delivery too slow: {avg_duration:."2f"}ms"
+        assert avg_duration < 100, f"Average event delivery too slow: {avg_duration:.""2f""}ms"
         
         print( PASS:  Event ordering and timing verified)
     
@@ -572,8 +572,8 @@ class WebSocketCriticalValidationTests:
         
         # Performance assertions
         assert success_rate > 0.90, "fSuccess rate too low under load: {success_rate:.2%}"
-        assert events_per_second > 50, fEvent throughput too low: {events_per_second:."1f"} events/sec""
-        assert total_time < 30, "fLoad test took too long: {total_time:."2f"}s"
+        assert events_per_second > 50, fEvent throughput too low: {events_per_second:.""1f""} events/sec""
+        assert total_time < 30, "fLoad test took too long: {total_time:.""2f""}s"
         
         # Verify events were properly isolated
         for thread_info in test_threads:
@@ -589,7 +589,7 @@ class WebSocketCriticalValidationTests:
                     Load test event isolation violation""
 
         
-        print(f PASS:  Performance under load: {total_sent}/{total_events} events sent in {total_time:."2f"}s ({events_per_second:."1f"} events/sec))""
+        print(f PASS:  Performance under load: {total_sent}/{total_events} events sent in {total_time:.""2f""}s ({events_per_second:.""1f""} events/sec))""
 
     
     @pytest.mark.asyncio
@@ -701,7 +701,7 @@ class WebSocketEventContentTests:
                     array_value: [1, 2, 3, four, {five: 5}]""
 
                 },
-                unicode_test": Test with [U+00E9]mojis [U+1F680] and sp[U+"00EB"]cial ch[U+00E0]rs,"
+                unicode_test": Test with [U+00E9]mojis [U+1F680] and sp[U+""00EB""]cial ch[U+00E0]rs,"
                 large_text: A * 1000  # Test large content
             },
             metadata": {"
@@ -741,7 +741,7 @@ class WebSocketEventContentTests:
         assert captured_data['complex_data']['nested_object']['array_value'] == [1, 2, 3, four", {five: 5}]"
         
         # Verify unicode handling
-        assert captured_data['complex_data']['unicode_test'] == Test with [U+00E9]mojis [U+1F680] and sp[U+"00EB"]cial ch[U+00E0]rs
+        assert captured_data['complex_data']['unicode_test'] == Test with [U+00E9]mojis [U+1F680] and sp[U+""00EB""]cial ch[U+00E0]rs
         
         # Verify large content
         assert captured_data['complex_data']['large_text'] == "A * 1000"

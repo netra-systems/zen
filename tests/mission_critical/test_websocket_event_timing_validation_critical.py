@@ -99,7 +99,7 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
         self.timing_requirements = {
             # Individual event timing (time to deliver event)
             "max_event_delivery_ms: 2000,      # 2 seconds max delivery time"
-            target_event_delivery_ms: 500,     # "500ms" target delivery time
+            target_event_delivery_ms: 500,     # ""500ms"" target delivery time
             
             # Event gap timing (time between consecutive events)
             max_event_gap_ms: 5000,           # 5 seconds max gap between events"
@@ -111,10 +111,10 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
             target_sequence_duration_ms": 10000, # 10 seconds target sequence"
             
             # Performance thresholds
-            excellent_threshold_ms: 5000,      # < "5s" = excellent
+            excellent_threshold_ms: 5000,      # < ""5s"" = excellent
             good_threshold_ms: 15000,          # < 15s = good"
             good_threshold_ms: 15000,          # < 15s = good"
-            "acceptable_threshold_ms: 30000,    # < "30s" = acceptable"
+            "acceptable_threshold_ms: 30000,    # < ""30s"" = acceptable"
         }
         
         # Track timing metrics across tests
@@ -145,8 +145,8 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
         
         logger.info(fTiming Performance Analysis Summary:)
         logger.info(f"  Total sequences tested: {total_sequences})"
-        logger.info(f  Average sequence duration: {avg_sequence_duration:."1f"}ms")"
-        logger.info(f  Average events per second: {avg_events_per_second:."2f"})
+        logger.info(f  Average sequence duration: {avg_sequence_duration:.""1f""}ms")"
+        logger.info(f  Average events per second: {avg_events_per_second:.""2f""})
         logger.info(f  Critical timing violations: {len(critical_violations)})"
         logger.info(f  Critical timing violations: {len(critical_violations)})"
         logger.info(f"  Warning timing violations: {len(warning_violations)})"
@@ -212,7 +212,7 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
                         expected_max_ms=self.timing_requirements[max_event_delivery_ms"],"
                         actual_ms=event_latency_ms,
                         severity=CRITICAL,
-                        message=fEvent {validated_event.event_type} delivery latency {event_latency_ms:."1f"}ms exceeds {self.timing_requirements['max_event_delivery_ms']}ms limit""
+                        message=fEvent {validated_event.event_type} delivery latency {event_latency_ms:.""1f""}ms exceeds {self.timing_requirements['max_event_delivery_ms']}ms limit""
                     )
                     timing_violations.append(violation)
                     logger.warning(violation.message)
@@ -225,11 +225,11 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
                         expected_max_ms=self.timing_requirements["target_event_delivery_ms],"
                         actual_ms=event_latency_ms,
                         severity=WARNING,
-                        message=f"Event {validated_event.event_type} delivery latency {event_latency_ms:."1f"}ms exceeds {self.timing_requirements['target_event_delivery_ms']}ms target"
+                        message=f"Event {validated_event.event_type} delivery latency {event_latency_ms:.""1f""}ms exceeds {self.timing_requirements['target_event_delivery_ms']}ms target"
                     )
                     timing_violations.append(violation)
                 
-                logger.debug(fEvent {i+1} ({validated_event.event_type}: {event_latency_ms:."1f"}ms")"
+                logger.debug(fEvent {i+1} ({validated_event.event_type}: {event_latency_ms:.""1f""}ms")"
         
         except Exception as e:
             logger.error(fException during latency validation: {e})
@@ -260,20 +260,20 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
         assert len(critical_violations) == 0, (
             fCRITICAL FAILURE: Event delivery latency violations detected:\n +
             "\n.join([f  - {v.message) for v in critical_violations] +"
-            f\nLatency stats: avg={avg_latency:."1f"}ms, max={max_latency:."1f"}ms, p95={percentiles['p95']:."1f"}ms""
+            f\nLatency stats: avg={avg_latency:.""1f""}ms, max={max_latency:.""1f""}ms, p95={percentiles['p95']:.""1f""}ms""
 
         )
         
         # Performance validation
         assert max_latency <= self.timing_requirements[max_event_delivery_ms), (
-            f"PERFORMANCE FAILURE: Maximum event latency {max_latency:."1f"}ms exceeds"
+            f"PERFORMANCE FAILURE: Maximum event latency {max_latency:.""1f""}ms exceeds"
             f{self.timing_requirements['max_event_delivery_ms']}ms limit"
             f{self.timing_requirements['max_event_delivery_ms']}ms limit""
 
         )
         
         assert percentiles[p95) <= self.timing_requirements[max_event_delivery_ms), (
-            f"PERFORMANCE FAILURE: "95th" percentile latency {percentiles['p95']:."1f"}ms exceeds"
+            f"PERFORMANCE FAILURE: ""95th"" percentile latency {percentiles['p95']:.""1f""}ms exceeds"
             f{self.timing_requirements['max_event_delivery_ms']}ms limit"
             f{self.timing_requirements['max_event_delivery_ms']}ms limit""
 
@@ -282,9 +282,9 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
         logger.info(fCHECK Event delivery latency validation PASSED for thread {thread_id})
         logger.info(f   Events processed: {len(validated_events)})"
         logger.info(f   Events processed: {len(validated_events)})"
-        logger.info(f"   Average latency: {avg_latency:."1f"}ms)"
-        logger.info(f   Maximum latency: {max_latency:."1f"}ms)
-        logger.info(f   "95th" percentile: {percentiles['p95']:."1f"}ms)
+        logger.info(f"   Average latency: {avg_latency:.""1f""}ms)"
+        logger.info(f   Maximum latency: {max_latency:.""1f""}ms)
+        logger.info(f   ""95th"" percentile: {percentiles['p95']:.""1f""}ms)
         logger.info(f   Critical violations: {len(critical_violations)}")"
         logger.info(f   Warning violations: {len([v for v in timing_violations if v.severity == 'WARNING']})
 
@@ -357,7 +357,7 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
                             expected_max_ms=self.timing_requirements[max_event_gap_ms],
                             actual_ms=gap_ms,
                             severity=CRITICAL","
-                            message=fGap before {validated_event.event_type} is {gap_ms:."1f"}ms, exceeds {self.timing_requirements['max_event_gap_ms']}ms limit""
+                            message=fGap before {validated_event.event_type} is {gap_ms:.""1f""}ms, exceeds {self.timing_requirements['max_event_gap_ms']}ms limit""
 
                         )
                         timing_violations.append(violation)
@@ -371,18 +371,18 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
                             severity=WARNING,"
                             severity=WARNING,"
                             message=fGap before {validated_event.event_type} is {gap_ms:.1f}ms, exceeds {self.timing_requirements['target_event_gap_ms']}ms target"
-                            message=fGap before {validated_event.event_type} is {gap_ms:.1f}ms, exceeds {self.timing_requirements['target_event_gap_ms']}ms target""
+                            message=fGap before {validated_event.event_type} is {gap_ms:."1f"}ms, exceeds {self.timing_requirements['target_event_gap_ms']}ms target""
 
                         )
                         timing_violations.append(violation)
                     
-                    logger.debug(fGap {i}: {gap_ms:."1f"}ms before {validated_event.event_type})""
+                    logger.debug(fGap {i}: {gap_ms:.""1f""}ms before {validated_event.event_type})""
 
                 
                 last_event_time = current_event_time
                 
                 # Add realistic gap between events (simulate processing time)
-                await asyncio.sleep(0.1)  # "100ms" processing simulation
+                await asyncio.sleep(0.1)  # ""100ms"" processing simulation
         
         except Exception as e:
             logger.error(fException during gap timing validation: {e})"
@@ -403,14 +403,14 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
         assert len(critical_violations) == 0, (
             fCRITICAL FAILURE: Event gap timing violations detected:\n +
             \n".join([f  - {v.message) for v in critical_violations] +"
-            f\nGap stats: avg={avg_gap:."1f"}ms, max={max_gap:."1f"}ms, count={len(event_gaps)}""
+            f\nGap stats: avg={avg_gap:.""1f""}ms, max={max_gap:.""1f""}ms, count={len(event_gaps)}""
 
         )
         
         # Validate maximum gap
         if event_gaps:
             assert max_gap <= self.timing_requirements[max_event_gap_ms), (
-                fPERFORMANCE FAILURE: Maximum event gap {max_gap:."1f"}ms exceeds ""
+                fPERFORMANCE FAILURE: Maximum event gap {max_gap:.""1f""}ms exceeds ""
                 f{self.timing_requirements['max_event_gap_ms']}ms limit
             )
         
@@ -435,8 +435,8 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
         
         logger.info(fCHECK Event gap timing validation PASSED for thread {thread_id})
         logger.info(f"   Event gaps measured: {len(event_gaps)})"
-        logger.info(f   Average gap: {avg_gap:."1f"}ms")"
-        logger.info(f   Maximum gap: {max_gap:."1f"}ms)
+        logger.info(f   Average gap: {avg_gap:.""1f""}ms")"
+        logger.info(f   Maximum gap: {max_gap:.""1f""}ms)
         logger.info(f   Events per second: {events_per_second:.2f})"
         logger.info(f   Events per second: {events_per_second:.2f})"
         logger.info(f"   Performance grade: {metrics.performance_grade})"
@@ -505,7 +505,7 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
                 validated_events.append(validated_event)
                 
                 # Add realistic processing delays
-                await asyncio.sleep(0.2)  # "200ms" processing simulation per event
+                await asyncio.sleep(0.2)  # ""200ms"" processing simulation per event
             
             sequence_end_time = time.time()
             total_sequence_duration_ms = (sequence_end_time - sequence_start_time) * 1000
@@ -522,7 +522,7 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
                     actual_ms=total_sequence_duration_ms,
                     severity=CRITICAL,"
                     severity=CRITICAL,"
-                    message=f"Total sequence duration {total_sequence_duration_ms:."1f"}ms exceeds {self.timing_requirements['max_sequence_duration_ms']}ms limit"
+                    message=f"Total sequence duration {total_sequence_duration_ms:.""1f""}ms exceeds {self.timing_requirements['max_sequence_duration_ms']}ms limit"
                 )
                 timing_violations.append(violation)
                 logger.warning(violation.message)
@@ -535,7 +535,7 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
                     expected_max_ms=self.timing_requirements[target_sequence_duration_ms"],"
                     actual_ms=total_sequence_duration_ms,
                     severity=WARNING,
-                    message=fTotal sequence duration {total_sequence_duration_ms:."1f"}ms exceeds {self.timing_requirements['target_sequence_duration_ms']}ms target""
+                    message=fTotal sequence duration {total_sequence_duration_ms:.""1f""}ms exceeds {self.timing_requirements['target_sequence_duration_ms']}ms target""
                 )
                 timing_violations.append(violation)
         
@@ -549,12 +549,12 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
         assert len(critical_violations) == 0, (
             fCRITICAL FAILURE: Sequence timing violations detected:\n +
             \n.join([f  - {v.message)" for v in critical_violations] +"
-            f"\nTotal duration: {total_sequence_duration_ms:."1f"}ms"
+            f"\nTotal duration: {total_sequence_duration_ms:.""1f""}ms"
         )
         
         # Validate sequence completed within time limit
         assert total_sequence_duration_ms <= self.timing_requirements[max_sequence_duration_ms), (
-            fPERFORMANCE FAILURE: Total sequence duration {total_sequence_duration_ms:."1f"}ms exceeds 
+            fPERFORMANCE FAILURE: Total sequence duration {total_sequence_duration_ms:.""1f""}ms exceeds 
             f{self.timing_requirements['max_sequence_duration_ms']}ms limit""
         )
         
@@ -572,9 +572,9 @@ class WebSocketEventTimingValidationCriticalTests(SSotAsyncTestCase):
         self.performance_samples.append(total_sequence_duration_ms)
         
         logger.info(f"CHECK End-to-end sequence timing validation PASSED for thread {thread_id})"
-        logger.info(f   Total sequence duration: {total_sequence_duration_ms:."1f"}ms)
+        logger.info(f   Total sequence duration: {total_sequence_duration_ms:.""1f""}ms)
         logger.info(f   Events processed: {len(validated_events)})
-        logger.info(f   Events per second: {events_per_second:."2f"}")"
+        logger.info(f   Events per second: {events_per_second:.""2f""}")"
         logger.info(f   Timing violations: {len(timing_violations)})
         
         if total_sequence_duration_ms <= self.timing_requirements[excellent_threshold_ms]:
@@ -690,7 +690,7 @@ if __name__ == __main__:
     
     print(\n + =" * 80)"
     print(CRITICAL WEBSOCKET EVENT TIMING VALIDATION TESTS - Issue #1199)
-    print(MISSION CRITICAL: Sub-2-Second Response Times for $"500K" plus ARR Chat"")
+    print(MISSION CRITICAL: Sub-2-Second Response Times for $""500K"" plus ARR Chat"")
     print(= * 80)"
     print(= * 80)""
 

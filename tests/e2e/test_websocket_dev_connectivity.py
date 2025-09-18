@@ -175,7 +175,7 @@ class WebSocketDevConnectivityTests:
             assert round_trip_time < 1.0, \
                 fRound-trip time too high: {round_trip_time}s
             
-            print(fPing/pong successful - RTT: {round_trip_time:."3f"}s"")
+            print(fPing/pong successful - RTT: {round_trip_time:.""3f""}s"")
 
     @pytest.mark.websocket
     async def test_dev_websocket_error_handling(self):

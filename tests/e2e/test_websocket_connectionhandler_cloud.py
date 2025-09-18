@@ -231,13 +231,13 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
                 successful_connections += 1
                 cycle_time = time.time() - cycle_start
                 connection_results.append({'cycle': cycle, 'success': True, 'message_success': message_success, 'cycle_time': cycle_time)
-                logger.info(f   PASS:  Cycle {cycle + 1}/{GCP_TEST_CONFIG['max_connections_test']}: Connection OK, Message: {('OK' if message_success else 'TIMEOUT')}, Time: {cycle_time:."2f"}s)""
+                logger.info(f   PASS:  Cycle {cycle + 1}/{GCP_TEST_CONFIG['max_connections_test']}: Connection OK, Message: {('OK' if message_success else 'TIMEOUT')}, Time: {cycle_time:.""2f""}s)""
 
             except Exception as e:
                 failed_connections += 1
                 cycle_time = time.time() - cycle_start
                 connection_results.append({'cycle': cycle, 'success': False, 'error': str(e), 'cycle_time': cycle_time}
-                logger.error(f"   FAIL:  Cycle {cycle + 1}/{GCP_TEST_CONFIG['max_connections_test']}: Failed - {e}, Time: {cycle_time:."2f"}s)"
+                logger.error(f"   FAIL:  Cycle {cycle + 1}/{GCP_TEST_CONFIG['max_connections_test']}: Failed - {e}, Time: {cycle_time:.""2f""}s)"
                 if 'maximum number of WebSocket managers' in str(e) or '20' in str(e):
                     logger.error(' ALERT:  CRITICAL BUG DETECTED: WebSocket manager resource limit reached')
                     logger.error('This indicates resource accumulation and improper cleanup')
@@ -250,7 +250,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
         logger.info(f'  - Successful connections: {successful_connections}')
         logger.info(f'  - Failed connections: {failed_connections}')
         logger.info(f'  - Success rate: {success_rate:.1%}')
-        logger.info(f'  - Average cycle time: {avg_time:."2f"}s')
+        logger.info(f'  - Average cycle time: {avg_time:.""2f""}s')
         completed_cycles = len(connection_results)
         assert completed_cycles >= 20, "f'Connection churning test should complete at least 20 cycles, but only completed {completed_cycles}. This indicates resource limits are being hit.'"
         assert success_rate >= 0.8, "f'Connection churning success rate too low: {success_rate:.1%}. Expected at least 80% success rate. This indicates resource accumulation or connection state management issues.'"
@@ -357,14 +357,14 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
         logger.info(f'Chat flow test results:')
         logger.info(f'  - Total responses received: {total_responses}')
         logger.info(f'  - WebSocket events received: {sorted(unique_event_types)}')
-        logger.info(f'  - Test duration: {time.time() - start_time:."1f"}s')
+        logger.info(f'  - Test duration: {time.time() - start_time:.""1f""}s')
         assert total_responses > 0, "f'CRITICAL BUG: No responses received from agent execution request. This indicates ConnectionHandler silent failure where request is processed but no responses are sent back to the user. Golden path is broken.'"
         expected_events = {'agent_started', 'agent_completed'}
         received_events = set(websocket_events_received)
         missing_events = expected_events - received_events
         assert len(missing_events) == 0, "f'Missing critical WebSocket events: {missing_events}. Received: {received_events}. This indicates WebSocket notification system is not working properly.'"
         actual_duration = time.time() - start_time
-        assert actual_duration < timeout_seconds * 0.9, "f'Chat flow took too long: {actual_duration:."1f"}s (timeout: {timeout_seconds}s). This may indicate connection handling delays or processing issues.'"
+        assert actual_duration < timeout_seconds * 0.9, "f'Chat flow took too long: {actual_duration:.""1f""}s (timeout: {timeout_seconds}s). This may indicate connection handling delays or processing issues.'"
         final_responses = [r for r in responses_received if r.get('type') in ['agent_completed', 'agent_response']]
         assert len(final_responses) > 0, f"No final completion response received. Agent execution may have failed or ConnectionHandler dropped the response. All responses: {[r.get('type') for r in responses_received]}"
         logger.info(' PASS:  Complete chat flow test passed - golden path working')

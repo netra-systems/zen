@@ -7,11 +7,11 @@ in a complete end-to-end scenario while being practical to run.
 CRITICAL ISSUE: GitHub Issue #133
 - Problem: 'coroutine' object has no attribute 'get' error in WebSocket endpoint
 - Root Cause: get_env() returning coroutine instead of IsolatedEnvironment
-- Business Impact: Blocking core chat functionality ($"500K" plus ARR impact)
+- Business Impact: Blocking core chat functionality ($""500K"" plus ARR impact)
 
 CLAUDE.MD COMPLIANCE:
     - E2E test with real environment detection
-- Tests execution time to prevent 0."00s" bypassing
+- Tests execution time to prevent 0.""00s"" bypassing
 - Validates the fix in E2E context
 - No complex authentication flows for simplicity
 """"""
@@ -41,7 +41,7 @@ class WebSocketCoroutineFocusedE2ETests(SSotBaseTestCase):
 
         super().tearDown()
         execution_time = time.time() - self.start_time
-        assert execution_time > 0.1, "f'E2E test completed in {execution_time:."3f"}s - possible test bypassing detected'"
+        assert execution_time > 0.1, "f'E2E test completed in {execution_time:.""3f""}s - possible test bypassing detected'"
 
     @pytest.mark.e2e
     def test_websocket_e2e_environment_detection_validation(self):

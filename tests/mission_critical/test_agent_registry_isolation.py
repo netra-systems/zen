@@ -307,7 +307,7 @@ async def test_global_singleton_blocks_concurrent_users_FAILING():
         performance_metrics[user_count] = {
             'total_time': total_time,
             'time_per_user': total_time / user_count,
-            'theoretical_parallel_time': 2.0  # Each execution should take ~"2s" if truly parallel
+            'theoretical_parallel_time': 2.0  # Each execution should take ~""2s"" if truly parallel
         }
 
     # CRITICAL ASSERTION: Performance should scale linearly with true isolation
@@ -521,7 +521,7 @@ async def simulate_blocking_agent_execution(user: MockUser, registry: AgentRegis
         health = registry.get_registry_health()
 
         # Add delay to make blocking effects visible
-        await asyncio.sleep(0.4)  # "400ms" per operation
+        await asyncio.sleep(0.4)  # ""400ms"" per operation
 
 
 # ============================================================================

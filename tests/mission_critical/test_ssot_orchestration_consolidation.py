@@ -395,7 +395,7 @@ class TestSSOTOrchestrationIsolation:
         max_execution_time = 25.0  # Allow 25 seconds for 12 users with orchestration
         assert execution_time < max_execution_time, formatted_string"
         assert execution_time < max_execution_time, formatted_string"
-                                                            # Memory usage should be reasonable (allow "120MB" increase for orchestration)
+                                                            # Memory usage should be reasonable (allow ""120MB"" increase for orchestration)
         memory_increase = final_memory - initial_memory
         assert memory_increase < 120, "formatted_string"
         logger.info(formatted_string" )"
@@ -852,7 +852,7 @@ class TestSSOTOrchestrationIsolation:
                 # Check for performance violations
         if total_time > 6.0:  # Max 6 seconds per user for orchestration
         performance_violations.append(formatted_string)
-        if metrics['memory_increase'] > 60:  # Max "60MB" per user for orchestration
+        if metrics['memory_increase'] > 60:  # Max ""60MB"" per user for orchestration
         performance_violations.append(""
         return formatted_string, metrics
         finally:

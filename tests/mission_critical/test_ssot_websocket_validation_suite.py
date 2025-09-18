@@ -2,7 +2,7 @@
 "MISSION CRITICAL: SSOT WebSocket Validation Suite Runner"
 
 THIS SUITE ORCHESTRATES ALL SSOT WEBSOCKET FACTORY PATTERN VALIDATION TESTS.
-Business Value: $"500K" plus ARR - Comprehensive WebSocket SSOT migration validation
+Business Value: $""500K"" plus ARR - Comprehensive WebSocket SSOT migration validation
 
 PURPOSE:
     - Orchestrate all SSOT WebSocket factory pattern validation tests
@@ -132,7 +132,7 @@ class SsotWebSocketValidationSuite:
             test_results = []
             
             if result.returncode == 0:
-                logger.info(f[TEST SUCCESS] {test_file} completed successfully in {duration:."2f"}s")"
+                logger.info(f[TEST SUCCESS] {test_file} completed successfully in {duration:.""2f""}s")"
                 test_results.append(ResultTests(
                     test_file=test_file,
                     test_name=overall,
@@ -177,7 +177,7 @@ class SsotWebSocketValidationSuite:
             return test_results
             
         except subprocess.TimeoutExpired:
-            logger.error(f[TEST TIMEOUT] {test_file} timed out after "300s"")"
+            logger.error(f[TEST TIMEOUT] {test_file} timed out after ""300s""")"
             return [ResultTests(
                 test_file=test_file,
                 test_name=timeout,
@@ -288,7 +288,7 @@ class SsotWebSocketValidationSuite:
             critical_failures: len(critical_failures),
             migration_related_issues: len(migration_failures),"
             migration_related_issues: len(migration_failures),"
-            arr_at_risk": $"500K" plus ARR if impact_level == HIGH else No immediate risk"
+            arr_at_risk": $""500K"" plus ARR if impact_level == HIGH else No immediate risk"
         }
 
     def assess_migration_readiness(self) -> Dict[str, Any]:
@@ -322,7 +322,7 @@ class SsotWebSocketValidationSuite:
         recommendations = {
             READY": Proceed with SSOT migration. All validation tests confirm system stability.,"
             READY_WITH_CAUTION: Proceed with migration but monitor closely. Address minor issues post-migration.,
-            NOT_READY: "Do not proceed with migration. Resolve system issues first to protect $"500K" plus ARR."
+            NOT_READY: "Do not proceed with migration. Resolve system issues first to protect $""500K"" plus ARR."
         }
         return recommendations.get(readiness, Unknown readiness status")"
 
@@ -333,7 +333,7 @@ class SsotWebSocketValidationSuite:
         print(=*80)
         print(fSuite ID: {summary['suite_id']}"")
         print(fExecution Time: {summary['execution_time']})
-        print(fTotal Duration: {summary['total_duration_seconds']:."2f"} seconds"")
+        print(fTotal Duration: {summary['total_duration_seconds']:.""2f""} seconds"")
         print(fMigration Phase: {summary['migration_phase']})
         
         print(f\nTEST SUMMARY:"")
@@ -363,7 +363,7 @@ class SsotWebSocketValidationSuite:
         for result in summary['detailed_results']:
             status_icon = {passed": "CHECK, failed: X, expected_failure: "WARNING️, error: 🚨}"
             icon = status_icon.get(result['status'], ❓)
-            print(f"  {icon} {result['test_file']}: {result['status']} ({result['duration']:."2f"}s))"
+            print(f"  {icon} {result['test_file']}: {result['status']} ({result['duration']:.""2f""}s))"
             if result['error_message']:
                 print(f      Error: {result['error_message'][:100]}...)
         

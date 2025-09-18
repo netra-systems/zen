@@ -43,7 +43,7 @@ class TestWebSocketConnection:
         1. Segment: Platform/Internal - Development Velocity, Risk Reduction
         2. Business Goal: Ensure Docker infrastructure reliability for CI/CD and development
         3. Value Impact: Prevents 4-8 hours/week of developer downtime from Docker failures
-        4. Revenue Impact: Protects development velocity for $"2M"+ ARR platform
+        4. Revenue Impact: Protects development velocity for $""2M""+ ARR platform
         '''
         '''
         import asyncio
@@ -380,7 +380,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         if len(attempt_times) < 3:  # Fail first 2 attempts
         result = subprocess.CompletedProcess(cmd, 1, '', 'Simulated failure')
         return result
-        else:  # Succeed on "3rd" attempt
+        else:  # Succeed on ""3rd"" attempt
         return subprocess.run(['docker', 'version'], capture_output=True, text=True, timeout=10)
         start_time = time.time()
         result = rate_limiter.execute_docker_command(['docker', 'fake-command'], timeout=30)
@@ -393,10 +393,10 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
     # Verify backoff timing
         if len(attempt_times) >= 2:
         first_retry_delay = attempt_times[1] - attempt_times[0]
-        self.assertGreaterEqual(first_retry_delay, 0.4, First retry should wait ~0."5s")
+        self.assertGreaterEqual(first_retry_delay, 0.4, First retry should wait ~0.""5s"")
         if len(attempt_times) >= 3:
         second_retry_delay = attempt_times[2] - attempt_times[1]
-        self.assertGreaterEqual(second_retry_delay, 0.9, "Second retry should wait ~1."0s")"
+        self.assertGreaterEqual(second_retry_delay, 0.9, "Second retry should wait ~1.""0s"")"
             # =============================================================================
             # Memory Limit Enforcement Tests
             # =============================================================================
@@ -406,7 +406,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
 
         pass
         container_name = "formatted_string"
-        memory_limit = "128m"
+        memory_limit = ""128m""
     # Create container with memory limit
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
@@ -424,7 +424,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         inspect_cmd = ['docker', 'inspect', container_name, '--format', '{{.HostConfig.Memory}}']
         result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=10)
         self.assertEqual(result.returncode, 0)
-    # Convert "128m" to bytes (128 * 1024 * 1024)
+    # Convert ""128m"" to bytes (128 * 1024 * 1024)
         expected_memory = 134217728
         actual_memory = int(result.stdout.strip())
         self.assertEqual(actual_memory, expected_memory,
@@ -432,7 +432,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
     # Test memory usage enforcement (this will kill the container if exceeded)
         stress_cmd = [
         'docker', 'exec', container_name,
-        'sh', '-c', 'dd if=/dev/zero of=/tmp/big bs="1M" count=200 || echo "Memory limit enforced'"
+        'sh', '-c', 'dd if=/dev/zero of=/tmp/big bs=""1M"" count=200 || echo "Memory limit enforced'"
     
         result = subprocess.run(stress_cmd, capture_output=True, text=True, timeout=30)
     # The command might fail due to memory limit, which is expected
@@ -444,7 +444,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         for service_name, config in manager.SERVICES.items():
         self.assertIn('memory_limit', config, formatted_string)
         memory_limit = config['memory_limit']
-        # Parse memory limit (e.g., ""512m", "1g")"
+        # Parse memory limit (e.g., """512m"", ""1g"")"
         if memory_limit.endswith('m'):
         memory_mb = int(memory_limit[:-1)
         elif memory_limit.endswith('g'):
@@ -464,7 +464,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
-        '--memory', '"64m"',
+        '--memory', '""64m""',
         '--oom-kill-disable=false',  # Allow OOM killer
         'alpine:latest',
         'sh', '-c', 'sleep 3600'
@@ -478,7 +478,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         stress_start_time = time.time()
         stress_cmd = [
         'docker', 'exec', container_name,
-        'sh', '-c', 'head -c "100m" </dev/zero >bigfile 2>&1; echo Exit code: $?'
+        'sh', '-c', 'head -c ""100m"" </dev/zero >bigfile 2>&1; echo Exit code: $?'
     
         result = subprocess.run(stress_cmd, capture_output=True, text=True, timeout=30)
         stress_duration = time.time() - stress_start_time
@@ -988,8 +988,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         'docker', 'run', '-d', '--name', healthy_container,
         '--label', 'formatted_string',
         '--health-cmd', 'echo "healthy',"
-        '--health-interval', '"5s"',
-        '--health-timeout', '"3s"',
+        '--health-interval', '""5s""',
+        '--health-timeout', '""3s""',
         '--health-retries', '2',
         'alpine:latest',
         'sh', '-c', 'sleep 60'
@@ -1002,8 +1002,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         'docker', 'run', '-d', '--name', unhealthy_container,
         '--label', 'formatted_string',
         '--health-cmd', 'exit 1',  # Always fail
-        '--health-interval', '"5s"',
-        '--health-timeout', '"3s"',
+        '--health-interval', '""5s""',
+        '--health-timeout', '""3s""',
         '--health-retries', '2',
         'alpine:latest',
         'sh', '-c', 'sleep 60'
@@ -1097,8 +1097,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         'docker', 'run', '-d', '--name', slow_container,
         '--label', 'formatted_string',
         '--health-cmd', 'sleep 10 && echo "finally healthy',  # Takes 10 seconds"
-        '--health-interval', '"15s"',
-        '--health-timeout', '"5s"',  # Timeout after 5 seconds
+        '--health-interval', '""15s""',
+        '--health-timeout', '""5s""',  # Timeout after 5 seconds
         '--health-retries', '2',
         'alpine:latest',
         'sh', '-c', 'sleep 300'
@@ -1130,7 +1130,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         statuses = [entry['status'] for entry in health_history]
                 Should see progression from starting -> unhealthy (due to timeout)
         self.assertIn('starting', statuses, "Should start with 'starting' status)"
-                # Due to timeout ("5s") being less than health check duration ("10s"),
+                # Due to timeout (""5s"") being less than health check duration (""10s""),
                 # it should eventually become unhealthy
         final_status = statuses[-1] if statuses else 'none'
         self.assertEqual(final_status, 'unhealthy',
@@ -1418,7 +1418,7 @@ class DockerInfrastructureServiceStartupTests(SSotAsyncTestCase):
         # Start container with strict limits
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
-        '--memory', '"128m"', '--cpus', '0.5',
+        '--memory', '""128m""', '--cpus', '0.5',
         '--label', 'formatted_string',
         'alpine:latest',
         'sh', '-c', 'echo Service $$ starting && sleep 60'
@@ -1447,7 +1447,7 @@ class DockerInfrastructureServiceStartupTests(SSotAsyncTestCase):
         status, memory_limit, cpu_limit = parts
         self.assertEqual(status, 'running', formatted_string)"
         self.assertEqual(status, 'running', formatted_string)"
-        self.assertEqual(memory_limit, '134217728', "Memory limit should be "128MB")  # "128MB" in bytes"
+        self.assertEqual(memory_limit, '134217728', "Memory limit should be ""128MB"")  # ""128MB"" in bytes"
     def test_startup_failure_recovery_mechanism(self):
         Test automatic recovery when services fail to start initially.""
         test_id = formatted_string
@@ -1619,8 +1619,8 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
         '--health-cmd', health_cmd,
-        '--health-interval', '"3s"',
-        '--health-timeout', '"2s"',
+        '--health-interval', '""3s""',
+        '--health-timeout', '""2s""',
         '--health-retries', '2',
         'alpine:latest',
         'sleep', '120'
@@ -1676,9 +1676,9 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
-        '--memory', '"64m"', '--cpus', '0.3',
+        '--memory', '""64m""', '--cpus', '0.3',
         'alpine:latest',
-        'sh', '-c', 'while true; do dd if=/dev/zero of=/dev/null bs="1M" count=1; sleep 0.1; done'
+        'sh', '-c', 'while true; do dd if=/dev/zero of=/dev/null bs=""1M"" count=1; sleep 0.1; done'
         
         result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=15)
         if result.returncode == 0:
@@ -1691,8 +1691,8 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         'docker', 'run', '-d', '--name', monitored_container,
         '--label', 'formatted_string',
         '--health-cmd', 'echo healthy',
-        '--health-interval', '"2s"',
-        '--health-timeout', '"1s"',
+        '--health-interval', '""2s""',
+        '--health-timeout', '""1s""',
         '--health-retries', '1',
         'alpine:latest',
         'sleep', '60'
@@ -1740,8 +1740,8 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         'docker', 'run', '-d', '--name', changing_container,
         '--label', 'formatted_string',
         '--health-cmd', 'if [ $(cat /proc/uptime | cut -d. -f1) -gt 20 ]; then exit 1; else echo ok; fi',
-        '--health-interval', '"2s"',
-        '--health-timeout', '"1s"',
+        '--health-interval', '""2s""',
+        '--health-timeout', '""1s""',
         '--health-retries', '1',
         'alpine:latest',
         'sleep', '60'
@@ -1791,11 +1791,11 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         test_id = formatted_string""
     # Create multiple services with different health patterns
         services = [
-        ('web', 'echo web ok', '"2s"'),
+        ('web', 'echo web ok', '""2s""'),
         ('api', 'echo api ok', '3s'),"
         ('api', 'echo api ok', '3s'),"
-        ('cache', 'echo "cache ok', '"2s"'),"
-        ('worker', 'if [ $(($(date +%s) % 8)) -lt 2 ]; then exit 1; else echo worker ok; fi', '"2s"')
+        ('cache', 'echo "cache ok', '""2s""'),"
+        ('worker', 'if [ $(($(date +%s) % 8)) -lt 2 ]; then exit 1; else echo worker ok; fi', '""2s""')
     
         service_containers = {}
         for service_name, health_cmd, interval in services:
@@ -1806,7 +1806,7 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         '--label', 'formatted_string',
         '--health-cmd', health_cmd,
         '--health-interval', interval,
-        '--health-timeout', '"1s"',
+        '--health-timeout', '""1s""',
         '--health-retries', '1',
         'alpine:latest',
         'sleep', '60'
@@ -1862,10 +1862,10 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
         '--health-cmd', 'formatted_string',
-        '--health-interval', '"5s"',
-        '--health-timeout', '"2s"',
+        '--health-interval', '""5s""',
+        '--health-timeout', '""2s""',
         '--health-retries', '1',
-        '--memory', '"32m"',  # Small memory limit
+        '--memory', '""32m""',  # Small memory limit
         'alpine:latest',
         'sleep', '90'
         
@@ -2059,10 +2059,10 @@ class DockerInfrastructureFailureRecoveryTests(SSotAsyncTestCase):
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
-        '--memory', '"128m"',  # Limited memory
+        '--memory', '""128m""',  # Limited memory
         '--oom-kill-disable=false',  # Allow OOM killer
         'alpine:latest',
-        'sh', '-c', 'while true; do dd if=/dev/zero of=/tmp/fill bs="1M" count=10 2>/dev/null || true; sleep 1; done'
+        'sh', '-c', 'while true; do dd if=/dev/zero of=/tmp/fill bs=""1M"" count=10 2>/dev/null || true; sleep 1; done'
         
         result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
         if result.returncode == 0:
@@ -2073,7 +2073,7 @@ class DockerInfrastructureFailureRecoveryTests(SSotAsyncTestCase):
         create_critical_cmd = [
         'docker', 'run', '-d', '--name', critical_container,
         '--label', 'formatted_string',
-        '--memory', '"64m"',
+        '--memory', '""64m""',
         '--restart', 'always',
         '--priority', '1000',  # Higher priority
         'alpine:latest',
@@ -2268,7 +2268,7 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
-        '--memory', '"64m"',
+        '--memory', '""64m""',
         'alpine:latest',
         'sleep', '30'
         
@@ -2305,9 +2305,9 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
     # Create containers with different memory profiles
         memory_test_containers = []
         memory_configs = [
-        ('small', '"32m"'),
-        ('medium', '"128m"'),
-        ('large', '"256m"')
+        ('small', '""32m""'),
+        ('medium', '""128m""'),
+        ('large', '""256m""')
     
         for size_name, memory_limit in memory_configs:
         for i in range(3):  # 3 containers per size
@@ -2344,7 +2344,7 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         parts = data_line.split('\t')
         if len(parts) >= 2:
         memory_usage = parts[1].strip()
-                            # Parse memory usage (e.g., 45."2MiB" / "128MiB")
+                            # Parse memory usage (e.g., 45.""2MiB"" / ""128MiB"")
         if '/' in memory_usage:
         current_mem = memory_usage.split('/')[0].strip()
         if 'MiB' in current_mem:
@@ -2390,7 +2390,7 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
-        '--memory', '"32m"',
+        '--memory', '""32m""',
         'alpine:latest',
         'echo', 'formatted_string'
             
@@ -2486,7 +2486,7 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
-        '--memory', '"128m"'
+        '--memory', '""128m""'
         
         if volume_name:
         create_cmd.extend(['-v', 'formatted_string')
@@ -2503,7 +2503,7 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         write_start = time.time()
         write_cmd = [
         'docker', 'exec', container_name,
-        'dd', 'if=/dev/zero', 'formatted_string', 'bs="1M"', 'count=10'
+        'dd', 'if=/dev/zero', 'formatted_string', 'bs=""1M""', 'count=10'
                 
         write_result = subprocess.run(write_cmd, capture_output=True, text=True, timeout=30)
         write_duration = time.time() - write_start
@@ -2515,7 +2515,7 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         read_start = time.time()
         read_cmd = [
         'docker', 'exec', container_name,
-        'dd', 'formatted_string', 'of=/dev/null', 'bs="1M"'
+        'dd', 'formatted_string', 'of=/dev/null', 'bs=""1M""'
                     
         read_result = subprocess.run(read_cmd, capture_output=True, text=True, timeout=30)
         read_duration = time.time() - read_start
@@ -2561,7 +2561,7 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
-        '--memory', '"64m"',
+        '--memory', '""64m""',
         image_name,
         'sleep', '30'
             

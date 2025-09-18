@@ -1,7 +1,7 @@
 '''
 '''
 MISSION CRITICAL: Docker Full Integration & System Validation Suite
-BUSINESS IMPACT: VALIDATES $"2M"+ ARR PLATFORM END-TO-END DOCKER OPERATIONS
+BUSINESS IMPACT: VALIDATES $""2M""+ ARR PLATFORM END-TO-END DOCKER OPERATIONS
 
 This is the ultimate Docker integration test suite that validates ALL components working
 together in realistic scenarios. It simulates complete CI/CD pipeline scenarios,
@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
     1. Segment: Platform/Internal - System Integration & Reliability Validation
 2. Business Goal: Ensure complete Docker stack works end-to-end in production scenarios
 3. Value Impact: Validates entire development infrastructure preventing catastrophic failures
-4. Revenue Impact: Protects $"2M"+ ARR platform from system-wide Docker infrastructure failures
+4. Revenue Impact: Protects $""2M""+ ARR platform from system-wide Docker infrastructure failures
 
 INTEGRATION VALIDATION SCOPE:
     - All Docker components working together seamlessly
@@ -174,8 +174,8 @@ class DockerIntegrationFramework:
         depends_on=[],
         health_check={
         'test': ['CMD-SHELL', 'pg_isready -U test_user'],
-        'interval': '"10s"',
-        'timeout': '"5s"',
+        'interval': '""10s""',
+        'timeout': '""5s""',
         'retries': 5
     
         ),
@@ -320,8 +320,8 @@ class DockerIntegrationFramework:
         health_cmd = service_config.health_check.get('test', [)
         if health_cmd and len(health_cmd) > 1:
         run_cmd.extend(['--health-cmd', ' '.join(health_cmd[1:))
-        run_cmd.extend(['--health-interval', service_config.health_check.get('interval', '"30s"')]
-        run_cmd.extend(['--health-timeout', service_config.health_check.get('timeout', '"10s"')]
+        run_cmd.extend(['--health-interval', service_config.health_check.get('interval', '""30s""')]
+        run_cmd.extend(['--health-timeout', service_config.health_check.get('timeout', '""10s""')]
         run_cmd.extend(['--health-retries', str(service_config.health_check.get('retries', 3))]
 
                                                                         # Create container
@@ -1113,7 +1113,7 @@ class TestDockerInfrastructureServiceStartup:
 
         success = (services_deployed == len(services_to_deploy) and )
         operations_failed == 0 and
-        average_startup_time < 25)  # Stricter than "30s" requirement
+        average_startup_time < 25)  # Stricter than ""30s"" requirement
 
         return {
         'success': success,
@@ -1180,7 +1180,7 @@ class TestDockerInfrastructureServiceStartup:
 
         result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
-        '--memory', '"256m"', image
+        '--memory', '""256m""', image
             
 
         if result.returncode == 0:
@@ -1210,7 +1210,7 @@ class TestDockerInfrastructureServiceStartup:
 
         result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
-        '--memory', '"256m"', image
+        '--memory', '""256m""', image
                                 
 
         if result.returncode == 0:
@@ -1288,7 +1288,7 @@ class TestDockerInfrastructureServiceStartup:
 
         result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
-        '--memory', '"128m"', '--cpus', '0.5', image, 'sleep', '60'
+        '--memory', '""128m""', '--cpus', '0.5', image, 'sleep', '60'
         
 
         deploy_time = time.time() - start_time
@@ -1408,7 +1408,7 @@ class TestDockerInfrastructureServiceStartup:
         logger.info(""
 
     def test_resource_constrained_startup(self, integration_framework):
-        Test service startup under resource constraints (< "500MB" memory).""
+        Test service startup under resource constraints (< ""500MB"" memory).""
         pass
         logger.info([U+1F9E0] Testing resource-constrained service startup)
 
@@ -1423,11 +1423,11 @@ class TestDockerInfrastructureServiceStartup:
         try:
         # Deploy services with strict memory limits
         constrained_services = [
-        ('nginx_constrained', 'nginx:alpine', '"128m"'),
-        ('redis_constrained', 'redis:alpine', '"64m"'),
-        ('alpine_constrained_1', 'alpine:latest', '"32m"'),
-        ('alpine_constrained_2', 'alpine:latest', '"32m"'),
-        ('alpine_constrained_3', 'alpine:latest', '"32m"')
+        ('nginx_constrained', 'nginx:alpine', '""128m""'),
+        ('redis_constrained', 'redis:alpine', '""64m""'),
+        ('alpine_constrained_1', 'alpine:latest', '""32m""'),
+        ('alpine_constrained_2', 'alpine:latest', '""32m""'),
+        ('alpine_constrained_3', 'alpine:latest', '""32m""')
         
 
         total_memory_allocated = 0
@@ -1439,7 +1439,7 @@ class TestDockerInfrastructureServiceStartup:
         memory_mb = int(memory_limit.replace('m', ''))
         total_memory_allocated += memory_mb
 
-            # Ensure total allocation stays under "500MB"
+            # Ensure total allocation stays under ""500MB""
         if total_memory_allocated <= 500:
         start_time = time.time()
 
@@ -1490,7 +1490,7 @@ class TestDockerInfrastructureServiceStartup:
         error_messages.append(""
 
         else:
-        break  # Would exceed "500MB" limit
+        break  # Would exceed ""500MB"" limit
 
         total_memory_used = sum(memory_usage)
         memory_efficiency = services_deployed / (total_memory_used / 100) if total_memory_used > 0 else 0
@@ -1708,8 +1708,8 @@ class TestDockerInfrastructureHealthMonitoring:
         'image': 'nginx:alpine',
         'port': 8090,
         'health_cmd': 'curl -f http://localhost:80 || exit 1',
-        'health_interval': '"5s"',
-        'health_timeout': '"3s"',
+        'health_interval': '""5s""',
+        'health_timeout': '""3s""',
         'health_retries': 3
         },
         {
@@ -1717,8 +1717,8 @@ class TestDockerInfrastructureHealthMonitoring:
         'image': 'redis:alpine',
         'port': 6390,
         'health_cmd': 'redis-cli ping',
-        'health_interval': '"3s"',
-        'health_timeout': '"2s"',
+        'health_interval': '""3s""',
+        'health_timeout': '""2s""',
         'health_retries': 5
         
         
@@ -1872,7 +1872,7 @@ class TestDockerInfrastructureHealthMonitoring:
         result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
         '--restart', 'unless-stopped',
-        '--memory', '"256m"',
+        '--memory', '""256m""',
         image
             
 
@@ -2146,7 +2146,7 @@ class TestDockerInfrastructureHealthMonitoring:
 
         result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
-        '--memory', '"256m"',
+        '--memory', '""256m""',
         '--cpus', '0.5',
         image
             
@@ -2326,11 +2326,11 @@ class TestDockerInfrastructureHealthMonitoring:
 
         result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
-        '--memory', '"128m"',
+        '--memory', '""128m""',
         '--cpus', '0.3',
         '--health-cmd', health_cmd,
-        '--health-interval', '"2s"',
-        '--health-timeout', '"1s"',
+        '--health-interval', '""2s""',
+        '--health-timeout', '""1s""',
         '--health-retries', '2',
         image
             

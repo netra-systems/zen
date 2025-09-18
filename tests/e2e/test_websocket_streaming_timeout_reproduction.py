@@ -64,7 +64,7 @@ class WebSocketStreamingTimeoutReproduction:
     async def test_redis_dependency_timeout(self):
     """"
 
-        REPRODUCES: Service 'redis' validation timeout after 30."0s"
+        REPRODUCES: Service 'redis' validation timeout after 30.""0s""
         EXPECTS: Service validation timeout warnings
         
         # This test simulates Redis timeout behavior
@@ -73,8 +73,8 @@ class WebSocketStreamingTimeoutReproduction:
         async def simulate_redis_validation():
             ""Simulates Redis service validation that times out""
 
-            await asyncio.sleep(30.1)  # Exceeds "30s" timeout
-            raise asyncio.TimeoutError(Service 'redis' validation timeout after 30."0s")""
+            await asyncio.sleep(30.1)  # Exceeds ""30s"" timeout
+            raise asyncio.TimeoutError(Service 'redis' validation timeout after 30.""0s"")""
             
         with pytest.raises(asyncio.TimeoutError):
             await asyncio.wait_for(simulate_redis_validation(), timeout=30.0)

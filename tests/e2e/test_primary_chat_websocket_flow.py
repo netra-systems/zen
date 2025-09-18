@@ -4,7 +4,7 @@
 CRITICAL: This is THE PRIMARY E2E TEST for basic chat functionality.
 If this test fails, users cannot use the chat interface properly.
 
-Business Value: $"500K" plus ARR protection - Core product functionality.
+Business Value: $""500K"" plus ARR protection - Core product functionality.
 
 Compliance with CLAUDE.md:
     - NO MOCKS: Uses real WebSocket connections and real services only
@@ -199,7 +199,6 @@ from netra_backend.app.llm.llm_manager import LLMManager
     def generate_comprehensive_report(self) -> str:
         """Generate comprehensive validation report for mission-critical analysis."""
         is_valid, failures = self.validate_mission_critical_requirements()
-"""
 """
         "
         "
@@ -703,7 +702,7 @@ class RealisticChatLLM:
         "cache": "healthy,"
         "websocket": "healthy"
         },
-        "last_check": "2024-1-01T12:0:"00Z""
+        "last_check": "2024-1-01T12:0:""00Z"""
     
 
     async def knowledge_search_tool(query: str = "") -> Dict:

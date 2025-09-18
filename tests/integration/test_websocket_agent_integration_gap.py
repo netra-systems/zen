@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure users receive real-time agent progress updates
 - Value Impact: WebSocket events provide transparency and trust in AI interactions
-- Strategic Impact: Core chat functionality that drives $"500K" plus ARR
+- Strategic Impact: Core chat functionality that drives $""500K"" plus ARR
 
 CRITICAL: This test reproduces the integration gap where ExecutionEngine was not updated
 when AgentWebSocketBridge was migrated from singleton to per-request pattern.

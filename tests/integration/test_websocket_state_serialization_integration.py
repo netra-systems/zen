@@ -112,7 +112,7 @@ class WebSocketStateSerializationIntegrationTests:
             websocket_client_state: _safe_websocket_state_for_logging(mock_websocket.client_state),
             websocket_application_state: _safe_websocket_state_for_logging(mock_websocket.application_state),"
             websocket_application_state: _safe_websocket_state_for_logging(mock_websocket.application_state),"
-            "timestamp: 2025-9-08T12:0:"00Z","
+            "timestamp: 2025-9-08T12:0:""00Z"","
             environment: staging
         }
         
@@ -143,7 +143,7 @@ class WebSocketStateSerializationIntegrationTests:
             details: {"
             details: {"
                 "retry_count: 3,"
-                last_attempt: 2025-9-08T12:0:"00Z"
+                last_attempt: 2025-9-08T12:0:""00Z""
             }
         }
         
@@ -170,7 +170,7 @@ class GCPCloudRunCompatibilityTests:
         gcp_log_entry = {
             "severity: INFO,"
             message: WebSocket connection established,
-            timestamp: 2025-9-08T12:0:0."000Z"","
+            timestamp: 2025-9-08T12:0:0.""000Z""","
             "labels: {"
                 service: netra-backend,
                 version": 1.0.0"
@@ -201,7 +201,7 @@ class GCPCloudRunCompatibilityTests:
         # Simulate the error context that was causing 1011 errors
         error_context = {
             @type": type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent,"
-            eventTime: 2025-9-08T12:0:0."000Z",
+            eventTime: 2025-9-08T12:0:0.""000Z"",
             serviceContext: {"
             serviceContext: {"
                 "service: netra-backend,"

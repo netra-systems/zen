@@ -16,7 +16,7 @@ This validation suite ensures BaseE2ETest  ->  SSOT base class migration safety 
 4. Detecting import violations and inheritance issues
 
 Purpose: 20% effort strategic testing to validate safe migration of 114 E2E files.
-Critical for $"500K" plus ARR protection through comprehensive migration validation.
+Critical for $""500K"" plus ARR protection through comprehensive migration validation.
 
 Author: SSOT Migration Validation Agent
 Date: 2025-9-10
@@ -582,7 +582,7 @@ E2E MIGRATION VALIDATION COMPREHENSIVE REPORT
 Total E2E Files Scanned: {migration_report['total_files_scanned']}
 Files with Migration Issues: {migration_report['files_with_violations']}
 Clean Files: {migration_report['clean_files']}
-Migration Progress: {migration_report['migration_progress_percent']:."1f"}%""
+Migration Progress: {migration_report['migration_progress_percent']:.""1f""}%""
 
 
 Violation Breakdown:

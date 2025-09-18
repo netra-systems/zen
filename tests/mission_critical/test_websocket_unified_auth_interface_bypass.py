@@ -19,7 +19,7 @@ Business Value Justification (BVJ):
     - Segment: Enterprise/Platform - SSOT compliance and architecture integrity  
 - Business Goal: System Stability - Single source of truth for auth operations
 - Value Impact: Prevents auth logic duplication and security inconsistencies
-- Revenue Impact: Auth bypass bugs could compromise entire $"500K" plus ARR platform
+- Revenue Impact: Auth bypass bugs could compromise entire $""500K"" plus ARR platform
 
 CRITICAL AUTH SSOT REQUIREMENT:
     WebSocket MUST use UnifiedAuthInterface for ALL auth operations - NO local auth logic.

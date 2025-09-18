@@ -6,13 +6,13 @@ reach the correct users with proper isolation, security, and real-time delivery 
 
 Business Value Justification (BVJ):
     - Segment: Platform/All - Core Chat Infrastructure
-- Business Goal: Revenue Protection - Ensures event delivery for $"500K" plus ARR chat functionality
+- Business Goal: Revenue Protection - Ensures event delivery for $""500K"" plus ARR chat functionality
 - Value Impact: Validates the routing system that delivers real-time AI value to users
 - Strategic Impact: Tests the infrastructure that powers 90% of platform business value
 
 CRITICAL REQUIREMENTS:
     1. Message routing with enterprise-grade user isolation
-2. Real-time delivery with performance SLAs (<"100ms" routing time)
+2. Real-time delivery with performance SLAs (<""100ms"" routing time)
 3. Event ordering and sequencing guarantees
 4. Connection health monitoring and failover handling
 5. Security validation and access control enforcement
@@ -160,7 +160,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
             raise SecurityError(f"User isolation violation: event user {event.user_id} != connection user {connection['user_id']})"
         
         # Simulate routing delay
-        await asyncio.sleep(0.1)  # "1ms" simulated network latency
+        await asyncio.sleep(0.1)  # ""1ms"" simulated network latency
         
         # Route event
         routed_event = {
@@ -243,7 +243,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
             assert routed_event["event][type] == event.event_type, fEvent type mismatch for event {i+1}"
             assert routed_event[event]["user_id] == user_context.user_id, fUser ID mismatch for event {i+1}"
             
-            print(f  📨 Routed: {event.event_type} ({routing_time * 1000:."1f"}ms))""
+            print(f  📨 Routed: {event.event_type} ({routing_time * 1000:.""1f""}ms))""
 
             
             await asyncio.sleep(0.1)  # Small delay between events
@@ -256,8 +256,8 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         avg_routing_time = sum(routing_times) / len(routing_times)
         max_routing_time = max(routing_times)
         
-        assert avg_routing_time < 0.1, "fAverage routing time too slow: {avg_routing_time * 1000:."1f"}ms"
-        assert max_routing_time < 0.2, f"Max routing time too slow: {max_routing_time * 1000:."1f"}ms"
+        assert avg_routing_time < 0.1, "fAverage routing time too slow: {avg_routing_time * 1000:.""1f""}ms"
+        assert max_routing_time < 0.2, f"Max routing time too slow: {max_routing_time * 1000:.""1f""}ms"
         
         # Validate event ordering
         routed_event_types = [event[event"][type] for event in connection_events]"
@@ -270,7 +270,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         self.record_metric(max_routing_time_ms, max_routing_time * 1000)""
         
         print(f"  CHECK Basic routing pipeline successful - {len(test_events)} events)"
-        print(f  ⚡ Performance: avg {avg_routing_time * 1000:."1f"}ms, max {max_routing_time * 1000:."1f"}ms)""
+        print(f  ⚡ Performance: avg {avg_routing_time * 1000:.""1f""}ms, max {max_routing_time * 1000:.""1f""}ms)""
 
     @pytest.mark.asyncio
     async def test_multi_user_routing_isolation(self):
@@ -372,7 +372,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         
         # Validate concurrent performance
         events_per_second = len(all_events) / total_routing_time
-        assert events_per_second > 100, "fConcurrent routing too slow: {events_per_second:."1f"} events/sec"
+        assert events_per_second > 100, "fConcurrent routing too slow: {events_per_second:.""1f""} events/sec"
         
         # Record metrics
         self.record_metric(concurrent_users, len(users))""
@@ -381,7 +381,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         self.record_metric("events_per_second, events_per_second)"
         
         print(f  CHECK Multi-user isolation successful - {len(users)} users, {len(all_events)} events)
-        print(f  🚀 Concurrent performance: {events_per_second:."1f"} events/sec")"
+        print(f  🚀 Concurrent performance: {events_per_second:.""1f""} events/sec")"
         print(f  🛡️ Zero cross-contamination detected")"
 
     @pytest.mark.asyncio
@@ -509,7 +509,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         self.record_metric(tool_pairs_validated", len(tool_pairs))"
         
         print(f  CHECK Event ordering preserved - {len(ordered_events)} events in correct sequence)
-        print(f  🕒 Routing with delays: {routing_duration * 1000:."1f"}ms total"")
+        print(f  🕒 Routing with delays: {routing_duration * 1000:.""1f""}ms total"")
         print(f  🔧 Tool execution pairs: {len(tool_pairs)} tools properly ordered)
 
     @pytest.mark.asyncio
@@ -656,8 +656,8 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         
         print(f  CHECK Connection health and failover successful")"
         print(f  📊 Event distribution: Primary {primary_total_events}, Backup {backup_total_events})
-        print(f  🔄 Failover success rate: {backup_events_routed}/{len(test_events[2:]} = {backup_events_routed/max(len(test_events[2:], 1"):."2f"})"
-        print(f  🚀 Recovery success rate: {recovered_events_routed}/{len(recovery_events)} = {recovered_events_routed/max(len(recovery_events), 1):."2f"})""
+        print(f  🔄 Failover success rate: {backup_events_routed}/{len(test_events[2:]} = {backup_events_routed/max(len(test_events[2:], 1"):.""2f""})"
+        print(f  🚀 Recovery success rate: {recovered_events_routed}/{len(recovery_events)} = {recovered_events_routed/max(len(recovery_events), 1):.""2f""})""
 
 
     @pytest.mark.asyncio
@@ -758,7 +758,7 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         # Validate performance requirements
         assert success_rate >= 0.95, f"Success rate too low: {success_rate:.2%} < 95%"
         assert avg_routing_time < 0.1, fAverage routing time too slow: {avg_routing_time * 1000:."1f"}ms > "100ms"""
-        assert events_per_second > 50, "fThroughput too low: {events_per_second:."1f"} events/sec < 50 events/sec"
+        assert events_per_second > 50, "fThroughput too low: {events_per_second:.""1f""} events/sec < 50 events/sec"
         
         # Validate user isolation under load
         for user_context in load_users:
@@ -792,9 +792,9 @@ class WebSocketMessageRoutingIntegrationTests(SSotAsyncTestCase):
         self.record_metric(load_test_total_time_ms", total_load_time * 1000)"
         
         print(f  CHECK Load test successful - {success_rate:.1%} success rate)
-        print(f  🚀 Throughput: {events_per_second:."1f"} events/sec")"
-        print(f  ⚡ Performance: avg {avg_routing_time * 1000:."1f"}ms, max {max_routing_time * 1000:."1f"}ms)
-        print(f  🕒 Total duration: {total_load_time * 1000:."1f"}ms")"
+        print(f  🚀 Throughput: {events_per_second:.""1f""} events/sec")"
+        print(f  ⚡ Performance: avg {avg_routing_time * 1000:.""1f""}ms, max {max_routing_time * 1000:.""1f""}ms)
+        print(f  🕒 Total duration: {total_load_time * 1000:.""1f""}ms")"
         
         if failed_routings:
             print(f  WARNING️ Failures: {len(failed_routings)} events failed routing)

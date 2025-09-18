@@ -5,7 +5,7 @@ PURPOSE: Detect WebSocket manager duplication across services
 These tests are designed to FAIL initially, proving current SSOT violations exist.
 
 MISSION: Validate WebSocket Manager consolidation for Golden Path reliability
-Business Value: $"500K" plus ARR Golden Path protection through unified WebSocket management
+Business Value: $""500K"" plus ARR Golden Path protection through unified WebSocket management
 
 Expected Initial Behavior: ALL TESTS FAIL - proving WebSocket manager duplication exists
 After remediation: All tests should PASS confirming single WebSocket management authority
@@ -40,7 +40,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
 """Empty docstring."""
     WebSocket Manager SSOT Tests - Designed to FAIL initially
 
-    Business Value: Platform/Internal - $"500K" plus ARR Golden Path WebSocket Management
+    Business Value: Platform/Internal - $""500K"" plus ARR Golden Path WebSocket Management
     These tests detect WebSocket manager duplication that fragments real-time communication.
 
     EXPECTED RESULT: ALL TESTS FAIL until SSOT remediation complete

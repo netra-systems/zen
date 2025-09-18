@@ -11,7 +11,7 @@ Focus Areas:
 - Business value protection through test execution
 - Integration with staging environment validation
 
-Business Impact: CRITICAL - Protects $"500K" plus ARR through reliable test execution
+Business Impact: CRITICAL - Protects $""500K"" plus ARR through reliable test execution
 Priority: P0 - Essential for business value validation
 "
 ""
@@ -272,7 +272,7 @@ class BusinessValueProtectionTests:
     def test_phase4_websocket_business_value_validation(self):
         PHASE 4: Validate WebSocket test suite can protect business value.
         
-        This specifically tests that the WebSocket tests protecting $"500K" plus ARR
+        This specifically tests that the WebSocket tests protecting $""500K"" plus ARR
         can execute properly.
 ""
         project_root = Path(__file__).parent.parent.parent
@@ -302,7 +302,7 @@ class BusinessValueProtectionTests:
         if result.returncode != 0:
             pytest.fail(
                 fWebSocket business value tests cannot be accessed:\n
-                fThis blocks protection of $"500K" plus ARR dependent on chat functionality.\n
+                fThis blocks protection of $""500K"" plus ARR dependent on chat functionality.\n
                 fError: {result.stderr}""
             )
         
@@ -332,7 +332,7 @@ class BusinessValueProtectionTests:
             ]:
                 pytest.fail(
                     fWebSocket tests blocked by config conflicts (Issue #519):\n
-                    f$"500K" plus ARR business value protection is blocked.\n
+                    f$""500K"" plus ARR business value protection is blocked.\n
                     f"Error: {result.stderr}"
                 )
             

@@ -27,7 +27,7 @@ Mission Critical because JWT secret sync failures cause:
 - 100% user lockout from authentication system
 - Complete WebSocket authentication failure
 - Circuit breaker permanently open
-- $"50K"+ MRR loss from system unavailability
+- $""50K""+ MRR loss from system unavailability
 "
 ""
 
@@ -190,7 +190,7 @@ class JWTSecretConsistencyValidator:
         "Check if a secret is a valid hex string (should be accepted)."
         try:
             # Check if it's base64-like or hex-like'
-            if len(secret) >= 16 and all(c in '"0123456789abcdefABCDEF"-_' for c in secret):
+            if len(secret) >= 16 and all(c in '""0123456789abcdefABCDEF""-_' for c in secret):
                 return True
             # Also accept base64-like strings
             if len(secret) >= 16:
@@ -575,7 +575,7 @@ class JWTSecretConsistencyValidator:
                 cascade_failure_risk: HIGH if critical_issues else "LOW,"
                 authentication_system_risk: CRITICAL if critical_issues else STABLE, "
                 authentication_system_risk: CRITICAL if critical_issues else STABLE, "
-                "estimated_mrr_at_risk: $"50K"+ if critical_issues else $0"
+                "estimated_mrr_at_risk: $""50K""+ if critical_issues else $0"
             },
             recommendations": self._generate_recommendations(critical_issues, warning_issues)"
         }

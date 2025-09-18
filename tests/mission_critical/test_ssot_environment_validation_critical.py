@@ -12,7 +12,7 @@ PURPOSE: Prevent revenue loss from configuration errors by validating SSOT compl
 Business Value Justification (BVJ):
     - Segment: Platform/Internal
 - Goal: System Stability & Revenue Protection  
-- Value Impact: Prevents $"500K" plus ARR loss from configuration cascade failures
+- Value Impact: Prevents $""500K"" plus ARR loss from configuration cascade failures
 - Revenue Impact: Critical infrastructure tests protecting Golden Path user flow
 
 CRITICAL REQUIREMENTS:
@@ -119,7 +119,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
         This test ensures the central validator maintains SSOT patterns and
         prevents duplicate validation logic that could cause configuration drift.
         
-        BUSINESS IMPACT: Prevents configuration errors that could cause $"500K" plus ARR loss.
+        BUSINESS IMPACT: Prevents configuration errors that could cause $""500K"" plus ARR loss.
         
         start_time = time.time()
         validation_errors = []
@@ -225,7 +225,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
                          \n.join(f"  - {error} for error in validation_errors))"
             
             self.logger.info(fCentral validator SSOT compliance validated in {validation_time:.1f}ms)"
-            self.logger.info(fCentral validator SSOT compliance validated in {validation_time:.1f}ms)""
+            self.logger.info(fCentral validator SSOT compliance validated in {validation_time:."1f"}ms)""
 
             
         except Exception as e:
@@ -289,7 +289,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
                 self.fail(f"Environment isolation SSOT consistency failed:\n +"
                          \n".join(f  - {error} for error in validation_errors))"
             
-            self.logger.info(fEnvironment isolation SSOT consistency validated in {validation_time:."1f"}ms)""
+            self.logger.info(fEnvironment isolation SSOT consistency validated in {validation_time:.""1f""}ms)""
 
             
         except Exception as e:
@@ -362,7 +362,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
                 self.fail(f"Startup validator SSOT integration failed:\n +"
                          \n.join(f  - {error} for error in validation_errors))
             
-            self.logger.info(fStartup validator SSOT integration validated in {validation_time:."1f"}ms)""
+            self.logger.info(fStartup validator SSOT integration validated in {validation_time:.""1f""}ms)""
 
             
         except Exception as e:
@@ -438,7 +438,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
                          \n.join(f  - {error} for error in validation_errors))
             
             self.logger.info(fBackend configuration validator SSOT compliance validated in {validation_time:.1f}ms)"
-            self.logger.info(fBackend configuration validator SSOT compliance validated in {validation_time:.1f}ms)""
+            self.logger.info(fBackend configuration validator SSOT compliance validated in {validation_time:."1f"}ms)""
 
             
         except Exception as e:
@@ -506,7 +506,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
                 self.fail(fCross-environment validation consistency failed:\n + 
                          \n.join(f  - {error}" for error in validation_errors))"
             
-            self.logger.info(f"Cross-environment validation consistency validated in {validation_time:."1f"}ms)"
+            self.logger.info(f"Cross-environment validation consistency validated in {validation_time:.""1f""}ms)"
             
         except Exception as e:
             self.record_metric(cross_environment_critical_error, 1)
@@ -637,7 +637,7 @@ class TestSsotEnvironmentValidationCritical(SSotAsyncTestCase):
             self.logger.info(
                 fSSOT validation test completed: {method.__name__ if method else 'unknown'} "
                 fSSOT validation test completed: {method.__name__ if method else 'unknown'} "
-                f"Duration: {test_duration:."3f"}s,"
+                f"Duration: {test_duration:.""3f""}s,"
                 fCritical validations: {metrics.get('critical_validations_performed', 0)}, 
                 fViolations detected: {metrics.get('ssot_violations_detected', 0)}, 
                 fRevenue protection checks: {metrics.get('revenue_protection_checks', 0)}""

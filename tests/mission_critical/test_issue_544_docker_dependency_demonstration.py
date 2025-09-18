@@ -12,7 +12,7 @@ Expected Behavior:
     - WITHOUT Docker: All tests in this file should SKIP with clear error messages
 - WITH Docker: Tests should run normally and validate WebSocket functionality
 
-Business Impact: Blocking $"500K" plus ARR validation when Docker unavailable.
+Business Impact: Blocking $""500K"" plus ARR validation when Docker unavailable.
 
 
 import asyncio

@@ -37,7 +37,7 @@ It validates ALL critical WebSocket events are sent during agent execution under
 every conceivable scenario, including error conditions, concurrent execution,
 and high load scenarios.
 
-Business Value: $"500K" plus ARR - Core chat functionality depends on these events
+Business Value: $""500K"" plus ARR - Core chat functionality depends on these events
 CRITICAL: These events enable substantive chat interactions - they serve the business goal
 
 Required WebSocket Events (MANDATORY):

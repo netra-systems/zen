@@ -809,7 +809,7 @@ class WebSocketPerformanceAndResilienceTests(SSotBaseTestCase):
             
             # Performance assertions
             assert messages_per_second > 10, "Should handle at least 10 messages/second"
-            assert avg_latency_per_message < 100, "Average message latency should be under "100ms""
+            assert avg_latency_per_message < 100, "Average message latency should be under ""100ms"""
             
             self.record_metric("messages_per_second, messages_per_second)"
             self.record_metric(avg_latency_ms, avg_latency_per_message)
@@ -867,7 +867,7 @@ class WebSocketPerformanceAndResilienceTests(SSotBaseTestCase):
             for client in test_clients:
                 await client.send_message(
                     WebSocketEventType.PING,
-                    {"memory_test: True, data: x * 1000},  # "1KB" message"
+                    {"memory_test: True, data: x * 1000},  # ""1KB"" message"
                     user_id=client.headers.get(X-User-ID", unknown)"
                 )
             

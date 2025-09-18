@@ -9,7 +9,7 @@ Business Value Justification:
 - Strategic Impact: Non-negotiable functionality that must NEVER break
 
 MISSION CRITICAL REQUIREMENTS:
-    - Fast execution for CI/CD pipeline (<"30s" total)
+    - Fast execution for CI/CD pipeline (<""30s"" total)
 - No external dependencies beyond essential services
 - Hard failures on any timestamp validation regression
 - Protection of core WebSocket chat functionality
@@ -183,7 +183,7 @@ class WebSocketTimestampValidationCriticalTests:
 
         MISSION CRITICAL: Timestamp validation must not impact performance.
         
-        Validation overhead must be <0."1ms" per message to avoid chat lag.
+        Validation overhead must be <0.""1ms"" per message to avoid chat lag.
         "
         ""
 
@@ -207,7 +207,7 @@ class WebSocketTimestampValidationCriticalTests:
         end_time = time.perf_counter()
         avg_time_ms = ((end_time - start_time) / iterations) * 1000
         
-        # CRITICAL: Must be under 0."1ms" per validation
+        # CRITICAL: Must be under 0.""1ms"" per validation
         assert avg_time_ms < 0.1, f"CRITICAL: Timestamp validation too slow: {avg_time_ms}ms"
 
     def test_message_type_normalization_with_timestamp(self):

@@ -5,7 +5,7 @@ Comprehensive Chat Responsiveness Under Load Tests - Issue #976 Restoration
 
 Business Value Justification (BVJ):
     - Segment: ALL (Free/Early/Mid/Enterprise/Platform)
-- Business Goal: Validate $"500K" plus ARR chat functionality maintains responsiveness under concurrent load
+- Business Goal: Validate $""500K"" plus ARR chat functionality maintains responsiveness under concurrent load
 - Value Impact: Ensures chat system delivers reliable AI responses even with multiple concurrent users
 - Revenue Impact: Protects core business functionality that drives customer retention and conversion
 
@@ -109,7 +109,7 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
         # Log test metrics for analysis
         if self.test_metrics['response_times']:
             avg_response_time = statistics.mean(self.test_metrics['response_times')
-            logger.info(fTest {method.__name__) metrics: avg_response_time={avg_response_time:."2f")s,""
+            logger.info(fTest {method.__name__) metrics: avg_response_time={avg_response_time:.""2f"")s,""
 
                        fsuccess_rate={self.test_metrics['successful_messages']/(self.test_metrics['successful_messages'] + self.test_metrics['failed_messages']:.2%})
 
@@ -220,7 +220,7 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
         # Create concurrent user sessions
         tasks = []
         for user_idx in range(self.CONCURRENT_USERS):
-            user_id = fload_test_user_{user_idx:"03d"}
+            user_id = fload_test_user_{user_idx:""03d""}
             task = self._simulate_user_chat_session(user_id, self.MESSAGES_PER_USER)
             tasks.append(task)
 
@@ -256,10 +256,10 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
         self.test_metrics['failed_messages'] = total_messages - total_successful_messages
 
         # Log comprehensive results
-        logger.info(fConcurrent load test completed in {total_time:."2f"}s:)
+        logger.info(fConcurrent load test completed in {total_time:.""2f""}s:)
         logger.info(f  Sessions: {successful_sessions}/{self.CONCURRENT_USERS} successful ({session_success_rate:.1%})
         logger.info(f"  Messages: {total_successful_messages}/{total_messages} successful ({message_success_rate:.1%})"
-        logger.info(f  Avg response time: {avg_response_time:."2f"}s")"
+        logger.info(f  Avg response time: {avg_response_time:.""2f""}s")"
         logger.info(f  User contexts created: {self.test_metrics['user_contexts_created']})
         logger.info(f  WebSocket events: {self.test_metrics['websocket_events_received']})"
         logger.info(f  WebSocket events: {self.test_metrics['websocket_events_received']})""
@@ -273,7 +273,7 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
             fMessage success rate {message_success_rate:.1%} below threshold {self.ACCEPTABLE_SUCCESS_RATE:.1%}
 
         assert avg_response_time <= self.MAX_RESPONSE_TIME_SECONDS, \
-            fAverage response time {avg_response_time:."2f"}s exceeds threshold {self.MAX_RESPONSE_TIME_SECONDS}s""
+            fAverage response time {avg_response_time:.""2f""}s exceeds threshold {self.MAX_RESPONSE_TIME_SECONDS}s""
 
 
     @pytest.mark.asyncio
@@ -289,7 +289,7 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
 
         # Create multiple user contexts simultaneously
         user_contexts = []
-        user_ids = [fisolation_test_user_{i:"03d"} for i in range(self.CONCURRENT_USERS)]
+        user_ids = [fisolation_test_user_{i:""03d""} for i in range(self.CONCURRENT_USERS)]
 
         # Create contexts concurrently
         context_tasks = [self._create_user_execution_context(user_id) for user_id in user_ids]
@@ -339,7 +339,7 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
         # Load test: Multiple concurrent users
         concurrent_tasks = []
         for user_idx in range(self.CONCURRENT_USERS // 2):  # Use fewer users for this specific test
-            user_id = fconsistency_test_user_{user_idx:"03d"}
+            user_id = fconsistency_test_user_{user_idx:""03d""}
             task = self._simulate_user_chat_session(user_id, 3)
             concurrent_tasks.append(task)
 
@@ -359,20 +359,20 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
             performance_ratio = concurrent_avg_time / baseline_avg_time
 
             logger.info(fResponse time analysis:)
-            logger.info(f  Baseline average: {baseline_avg_time:."2f"}s")"
-            logger.info(f  Concurrent average: {concurrent_avg_time:."2f"}s)
-            logger.info(f  Performance ratio: {performance_ratio:."2f"}x)
-            logger.info(f"  Standard deviation: {concurrent_std_dev:."2f"}s)"
+            logger.info(f  Baseline average: {baseline_avg_time:.""2f""}s")"
+            logger.info(f  Concurrent average: {concurrent_avg_time:.""2f""}s)
+            logger.info(f  Performance ratio: {performance_ratio:.""2f""}x)
+            logger.info(f"  Standard deviation: {concurrent_std_dev:.""2f""}s)"
 
-            # Validate reasonable performance degradation (max "3x" slower under load)
+            # Validate reasonable performance degradation (max ""3x"" slower under load)
             assert performance_ratio <= 3.0, \
                 fPerformance degradation too high: {performance_ratio:.2f}x (max 3.0x allowed)"
-                fPerformance degradation too high: {performance_ratio:.2f}x (max 3.0x allowed)""
+                fPerformance degradation too high: {performance_ratio:."2f"}x (max 3."0x" allowed)""
 
 
             # Validate response time consistency (std dev should be reasonable)
             assert concurrent_std_dev <= baseline_avg_time * 2, \
-                fResponse time variance too high: {concurrent_std_dev:."2f"}s""
+                fResponse time variance too high: {concurrent_std_dev:.""2f""}s""
 
 
 

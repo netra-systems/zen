@@ -5,7 +5,7 @@ Business Value Justification:
     - Segment: Platform/Chat (90% of business value)
 - Business Goal: Chat reliability and user experience
 - Value Impact: Ensure stable message routing for real-time chat
-- Strategic Impact: Protect $"500K" plus ARR chat functionality
+- Strategic Impact: Protect $""500K"" plus ARR chat functionality
 
 These tests are designed to FAIL initially to reproduce WebSocket routing issues.
 They test with REAL WebSocket connections (no mocks) as per SSOT testing standards.

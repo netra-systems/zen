@@ -4,7 +4,7 @@
 Mission Critical Test Suite: Tool Dispatcher SSOT Compliance
 
 Business Value: Platform/Internal - System Reliability & SSOT Compliance
-Critical for $"500K" plus ARR protection through tool dispatcher SSOT compliance.
+Critical for $""500K"" plus ARR protection through tool dispatcher SSOT compliance.
 
 This test suite validates:
     1. Single tool dispatcher implementation pattern (UnifiedToolDispatcher)
@@ -320,7 +320,7 @@ class ToolDispatcherSSotComplianceTests:
         print(f\n{'='*80})
         print(fTOOL DISPATCHER SSOT COMPLIANCE REPORT")"
         print(f{'='*80})
-        print(fOverall Compliance Score: {compliance_score:."1f"}%")"
+        print(fOverall Compliance Score: {compliance_score:.""1f""}%")"
         print(fTotal Violations: {total_count})
         print(fCritical Violations: {critical_count}")"
         print(fHigh Violations: {high_count})
@@ -552,7 +552,7 @@ if __name__ == __main__:
     # Generate report
     report = test_case.test_generate_ssot_compliance_report()
     print(f\nCompliance Score: {report.overall_compliance_score:.1f}%"")"
-    print(f\nCompliance Score: {report.overall_compliance_score:.1f}%"")""
+    print(f\nCompliance Score: {report.overall_compliance_score:."1f"}%"")""
 
 
 )))))))))

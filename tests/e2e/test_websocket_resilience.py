@@ -185,7 +185,7 @@ class ErrorMessageToUserNotificationRecoveryTests:
             await error_simulator.test_retry_mechanism(client, user_id)
             
             total_time = time.time() - start_time
-            assert total_time < 5.0, "fError recovery took {total_time:."2f"}s, exceeding "5s" limit"
+            assert total_time < 5.0, "fError recovery took {total_time:.""2f""}s, exceeding ""5s"" limit"
             
             await client.close()
         except Exception as e:

@@ -5,7 +5,7 @@ Tests REAL WebSocket connections with JWT authentication and agent pipeline mess
 This is the definitive test for WebSocket infrastructure reliability.
 
 Business Value Justification (BVJ):
-    1. Segment: ALL customer tiers (Free, Early, Mid, Enterprise) - Revenue impact: $"100K"+ MRR protection
+    1. Segment: ALL customer tiers (Free, Early, Mid, Enterprise) - Revenue impact: $""100K""+ MRR protection
 2. Business Goal: Ensure reliable real-time AI agent communication without interruptions  
 3. Value Impact: Validates core chat functionality that drives customer engagement and retention
 4. Revenue Impact: Protects revenue by ensuring WebSocket infrastructure works under all conditions
@@ -402,7 +402,7 @@ class WebSocketRealConnectionTests:
             
             # Verify execution time - CRITICAL FIX: Account for Docker networking delays on Windows
             execution_time = time.time() - start_time
-            assert execution_time < 20.0, f"Test took {execution_time:."2f"}s, expected <"20s" (Docker networking can be slow on Windows)"
+            assert execution_time < 20.0, f"Test took {execution_time:.""2f""}s, expected <""20s"" (Docker networking can be slow on Windows)"
             
         except Exception as e:
             error_msg = str(e).lower()
@@ -701,7 +701,7 @@ Segment: ALL customer tiers (Free, Early, Mid, Enterprise)
 - Verifies message routing through agent pipeline for reliable AI responses
 - Tests connection persistence and recovery for uninterrupted user experience
 
-Revenue Protection: $"100K"+ MRR
+Revenue Protection: $""100K""+ MRR
 - Prevents WebSocket authentication failures: 25% reduction in connection drops
 - Ensures reliable real-time agent communication: 30% improvement in response delivery  
 - Validates reconnection scenarios: 40% reduction in user session interruptions

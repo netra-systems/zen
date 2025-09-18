@@ -6,7 +6,7 @@ Mission Critical Tests for WebSocket Authentication Chat Value Protection
 
 Business Value Justification (BVJ):
     - Segment: ALL (Free -> Enterprise) - Chat is 90% of platform value delivery
-- Business Goal: PROTECT $"120K"+ MRR by ensuring chat functionality never fails
+- Business Goal: PROTECT $""120K""+ MRR by ensuring chat functionality never fails
 - Value Impact: Chat downtime = immediate revenue loss and customer churn
 """"
 
@@ -70,7 +70,7 @@ class WebSocketAuthChatValueProtectionTests:
      ALERT:  MISSION CRITICAL tests for WebSocket authentication chat value protection.
     
     CRITICAL: These tests ensure authentication ENABLES chat functionality
-    and NEVER blocks legitimate users from accessing $"120K"+ MRR chat platform.
+    and NEVER blocks legitimate users from accessing $""120K""+ MRR chat platform.
     
     Tests focus on:
     1. Zero false negatives - legitimate users always access chat
@@ -252,7 +252,7 @@ class WebSocketAuthChatValueProtectionTests:
         # Performance requirements for chat access
         for result in successful_access:
             access_time = result.get('chat_access_time_ms', 0)
-            assert access_time < 5000, "f FAIL:  CHAT UX FAILURE: User {result['user_index']} took {access_time}ms to access chat (limit: "5000ms")"
+            assert access_time < 5000, "f FAIL:  CHAT UX FAILURE: User {result['user_index']} took {access_time}ms to access chat (limit: ""5000ms"")"
         
         # Business impact validation
         business_success = [r for r in successful_access if r.get('business_impact') == 'SUCCESS - Revenue protected']
@@ -676,7 +676,7 @@ class WebSocketAuthChatValueProtectionTests:
         regular_time = regular_result['auth_time_ms']
         
         # Enterprise authentication should be fast (absolute requirement)
-        assert enterprise_time < 3000, "fEnterprise auth too slow: {enterprise_time}ms (limit: "3000ms")"
+        assert enterprise_time < 3000, "fEnterprise auth too slow: {enterprise_time}ms (limit: ""3000ms"")"
         
         # Enterprise should receive priority processing indicators
         enterprise_priority = enterprise_result.get('priority_processing', False)

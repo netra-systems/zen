@@ -7,7 +7,7 @@ resolved and the Golden Path chat functionality is operational.
 
 Business Value Justification:
     - Segment: Platform/Internal
-- Business Goal: Restore $"500K" plus ARR chat functionality
+- Business Goal: Restore $""500K"" plus ARR chat functionality
 - Value Impact: Validates complete WebSocket stability and agent execution pipeline
 - Strategic Impact: Ensures staging deployment success and prevents production incidents
 
@@ -274,7 +274,6 @@ class WebSocket1011PreventionTests:
         This addresses the tertiary issue where E2E tests were failing due to
         authentication pattern violations.
 """
-"""
         logger.info(Testing E2E authentication integration...)""
         
         try:
@@ -360,11 +359,11 @@ class WebSocket1011PreventionTests:
             registry.unregister_connection(integration_connection)
             
             test_duration = time.time() - test_start_time
-            logger.info(f"SUCCESS: Complete WebSocket 1011 prevention validated in {test_duration:0."2f"}s)"
+            logger.info(f"SUCCESS: Complete WebSocket 1011 prevention validated in {test_duration:0.""2f""}s)"
             
         except Exception as e:
             test_duration = time.time() - test_start_time
-            pytest.f"ail(fWebSocket 1011 prevention integration failed after {test_duration:0."2f"}s: {e})"
+            pytest.f"ail(fWebSocket 1011 prevention integration failed after {test_duration:0.""2f""}s: {e})"
 
     async def test_golden_path_compatibility_e2e(self):
     """"
@@ -435,7 +434,7 @@ class WebSocket1011BusinessValueValidationTests:
         E2E test that validates chat functionality restoration.
         
         BVJ: Segment: All segments, Goal: Revenue Protection,
-        Impact: Validates $"500K" plus ARR chat functionality is operational
+        Impact: Validates $""500K"" plus ARR chat functionality is operational
 """
 """
         logger.info("Testing chat functionality restoration...)"

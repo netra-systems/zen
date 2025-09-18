@@ -6,7 +6,7 @@ This test suite validates the 5 CRITICAL WebSocket events that enable substantiv
 using REAL authentication as mandated by CLAUDE.md Section 6.
 
 Business Value Justification:
-    - Segment: Platform/Internal (Core Infrastructure) - Protects $"500K" plus ARR chat functionality  
+    - Segment: Platform/Internal (Core Infrastructure) - Protects $""500K"" plus ARR chat functionality  
 - Business Goal: Ensure 100% reliability of critical WebSocket events for AI value delivery
 - Value Impact: Validates event ordering, timing, and content that enables optimal chat UX
 - Strategic Impact: Prevents event sequence failures that cause user frustration and churn
@@ -26,8 +26,8 @@ CLAUDE.md COMPLIANCE:
  PASS:  Focus on business-critical WebSocket infrastructure for chat value delivery
 
 PERFORMANCE REQUIREMENTS:
-    - First event (agent_started): <"100ms" from request
-- Total event sequence: <"45s" for complete agent execution
+    - First event (agent_started): <""100ms"" from request
+- Total event sequence: <""45s"" for complete agent execution
 - Event ordering: Strict sequence validation for optimal UX
 - Event content: Meaningful progress updates for user engagement
 ""
@@ -96,8 +96,8 @@ class AgentEventSequenceValidator:
         self.required_events = ["agent_started, agent_thinking, tool_executing, tool_completed, "agent_completed]""
         
         # Performance thresholds for business viability
-        self.max_first_event_latency_ms = 100  # CLAUDE.md requirement: <"100ms" first event
-        self.max_total_sequence_time_seconds = 45  # CLAUDE.md requirement: <"45s" total
+        self.max_first_event_latency_ms = 100  # CLAUDE.md requirement: <""100ms"" first event
+        self.max_total_sequence_time_seconds = 45  # CLAUDE.md requirement: <""45s"" total
         self.min_progress_transparency_events = 3  # Minimum for good UX
         
         # Business value validation
@@ -192,8 +192,8 @@ class AgentEventSequenceValidator:
         
         CLAUDE.md Requirements:
         - All 5 critical events must be received
-        - First event within "100ms"
-        - Complete sequence within "45s"
+        - First event within ""100ms""
+        - Complete sequence within ""45s""
         - Events must contain meaningful progress updates
         ""
         events_received = set()
@@ -204,7 +204,7 @@ class AgentEventSequenceValidator:
                 # Business requirement: Don't wait indefinitely'
                 elapsed_time = time.time() - sequence_start
                 if elapsed_time > self.max_total_sequence_time_seconds:
-                    print(f[U+23F0] Event collection timeout after {elapsed_time:."1f"}s)""
+                    print(f[U+23F0] Event collection timeout after {elapsed_time:.""1f""}s)""
 
                     break
                 
@@ -255,7 +255,7 @@ class AgentEventSequenceValidator:
                             if self._contains_progress_indicators(event_data):
                                 metrics.progress_update_events += 1
                             
-                            print(f" PASS:  Event: {event_type} ({event_latency_ms:."0f"}ms from request, {sequence_elapsed_ms:."0f"}ms total))"
+                            print(f" PASS:  Event: {event_type} ({event_latency_ms:.""0f""}ms from request, {sequence_elapsed_ms:.""0f""}ms total))"
                         
                         else:
                             # Non-critical event - still record for analysis
@@ -321,9 +321,9 @@ class AgentEventSequenceValidator:
         print(f   - All events received: {metrics.all_required_events_received})
         print(f"   - Correct order: {metrics.events_in_correct_order})"
         print(f   - Performance OK: {metrics.performance_requirements_met})
-        print(f   - First event: {metrics.first_event_latency_ms:."0f"}ms (limit: {self.max_first_event_latency_ms}ms))""
+        print(f   - First event: {metrics.first_event_latency_ms:.""0f""}ms (limit: {self.max_first_event_latency_ms}ms))""
 
-        print(f   - Total time: {metrics.total_sequence_time_ms:."0f"}ms (limit: {self.max_total_sequence_time_seconds * 1000}ms))""
+        print(f   - Total time: {metrics.total_sequence_time_ms:.""0f""}ms (limit: {self.max_total_sequence_time_seconds * 1000}ms))""
 
     
     def _assess_business_value_indicators(self, metrics: EventSequenceMetrics):
@@ -451,7 +451,7 @@ class WebSocketAgentEventSequenceAuthenticatedTests:
         CLAUDE.md Requirements:
          PASS:  MANDATORY JWT authentication (SSOT E2EAuthHelper)
          PASS:  Real WebSocket connection (NO MOCKS)
-         PASS:  Performance: <"100ms" first event, <"45s" total
+         PASS:  Performance: <""100ms"" first event, <""45s"" total
          PASS:  Business value content in events
 ""
         # Business-relevant prompt to trigger comprehensive agent execution
@@ -485,7 +485,7 @@ class WebSocketAgentEventSequenceAuthenticatedTests:
         # Detailed validation logging
         print( PASS:  CLAUDE.md COMPLIANT: Complete agent event sequence validation PASSED)
         print(f CHART:  Events received: {[e['type'] for e in metrics.events_received]})
-        print(f[U+23F1][U+FE0F] Performance: {metrics.first_event_latency_ms:."0f"}ms first, {metrics.total_sequence_time_ms:."0f"}ms total)
+        print(f[U+23F1][U+FE0F] Performance: {metrics.first_event_latency_ms:.""0f""}ms first, {metrics.total_sequence_time_ms:.""0f""}ms total)
         print(f"[U+1F4B0] Business value: {metrics.reasoning_transparency_events + metrics.tool_transparency_events} transparency events)"
     
     @pytest.mark.asyncio
@@ -549,13 +549,13 @@ class WebSocketAgentEventSequenceAuthenticatedTests:
         assert success_rate >= 0.9, "f CHART:  Event sequence success rate {success_rate:.1%} below 90% under load"
         assert performance_rate >= 0.8, "f[U+23F0] Performance compliance rate {performance_rate:.1%} below 80% under load"
         assert business_value_rate >= 0.8, f[U+1F4B0] Business value rate {business_value_rate:.1%} below 80% under load""
-        assert total_execution_time <= 120.0, "f[U+23F0] Total concurrent execution {total_execution_time:."1f"}s exceeded "120s" limit"
+        assert total_execution_time <= 120.0, "f[U+23F0] Total concurrent execution {total_execution_time:.""1f""}s exceeded ""120s"" limit"
         
         print(" PASS:  CLAUDE.md COMPLIANT: Event sequence performance stress test PASSED)"
         print(f CHART:  Success rate: {success_rate:.1%} ({successful_sequences}/{concurrent_sequences})
         print(f[U+23F1][U+FE0F] Performance rate: {performance_rate:.1%})
         print(f[U+1F4B0] Business value rate: {business_value_rate:.1%}")"
-        print(f"[U+1F680] Total execution time: {total_execution_time:."1f"}s)"
+        print(f"[U+1F680] Total execution time: {total_execution_time:.""1f""}s)"
     
     @pytest.mark.asyncio
     async def test_authenticated_event_sequence_order_validation(self):
@@ -601,11 +601,11 @@ class WebSocketAgentEventSequenceAuthenticatedTests:
         
         # Timing quality for UX (events should be reasonably spaced)
         if metrics.average_event_interval_ms:
-            assert metrics.average_event_interval_ms <= 10000, f"[U+23F0] Events too spaced out: {metrics.average_event_interval_ms:."0f"}ms average"
+            assert metrics.average_event_interval_ms <= 10000, f"[U+23F0] Events too spaced out: {metrics.average_event_interval_ms:.""0f""}ms average"
         
         print( PASS:  CLAUDE.md COMPLIANT: Event sequence order validation PASSED)
         print(f CHART:  Event sequence: {event_sequence})
-        print(f[U+23F1][U+FE0F] Average event interval: {metrics.average_event_interval_ms:."0f"}ms if metrics.average_event_interval_ms else "N/A)"
+        print(f[U+23F1][U+FE0F] Average event interval: {metrics.average_event_interval_ms:.""0f""}ms if metrics.average_event_interval_ms else "N/A)"
         print(f[U+1F4AD] Reasoning events: {len(reasoning_events)} (transparency for user engagement))
     
     @pytest.mark.asyncio
@@ -688,7 +688,7 @@ if __name__ == __main__:
         if metrics.events_received:
             print(f\n[U+1F4CB] Event Timeline:")"
             for event in metrics.events_received:
-                print(f"  {event['sequence_position']}. {event['type']} ({event['latency_from_request_ms']:."0f"}ms)"")"
+                print(f"  {event['sequence_position']}. {event['type']} ({event['latency_from_request_ms']:.""0f""}ms)"")"
     
     # Run validation
     asyncio.run(main())

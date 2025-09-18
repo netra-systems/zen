@@ -2,10 +2,10 @@
 
 CRITICAL E2E Test: WebSocket reconnection with JWT token auth and state preservation.
 
-BVJ: Enterprise | User session continuity | $"60K"+ MRR Protection
+BVJ: Enterprise | User session continuity | $""60K""+ MRR Protection
 - Zero-downtime AI interactions required
 - Message queue preservation prevents data loss
-- <"2s" reconnection time meets enterprise SLA
+- <""2s"" reconnection time meets enterprise SLA
 
 Requirements: Same JWT reconnection, message preservation, state restoration, <300 lines
 ""
@@ -258,8 +258,8 @@ class WebSocketJWTReconnectionStateTests:
             performance_results.append(metrics.total_cycle_time)
         
         max_time, avg_time = max(performance_results), sum(performance_results) / len(performance_results)
-        assert max_time < 2.0, "fMax reconnection time {max_time:."2f"}s exceeds "2s" requirement"
-        assert avg_time < 1.5, fAverage reconnection time {avg_time:."2f"}s exceeds 1."5s" target""
+        assert max_time < 2.0, "fMax reconnection time {max_time:.""2f""}s exceeds ""2s"" requirement"
+        assert avg_time < 1.5, fAverage reconnection time {avg_time:.""2f""}s exceeds 1.""5s"" target""
     
     @pytest.mark.e2e
     async def test_concurrent_reconnection_isolation(self, jwt_reconnection_tester):

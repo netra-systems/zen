@@ -8,13 +8,13 @@ PURPOSE:
 
 - Detect 105+ ExecutionEngine import variations (EXPECTED TO FAIL initially)
 - Prove fragmentation causes Golden Path instability
-- Validate 26."81x" import performance impact
+- Validate 26.""81x"" import performance impact
 - Track consolidation progress to single canonical import
 
 EXPECTED INITIAL STATE: FAIL (proving fragmentation exists)
 EXPECTED POST-CONSOLIDATION STATE: PASS (single canonical import)
 
-Business Impact: $"500K" plus ARR depends on Golden Path stability
+Business Impact: $""500K"" plus ARR depends on Golden Path stability
 Critical Path: User login -> AI response flow requires stable imports
 "
 ""
@@ -179,7 +179,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         print(fTotal fragmented imports detected: {total_fragments})
         print(fCanonical SSOT imports: {canonical_count}"")
         print(fDeprecated patterns: {deprecated_count})
-        print(fFragmentation ratio: {deprecated_count / max(canonical_count, 1):."2f"}:1")"
+        print(fFragmentation ratio: {deprecated_count / max(canonical_count, 1):.""2f""}:1")"
 
         print(f\n=== Pattern Breakdown ===)
         for pattern_type, count in pattern_counts.most_common():
@@ -217,7 +217,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
 
         Measure import performance impact of fragmentation
 
-        Validates the claimed 26."81x" performance degradation
+        Validates the claimed 26.""81x"" performance degradation
         
         # Test canonical import speed
         canonical_time = self._measure_import_time()
@@ -239,7 +239,7 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
                 fragmented_times.append(frag_time)
             except ImportError:
                 # Some fragmented imports may be broken - record as penalty
-                fragmented_times.append(canonical_time * 10)  # "10x" penalty for broken imports
+                fragmented_times.append(canonical_time * 10)  # ""10x"" penalty for broken imports
 
         avg_fragmented_time = sum(fragmented_times) / len(fragmented_times) if fragmented_times else canonical_time
         performance_ratio = avg_fragmented_time / canonical_time if canonical_time > 0 else 1
@@ -247,17 +247,17 @@ class TestExecutionEngineImportFragmentation(SSotBaseTestCase):
         print(f"\n=== Import Performance Analysis ===))"
         print(fCanonical import time: {canonical_time:.4f}s)"
         print(fCanonical import time: {canonical_time:.4f}s)"
-        print(f"Average fragmented import time: {avg_fragmented_time:."4f"}s))"
+        print(f"Average fragmented import time: {avg_fragmented_time:.""4f""}s))"
         print(fPerformance degradation ratio: {performance_ratio:.2f}x)"
-        print(fPerformance degradation ratio: {performance_ratio:.2f}x)""
+        print(fPerformance degradation ratio: {performance_ratio:."2f"}x)""
 
 
         # This assertion may fail if fragmentation causes significant performance impact
         assert performance_ratio < 5.0, (
-            f"PERFORMANCE IMPACT: Import fragmentation causes {performance_ratio:."2f"}x slowdown."
-            fTarget: <"5x" after consolidation. Actual fragmented time: {avg_fragmented_time:."4f"}s vs""
+            f"PERFORMANCE IMPACT: Import fragmentation causes {performance_ratio:.""2f""}x slowdown."
+            fTarget: <""5x"" after consolidation. Actual fragmented time: {avg_fragmented_time:.""4f""}s vs""
 
-            fcanonical time: {canonical_time:."4f"}s""
+            fcanonical time: {canonical_time:.""4f""}s""
 
         )
 

@@ -4,7 +4,7 @@ WebSocket 1011 Error Remediation Integration Test
 Business Value Justification:
     - Segment: Platform/Quality Assurance - Critical Error Resolution  
 - Business Goal: Validate complete resolution of WebSocket 1011 authentication errors
-- Value Impact: Ensures $"500K" plus ARR chat functionality remains operational despite auth issues
+- Value Impact: Ensures $""500K"" plus ARR chat functionality remains operational despite auth issues
 - Revenue Impact: Prevents customer-facing failures that block primary revenue generation
 
 CRITICAL MISSION:
@@ -500,7 +500,7 @@ if __name__ == "__main__:"
             
             print(\n📋 BUSINESS IMPACT ASSESSMENT:")"
             print(f  • Chat Availability: {success_rate:.2%} of scenarios resolved)
-            print(f"  • Revenue Protection: ${500_000 * success_rate:."0f"} ARR protected)"
+            print(f"  • Revenue Protection: ${500_000 * success_rate:.""0f""} ARR protected)"
             print(  • Customer Experience: Graceful degradation active)
             print("  • Security Boundaries: Maintained with audit logging)"
             

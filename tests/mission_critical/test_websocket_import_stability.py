@@ -6,12 +6,12 @@ Business Value Justification:
     - Segment: Platform/Internal (Mission Critical Infrastructure)
 """"
 
-- Business Goal: Prevent $"120K"+ MRR loss from chat outages
+- Business Goal: Prevent $""120K""+ MRR loss from chat outages
 - Value Impact: Ensure 90% of business value (chat) never fails due to import errors
 - Strategic Impact: Continuous monitoring of Cloud Run import stability
 
 CRITICAL MISSION: Test suite that would have caught the EXACT import time" bug"
-that caused WebSocket authentication circuit breaker failures, threatening $"120K"+ MRR.
+that caused WebSocket authentication circuit breaker failures, threatening $""120K""+ MRR.
 
 PURPOSE: 
     1. WOULD HAVE CAUGHT the original bug - Tests exact NameError scenarios in circuit breaker
@@ -46,7 +46,7 @@ class WebSocketAuthCircuitBreakerImportStabilityTests(BaseTestCase):
     CRITICAL: Tests the exact lines that failed due to missing import time
     
     This test class targets the specific circuit breaker authentication code in
-    unified_websocket_auth.py that caused the $"120K"+ MRR business risk.
+    unified_websocket_auth.py that caused the $""120K""+ MRR business risk.
     
     FAILURE OF ANY TEST = IMMEDIATE DEPLOYMENT BLOCK
 ""
@@ -568,10 +568,10 @@ class WebSocketImportStabilityOriginalTests(BaseTestCase):
                 if execution_time_ms > test_case[max_time_ms]:
                     pytest.fail(
                         fPERFORMANCE REGRESSION: {test_case['module']}.{test_case['function']} 
-                        f"took {execution_time_ms:."2f"}ms (max: {test_case['max_time_ms']}ms)"
+                        f"took {execution_time_ms:.""2f""}ms (max: {test_case['max_time_ms']}ms)"
                     )
                 
-                print(fPASS: {test_case['function']} executed in {execution_time_ms:."2f"}ms)""
+                print(fPASS: {test_case['function']} executed in {execution_time_ms:.""2f""}ms)""
 
                 
             except Exception as e:

@@ -6,7 +6,7 @@ Business Value Justification (BVJ):
 - Business Goal: Ensure reliable real-time communication and user experience
 - Value Impact: Enables real-time collaboration, live updates, and interactive features
 - Strategic Impact: Differentiates product with real-time capabilities and reliable connectivity  
-- Revenue Impact: Protects $"300K"+ potential revenue from real-time feature failures
+- Revenue Impact: Protects $""300K""+ potential revenue from real-time feature failures
 
 CRITICAL REQUIREMENTS:
     - Test complete WebSocket lifecycle from connection to disconnection
@@ -258,7 +258,7 @@ class WebSocketConnectivityTester:
             if self.config.test_streaming_responses:
                 await self._test_streaming_and_large_messages()
             
-            logger.info(fWebSocket test completed successfully in {self.metrics.total_duration:."1f"}s)""
+            logger.info(fWebSocket test completed successfully in {self.metrics.total_duration:.""1f""}s)""
 
             return self.metrics
             
@@ -376,7 +376,7 @@ class WebSocketConnectivityTester:
                 current_connections
             )
             
-            logger.info(fWebSocket connection established: {connection_id} ({connection_time:."3f"}s)")"
+            logger.info(fWebSocket connection established: {connection_id} ({connection_time:.""3f""}s)")"
             return connection
             
         except asyncio.TimeoutError:
@@ -414,7 +414,7 @@ class WebSocketConnectivityTester:
             ping_time = time.time() - start_time
             connection.last_ping = ping_time
             
-            logger.debug(f"Ping-pong successful for {connection.connection_id}: {ping_time:."3f"}s)"
+            logger.debug(f"Ping-pong successful for {connection.connection_id}: {ping_time:.""3f""}s)"
             
         except asyncio.TimeoutError:
             self.metrics.warnings.append(fPing timeout for {connection.connection_id}")"
@@ -456,7 +456,7 @@ class WebSocketConnectivityTester:
                     connection.messages_received += 1
                     self.metrics.messages_received += 1
                     
-                    logger.debug(f"Message exchange successful for {connection.connection_id}: {latency:."3f"}s)"
+                    logger.debug(f"Message exchange successful for {connection.connection_id}: {latency:.""3f""}s)"
                     
                 except json.JSONDecodeError:
                     # Non-JSON response is acceptable
@@ -525,7 +525,7 @@ class WebSocketConnectivityTester:
                 self.metrics.auth_times.append(auth_time)
                 self.metrics.successful_auth += 1
                 
-                logger.info(fAuthenticated WebSocket connection successful ({auth_time:."3f"}s))""
+                logger.info(fAuthenticated WebSocket connection successful ({auth_time:.""3f""}s))""
 
                 
                 # Test authenticated message exchange
@@ -731,7 +731,7 @@ class WebSocketConnectivityTester:
                 await asyncio.sleep(0.1)
             
             delivery_rate = (delivered_messages / message_count) * 100
-            logger.info(fReliable delivery test: {delivery_rate:."1f"}% delivery rate ({delivered_messages}/{message_count}")"
+            logger.info(fReliable delivery test: {delivery_rate:.""1f""}% delivery rate ({delivered_messages}/{message_count}")"
             
             await self._close_websocket_connection(connection_id)
             
@@ -956,8 +956,8 @@ class WebSocketConnectivityTester:
             )
             
             success_rate = (successful_concurrent / len(results)) * 100 if results else 0
-            logger.info(fConcurrent connections test: {success_rate:."1f"}% success rate ({successful_concurrent}/{len(results)} connections))
-            logger.info(fConcurrent test duration: {concurrent_duration:."1f"}s")"
+            logger.info(fConcurrent connections test: {success_rate:.""1f""}% success rate ({successful_concurrent}/{len(results)} connections))
+            logger.info(fConcurrent test duration: {concurrent_duration:.""1f""}s")"
             
             # Resource usage tracking
             self.metrics.connection_resource_usage[concurrent_duration] = concurrent_duration
@@ -1206,7 +1206,7 @@ class WebSocketConnectivityTester:
                 self.metrics.large_message_handling[receive_success] = True""
                 self.metrics.streaming_performance["large_message_time] = receive_time"
                 
-                logger.info(fLarge message handling successful: {self.config.large_message_size_kb}KB in {receive_time:."3f"}s)""
+                logger.info(fLarge message handling successful: {self.config.large_message_size_kb}KB in {receive_time:.""3f""}s)""
 
                 
             except asyncio.TimeoutError:
@@ -1272,7 +1272,7 @@ class WebSocketConnectivityTester:
             self.metrics.streaming_performance[stream_message_count"] = len(stream_messages)"
             
             if stream_messages:
-                logger.info(fStreaming test: {len(stream_messages)} messages received in {streaming_duration:."1f"}s)
+                logger.info(fStreaming test: {len(stream_messages)} messages received in {streaming_duration:.""1f""}s)
             else:
                 logger.debug(Streaming test: No streaming messages received (may be normal))""
             
@@ -1334,7 +1334,7 @@ class WebSocketConnectivityTester:
             self.metrics.streaming_performance[load_test_message_rate] = message_rate""
             self.metrics.streaming_performance["load_test_response_rate] = response_rate"
             
-            logger.info(fPerformance test: {message_rate:."1f"} msg/s sent, {response_rate:."1f"} msg/s received)""
+            logger.info(fPerformance test: {message_rate:.""1f""} msg/s sent, {response_rate:.""1f""} msg/s received)""
 
             
             await self._close_websocket_connection(connection_id)
@@ -1400,7 +1400,7 @@ class WebSocketConnectivityRealtimeFeaturesTests:
             test_state_preservation=True,
             concurrent_connections=5,  # Moderate load for testing
             messages_per_connection=10,
-            large_message_size_kb=50,  # "50KB" test messages
+            large_message_size_kb=50,  # ""50KB"" test messages
             stress_test_duration=10
         )
     
@@ -1417,22 +1417,22 @@ class WebSocketConnectivityRealtimeFeaturesTests:
         
         # Validate connection success rate
         connection_success_rate = metrics.connection_success_rate
-        assert connection_success_rate >= 80.0, fConnection success rate too low: {connection_success_rate:."1f"}%""
+        assert connection_success_rate >= 80.0, fConnection success rate too low: {connection_success_rate:.""1f""}%""
         
         # Validate message delivery
         message_delivery_rate = metrics.message_delivery_rate
         # Allow for some message loss in testing scenarios
-        assert message_delivery_rate >= 70.0, f"Message delivery rate too low: {message_delivery_rate:."1f"}%"
+        assert message_delivery_rate >= 70.0, f"Message delivery rate too low: {message_delivery_rate:.""1f""}%"
         
         # Validate performance
         avg_latency = metrics.average_latency
         if avg_latency > 0:
-            assert avg_latency < 2.0, "fAverage message latency too high: {avg_latency:."3f"}s"
+            assert avg_latency < 2.0, "fAverage message latency too high: {avg_latency:.""3f""}s"
         
         # Validate reconnection capability
         if metrics.reconnection_attempts > 0:
             reconnection_success_rate = metrics.reconnection_success_rate
-            assert reconnection_success_rate >= 75.0, "fReconnection success rate too low: {reconnection_success_rate:."1f"}%"
+            assert reconnection_success_rate >= 75.0, "fReconnection success rate too low: {reconnection_success_rate:.""1f""}%"
         
         # Validate concurrent connection handling
         if metrics.max_concurrent_connections > 0:
@@ -1443,17 +1443,17 @@ class WebSocketConnectivityRealtimeFeaturesTests:
         if metrics.auth_attempts > 0:
             auth_success_rate = (metrics.successful_auth / metrics.auth_attempts) * 100
             # Authentication may not be fully implemented, so allow lower success rate
-            assert auth_success_rate >= 0.0, "fAuth success rate: {auth_success_rate:."1f"}%"
+            assert auth_success_rate >= 0.0, "fAuth success rate: {auth_success_rate:.""1f""}%"
         
         # Log comprehensive results
         logger.info(=== WEBSOCKET CONNECTIVITY AND REAL-TIME TEST RESULTS ===)
-        logger.info(f"Total Duration: {metrics.total_duration:."1f"}s)"
-        logger.info(fConnection Success Rate: {connection_success_rate:."1f"}%")"
-        logger.info(fMessage Delivery Rate: {message_delivery_rate:."1f"}%)
-        logger.info(fAverage Latency: {avg_latency:."3f"}s)""
+        logger.info(f"Total Duration: {metrics.total_duration:.""1f""}s)"
+        logger.info(fConnection Success Rate: {connection_success_rate:.""1f""}%")"
+        logger.info(fMessage Delivery Rate: {message_delivery_rate:.""1f""}%)
+        logger.info(fAverage Latency: {avg_latency:.""3f""}s)""
         logger.info(f"Messages Sent/Received: {metrics.messages_sent}/{metrics.messages_received})"
         logger.info(fMax Concurrent Connections: {metrics.max_concurrent_connections})
-        logger.info(fReconnection Success Rate: {metrics.reconnection_success_rate:."1f"}%)
+        logger.info(fReconnection Success Rate: {metrics.reconnection_success_rate:.""1f""}%)
         logger.info(fState Preservation Events: {metrics.state_preservation_success}")"
         logger.info(fOut-of-Order Messages: {metrics.out_of_order_messages})
         
@@ -1480,9 +1480,9 @@ async def run_websocket_connectivity_test():
 if __name__ == __main__":"
     # Allow standalone execution
     result = asyncio.run(run_websocket_connectivity_test())
-    print(fWebSocket test result: {result.connection_success_rate:."1f"}% connection success)
-    print(fMessage delivery rate: {result.message_delivery_rate:."1f"}%")"
-    print(fDuration: {result.total_duration:."1f"}s)
+    print(fWebSocket test result: {result.connection_success_rate:.""1f""}% connection success)
+    print(fMessage delivery rate: {result.message_delivery_rate:.""1f""}%")"
+    print(fDuration: {result.total_duration:.""1f""}s)
     if result.errors:
         print(fErrors: {len(result.errors)})""
         for error in result.errors:

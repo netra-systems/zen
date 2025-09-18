@@ -694,7 +694,7 @@ registration_data = {"email": "formatted_string",, "password": "SecureOnboarding
         successful_users = sum(1 for r in results if r.get("success, False))"
         avg_duration = statistics.mean([r.get("duration, 0) for r in results]) if results else 0"
 
-                    # Performance criteria: >70% success rate, <"30s" average duration
+                    # Performance criteria: >70% success rate, <""30s"" average duration
         success_rate = successful_users / len(results) if results else 0
         performance_acceptable = avg_duration < 30.0
 

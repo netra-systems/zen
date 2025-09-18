@@ -3,7 +3,7 @@
 
 Business Value Justification:
     - Segment: Platform/Internal (Mission Critical Infrastructure)
-- Business Goal: Provide real-time monitoring and analysis of $"500K" plus ARR chat functionality
+- Business Goal: Provide real-time monitoring and analysis of $""500K"" plus ARR chat functionality
 - Value Impact: Enables proactive detection of WebSocket issues before they impact users
 - Strategic Impact: Maintains chat quality that drives customer retention and conversions
 
@@ -214,7 +214,7 @@ class RealTimeEventMonitor:
         if metrics.latency_ms > self.alert_thresholds['max_latency_ms']:
             alert = {
                 'type': 'HIGH_LATENCY',
-                'message': f'Event latency {metrics.latency_ms:."1f"}ms exceeds threshold {self.alert_thresholds["max_latency_ms]}ms',"
+                'message': f'Event latency {metrics.latency_ms:.""1f""}ms exceeds threshold {self.alert_thresholds["max_latency_ms]}ms',"
                 'event_type': metrics.event_type,
                 'thread_id': metrics.thread_id,
                 'timestamp': current_time,
@@ -238,7 +238,7 @@ class RealTimeEventMonitor:
         if len(self.all_events) % 10 == 0 and self.performance_window.events_per_second < self.alert_thresholds['min_events_per_second']:
             alert = {
                 'type': 'LOW_THROUGHPUT',
-                'message': f'Events per second {self.performance_window.events_per_second:."2f"} below threshold {self.alert_thresholds[min_events_per_second]}',""
+                'message': f'Events per second {self.performance_window.events_per_second:.""2f""} below threshold {self.alert_thresholds[min_events_per_second]}',""
 
                 'timestamp': current_time,
                 'severity': 'WARNING'
@@ -351,7 +351,7 @@ class EventTimelineVisualizer:
         fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(15, 12))
         
         # Events over time
-        event_counts = df.groupby([df['datetime'].dt.floor('"1s"'), 'event_type'].size().unstack(fill_value=0)
+        event_counts = df.groupby([df['datetime'].dt.floor('""1s""'), 'event_type'].size().unstack(fill_value=0)
         event_counts.plot(kind='area', ax=ax1, alpha=0.7)
         ax1.set_title(f'{title} - Events Over Time')
         ax1.set_ylabel('Events per Second')
@@ -359,13 +359,13 @@ class EventTimelineVisualizer:
         
         # Latency over time
         ax2.scatter(df['datetime'], df['latency_ms'], c=df['latency_ms'], cmap='RdYlBu_r', alpha=0.6)
-        ax2.axhline(y=100, color='r', linestyle='--', alpha=0.7, label='"100ms" threshold')
+        ax2.axhline(y=100, color='r', linestyle='--', alpha=0.7, label='""100ms"" threshold')
         ax2.set_title('Event Latency Over Time')
         ax2.set_ylabel('Latency (ms)')
         ax2.legend()
         
         # Validation results
-        validation_counts = df.groupby([df['datetime'].dt.floor('"5s"'), 'validation_result'].size().unstack(fill_value=0)
+        validation_counts = df.groupby([df['datetime'].dt.floor('""5s""'), 'validation_result'].size().unstack(fill_value=0)
         validation_counts.plot(kind='bar', ax=ax3, stacked=True, alpha=0.8)
         ax3.set_title('Event Validation Results')
         ax3.set_ylabel('Event Count')
@@ -399,14 +399,14 @@ class EventTimelineVisualizer:
         # 1. Event distribution pie chart
         ax1 = plt.subplot(3, 3, 1)
         event_type_counts = df['event_type'].value_counts()
-        ax1.pie(event_type_counts.values, labels=event_type_counts.index, autopct='%1."1f"%%')""
+        ax1.pie(event_type_counts.values, labels=event_type_counts.index, autopct='%1.""1f""%%')""
 
         ax1.set_title('Event Type Distribution')
         
         # 2. Latency histogram
         ax2 = plt.subplot(3, 3, 2)
         ax2.hist(df['latency_ms'], bins=50, alpha=0.7, edgecolor='black')
-        ax2.axvline(x=100, color='r', linestyle='--', label='"100ms" threshold')
+        ax2.axvline(x=100, color='r', linestyle='--', label='""100ms"" threshold')
         ax2.set_title('Latency Distribution')
         ax2.set_xlabel('Latency (ms)')
         ax2.legend()
@@ -436,7 +436,7 @@ class EventTimelineVisualizer:
         
         # 5. Thread activity heatmap
         ax5 = plt.subplot(3, 3, 5)
-        thread_activity = df.groupby(['thread_id', df['datetime'].dt.floor('"5s"')].size().unstack(fill_value=0)
+        thread_activity = df.groupby(['thread_id', df['datetime'].dt.floor('""5s""')].size().unstack(fill_value=0)
         if len(thread_activity) > 0:
             im = ax5.imshow(thread_activity.values, aspect='auto', cmap='YlOrRd')
             ax5.set_title('Thread Activity Heatmap')
@@ -986,8 +986,8 @@ class WebSocketMonitoringOrchestrator:
         logger.info(f CHART:  EVENT METRICS:)"
         logger.info(f CHART:  EVENT METRICS:)"
         logger.info(f"  Total Events: {session_summary.get('total_events', 0)})"
-        logger.info(f  Success Rate: {session_summary.get('success_rate_percent', 0):."1f"}%)
-        logger.info(f  Avg Latency: {session_summary.get('recent_performance', {}.get('avg_latency_ms', 0):."1f"}ms)
+        logger.info(f  Success Rate: {session_summary.get('success_rate_percent', 0):.""1f""}%)
+        logger.info(f  Avg Latency: {session_summary.get('recent_performance', {}.get('avg_latency_ms', 0):.""1f""}ms)
         logger.info(f  Active Users: {session_summary.get('active_users', 0)}")"
         logger.info(f  Active Threads: {session_summary.get('active_threads', 0)})
         

@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
     - Segment: Platform/Internal
 - Business Goal: System Stability & User Safety  
 - Value Impact: Ensures replacement ExecutionEngine properly isolates users and prevents data leakage
-- Strategic Impact: $"500K" plus ARR protection through proper multi-user system implementation
+- Strategic Impact: $""500K"" plus ARR protection through proper multi-user system implementation
 
 PURPOSE: These tests should PASS to prove UserExecutionEngine is the correct SSOT replacement.
 These validate the solution works correctly after SSOT remediation.
@@ -337,7 +337,7 @@ class UserExecutionEngineSSotValidationTests(SSotAsyncTestCase):
                 # Add some execution state to test cleanup
                 if hasattr(engine, '_execution_state'):
                     engine._execution_state = {
-                        'user_data': f'data_for_user_{i}' * 100,  # ~"1KB" per user
+                        'user_data': f'data_for_user_{i}' * 100,  # ~""1KB"" per user
                         'execution_history': [f'step_{j}' for j in range(50)]
                     }
                 

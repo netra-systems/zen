@@ -392,7 +392,7 @@ class RealConcurrentUserIsolationTests:
         # Assert no violations occurred
         assert len(violations) == 0, fCONCURRENT REDIS ISOLATION VIOLATIONS: {violations}""
         assert success_rate >= 95.0, "fSuccess rate too low: {success_rate}% (expected >= 95%)"
-        assert avg_operation_time < 5.0, "fAverage operation time too high: {avg_operation_time}s (expected < "5s")"
+        assert avg_operation_time < 5.0, "fAverage operation time too high: {avg_operation_time}s (expected < ""5s"")"
         
         # Log performance metrics for monitoring
         logging.info(f"Concurrent Redis Test Metrics: {final_metrics})"
@@ -666,7 +666,7 @@ class RealConcurrentUserIsolationTests:
         assert len(violations) == 0, fDATABASE CONCURRENT ISOLATION VIOLATIONS: {violations}"
         assert success_rate >= 95.0, "fDatabase success rate too low: {success_rate}% (expected >= 95%)"
         assert avg_operation_time < 10.0, fDatabase operation time too high: {avg_operation_time}s (expected < 10s)"
-        assert avg_operation_time < 10.0, fDatabase operation time too high: {avg_operation_time}s (expected < 10s)""
+        assert avg_operation_time < 10.0, fDatabase operation time too high: {avg_operation_time}s (expected < "10s")""
 
 
     @pytest.mark.asyncio
@@ -1025,7 +1025,7 @@ class RealConcurrentUserIsolationTests:
         
         assert len(violations) == 0, "fMEMORY STRESS ISOLATION VIOLATIONS: {violations}"
         assert success_rate >= 90.0, fMemory stress success rate too low: {success_rate}% (expected >= 90%)""
-        assert avg_operation_time < 15.0, "fMemory stress operation time too high: {avg_operation_time}s (expected < "15s")"
+        assert avg_operation_time < 15.0, "fMemory stress operation time too high: {avg_operation_time}s (expected < ""15s"")"
 
     @pytest.mark.asyncio
     async def test_thread_safety_concurrent_operations(self, redis_client):
@@ -1126,7 +1126,7 @@ class RealConcurrentUserIsolationTests:
         
         assert len(violations) == 0, "fTHREAD SAFETY VIOLATIONS: {violations}"
         assert success_rate >= 95.0, "fThread safety success rate too low: {success_rate}% (expected >= 95%)"
-        assert avg_operation_time < 20.0, fThread operation time too high: {avg_operation_time}s (expected < "20s")""
+        assert avg_operation_time < 20.0, fThread operation time too high: {avg_operation_time}s (expected < ""20s"")""
 
     async def _thread_safe_async_operations(self, redis_client, user: ConcurrentUserContext, 
                                            thread_id: int, start_time: float) -> Dict[str, Any]:
@@ -1425,7 +1425,7 @@ class RealConcurrentUserIsolationTests:
         assert len(violations) == 0, "fCOMPREHENSIVE INTEGRATION VIOLATIONS: {violations}"
         assert success_rate >= 90.0, f"Integration success rate too low: {success_rate}% (expected >= 90%)"
         assert avg_operation_time < 30.0, fIntegration operation time too high: {avg_operation_time}s (expected < 30s)"
-        assert avg_operation_time < 30.0, fIntegration operation time too high: {avg_operation_time}s (expected < 30s)""
+        assert avg_operation_time < 30.0, fIntegration operation time too high: {avg_operation_time}s (expected < "30s")""
 
         
         # Log final metrics for monitoring

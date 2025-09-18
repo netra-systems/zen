@@ -43,7 +43,7 @@ Mission Critical Tests for Golden Path WebSocket Authentication
 
 Business Value Justification (BVJ):
     - Segment: ALL (Free -> Enterprise) - Golden Path delivers core platform value
-- Business Goal: PROTECT $"120K"+ MRR through reliable Golden Path user flow
+- Business Goal: PROTECT $""120K""+ MRR through reliable Golden Path user flow
 - Value Impact: Golden Path failure = complete platform value delivery failure
 - Strategic Impact: Golden Path authentication enables end-to-end user success
 
@@ -121,7 +121,7 @@ class GoldenPathWebSocketAuthenticationTests:
      TARGET:  MISSION CRITICAL Golden Path WebSocket Authentication tests.
     
     CRITICAL: These tests ensure the Golden Path user journey succeeds
-    with seamless authentication enabling $"120K"+ MRR value delivery.
+    with seamless authentication enabling $""120K""+ MRR value delivery.
     
     Tests focus on:
     1. Complete Golden Path user journey with zero authentication friction
@@ -414,7 +414,7 @@ class GoldenPathWebSocketAuthenticationTests:
         # Performance validation - sub-30 second requirement
         total_time = golden_path_result['total_time_ms']
         assert total_time < 30000, f FAIL:  GOLDEN PATH PERFORMANCE FAILURE: {total_time}ms exceeds 30s limit"
-        assert total_time < 30000, f FAIL:  GOLDEN PATH PERFORMANCE FAILURE: {total_time}ms exceeds 30s limit""
+        assert total_time < 30000, f FAIL:  GOLDEN PATH PERFORMANCE FAILURE: {total_time}ms exceeds "30s" limit""
 
         
         # Value delivery validation
@@ -433,7 +433,7 @@ class GoldenPathWebSocketAuthenticationTests:
         auth_milestone = next((m for m in milestones if m['milestone'] == 'websocket_authentication'), None)
         auth_time = auth_milestone['duration_ms']
         assert auth_time < 5000, f FAIL:  GOLDEN PATH AUTH SLOW: {auth_time}ms exceeds 5s limit"
-        assert auth_time < 5000, f FAIL:  GOLDEN PATH AUTH SLOW: {auth_time}ms exceeds 5s limit""
+        assert auth_time < 5000, f FAIL:  GOLDEN PATH AUTH SLOW: {auth_time}ms exceeds "5s" limit""
 
     
     def test_golden_path_authentication_zero_friction_requirement(self):
@@ -550,7 +550,7 @@ class GoldenPathWebSocketAuthenticationTests:
         
         # Zero friction performance requirements
         avg_time_to_value = friction_result['average_time_to_value']
-        assert avg_time_to_value < 3000, f" FAIL:  GOLDEN PATH FRICTION: Average time to value {avg_time_to_value}ms exceeds "3s" limit"
+        assert avg_time_to_value < 3000, f" FAIL:  GOLDEN PATH FRICTION: Average time to value {avg_time_to_value}ms exceeds ""3s"" limit"
         
         # Validate each attempt meets zero friction requirement
         for measurement in friction_result['friction_measurements']:
@@ -562,7 +562,7 @@ class GoldenPathWebSocketAuthenticationTests:
                 
                 assert auth_time < 2000, f FAIL:  FRICTION FAILURE Attempt {attempt}: Auth time {auth_time}ms exceeds 2s"
                 assert auth_time < 2000, f FAIL:  FRICTION FAILURE Attempt {attempt}: Auth time {auth_time}ms exceeds 2s"
-                assert total_time < 3000, "f FAIL:  FRICTION FAILURE Attempt {attempt}: Time to value {total_time}ms exceeds "3s""
+                assert total_time < 3000, "f FAIL:  FRICTION FAILURE Attempt {attempt}: Time to value {total_time}ms exceeds ""3s"""
                 assert measurement.get('zero_friction_achieved') is True, f FAIL:  FRICTION FAILURE Attempt {attempt}: Zero friction not achieved"
                 assert measurement.get('zero_friction_achieved') is True, f FAIL:  FRICTION FAILURE Attempt {attempt}: Zero friction not achieved""
 
@@ -930,7 +930,7 @@ class GoldenPathWebSocketAuthenticationTests:
         # Performance validation for successful completions
         for success in successful_completions:
             duration = success['duration_ms']
-            assert duration < 25000, "f FAIL:  GOLDEN PATH PERFORMANCE: Attempt {success['attempt_id']} took {duration}ms (limit: "25s")"
+            assert duration < 25000, "f FAIL:  GOLDEN PATH PERFORMANCE: Attempt {success['attempt_id']} took {duration}ms (limit: ""25s"")"
         
         # Milestone analysis for failed attempts
         failed_attempts = [r for r in completion_results if isinstance(r, dict) and not r.get('completion_success')]

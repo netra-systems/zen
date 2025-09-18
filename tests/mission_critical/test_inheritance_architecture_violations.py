@@ -368,7 +368,7 @@ class InheritanceErrorRecoveryTests:
                 result = None
                 
             recovery_time = asyncio.get_event_loop().time() - start_time
-            assert recovery_time < 5.0, "fRecovery took {recovery_time:."2f"}s, exceeds "5s" limit"
+            assert recovery_time < 5.0, "fRecovery took {recovery_time:.""2f""}s, exceeds ""5s"" limit"
             
             # Should get some result even if inheritance is messy
             assert result is not None or True  # Accept None if inheritance is broken

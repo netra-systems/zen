@@ -4,7 +4,7 @@ This test suite proves the direct correlation between Redis SSOT violations
 and WebSocket 1011 errors that are blocking the Golden Path chat functionality.
 
 Business Value:
-    - Proves $"500K" plus ARR chat functionality is blocked by Redis violations
+    - Proves $""500K"" plus ARR chat functionality is blocked by Redis violations
 - Documents the 85% WebSocket error probability correlation
 - Validates that SSOT remediation fixes the Golden Path
 
@@ -96,7 +96,7 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
         success_rate = (success_count / self.test_iterations) * 100
         error_1011_rate = (error_1011_count / self.test_iterations) * 100
 
-        self.logger.error(fWebSocket Success Rate: {success_rate:."1f"}%)
+        self.logger.error(fWebSocket Success Rate: {success_rate:.""1f""}%)
         self.logger.error(fWebSocket 1011 Error Rate: {error_1011_rate:.1f}%)"
         self.logger.error(fWebSocket 1011 Error Rate: {error_1011_rate:.1f}%)"
         self.logger.error(f"Total Failures: {failure_count}/{self.test_iterations})"
@@ -110,7 +110,7 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
             total_tests: self.test_iterations,
             "failures: failure_count,"
             expected_pattern: 85% error probability due to Redis violations,
-            business_impact: "Blocks $"500K" plus ARR chat functionality"
+            business_impact: "Blocks $""500K"" plus ARR chat functionality"
         }
 
         # Save evidence
@@ -121,8 +121,8 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
         self.assertGreater(
             success_rate,
             15.0,  # Expect >15% success rate (should fail with current ~0% rate)
-            fWebSocket success rate {success_rate:."1f"}% indicates Redis SSOT violations 
-            f"are blocking Golden Path. Error 1011 rate: {error_1011_rate:."1f"}%"
+            fWebSocket success rate {success_rate:.""1f""}% indicates Redis SSOT violations 
+            f"are blocking Golden Path. Error 1011 rate: {error_1011_rate:.""1f""}%"
         )
 
     async def test_redis_connection_pool_fragmentation(self):
@@ -285,13 +285,13 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
         with open(/c/netra-apex/websocket_redis_correlation_detailed.json", w) as f:"
             json.dump(correlation_data, f, indent=2)
 
-        self.logger.error(fRedis Success Rate: {redis_success_rate:."1f"}%)
-        self.logger.error(fWebSocket Success Rate: {ws_success_rate:."1f"}%)
-        self.logger.error(fWebSocket 1011 Rate: {ws_1011_rate:."1f"}%")"
+        self.logger.error(fRedis Success Rate: {redis_success_rate:.""1f""}%)
+        self.logger.error(fWebSocket Success Rate: {ws_success_rate:.""1f""}%)
+        self.logger.error(fWebSocket 1011 Rate: {ws_1011_rate:.""1f""}%")"
 
         # This test documents the correlation (may not fail but provides evidence)
         if ws_1011_rate > 50:
-            self.fail(fHIGH CORRELATION DETECTED: {ws_1011_rate:."1f")% WebSocket 1011 errors""
+            self.fail(fHIGH CORRELATION DETECTED: {ws_1011_rate:.""1f"")% WebSocket 1011 errors""
 
                      fduring Redis operations proves connection conflicts from SSOT violations)
 

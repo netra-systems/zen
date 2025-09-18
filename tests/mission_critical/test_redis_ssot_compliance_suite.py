@@ -6,7 +6,7 @@ BUSINESS VALUE JUSTIFICATION:
     - Segment: Platform/Internal
 - Business Goal: Chat Functionality Stability (90% of platform value)
 - Value Impact: Prevents WebSocket 1011 errors that break chat reliability
-- Strategic Impact: Protects $"500K" plus ARR by ensuring Redis operations don't conflict'
+- Strategic Impact: Protects $""500K"" plus ARR by ensuring Redis operations don't conflict'
 
 This test suite validates that:
     1. SSOT Redis Manager is the only active Redis implementation
@@ -213,7 +213,7 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
         session_data = {
             user_id: test_user,
             "permissions: [read, write],"
-            created_at: "2025-9-16T10:0:"00Z""
+            created_at: "2025-9-16T10:0:""00Z"""
         }
         
         # Test session storage

@@ -2,18 +2,18 @@
 Integration Test: SSOT Auth-WebSocket-Agent Golden Path
 ISSUE #1176 REMEDIATION: Comprehensive validation of unified authentication pathway
 
-Business Impact: $500K+ ARR - Validates complete user login -> AI response flow
+Business Impact: $"500K" plus ARR - Validates complete user login -> AI response flow
 Technical Impact: Integration test for SSOT auth consolidation and Golden Path restoration
 
 GOLDEN PATH FLOW TESTED:
-1. User authentication via SSOT pathway
+    1. User authentication via SSOT pathway
 2. WebSocket connection with jwt-auth subprotocol
 3. Agent request submission 
 4. All 5 critical WebSocket events delivered
 5. Complete AI response received
 
 SUCCESS CRITERIA:
-- Authentication succeeds via jwt-auth subprotocol (primary method)
+    - Authentication succeeds via jwt-auth subprotocol (primary method)
 - WebSocket connection established with SSOT auth
 - Agent events: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
 - Complete flow works under 30 seconds
@@ -114,7 +114,7 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             pytest.fail(fX SSOT jwt-auth subprotocol authentication FAILED: {str(e)}")"
     
     async def test_ssot_auth_authorization_header_fallback(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test SSOT authentication using Authorization header as fallback method.
         
         ISSUE #1176 REMEDIATION: Validates Authorization header still works when not stripped.
@@ -216,7 +216,8 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             pytest.fail(fX SSOT query parameter authentication FAILED: {str(e)})
     
     async def test_ssot_auth_e2e_bypass_testing_environment(self):
-    """
+    """"
+
         Test SSOT authentication E2E bypass for testing environments.
         
         ISSUE #1176 REMEDIATION: Validates E2E bypass works in test environments.
@@ -353,7 +354,7 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
             performance_success = total_duration < 45.0  # Under 45 seconds
             
             logger.info(f"🏆 GOLDEN PATH RESULTS:)"
-            logger.info(f   Duration: {total_duration:.1f}s")"
+            logger.info(f   Duration: {total_duration:."1f"}s")"
             logger.info(f   Auth Success: {auth_success})
             logger.info(f   WebSocket Success: {websocket_success})""
             logger.info(f"   Events Received: {len(received_events)}/{len(required_events)} ({list(received_events)})"
@@ -366,7 +367,7 @@ class TestSSotAuthWebSocketGoldenPath(SSotAsyncTestCase):
                 if not response_success:
                     logger.warning(fWARNING️ Agent response incomplete but core flow functional)
                 if not performance_success:
-                    logger.warning(fWARNING️ Performance slower than target ({total_duration:.1f}s > 45s))
+                    logger.warning(fWARNING️ Performance slower than target ({total_duration:."1f"}s > "45s"))
             else:
                 failure_reasons = []
                 if not auth_success:
@@ -469,5 +470,6 @@ class TestSSotAuthMethodPriority(SSotAsyncTestCase):
 
 if __name__ == __main__":"
     pytest.main([__file__, "-v)"
-"""
+""""
+
 )))))))))

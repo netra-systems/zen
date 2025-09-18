@@ -20,7 +20,7 @@ Business Value Justification (BVJ):
     - Segment: Enterprise/Platform - Auth consistency critical for security
 - Business Goal: Security/Compliance - Consistent auth across all services  
 - Value Impact: Prevents auth tokens working in one service but not another
-- Revenue Impact: Auth inconsistencies could lose enterprise customers ($"200K"+ ARR)
+- Revenue Impact: Auth inconsistencies could lose enterprise customers ($""200K""+ ARR)
 
 CRITICAL JWT CONSISTENCY REQUIREMENT:
     ALL services MUST use identical JWT validation logic through UnifiedAuthInterface.

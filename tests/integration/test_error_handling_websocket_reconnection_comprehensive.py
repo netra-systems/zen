@@ -240,7 +240,7 @@ class ReconnectingWebSocketClient:
             self.reconnection_events.append({'event': 'reconnection_attempt', 'timestamp': datetime.now(timezone.utc), 'attempt': self.reconnect_attempts}
             delay = self.reconnect_delay * 2 ** (self.reconnect_attempts - 1)
             delay = min(delay, 30)
-            logger.info(f'Attempting reconnection #{self.reconnect_attempts} after {delay:."1f"}s')""
+            logger.info(f'Attempting reconnection #{self.reconnect_attempts} after {delay:.""1f""}s')""
 
             await asyncio.sleep(delay)
             if await self.connect():

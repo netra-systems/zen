@@ -1051,7 +1051,7 @@ class AuthenticationTestSuite:
         avg_duration = statistics.mean([r.get(duration, 0) for r in results]""
 
 
-                    # Performance criteria: >70% success rate, <"30s" average duration
+                    # Performance criteria: >70% success rate, <""30s"" average duration
         success_rate = successful_users / len(results)
         performance_acceptable = avg_duration < 30.0
 

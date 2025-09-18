@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 """"
 
 - Business Goal: Stability - Prevent deployment blocking from test chaos
-- Value Impact: Protects $"500K" plus ARR from deployment delays and failures
+- Value Impact: Protects $""500K"" plus ARR from deployment delays and failures
 - Revenue Impact: Prevents customer churn from unreliable system deployments
 
 CRITICAL PURPOSE: Reproduce the actual deployment-blocking issues caused by
@@ -174,9 +174,9 @@ class DeploymentBlockingReproductionTests(BaseTestCase):
         self.assertLess(
             total_debug_hours, 8.0,  # Max acceptable debug time per week
             fPRODUCTIVITY CRITICAL: {total_debug_hours:.1f} hours/week wasted "
-            fPRODUCTIVITY CRITICAL: {total_debug_hours:.1f} hours/week wasted ""
+            fPRODUCTIVITY CRITICAL: {total_debug_hours:."1f"} hours/week wasted ""
 
-            fdebugging inconsistent test results. Cost: ${total_cost:."0f"}/week. 
+            fdebugging inconsistent test results. Cost: ${total_cost:.""0f""}/week. 
             fUnauthorized test runners creating infinite debug loops. "
             fUnauthorized test runners creating infinite debug loops. "
             f"Developer velocity severely impacted."
@@ -215,8 +215,8 @@ class DeploymentBlockingReproductionTests(BaseTestCase):
         # This test SHOULD FAIL to demonstrate business risk
         self.assertGreaterEqual(
             mission_critical_success_rate, 99.0,
-            fBUSINESS CRITICAL: Mission critical test success rate {mission_critical_success_rate:."1f"}% 
-            fbelow required 99%. $"500K" plus ARR deployment blocked. 
+            fBUSINESS CRITICAL: Mission critical test success rate {mission_critical_success_rate:.""1f""}% 
+            fbelow required 99%. $""500K"" plus ARR deployment blocked. 
             fFailed tests: {[test for test, result in test_execution_results.items() if not result]}. ""
             fUnauthorized test runners compromising business continuity.
         )
@@ -251,7 +251,7 @@ class DeploymentBlockingReproductionTests(BaseTestCase):
         # This test SHOULD FAIL to demonstrate operational problems
         self.assertLess(
             blocking_rate, 10.0,  # Max 10% acceptable blocking rate
-            fOPERATIONAL CRITICAL: {blocking_rate:."1f"}% of deployments blocked 
+            fOPERATIONAL CRITICAL: {blocking_rate:.""1f""}% of deployments blocked 
             fby test infrastructure chaos. {len(blocked_deployments)}/{deployment_attempts} "
             fby test infrastructure chaos. {len(blocked_deployments)}/{deployment_attempts} "
             f"deployments failed. Customer features delayed."
@@ -268,7 +268,7 @@ class BusinessImpactQuantificationTests(AsyncBaseTestCase):
         Expected to FAIL - demonstrates financial impact
 ""
         # Business metrics from Issue #1024
-        annual_recurring_revenue = 500000  # $"500K" plus ARR
+        annual_recurring_revenue = 500000  # $""500K"" plus ARR
         golden_path_reliability_current = 60.0  # ~60%
         golden_path_reliability_target = 95.0   # >95%
 
@@ -286,11 +286,11 @@ class BusinessImpactQuantificationTests(AsyncBaseTestCase):
 
         # This test SHOULD FAIL to demonstrate financial impact
         self.assertLess(
-            total_business_impact, 50000,  # Max $"50K" acceptable impact
-            fFINANCIAL CRITICAL: ${total_business_impact:."0f"} business impact from test chaos. 
+            total_business_impact, 50000,  # Max $""50K"" acceptable impact
+            fFINANCIAL CRITICAL: ${total_business_impact:.""0f""} business impact from test chaos. 
             fRevenue at risk: ${revenue_at_risk:.0f} from {reliability_gap:.1f}% reliability gap. "
             fRevenue at risk: ${revenue_at_risk:.0f} from {reliability_gap:.1f}% reliability gap. "
-            f"Deployment delays: ${deployment_delay_cost:."0f"} from {average_deployment_delay_days} day delays."
+            f"Deployment delays: ${deployment_delay_cost:.""0f""} from {average_deployment_delay_days} day delays."
             fUnauthorized test runners threatening business viability.
         )
 
@@ -335,8 +335,8 @@ class BusinessImpactQuantificationTests(AsyncBaseTestCase):
             fCUSTOMER CRITICAL: {customer_satisfaction_impact:.1f}% customer satisfaction impact "
             fCUSTOMER CRITICAL: {customer_satisfaction_impact:.1f}% customer satisfaction impact "
             f"from test infrastructure chaos. Experience gaps: {experience_gaps}."
-            fChat reliability: {customer_experience_metrics['chat_response_reliability']:."1f"}% 
-            f(target: {required_thresholds['chat_response_reliability']:."1f"}%). 
+            fChat reliability: {customer_experience_metrics['chat_response_reliability']:.""1f""}% 
+            f(target: {required_thresholds['chat_response_reliability']:.""1f""}%). 
             fUnauthorized test runners degrading customer experience.""
         )
 

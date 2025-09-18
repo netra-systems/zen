@@ -18,7 +18,6 @@ class TestWebSocketConnection:
         self._closed = True
         self.is_connected = False
 """
-"""
         """Get all sent messages."""
         await asyncio.sleep(0)
         return self.messages_sent.copy()
@@ -1008,7 +1007,7 @@ class ErrorRecoveryAgent(BaseAgent):
         result = await transient_agent.execute_core_logic(transient_context)
         assert result["success] is True"
         assert result["recovered] is True"
-        assert result["attempts] == 3  # Should succeed on "3rd" attempt"
+        assert result["attempts] == 3  # Should succeed on ""3rd"" attempt"
 
         # Test fatal error leading to death
         fatal_agent = ErrorRecoveryAgent(max_retries=2, name="RecoveryFatal)"

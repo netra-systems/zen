@@ -1,0 +1,37 @@
+tests\mission_critical\test_error_handling_ssot_consistency.py:13: SyntaxWarning: invalid escape sequence '\('
+  '''
+tests\mission_critical\test_ssot_regression_prevention_monitor.py:9: SyntaxWarning: invalid escape sequence '\s'
+  """"
+tests\mission_critical\test_ssot_test_infrastructure_fragmentation.py:12: SyntaxWarning: invalid escape sequence '\.'
+  """"
+tests\e2e\staging\test_secret_key_validation.py:2: SyntaxWarning: invalid escape sequence '\s'
+  """
+Validating syntax in tests
+
+SYNTAX VALIDATION RESULTS:
+  Total files: 4498
+  Valid files: 3954 (87.9%)
+  Error files: 544 (12.1%)
+
+FILES WITH SYNTAX ERRORS (544):
+  tests\conftest_new.py: Line 235: unterminated string literal (detected at line 235)
+  tests\fixture_dependency_graph.py: Line 3: invalid syntax
+  tests\integration_test_docker_rate_limiter.py: Line 10: invalid syntax
+  tests\run_all_refresh_tests.py: Line 237: unterminated triple-quoted string literal (detected at line 327)
+  tests\run_refresh_tests.py: Line 275: unterminated triple-quoted string literal (detected at line 343)
+  tests\test_alpine_container_selection.py: Line 12: invalid decimal literal
+  tests\test_deterministic_startup.py: Line 230: unterminated string literal (detected at line 230)
+  tests\test_docker_infrastructure.py: Line 25: invalid syntax
+  tests\test_docker_optional_demo.py: Line 32: closing parenthesis ']' does not match opening parenthesis '(' on line 26
+  tests\test_import_circular_dependencies.py: Line 3: invalid syntax
+  tests\test_parallel_docker_runs.py: Line 3: invalid syntax
+  tests\test_phase0_migration.py: Line 362: unterminated string literal (detected at line 362)
+  tests\validate_ws_speed.py: Line 5: invalid decimal literal
+  tests\critical\test_auth_cross_system_failures.py: Line 231: unterminated string literal (detected at line 231)
+  tests\critical\test_health_route_configuration_chaos.py: Line 58: illegal target for annotation
+  tests\critical\test_health_route_duplication_audit.py: Line 53: expected an indented block after 'for' statement on line 52
+  tests\critical\test_websocket_comprehensive_failure_suite.py: Line 30: unterminated triple-quoted string literal (detected at line 627)
+  tests\database\test_port_configuration_mismatch.py: Line 3: invalid syntax
+  tests\deployment\test_oauth_staging_flow.py: Line 108: unterminated string literal (detected at line 108)
+  tests\e2e\dev_launcher_real_system.py: Line 3: invalid syntax
+  ... and 524 more files

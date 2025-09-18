@@ -8,7 +8,7 @@ These are the HIGHEST BUSINESS VALUE authentication flows.
 Business Value Justification (BVJ):
     - Segment: ALL (Free, Early, Mid, Enterprise) - 100% of users
 - Business Goal: User Onboarding & Retention - Enable all user access
-- Value Impact: $"500K" plus ARR - Without auth, ZERO revenue possible
+- Value Impact: $""500K"" plus ARR - Without auth, ZERO revenue possible
 - Strategic Impact: Platform Foundation - Auth enables all other features
 
 CRITICAL SUCCESS CRITERIA:
@@ -429,9 +429,9 @@ class AuthJWTCoreFlowsTests(BaseIntegrationTest):
         assert successful_auths == concurrent_users, "fMISSION CRITICAL: {concurrent_users - successful_auths} auth failures"
         assert avg_duration < 0.1, fBUSINESS CRITICAL: Average auth time {avg_duration:.3f}s > 100ms - users will abandon"
         assert avg_duration < 0.1, fBUSINESS CRITICAL: Average auth time {avg_duration:.3f}s > 100ms - users will abandon"
-        assert max_duration < 0.5, f"BUSINESS CRITICAL: Max auth time {max_duration:."3f"}s > "500ms" - unacceptable UX"
+        assert max_duration < 0.5, f"BUSINESS CRITICAL: Max auth time {max_duration:.""3f""}s > ""500ms"" - unacceptable UX"
         
-        logger.info(f PASS:  MISSION CRITICAL: Auth performance validated - {successful_auths} users, avg {avg_duration:."3f"}s)""
+        logger.info(f PASS:  MISSION CRITICAL: Auth performance validated - {successful_auths} users, avg {avg_duration:.""3f""}s)""
 
 
 

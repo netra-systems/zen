@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
     - Segment: Platform/Internal
 - Business Goal: System Stability - Ensure single source of truth for configuration
 - Value Impact: Validates SSOT consolidation prevents configuration conflicts
-- Strategic Impact: Protects $"500K" plus ARR by ensuring consistent configuration management
+- Strategic Impact: Protects $""500K"" plus ARR by ensuring consistent configuration management
 
 PURPOSE: This test will PASS after Issue #667 consolidation is complete.
 It validates that only one configuration manager exists and provides consistent API.
@@ -22,7 +22,7 @@ Test Coverage:
 4. Configuration method availability validation
 
 CRITICAL: This test ensures consolidated configuration management supports
-Golden Path user login and AI chat functionality worth $"500K" plus ARR protection.
+Golden Path user login and AI chat functionality worth $""500K"" plus ARR protection.
 "
 ""
 
@@ -378,7 +378,7 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
             fGOLDEN PATH INTEGRATION FAILURE: SSOT config manager cannot handle required 
             fGolden Path configurations: {missing_configurations}. "
             fGolden Path configurations: {missing_configurations}. "
-            f"Must support all configuration categories for $"500K" plus ARR protection."
+            f"Must support all configuration categories for $""500K"" plus ARR protection."
         )
 
         # Test basic functionality

@@ -2,10 +2,10 @@
 
 JWT Golden Path Protection Tests
 
-PURPOSE: These tests FAIL when JWT changes break the $"500K" plus ARR Golden Path
+PURPOSE: These tests FAIL when JWT changes break the $""500K"" plus ARR Golden Path
 user flow (Login -> JWT -> Chat). Tests will PASS after SSOT refactor.
 
-MISSION CRITICAL: Protects $"500K" plus ARR Golden Path by ensuring JWT integration
+MISSION CRITICAL: Protects $""500K"" plus ARR Golden Path by ensuring JWT integration
 maintains end-to-end user authentication and chat functionality.
 
 BUSINESS VALUE: Enterprise/Platform - Revenue Protection & Customer Experience
@@ -54,7 +54,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
     These tests FAIL when JWT changes break the Golden Path user flow.
     After SSOT refactor, all tests should PASS.
     
-    CRITICAL: These tests protect $"500K" plus ARR by ensuring JWT authentication
+    CRITICAL: These tests protect $""500K"" plus ARR by ensuring JWT authentication
     works end-to-end in the Golden Path (Login -> Chat -> AI Response).
 "
 ""
@@ -238,7 +238,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
         except Exception as e:
             pytest.fail(
                 fGOLDEN PATH CRITICAL FAILURE: JWT Golden Path completely broken. 
-                fThis affects $"500K" plus ARR customer experience. Error: {e}
+                fThis affects $""500K"" plus ARR customer experience. Error: {e}
             )
 
     @pytest.mark.asyncio
@@ -399,7 +399,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                 # This test SHOULD FAIL before SSOT refactor
                 assert not isolation_violations, (
                     fJWT ISOLATION VIOLATION: Multi-user chat isolation is broken, ""
-                    faffecting enterprise customers ($"500K" plus ARR). 
+                    faffecting enterprise customers ($""500K"" plus ARR). 
                     fFound {len(isolation_violations)} isolation violations. 
                     f"Violations:\n{violation_summary}"
                 )
@@ -561,7 +561,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
             assert not error_handling_violations, (
                 fJWT ERROR HANDLING VIOLATION: Poor JWT error handling disrupts Golden Path UX 
                 fand creates security risks. Found {len(error_handling_violations)} violations 
-                faffecting $"500K" plus ARR customer experience. Violations:\n{violation_summary}""
+                faffecting $""500K"" plus ARR customer experience. Violations:\n{violation_summary}""
             )
         else:
             logger.info(CHECK JWT ERROR HANDLING SUCCESS: Graceful error handling preserves Golden Path)
@@ -614,7 +614,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                         
                         if auth_time > max_backend_auth_time:
                             performance_violations.append(
-                                f"Backend JWT auth too slow: {auth_time:."2f")s > {max_backend_auth_time)s (attempt {attempt + 1)"
+                                f"Backend JWT auth too slow: {auth_time:.""2f"")s > {max_backend_auth_time)s (attempt {attempt + 1)"
                             )
                         
                         if response.status_code != 200:
@@ -661,7 +661,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                     
                     if connect_time > max_websocket_connect_time:
                         performance_violations.append(
-                            f"WebSocket JWT connect too slow: {connect_time:."2f"}s > {max_websocket_connect_time}s"
+                            f"WebSocket JWT connect too slow: {connect_time:.""2f""}s > {max_websocket_connect_time}s"
                         )
                     
                     await websocket.close()
@@ -693,7 +693,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
                     if validation_time > max_jwt_validation_time:
                         performance_violations.append(
                             fJWT validation too slow: {validation_time:.3f}s > {max_jwt_validation_time}s"
-                            fJWT validation too slow: {validation_time:.3f}s > {max_jwt_validation_time}s""
+                            fJWT validation too slow: {validation_time:."3f"}s > {max_jwt_validation_time}s""
 
                         )
                     
@@ -714,10 +714,10 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
             
             # Log performance metrics
             logger.info(fJWT Performance Metrics:")"
-            logger.info(f  - Backend Auth: {avg_backend_auth:."2f"}s avg)
+            logger.info(f  - Backend Auth: {avg_backend_auth:.""2f""}s avg)
             logger.info(f  - WebSocket Connect: {avg_websocket_connect:.2f}s avg)"
             logger.info(f  - WebSocket Connect: {avg_websocket_connect:.2f}s avg)"
-            logger.info(f"  - JWT Validation: {avg_jwt_validation:."3f"}s avg)"
+            logger.info(f"  - JWT Validation: {avg_jwt_validation:.""3f""}s avg)"
             
             # Check if performance is acceptable for Golden Path
             total_golden_path_time = avg_backend_auth + avg_websocket_connect
@@ -725,7 +725,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
             
             if total_golden_path_time > max_total_golden_path_time:
                 performance_violations.append(
-                    fTotal Golden Path JWT performance too slow: {total_golden_path_time:."2f"}s > {max_total_golden_path_time}s""
+                    fTotal Golden Path JWT performance too slow: {total_golden_path_time:.""2f""}s > {max_total_golden_path_time}s""
 
                 )
             
@@ -742,7 +742,7 @@ class JwtGoldenPathProtectionTests(SSotAsyncTestCase):
             assert not performance_violations, (
                 fJWT PERFORMANCE VIOLATION: Slow JWT operations degrade Golden Path user experience, "
                 fJWT PERFORMANCE VIOLATION: Slow JWT operations degrade Golden Path user experience, "
-                f"affecting $"500K" plus ARR customer satisfaction."
+                f"affecting $""500K"" plus ARR customer satisfaction."
                 fFound {len(performance_violations)} performance issues. 
                 fViolations:\n{violation_summary}
             )

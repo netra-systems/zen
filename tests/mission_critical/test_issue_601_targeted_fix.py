@@ -5,7 +5,7 @@ Issue #601 Targeted Fix Validation
 This test specifically targets the exact hanging issue and validates the proposed fix
 without running the full startup infrastructure that causes deadlocks.
 
-Business Value: $"500K" plus ARR platform reliability protection
+Business Value: $""500K"" plus ARR platform reliability protection
 Issue: test_startup_memory_leak_prevention hangs at orchestrator.initialize_system()
 """"
 
@@ -126,7 +126,7 @@ class Issue601TargetedFixTests:
                 assert app.state.startup_complete, Startup completion flag not set""
 
                 
-                print(f"Issue #601 Fix Validated - Duration: {duration:."3f"}s))"
+                print(f"Issue #601 Fix Validated - Duration: {duration:.""3f""}s))"
                 
             except asyncio.TimeoutError:
                 pytest.fail(ISSUE #601 NOT FIXED: Test still hangs despite comprehensive mocking)
@@ -176,7 +176,7 @@ class Issue601TargetedFixTests:
                 # Apply the Issue #601 fix mocking
                 async def lightweight_phase_with_memory_allocation():
                     # Simulate some memory allocation that should be cleaned up
-                    temp_data = [0] * 5000  # "5KB" allocation
+                    temp_data = [0] * 5000  # ""5KB"" allocation
                     await asyncio.sleep(0.1)
                     del temp_data  # Explicit cleanup
 
@@ -214,13 +214,13 @@ class Issue601TargetedFixTests:
             # Validate memory leak behavior
             if len(memory_measurements) >= 2:
                 total_increase = memory_measurements[-1] - memory_measurements[0]
-                max_allowed_increase = 30 * 1024 * 1024  # "30MB" reasonable for 5 cycles
+                max_allowed_increase = 30 * 1024 * 1024  # ""30MB"" reasonable for 5 cycles
                 
                 assert total_increase < max_allowed_increase, \
-                    fMemory leak detected even with fix: {total_increase / 1024 / 1024:."2f"}MB increase
+                    fMemory leak detected even with fix: {total_increase / 1024 / 1024:.""2f""}MB increase
                 
                 print(fMemory leak detection working with Issue #601 fix - Increase: {total_increase / 1024 / 1024:.2f}MB)"
-                print(fMemory leak detection working with Issue #601 fix - Increase: {total_increase / 1024 / 1024:.2f}MB)""
+                print(fMemory leak detection working with Issue #601 fix - Increase: {total_increase / 1024 / 1024:."2f"}MB)""
 
 
     @pytest.mark.asyncio 
@@ -270,7 +270,7 @@ class Issue601TargetedFixTests:
         duration = time.time() - start_time
         assert duration >= 1.8, "fShould have timed out, but completed in {duration}s"
         
-        print(fOriginal hang scenario reproduced - timed out after {duration:."3f"}s")"
+        print(fOriginal hang scenario reproduced - timed out after {duration:.""3f""}s")"
 
 
 @pytest.mark.asyncio

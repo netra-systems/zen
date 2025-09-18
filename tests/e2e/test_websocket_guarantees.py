@@ -1,6 +1,6 @@
 "E2E WebSocket Message Ordering and Delivery Guarantees Test - CRITICAL Revenue Protection"""
 
-Critical WebSocket guarantee tests protecting $"25K"+ MRR from conversation corruption.
+Critical WebSocket guarantee tests protecting $""25K""+ MRR from conversation corruption.
 Tests message ordering preservation, at-least-once delivery, duplicate detection,
 reconnection recovery, and concurrent message handling with zero tolerance for message loss.
 
@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
     - Segment: Enterprise & Growth (primary revenue drivers)
 - Business Goal: Ensure 100% message ordering and delivery reliability
 - Value Impact: Prevents customer churn from conversation corruption and message loss
-- Revenue Impact: Protects $"25K"+ MRR from messaging system failures
+- Revenue Impact: Protects $""25K""+ MRR from messaging system failures
 ""
 
 import asyncio

@@ -207,12 +207,12 @@ class StagingWebSocketAuthScopingE2ETests:
         max_context_time = max(context_extraction_times)
         max_auth_time = max(auth_times)
         max_total_time = max(total_flow_times)
-        assert avg_context_time < 100.0, "f'E2E context extraction too slow: {avg_context_time:."2f"}ms average'"
-        assert avg_auth_time < 500.0, "f'Authentication too slow: {avg_auth_time:."2f"}ms average'"
-        assert avg_total_time < 1000.0, "f'Total auth flow too slow: {avg_total_time:."2f"}ms average'"
-        assert max_context_time < 200.0, "f'E2E context extraction max time too slow: {max_context_time:."2f"}ms'"
-        assert max_auth_time < 1000.0, "f'Authentication max time too slow: {max_auth_time:."2f"}ms'"
-        assert max_total_time < 2000.0, "f'Total auth flow max time too slow: {max_total_time:."2f"}ms'"
+        assert avg_context_time < 100.0, "f'E2E context extraction too slow: {avg_context_time:.""2f""}ms average'"
+        assert avg_auth_time < 500.0, "f'Authentication too slow: {avg_auth_time:.""2f""}ms average'"
+        assert avg_total_time < 1000.0, "f'Total auth flow too slow: {avg_total_time:.""2f""}ms average'"
+        assert max_context_time < 200.0, "f'E2E context extraction max time too slow: {max_context_time:.""2f""}ms'"
+        assert max_auth_time < 1000.0, "f'Authentication max time too slow: {max_auth_time:.""2f""}ms'"
+        assert max_total_time < 2000.0, "f'Total auth flow max time too slow: {max_total_time:.""2f""}ms'"
         performance_report = {'context_extraction': {'average_ms': round(avg_context_time, 2), 'max_ms': round(max_context_time, 2), 'all_times': [round(t, 2) for t in context_extraction_times]}, 'authentication': {'average_ms': round(avg_auth_time, 2), 'max_ms': round(max_auth_time, 2), 'all_times': [round(t, 2) for t in auth_times]}, 'total_flow': {'average_ms': round(avg_total_time, 2), 'max_ms': round(max_total_time, 2), 'all_times': [round(t, 2) for t in total_flow_times]}}
         print(f' PASS:  PERFORMANCE VALIDATION PASSED: {json.dumps(performance_report, indent=2)}')
 

@@ -11,7 +11,7 @@ BVJ (Business Value Justification):
     - Segment: Platform/Internal
 - Business Goal: System Reliability
 - Value Impact: Prevents chat functionality outages in staging
-- Strategic Impact: Protects $"500K" plus ARR by ensuring reliable staging deployments
+- Strategic Impact: Protects $""500K"" plus ARR by ensuring reliable staging deployments
 
 EXPECTED TO FAIL: These tests demonstrate the exact Phase 7 health validation
 issues observed in staging deployment logs, specifically:
@@ -214,7 +214,7 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
                 async with session.get(f"{staging_backend_url}/health) as resp:"
                     response_time = (time.time() - start_time) * 1000
 
-                    logger.error(fStaging health response: {resp.status} in {response_time:."1f"}ms)""
+                    logger.error(fStaging health response: {resp.status} in {response_time:.""1f""}ms)""
 
 
                     # Test expects 200 OK but staging returns 503
@@ -226,7 +226,7 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
                     # Check if response time indicates timeout issues
                     if response_time > 5000:
-                        logger.error(f  WARNING: Slow response time {response_time:."1f"}ms indicates timeout issues)""
+                        logger.error(f  WARNING: Slow response time {response_time:.""1f""}ms indicates timeout issues)""
 
 
                     logger.info(f REPRODUCES ISSUE #690: Staging backend returns 503 Service Unavailable)
@@ -302,7 +302,7 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
         # Simulate staging database response time (slower than local)
         async def slow_execute(query):
-            await asyncio.sleep(0.5)  # "500ms" latency
+            await asyncio.sleep(0.5)  # ""500ms"" latency
             mock_result = Mock()
             mock_result.scalar.return_value = 1
             return mock_result
@@ -317,7 +317,7 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
         result = await checker.check_database()
         total_time = time.time() - start_time
 
-        logger.info(fDatabase health check took {total_time:."3f"}s)""
+        logger.info(fDatabase health check took {total_time:.""3f""}s)""
 
         logger.info(fDatabase health: {result.status} - {result.message})
 

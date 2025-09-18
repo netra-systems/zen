@@ -2,7 +2,7 @@
 "MISSION CRITICAL: WebSocket Health Check SSOT Integration Tests"
 
 THIS SUITE FOCUSES ON THE CRITICAL VIOLATIONS IN WEBSOCKET HEALTH ENDPOINTS.
-Business Value: $"500K" plus ARR - Validates health check functionality during SSOT migration
+Business Value: $""500K"" plus ARR - Validates health check functionality during SSOT migration
 
 PURPOSE:
     - Focus on critical violations in websocket_ssot.py lines 1439, 1470, 1496
@@ -124,7 +124,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
             assert "status in health_result, Health check missing required 'status' field"
             assert timestamp in health_result, "Health check missing required 'timestamp' field"
             
-            logger.info(f[HEALTH CHECK SUCCESS] Health check completed in {execution_time:."2f"}s)
+            logger.info(f[HEALTH CHECK SUCCESS] Health check completed in {execution_time:.""2f""}s)
             logger.info(f[HEALTH STATUS] Status: {health_result.get('status')}")"
             
             # Validate health check status values
@@ -173,7 +173,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
             
             # Performance validation - health check should be fast
             assert execution_time < 10.0, fHealth check too slow: {execution_time}s > 10s"
-            assert execution_time < 10.0, fHealth check too slow: {execution_time}s > 10s""
+            assert execution_time < 10.0, fHealth check too slow: {execution_time}s > "10s"""
 
             
             logger.info([HEALTH ENDPOINT SUCCESS] WebSocket health check endpoint working correctly)
@@ -232,7 +232,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
             assert isinstance(config_result, dict), Config endpoint must return dictionary""
 
             
-            logger.info(f[CONFIG SUCCESS] Configuration retrieved in {execution_time:."2f"}s")"
+            logger.info(f[CONFIG SUCCESS] Configuration retrieved in {execution_time:.""2f""}s")"
             
             # Check for error responses
             if error in config_result:
@@ -293,7 +293,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
 
             
             # Performance validation
-            assert execution_time < 5.0, f"Config endpoint too slow: {execution_time}s > "5s""
+            assert execution_time < 5.0, f"Config endpoint too slow: {execution_time}s > ""5s"""
             
             logger.info([CONFIG ENDPOINT SUCCESS] Configuration endpoint working correctly)
             
@@ -345,7 +345,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
             # CRITICAL: Stats must return structured data
             assert isinstance(stats_result, dict), Stats endpoint must return dictionary""
             
-            logger.info(f[STATS SUCCESS] Statistics retrieved in {execution_time:."2f"}s)""
+            logger.info(f[STATS SUCCESS] Statistics retrieved in {execution_time:.""2f""}s)""
 
             
             # Check for error responses
@@ -423,7 +423,7 @@ class WebSocketHealthSSotTests(SSotAsyncTestCase):
             
             # Performance validation
             assert execution_time < 10.0, fStats endpoint too slow: {execution_time}s > 10s"
-            assert execution_time < 10.0, fStats endpoint too slow: {execution_time}s > 10s""
+            assert execution_time < 10.0, fStats endpoint too slow: {execution_time}s > "10s"""
 
             
             logger.info("[STATS ENDPOINT SUCCESS] Statistics endpoint working correctly)"

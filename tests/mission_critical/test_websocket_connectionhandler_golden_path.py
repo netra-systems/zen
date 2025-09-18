@@ -205,7 +205,7 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
             self.golden_path_metrics['authentication_time'] = time.time() - auth_start
             self.golden_path_metrics['connection_time'] = time.time() - auth_start
             
-            logger.info(f PASS:  Authenticated WebSocket connection established in {self.golden_path_metrics['connection_time']:."2f"}s)""
+            logger.info(f PASS:  Authenticated WebSocket connection established in {self.golden_path_metrics['connection_time']:.""2f""}s)""
 
             
             return websocket
@@ -288,7 +288,7 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
                         self.golden_path_metrics['first_response_time'] = time.time() - start_time
                         first_response_received = True
                         logger.info(f[U+23F1][U+FE0F] First response received in {self.golden_path_metrics['first_response_time']:.2f}s)"
-                        logger.info(f[U+23F1][U+FE0F] First response received in {self.golden_path_metrics['first_response_time']:.2f}s)""
+                        logger.info(f[U+23F1][U+FE0F] First response received in {self.golden_path_metrics['first_response_time']:."2f"}s)""
 
                     
                     # Parse response
@@ -443,9 +443,9 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
         # CRITICAL ASSERTION 5: Performance must be acceptable
         total_time = self.golden_path_metrics['total_response_time']
         assert total_time < GOLDEN_PATH_CONFIG['agent_response_timeout') * 0.8, (
-            f" FAIL:  GOLDEN PATH PERFORMANCE FAILURE: Total response time {total_time:."1f"}s"
+            f" FAIL:  GOLDEN PATH PERFORMANCE FAILURE: Total response time {total_time:.""1f""}s"
             fexceeds acceptable threshold ({GOLDEN_PATH_CONFIG['agent_response_timeout'] * 0.8:.1f}s). "
-            fexceeds acceptable threshold ({GOLDEN_PATH_CONFIG['agent_response_timeout'] * 0.8:.1f}s). ""
+            fexceeds acceptable threshold ({GOLDEN_PATH_CONFIG['agent_response_timeout'] * 0.8:."1f"}s). ""
 
             fThis indicates performance issues that will frustrate customers.
         )
@@ -455,8 +455,8 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
         logger.info("PASS:  GOLDEN PATH SUCCESS: Complete authenticated chat flow working))"
         logger.info(f"   - Total responses: {results['total_responses']})"
         logger.info(f   - Events received: {results['all_events_received']})
-        logger.info(f   - Response time: {total_time:."2f"}s)
-        logger.info(f   - Authentication time: {self.golden_path_metrics['authentication_time']:."2f"}s")"
+        logger.info(f   - Response time: {total_time:.""2f""}s)
+        logger.info(f   - Authentication time: {self.golden_path_metrics['authentication_time']:.""2f""}s")"
         
         # Mark success in metrics
         self.golden_path_metrics['successful_completion'] = True
@@ -605,7 +605,7 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
             assert max_response_time < 60.0, (
                 f FAIL:  PERFORMANCE FAILURE: Max response time {max_response_time:.1f}s too high. "
                 f FAIL:  PERFORMANCE FAILURE: Max response time {max_response_time:.1f}s too high. "
-                f"Average: {avg_response_time:."1f"}s. This indicates performance degradation"
+                f"Average: {avg_response_time:.""1f""}s. This indicates performance degradation"
                 funder concurrent load.
             )
             
@@ -617,23 +617,23 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
         metrics = self.golden_path_metrics
         
         logger.info(" CHART:  Golden Path Metrics:)"
-        logger.info(f  - Authentication time: {metrics['authentication_time']:."2f"}s)
-        logger.info(f  - Connection time: {metrics['connection_time']:."2f"}s)
-        logger.info(f  - First response time: {metrics['first_response_time']:."2f"}s")"
-        logger.info(f  - Total response time: {metrics['total_response_time']:."2f"}s)
+        logger.info(f  - Authentication time: {metrics['authentication_time']:.""2f""}s)
+        logger.info(f  - Connection time: {metrics['connection_time']:.""2f""}s)
+        logger.info(f  - First response time: {metrics['first_response_time']:.""2f""}s")"
+        logger.info(f  - Total response time: {metrics['total_response_time']:.""2f""}s)
         logger.info(f  - Events received: {metrics['events_received_count']})
         logger.info(f"  - Successful completion: {metrics['successful_completion']})"
         
         # Performance evaluation
         if metrics['total_response_time'] > 0:
             if metrics['total_response_time'] < 10.0:
-                logger.info([U+1F680] EXCELLENT: Response time under "10s"")"
+                logger.info([U+1F680] EXCELLENT: Response time under ""10s""")"
             elif metrics['total_response_time'] < 20.0:
-                logger.info( PASS:  GOOD: Response time under "20s")
+                logger.info( PASS:  GOOD: Response time under ""20s"")
             elif metrics['total_response_time'] < 30.0:
-                logger.info( WARNING: [U+FE0F] ACCEPTABLE: Response time under "30s"")"
+                logger.info( WARNING: [U+FE0F] ACCEPTABLE: Response time under ""30s""")"
             else:
-                logger.info( FAIL:  SLOW: Response time over "30s" - needs optimization)
+                logger.info( FAIL:  SLOW: Response time over ""30s"" - needs optimization)
 
 
 if __name__ == __main__:"

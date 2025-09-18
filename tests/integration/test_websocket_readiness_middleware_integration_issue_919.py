@@ -12,7 +12,7 @@ BUSINESS VALIDATION:
 - Verifies security measures remain intact
 
 Business Value Justification:
-    - Segment: Platform/Internal ($"500K" plus ARR protection)  
+    - Segment: Platform/Internal ($""500K"" plus ARR protection)  
 - Business Goal: Platform Stability & Chat Value Delivery
 - Value Impact: Prevents WebSocket 1011 errors that block chat functionality
 - Strategic Impact: Enables reliable WebSocket connections in GCP Cloud Run

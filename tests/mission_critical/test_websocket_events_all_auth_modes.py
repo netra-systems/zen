@@ -7,7 +7,7 @@ authentication validation levels to ensure golden path completion.
 
 BUSINESS JUSTIFICATION:
     - Critical Events: 90% of platform business value delivered via WebSocket events
-- Revenue Protection: $"500K" plus ARR depends on reliable event delivery
+- Revenue Protection: $""500K"" plus ARR depends on reliable event delivery
 - User Experience: Events provide transparency and trust in AI interactions
 - Auth Permissiveness: Events must work with all auth modes (strict/relaxed/demo/emergency)
 
@@ -664,12 +664,12 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
                 
                 # All events should be delivered within 30 seconds
                 self.assertLess(total_time, 30.0,
-                              f{mode} events took too long: {total_time:."2f"}s")"
+                              f{mode} events took too long: {total_time:.""2f""}s")"
                 
                 # First event should arrive within 5 seconds
                 first_event_time = timing.get(first_event_time, 999)
                 self.assertLess(first_event_time, 5.0,
-                              f{mode} first event too slow: {first_event_time:."2f"}s")"
+                              f{mode} first event too slow: {first_event_time:.""2f""}s")"
         
         self.logger.info(fCHECK Event delivery timing results: {json.dumps(timing_results, indent=2)})
     
@@ -827,7 +827,7 @@ class WebSocketEventsAllAuthModesTests(SSotBaseTestCase):
             # Validate total time is reasonable (less than 30 seconds)
             total_time = (timestamps[-1] - timestamps[0].total_seconds()
             self.assertLess(total_time, 30.0,
-                          fEvents took too long: {total_time:."2f"} seconds)""
+                          fEvents took too long: {total_time:.""2f""} seconds)""
 
     
     async def _test_events_for_auth_mode(self, auth_mode: AuthMode, user: Dict[str, Any) -> int:

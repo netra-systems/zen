@@ -140,7 +140,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
                         all_events.append(event)
                         event_timestamps[event_type) = event_timestamps.get(event_type, [) + [event_time - start_time)
                         
-                        print(f"[U+1F4E8] Event #{len(all_events)}: {event_type} (t={event_time - start_time:."2f"}s))"
+                        print(f"[U+1F4E8] Event #{len(all_events)}: {event_type} (t={event_time - start_time:.""2f""}s))"
                         
                         # Log additional details for key events
                         if event_type == 'agent_thinking' and event.get('data'):
@@ -156,11 +156,11 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
                         # Stop when workflow complete
                         if event_type == 'agent_completed':
                             completion_time = event_time - start_time
-                            print(f"[U+1F3C1] Workflow completed in {completion_time:."2f"}s)"
+                            print(f"[U+1F3C1] Workflow completed in {completion_time:.""2f""}s)"
                             break
                             
                     except asyncio.TimeoutError:
-                        print(f[U+23F0] Timeout waiting for events after {time.time() - start_time:."2f"}s)""
+                        print(f[U+23F0] Timeout waiting for events after {time.time() - start_time:.""2f""}s)""
 
                         break
                     except json.JSONDecodeError as e:
@@ -223,13 +223,13 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
         
         # No single event should take more than 30 seconds (reasonable UX)
         max_interval = max(event_intervals) if event_intervals else 0
-        assert max_interval < 30, f"Event interval too long: {max_interval:."2f"}s (max "30s" for good UX)"
+        assert max_interval < 30, f"Event interval too long: {max_interval:.""2f""}s (max ""30s"" for good UX)"
         
         # Average interval should be reasonable
         avg_interval = sum(event_intervals) / len(event_intervals) if event_intervals else 0
-        assert avg_interval < 10, fAverage event interval too long: {avg_interval:."2f"}s (max "10s")""
+        assert avg_interval < 10, fAverage event interval too long: {avg_interval:.""2f""}s (max ""10s"")""
         
-        print(f PASS:  Event timing validated (max: {max_interval:."2f"}s, avg: {avg_interval:."2f"}s))""
+        print(f PASS:  Event timing validated (max: {max_interval:.""2f""}s, avg: {avg_interval:.""2f""}s))""
 
         
         # Validate event payloads contain business context
@@ -402,7 +402,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
             print(f CHART:  User {i} ({session['user_email']}:)
             print(f   Events received: {len(user_events)})""
             print(f"   Mandatory events: {session['mandatory_events_count']})"
-            print(f   Completion time: {session['completion_time']:."2f"}s if session['completion_time'] else    No completion")"
+            print(f   Completion time: {session['completion_time']:.""2f""}s if session['completion_time'] else    No completion")"
             
             # Each user should receive mandatory events
             assert session[mandatory_events_count"] >= 3, \"
@@ -431,7 +431,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
                         if own_use_case_score > 0:  # Only check if own use case is present
                             contamination_ratio = contamination_score / own_use_case_score
                             assert contamination_ratio < 0.5, \
-                                fUser {i} over-contaminated with User {j} use case: {contamination_ratio:."2f"}
+                                fUser {i} over-contaminated with User {j} use case: {contamination_ratio:.""2f""}
             
             print(f PASS:  User {i} isolation validated"")
         
@@ -511,7 +511,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
                         last_event_time = current_time
                         
                         print(f[U+1F4E8] Event #{connection_metrics['events_received']): {event['type'])  + 
-                              f(gap: {event_gap:."1f"}s"))"
+                              f(gap: {event_gap:.""1f""}s"))"
                         
                         if event['type'] == 'agent_completed':
                             connection_metrics[total_duration] = current_time - start_time
@@ -535,8 +535,8 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
         print(f"\n CHART:  CONNECTION STABILITY METRICS:)"
         print(f   Events received: {connection_metrics['events_received']})""
         print(f"   Connection drops: {connection_metrics['connection_drops']})"
-        print(f   Max event gap: {connection_metrics['max_event_gap']:."1f"}s)  ""
-        print(f"   Total duration: {connection_metrics['total_duration']:."1f"}s)"
+        print(f   Max event gap: {connection_metrics['max_event_gap']:.""1f""}s)  ""
+        print(f"   Total duration: {connection_metrics['total_duration']:.""1f""}s)"
         
         # Validation criteria
         assert connection_metrics[events_received] >= 5, \
@@ -546,7 +546,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
             fUnexpected connection drops: {connection_metrics['connection_drops']}
         
         assert connection_metrics[max_event_gap] < 30, \""
-            f"Event gap too large: {connection_metrics['max_event_gap']:."1f"}s (max "30s")"
+            f"Event gap too large: {connection_metrics['max_event_gap']:.""1f""}s (max ""30s"")"
         
         print(f PASS:  CONNECTION STABILITY VALIDATED!)
 
@@ -667,7 +667,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
             print(f"     Has type field: {results['has_type']})"
             print(f     Has timestamp: {results['has_timestamp']})
             print(f"     Has data"": {"results['has_data']"})"
-            print(f     Avg payload size: {results['avg_payload_size']:."0f"} bytes)
+            print(f     Avg payload size: {results['avg_payload_size']:.""0f""} bytes)
             print(f"     Business context: {results['business_context_found']})"
             
             # Validation assertions
@@ -802,7 +802,7 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
                 successful_sessions.append(result)
         
         print(f CHART:  LOAD TEST RESULTS:)
-        print(f   Total load time: {total_load_time:."2f"}s")"
+        print(f   Total load time: {total_load_time:.""2f""}s")"
         print(f   Successful sessions: {len(successful_sessions)})
         print(f   Failed sessions: {len(failed_sessions)})""
         
@@ -820,15 +820,15 @@ class WebSocketEventDeliveryRealTimeTests(SSotBaseTestCase):
             avg_events = sum(event_counts) / len(event_counts) if event_counts else 0
             avg_mandatory = sum(mandatory_event_counts) / len(mandatory_event_counts) if mandatory_event_counts else 0
             
-            print(f   Avg response time: {avg_response_time:."2f"}s)""
-            print(f"   Max response time: {max_response_time:."2f"}s)"
-            print(f   Avg events per session: {avg_events:."1f"})""
-            print(f"   Avg mandatory events: {avg_mandatory:."1f"})"
+            print(f   Avg response time: {avg_response_time:.""2f""}s)""
+            print(f"   Max response time: {max_response_time:.""2f""}s)"
+            print(f   Avg events per session: {avg_events:.""1f""})""
+            print(f"   Avg mandatory events: {avg_mandatory:.""1f""})"
             
             # Performance criteria
-            assert avg_response_time < 20, "fAverage response time too slow under load: {avg_response_time:."2f"}s"
-            assert max_response_time < 40, f"Max response time too slow under load: {max_response_time:."2f"}s"
-            assert avg_mandatory >= 3, fToo few mandatory events under load: {avg_mandatory:."1f"}""
+            assert avg_response_time < 20, "fAverage response time too slow under load: {avg_response_time:.""2f""}s"
+            assert max_response_time < 40, f"Max response time too slow under load: {max_response_time:.""2f""}s"
+            assert avg_mandatory >= 3, fToo few mandatory events under load: {avg_mandatory:.""1f""}""
         
         print(f PASS:  WEBSOCKET LOAD PERFORMANCE VALIDATED!)
         print(f   [U+2713] {success_rate:.1%} success rate under {load_user_count}-user load"")

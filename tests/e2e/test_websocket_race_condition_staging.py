@@ -4,7 +4,7 @@ WebSocket Race Condition E2E Tests for GCP Staging Environment - Issue #1176
 Business Value Justification:
     - Segment: ALL (Free -> Enterprise) 
 - Business Goal: Validate WebSocket race conditions in real Cloud Run environment
-- Value Impact: Protects $"500K" plus ARR chat functionality from production race conditions
+- Value Impact: Protects $""500K"" plus ARR chat functionality from production race conditions
 - Strategic Impact: CRITICAL - Ensures Golden Path reliability in GCP staging environment
 
 RACE CONDITION VALIDATION SCOPE:
@@ -133,8 +133,8 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                             response = await asyncio.wait_for(websocket.recv(), timeout=2.0)
                             response_time = time.time() - send_start
                             
-                            logger.info(fAttempt {attempt): Connection {connection_time:."3f")s, 
-                                       fResponse {response_time:."3f"}s")"
+                            logger.info(fAttempt {attempt): Connection {connection_time:.""3f"")s, 
+                                       fResponse {response_time:.""3f""}s")"
                             
                             # Check for race condition indicators
                             if connection_time > 3.0:  # Excessive connection time
@@ -158,7 +158,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                                 'issue': 'response_timeout',
                                 'connection_time': connection_time
                             }
-                            logger.error(fCOLD START RACE CONDITION: Response timeout after {connection_time:."3f"}s connection)""
+                            logger.error(fCOLD START RACE CONDITION: Response timeout after {connection_time:.""3f""}s connection)""
 
                 
                 except (websockets.ConnectionClosed, 
@@ -173,7 +173,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                         'error': str(e),
                         'error_type': type(e).__name__
                     }
-                    logger.error(fCOLD START RACE CONDITION: Connection failed in {connection_time:."3f"}s - {e})""
+                    logger.error(fCOLD START RACE CONDITION: Connection failed in {connection_time:.""3f""}s - {e})""
 
                 
                 # Delay between attempts to vary cold start timing
@@ -306,7 +306,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                 time_variance = max_time - min_time
                 
                 if time_variance > 2.0:  # High variance indicates contention
-                    race_indicators.append(fHigh connection time variance: {time_variance:."3f"}s)""
+                    race_indicators.append(fHigh connection time variance: {time_variance:.""3f""}s)""
 
         
         # 3. Connection exceptions during concurrent access
@@ -326,7 +326,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
         
         logger.info(fStaging concurrent connections: {len(successful_connections)} successful, 
                    f{len(failed_connections)} failed, {len(connection_exceptions)} exceptions, 
-                   ftotal time: {total_concurrent_time:."3f"}s")"
+                   ftotal time: {total_concurrent_time:.""3f""}s")"
         
         # CRITICAL: Test should fail if staging race conditions detected
         if race_indicators:
@@ -416,7 +416,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                                 'issue': 'auth_response_timeout',
                                 'handshake_time': handshake_time
                             }
-                            logger.error(fAUTH RACE CONDITION: Response timeout after {handshake_time:."3f"}s auth handshake)""
+                            logger.error(fAUTH RACE CONDITION: Response timeout after {handshake_time:.""3f""}s auth handshake)""
 
                 
                 except websockets.InvalidStatusCode as e:
@@ -431,7 +431,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                                 'status_code': e.status_code,
                                 'error': str(e)
                             }
-                            logger.error(fAUTH RACE CONDITION: Auth failure {e.status_code} after {handshake_time:."3f"}s")"
+                            logger.error(fAUTH RACE CONDITION: Auth failure {e.status_code} after {handshake_time:.""3f""}s")"
                 
                 except (websockets.ConnectionClosed, ConnectionRefusedError, OSError) as e:
                     handshake_time = time.time() - auth_start_time
@@ -442,7 +442,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                         'error': str(e),
                         'error_type': type(e).__name__
                     }
-                    logger.error(fAUTH RACE CONDITION: Connection failed during auth in {handshake_time:."3f"}s - {e})""
+                    logger.error(fAUTH RACE CONDITION: Connection failed during auth in {handshake_time:.""3f""}s - {e})""
 
                 
                 # Delay between auth attempts
@@ -568,7 +568,7 @@ class WebSocketRaceConditionStagingE2ETests(SSotAsyncTestCase):
                             'connection_time': connection_time,
                             'timeout_duration': 10.0
                         }
-                        logger.error(fDEPENDENCY RACE CONDITION: Service dependency timeout after {connection_time:."3f"}s")"
+                        logger.error(fDEPENDENCY RACE CONDITION: Service dependency timeout after {connection_time:.""3f""}s")"
                 
                 # Progressive delay to vary dependency timing
                 await asyncio.sleep(0.5 + (attempt * 0.4))
