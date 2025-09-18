@@ -152,7 +152,7 @@ zen --start-at "2am"
 ```
 
 # Example Command
-** Assumes you have a claude command \runtests **
+**Assumes you have a claude command /runtests**
 ```
 zen "/runtests"
 ```
