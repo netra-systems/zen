@@ -227,23 +227,22 @@ assert "Tool dispatcher not enhanced with WebSocket in str(exc_info.value)"
 
 @pytest.mark.asyncio
     async def test_phase4_clickhouse_failure_is_optional(self, orchestrator):
-        """Test that ClickHouse failure doesn't stop startup.""'"
-pass
-                                                                                                                                                                                                                    # Mock successful critical phases
-with patch.object(orchestrator, '_phase1_foundation'):
-    with patch.object(orchestrator, '_phase2_core_services'):
-        with patch.object(orchestrator, '_phase3_chat_pipeline'):
-            with patch.object(orchestrator, '_phase5_validation'):
-                with patch.object(orchestrator, '_initialize_clickhouse') as mock_ch:
-                    mock_ch.side_effect = Exception("ClickHouse failed)"
+        """Test that ClickHouse failure doesn't stop startup."""
+        # Mock successful critical phases
+        with patch.object(orchestrator, '_phase1_foundation'):
+            with patch.object(orchestrator, '_phase2_core_services'):
+                with patch.object(orchestrator, '_phase3_chat_pipeline'):
+                    with patch.object(orchestrator, '_phase5_validation'):
+                        with patch.object(orchestrator, '_initialize_clickhouse') as mock_ch:
+                            mock_ch.side_effect = Exception("ClickHouse failed")
 
-                                                                                                                                                                                                                                        # Should not raise - ClickHouse is optional
-await orchestrator.initialize_system()
-assert orchestrator.app.state.startup_complete == True
+                            # Should not raise - ClickHouse is optional
+                            await orchestrator.initialize_system()
+                            assert orchestrator.app.state.startup_complete == True
 
 @pytest.mark.asyncio
     async def test_phase4_monitoring_failure_is_optional(self, orchestrator):
-        """Test that monitoring failure doesn't stop startup.""'"
+        """Test that monitoring failure doesn't stop startup."""
                                                                                                                                                                                                                                             # Mock successful critical phases
 with patch.object(orchestrator, '_phase1_foundation'):
     with patch.object(orchestrator, '_phase2_core_services'):
