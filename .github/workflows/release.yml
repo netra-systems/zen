@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/project/zen-orchestrator/
+      url: https://pypi.org/project/netra-zen/
     permissions:
       id-token: write  # Required for trusted publishing
 
