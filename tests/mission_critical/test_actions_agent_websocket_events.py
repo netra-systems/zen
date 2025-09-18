@@ -335,10 +335,10 @@ class ActionsAgentWebSocketComplianceTests:
         mock_bridge = Mock()
         
         # Should be able to set WebSocket bridge (inherited from BaseAgent)
-        agent.set_websocket_bridge(mock_bridge, compliance-test")"
-        assert agent.has_websocket_context(), Agent should have WebSocket context after bridge set
+        agent.set_websocket_bridge(mock_bridge, "compliance-test")"
+        assert agent.has_websocket_context(), "Agent should have WebSocket context after bridge set"
         
-        # Test 2: Agent should use inherited emit methods but doesn't'
+        # Test 2: Agent should use inherited emit methods but doesn't
         compliance_violations = []
         
         # Check if agent overrides the proper WebSocket methods
@@ -369,31 +369,29 @@ class ActionsAgentWebSocketComplianceTests:
             
             # Create minimal state for testing
             state = DeepAgentState(
-                user_request=compliance test,
+                user_request="compliance test",
                 optimizations_result=OptimizationsResult(
-                    optimization_type=test, "
-                    optimization_type=test, "
-                    recommendations=[test"],"
+                    optimization_type="test",
+                    recommendations=["test"],
                     confidence_score=0.5
                 ),
                 data_result=DataAnalysisResponse(
-                    analysis_id=compliance-test-1,
-                    status=completed","
-                    results={insights: {}, metadata: {}, recommendations: []},"
-                    results={insights: {}, metadata: {}, recommendations: []},"
+                    analysis_id="compliance-test-1",
+                    status="completed",
+                    results={},
                     metrics=PerformanceMetrics(duration_ms=50.0),
                     created_at=time.time()
                 )
             )
             
             # Execute agent
-            await agent.execute(state, compliance-run", stream_updates=True)"
+            await agent.execute(state, "compliance-run", stream_updates=True)
             
-            # Should have called emit methods but doesn't'
+            # Should have called emit methods but doesn't
             if mock_started.call_count == 0:
-                compliance_violations.append(Never calls emit_agent_started during execution)
+                compliance_violations.append("Never calls emit_agent_started during execution")
             if mock_thinking.call_count == 0:
-                compliance_violations.append(Never calls emit_thinking during execution")"
+                compliance_violations.append("Never calls emit_thinking during execution")"
         
         # Test 4: Uses custom WebSocket pattern instead of standardized bridge
         uses_send_update = hasattr(agent, '_send_update') and callable(agent._send_update)
