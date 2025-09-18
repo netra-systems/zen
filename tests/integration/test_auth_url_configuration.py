@@ -135,8 +135,7 @@ assert '/api/v1' in base_url, \
 
                                                                 # Should start with service URL
 assert base_url.startswith(config.service_url), \
-""t start with service URL"
-""t start with service URL"
+"Base URL should start with service URL"
 
 def test_frontend_backend_auth_triangle(self):
     pass
