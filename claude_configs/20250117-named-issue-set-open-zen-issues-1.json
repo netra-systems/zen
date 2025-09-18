@@ -1,0 +1,9 @@
+{
+  "instances": [
+    {
+      "command": "/gitissueprogressorv4 1334",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json"
+    }
+  ]
+}
