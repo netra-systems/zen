@@ -214,13 +214,53 @@ export E2E_BYPASS_KEY="<bypass-key>"
 - **Response Time:** Target <2s for 95th percentile
 - **Agent Events:** Target 5/5 events delivered (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)
 
+## Test Execution Results
+
+### Phase 1: Infrastructure Connectivity Tests (COMPLETED - 06:15 UTC)
+**Test Command:** `python -m pytest tests/e2e/staging/test_staging_connectivity_validation.py -v`
+
+**Results:**
+- ✅ **Frontend Health:** https://staging.netrasystems.ai/ returns 200 OK
+- ✅ **API Health Endpoint:** /api/health returns 200 OK with status: "healthy"
+- ❌ **Main Health Endpoint:** /health returns 503 Service Unavailable
+- ❌ **WebSocket Connectivity:** ALL WebSocket endpoints timeout or return 502:
+  - wss://staging.netrasystems.ai/api/v1/websocket - TIMEOUT
+  - wss://staging.netrasystems.ai/ws - HTTP 502 Bad Gateway
+  - wss://api-staging.netrasystems.ai/api/v1/websocket - HTTP 502
+
+**Critical Discovery - WebSocket Service Missing:**
+- OpenAPI spec shows 28 HTTP endpoints, **ZERO WebSocket endpoints**
+- Backend code DOES contain WebSocket routes (verified in websocket_ssot.py):
+  - `/ws` (line 310) - Main WebSocket endpoint
+  - `/api/v1/websocket` (line 338) - API WebSocket endpoint
+  - Routes are registered in app_factory_route_configs.py (line 57)
+- **Root Cause:** Backend service health issue preventing WebSocket upgrade
+
+### WebSocket Investigation Results (06:20 UTC)
+**Finding:** WebSocket is NOT a separate service - it's part of backend
+- Deployment script (deploy_to_gcp_actual.py) shows WebSocket config in backend env vars
+- Backend allocated 6Gi RAM, 4 CPUs for WebSocket handling
+- WebSocket timeouts properly configured (240s connection, 15s heartbeat)
+
+**Why WebSocket Not Working:**
+1. Backend main health check returning 503 (while API health returns 200)
+2. This prevents WebSocket protocol upgrade from HTTP
+3. Cloud Run may be blocking WebSocket due to health check failure
+
 ## Next Steps
 
-1. **IMMEDIATE:** Execute Phase 1 & 2 tests (connectivity + auth)
-2. **Backend Recovery:** Deploy/fix backend API service
-3. **Validation:** Run complete E2E suite once backend restored
-4. **Documentation:** Update system status based on results
+### IMMEDIATE ACTION REQUIRED:
+1. **Check GCP Logs:** Investigate why backend health check returns 503
+2. **Fix Backend Health:** Resolve the health check issue causing 503
+3. **Redeploy Backend:** Deploy fixed backend to enable WebSocket
+4. **Validate WebSocket:** Test WebSocket connectivity after fix
+
+### Recovery Plan:
+1. **Phase 2 Tests:** Run auth tests that don't need WebSocket
+2. **Backend Fix:** Resolve health check 503 issue
+3. **Phase 3 Tests:** Validate WebSocket after backend recovery
+4. **Phase 4 Tests:** Golden Path validation
 
 ---
 
-**CRITICAL NOTE:** This session prioritizes infrastructure recovery over comprehensive testing due to current P0 backend failure. Full E2E validation will proceed once basic services are operational.
+**CRITICAL UPDATE:** WebSocket functionality is completely unavailable due to backend health check failure. This blocks 90% of platform value (real-time agent interactions). Priority is fixing backend health check.
