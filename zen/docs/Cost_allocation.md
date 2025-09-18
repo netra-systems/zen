@@ -120,6 +120,61 @@ TOOL_PRICING = {
 }
 ```
 
+## Model-Based Cost Tracking
+
+### Why Model Detection Matters for Your Budget
+
+The Model column in Zen's status display isn't just informational - it's critical for accurate cost tracking and budget management. Here's why:
+
+**Cost Variations Between Models** (Per Million Tokens):
+- **Claude Opus**: $15 input / $75 output - Premium reasoning
+- **Claude Sonnet**: $3 input / $15 output - Balanced performance
+- **Claude Haiku**: $0.8 input / $4 output - Fast and efficient
+
+**Real-World Example**:
+```
+Task: "Analyze this complex codebase"
+Your Setting: Sonnet ($3/$15 per million)
+Actual Model Used: Opus ($15/$75 per million)
+Cost Impact: 5x higher than expected!
+```
+
+### How Model Detection Protects Your Budget
+
+1. **Accurate Cost Calculations**: Zen uses the actual model for cost calculations, not your configuration
+2. **Budget Compliance**: Budget limits are enforced against real costs, preventing overspend
+3. **Transparency**: You see exactly which model processed each request
+4. **Optimization Insights**: Identify when you're paying premium rates vs. standard rates
+
+### Model Detection in Action
+
+**Status Display Example**:
+```
+║  Status   Name             Model      Duration  Cost      Budget
+║  ✅        simple-task      haiku35    0m30s     $0.002    5% used
+║  🏃        complex-analysis opus4      12m15s    $0.875    78% used
+║  ✅        code-review      35sonnet   3m45s     $0.045    25% used
+```
+
+**What This Tells You**:
+- Simple task was efficiently routed to Haiku (cheapest)
+- Complex analysis escalated to Opus (most expensive but most capable)
+- Code review used Sonnet (balanced cost/performance)
+
+### Cost Optimization Benefits
+
+**Before Model Detection** (assumptions-based costing):
+- Budget: $10 for Sonnet tasks
+- Reality: Claude used Opus
+- Actual Cost: $50 (5x over budget!)
+- Result: Budget violations, surprise costs
+
+**With Model Detection** (reality-based costing):
+- Budget: $10 for mixed tasks
+- Detection: Haiku ($2) + Sonnet ($5) + Opus ($3)
+- Actual Cost: $10 (on budget)
+- Result: Accurate tracking, no surprises
+
 ## Model Detection Strategy
 
 ### Automatic Model Detection
