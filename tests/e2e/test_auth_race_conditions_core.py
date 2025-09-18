@@ -45,7 +45,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
-from auth_service.core.auth_manager import AuthManager
+# REMOVED: Direct auth_service import - using backend auth integration
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -57,16 +57,10 @@ import pytest
 
 import jwt as jwt_lib
 
-from auth_service.auth_core.core.jwt_handler import JWTHandler
-from auth_service.auth_core.core.session_manager import SessionManager
-from auth_service.auth_core.models.auth_models import (
-    AuthProvider,
-    LoginRequest,
-    LoginResponse,
-    TokenResponse,
-)
-from auth_service.auth_core.services.auth_service import AuthService
-from auth_service.tests.factories.user_factory import UserFactory
+from netra_backend.app.core.unified.jwt_validator import UnifiedJWTValidator, TokenValidationResult
+from netra_backend.app.database.session_manager import SessionManager
+# Note: Auth models and services accessed via auth_client integration
+# from auth_service.tests.factories.user_factory import UserFactory  # TODO: Replace with backend factory
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
