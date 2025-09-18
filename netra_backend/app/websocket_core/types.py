@@ -1017,6 +1017,14 @@ def generate_default_message(
 
 # Batch Message Processing Types
 
+class MessagePriority(str, Enum):
+    """Message priority levels for queue management."""
+    CRITICAL = "critical"      # System messages, errors (never dropped)
+    HIGH = "high"              # Agent responses, user messages  
+    NORMAL = "normal"          # General messages
+    LOW = "low"                # Background tasks, metrics
+
+
 class MessageState(str, Enum):
     """Message processing states for batch operations."""
     PENDING = "pending"

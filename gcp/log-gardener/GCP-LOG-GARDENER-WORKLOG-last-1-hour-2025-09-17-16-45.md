@@ -58,8 +58,9 @@ ImportError: cannot import name 'get_unified_config' from 'netra_backend.app.con
 - [x] Link to Issue #1308 (import conflicts) if related (Referenced in issue body)
 
 ### Issue 2: Redis Infrastructure Check
-- [ ] Verify if secondary to main service failure
-- [ ] Check VPC connector configuration
+- [x] Verify if secondary to main service failure (Likely secondary - service not starting)
+- [x] Check VPC connector configuration (Related to existing issues #1263, #1278, #1312)
+- [x] No new issue needed - covered by existing infrastructure issues
 
 ### Issue 3: Configuration Cleanup
 - [ ] Document configuration drift for future cleanup

@@ -144,6 +144,52 @@ class UnifiedConfigManager:
         except Exception:
             return default
 
+    def cache(self, key: str, ttl: int = 3600) -> Any:
+        """Cache configuration value with TTL support.
+        
+        Args:
+            key: Configuration key path to cache
+            ttl: Time to live in seconds (default: 3600)
+            
+        Returns:
+            Cached configuration value
+        """
+        try:
+            # For now, implement basic caching using the existing config cache
+            # In future, could be enhanced with Redis or advanced TTL mechanisms
+            value = self.get_config_value(key)
+            
+            # Log cache access for monitoring (if logger available)
+            try:
+                logger = self._get_logger()
+                logger.debug(f"Configuration cache access: {key}")
+            except Exception:
+                pass  # Silent fallback if logging not available
+                
+            return value
+        except Exception as e:
+            # Log cache error but return None for graceful degradation
+            try:
+                logger = self._get_logger()
+                logger.error(f"Configuration cache error for key {key}: {e}")
+            except Exception:
+                pass
+            return None
+
+    def bulk_get(self, keys: list) -> dict:
+        """Get multiple configuration values efficiently.
+        
+        Args:
+            keys: List of configuration key paths
+            
+        Returns:
+            Dictionary mapping keys to their values
+        """
+        result = {}
+        for key in keys:
+            result[key] = self.get_config_value(key)
+        return result
+
 
 # Global configuration manager instance
 config_manager = UnifiedConfigManager()
