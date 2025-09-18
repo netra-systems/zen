@@ -207,7 +207,7 @@ class AuthIntegrationStartupTests(BaseIntegrationTest):
             auth_middleware = MagicMock()
             middleware_initialized = True
         assert middleware_initialized, 'Authentication middleware must initialize'
-        with patch('netra_backend.app.auth_integration.auth.auth_service_get_session_user') as mock_auth_service:
+        with patch('netra_backend.app.auth_integration.auth._validate_token_with_auth_service') as mock_auth_service:
             mock_auth_service.return_value = {'user_id': 'test_user_123', 'email': 'test@example.com'}
             middleware_processed = True
             try:

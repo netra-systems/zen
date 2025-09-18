@@ -742,10 +742,11 @@ class WebSocketManagerRaceConditionsTests(BaseTestCase):
                     })
                 return False
         
-        # Execute concurrent pool operations with varying durations
+        # Execute concurrent pool operations with deterministic varying durations
+        # Use deterministic but varied durations based on user index to test race conditions
         tasks = [
-            use_emitter(user_id, random.uniform(0.01, 0.05))  # 10-50ms operations
-            for user_id in user_ids
+            use_emitter(user_id, 0.01 + (i % 5) * 0.01)  # Deterministic 10-50ms operations (10, 20, 30, 40, 50ms pattern)
+            for i, user_id in enumerate(user_ids)
         ]
         
         results = await asyncio.gather(*tasks, return_exceptions=True)
