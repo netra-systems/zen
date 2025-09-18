@@ -70,7 +70,7 @@ class InstanceConfig:
     name: Optional[str] = None
     description: Optional[str] = None
     allowed_tools: List[str] = None
-    permission_mode: str = "acceptEdits"
+    permission_mode: str = None  # Will be set based on platform
     output_format: str = "stream-json"  # Default to stream-json for real-time output
     session_id: Optional[str] = None
     clear_history: bool = False
@@ -84,6 +84,14 @@ class InstanceConfig:
             self.name = self.command
         if self.description is None:
             self.description = f"Execute {self.command}"
+        # Set permission mode based on platform if not explicitly set
+        if self.permission_mode is None:
+            # On Windows, use bypassPermissions to avoid approval prompts
+            # On Mac/Linux, acceptEdits should work fine
+            if platform.system() == "Windows":
+                self.permission_mode = "bypassPermissions"
+            else:
+                self.permission_mode = "acceptEdits"
 
 @dataclass
 class InstanceStatus:
@@ -1944,13 +1952,13 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
     return [
         InstanceConfig(
             command="1+1 ",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format,
             max_tokens_per_command=1000
         ),
         InstanceConfig(
             command="Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format,
             max_tokens_per_command=1000
         )
