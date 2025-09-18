@@ -10,8 +10,8 @@ This document explains how the zen package works across different operating syst
 - **macOS** (10.15+)
 - **WSL/WSL2** (Windows Subsystem for Linux)
 
-### ⚠️ Partial Compatibility
-- **Windows** (Native) - Requires adjustments
+### ✅ Full Compatibility (with automatic adjustments)
+- **Windows** (Native) - Automatic permission mode detection as of Issue #1320
 
 ### 🐳 Universal Compatibility
 - **Docker** - Works on all platforms that support Docker
@@ -71,6 +71,27 @@ Windows requires special considerations due to different path handling and execu
 2. **Executable format**: Windows doesn't use shebang lines
 3. **File permissions**: Different permission model
 4. **Shell differences**: CMD/PowerShell vs Unix shells
+
+#### Windows Permission Mode (Issue #1320 Fix)
+As of Issue #1320, Zen automatically detects Windows and adjusts the Claude CLI permission mode:
+
+```python
+# Automatic platform detection in zen_orchestrator.py
+if platform.system() == "Windows":
+    self.permission_mode = "bypassPermissions"  # Prevents approval prompts
+else:
+    self.permission_mode = "acceptEdits"  # Standard mode for Unix-like systems
+```
+
+**Why this is needed:** Windows Claude CLI doesn't properly respect `acceptEdits` mode and requires manual approval for commands, causing silent failures.
+
+**Solution:** Zen now:
+- Detects Windows automatically
+- Uses `bypassPermissions` mode to avoid approval prompts
+- Provides clear error messages if permission issues occur
+- Works without any manual configuration
+
+For full details, see [Issue #1320 Documentation](../../docs/issues/ISSUE_1320_ZEN_PERMISSION_ERROR_FIX.md).
 
 #### Windows Installation
 ```powershell

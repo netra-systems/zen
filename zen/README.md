@@ -98,6 +98,20 @@ Ad hoc questions or validating if a command is working as expected for now is be
 
 3. What does this assume?
 - You have claude code installed, authenticated, and configured already.
+
+## Known Issues and Solutions
+
+### Windows Permission Errors (Issue #1320)
+**Problem:** Commands may fail with "This command requires approval" on Windows.
+
+**Solution:** Zen now automatically detects Windows and uses `bypassPermissions` mode. If you still experience issues, see [Issue #1320 Documentation](../docs/issues/ISSUE_1320_ZEN_PERMISSION_ERROR_FIX.md).
+
+### Platform-Specific Behavior
+Zen automatically adjusts permission modes based on your platform:
+- **Windows**: Uses `bypassPermissions` to avoid approval prompts
+- **Mac/Linux**: Uses standard `acceptEdits` mode
+
+For more details, see [Cross-Platform Compatibility](docs/CROSS_PLATFORM_COMPATIBILITY.md).
 - All existing config stays the same unless expressly defined in Zen.
 - - e.g. if your have your model set to Opus and don't change it per command in Zen, then all
 Claude Zen instances use Opus.
