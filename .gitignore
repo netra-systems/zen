@@ -1,2 +1,4 @@
 *.pyc
 /dist
+/netra_zen.egg-info
+check_install.py
