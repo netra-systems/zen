@@ -1099,7 +1099,7 @@ class AgentWebSocketIntegrationEnhancedTests:
         captured_events = []
         
         async def mock_event_sender(event_type: str, event_data: dict):
-            captured_events.append({type: event_type, data: event_data}
+            captured_events.append({"type": event_type, "data": event_data})
         
         websocket_notifier.send_event = mock_event_sender
         

@@ -20,6 +20,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable, Dict, List, NamedTuple, Optional
+from sqlalchemy import text
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.startup_checks.models import StartupCheckResult
@@ -336,7 +337,7 @@ class OptimizedStartupChecker:
             from netra_backend.app.db.postgres import async_session_factory
             if async_session_factory:
                 async with async_session_factory() as session:
-                    result = await session.execute("SELECT 1")
+                    result = await session.execute(text("SELECT 1"))
                     await result.fetchone()
                 return StartupCheckResult(
                     name=check_name, success=True, critical=True,
