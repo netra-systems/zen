@@ -177,7 +177,20 @@ class TestDirectCommandArgumentParsing:
         mock_status.total_tokens = 100
         mock_status.cached_tokens = 20
         mock_status.tool_calls = 5
+        mock_status.total_cost_usd = None  # Required for cost calculation
+        mock_status.input_tokens = 50
+        mock_status.output_tokens = 50
+        mock_status.start_time = 1000.0  # Required for duration calculation
+        mock_status.end_time = 1005.0  # Required for duration calculation
+        mock_status.status = "completed"  # Required for status display
+        mock_status.cache_creation_tokens = 10  # Required for cache display
+        mock_status.cache_read_tokens = 10  # Required for cache display
+        mock_status.error = ""  # Required for error checking
+        mock_status.output = ""  # Required for output display
+        mock_status.tool_details = []  # Required for tool display
         mock_orchestrator_instance.statuses = {"test-instance": mock_status}
+        mock_orchestrator_instance._calculate_cost = Mock(return_value=0.001)  # Mock the cost calculation method
+        mock_orchestrator_instance.pricing_engine = None  # Mock the pricing engine
         mock_orchestrator_instance.add_instance = Mock()
         mock_orchestrator_instance.run_all_instances = AsyncMock(return_value={})
         mock_orchestrator_instance.get_status_summary = Mock(return_value={"completed": 1, "failed": 0, "running": 0})
@@ -196,10 +209,12 @@ class TestDirectCommandArgumentParsing:
                 with patch('zen_orchestrator.Path.cwd', return_value=temp_path):
                     with patch.object(Path, 'exists', return_value=True):
                         with patch.object(Path, 'is_dir', return_value=True):
-                            try:
-                                await main()
-                            except SystemExit:
-                                pass  # Expected for argument parsing test
+                            # Mock the output section to avoid Mock attribute issues
+                            with patch('builtins.print'):
+                                try:
+                                    await main()
+                                except SystemExit:
+                                    pass  # Expected for argument parsing test
 
         # Verify create_direct_instance was called
         assert mock_direct.called
