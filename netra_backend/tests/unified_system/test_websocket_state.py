@@ -341,13 +341,17 @@ class WebSocketStateManagementTests:
         return conn_info
 
     async def _generate_test_jwt_token(self, session):
-        """Generate test JWT token."""
-        import time
-        import jwt
-        payload = {'user_id': session.user_id, 'session_id': session.session_id, 'iat': int(time.time()), 'exp': int(time.time()) + 3600, 'scope': 'websocket_access'}
-        test_secret = 'test_websocket_secret_key_2024'
-        token = jwt.encode(payload, test_secret, algorithm='HS256')
-        return token
+        """Generate test JWT token through auth service."""
+        from netra_backend.app.clients.auth_client_core import AuthServiceClient
+        auth_client = AuthServiceClient()
+        
+        # Create token through auth service
+        result = await auth_client.create_access_token(session.user_id, f"test-{session.user_id}@netrasystems.ai")
+        if result and "access_token" in result:
+            return result["access_token"]
+        
+        # Fallback for offline testing
+        return f"test-token-{session.user_id}-{session.session_id}"
 
     async def _store_auth_context(self, session, jwt_token):
         """Store authentication context for reconnection."""
