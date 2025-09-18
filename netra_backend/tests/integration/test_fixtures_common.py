@@ -5,7 +5,7 @@ Common fixtures and utilities for integration tests.
 Extracted from oversized test_critical_missing_integration.py
 """""
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -29,7 +29,7 @@ from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.db.base import Base
 
 from netra_backend.app.db.models_postgres import Message, Run, Thread, User
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 @pytest.fixture
 async def test_database():

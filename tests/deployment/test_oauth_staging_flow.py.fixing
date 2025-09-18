@@ -104,9 +104,7 @@ class OAuthStagingTester:
 
         if response.status_code != 302:
         print( )
-        f'[FAIL] OAuth initiation didn't redirect: { }
-        response.status_code}"
-        response.status_code}"
+        f'[FAIL] OAuth initiation didn't redirect: {response.status_code}'
                                                                                 
         return False
 

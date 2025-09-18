@@ -34,6 +34,33 @@ class WebSocketTestHelpers:
         await websocket.send_text(message)
 
 
+class MockWebSocketConnection:
+    """Mock WebSocket connection for testing."""
+
+    def __init__(self, user_id: str = "test_user"):
+        self.user_id = user_id
+        self.send_text = AsyncMock()
+        self.receive_text = AsyncMock()
+        self.accept = AsyncMock()
+        self.close = AsyncMock()
+        self.closed = False
+        self.events_sent = []
+
+    async def send_json(self, data: Dict[str, Any]):
+        """Mock sending JSON data."""
+        self.events_sent.append(data)
+        await self.send_text(str(data))
+
+
+def assert_websocket_events(events: List[Dict[str, Any]], expected_types: List[str]):
+    """Assert that expected WebSocket events were sent."""
+    event_types = [event.get("type", "") for event in events]
+
+    for expected_type in expected_types:
+        if expected_type not in event_types:
+            raise AssertionError(f"Expected event type '{expected_type}' not found in events: {event_types}")
+
+
 class WebSocketPerformanceMonitor:
     """Performance monitoring for WebSocket connections."""
 
