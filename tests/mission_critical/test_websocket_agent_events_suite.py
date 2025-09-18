@@ -549,7 +549,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
             pipeline=self.test_pipeline_steps,
             user_context=self.test_user_context,
             run_id=pipeline_run_001,
-            context={"user_id: pipeline_user_001", thread_id: pipeline_thread_001},
+            context={"user_id": "pipeline_user_001", "thread_id": "pipeline_thread_001"},
             db_session=self.mock_db_session  # Session passed as parameter
         )
         
@@ -570,11 +570,12 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     @pytest.mark.unit
     @pytest.mark.isolation_critical
     async def test_user_context_isolation_factory_pattern(self):
-    ""
+        """
         Test user context isolation using factory pattern for pipeline execution.
-        
+
         BVJ: Enterprise security - ensures pipeline execution is user-isolated
         Critical Path: User context  ->  Factory pattern  ->  Isolated execution
+        """
         
         # Arrange: Create PipelineExecutor with user context
         pipeline_executor_with_context = PipelineExecutor(
