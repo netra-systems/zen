@@ -97,7 +97,7 @@ class TestAuthCrossSystemFailures:
 @pytest.mark.critical
 # @pytest.fixture
     async def test_concurrent_login_race_condition(self):
-'''Test 1: Concurrent Login Race Condition'
+'''Test 1: Concurrent Login Race Condition
 
 This test WILL FAIL because the auth service and main backend
 don"t properly handle concurrent login attempts for the same user."
@@ -228,7 +228,7 @@ f"This indicates token blacklisting isnt synchronized across services.""
 @pytest.mark.critical
 # @pytest.fixture, reason="Auth service or backend not available)"
     async def test_session_state_desync(self):
-'''Test 3: Session State Desync'
+'''Test 3: Session State Desync
 
 This test WILL FAIL because session state between auth_service
 and netra_backend can become desynchronized, leading to
