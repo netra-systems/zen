@@ -2157,11 +2157,12 @@ class StartupOrchestrator:
             # CRITICAL FIX: Always initialize websocket_factory to prevent "not associated with a value" error
             from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
             websocket_factory = create_agent_websocket_bridge()
-            
+
             # Note: AgentWebSocketBridge is self-configuring and creates its own dependencies
             # Connection pool and registry are handled internally via dependency injection
             # Health monitor is initialized automatically during bridge initialization
             self.app.state.websocket_bridge_factory = websocket_factory
+            self.app.state.agent_websocket_bridge = websocket_factory  # Also store as agent_websocket_bridge for compatibility
             self.logger.info("    [U+2713] AgentWebSocketBridge configured with connection pool")
             
             # 4. AgentInstanceFactory - REMOVED SINGLETON PATTERN
