@@ -107,9 +107,9 @@ Service startup ABORTED for safety.
             logger.warning(f"⚠️ Environment validation error in {environment}: {e} - continuing startup")
 
 # Run SSOT-compliant validation before creating app
-# TEMPORARILY DISABLED FOR ISSUE #1338 - OAuth validation causing startup timeouts
-# validate_environment_at_startup()
-logger.info("⚠️ Skipping environment validation for development startup")
+# RE-ENABLED FOR BACKEND SERVICE DATABASE CONFIGURATION ISSUE REMEDIATION
+validate_environment_at_startup()
+logger.info("✅ Environment validation enabled for proper configuration")
 
 from netra_backend.app.core.app_factory import create_app
 

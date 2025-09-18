@@ -44,18 +44,16 @@ class JWTValidationMissionCriticalTests:
     """
 
 
-    @pytest.fixture(scope="class)"
+    @pytest.fixture(scope="class")
     def critical_test_logger(self):
-        Logger for mission critical test output.""
-        logger = logging.getLogger(mission_critical_jwt)
+        """Logger for mission critical test output."""
+        logger = logging.getLogger("mission_critical_jwt")
         logger.setLevel(logging.INFO)
         
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                 ALERT:  CRITICAL JWT: %(asctime)s - %(levelname)s - %(message)s"
-                 ALERT:  CRITICAL JWT: %(asctime)s - %(levelname)s - %(message)s""
-
+                "🚨 ALERT: 🔐 CRITICAL JWT: %(asctime)s - %(levelname)s - %(message)s"
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
