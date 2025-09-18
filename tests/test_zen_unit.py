@@ -346,7 +346,6 @@ class TestClaudeInstanceOrchestratorInit:
         assert orchestrator.startup_delay == 1.0
         assert orchestrator.max_line_length == 500
         assert orchestrator.status_report_interval == 30
-        assert orchestrator.use_cloud_sql is False
         assert orchestrator.quiet is False
         assert orchestrator.batch_id is not None
         assert len(orchestrator.batch_id) == 36  # UUID length
@@ -359,7 +358,6 @@ class TestClaudeInstanceOrchestratorInit:
             startup_delay=2.5,
             max_line_length=1000,
             status_report_interval=60,
-            use_cloud_sql=True,
             quiet=True
         )
 
@@ -368,24 +366,8 @@ class TestClaudeInstanceOrchestratorInit:
         assert orchestrator.startup_delay == 2.5
         assert orchestrator.max_line_length == 1000
         assert orchestrator.status_report_interval == 60
-        assert orchestrator.use_cloud_sql is True
         assert orchestrator.quiet is True
 
-    def test_orchestrator_cloud_sql_disabled(self):
-        """Test that CloudSQL configuration is disabled for security"""
-        with patch.dict(os.environ, {}, clear=True):
-            orchestrator = ClaudeInstanceOrchestrator(
-                workspace_dir=self.workspace,
-                use_cloud_sql=True
-            )
-
-            # CloudSQL functionality disabled for security
-            assert orchestrator.use_cloud_sql is True  # Flag preserved for backward compatibility
-            # But no environment variables should be set for security
-            assert os.environ.get('POSTGRES_PORT') is None
-            assert os.environ.get('POSTGRES_HOST') is None
-            assert os.environ.get('POSTGRES_DB') is None
-            assert os.environ.get('POSTGRES_USER') is None
 
     def test_add_instance(self):
         """Test adding instances to orchestrator"""

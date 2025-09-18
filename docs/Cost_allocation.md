@@ -361,7 +361,6 @@ status.cached_tokens = status.cache_read_tokens + status.cache_creation_tokens
 - Custom pricing override capabilities
 
 ### Integration Roadmap
-- Enhanced CloudSQL metrics persistence
 - Advanced reporting dashboards
 - Cost forecasting and predictions
 - Team and project cost allocation
