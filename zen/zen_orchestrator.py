@@ -913,6 +913,8 @@ class ClaudeInstanceOrchestrator:
         # Print column headers with separated cache metrics
         print(f"║  {'Status':<8} {'Name':<30} {'Model':<10} {'Duration':<10} {'Overall':<8} {'Tokens':<8} {'Cache Cr':<8} {'Cache Rd':<8} {'Tools':<6} {'Budget':<10}")
         print(f"║  {'─'*8} {'─'*30} {'─'*10} {'─'*10} {'─'*8} {'─'*8} {'─'*8} {'─'*8} {'─'*6} {'─'*10}")
+        print(f"║  📝 Model shows actual Claude model used (critical for accurate cost tracking)")
+        print(f"║  💡 Tip: Model may differ from your config - Claude routes requests intelligently")
 
         for name, status in self.statuses.items():
             # Status emoji
