@@ -226,7 +226,6 @@ class StagingWebSocketFlowTests:
     @pytest.mark.timeout(120)  # Longer timeout for staging cold starts
     async def test_staging_websocket_connection_with_auth(self):
         """Test that we can connect to staging WebSocket with proper authentication."""
-        """Test that we can connect to staging WebSocket with proper authentication."""
         logger.info("Testing staging WebSocket connection with authentication")"
 
         # Test connection
@@ -259,7 +258,7 @@ class StagingWebSocketFlowTests:
         # Register event handler
         def record_event(data):
             event = WebSocketEventRecord(
-                event_type=data.get(type),
+                event_type=data.get("type"),
                 data=data,
                 timestamp=time.time(),
                 thread_id=data.get("thread_id", "unknown")
@@ -272,7 +271,7 @@ class StagingWebSocketFlowTests:
             self.helper.on_event(event_type, record_event)
 
         # Send agent request
-        thread_id = fstaging-test-{int(time.time())}
+        thread_id = f"staging-test-{int(time.time())}"
         query = "What is the current system status? Please provide a brief summary."
 
         success = await self.helper.send_agent_request(
@@ -301,9 +300,9 @@ class StagingWebSocketFlowTests:
         assert is_valid, f"Staging WebSocket validation failed: {failures}"
 
         logger.info("PASS: Agent flow completed successfully in staging:")
-        logger.info(f"  - Duration: {flow_result['duration']:.2f}s")"
-        logger.info(f  - Events: {flow_result['total_events']})
-        logger.info(f  - Types: {flow_result['event_types']})
+        logger.info(f"  - Duration: {flow_result['duration']:.2f}s")
+        logger.info(f"  - Events: {flow_result['total_events']}")
+        logger.info(f"  - Types: {flow_result['event_types']}")
 
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -329,7 +328,7 @@ class StagingWebSocketFlowTests:
         )
         assert success, "Failed to send message over secure WebSocket connection"
 
-        logger.info(PASS: Staging WebSocket SSL/TLS security validated)
+        logger.info("PASS: Staging WebSocket SSL/TLS security validated")
 
     @pytest.mark.asyncio
     @pytest.mark.staging
