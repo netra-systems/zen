@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime, timedelta
 import traceback
+from sqlalchemy import text
 
 from shared.logging.unified_logging_ssot import get_logger
 
@@ -252,7 +253,7 @@ class HealthMonitor:
             # Try to get a session
             async with get_db_session() as session:
                 # Try a simple query
-                result = await session.execute("SELECT 1")
+                result = await session.execute(text("SELECT 1"))
                 if result:
                     return HealthStatus.HEALTHY, "Database responsive", {}
             

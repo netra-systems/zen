@@ -899,11 +899,11 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     @pytest.mark.unit
     @pytest.mark.performance
     async def test_pipeline_execution_performance_characteristics(self):
-        
+        """
         Test pipeline execution performance characteristics.
-        
+
         BVJ: Platform performance - ensures pipeline execution meets timing requirements
-""
+        """
         # Arrange: Create PipelineExecutor
         pipeline_executor = PipelineExecutor(
             engine=self.mock_execution_engine,
@@ -1009,9 +1009,9 @@ class AgentWebSocketIntegrationEnhancedTests:
         tool_dispatcher = await agent_registry.create_enhanced_tool_dispatcher(user_context)
         
         # Verify WebSocket integration in tool dispatcher
-        assert hasattr(tool_dispatcher, '_websocket_notifier'), Tool dispatcher missing WebSocket notifier""
+        assert hasattr(tool_dispatcher, '_websocket_notifier'), "Tool dispatcher missing WebSocket notifier"
         
-        logger.info( PASS:  AgentRegistry WebSocket integration validated)
+        logger.info("PASS: AgentRegistry WebSocket integration validated")
 
     @pytest.mark.asyncio 
     @pytest.mark.critical
@@ -1043,7 +1043,7 @@ class AgentWebSocketIntegrationEnhancedTests:
         
         # Verify integration
         assert hasattr(execution_engine, '_websocket_notifier'), "Execution engine missing WebSocket notifier"
-        assert execution_engine._websocket_notifier is websocket_notifier, WebSocket notifier reference mismatch
+        assert execution_engine._websocket_notifier is websocket_notifier, "WebSocket notifier reference mismatch"
         
         # Test agent context creation with WebSocket integration
         agent_context = AgentExecutionContext(
@@ -1126,10 +1126,11 @@ class AgentWebSocketIntegrationEnhancedTests:
     @pytest.mark.critical
     # @require_docker_services()  # Temporarily disabled - GCP integration regression
     async def test_unified_websocket_manager_agent_coordination(self):
-        Test UnifiedWebSocketManager coordination with agent systems."
-        
+        """
+        Test UnifiedWebSocketManager coordination with agent systems.
+
         Business Value: Validates the central WebSocket management coordination with agents.
-        "
+        """
         config = RealWebSocketTestConfig()
         context = create_test_context()
         
