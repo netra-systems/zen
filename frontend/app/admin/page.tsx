@@ -19,6 +19,8 @@ interface AdminSection {
   description: string;
   icon: LucideIcon;
   color: string;
+  href?: string;
+  isTab?: boolean;
 }
 import { motion } from 'framer-motion';
 
@@ -67,7 +69,7 @@ const AdminPage: NextPage = () => {
         {activeTab === 'dashboard' && (
           <>
             <AdminQuickStats />
-            <AdminDashboard />
+            <AdminDashboard setActiveTab={setActiveTab} />
           </>
         )}
 
@@ -132,13 +134,21 @@ const createStatCard = (stat: AdminStat, index: number) => {
   );
 };
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
   const adminSections = [
+    {
+      title: 'WebSocket Auth Monitor',
+      description: 'Real-time WebSocket authentication monitoring and diagnostics',
+      icon: Wifi,
+      color: 'bg-blue-500',
+      href: 'websocket-auth',
+      isTab: true
+    },
     {
       title: 'System Settings',
       description: 'Configure system-wide settings and preferences',
       icon: Settings,
-      color: 'bg-blue-500',
+      color: 'bg-gray-500',
       href: '#'
     },
     {
