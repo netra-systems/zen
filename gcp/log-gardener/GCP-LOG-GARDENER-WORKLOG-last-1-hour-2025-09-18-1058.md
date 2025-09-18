@@ -78,6 +78,7 @@ TypeError: object Row can't be used in 'await' expression
 ### For Cluster 2 (Database Async):
 - **Search for existing issue:** Database async/await or Row object issues
 - **Action:** Create new P1 issue if none exists, or update existing
+- **COMPLETED:** Created GitHub issue #1340 - "GCP-active-dev | P1 | Database Row object incorrectly used with await causing transaction failures"
 
 ### For Cluster 3 (Recovery):
 - **Search for existing issue:** Recovery or startup fixes
@@ -93,3 +94,4 @@ TypeError: object Row can't be used in 'await' expression
 
 ## Issue Tracking
 - **Issue #1339:** AgentWebSocketBridge missing 'configure' attribute (P0) - CREATED
+- **Issue #1340:** Database Row object incorrectly used with await causing transaction failures (P1) - CREATED
