@@ -32,6 +32,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional, List, Tuple
 import hashlib
 from unittest.mock import AsyncMock
+from sqlalchemy import text
 
 from shared.isolated_environment import get_env
 from test_framework.base_integration_test import BaseIntegrationTest
