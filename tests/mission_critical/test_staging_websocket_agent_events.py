@@ -56,10 +56,9 @@ class StagingWebSocketEventValidator:
 
     # Additional events that may be sent in real scenarios
     OPTIONAL_EVENTS = {
-        agent_fallback","
-        final_report,
-        partial_result,"
-        partial_result,"
+        "agent_fallback",
+        "final_report",
+        "partial_result",
         "tool_error"
     }
 
