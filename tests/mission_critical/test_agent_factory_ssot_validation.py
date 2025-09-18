@@ -54,13 +54,14 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
         self.test_user_contexts.clear()
 
     def test_agent_registry_factory_user_isolation_ssot_compliance(self):
-        TEST FAILS: AgentRegistry factory allows shared state between users.""
+        """TEST FAILS: AgentRegistry factory allows shared state between users.
 
         CRITICAL BUSINESS IMPACT: Shared state causes WebSocket events to be delivered
-        to wrong users, directly violating ""500K"" ARR Golden Path user experience.
+        to wrong users, directly violating $500K ARR Golden Path user experience.
 
         EXPECTED FAILURE: Multiple users get same AgentRegistry instance.
         PASSES AFTER: Each user gets isolated AgentRegistry with unique WebSocket manager.
+        """
         
         try:
             from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry

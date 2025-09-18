@@ -232,7 +232,7 @@ def is_docker_available() -> bool:
         manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
         return manager.is_docker_available()
     except Exception as e:
-        logger.warning(fDocker availability check failed: {e}")"
+        logger.warning(f"Docker availability check failed: {e}")
         return False
 
 
@@ -1640,3 +1640,4 @@ async def send_test_agent_request(
     
     await test_context.send_message(message)
     return message
+"""

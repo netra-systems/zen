@@ -418,14 +418,12 @@ class AgentExecutionBusinessValueTests(BaseIntegrationTest):
         Business Value: Real-time event delivery creates engagement and demonstrates
         AI value as it's being generated, not just at the end.'
         
-        logger.info([U+1F4E1] Testing WebSocket event delivery during agent execution")"
+        logger.info("Testing WebSocket event delivery during agent execution")
         
         # Set up authenticated context
         user_context = await create_authenticated_user_context(
-            user_email=websocket_test@example.com,
-            environment=test,"
-            environment=test,""
-
+            user_email="websocket_test@example.com",
+            environment="test",
             websocket_enabled=True
         )
         
