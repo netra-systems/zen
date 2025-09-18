@@ -38,7 +38,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from tests.e2e.staging_test_base import StagingTestBase, track_test_timing
 from tests.e2e.staging_config import StagingTestConfig as StagingConfig
 from tests.e2e.staging_auth_client import StagingAuthClient
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from netra_backend.tests.e2e.real_websocket_client import RealWebSocketClient
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
