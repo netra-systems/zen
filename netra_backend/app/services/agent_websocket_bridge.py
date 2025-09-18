@@ -2484,16 +2484,17 @@ class AgentWebSocketBridge(MonitorableComponent):
                 event_id = result.get('event_id')
             
             # Build standardized notification message with user_id for proper routing
+            # CRITICAL BUSINESS FIX: tool_name must be at top level for tool transparency (matches tool_executing fix)
             sanitized_result = self._sanitize_result(result) if result else {}
             notification = {
                 "type": "tool_completed",
                 "run_id": run_id,
                 "user_id": effective_user_context.user_id,  # PHASE 1 FIX: Include user_id for routing
                 "agent_name": effective_agent_name,
+                "tool_name": tool_name,  # BUSINESS CRITICAL: Tool transparency - moved to top level (Issue #1039 consistency)
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "results": sanitized_result,  # FIX #935: Add top-level results field
                 "data": {
-                    "tool_name": tool_name,
                     "result": sanitized_result,  # Keep nested result for backward compatibility
                     "execution_time_ms": execution_time_ms,
                     "status": "completed",
