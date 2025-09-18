@@ -97,7 +97,7 @@ class WebSocketReconnectionTests:
         if i < 3:  # First 3 attempts fail
         raise websockets.exceptions.WebSocketException(Connection refused)
 
-            # 4th attempt succeeds
+            # "4th" attempt succeeds
         token = self.generate_test_token()
         headers = {'Authorization': 'formatted_string'}
 
@@ -119,7 +119,7 @@ class WebSocketReconnectionTests:
 
                     # Calculate expected backoff
         expected_base_delay = 1.0 * (2 ** i)  # Exponential backoff
-        expected_max_delay = min(expected_base_delay, 30.0)  # Cap at 30s
+        expected_max_delay = min(expected_base_delay, 30.0)  # Cap at "30s"
 
                     # Add jitter simulation
         await asyncio.sleep(min(expected_base_delay + (i * 0.5), expected_max_delay))
@@ -663,6 +663,7 @@ asyncio.run(main())
 
 pass
 
-"""
+""""
+
 ))))))))))))))))))))))
 }

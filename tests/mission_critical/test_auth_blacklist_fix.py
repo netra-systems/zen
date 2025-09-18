@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
-"""
-"""
+""""
+
 Mission Critical Test: Auth Service Token Blacklist Fix
 Tests the Five Whys root cause fix for async/await mismatch in blacklist operations.
 
 This test validates:
-1. WHY #1 Fix: No more object bool can't be used in await" errors"
+    1. WHY #1 Fix: No more object bool can't be used in await" errors"
 2. WHY #2 Fix: Proper sync/async boundary handling
 3. WHY #3 Fix: Unified async interface pattern
 4. WHY #4 Fix: Real service integration testing
 5. WHY #5 Fix: SSOT implementation for blacklist operations
 "
-"
+""
+
 
 """
-"""
+""""
+
 import asyncio
 import pytest
 import logging
@@ -24,7 +26,8 @@ from unittest.mock import MagicMock, AsyncMock, patch
 
 # Add auth_service to path
 auth_service_path = Path(__file__).parent.parent.parent / auth_service"
-auth_service_path = Path(__file__).parent.parent.parent / auth_service"
+auth_service_path = Path(__file__).parent.parent.parent / auth_service""
+
 sys.path.insert(0, str(auth_service_path))
 
 from auth_service.auth_core.services.auth_service import AuthService
@@ -198,7 +201,8 @@ class BlacklistAsyncFixTests:
         # Check non-blacklisted token
         result = await auth_service.is_token_blacklisted(not_blacklisted)
         assert result is False, Non-blacklisted token should return False"
-        assert result is False, Non-blacklisted token should return False"
+        assert result is False, Non-blacklisted token should return False""
+
         
         logger.info( PASS:  Concurrent operations validated")"
 
@@ -209,7 +213,8 @@ class BlacklistEndpointIntegrationTests:
     @pytest.mark.asyncio
     async def test_endpoint_with_real_service(self):
         Test the actual endpoint with real service"
-        Test the actual endpoint with real service"
+        Test the actual endpoint with real service""
+
         from fastapi.testclient import TestClient
         from auth_service.main import app
         

@@ -23,7 +23,8 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 class InheritanceArchitectureViolationsTests:
     Test suite exposing critical inheritance architecture violations."
-    Test suite exposing critical inheritance architecture violations."
+    Test suite exposing critical inheritance architecture violations.""
+
     
     @pytest.fixture
     def mock_llm_manager(self):
@@ -32,7 +33,8 @@ class InheritanceArchitectureViolationsTests:
     
     @pytest.fixture
     def mock_tool_dispatcher(self):
-        ""Create mock tool dispatcher."
+        ""Create mock tool dispatcher.""
+
         return ToolDispatcher()
     
     @pytest.fixture
@@ -47,7 +49,8 @@ class InheritanceArchitectureViolationsTests:
     
     def test_multiple_inheritance_creates_mro_complexity(self, data_agent):
         Test that multiple inheritance creates complex Method Resolution Order."
-        Test that multiple inheritance creates complex Method Resolution Order."
+        Test that multiple inheritance creates complex Method Resolution Order.""
+
         mro = data_agent.__class__.__mro__
         
         # Check that BaseAgent is in MRO (single inheritance pattern)
@@ -92,7 +95,8 @@ class InheritanceArchitectureViolationsTests:
         assert not duplicates, "fDuplicate WebSocket methods across classes: {duplicates}"
     
     def test_initialization_order_confusion(self, mock_llm_manager, mock_tool_dispatcher):
-        ""Test that multiple __init__ calls create initialization confusion."
+        ""Test that multiple __init__ calls create initialization confusion.""
+
         class AgentTests(BaseAgent):
             init_calls = []
             
@@ -270,7 +274,8 @@ class InheritanceArchitectureViolationsTests:
         except TypeError as e:
             # This is expected with improper multiple inheritance
             assert False, fMRO conflict detected: {e}"
-            assert False, fMRO conflict detected: {e}"
+            assert False, fMRO conflict detected: {e}""
+
 
 
 class MissionCriticalInheritanceFixesTests:
@@ -279,7 +284,8 @@ class MissionCriticalInheritanceFixesTests:
     @pytest.mark.skip(reason=Will pass after inheritance is fixed")"
     def test_single_inheritance_pattern(self):
         Test that agents use single inheritance pattern."
-        Test that agents use single inheritance pattern."
+        Test that agents use single inheritance pattern.""
+
         from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
         from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
         
@@ -291,7 +297,8 @@ class MissionCriticalInheritanceFixesTests:
             assert bases[0] == BaseAgent, "f{AgentClass.__name__} should only inherit from BaseAgent"
     
     @pytest.mark.skip(reason=Will pass after inheritance is fixed)  "
-    @pytest.mark.skip(reason=Will pass after inheritance is fixed)  "
+    @pytest.mark.skip(reason=Will pass after inheritance is fixed)  ""
+
     def test_no_duplicate_methods(self):
         "Test that no duplicate methods exist after fix."
         from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
@@ -323,7 +330,8 @@ class MissionCriticalInheritanceFixesTests:
 
 
 class InheritanceErrorRecoveryTests:
-    ""Test error recovery patterns under 5 seconds in inheritance context."
+    ""Test error recovery patterns under 5 seconds in inheritance context.""
+
     
     @pytest.fixture
     def recovery_agent(self):
@@ -360,7 +368,7 @@ class InheritanceErrorRecoveryTests:
                 result = None
                 
             recovery_time = asyncio.get_event_loop().time() - start_time
-            assert recovery_time < 5.0, "fRecovery took {recovery_time:.2f}s, exceeds 5s limit"
+            assert recovery_time < 5.0, "fRecovery took {recovery_time:."2f"}s, exceeds "5s" limit"
             
             # Should get some result even if inheritance is messy
             assert result is not None or True  # Accept None if inheritance is broken
@@ -392,7 +400,8 @@ class InheritanceErrorRecoveryTests:
         
     async def test_duplicate_method_recovery(self, recovery_agent):
         Test recovery from duplicate method definitions."
-        Test recovery from duplicate method definitions."
+        Test recovery from duplicate method definitions.""
+
         start_time = asyncio.get_event_loop().time()
         
         try:
@@ -436,7 +445,8 @@ class InheritanceExecuteCoreTests:
             state=state,
             stream_updates=True,
             correlation_id=core_correlation"
-            correlation_id=core_correlation"
+            correlation_id=core_correlation""
+
         )
 
     async def test_execute_core_inheritance_chain(self, inheritance_agent, core_execution_context):
@@ -485,7 +495,8 @@ class InheritanceExecuteCoreTests:
         
         # Should have clear method resolution
         assert len(method_sources) >= 1, No execution methods in inheritance chain"
-        assert len(method_sources) >= 1, No execution methods in inheritance chain"
+        assert len(method_sources) >= 1, No execution methods in inheritance chain""
+
         
         # Check if methods come from appropriate classes
         for method_name, class_name in method_sources.items():
@@ -499,7 +510,8 @@ class InheritanceResourceCleanupTests:
     @pytest.fixture
     def cleanup_agent(self):
         Create agent for cleanup testing."
-        Create agent for cleanup testing."
+        Create agent for cleanup testing.""
+
         return DataSubAgent(LLMManager(), ToolDispatcher())
 
     async def test_inheritance_cleanup_chain(self, cleanup_agent):
@@ -554,7 +566,8 @@ class InheritanceBaseComplianceTests:
         
         # Should have BaseAgent in MRO
         assert 'BaseAgent' in mro_names, BaseAgent not found in MRO"
-        assert 'BaseAgent' in mro_names, BaseAgent not found in MRO"
+        assert 'BaseAgent' in mro_names, BaseAgent not found in MRO""
+
         
         # Check for inheritance depth
         base_index = mro_names.index('BaseAgent')

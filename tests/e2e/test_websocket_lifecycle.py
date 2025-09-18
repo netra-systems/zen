@@ -4,15 +4,15 @@ Complete message lifecycle validation for core chat experience.
 Tests real WebSocket connections with SupervisorAgent integration and streaming response delivery.
 
 Business Value Justification (BVJ):
-1. Segment: All users (Free, Early, Mid, Enterprise) - Core chat experience
+    1. Segment: All users (Free, Early, Mid, Enterprise) - Core chat experience
 2. Business Goal: Core platform functionality reliability
 3. Value Impact: Foundation for all AI interactions - prevents user churn
 4. Revenue Impact: Critical for user retention and conversion to paid tiers
 
 ARCHITECTURE COMPLIANCE:
-- File  <= 300 lines, functions  <= 8 lines each
+    - File  <= 300 lines, functions  <= 8 lines each
 - Real WebSocket connections only (no mocks)
-- Performance thresholds: <500ms connection, <1s streaming, <3s roundtrip
+- Performance thresholds: <"500ms" connection, <"1s" streaming, <"3s" roundtrip
 ""
 
 import asyncio
@@ -52,7 +52,8 @@ class WebSocketLifecycleTracker:
         self.connection_start = time.time()
     
     def record_connection_established(self) -> None:
-        ""Record successful connection."
+        ""Record successful connection.""
+
         self.connection_established = time.time()
     
     def record_message_sent(self) -> None:
@@ -188,7 +189,8 @@ class StreamingResponseValidator:
 
 @pytest.fixture
 async def lifecycle_harness():
-    ""Create WebSocket lifecycle testing harness."
+    ""Create WebSocket lifecycle testing harness.""
+
     harness = UnifiedE2ETestHarness()
     yield harness
     # Cleanup handled by harness
@@ -308,23 +310,23 @@ class WebSocketAgentMessageLifecycleTests:
     def _assert_performance_thresholds(self, tracker: WebSocketLifecycleTracker, 
                                      validator: StreamingResponseValidator) -> None:
         Assert all performance timing requirements.""
-        # Connection established < 500ms
+        # Connection established < "500ms"
         connection_time = tracker.connection_established - tracker.connection_start
-        assert connection_time < 0.5, "fConnection too slow: {connection_time:.3f}s > 0.5s"
+        assert connection_time < 0.5, "fConnection too slow: {connection_time:."3f"}s > 0."5s""
         
-        # Message acknowledged immediately (within 100ms)
+        # Message acknowledged immediately (within "100ms")
         ack_time = tracker.message_acknowledged - tracker.message_sent
-        assert ack_time < 0.1, "fMessage acknowledgment too slow: {ack_time:.3f}s > 0.1s"
+        assert ack_time < 0.1, "fMessage acknowledgment too slow: {ack_time:."3f"}s > 0."1s""
         
         # Streaming starts < 1 second
         if validator.streaming_started:
             streaming_delay = validator.streaming_started - tracker.message_sent
-            assert streaming_delay < 1.0, fStreaming start too slow: {streaming_delay:.3f}s > 1.0s""
+            assert streaming_delay < 1.0, fStreaming start too slow: {streaming_delay:."3f"}s > 1."0s"""
         
         # Full roundtrip < 3 seconds
         if validator.last_chunk_time:
             roundtrip_time = validator.last_chunk_time - tracker.message_sent
-            assert roundtrip_time < 3.0, "fFull roundtrip too slow: {roundtrip_time:.3f}s > 3.0s"
+            assert roundtrip_time < 3.0, "fFull roundtrip too slow: {roundtrip_time:."3f"}s > 3."0s""
 
 
 @pytest.mark.e2e

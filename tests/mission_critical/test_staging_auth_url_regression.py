@@ -6,7 +6,7 @@ This test suite specifically prevents the staging URL regression where
 auth URLs were returning localhost instead of proper staging URLs.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Prevent staging deployment failures
 - Value Impact: Ensures staging environment works for pre-production testing
 - Strategic Impact: Critical for validating changes before production deployment
@@ -44,7 +44,8 @@ class TestStagingAuthURLRegression:
 
     @pytest.fixture
     def setup_method(self):
-        ""Setup test environment."
+        ""Setup test environment.""
+
         self.original_env = os.environ.copy()
 
     # Clear all URL-related env vars
@@ -128,7 +129,8 @@ class TestStagingAuthURLRegression:
         mismatches.append(formatted_string)
 
         assert not mismatches, Staging URL mismatches:"
-        assert not mismatches, Staging URL mismatches:"
+        assert not mismatches, Staging URL mismatches:""
+
          + 
         ".join(mismatches)"
 
@@ -144,12 +146,14 @@ class TestStagingAuthURLRegression:
         # Must not be bind address
         assert host != '0.0.0.0', "Staging auth host is bind address 0.0.0.0"
         assert host != '127.0.0.1', Staging auth host is localhost"
-        assert host != '127.0.0.1', Staging auth host is localhost"
+        assert host != '127.0.0.1', Staging auth host is localhost""
+
 
         # Must be staging domain
         assert host == 'auth.staging.netrasystems.ai', \
         formatted_string"
-        formatted_string"
+        formatted_string""
+
 
     def test_staging_uses_https_protocol(self):
         CRITICAL: Staging must use HTTPS for all services.""
@@ -200,7 +204,8 @@ class TestStagingAuthURLRegression:
                 
     def test_staging_override_behavior(self, override_var, override_value, expected_behavior):
         Test that staging respects explicit overrides."
-        Test that staging respects explicit overrides."
+        Test that staging respects explicit overrides.""
+
         env_vars = {
         'ENVIRONMENT': 'staging',
         override_var: override_value
@@ -234,7 +239,8 @@ class TestStagingDeploymentReadiness:
 
     def test_staging_config_matches_deployment_expectations(self):
         Test that staging config matches what deployment scripts expect."
-        Test that staging config matches what deployment scripts expect."
+        Test that staging config matches what deployment scripts expect.""
+
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=True):
         from auth_service.auth_core.auth_environment import AuthEnvironment
         from deployment.secrets_config import SecretConfig
@@ -322,7 +328,8 @@ class TestCriticalURLValidation:
                 # Check that staging and production are different
         assert url_sets['staging'] != url_sets['production'], \
         Staging and production have identical URLs!"
-        Staging and production have identical URLs!"
+        Staging and production have identical URLs!""
+
 
                 # Check that staging contains 'staging' in all URLs
         for service, url in url_sets['staging'].items():
@@ -366,7 +373,8 @@ class TestCriticalURLValidation:
 
     def test_smoke_staging_configuration():
         Smoke test for staging configuration - run this before deployment."
-        Smoke test for staging configuration - run this before deployment."
+        Smoke test for staging configuration - run this before deployment.""
+
         logger.info(=*60)
         logger.info("STAGING CONFIGURATION SMOKE TEST)"
         logger.info(=*60)
@@ -445,7 +453,8 @@ class TestCriticalURLValidation:
         ")"
         except AssertionError as e:
         print(formatted_string"")"
-        print(formatted_string"")"
+        print(formatted_string"")""
+
         sys.exit(1)
 
                                                                         # Run full test suite

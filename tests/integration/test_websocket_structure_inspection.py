@@ -1,11 +1,13 @@
 "
-"
+""
+
 WebSocket event structure inspection for Issue #1049
 
 This test file examines the actual structure of events being delivered
 through the WebSocket infrastructure to document the structure mismatch.
 "
-"
+""
+
 
 import pytest
 import asyncio
@@ -75,7 +77,8 @@ class WebSocketStructureInspectionTests:
 
         assert success, "Tool executing notification should succeed"
         assert len(captured_events) > 0, Should capture at least one event"
-        assert len(captured_events) > 0, Should capture at least one event"
+        assert len(captured_events) > 0, Should capture at least one event""
+
 
         # Inspect the captured event structure
         method_name, args, kwargs = captured_events[0]
@@ -85,7 +88,8 @@ class WebSocketStructureInspectionTests:
         print(fMethod: {method_name})"
         print(f"Args: {args})"
         print(fKwargs: {kwargs})"
-        print(fKwargs: {kwargs})"
+        print(fKwargs: {kwargs})""
+
 
         # Extract event data
         if args and len(args) > 1:
@@ -115,7 +119,8 @@ class WebSocketStructureInspectionTests:
             pytest.fail(fEvent missing 'type' field. Actual structure: {json.dumps(actual_structure, indent=2)})
 
     async def test_inspect_tool_completed_structure(self, bridge_with_capture):
-        """
+        """"
+
         Inspect actual tool_completed event structure to document the format.
 
         bridge, captured_events = bridge_with_capture
@@ -127,7 +132,8 @@ class WebSocketStructureInspectionTests:
                 Switch to GPT-4o for 15% cost reduction,"
                 Switch to GPT-4o for 15% cost reduction,"
                 Implement request caching for 8% additional savings"
-                Implement request caching for 8% additional savings"
+                Implement request caching for 8% additional savings""
+
             ],
             confidence: 0.94,
             details": {"
@@ -169,7 +175,8 @@ class WebSocketStructureInspectionTests:
             event_data = kwargs
 
         print(f\n=== EVENT DATA STRUCTURE ===)"
-        print(f\n=== EVENT DATA STRUCTURE ===)"
+        print(f\n=== EVENT DATA STRUCTURE ===)""
+
         pprint(event_data)
 
         # Document the actual structure for results field
@@ -182,7 +189,8 @@ class WebSocketStructureInspectionTests:
             results_location: top_level if "results in event_data else unknown,"
             all_fields: list(event_data.keys()) if isinstance(event_data, dict) else not_dict,
             event_data_type: type(event_data).__name__"
-            event_data_type: type(event_data).__name__"
+            event_data_type: type(event_data).__name__""
+
         }
 
         print(f\n=== STRUCTURE ANALYSIS ===")"
@@ -195,10 +203,12 @@ class WebSocketStructureInspectionTests:
 
     async def test_compare_validator_expectations_vs_reality(self, bridge_with_capture):
         """
-    "
+    ""
+
         Compare what the validator expects vs what the bridge actually delivers.
         "
-        "
+        ""
+
         from netra_backend.app.websocket_core.event_validator import UnifiedEventValidator
 
         bridge, captured_events = bridge_with_capture
@@ -233,7 +243,7 @@ class WebSocketStructureInspectionTests:
             type: tool_executing,
             "run_id: run-123,"
             agent_name: test_agent,
-            timestamp: 2025-9-14T12:0:00Z","
+            timestamp: 2025-9-14T12:0:"00Z"","
             "payload: {}"
         }
 

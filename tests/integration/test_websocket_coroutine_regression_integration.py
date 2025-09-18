@@ -7,10 +7,10 @@ Tests WebSocket endpoint behavior with real authentication and environment detec
 CRITICAL ISSUE: GitHub Issue #133
 - Problem: 'coroutine' object has no attribute 'get' error in WebSocket endpoint  
 - Root Cause: get_env() returning coroutine instead of IsolatedEnvironment
-- Business Impact: Blocking core chat functionality ($500K+ ARR impact)
+- Business Impact: Blocking core chat functionality ($"500K" plus ARR impact)
 
 CLAUDE.MD COMPLIANCE:
-- Integration tests use real authentication (NO MOCKS for auth)
+    - Integration tests use real authentication (NO MOCKS for auth)
 - Tests real WebSocket endpoint behavior in different environments
 - Tests designed to FAIL HARD when coroutine issue occurs
 - Uses existing test framework patterns from /tests/integration/
@@ -62,7 +62,7 @@ class WebSocketCoroutineRegressionIntegrationTests(BaseIntegrationTest):
         await super().asyncSetUp() if hasattr(super(), 'asyncSetUp') else None
 
     async def test_websocket_connection_establishment_with_real_auth(self):
-"""Empty docstring."""
+    """Empty docstring."""
         CRITICAL: Test WebSocket connection with real authentication.
         
         This integration test validates that the WebSocket endpoint can establish
@@ -117,7 +117,8 @@ class WebSocketCoroutineRegressionIntegrationTests(BaseIntegrationTest):
                 self.fail(fWebSocket endpoint failed with coroutine regression: {e})
 
     def test_websocket_environment_detection_integration(self):
-    """
+    """"
+
         Test WebSocket environment detection logic with real environment.
         
         This tests the E2E detection logic that caused the coroutine issue
@@ -212,7 +213,8 @@ class WebSocketCoroutineRegressionIntegrationTests(BaseIntegrationTest):
             self.assertIsInstance(is_e2e_testing, bool)
 
     async def test_websocket_auth_integration_with_environment_detection(self):
-    """
+    """"
+
         CRITICAL: Test WebSocket authentication integrated with environment detection.
         
         This test combines real authentication with environment detection to ensure

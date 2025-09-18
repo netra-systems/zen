@@ -1,23 +1,25 @@
 #!/usr/bin/env python3
-"""
-"""
+""""
+
 MISSION CRITICAL: WebSocket Message Queue Resilience Test
 
 This test validates that the WebSocket message queue never permanently loses messages
 and has comprehensive recovery mechanisms for all failure scenarios.
 
 CRITICAL REQUIREMENTS VALIDATED:
-1. No permanent message loss - all messages either succeed or go to DLQ
+    1. No permanent message loss - all messages either succeed or go to DLQ
 2. Exponential backoff retry mechanism works correctly  
 3. Circuit breaker integration prevents cascade failures
 4. Dead Letter Queue captures and allows investigation of failed messages
 5. Background retry processor recovers failed messages
 6. Comprehensive state transitions and logging
 "
-"
+""
+
 
 """
-"""
+""""
+
 import asyncio
 import json
 import pytest
@@ -62,7 +64,8 @@ class MockHandler:
 @pytest.mark.asyncio
 class WebSocketMessageQueueResilienceTests:
     Mission critical tests for WebSocket message queue resilience"
-    Mission critical tests for WebSocket message queue resilience"
+    Mission critical tests for WebSocket message queue resilience""
+
 
     @pytest.fixture
     async def message_queue_with_mock_redis(self):
@@ -82,7 +85,8 @@ class WebSocketMessageQueueResilienceTests:
                 entry = self.redis_storage[key]
                 if time.time() < entry[expires]:
                     return entry[value]"
-                    return entry[value]"
+                    return entry[value]""
+
                 else:
                     del self.redis_storage[key]
             return None
@@ -152,7 +156,7 @@ class WebSocketMessageQueueResilienceTests:
         Create test messages for various scenarios""
         return [
             QueuedMessage(
-                id=ftest-msg-{i:03d},
+                id=ftest-msg-{i:"03d"},
                 user_id=fuser-{i},
                 type="test_message,"
                 payload={test_data: fdata-{i}, index: i},
@@ -217,10 +221,10 @@ class WebSocketMessageQueueResilienceTests:
         # Test exponential backoff progression
         expected_ranges = [
             (1, 1),      # retry_count 0: base delay
-            (1, 3),      # retry_count 1: ~2s with jitter
-            (2, 5),      # retry_count 2: ~4s with jitter  
-            (4, 10),     # retry_count 3: ~8s with jitter
-            (8, 20),     # retry_count 4: ~16s with jitter
+            (1, 3),      # retry_count 1: ~"2s" with jitter
+            (2, 5),      # retry_count 2: ~"4s" with jitter  
+            (4, 10),     # retry_count 3: ~"8s" with jitter
+            (8, 20),     # retry_count 4: ~"16s" with jitter
         ]
         
         for retry_count, (min_delay, max_delay) in enumerate(expected_ranges):
@@ -303,7 +307,8 @@ class WebSocketMessageQueueResilienceTests:
             final_error, moved_to_dlq_at, retry_history, "
             final_error, moved_to_dlq_at, retry_history, "
             "total_processing_time, id, user_id, type, "payload"
-            "total_processing_time, id, user_id, type, "payload"
+            "total_processing_time, id, user_id, type, "payload""
+
         ]
         
         for field in required_fields:
@@ -318,7 +323,8 @@ class WebSocketMessageQueueResilienceTests:
     @pytest.mark.asyncio
     async def test_critical_dlq_message_reprocessing(self, message_queue_with_mock_redis, test_messages):
         CRITICAL: Messages can be recovered from DLQ and reprocessed"
-        CRITICAL: Messages can be recovered from DLQ and reprocessed"
+        CRITICAL: Messages can be recovered from DLQ and reprocessed""
+
         queue, mock_redis = message_queue_with_mock_redis
         
         # Put message in DLQ
@@ -341,7 +347,8 @@ class WebSocketMessageQueueResilienceTests:
         dlq_ids = [msg[id] for msg in dlq_messages]
         
         assert message.id not in dlq_ids, Message not removed from DLQ after reprocessing"
-        assert message.id not in dlq_ids, Message not removed from DLQ after reprocessing"
+        assert message.id not in dlq_ids, Message not removed from DLQ after reprocessing""
+
 
     @pytest.mark.asyncio
     async def test_critical_retry_eventually_succeeds(self, message_queue_with_mock_redis, test_messages):
@@ -383,14 +390,16 @@ class WebSocketMessageQueueResilienceTests:
     @pytest.mark.asyncio
     async def test_critical_comprehensive_logging_and_observability(self, message_queue_with_mock_redis, test_messages):
         CRITICAL: All state transitions are logged with comprehensive context"
-        CRITICAL: All state transitions are logged with comprehensive context"
+        CRITICAL: All state transitions are logged with comprehensive context""
+
         queue, mock_redis = message_queue_with_mock_redis
         
         with patch('netra_backend.app.services.websocket.message_queue.logger') as mock_logger:
             # Register failing handler
             failing_handler = MockHandler()
             failing_handler.failure_mode = always_fail"
-            failing_handler.failure_mode = always_fail"
+            failing_handler.failure_mode = always_fail""
+
             queue.register_handler(test_message, failing_handler)
             
             message = test_messages[0]
@@ -413,7 +422,8 @@ class WebSocketMessageQueueResilienceTests:
             
             for field in required_fields:
                 assert field in extra_data, fMissing required logging field: {field}"
-                assert field in extra_data, fMissing required logging field: {field}"
+                assert field in extra_data, fMissing required logging field: {field}""
+
 
     @pytest.mark.asyncio
     async def test_critical_background_retry_processor_resilience(self, message_queue_with_mock_redis, test_messages):
@@ -471,7 +481,8 @@ class WebSocketMessageQueueResilienceTests:
             message.status = from_status
             message.status = to_status
             assert message.status == to_status, fInvalid transition {from_status} -> {to_status}"
-            assert message.status == to_status, fInvalid transition {from_status} -> {to_status}"
+            assert message.status == to_status, fInvalid transition {from_status} -> {to_status}""
+
         
         # Test retry eligibility logic
         message.retry_count = 0

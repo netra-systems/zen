@@ -1,20 +1,20 @@
 "E2E tests for WebSocket events during execution."""
 
 Business Value Justification:
-- Segment: ALL (Free  ->  Enterprise)
+    - Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Real-Time Agent Execution Feedback & Chat Business Value
-- Value Impact: Validates $500K+ ARR WebSocket chat functionality works end-to-end
+- Value Impact: Validates $"500K" plus ARR WebSocket chat functionality works end-to-end
 - Strategic Impact: Ensures critical real-time user feedback during agent execution
 
 CRITICAL REQUIREMENTS per CLAUDE.md:
-1. MANDATORY E2E AUTH - ALL e2e tests MUST use authentication for real user contexts
+    1. MANDATORY E2E AUTH - ALL e2e tests MUST use authentication for real user contexts
 2. BUSINESS CRITICAL WEBSOCKET EVENTS - Test all 5 mission-critical events:
    - agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
 3. REAL WEBSOCKET - Use real WebSocket connections with real execution engines
 4. User Isolation - Test WebSocket events maintain user boundaries during execution
 5. CHAT BUSINESS VALUE - Test complete execution workflow delivers chat value
 
-This tests the mission-critical WebSocket events that enable $500K+ ARR chat functionality.
+This tests the mission-critical WebSocket events that enable $"500K" plus ARR chat functionality.
 ""
 import pytest
 import asyncio
@@ -47,7 +47,8 @@ class MockWebSocketConnection:
         self.business_value_events = []
 
     async def send(self, message: str):
-        ""Mock sending message to WebSocket."
+        ""Mock sending message to WebSocket.""
+
         try:
             event_data = json.loads(message)
             self.events_received.append({'timestamp': datetime.now(timezone.utc), 'event_data': event_data, 'user_id': self.user_id, 'connection_id': self.connection_id}
@@ -130,7 +131,8 @@ class MockWebSocketBridge:
             self.business_value_metrics['critical_events_delivered'] += 1
 
     def get_business_value_metrics(self) -> Dict[str, Any]:
-        ""Get business value metrics."
+        ""Get business value metrics.""
+
         return {**self.business_value_metrics, 'users_served_count': len(self.business_value_metrics['users_served'], 'connections_active': len([c for c in self.connections.values() if c.connected]}
 
 @pytest.mark.e2e

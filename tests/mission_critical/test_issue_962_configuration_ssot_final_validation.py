@@ -1,17 +1,18 @@
-"""
-"""
+""""
+
 MISSION CRITICAL TEST: Issue #962 Configuration SSOT Final Validation (P0 Revenue Protection)
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal - Revenue Protection & System Stability
+    - Segment: Platform/Internal - Revenue Protection & System Stability
 - Business Goal: Eliminate all configuration SSOT violations to protect Golden Path
-- Value Impact: PROTECTS $500K+ ARR by ensuring zero authentication failures from config fragmentation
+- Value Impact: PROTECTS $"500K" plus ARR by ensuring zero authentication failures from config fragmentation
 - Strategic Impact: Final validation that SSOT configuration consolidation is complete
-"""
-"""
+""""
+
 
 """
-"""
+""""
+
 CRITICAL MISSION: Issue #962 Configuration SSOT Final Compliance Validation
 
 This MISSION CRITICAL test suite provides final validation that ALL configuration SSOT
@@ -19,23 +20,24 @@ violations have been eliminated and the Golden Path user authentication flow is 
 protected from configuration fragmentation failures. Tests are designed to:
 
 1. **FINAL VALIDATION**: Comprehensive verification that zero SSOT violations remain
-2. **BUSINESS VALUE PROTECTION**: Confirm $500K+ ARR Golden Path works perfectly
+2. **BUSINESS VALUE PROTECTION**: Confirm $"500K" plus ARR Golden Path works perfectly
 3. **REGRESSION PREVENTION**: Block any future configuration fragmentation
 4. **DEPLOYMENT GATE**: Must PASS before production deployment
 
 EXPECTED TEST BEHAVIOR:
-- **PHASE 0-3**: Tests FAIL demonstrating configuration SSOT violations exist
+    - **PHASE 0-3**: Tests FAIL demonstrating configuration SSOT violations exist
 - **PHASE 4 (FINAL)**: Tests PASS proving complete SSOT compliance achieved
 - **ONGOING**: Tests serve as deployment gate - any failure blocks production deployment
 
 CRITICAL BUSINESS IMPACT:
-This is the FINAL VALIDATION that protects $500K+ ARR. Any failure in these tests
+    This is the FINAL VALIDATION that protects $"500K" plus ARR. Any failure in these tests
 indicates that configuration fragmentation could still cause authentication failures,
 directly blocking Golden Path user flows and revenue generation.
 
 These tests MUST PASS before Issue #962 can be considered resolved.
 """
-"""
+""""
+
 
 import asyncio
 import os
@@ -51,16 +53,18 @@ from shared.isolated_environment import IsolatedEnvironment
 
 class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
     "
-    "
+    ""
+
     MISSION CRITICAL tests for final SSOT configuration validation - Issue #962.
 
     These tests provide the final gate for Issue #962 resolution, ensuring that
-    ALL configuration SSOT violations have been eliminated and the $500K+ ARR
+    ALL configuration SSOT violations have been eliminated and the $"500K" plus ARR
     Golden Path is completely protected.
 
     ANY FAILURE IN THESE TESTS BLOCKS PRODUCTION DEPLOYMENT.
 "
-"
+""
+
 
     def setUp(self):
         "Set up mission critical test environment."
@@ -84,7 +88,8 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         }
 
     async def test_zero_configuration_ssot_violations_remaining(self):
-        """
+        """"
+
         MISSION CRITICAL TEST: Validate ZERO configuration SSOT violations remain
 
         SUCCESS CRITERIA:
@@ -95,7 +100,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
 
         BUSINESS IMPACT:
         Any remaining SSOT violations indicate potential for configuration fragmentation
-        that could cause authentication failures, directly blocking $500K+ ARR Golden Path.
+        that could cause authentication failures, directly blocking $"500K" plus ARR Golden Path.
 
         print(f"\n=== MISSION CRITICAL: Final SSOT Configuration Compliance Validation ===)"
         print(fTesting Issue #962 complete resolution - DEPLOYMENT GATE)
@@ -125,26 +130,29 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
                 print(fBLOCKER: {imp})
             if len(deprecated_imports) > 5:
                 print(f... and {len(deprecated_imports) - 5} more)"
-                print(f... and {len(deprecated_imports) - 5} more)"
+                print(f... and {len(deprecated_imports) - 5} more)""
+
 
         if multiple_managers:
             print(f"\n--- MULTIPLE CONFIG MANAGERS (DEPLOYMENT BLOCKERS) ---))"
             for mgr in multiple_managers:
                 print(fBLOCKER: {mgr})"
-                print(fBLOCKER: {mgr})"
+                print(fBLOCKER: {mgr})""
+
 
         if config_inconsistencies:
             print(f"\n--- CONFIGURATION INCONSISTENCIES (DEPLOYMENT BLOCKERS) ---))"
             for incon in config_inconsistencies:
                 print(fBLOCKER: {incon})"
-                print(fBLOCKER: {incon})"
+                print(fBLOCKER: {incon})""
+
 
         # CRITICAL MISSION SUCCESS ASSERTION
         self.assertEqual(
             total_violations, 0,
             f"MISSION CRITICAL FAILURE - Issue #962 NOT RESOLVED:"
             f{total_violations} configuration SSOT violations remain, blocking production deployment. 
-            fGolden Path $500K+ ARR at risk. 
+            fGolden Path $"500K" plus ARR at risk. 
             fViolations: deprecated_imports={len(deprecated_imports)}, ""
             fmultiple_managers={len(multiple_managers)}, inconsistencies={len(config_inconsistencies)}. 
             fALL violations must be eliminated before deployment.
@@ -166,7 +174,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         - End-to-end user flow works reliably
 
         BUSINESS IMPACT:
-        This is the ultimate validation that $500K+ ARR Golden Path user flows work
+        This is the ultimate validation that $"500K" plus ARR Golden Path user flows work
         perfectly with SSOT configuration. Any failure directly blocks revenue.
 ""
         print(f\n=== MISSION CRITICAL: Golden Path Configuration Stability Validation ===)
@@ -213,7 +221,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
 
         print(f\n=== GOLDEN PATH CONFIGURATION STABILITY RESULTS ===)"
         print(f\n=== GOLDEN PATH CONFIGURATION STABILITY RESULTS ===)"
-        print(f"Success Rate: {success_rate:.1f}%))"
+        print(f"Success Rate: {success_rate:."1f"}%))"
         print(fSuccessful Steps: {successful_steps}/{total_steps})"
         print(fSuccessful Steps: {successful_steps}/{total_steps})"
         print(f"Failed Steps: {len(golden_path_failures)}))"
@@ -226,16 +234,16 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         # CRITICAL BUSINESS ASSERTION - Golden Path must be perfect
         self.assertEqual(
             success_rate, 100.0,
-            fMISSION CRITICAL FAILURE: Golden Path only {success_rate:.1f}% successful with 
+            fMISSION CRITICAL FAILURE: Golden Path only {success_rate:."1f"}% successful with 
             fSSOT configuration. Expected: 100%. 
             fFailed steps: {golden_path_failures}. ""
-            fConfiguration issues are blocking $500K+ ARR Golden Path user flows.
+            fConfiguration issues are blocking $"500K" plus ARR Golden Path user flows.
         )
 
         # SUCCESS: Golden Path works perfectly
         print(f\n✅ MISSION CRITICAL SUCCESS: Golden Path 100% stable with SSOT configuration)"
         print(f\n✅ MISSION CRITICAL SUCCESS: Golden Path 100% stable with SSOT configuration)"
-        print(f"✅ $500K+ ARR Golden Path fully protected from configuration failures))"
+        print(f"✅ $"500K" plus ARR Golden Path fully protected from configuration failures))"
 
     async def test_authentication_configuration_eliminates_race_conditions(self):
         
@@ -269,7 +277,8 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         for test_name, test_func in race_condition_tests:
             try:
                 print(f\nTesting Race Condition: {test_name})"
-                print(f\nTesting Race Condition: {test_name})"
+                print(f\nTesting Race Condition: {test_name})""
+
                 no_race_condition = await test_func()
                 race_condition_results[test_name] = no_race_condition
 
@@ -291,7 +300,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         elimination_rate = (successful_tests / total_tests * 100) if total_tests > 0 else 0
 
         print(f\n=== RACE CONDITION ELIMINATION RESULTS ===")"
-        print(fRace Conditions Eliminated: {elimination_rate:.1f}%")"
+        print(fRace Conditions Eliminated: {elimination_rate:."1f"}%")"
         print(fTests Passed: {successful_tests}/{total_tests}")"
         print(fRace Conditions Remaining: {len(race_condition_failures)})
 
@@ -303,7 +312,7 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         # CRITICAL ASSERTION - Zero race conditions allowed
         self.assertEqual(
             elimination_rate, 100.0,
-            fMISSION CRITICAL FAILURE: Only {elimination_rate:.1f}% of authentication ""
+            fMISSION CRITICAL FAILURE: Only {elimination_rate:."1f"}% of authentication ""
             frace conditions eliminated. Expected: 100%. 
             fRemaining race conditions: {race_condition_failures}. 
             f"Race conditions cause unpredictable authentication failures in Golden Path."
@@ -321,7 +330,8 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
             "from netra_backend.app.core.configuration.base import get_unified_config,"
             from netra_backend.app.core.configuration.base import UnifiedConfigurationManager,
             from netra_backend.app.core.configuration import get_unified_config,"
-            from netra_backend.app.core.configuration import get_unified_config,"
+            from netra_backend.app.core.configuration import get_unified_config,""
+
         ]
 
         violations = []
@@ -335,7 +345,8 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
             if scan_dir.exists():
                 for py_file in scan_dir.rglob(*.py):
                     if __pycache__ in str(py_file):"
-                    if __pycache__ in str(py_file):"
+                    if __pycache__ in str(py_file):""
+
                         continue
                     try:
                         with open(py_file, 'r', encoding='utf-8') as f:
@@ -351,7 +362,8 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
 
     async def _validate_single_configuration_manager(self) -> List[str]:
         Validate only single configuration manager is accessible."
-        Validate only single configuration manager is accessible."
+        Validate only single configuration manager is accessible.""
+
         multiple_managers = []
 
         # Check if deprecated managers are still accessible
@@ -384,7 +396,8 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
 
             # Test critical configuration keys exist and are consistent
             critical_keys = [JWT_SECRET_KEY, DATABASE_URL, REDIS_URL]"
-            critical_keys = [JWT_SECRET_KEY, DATABASE_URL, REDIS_URL]"
+            critical_keys = [JWT_SECRET_KEY, DATABASE_URL, REDIS_URL]""
+
             for key in critical_keys:
                 value = config.get(key)
                 if not value:
@@ -394,7 +407,8 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
 
         except Exception as e:
             inconsistencies.append(fSSOT config loading failed: {e})"
-            inconsistencies.append(fSSOT config loading failed: {e})"
+            inconsistencies.append(fSSOT config loading failed: {e})""
+
 
         return inconsistencies
 
@@ -408,7 +422,8 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
             return False
 
     async def _test_jwt_configuration_perfect(self) -> bool:
-        ""Test JWT configuration is perfect."
+        ""Test JWT configuration is perfect.""
+
         try:
             from netra_backend.app.config import get_config
             config = get_config()
@@ -426,7 +441,8 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
             config = get_config()
             db_url = config.get(DATABASE_URL)
             return bool(db_url and postgresql in db_url.lower())"
-            return bool(db_url and postgresql in db_url.lower())"
+            return bool(db_url and postgresql in db_url.lower())""
+
         except Exception:
             return False
 
@@ -452,7 +468,8 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
             return False
 
     async def _test_authentication_flow_end_to_end(self) -> bool:
-        ""Test authentication flow end-to-end."
+        ""Test authentication flow end-to-end.""
+
         try:
             from netra_backend.app.config import get_config
             config = get_config()
@@ -466,7 +483,8 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
             return False
 
     async def _test_websocket_configuration_stable(self) -> bool:
-        ""Test WebSocket configuration stability."
+        ""Test WebSocket configuration stability.""
+
         try:
             from netra_backend.app.config import get_config
             config = get_config()
@@ -486,7 +504,8 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
             # Agents need database and JWT config
             jwt_secret = config.get(JWT_SECRET_KEY)
             db_url = config.get(DATABASE_URL)"
-            db_url = config.get(DATABASE_URL)"
+            db_url = config.get(DATABASE_URL)""
+
             return bool(jwt_secret and db_url)
         except Exception:
             return False
@@ -517,7 +536,8 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
             return False
 
     async def _load_config_concurrent(self) -> str:
-        ""Load configuration concurrently for race condition testing."
+        ""Load configuration concurrently for race condition testing.""
+
         from netra_backend.app.config import get_config
         config = get_config()
         return str(config.get(JWT_SECRET_KEY, "))"
@@ -527,7 +547,8 @@ class Issue962ConfigurationSSOTFinalValidationTests(SSotAsyncTestCase):
         return await self._test_config_load_race_conditions()
 
     async def _test_database_connection_race_conditions(self) -> bool:
-        ""Test for database connection race conditions."
+        ""Test for database connection race conditions.""
+
         return await self._test_config_load_race_conditions()
 
     async def _test_service_startup_race_conditions(self) -> bool:

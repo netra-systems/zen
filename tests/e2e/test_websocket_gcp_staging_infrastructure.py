@@ -2,32 +2,32 @@
 E2E GCP Staging Tests - WebSocket Infrastructure Validation - CRITICAL REGRESSION PREVENTION
 
 Business Value Justification:
-- Segment: Platform/Internal - GCP Infrastructure Validation
+    - Segment: Platform/Internal - GCP Infrastructure Validation
 - Business Goal: Prevent WebSocket infrastructure failures in staging/production
 - Value Impact: Catches GCP Load Balancer configuration issues that block Golden Path
-- Revenue Impact: Prevents 100% chat functionality failure scenarios ($120K+ MRR impact)
+- Revenue Impact: Prevents 100% chat functionality failure scenarios ($"120K"+ MRR impact)
 
 CRITICAL TEST PURPOSE:
-These E2E tests specifically target the GCP Load Balancer authentication header 
+    These E2E tests specifically target the GCP Load Balancer authentication header 
 stripping issue that caused complete WebSocket infrastructure failure (GitHub issue #113).
 
 PRIMARY REGRESSION PREVENTION:
-- test_gcp_load_balancer_preserves_authorization_header()
+    - test_gcp_load_balancer_preserves_authorization_header()
 - test_gcp_load_balancer_preserves_e2e_bypass_header()
 
 Root Cause Addressed:
-GCP HTTPS Load Balancer was stripping authentication headers (Authorization, X-E2E-Bypass) 
+    GCP HTTPS Load Balancer was stripping authentication headers (Authorization, X-E2E-Bypass) 
 for WebSocket upgrade requests, causing 100% authentication failures and 1011 errors.
 
 Infrastructure Fix Required:
-terraform-gcp-staging/load-balancer.tf needs WebSocket path authentication header preservation.
+    terraform-gcp-staging/load-balancer.tf needs WebSocket path authentication header preservation.
 
 COMPLEMENTARY TESTS:
-This file focuses on WebSocket-specific infrastructure validation. 
+    This file focuses on WebSocket-specific infrastructure validation. 
 See test_gcp_load_balancer_header_validation.py for comprehensive load balancer testing.
 
 CLAUDE.MD E2E AUTH COMPLIANCE:
-All tests use real authentication as required by CLAUDE.MD Section 7.3.
+    All tests use real authentication as required by CLAUDE.MD Section 7.3.
 """"""
 import asyncio
 import json
@@ -67,7 +67,8 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
         self.auth_timeout = 10.0
 
     async def test_gcp_load_balancer_preserves_authorization_header(self):
-        """
+        """"
+
         CRITICAL: Test that GCP Load Balancer preserves Authorization header for WebSocket.
         
         This is the PRIMARY REGRESSION PREVENTION test for the infrastructure failure
@@ -117,7 +118,8 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
         print(f' PASS:  CRITICAL TEST PASSED: GCP Load Balancer preserves Authorization headers')
 
     async def test_gcp_load_balancer_preserves_e2e_bypass_header(self):
-    """
+    """"
+
         CRITICAL: Test that GCP Load Balancer preserves X-E2E-Bypass header.
         
         This validates E2E testing headers are forwarded through the Load Balancer,
@@ -193,7 +195,7 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
         self.assertEqual(len(completed_required_steps), len(required_steps), f'CRITICAL FAILURE: Golden Path WebSocket flow incomplete. Required steps: {required_steps}. Completed: {completed_required_steps}. All completed: {golden_path_steps_completed}. This indicates WebSocket infrastructure cannot support core business value.')
 
     async def test_websocket_reconnection_with_auth(self):
-""""""
+    """"""
         Test WebSocket reconnection scenarios with authentication preservation.
         
         This validates resilience patterns that ensure chat sessions can
@@ -221,7 +223,8 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
         self.assertGreater(len(successful_attempts), 0, f'WebSocket reconnection should succeed with preserved auth. Attempts: {connection_attempts}')
 
     async def test_multi_user_websocket_isolation_in_gcp(self):
-    """
+    """"
+
         CRITICAL: Test multi-user WebSocket isolation through GCP infrastructure.
         
         This validates that GCP Load Balancer preserves user context isolation,
@@ -264,7 +267,7 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
             self.assertEqual(len(unique_users), len(user_ids), f'Users should have unique isolated contexts. User IDs: {user_ids}')
 
     async def test_websocket_header_stripping_regression_prevention(self):
-""""""
+    """"""
         CRITICAL: Specific regression test for GitHub issue #113 header stripping.
         
         This test validates that the specific header stripping issue that caused
@@ -315,7 +318,8 @@ class WebSocketGCPStagingInfrastructureTests(SSotBaseTestCase, unittest.TestCase
 
 @pytest.mark.e2e
 class GCPWebSocketInfrastructureResilienceTests(SSotBaseTestCase, unittest.TestCase):
-    """
+    """"
+
     Tests for GCP WebSocket infrastructure resilience and error handling.
     
     These tests validate proper behavior under various failure conditions
@@ -323,14 +327,16 @@ class GCPWebSocketInfrastructureResilienceTests(SSotBaseTestCase, unittest.TestC
     
 
     def setup_method(self, method=None):
-        ""Set up resilience test environment."
+        ""Set up resilience test environment.""
+
         super().setup_method(method)
         self.staging_config = StagingTestConfig()
         self.e2e_helper = E2EWebSocketAuthHelper(environment='staging')
         self.staging_websocket_url = self.staging_config.urls.websocket_url
 
     async def test_websocket_gcp_timeout_resilience(self):
-    """
+    """"
+
         Test WebSocket resilience to GCP Cloud Run timeout limitations.
         
         This validates proper handling of GCP-specific timeout constraints
@@ -349,7 +355,8 @@ class GCPWebSocketInfrastructureResilienceTests(SSotBaseTestCase, unittest.TestC
                     timeout_message = {'type': 'gcp_timeout_resilience_test', 'scenario': scenario_name, 'timeout_configured': timeout_value, 'actual_connection_time': connection_time, 'timestamp': datetime.now(timezone.utc).isoformat()}
                     await websocket.send(json.dumps(timeout_message))
                     timeout_results.append({'scenario': scenario_name, 'success': True, 'connection_time': connection_time, 'configured_timeout': timeout_value)
-                    print(f' PASS:  {scenario_name}: Connected in {connection_time:.2f}s')
+                    print(f' PASS:  {scenario_name}: Connected in {connection_time:."2f"}s')""
+
             except asyncio.TimeoutError:
                 timeout_results.append({'scenario': scenario_name, 'success': False, 'error': 'timeout', 'configured_timeout': timeout_value)
                 print(f'[U+23F0] {scenario_name}: Timeout at {timeout_value}s')
@@ -360,7 +367,7 @@ class GCPWebSocketInfrastructureResilienceTests(SSotBaseTestCase, unittest.TestC
         self.assertGreater(len(successful_scenarios), 0, f'At least one timeout scenario should succeed in GCP. Results: {timeout_results}')
 
     async def test_websocket_gcp_infrastructure_error_handling(self):
-""""""
+    """"""
         Test proper error handling for GCP infrastructure issues.
         
         This validates that infrastructure errors are properly detected
@@ -384,5 +391,6 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
-"""
+""""
+
 )))))))))))))))))

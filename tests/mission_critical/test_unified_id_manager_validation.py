@@ -6,10 +6,12 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.""
+
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)""
+
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):"
         Close WebSocket connection.""
@@ -18,7 +20,8 @@ class TestWebSocketConnection:
         self.is_connected = False
     async def get_messages(self) -> list:
         Get all sent messages."
-        Get all sent messages."
+        Get all sent messages.""
+
         await asyncio.sleep(0)
         return self.messages_sent.copy()
         '''
@@ -59,7 +62,8 @@ class TestMethodSignatures:
         ""CRITICAL: Test that generate_run_id only accepts thread_id."
     # This should work
         thread_id = test_thread"
-        thread_id = test_thread"
+        thread_id = test_thread""
+
         run_id = UnifiedIDManager.generate_run_id(thread_id)
         assert run_id.startswith(thread_test_thread_run_")"
     # This should fail - the bug we fixed
@@ -68,7 +72,8 @@ class TestMethodSignatures:
         assert takes 1 positional argument but 2 were given" in str(exc_info.value)"
     def test_deprecated_function_signature_confusion(self):
         Test that deprecated function signature doesn't match class method."
-        Test that deprecated function signature doesn't match class method."
+        Test that deprecated function signature doesn't match class method.""
+
         pass
     # Get signatures
         class_method_sig = inspect.signature(UnifiedIDManager.generate_run_id)
@@ -91,7 +96,8 @@ class TestMethodSignatures:
                 # Should be a static method
         assert isinstance(inspect.getattr_static(UnifiedIDManager, "name), staticmethod), \"
         formatted_string"
-        formatted_string"
+        formatted_string""
+
 class TestImportValidation:
         "Test that imports work correctly and catch lazy loading issues."
     def test_import_from_different_contexts(self):
@@ -109,7 +115,8 @@ class TestImportValidation:
     # All should work
         for UID in [UID1, UID2, UID3]:
         run_id = UID.generate_run_id(test_import)"
-        run_id = UID.generate_run_id(test_import)"
+        run_id = UID.generate_run_id(test_import)""
+
         assert UID.validate_run_id(run_id)
     def test_lazy_import_in_function_works(self):
         "Test pattern used in run_repository, interfaces_observability, etc."
@@ -144,11 +151,13 @@ class TestRealIntegration:
 @pytest.mark.asyncio
     async def test_thread_service_integration(self):
     Test ThreadService uses UnifiedIDManager correctly."
-    Test ThreadService uses UnifiedIDManager correctly."
+    Test ThreadService uses UnifiedIDManager correctly.""
+
 from netra_backend.app.services.thread_service import ThreadService
 service = ThreadService()
 thread_id = integration_test_thread"
-thread_id = integration_test_thread"
+thread_id = integration_test_thread""
+
 assistant_id = test_assistant
 model = gpt-4""
 instructions = Test instructions
@@ -192,7 +201,8 @@ except TypeError as e:
         pytest.fail(""
 class TestConcurrentUsage:
         Test UnifiedIDManager under concurrent load."
-        Test UnifiedIDManager under concurrent load."
+        Test UnifiedIDManager under concurrent load.""
+
     def test_thread_safe_id_generation(self):
         "Test concurrent ID generation doesn't cause conflicts."
     async def generate_ids(prefix: str, count: int) -> List[str]:
@@ -227,7 +237,8 @@ return UnifiedIDManager.generate_run_id(thread_id)
     # Generate IDs concurrently
 tasks = [
 generate_id_async("
-generate_id_async("
+generate_id_async(""
+
 for i in range(100)
     
 ids = await asyncio.gather(*tasks)
@@ -242,7 +253,8 @@ class TestErrorScenarios:
         with pytest.raises(ValueError) as exc_info:
         UnifiedIDManager.generate_run_id(None)
         assert cannot be empty or None in str(exc_info.value)"
-        assert cannot be empty or None in str(exc_info.value)"
+        assert cannot be empty or None in str(exc_info.value)""
+
     def test_empty_string_rejected(self):
         "Test empty strings are rejected."
         pass
@@ -255,7 +267,8 @@ class TestErrorScenarios:
         UnifiedIDManager.generate_run_id(123)  # Number instead of string
         assert must be string in str(exc_info.value)
     def test_reserved_sequence_rejected(self):
-        ""Test thread_ids with reserved sequences are rejected."
+        ""Test thread_ids with reserved sequences are rejected.""
+
         pass
         with pytest.raises(ValueError) as exc_info:
         UnifiedIDManager.generate_run_id(thread_run_invalid)"
@@ -265,7 +278,8 @@ class TestStartupValidation:
         Tests that would catch issues at startup.""
     def test_critical_methods_exist(self):
         Test all critical methods exist with correct signatures."
-        Test all critical methods exist with correct signatures."
+        Test all critical methods exist with correct signatures.""
+
         critical_methods = [
         ('generate_run_id', 1),  # method_name, expected_arg_count
         ('extract_thread_id', 1),
@@ -293,7 +307,8 @@ class TestStartupValidation:
         pass
     # Generate a test ID
         test_thread = startup_validation_test"
-        test_thread = startup_validation_test"
+        test_thread = startup_validation_test""
+
         run_id = UnifiedIDManager.generate_run_id(test_thread)
     # Validate it
         assert UnifiedIDManager.validate_run_id(run_id)
@@ -308,7 +323,8 @@ class TestStartupValidation:
         assert UnifiedIDManager.validate_thread_id(test_thread)
     # Test normalization
         normalized = UnifiedIDManager.normalize_thread_id("
-        normalized = UnifiedIDManager.normalize_thread_id("
+        normalized = UnifiedIDManager.normalize_thread_id(""
+
         assert normalized == test_thread
 class TestDeprecationPath:
         "Test migration from deprecated functions."

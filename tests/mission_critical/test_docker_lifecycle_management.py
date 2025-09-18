@@ -7,10 +7,12 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.""
+
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)""
+
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):"
         Close WebSocket connection.""
@@ -19,7 +21,8 @@ class TestWebSocketConnection:
         self.is_connected = False
     async def get_messages(self) -> list:
         Get all sent messages."
-        Get all sent messages."
+        Get all sent messages.""
+
         await asyncio.sleep(0)
         return self.messages_sent.copy()
         '''
@@ -40,7 +43,7 @@ class TestWebSocketConnection:
         1. Segment: Platform/Internal - Development Velocity, Risk Reduction
         2. Business Goal: Ensure Docker infrastructure reliability for CI/CD and development
         3. Value Impact: Prevents 4-8 hours/week of developer downtime from Docker failures
-        4. Revenue Impact: Protects development velocity for $2M+ ARR platform
+        4. Revenue Impact: Protects development velocity for $"2M"+ ARR platform
         '''
         '''
         import asyncio
@@ -180,7 +183,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
                                     # Safe Container Removal Tests
                                     # =============================================================================
     def test_graceful_container_shutdown_sequence(self):
-        ""Test that containers are shut down gracefully with proper signal handling."
+        ""Test that containers are shut down gracefully with proper signal handling.""
+
         pass
     # Create a test container that can handle signals
         container_name = formatted_string"
@@ -194,7 +198,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
     
         result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, "
-        self.assertEqual(result.returncode, 0, "
+        self.assertEqual(result.returncode, 0, ""
+
         self.created_containers.add(container_name)
     # Wait for container to be running
         time.sleep(2)
@@ -230,7 +235,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
     
         result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, "
-        self.assertEqual(result.returncode, 0, "
+        self.assertEqual(result.returncode, 0, ""
+
         self.created_containers.add(container_name)
     # Wait for container to be running
         time.sleep(2)
@@ -249,10 +255,12 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         self.assertEqual(result.stdout.strip(), 'exited')
     def test_container_removal_with_volume_cleanup(self):
         Test container removal properly cleans up associated volumes."
-        Test container removal properly cleans up associated volumes."
+        Test container removal properly cleans up associated volumes.""
+
         pass
         container_name = formatted_string"
-        container_name = formatted_string"
+        container_name = formatted_string""
+
         volume_name = formatted_string
     # Create a named volume
         volume_cmd = ['docker', 'volume', 'create', volume_name]
@@ -269,7 +277,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         
         result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, formatted_string)"
-        self.assertEqual(result.returncode, 0, formatted_string)"
+        self.assertEqual(result.returncode, 0, formatted_string)""
+
         self.created_containers.add(container_name)
         # Verify volume contains data
         exec_cmd = ['docker', 'exec', container_name, 'cat', '/data/test.txt']
@@ -371,7 +380,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         if len(attempt_times) < 3:  # Fail first 2 attempts
         result = subprocess.CompletedProcess(cmd, 1, '', 'Simulated failure')
         return result
-        else:  # Succeed on 3rd attempt
+        else:  # Succeed on "3rd" attempt
         return subprocess.run(['docker', 'version'], capture_output=True, text=True, timeout=10)
         start_time = time.time()
         result = rate_limiter.execute_docker_command(['docker', 'fake-command'], timeout=30)
@@ -384,19 +393,20 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
     # Verify backoff timing
         if len(attempt_times) >= 2:
         first_retry_delay = attempt_times[1] - attempt_times[0]
-        self.assertGreaterEqual(first_retry_delay, 0.4, First retry should wait ~0.5s)
+        self.assertGreaterEqual(first_retry_delay, 0.4, First retry should wait ~0."5s")
         if len(attempt_times) >= 3:
         second_retry_delay = attempt_times[2] - attempt_times[1]
-        self.assertGreaterEqual(second_retry_delay, 0.9, "Second retry should wait ~1.0s)"
+        self.assertGreaterEqual(second_retry_delay, 0.9, "Second retry should wait ~1."0s")"
             # =============================================================================
             # Memory Limit Enforcement Tests
             # =============================================================================
     def test_container_memory_limit_enforcement(self):
         Test that containers respect configured memory limits."
-        Test that containers respect configured memory limits."
+        Test that containers respect configured memory limits.""
+
         pass
         container_name = "formatted_string"
-        memory_limit = 128m
+        memory_limit = "128m"
     # Create container with memory limit
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
@@ -414,7 +424,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         inspect_cmd = ['docker', 'inspect', container_name, '--format', '{{.HostConfig.Memory}}']
         result = subprocess.run(inspect_cmd, capture_output=True, text=True, timeout=10)
         self.assertEqual(result.returncode, 0)
-    # Convert 128m to bytes (128 * 1024 * 1024)
+    # Convert "128m" to bytes (128 * 1024 * 1024)
         expected_memory = 134217728
         actual_memory = int(result.stdout.strip())
         self.assertEqual(actual_memory, expected_memory,
@@ -422,7 +432,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
     # Test memory usage enforcement (this will kill the container if exceeded)
         stress_cmd = [
         'docker', 'exec', container_name,
-        'sh', '-c', 'dd if=/dev/zero of=/tmp/big bs=1M count=200 || echo "Memory limit enforced'"
+        'sh', '-c', 'dd if=/dev/zero of=/tmp/big bs="1M" count=200 || echo "Memory limit enforced'"
     
         result = subprocess.run(stress_cmd, capture_output=True, text=True, timeout=30)
     # The command might fail due to memory limit, which is expected
@@ -434,7 +444,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         for service_name, config in manager.SERVICES.items():
         self.assertIn('memory_limit', config, formatted_string)
         memory_limit = config['memory_limit']
-        # Parse memory limit (e.g., "512m, 1g)"
+        # Parse memory limit (e.g., ""512m", "1g")"
         if memory_limit.endswith('m'):
         memory_mb = int(memory_limit[:-1)
         elif memory_limit.endswith('g'):
@@ -445,7 +455,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         self.assertGreater(memory_mb, 0, formatted_string")"
         self.assertLessEqual(memory_mb, 4096, 
     def test_memory_pressure_container_behavior(self):
-        ""Test container behavior under memory pressure."
+        ""Test container behavior under memory pressure.""
+
         pass
         container_name = formatted_string"
         container_name = formatted_string"
@@ -453,7 +464,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
-        '--memory', '64m',
+        '--memory', '"64m"',
         '--oom-kill-disable=false',  # Allow OOM killer
         'alpine:latest',
         'sh', '-c', 'sleep 3600'
@@ -467,7 +478,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         stress_start_time = time.time()
         stress_cmd = [
         'docker', 'exec', container_name,
-        'sh', '-c', 'head -c 100m </dev/zero >bigfile 2>&1; echo Exit code: $?'
+        'sh', '-c', 'head -c "100m" </dev/zero >bigfile 2>&1; echo Exit code: $?'
     
         result = subprocess.run(stress_cmd, capture_output=True, text=True, timeout=30)
         stress_duration = time.time() - stress_start_time
@@ -529,7 +540,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         formatted_string")"
     def test_concurrent_docker_operations_stability(self):
         Test Docker daemon stability under concurrent operations load."
-        Test Docker daemon stability under concurrent operations load."
+        Test Docker daemon stability under concurrent operations load.""
+
         pass
         operations_per_thread = 3
         num_threads = 4
@@ -691,7 +703,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
     
         result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, formatted_string)"
-        self.assertEqual(result.returncode, 0, formatted_string)"
+        self.assertEqual(result.returncode, 0, formatted_string)""
+
         self.created_networks.add(network_name)
     # Verify network exists and has correct configuration
         inspect_cmd = ['docker', 'network', 'inspect', network_name]
@@ -717,7 +730,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         
         result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, "
-        self.assertEqual(result.returncode, 0, "
+        self.assertEqual(result.returncode, 0, ""
+
         self.created_containers.add(container_name)
         # Wait for containers to start
         time.sleep(3)
@@ -796,7 +810,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         ls_cmd = ['docker', 'network', 'ls', '--format', '{{.Name}}']
         result = subprocess.run(ls_cmd, capture_output=True, text=True, timeout=10)
         networks_before = set(result.stdout.strip().split( ))"
-        networks_before = set(result.stdout.strip().split( ))"
+        networks_before = set(result.stdout.strip().split( ))""
+
         ))
         # Release environment
         manager.release_environment(env_name)
@@ -811,7 +826,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         remaining_test_networks = [item for item in []]
         self.assertEqual(len(remaining_test_networks), 0,
         "
-        "
+        ""
+
         except Exception as e:
             # Ensure cleanup even if test fails
         try:
@@ -864,7 +880,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
     
         result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, formatted_string)"
-        self.assertEqual(result.returncode, 0, formatted_string)"
+        self.assertEqual(result.returncode, 0, formatted_string)""
+
         self.created_containers.add(conflicting_container)
     # Create manager and try to acquire environment
         manager = UnifiedDockerManager( )
@@ -886,7 +903,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         if isinstance(health, dict) and health.get('healthy', False)]
         # Should have at least some healthy services
         self.assertGreater(len(healthy_services), 0, Should have at least some healthy services after conflict resolution)"
-        self.assertGreater(len(healthy_services), 0, Should have at least some healthy services after conflict resolution)"
+        self.assertGreater(len(healthy_services), 0, Should have at least some healthy services after conflict resolution)""
+
         finally:
         try:
         manager.release_environment(env_name if 'env_name' in locals() else None)
@@ -970,8 +988,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         'docker', 'run', '-d', '--name', healthy_container,
         '--label', 'formatted_string',
         '--health-cmd', 'echo "healthy',"
-        '--health-interval', '5s',
-        '--health-timeout', '3s',
+        '--health-interval', '"5s"',
+        '--health-timeout', '"3s"',
         '--health-retries', '2',
         'alpine:latest',
         'sh', '-c', 'sleep 60'
@@ -984,8 +1002,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         'docker', 'run', '-d', '--name', unhealthy_container,
         '--label', 'formatted_string',
         '--health-cmd', 'exit 1',  # Always fail
-        '--health-interval', '5s',
-        '--health-timeout', '3s',
+        '--health-interval', '"5s"',
+        '--health-timeout', '"3s"',
         '--health-retries', '2',
         'alpine:latest',
         'sh', '-c', 'sleep 60'
@@ -1079,8 +1097,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         'docker', 'run', '-d', '--name', slow_container,
         '--label', 'formatted_string',
         '--health-cmd', 'sleep 10 && echo "finally healthy',  # Takes 10 seconds"
-        '--health-interval', '15s',
-        '--health-timeout', '5s',  # Timeout after 5 seconds
+        '--health-interval', '"15s"',
+        '--health-timeout', '"5s"',  # Timeout after 5 seconds
         '--health-retries', '2',
         'alpine:latest',
         'sh', '-c', 'sleep 300'
@@ -1112,7 +1130,7 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         statuses = [entry['status'] for entry in health_history]
                 Should see progression from starting -> unhealthy (due to timeout)
         self.assertIn('starting', statuses, "Should start with 'starting' status)"
-                # Due to timeout (5s) being less than health check duration (10s),
+                # Due to timeout ("5s") being less than health check duration ("10s"),
                 # it should eventually become unhealthy
         final_status = statuses[-1] if statuses else 'none'
         self.assertEqual(final_status, 'unhealthy',
@@ -1137,7 +1155,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         resources_created['volumes'].append(volume_name)
     # Create network
         network_name = formatted_string"
-        network_name = formatted_string"
+        network_name = formatted_string""
+
         network_cmd = [
         'docker', 'network', 'create',
         '--label', 'formatted_string',
@@ -1218,7 +1237,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
         self.assertEqual(result.stdout.strip(), '', ""
     def test_orphaned_resource_detection_and_cleanup(self):
         Test detection and cleanup of orphaned Docker resources."
-        Test detection and cleanup of orphaned Docker resources."
+        Test detection and cleanup of orphaned Docker resources.""
+
         pass
     # Create some containers that will become "orphaned"
         orphaned_containers = []
@@ -1261,7 +1281,8 @@ class DockerLifecycleTestSuite(SSotAsyncTestCase):
                     # (Implementation may vary based on the actual cleanup logic)
         self.assertLessEqual(len(remaining_containers), len(orphaned_containers),
         Cleanup should remove some or all orphaned containers)"
-        Cleanup should remove some or all orphaned containers)"
+        Cleanup should remove some or all orphaned containers)""
+
     def test_environment_cleanup_completeness(self):
         "Test that environment cleanup is complete and doesn't leave artifacts."
         manager = UnifiedDockerManager( )
@@ -1329,7 +1350,8 @@ class DockerInfrastructureServiceStartupTests(SSotAsyncTestCase):
     def setUpClass(cls):
         pass
         cls.test_project_prefix = infra_startup"
-        cls.test_project_prefix = infra_startup"
+        cls.test_project_prefix = infra_startup""
+
         cls.created_containers = set()
         cls.docker_manager = UnifiedDockerManager( )
         environment_type=EnvironmentType.DEDICATED,
@@ -1375,14 +1397,16 @@ class DockerInfrastructureServiceStartupTests(SSotAsyncTestCase):
         healthy_services = sum(1 for h in health_report.values() )
         if isinstance(h, dict) and h.get('healthy'))
         self.assertGreater(healthy_services, 0, Should have healthy services)"
-        self.assertGreater(healthy_services, 0, Should have healthy services)"
+        self.assertGreater(healthy_services, 0, Should have healthy services)""
+
         finally:
         if 'result' in locals() and result:
         manager.release_environment(result[0] if isinstance(result, tuple) else env_name)
                     # Verify average startup time meets requirement
         avg_startup = sum(startup_times) / len(startup_times)
         self.assertLess(avg_startup, 25, "
-        self.assertLess(avg_startup, 25, "
+        self.assertLess(avg_startup, 25, ""
+
     def test_service_startup_with_resource_constraints(self):
         "Test service startup under strict memory and CPU limits."
         pass
@@ -1394,7 +1418,7 @@ class DockerInfrastructureServiceStartupTests(SSotAsyncTestCase):
         # Start container with strict limits
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
-        '--memory', '128m', '--cpus', '0.5',
+        '--memory', '"128m"', '--cpus', '0.5',
         '--label', 'formatted_string',
         'alpine:latest',
         'sh', '-c', 'echo Service $$ starting && sleep 60'
@@ -1404,7 +1428,8 @@ class DockerInfrastructureServiceStartupTests(SSotAsyncTestCase):
         creation_time = time.time() - start_time
         self.assertEqual(result.returncode, 0,
         formatted_string)"
-        formatted_string)"
+        formatted_string)""
+
         constrained_containers.append(container_name)
         self.created_containers.add(container_name)
         # Verify startup was reasonably fast despite constraints
@@ -1422,7 +1447,7 @@ class DockerInfrastructureServiceStartupTests(SSotAsyncTestCase):
         status, memory_limit, cpu_limit = parts
         self.assertEqual(status, 'running', formatted_string)"
         self.assertEqual(status, 'running', formatted_string)"
-        self.assertEqual(memory_limit, '134217728', "Memory limit should be 128MB)  # 128MB in bytes"
+        self.assertEqual(memory_limit, '134217728', "Memory limit should be "128MB")  # "128MB" in bytes"
     def test_startup_failure_recovery_mechanism(self):
         Test automatic recovery when services fail to start initially.""
         test_id = formatted_string
@@ -1456,7 +1481,8 @@ class DockerInfrastructureServiceStartupTests(SSotAsyncTestCase):
         self.assertEqual(result.stdout.strip(), 'running', "Recovered container should be running)"
     def test_parallel_service_startup_isolation(self):
         Test multiple services can start in parallel without interference."
-        Test multiple services can start in parallel without interference."
+        Test multiple services can start in parallel without interference.""
+
         pass
         test_id = "formatted_string"
     def start_isolated_service(service_id):
@@ -1492,14 +1518,16 @@ class DockerInfrastructureServiceStartupTests(SSotAsyncTestCase):
         startup_times = [r['startup_time'] for r in successful_starts]
         self.assertGreaterEqual(len(successful_starts), 6,
         formatted_string)"
-        formatted_string)"
+        formatted_string)""
+
         if startup_times:
         avg_startup = sum(startup_times) / len(startup_times)
         max_startup = max(startup_times)
         self.assertLess(avg_startup, 5, "
         self.assertLess(avg_startup, 5, "
         self.assertLess(max_startup, 15, formatted_string)"
-        self.assertLess(max_startup, 15, formatted_string)"
+        self.assertLess(max_startup, 15, formatted_string)""
+
     def test_service_dependency_startup_ordering(self):
         "Test services start in correct dependency order."
         pass
@@ -1514,20 +1542,23 @@ class DockerInfrastructureServiceStartupTests(SSotAsyncTestCase):
         '--label', 'service_type=database',
         'alpine:latest',
         'sh', '-c', 'echo DB ready > /tmp/ready && sleep 60'"
-        'sh', '-c', 'echo DB ready > /tmp/ready && sleep 60'"
+        'sh', '-c', 'echo DB ready > /tmp/ready && sleep 60'""
+
     
         start_time = time.time()
         result = subprocess.run(create_db_cmd, capture_output=True, text=True, timeout=15)
         db_start_time = time.time() - start_time
         self.assertEqual(result.returncode, 0, "
-        self.assertEqual(result.returncode, 0, "
+        self.assertEqual(result.returncode, 0, ""
+
         dependency_containers.append(db_container)
         self.created_containers.add(db_container)
     # Wait for DB to be ready
         time.sleep(2)
     # Backend service (depends on DB)
         backend_container = formatted_string"
-        backend_container = formatted_string"
+        backend_container = formatted_string""
+
         create_backend_cmd = [
         'docker', 'run', '-d', '--name', backend_container,
         '--label', 'formatted_string',
@@ -1588,8 +1619,8 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
         '--health-cmd', health_cmd,
-        '--health-interval', '3s',
-        '--health-timeout', '2s',
+        '--health-interval', '"3s"',
+        '--health-timeout', '"2s"',
         '--health-retries', '2',
         'alpine:latest',
         'sleep', '120'
@@ -1631,7 +1662,8 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         fUnhealthy container should report unhealthy status)
                                     # Degraded scenario may vary between healthy/unhealthy
     def test_health_check_performance_under_load(self):
-        ""Test health check performance doesn't degrade under system load.'"
+        ""Test health check performance doesn't degrade under system load.'""
+
         pass
         test_id = formatted_string"
         test_id = formatted_string"
@@ -1639,13 +1671,14 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         load_containers = []
         for i in range(10):
         container_name = formatted_string"
-        container_name = formatted_string"
+        container_name = formatted_string""
+
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
-        '--memory', '64m', '--cpus', '0.3',
+        '--memory', '"64m"', '--cpus', '0.3',
         'alpine:latest',
-        'sh', '-c', 'while true; do dd if=/dev/zero of=/dev/null bs=1M count=1; sleep 0.1; done'
+        'sh', '-c', 'while true; do dd if=/dev/zero of=/dev/null bs="1M" count=1; sleep 0.1; done'
         
         result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=15)
         if result.returncode == 0:
@@ -1658,15 +1691,16 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         'docker', 'run', '-d', '--name', monitored_container,
         '--label', 'formatted_string',
         '--health-cmd', 'echo healthy',
-        '--health-interval', '2s',
-        '--health-timeout', '1s',
+        '--health-interval', '"2s"',
+        '--health-timeout', '"1s"',
         '--health-retries', '1',
         'alpine:latest',
         'sleep', '60'
             
         result = subprocess.run(create_monitored_cmd, capture_output=True, text=True, timeout=20)
         self.assertEqual(result.returncode, 0, formatted_string)"
-        self.assertEqual(result.returncode, 0, formatted_string)"
+        self.assertEqual(result.returncode, 0, formatted_string)""
+
         self.created_containers.add(monitored_container)
             # Monitor health check performance under load
         health_check_times = []
@@ -1684,7 +1718,8 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
                 # Health should remain responsive under load
         self.assertIn(status, ['starting', 'healthy', 'unhealthy'),
         "
-        "
+        ""
+
         time.sleep(2)
                 # Verify health check performance
         if health_check_times:
@@ -1693,7 +1728,8 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         self.assertLess(avg_check_time, 1.0, formatted_string)"
         self.assertLess(avg_check_time, 1.0, formatted_string)"
         self.assertLess(max_check_time, 2.0, "
-        self.assertLess(max_check_time, 2.0, "
+        self.assertLess(max_check_time, 2.0, ""
+
     def test_health_status_change_detection_speed(self):
         "Test rapid detection of health status changes."
         test_id = formatted_string
@@ -1704,15 +1740,16 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         'docker', 'run', '-d', '--name', changing_container,
         '--label', 'formatted_string',
         '--health-cmd', 'if [ $(cat /proc/uptime | cut -d. -f1) -gt 20 ]; then exit 1; else echo ok; fi',
-        '--health-interval', '2s',
-        '--health-timeout', '1s',
+        '--health-interval', '"2s"',
+        '--health-timeout', '"1s"',
         '--health-retries', '1',
         'alpine:latest',
         'sleep', '60'
     
         result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
         self.assertEqual(result.returncode, 0, formatted_string)"
-        self.assertEqual(result.returncode, 0, formatted_string)"
+        self.assertEqual(result.returncode, 0, formatted_string)""
+
         self.created_containers.add(changing_container)
     # Monitor health status changes
         status_changes = []
@@ -1734,7 +1771,8 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
             # Verify status change detection
         self.assertGreaterEqual(len(status_changes), 2,
         "
-        "
+        ""
+
             Find the change from healthy to unhealthy
         health_to_unhealthy = None
         for timestamp, from_status, to_status in status_changes:
@@ -1745,18 +1783,19 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
                         # Should detect change reasonably quickly after 20 seconds
         self.assertLess(health_to_unhealthy, 35,
         formatted_string)"
-        formatted_string)"
+        formatted_string)""
+
     def test_multi_service_health_aggregation(self):
         "Test health monitoring across multiple services with aggregation."
         pass
         test_id = formatted_string""
     # Create multiple services with different health patterns
         services = [
-        ('web', 'echo web ok', '2s'),
+        ('web', 'echo web ok', '"2s"'),
         ('api', 'echo api ok', '3s'),"
         ('api', 'echo api ok', '3s'),"
-        ('cache', 'echo "cache ok', '2s'),"
-        ('worker', 'if [ $(($(date +%s) % 8)) -lt 2 ]; then exit 1; else echo worker ok; fi', '2s')
+        ('cache', 'echo "cache ok', '"2s"'),"
+        ('worker', 'if [ $(($(date +%s) % 8)) -lt 2 ]; then exit 1; else echo worker ok; fi', '"2s"')
     
         service_containers = {}
         for service_name, health_cmd, interval in services:
@@ -1767,7 +1806,7 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         '--label', 'formatted_string',
         '--health-cmd', health_cmd,
         '--health-interval', interval,
-        '--health-timeout', '1s',
+        '--health-timeout', '"1s"',
         '--health-retries', '1',
         'alpine:latest',
         'sleep', '60'
@@ -1810,7 +1849,8 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         high_availability_services = sum(1 for avail in service_availability.values() if avail >= 0.7)
         self.assertGreaterEqual(high_availability_services, 3,
         "
-        "
+        ""
+
     def test_health_monitoring_resource_efficiency(self):
         "Test health monitoring doesn't consume excessive system resources."
         test_id = ""
@@ -1822,10 +1862,10 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
         '--health-cmd', 'formatted_string',
-        '--health-interval', '5s',
-        '--health-timeout', '2s',
+        '--health-interval', '"5s"',
+        '--health-timeout', '"2s"',
         '--health-retries', '1',
-        '--memory', '32m',  # Small memory limit
+        '--memory', '"32m"',  # Small memory limit
         'alpine:latest',
         'sleep', '90'
         
@@ -1860,7 +1900,8 @@ class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
         operations_per_second = monitoring_operations / total_monitoring_time
         self.assertGreater(monitoring_operations, 100,
         "
-        "
+        ""
+
         self.assertGreater(operations_per_second, 5,
         formatted_string")"
 class DockerInfrastructureFailureRecoveryTests(SSotAsyncTestCase):
@@ -1897,7 +1938,8 @@ class DockerInfrastructureFailureRecoveryTests(SSotAsyncTestCase):
     
         result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
         self.assertEqual(result.returncode, 0, formatted_string)"
-        self.assertEqual(result.returncode, 0, formatted_string)"
+        self.assertEqual(result.returncode, 0, formatted_string)""
+
         self.created_containers.add(service_container)
     # Wait for service to be running
         time.sleep(3)
@@ -1937,17 +1979,20 @@ class DockerInfrastructureFailureRecoveryTests(SSotAsyncTestCase):
         test_id = formatted_string
     # Create network for service communication
         network_name = formatted_string"
-        network_name = formatted_string"
+        network_name = formatted_string""
+
         network_cmd = ['docker', 'network', 'create', network_name]
         result = subprocess.run(network_cmd, capture_output=True, text=True, timeout=20)
         self.assertEqual(result.returncode, 0, "
-        self.assertEqual(result.returncode, 0, "
+        self.assertEqual(result.returncode, 0, ""
+
         try:
         # Create multiple interconnected services
         service_containers = []
         for i in range(5):
         container_name = formatted_string"
-        container_name = formatted_string"
+        container_name = formatted_string""
+
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--network', network_name,
@@ -1959,7 +2004,8 @@ class DockerInfrastructureFailureRecoveryTests(SSotAsyncTestCase):
         result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
         self.assertEqual(result.returncode, 0,
         "
-        "
+        ""
+
         service_containers.append(container_name)
         self.created_containers.add(container_name)
             # Wait for all services to be running
@@ -2013,10 +2059,10 @@ class DockerInfrastructureFailureRecoveryTests(SSotAsyncTestCase):
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
-        '--memory', '128m',  # Limited memory
+        '--memory', '"128m"',  # Limited memory
         '--oom-kill-disable=false',  # Allow OOM killer
         'alpine:latest',
-        'sh', '-c', 'while true; do dd if=/dev/zero of=/tmp/fill bs=1M count=10 2>/dev/null || true; sleep 1; done'
+        'sh', '-c', 'while true; do dd if=/dev/zero of=/tmp/fill bs="1M" count=10 2>/dev/null || true; sleep 1; done'
         
         result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
         if result.returncode == 0:
@@ -2027,7 +2073,7 @@ class DockerInfrastructureFailureRecoveryTests(SSotAsyncTestCase):
         create_critical_cmd = [
         'docker', 'run', '-d', '--name', critical_container,
         '--label', 'formatted_string',
-        '--memory', '64m',
+        '--memory', '"64m"',
         '--restart', 'always',
         '--priority', '1000',  # Higher priority
         'alpine:latest',
@@ -2043,7 +2089,8 @@ class DockerInfrastructureFailureRecoveryTests(SSotAsyncTestCase):
         result = subprocess.run(critical_status_cmd, capture_output=True, text=True, timeout=10)
             # Critical service should either be running or have restarted
         self.assertEqual(result.returncode, 0, Critical service should exist)"
-        self.assertEqual(result.returncode, 0, Critical service should exist)"
+        self.assertEqual(result.returncode, 0, Critical service should exist)""
+
         status = result.stdout.strip()
         self.assertIn(status, ['running', 'restarting'),
         formatted_string")"
@@ -2057,23 +2104,27 @@ class DockerInfrastructureFailureRecoveryTests(SSotAsyncTestCase):
                     # Some resource-hungry containers should be OOM killed
         self.assertGreater(killed_containers, 0, Resource exhaustion should trigger OOM kills)
     def test_network_failure_recovery(self):
-        ""Test recovery from network connectivity issues."
+        ""Test recovery from network connectivity issues.""
+
         pass
         test_id = formatted_string"
         test_id = formatted_string"
     # Create custom network
         network_name = formatted_string"
-        network_name = formatted_string"
+        network_name = formatted_string""
+
         network_cmd = ['docker', 'network', 'create', network_name]
         result = subprocess.run(network_cmd, capture_output=True, text=True, timeout=20)
         self.assertEqual(result.returncode, 0, "
-        self.assertEqual(result.returncode, 0, "
+        self.assertEqual(result.returncode, 0, ""
+
         try:
         # Create services on the network
         service_containers = []
         for i in range(3):
         container_name = formatted_string"
-        container_name = formatted_string"
+        container_name = formatted_string""
+
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--network', network_name,
@@ -2084,7 +2135,8 @@ class DockerInfrastructureFailureRecoveryTests(SSotAsyncTestCase):
         result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
         self.assertEqual(result.returncode, 0,
         "
-        "
+        ""
+
         service_containers.append(container_name)
         self.created_containers.add(container_name)
             # Wait for services to start
@@ -2138,7 +2190,8 @@ class DockerInfrastructureFailureRecoveryTests(SSotAsyncTestCase):
         '--restart', 'always',
         'alpine:latest',
         'sh', '-c', 'while true; do echo Service running; sleep 3; done'"
-        'sh', '-c', 'while true; do echo Service running; sleep 3; done'"
+        'sh', '-c', 'while true; do echo Service running; sleep 3; done'""
+
     
         result = subprocess.run(create_cmd, capture_output=True, text=True, timeout=20)
         self.assertEqual(result.returncode, 0, formatted_string")"
@@ -2215,7 +2268,7 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
-        '--memory', '64m',
+        '--memory', '"64m"',
         'alpine:latest',
         'sleep', '30'
         
@@ -2244,21 +2297,23 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         logger.info(formatted_string" )"
         
     def test_memory_usage_efficiency_validation(self):
-        ""Test containers operate within memory efficiency requirements."
+        ""Test containers operate within memory efficiency requirements.""
+
         pass
         test_id = formatted_string"
         test_id = formatted_string"
     # Create containers with different memory profiles
         memory_test_containers = []
         memory_configs = [
-        ('small', '32m'),
-        ('medium', '128m'),
-        ('large', '256m')
+        ('small', '"32m"'),
+        ('medium', '"128m"'),
+        ('large', '"256m"')
     
         for size_name, memory_limit in memory_configs:
         for i in range(3):  # 3 containers per size
         container_name = formatted_string"
-        container_name = formatted_string"
+        container_name = formatted_string""
+
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
@@ -2289,7 +2344,7 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         parts = data_line.split('\t')
         if len(parts) >= 2:
         memory_usage = parts[1].strip()
-                            # Parse memory usage (e.g., 45.2MiB / 128MiB)
+                            # Parse memory usage (e.g., 45."2MiB" / "128MiB")
         if '/' in memory_usage:
         current_mem = memory_usage.split('/')[0].strip()
         if 'MiB' in current_mem:
@@ -2335,7 +2390,7 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
-        '--memory', '32m',
+        '--memory', '"32m"',
         'alpine:latest',
         'echo', 'formatted_string'
             
@@ -2431,7 +2486,7 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
-        '--memory', '128m'
+        '--memory', '"128m"'
         
         if volume_name:
         create_cmd.extend(['-v', 'formatted_string')
@@ -2448,7 +2503,7 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         write_start = time.time()
         write_cmd = [
         'docker', 'exec', container_name,
-        'dd', 'if=/dev/zero', 'formatted_string', 'bs=1M', 'count=10'
+        'dd', 'if=/dev/zero', 'formatted_string', 'bs="1M"', 'count=10'
                 
         write_result = subprocess.run(write_cmd, capture_output=True, text=True, timeout=30)
         write_duration = time.time() - write_start
@@ -2460,7 +2515,7 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         read_start = time.time()
         read_cmd = [
         'docker', 'exec', container_name,
-        'dd', 'formatted_string', 'of=/dev/null', 'bs=1M'
+        'dd', 'formatted_string', 'of=/dev/null', 'bs="1M"'
                     
         read_result = subprocess.run(read_cmd, capture_output=True, text=True, timeout=30)
         read_duration = time.time() - read_start
@@ -2506,7 +2561,7 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         create_cmd = [
         'docker', 'run', '-d', '--name', container_name,
         '--label', 'formatted_string',
-        '--memory', '64m',
+        '--memory', '"64m"',
         image_name,
         'sleep', '30'
             
@@ -2607,7 +2662,8 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         return (env_name, False)
         except Exception as e:
         logger.error(formatted_string)"
-        logger.error(formatted_string)"
+        logger.error(formatted_string)""
+
         return (env_name, False)
         try:
                     # Create environments in parallel
@@ -2630,7 +2686,8 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         health2 = self.docker_manager.get_health_report(env2)
         self.assertTrue(health2.get('all_healthy', False),
         "
-        "
+        ""
+
         finally:
                                         # Clean up all environments
         for env_name in environments:
@@ -2639,7 +2696,8 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         self.docker_manager.release_environment(env_name)
         except Exception as e:
         logger.warning(formatted_string)"
-        logger.warning(formatted_string)"
+        logger.warning(formatted_string)""
+
     def test_container_failure_recovery_mechanisms(self):
         "Test container failure recovery and restart mechanisms."
         pass
@@ -2661,7 +2719,8 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         container.kill()
         killed_containers.append(container.name)
         logger.info("
-        logger.info("
+        logger.info(""
+
         except Exception as e:
         logger.warning(formatted_string)"
         logger.warning(formatted_string)"
@@ -2704,7 +2763,8 @@ class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
         self.assertLess(total_memory, 1000, formatted_string)"
         self.assertLess(total_memory, 1000, formatted_string)"
         logger.info("
-        logger.info("
+        logger.info(""
+
         finally:
                         # Clean up environment
         if hasattr(self.docker_manager, 'release_environment'):

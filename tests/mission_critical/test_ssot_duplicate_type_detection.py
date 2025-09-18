@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
-"""
-"""
+""""
+
 SSOT Duplicate Type Definition Detection - Issue #1075
 """
-"""
+""""
+
 Focused unit test to detect the specific 89 duplicate type definitions identified in the analysis.
 
 CRITICAL BUSINESS IMPACT: Duplicate type definitions lead to:
-- Runtime errors from incorrect imports
+    - Runtime errors from incorrect imports
 - Development confusion and slower velocity
 - Maintenance overhead and technical debt
-- Risk to $500K+ ARR from system instability
+- Risk to $"500K" plus ARR from system instability
 
 This test is designed to FAIL initially to prove the specific violations exist.
 "
-"
+""
+
 
 import os
 import sys
@@ -104,7 +106,8 @@ class DuplicateTypeAnalyzer:
 
     def find_production_duplicates(self, type_definitions: Dict) -> List[Dict]:
         Find duplicate type definitions in production code"
-        Find duplicate type definitions in production code"
+        Find duplicate type definitions in production code""
+
         duplicates = []
 
         for type_name, definitions in type_definitions.items():
@@ -178,14 +181,16 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
     @classmethod
     def setup_class(cls):
         Setup class-level resources"
-        Setup class-level resources"
+        Setup class-level resources""
+
         super().setup_class()
         cls.analyzer = DuplicateTypeAnalyzer(PROJECT_ROOT)
         cls.type_definitions = cls.analyzer.scan_type_definitions()
 
     def test_detect_production_duplicate_types(self):
         """
-        "
+        ""
+
         Test: Detect duplicate type definitions in production code
 
         This test should FAIL initially to prove the violations exist.
@@ -229,12 +234,14 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
         self.assertGreater(
             len(critical_duplicates), 3,
             fExpected multiple critical SSOT pattern duplicates but found {len(critical_duplicates)}"
-            fExpected multiple critical SSOT pattern duplicates but found {len(critical_duplicates)}"
+            fExpected multiple critical SSOT pattern duplicates but found {len(critical_duplicates)}""
+
         )
 
     def test_detect_test_infrastructure_duplicates(self):
         """
-    "
+    ""
+
         Test: Detect duplicate type definitions in test infrastructure
 
         Expected: Massive duplication in test infrastructure (6,96+ duplicate implementations)
@@ -263,12 +270,14 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
             sorted_duplicates = sorted(test_duplicates, key=lambda x: x['definition_count'], reverse=True)
             for duplicate in sorted_duplicates[:5]:
                 print(f{duplicate['type_name']}: {duplicate['definition_count']} definitions)"
-                print(f{duplicate['type_name']}: {duplicate['definition_count']} definitions)"
+                print(f{duplicate['type_name']}: {duplicate['definition_count']} definitions)""
+
                 for definition in duplicate['definitions'][:3]:  # Show first 3
                     print(f"  - {definition['relative_path']}:{definition['line']}))"
                 if len(duplicate['definitions') > 3:
                     print(f  ... and {len(duplicate['definitions'] - 3} more)"
-                    print(f  ... and {len(duplicate['definitions'] - 3} more)"
+                    print(f  ... and {len(duplicate['definitions'] - 3} more)""
+
                 print()
 
         # This should FAIL initially due to massive test fragmentation
@@ -283,23 +292,27 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
         if base_test_duplicates:
             base_test_count = sum(d['definition_count'] for d in base_test_duplicates)
             self.record_metric(base_test_case_duplicates, base_test_count)"
-            self.record_metric(base_test_case_duplicates, base_test_count)"
+            self.record_metric(base_test_case_duplicates, base_test_count)""
+
 
             self.assertGreater(
                 base_test_count, 5,
                 fExpected significant BaseTestCase duplication but found {base_test_count} instances"
-                fExpected significant BaseTestCase duplication but found {base_test_count} instances"
+                fExpected significant BaseTestCase duplication but found {base_test_count} instances""
+
             )
 
     def test_analyze_import_conflicts(self):
         """
-    "
+    ""
+
         Test: Analyze potential import conflicts from duplicate types
 
         This identifies where duplicate type definitions could cause import errors
         or runtime confusion in the system.
         "
-        "
+        ""
+
         self.record_metric(test_category, analysis)
 
         conflicts = self.analyzer.analyze_import_conflicts(self.type_definitions)
@@ -311,7 +324,8 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
         # Log high-risk import conflicts
         if high_risk_conflicts:
             print(f\n=== HIGH-RISK IMPORT CONFLICTS ({len(high_risk_conflicts)} found) ===)"
-            print(f\n=== HIGH-RISK IMPORT CONFLICTS ({len(high_risk_conflicts)} found) ===)"
+            print(f\n=== HIGH-RISK IMPORT CONFLICTS ({len(high_risk_conflicts)} found) ===)""
+
             for conflict in high_risk_conflicts[:5]:
                 print(f"\n{conflict['type_name']} conflicts across modules:))"
                 for module in conflict['conflicting_modules']:
@@ -327,7 +341,8 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
             )
 
     def test_specific_ssot_pattern_violations(self):
-    """
+    """"
+
         Test: Check for specific SSOT pattern violations
 
         This test specifically validates that known SSOT patterns are properly
@@ -364,7 +379,8 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
         critical_violations = {k: v for k, v in ssot_violations.items() if k in critical_patterns}
 
         self.record_metric(critical_ssot_violations, len(critical_violations))"
-        self.record_metric(critical_ssot_violations, len(critical_violations))"
+        self.record_metric(critical_ssot_violations, len(critical_violations))""
+
 
         # If critical violations exist, flag them
         if len(critical_violations) > 0:
@@ -375,7 +391,8 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
             )
 
     def test_comprehensive_duplicate_summary(self):
-    """
+    """"
+
         Test: Generate comprehensive duplicate type definition summary
 
         This provides a complete overview of all duplicate type issues across
@@ -424,7 +441,8 @@ class TestSsotDuplicateTypeDetection(SSotBaseTestCase):
             risk_level = MEDIUM
 
         print(fBusiness Risk Level: {risk_level}")"
-        print(fEstimated Remediation Effort: {total_duplicate_instances * 0.5:.1f} hours)
+        print(fEstimated Remediation Effort: {total_duplicate_instances * 0.5:."1f"} hours)""
+
         print()
 
         # This validates the comprehensive analysis

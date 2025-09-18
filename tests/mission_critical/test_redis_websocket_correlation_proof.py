@@ -4,12 +4,12 @@ This test suite proves the direct correlation between Redis SSOT violations
 and WebSocket 1011 errors that are blocking the Golden Path chat functionality.
 
 Business Value:
-- Proves $500K+ ARR chat functionality is blocked by Redis violations
+    - Proves $"500K" plus ARR chat functionality is blocked by Redis violations
 - Documents the 85% WebSocket error probability correlation
 - Validates that SSOT remediation fixes the Golden Path
 
 Test Strategy:
-- Test WebSocket connection reliability under current Redis configuration
+    - Test WebSocket connection reliability under current Redis configuration
 - Measure connection pool fragmentation impact on WebSocket stability
 - Correlate Redis manager instantiation patterns with WebSocket failures
 - Prove SSOT Redis manager improves WebSocket reliability
@@ -35,7 +35,8 @@ from netra_backend.app.redis_manager import redis_manager
 @dataclass
 class WebSocketTestResult:
     Result of WebSocket connection test."
-    Result of WebSocket connection test."
+    Result of WebSocket connection test.""
+
     success: bool
     error_code: Optional[int]
     error_type: str
@@ -52,7 +53,8 @@ class RedisInstanceTracker:
 
 
 class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
-    ""Test suite proving Redis violations cause WebSocket failures."
+    ""Test suite proving Redis violations cause WebSocket failures.""
+
 
     def setUp(self):
         Set up test environment.""
@@ -94,7 +96,7 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
         success_rate = (success_count / self.test_iterations) * 100
         error_1011_rate = (error_1011_count / self.test_iterations) * 100
 
-        self.logger.error(fWebSocket Success Rate: {success_rate:.1f}%)
+        self.logger.error(fWebSocket Success Rate: {success_rate:."1f"}%)
         self.logger.error(fWebSocket 1011 Error Rate: {error_1011_rate:.1f}%)"
         self.logger.error(fWebSocket 1011 Error Rate: {error_1011_rate:.1f}%)"
         self.logger.error(f"Total Failures: {failure_count}/{self.test_iterations})"
@@ -108,7 +110,7 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
             total_tests: self.test_iterations,
             "failures: failure_count,"
             expected_pattern: 85% error probability due to Redis violations,
-            business_impact: "Blocks $500K+ ARR chat functionality"
+            business_impact: "Blocks $"500K" plus ARR chat functionality"
         }
 
         # Save evidence
@@ -119,8 +121,8 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
         self.assertGreater(
             success_rate,
             15.0,  # Expect >15% success rate (should fail with current ~0% rate)
-            fWebSocket success rate {success_rate:.1f}% indicates Redis SSOT violations 
-            f"are blocking Golden Path. Error 1011 rate: {error_1011_rate:.1f}%"
+            fWebSocket success rate {success_rate:."1f"}% indicates Redis SSOT violations 
+            f"are blocking Golden Path. Error 1011 rate: {error_1011_rate:."1f"}%"
         )
 
     async def test_redis_connection_pool_fragmentation(self):
@@ -145,7 +147,8 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
             }
         except Exception as e:
             self.logger.error(fFailed to import redis_manager: {e})"
-            self.logger.error(fFailed to import redis_manager: {e})"
+            self.logger.error(fFailed to import redis_manager: {e})""
+
 
         try:
             # Test if legacy auth service redis still exists
@@ -170,7 +173,8 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
             }
         except Exception as e:
             self.logger.info(fCache redis manager not found (good): {e})"
-            self.logger.info(fCache redis manager not found (good): {e})"
+            self.logger.info(fCache redis manager not found (good): {e})""
+
 
         # Count unique instances
         unique_instances = len(set(inst["instance_id] for inst in redis_instances))"
@@ -199,7 +203,8 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
             unique_instances,
             1,
             fSSOT violation detected: {unique_instances} competing Redis managers found. "
-            fSSOT violation detected: {unique_instances} competing Redis managers found. "
+            fSSOT violation detected: {unique_instances} competing Redis managers found. ""
+
             fThis fragmentation causes WebSocket 1011 errors. Expected: 1 SSOT instance.
         )
 
@@ -211,7 +216,8 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
 "
 "
         self.logger.info(Testing WebSocket-Redis error correlation - EXPECTING CORRELATION)"
-        self.logger.info(Testing WebSocket-Redis error correlation - EXPECTING CORRELATION)"
+        self.logger.info(Testing WebSocket-Redis error correlation - EXPECTING CORRELATION)""
+
 
         # Test WebSocket connection during Redis operations
         redis_operation_results = []
@@ -222,14 +228,16 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
             redis_start = time.time()
             try:
                 test_key = ftest_websocket_correlation_{i}"
-                test_key = ftest_websocket_correlation_{i}"
+                test_key = ftest_websocket_correlation_{i}""
+
                 await redis_manager.set(test_key, ftest_value_{i}, ex=30)
                 redis_result = await redis_manager.get(test_key)
                 redis_success = redis_result is not None
                 await redis_manager.delete(test_key)
             except Exception as e:
                 self.logger.error(fRedis operation failed: {e})"
-                self.logger.error(fRedis operation failed: {e})"
+                self.logger.error(fRedis operation failed: {e})""
+
                 redis_success = False
 
             redis_time = time.time() - redis_start
@@ -256,7 +264,8 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
         redis_successes = sum(1 for r in redis_operation_results if r[redis_success")"
         ws_successes = sum(1 for r in websocket_operation_results if r[websocket_success)
         ws_1011_errors = sum(1 for r in websocket_operation_results if r[websocket_error_code] == 1011)"
-        ws_1011_errors = sum(1 for r in websocket_operation_results if r[websocket_error_code] == 1011)"
+        ws_1011_errors = sum(1 for r in websocket_operation_results if r[websocket_error_code] == 1011)""
+
 
         redis_success_rate = (redis_successes / len(redis_operation_results)) * 100
         ws_success_rate = (ws_successes / len(websocket_operation_results)) * 100
@@ -276,13 +285,14 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
         with open(/c/netra-apex/websocket_redis_correlation_detailed.json", w) as f:"
             json.dump(correlation_data, f, indent=2)
 
-        self.logger.error(fRedis Success Rate: {redis_success_rate:.1f}%)
-        self.logger.error(fWebSocket Success Rate: {ws_success_rate:.1f}%)
-        self.logger.error(fWebSocket 1011 Rate: {ws_1011_rate:.1f}%")"
+        self.logger.error(fRedis Success Rate: {redis_success_rate:."1f"}%)
+        self.logger.error(fWebSocket Success Rate: {ws_success_rate:."1f"}%)
+        self.logger.error(fWebSocket 1011 Rate: {ws_1011_rate:."1f"}%")"
 
         # This test documents the correlation (may not fail but provides evidence)
         if ws_1011_rate > 50:
-            self.fail(fHIGH CORRELATION DETECTED: {ws_1011_rate:.1f)% WebSocket 1011 errors 
+            self.fail(fHIGH CORRELATION DETECTED: {ws_1011_rate:."1f")% WebSocket 1011 errors""
+
                      fduring Redis operations proves connection conflicts from SSOT violations)
 
     async def test_ssot_redis_singleton_validation(self):
@@ -400,7 +410,8 @@ class RedisWebSocketCorrelationTests(SSotAsyncTestCase):
                 success=False,
                 error_code=None,
                 error_type=fexception_{type(e).__name__},"
-                error_type=fexception_{type(e).__name__},"
+                error_type=fexception_{type(e).__name__},""
+
                 connection_time=connection_time,
                 duration=connection_time
             )

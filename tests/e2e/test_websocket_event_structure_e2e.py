@@ -71,7 +71,7 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_staging_agent_execution_event_structure(self):
-""""""
+    """"""
         Test complete agent execution event structure in staging
         EXPECTED FAILURE: Events should have business fields at top level
 """"""
@@ -121,7 +121,8 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
             self.fail(thinking_content should not be buried in 'data' wrapper)
 
     def validate_tool_executing_structure(self, event: Dict[str, Any):
-        """
+        """"
+
         Validate tool_executing event structure
         EXPECTED FAILURE: Tool details should be at top level
 
@@ -158,7 +159,7 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_frontend_event_parsing_compatibility(self):
-""""""
+    """"""
         Test WebSocket event structure compatibility with frontend parsing
         EXPECTED FAILURE: Current structure may break frontend event handling
 """"""
@@ -191,7 +192,8 @@ class WebSocketEventStructureE2ETests(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_real_time_event_streaming_structure(self):
-    """
+    """"
+
         Test real-time event streaming maintains consistent structure
         EXPECTED FAILURE: Structure inconsistencies may affect real-time UX
         
@@ -242,5 +244,6 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
-"""
+""""
+
 )))))))))

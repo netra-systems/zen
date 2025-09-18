@@ -1,5 +1,5 @@
-"""
-"""
+""""
+
 MISSION CRITICAL: WebSocket Event Emission Validation Test
 
 This test validates that all 5 critical WebSocket events are properly emitted
@@ -7,7 +7,7 @@ during agent execution flow after the fixes implemented to address the
 ConnectionHandler issues.
 
 Critical Events Tested:
-1. agent_started - When agent begins processing
+    1. agent_started - When agent begins processing
 2. agent_thinking - During agent reasoning 
 3. tool_executing - When tools are being used
 4. tool_completed - When tool execution finishes
@@ -16,10 +16,11 @@ Critical Events Tested:
 This test runs without requiring full backend services by using mocks,
 but validates that the integration points are correctly connected.
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import asyncio
 import pytest
 import time
@@ -199,7 +200,8 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         # Validate tool dispatcher is created
         tool_dispatcher = engine.get_tool_dispatcher()
         assert tool_dispatcher is not None, Tool dispatcher creation failed"
-        assert tool_dispatcher is not None, Tool dispatcher creation failed"
+        assert tool_dispatcher is not None, Tool dispatcher creation failed""
+
         
         # Validate agent registry has tool dispatcher
         self.mock_agent_registry.set_tool_dispatcher.assert_called()
@@ -212,7 +214,8 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         assert len(self.emitted_events) >= 2, "Events not properly emitted"
         
         print( PASS:  Complete integration test passed - all components connected correctly)"
-        print( PASS:  Complete integration test passed - all components connected correctly)"
+        print( PASS:  Complete integration test passed - all components connected correctly)""
+
         
     def get_event_summary(self) -> Dict[str, Any]:
         "Get summary of emitted events for debugging."

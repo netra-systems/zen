@@ -5,10 +5,12 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.""
+
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)""
+
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):"
         Close WebSocket connection.""
@@ -16,7 +18,8 @@ class TestWebSocketConnection:
         self.is_connected = False
     def get_messages(self) -> list:
         Get all sent messages."
-        Get all sent messages."
+        Get all sent messages.""
+
         return self.messages_sent.copy()
         '''
         '''
@@ -31,7 +34,7 @@ class TestWebSocketConnection:
         1. Segment: Platform/Internal - Development Velocity, Risk Reduction
         2. Business Goal: Validate Docker infrastructure reliability for CI/CD and development
         3. Value Impact: Prevents 4-8 hours/week of developer downtime from Docker failures
-        4. Revenue Impact: Protects development velocity for $2M+ ARR platform
+        4. Revenue Impact: Protects development velocity for $"2M"+ ARR platform
         '''
         '''
         import asyncio
@@ -80,7 +83,8 @@ class ValidationResult:
         warnings: List[str]
         @dataclass
 class StressTestResult:
-        ""Result of a stress test scenario."
+        ""Result of a stress test scenario.""
+
         scenario: str
         total_operations: int
         successful_operations: int
@@ -115,7 +119,8 @@ class DockerStabilityValidator:
         # Check Docker availability
         if not self._check_docker_availability():
         logger.error(Docker not available for validation)"
-        logger.error(Docker not available for validation)"
+        logger.error(Docker not available for validation)""
+
         return False
             # Record initial resource state
         self.initial_containers = self._get_docker_containers()
@@ -124,11 +129,13 @@ class DockerStabilityValidator:
             # Clean up any previous test artifacts
         self._cleanup_test_artifacts()
         logger.info("
-        logger.info("
+        logger.info(""
+
         return True
         except Exception as e:
         logger.error(formatted_string)"
-        logger.error(formatted_string)"
+        logger.error(formatted_string)""
+
         return False
     def cleanup_validation(self) -> bool:
         "Clean up validation environment and resources."
@@ -157,7 +164,8 @@ class DockerStabilityValidator:
         logger.error(
         return False
     def run_comprehensive_validation(self) -> Dict[str, Any]:
-        ""Run all validation scenarios and return comprehensive report."
+        ""Run all validation scenarios and return comprehensive report.""
+
         if not self.setup_validation():
         return {success: False, error": Failed to setup validation environment}"
         try:
@@ -176,20 +184,24 @@ class DockerStabilityValidator:
         overall_success = True
         for scenario_name, scenario_func in scenarios:
         logger.info(formatted_string)"
-        logger.info(formatted_string)"
+        logger.info(formatted_string)""
+
         try:
         result = scenario_func()
         self.validation_results.append(result)
         if not result.success:
         overall_success = False
         logger.error("
-        logger.error("
+        logger.error(""
+
         else:
         logger.info(formatted_string)"
-        logger.info(formatted_string)"
+        logger.info(formatted_string)""
+
         except Exception as e:
         logger.error("
-        logger.error("
+        logger.error(""
+
         overall_success = False
                                 # Add failed result
         self.validation_results.append(ValidationResult( ))
@@ -205,11 +217,13 @@ class DockerStabilityValidator:
                                 # Cleanup
         cleanup_success = self.cleanup_validation()
         report[cleanup_success] = cleanup_success"
-        report[cleanup_success] = cleanup_success"
+        report[cleanup_success] = cleanup_success""
+
         return report
         except Exception as e:
         logger.error("
-        logger.error("
+        logger.error(""
+
         self.cleanup_validation()
         return {success: False, "error: str(e)}"
     def _validate_docker_lifecycle_management(self) -> ValidationResult:
@@ -232,7 +246,8 @@ class DockerStabilityValidator:
         if create_result.returncode != 0:
         errors.append(formatted_string)
         return ValidationResult(Docker Lifecycle Management, False,"
-        return ValidationResult(Docker Lifecycle Management, False,"
+        return ValidationResult(Docker Lifecycle Management, False,""
+
         time.time() - start_time, metrics, errors, warnings)
         self.created_containers.add(container_name)
         metrics['container_create_time'] = create_time
@@ -279,7 +294,8 @@ class DockerStabilityValidator:
         time.time() - start_time, metrics, errors, warnings)
     def _validate_concurrent_operations_stability(self) -> ValidationResult:
         Validate stability under concurrent Docker operations."
-        Validate stability under concurrent Docker operations."
+        Validate stability under concurrent Docker operations.""
+
         start_time = time.time()
         errors = []
         warnings = []
@@ -380,7 +396,8 @@ class DockerStabilityValidator:
         success = len(errors) == 0
         duration = time.time() - start_time
         return ValidationResult(Concurrent Operations Stability, success,"
-        return ValidationResult(Concurrent Operations Stability, success,"
+        return ValidationResult(Concurrent Operations Stability, success,""
+
         duration, metrics, errors, warnings)
         except Exception as e:
         errors.append(str(e))
@@ -416,7 +433,7 @@ class DockerStabilityValidator:
         if inspect_result.returncode != 0:
         errors.append(formatted_string")"
         else:
-        expected_memory = 134217728  # 128MB in bytes
+        expected_memory = 134217728  # "128MB" in bytes
         actual_memory = int(inspect_result.stdout.strip())
         metrics['expected_memory_bytes'] = expected_memory
         metrics['actual_memory_bytes'] = actual_memory
@@ -425,7 +442,7 @@ class DockerStabilityValidator:
                         # Test memory enforcement with stress command
         stress_result = self._execute_docker_command()
         'docker', 'exec', container_name,
-        'sh', '-c', 'dd if=/dev/zero of=/tmp/big bs=1M count=200 2>&1 || echo Memory limit enforced"'"
+        'sh', '-c', 'dd if=/dev/zero of=/tmp/big bs="1M" count=200 2>&1 || echo Memory limit enforced"'"
         ], timeout=30)
                         # Check if memory limit was enforced
         if stress_result.returncode == 0:
@@ -445,7 +462,8 @@ class DockerStabilityValidator:
         metrics['oom_killed'] = oom_killed == 'true'
         if oom_killed != 'true' and status == 'running':
         warnings.append(Memory stress test did not trigger OOM killer as expected)"
-        warnings.append(Memory stress test did not trigger OOM killer as expected)"
+        warnings.append(Memory stress test did not trigger OOM killer as expected)""
+
         else:
                                                     # Command failed, which could indicate memory enforcement
         metrics['memory_enforcement_working'] = True
@@ -506,7 +524,8 @@ class DockerStabilityValidator:
             # Validate rate limiting effectiveness
         if len(significant_gaps) == 0:
         warnings.append(No significant gaps detected - rate limiter may not be active)"
-        warnings.append(No significant gaps detected - rate limiter may not be active)"
+        warnings.append(No significant gaps detected - rate limiter may not be active)""
+
         success_rate = metrics['successful_operations'] / metrics['total_operations']
         if success_rate < 0.9:
         errors.append("
@@ -535,7 +554,8 @@ class DockerStabilityValidator:
         metrics['concurrent_limit_enforced'] = max_concurrent <= 2
         if max_concurrent > 2:
         errors.append(formatted_string)"
-        errors.append(formatted_string)"
+        errors.append(formatted_string)""
+
         success = len(errors) == 0
         duration = time.time() - start_time
         return ValidationResult("Rate Limiter Functionality, success,"
@@ -598,7 +618,8 @@ class DockerStabilityValidator:
                                 
         if create_result.returncode != 0:
         errors.append("
-        errors.append("
+        errors.append(""
+
         else:
         self.created_containers.add(unresponsive_container)
         time.sleep(2)  # Let container start
@@ -613,7 +634,8 @@ class DockerStabilityValidator:
                                                 # Should take at least the timeout period plus some kill time
         if force_time < 3:
         warnings.append("
-        warnings.append("
+        warnings.append(""
+
         elif force_time > 10:
         warnings.append(formatted_string")"
                                                         # Test removal of stopped containers
@@ -628,7 +650,8 @@ class DockerStabilityValidator:
         self.created_containers.discard(container)
         else:
         errors.append("
-        errors.append("
+        errors.append(""
+
         if removal_times:
         metrics['avg_removal_time'] = sum(removal_times) / len(removal_times)
         metrics['max_removal_time'] = max(removal_times)
@@ -641,7 +664,8 @@ class DockerStabilityValidator:
         return ValidationResult(Safe Container Removal, False,
         time.time() - start_time, metrics, errors, warnings)
     def _validate_resource_leak_prevention(self) -> ValidationResult:
-        ""Validate that operations don't leave resource leaks.'"
+        ""Validate that operations don't leave resource leaks.'""
+
         start_time = time.time()
         errors = []
         warnings = []
@@ -660,7 +684,8 @@ class DockerStabilityValidator:
         container_name = formatted_string"
         container_name = formatted_string"
         network_name = formatted_string"
-        network_name = formatted_string"
+        network_name = formatted_string""
+
         volume_name = formatted_string
             # Create volume
         vol_result = self._execute_docker_command(['docker', 'volume', 'create', volume_name)
@@ -729,7 +754,8 @@ class DockerStabilityValidator:
         errors.extend([formatted_string for c in leaked_containers)
         if leaked_networks:
         errors.extend([formatted_string for n in leaked_networks)"
-        errors.extend([formatted_string for n in leaked_networks)"
+        errors.extend([formatted_string for n in leaked_networks)""
+
         if leaked_volumes:
         errors.extend(["formatted_string for v in leaked_volumes)"
         if cleanup_errors:
@@ -744,7 +770,8 @@ class DockerStabilityValidator:
         time.time() - start_time, metrics, errors, warnings)
     def _validate_docker_daemon_resilience(self) -> ValidationResult:
         Validate Docker daemon remains stable under stress."
-        Validate Docker daemon remains stable under stress."
+        Validate Docker daemon remains stable under stress.""
+
         start_time = time.time()
         errors = []
         warnings = []
@@ -821,7 +848,8 @@ class DockerStabilityValidator:
         time.time() - start_time, metrics, errors, warnings)
     def _run_stress_test_suite(self) -> ValidationResult:
         Run comprehensive stress test scenarios."
-        Run comprehensive stress test scenarios."
+        Run comprehensive stress test scenarios.""
+
         start_time = time.time()
         errors = []
         warnings = []
@@ -878,7 +906,8 @@ class DockerStabilityValidator:
         success = len(errors) == 0 and len(stress_results) > 0
         duration = time.time() - start_time
         return ValidationResult(Stress Test Suite, success,"
-        return ValidationResult(Stress Test Suite, success,"
+        return ValidationResult(Stress Test Suite, success,""
+
         duration, metrics, errors, warnings)
         except Exception as e:
         errors.append(str(e))
@@ -996,7 +1025,8 @@ class DockerStabilityValidator:
         avg_time = sum(operation_times) / len(operation_times) if operation_times else 0
         return StressTestResult( )
         scenario=Network Operations,"
-        scenario=Network Operations,"
+        scenario=Network Operations,""
+
         total_operations=total_operations,
         successful_operations=successful_operations,
         failed_operations=total_operations - successful_operations,
@@ -1030,7 +1060,8 @@ class DockerStabilityValidator:
         '--label', 'formatted_string',
         'alpine:latest',
         'sh', '-c', 'echo test data > /data/test.txt && cat /data/test.txt'"
-        'sh', '-c', 'echo test data > /data/test.txt && cat /data/test.txt'"
+        'sh', '-c', 'echo test data > /data/test.txt && cat /data/test.txt'""
+
                 
         if container_result.returncode == 0:
         self.created_containers.add(container_name)
@@ -1048,7 +1079,8 @@ class DockerStabilityValidator:
         errors.append(formatted_string")"
         else:
         errors.append("
-        errors.append("
+        errors.append(""
+
         except Exception as e:
         errors.append(formatted_string")"
         success_rate = successful_operations / total_operations if total_operations > 0 else 0
@@ -1065,7 +1097,8 @@ class DockerStabilityValidator:
         errors=errors[:5]
                                     
     def _stress_high_concurrency(self) -> StressTestResult:
-        ""Stress test high concurrency operations."
+        ""Stress test high concurrency operations.""
+
         total_operations = 20
         successful_operations = 0
         operation_times = []
@@ -1103,7 +1136,8 @@ class DockerStabilityValidator:
         avg_time = sum(operation_times) / len(operation_times) if operation_times else 0
         return StressTestResult( )
         scenario=High Concurrency,"
-        scenario=High Concurrency,"
+        scenario=High Concurrency,""
+
         total_operations=total_operations,
         successful_operations=successful_operations,
         failed_operations=total_operations - successful_operations,
@@ -1179,7 +1213,8 @@ class DockerStabilityValidator:
         "networks_at_end: len(final_networks),"
         volumes_at_start: len(self.initial_volumes),
         volumes_at_end: len(final_volumes)"
-        volumes_at_end: len(final_volumes)"
+        volumes_at_end: len(final_volumes)""
+
         },
         validation_areas": {"
         docker_lifecycle_management: self._get_test_status(Docker Lifecycle Management),
@@ -1199,7 +1234,8 @@ class DockerStabilityValidator:
         for keyword in ['crash', 'fail', 'unresponsive', 'timeout']],
         top_errors: list(set(all_errors))[:10],
         top_warnings: list(set(all_warnings))[:10]"
-        top_warnings: list(set(all_warnings))[:10]"
+        top_warnings: list(set(all_warnings))[:10]""
+
         },
         "recommendations: self._generate_recommendations(overall_success, all_errors, all_warnings)"
         
@@ -1210,7 +1246,8 @@ class DockerStabilityValidator:
         if result.test_name == test_name:
         return PASS if result.success else FAIL
         return NOT_RUN"
-        return NOT_RUN"
+        return NOT_RUN""
+
     def _generate_recommendations(self, overall_success: bool, errors: List[str), warnings: List[str) -> List[str):
         "Generate recommendations based on validation results."
         recommendations = []
@@ -1232,7 +1269,8 @@ class DockerStabilityValidator:
         recommendations.append(Address warning conditions to prevent future failures)
         if not recommendations:
         recommendations.append(Docker stability improvements are working effectively)"
-        recommendations.append(Docker stability improvements are working effectively)"
+        recommendations.append(Docker stability improvements are working effectively)""
+
         return recommendations
     def _check_docker_availability(self) -> bool:
         "Check if Docker is available and responsive."
@@ -1268,13 +1306,15 @@ class DockerStabilityValidator:
         pass
         return set()
     def _get_docker_networks(self) -> Set[str]:
-        ""Get current Docker networks."
+        ""Get current Docker networks.""
+
         try:
         result = subprocess.run(['docker', 'network', 'ls', '--format', '{{.Name))'],
         capture_output=True, text=True, timeout=10)
         if result.returncode == 0:
         return set(name.strip() for name in result.stdout.strip().split( ))"
-        return set(name.strip() for name in result.stdout.strip().split( ))"
+        return set(name.strip() for name in result.stdout.strip().split( ))""
+
         ) if name.strip())
         except:
         pass
@@ -1292,7 +1332,8 @@ class DockerStabilityValidator:
         return set()
     def _cleanup_test_artifacts(self):
         Clean up test artifacts and resources."
-        Clean up test artifacts and resources."
+        Clean up test artifacts and resources.""
+
         try:
         # Remove test containers safely (no force flag)
         containers_to_remove = list(self.created_containers)
@@ -1318,7 +1359,8 @@ class DockerStabilityValidator:
         self.created_volumes.discard(volume_name)
         except Exception as e:
         logger.warning("
-        logger.warning("
+        logger.warning(""
+
 class DockerStabilityValidationTestSuite(unittest.TestCase):
         "Test suite wrapper for Docker stability validation."
     def setUp(self):
@@ -1353,7 +1395,8 @@ class DockerStabilityValidationTestSuite(unittest.TestCase):
         logger.warning(formatted_string)
                         # Log recommendations
         logger.info( )"
-        logger.info( )"
+        logger.info( )""
+
         === RECOMMENDATIONS ===)
         for recommendation in report['recommendations']:
         logger.info(formatted_string")"

@@ -3,11 +3,11 @@
 E2E test to expose WebSocket connection failures in dev docker environment.
 
 This test specifically targets the WebSocket connection issue occurring at:
-- ws://localhost:8000/ws
+    - ws://localhost:8000/ws
 - Environment: dev docker
 
 Expected Error Pattern:
-- WebSocketService.ts:988 WebSocket connection to 'ws://localhost:8000/ws' failed
+    - WebSocketService.ts:988 WebSocket connection to 'ws://localhost:8000/ws' failed
 - WebSocket error occurred [WebSocketService] (websocket_error)
 - WebSocket connection error [WebSocketProvider] (connection_error)
 '''

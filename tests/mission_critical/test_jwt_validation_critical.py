@@ -1,5 +1,5 @@
-"""
-"""
+""""
+
 Mission Critical JWT Validation Tests
 
 Tests critical JWT validation functionality that directly impacts business value.
@@ -8,15 +8,16 @@ These tests MUST PASS to ensure user authentication works and revenue is protect
 ULTRA CRITICAL: JWT validation failures = 100% user lockout = $0 revenue
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free  ->  Enterprise) - Authentication affects every user
+    - Segment: ALL (Free  ->  Enterprise) - Authentication affects every user
 - Business Goal: Prevent complete system lockout due to JWT validation failures  
 - Value Impact: Protects ALL business value that depends on user authentication
-- Strategic Impact: $120K+ MRR protection through functional authentication
+- Strategic Impact: $"120K"+ MRR protection through functional authentication
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import pytest
 import asyncio
 import logging
@@ -41,13 +42,15 @@ from netra_backend.app.core.service_dependencies.models import ()
 
 class JWTValidationMissionCriticalTests:
     "
-    "
+    ""
+
     Mission Critical JWT validation tests.
     
     FAILURE TOLERANCE: ZERO
     These tests protect the authentication infrastructure that enables all business value.
 "
-"
+""
+
 
     @pytest.fixture(scope="class)"
     def critical_test_logger(self):
@@ -59,7 +62,8 @@ class JWTValidationMissionCriticalTests:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
                  ALERT:  CRITICAL JWT: %(asctime)s - %(levelname)s - %(message)s"
-                 ALERT:  CRITICAL JWT: %(asctime)s - %(levelname)s - %(message)s"
+                 ALERT:  CRITICAL JWT: %(asctime)s - %(levelname)s - %(message)s""
+
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
@@ -73,7 +77,8 @@ class JWTValidationMissionCriticalTests:
 
     @pytest.fixture
     def mission_critical_golden_path_validator(self):
-        ""Golden Path Validator for mission critical tests."
+        ""Golden Path Validator for mission critical tests.""
+
         return GoldenPathValidator()
 
     def test_mission_critical_jwt_validator_initialization(
@@ -140,7 +145,8 @@ class JWTValidationMissionCriticalTests:
         critical_test_logger
     ):
         CRITICAL: Complete token creation and validation cycle MUST work."
-        CRITICAL: Complete token creation and validation cycle MUST work."
+        CRITICAL: Complete token creation and validation cycle MUST work.""
+
         
         critical_test_logger.info(Testing critical JWT token creation/validation cycle")"
         
@@ -169,9 +175,10 @@ class JWTValidationMissionCriticalTests:
             
             # CRITICAL: Token creation must be fast (< 5 seconds)
             assert creation_time < 5.0, f ALERT:  CRITICAL: Token creation too slow: {creation_time}s"
-            assert creation_time < 5.0, f ALERT:  CRITICAL: Token creation too slow: {creation_time}s"
+            assert creation_time < 5.0, f ALERT:  CRITICAL: Token creation too slow: {creation_time}s""
+
             
-            critical_test_logger.info(f" PASS:  Token created in {creation_time:.2f}s)"
+            critical_test_logger.info(f" PASS:  Token created in {creation_time:."2f"}s)"
             
             # Step 2: Token validation MUST work
             validation_start = time.time()
@@ -190,7 +197,7 @@ class JWTValidationMissionCriticalTests:
             # CRITICAL: Validation must be fast (< 3 seconds)
             assert validation_time < 3.0, f" ALERT:  CRITICAL: Token validation too slow: {validation_time}s"
             
-            critical_test_logger.info(f PASS:  Token validated in {validation_time:.2f}s")"
+            critical_test_logger.info(f PASS:  Token validated in {validation_time:."2f"}s")"
             critical_test_logger.info( TARGET:  CRITICAL JWT CYCLE SUCCESSFUL)
             
         except Exception as e:
@@ -208,7 +215,8 @@ class JWTValidationMissionCriticalTests:
         critical_test_logger.info(Testing critical refresh token flow)
         
         test_user_id = refresh-critical-user"
-        test_user_id = refresh-critical-user"
+        test_user_id = refresh-critical-user""
+
         
         try:
             # Create initial tokens
@@ -299,7 +307,8 @@ class JWTValidationMissionCriticalTests:
         critical_test_logger
     ):
         CRITICAL: Document the architectural mismatch causing Golden Path failures."
-        CRITICAL: Document the architectural mismatch causing Golden Path failures."
+        CRITICAL: Document the architectural mismatch causing Golden Path failures.""
+
         
         critical_test_logger.info(Testing critical Golden Path vs JWT architecture mismatch")"
         
@@ -347,7 +356,8 @@ class JWTValidationMissionCriticalTests:
         # This test documents the bug - both conditions can be true
         if jwt_actually_works:
             critical_test_logger.error( TARGET:  BUG REPRODUCED: JWT works but Golden Path fails)"
-            critical_test_logger.error( TARGET:  BUG REPRODUCED: JWT works but Golden Path fails)"
+            critical_test_logger.error( TARGET:  BUG REPRODUCED: JWT works but Golden Path fails)""
+
 
     @pytest.mark.asyncio
     async def test_mission_critical_jwt_performance_requirements(
@@ -405,22 +415,23 @@ class JWTValidationMissionCriticalTests:
         
         assert failures <= max_acceptable_failures, f ALERT:  CRITICAL: {failures} JWT operations failed"
         assert failures <= max_acceptable_failures, f ALERT:  CRITICAL: {failures} JWT operations failed"
-        assert avg_creation_time < max_token_creation_time, "f ALERT:  CRITICAL: Avg creation time {avg_creation_time:.2f}s exceeds {max_token_creation_time}s"
+        assert avg_creation_time < max_token_creation_time, "f ALERT:  CRITICAL: Avg creation time {avg_creation_time:."2f"}s exceeds {max_token_creation_time}s"
         assert avg_validation_time < max_token_validation_time, f ALERT:  CRITICAL: Avg validation time {avg_validation_time:.2f}s exceeds {max_token_validation_time}s"
         assert avg_validation_time < max_token_validation_time, f ALERT:  CRITICAL: Avg validation time {avg_validation_time:.2f}s exceeds {max_token_validation_time}s"
-        assert max_creation_time < max_token_creation_time * 2, f" ALERT:  CRITICAL: Max creation time {max_creation_time:.2f}s too high"
-        assert max_validation_time < max_token_validation_time * 2, "f ALERT:  CRITICAL: Max validation time {max_validation_time:.2f}s too high"
+        assert max_creation_time < max_token_creation_time * 2, f" ALERT:  CRITICAL: Max creation time {max_creation_time:."2f"}s too high"
+        assert max_validation_time < max_token_validation_time * 2, "f ALERT:  CRITICAL: Max validation time {max_validation_time:."2f"}s too high"
         
         critical_test_logger.info(f PASS:  PERFORMANCE REQUIREMENTS MET:)
-        critical_test_logger.info(f   - Avg creation time: {avg_creation_time:.3f}s")"
-        critical_test_logger.info(f   - Avg validation time: {avg_validation_time:.3f}s) 
+        critical_test_logger.info(f   - Avg creation time: {avg_creation_time:."3f"}s")"
+        critical_test_logger.info(f   - Avg validation time: {avg_validation_time:."3f"}s)""
+
         critical_test_logger.info(f   - Failures: {failures}/{test_iterations})
 
     def test_mission_critical_test_summary(self, critical_test_logger):
         "Document the mission critical JWT validation test suite."
         
         critical_summary = {
-            mission: "Protect $120K+ MRR by ensuring JWT authentication works,"
+            mission: "Protect $"120K"+ MRR by ensuring JWT authentication works,"
             failure_tolerance": ZERO - Any failure = complete user lockout,"
             critical_validations: [
                 "JWT Validator initialization and method availability,"
@@ -438,7 +449,7 @@ class JWTValidationMissionCriticalTests:
         
         assert critical_summary[failure_tolerance] == ZERO - Any failure = complete user lockout
         assert len(critical_summary["critical_validations) >= 6"
-        assert $120K+ in critical_summary[mission]
+        assert $"120K"+ in critical_summary[mission]
         
         critical_test_logger.info(\n + =*80)
         critical_test_logger.info( ALERT:  MISSION CRITICAL JWT VALIDATION TEST SUMMARY")"
@@ -446,7 +457,8 @@ class JWTValidationMissionCriticalTests:
         for key, value in critical_summary.items():
             if isinstance(value, list):
                 critical_test_logger.info(f{key.upper()}:)"
-                critical_test_logger.info(f{key.upper()}:)"
+                critical_test_logger.info(f{key.upper()}:)""
+
                 for item in value:
                     critical_test_logger.info(f"  - {item})"
             else:

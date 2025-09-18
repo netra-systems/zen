@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
-"""
-"""
+""""
+
 MISSION CRITICAL TEST SUITE: SSOT Import Compliance Validation
 
-Business Value: Platform/Internal - $500K+ ARR Golden Path Protection
+Business Value: Platform/Internal - $"500K" plus ARR Golden Path Protection
 """
-"""
+""""
+
 Prevents regression to duplicate imports and ensures all production code imports resolve to SSOT sources.
 
 This test suite validates:
-1. No production code imports rollback utility WebSocketNotifier
+    1. No production code imports rollback utility WebSocketNotifier
 2. agent_websocket_bridge.py has no duplicate WebSocketNotifier class
 3. All imports resolve to single SSOT source
 4. Circular dependency prevention
 5. Import path consistency across services
 
 P0 SSOT Import Violations Targeted:
-- Multiple import paths for same SSOT classes
+    - Multiple import paths for same SSOT classes
 - Circular dependencies causing import failures
 
 CRITICAL: Tests must run without Docker dependency for CI/CD integration.
@@ -24,7 +25,8 @@ CRITICAL: Tests must run without Docker dependency for CI/CD integration.
 Author: Agent Events Remediation Team
 Date: 2025-9-12
 "
-"
+""
+
 
 import ast
 import importlib
@@ -168,7 +170,8 @@ class SSotImportComplianceTests(SSotBaseTestCase):
 
     def setup_method(self, method):
         Setup test method with SSOT base configuration."
-        Setup test method with SSOT base configuration."
+        Setup test method with SSOT base configuration.""
+
         super().setup_method(method)
         self.project_root = Path(project_root)
         self.analyzer = ImportAnalyzer(self.project_root)
@@ -298,7 +301,8 @@ class SSotImportComplianceTests(SSotBaseTestCase):
             logger.error(Import consistency violations found:)
             for violation in violations:
                 logger.error(f  {violation.file_path}:{violation.line_number} - {violation.import_statement})"
-                logger.error(f  {violation.file_path}:{violation.line_number} - {violation.import_statement})"
+                logger.error(f  {violation.file_path}:{violation.line_number} - {violation.import_statement})""
+
 
         # ASSERTION: All WebSocketNotifier imports should use canonical source
         # (Allow some flexibility during migration, but log violations)
@@ -361,7 +365,8 @@ class SSotImportComplianceTests(SSotBaseTestCase):
         # CRITICAL ASSERTION: All critical imports must succeed
         assert len(import_failures) == 0, ()
             fImport failures detected (possible circular dependencies): {import_failures}"
-            fImport failures detected (possible circular dependencies): {import_failures}"
+            fImport failures detected (possible circular dependencies): {import_failures}""
+
         )
 
         logger.info(✅ Circular dependency prevention validated)
@@ -369,7 +374,8 @@ class SSotImportComplianceTests(SSotBaseTestCase):
     def test_agent_websocket_bridge_has_single_websocket_notifier(self):
         ""Test that agent_websocket_bridge.py has exactly one WebSocketNotifier class."
         logger.info(Testing agent_websocket_bridge.py for single WebSocketNotifier class)"
-        logger.info(Testing agent_websocket_bridge.py for single WebSocketNotifier class)"
+        logger.info(Testing agent_websocket_bridge.py for single WebSocketNotifier class)""
+
 
         bridge_file = self.project_root / netra_backend" / app / services / agent_websocket_bridge.py"
 
@@ -408,7 +414,8 @@ class SSotImportComplianceTests(SSotBaseTestCase):
     def test_generate_import_compliance_report(self):
         ""Generate comprehensive import compliance report."
         logger.info(Generating import compliance report)"
-        logger.info(Generating import compliance report)"
+        logger.info(Generating import compliance report)""
+
 
         production_files, all_imports = self._scan_production_files_for_imports()
 
@@ -475,7 +482,8 @@ class SSotImportComplianceTests(SSotBaseTestCase):
         )
 
         logger.info(✅ Import compliance report generated successfully)"
-        logger.info(✅ Import compliance report generated successfully)"
+        logger.info(✅ Import compliance report generated successfully)""
+
 
         return report
 

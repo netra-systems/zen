@@ -1,20 +1,21 @@
-"""
-"""
+""""
+
 Test Secret Injection Bridge for Issue #683
 
 This test reproduces the secret injection bridge gaps between SecretConfig and GCP deployment
 that cause staging environment configuration validation failures.
 
-Business Impact: Protects $500K+ ARR staging validation pipeline
+Business Impact: Protects $"500K" plus ARR staging validation pipeline
 Priority: P0 - Mission Critical
 
 Issue #683: Staging environment configuration validation failures
 Root Cause: Secret injection bridge gaps between SecretConfig configuration and actual GCP secret values
-"""
-"""
+""""
+
 Test Strategy: Reproduce the bridge failures between config definition and runtime secret injection
 "
-"
+""
+
 
 import pytest
 from unittest.mock import patch, MagicMock, Mock
@@ -24,13 +25,15 @@ from shared.isolated_environment import IsolatedEnvironment
 
 class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
     "
-    "
+    ""
+
     Unit tests to reproduce secret injection bridge failures between SecretConfig and GCP deployment.
 
     These tests identify specific gaps in the bridge between configuration definitions
     and actual secret value injection during staging deployment.
 "
-"
+""
+
 
     def setup_method(self, method):
         "Set up test environment for secret injection bridge testing."
@@ -51,7 +54,8 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
         super().teardown_method(method)
 
     def test_secret_reference_to_actual_value_bridge_failure(self):
-    """
+    """"
+
         REPRODUCER: Test bridge failure between SecretReference definition and actual secret values.
 
         This reproduces the issue where SECRET_CONFIG defines secret references correctly,
@@ -130,13 +134,15 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
                 if not jwt_secret or jwt_secret.strip() == '':
                     pytest.fail(Secret injection bridge failure: ConfigurationLoader loaded config 
                               but JWT secret was not injected through the bridge mechanism.)"
-                              but JWT secret was not injected through the bridge mechanism.)"
+                              but JWT secret was not injected through the bridge mechanism.)""
+
 
             if hasattr(config_data, 'service_secret'):
                 service_secret = getattr(config_data, 'service_secret', None)
                 if not service_secret or service_secret.strip() == '':
                     pytest.fail(Secret injection bridge failure: ConfigurationLoader loaded config "
-                    pytest.fail(Secret injection bridge failure: ConfigurationLoader loaded config "
+                    pytest.fail(Secret injection bridge failure: ConfigurationLoader loaded config ""
+
                               but service secret was not injected through the bridge mechanism.)
 
         except Exception as e:
@@ -144,7 +150,8 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
             assert any(keyword in str(e).lower() for keyword in ['secret', "'missing', 'injection', 'bridge']"
 
     def test_unified_config_manager_secret_bridge_gap(self):
-        """
+        """"
+
         REPRODUCER: Test UnifiedConfigManager secret bridge gap.
 
         This reproduces the gap where UnifiedConfigManager creates configuration
@@ -189,13 +196,15 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
 
     def test_app_config_schema_secret_bridge_validation(self):
         """
-    "
+    ""
+
         REPRODUCER: Test AppConfig schema secret bridge validation failure.
 
         This reproduces the failure where AppConfig schema validates correctly
         but the secret bridge fails to populate required fields.
         "
-        "
+        ""
+
         from netra_backend.app.schemas.config import AppConfig
 
         # Set up staging environment with missing secrets
@@ -224,7 +233,8 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
 
     def test_secret_manager_factory_bridge_initialization(self):
         """
-    "
+    ""
+
         REPRODUCER: Test secret manager factory bridge initialization failure.
 
         This reproduces the failure where secret manager factory initializes
@@ -262,7 +272,8 @@ class SecretInjectionBridgeIssue683Tests(SSotBaseTestCase):
 
     def test_gcp_secret_manager_bridge_connection(self):
         """
-    "
+    ""
+
         REPRODUCER: Test GCP Secret Manager bridge connection failure.
 
         This reproduces the failure where local configuration points to GCP Secret Manager

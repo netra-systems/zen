@@ -7,7 +7,6 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
 """
-"""
         """Send JSON message.""""""
         """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed)"
@@ -114,7 +113,7 @@ assert mock_ws_manager.send_to_thread.call_count >= 7
 
 @pytest.mark.asyncio
     async def test_websocket_notifier_handles_missing_manager():
-"""Test that notifier handles missing WebSocket manager gracefully."""
+    """Test that notifier handles missing WebSocket manager gracefully."""
 pass
             # Create notifier without manager
 notifier = WebSocketNotifier.create_for_user(None)
@@ -137,7 +136,7 @@ await notifier.send_agent_completed(context, {}, 100.0)
 
 @pytest.mark.asyncio
     async def test_enhanced_execution_engine_sends_notifications():
-"""Test that enhanced execution engine sends proper notifications."""
+    """Test that enhanced execution engine sends proper notifications."""
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
@@ -170,7 +169,7 @@ state.final_report = "Test answer"
                 # Mock the agent core to await asyncio.sleep(0)
 return success
 with patch.object(engine.agent_core, 'execute_agent') as mock_execute:
-from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
+    from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
 mock_result = AgentExecutionResult( )
 success=True,
 state=state,

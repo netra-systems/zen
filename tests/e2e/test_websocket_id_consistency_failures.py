@@ -5,18 +5,18 @@ MISSION CRITICAL: This test suite validates end-to-end WebSocket ID generation
 consistency and routing integrity across the full system stack.
 
 Business Value Justification:
-- Segment: ALL (Free  ->  Enterprise)  
+    - Segment: ALL (Free  ->  Enterprise)  
 - Business Goal: Ensure WebSocket message routing reliability and user isolation
 - Value Impact: Prevents message misdelivery and user data leakage via WebSocket
 - Strategic Impact: Critical for real-time chat functionality and multi-user isolation
 
 Test Strategy:
-These tests are designed to FAIL initially, exposing WebSocket ID inconsistencies
+    These tests are designed to FAIL initially, exposing WebSocket ID inconsistencies
 that cause routing failures and user isolation breaches. They test real E2E flows
 with authenticated users and live WebSocket connections.
 
 Identified Violations:
-- WebSocket manager factory uses inconsistent ID generation
+    - WebSocket manager factory uses inconsistent ID generation
 - WebSocket client IDs don't follow SSOT patterns'
 - WebSocket connection IDs have format conflicts
 - Thread/WebSocket ID routing dependencies broken
@@ -59,7 +59,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
         self.websocket_helper = WebSocketTestHelper()
         self.consistency_violations = []
         self.id_patterns = {
-            'uuid_v4': re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$', re.I),
+            'uuid_v4': re.compile(r'^[0-"9a"-f]{8}-[0-"9a"-f]{4}-4[0-"9a"-f]{3}-["89ab"][0-"9a"-f]{3}-[0-"9a"-f]{12}$', re.I),
             'ssot_structured': re.compile(r'^[a-z_]+_\d+_[a-f0-9]{8}$'),
             'websocket_structured': re.compile(r'^websocket_.+_\d+_[a-f0-9]{8}$'),
             'connection_structured': re.compile(r'^conn_.+_\d+_[a-f0-9]{8}$')
@@ -86,7 +86,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_client_id_violations_SHOULD_FAIL(self):
-"""Empty docstring."""
+    """Empty docstring."""
         EXPECTED TO FAIL: WebSocket client IDs use inconsistent generation patterns.
         
         This test exposes WebSocket client ID generation that doesn't follow'
@@ -227,7 +227,8 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio 
     async def test_websocket_thread_routing_violations_SHOULD_FAIL(self):
-    """
+    """"
+
         EXPECTED TO FAIL: WebSocket routing fails due to thread/run ID format inconsistencies.
         
         This test exposes failures in WebSocket message routing when thread IDs
@@ -319,7 +320,8 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_multi_user_websocket_isolation_violations_SHOULD_FAIL(self):
-    """
+    """"
+
         EXPECTED TO FAIL: Multi-user WebSocket isolation fails due to ID inconsistencies.
         
         This test validates that inconsistent ID formats cause user isolation
@@ -470,7 +472,8 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_message_id_violations_SHOULD_FAIL(self):
-    """
+    """"
+
         EXPECTED TO FAIL: WebSocket messages contain IDs in inconsistent formats.
         
         This test validates that WebSocket messages contain properly formatted
@@ -577,7 +580,8 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_ssot_compliance_SHOULD_PASS_AFTER_MIGRATION(self):
-    """
+    """"
+
         This test should PASS after migration validates SSOT compliance in WebSocket components.
         
         # Create user context with SSOT-compliant IDs
@@ -687,7 +691,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_id_regression_prevention(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test to prevent regression back to inconsistent WebSocket ID generation.
 """Empty docstring."""
         # Define patterns that should NEVER be used after migration
@@ -725,7 +729,7 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_id_consistency_under_load(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test WebSocket ID consistency under concurrent load conditions.
 """Empty docstring."""
         # Create multiple concurrent WebSocket operations
@@ -785,7 +789,8 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_integration_health_check(self):
-    """
+    """"
+
         Health check to validate basic WebSocket integration works.
         This test should always pass to ensure basic functionality.
         
@@ -812,7 +817,8 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio  
     async def test_websocket_factory_pattern_validation(self):
-    """
+    """"
+
         Test WebSocket factory pattern produces consistent ID formats.
         
         This test validates that the WebSocketManagerFactory creates managers
@@ -857,5 +863,6 @@ class WebSocketIDConsistencyFailuresTests(BaseTestCase):
         except Exception as e:
             pytest.fail(fWebSocket factory pattern validation failed: {e}")"
 
-"""
+""""
+
 ))))

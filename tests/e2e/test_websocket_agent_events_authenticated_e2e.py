@@ -1,17 +1,17 @@
 "E2E Tests for WebSocket Agent Events with Authentication"""
 
 Business Value Justification:
-- Segment: All (Free, Early, Mid, Enterprise)
+    - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure real-time user feedback during authenticated AI sessions
 - Value Impact: Prevents user abandonment by providing live progress updates
 - Strategic Impact: Core UX that builds user trust and engagement with AI
 
 CRITICAL TEST PURPOSE:
-These E2E tests validate WebSocket event delivery during authenticated
+    These E2E tests validate WebSocket event delivery during authenticated
 agent execution to ensure users receive real-time AI progress updates.
 
 Test Coverage:
-- WebSocket authentication and connection establishment
+    - WebSocket authentication and connection establishment
 - Real-time event delivery during agent execution
 - Event ordering and timing with authentication context
 - Multi-user event isolation with real authentication
@@ -226,5 +226,6 @@ class WebSocketAgentEventsAuthenticatedE2ETests:
                 else:
                     return {success": False, "error": await response.text()}"
 
-"""
+""""
+
 ))))))

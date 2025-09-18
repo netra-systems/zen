@@ -7,10 +7,12 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.""
+
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)""
+
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):"
         Close WebSocket connection.""
@@ -19,7 +21,8 @@ class TestWebSocketConnection:
         self.is_connected = False
     async def get_messages(self) -> list:
         Get all sent messages."
-        Get all sent messages."
+        Get all sent messages.""
+
         await asyncio.sleep(0)
         return self.messages_sent.copy()
         '''
@@ -72,11 +75,13 @@ class TestWebSocketConnection:
 class TestWebSocketE2EProof(SSotAsyncTestCase):
         Prove the WebSocket factory pattern flow works end-to-end.
     def setUp(self):
-        ""Set up test environment with factory components."
+        ""Set up test environment with factory components.""
+
         self.captured_events = []
         self.run_id = formatted_string
         self.thread_id = "
-        self.thread_id = "
+        self.thread_id = ""
+
         self.user_id = formatted_string
         self.connection_id = "
         self.connection_id = "
@@ -193,7 +198,8 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         print(   PASS:  Per-user event queue)
         print(   PASS:  No shared state"")
         print()"
-        print()"
+        print()""
+
         TARGET:  JSON SERIALIZATION VALIDATED:)
         print("   PASS:  All events serialize to JSON)"
         print(   PASS:  All events deserialize correctly)
@@ -203,7 +209,8 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         print(=*70")"
     def test_factory_user_isolation(self):
         CRITICAL: Verify factory ensures complete user isolation."
-        CRITICAL: Verify factory ensures complete user isolation."
+        CRITICAL: Verify factory ensures complete user isolation.""
+
     async def test_isolation():
         # Create emitters for two different users
         user1_id = "formatted_string"
@@ -213,7 +220,8 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         conn1_id = formatted_string"
         conn1_id = formatted_string"
         conn2_id = formatted_string"
-        conn2_id = formatted_string"
+        conn2_id = formatted_string""
+
         emitter1 = await self.websocket_factory.create_user_emitter( )
         user_id=user1_id,
         thread_id=thread1_id,
@@ -316,7 +324,8 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         else:
         print()
         PASS:  ALL FACTORY COMPONENTS VERIFIED - Complete factory pattern available!)"
-        PASS:  ALL FACTORY COMPONENTS VERIFIED - Complete factory pattern available!)"
+        PASS:  ALL FACTORY COMPONENTS VERIFIED - Complete factory pattern available!)""
+
     def test_websocket_event_json_serialization_comprehensive(self):
         "CRITICAL: Comprehensive JSON serialization test for all event types."
     # Test all 5 required event types with various data
@@ -397,7 +406,8 @@ class TestWebSocketE2EProof(SSotAsyncTestCase):
         self.fail("
         print("")
         PASS:  ALL EVENT TYPES JSON SERIALIZATION VERIFIED)"
-        PASS:  ALL EVENT TYPES JSON SERIALIZATION VERIFIED)"
+        PASS:  ALL EVENT TYPES JSON SERIALIZATION VERIFIED)""
+
     def _create_mock_connection_pool(self):
         "Create mock connection pool for testing."
 class MockWebSocketConnection:
@@ -441,7 +451,8 @@ class MockConnectionPool:
         Get or create mock connection.
         pass
         key = "
-        key = "
+        key = ""
+
         if key not in self.connections:
         self.connections[key] = MockWebSocketConnection(user_id, connection_id)
         # Return connection info structure

@@ -2,13 +2,13 @@
 Test Issue #920: WebSocket Integration Without Docker Dependencies
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal - Integration Testing Infrastructure
+    - Segment: Platform/Internal - Integration Testing Infrastructure
 - Business Goal: Validate WebSocket integration works without Docker dependencies for Issue #920
 - Value Impact: Ensures development and CI environments can test WebSocket functionality
 - Strategic Impact: Critical for reliable testing pipeline and development workflow
 
 This integration test suite validates Issue #920 WebSocket behaviors:
-- WebSocket integration should work without Docker containers
+    - WebSocket integration should work without Docker containers
 - ExecutionEngineFactory + UserWebSocketEmitter integration should function
 - Agent creation and WebSocket event flow should work end-to-end
 - Resource cleanup should work properly in integration scenarios
@@ -117,7 +117,8 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     def test_execution_engine_factory_websocket_integration_with_none_bridge(self):
-    """
+    """"
+
         ISSUE #920 INTEGRATION FIXED: ExecutionEngineFactory integration with None websocket_bridge.
         
         This test validates Issue #920 fixed behavior - factory should handle None websocket_bridge
@@ -151,7 +152,7 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_user_websocket_emitter_factory_integration_flow(self):
-"""Empty docstring."""
+    """Empty docstring."""
         ISSUE #920 INTEGRATION: Complete UserWebSocketEmitter + Factory integration flow.
         
         This validates the end-to-end integration from factory creation through
@@ -205,7 +206,7 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_multi_user_websocket_integration_isolation(self):
-"""Empty docstring."""
+    """Empty docstring."""
         ISSUE #920 INTEGRATION: Multi-user WebSocket integration with proper isolation.
         
         This validates that Issue #920 fixes don't break multi-user isolation'
@@ -273,7 +274,7 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_websocket_integration_error_recovery(self):
-"""Empty docstring."""
+    """Empty docstring."""
         ISSUE #920 INTEGRATION: WebSocket integration with error recovery scenarios.
         
         This validates that the integration handles failures gracefully
@@ -376,5 +377,6 @@ class Issue920WebSocketIntegrationNoDockersTests(SSotBaseTestCase):
         )
         
         super().teardown_method(method)
-"""
+""""
+
 )))))))

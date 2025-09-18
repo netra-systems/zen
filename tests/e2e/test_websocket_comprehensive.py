@@ -17,13 +17,13 @@ issues with:
 8. Multiple concurrent connections
 
 Business Value Justification (BVJ):
-- Segment: Enterprise/Platform
+    - Segment: Enterprise/Platform
 - Business Goal: System Stability & User Experience
 - Value Impact: Prevents user frustration, ensures real-time communication works
 - Strategic Impact: Exposes critical WebSocket issues before they affect customers
 
 Expected Failures (to be fixed):
-- Connection not automatically established after login
+    - Connection not automatically established after login
 - Authentication failures during WebSocket handshake
 - Message loss during reconnection scenarios
 - Broadcasting failures between multiple connections
@@ -280,7 +280,8 @@ class WebSocketTestClient:
         return None
 
     async def simulate_network_interruption(self) -> bool:
-        ""Simulate network interruption and test reconnection - EXPECTED TO FAIL."
+        ""Simulate network interruption and test reconnection - EXPECTED TO FAIL.""
+
         if not self.websocket:
         return False
 
@@ -435,7 +436,8 @@ print([SUCCESS] WebSocket config parsing logic works correctly)
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_backend_service_discovery(self):
-        ""Test discovery of backend services - EXPOSES SERVICE STARTUP ISSUES."
+        ""Test discovery of backend services - EXPOSES SERVICE STARTUP ISSUES.""
+
 
 services_to_test = {
 main_backend: http://localhost:8000/health","
@@ -450,7 +452,7 @@ for service_name, url in services_to_test.items():
     try:
         pass
 async with httpx.AsyncClient(follow_redirects=True) as client:
-response = await client.get(url, timeout=3)
+    response = await client.get(url, timeout=3)
 service_status[service_name] = {
 status: available if response.status_code == 200 else formatted_string,""
 response_time": response.elapsed.total_seconds()"
@@ -584,7 +586,7 @@ auth_failed_events = [item for item in []] == "auth_failed]"
 connection_errors = [item for item in []] == connection_error]
 
 assert len(auth_failed_events) > 0 or len(connection_errors) > 0, \
-Should have auth failure or connection error events
+    Should have auth failure or connection error events
 
 finally:
     pass
@@ -636,7 +638,8 @@ await client.close()
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_message_delivery_guarantees(self, test_user_with_token):
-        ""Test that messages are delivered reliably - EXPECTED TO FAIL."
+        ""Test that messages are delivered reliably - EXPECTED TO FAIL.""
+
 
 pass
 client = WebSocketTestClient( )
@@ -684,7 +687,7 @@ else:
 
                                             # ASSERTION LIKELY TO FAIL: Not all messages will be processed
 assert len(responses) >= len(message_ids), \
-formatted_string
+    formatted_string
 
 finally:
     pass
@@ -747,10 +750,10 @@ received_by_user2 = await client2.receive_message(timeout=5)
 
                     # ASSERTION LIKELY TO FAIL: Broadcasting not working
 assert received_by_user2 is not None, \
-"User2 should receive broadcasted message from User1"""
+    "User2 should receive broadcasted message from User1"""
 
 assert received_by_user2.get(type) == thread_message, \
-Should receive correct message type
+    Should receive correct message type
 
 assert received_by_user2.get("payload", "{}.get(sender_id) == user1_data[user_id], \"
 Should receive message from correct sender
@@ -1020,7 +1023,7 @@ Should receive error response for malformed JSON
 else:
                                 # Connection might have been closed due to error
 assert not client.websocket or client.websocket.closed, \
-"Connection should be closed after malformed message"""
+    "Connection should be closed after malformed message"""
 
 except Exception as e:
                                     # Connection handling might raise exception
@@ -1122,7 +1125,7 @@ if connected:
                                                                                                     # Force various error conditions
 if i == 0:
                                                                                                         # Send oversized message
-huge_payload = {data: x" * 10000}  # 10KB payload"
+huge_payload = {data: x" * 10000}  # "10KB" payload"
 await client.send_message(oversized_test, huge_payload)
 elif i == 1:
                                                                                                             # Send message with invalid structure
@@ -1363,7 +1366,7 @@ if connection_stats["connection_errors]:"
 
                                                                                                                                             # At least some connections should succeed
 assert connection_stats[successful_connections] > 0, \
-At least some connection cycles should succeed
+    At least some connection cycles should succeed
 
 
 @pytest.mark.e2e

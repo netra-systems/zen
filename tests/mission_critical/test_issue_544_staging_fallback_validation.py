@@ -5,17 +5,17 @@ This test suite validates that staging environment connectivity can serve as a
 fallback solution when Docker is unavailable for mission critical WebSocket tests.
 
 PHASE 2 OBJECTIVES:
-1. Validate staging environment accessibility
+    1. Validate staging environment accessibility
 2. Test WebSocket connectivity to staging
 3. Verify agent event delivery through staging
 4. Demonstrate staging as viable Docker alternative
 
 Expected Behavior:
-- Tests should demonstrate staging environment can replace Docker dependency
+    - Tests should demonstrate staging environment can replace Docker dependency
 - WebSocket events should be receivable from staging environment
 - Performance should be acceptable for validation purposes
 
-Business Impact: Provides $500K+ ARR validation coverage when Docker unavailable.
+Business Impact: Provides $"500K" plus ARR validation coverage when Docker unavailable.
 
 
 import asyncio
@@ -41,7 +41,8 @@ from loguru import logger
 from shared.isolated_environment import get_env, IsolatedEnvironment
 
 class Issue544StagingEnvironmentConnectivityTests:
-    ""Test staging environment connectivity for Issue #544 fallback solution."
+    ""Test staging environment connectivity for Issue #544 fallback solution.""
+
     
     @pytest.fixture(autouse=True)
     def setup_staging_environment(self):
@@ -60,7 +61,8 @@ class Issue544StagingEnvironmentConnectivityTests:
             self.staging_config[key] = self.env.get(key, default_value)
         
         logger.info(Staging configuration for Issue #544 testing:)"
-        logger.info(Staging configuration for Issue #544 testing:)"
+        logger.info(Staging configuration for Issue #544 testing:)""
+
         for key, value in self.staging_config.items():
             logger.info(f"  {key}: {value})"
     
@@ -92,7 +94,8 @@ class Issue544StagingEnvironmentConnectivityTests:
         except Exception as e:
             logger.error(f❌ Unexpected error checking staging backend: {e})
             pytest.skip(fStaging backend check error: {e})"
-            pytest.skip(fStaging backend check error: {e})"
+            pytest.skip(fStaging backend check error: {e})""
+
     
     def test_staging_auth_service_connectivity(self):
         "Phase 2.2: Validate staging auth service accessibility."
@@ -100,7 +103,8 @@ class Issue544StagingEnvironmentConnectivityTests:
         
         auth_url = self.staging_config[STAGING_AUTH_URL]
         health_endpoint = f{auth_url}/health"
-        health_endpoint = f{auth_url}/health"
+        health_endpoint = f{auth_url}/health""
+
         
         try:
             import requests
@@ -126,7 +130,8 @@ class Issue544StagingEnvironmentConnectivityTests:
         logger.info(=== ISSUE #544 PHASE 2.3: Staging WebSocket Connectivity ===)
         
         websocket_url = self.staging_config[STAGING_WEBSOCKET_URL]"
-        websocket_url = self.staging_config[STAGING_WEBSOCKET_URL]"
+        websocket_url = self.staging_config[STAGING_WEBSOCKET_URL]""
+
         
         try:
             # Attempt basic WebSocket connection
@@ -205,7 +210,8 @@ class Issue544StagingEnvironmentConnectivityTests:
                             event_data = json.loads(response)
                             received_events.append(event_data)
                             logger.info(fReceived event: {event_data.get('type', 'unknown')})"
-                            logger.info(fReceived event: {event_data.get('type', 'unknown')})"
+                            logger.info(fReceived event: {event_data.get('type', 'unknown')})""
+
                             
                             # Check for mission critical events
                             event_type = event_data.get('type', '')
@@ -246,7 +252,8 @@ class Issue544StagingEnvironmentConnectivityTests:
             STAGING_WEBSOCKET_URL, "
             STAGING_WEBSOCKET_URL, "
             STAGING_AUTH_URL"
-            STAGING_AUTH_URL"
+            STAGING_AUTH_URL""
+
         ]
         
         missing_config = []
@@ -280,7 +287,8 @@ class Issue544StagingEnvironmentConnectivityTests:
 
 class Issue544StagingPerformanceValidationTests:
     Test staging environment performance for Issue #544 solution validation."
-    Test staging environment performance for Issue #544 solution validation."
+    Test staging environment performance for Issue #544 solution validation.""
+
     
     def test_staging_response_time_analysis(self):
         "Phase 2.6: Analyze staging environment response times."
@@ -308,7 +316,8 @@ class Issue544StagingPerformanceValidationTests:
                     accessible": response.status_code == 200"
                 }
                 
-                logger.info(f{name}: {response_time:.2f}s (Status: {response.status_code})
+                logger.info(f{name}: {response_time:."2f"}s (Status: {response.status_code})""
+
                 
             except Exception as e:
                 logger.warning(f{name} failed: {e})
@@ -330,20 +339,23 @@ class Issue544StagingPerformanceValidationTests:
             avg_response_time = sum(
                 result[response_time] for result in performance_results.values() 
                 if result[response_time] is not None"
-                if result[response_time] is not None"
+                if result[response_time] is not None""
+
             ) / accessible_count
             
-            logger.info(f"Average staging response time: {avg_response_time:.2f}s)"
+            logger.info(f"Average staging response time: {avg_response_time:."2f"}s)"
             
             if avg_response_time < 10:
                 logger.info(✅ Staging performance acceptable for test validation)
             else:
                 logger.warning(⚠️ Staging performance slow but usable for validation)"
-                logger.warning(⚠️ Staging performance slow but usable for validation)"
+                logger.warning(⚠️ Staging performance slow but usable for validation)""
+
         
         # Test always passes - it's informational'
         assert accessible_count >= 0, Performance analysis completed"
-        assert accessible_count >= 0, Performance analysis completed"
+        assert accessible_count >= 0, Performance analysis completed""
+
     
     @pytest.mark.asyncio
     async def test_staging_websocket_latency_test(self):
@@ -351,7 +363,8 @@ class Issue544StagingPerformanceValidationTests:
         logger.info(=== ISSUE #544 PHASE 2.7: Staging WebSocket Latency Test ===)
         
         websocket_url = wss://netra-staging-backend-dot-netra-staging.uw.r.appspot.com/ws"
-        websocket_url = wss://netra-staging-backend-dot-netra-staging.uw.r.appspot.com/ws"
+        websocket_url = wss://netra-staging-backend-dot-netra-staging.uw.r.appspot.com/ws""
+
         
         try:
             latency_measurements = []
@@ -380,7 +393,8 @@ class Issue544StagingPerformanceValidationTests:
                         latency = end_time - start_time
                         latency_measurements.append(latency)
                         
-                        logger.info(fPing {i+1}: {latency:.3f}s latency)
+                        logger.info(fPing {i+1}: {latency:."3f"}s latency)""
+
                         
                     except asyncio.TimeoutError:
                         logger.warning(fPing {i+1}: Timeout")"
@@ -394,9 +408,9 @@ class Issue544StagingPerformanceValidationTests:
                     max_latency = max(latency_measurements)
                     
                     logger.info(fWebSocket Latency Results:)
-                    logger.info(f  Average: {avg_latency:.3f}s)
-                    logger.info(f"  Min: {min_latency:.3f}s)"
-                    logger.info(f  Max: {max_latency:.3f}s")"
+                    logger.info(f  Average: {avg_latency:."3f"}s)
+                    logger.info(f"  Min: {min_latency:."3f"}s)"
+                    logger.info(f  Max: {max_latency:."3f"}s")"
                     
                     if avg_latency < 5:
                         logger.info(✅ Staging WebSocket latency acceptable for testing)

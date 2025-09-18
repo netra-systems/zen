@@ -5,12 +5,12 @@ consistency issues with REAL authentication, demonstrating the business impact o
 ID generation inconsistencies on actual user workflows.
 
 Root Cause Being Tested:
-- WebSocket connections with authenticated users fail due to thread ID mismatches
+    - WebSocket connections with authenticated users fail due to thread ID mismatches
 - Real multi-user scenarios break when WebSocket factory IDs conflict with database expectations
 - Session isolation violations occur when ID formats don't match between components'
 
 Error Pattern Being Exposed:
-Failed to create request-scoped database session req_1757357912444_24_73708c2b: 404: Thread not found
+    Failed to create request-scoped database session req_1757357912444_24_73708c2b: 404: Thread not found
 Thread ID mismatch in authenticated WebSocket sessions causing user isolation breakdown
 
 Business Value: Ensuring chat interactions work reliably for paying customers
@@ -186,7 +186,8 @@ class WebSocketUserSessionConsistencyE2ETests:
     @pytest.mark.e2e
     @pytest.mark.asyncio
     async def test_websocket_session_persistence_across_reconnections(self):
-        ""FAILING E2E TEST: Verify WebSocket sessions persist correctly across reconnections"
+        ""FAILING E2E TEST: Verify WebSocket sessions persist correctly across reconnections""
+
         
         EXPECTED FAILURE: This test should FAIL because thread ID format inconsistencies
         break session persistence when users reconnect their WebSocket connections.

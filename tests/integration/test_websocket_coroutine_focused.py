@@ -7,10 +7,10 @@ Tests the core WebSocket environment detection logic without complex authenticat
 CRITICAL ISSUE: GitHub Issue #133
 - Problem: 'coroutine' object has no attribute 'get' error in WebSocket endpoint
 - Root Cause: get_env() returning coroutine instead of IsolatedEnvironment
-- Business Impact: Blocking core chat functionality ($500K+ ARR impact)
+- Business Impact: Blocking core chat functionality ($"500K" plus ARR impact)
 
 CLAUDE.MD COMPLIANCE:
-- Integration test with minimal dependencies
+    - Integration test with minimal dependencies
 - Tests real environment detection logic
 - No mocks for environment access
 - Focuses on coroutine regression detection
@@ -36,7 +36,8 @@ class WebSocketCoroutineFocusedTests(BaseIntegrationTest):
 
     @pytest.mark.integration
     def test_websocket_get_env_returns_isolated_environment(self):
-        """
+        """"
+
         CRITICAL: Test that get_env() returns IsolatedEnvironment, not coroutine.
         
         This is the core test for the regression where get_env() was returning

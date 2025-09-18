@@ -2,23 +2,23 @@
 Issue #971 Test Suite: Missing WebSocketTestManager Class Alias Verification
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal - Developer Experience & Test Infrastructure
+    - Segment: Platform/Internal - Developer Experience & Test Infrastructure
 - Business Goal: Test Infrastructure Stability & Developer Productivity
 - Value Impact: Enables 3 critical integration test suites to collect and execute
-- Strategic Impact: Maintains test coverage protecting $500K+ ARR chat functionality
+- Strategic Impact: Maintains test coverage protecting $"500K" plus ARR chat functionality
 
 This test suite validates the WebSocketTestManager alias fix for Issue #971.
 Tests ensure that adding the alias resolves import errors while maintaining
 SSOT compliance and not breaking existing functionality.
 
 Test Strategy:
-1. Pre-Fix Validation: Verify expected failures before implementing fix
+    1. Pre-Fix Validation: Verify expected failures before implementing fix
 2. Post-Fix Validation: Verify fix resolves issues without side effects
 3. Regression Prevention: Ensure SSOT compliance and no conflicts
 4. Integration Recovery: Verify affected tests can collect after fix
 
 CRITICAL REQUIREMENTS per CLAUDE.md:
-- Uses SSOT BaseTestCase patterns for consistent test infrastructure
+    - Uses SSOT BaseTestCase patterns for consistent test infrastructure
 - Tests validate business-critical test infrastructure reliability
 - No test cheating - tests must fail/pass meaningfully
 - Real import testing - no mocked import mechanisms

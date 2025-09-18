@@ -2,7 +2,7 @@
 
 Tests cross-service WebSocket message routing per SPEC/independent_services.xml
 and SPEC/websockets.xml requirements:
-- Main Backend (/app) - primary application service
+    - Main Backend (/app) - primary application service
 - Auth Service (/auth_service) - authentication service  
 - Frontend (/frontend) - user interface service
 
@@ -42,7 +42,8 @@ class WebSocketMultiServiceTests:
     
     @pytest.fixture
     async def websocket_client(self, backend_client):
-        ""Get authenticated WebSocket client."
+        ""Get authenticated WebSocket client.""
+
         token = await backend_client.get_jwt_token()
         ws_client = WebSocketTestClient()
         await ws_client.connect(token)
@@ -122,7 +123,8 @@ class WebSocketMultiServiceTests:
         # Trigger events that might involve multiple services
         await websocket_client.send_message({
             type: user_message,
-            payload": {"content": "Test service independence with agent execution}"
+            payload": {"content": "Test service independence with agent execution}""
+
         }
         
         # Track service origins of events
@@ -475,5 +477,6 @@ class WebSocketMultiServiceTests:
                     markers.add(str(payload[field])
         return markers
 
-"""
+""""
+
 )))))))))))))))))))))))

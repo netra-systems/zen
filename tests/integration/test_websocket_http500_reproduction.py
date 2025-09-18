@@ -5,9 +5,9 @@ These tests target Issue #517 - reproducing HTTP 500 WebSocket connection errors
 in real service integration without Docker dependencies.
 
 Business Value Justification:
-- Segment: Platform/Infrastructure
+    - Segment: Platform/Infrastructure
 - Goal: Stability - Identify and reproduce HTTP 500 WebSocket errors  
-- Impact: Protects $500K+ ARR chat functionality from connection failures
+- Impact: Protects $"500K" plus ARR chat functionality from connection failures
 - Revenue Impact: Prevents WebSocket service degradation affecting customer chat
 """Empty docstring."""
 import asyncio
@@ -111,7 +111,8 @@ class WebSocketHTTP500ReproductionTests(SSotAsyncTestCase):
             return False
 
     async def _test_rapid_connect_disconnect(self) -> Dict:
-        ""Test rapid WebSocket connect/disconnect cycles for ASGI scope race conditions"
+        ""Test rapid WebSocket connect/disconnect cycles for ASGI scope race conditions""
+
         try:
             http_500_count = 0
             for i in range(5):
@@ -218,5 +219,6 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
-"""
+""""
+
 )))

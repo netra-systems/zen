@@ -1,22 +1,23 @@
-"""
-"""
+""""
+
 SSOT Wrapper Function Detection Tests for Issue #1076
 
 Test Plan: Detect backward compatibility wrapper functions that create SSOT violations.
 Should FAIL initially (detecting violations) and PASS after remediation.
 
 Key violations to detect:
-1. Remaining wrapper functions in auth integration
+    1. Remaining wrapper functions in auth integration
 2. Backward compatibility functions that should be removed
 3. Functions that delegate to legacy patterns instead of using SSOT directly
 
 Related Issues: #1076 - SSOT compliance verification
 Priority: CRITICAL - These tests protect against regression during SSOT migration
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import pytest
 import ast
 import os
@@ -44,7 +45,8 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
 
     def test_auth_integration_wrapper_detection(self):
         """
-        "
+        ""
+
         CRITICAL: Detect wrapper functions in auth integration that bypass SSOT.
 
         EXPECTED: Should FAIL initially - detects remaining wrapper functions
@@ -121,7 +123,8 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
             "_fallback,"
             compat_,
             _compat"
-            _compat"
+            _compat""
+
         ]
 
         backward_compat_functions = []
@@ -184,13 +187,15 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
 
     def test_function_delegation_pattern_detection(self):
         """
-        "
+        ""
+
         CRITICAL: Detect functions that delegate to legacy patterns instead of SSOT.
 
         EXPECTED: Should FAIL initially - detects delegation violations
         REMEDIATION: Update functions to use SSOT directly
 "
-"
+""
+
         delegation_violations = []
 
         # Search for functions that import and delegate to legacy modules
@@ -241,7 +246,8 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
             violation_details = \n.join(["
             violation_details = \n.join(["
                 f  - {v['file']):{v['line']) - {v['content']) (pattern: {v['pattern'])"
-                f  - {v['file']):{v['line']) - {v['content']) (pattern: {v['pattern'])"
+                f  - {v['file']):{v['line']) - {v['content']) (pattern: {v['pattern'])""
+
                 for v in delegation_violations
             ]
 
@@ -319,7 +325,8 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
             violation_details = \n.join(["
             violation_details = \n.join(["
                 f  - {dup['function']}: {dup['file1']} vs {dup['file2']}"
-                f  - {dup['function']}: {dup['file1']} vs {dup['file2']}"
+                f  - {dup['function']}: {dup['file1']} vs {dup['file2']}""
+
                 for dup in business_duplicates[:10]  # Limit output
             ]
 

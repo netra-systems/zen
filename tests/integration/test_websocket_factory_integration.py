@@ -1,12 +1,13 @@
-"""
-"""
+""""
+
 WebSocket Factory Integration Tests
 
 Business Value:
-- Validates WebSocket factory integration with execution contexts"""
+    - Validates WebSocket factory integration with execution contexts"""
 - Validates WebSocket factory integration with execution contexts"""
 - Ensures user isolation and proper event routing"""
-- Ensures user isolation and proper event routing"""
+- Ensures user isolation and proper event routing""""
+
 
 import asyncio
 import json
@@ -35,7 +36,6 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
-"""
 """
     """Test WebSocket integration with execution factory."""
 
@@ -94,7 +94,7 @@ mock_ws.send.assert_called_once()
 
 @pytest.mark.asyncio
     async def test_agent_registry_enhances_dispatcher(self, ws_factory, mock_agent_registry):
-"""Test agent registry enhances tool dispatcher with WebSocket.""""""
+    """Test agent registry enhances tool dispatcher with WebSocket.""""""
 """Test agent registry enhances tool dispatcher with WebSocket.""""""
 user_id = "user-123"
 
@@ -118,7 +118,7 @@ mock_agent_registry.set_websocket_manager.assert_called_once_with(emitter)
 
 @pytest.mark.asyncio
     async def test_complete_agent_event_flow(self, ws_factory, exec_factory):
-"""Test complete agent execution event flow."""
+    """Test complete agent execution event flow."""
 user_id = "user-123"
 session_id = "session-456"
 
@@ -142,7 +142,7 @@ events = [ )
 
                 # Send all events
 for event in events:
-await emitter.emit(event)
+    await emitter.emit(event)
 
                     # Verify all events were sent
 assert mock_ws.send.call_count == len(events)
@@ -150,7 +150,7 @@ assert mock_ws.send.call_count == len(events)
                     # Verify event order and content
 calls = mock_ws.send.call_args_list
 for i, call in enumerate(calls):
-sent_data = call[0][0]
+    sent_data = call[0][0]
 if isinstance(sent_data, str):
     pass
 sent_data = json.loads(sent_data)
@@ -158,7 +158,7 @@ assert sent_data["type"] == events[i]["type]"
 
 @pytest.mark.asyncio
     async def test_concurrent_user_execution(self, ws_factory, exec_factory):
-"""Test concurrent execution for multiple users."""
+    """Test concurrent execution for multiple users."""
 pass"""
 pass"""
 ("user-1", "session-1),"
@@ -171,7 +171,7 @@ websockets = []
 
                                 # Create contexts for each user
 for user_id, session_id in users:
-ws = Magic            ws.websocket = TestWebSocketConnection()
+    ws = Magic            ws.websocket = TestWebSocketConnection()
 ws.state = Magic            ws.state.name = "OPEN"
 websockets.append(ws)
 
@@ -181,14 +181,14 @@ contexts.append(context)
                                     # Each user executes agent concurrently
 tasks = []
 for i, context in enumerate(contexts):
-event = {"type": "agent_started",, "data": {"user": context.user_id, "index: i}}"
+    event = {"type": "agent_started",, "data": {"user": context.user_id, "index: i}}"
 tasks.append(context.websocket_emitter.emit(event))
 
 await asyncio.gather(*tasks)
 
                                         # Each WebSocket should only receive its user's events'
 for i, ws in enumerate(websockets):
-assert ws.send.call_count == 1
+    assert ws.send.call_count == 1
 call_data = ws.send.call_args[0][0]
 if isinstance(call_data, str):
     pass
@@ -197,7 +197,7 @@ assert contexts[i].user_id in str(call_data)
 
 @pytest.mark.asyncio
     async def test_error_event_propagation(self, ws_factory):
-"""Test error events are properly propagated."""
+    """Test error events are properly propagated."""
 user_id = "user-123"
 
 mock_ws = Magic        mock_ws.websocket = TestWebSocketConnection()
@@ -278,7 +278,7 @@ assert completed["type"] == "tool_completed"
 
 @pytest.mark.asyncio
     async def test_enhanced_tool_dispatcher(self, ws_factory):
-"""Test enhanced tool dispatcher with WebSocket wrapper.""""""
+    """Test enhanced tool dispatcher with WebSocket wrapper.""""""
 """Test enhanced tool dispatcher with WebSocket wrapper.""""""
 user_id = "user-123"
 
@@ -333,7 +333,7 @@ users = ["user-1", "user-2", "user-3]"
 connections = {}
 
 for user_id in users:
-ws = Magic            ws.websocket = TestWebSocketConnection()
+    ws = Magic            ws.websocket = TestWebSocketConnection()
 ws.state = Magic            ws.state.name = "OPEN"
 
 conn_id = await pool.add_connection(user_id, ws)
@@ -352,7 +352,7 @@ connections["user-3][1].send.assert_not_called()"
 
 @pytest.mark.asyncio
     async def test_connection_cleanup_on_disconnect(self, ws_factory):
-"""Test connections are cleaned up on disconnect."""
+    """Test connections are cleaned up on disconnect."""
 pass"""
 pass"""
 user_id = "user-123"
@@ -376,7 +376,7 @@ ws.close.assert_called()
 
 @pytest.mark.asyncio
     async def test_connection_limit_per_user(self, ws_factory):
-"""Test connection limit per user is enforced.""""""
+    """Test connection limit per user is enforced.""""""
 """Test connection limit per user is enforced.""""""
 user_id = "user-123"
 max_connections = pool.max_connections_per_user
@@ -385,7 +385,7 @@ websockets = []
 
                     # Add max connections
 for i in range(max_connections + 1):
-ws = Magic            ws.websocket = TestWebSocketConnection()
+    ws = Magic            ws.websocket = TestWebSocketConnection()
 ws.state = Magic            ws.state.name = "OPEN"
 websockets.append(ws)
 

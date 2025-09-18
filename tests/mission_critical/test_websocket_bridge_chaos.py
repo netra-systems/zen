@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""
-"""
+""""
+
 Comprehensive Chaos Engineering Tests for WebSocket Bridge
 
 Business Value Justification:
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: System Reliability & Risk Reduction
 - Value Impact: Validates resilience under extreme network conditions
 - Strategic Impact: Ensures WebSocket bridge maintains eventual consistency during chaos
@@ -14,24 +14,26 @@ under extreme conditions including random disconnects, network delays, message
 corruption, and rapid reconnection cycles.
 
 REQUIREMENTS:
-- System must maintain eventual consistency
+    - System must maintain eventual consistency
 - Automatic reconnection within 3 seconds
 - No permanent message loss after recovery
 - Graceful degradation under chaos
 
 Test Categories:
-1. Random Connection Drops (20-50% drop rate simulation)
-2. Network Latency Injection (100-500ms delays)
+    1. Random Connection Drops (20-50% drop rate simulation)
+2. Network Latency Injection (100-"500ms" delays)
 3. Message Reordering Scenarios
 4. Partial Message Corruption
 5. Rapid Connect/Disconnect Cycles
 6. Automatic Reconnection Tests
 7. System Recovery Validation
 "
-"
+""
+
 
 """
-"""
+""""
+
 import asyncio
 import json
 import random
@@ -88,7 +90,8 @@ class ChaosMetrics:
     @property
     def avg_recovery_time(self) -> float:
         Average recovery time in seconds."
-        Average recovery time in seconds."
+        Average recovery time in seconds.""
+
         return statistics.mean(self.recovery_times) if self.recovery_times else 0.0
 
 
@@ -102,7 +105,8 @@ class ChaosEvent:
 
 
 class ChaosWebSocketClient:
-    ""WebSocket client that simulates network chaos."
+    ""WebSocket client that simulates network chaos.""
+
 
     def __init__(self, user_id: str, chaos_config: Dict[str, Any):
         self.user_id = user_id
@@ -145,7 +149,8 @@ class ChaosWebSocketClient:
 
     async def send_message(self, message: Dict[str, Any) -> str:
         Send message with chaos injection."
-        Send message with chaos injection."
+        Send message with chaos injection.""
+
         message_id = str(uuid.uuid4())
         message['message_id'] = message_id
 
@@ -181,7 +186,8 @@ class ChaosWebSocketClient:
 
     async def receive_messages(self) -> List[Dict[str, Any]]:
         Receive messages with chaos handling."
-        Receive messages with chaos handling."
+        Receive messages with chaos handling.""
+
         messages = []
 
         try:
@@ -221,7 +227,8 @@ class ChaosWebSocketClient:
 
     def _should_inject_chaos(self, operation: str) -> bool:
         Determine if chaos should be injected for operation."
-        Determine if chaos should be injected for operation."
+        Determine if chaos should be injected for operation.""
+
         chaos_rate = self.chaos_config.get(f'{operation}_chaos_rate', 0.0)
         return random.random() < chaos_rate
 
@@ -257,7 +264,8 @@ class ChaosWebSocketClient:
 
             except Exception as e:
                 self.metrics.errors.append(fChaos injection error: {str(e)})"
-                self.metrics.errors.append(fChaos injection error: {str(e)})"
+                self.metrics.errors.append(fChaos injection error: {str(e)})""
+
 
     async def _simulate_disconnect(self):
         "Simulate network disconnection."
@@ -279,7 +287,8 @@ class ChaosWebSocketClient:
                 pass
 
     async def _auto_reconnect(self):
-        ""Automatic reconnection with exponential backoff."
+        ""Automatic reconnection with exponential backoff.""
+
         retry_count = 0
         max_retries = 5
 
@@ -327,7 +336,8 @@ class ChaosTestOrchestrator:
 
         for i in range(self.num_clients):
             user_id = fchaos_user_{i}"
-            user_id = fchaos_user_{i}"
+            user_id = fchaos_user_{i}""
+
             client = ChaosWebSocketClient(user_id, chaos_config)
 
             # Create auth headers
@@ -361,7 +371,8 @@ class ChaosTestOrchestrator:
 
     async def _client_message_loop(self, client: ChaosWebSocketClient, config: Dict[str, Any):
         Message sending loop for a client."
-        Message sending loop for a client."
+        Message sending loop for a client.""
+
         message_interval = config.get('message_interval', 1.0)
 
         try:
@@ -461,7 +472,8 @@ class ChaosTestOrchestrator:
 @pytest.mark.asyncio
 async def test_websocket_random_disconnections():
     Test WebSocket resilience under random disconnection chaos."
-    Test WebSocket resilience under random disconnection chaos."
+    Test WebSocket resilience under random disconnection chaos.""
+
     chaos_config = {
         'disconnect_chaos_rate': 0.3,  # 30% chance of random disconnect
         'send_chaos_rate': 0.1,        # 10% chance of send issues
@@ -499,7 +511,8 @@ async def test_websocket_random_disconnections():
 
         central_logger.info(Chaos disconnection test PASSED)
         central_logger.info(fReport: {json.dumps(report, indent=2)})"
-        central_logger.info(fReport: {json.dumps(report, indent=2)})"
+        central_logger.info(fReport: {json.dumps(report, indent=2)})""
+
 
     finally:
         await orchestrator.cleanup()
@@ -573,7 +586,8 @@ async def test_websocket_rapid_reconnection_chaos():
 
         assert report['performance_metrics']['max_recovery_time_s'] <= 10.0, \
             fMaximum recovery time too slow: {report['performance_metrics']['max_recovery_time_s']}s"
-            fMaximum recovery time too slow: {report['performance_metrics']['max_recovery_time_s']}s"
+            fMaximum recovery time too slow: {report['performance_metrics']['max_recovery_time_s']}s""
+
 
         # System should maintain some level of message delivery despite chaos
         assert report['message_metrics']['message_loss_rate'] <= 30.0, \
@@ -590,7 +604,8 @@ async def test_websocket_rapid_reconnection_chaos():
 @pytest.mark.asyncio
 async def test_websocket_message_corruption_resilience():
     Test WebSocket resilience to message corruption."
-    Test WebSocket resilience to message corruption."
+    Test WebSocket resilience to message corruption.""
+
     chaos_config = {
         'send_chaos_rate': 0.5,        # 50% chance of message corruption
         'disconnect_chaos_rate': 0.1,  # 10% chance of disconnections
@@ -662,7 +677,8 @@ async def test_websocket_comprehensive_chaos_endurance():
 
         assert report['performance_metrics']['avg_latency_ms'] <= 1500.0, \
             fAverage latency too high: {report['performance_metrics']['avg_latency_ms']}ms"
-            fAverage latency too high: {report['performance_metrics']['avg_latency_ms']}ms"
+            fAverage latency too high: {report['performance_metrics']['avg_latency_ms']}ms""
+
 
         assert report['reliability_metrics']['error_rate_per_client'] <= 10.0, \
             fError rate per client too high: {report['reliability_metrics']['error_rate_per_client']}
@@ -670,19 +686,20 @@ async def test_websocket_comprehensive_chaos_endurance():
         # Throughput should be maintained despite chaos
         assert report['message_metrics']['throughput_msg_per_sec'] >= 2.0, \
             fThroughput too low: {report['message_metrics']['throughput_msg_per_sec']} msg/s"
-            fThroughput too low: {report['message_metrics']['throughput_msg_per_sec']} msg/s"
+            fThroughput too low: {report['message_metrics']['throughput_msg_per_sec']} msg/s""
+
 
         central_logger.info("Comprehensive chaos endurance test PASSED)"
         central_logger.info(= * 60)
         central_logger.info("CHAOS ENGINEERING SUMMARY)"
         central_logger.info(= * 60)
-        central_logger.info(fTest Duration: {report['test_summary']['duration_seconds']:.1f}s)
+        central_logger.info(fTest Duration: {report['test_summary']['duration_seconds']:."1f"}s)
         central_logger.info(fTotal Clients: {report['test_summary']['total_clients']}")"
         central_logger.info(fConnection Drops: {report['test_summary']['total_connection_drops']})
-        central_logger.info(fReconnection Rate: {report['test_summary']['reconnection_success_rate']:.1f}%)
-        central_logger.info(f"Message Loss Rate: {report['message_metrics']['message_loss_rate']:.1f}%)"
-        central_logger.info(fAverage Latency: {report['performance_metrics']['avg_latency_ms']:.1f}ms")"
-        central_logger.info(fAverage Recovery: {report['performance_metrics']['avg_recovery_time_s']:.1f}s)
+        central_logger.info(fReconnection Rate: {report['test_summary']['reconnection_success_rate']:."1f"}%)
+        central_logger.info(f"Message Loss Rate: {report['message_metrics']['message_loss_rate']:."1f"}%)"
+        central_logger.info(fAverage Latency: {report['performance_metrics']['avg_latency_ms']:."1f"}ms")"
+        central_logger.info(fAverage Recovery: {report['performance_metrics']['avg_recovery_time_s']:."1f"}s)
         central_logger.info(fSystem Status: {report['reliability_metrics']['system_stability']})"
         central_logger.info(fSystem Status: {report['reliability_metrics']['system_stability']})"
         central_logger.info("= * 60)"
@@ -698,7 +715,8 @@ if __name__ == __main__:
     async def run_standalone_chaos():
         "Run a quick standalone chaos test."
         central_logger.info(Starting standalone WebSocket chaos test...)"
-        central_logger.info(Starting standalone WebSocket chaos test...)"
+        central_logger.info(Starting standalone WebSocket chaos test...)""
+
 
         chaos_config = {
             'disconnect_chaos_rate': 0.3,

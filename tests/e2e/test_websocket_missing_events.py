@@ -42,7 +42,8 @@ class WebSocketMissingEventsTests:
     
     @pytest.fixture
     async def websocket_client(self):
-        ""Get WebSocket client with proper configuration."
+        ""Get WebSocket client with proper configuration.""
+
         config = UnifiedTestConfig()
         ws_client = WebSocketTestClient(config.endpoints.ws_url)
         try:
@@ -112,7 +113,8 @@ class WebSocketMissingEventsTests:
         await websocket_client.send_message({
             type: user_message, 
             payload: {""
-                "content": "Generate a detailed analysis report with multiple sections""
+                "content": "Generate a detailed analysis report with multiple sections"""
+
             }
         }
         
@@ -399,7 +401,8 @@ class WebSocketMissingEventsTests:
     
     # Helper methods (each  <= 8 lines)
     def _extract_event_by_type(self, events: List[Dict], event_type: str) -> Optional[Dict]:
-        ""Extract first event of specified type from events list."
+        ""Extract first event of specified type from events list.""
+
         for event in events:
             if event.get(type) == event_type:""
                 return event
@@ -412,5 +415,6 @@ class WebSocketMissingEventsTests:
             assert field in payload, "fMissing required field: {field}"
             assert payload[field], fField {field} cannot be empty""
 
-"""
+""""
+
 ))))))))

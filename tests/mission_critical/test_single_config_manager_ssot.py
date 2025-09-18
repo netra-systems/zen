@@ -1,30 +1,31 @@
-"""
-"""
+""""
+
 Test Single Configuration Manager SSOT Validation - Issue #667
 
 EXPECTED TO PASS AFTER CONSOLIDATION - Validates SSOT Config Manager
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: System Stability - Ensure single source of truth for configuration
 - Value Impact: Validates SSOT consolidation prevents configuration conflicts
-- Strategic Impact: Protects $500K+ ARR by ensuring consistent configuration management
+- Strategic Impact: Protects $"500K" plus ARR by ensuring consistent configuration management
 
 PURPOSE: This test will PASS after Issue #667 consolidation is complete.
 It validates that only one configuration manager exists and provides consistent API.
 
 Test Coverage:
-"""
-"""
+    """"
+
 1. Single import path for configuration management
 2. Consistent API across all usage patterns
 3. SSOT environment access validation
 4. Configuration method availability validation
 
 CRITICAL: This test ensures consolidated configuration management supports
-Golden Path user login and AI chat functionality worth $500K+ ARR protection.
+Golden Path user login and AI chat functionality worth $"500K" plus ARR protection.
 "
-"
+""
+
 
 import pytest
 import sys
@@ -41,7 +42,8 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
     "Test suite to validate single configuration manager SSOT compliance."
 
     def test_only_one_config_manager_can_be_imported(self):
-    """
+    """"
+
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate single config manager import.
 
         After SSOT consolidation, only one configuration manager should be importable.
@@ -54,7 +56,8 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
         deprecated_paths = [
             netra_backend.app.core.configuration.base.UnifiedConfigManager,
             netra_backend.app.services.configuration_service.ConfigurationManager"
-            netra_backend.app.services.configuration_service.ConfigurationManager"
+            netra_backend.app.services.configuration_service.ConfigurationManager""
+
         ]
 
         # Test SSOT manager can be imported
@@ -97,7 +100,8 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
 
     def test_config_manager_import_paths_redirect_to_ssot(self):
         """
-        "
+        ""
+
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate import path redirection to SSOT.
 
         Legacy import paths should redirect to the SSOT manager to maintain compatibility.
@@ -105,7 +109,8 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
 "
         # SSOT import
         ssot_import = netra_backend.app.core.configuration.base"
-        ssot_import = netra_backend.app.core.configuration.base"
+        ssot_import = netra_backend.app.core.configuration.base""
+
 
         # Legacy imports that should redirect to SSOT
         legacy_imports = [
@@ -163,12 +168,14 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
         assert len(non_redirected_managers) == 0, (
             f"SSOT VIOLATION: Found manager classes that don't redirect to SSOT: {non_redirected_managers}."
             fAll legacy manager imports should redirect to SSOT or be removed."
-            fAll legacy manager imports should redirect to SSOT or be removed."
+            fAll legacy manager imports should redirect to SSOT or be removed.""
+
         )
 
     def test_ssot_config_manager_has_complete_api(self):
         """
-    "
+    ""
+
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate SSOT manager API completeness.
 
         The SSOT config manager should have all methods needed for Golden Path functionality.
@@ -216,7 +223,8 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
         assert len(missing_required_methods) == 0, (
             f"SSOT API INCOMPLETE: SSOT config manager missing required methods: {missing_required_methods}."
             fAvailable methods: {[m for m in dir(manager) if not m.startswith('_')]}. "
-            fAvailable methods: {[m for m in dir(manager) if not m.startswith('_')]}. "
+            fAvailable methods: {[m for m in dir(manager) if not m.startswith('_')]}. ""
+
             fRequired for Golden Path functionality.
         )
 
@@ -225,11 +233,13 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
             if hasattr(manager, method_name):
                 method = getattr(manager, method_name)
                 assert callable(method), fMethod {method_name} must be callable"
-                assert callable(method), fMethod {method_name} must be callable"
+                assert callable(method), fMethod {method_name} must be callable""
+
 
     def test_ssot_config_manager_uses_isolated_environment(self):
         """
-    "
+    ""
+
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate SSOT manager uses IsolatedEnvironment.
 
         The SSOT config manager must use IsolatedEnvironment for environment access.
@@ -321,7 +331,8 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
             )
 
     def test_ssot_config_manager_golden_path_integration(self):
-        """
+        """"
+
         EXPECTED TO PASS AFTER CONSOLIDATION - Validate Golden Path integration readiness.
 
         The SSOT config manager should provide configuration needed for Golden Path functionality.
@@ -367,7 +378,7 @@ class SingleConfigManagerSSotTests(SSotBaseTestCase):
             fGOLDEN PATH INTEGRATION FAILURE: SSOT config manager cannot handle required 
             fGolden Path configurations: {missing_configurations}. "
             fGolden Path configurations: {missing_configurations}. "
-            f"Must support all configuration categories for $500K+ ARR protection."
+            f"Must support all configuration categories for $"500K" plus ARR protection."
         )
 
         # Test basic functionality

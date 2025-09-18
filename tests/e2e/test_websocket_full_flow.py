@@ -15,15 +15,15 @@ import aiohttp
 
 # Simple color codes for terminal output
 class Colors:
-    RED = '\33[91m'
-    GREEN = '\33[92m'
-    YELLOW = '\33[93m'
-    BLUE = '\33[94m'
-    CYAN = '\33[96m'
-    WHITE = '\33[97m'
-    RESET = '\33[0m'
-    RESET_ALL = '\33[0m'
-    BRIGHT = '\33[1m'
+    RED = '\33["91m"'
+    GREEN = '\33["92m"'
+    YELLOW = '\33["93m"'
+    BLUE = '\33["94m"'
+    CYAN = '\33["96m"'
+    WHITE = '\33["97m"'
+    RESET = '\33["0m"'
+    RESET_ALL = '\33["0m"'
+    BRIGHT = '\33["1m"'
 
 Fore = Colors
 Style = Colors
@@ -119,8 +119,8 @@ class WebSocketEventCapture:
             
         print(f\n{Fore.YELLOW}Statistics:{Style.RESET_ALL})""
         print(f"  Total Events: {len(self.events_captured)})"
-        print(f  Duration: {duration:.2f} seconds)""
-        print(f"  Events/Second: {len(self.events_captured)/duration if duration > 0 else 0:.2f})"
+        print(f  Duration: {duration:."2f"} seconds)""
+        print(f"  Events/Second: {len(self.events_captured)/duration if duration > 0 else 0:."2f"})"
         
         # Check if all required events were received
         all_received = all(count > 0 for count in self.event_counts.values())
@@ -279,7 +279,7 @@ async def test_multiple_concurrent_users():
     total_events = sum(len(r) for r in results)
     print(f\n{Fore.CYAN}Multi-User Test Summary:{Style.RESET_ALL}")"
     print(f  Total Events: {total_events})
-    print(f  Average Events/User: {total_events/10:.1f}")"
+    print(f  Average Events/User: {total_events/10:."1f"}")"
     print(f{Fore.GREEN}[U+2713] Multi-user isolation test completed{Style.RESET_ALL}\n)
 
 async def main():

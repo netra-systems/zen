@@ -8,7 +8,8 @@ class WebSocketConnectionTests:
         self._closed = False
         
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.""
+
         if self._closed:
             raise RuntimeError(WebSocket is closed)""
         self.messages_sent.append(message)
@@ -26,10 +27,10 @@ class WebSocketConnectionTests:
 WebSocket Authentication Handshake Complete Flow Integration Test
 
 Business Value Justification (BVJ):
-- Segment: All segments (Core authentication infrastructure)
+    - Segment: All segments (Core authentication infrastructure)
 - Business Goal: Security, Reliability, User Experience
 - Value Impact: Prevents auth failures that cause customer churn
-- Revenue Impact: $18K MRR - Protects real-time features and multi-user collaboration
+- Revenue Impact: $"18K" MRR - Protects real-time features and multi-user collaboration
 
 # This test validates the complete WebSocket authentication handshake flow from # Incomplete import statement
 initial connection through JWT validation, session binding, and state persistence.
@@ -51,7 +52,8 @@ import websockets
 
 from test_framework.base_integration_test import BaseIntegrationTest
 # Removed mock import - using real service testing per CLAUDE.md MOCKS = Abomination"
-# Removed mock import - using real service testing per CLAUDE.md MOCKS = Abomination"
+# Removed mock import - using real service testing per CLAUDE.md MOCKS = Abomination""
+
 from test_framework.real_services import get_real_services
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
@@ -199,7 +201,8 @@ class WebSocketAuthHandshakeTester:
         auth_token: str,
         num_connections: int = 5
     ) -> List[WebSocketAuthResult]:
-        ""Test multiple concurrent WebSocket connections."
+        ""Test multiple concurrent WebSocket connections.""
+
         tasks = [
             self.establish_websocket_connection(auth_token)
             for _ in range(num_connections)
@@ -217,7 +220,7 @@ class WebSocketAuthHandshakeCompleteFlowTests(BaseIntegrationTest):
         self.auth_tester = WebSocketAuthHandshakeTester()
     
 # COMMENTED OUT: Mock-dependent test -         async def test_websocket_auth_handshake_complete_flow(self):
-# COMMENTED OUT: Mock-dependent test -         Test complete WebSocket authentication handshake flow.
+    # COMMENTED OUT: Mock-dependent test -         Test complete WebSocket authentication handshake flow.
         # 1. OAuth authentication flow
 # COMMENTED OUT: Mock-dependent test -         oauth_result = await self.auth_tester.perform_oauth_flow(testuser", password123)"
 # COMMENTED OUT: Mock-dependent test -         assert oauth_result[access_token]
@@ -271,7 +274,7 @@ class WebSocketAuthHandshakeCompleteFlowTests(BaseIntegrationTest):
         assert result.connection_state == disconnected
     
 # COMMENTED OUT: Mock-dependent test -         async def test_expired_token_handling(self):
-# COMMENTED OUT: Mock-dependent test -         "Test handling of expired JWT tokens."
+    # COMMENTED OUT: Mock-dependent test -         "Test handling of expired JWT tokens."
         # Create an expired token
 # COMMENTED OUT: Mock-dependent test -         oauth_result = await self.auth_tester.perform_oauth_flow(testuser, password123)
 # COMMENTED OUT: Mock-dependent test -         expired_token = oauth_result[access_token]  # Would be expired in real scenario
@@ -302,7 +305,7 @@ class WebSocketAuthHandshakeCompleteFlowTests(BaseIntegrationTest):
         assert refresh_success, Token refresh should maintain connection""
     
 # COMMENTED OUT: Mock-dependent test -         async def test_concurrent_websocket_connections(self):
-# COMMENTED OUT: Mock-dependent test -         Test multiple concurrent WebSocket connections with same auth.
+    # COMMENTED OUT: Mock-dependent test -         Test multiple concurrent WebSocket connections with same auth.
 # COMMENTED OUT: Mock-dependent test -         oauth_result = await self.auth_tester.perform_oauth_flow(testuser", password123)"
 # COMMENTED OUT: Mock-dependent test -         
         # Mock: Component isolation for testing without external dependencies
@@ -344,7 +347,7 @@ class WebSocketAuthHandshakeCompleteFlowTests(BaseIntegrationTest):
         assert session_valid
     
 # COMMENTED OUT: Mock-dependent test -     async def test_websocket_reconnection_with_same_token(self):
-# COMMENTED OUT: Mock-dependent test -         "Test WebSocket reconnection using the same auth token."
+    # COMMENTED OUT: Mock-dependent test -         "Test WebSocket reconnection using the same auth token."
 # COMMENTED OUT: Mock-dependent test -         oauth_result = await self.auth_tester.perform_oauth_flow(testuser, password123")"
 # COMMENTED OUT: Mock-dependent test -         
         # First connection
@@ -387,7 +390,7 @@ class WebSocketAuthHandshakeCompleteFlowTests(BaseIntegrationTest):
         # Sessions may differ but user should be consistent
 # COMMENTED OUT: Mock-dependent test -     
 # COMMENTED OUT: Mock-dependent test -     async def test_malformed_auth_message_handling(self):
-# COMMENTED OUT: Mock-dependent test -         "Test handling of malformed authentication messages."
+    # COMMENTED OUT: Mock-dependent test -         "Test handling of malformed authentication messages."
 # COMMENTED OUT: Mock-dependent test -         oauth_result = await self.auth_tester.perform_oauth_flow(testuser, password123)
 # COMMENTED OUT: Mock-dependent test -         
         # Mock: Component isolation for testing without external dependencies

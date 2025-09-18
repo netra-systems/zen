@@ -1,9 +1,9 @@
 "SSOT Execution Engine Violation Detection - Issue #1146"
 
 Business Value Justification:
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Stability & System Integrity 
-- Value Impact: Prevents execution engine duplication cascade failures affecting $500K+ ARR
+- Value Impact: Prevents execution engine duplication cascade failures affecting $"500K" plus ARR
 - Strategic Impact: Ensures 12 execution engines → 1 UserExecutionEngine consolidation remains stable
 
 CRITICAL MISSION: NEW 20% SSOT VALIDATION TESTS
@@ -33,7 +33,8 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
     Detects SSOT violations in execution engine consolidation and prevents regression."
-    Detects SSOT violations in execution engine consolidation and prevents regression."
+    Detects SSOT violations in execution engine consolidation and prevents regression.""
+
 
     def setup_method(self, method=None):
         "Set up SSOT violation detection test environment."
@@ -55,7 +56,8 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
             "RegistryExecutionEngine: Registry-specific engine - must be consolidated,"
             FactoryExecutionEngine: Factory-specific engine - must be consolidated,
             UnifiedExecutionEngine: Another unified attempt - must be consolidated"
-            UnifiedExecutionEngine: Another unified attempt - must be consolidated"
+            UnifiedExecutionEngine: Another unified attempt - must be consolidated""
+
         }
         
         # ONLY ALLOWED: Single SSOT implementation
@@ -67,7 +69,8 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
 
     def test_no_forbidden_execution_engine_classes_exist(self):
         CRITICAL: Detect if any forbidden execution engine classes still exist."
-        CRITICAL: Detect if any forbidden execution engine classes still exist."
+        CRITICAL: Detect if any forbidden execution engine classes still exist.""
+
         forbidden_classes_found = []
         
         # Scan all Python files in netra_backend
@@ -101,7 +104,7 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
             for violation in forbidden_classes_found:
                 error_msg.append(f  - {violation['file']}:{violation['line']} class {violation['class']} ({violation['reason']})
             error_msg.append(f\nIssue #1146: All execution engines must be consolidated into UserExecutionEngine)
-            error_msg.append(fBusiness Impact: Multiple execution engines cause state contamination affecting $500K+ ARR")"
+            error_msg.append(fBusiness Impact: Multiple execution engines cause state contamination affecting $"500K" plus ARR")"
             
             pytest.fail(\n.join(error_msg))
 
@@ -160,7 +163,8 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
                 error_msg.append(f    Code: {violation['content'][:100]}...")"
             error_msg.append(f\nIssue #1146: All execution engine imports must use UserExecutionEngine)
             error_msg.append(fGolden Path Impact: Multiple engines cause user isolation failures)"
-            error_msg.append(fGolden Path Impact: Multiple engines cause user isolation failures)"
+            error_msg.append(fGolden Path Impact: Multiple engines cause user isolation failures)""
+
             
             pytest.fail("\n.join(error_msg))"
 
@@ -170,7 +174,8 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
         
         if not ssot_registry_path.exists():
             self.skipTest(SSOT_IMPORT_REGISTRY.md not found - cannot validate execution engine entries)"
-            self.skipTest(SSOT_IMPORT_REGISTRY.md not found - cannot validate execution engine entries)"
+            self.skipTest(SSOT_IMPORT_REGISTRY.md not found - cannot validate execution engine entries)""
+
         
         try:
             with open(ssot_registry_path, 'r', encoding='utf-8') as f:
@@ -202,7 +207,8 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
                 error_msg.append(f\nIssue #1146: SSOT registry must only contain UserExecutionEngine entries)
                 
                 pytest.fail(\n.join(error_msg))"
-                pytest.fail(\n.join(error_msg))"
+                pytest.fail(\n.join(error_msg))""
+
                 
         except (UnicodeDecodeError, PermissionError) as e:
             pytest.fail(f"Cannot read SSOT registry: {e})"
@@ -219,7 +225,8 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
             netra_backend/app/core/tools/unified_tool_dispatcher.py,  # If it contains ExecutionEngine"
             netra_backend/app/core/tools/unified_tool_dispatcher.py,  # If it contains ExecutionEngine"
             netra_backend/app/services/unified_tool_registry/execution_engine.py"
-            netra_backend/app/services/unified_tool_registry/execution_engine.py"
+            netra_backend/app/services/unified_tool_registry/execution_engine.py""
+
         ]
         
         files_still_exist = []
@@ -250,7 +257,8 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
         # Report violations
         if files_with_forbidden_classes:
             error_msg = [CONSOLIDATION INCOMPLETE: Files still contain forbidden execution engine classes:]"
-            error_msg = [CONSOLIDATION INCOMPLETE: Files still contain forbidden execution engine classes:]"
+            error_msg = [CONSOLIDATION INCOMPLETE: Files still contain forbidden execution engine classes:]""
+
             for violation in files_with_forbidden_classes:
                 error_msg.append(f"  - {violation['file']} contains class {violation['class']} ({violation['reason']})"
             error_msg.append(f\nIssue #1146: These files must be refactored to use UserExecutionEngine)
@@ -266,7 +274,8 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
 
     def test_user_execution_engine_is_only_execution_engine_implementation(self"):"
         CRITICAL: Validate UserExecutionEngine is the only execution engine implementation."
-        CRITICAL: Validate UserExecutionEngine is the only execution engine implementation."
+        CRITICAL: Validate UserExecutionEngine is the only execution engine implementation.""
+
         execution_engine_implementations = []
         
         # Scan for any class that implements execution engine interface
@@ -310,7 +319,8 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
             pytest.fail(\n.join(error_msg))
 
     def test_no_execution_engine_factory_creates_forbidden_engines(self):
-        ""CRITICAL: Validate factories only create UserExecutionEngine instances."
+        ""CRITICAL: Validate factories only create UserExecutionEngine instances.""
+
         factory_violations = []
         
         # Look for factory methods that might create forbidden execution engines
@@ -358,7 +368,8 @@ class SSotExecutionEngineViolationDetection1146Tests(SSotBaseTestCase):
                 error_msg.append(f    Line {violation['violation_line']}: creates {violation['forbidden_class']}")"
                 error_msg.append(f    Code: {violation['code']})
             error_msg.append(f\nIssue #1146: All factories must create only UserExecutionEngine instances)"
-            error_msg.append(f\nIssue #1146: All factories must create only UserExecutionEngine instances)"
+            error_msg.append(f\nIssue #1146: All factories must create only UserExecutionEngine instances)""
+
             
             pytest.fail("\n.join(error_msg))"
 

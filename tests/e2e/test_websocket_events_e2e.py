@@ -2,7 +2,7 @@
 Test WebSocket Events E2E
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise)
+    - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure real-time user feedback during AI agent execution
 - Value Impact: Delivers 90% of user value through real-time AI interaction
 - Strategic Impact: Core user experience for engagement and platform stickiness

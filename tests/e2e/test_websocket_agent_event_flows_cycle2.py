@@ -2,7 +2,7 @@
 E2E Tests for Complete WebSocket Agent Event Flows - Cycle 2
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise)
+    - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure complete agent-to-user event delivery in production-like environment
 - Value Impact: Users experience seamless real-time AI interaction with full transparency
 - Strategic Impact: Core business value delivery - this IS the chat experience customers pay for
@@ -135,7 +135,7 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
     @pytest.mark.e2e
     @pytest.mark.real_services
     async def test_websocket_agent_multi_user_isolation_e2e(self, real_services):
-""""""
+    """"""
         Test that multiple authenticated users receive only their own agent events.
         
         Business Value: Ensures privacy and data isolation in production.
@@ -219,7 +219,7 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
     @pytest.mark.e2e
     @pytest.mark.real_services
     async def test_websocket_connection_recovery_during_agent_execution(self, authenticated_user, real_services):
-""""""
+    """"""
         Test WebSocket connection recovery during agent execution.
         
         Business Value: Users don't lose progress during network interruptions.'
@@ -351,6 +351,6 @@ class WebSocketAgentEventFlowsE2ETests(BaseE2ETest):
         # Business requirement: Platform handles concurrent load efficiently
         assert total_execution_time < 120, f"Total concurrent execution too slow: {total_execution_time}s"
         
-        print(fE2E Load Test Results: {len(successful_sessions)}/{len(users)} users successful in {total_execution_time:.1f}s")"
+        print(fE2E Load Test Results: {len(successful_sessions)}/{len(users)} users successful in {total_execution_time:."1f"}s")"
 
 )))))

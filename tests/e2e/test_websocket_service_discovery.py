@@ -1,7 +1,7 @@
 "WebSocket Service Discovery Tests."""
 
 Tests service discovery requirements per SPEC/websockets.xml:
-- Backend provides WebSocket config discovery to frontend
+    - Backend provides WebSocket config discovery to frontend
 - Frontend discovers WebSocket config at earliest application state
 - Service discovery integration with existing config system
 
@@ -40,7 +40,8 @@ class WebSocketServiceDiscoveryTests:
     
     @pytest.fixture
     async def websocket_client(self, backend_client):
-        ""Get authenticated WebSocket client."
+        ""Get authenticated WebSocket client.""
+
         token = await backend_client.get_jwt_token()
         ws_client = WebSocketTestClient()
         await ws_client.connect(token)
@@ -322,5 +323,6 @@ class WebSocketServiceDiscoveryTests:
         Extract domain from WebSocket URL.""
         return websocket_url.split(://)[1].split(/)[0].split(:)[0]""
 
-"""
+""""
+
 ))

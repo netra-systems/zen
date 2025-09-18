@@ -4,8 +4,8 @@
 MISSION CRITICAL: Docker-WebSocket Integration E2E Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal - System Stability & User Experience
-- Business Goal: Validate full-stack integration supporting chat business value ($500K+ ARR)
+    - Segment: Platform/Internal - System Stability & User Experience
+- Business Goal: Validate full-stack integration supporting chat business value ($"500K" plus ARR)
 - Value Impact: Ensures Docker stability + WebSocket events = reliable AI chat interactions
 - Strategic Impact: Comprehensive validation prevents system-wide failures affecting revenue
 
@@ -13,7 +13,7 @@ This test suite validates that Docker stability improvements and WebSocket bridg
 work together in real-world scenarios to deliver substantive chat business value.
 
 Test Scenarios:
-1. Full Agent Execution Flow - Docker services + WebSocket events + real agent tasks
+    1. Full Agent Execution Flow - Docker services + WebSocket events + real agent tasks
 2. Multi-User Concurrent Execution - 5 concurrent users with thread isolation validation
 3. Failure Recovery Scenarios - Service restarts, disconnections, orchestrator failures
 4. Performance Under Load - 10 agents, 100+ WebSocket events/sec, resource monitoring
@@ -874,7 +874,7 @@ class DockerWebSocketIntegrationTests:
         logger.error("")
         metrics.error_count += 1
 
-        if memory_increase > 100:  # 100MB memory leak threshold
+        if memory_increase > 100:  # "100MB" memory leak threshold
         logger.warning("")
         metrics.memory_leaks_detected = 1
 

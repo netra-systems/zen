@@ -1,13 +1,13 @@
 "Integration tests for ExecutionEngineFactory with WebSocket bridge."""
 
 Business Value Justification:
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Factory Pattern WebSocket Integration
-- Value Impact: Ensures $500K+ ARR chat functionality through proper factory WebSocket integration
+- Value Impact: Ensures $"500K" plus ARR chat functionality through proper factory WebSocket integration
 - Strategic Impact: Critical foundation for scalable multi-user WebSocket event delivery
 
 CRITICAL REQUIREMENTS per CLAUDE.md:
-1. REAL WEBSOCKET INTEGRATION - Test actual factory WebSocket bridge patterns
+    1. REAL WEBSOCKET INTEGRATION - Test actual factory WebSocket bridge patterns
 2. Factory Patterns - Test ExecutionEngineFactory creates proper WebSocket connections
 3. User Isolation - Test factory maintains WebSocket isolation per user
 4. WebSocket Lifecycle - Test WebSocket bridge lifecycle through factory
@@ -58,7 +58,8 @@ class ExecutionEngineFactoryWebSocketIntegrationTests:
         return bridge
 
     def create_user_context(self, user_suffix: str) -> UserExecutionContext:
-        ""Create user execution context for factory testing."
+        ""Create user execution context for factory testing.""
+
         return UserExecutionContext(user_id=f'factory_user_{user_suffix}_{uuid.uuid4().hex[:8]}', thread_id=f'factory_thread_{user_suffix}_{uuid.uuid4().hex[:8]}', run_id=f'factory_run_{user_suffix}_{uuid.uuid4().hex[:8]}', request_id=f'factory_req_{user_suffix}_{uuid.uuid4().hex[:8]}', websocket_client_id=f'factory_ws_{user_suffix}_{uuid.uuid4().hex[:8]}')
 
     def test_factory_supports_none_websocket_bridge_for_test_environments(self):
@@ -239,7 +240,8 @@ class ExecutionEngineFactoryWebSocketConfigurationTests:
         assert retrieved_factory._websocket_bridge == mock_bridge
 
     def test_factory_websocket_bridge_validation_prevents_late_errors(self):
-        ""Test early WebSocket bridge validation prevents runtime errors."
+        ""Test early WebSocket bridge validation prevents runtime errors.""
+
         with pytest.raises(ExecutionEngineFactoryError, match='ExecutionEngineFactory requires websocket_bridge'):
             ExecutionEngineFactory(websocket_bridge=None)
         mock_bridge = MagicMock()

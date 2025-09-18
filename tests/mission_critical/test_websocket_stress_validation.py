@@ -2,13 +2,13 @@
 "MISSION CRITICAL: WebSocket Stress Testing & High-Load Validation"
 
 Business Value Justification:
-- Segment: Platform/Internal (Mission Critical Infrastructure)
-- Business Goal: Ensure $500K+ ARR chat functionality scales under production load
+    - Segment: Platform/Internal (Mission Critical Infrastructure)
+- Business Goal: Ensure $"500K" plus ARR chat functionality scales under production load
 - Value Impact: Validates WebSocket performance under concurrent user scenarios
 - Strategic Impact: Prevents system collapse under high load that causes revenue loss
 
 This stress test suite validates:
-1. High concurrent connection handling (25+ simultaneous users)
+    1. High concurrent connection handling (25+ simultaneous users)
 2. Message throughput and latency under load
 3. Memory leak detection during extended operation
 4. Connection recovery and reconnection resilience
@@ -65,7 +65,8 @@ from tests.mission_critical.test_websocket_event_validation_suite import ()
 
 @dataclass
 class StressTestConfig:
-    ""Configuration for WebSocket stress testing."
+    ""Configuration for WebSocket stress testing.""
+
     
     # Connection stress parameters
     max_concurrent_connections: int = 25
@@ -79,8 +80,8 @@ class StressTestConfig:
     
     # Performance thresholds
     max_connection_time_ms: float = 5000.0  # 5 seconds to establish
-    max_message_latency_ms: float = 200.0   # 200ms max latency
-    max_memory_growth_mb: float = 500.0     # 500MB max memory growth
+    max_message_latency_ms: float = 200.0   # "200ms" max latency
+    max_memory_growth_mb: float = 500.0     # "500MB" max memory growth
     min_throughput_msgs_sec: float = 10.0   # 10 messages/sec minimum
     
     # Resilience testing
@@ -146,7 +147,8 @@ class StressTestMonitor:
         logger.info(Stress test monitoring stopped)
     
     def _monitor_resources(self):
-        ""Monitor system resources continuously."
+        ""Monitor system resources continuously.""
+
         while self._monitoring_active:
             current_time = time.time()
             
@@ -177,7 +179,8 @@ class StressTestMonitor:
     
     def record_connection_closed(self):
         Record connection closure."
-        Record connection closure."
+        Record connection closure.""
+
         self.active_connections = max(0, self.active_connections - 1)
     
     def record_connection_failure(self):
@@ -208,7 +211,8 @@ class StressTestMonitor:
     
     def get_performance_metrics(self) -> Dict[str, Any]:
         Get comprehensive performance metrics."
-        Get comprehensive performance metrics."
+        Get comprehensive performance metrics.""
+
         current_time = time.time()
         duration = current_time - self.start_time
         
@@ -233,10 +237,11 @@ class StressTestMonitor:
             latency_stats = {
                 "avg_ms: statistics.mean(self.message_latencies),"
                 median_ms: statistics.median(self.message_latencies),
-                "p95_ms: statistics.quantiles(self.message_latencies, n=20)[18],  # 95th percentile"
+                "p95_ms: statistics.quantiles(self.message_latencies, n=20)[18],  # "95th" percentile"
                 max_ms: max(self.message_latencies),
                 min_ms: min(self.message_latencies)"
-                min_ms: min(self.message_latencies)"
+                min_ms: min(self.message_latencies)""
+
             }
         
         # Connection time statistics
@@ -367,7 +372,8 @@ class WebSocketStressTestRunner:
             self.monitor.stop_monitoring()
     
     async def _create_delayed_connection(self, user_id: str, auth_token: str, delay: float) -> Optional[Tuple]:
-        ""Create a connection with specified delay."
+        ""Create a connection with specified delay.""
+
         try:
             if delay > 0:
                 await asyncio.sleep(delay)
@@ -392,7 +398,8 @@ class WebSocketStressTestRunner:
     async def run_message_throughput_test(self) -> Dict[str, Any]:
         ""Test message throughput and latency under load."
         logger.info(Starting message throughput stress test)"
-        logger.info(Starting message throughput stress test)"
+        logger.info(Starting message throughput stress test)""
+
         
         self.monitor.start_monitoring()
         
@@ -404,7 +411,8 @@ class WebSocketStressTestRunner:
             # Establish connections
             for i in range(num_connections):
                 user_id = fthroughput_user_{i}_{uuid.uuid4().hex[:8]}"
-                user_id = fthroughput_user_{i}_{uuid.uuid4().hex[:8]}"
+                user_id = fthroughput_user_{i}_{uuid.uuid4().hex[:8]}""
+
                 auth_token = create_mock_auth_token(user_id)
                 
                 try:
@@ -417,7 +425,8 @@ class WebSocketStressTestRunner:
                     self.monitor.record_connection_failure()
             
             logger.info(fEstablished {len(connections)} connections for throughput test)"
-            logger.info(fEstablished {len(connections)} connections for throughput test)"
+            logger.info(fEstablished {len(connections)} connections for throughput test)""
+
             
             # Send messages from all connections simultaneously
             message_tasks = []
@@ -451,7 +460,8 @@ class WebSocketStressTestRunner:
     
     async def _send_message_burst(self, websocket, user_id: str, message_count: int):
         Send burst of messages from a connection."
-        Send burst of messages from a connection."
+        Send burst of messages from a connection.""
+
         try:
             for i in range(message_count):
                 message = create_test_agent_message(
@@ -503,7 +513,8 @@ class WebSocketStressTestRunner:
                 connections = []
                 for i in range(connections_per_cycle):
                     user_id = fleak_test_user_{cycle}_{i}_{uuid.uuid4().hex[:8]}"
-                    user_id = fleak_test_user_{cycle}_{i}_{uuid.uuid4().hex[:8]}"
+                    user_id = fleak_test_user_{cycle}_{i}_{uuid.uuid4().hex[:8]}""
+
                     auth_token = create_mock_auth_token(user_id)
                     
                     try:
@@ -517,7 +528,8 @@ class WebSocketStressTestRunner:
                 for websocket, user_id in connections:
                     try:
                         message = create_test_agent_message(user_id, fLeak test cycle {cycle})"
-                        message = create_test_agent_message(user_id, fLeak test cycle {cycle})"
+                        message = create_test_agent_message(user_id, fLeak test cycle {cycle})""
+
                         await self.websocket_manager.send_message(websocket, message)
                     except Exception as e:
                         logger.error(f"Message failed in leak test: {e})"
@@ -540,7 +552,8 @@ class WebSocketStressTestRunner:
                 current_memory = psutil.virtual_memory().used
                 memory_samples.append(current_memory)
                 
-                logger.info(fCycle {cycle + 1} memory: {current_memory / (1024*1024):.1f} MB)
+                logger.info(fCycle {cycle + 1} memory: {current_memory / (1024*1024):."1f"} MB)""
+
                 
                 # Brief pause between cycles
                 await asyncio.sleep(1.0)
@@ -599,7 +612,8 @@ class WebSocketStressTestRunner:
                     await websocket.close()
                     self.monitor.record_connection_closed()
                     logger.info(fDropped connection for {user_id})"
-                    logger.info(fDropped connection for {user_id})"
+                    logger.info(fDropped connection for {user_id})""
+
                 except Exception as e:
                     logger.error(f"Failed to drop connection for {user_id}: {e})"
             
@@ -617,7 +631,8 @@ class WebSocketStressTestRunner:
                         
                         # Test the new connection
                         test_message = create_test_agent_message(user_id, Reconnection test)"
-                        test_message = create_test_agent_message(user_id, Reconnection test)"
+                        test_message = create_test_agent_message(user_id, Reconnection test)""
+
                         await self.websocket_manager.send_message(new_websocket, test_message)
                         
                         reconnection_successes += 1
@@ -668,7 +683,8 @@ class WebSocketStressValidationTests:
         return StressTestConfig()
     
     @pytest.fixture(scope=class)"
-    @pytest.fixture(scope=class)"
+    @pytest.fixture(scope=class)""
+
     def docker_manager(self):
         "Docker manager for stress testing."
         # CRITICAL: Require Docker - no fallback per CLAUDE.md
@@ -696,14 +712,16 @@ class WebSocketStressValidationTests:
         assert result[connection_success_rate] >= 90.0, \"
         assert result[connection_success_rate] >= 90.0, \"
             fConnection success rate {result['connection_success_rate']}% below 90%"
-            fConnection success rate {result['connection_success_rate']}% below 90%"
+            fConnection success rate {result['connection_success_rate']}% below 90%""
+
         
         # Validate connection timing
         if performance[connections][timing_stats]:
             avg_connection_time = performance["connections][timing_stats][avg_ms]"
             assert avg_connection_time <= stress_config.max_connection_time_ms, \
                 fAverage connection time {avg_connection_time}ms exceeds {stress_config.max_connection_time_ms}ms"
-                fAverage connection time {avg_connection_time}ms exceeds {stress_config.max_connection_time_ms}ms"
+                fAverage connection time {avg_connection_time}ms exceeds {stress_config.max_connection_time_ms}ms""
+
         
         # Validate memory growth
         memory_growth = performance["memory][growth_mb]"
@@ -713,15 +731,18 @@ class WebSocketStressValidationTests:
         logger.info(f[U+2713] Concurrent connection stress test passed:)"
         logger.info(f[U+2713] Concurrent connection stress test passed:)"
         logger.info(f"  Successful connections: {result['connections_successful']}/{result['connections_requested']})"
-        logger.info(f  Connection success rate: {result['connection_success_rate']:.1f}%)
-        logger.info(f  Memory growth: {memory_growth:.1f}MB)
+        logger.info(f  Connection success rate: {result['connection_success_rate']:."1f"}%)""
+
+        logger.info(f  Memory growth: {memory_growth:."1f"}MB)""
+
     
     @requires_docker
     @pytest.mark.asyncio
     async def test_message_throughput_stress(self, stress_runner, stress_config):
         ""Test message throughput and latency under load."
         logger.info(Testing message throughput under stress)"
-        logger.info(Testing message throughput under stress)"
+        logger.info(Testing message throughput under stress)""
+
         
         result = await stress_runner.run_message_throughput_test()
         performance = stress_runner.monitor.get_performance_metrics()
@@ -729,48 +750,56 @@ class WebSocketStressValidationTests:
         # Validate throughput
         throughput = performance[messages"][throughput_msgs_sec]"
         assert throughput >= stress_config.min_throughput_msgs_sec, \
-            fThroughput {throughput:.1f} msgs/sec below minimum {stress_config.min_throughput_msgs_sec}
+            fThroughput {throughput:."1f"} msgs/sec below minimum {stress_config.min_throughput_msgs_sec}""
+
         
         # Validate latency
         if performance["messages][latency_stats]:"
             avg_latency = performance[messages][latency_stats][avg_ms]"
-            avg_latency = performance[messages][latency_stats][avg_ms]"
+            avg_latency = performance[messages][latency_stats][avg_ms]""
+
             assert avg_latency <= stress_config.max_message_latency_ms, \
                 fAverage latency {avg_latency:.1f}ms exceeds {stress_config.max_message_latency_ms}ms"
-                fAverage latency {avg_latency:.1f}ms exceeds {stress_config.max_message_latency_ms}ms"
+                fAverage latency {avg_latency:.1f}ms exceeds {stress_config.max_message_latency_ms}ms""
+
             
             p95_latency = performance[messages][latency_stats]["p95_ms]"
             assert p95_latency <= stress_config.max_message_latency_ms * 2, \
-                f95th percentile latency {p95_latency:.1f}ms exceeds {stress_config.max_message_latency_ms * 2}ms
+                f95th percentile latency {p95_latency:."1f"}ms exceeds {stress_config.max_message_latency_ms * 2}ms""
+
         
         # Validate message success rate
         message_success_rate = performance[messages][success_rate_percent"]"
         assert message_success_rate >= 95.0, \
-            f"Message success rate {message_success_rate:.1f}% below 95%"
+            f"Message success rate {message_success_rate:."1f"}% below 95%"
         
         logger.info(f[U+2713] Message throughput stress test passed:)
-        logger.info(f  Throughput: {throughput:.1f} msgs/sec)
-        logger.info(f  Message success rate: {message_success_rate:.1f}%")"
+        logger.info(f  Throughput: {throughput:."1f"} msgs/sec)
+        logger.info(f  Message success rate: {message_success_rate:."1f"}%")"
         if performance[messages][latency_stats]:
-            logger.info(f  Average latency: {avg_latency:.1f}ms)
+            logger.info(f  Average latency: {avg_latency:."1f"}ms)""
+
     
     @requires_docker
     @pytest.mark.asyncio
     async def test_memory_leak_detection(self, stress_runner, stress_config):
         ""Test for memory leaks during extended WebSocket operation."
         logger.info(Testing for memory leaks during extended operation)"
-        logger.info(Testing for memory leaks during extended operation)"
+        logger.info(Testing for memory leaks during extended operation)""
+
         
         result = await stress_runner.run_memory_leak_test()
         
         # Validate memory growth is within acceptable limits
         memory_growth = result[memory_growth_mb"]"
         assert memory_growth <= stress_config.max_memory_growth_mb, \
-            fMemory growth {memory_growth:.1f}MB exceeds limit {stress_config.max_memory_growth_mb}MB
+            fMemory growth {memory_growth:."1f"}MB exceeds limit {stress_config.max_memory_growth_mb}MB""
+
         
         # Check that memory growth is not linear (indicating a leak)
         memory_samples = result[memory_samples]"
-        memory_samples = result[memory_samples]"
+        memory_samples = result[memory_samples]""
+
         if len(memory_samples) >= 3:
             # Calculate if memory is consistently growing
             growth_trend = []
@@ -785,13 +814,14 @@ class WebSocketStressValidationTests:
             # Check for excessive final memory growth
             final_growth_rate = growth_trend[-1] if growth_trend else 0
             assert final_growth_rate <= 50.0, \
-                fFinal cycle memory growth {final_growth_rate:.1f}MB indicates potential leak
+                fFinal cycle memory growth {final_growth_rate:."1f"}MB indicates potential leak
         
         logger.info(f"[U+2713] Memory leak test passed:)"
         logger.info(f  Cycles completed: {result['cycles_completed']}")"
-        logger.info(f  Memory growth: {memory_growth:.1f}MB)
+        logger.info(f  Memory growth: {memory_growth:."1f"}MB)
         logger.info(f  Final memory: {result['final_memory_mb']:.1f}MB)"
-        logger.info(f  Final memory: {result['final_memory_mb']:.1f}MB)"
+        logger.info(f  Final memory: {result['final_memory_mb']:.1f}MB)""
+
     
     @requires_docker
     @pytest.mark.asyncio 
@@ -805,7 +835,8 @@ class WebSocketStressValidationTests:
         reconnection_success_rate = result[reconnection_success_rate]
         assert reconnection_success_rate >= 80.0, \
             fReconnection success rate {reconnection_success_rate:.1f}% below 80%"
-            fReconnection success rate {reconnection_success_rate:.1f}% below 80%"
+            fReconnection success rate {reconnection_success_rate:.1f}% below 80%""
+
         
         # Validate that at least some connections were dropped (test is working)
         assert result["connections_dropped] > 0, No connections were dropped - test may not be working"
@@ -814,7 +845,8 @@ class WebSocketStressValidationTests:
         logger.info(f  Connections dropped: {result['connections_dropped']})"
         logger.info(f  Connections dropped: {result['connections_dropped']})"
         logger.info(f"  Reconnection attempts: {result['reconnection_attempts']})"
-        logger.info(f  Reconnection success rate: {reconnection_success_rate:.1f}%)
+        logger.info(f  Reconnection success rate: {reconnection_success_rate:."1f"}%)""
+
     
     @requires_docker
     @pytest.mark.asyncio
@@ -837,24 +869,27 @@ class WebSocketStressValidationTests:
             
             # Validate system remained stable during extended test
             assert result["connection_success_rate] >= 85.0, \"
-                fExtended load test connection success rate {result['connection_success_rate']:.1f}% below 85%
+                fExtended load test connection success rate {result['connection_success_rate']:."1f"}% below 85%""
+
             
             # Validate memory didn't grow excessively'
             memory_growth = performance[memory][growth_mb"]"
             assert memory_growth <= stress_config.max_memory_growth_mb * 1.5, \
-                f"Extended test memory growth {memory_growth:.1f}MB exceeds limit"
+                f"Extended test memory growth {memory_growth:."1f"}MB exceeds limit"
             
             # Validate CPU usage remained reasonable
             avg_cpu = performance[resource_usage][avg_cpu_percent]
             assert avg_cpu <= 80.0, \
                 fAverage CPU usage {avg_cpu:.1f}% too high during extended test"
-                fAverage CPU usage {avg_cpu:.1f}% too high during extended test"
+                fAverage CPU usage {avg_cpu:.1f}% too high during extended test""
+
             
             logger.info(f"[U+2713] Extended load endurance test passed:)"
-            logger.info(f  Test duration: {performance['duration_seconds']:.1f} seconds)
-            logger.info(f  Connection success rate: {result['connection_success_rate']:.1f}%)
-            logger.info(f  Memory growth: {memory_growth:.1f}MB")"
-            logger.info(f  Average CPU: {avg_cpu:.1f}%)
+            logger.info(f  Test duration: {performance['duration_seconds']:."1f"} seconds)
+            logger.info(f  Connection success rate: {result['connection_success_rate']:."1f"}%)
+            logger.info(f  Memory growth: {memory_growth:."1f"}MB")"
+            logger.info(f  Average CPU: {avg_cpu:."1f"}%)""
+
             
         finally:
             # Restore original config
@@ -884,7 +919,8 @@ class WebSocketStressValidationTests:
         
         logger.info(Phase 3: Memory leak detection)
         comprehensive_results[memory_test] = await stress_runner.run_memory_leak_test()"
-        comprehensive_results[memory_test] = await stress_runner.run_memory_leak_test()"
+        comprehensive_results[memory_test] = await stress_runner.run_memory_leak_test()""
+
         
         await asyncio.sleep(2.0)
         
@@ -902,7 +938,8 @@ class WebSocketStressValidationTests:
         if comprehensive_results[connection_stress][connection_success_rate] < 90.0:
             all_tests_passed = False
             logger.error(Connection stress test failed)"
-            logger.error(Connection stress test failed)"
+            logger.error(Connection stress test failed)""
+
         
         # Memory test validation  
         if comprehensive_results[memory_test"][memory_growth_mb] > stress_config.max_memory_growth_mb:"
@@ -915,14 +952,15 @@ class WebSocketStressValidationTests:
             logger.error(Resilience test failed)
         
         assert all_tests_passed, One or more comprehensive stress tests failed"
-        assert all_tests_passed, One or more comprehensive stress tests failed"
+        assert all_tests_passed, One or more comprehensive stress tests failed""
+
         
         logger.info(" PASS:  COMPREHENSIVE STRESS VALIDATION PASSED)"
         logger.info(= * 60)
         logger.info("STRESS TEST SUMMARY:)"
-        logger.info(f  Connection Success Rate: {comprehensive_results['connection_stress']['connection_success_rate']:.1f}%)
-        logger.info(f  Memory Growth: {comprehensive_results['memory_test']['memory_growth_mb']:.1f}MB)
-        logger.info(f  Reconnection Success: {comprehensive_results['resilience_test']['reconnection_success_rate']:.1f}%")"
+        logger.info(f  Connection Success Rate: {comprehensive_results['connection_stress']['connection_success_rate']:."1f"}%)
+        logger.info(f  Memory Growth: {comprehensive_results['memory_test']['memory_growth_mb']:."1f"}MB)
+        logger.info(f  Reconnection Success: {comprehensive_results['resilience_test']['reconnection_success_rate']:."1f"}%")"
         logger.info(= * 60)
 
 
@@ -937,6 +975,7 @@ if __name__ == __main__:"
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
 
-"""
+""""
+
 )))
 }}

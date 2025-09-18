@@ -12,7 +12,8 @@ class TestSyntaxFix:
 
 class WebSocketTestHelper:
     Real WebSocket connection for testing instead of mocks."
-    Real WebSocket connection for testing instead of mocks."
+    Real WebSocket connection for testing instead of mocks.""
+
     
     def __init__(self):
         self.messages_sent = []
@@ -118,7 +119,8 @@ MOCK_DETECTED = False
 
 def detect_mock_usage():
     Detect any mock usage - FORBIDDEN in isolation tests."
-    Detect any mock usage - FORBIDDEN in isolation tests."
+    Detect any mock usage - FORBIDDEN in isolation tests.""
+
     global MOCK_DETECTED
     
     def mock_detector(*args, **kwargs):
@@ -153,7 +155,8 @@ class SSotIsolationTestResult:
     memory_usage_mb: float = 0.0
     
     def has_violations(self) -> bool:
-        ""Check if any isolation violations were detected."
+        ""Check if any isolation violations were detected.""
+
         return self.data_leakage_detected or bool(self.isolation_violations)
 
 
@@ -205,7 +208,8 @@ class SSotUserContextSimulator:
         try:
             # Mock factory operations
             mock = self.ssot_components['mock_factory'].create_mock(fservice_{self.user_id})"
-            mock = self.ssot_components['mock_factory'].create_mock(fservice_{self.user_id})"
+            mock = self.ssot_components['mock_factory'].create_mock(fservice_{self.user_id})""
+
             if mock:
                 operations_performed.append(f"created_mock_{self.user_id})"
             
@@ -248,7 +252,8 @@ class SSotUserContextSimulator:
                 self.ssot_components['mock_factory'].cleanup_all_mocks()
         except Exception as e:
             logger.warning(fUser {self.user_id} cleanup failed: {e})"
-            logger.warning(fUser {self.user_id} cleanup failed: {e})"
+            logger.warning(fUser {self.user_id} cleanup failed: {e})""
+
 
 
 @pytest.mark.usefixtures("isolated_test_env)"
@@ -282,7 +287,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
     def tearDown(self):
         Tear down with metrics collection and mock detection.""
         duration = time.time() - self.start_time
-        logger.info(fSSOT isolation test {self._testMethodName} took {duration:.2f}s)
+        logger.info(fSSOT isolation test {self._testMethodName} took {duration:."2f"}s)""
+
         
         # Verify no mocks were used (CRITICAL)
         global MOCK_DETECTED
@@ -304,7 +310,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
         
         def run_user_ssot_operations(user_id):
             Run SSOT operations for a single user."
-            Run SSOT operations for a single user."
+            Run SSOT operations for a single user.""
+
             try:
                 # Create user simulator
                 user_simulator = SSotUserContextSimulator(fuser_{user_id}", self.test_env_manager)"
@@ -335,7 +342,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
                     
             except Exception as e:
                 error_msg = fUser {user_id} SSOT operations failed: {str(e)}"
-                error_msg = fUser {user_id} SSOT operations failed: {str(e)}"
+                error_msg = fUser {user_id} SSOT operations failed: {str(e)}""
+
                 isolation_violations.append(error_msg)
                 logger.error(error_msg)
                 return f"user_{user_id}_failed"
@@ -360,7 +368,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
         
         # Validate all users completed successfully
         successful_results = [r for r in results if success in r]"
-        successful_results = [r for r in results if success in r]"
+        successful_results = [r for r in results if success in r]""
+
         self.assertEqual(len(successful_results), num_users,
                         fNot all users completed SSOT operations successfully: {results}")"
         
@@ -385,18 +394,21 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
         max_execution_time = 20.0  # Allow 20 seconds for 12 users
         self.assertLess(execution_time, max_execution_time,
                        fSSOT concurrent operations too slow: {execution_time:.2f}s)"
-                       fSSOT concurrent operations too slow: {execution_time:.2f}s)"
+                       fSSOT concurrent operations too slow: {execution_time:.2f}s)""
+
         
-        # Memory usage should be reasonable (allow 100MB increase)
+        # Memory usage should be reasonable (allow "100MB" increase)
         memory_increase = final_memory - initial_memory
         self.assertLess(memory_increase, 100,
-                       f"SSOT framework excessive memory usage: {memory_increase:.1f}MB)"
+                       f"SSOT framework excessive memory usage: {memory_increase:."1f"}MB)"
         
         logger.info(f[U+2713] SSOT Framework isolation test: {num_users) users, 
-                   f{execution_time:.2f}s, {memory_increase:.1f}MB increase)
+                   f{execution_time:."2f"}s, {memory_increase:."1f"}MB increase)""
+
     
     def test_database_session_per_user_ssot_operations(self):
-        """
+        """"
+
         CRITICAL: Test each user gets isolated database sessions for SSOT operations.
         
         Validates that SSOT database utilities provide proper session isolation
@@ -410,7 +422,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
             "Test database isolation for a single user."
             try:
                 user_simulator = SSotUserContextSimulator(fdbuser_{user_id}, self.test_env_manager)"
-                user_simulator = SSotUserContextSimulator(fdbuser_{user_id}, self.test_env_manager)"
+                user_simulator = SSotUserContextSimulator(fdbuser_{user_id}, self.test_env_manager)""
+
                 
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
@@ -459,7 +472,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
                     
             except Exception as e:
                 error_msg = fUser {user_id} database isolation test failed: {str(e)}"
-                error_msg = fUser {user_id} database isolation test failed: {str(e)}"
+                error_msg = fUser {user_id} database isolation test failed: {str(e)}""
+
                 isolation_violations.append(error_msg)
                 return fdbuser_{user_id}_failed, None
         
@@ -471,7 +485,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
         # Validate no isolation violations
         self.assertEqual(len(isolation_violations), 0,
                         fDatabase session isolation violations: {isolation_violations})"
-                        fDatabase session isolation violations: {isolation_violations})"
+                        fDatabase session isolation violations: {isolation_violations})""
+
         
         # Validate all users completed
         successful_results = [r for r in results if "success in r[0] or simulated in r[0]]"
@@ -486,7 +501,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
             # All session data must be unique (no leakage)
             self.assertEqual(len(set(user_session_ids)), len(session_data),
                             CRITICAL: Database session data leaked between users)"
-                            CRITICAL: Database session data leaked between users)"
+                            CRITICAL: Database session data leaked between users)""
+
             
             # All transaction IDs must be unique
             self.assertEqual(len(set(user_transaction_ids)), len(session_data),
@@ -495,7 +511,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
             logger.info(f[U+2713] Database session isolation: {len(session_data)} unique sessions)
     
     def test_websocket_channel_isolation_ssot_framework(self):
-    """
+    """"
+
         CRITICAL: Test WebSocket channel isolation in SSOT framework operations.
         
         Validates that SSOT WebSocket utilities provide proper channel separation
@@ -506,7 +523,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
         isolation_violations = []
         
         def test_user_websocket_isolation(user_id):
-            ""Test WebSocket isolation for a single user."
+            ""Test WebSocket isolation for a single user.""
+
             try:
                 user_simulator = SSotUserContextSimulator(fwsuser_{user_id}, self.test_env_manager)
                 
@@ -589,7 +607,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
             # All event filters must be unique (no event mixing)
             self.assertEqual(len(set(user_event_filters)), len(channel_data),
                             CRITICAL: WebSocket event filters leaked between users)"
-                            CRITICAL: WebSocket event filters leaked between users)"
+                            CRITICAL: WebSocket event filters leaked between users)""
+
             
             # Validate events are properly namespaced per user
             for user_id, data in channel_data.items():
@@ -600,7 +619,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
             logger.info(f[U+2713] WebSocket channel isolation: {len(channel_data)} unique channels)
     
     def test_race_condition_prevention_ssot_framework(self):
-        """
+        """"
+
         CRITICAL: Test SSOT framework prevents race conditions in concurrent access.
         
         Validates that SSOT components handle concurrent access properly without
@@ -618,7 +638,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
             "Perform SSOT operations that could have race conditions."
             try:
                 user_simulator = SSotUserContextSimulator(frace_{thread_id}, self.test_env_manager)"
-                user_simulator = SSotUserContextSimulator(frace_{thread_id}, self.test_env_manager)"
+                user_simulator = SSotUserContextSimulator(frace_{thread_id}, self.test_env_manager)""
+
                 
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
@@ -701,13 +722,15 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
     
     def test_security_boundary_enforcement_ssot_framework(self):
         """
-        "
+        ""
+
         CRITICAL: Test SSOT framework enforces security boundaries between users.
         
         Validates that users cannot access each other's SSOT framework resources,'
         mock objects, or sensitive data through any attack vectors.
 "
-"
+""
+
         num_users = 6
         security_violations = []
         user_resources = {}
@@ -815,7 +838,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
             # All API keys must be unique (no sharing)
             self.assertEqual(len(set(api_keys)), len(user_resources),
                             SECURITY: API keys leaked between users)"
-                            SECURITY: API keys leaked between users)"
+                            SECURITY: API keys leaked between users)""
+
             
             # All session secrets must be unique (no sharing)
             self.assertEqual(len(set(session_secrets)), len(user_resources),
@@ -833,13 +857,15 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
     
     def test_performance_monitoring_ssot_concurrent_load(self):
         """
-        "
+        ""
+
         CRITICAL: Test SSOT framework performance under concurrent load.
         
         Validates that SSOT framework components maintain acceptable performance
         with multiple concurrent users and don't degrade system performance.'
 "
-"
+""
+
         num_users = 15
         performance_metrics = {}
         performance_violations = []
@@ -886,10 +912,11 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
                     
                     # Check for performance violations
                     if total_time > 5.0:  # Max 5 seconds per user
-                        performance_violations.append(fUser {user_id} too slow: {total_time:.2f}s)
+                        performance_violations.append(fUser {user_id} too slow: {total_time:."2f"}s)""
+
                     
-                    if metrics['memory_increase'] > 50:  # Max 50MB per user
-                        performance_violations.append(fUser {user_id} excessive memory: {metrics['memory_increase']:.1f}MB)
+                    if metrics['memory_increase'] > 50:  # Max "50MB" per user
+                        performance_violations.append(fUser {user_id} excessive memory: {metrics['memory_increase']:."1f"}MB)
                     
                     return f"perfuser_{user_id}_success, metrics"
                     
@@ -899,7 +926,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
                     
             except Exception as e:
                 error_msg = fUser {user_id} performance test failed: {str(e)}"
-                error_msg = fUser {user_id} performance test failed: {str(e)}"
+                error_msg = fUser {user_id} performance test failed: {str(e)}""
+
                 logger.error(error_msg)
                 return fperfuser_{user_id}_failed, None
         
@@ -916,7 +944,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
         # Validate no performance violations
         self.assertEqual(len(performance_violations), 0,
                         fPerformance violations detected: {performance_violations})"
-                        fPerformance violations detected: {performance_violations})"
+                        fPerformance violations detected: {performance_violations})""
+
         
         # Validate all users completed performance tests
         successful_results = [r for r in results if "success in r[0]]"
@@ -936,18 +965,19 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
             avg_throughput = sum(throughputs) / len(throughputs) if throughputs else 0
             
             # Performance should be reasonable
-            self.assertLess(avg_time, 3.0, f"Average user time too high: {avg_time:.2f}s)"
-            self.assertLess(max_time, 8.0, fMax user time too high: {max_time:.2f}s")"
-            self.assertLess(total_memory_increase, 200, fTotal memory increase too high: {total_memory_increase:.1f}MB)
+            self.assertLess(avg_time, 3.0, f"Average user time too high: {avg_time:."2f"}s)"
+            self.assertLess(max_time, 8.0, fMax user time too high: {max_time:."2f"}s")"
+            self.assertLess(total_memory_increase, 200, fTotal memory increase too high: {total_memory_increase:."1f"}MB)
             self.assertLess(test_total_time, 30.0, fTotal test time too high: {test_total_time:.2f}s)"
-            self.assertLess(test_total_time, 30.0, fTotal test time too high: {test_total_time:.2f}s)"
+            self.assertLess(test_total_time, 30.0, fTotal test time too high: {test_total_time:.2f}s)""
+
             
             if throughputs:
-                self.assertGreater(avg_throughput, 0.5, f"Average throughput too low: {avg_throughput:.2f} ops/sec)"
+                self.assertGreater(avg_throughput, 0.5, f"Average throughput too low: {avg_throughput:."2f"} ops/sec)"
         
         logger.info(f[U+2713] Performance monitoring: {num_users) users, 
-                   favg: {avg_time:.2f}s, max: {max_time:.2f}s, 
-                   fmemory: {total_memory_increase:.1f}MB")"
+                   favg: {avg_time:."2f"}s, max: {max_time:."2f"}s, 
+                   fmemory: {total_memory_increase:."1f"}MB")"
     
     def test_ssot_compliance_validation_with_isolation(self):
         pass
@@ -962,7 +992,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
         
         def run_concurrent_compliance_check(check_id):
             Run SSOT compliance check in isolation."
-            Run SSOT compliance check in isolation."
+            Run SSOT compliance check in isolation.""
+
             try:
                 user_simulator = SSotUserContextSimulator(f"compliance_{check_id}, self.test_env_manager)"
                 
@@ -998,7 +1029,7 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
                         compliance_violations.extend([fCheck {check_id): {v) for v in violations]
                     
                     if compliance_time > 2.0:  # Should be fast
-                        compliance_violations.append(fCheck {check_id} too slow: {compliance_time:.2f}s)
+                        compliance_violations.append(fCheck {check_id} too slow: {compliance_time:."2f"}s)
                     
                     return fcompliance_{check_id}_success", compliance_result"
                     
@@ -1034,7 +1065,8 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
                 unique_versions = set(versions)
                 self.assertEqual(len(unique_versions), 1,
                                 fInconsistent SSOT versions across checks: {unique_versions})"
-                                fInconsistent SSOT versions across checks: {unique_versions})"
+                                fInconsistent SSOT versions across checks: {unique_versions})""
+
             
             # Component counts should be consistent
             component_counts = [r['components_count'] for r in compliance_results.values()]
@@ -1049,12 +1081,13 @@ class SSotFrameworkWithIsolationTests(BaseTestCase):
             max_compliance_time = max(compliance_times)
             
             self.assertLess(avg_compliance_time, 1.0,
-                           fAverage compliance check too slow: {avg_compliance_time:.2f}s)
+                           fAverage compliance check too slow: {avg_compliance_time:."2f"}s)""
+
             self.assertLess(max_compliance_time, 3.0,
-                           fMax compliance check too slow: {max_compliance_time:.2f}s)
+                           fMax compliance check too slow: {max_compliance_time:."2f"}s)
         
         logger.info(f[U+2713] SSOT compliance validation: {num_concurrent_checks) concurrent checks, ""
-                   f"avg: {avg_compliance_time:.2f}s)"
+                   f"avg: {avg_compliance_time:."2f"}s)"
 
 
 if __name__ == '__main__':

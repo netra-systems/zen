@@ -1,5 +1,5 @@
-"""
-"""
+""""
+
 Mission Critical Test: Docker SSOT Compliance Verification
 
 TEAM DELTA INFRASTRUCTURE TESTS: Comprehensive SSOT validation and compliance
@@ -11,17 +11,18 @@ and prevents regression to multiple Docker management implementations.
 Critical for spacecraft reliability: No direct Docker calls outside SSOT.
 
 INFRASTRUCTURE VALIDATION:
-- SSOT architecture enforcement and compliance auditing
+    - SSOT architecture enforcement and compliance auditing
 - Performance impact of SSOT pattern implementation
 - Resource efficiency and overhead measurement
 - Compliance violation detection and reporting
 - Architecture boundary validation
 - Multi-environment SSOT consistency
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import asyncio
 import inspect
 import logging
@@ -58,7 +59,8 @@ logger = logging.getLogger(__name__)
 
 class DockerSSOTComplianceTests:
     "
-    "
+    ""
+
     Comprehensive tests to ensure Docker SSOT compliance.
     
     Verifies:
@@ -67,7 +69,8 @@ class DockerSSOTComplianceTests:
     3. No direct Docker calls exist outside SSOT
     4. All functionality is preserved during consolidation
 "
-"
+""
+
     
     @pytest.mark.asyncio
     async def test_unified_docker_manager_is_ssot(self):
@@ -124,7 +127,8 @@ class DockerSSOTComplianceTests:
         assert isinstance(manager._docker_utility, "DockerTestUtility)"
         
         logger.info(DockerTestManager deprecation warning verified)"
-        logger.info(DockerTestManager deprecation warning verified)"
+        logger.info(DockerTestManager deprecation warning verified)""
+
 
 
 @dataclass
@@ -179,8 +183,8 @@ class DockerSSOTInfrastructureTests:
         compliance_metrics.ssot_compliant_operations += 1
         
         # Verify compliance percentage
-        logger.info(f PASS:  SSOT compliance: {compliance_metrics.compliance_percentage:.1f}%")"
-        assert compliance_metrics.compliance_percentage >= 100.0, "fSSOT compliance below 100%: {compliance_metrics.compliance_percentage:.1f}%"
+        logger.info(f PASS:  SSOT compliance: {compliance_metrics.compliance_percentage:."1f"}%")"
+        assert compliance_metrics.compliance_percentage >= 100.0, "fSSOT compliance below 100%: {compliance_metrics.compliance_percentage:."1f"}%"
     
     def test_ssot_performance_overhead_measurement(self):
         Measure performance overhead of SSOT pattern implementation.""
@@ -228,13 +232,14 @@ class DockerSSOTInfrastructureTests:
         overhead_percentage = ((ssot_avg / baseline_avg) - 1) * 100 if baseline_avg > 0 else 0
         
         logger.info(f PASS:  SSOT performance analysis:)
-        logger.info(f   Baseline average: {baseline_avg:.4f}s)
-        logger.info(f   SSOT average: {ssot_avg:.4f}s")"
-        logger.info(f   Overhead: {overhead_ms:.2f}ms ({overhead_percentage:.1f}%))
+        logger.info(f   Baseline average: {baseline_avg:."4f"}s)
+        logger.info(f   SSOT average: {ssot_avg:."4f"}s")"
+        logger.info(f   Overhead: {overhead_ms:."2f"}ms ({overhead_percentage:."1f"}%))""
+
         
-        # Validate overhead is acceptable (< 10ms and < 50% increase)
-        assert overhead_ms < 10.0, "fSSOT overhead too high: {overhead_ms:.2f}ms"
-        assert overhead_percentage < 50.0, f"SSOT overhead percentage too high: {overhead_percentage:.1f}%"
+        # Validate overhead is acceptable (< "10ms" and < 50% increase)
+        assert overhead_ms < 10.0, "fSSOT overhead too high: {overhead_ms:."2f"}ms"
+        assert overhead_percentage < 50.0, f"SSOT overhead percentage too high: {overhead_percentage:."1f"}%"
     
     def test_ssot_resource_efficiency(self):
         "Test resource efficiency of SSOT pattern implementation."
@@ -279,13 +284,14 @@ class DockerSSOTInfrastructureTests:
         total_thread_delta = final_threads - initial_threads
         
         logger.info(f PASS:  SSOT resource efficiency analysis:)
-        logger.info(f   Average memory per utility: {avg_memory_per_utility:.2f}MB)
-        logger.info(f   Maximum memory per utility: {max_memory_per_utility:.2f}MB")"
-        logger.info(f   Total memory delta: {total_memory_delta:.2f}MB)
+        logger.info(f   Average memory per utility: {avg_memory_per_utility:."2f"}MB)
+        logger.info(f   Maximum memory per utility: {max_memory_per_utility:."2f"}MB")"
+        logger.info(f   Total memory delta: {total_memory_delta:."2f"}MB)""
+
         logger.info(f   Total thread delta: {total_thread_delta})
         
         # Validate resource efficiency
-        assert avg_memory_per_utility < 10.0, f"Average memory per SSOT utility too high: {avg_memory_per_utility:.2f}MB"
+        assert avg_memory_per_utility < 10.0, f"Average memory per SSOT utility too high: {avg_memory_per_utility:."2f"}MB"
         assert total_memory_delta < 100.0, fTotal memory usage too high: {total_memory_delta:.2f}MB"
         assert total_memory_delta < 100.0, fTotal memory usage too high: {total_memory_delta:.2f}MB"
         assert total_thread_delta < 5, "fThread usage too high: {total_thread_delta}"
@@ -322,7 +328,8 @@ class DockerSSOTInfrastructureTests:
         
         if manager1 is manager2:
             violations_detected.append(UnifiedDockerManager is singleton when it should allow multiple instances)"
-            violations_detected.append(UnifiedDockerManager is singleton when it should allow multiple instances)"
+            violations_detected.append(UnifiedDockerManager is singleton when it should allow multiple instances)""
+
         
         logger.info(f" PASS:  Compliance violation detection:)"
         if violations_detected:
@@ -409,14 +416,16 @@ class DockerSSOTInfrastructureTests:
         
         logger.info(f PASS:  Architecture boundary validation:)
         logger.info(f   Passed checks: {passed_checks}/{total_checks} ({boundary_compliance:.1f}%))"
-        logger.info(f   Passed checks: {passed_checks}/{total_checks} ({boundary_compliance:.1f}%))"
+        logger.info(f   Passed checks: {passed_checks}/{total_checks} ({boundary_compliance:.1f}%))""
+
         for check, result in boundary_checks.items():
             status = "[U+2713] if result else [U+2717]"
             logger.info(f     {status} {check})
         
         # Validate boundary compliance
         assert boundary_compliance >= 80.0, fArchitecture boundary compliance too low: {boundary_compliance:.1f}%"
-        assert boundary_compliance >= 80.0, fArchitecture boundary compliance too low: {boundary_compliance:.1f}%"
+        assert boundary_compliance >= 80.0, fArchitecture boundary compliance too low: {boundary_compliance:.1f}%""
+
     
     @pytest.mark.asyncio
     async def test_multi_environment_ssot_consistency(self):
@@ -487,7 +496,7 @@ class DockerSSOTInfrastructureTests:
         consistency_percentage = (consistent_aspects / total_aspects) * 100
         
         logger.info(f" PASS:  Multi-environment SSOT consistency:)"
-        logger.info(f   Overall consistency: {consistency_percentage:.1f}%")"
+        logger.info(f   Overall consistency: {consistency_percentage:."1f"}%")"
         for aspect, is_consistent in consistency_metrics.items():
             status = [U+2713] if is_consistent else [U+2717]
             logger.info(f"     {status} {aspect})"
@@ -500,7 +509,8 @@ class DockerSSOTInfrastructureTests:
     def test_ssot_concurrent_access_safety(self):
         ""Test SSOT pattern safety under concurrent access."
         logger.info( CYCLE:  Testing SSOT concurrent access safety)"
-        logger.info( CYCLE:  Testing SSOT concurrent access safety)"
+        logger.info( CYCLE:  Testing SSOT concurrent access safety)""
+
         
         concurrent_results = []
         error_count = 0
@@ -565,15 +575,15 @@ class DockerSSOTInfrastructureTests:
         success_rate = (success_count / (success_count + error_count)) * 100 if (success_count + error_count) > 0 else 0
         
         logger.info(f PASS:  SSOT concurrent access safety:")"
-        logger.info(f   Success rate: {success_rate:.1f}% ({success_count}/{success_count + error_count})
+        logger.info(f   Success rate: {success_rate:."1f"}% ({success_count}/{success_count + error_count})
         logger.info(f   Average operation time: {avg_operation_time:.3f}s)"
         logger.info(f   Average operation time: {avg_operation_time:.3f}s)"
-        logger.info(f"   Maximum operation time: {max_operation_time:.3f}s)"
+        logger.info(f"   Maximum operation time: {max_operation_time:."3f"}s)"
         logger.info(f   Error count: {error_count})
         
         # Validate concurrent access safety
-        assert success_rate >= 90.0, "fConcurrent access success rate too low: {success_rate:.1f}%"
-        assert max_operation_time < 5.0, fMaximum operation time too high: {max_operation_time:.3f}s""
+        assert success_rate >= 90.0, "fConcurrent access success rate too low: {success_rate:."1f"}%"
+        assert max_operation_time < 5.0, fMaximum operation time too high: {max_operation_time:."3f"}s""
         assert error_count < success_count * 0.1, f"Too many errors in concurrent access: {error_count}"
 
 

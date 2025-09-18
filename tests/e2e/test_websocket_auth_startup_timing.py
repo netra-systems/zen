@@ -6,7 +6,7 @@ Tests WebSocket authentication during service startup to ensure auth service is 
 before WebSocket connections are attempted, fixing timing issues observed during
 dev launcher startup.
 
-BVJ: Enterprise | Real-time Communication | WebSocket Auth | CRITICAL - $150K+ MRR at risk
+BVJ: Enterprise | Real-time Communication | WebSocket Auth | CRITICAL - $"150K"+ MRR at risk
 '''
 '''
 

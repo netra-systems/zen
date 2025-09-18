@@ -7,7 +7,6 @@ class TestWebSocketConnection:
         self.is_connected = True"""
         self.is_connected = True"""
 """
-"""
         """Send JSON message.""""""
         """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed)"
@@ -28,7 +27,8 @@ class TestWebSocketConnection:
         Tests for SSOT compliance and proper WebSocket event handling"""
         Tests for SSOT compliance and proper WebSocket event handling"""
         CRITICAL: These tests ensure WebSocket events (90% of business value) work correctly"""
-        CRITICAL: These tests ensure WebSocket events (90% of business value) work correctly"""
+        CRITICAL: These tests ensure WebSocket events (90% of business value) work correctly""""
+
 
 import asyncio
 import pytest
@@ -89,7 +89,7 @@ from shared.isolated_environment import get_env"""
 
 @pytest.mark.asyncio
     async def test_no_duplicate_websocket_methods(self):
-"""Test that WebSocket methods are not duplicated across modules"""
+    """Test that WebSocket methods are not duplicated across modules"""
         # Critical test: Ensure only ONE implementation of each WebSocket method
 
 methods_to_check = [ )
@@ -108,7 +108,7 @@ lifecycle_methods = [item for item in []]
         # Count total occurrences (legacy interface has been removed)
 all_occurrences = {}
 for method in methods_to_check:
-count = 0
+    count = 0
 locations = []"""
 locations = []"""
 if method in comm_methods:"""
@@ -127,7 +127,7 @@ assert not duplicates, "formatted_string"
 
 @pytest.mark.asyncio
     async def test_websocket_bridge_is_single_source(self, mock_bridge):
-"""Test that all WebSocket communication goes through the Bridge"""
+    """Test that all WebSocket communication goes through the Bridge"""
 
                         # Test AgentCommunicationMixin
 class TestCommAgent(AgentCommunicationMixin):"""
@@ -146,7 +146,7 @@ class TestCommAgent(AgentCommunicationMixin):"""
 
 @pytest.mark.asyncio
     async def test_error_handling_classes_not_duplicated(self):
-"""Test that error handling classes are centralized"""
+    """Test that error handling classes are centralized"""
 
         # Check if WebSocketError is defined locally in agent_communication.py
 from netra_backend.app.agents import agent_communication"""
@@ -166,13 +166,13 @@ pytest.fail("No centralized WebSocketError found - must create one)"
 
 @pytest.mark.asyncio
     async def test_all_websocket_events_sent_correctly(self, mock_bridge, execution_context):
-"""Test that all required WebSocket events are sent during agent execution"""
+    """Test that all required WebSocket events are sent during agent execution"""
 
 events_received = []
 
                     # Track all Bridge method calls
 async def track_event(event_type, *args, **kwargs):
-pass
+    pass
 events_received.append(event_type)"""
 events_received.append(event_type)"""
 return None"""
@@ -248,7 +248,7 @@ class TestAgent(AgentLifecycleMixin):
 
 @pytest.mark.asyncio
     async def test_undefined_attributes_handled(self):
-"""Test that undefined attributes in agent_communication are properly handled"""
+    """Test that undefined attributes in agent_communication are properly handled"""
 
 class TestAgent(AgentCommunicationMixin):"""
 class TestAgent(AgentCommunicationMixin):"""
@@ -274,7 +274,7 @@ class TestAgent(AgentCommunicationMixin):"""
 
 @pytest.mark.asyncio
     async def test_dead_code_removed(self):
-"""Test that dead code methods are removed from sub-agents"""
+    """Test that dead code methods are removed from sub-agents"""
 
                 # Import sub-agents
 try:
@@ -298,7 +298,7 @@ assert not hasattr(ValidationSubAgent, "dead_method), \"
 
 @pytest.mark.asyncio
     async def test_websocket_bridge_consistency(self, mock_bridge):
-"""Test that all agents use Bridge consistently"""
+    """Test that all agents use Bridge consistently"""
 
                             # Track how many different patterns are used
 patterns_found = set()
@@ -318,11 +318,11 @@ patterns_found.add("bridge_pattern)"
 
                                     # Should only have ONE consistent pattern
 assert len(patterns_found) == 1, \
-"formatted_string"
+    "formatted_string"
 
 @pytest.mark.asyncio
     async def test_multiple_inheritance_resolved(self):
-"""Test that multiple inheritance issues are resolved"""
+    """Test that multiple inheritance issues are resolved"""
 
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 
@@ -340,29 +340,30 @@ base_classes = [item for item in []]]
 
 @pytest.mark.asyncio
     async def test_import_organization(self):
-"""Test that imports are properly organized at top of files""""""
+    """Test that imports are properly organized at top of files""""""
 """Test that imports are properly organized at top of files""""""
                                             # Read validation_sub_agent.py"""
                                             # Read validation_sub_agent.py"""
 file_path = "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\
-etra-core-generation-1\
-etra_backend\\app\\agents\\validation_sub_agent.py"
-etra_backend\\app\\agents\\validation_sub_agent.py"
+    etra-core-generation-1\
+    etra_backend\\app\\agents\\validation_sub_agent.py"
+etra_backend\\app\\agents\\validation_sub_agent.py""
+
 
 if os.path.exists(file_path):
     pass
 with open(file_path, 'r') as f:
-lines = f.readlines()
+    lines = f.readlines()
 
                                                     # Check for imports after line 100 (should be at top)
 late_imports = []
 for i, line in enumerate(lines[100:], start=100):
-if line.strip().startswith('import ') or line.strip().startswith('from '):
+    if line.strip().startswith('import ') or line.strip().startswith('from '):
     pass
 late_imports.append((i+1, line.strip()))
 
 assert not late_imports, \
-"formatted_string"
+    "formatted_string"
 
 
 class TestWebSocketCriticalPath:
@@ -445,7 +446,7 @@ class TestAgent(AgentCommunicationMixin):
 
 @pytest.mark.asyncio
     async def test_websocket_failure_handling(self, mock_bridge):
-"""Test graceful degradation when WebSocket fails"""
+    """Test graceful degradation when WebSocket fails"""
 """
 """
 mock_bridge.notify_agent_thinking = AsyncMock(side_effect=Exception("WebSocket error))"

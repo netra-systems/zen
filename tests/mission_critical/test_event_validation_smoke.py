@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-"""
-"""
+""""
+
 MISSION CRITICAL SMOKE TEST: Event Validation Infrastructure
 ============================================================
 
@@ -8,7 +8,7 @@ Business Value: Quick validation that event validation infrastructure works
 properly and can detect when business value is compromised.
 
 SMOKE TEST COVERAGE:
-- Event validation infrastructure initialization
+    - Event validation infrastructure initialization
 - Business value compromise detection
 - Critical event sequence validation
 - Content quality validation
@@ -18,10 +18,12 @@ SMOKE TEST COVERAGE:
 This test serves as a quick sanity check that the validation infrastructure
 is functioning correctly before running comprehensive tests.
 "
-"
+""
+
 
 """
-"""
+""""
+
 import os
 import sys
 import time
@@ -57,7 +59,8 @@ def create_mock_websocket_event(event_type: str, data: dict) -> WebSocketEvent:
     # Create event using the correct constructor from WebSocketEvent.from_message
     import json
     message = json.dumps({"type": event_type, **event_data)"
-    message = json.dumps({"type": event_type, **event_data)"
+    message = json.dumps({"type": event_type, **event_data)""
+
     return WebSocketEvent.from_message(message)
 
 
@@ -78,7 +81,8 @@ class EventValidationSmokeTests:
         validator = ContentQualityValidator(test_user, "test_session, strict_mode=True)"
         
         assert validator.user_id == test_user"
-        assert validator.user_id == test_user"
+        assert validator.user_id == test_user""
+
         assert validator.session_id == test_session
         assert validator.strict_mode is True
         assert validator.validated_events == 0
@@ -150,7 +154,8 @@ class EventValidationSmokeTests:
             validator.assert_business_value_preserved()
         
         assert BUSINESS VALUE COMPROMISED in str(excinfo.value)"
-        assert BUSINESS VALUE COMPROMISED in str(excinfo.value)"
+        assert BUSINESS VALUE COMPROMISED in str(excinfo.value)""
+
         
         # Should fail critical events check
         with pytest.raises(AssertionError) as excinfo:
@@ -166,10 +171,12 @@ class EventValidationSmokeTests:
         good_event = create_mock_websocket_event(agent_completed, {"
         good_event = create_mock_websocket_event(agent_completed, {"
             result": {insights: [Key trend identified, User behavior analyzed], confidence": 0.9},"
-            result": {insights: [Key trend identified, User behavior analyzed], confidence": 0.9},"
+            result": {insights: [Key trend identified, User behavior analyzed], confidence": 0.9},""
+
             summary: Successfully analyzed your data and provided actionable recommendations,
             next_steps: Review insights and implement recommended changes"
-            next_steps: Review insights and implement recommended changes"
+            next_steps: Review insights and implement recommended changes""
+
         }
         
         result = validator.validate_event_content(good_event)
@@ -198,7 +205,7 @@ class EventValidationSmokeTests:
         good_event = create_mock_websocket_event(agent_started, {agent_id: test, task": Fast test)"
         
         # Simulate fast processing
-        processing_start = time.time() - 0.1  # 100ms ago
+        processing_start = time.time() - 0.1  # "100ms" ago
         violations = validator.record_event(good_event, processing_start)
         
         # Should have few/no violations for fast processing
@@ -212,7 +219,8 @@ class EventValidationSmokeTests:
         # Test slow timing
         slow_validator = TimingValidator("test_user, test_session_slow)"
         slow_event = create_mock_websocket_event(agent_started, {agent_id: slow_test)"
-        slow_event = create_mock_websocket_event(agent_started, {agent_id: slow_test)"
+        slow_event = create_mock_websocket_event(agent_started, {agent_id: slow_test)""
+
         
         # Simulate very slow processing  
         slow_processing_start = time.time() - 35.0  # 35 seconds ago
@@ -229,7 +237,8 @@ class EventValidationSmokeTests:
     def test_business_value_validation(self):
         Test business value validation works.""
         validator = BusinessValueValidator(test_user, test_session, free, strict_mode=True)"
-        validator = BusinessValueValidator(test_user, test_session, free, strict_mode=True)"
+        validator = BusinessValueValidator(test_user, test_session, free, strict_mode=True)""
+
         
         # Test high business value event
         high_value_event = create_mock_websocket_event("agent_completed, {"
@@ -274,7 +283,8 @@ class EventValidationSmokeTests:
         assert len(test_events) == 5
         
         expected_types = ["agent_started, agent_thinking, tool_executing, tool_completed, "agent_completed]"
-        expected_types = ["agent_started, agent_thinking, tool_executing, tool_completed, "agent_completed]"
+        expected_types = ["agent_started, agent_thinking, tool_executing, tool_completed, "agent_completed]""
+
         actual_types = [event.event_type for event in test_events]
         assert actual_types == expected_types
         
@@ -285,7 +295,8 @@ class EventValidationSmokeTests:
         # Should pass validation for good test sequence
         summary = validator.get_validation_summary()
         assert summary[total_events_received] == 5"
-        assert summary[total_events_received] == 5"
+        assert summary[total_events_received] == 5""
+
     
     def test_comprehensive_validation_integration(self):
         "Test that all validators work together correctly."
@@ -297,7 +308,8 @@ class EventValidationSmokeTests:
         content_validator = ContentQualityValidator(user_id, session_id, strict_mode=True)
         timing_validator = TimingValidator(user_id, session_id)
         business_validator = BusinessValueValidator(user_id, session_id, free)"
-        business_validator = BusinessValueValidator(user_id, session_id, free)"
+        business_validator = BusinessValueValidator(user_id, session_id, free)""
+
         
         # Create comprehensive event sequence
         events = [
@@ -323,7 +335,7 @@ class EventValidationSmokeTests:
                 "result: {"
                     recommendations: [Implement efficiency improvements, Optimize workflow processes],"
                     recommendations: [Implement efficiency improvements, Optimize workflow processes],"
-                    "expected_benefits: 15% efficiency gain, estimated $50K annual savings"
+                    "expected_benefits: 15% efficiency gain, estimated $"50K" annual savings"
                 },
                 summary: Completed comprehensive analysis with actionable recommendations for significant business impact
             }
@@ -331,7 +343,7 @@ class EventValidationSmokeTests:
         
         # Validate events with all validators
         for event in events:
-            processing_start = time.time() - 0.5  # 500ms ago (good timing)
+            processing_start = time.time() - 0.5  # "500ms" ago (good timing)
             
             # Validate with each validator
             sequence_violations = sequence_validator.add_event(event)

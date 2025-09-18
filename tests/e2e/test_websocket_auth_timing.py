@@ -7,20 +7,20 @@ during DevLauncher startup, where the frontend attempts to connect without a val
 JWT token and fails with error 1008.
 
 Test Scenarios:
-1. Connection without token fails with error 1008
+    1. Connection without token fails with error 1008
 2. Connection with null token handling
 3. Race condition where token becomes available after connection attempt
 4. CORS handling when origin header is None
 5. WebSocket recovery after initial auth failure
 
 BVJ (Business Value Justification):
-- Segment: All tiers (Free  ->  Enterprise)
+    - Segment: All tiers (Free  ->  Enterprise)
 - Business Goal: Real-time Communication Reliability
 - Value Impact: Prevents WebSocket connection failures that break user experience
 - Strategic Impact: Ensures DevLauncher startup robustness across all environments
 
 Architecture Compliance:
-- Function size: <25 lines each
+    - Function size: <25 lines each
 - Real service integration with controlled mocking
 - Follows existing E2E test patterns
 - Comprehensive edge case coverage
@@ -90,7 +90,8 @@ class TestWebSocketTimingSuite:
     # ============================================================================
 
 class TestWebSocketAuthTiminger:
-        ""Reproduces WebSocket authentication timing issues during DevLauncher startup."
+        ""Reproduces WebSocket authentication timing issues during DevLauncher startup.""
+
 
     def __init__(self):
         Initialize the WebSocket auth timing tester.""
@@ -220,7 +221,7 @@ class TestWebSocketAuthTiminger:
                                                                                                     
 
                                                                                                     # Simulate token becoming available shortly after
-        await asyncio.sleep(0.1)  # 100ms delay to simulate race
+        await asyncio.sleep(0.1)  # "100ms" delay to simulate race
 
                                                                                                     # Token becomes available but connection already failed
         try:
@@ -276,7 +277,8 @@ class TestWebSocketAuthTiminger:
                     
 
     async def _test_recovery_connection(self, token: str) -> Dict[str, Any]:
-        ""Helper: Test WebSocket connection recovery with valid token."
+        ""Helper: Test WebSocket connection recovery with valid token.""
+
         try:
         headers = {Authorization: token}""
         async with websockets.connect()
@@ -428,7 +430,7 @@ pytest.skip("WebSocket service not available - test requires running WebSocket s
 
                     # Verify authentication failure was detected (expected behavior)
 assert result.auth_failure_detected or result.error_code is not None, \
-formatted_string
+    formatted_string
 
                     # Verify error code indicates authentication issue
 if result.error_code:
@@ -438,11 +440,11 @@ if result.error_code:
 
                         # Performance requirement
 assert result.response_time_ms < 10000, \
-formatted_string
+    formatted_string
 
                         # Security requirement: connection should NOT succeed without token
 assert not result.connection_successful, \
-"Security violation: WebSocket connection succeeded without authentication"
+    "Security violation: WebSocket connection succeeded without authentication"
 
 print(formatted_string)
 
@@ -469,7 +471,7 @@ assert result.connection_attempted, "Connection attempt should have been made"
 
                             # Verify null token is properly rejected
 assert result.auth_failure_detected or result.error_code is not None, \
-formatted_string
+    formatted_string
 
                             # Verify appropriate error handling
 if result.error_code:
@@ -479,11 +481,11 @@ if result.error_code:
 
                                 # Performance requirement
 assert result.response_time_ms < 10000, \
-formatted_string
+    formatted_string
 
                                 # Security requirement: null token should NOT be accepted
 assert not result.connection_successful, \
-"Security violation: WebSocket accepted null token"""
+    "Security violation: WebSocket accepted null token"""
 
 print(formatted_string)
 
@@ -510,7 +512,7 @@ assert result.connection_attempted, "Race condition test should attempt connecti
 
                                     # Verify initial connection failed as expected
 assert result.auth_failure_detected, \
-formatted_string
+    formatted_string
 
                                     # Verify recovery is possible when token becomes available
 if result.recovery_successful:
@@ -549,7 +551,7 @@ assert result.connection_attempted, "Origin=null test should attempt connection"
 
                                                 # Verify auth failure still occurs with null Origin
 assert result.auth_failure_detected or result.error_code is not None, \
-formatted_string
+    formatted_string
 
                                                 # Check for appropriate error codes
 if result.error_code:
@@ -560,7 +562,7 @@ assert result.error_code in expected_codes, \
 
                                                     # Performance requirement
 assert result.response_time_ms < 10000, \
-formatted_string
+    formatted_string
 
 print(")"
 
@@ -658,7 +660,7 @@ assert suite_result.recovery_test is not None, "Recovery test should complete"
 
                                                                                         # Performance validation for complete suite
 assert suite_result.total_execution_time < 60.0, \
-formatted_string
+    formatted_string
 
                                                                                         # Security validation
 critical_vulnerabilities = [v for v in suite_result.vulnerabilities_found )
@@ -691,7 +693,7 @@ suite_result.recovery_test.auth_failure_detected  # Initial failure expected
 
 expected_failures_detected = sum(tests_with_expected_failures")"
 assert expected_failures_detected >= 3, \
-""
+    ""
 
 print(f[SUCCESS] WebSocket auth timing issues properly reproduced and tested")"
 

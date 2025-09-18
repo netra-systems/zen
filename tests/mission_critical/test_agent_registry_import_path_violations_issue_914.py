@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
-"""
-"""
+""""
+
 Issue #914: AgentRegistry Import Path SSOT Violations Test Suite
 
 """
-"""
+""""
+
 This test suite specifically focuses on import path inconsistencies and violations
 in AgentRegistry implementations. These tests validate that there is a single,
 canonical import path for AgentRegistry functionality.
 
 Business Impact:
-- $500K+ ARR at risk from import path confusion causing runtime failures
+    - $"500K" plus ARR at risk from import path confusion causing runtime failures
 - Developer productivity lost due to unclear import patterns
 - Testing infrastructure broken by import ambiguity
 - WebSocket integration failures due to registry import conflicts
 
 Test Focus Areas:
-1. Import path uniqueness and canonicalization
+    1. Import path uniqueness and canonicalization
 2. SSOT import registry compliance
 3. Circular dependency detection
 4. Import resolution consistency
@@ -24,7 +25,8 @@ Test Focus Areas:
 Expected Result: Tests FAIL initially showing import path violations.
 After SSOT consolidation, tests pass with single canonical import path.
 "
-"
+""
+
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 import sys
@@ -64,7 +66,8 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
     def test_01_multiple_agent_registry_import_paths_exist(self):
         "TEST EXPECTED TO FAIL: Only one AgentRegistry import path should exist."
         print(\n=== TEST 1: Multiple Import Path Validation ===)"
-        print(\n=== TEST 1: Multiple Import Path Validation ===)"
+        print(\n=== TEST 1: Multiple Import Path Validation ===)""
+
         
         successful_imports = []
         failed_imports = []
@@ -136,7 +139,8 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
         
         # Check if SSOT_IMPORT_REGISTRY.md documents canonical AgentRegistry import
         ssot_registry_path = self.project_root / SSOT_IMPORT_REGISTRY.md"
-        ssot_registry_path = self.project_root / SSOT_IMPORT_REGISTRY.md"
+        ssot_registry_path = self.project_root / SSOT_IMPORT_REGISTRY.md""
+
         
         if not ssot_registry_path.exists():
             self.fail(f"SSOT Import Registry not found at: {ssot_registry_path})"
@@ -240,13 +244,15 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
         if len(unique_paths) > 1:
             self.fail(f"IMPORT RESOLUTION VIOLATION: Multiple unique file paths resolved"
                      ffor AgentRegistry imports. Should resolve to single SSOT implementation. "
-                     ffor AgentRegistry imports. Should resolve to single SSOT implementation. "
+                     ffor AgentRegistry imports. Should resolve to single SSOT implementation. ""
+
                      fPaths: {unique_paths})
     
     def test_06_import_statement_standardization(self):
         "TEST EXPECTED TO FAIL: Import statements should follow standard pattern."
         print(\n=== TEST 6: Import Statement Standardization ===)"
-        print(\n=== TEST 6: Import Statement Standardization ===)"
+        print(\n=== TEST 6: Import Statement Standardization ===)""
+
         
         # Analyze import statement patterns in codebase
         import_statements = self._extract_all_agent_registry_import_statements()
@@ -275,7 +281,8 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
                 import_categories['direct_class'].append((file_path, statement))
         
         print(Import pattern distribution:)"
-        print(Import pattern distribution:)"
+        print(Import pattern distribution:)""
+
         for category, statements in import_categories.items():
             print(f  {category}: {len(statements)}")"
             for file_path, statement in statements[:2]:  # Show examples
@@ -329,7 +336,8 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
     
     def _extract_import_pattern(self, import_line: str) -> str:
         Extract standardized import pattern from import line."
-        Extract standardized import pattern from import line."
+        Extract standardized import pattern from import line.""
+
         import_line = import_line.strip()
         
         # Normalize patterns
@@ -410,7 +418,8 @@ class AgentRegistryImportPathViolationsTests(SSotBaseTestCase):
     
     def _extract_all_agent_registry_import_statements(self) -> List[Tuple[str, str]]:
         Extract all AgentRegistry import statements from codebase."
-        Extract all AgentRegistry import statements from codebase."
+        Extract all AgentRegistry import statements from codebase.""
+
         statements = []
         
         import_usages = self._scan_codebase_for_agent_registry_imports()

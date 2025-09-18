@@ -4,13 +4,13 @@ CRITICAL E2E tests for WebSocket functionality focusing on connection resilience
 state recovery, and error handling in real production-like scenarios.
 
 Business Value Justification (BVJ):
-1. Segment: Enterprise & Growth 
+    1. Segment: Enterprise & Growth 
 2. Business Goal: Ensure 99.9% uptime for real-time chat experience
 3. Value Impact: Prevents customer churn from communication failures
 4. Revenue Impact: Protects revenue by validating core product reliability
 
 ARCHITECTURAL COMPLIANCE:
-- File size: <300 lines (modular design with core utilities)
+    - File size: <300 lines (modular design with core utilities)
 - Function size: <8 lines each
 - Real WebSocket connections, no mocking
 - <5 seconds per test execution
@@ -45,7 +45,8 @@ class WebSocketReconnectionWithStateRecoveryTests:
     
     @pytest.fixture  
     def state_manager(self):
-        ""Initialize state recovery manager."
+        ""Initialize state recovery manager.""
+
         return WebSocketStateRecoveryManager()
     
     @pytest.fixture
@@ -184,7 +185,7 @@ class ErrorMessageToUserNotificationRecoveryTests:
             await error_simulator.test_retry_mechanism(client, user_id)
             
             total_time = time.time() - start_time
-            assert total_time < 5.0, "fError recovery took {total_time:.2f}s, exceeding 5s limit"
+            assert total_time < 5.0, "fError recovery took {total_time:."2f"}s, exceeding "5s" limit"
             
             await client.close()
         except Exception as e:
@@ -195,7 +196,8 @@ class ErrorMessageToUserNotificationRecoveryTests:
     @pytest.mark.e2e
     async def test_timing_requirements_validation(self):
         Test that timing requirements are validated correctly."""
-        Test that timing requirements are validated correctly."""
+        Test that timing requirements are validated correctly.""""
+
         start_time = time.time()
         
         # Simulate processing time

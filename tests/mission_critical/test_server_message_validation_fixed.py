@@ -1,21 +1,23 @@
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
-"""
-"""
+""""
+
 Mission Critical Server Message Validation Tests - POST FIX
 
 This module tests the FIXED MissionCriticalEventValidator's ability to handle'
 both flat and ServerMessage format structures.
 
-BUSINESS IMPACT: $500K+ ARR depends on proper WebSocket event validation
+BUSINESS IMPACT: $"500K" plus ARR depends on proper WebSocket event validation
 to ensure Golden Path chat functionality works correctly.
 
 Issue #892: Validation that MissionCriticalEventValidator now handles
 both flat event structures and ServerMessage format with nested payload.
 "
-"
+""
+
 
 """
-"""
+""""
+
 import json
 from datetime import datetime, timezone
 from typing import Dict, Any
@@ -40,14 +42,16 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
             "user_id: test-user-123,"
             thread_id: test-thread-456, 
             timestamp: self.test_timestamp"
-            timestamp: self.test_timestamp"
+            timestamp: self.test_timestamp""
+
         }
         
         self.validator.errors = []
         result = self.validator.validate_event_content_structure(flat_event, agent_started")"
         self.assertTrue(result, fFlat event validation should work, errors: {self.validator.errors})
         self.assertEqual(len(self.validator.errors), 0, No validation errors expected for flat format)"
-        self.assertEqual(len(self.validator.errors), 0, No validation errors expected for flat format)"
+        self.assertEqual(len(self.validator.errors), 0, No validation errors expected for flat format)""
+
     
     def test_server_message_format_now_passes(self):
         "Verify that ServerMessage format now passes with fixed validator."
@@ -81,7 +85,8 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
             },
             sender: system, 
             timestamp: self.test_timestamp"
-            timestamp: self.test_timestamp"
+            timestamp: self.test_timestamp""
+
         }
         
         self.validator.errors = []
@@ -91,7 +96,8 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
     
     def test_agent_completed_server_message_format_passes(self):
         Test agent_completed event in ServerMessage format passes after fix."
-        Test agent_completed event in ServerMessage format passes after fix."
+        Test agent_completed event in ServerMessage format passes after fix.""
+
         server_message = {
             "type: agent_completed,"
             payload: {
@@ -113,7 +119,8 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
         self.assertEqual(len(self.validator.errors), 0, No validation errors for agent_completed ServerMessage)
     
     def test_agent_thinking_both_formats_work(self):
-        ""Test that both flat and ServerMessage formats work for agent_thinking."
+        ""Test that both flat and ServerMessage formats work for agent_thinking.""
+
         flat_event = {
             type: agent_thinking","
             "reasoning: Analyzing user request,"
@@ -144,7 +151,8 @@ class ServerMessageValidationFixedTests(SSotBaseTestCase):
     
     def test_tool_completed_both_formats_work(self):
         Test that both formats work for tool_completed events."
-        Test that both formats work for tool_completed events."
+        Test that both formats work for tool_completed events.""
+
         flat_event = {
             type": tool_completed,"
             tool_name: search_data,

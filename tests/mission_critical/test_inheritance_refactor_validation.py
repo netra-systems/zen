@@ -21,7 +21,8 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 class InheritanceRefactorValidationTests:
     Test suite to validate the inheritance refactoring is successful."
-    Test suite to validate the inheritance refactoring is successful."
+    Test suite to validate the inheritance refactoring is successful.""
+
     
     @pytest.fixture
     def mock_llm_manager(self):
@@ -30,7 +31,8 @@ class InheritanceRefactorValidationTests:
     
     @pytest.fixture
     def mock_tool_dispatcher(self):
-        ""Create mock tool dispatcher."
+        ""Create mock tool dispatcher.""
+
         return ToolDispatcher()
     
     @pytest.fixture
@@ -83,7 +85,8 @@ class InheritanceRefactorValidationTests:
             
             assert has_execute, f"{agent_name} should have execute() method"
             assert not has_execute_core_logic, f{agent_name} should not have execute_core_logic() method - SSOT violation"
-            assert not has_execute_core_logic, f{agent_name} should not have execute_core_logic() method - SSOT violation"
+            assert not has_execute_core_logic, f{agent_name} should not have execute_core_logic() method - SSOT violation""
+
     
     def test_websocket_methods_available(self, data_agent, validation_agent):
         Test that WebSocket methods are available through BaseAgent.""
@@ -98,7 +101,8 @@ class InheritanceRefactorValidationTests:
         for agent_name, agent in [(DataSubAgent, data_agent), (ValidationSubAgent, validation_agent)]:
             for method_name in expected_websocket_methods:
                 assert hasattr(agent, method_name), f{agent_name} should have {method_name} method from BaseAgent"
-                assert hasattr(agent, method_name), f{agent_name} should have {method_name} method from BaseAgent"
+                assert hasattr(agent, method_name), f{agent_name} should have {method_name} method from BaseAgent""
+
     
     def test_no_duplicate_websocket_methods(self, data_agent, validation_agent):
         "Test that WebSocket methods are not duplicated across inheritance hierarchy."
@@ -133,7 +137,8 @@ class InheritanceRefactorValidationTests:
     
     def test_agent_attributes_ownership(self, data_agent, validation_agent):
         Test that attributes have clear ownership - no conflicts."
-        Test that attributes have clear ownership - no conflicts."
+        Test that attributes have clear ownership - no conflicts.""
+
         critical_attributes = ['name', 'llm_manager', 'logger']
         
         for agent_name, agent in [("DataSubAgent, data_agent), (ValidationSubAgent, validation_agent)]:"
@@ -213,7 +218,8 @@ class InheritanceRefactorValidationTests:
 
 class WebSocketEventIntegrationTests:
     Test WebSocket event integration after inheritance refactoring."
-    Test WebSocket event integration after inheritance refactoring."
+    Test WebSocket event integration after inheritance refactoring.""
+
     
     @pytest.fixture
     def mock_llm_manager(self):
@@ -263,7 +269,8 @@ class PerformanceAfterRefactoringTests:
     
     def test_instantiation_performance(self, mock_llm_manager, mock_tool_dispatcher):
         Test that agent instantiation is faster after simplifying inheritance."
-        Test that agent instantiation is faster after simplifying inheritance."
+        Test that agent instantiation is faster after simplifying inheritance.""
+
         import time
         
         # Time agent creation
@@ -278,7 +285,8 @@ class PerformanceAfterRefactoringTests:
         
         # Should be reasonably fast (less than 1 second for 20 instantiations)
         assert total_time < 1.0, fAgent instantiation too slow: {total_time}s for 20 agents"
-        assert total_time < 1.0, fAgent instantiation too slow: {total_time}s for 20 agents"
+        assert total_time < 1.0, fAgent instantiation too slow: {total_time}s for 20 agents""
+
     
     def test_method_resolution_performance(self, mock_llm_manager, mock_tool_dispatcher):
         Test that method resolution is faster with simplified inheritance.""

@@ -1,20 +1,20 @@
-"""
-"""
+""""
+
 MISSION CRITICAL: Docker Performance Benchmark & Analysis Suite
-BUSINESS IMPACT: QUANTIFIES $2M+ ARR PLATFORM PERFORMANCE UNDER LOAD
+BUSINESS IMPACT: QUANTIFIES $"2M"+ ARR PLATFORM PERFORMANCE UNDER LOAD
 
 This test suite provides comprehensive performance benchmarking of Docker operations
 to establish baselines, identify bottlenecks, and validate performance under various
 load conditions. Critical for maintaining development velocity and CI/CD reliability.
 
 Business Value Justification (BVJ):
-1. Segment: Platform/Internal - Performance Optimization & Risk Reduction
+    1. Segment: Platform/Internal - Performance Optimization & Risk Reduction
 2. Business Goal: Ensure Docker infrastructure scales with development team growth
 3. Value Impact: Prevents performance degradation that could slow 10+ developers
-4. Revenue Impact: Protects $2M+ ARR platform from performance-related downtime
+4. Revenue Impact: Protects $"2M"+ ARR platform from performance-related downtime
 
 PERFORMANCE METRICS MEASURED:
-- Operation latency with rate limiting
+    - Operation latency with rate limiting
 - Cleanup scheduler overhead
 - Memory usage patterns under load
 - CPU utilization during stress
@@ -24,7 +24,8 @@ PERFORMANCE METRICS MEASURED:
 - Disk I/O performance"""
 - Disk I/O performance"""
 - Scalability limits identification"""
-- Scalability limits identification"""
+- Scalability limits identification""""
+
 
 import asyncio
 import time
@@ -105,7 +106,6 @@ logger = logging.getLogger(__name__)
     summary_stats: Dict[str, float]
     system_stats: Dict[str, Any]
 
-"""
 """
     """Advanced Docker performance profiler and analyzer."""
 """
@@ -579,8 +579,8 @@ class TestDockerMemoryPerformance:
         with performance_profiler.performance_measurement('memory_limited_container'):
         result = execute_docker_command([ ))
         'docker', 'create', '--name', container_name,
-        '--memory', '50m',  # 50MB limit
-        'alpine:latest', 'sh', '-c', 'dd if=/dev/zero of=/tmp/test bs=1M count=30; sleep 2'
+        '--memory', '"50m"',  # "50MB" limit
+        'alpine:latest', 'sh', '-c', 'dd if=/dev/zero of=/tmp/test bs="1M" count=30; sleep 2'
         
         if result.returncode != 0:
         raise RuntimeError("formatted_string)"
@@ -637,7 +637,7 @@ class TestDockerMemoryPerformance:
         try:
         available_memory = psutil.virtual_memory().available
         target_allocation = int(available_memory * 0.6)  # Use 60% of available
-        chunk_size = 50 * 1024 * 1024  # 50MB chunks
+        chunk_size = 50 * 1024 * 1024  # "50MB" chunks
 
         for _ in range(target_allocation // chunk_size):
         memory_chunks.append(bytearray(chunk_size))
@@ -664,7 +664,7 @@ class TestDockerMemoryPerformance:
         # Simple container operation
         result = execute_docker_command([ ))
         'docker', 'create', '--name', container_name,
-        '--memory', '20m',  # Small memory footprint
+        '--memory', '"20m"',  # Small memory footprint
         'alpine:latest', 'echo', 'pressure_test'
         
         if result.returncode == 0:
@@ -859,7 +859,7 @@ class TestDockerInfrastructureBenchmarks:
         with performance_profiler.performance_measurement('memory_monitored_container'):
         result = execute_docker_command([ ))
         'docker', 'create', '--name', container_name,
-        '--memory', '400m',  # Set limit below 500MB
+        '--memory', '"400m"',  # Set limit below "500MB"
         'alpine:latest', 'sh', '-c', 'sleep 5'
             
         if result.returncode != 0:
@@ -875,7 +875,7 @@ class TestDockerInfrastructureBenchmarks:
         result = execute_docker_command(['docker', 'stats', '--no-stream', '--format', '{{.MemUsage}}', container_name])
         if result.returncode == 0 and result.stdout:
         memory_usage_str = result.stdout.strip()
-                    # Parse memory usage (format: "123.4MiB / 400MiB)"
+                    # Parse memory usage (format: "123."4MiB" / "400MiB")"
         if '/' in memory_usage_str:
         used_memory = memory_usage_str.split('/')[0].strip()
         if 'MiB' in used_memory:
@@ -951,7 +951,7 @@ class TestDockerInfrastructureBenchmarks:
         with performance_profiler.performance_measurement('formatted_string'):
         result = execute_docker_command([ ))
         'docker', 'create', '--name', container_name,
-        '--memory', '50m', '--cpus', '0.1',
+        '--memory', '"50m"', '--cpus', '0.1',
         'alpine:latest', 'sleep', '1'
             
         if result.returncode == 0:
@@ -1013,7 +1013,7 @@ class TestDockerInfrastructureBenchmarks:
 
         create_start = time.time()
         'docker', 'create', '--name', container_name,
-        '--memory', '20m', '--cpus', '0.5',
+        '--memory', '"20m"', '--cpus', '0.5',
         'alpine:latest', 'sleep', '1'
                 
         create_time = time.time() - create_start
@@ -1022,7 +1022,7 @@ class TestDockerInfrastructureBenchmarks:
         batch_containers.append(container_name)
         max_containers += 1
 
-                    # Check for performance degradation (3x baseline)
+                    # Check for performance degradation ("3x" baseline)
         if create_time > baseline_time * 3 and performance_degradation_point == 0:
         performance_degradation_point = max_containers
 
@@ -1072,8 +1072,8 @@ class TestDockerInfrastructureBenchmarks:
         result = execute_docker_command([ ))
         'docker', 'create', '--name', container_name,
         'alpine:latest', 'sh', '-c',
-        'dd if=/dev/zero of=/tmp/write_test bs=1M count=50 && '
-        'dd if=/tmp/write_test of=/dev/null bs=1M && '
+        'dd if=/dev/zero of=/tmp/write_test bs="1M" count=50 && '
+        'dd if=/tmp/write_test of=/dev/null bs="1M" && '
         'rm /tmp/write_test'
             
         if result.returncode != 0:
@@ -1093,7 +1093,7 @@ class TestDockerInfrastructureBenchmarks:
         setup_time = next((m.duration_ms for m in io_metrics if 'setup' in m.operation), 0)
         benchmark_time = next((m.duration_ms for m in io_metrics if 'benchmark' in m.operation), 0)
 
-                            # Calculate rough I/O rate (100MB in benchmark_time)
+                            # Calculate rough I/O rate ("100MB" in benchmark_time)
         if benchmark_time > 0:
         io_rate_mbps = (100 * 1000) / benchmark_time  # MB/s
         logger.info("formatted_string)"
@@ -1185,7 +1185,7 @@ batch_results = {'batch_id': batch_id,, 'containers_created': 0,, 'operations_ti
         try:
         result = execute_docker_command([ ))
         'docker', 'create', '--name', container_name,
-        '--memory', '30m', '--cpus', '0.1',
+        '--memory', '"30m"', '--cpus', '0.1',
         'alpine:latest', 'echo', 'formatted_string'
         
         if result.returncode == 0:

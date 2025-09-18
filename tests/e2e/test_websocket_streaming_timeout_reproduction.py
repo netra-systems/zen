@@ -2,7 +2,7 @@
 WEBSOCKET STREAMING TIMEOUT REPRODUCTION TEST SUITE
 
 This test suite reproduces the exact P1 critical failures identified in the Five Whys analysis:
-1. User ID validation failure for Google OAuth IDs
+    1. User ID validation failure for Google OAuth IDs
 2. Missing streaming implementation causing timeouts
 3. Redis dependency cascade failures
 4. Connection tracking issues
@@ -28,7 +28,8 @@ class WebSocketStreamingTimeoutReproduction:
         self.google_oauth_user_id = 105945141827451681156  # Exact ID from logs
         
     async def test_user_id_validation_failure(self):
-    """
+    """"
+
         REPRODUCES: WebSocket error: Invalid user_id format: 105945141827451681156
         EXPECTS: ValueError from shared/types/core_types.py:346
         
@@ -61,17 +62,19 @@ class WebSocketStreamingTimeoutReproduction:
         logger.info( PASS:  REPRODUCED: Missing streaming implementation)
         
     async def test_redis_dependency_timeout(self):
-    """
-        REPRODUCES: Service 'redis' validation timeout after 30.0s
+    """"
+
+        REPRODUCES: Service 'redis' validation timeout after 30."0s"
         EXPECTS: Service validation timeout warnings
         
         # This test simulates Redis timeout behavior
         # In real environment, this takes 30+ seconds and fails
         
         async def simulate_redis_validation():
-            ""Simulates Redis service validation that times out"
-            await asyncio.sleep(30.1)  # Exceeds 30s timeout
-            raise asyncio.TimeoutError(Service 'redis' validation timeout after 30.0s)""
+            ""Simulates Redis service validation that times out""
+
+            await asyncio.sleep(30.1)  # Exceeds "30s" timeout
+            raise asyncio.TimeoutError(Service 'redis' validation timeout after 30."0s")""
             
         with pytest.raises(asyncio.TimeoutError):
             await asyncio.wait_for(simulate_redis_validation(), timeout=30.0)
@@ -79,7 +82,7 @@ class WebSocketStreamingTimeoutReproduction:
         logger.info( PASS:  REPRODUCED: Redis dependency timeout")"
         
     async def test_websocket_connection_tracking_failure(self):
-"""Empty docstring."""
+    """Empty docstring."""
         REPRODUCES: No connections available for user test-use... Message type: agent_stopped
         EXPECTS: WebSocket message delivery failure due to connection tracking issues
 """Empty docstring."""
@@ -94,7 +97,7 @@ class WebSocketStreamingTimeoutReproduction:
         logger.info( PASS:  REPRODUCED: Connection tracking mismatch)
         
     async def test_full_websocket_streaming_timeout_scenario(self):
-"""Empty docstring."""
+    """Empty docstring."""
         INTEGRATION TEST: Reproduces the complete failure scenario
         
         This test attempts to:
@@ -212,7 +215,8 @@ if __name__ == __main__:
     logging.basicConfig(level=logging.INFO)
     
     async def run_reproduction_suite():
-        ""Run the complete reproduction test suite"
+        ""Run the complete reproduction test suite""
+
         reproducer = WebSocketStreamingTimeoutReproduction()
         
         print( SEARCH:  REPRODUCING WEBSOCKET STREAMING TIMEOUT ISSUES...")"

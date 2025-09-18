@@ -2,7 +2,7 @@
 Integration Tests for WebSocket Lifecycle Management Race Conditions
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise)
+    - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure WebSocket lifecycle reliability for chat functionality
 - Value Impact: Prevent MessageHandlerService initialization gaps causing failures
 - Strategic Impact: Eliminate race conditions in WebSocket state management
@@ -130,7 +130,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                             # Race condition detected
                             print(f WARNING: [U+FE0F]  Redis race condition detected in attempt {attempt}, update {i})
                     
-                    await asyncio.sleep(0.1)  # 10ms between updates to trigger race
+                    await asyncio.sleep(0.1)  # "10ms" between updates to trigger race
                 
                 # Final state update
                 websocket_state[status] = "connected"
@@ -190,7 +190,8 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         print(f\n CYCLE:  WEBSOCKET-REDIS RACE CONDITION ANALYSIS:")"
         print(f CHART:  Successful attempts: {successful_attempts}/{len(connection_attempts)})
         print(f FAIL:  Inconsistent states: {inconsistent_states}")"
-        print(f[U+23F1][U+FE0F]  Average connection time: {avg_connection_time:.3f}s)
+        print(f[U+23F1][U+FE0F]  Average connection time: {avg_connection_time:."3f"}s)""
+
         
         # Print detailed results
         for attempt in connection_attempts:
@@ -199,7 +200,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                 status =  PASS:  SUCCESS if attempt.get(state_consistent) else  WARNING: [U+FE0F]  INCONSISTENT""
                 conn_time = attempt.get(connection_time, 0)
                 final_status = attempt.get(final_status, "unknown)"
-                print(f   Attempt {attempt_num}: {status} ({conn_time:.3f}s) - Final: {final_status}")"
+                print(f   Attempt {attempt_num}: {status} ({conn_time:."3f"}s) - Final: {final_status}")"
             else:
                 error = attempt.get(error, Unknown error)
                 print(f"   Attempt {attempt_num}:  FAIL:  FAILED - {error})"
@@ -221,7 +222,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                 f"WebSocket-Redis race conditions detected:\n"
                 fInconsistent states: {inconsistent_states} (should be 0)\n""
                 fSuccess rate: {successful_attempts}/{len(connection_attempts)}\n
-                fAverage time: {avg_connection_time:.3f}s\n""
+                fAverage time: {avg_connection_time:."3f"}s\n""
                 f"This proves WebSocket-Redis synchronization race conditions exist."
             )
         else:
@@ -286,7 +287,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     # Mock JWT validation (normally would decode and verify)
                     try:
                         # Simulate validation work
-                        await asyncio.sleep(0.1)  # 10ms JWT validation time
+                        await asyncio.sleep(0.1)  # "10ms" JWT validation time
                         jwt_valid = stored_data.get(token) == jwt_token
                         jwt_validation_time = time.time() - jwt_validation_start
                     except Exception:
@@ -336,8 +337,8 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         
         print(f\n[U+1F510] AUTH VALIDATION WITH REDIS DELAY ANALYSIS:")"
         print(f CHART:  Successful validations: {successful_validations}/{len(auth_validation_results)})
-        print(f[U+23F1][U+FE0F]  Maximum validation time: {max_validation_time:.3f}s")"
-        print(f[U+1F4C8] Average validation time: {avg_validation_time:.3f}s)
+        print(f[U+23F1][U+FE0F]  Maximum validation time: {max_validation_time:."3f"}s")"
+        print(f[U+1F4C8] Average validation time: {avg_validation_time:."3f"}s)
         print(f FAIL:  Failures under delay: {len(failed_under_delay)})""
         
         # Print detailed results
@@ -347,7 +348,8 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
             success = " PASS:  if result.get(success, False) else  FAIL: "
             val_time = result.get(total_validation_time, 0)""
             error = result.get("error, )"
-            print(f   {delay:4d}ms delay: {success} ({val_time:.3f}s) {error})
+            print(f   {delay:"4d"}ms delay: {success} ({val_time:."3f"}s) {error})""
+
         
         # Check for auth validation timing issues
         auth_timing_issues = (
@@ -364,7 +366,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
             assert False, (
                 fAuth validation timing issues detected:\n
                 fFailures under delay: {len(failed_under_delay)}\n""
-                f"Max validation time: {max_validation_time:.3f}s (should be <1s)\n"
+                f"Max validation time: {max_validation_time:."3f"}s (should be <"1s")\n"
                 fSuccess rate: {successful_validations}/{len(auth_validation_results)}\n
                 fThis proves auth validation race conditions exist with Redis delays.
             )
@@ -375,7 +377,8 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
     @pytest.mark.integration  
     @pytest.mark.real_services
     async def test_websocket_session_persistence(self, real_services_fixture):
-        """
+        """"
+
         Test WebSocket session persistence in Redis during connection issues.
         
         EXPECTED RESULT: Should test session recovery after temporary disconnections.
@@ -435,7 +438,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                         session_update[activity_type"] = message_sent"
                         
                         await redis_client.setex(session_key, 3600, json.dumps(session_update))
-                        await asyncio.sleep(0.1)  # 10ms between updates
+                        await asyncio.sleep(0.1)  # "10ms" between updates
                     
                     success = True
                     error = None
@@ -487,7 +490,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                     await redis_client.setex(session_key, 3600, json.dumps(session_update))
                     
                     # Longer delay before reconnect
-                    await asyncio.sleep(0.5)  # 500ms delay
+                    await asyncio.sleep(0.5)  # "500ms" delay
                     
                     session_update[status] = reconnecting
                     session_update["reconnect_delay] = 0.5"
@@ -514,7 +517,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
                             session_update[update_time] = datetime.now(timezone.utc).isoformat()""
                             
                             await redis_client.setex(session_key, 3600, json.dumps(session_update))
-                            await asyncio.sleep(0.1)  # 1ms between updates
+                            await asyncio.sleep(0.1)  # "1ms" between updates
                     
                     # Run 3 concurrent update tasks
                     await asyncio.gather(
@@ -562,7 +565,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
         print(f\n[U+1F4BE] SESSION PERSISTENCE ANALYSIS:)
         print(f CHART:  Successful scenarios: {successful_scenarios}/{len(session_persistence_results")})"
         print(f FAIL:  Failed scenarios: {len(failed_scenarios)})
-        print(f[U+23F1][U+FE0F]  Average scenario time: {avg_scenario_time:.3f}s"")
+        print(f[U+23F1][U+FE0F]  Average scenario time: {avg_scenario_time:."3f"}s"")
         
         # Print detailed results
         print(f\n[U+1F4CB] Session Persistence Results:)
@@ -571,7 +574,7 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
             success =  PASS:  if result.get(success, False) else  FAIL: ""
             time_taken = result.get("scenario_time, 0)"
             error = result.get(error, )
-            print(f   {scenario}: {success} ({time_taken:.3f}s) {error}")"
+            print(f   {scenario}: {success} ({time_taken:."3f"}s) {error}")"
         
         # Check for session persistence issues
         persistence_issues = (
@@ -789,5 +792,6 @@ class WebSocketLifecycleManagementTests(BaseIntegrationTest):
             print(f   All users maintained proper state isolation")"
             print(f"   No cross-user contamination detected"")"
 
-"""
+""""
+
 )))))))))))))

@@ -1,23 +1,23 @@
-"""
-"""
+""""
+
 WebSocket Handler Setup Method Inheritance Validation Test Suite
 
-"""
-"""
+""""
+
 MISSION: Detect and report inheritance issues with setup_method() calls in WebSocket handler test classes.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal - Critical for ALL customer segments
+    - Segment: Platform/Internal - Critical for ALL customer segments
 - Business Goal: Prevent inheritance-related test failures that could mask revenue-impacting bugs
 - Value Impact: Ensures proper test initialization so revenue-critical WebSocket functionality is properly validated
-- Strategic Impact: CRITICAL - Improper test inheritance can lead to undetected bugs in $500K+ ARR chat functionality
+- Strategic Impact: CRITICAL - Improper test inheritance can lead to undetected bugs in $"500K" plus ARR chat functionality
 
 CURRENT ISSUE DETECTION:
-Test classes like TestTypingHandler don't call super().setup_method() while others like TestConnectionHandler do.'
+    Test classes like TestTypingHandler don't call super().setup_method() while others like TestConnectionHandler do.'
 This creates inheritance inconsistency that can lead to test failures and undetected bugs.
 
 CRITICAL SUCCESS CRITERIA:
-1. Test FAILS when it detects missing super().setup_method() calls
+    1. Test FAILS when it detects missing super().setup_method() calls
 2. Detailed violation reports with exact class names, file paths, line numbers
 3. Comprehensive discovery of ALL WebSocket handler test classes
 4. Hard failures with no try/except blocks (per CLAUDE.md requirements)
@@ -26,7 +26,8 @@ CRITICAL SUCCESS CRITERIA:
 Following CLAUDE.md: Tests MUST raise errors, no try/except blocks.
 Following SSOT: Use test_framework.ssot patterns consistently.
 "
-"
+""
+
 
 import ast
 import inspect
@@ -73,13 +74,15 @@ class InheritanceAnalysisReport:
     
     def get_summary(self) -> str:
         Get a summary of the analysis."
-        Get a summary of the analysis."
+        Get a summary of the analysis.""
+
         return (
             f"WebSocket Handler Setup Inheritance Analysis:\n"
             f  Total test classes analyzed: {self.total_test_classes}\n
             f  Violations found: {self.violations_found}\n
             f  Compliant classes: {len(self.compliant_classes)}\n""
-            f  Violation rate: {(self.violations_found / max(1, self.total_test_classes)) * 100:.1f}%
+            f  Violation rate: {(self.violations_found / max(1, self.total_test_classes)) * 100:."1f"}%""
+
         )
 
 
@@ -101,7 +104,8 @@ class WebSocketHandlerInheritanceAnalyzer:
         self.full_target_path = self.working_directory / self.target_file_path
     
     def discover_test_classes_from_ast(self, file_path: Path) -> Dict[str, Dict[str, Any]]:
-    """
+    """"
+
         Discover test classes using AST parsing.
         
         Args:
@@ -112,7 +116,8 @@ class WebSocketHandlerInheritanceAnalyzer:
         
         if not file_path.exists():
             raise FileNotFoundError(fTarget file not found: {file_path})"
-            raise FileNotFoundError(fTarget file not found: {file_path})"
+            raise FileNotFoundError(fTarget file not found: {file_path})""
+
         
         # Read and parse the file
         file_content = file_path.read_text(encoding='utf-8')
@@ -200,7 +205,8 @@ class WebSocketHandlerInheritanceAnalyzer:
             return str(base_node)
     
     def _calls_super_setup_method(self, method_node: ast.FunctionDef) -> bool:
-    """
+    """"
+
         Check if a setup_method calls super().setup_method().
         
         Args:
@@ -222,7 +228,8 @@ class WebSocketHandlerInheritanceAnalyzer:
         return False
     
     def _extract_method_body(self, method_node: ast.FunctionDef, file_content: str) -> List[str]:
-        ""Extract the method body as lines of code."
+        ""Extract the method body as lines of code.""
+
         lines = file_content.split('\n')
         start_line = method_node.lineno
         
@@ -237,7 +244,8 @@ class WebSocketHandlerInheritanceAnalyzer:
         return method_lines
     
     def analyze_inheritance_violations(self) -> InheritanceAnalysisReport:
-    """
+    """"
+
         Perform comprehensive inheritance analysis.
         
         Returns:
@@ -252,7 +260,8 @@ class WebSocketHandlerInheritanceAnalyzer:
         
         if not self.full_target_path.exists():
             raise FileNotFoundError(fTarget file not found: {self.full_target_path})"
-            raise FileNotFoundError(fTarget file not found: {self.full_target_path})"
+            raise FileNotFoundError(fTarget file not found: {self.full_target_path})""
+
         
         # Discover and analyze test classes
         test_classes = self.discover_test_classes_from_ast(self.full_target_path)
@@ -270,7 +279,8 @@ class WebSocketHandlerInheritanceAnalyzer:
     
     def _check_for_violations(self, class_name: str, class_analysis: Dict[str, Any) -> Optional[SetupMethodInheritanceViolation):
         """
-    "
+    ""
+
         Check a single class for inheritance violations.
         
         Args:
@@ -292,7 +302,8 @@ class WebSocketHandlerInheritanceAnalyzer:
         # Check for violations
         violation_type = None
         details = "
-        details = "
+        details = ""
+
         remediation_steps = []
         
         if has_setup_method and not calls_super_setup:
@@ -312,7 +323,8 @@ class WebSocketHandlerInheritanceAnalyzer:
                 fAdd setup_method(self): method to {class_name}","
                 Call super().setup_method() as first line,
                 Add any class-specific test setup after super() call"
-                Add any class-specific test setup after super() call"
+                Add any class-specific test setup after super() call""
+
             ]
         
         if violation_type:
@@ -336,7 +348,8 @@ class WebSocketHandlerInheritanceAnalyzer:
         return any(base in ' '.join(base_classes) for base in test_base_classes)
     
     def _calculate_mro_chain(self, class_name: str, base_classes: List[str) -> List[str):
-        ""Calculate the Method Resolution Order chain for documentation."
+        ""Calculate the Method Resolution Order chain for documentation.""
+
         mro = [class_name]
         mro.extend(base_classes)
         
@@ -348,7 +361,8 @@ class WebSocketHandlerInheritanceAnalyzer:
 
 
 class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
-    """
+    """"
+
     MISSION CRITICAL: Test suite for detecting setup_method() inheritance violations.
     
     This test suite FAILS when inheritance issues are detected, providing detailed
@@ -393,7 +407,8 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
             print(f  - {class_name})
     
     def test_detect_missing_super_setup_calls(self):
-    """
+    """"
+
         CRITICAL TEST: Detect test classes missing super().setup_method() calls.
         
         This test FAILS when it finds classes that have setup_method() but don't'
@@ -406,7 +421,8 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
         self.record_metric(total_classes_analyzed", self.report.total_test_classes)"
         self.record_metric(violations_found, self.report.violations_found)
         self.record_metric(compliant_classes, len(self.report.compliant_classes))"
-        self.record_metric(compliant_classes, len(self.report.compliant_classes))"
+        self.record_metric(compliant_classes, len(self.report.compliant_classes))""
+
         
         print(f"\n{self.report.get_summary()}))"
         
@@ -419,17 +435,20 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
                 fSETUP METHOD INHERITANCE VIOLATIONS DETECTED!\n
                 f"\nFound {self.report.violations_found} inheritance violations:\n"
                 f{violation_details}\n"
-                f{violation_details}\n"
+                f{violation_details}\n""
+
                 f\nTHESE VIOLATIONS MUST BE FIXED IMMEDIATELY!\n
                 fThey can cause test infrastructure failures that mask revenue-critical bugs."
-                fThey can cause test infrastructure failures that mask revenue-critical bugs."
+                fThey can cause test infrastructure failures that mask revenue-critical bugs.""
+
             )
         
         print("[U+2713] All test classes have proper setup_method() inheritance)"
     
     def test_verify_specific_known_violations(self):
         """
-        "
+        ""
+
         CRITICAL TEST: Verify detection of known inheritance violations.
         
         Based on the issue description, we expect to find TestTypingHandler and 
@@ -463,7 +482,8 @@ class WebSocketHandlerSetupInheritanceTests(SSotBaseTestCase):
             
             assert False, (
                 fDETECTED KNOWN SETUP METHOD VIOLATIONS!\n"
-                fDETECTED KNOWN SETUP METHOD VIOLATIONS!\n"
+                fDETECTED KNOWN SETUP METHOD VIOLATIONS!\n""
+
                 f\nThe following classes are missing super().setup_method() calls:\n
                 f"{''.join(violation_details)}\n"
                 fThese are the exact violations described in the issue.\n

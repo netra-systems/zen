@@ -1,15 +1,15 @@
-"""
-"""
+""""
+
 Redis SSOT Compliance Test Suite - Mission Critical Validation
 
 BUSINESS VALUE JUSTIFICATION:
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Chat Functionality Stability (90% of platform value)
 - Value Impact: Prevents WebSocket 1011 errors that break chat reliability
-- Strategic Impact: Protects $500K+ ARR by ensuring Redis operations don't conflict'
+- Strategic Impact: Protects $"500K" plus ARR by ensuring Redis operations don't conflict'
 
 This test suite validates that:
-1. SSOT Redis Manager is the only active Redis implementation
+    1. SSOT Redis Manager is the only active Redis implementation
 2. Legacy compatibility layer properly redirects to SSOT
 3. No competing Redis managers exist that could cause WebSocket 1011 errors
 4. Circuit breaker and auto-reconnection work correctly
@@ -17,10 +17,11 @@ This test suite validates that:
 
 CRITICAL: Uses REAL Redis services (non-Docker) as specified in requirements
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import asyncio
 import pytest
 import time
@@ -72,7 +73,8 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
         self.original_state = {
             connected: self.redis_manager.is_connected,
             client: self.redis_manager._client"
-            client: self.redis_manager._client"
+            client: self.redis_manager._client""
+
         }
     
     async def asyncTearDown(self):
@@ -127,7 +129,8 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
         # Test exists operation
         exists = await self.redis_manager.exists(test_key)
         self.assertTrue(exists, Key should exist after setting)"
-        self.assertTrue(exists, Key should exist after setting)"
+        self.assertTrue(exists, Key should exist after setting)""
+
         
         # Test delete operation
         deleted = await self.redis_manager.delete(test_key)
@@ -205,11 +208,12 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
         Test auth service compatibility methods."
         Test auth service compatibility methods."
         session_id = test_session_123"
-        session_id = test_session_123"
+        session_id = test_session_123""
+
         session_data = {
             user_id: test_user,
             "permissions: [read, write],"
-            created_at: "2025-9-16T10:0:00Z"
+            created_at: "2025-9-16T10:0:"00Z""
         }
         
         # Test session storage
@@ -242,7 +246,8 @@ class TestRedisSSOTCompliance(SSotAsyncTestCase):
         set_result = await user_cache.set_user_cache(user_id, cache_key, cache_value, ttl=30)
         if self.redis_manager.is_connected:
             self.assertTrue(set_result, User cache set should succeed)"
-            self.assertTrue(set_result, User cache set should succeed)"
+            self.assertTrue(set_result, User cache set should succeed)""
+
             
             # Test user cache get
             retrieved_value = await user_cache.get_user_cache(user_id, cache_key)
@@ -330,7 +335,8 @@ class TestRedisLegacyCompatibility(SSotAsyncTestCase):
         
         if self.deprecated_manager._ssot_manager and self.deprecated_manager._ssot_manager.is_connected:
             self.assertTrue(result, Legacy set should succeed via SSOT redirect)"
-            self.assertTrue(result, Legacy set should succeed via SSOT redirect)"
+            self.assertTrue(result, Legacy set should succeed via SSOT redirect)""
+
             
             # Test get operation through legacy interface
             retrieved_value = await self.deprecated_manager.get(test_key)
@@ -346,7 +352,8 @@ class TestRedisLegacyCompatibility(SSotAsyncTestCase):
     
     def test_legacy_deprecation_warning_issued(self):
         Test that importing legacy manager issues deprecation warning."
-        Test that importing legacy manager issues deprecation warning."
+        Test that importing legacy manager issues deprecation warning.""
+
         import warnings
         
         with warnings.catch_warnings(record=True) as warning_list:
@@ -412,7 +419,8 @@ class TestRedisMultiUserIsolation(SSotAsyncTestCase):
         user1_value = user1_processing"
         user1_value = user1_processing"
         user2_value = user2_idle"
-        user2_value = user2_idle"
+        user2_value = user2_idle""
+
         
         # Set cache for both users
         if self.user1_manager.is_connected:
@@ -434,7 +442,8 @@ class TestRedisMultiUserIsolation(SSotAsyncTestCase):
             # but the keys should be different due to user_id prefixing
             self.assertEqual(user1_cannot_access_user2, user2_value, Users share Redis but use different keys)
             self.assertEqual(user2_cannot_access_user1, user1_value, Users share Redis but use different keys)"
-            self.assertEqual(user2_cannot_access_user1, user1_value, Users share Redis but use different keys)"
+            self.assertEqual(user2_cannot_access_user1, user1_value, Users share Redis but use different keys)""
+
     
     async def test_concurrent_user_operations_no_conflicts(self):
         "Test concurrent operations from multiple users don't conflict."
@@ -471,7 +480,8 @@ class TestRedisMultiUserIsolation(SSotAsyncTestCase):
         
         user1_state = {agent: "processing, step: 1, tools: [search]}"
         user2_state = {"agent: waiting", step: 3, tools: [calculator]}"
-        user2_state = {"agent: waiting", step: 3, tools: [calculator]}"
+        user2_state = {"agent: waiting", step: 3, tools: [calculator]}""
+
         
         if self.user1_manager.is_connected:
             # Store WebSocket state for each user
@@ -485,7 +495,8 @@ class TestRedisMultiUserIsolation(SSotAsyncTestCase):
             
             self.assertEqual(json.loads(user1_retrieved), user1_state, User 1 WebSocket state should be isolated)
             self.assertEqual(json.loads(user2_retrieved), user2_state, User 2 WebSocket state should be isolated)"
-            self.assertEqual(json.loads(user2_retrieved), user2_state, User 2 WebSocket state should be isolated)"
+            self.assertEqual(json.loads(user2_retrieved), user2_state, User 2 WebSocket state should be isolated)""
+
 
 
 if __name__ == __main__":"

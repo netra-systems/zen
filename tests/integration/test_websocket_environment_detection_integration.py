@@ -6,7 +6,7 @@ and WebSocket factory SSOT validation paths. Tests the critical path that determ
 whether WebSocket connections use strict or E2E-safe validation.
 
 Business Impact:
-- Validates root cause of WebSocket 1011 errors: environment variable detection failure
+    - Validates root cause of WebSocket 1011 errors: environment variable detection failure
 - Tests factory SSOT validation path selection (strict vs E2E-safe)
 - Ensures proper E2E context extraction and propagation
 
@@ -60,7 +60,8 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
         super().teardown_method()
 
     def test_e2e_environment_variable_detection_local(self):
-    """
+    """"
+
         Test E2E environment variable detection in local test environment.
         
         This validates that the environment variable detection logic works correctly
@@ -114,7 +115,8 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             logger.info( PASS:  Manual E2E detection logic working correctly)
 
     def test_staging_environment_detection_simulation(self):
-    """
+    """"
+
         Test environment detection with staging environment simulation.
         
         This simulates the GCP staging environment configuration and validates
@@ -182,7 +184,8 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
                 pytest.fail(Manual E2E detection succeeded when it should fail)
 
     def test_factory_ssot_validation_path_selection(self):
-        """
+        """"
+
         Test factory SSOT validation path selection based on E2E context.
         
         This tests the critical decision point that determines whether WebSocket
@@ -353,7 +356,8 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             raise
 
     def test_e2e_context_extraction_from_websocket_headers(self):
-    """
+    """"
+
         Test E2E context extraction from WebSocket headers.
         
         This tests the specific function that extracts E2E context from WebSocket connections.
@@ -447,7 +451,8 @@ class WebSocketEnvironmentDetectionIntegrationTests(SSotBaseTestCase):
             raise
 
     def test_staging_cloud_run_environment_simulation(self):
-        """
+        """"
+
         Test complete simulation of GCP Cloud Run staging environment.
         
         This simulates the exact environment configuration that exists in GCP staging
@@ -566,5 +571,6 @@ if __name__ == "__main__:"
     finally:
         test_instance.teardown_method()
 
-"""
+""""
+
 )))

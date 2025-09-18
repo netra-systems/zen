@@ -2,13 +2,13 @@
 Redis WebSocket Integration Tests - No Docker
 
 BUSINESS VALUE JUSTIFICATION:
-- Segment: Platform/Internal  
+    - Segment: Platform/Internal  
 - Business Goal: Chat Functionality Reliability (90% of platform value)
 - Value Impact: Validates Redis + WebSocket integration for real-time agent events
-- Strategic Impact: Prevents WebSocket 1011 errors that break $500K+ ARR chat functionality
+- Strategic Impact: Prevents WebSocket 1011 errors that break $"500K" plus ARR chat functionality
 
 This test suite validates:
-1. WebSocket events properly use Redis for state management
+    1. WebSocket events properly use Redis for state management
 2. Agent execution state persists correctly in Redis
 3. Real-time events are delivered without Redis conflicts
 4. No WebSocket 1011 errors due to Redis manager conflicts

@@ -5,13 +5,13 @@ CRITICAL BUSINESS MISSION: These tests validate REAL-TIME WebSocket event delive
 that enables SUBSTANTIVE CHAT VALUE through transparent AI processing visibility.
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise)
+    - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Validate real-time chat UX through WebSocket event transparency  
 - Value Impact: Ensures users see AI working (agent_thinking, tool_executing) for trust
-- Strategic Impact: Protects $500K+ ARR by ensuring chat feels responsive and transparent
+- Strategic Impact: Protects $"500K" plus ARR by ensuring chat feels responsive and transparent
 
 CRITICAL REQUIREMENTS per CLAUDE.md:
-1. MUST use REAL WebSocket connections - NO mocks per MOCKS = Abomination""
+    1. MUST use REAL WebSocket connections - NO mocks per MOCKS = Abomination""
 2. MUST use REAL authentication (JWT/OAuth) for WebSocket connections
 3. MUST validate ALL 5 REQUIRED WebSocket events: agent_started, agent_thinking, 
    tool_executing, tool_completed, agent_completed
@@ -116,7 +116,7 @@ class WebSocketEventDeliveryDuringChatTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_complete_websocket_event_sequence_during_ai_chat_processing(self):
-""""""
+    """"""
         Test complete WebSocket event sequence during AI chat processing with REAL services.
         
         CRITICAL: This validates the CORE business value delivery mechanism:
@@ -155,8 +155,8 @@ class WebSocketEventDeliveryDuringChatTests(SSotAsyncTestCase):
         validation_result = self._event_collector.validate_required_events(required_events)
         self.assertTrue(validation_result['all_required_present'], fCRITICAL FAILURE: Missing required WebSocket events: {validation_result['missing_events']}. This breaks real-time chat transparency. Received: {validation_result['received_events']})
         timing_analysis = self._event_collector.get_timing_analysis()
-        self.assertLess(timing_analysis['first_event_delay'], 3.0, fFirst WebSocket event took {timing_analysis['first_event_delay']:.2f}s - too slow for responsive UX)
-        self.assertLess(timing_analysis['max_delay_between_events'], 10.0, fMax delay between events: {timing_analysis['max_delay_between_events']:.2f}s - too long for smooth UX")"
+        self.assertLess(timing_analysis['first_event_delay'], 3.0, fFirst WebSocket event took {timing_analysis['first_event_delay']:."2f"}s - too slow for responsive UX)
+        self.assertLess(timing_analysis['max_delay_between_events'], 10.0, fMax delay between events: {timing_analysis['max_delay_between_events']:."2f"}s - too long for smooth UX")"
         agent_started_events = self._event_collector.get_events_by_type('agent_started')
         self.assertGreater(len(agent_started_events), 0, 'Must have agent_started events')
         thinking_events = self._event_collector.get_events_by_type('agent_thinking')
@@ -224,7 +224,7 @@ class WebSocketEventDeliveryDuringChatTests(SSotAsyncTestCase):
             user_validation = collector.validate_required_events(required_events)
             self.assertTrue(user_validation['all_required_present'], fUser {i} missing required events: {user_validation['missing_events']}. Concurrent load must not break individual user event delivery.)
             timing_analysis = collector.get_timing_analysis()
-            self.assertLess(timing_analysis['first_event_delay'], 5.0, fUser {i} first event delay: {timing_analysis['first_event_delay']:.2f}s - too slow under load)""
+            self.assertLess(timing_analysis['first_event_delay'], 5.0, fUser {i} first event delay: {timing_analysis['first_event_delay']:."2f"}s - too slow under load)""
         total_events = sum((len(collector.events) for collector in event_collectors))
         successful_users = sum((1 for collector in event_collectors if collector.validate_required_events(required_events)['all_required_present'])
         self.assertEqual(successful_users, concurrent_users, f'All {concurrent_users} users must receive events. Only {successful_users} successful.')
@@ -257,7 +257,8 @@ class WebSocketEventDeliveryDuringChatTests(SSotAsyncTestCase):
         self.logger.info(f'User {user_index}: Collected {events_received} events')
 
     async def async_teardown_method(self, method=None):
-        ""Cleanup Docker services and connections."
+        ""Cleanup Docker services and connections.""
+
         if self._docker_manager and self._docker_manager.is_docker_available():
             try:
                 await self._docker_manager.stop_services(['backend', 'auth', 'redis')
@@ -267,7 +268,8 @@ class WebSocketEventDeliveryDuringChatTests(SSotAsyncTestCase):
 
     def teardown_method(self, method=None):
         Cleanup after each test."""
-        Cleanup after each test."""
+        Cleanup after each test.""""
+
         super().teardown_method(method)
         if self._event_collector:
             self._event_collector.events.clear()

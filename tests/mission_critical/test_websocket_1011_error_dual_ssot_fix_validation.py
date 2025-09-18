@@ -1,31 +1,32 @@
-"""
-"""
+""""
+
 MISSION CRITICAL TEST: WebSocket 1011 Error Dual SSOT Fix Validation
 ================================================================
 
 ISSUE #301: Validates the fix for WebSocket 1011 errors caused by dual SSOT ID systems.
 
-BUSINESS IMPACT: $500K+ ARR protection - ensures WebSocket connections don't fail due to'
+BUSINESS IMPACT: $"500K" plus ARR protection - ensures WebSocket connections don't fail due to'
 resource cleanup issues when UnifiedIDManager and UnifiedIdGenerator create different
 ID patterns for the same user session.
 
 CRITICAL FAILURE SCENARIOS:
-1. User connects via WebSocket (creates IDs with one SSOT system)
+    1. User connects via WebSocket (creates IDs with one SSOT system)
 2. Agent execution begins (may use different SSOT system for IDs)  
 3. WebSocket disconnect triggers cleanup using mismatched ID patterns
 4. Cleanup fails to find resources  ->  WebSocket 1011 error
 5. User loses connection, chat functionality broken
 
 VALIDATION STRATEGY:
-- Test all permutations of dual SSOT ID creation
+    - Test all permutations of dual SSOT ID creation
 - Verify cleanup works regardless of which system created the IDs  
 - Validate no business logic regression
 - Ensure performance impact is minimal
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import asyncio
 import pytest
 import time
@@ -53,13 +54,15 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
         
     def test_websocket_1011_error_fix_all_permutations(self):
         """
-        "
+        ""
+
         CRITICAL: Test all permutations of dual SSOT ID creation and cleanup.
         
         This is the core business value test - validates that WebSocket 1011 errors
         are prevented regardless of which ID system creates the original IDs.
 "
-"
+""
+
         user_scenarios = [
             enterprise_user_123,"
             enterprise_user_123,"
@@ -98,12 +101,12 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
                         'error': result['error']
                     }
         
-        # CRITICAL: All scenarios must succeed to prevent $500K+ ARR loss
+        # CRITICAL: All scenarios must succeed to prevent $"500K" plus ARR loss
         success_rate = (success_count / total_scenarios) * 100
         self.assertEqual(success_count, total_scenarios, 
                         fWebSocket 1011 fix failed in {total_scenarios - success_count} scenarios. "
                         fWebSocket 1011 fix failed in {total_scenarios - success_count} scenarios. "
-                        f"Success rate: {success_rate:.1f}%. Failed scenarios: {self.failed_cleanups})"
+                        f"Success rate: {success_rate:."1f"}%. Failed scenarios: {self.failed_cleanups})"
         
     def test_websocket_resource_cleanup_pattern_matching(self):
         pass
@@ -124,7 +127,8 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
         for creation_id, cleanup_id, should_match in test_cases:
             # Register connection with creation pattern
             self._register_websocket_connection(creation_id, fws_{creation_id})"
-            self._register_websocket_connection(creation_id, fws_{creation_id})"
+            self._register_websocket_connection(creation_id, fws_{creation_id})""
+
             
             # Attempt cleanup with different pattern
             cleanup_result = self._attempt_pattern_based_cleanup(cleanup_id)
@@ -140,7 +144,8 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
             self.active_connections.clear()
                 
     def test_websocket_1011_error_business_impact_validation(self):
-        """
+        """"
+
         Validate that the fix addresses the specific business impact scenarios.
         
         These are real user scenarios that were causing revenue loss.
@@ -151,7 +156,7 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
                 'user_id': 'enterprise_customer_001',
                 'session_duration_minutes': 45,
                 'agent_switches': 5,
-                'expected_revenue_impact': 1500  # $1.5K per session for enterprise
+                'expected_revenue_impact': 1500  # $1."5K" per session for enterprise
             },
             {
                 'name': 'Mid-Tier Customer Optimization Workflow', 
@@ -184,10 +189,11 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
         
         # Validate overall business impact protection
         self.assertGreater(total_protected_revenue, 2000, 
-                          Protected revenue should exceed $2K for test scenarios)
+                          Protected revenue should exceed $"2K" for test scenarios)
         
     def test_dual_ssot_performance_impact_on_critical_path(self):
-        """
+        """"
+
         Ensure the compatibility fix doesn't impact critical path performance.'
         
         WebSocket operations are on the critical path for chat functionality.
@@ -208,9 +214,9 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
         
         # Performance requirements for critical path
         self.assertLess(performance_benchmarks['connection_time'), 1.0, 
-                       WebSocket connection time exceeds 1s for 100 connections)
+                       WebSocket connection time exceeds "1s" for 100 connections)
         self.assertLess(performance_benchmarks['cleanup_time'), 0.5,
-                       WebSocket cleanup time exceeds 0.5s for 100 cleanups")"
+                       WebSocket cleanup time exceeds 0."5s" for 100 cleanups")"
                        
         # Log performance for monitoring
         print(fPerformance Benchmarks: {performance_benchmarks})
@@ -384,7 +390,8 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
         try:
             # Create initial WebSocket connection
             connection_ids = self._create_websocket_connection(user_id, manager)"
-            connection_ids = self._create_websocket_connection(user_id, manager)"
+            connection_ids = self._create_websocket_connection(user_id, manager)""
+
             
             # Simulate agent switches during session
             for switch_num in range(scenario['agent_switches'):
@@ -434,7 +441,8 @@ class WebSocket1011ErrorDualSSOTFixValidationTests(SSotBaseTestCase):
         if user_connections:
             thread_id, connection_info = user_connections[0]
             cleanup_system = generator if connection_info['created_by'] == manager else manager"
-            cleanup_system = generator if connection_info['created_by'] == manager else manager"
+            cleanup_system = generator if connection_info['created_by'] == manager else manager""
+
             
             return self._perform_websocket_cleanup(
                 user_id, 

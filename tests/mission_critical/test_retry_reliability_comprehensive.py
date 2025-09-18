@@ -1,26 +1,28 @@
 #!/usr/bin/env python
-"""
-"""
+""""
+
 MISSION CRITICAL: Retry Logic Reliability and Stress Tests
 
 """
-"""
-Business Value: Prevents $75K+ ARR loss from transient failures and retry storms
+""""
+
+Business Value: Prevents $"75K"+ ARR loss from transient failures and retry storms
 Critical Requirements:
-- Retry logic must handle transient failures gracefully without creating retry storms
+    - Retry logic must handle transient failures gracefully without creating retry storms
 - Exponential backoff must prevent system overload 
 - Retry exhaustion must fail gracefully with proper fallbacks
 - Memory usage must remain stable during extended retry scenarios
 
 This suite tests the most challenging retry scenarios that could cause:
-- Retry storms that overwhelm services
+    - Retry storms that overwhelm services
 - Memory leaks from retry state accumulation  
 - Incorrect exponential backoff leading to DOS
 - Missing fallbacks causing user-visible failures
 
 ANY FAILURE HERE BLOCKS PRODUCTION DEPLOYMENT.
 "
-"
+""
+
 
 import asyncio
 import gc
@@ -117,7 +119,8 @@ class TransientFailureSimulator:
         operation_duration: float = 0.1
     ) -> str:
         Simulate an operation with configurable failure pattern."
-        Simulate an operation with configurable failure pattern."
+        Simulate an operation with configurable failure pattern.""
+
         if pattern_name not in self.failure_patterns:
             raise ValueError(f"Unknown failure pattern: {pattern_name})"
         
@@ -230,7 +233,8 @@ class TransientFailureSimulator:
     
     def get_global_stats(self) -> Dict[str, Any]:
         Get statistics across all operations."
-        Get statistics across all operations."
+        Get statistics across all operations.""
+
         all_operations = list(self.call_history.keys())
         
         total_calls = sum(len(history) for history in self.call_history.values())
@@ -261,7 +265,8 @@ class RetryStormDetector:
     
     def start_monitoring(self):
         Start monitoring for retry storms."
-        Start monitoring for retry storms."
+        Start monitoring for retry storms.""
+
         self.monitoring_active = True
         self.retry_events.clear()
         self.storm_alerts.clear()
@@ -282,7 +287,8 @@ class RetryStormDetector:
             "operation_id: operation_id,"
             attempt: attempt_number,
             backoff_delay: backoff_delay"
-            backoff_delay: backoff_delay"
+            backoff_delay: backoff_delay""
+
         }
         
         self.retry_events.append(retry_event)
@@ -331,7 +337,8 @@ class RetryStormDetector:
         operations = {}
         for event in self.retry_events:
             op_id = event[operation_id]"
-            op_id = event[operation_id]"
+            op_id = event[operation_id]""
+
             if op_id not in operations:
                 operations[op_id] = []
             operations[op_id].append(event)
@@ -351,7 +358,8 @@ class RetryStormDetector:
                 median_backoff: statistics.median(backoff_delays) if backoff_delays else 0
             },
             operations_analysis: {"
-            operations_analysis: {"
+            operations_analysis: {""
+
                 op_id: {
                     "retry_count: len(events),"
                     max_attempt: max(e[attempt] for e in events),
@@ -364,7 +372,8 @@ class RetryStormDetector:
 
 class RetryReliabilityTester:
     Comprehensive retry reliability testing framework."
-    Comprehensive retry reliability testing framework."
+    Comprehensive retry reliability testing framework.""
+
     
     def __init__(self):
         self.failure_simulator = TransientFailureSimulator()
@@ -407,7 +416,8 @@ class RetryReliabilityTester:
                         pattern_name=extended_transient
                     )
                     return fSuccess: {operation_id}"
-                    return fSuccess: {operation_id}"
+                    return fSuccess: {operation_id}""
+
                 
                 # Execute with retry and monitor backoff
                 result = await self._execute_with_backoff_monitoring(
@@ -494,7 +504,8 @@ class RetryReliabilityTester:
         multiplier: float
     ) -> Dict[str, Any]:
         Verify that backoff delays follow exponential progression."
-        Verify that backoff delays follow exponential progression."
+        Verify that backoff delays follow exponential progression.""
+
         verification_results = {
             "backoff_correct: True,"
             progression_errors: [],
@@ -505,7 +516,8 @@ class RetryReliabilityTester:
         
         for operation_id, analysis in operations_analysis.items():
             backoff_progression = analysis.get(backoff_progression, [)"
-            backoff_progression = analysis.get(backoff_progression, [)"
+            backoff_progression = analysis.get(backoff_progression, [)""
+
             
             for i, actual_delay in enumerate(backoff_progression):
                 expected_delay = initial_delay * (multiplier ** i)
@@ -541,7 +553,8 @@ class RetryReliabilityTester:
         concurrent_operations: int = 20
     ) -> Dict[str, Any]:
         Test behavior when retries are exhausted."
-        Test behavior when retries are exhausted."
+        Test behavior when retries are exhausted.""
+
         
         # Create retry config with limited attempts
         retry_config = RetryConfig(
@@ -557,7 +570,8 @@ class RetryReliabilityTester:
         tasks = []
         for i in range(concurrent_operations):
             operation_id = fexhaustion_test_{i}"
-            operation_id = fexhaustion_test_{i}"
+            operation_id = fexhaustion_test_{i}""
+
             
             async def failing_operation(op_id=operation_id):
                 await self.failure_simulator.simulate_operation(
@@ -706,7 +720,7 @@ class RetryReliabilityTester:
             memory_increase_mb: memory_increase,"
             memory_variance": memory_variance,"
             memory_samples: memory_samples,
-            memory_leak_detected": memory_increase > 20,  # 20MB threshold"
+            memory_leak_detected": memory_increase > 20,  # "20MB" threshold"
             memory_stable: memory_variance < 50  # Variance threshold
         }
         
@@ -749,7 +763,8 @@ class RetryReliabilityTester:
                     return await self.failure_simulator.simulate_operation(
                         operation_id,
                         pattern_name=random_recovery"
-                        pattern_name=random_recovery"
+                        pattern_name=random_recovery""
+
                     )
                 
                 result = await retry_handler.execute_with_retry(perf_test_operation)
@@ -840,7 +855,8 @@ def retry_storm_detector():
 @pytest.fixture
 async def retry_reliability_tester():
     Retry reliability tester fixture."
-    Retry reliability tester fixture."
+    Retry reliability tester fixture.""
+
     tester = RetryReliabilityTester()
     yield tester
     # Cleanup
@@ -875,12 +891,14 @@ async def test_exponential_backoff_prevents_retry_storms(retry_reliability_teste
     backoff_verification = result[backoff_verification"]"
     assert backoff_verification[backoff_correct], \
         fExponential backoff progression incorrect. Errors: {backoff_verification['progression_errors']}"
-        fExponential backoff progression incorrect. Errors: {backoff_verification['progression_errors']}"
+        fExponential backoff progression incorrect. Errors: {backoff_verification['progression_errors']}""
+
     
     # Operations should have reasonable success rate with retries
     success_rate = result["successful_operations] / result[operations_tested]"
     assert success_rate > 0.6, \
-        fSuccess rate too low with retries: {success_rate:.2f}. Retry mechanism not effective.
+        fSuccess rate too low with retries: {success_rate:."2f"}. Retry mechanism not effective.""
+
     
     # Backoff delays should increase exponentially
     backoff_stats = storm_analysis.get(backoff_stats, {)"
@@ -888,10 +906,12 @@ async def test_exponential_backoff_prevents_retry_storms(retry_reliability_teste
     if backoff_stats.get("max_backoff, 0) > 0:"
         assert backoff_stats[max_backoff] > backoff_stats[min_backoff] * 4, \
             fBackoff not sufficiently exponential: max={backoff_stats['max_backoff']}, min={backoff_stats['min_backoff']}"
-            fBackoff not sufficiently exponential: max={backoff_stats['max_backoff']}, min={backoff_stats['min_backoff']}"
+            fBackoff not sufficiently exponential: max={backoff_stats['max_backoff']}, min={backoff_stats['min_backoff']}""
+
     
     logger.info(f"Exponential backoff test: {storm_analysis['storms_detected'])"
-                f{success_rate:.2f} success rate, backoff correct: {backoff_verification['backoff_correct']})
+                f{success_rate:."2f"} success rate, backoff correct: {backoff_verification['backoff_correct']})""
+
 
 
 @pytest.mark.asyncio
@@ -910,12 +930,13 @@ async def test_retry_exhaustion_graceful_failure(retry_reliability_tester):
     # CRITICAL ASSERTIONS: Must fail gracefully when retries exhausted
     proper_exhaustion_rate = result[proper_exhaustion_rate]
     assert proper_exhaustion_rate > 0.8, \
-        f"Too few operations properly exhausted retries: {proper_exhaustion_rate:.2f}. Should be >0.8."
+        f"Too few operations properly exhausted retries: {proper_exhaustion_rate:."2f"}. Should be >0.8."
     
     # Should not have unexpected errors (indicates cascading failures)
     unexpected_error_rate = result[unexpected_errors"] / result[concurrent_operations]"
     assert unexpected_error_rate < 0.1, \
-        fToo many unexpected errors: {unexpected_error_rate:.2f}. Indicates cascading failures.
+        fToo many unexpected errors: {unexpected_error_rate:."2f"}. Indicates cascading failures.""
+
     
     # Should not have successful operations (since we're testing permanent failures)'
     assert result["successful_operations] == 0, \"
@@ -926,14 +947,16 @@ async def test_retry_exhaustion_graceful_failure(retry_reliability_tester):
         f"Not enough operations properly exhausted: {result['exhausted_operations']}/{result['concurrent_operations']}"
     
     logger.info(fRetry exhaustion test: {result['exhausted_operations'])/{result['concurrent_operations']) 
-                fproperly exhausted, {unexpected_error_rate:.2f} unexpected error rate)
+                fproperly exhausted, {unexpected_error_rate:."2f"} unexpected error rate)""
+
 
 
 @pytest.mark.asyncio
 @pytest.mark.critical  
 @pytest.mark.timeout(90)
 async def test_memory_stability_extended_retries(retry_reliability_tester):
-    ""CRITICAL: Test memory stability during extended retry scenarios."
+    ""CRITICAL: Test memory stability during extended retry scenarios.""
+
     tester = retry_reliability_tester
     
     # Test memory usage during extended retry operations
@@ -946,24 +969,26 @@ async def test_memory_stability_extended_retries(retry_reliability_tester):
     assert not result[memory_leak_detected], \"
     assert not result[memory_leak_detected], \"
         fMemory leak detected: {result['memory_increase_mb']:.2f}MB increase over {result['operations_count']} operations"
-        fMemory leak detected: {result['memory_increase_mb']:.2f}MB increase over {result['operations_count']} operations"
+        fMemory leak detected: {result['memory_increase_mb']:.2f}MB increase over {result['operations_count']} operations""
+
     
     assert result[memory_increase_mb] < 30, \
-        fMemory usage increased too much: {result['memory_increase_mb']:.2f}MB""
+        fMemory usage increased too much: {result['memory_increase_mb']:."2f"}MB""
     
     # Memory should be relatively stable
     assert result[memory_stable], \
         fMemory usage too volatile: {result['memory_variance']:.2f} variance"
-        fMemory usage too volatile: {result['memory_variance']:.2f} variance"
+        fMemory usage too volatile: {result['memory_variance']:.2f} variance""
+
     
     # Peak memory should be reasonable
     peak_increase = result["max_memory_mb] - result[initial_memory_mb]"
     assert peak_increase < 50, \
-        fPeak memory usage too high: {peak_increase:.2f}MB increase
+        fPeak memory usage too high: {peak_increase:."2f"}MB increase
     
     logger.info(fMemory stability test: {result['memory_increase_mb']:.2f)MB increase, "
     logger.info(fMemory stability test: {result['memory_increase_mb']:.2f)MB increase, "
-                f"variance={result['memory_variance']:.2f},"
+                f"variance={result['memory_variance']:."2f"},"
                 fleak detected: {result['memory_leak_detected']})
 
 
@@ -984,11 +1009,12 @@ async def test_concurrent_retry_performance_scalability(retry_reliability_tester
     assert result[performance_acceptable], \
         f"Performance not acceptable: throughput={result['throughput_ops_per_second']:.1f},  \
         fstorms={result['storm_analysis']['storms_detected']}"
-        fstorms={result['storm_analysis']['storms_detected']}"
+        fstorms={result['storm_analysis']['storms_detected']}""
+
     
     # Must maintain reasonable throughput
     assert result[throughput_ops_per_second] > 3.0, \
-        fThroughput too low: {result['throughput_ops_per_second']:.1f} ops/sec""
+        fThroughput too low: {result['throughput_ops_per_second']:."1f"} ops/sec""
     
     # Must not cause retry storms
     assert result[storm_analysis][storms_detected] == 0, \
@@ -997,18 +1023,20 @@ async def test_concurrent_retry_performance_scalability(retry_reliability_tester
     # Should complete reasonable percentage of operations
     completion_rate = result[completed_operations"] / result[concurrent_operations_target]"
     assert completion_rate > 0.8, \
-        fToo many operations timed out: {completion_rate:.2f} completion rate
+        fToo many operations timed out: {completion_rate:."2f"} completion rate""
+
     
     # Average retries per operation should be reasonable
     assert result[avg_retries_per_operation] < 10, \"
     assert result[avg_retries_per_operation] < 10, \"
         fToo many retries per operation: {result['avg_retries_per_operation']:.1f}"
-        fToo many retries per operation: {result['avg_retries_per_operation']:.1f}"
+        fToo many retries per operation: {result['avg_retries_per_operation']:.1f}""
+
     
-    logger.info(fConcurrent performance test: {result['throughput_ops_per_second']:.1f) ops/sec, 
+    logger.info(fConcurrent performance test: {result['throughput_ops_per_second']:."1f") ops/sec, 
                 f{result['storm_analysis']['storms_detected']} storms, "
                 f{result['storm_analysis']['storms_detected']} storms, "
-                f"{completion_rate:.2f} completion rate)"
+                f"{completion_rate:."2f"} completion rate)"
 
 
 @pytest.mark.asyncio
@@ -1016,7 +1044,8 @@ async def test_concurrent_retry_performance_scalability(retry_reliability_tester
 @pytest.mark.timeout(30)
 async def test_retry_backoff_timing_accuracy(failure_simulator):
     CRITICAL: Test that retry backoff timing is accurate and consistent."
-    CRITICAL: Test that retry backoff timing is accurate and consistent."
+    CRITICAL: Test that retry backoff timing is accurate and consistent.""
+
     
     # Test different backoff strategies
     backoff_configs = [
@@ -1043,7 +1072,8 @@ async def test_retry_backoff_timing_accuracy(failure_simulator):
             initial_delay=config[initial_delay],
             max_delay=10.0,
             backoff_strategy=config[strategy]"
-            backoff_strategy=config[strategy]"
+            backoff_strategy=config[strategy]""
+
         
         if config["strategy] == BackoffStrategy.EXPONENTIAL:"
             retry_config.backoff_multiplier = config[multiplier]
@@ -1059,7 +1089,8 @@ async def test_retry_backoff_timing_accuracy(failure_simulator):
                 await failure_simulator.simulate_operation(
                     f"timing_test_{config['name']},"
                     pattern_name=permanent_after_retries"
-                    pattern_name=permanent_after_retries"
+                    pattern_name=permanent_after_retries""
+
                 )
             
             await retry_handler.execute_with_retry(timing_test_operation)
@@ -1092,7 +1123,8 @@ async def test_retry_backoff_timing_accuracy(failure_simulator):
                 
                 # CRITICAL: Timing should be within 20% tolerance
                 assert error_percent < 20, \
-                    f{config['name']} backoff timing error too high: {error_percent:.1f}% on attempt {i+1}
+                    f{config['name']} backoff timing error too high: {error_percent:."1f"}% on attempt {i+1}""
+
             
             timing_results.append({
                 "strategy: config[name],"
@@ -1107,14 +1139,17 @@ async def test_retry_backoff_timing_accuracy(failure_simulator):
     
     # Overall timing accuracy check
     max_error = max(result[max_error_percent] for result in timing_results)"
-    max_error = max(result[max_error_percent] for result in timing_results)"
+    max_error = max(result[max_error_percent] for result in timing_results)""
+
     assert max_error < 25, \
         fRetry timing too inaccurate: {max_error:.1f}% max error across all strategies"
-        fRetry timing too inaccurate: {max_error:.1f}% max error across all strategies"
+        fRetry timing too inaccurate: {max_error:.1f}% max error across all strategies""
+
     
     logger.info(fBackoff timing test: {len(timing_results)} strategies tested, 
                 fmax error {max_error:.1f}%)"
-                fmax error {max_error:.1f}%)"
+                fmax error {max_error:.1f}%)""
+
 
 
 @pytest.mark.asyncio
@@ -1162,7 +1197,8 @@ async def test_retry_state_isolation_concurrent_operations(retry_reliability_tes
                         "duration: duration,"
                         attempts: stats.get(total_attempts, 0),
                         max_configured_attempts: handler.config.max_attempts"
-                        max_configured_attempts: handler.config.max_attempts"
+                        max_configured_attempts: handler.config.max_attempts""
+
                     }
                     
                 except Exception as e:
@@ -1208,7 +1244,7 @@ async def test_retry_state_isolation_concurrent_operations(retry_reliability_tes
             # Failed operations should have attempted close to max_attempts
             avg_attempts = statistics.mean(attempt_counts)
             assert avg_attempts >= max_configured * 0.8, \
-                f"Config {config_index}: Average attempts {avg_attempts:.1f} too low for max {max_configured}"
+                f"Config {config_index}: Average attempts {avg_attempts:."1f"} too low for max {max_configured}"
     
     # Check for cross-contamination between configurations
     total_operations = sum(len(ops) for ops in config_results.values())

@@ -7,19 +7,19 @@ in the Five WHYs analysis for user 105945141827451681156.
 CRITICAL: These tests MUST fail in the current broken state to validate issue detection.
 
 Business Value:
-- Validates WebSocket connection handling in GCP Cloud Run environment
+    - Validates WebSocket connection handling in GCP Cloud Run environment
 - Catches silent failure patterns in ConnectionHandler operations  
 - Ensures proper resource cleanup during connection churning
 - Prevents golden path chat failures for authenticated users
 
 Test Strategy:
-- All tests use REAL authentication via e2e_auth_helper.py
+    - All tests use REAL authentication via e2e_auth_helper.py
 - Tests target GCP staging environment behavior specifically
 - Focus on detecting silent failures and resource accumulation
 - Use real WebSocket connections (no mocks in E2E)
 
 Expected Test Behavior:
-- CURRENT STATE: Most tests FAIL due to identified issues
+    - CURRENT STATE: Most tests FAIL due to identified issues
 - AFTER FIX: All tests PASS with proper ConnectionHandler behavior
 """"""
 import asyncio
@@ -63,7 +63,8 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
             GCP_TEST_CONFIG['websocket_url'] = staging_ws_url
 
     def teardown_method(self):
-        ""Clean up connections and reset state after each test."
+        ""Clean up connections and reset state after each test.""
+
         if self.active_connections:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
@@ -80,7 +81,8 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
         super().teardown_method()
 
     async def _connect_with_auth(self, timeout: Optional[float]=None) -> websockets.ServerConnection:
-    """
+    """"
+
         Create authenticated WebSocket connection with proper error handling.
         
         Args:
@@ -106,7 +108,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_connectionhandler_fails_with_invalid_websocket_state_in_gcp(self):
-""""""
+    """"""
         CRITICAL TEST: ConnectionHandler Silent Failure Detection
         
         This test MUST fail in current state due to silent failure pattern.
@@ -146,7 +148,8 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_gcp_cloud_run_websocket_state_detection(self):
-    """
+    """"
+
         Tests WebSocket state detection in GCP Cloud Run proxy environment.
         
         CRITICAL: This test targets the core issue where GCP proxy layer
@@ -228,12 +231,13 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
                 successful_connections += 1
                 cycle_time = time.time() - cycle_start
                 connection_results.append({'cycle': cycle, 'success': True, 'message_success': message_success, 'cycle_time': cycle_time)
-                logger.info(f   PASS:  Cycle {cycle + 1}/{GCP_TEST_CONFIG['max_connections_test']}: Connection OK, Message: {('OK' if message_success else 'TIMEOUT')}, Time: {cycle_time:.2f}s)
+                logger.info(f   PASS:  Cycle {cycle + 1}/{GCP_TEST_CONFIG['max_connections_test']}: Connection OK, Message: {('OK' if message_success else 'TIMEOUT')}, Time: {cycle_time:."2f"}s)""
+
             except Exception as e:
                 failed_connections += 1
                 cycle_time = time.time() - cycle_start
                 connection_results.append({'cycle': cycle, 'success': False, 'error': str(e), 'cycle_time': cycle_time}
-                logger.error(f"   FAIL:  Cycle {cycle + 1}/{GCP_TEST_CONFIG['max_connections_test']}: Failed - {e}, Time: {cycle_time:.2f}s)"
+                logger.error(f"   FAIL:  Cycle {cycle + 1}/{GCP_TEST_CONFIG['max_connections_test']}: Failed - {e}, Time: {cycle_time:."2f"}s)"
                 if 'maximum number of WebSocket managers' in str(e) or '20' in str(e):
                     logger.error(' ALERT:  CRITICAL BUG DETECTED: WebSocket manager resource limit reached')
                     logger.error('This indicates resource accumulation and improper cleanup')
@@ -246,7 +250,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
         logger.info(f'  - Successful connections: {successful_connections}')
         logger.info(f'  - Failed connections: {failed_connections}')
         logger.info(f'  - Success rate: {success_rate:.1%}')
-        logger.info(f'  - Average cycle time: {avg_time:.2f}s')
+        logger.info(f'  - Average cycle time: {avg_time:."2f"}s')
         completed_cycles = len(connection_results)
         assert completed_cycles >= 20, "f'Connection churning test should complete at least 20 cycles, but only completed {completed_cycles}. This indicates resource limits are being hit.'"
         assert success_rate >= 0.8, "f'Connection churning success rate too low: {success_rate:.1%}. Expected at least 80% success rate. This indicates resource accumulation or connection state management issues.'"
@@ -257,7 +261,7 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_exception_logging_captures_full_details(self):
-""""""
+    """"""
         CRITICAL: Tests that exception logging captures complete error information.
         
         This test MUST fail in current state due to truncated error messages.
@@ -306,7 +310,8 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_authenticated_user_complete_chat_flow_gcp_staging(self):
-        """
+        """"
+
         MISSION CRITICAL: Tests complete chat flow for authenticated users in GCP staging.
         
         Uses real authentication (JWT/OAuth) to test the golden path that's currently broken.'
@@ -352,14 +357,14 @@ class WebSocketConnectionHandlerCloudTests(SSotBaseTestCase):
         logger.info(f'Chat flow test results:')
         logger.info(f'  - Total responses received: {total_responses}')
         logger.info(f'  - WebSocket events received: {sorted(unique_event_types)}')
-        logger.info(f'  - Test duration: {time.time() - start_time:.1f}s')
+        logger.info(f'  - Test duration: {time.time() - start_time:."1f"}s')
         assert total_responses > 0, "f'CRITICAL BUG: No responses received from agent execution request. This indicates ConnectionHandler silent failure where request is processed but no responses are sent back to the user. Golden path is broken.'"
         expected_events = {'agent_started', 'agent_completed'}
         received_events = set(websocket_events_received)
         missing_events = expected_events - received_events
         assert len(missing_events) == 0, "f'Missing critical WebSocket events: {missing_events}. Received: {received_events}. This indicates WebSocket notification system is not working properly.'"
         actual_duration = time.time() - start_time
-        assert actual_duration < timeout_seconds * 0.9, "f'Chat flow took too long: {actual_duration:.1f}s (timeout: {timeout_seconds}s). This may indicate connection handling delays or processing issues.'"
+        assert actual_duration < timeout_seconds * 0.9, "f'Chat flow took too long: {actual_duration:."1f"}s (timeout: {timeout_seconds}s). This may indicate connection handling delays or processing issues.'"
         final_responses = [r for r in responses_received if r.get('type') in ['agent_completed', 'agent_response']]
         assert len(final_responses) > 0, f"No final completion response received. Agent execution may have failed or ConnectionHandler dropped the response. All responses: {[r.get('type') for r in responses_received]}"
         logger.info(' PASS:  Complete chat flow test passed - golden path working')
@@ -368,5 +373,6 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
-"""
+""""
+
 ))))))))))))

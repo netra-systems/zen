@@ -5,7 +5,7 @@ This test reproduces the WebSocket 403 authentication error and verifies
 that the unified JWT secret manager fixes the issue by ensuring both
 auth service and backend use identical JWT secrets.
 
-Business Value: Prevents $50K MRR loss from WebSocket authentication failures
+Business Value: Prevents $"50K" MRR loss from WebSocket authentication failures
 """Empty docstring."""
 
 import pytest
@@ -146,7 +146,8 @@ class WebSocket403FixTests:
         get_jwt_secret_manager().clear_cache()
         
     def test_jwt_configuration_validation(self):
-        ""Test JWT configuration validation."
+        ""Test JWT configuration validation.""
+
         validation_result = validate_unified_jwt_config()
         
         # Should be valid in test environment
@@ -159,7 +160,8 @@ class WebSocket403FixTests:
         print(f   Secret length: {validation_result['info']['secret_length']} characters)
         
     def test_reproduce_websocket_403_scenario_before_fix(self):
-    """
+    """"
+
         Reproduce the original WebSocket 403 scenario.
         
         This test simulates the condition where auth service and backend
@@ -197,7 +199,8 @@ class WebSocket403FixTests:
             pytest.fail(fUnified JWT validation should succeed: {e})
     
     def test_staging_environment_configuration(self):
-        ""Test that staging environment configuration is correct."
+        ""Test that staging environment configuration is correct.""
+
         env = get_env()
         env.set(ENVIRONMENT, staging", test)"
         
@@ -293,7 +296,7 @@ if __name__ == "__main__:"
             
             print(\n + = * 60)
             print("[CELEBRATION] ALL TESTS PASSED - WebSocket 403 fix verified!)"
-            print([ROCKET] $50K MRR WebSocket functionality restored)""
+            print([ROCKET] $"50K" MRR WebSocket functionality restored)""
             print("= * 60)"
             
         except Exception as e:

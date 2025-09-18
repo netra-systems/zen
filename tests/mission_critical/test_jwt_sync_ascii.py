@@ -1,5 +1,5 @@
-"""
-"""
+""""
+
 COMPREHENSIVE JWT ASCII SYNCHRONIZATION AND AUTHENTICATION TEST SUITE
 ====================================================================
 
@@ -8,7 +8,7 @@ authentication flows, user journeys, and performance validation. Focuses on
 revenue-critical paths and user value delivery with cross-platform compatibility.
 
 AUTHENTICATION FLOW VALIDATION:
-- Complete signup  ->  login  ->  chat flow with ASCII logging
+    - Complete signup  ->  login  ->  chat flow with ASCII logging
 - JWT token generation and validation
 - Token refresh during active chat
 - Cross-service authentication
@@ -20,7 +20,7 @@ AUTHENTICATION FLOW VALIDATION:
 - Permission-based access
 
 USER JOURNEY TESTING:
-- First-time user onboarding
+    - First-time user onboarding
 - Power user workflows
 - Free tier limitations
 - Premium tier features
@@ -32,12 +32,13 @@ USER JOURNEY TESTING:
 - User preference persistence
 
 PERFORMANCE UNDER LOAD:
-- 50+ concurrent users
+    - 50+ concurrent users
 - < 30 second journey completion
 - Memory leak detection"""
 - Memory leak detection"""
 - Scaling behavior"""
-- Scaling behavior"""
+- Scaling behavior""""
+
 
 import hashlib
 import json
@@ -693,7 +694,7 @@ registration_data = {"email": "formatted_string",, "password": "SecureOnboarding
         successful_users = sum(1 for r in results if r.get("success, False))"
         avg_duration = statistics.mean([r.get("duration, 0) for r in results]) if results else 0"
 
-                    # Performance criteria: >70% success rate, <30s average duration
+                    # Performance criteria: >70% success rate, <"30s" average duration
         success_rate = successful_users / len(results) if results else 0
         performance_acceptable = avg_duration < 30.0
 

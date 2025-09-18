@@ -1,16 +1,17 @@
-"""
-"""
+""""
+
 Simple SSOT Violation Test for Issue #885
 
 This test validates that multiple WebSocket manager implementations exist,
 proving the 0.0% SSOT compliance issue.
-"""
-"""
+""""
+
 
 """
 """
 """
-"""
+""""
+
 import pytest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
@@ -25,12 +26,14 @@ class TestWebSocketSSotSimpleViolations(SSotBaseTestCase):
 
     def test_multiple_websocket_implementations_exist(self):
         """
-        "
+        ""
+
         EXPECTED TO FAIL: This test should detect multiple WebSocket implementations.
 
         This proves SSOT violation by finding multiple manager classes.
 "
-"
+""
+
         implementations = []
 
         # Test key import paths that should be consolidated
@@ -62,19 +65,23 @@ class TestWebSocketSSotSimpleViolations(SSotBaseTestCase):
             len(implementations), 1,
             f"SSOT VIOLATION: Found {len(implementations)} WebSocket implementations."
             fShould be exactly 1 after SSOT consolidation. "
-            fShould be exactly 1 after SSOT consolidation. "
+            fShould be exactly 1 after SSOT consolidation. ""
+
             fImplementations: {implementations}
         )
 
         print(fSSOT VIOLATION CONFIRMED: {len(implementations)} implementations detected)"
-        print(fSSOT VIOLATION CONFIRMED: {len(implementations)} implementations detected)"
+        print(fSSOT VIOLATION CONFIRMED: {len(implementations)} implementations detected)""
+
 
     def test_factory_patterns_exist(self):
         """
-    "
+    ""
+
         EXPECTED TO FAIL: This test should detect multiple factory patterns.
         "
-        "
+        ""
+
         factories = []
 
         factory_tests = [
@@ -105,13 +112,14 @@ class TestWebSocketSSotSimpleViolations(SSotBaseTestCase):
 
     def tearDown(self"):"
         Report violations found."
-        Report violations found."
+        Report violations found.""
+
         if self.violations_found:
             print("\n + =*60)"
             print(WEBSOCKET SSOT VIOLATIONS DETECTED")"
             print(=*60)
             for i, violation in enumerate(self.violations_found, 1):
-                print(f"{i:2d}. {violation})"
+                print(f"{i:"2d"}. {violation})"
             print(=*60)
             print(f"TOTAL VIOLATIONS: {len(self.violations_found)})"
             print(=*60)
@@ -119,5 +127,6 @@ class TestWebSocketSSotSimpleViolations(SSotBaseTestCase):
 
 if __name__ == "__main__:"
     pytest.main([__file__, -v, -s)"
-    pytest.main([__file__, -v, -s)"
+    pytest.main([__file__, -v, -s)""
+
 )))

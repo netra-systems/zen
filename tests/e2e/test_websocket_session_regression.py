@@ -8,7 +8,8 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.""
+
         if self._closed:
         raise RuntimeError(WebSocket is closed)""
         self.messages_sent.append(message)
@@ -67,7 +68,8 @@ class TestWebSocketConnection:
 
 @pytest.mark.asyncio
 class TestWebSocketSessionRegression:
-    ""Test suite to prevent regression of session management issues."
+    ""Test suite to prevent regression of session management issues.""
+
 
     @use_real_services_enforced
     async def test_session_not_passed_to_supervisor(self):
@@ -238,7 +240,8 @@ class TestWebSocketSessionRegression:
         pass
                                     # Simulate the error condition
     async def problematic_handler():
-        ""Simulate the problematic pattern that causes errors."
+        ""Simulate the problematic pattern that causes errors.""
+
         async with get_db() as session:
         # Simulate concurrent access pattern that causes issues
         agent = Magic                agent.db_session = session  # WRONG: This is the pattern to avoid
@@ -298,7 +301,7 @@ class TestAgentPerformanceRegression:
     try:
     result = await asyncio.wait_for( )
     handler.handle_message("perf_user, None, message),"
-    timeout=5.0  # Should complete much faster than 20s
+    timeout=5.0  # Should complete much faster than "20s"
             
     elapsed = time.time() - start_time
 
@@ -434,5 +437,6 @@ class TestSessionCleanup:
     # Verify session was still closed despite error
         assert session_closed, "Session should be closed even after error"
 
-"""
+""""
+
 '''

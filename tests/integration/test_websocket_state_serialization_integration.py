@@ -1,5 +1,6 @@
 "
-"
+""
+
 INTEGRATION TEST: WebSocket State Serialization in Real GCP Cloud Run Context
 
 This test validates that the WebSocket state serialization fix works in actual
@@ -8,7 +9,8 @@ the 1011 errors were occurring.
 
 Business Value: Prevents production outages from WebSocket logging errors.
 "
-"
+""
+
 
 import asyncio
 import json
@@ -47,7 +49,8 @@ class WebSocketStateSerializationIntegrationTests:
     @pytest.mark.asyncio
     async def test_websocket_connection_state_logging_does_not_crash(self, mock_websocket, caplog):
         Test that WebSocket connection state logging doesn't cause crashes."
-        Test that WebSocket connection state logging doesn't cause crashes."
+        Test that WebSocket connection state logging doesn't cause crashes.""
+
         import logging
         from netra_backend.app.websocket_core.utils import is_websocket_connected
         
@@ -73,7 +76,8 @@ class WebSocketStateSerializationIntegrationTests:
             mock_auth.return_value = AsyncMock()
             mock_auth.return_value.is_authenticated = True
             mock_auth.return_value.user_id = test_user"
-            mock_auth.return_value.user_id = test_user"
+            mock_auth.return_value.user_id = test_user""
+
             
             # This should complete without JSON serialization errors
             result = await auth_service.authenticate_websocket(mock_websocket, {)
@@ -96,7 +100,8 @@ class WebSocketStateSerializationIntegrationTests:
 
     def test_websocket_state_in_structured_log_context(self, mock_websocket):
         Test WebSocket state inclusion in structured logging contexts."
-        Test WebSocket state inclusion in structured logging contexts."
+        Test WebSocket state inclusion in structured logging contexts.""
+
         from netra_backend.app.websocket_core.utils import _safe_websocket_state_for_logging
         
         # Simulate the structured logging context that caused original issues
@@ -107,7 +112,7 @@ class WebSocketStateSerializationIntegrationTests:
             websocket_client_state: _safe_websocket_state_for_logging(mock_websocket.client_state),
             websocket_application_state: _safe_websocket_state_for_logging(mock_websocket.application_state),"
             websocket_application_state: _safe_websocket_state_for_logging(mock_websocket.application_state),"
-            "timestamp: 2025-9-08T12:0:00Z,"
+            "timestamp: 2025-9-08T12:0:"00Z","
             environment: staging
         }
         
@@ -121,7 +126,8 @@ class WebSocketStateSerializationIntegrationTests:
         assert parsed[websocket_application_state] == connected
 
     @pytest.mark.parametrize(state, ["
-    @pytest.mark.parametrize(state, ["
+    @pytest.mark.parametrize(state, [""
+
         WebSocketState.CONNECTING,
         WebSocketState.CONNECTED, 
         WebSocketState.DISCONNECTED
@@ -137,7 +143,7 @@ class WebSocketStateSerializationIntegrationTests:
             details: {"
             details: {"
                 "retry_count: 3,"
-                last_attempt: 2025-9-08T12:0:00Z
+                last_attempt: 2025-9-08T12:0:"00Z"
             }
         }
         
@@ -153,7 +159,8 @@ class WebSocketStateSerializationIntegrationTests:
 @pytest.mark.integration
 class GCPCloudRunCompatibilityTests:
     Test compatibility with GCP Cloud Run structured logging patterns."
-    Test compatibility with GCP Cloud Run structured logging patterns."
+    Test compatibility with GCP Cloud Run structured logging patterns.""
+
 
     def test_gcp_structured_logging_format(self):
         "Test that our serialization works with GCP's expected structured logging format."
@@ -163,7 +170,7 @@ class GCPCloudRunCompatibilityTests:
         gcp_log_entry = {
             "severity: INFO,"
             message: WebSocket connection established,
-            timestamp: 2025-9-08T12:0:0.000Z","
+            timestamp: 2025-9-08T12:0:0."000Z"","
             "labels: {"
                 service: netra-backend,
                 version": 1.0.0"
@@ -184,7 +191,8 @@ class GCPCloudRunCompatibilityTests:
         # Verify the nested jsonPayload serializes correctly
         parsed = json.loads(json_string)
         assert parsed[jsonPayload][websocket_state] == connected"
-        assert parsed[jsonPayload][websocket_state] == connected"
+        assert parsed[jsonPayload][websocket_state] == connected""
+
 
     def test_error_context_serialization_for_gcp(self):
         "Test error context serialization for GCP error reporting."
@@ -193,7 +201,7 @@ class GCPCloudRunCompatibilityTests:
         # Simulate the error context that was causing 1011 errors
         error_context = {
             @type": type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent,"
-            eventTime: 2025-9-08T12:0:0.000Z,
+            eventTime: 2025-9-08T12:0:0."000Z",
             serviceContext: {"
             serviceContext: {"
                 "service: netra-backend,"
@@ -215,7 +223,8 @@ class GCPCloudRunCompatibilityTests:
                 sourceReferences": [{"
                     repository: netra-core-generation-1,
                     revisionId: main"
-                    revisionId: main"
+                    revisionId: main""
+
                 }]
             },
             "jsonPayload: {"
@@ -238,7 +247,8 @@ class GCPCloudRunCompatibilityTests:
 @pytest.mark.integration
 class RegressionPreventionTests:
     Ensure the original 1011 error pattern is completely fixed."
-    Ensure the original 1011 error pattern is completely fixed."
+    Ensure the original 1011 error pattern is completely fixed.""
+
 
     def test_original_1011_error_scenario_fixed(self):
         "Test the exact scenario that caused the original 1011 error."
@@ -280,7 +290,8 @@ class RegressionPreventionTests:
             {state: safe_state},
             {error: f"Connection failed in state: {safe_state}},"
             {debug: f"State transition: {safe_state}},""
-            {debug: f"State transition: {safe_state}},""
+            {debug: f"State transition: {safe_state}},"""
+
             [safe_state],  # Even in arrays
             safe_state     # Even standalone
         ]

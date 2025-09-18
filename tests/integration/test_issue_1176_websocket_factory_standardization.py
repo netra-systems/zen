@@ -5,7 +5,7 @@ These tests validate that the standardized factory interface prevents coordinati
 and ensures consistent WebSocket manager initialization across integration points.
 
 Business Justification:
-- Prevents $500K+ ARR risk from WebSocket initialization failures
+    - Prevents $"500K" plus ARR risk from WebSocket initialization failures
 - Validates Issue #1176 coordination gap prevention
 - Ensures factory pattern consistency across the codebase
 """Empty docstring."""
@@ -292,7 +292,8 @@ class TestIssue1176IntegrationPointValidation(SSotAsyncTestCase):
             self.assertTrue(validation_result.get('compliant', False))
 
     async def test_websocket_manager_setter_validation(self):
-        ""Test that WebSocket manager setter includes standardized validation."
+        ""Test that WebSocket manager setter includes standardized validation.""
+
         from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
         bridge = AgentWebSocketBridge()

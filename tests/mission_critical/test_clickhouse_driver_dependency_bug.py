@@ -25,7 +25,8 @@ return True
 except ImportError as e:
     print(formatted_string"")
     print(  The code requires clickhouse-driver but it's not installed)"
-    print(  The code requires clickhouse-driver but it's not installed)"
+    print(  The code requires clickhouse-driver but it's not installed)""
+
 return False
 
 
@@ -45,7 +46,8 @@ print(f )
 Requirements.txt analysis:)
 print(formatted_string")"
 print()"
-print()"
+print()""
+
 
         # Check what's actually imported in code'
 code_uses_driver = False
@@ -112,7 +114,8 @@ if has_connect and not has_driver:
     print("")
 [X] BUG CONFIRMED: Wrong ClickHouse library installed!)
 print(  Solution: Add 'clickhouse-driver' to requirements.txt)"
-print(  Solution: Add 'clickhouse-driver' to requirements.txt)"
+print(  Solution: Add 'clickhouse-driver' to requirements.txt)""
+
 return False
 
 return True

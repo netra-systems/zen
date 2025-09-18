@@ -2,13 +2,13 @@
 WebSocket Reconnection Flow E2E Test
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise)
+    - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Connection resilience ensures uninterrupted user experience
 - Value Impact: Users can continue working despite network interruptions or server restarts
 - Strategic Impact: Platform reliability reduces customer frustration and support tickets
 
 This test validates WebSocket connection resilience:
-1. Automatic reconnection after connection drops
+    1. Automatic reconnection after connection drops
 2. Session state preservation across reconnections
 3. Message queue handling during reconnection
 4. Real-time notification of connection status to users
@@ -17,14 +17,14 @@ This test validates WebSocket connection resilience:
 7. Graceful handling of extended disconnections
 
 CRITICAL REQUIREMENTS:
-- MANDATORY AUTHENTICATION: Reconnections maintain proper authentication context
+    - MANDATORY AUTHENTICATION: Reconnections maintain proper authentication context
 - NO MOCKS: Real WebSocket connections with actual disconnection scenarios
 - SESSION CONTINUITY: User context and conversation state preserved
 - ALL 5 WEBSOCKET EVENTS: Agent execution continues normally after reconnection
 - USER NOTIFICATION: Clear status updates about connection state
 
 This test ensures:
-- Users don't lose work due to temporary network issues'
+    - Users don't lose work due to temporary network issues'
 - Seamless experience during server maintenance
 - Enterprise-grade connection reliability
 - Proper handling of mobile network disruptions
@@ -68,7 +68,8 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
                 pass
 
     async def create_authenticated_websocket_session(self, email: str) -> Tuple[Any, Any, Any]:
-        ""Create authenticated WebSocket session."
+        ""Create authenticated WebSocket session.""
+
         auth_user = await self.auth_helper.create_authenticated_user(email=email, permissions=['read', 'write', 'agent_execute')
         user_context = await create_authenticated_user_context(user_email=auth_user.email, user_id=auth_user.user_id, environment='test', permissions=auth_user.permissions, websocket_enabled=True)
         websocket_url = 'ws://localhost:8000/ws/chat'
@@ -78,7 +79,8 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
         return (auth_user, websocket_connection, user_context)
 
     async def simulate_connection_drop(self, websocket_connection: Any) -> None:
-    """
+    """"
+
         Simulate connection drop for testing reconnection.
         
         This simulates real network disconnection scenarios.
@@ -93,7 +95,7 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
         logger.info(' PASS:  Connection drop simulated')
 
     async def establish_reconnection(self, auth_user: Any, delay_seconds: float=1.0) -> Any:
-"""Empty docstring."""
+    """Empty docstring."""
         Establish reconnection after simulated drop.
         
         Args:
@@ -196,7 +198,7 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
     @pytest.mark.e2e
     @pytest.mark.real_services
     async def test_reconnection_with_message_queuing(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test reconnection with message queuing during disconnection.
         
         This test validates that messages sent during disconnection periods
@@ -271,7 +273,7 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
     @pytest.mark.e2e
     @pytest.mark.real_services
     async def test_reconnection_authentication_validation(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test that reconnection properly validates authentication tokens.
         
         This test ensures that expired or invalid tokens are properly handled
@@ -336,7 +338,8 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
         baseline_duration = time.time() - baseline_start
         assert len(baseline_events) > 0, "'Baseline performance test should complete'"
         assert any((e.get('type') == 'agent_completed' for e in baseline_events)), "'Baseline should complete'"
-        logger.info(f' PASS:  Baseline performance: {baseline_duration:.2f}s')
+        logger.info(f' PASS:  Baseline performance: {baseline_duration:."2f"}s')""
+
         await self.simulate_connection_drop(websocket_connection)
         reconnected_websocket = await self.establish_reconnection(auth_user, delay_seconds=1.0)
         logger.info('[U+23F1][U+FE0F] Measuring post-reconnection performance...')
@@ -346,24 +349,29 @@ class WebSocketReconnectionFlowE2ETests(BaseE2ETest):
         reconnection_duration = time.time() - reconnection_start
         assert len(reconnection_events) > 0, "'Post-reconnection performance test should complete'"
         assert any((e.get('type') == 'agent_completed' for e in reconnection_events)), "'Reconnection test should complete'"
-        logger.info(f' PASS:  Post-reconnection performance: {reconnection_duration:.2f}s')
+        logger.info(f' PASS:  Post-reconnection performance: {reconnection_duration:."2f"}s')""
+
         performance_ratio = reconnection_duration / baseline_duration
         performance_degradation = (reconnection_duration - baseline_duration) / baseline_duration * 100
         logger.info(f' CHART:  Performance comparison:')
-        logger.info(f'   Baseline: {baseline_duration:.2f}s')
-        logger.info(f'   Post-reconnection: {reconnection_duration:.2f}s')
-        logger.info(f'   Ratio: {performance_ratio:.2f}x')
-        logger.info(f'   Degradation: {performance_degradation:+.1f}%')
-        assert performance_ratio < 1.5, "f'Significant performance degradation after reconnection: {performance_ratio:.2f}x (max: 1.5x)'"
-        assert baseline_duration < 30.0, "f'Baseline too slow: {baseline_duration:.2f}s'"
-        assert reconnection_duration < 45.0, "f'Post-reconnection too slow: {reconnection_duration:.2f}s'"
+        logger.info(f'   Baseline: {baseline_duration:."2f"}s')""
+
+        logger.info(f'   Post-reconnection: {reconnection_duration:."2f"}s')""
+
+        logger.info(f'   Ratio: {performance_ratio:."2f"}x')
+        logger.info(f'   Degradation: {performance_degradation:+."1f"}%')
+        assert performance_ratio < 1.5, "f'Significant performance degradation after reconnection: {performance_ratio:."2f"}x (max: 1."5x")'"
+        assert baseline_duration < 30.0, "f'Baseline too slow: {baseline_duration:."2f"}s'"
+        assert reconnection_duration < 45.0, "f'Post-reconnection too slow: {reconnection_duration:."2f"}s'"
         logger.info(' CELEBRATION:  RECONNECTION PERFORMANCE IMPACT TEST PASSED')
-        logger.info(f'    LIGHTNING:  Performance Ratio: {performance_ratio:.2f}x (acceptable)')
+        logger.info(f'    LIGHTNING:  Performance Ratio: {performance_ratio:."2f"}x (acceptable)')""
+
         logger.info(f'   [U+1F4C8] Performance Consistency: VERIFIED')
         logger.info(f'    PASS:  User Experience: MAINTAINED')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
-"""
+""""
+
 )))))))

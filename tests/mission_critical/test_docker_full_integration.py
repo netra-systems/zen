@@ -1,20 +1,20 @@
 '''
 '''
 MISSION CRITICAL: Docker Full Integration & System Validation Suite
-BUSINESS IMPACT: VALIDATES $2M+ ARR PLATFORM END-TO-END DOCKER OPERATIONS
+BUSINESS IMPACT: VALIDATES $"2M"+ ARR PLATFORM END-TO-END DOCKER OPERATIONS
 
 This is the ultimate Docker integration test suite that validates ALL components working
 together in realistic scenarios. It simulates complete CI/CD pipeline scenarios,
 multi-service interactions, and real-world usage patterns.
 
 Business Value Justification (BVJ):
-1. Segment: Platform/Internal - System Integration & Reliability Validation
+    1. Segment: Platform/Internal - System Integration & Reliability Validation
 2. Business Goal: Ensure complete Docker stack works end-to-end in production scenarios
 3. Value Impact: Validates entire development infrastructure preventing catastrophic failures
-4. Revenue Impact: Protects $2M+ ARR platform from system-wide Docker infrastructure failures
+4. Revenue Impact: Protects $"2M"+ ARR platform from system-wide Docker infrastructure failures
 
 INTEGRATION VALIDATION SCOPE:
-- All Docker components working together seamlessly
+    - All Docker components working together seamlessly
 - Real Docker operations (absolutely no mocks)
 - Multi-service scenarios with dependencies
 - Complete test suite execution with Docker orchestration
@@ -98,7 +98,8 @@ class IntegrationTestResult:
 
     @dataclass
 class ServiceConfiguration:
-    ""Configuration for a service in integration testing."
+    ""Configuration for a service in integration testing.""
+
     name: str
     image: str
     ports: Dict[str, int]
@@ -173,8 +174,8 @@ class DockerIntegrationFramework:
         depends_on=[],
         health_check={
         'test': ['CMD-SHELL', 'pg_isready -U test_user'],
-        'interval': '10s',
-        'timeout': '5s',
+        'interval': '"10s"',
+        'timeout': '"5s"',
         'retries': 5
     
         ),
@@ -211,7 +212,8 @@ class DockerIntegrationFramework:
         continue
         else:
         raise RuntimeError("
-        raise RuntimeError("
+        raise RuntimeError(""
+
         else:
         allocated_ports[container_port] = host_port
 
@@ -242,17 +244,20 @@ class DockerIntegrationFramework:
         return True
         else:
         logger.warning(formatted_string)"
-        logger.warning(formatted_string)"
+        logger.warning(formatted_string)""
+
         return False
         except Exception as e:
         logger.error("
-        logger.error("
+        logger.error(""
+
         return False
 
     def deploy_service(self, service_config: ServiceConfiguration) -> bool:
         "Deploy a service with complete configuration."
         logger.info("
-        logger.info("
+        logger.info(""
+
 
         try:
         # Allocate ports
@@ -284,7 +289,8 @@ class DockerIntegrationFramework:
         if not volume_exists:
         if not self.create_volume(volume):
         logger.error("
-        logger.error("
+        logger.error(""
+
         return False
 
                                                 # Build Docker run command
@@ -314,8 +320,8 @@ class DockerIntegrationFramework:
         health_cmd = service_config.health_check.get('test', [)
         if health_cmd and len(health_cmd) > 1:
         run_cmd.extend(['--health-cmd', ' '.join(health_cmd[1:))
-        run_cmd.extend(['--health-interval', service_config.health_check.get('interval', '30s')]
-        run_cmd.extend(['--health-timeout', service_config.health_check.get('timeout', '10s')]
+        run_cmd.extend(['--health-interval', service_config.health_check.get('interval', '"30s"')]
+        run_cmd.extend(['--health-timeout', service_config.health_check.get('timeout', '"10s"')]
         run_cmd.extend(['--health-retries', str(service_config.health_check.get('retries', 3))]
 
                                                                         # Create container
@@ -334,7 +340,8 @@ class DockerIntegrationFramework:
                                                                                     
         except Exception as e:
         logger.warning("
-        logger.warning("
+        logger.warning(""
+
 
                                                                                         # Store service info
         self.active_services[service_config.name] = {
@@ -348,7 +355,8 @@ class DockerIntegrationFramework:
 
         except Exception as e:
         logger.error("
-        logger.error("
+        logger.error(""
+
         return False
 
     def wait_for_service_health(self, service_name: str, timeout: int = 60) -> bool:
@@ -388,7 +396,8 @@ class DockerIntegrationFramework:
     def run_integration_scenario(self, scenario_name: str, scenario_func) -> IntegrationTestResult:
         "Run an integration test scenario and collect results."
         logger.info(formatted_string)"
-        logger.info(formatted_string)"
+        logger.info(formatted_string)""
+
 
         start_time = datetime.now()
         operations_completed = 0
@@ -425,7 +434,8 @@ class DockerIntegrationFramework:
         operations_failed += 1
         error_messages.append(str(e))
         logger.error("
-        logger.error("
+        logger.error(""
+
 
         end_time = datetime.now()
 
@@ -498,7 +508,8 @@ class DockerIntegrationFramework:
 
     def update_metrics(self, result: IntegrationTestResult):
         Update overall integration metrics."
-        Update overall integration metrics."
+        Update overall integration metrics.""
+
         self.metrics['total_scenarios'] += 1
         if result.success:
         self.metrics['successful_scenarios'] += 1
@@ -545,7 +556,8 @@ class DockerIntegrationFramework:
 
         @pytest.fixture
     def integration_framework():
-        ""Pytest fixture providing Docker integration framework."
+        ""Pytest fixture providing Docker integration framework.""
+
         framework = DockerIntegrationFramework()
         yield framework
         framework.cleanup_scenario_resources()
@@ -575,7 +587,8 @@ class TestDockerMultiServiceIntegration:
         else:
         operations_failed += 1
         error_messages.append(PostgreSQL health check failed)"
-        error_messages.append(PostgreSQL health check failed)"
+        error_messages.append(PostgreSQL health check failed)""
+
         else:
         operations_failed += 1
         error_messages.append("PostgreSQL deployment failed)"
@@ -607,7 +620,8 @@ class TestDockerMultiServiceIntegration:
         else:
         operations_failed += 1
         error_messages.append(Nginx deployment failed)"
-        error_messages.append(Nginx deployment failed)"
+        error_messages.append(Nginx deployment failed)""
+
 
                                                         # Test inter-service connectivity
         connectivity_tests = 0
@@ -630,7 +644,8 @@ class TestDockerMultiServiceIntegration:
         connectivity_tests += 1
         operations_failed += 1
         error_messages.append("
-        error_messages.append("
+        error_messages.append(""
+
 
         success = (operations_failed == 0 and services_deployed >= 3 and )
         successful_connections >= connectivity_tests * 0.8)
@@ -668,7 +683,8 @@ class TestDockerMultiServiceIntegration:
         assert result.operations_failed <= 1, "formatted_string"
 
         logger.info(formatted_string)"
-        logger.info(formatted_string)"
+        logger.info(formatted_string)""
+
 
     def test_service_dependency_resolution(self, integration_framework):
         "Test proper service dependency resolution and startup ordering."
@@ -730,7 +746,8 @@ class TestDockerMultiServiceIntegration:
         dependency_tests += 1
         operations_failed += 1
         error_messages.append(formatted_string)"
-        error_messages.append(formatted_string)"
+        error_messages.append(formatted_string)""
+
 
         success = (services_deployed == len(dependency_order) and )
         operations_failed <= 1 and
@@ -774,7 +791,8 @@ class TestDockerMultiServiceIntegration:
 
 class TestDockerCIPipelineSimulation:
         Simulate complete CI/CD pipeline scenarios with Docker."
-        Simulate complete CI/CD pipeline scenarios with Docker."
+        Simulate complete CI/CD pipeline scenarios with Docker.""
+
 
     def test_parallel_build_and_test_simulation(self, integration_framework):
         "Simulate parallel build and test operations like in CI/CD."
@@ -807,7 +825,8 @@ class TestDockerCIPipelineSimulation:
         return True, build_time, formatted_string
         else:
         return False, build_time, formatted_string"
-        return False, build_time, formatted_string"
+        return False, build_time, formatted_string""
+
 
         except Exception as e:
         build_time = time.time() - start_time
@@ -901,18 +920,21 @@ class TestDockerCIPipelineSimulation:
 
         build_success_rate = result.performance_metrics.get('build_success_rate', 0)
         assert build_success_rate >= 75, formatted_string"
-        assert build_success_rate >= 75, formatted_string"
+        assert build_success_rate >= 75, formatted_string""
+
 
         parallel_throughput = result.performance_metrics.get('parallel_throughput', 0)
         assert parallel_throughput > 2.0, formatted_string"
-        assert parallel_throughput > 2.0, formatted_string"
+        assert parallel_throughput > 2.0, formatted_string""
+
 
         logger.info(formatted_string )
         formatted_string")"
 
     def test_rolling_deployment_simulation(self, integration_framework):
         Simulate rolling deployment scenario with zero downtime."
-        Simulate rolling deployment scenario with zero downtime."
+        Simulate rolling deployment scenario with zero downtime.""
+
         pass
         logger.info( CYCLE:  Simulating rolling deployment with zero downtime")"
 
@@ -936,7 +958,8 @@ class TestDockerCIPipelineSimulation:
         else:
         operations_failed += 1
         error_messages.append("
-        error_messages.append("
+        error_messages.append(""
+
         else:
         operations_failed += 1
         error_messages.append(formatted_string")"
@@ -996,12 +1019,14 @@ class TestDockerCIPipelineSimulation:
         else:
         operations_failed += 1
         error_messages.append(Could not allocate port for new version)"
-        error_messages.append(Could not allocate port for new version)"
+        error_messages.append(Could not allocate port for new version)""
+
 
         except Exception as e:
         operations_failed += 1
         error_messages.append("
-        error_messages.append("
+        error_messages.append(""
+
 
         success = (operations_failed <= 1 and services_deployed >= 2)
 
@@ -1027,7 +1052,8 @@ class TestDockerCIPipelineSimulation:
 
         result = integration_framework.run_integration_scenario( )
         Rolling Deployment Simulation,"
-        Rolling Deployment Simulation,"
+        Rolling Deployment Simulation,""
+
         rolling_deployment_scenario
                                                                                     
 
@@ -1074,18 +1100,20 @@ class TestDockerInfrastructureServiceStartup:
         else:
         operations_failed += 1
         error_messages.append(formatted_string)"
-        error_messages.append(formatted_string)"
+        error_messages.append(formatted_string)""
+
         else:
         operations_failed += 1
         error_messages.append("
-        error_messages.append("
+        error_messages.append(""
+
 
         total_startup_time = time.time() - overall_start_time
         average_startup_time = sum(startup_times) / len(startup_times) if startup_times else 0
 
         success = (services_deployed == len(services_to_deploy) and )
         operations_failed == 0 and
-        average_startup_time < 25)  # Stricter than 30s requirement
+        average_startup_time < 25)  # Stricter than "30s" requirement
 
         return {
         'success': success,
@@ -1112,7 +1140,8 @@ class TestDockerInfrastructureServiceStartup:
 
         result = integration_framework.run_integration_scenario( )
         Rapid Multi-Service Startup Sequence,"
-        Rapid Multi-Service Startup Sequence,"
+        Rapid Multi-Service Startup Sequence,""
+
         startup_sequence_scenario
                                 
 
@@ -1151,7 +1180,7 @@ class TestDockerInfrastructureServiceStartup:
 
         result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
-        '--memory', '256m', image
+        '--memory', '"256m"', image
             
 
         if result.returncode == 0:
@@ -1181,7 +1210,7 @@ class TestDockerInfrastructureServiceStartup:
 
         result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
-        '--memory', '256m', image
+        '--memory', '"256m"', image
                                 
 
         if result.returncode == 0:
@@ -1232,7 +1261,8 @@ class TestDockerInfrastructureServiceStartup:
 
         avg_alpine = result.performance_metrics.get('average_alpine_startup', 999)
         assert avg_alpine < 15, formatted_string"
-        assert avg_alpine < 15, formatted_string"
+        assert avg_alpine < 15, formatted_string""
+
 
         logger.info(formatted_string")"
 
@@ -1250,14 +1280,15 @@ class TestDockerInfrastructureServiceStartup:
     def deploy_service_concurrently(service_info):
         service_name, image = service_info
         container_name = formatted_string"
-        container_name = formatted_string"
+        container_name = formatted_string""
+
 
         try:
         start_time = time.time()
 
         result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
-        '--memory', '128m', '--cpus', '0.5', image, 'sleep', '60'
+        '--memory', '"128m"', '--cpus', '0.5', image, 'sleep', '60'
         
 
         deploy_time = time.time() - start_time
@@ -1268,7 +1299,8 @@ class TestDockerInfrastructureServiceStartup:
         'success': True,
         'deploy_time': deploy_time,
         'message': formatted_string"
-        'message': formatted_string"
+        'message': formatted_string""
+
             
         else:
         return {
@@ -1364,7 +1396,8 @@ class TestDockerInfrastructureServiceStartup:
                                                             
 
         assert result.success, formatted_string"
-        assert result.success, formatted_string"
+        assert result.success, formatted_string""
+
 
         success_rate = result.performance_metrics.get('concurrent_success_rate', 0)
         assert success_rate >= 80, "formatted_string"
@@ -1375,7 +1408,7 @@ class TestDockerInfrastructureServiceStartup:
         logger.info(""
 
     def test_resource_constrained_startup(self, integration_framework):
-        Test service startup under resource constraints (< 500MB memory).""
+        Test service startup under resource constraints (< "500MB" memory).""
         pass
         logger.info([U+1F9E0] Testing resource-constrained service startup)
 
@@ -1390,22 +1423,23 @@ class TestDockerInfrastructureServiceStartup:
         try:
         # Deploy services with strict memory limits
         constrained_services = [
-        ('nginx_constrained', 'nginx:alpine', '128m'),
-        ('redis_constrained', 'redis:alpine', '64m'),
-        ('alpine_constrained_1', 'alpine:latest', '32m'),
-        ('alpine_constrained_2', 'alpine:latest', '32m'),
-        ('alpine_constrained_3', 'alpine:latest', '32m')
+        ('nginx_constrained', 'nginx:alpine', '"128m"'),
+        ('redis_constrained', 'redis:alpine', '"64m"'),
+        ('alpine_constrained_1', 'alpine:latest', '"32m"'),
+        ('alpine_constrained_2', 'alpine:latest', '"32m"'),
+        ('alpine_constrained_3', 'alpine:latest', '"32m"')
         
 
         total_memory_allocated = 0
 
         for service_name, image, memory_limit in constrained_services:
         container_name = formatted_string"
-        container_name = formatted_string"
+        container_name = formatted_string""
+
         memory_mb = int(memory_limit.replace('m', ''))
         total_memory_allocated += memory_mb
 
-            # Ensure total allocation stays under 500MB
+            # Ensure total allocation stays under "500MB"
         if total_memory_allocated <= 500:
         start_time = time.time()
 
@@ -1438,7 +1472,8 @@ class TestDockerInfrastructureServiceStartup:
         else:
         operations_failed += 1
         error_messages.append("
-        error_messages.append("
+        error_messages.append(""
+
 
                                 # Check startup time under constraints
         if deploy_time < 30:
@@ -1446,14 +1481,16 @@ class TestDockerInfrastructureServiceStartup:
         else:
         operations_failed += 1
         error_messages.append(formatted_string)"
-        error_messages.append(formatted_string)"
+        error_messages.append(formatted_string)""
+
 
         else:
         operations_failed += 1
         error_messages.append("
-        error_messages.append("
+        error_messages.append(""
+
         else:
-        break  # Would exceed 500MB limit
+        break  # Would exceed "500MB" limit
 
         total_memory_used = sum(memory_usage)
         memory_efficiency = services_deployed / (total_memory_used / 100) if total_memory_used > 0 else 0
@@ -1487,7 +1524,8 @@ class TestDockerInfrastructureServiceStartup:
 
         result = integration_framework.run_integration_scenario( )
         Resource-Constrained Service Startup,"
-        Resource-Constrained Service Startup,"
+        Resource-Constrained Service Startup,""
+
         resource_constrained_scenario
                                                     
 
@@ -1633,14 +1671,17 @@ class TestDockerInfrastructureServiceStartup:
 
         recovery_rate = result.performance_metrics.get('recovery_success_rate', 0)
         assert recovery_rate >= 80, formatted_string"
-        assert recovery_rate >= 80, formatted_string"
+        assert recovery_rate >= 80, formatted_string""
+
 
         recovery_time = result.performance_metrics.get('average_recovery_time', 999)
         assert recovery_time < 10, formatted_string"
-        assert recovery_time < 10, formatted_string"
+        assert recovery_time < 10, formatted_string""
+
 
         logger.info("
-        logger.info("
+        logger.info(""
+
 
 
 class TestDockerInfrastructureHealthMonitoring:
@@ -1649,7 +1690,8 @@ class TestDockerInfrastructureHealthMonitoring:
     def test_comprehensive_health_check_validation(self, integration_framework):
         "Test comprehensive health check mechanisms across all services."
         logger.info([U+1F3E5] Testing comprehensive health check validation)"
-        logger.info([U+1F3E5] Testing comprehensive health check validation)"
+        logger.info([U+1F3E5] Testing comprehensive health check validation)""
+
 
     def health_check_scenario():
         operations_completed = 0
@@ -1666,8 +1708,8 @@ class TestDockerInfrastructureHealthMonitoring:
         'image': 'nginx:alpine',
         'port': 8090,
         'health_cmd': 'curl -f http://localhost:80 || exit 1',
-        'health_interval': '5s',
-        'health_timeout': '3s',
+        'health_interval': '"5s"',
+        'health_timeout': '"3s"',
         'health_retries': 3
         },
         {
@@ -1675,8 +1717,8 @@ class TestDockerInfrastructureHealthMonitoring:
         'image': 'redis:alpine',
         'port': 6390,
         'health_cmd': 'redis-cli ping',
-        'health_interval': '3s',
-        'health_timeout': '2s',
+        'health_interval': '"3s"',
+        'health_timeout': '"2s"',
         'health_retries': 5
         
         
@@ -1797,7 +1839,8 @@ class TestDockerInfrastructureHealthMonitoring:
 
         avg_time = result.performance_metrics.get('average_health_check_time', 999)
         assert avg_time < 20, formatted_string"
-        assert avg_time < 20, formatted_string"
+        assert avg_time < 20, formatted_string""
+
 
         logger.info(formatted_string")"
 
@@ -1823,12 +1866,13 @@ class TestDockerInfrastructureHealthMonitoring:
 
         for service_name, image in uptime_services:
         container_name = formatted_string"
-        container_name = formatted_string"
+        container_name = formatted_string""
+
 
         result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
         '--restart', 'unless-stopped',
-        '--memory', '256m',
+        '--memory', '"256m"',
         image
             
 
@@ -1889,7 +1933,8 @@ class TestDockerInfrastructureHealthMonitoring:
         else:
         operations_failed += 1
         error_messages.append("
-        error_messages.append("
+        error_messages.append(""
+
         else:
         operations_failed += 1
         error_messages.append(formatted_string")"
@@ -1937,10 +1982,12 @@ class TestDockerInfrastructureHealthMonitoring:
 
         downtime = result.performance_metrics.get('total_downtime_seconds', 999)
         assert downtime == 0, formatted_string"
-        assert downtime == 0, formatted_string"
+        assert downtime == 0, formatted_string""
+
 
         logger.info("
-        logger.info("
+        logger.info(""
+
 
     def test_zero_port_conflict_monitoring(self, integration_framework):
         "Test monitoring and prevention of port conflicts."
@@ -2059,7 +2106,8 @@ class TestDockerInfrastructureHealthMonitoring:
 
         result = integration_framework.run_integration_scenario( )
         Zero Port Conflict Monitoring,"
-        Zero Port Conflict Monitoring,"
+        Zero Port Conflict Monitoring,""
+
         port_conflict_scenario
                                                                     
 
@@ -2098,7 +2146,7 @@ class TestDockerInfrastructureHealthMonitoring:
 
         result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
-        '--memory', '256m',
+        '--memory', '"256m"',
         '--cpus', '0.5',
         image
             
@@ -2232,11 +2280,13 @@ class TestDockerInfrastructureHealthMonitoring:
                                                                             
 
         assert result.success, formatted_string"
-        assert result.success, formatted_string"
+        assert result.success, formatted_string""
+
 
         samples = result.performance_metrics.get('total_performance_samples', 0)
         assert samples >= 10, formatted_string"
-        assert samples >= 10, formatted_string"
+        assert samples >= 10, formatted_string""
+
 
         cpu_avg = result.performance_metrics.get('average_cpu_percent', 999)
         assert cpu_avg < 50, "formatted_string"
@@ -2249,7 +2299,8 @@ class TestDockerInfrastructureHealthMonitoring:
     def test_health_monitoring_under_load(self, integration_framework):
         ""Test health monitoring system under load conditions."
         logger.info([U+1F3CB][U+FE0F] Testing health monitoring under load conditions)"
-        logger.info([U+1F3CB][U+FE0F] Testing health monitoring under load conditions)"
+        logger.info([U+1F3CB][U+FE0F] Testing health monitoring under load conditions)""
+
 
     def health_under_load_scenario():
         operations_completed = 0
@@ -2267,18 +2318,19 @@ class TestDockerInfrastructureHealthMonitoring:
 
         for service_name, image in load_services:
         container_name = formatted_string"
-        container_name = formatted_string"
+        container_name = formatted_string""
+
 
             # Deploy with health check
         health_cmd = 'curl -f http://localhost:80 || exit 1' if 'nginx' in image else 'redis-cli ping'
 
         result = execute_docker_command([)
         'docker', 'run', '-d', '--name', container_name,
-        '--memory', '128m',
+        '--memory', '"128m"',
         '--cpus', '0.3',
         '--health-cmd', health_cmd,
-        '--health-interval', '2s',
-        '--health-timeout', '1s',
+        '--health-interval', '"2s"',
+        '--health-timeout', '"1s"',
         '--health-retries', '2',
         image
             
@@ -2400,7 +2452,8 @@ class TestDockerInfrastructureHealthMonitoring:
                                                         
 
         assert result.success, formatted_string"
-        assert result.success, formatted_string"
+        assert result.success, formatted_string""
+
 
         health_rate = result.performance_metrics.get('average_health_success_rate_under_load', 0)
         assert health_rate >= 90, "formatted_string"

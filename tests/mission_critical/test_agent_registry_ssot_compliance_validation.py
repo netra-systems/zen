@@ -1,9 +1,9 @@
-"""
-"""
+""""
+
 AgentRegistry SSOT Compliance Validation Tests - Issue #1080
 
 MISSION: Validate AgentRegistry SSOT compliance after fixes
-Business Impact: $500K+ ARR Golden Path restoration
+Business Impact: $"500K" plus ARR Golden Path restoration
 
 These tests validate the FIXED state after SSOT consolidation.
 EXPECTED INITIAL RESULT: ALL TESTS FAIL (waiting for fixes)
@@ -14,10 +14,11 @@ Golden Path Restored: Users login → AI agents process requests → Users recei
 Created: 2025-9-14 - SSOT Test Plan Step 2
 Priority: P0 Critical - Golden Path validation
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import pytest
 import asyncio
 from typing import Dict, Any, Optional, Type, List
@@ -33,13 +34,15 @@ from shared.isolated_environment import IsolatedEnvironment
 
 class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
     "
-    "
+    ""
+
     Validation tests for AgentRegistry SSOT compliance.
     
     EXPECTED INITIAL: All tests FAIL (fixes not implemented)
     AFTER SSOT FIX: All tests PASS (proving compliance)
 "
-"
+""
+
     
     def setup_method(self, method=None):
         "Set up test environment with SSOT patterns"
@@ -56,13 +59,15 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
 
     async def test_single_registry_import_resolution(self):
         """
-    "
+    ""
+
         CRITICAL: Validate only one AgentRegistry class exists across all imports
         
         Business Impact: Eliminates developer confusion and ensures consistency
         Expected: FAIL initially, PASS after SSOT fix
         "
-        "
+        ""
+
         self.record_metric(test_type, ssot_import_validation)
         
         # Define all possible import paths for AgentRegistry
@@ -84,7 +89,8 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
                 successful_imports.append(import_path)
                 
                 self.record_metric(fimport_success_{module_path}, True)"
-                self.record_metric(fimport_success_{module_path}, True)"
+                self.record_metric(fimport_success_{module_path}, True)""
+
                 
             except (ImportError, AttributeError) as e:
                 self.record_metric(f"import_failed_{import_path}, str(e))"
@@ -101,7 +107,8 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
         assert len(successful_imports) > 0, ()
             fSSOT COMPLIANCE FAILURE: No AgentRegistry imports work. 
             fTried: {import_paths}"
-            fTried: {import_paths}"
+            fTried: {import_paths}""
+
         )
         
         # All working imports must resolve to same class
@@ -122,7 +129,8 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
                 )
 
     async def test_unified_websocket_event_delivery(self):
-    """
+    """"
+
         CRITICAL: Validate consistent WebSocket event delivery across all contexts
         
         Business Impact: Ensures reliable Golden Path chat experience
@@ -179,13 +187,15 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
 
     async def test_uniform_multi_user_isolation(self):
         """
-    "
+    ""
+
         CRITICAL: Validate user isolation works consistently across all instances
         
         Business Impact: Ensures enterprise security and data protection
         Expected: FAIL initially, PASS after SSOT fix  
         "
-        "
+        ""
+
         self.record_metric(test_type, multi_user_isolation_validation)
         self.record_metric(security_impact", ENTERPRISE_CRITICAL)"
         
@@ -224,10 +234,12 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
             assert user_isolation == reference_isolation, (
                 f"SSOT COMPLIANCE FAILURE: User isolation capabilities inconsistent."
                 fUser {user_contexts[0]}: {reference_isolation} "
-                fUser {user_contexts[0]}: {reference_isolation} "
+                fUser {user_contexts[0]}: {reference_isolation} ""
+
                 fvs User {user_id}: {user_isolation}. 
                 fSSOT requires consistent isolation across all users."
-                fSSOT requires consistent isolation across all users."
+                fSSOT requires consistent isolation across all users.""
+
             )
         
         self.record_metric("multi_user_isolation_consistent, True)"
@@ -296,13 +308,15 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
                 assert signature == reference_signature, (
                     f"SSOT COMPLIANCE FAILURE: Initialization signatures inconsistent."
                     fInstance 0: {reference_signature} vs Instance {i}: {signature}"
-                    fInstance 0: {reference_signature} vs Instance {i}: {signature}"
+                    fInstance 0: {reference_signature} vs Instance {i}: {signature}""
+
                 )
         
         self.record_metric(factory_pattern_consistent, True)
 
     def _analyze_registry_factory_pattern(self, registry_class: Type) -> Dict[str, Any]:
-        ""Analyze the factory pattern of a registry class for SSOT compliance"
+        ""Analyze the factory pattern of a registry class for SSOT compliance""
+
         
         # Get class methods
         class_methods = inspect.getmembers(registry_class, predicate=inspect.ismethod)
@@ -337,7 +351,8 @@ class AgentRegistrySSoTComplianceValidationTests(SSotAsyncTestCase):
         }
 
     async def test_ssot_compliance_comprehensive_validation(self):
-    """
+    """"
+
         Comprehensive validation of all SSOT compliance aspects
         
         Business Impact: Complete Golden Path protection validation

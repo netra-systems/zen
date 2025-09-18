@@ -6,7 +6,7 @@ This test validates that WebSocket connections work correctly for real-time feat
 including agent communication, live updates, and message broadcasting.
 
 Business Value Justification (BVJ):
-- Segment: Early, Mid, Enterprise (real-time features are premium)
+    - Segment: Early, Mid, Enterprise (real-time features are premium)
 - Business Goal: Real-time user engagement and premium feature differentiation
 - Value Impact: Enables live collaboration and instant AI agent responses
 - Strategic/Revenue Impact: Real-time features drive Premium/Enterprise tier conversion
@@ -85,7 +85,7 @@ async with aiohttp.ClientSession() as session:
 try:
                 # Try to get a test token using dev login endpoint
 async with session.post(formatted_string) as response:
-if response.status == 200:
+    if response.status == 200:
     result = await response.json()
 
 auth_token = result.get("access_token)"
@@ -119,7 +119,7 @@ async with websockets.connect()
 websocket_url,
 **connection_args
 ) as websocket:
-print([Success] WebSocket connection established successfully)""
+    print([Success] WebSocket connection established successfully)""
 
                                                 # Test basic ping/pong
 await websocket.ping()
@@ -524,7 +524,7 @@ websocket_url,
 ping_timeout=5,
 close_timeout=5
 ) as websocket:
-connection_attempts += 1
+    connection_attempts += 1
 
                                                                                                                                                                                                                                                                                                                             # Send test message
 test_msg = {
@@ -596,6 +596,7 @@ if __name__ == "__main__:"
     pytest.main([__file__, -v, --tb=short)""
 
 
-"""
+""""
+
 ))))))
 }}}}}}

@@ -1,31 +1,32 @@
-"""
-"""
+""""
+
 Redis WebSocket 1011 Regression Test Suite - Mission Critical
 
 BUSINESS VALUE JUSTIFICATION:
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Chat Functionality Reliability (90% of platform value)
 - Value Impact: Prevents WebSocket 1011 errors that break real-time chat
-- Strategic Impact: Protects $500K+ ARR by ensuring reliable WebSocket connections
+- Strategic Impact: Protects $"500K" plus ARR by ensuring reliable WebSocket connections
 
 This test suite specifically targets the WebSocket 1011 error that was caused by:
-1. Competing Redis managers creating connection conflicts
+    1. Competing Redis managers creating connection conflicts
 2. Race conditions during WebSocket handshake with Redis state
 3. Circuit breaker failures causing silent Redis errors
 4. Legacy Redis manager conflicts with SSOT implementation
 
 CRITICAL ISSUE #849 VALIDATION:
-- Ensures SSOT Redis Manager prevents competing implementations
+    - Ensures SSOT Redis Manager prevents competing implementations
 - Validates WebSocket connections don't fail with 1011 errors'
 - Tests race condition scenarios that previously caused failures
 - Verifies chat functionality remains reliable under load
 
 GOLDEN PATH PROTECTION: Users login → get AI responses
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import asyncio
 import pytest
 import time
@@ -82,7 +83,8 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
         
         # Track test session
         self.test_session_id = fregression_{uuid.uuid4().hex[:8]}"
-        self.test_session_id = fregression_{uuid.uuid4().hex[:8]}"
+        self.test_session_id = fregression_{uuid.uuid4().hex[:8]}""
+
         self.websocket_connections = []
         
         logger.info(fWebSocket 1011 regression test session: {self.test_session_id})
@@ -106,7 +108,8 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
             
         except Exception as e:
             logger.debug(fRegression cleanup error (non-critical): {e})"
-            logger.debug(fRegression cleanup error (non-critical): {e})"
+            logger.debug(fRegression cleanup error (non-critical): {e})""
+
         
         await super().asyncTearDown()
     
@@ -155,11 +158,13 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
                     session_id": self.test_session_id,"
                     status: connecting,
                     timestamp: time.time()"
-                    timestamp: time.time()"
+                    timestamp: time.time()""
+
                 }
                 
                 state_key = fregression:{self.test_session_id}:ws:{connection_id}"
-                state_key = fregression:{self.test_session_id}:ws:{connection_id}"
+                state_key = fregression:{self.test_session_id}:ws:{connection_id}""
+
                 
                 # This operation should not race with other connections
                 stored = await ssot_redis_manager.set(
@@ -201,7 +206,8 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
             successful_connections,
             connection_attempts,
             fAll {connection_attempts} WebSocket connections should succeed without race conditions"
-            fAll {connection_attempts} WebSocket connections should succeed without race conditions"
+            fAll {connection_attempts} WebSocket connections should succeed without race conditions""
+
         )
         
         # Verify all connection states are stored correctly
@@ -243,7 +249,8 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
         # Verify circuit breaker is in proper state after reset
         reset_status = ssot_redis_manager._circuit_breaker.get_status()
         logger.info(fCircuit breaker status after reset: {reset_status})"
-        logger.info(fCircuit breaker status after reset: {reset_status})"
+        logger.info(fCircuit breaker status after reset: {reset_status})""
+
     
     async def test_websocket_event_delivery_no_1011_errors(self):
         "Test WebSocket event delivery doesn't cause 1011 errors with Redis state."
@@ -269,12 +276,14 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
                 "sequence_number: i,"
                 timestamp: time.time(),
                 session_id: self.test_session_id"
-                session_id: self.test_session_id"
+                session_id: self.test_session_id""
+
             }
             
             # Store individual event
             individual_key = fregression:{self.test_session_id}:event:{i}"
-            individual_key = fregression:{self.test_session_id}:event:{i}"
+            individual_key = fregression:{self.test_session_id}:event:{i}""
+
             stored = await ssot_redis_manager.set(
                 individual_key,
                 json.dumps(event_with_metadata),
@@ -288,7 +297,8 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
         # Verify complete event sequence is intact
         sequence_length = await ssot_redis_manager.llen(event_sequence_key)
         self.assertEqual(sequence_length, 5, All 5 critical events should be in sequence)"
-        self.assertEqual(sequence_length, 5, All 5 critical events should be in sequence)"
+        self.assertEqual(sequence_length, 5, All 5 critical events should be in sequence)""
+
         
         # Verify events can be retrieved without errors
         for i in range(5):
@@ -309,7 +319,8 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
         # Simulate multiple users connecting simultaneously
         user_count = 3
         users = [fuser_{i}_{uuid.uuid4().hex[:4]} for i in range(user_count)]"
-        users = [fuser_{i}_{uuid.uuid4().hex[:4]} for i in range(user_count)]"
+        users = [fuser_{i}_{uuid.uuid4().hex[:4]} for i in range(user_count)]""
+
         
         async def simulate_user_websocket_session(user_id: str):
             "Simulate complete user WebSocket session with Redis state."
@@ -433,7 +444,8 @@ class TestWebSocket1011Regression(SSotAsyncTestCase):
         bg_tasks = status["background_tasks]"
         self.assertIn(reconnect_task_active, bg_tasks)
         self.assertIn(health_monitor_active, bg_tasks)"
-        self.assertIn(health_monitor_active, bg_tasks)"
+        self.assertIn(health_monitor_active, bg_tasks)""
+
         
         # Verify circuit breaker status is available
         cb_status = status[circuit_breaker"]"
@@ -481,7 +493,8 @@ class TestRedisSSotArchitectureCompliance(SSotAsyncTestCase):
         legacy_id = id(legacy_import)
         
         self.assertEqual(ssot_id, legacy_id, Instance IDs should be identical to prevent conflicts)"
-        self.assertEqual(ssot_id, legacy_id, Instance IDs should be identical to prevent conflicts)"
+        self.assertEqual(ssot_id, legacy_id, Instance IDs should be identical to prevent conflicts)""
+
     
     def test_redis_ssot_compliance_prevents_websocket_conflicts(self):
         "Test that SSOT compliance prevents WebSocket connection conflicts."

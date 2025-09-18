@@ -6,20 +6,20 @@ between different users, preventing state leakage and ensuring secure
 concurrent operations. It's part of the SSOT consolidation validation.'
 
 Business Value Justification:
-- Segment: Platform/Internal  
+    - Segment: Platform/Internal  
 - Business Goal: Security & User Experience
-- Value Impact: Ensures secure multi-user chat operations protecting $500K+ ARR
+- Value Impact: Ensures secure multi-user chat operations protecting $"500K" plus ARR
 - Strategic Impact: Validates user isolation required for production multi-tenant deployment
 
 Key Isolation Areas:
-- State isolation between different user contexts
+    - State isolation between different user contexts
 - WebSocket event routing to correct users only
 - Resource limits enforcement per user
 - Memory isolation preventing data leaks
 - Concurrent execution without interference
 
 EXPECTED BEHAVIOR:
-This test should PASS if UserExecutionEngine properly implements user isolation.
+    This test should PASS if UserExecutionEngine properly implements user isolation.
 If it FAILS, it indicates security vulnerabilities requiring immediate fix.
 
 
@@ -37,7 +37,8 @@ logger = central_logger.get_logger(__name__)
 
 
 class UserExecutionEngineIsolationTests(SSotBaseTestCase):
-    ""Test UserExecutionEngine multi-user isolation functionality."
+    ""Test UserExecutionEngine multi-user isolation functionality.""
+
     
     def setup_method(self, method):
         Set up test environment for isolation testing.""
@@ -52,7 +53,8 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
     def test_user_state_isolation(self):
         "Test that different users have completely isolated state."
         logger.info(🔒 ISOLATION TEST: Validating user state isolation)"
-        logger.info(🔒 ISOLATION TEST: Validating user state isolation)"
+        logger.info(🔒 ISOLATION TEST: Validating user state isolation)""
+
         
         async def test_isolation():
             try:
@@ -146,7 +148,8 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
             except Exception as e:
                 self.isolation_violations.append(fState isolation test failed: {e})
                 logger.error(f❌ FAIL: User state isolation broken - {e})"
-                logger.error(f❌ FAIL: User state isolation broken - {e})"
+                logger.error(f❌ FAIL: User state isolation broken - {e})""
+
                 return False
         
         result = asyncio.run(test_isolation())
@@ -168,7 +171,8 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 # Create unique user context
                 user_id = UnifiedIdGenerator.generate_base_id(fconcurrent_user_{user_index}, True, 8)
                 thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, fconcurrent_test_{user_index})"
-                thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, fconcurrent_test_{user_index})"
+                thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(user_id, fconcurrent_test_{user_index})""
+
                 
                 user_context = UserExecutionContext(
                     user_id=user_id,
@@ -204,7 +208,8 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                         "operation: op,"
                         timestamp: time.time(),
                         random: random.randint(1, 1000)"
-                        random: random.randint(1, 1000)"
+                        random: random.randint(1, 1000)""
+
                     }
                     
                     # Get stats
@@ -218,7 +223,8 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                         user_id": user_id,"
                         engine_id: engine.engine_id,
                         operation_index: op"
-                        operation_index: op"
+                        operation_index: op""
+
                     }
                     
                     # Small delay to simulate real work
@@ -274,7 +280,8 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
             self.assertEqual(len(unique_user_ids), user_count, "All users should have unique IDs)"
             self.assertEqual(len(unique_engine_ids), user_count, All users should have unique engines)
             self.assertEqual(total_operations, user_count * operations_per_user, All operations should complete)"
-            self.assertEqual(total_operations, user_count * operations_per_user, All operations should complete)"
+            self.assertEqual(total_operations, user_count * operations_per_user, All operations should complete)""
+
             
             logger.info(f✅ PASS: Concurrent operations completed - {successful_users} users, {total_operations} operations")"
             return True
@@ -285,7 +292,8 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
     def test_websocket_event_routing_isolation(self):
         ""Test that WebSocket events are routed only to the correct users."
         logger.info(📡 WEBSOCKET TEST: Validating WebSocket event routing isolation)"
-        logger.info(📡 WEBSOCKET TEST: Validating WebSocket event routing isolation)"
+        logger.info(📡 WEBSOCKET TEST: Validating WebSocket event routing isolation)""
+
         
         async def test_websocket_isolation():
             try:
@@ -316,7 +324,8 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 
                 thread1_id, run1_id, _ = UnifiedIdGenerator.generate_user_context_ids(user1_id, websocket_test)
                 thread2_id, run2_id, _ = UnifiedIdGenerator.generate_user_context_ids(user2_id, websocket_test)"
-                thread2_id, run2_id, _ = UnifiedIdGenerator.generate_user_context_ids(user2_id, websocket_test)"
+                thread2_id, run2_id, _ = UnifiedIdGenerator.generate_user_context_ids(user2_id, websocket_test)""
+
                 
                 user1_context = UserExecutionContext(
                     user_id=user1_id,
@@ -403,7 +412,8 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                 
                 thread1_id, run1_id, _ = UnifiedIdGenerator.generate_user_context_ids(user1_id, resource_test)
                 thread2_id, run2_id, _ = UnifiedIdGenerator.generate_user_context_ids(user2_id, resource_test)"
-                thread2_id, run2_id, _ = UnifiedIdGenerator.generate_user_context_ids(user2_id, resource_test)"
+                thread2_id, run2_id, _ = UnifiedIdGenerator.generate_user_context_ids(user2_id, resource_test)""
+
                 
                 # User 1 - lower resource limits
                 user1_context = UserExecutionContext(
@@ -466,7 +476,8 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
             except Exception as e:
                 self.resource_leaks.append(fResource isolation test failed: {e})
                 logger.error(f❌ FAIL: Resource limits isolation broken - {e})"
-                logger.error(f❌ FAIL: Resource limits isolation broken - {e})"
+                logger.error(f❌ FAIL: Resource limits isolation broken - {e})""
+
                 return False
         
         result = asyncio.run(test_resource_isolation())
@@ -513,10 +524,11 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                     # Add some state and data
                     engine.set_agent_state(ftest_agent_{i}, fstate_{i})
                     engine.set_agent_result(ftest_result_{i), {
-                        "large_data: x * 1000,  # 1KB of data"
+                        "large_data: x * 1000,  # "1KB" of data"
                         iteration: i,
                         user_id: user_id"
-                        user_id: user_id"
+                        user_id: user_id""
+
                     }
                     
                     # Verify engine is active and has data
@@ -537,7 +549,8 @@ class UserExecutionEngineIsolationTests(SSotBaseTestCase):
                     
                     # Verify engine is no longer active
                     self.assertFalse(engine.is_active(), fEngine {j} should be inactive after cleanup)"
-                    self.assertFalse(engine.is_active(), fEngine {j} should be inactive after cleanup)"
+                    self.assertFalse(engine.is_active(), fEngine {j} should be inactive after cleanup)""
+
                 
                 # Verify that each engine's cleanup didn't affect others (while they were active)
                 # This tests that cleanup is properly isolated

@@ -7,14 +7,14 @@ Tests complete chat business value validation and WebSocket connection flows.
 CRITICAL ISSUE: GitHub Issue #133
 - Problem: 'coroutine' object has no attribute 'get' error in WebSocket endpoint
 - Root Cause: get_env() returning coroutine instead of IsolatedEnvironment  
-- Business Impact: Blocking core chat functionality ($500K+ ARR impact)
+- Business Impact: Blocking core chat functionality ($"500K" plus ARR impact)
 
 CLAUDE.MD COMPLIANCE:
-- ALL e2e tests MUST use real authentication (JWT/OAuth) 
+    - ALL e2e tests MUST use real authentication (JWT/OAuth) 
 - NO MOCKS in E2E tests - uses real services only
 - Tests complete chat business value (connection  ->  agent response)
 - Tests designed to FAIL HARD when coroutine regression occurs
-- Must prevent 0.00s execution times (indicates test bypassing)
+- Must prevent 0."00s" execution times (indicates test bypassing)
 ""
 
 import asyncio
@@ -74,20 +74,22 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
         )
 
     def tearDown(self):
-        Validate E2E test execution time to prevent 0.00s bypassing.""
+        Validate E2E test execution time to prevent 0."00s" bypassing.""
         super().tearDown()
         
         execution_time = time.time() - self.start_time
         
-        # CRITICAL: E2E tests MUST take meaningful time (not 0.00s)
+        # CRITICAL: E2E tests MUST take meaningful time (not 0."00s")
         self.assertGreater(
             execution_time, 
-            0.1,  # Minimum 100ms for real E2E test
-            fE2E test completed in {execution_time:.3f}s - possible test bypassing detected
+            0.1,  # Minimum "100ms" for real E2E test
+            fE2E test completed in {execution_time:."3f"}s - possible test bypassing detected""
+
         )
 
     async def test_complete_websocket_chat_flow_with_authentication(self):
-    """
+    """"
+
         CRITICAL: Test complete WebSocket chat flow with real authentication.
         
         This E2E test validates the complete business value flow:
@@ -185,7 +187,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
             raise
 
     async def test_websocket_environment_detection_e2e_flow(self):
-""""""
+    """"""
         Test WebSocket environment detection in complete E2E flow.
         
         This tests the E2E environment detection logic that caused the 
@@ -307,7 +309,7 @@ class WebSocketCoroutineRegressionE2ETests(SSotBaseTestCase):
                 self.fail(fMulti-user E2E test failed with coroutine regression: {e})
 
     async def test_websocket_agent_events_without_coroutine_regression(self):
-""""""
+    """"""
         CRITICAL: Test WebSocket agent events without coroutine regression.
         
         This validates the mission-critical WebSocket agent events that enable

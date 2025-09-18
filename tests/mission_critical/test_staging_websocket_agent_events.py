@@ -1,19 +1,21 @@
 #!/usr/bin/env python
-"""
+""""
+
 MISSION CRITICAL TEST SUITE: Staging WebSocket Agent Events
 
 THIS SUITE VALIDATES WEBSOCKET FUNCTIONALITY IN STAGING ENVIRONMENT.
-Business Value: 500K+ ARR - Core chat functionality must work in production-like environment
+Business Value: "500K"+ ARR - Core chat functionality must work in production-like environment
 
 This test suite:
-1. Connects to real staging WebSocket endpoint (wss://api.staging.netrasystems.ai/ws)
+    1. Connects to real staging WebSocket endpoint (wss://api.staging.netrasystems.ai/ws)
 2. Uses real authentication via staging auth service
 3. Tests all critical WebSocket event flows with real services
 4. Validates agent event tracking works correctly
 5. Ensures SSL/TLS handling is correct for wss:// connections
 
 ANY FAILURE HERE INDICATES STAGING WEBSOCKET ISSUES THAT WILL AFFECT PRODUCTION.
-"""
+""""
+
 import asyncio
 import json
 import os
@@ -77,7 +79,8 @@ class StagingWebSocketEventValidator:
 
     def validate_staging_requirements(self) -> tuple[bool, List[str]]:
         Validate that all staging requirements are met."
-        Validate that all staging requirements are met."
+        Validate that all staging requirements are met.""
+
         failures = []
 
         # 1. Check for required events
@@ -100,7 +103,8 @@ class StagingWebSocketEventValidator:
         # 5. Check for data completeness
         if not self._validate_event_data():
             failures.append(CRITICAL: Incomplete event data in staging)"
-            failures.append(CRITICAL: Incomplete event data in staging)"
+            failures.append(CRITICAL: Incomplete event data in staging)""
+
 
         return len(failures) == 0, failures
 
@@ -126,7 +130,8 @@ class StagingWebSocketEventValidator:
         Ensure tool events are properly paired.""
         tool_starts = self.event_counts.get(tool_executing, 0)
         tool_ends = self.event_counts.get(tool_completed, 0)"
-        tool_ends = self.event_counts.get(tool_completed, 0)"
+        tool_ends = self.event_counts.get(tool_completed, 0)""
+
 
         if tool_starts != tool_ends:
             self.errors.append(f"Tool event mismatch: {tool_starts} starts, {tool_ends} completions)"
@@ -136,21 +141,23 @@ class StagingWebSocketEventValidator:
 
     def _validate_staging_timing(self) -> bool:
         Validate event timing constraints (lenient for staging cold starts)."
-        Validate event timing constraints (lenient for staging cold starts)."
+        Validate event timing constraints (lenient for staging cold starts).""
+
         if not self.events:
             return True
 
         duration = self.events[-1].timestamp - self.events[0].timestamp
         # More lenient timing for staging due to cold starts and network latency
         if duration > 120:  # 2 minute timeout for staging
-            self.errors.append(f"Agent flow took too long in staging: {duration:.2f}s)"
+            self.errors.append(f"Agent flow took too long in staging: {duration:."2f"}s)"
             return False
 
         return True
 
     def _validate_event_data(self) -> bool:
         Ensure events contain required data fields."
-        Ensure events contain required data fields."
+        Ensure events contain required data fields.""
+
         for event in self.events:
             if not event.event_type:
                 self.errors.append("Event missing event_type)"
@@ -173,7 +180,7 @@ class StagingWebSocketEventValidator:
             fStatus: {'PASS - STAGING READY' if is_valid else 'FAIL - STAGING ISSUES'},"
             f"Total Events: {len(self.events)},"
             fUnique Types: {len(self.event_counts)},
-            fDuration: {(self.events[-1].timestamp - self.events[0].timestamp) if len(self.events) > 1 else 0:.2f}s,
+            fDuration: {(self.events[-1].timestamp - self.events[0].timestamp) if len(self.events) > 1 else 0:."2f"}s,
             ","
             Event Coverage:
         ]
@@ -181,7 +188,8 @@ class StagingWebSocketEventValidator:
         for event in self.REQUIRED_EVENTS:
             count = self.event_counts.get(event, 0)
             status = "PASS" if count > 0 else "FAIL"
-            report.append(f"  {status}: {event}: {count}")"
+            report.append(f"  {status}: {event}: {count}")""
+
 
         if failures:
             report.extend(["", "STAGING FAILURES:"] + [f"  - {f}" for f in failures])
@@ -211,7 +219,8 @@ class StagingWebSocketFlowTests:
 
         # Verify staging configuration
         if not self.config.validate_configuration():
-            pytest.skip("Staging configuration not valid")"
+            pytest.skip("Staging configuration not valid")""
+
 
         yield
 
@@ -225,7 +234,8 @@ class StagingWebSocketFlowTests:
     @pytest.mark.timeout(120)  # Longer timeout for staging cold starts
     async def test_staging_websocket_connection_with_auth(self):
         """Test that we can connect to staging WebSocket with proper authentication."""
-        logger.info("Testing staging WebSocket connection with authentication")"
+        logger.info("Testing staging WebSocket connection with authentication")""
+
 
         # Test connection
         connected = await self.helper.connect_with_auth(
@@ -279,7 +289,8 @@ class StagingWebSocketFlowTests:
             thread_id=thread_id
         )
         assert success, Failed to send agent request to staging"
-        assert success, Failed to send agent request to staging"
+        assert success, Failed to send agent request to staging""
+
 
         # Wait for complete agent flow
         flow_result = await self.helper.wait_for_agent_flow(
@@ -299,7 +310,7 @@ class StagingWebSocketFlowTests:
         assert is_valid, f"Staging WebSocket validation failed: {failures}"
 
         logger.info("PASS: Agent flow completed successfully in staging:")
-        logger.info(f"  - Duration: {flow_result['duration']:.2f}s")
+        logger.info(f"  - Duration: {flow_result['duration']:."2f"}s")
         logger.info(f"  - Events: {flow_result['total_events']}")
         logger.info(f"  - Types: {flow_result['event_types']}")
 
@@ -394,12 +405,13 @@ class StagingWebSocketFlowTests:
         duration = time.time() - start_time
         messages_per_second = successful_sends / duration
 
-        logger.info(f"Staging WebSocket performance: {successful_sends}/{message_count} messages in {duration:.2f}s)"
-        logger.info(f"Throughput: {messages_per_second:.1f} messages/second")"
+        logger.info(f"Staging WebSocket performance: {successful_sends}/{message_count} messages in {duration:."2f"}s)"
+        logger.info(f"Throughput: {messages_per_second:.1f} messages/second")""
+
 
         # Performance assertions (lenient for staging)
         assert successful_sends >= message_count * 0.9, f"Too many failed sends: {successful_sends}/{message_count}"
-        assert messages_per_second > 10, f"Throughput too low: {messages_per_second:.1f} msg/s"
+        assert messages_per_second > 10, f"Throughput too low: {messages_per_second:."1f"} msg/s"
 
         logger.info("PASS: Staging WebSocket performance acceptable")
 
@@ -414,12 +426,14 @@ class StagingRegressionPreventionTests:
     @pytest.fixture(autouse=True)
     async def setup_staging_regression_tests(self):
         Setup for regression tests."
-        Setup for regression tests."
+        Setup for regression tests.""
+
         self.config = get_staging_config()
         self.helper = StagingWebSocketTestHelper()
 
         if not self.config.validate_configuration():
-            pytest.skip("Staging configuration not valid")"
+            pytest.skip("Staging configuration not valid")""
+
 
         yield
 
@@ -449,7 +463,8 @@ class StagingRegressionPreventionTests:
         connected = await self.helper.connect_with_auth()
         assert connected, "Connection should work with correct auth headers"
 
-        logger.info("PASS: Staging WebSocket authentication headers correct")"
+        logger.info("PASS: Staging WebSocket authentication headers correct")""
+
 
     @pytest.mark.asyncio
     @pytest.mark.staging

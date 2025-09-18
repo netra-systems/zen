@@ -4,12 +4,12 @@ This test verifies Single Source of Truth compliance for MessageRouter implement
 It is designed to FAIL initially (4+ different router classes exist) and PASS after SSOT consolidation.
 
 Business Value: Platform/Internal - System Stability & Golden Path Protection
-- Protects $500K+ ARR chat functionality from configuration drift
+- Protects $"500K" plus ARR chat functionality from configuration drift
 - Prevents MessageRouter duplication causing connection failures
 - Ensures single canonical routing implementation for reliability
 
 EXPECTED BEHAVIOR:
-- FAIL initially: Detects 4+ MessageRouter implementations across multiple modules
+    - FAIL initially: Detects 4+ MessageRouter implementations across multiple modules
 - PASS after SSOT remediation: Only 1 canonical MessageRouter in websocket_core/handlers.py
 
 GitHub Issue: #1077 - MessageRouter SSOT violations blocking golden path
@@ -26,7 +26,8 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
     Test that verifies Single Source of Truth for MessageRouter implementations."
-    Test that verifies Single Source of Truth for MessageRouter implementations."
+    Test that verifies Single Source of Truth for MessageRouter implementations.""
+
 
     def setup_method(self, method=None):
         "Set up test fixtures."
@@ -78,7 +79,8 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
 
     def test_agent_compatibility_import(self):
         Verify the compatibility import works correctly."
-        Verify the compatibility import works correctly."
+        Verify the compatibility import works correctly.""
+
         try:
             from netra_backend.app.agents.message_router import MessageRouter as AgentRouter
             from netra_backend.app.websocket_core.handlers import MessageRouter as CoreRouter
@@ -87,14 +89,16 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
             self.assertIs(
                 AgentRouter, CoreRouter,
                 Compatibility import should return the same MessageRouter class"
-                Compatibility import should return the same MessageRouter class"
+                Compatibility import should return the same MessageRouter class""
+
             )
             
         except ImportError as e:
             self.fail(fCOMPATIBILITY IMPORT BROKEN: {e})
         
         self.logger.info(✓ Agent compatibility import working correctly)"
-        self.logger.info(✓ Agent compatibility import working correctly)"
+        self.logger.info(✓ Agent compatibility import working correctly)""
+
 
     def test_message_router_interface_works(self):
         "Test that the MessageRouter interface works as expected."
@@ -124,7 +128,8 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
         self.logger.info(✓ MessageRouter interface working correctly)
 
     def test_no_duplicate_message_router_imports(self):
-        ""Verify no imports try to use old/duplicate MessageRouter locations."
+        ""Verify no imports try to use old/duplicate MessageRouter locations.""
+
         import re
         
         # Pattern for old/problematic imports
@@ -138,7 +143,8 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
         
         # Search through Python files
         for py_file in self.base_path.rglob(*.py):"
-        for py_file in self.base_path.rglob(*.py):"
+        for py_file in self.base_path.rglob(*.py):""
+
             if self._should_skip_file(py_file):
                 continue
             
@@ -158,7 +164,8 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
         if duplicate_imports:
             self.fail(
                 fDUPLICATE IMPORTS DETECTED: {len(duplicate_imports)} files using old MessageRouter imports.\n"
-                fDUPLICATE IMPORTS DETECTED: {len(duplicate_imports)} files using old MessageRouter imports.\n"
+                fDUPLICATE IMPORTS DETECTED: {len(duplicate_imports)} files using old MessageRouter imports.\n""
+
                 fFiles with problematic imports:\n + 
                 \n.join(f"  - {path) for path in duplicate_imports[:10] +"
                 (\n  ... if len(duplicate_imports) > 10 else ")"
@@ -192,7 +199,8 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
 
     def test_no_competing_message_router_classes(self):
         Test that no competing MessageRouter class definitions exist."
-        Test that no competing MessageRouter class definitions exist."
+        Test that no competing MessageRouter class definitions exist.""
+
         router_classes_found = []
         
         # Search for class definitions named MessageRouter
@@ -252,12 +260,14 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
         if not canonical_found:
             self.fail(
                 fCANONICAL ROUTER MISSING: No MessageRouter class found in {canonical_rel_path}. "
-                fCANONICAL ROUTER MISSING: No MessageRouter class found in {canonical_rel_path}. "
+                fCANONICAL ROUTER MISSING: No MessageRouter class found in {canonical_rel_path}. ""
+
                 fGolden Path requires canonical router.
             )
         
         self.logger.info(✓ Only canonical MessageRouter class exists)"
-        self.logger.info(✓ Only canonical MessageRouter class exists)"
+        self.logger.info(✓ Only canonical MessageRouter class exists)""
+
 
     def _should_skip_file(self, file_path: Path) -> bool:
         "Determine if a file should be skipped during scanning."

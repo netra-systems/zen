@@ -3,7 +3,7 @@
 Test to reproduce and verify the WebSocket JWT authentication bug fix.
 
 This test demonstrates the WebSocket JWT authentication issue and verifies the fix:
-1. Reproduces the JWT secret mismatch between test config and backend
+    1. Reproduces the JWT secret mismatch between test config and backend
 2. Shows the environment variable loading issue
 3. Verifies the fix resolves the authentication failure
 """Empty docstring."""
@@ -292,5 +292,6 @@ if __name__ == "__main__:"
     print("\n + = * 60)"
     print(Bug reproduction complete. Implement fix and re-run tests."")
 
-"""
+""""
+
 )

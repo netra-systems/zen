@@ -1,14 +1,14 @@
-"""
-"""
+""""
+
 Test WebSocket Event Consistency for ExecutionEngine
 
 MISSION CRITICAL: WebSocket events are 90% of platform business value - they enable chat functionality.
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise, Platform)
+    - Segment: All (Free, Early, Mid, Enterprise, Platform)
 - Business Goal: Chat functionality delivers 90% of platform value
 - Value Impact: WebSocket events enable users to see real-time agent progress and results
-- Strategic Impact: $500K+ ARR depends on reliable, consistent WebSocket event delivery
+- Strategic Impact: $"500K" plus ARR depends on reliable, consistent WebSocket event delivery
 
 PURPOSE: Validate that ExecutionEngine implementations consistently deliver all 5 critical WebSocket events
 in the correct order with proper content for every agent execution.
@@ -17,14 +17,14 @@ GOLDEN PATH PROTECTION: Users login  ->  get AI responses
 The AI responses" part critically depends on these WebSocket events working correctly."
 
 Critical WebSocket Events (ALL MUST BE SENT):
-1. agent_started - User sees agent began processing
+    1. agent_started - User sees agent began processing
 2. agent_thinking - Real-time reasoning visibility  
 3. tool_executing - Tool usage transparency (if tools used)
 4. tool_completed - Tool results display (if tools used)
 5. agent_completed - User knows response is ready
 
 Test Coverage:
-1. All 5 events sent in correct sequence
+    1. All 5 events sent in correct sequence
 2. Event content includes required fields
 3. Events routed to correct user only
 4. Event timing and sequencing validation
@@ -32,10 +32,11 @@ Test Coverage:
 6. Performance impact of event sending
 7. Event persistence and reliability
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import asyncio
 import pytest
 import time
@@ -68,7 +69,8 @@ class WebSocketEventCapture:
     
     def capture_event(self, event_type: str, data: Dict[str, Any) -> None:
         Capture a WebSocket event."
-        Capture a WebSocket event."
+        Capture a WebSocket event.""
+
         event = WebSocketEvent(
             event_type=event_type,
             data=data,
@@ -100,13 +102,15 @@ class WebSocketEventCapture:
 
 class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
     "
-    "
+    ""
+
     Mission critical tests for WebSocket event consistency in ExecutionEngine.
     
     These tests ensure that the chat functionality (90% of business value) works
     correctly by validating WebSocket event delivery.
     "
-    "
+    ""
+
 
     async def asyncSetUp(self):
         Set up test environment for WebSocket event testing.""
@@ -191,7 +195,8 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
             agent_thinking_events = event_capture.get_events_by_type('agent_thinking')
             self.assertGreater(len(agent_thinking_events), 0,
                 agent_thinking event MUST be sent - users need real-time reasoning visibility)"
-                agent_thinking event MUST be sent - users need real-time reasoning visibility)"
+                agent_thinking event MUST be sent - users need real-time reasoning visibility)""
+
             
             agent_completed_events = event_capture.get_events_by_type('agent_completed')
             self.assertGreater(len(agent_completed_events), 0,
@@ -223,13 +228,15 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
     @pytest.mark.integration
     async def test_websocket_event_content_validation(self):
         """
-    "
+    ""
+
         Test that WebSocket events contain required content fields.
         
         Event content is critical for UI display and user experience.
         Missing or malformed content breaks the chat interface.
         "
-        "
+        ""
+
         user_data = self.test_users[0]
         event_capture = self.event_captures[user_data['user_id']]
         
@@ -283,7 +290,8 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
             for thinking_event in thinking_events:
                 self.assertIsInstance(thinking_event.data, dict,
                     agent_thinking event data must be a dictionary)"
-                    agent_thinking event data must be a dictionary)"
+                    agent_thinking event data must be a dictionary)""
+
                 
                 # Should contain some thought content
                 has_thought_content = any(
@@ -413,7 +421,8 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
         for event in user2_events:
             self.assertEqual(event.user_id, user2_data['user_id'),
                 Event should be tagged with correct user ID)"
-                Event should be tagged with correct user ID)"
+                Event should be tagged with correct user ID)""
+
             
             # Check that user1's data doesn't appear in user2's events'
             event_str = str(event.data)
@@ -430,13 +439,15 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
     @pytest.mark.integration
     async def test_websocket_event_timing_performance(self):
         """
-    "
+    ""
+
         Test that WebSocket events are sent with acceptable timing and performance.
         
         Performance is critical for real-time chat experience.
         Delayed events make the system feel unresponsive.
         "
-        "
+        ""
+
         user_data = self.test_users[0]
         event_capture = self.event_captures[user_data['user_id']]
         
@@ -480,20 +491,22 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
                 # First event should be sent quickly
                 first_event = events[0]
                 first_event_delay = first_event.timestamp - start_time
-                self.assertLess(first_event_delay, 0.1,  # 100ms
-                    fFirst event (agent_started) sent too late: {first_event_delay:.3f}s)
+                self.assertLess(first_event_delay, 0.1,  # "100ms"
+                    fFirst event (agent_started) sent too late: {first_event_delay:."3f"}s)""
+
                 
                 # Last event should be sent reasonably quickly after completion
                 last_event = events[-1] 
                 last_event_delay = end_time - last_event.timestamp
-                self.assertLess(last_event_delay, 0.5,  # 50ms
-                    fLast event sent too late after execution: {last_event_delay:.3f}s)
+                self.assertLess(last_event_delay, 0.5,  # "50ms"
+                    fLast event sent too late after execution: {last_event_delay:."3f"}s)""
+
                 
                 # Events should be spaced reasonably
                 for i in range(1, len(events)):
                     time_gap = events[i].timestamp - events[i-1].timestamp
                     self.assertLess(time_gap, 2.0,  # 2 seconds max between events
-                        fGap between events {i-1} and {i} too large: {time_gap:.3f}s")"
+                        fGap between events {i-1} and {i} too large: {time_gap:."3f"}s")"
                 
                 # Total event sending overhead should be minimal
                 event_overhead = (events[-1].timestamp - events[0].timestamp) / total_execution_time
@@ -501,7 +514,7 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
                     fEvent sending overhead too high: {event_overhead:.2%})
             
             print(fINFO: WebSocket event timing test PASSED. 
-                           f"Execution: {total_execution_time:.3f}s, Events: {len(events)})"
+                           f"Execution: {total_execution_time:."3f"}s, Events: {len(events)})"
             
         except Exception as e:
             self.fail(fWebSocket event timing test FAILED: {e})
@@ -509,7 +522,8 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
     @pytest.mark.mission_critical
     @pytest.mark.integration
     async def test_websocket_events_error_scenarios(self):
-    """
+    """"
+
         Test that WebSocket events are still sent correctly in error scenarios.
         
         Error handling is critical - users need to know when agents fail.
@@ -531,7 +545,8 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
                     user_id=user_data['user_id'],
                     session_id=user_data['session_id'],
                     request_id=ferror_test_{uuid.uuid4().hex[:8]}"
-                    request_id=ferror_test_{uuid.uuid4().hex[:8]}"
+                    request_id=ferror_test_{uuid.uuid4().hex[:8]}""
+
                 )
                 engine = UserExecutionEngine(user_context=context)
             else:
@@ -572,13 +587,15 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
                 print("INFO: Error properly indicated in WebSocket events)"
             else:
                 print(WARNING: Error not explicitly indicated in events - consider improving error reporting)"
-                print(WARNING: Error not explicitly indicated in events - consider improving error reporting)"
+                print(WARNING: Error not explicitly indicated in events - consider improving error reporting)""
+
             
             print("INFO: WebSocket events error scenarios test PASSED)"
             
         except Exception as e:
             self.fail(fWebSocket events error scenarios test FAILED: {e})"
-            self.fail(fWebSocket events error scenarios test FAILED: {e})"
+            self.fail(fWebSocket events error scenarios test FAILED: {e})""
+
 
     async def _simulate_complete_agent_execution(self, engine, user_data):
         "Simulate a complete agent execution with WebSocket events."
@@ -598,7 +615,8 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
                 Analyzing user request...","
                 Determining best approach..., 
                 Processing information..."
-                Processing information..."
+                Processing information...""
+
             ]
             
             for thought in thinking_steps:
@@ -684,7 +702,8 @@ class WebSocketEventConsistencyExecutionEngineTests(SSotAsyncTestCase):
 if __name__ == __main__:"
 if __name__ == __main__:"
 "
-"
+""
+
     Run WebSocket event consistency tests.
     
     Expected Result: ALL TESTS SHOULD PASS for proper chat functionality.

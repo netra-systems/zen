@@ -5,7 +5,7 @@ ISSUE #395 TEST PLAN (Step 3) - Integration Test Suite
 Tests the complete WebSocket authentication handshake flow without docker dependency:
 
 TARGET ISSUES:
-1. WebSocket authentication handshake immediate failure
+    1. WebSocket authentication handshake immediate failure
 2. Authentication service integration broken 
 3. E2E context propagation failure in integration scenarios
 
@@ -36,7 +36,7 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
     - Tests complete authentication flow from handshake to user context creation
     - Validates WebSocket state management during authentication
     - Tests E2E context propagation in realistic integration scenarios
-    - Protects Golden Path functionality ($500K+ ARR)
+    - Protects Golden Path functionality ($"500K" plus ARR)
     
     EXPECTED BEHAVIOR:
     - Initial runs: Tests should FAIL (reproducing handshake failures)
@@ -50,7 +50,8 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
         self.auth_service = get_unified_auth_service()
 
     def create_mock_websocket_with_state(self, state: str='CONNECTED', **kwargs) -> object:
-        ""Create a mock WebSocket with realistic state and attributes."
+        ""Create a mock WebSocket with realistic state and attributes.""
+
         from unittest.mock import Mock
         from fastapi.websockets import WebSocketState
         websocket = Mock()
@@ -72,7 +73,8 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
         return websocket
 
     async def test_handshake_timing_validation_integration(self):
-    """
+    """"
+
         INTEGRATION TEST: WebSocket handshake timing validation.
         
         Issue #395: Tests that handshake timing validation works correctly in integration scenarios.
@@ -89,7 +91,7 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
                 self.assertFalse(is_valid, f'HANDSHAKE TIMING BUG: {description}')
 
     async def test_authentication_service_integration_real(self):
-"""Empty docstring."""
+    """Empty docstring."""
         INTEGRATION TEST: Real authentication service integration.
         
         Issue #395: Tests authentication service integration with real service calls.
@@ -113,7 +115,8 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
             self.fail(f'Authentication service integration error: {e}')
 
     async def test_e2e_context_propagation_integration(self):
-    """
+    """"
+
         INTEGRATION TEST: E2E context propagation through authentication flow.
         
         Issue #395: Tests that E2E context is properly propagated through the entire authentication flow.
@@ -139,7 +142,7 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
                     logger.info(fAuth method with E2E context: {metadata['auth_method']})""
 
     async def test_websocket_state_management_during_auth(self):
-"""Empty docstring."""
+    """Empty docstring."""
         INTEGRATION TEST: WebSocket state management during authentication.
         
         Issue #395: Tests that WebSocket state is properly managed during authentication flow.
@@ -163,7 +166,7 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
                 self.assertIn('WEBSOCKET_STATE', result.error_code or '', 'Error code should indicate WebSocket state issue')
 
     async def test_authentication_retry_mechanism_integration(self):
-"""Empty docstring."""
+    """Empty docstring."""
         INTEGRATION TEST: Authentication retry mechanism with real timing.
         
         Issue #395: Tests that authentication retry mechanism works with realistic timing.
@@ -178,10 +181,11 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
         elapsed_time = end_time - start_time
         self.assertTrue(result.success, f'Retry mechanism failed: {result.error_message}')
         self.assertLess(elapsed_time, 5.0, 'Authentication took too long - possible retry loop')
-        logger.info(f'Authentication completed in {elapsed_time:.2f} seconds')
+        logger.info(f'Authentication completed in {elapsed_time:."2f"} seconds')""
+
 
     async def test_circuit_breaker_integration(self):
-"""Empty docstring."""
+    """Empty docstring."""
         INTEGRATION TEST: Circuit breaker pattern in authentication.
         
         Issue #395: Tests that circuit breaker pattern works in integration scenarios.
@@ -198,7 +202,7 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
         self.assertEqual(circuit_state, 'CLOSED', 'Single failure should not open circuit breaker')
 
     async def test_concurrent_authentication_integration(self):
-"""Empty docstring."""
+    """Empty docstring."""
         INTEGRATION TEST: Concurrent authentication handling.
         
         Issue #395: Tests that multiple concurrent authentication attempts are handled correctly.
@@ -235,8 +239,10 @@ class WebSocketAuthenticationHandshakeFlowTests(SSotAsyncTestCase):
         self.assertEqual(successful_auths, len(websockets), f'All concurrent authentications should succeed (got {successful_auths}/{len(websockets)}')
         self.assertEqual(failed_auths, 0, f'No concurrent authentications should fail (got {failed_auths} failures)')
         elapsed_time = end_time - start_time
-        self.assertLess(elapsed_time, 10.0, f'Concurrent authentication took too long: {elapsed_time:.2f}s')
-        logger.info(f'Concurrent authentication of {len(websockets)} connections completed in {elapsed_time:.2f} seconds')
+        self.assertLess(elapsed_time, 10.0, f'Concurrent authentication took too long: {elapsed_time:."2f"}s')""
+
+        logger.info(f'Concurrent authentication of {len(websockets)} connections completed in {elapsed_time:."2f"} seconds')""
+
 
     def test_websocket_validation_edge_cases(self):
         pass
@@ -261,5 +267,6 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
-"""
+""""
+
 )))))

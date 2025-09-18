@@ -1,5 +1,6 @@
 "
-"
+""
+
 WebSocket SSOT Authentication Compliance Test Suite
 
 ISSUE #342: Validates SSOT compliance in WebSocket authentication
@@ -9,7 +10,8 @@ the unified authentication service and doesn't bypass SSOT patterns.'
 
 PRIORITY: TERTIARY - These tests ensure architectural compliance
 "
-"
+""
+
 
 import pytest
 import json
@@ -32,13 +34,15 @@ from netra_backend.app.services.unified_authentication_service import ()
 @pytest.mark.integration
 class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
     "
-    "
+    ""
+
     Test suite to validate SSOT compliance in WebSocket authentication.
     
     These tests ensure that WebSocket auth follows SSOT principles and
     doesn't create duplicate authentication paths.'
 "
-"
+""
+
 
     def setUp(self):
         "Set up test fixtures."
@@ -46,21 +50,25 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
         self.websocket_authenticator = UnifiedWebSocketAuthenticator()
         
     def create_mock_websocket(self, headers: Dict[str, str) -> Mock:
-        ""Create mock WebSocket with specific headers. "
+        ""Create mock WebSocket with specific headers. ""
+
         websocket = Mock()
         websocket.headers = headers
         websocket.client = Mock()
         websocket.client.host = 127.0.0.1"
-        websocket.client.host = 127.0.0.1"
+        websocket.client.host = 127.0.0.1""
+
         websocket.client.port = 8000
         websocket.client_state = Mock()
         websocket.client_state.name = CONNECTED"
-        websocket.client_state.name = CONNECTED"
+        websocket.client_state.name = CONNECTED""
+
         return websocket
 
     async def test_websocket_uses_unified_auth_service(self):
         """
-    "
+    ""
+
         Test that WebSocket authentication uses the unified auth service.
         
         This validates that WebSocket auth doesn't bypass SSOT patterns.'
@@ -91,7 +99,8 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
             # Check if they're the same type'
             ssot_compliance[same_type"] = type(websocket_auth_service) == type(unified_auth_service)"
             ssot_compliance[services_match] = ssot_compliance[same_instance] or ssot_compliance[same_type]"
-            ssot_compliance[services_match] = ssot_compliance[same_instance] or ssot_compliance[same_type]"
+            ssot_compliance[services_match] = ssot_compliance[same_instance] or ssot_compliance[same_type]""
+
         
         # Log SSOT compliance check
         print(\n=== SSOT COMPLIANCE VALIDATION ===")"
@@ -101,13 +110,15 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
         self.assertIsNotNone(
             unified_auth_service,
             Unified auth service should be available"
-            Unified auth service should be available"
+            Unified auth service should be available""
+
         )
         
         self.assertIsNotNone(
             websocket_authenticator,
             WebSocket authenticator should be available"
-            WebSocket authenticator should be available"
+            WebSocket authenticator should be available""
+
         )
         
         self.assertIsNotNone(
@@ -124,7 +135,8 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
 
     async def test_no_auth_bypass_patterns(self):
         """
-        "
+        ""
+
         Test that WebSocket authentication doesn't bypass unified patterns.'
         
         This checks for anti-patterns like direct JWT validation or
@@ -215,7 +227,8 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
         This detects if WebSocket auth is importing from deprecated or
         non-SSOT authentication modules.
         "
-        "
+        ""
+
         import inspect
         import sys
         
@@ -333,7 +346,8 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
 
     async def test_websocket_auth_service_singleton_compliance(self):
         """
-    "
+    ""
+
         Test that WebSocket authenticator follows singleton patterns correctly.
         
         This ensures proper SSOT instance management.
@@ -464,7 +478,8 @@ class WebSocketUnifiedAuthComplianceTests(SSotAsyncTestCase):
 
     async def test_websocket_auth_configuration_isolation(self):
         """
-        "
+        ""
+
         Test that WebSocket auth configuration is properly isolated.
         
         This ensures WebSocket auth doesn't interfere with other auth systems.'

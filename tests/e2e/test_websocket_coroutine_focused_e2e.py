@@ -7,11 +7,11 @@ in a complete end-to-end scenario while being practical to run.
 CRITICAL ISSUE: GitHub Issue #133
 - Problem: 'coroutine' object has no attribute 'get' error in WebSocket endpoint
 - Root Cause: get_env() returning coroutine instead of IsolatedEnvironment
-- Business Impact: Blocking core chat functionality ($500K+ ARR impact)
+- Business Impact: Blocking core chat functionality ($"500K" plus ARR impact)
 
 CLAUDE.MD COMPLIANCE:
-- E2E test with real environment detection
-- Tests execution time to prevent 0.00s bypassing
+    - E2E test with real environment detection
+- Tests execution time to prevent 0."00s" bypassing
 - Validates the fix in E2E context
 - No complex authentication flows for simplicity
 """"""
@@ -37,14 +37,16 @@ class WebSocketCoroutineFocusedE2ETests(SSotBaseTestCase):
         self.env = get_env()
 
     def tearDown(self):
-        ""Validate E2E test execution time."
+        ""Validate E2E test execution time.""
+
         super().tearDown()
         execution_time = time.time() - self.start_time
-        assert execution_time > 0.1, "f'E2E test completed in {execution_time:.3f}s - possible test bypassing detected'"
+        assert execution_time > 0.1, "f'E2E test completed in {execution_time:."3f"}s - possible test bypassing detected'"
 
     @pytest.mark.e2e
     def test_websocket_e2e_environment_detection_validation(self):
-    """
+    """"
+
         CRITICAL: Test WebSocket environment detection in E2E context.
         
         This validates that the environment detection logic from websocket.py
@@ -81,7 +83,8 @@ class WebSocketCoroutineFocusedE2ETests(SSotBaseTestCase):
 
     @pytest.mark.e2e
     def test_websocket_get_env_consistency_e2e(self):
-    """
+    """"
+
         Test get_env() consistency in E2E environment.
         
         Ensures that multiple calls to get_env() return consistent
@@ -118,7 +121,8 @@ class WebSocketCoroutineFocusedE2ETests(SSotBaseTestCase):
 
     @pytest.mark.e2e
     def test_websocket_business_logic_pattern_e2e(self):
-    """
+    """"
+
         Test WebSocket business logic pattern that caused regression.
         
         This tests the business logic pattern that was failing in the

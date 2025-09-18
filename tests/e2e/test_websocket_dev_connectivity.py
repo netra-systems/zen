@@ -3,7 +3,7 @@ WebSocket Development Connectivity Test
 Tests WebSocket connectivity for dev launcher environment validation.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal - Development Environment
+    - Segment: Platform/Internal - Development Environment
 - Business Goal: Development Velocity & System Stability
 - Value Impact: Ensures WebSocket connectivity works in dev environment
 - Strategic Impact: Prevents dev environment broken states, reduces developer friction
@@ -26,7 +26,8 @@ class WebSocketDevConnectivityTests:
 
     @pytest.mark.websocket
     async def test_dev_websocket_basic_connectivity(self):
-    """
+    """"
+
         Test basic WebSocket connectivity to the test endpoint.
         
         Critical Assertions:
@@ -130,7 +131,8 @@ class WebSocketDevConnectivityTests:
 
     @pytest.mark.websocket
     async def test_dev_websocket_ping_pong(self):
-    """
+    """"
+
         Test WebSocket ping/pong heartbeat functionality.
         
         Critical Assertions:
@@ -173,11 +175,11 @@ class WebSocketDevConnectivityTests:
             assert round_trip_time < 1.0, \
                 fRound-trip time too high: {round_trip_time}s
             
-            print(fPing/pong successful - RTT: {round_trip_time:.3f}s"")
+            print(fPing/pong successful - RTT: {round_trip_time:."3f"}s"")
 
     @pytest.mark.websocket
     async def test_dev_websocket_error_handling(self):
-""""""
+    """"""
         Test WebSocket error handling for malformed messages.
         
         Critical Assertions:
@@ -224,7 +226,7 @@ class WebSocketDevConnectivityTests:
 
     @pytest.mark.websocket
     async def test_dev_websocket_multiple_messages(self):
-""""""
+    """"""
         Test WebSocket handling of multiple rapid messages.
         
         Critical Assertions:
@@ -280,7 +282,7 @@ class WebSocketDevConnectivityTests:
 
     @pytest.mark.websocket
     async def test_dev_websocket_connection_info(self):
-""""""
+    """"""
         Test WebSocket provides useful connection information for debugging.
         
         Critical Assertions:
@@ -326,7 +328,8 @@ class WebSocketDevConnectivityTests:
 
     @pytest.mark.asyncio
     async def test_websocket_availability_check(self):
-        """
+        """"
+
         Quick availability check for WebSocket service.
         This test ensures the WebSocket service is running and responding.
         

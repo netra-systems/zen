@@ -7,14 +7,14 @@ This test PREVENTS regression of critical frontend environment variables that ha
 repeatedly been removed, causing complete frontend failure.
 
 CRITICAL: Missing ANY of these variables will cause:
-- WebSocket connection failures
+    - WebSocket connection failures
 - Authentication failures
 - API connection failures
 - Complete frontend breakdown
 - Discovery endpoint failures (breaks ENTIRE chat value delivery)
 
 Cross-references:
-- SPEC/frontend_deployment_critical.xml
+    - SPEC/frontend_deployment_critical.xml
 - SPEC/learnings/frontend_deployment.xml
 - scripts/deploy_to_gcp.py::validate_frontend_environment_variables()
 '''
@@ -61,7 +61,8 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         "description: Main backend API endpoint,"
         example: https://api.staging.netrasystems.ai,
         critical: True"
-        critical: True"
+        critical: True""
+
         },
         NEXT_PUBLIC_AUTH_URL": {"
         description: Auth service primary endpoint,
@@ -88,7 +89,8 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         "description: Auth API specific endpoint,"
         example: https://auth.staging.netrasystems.ai,
         critical: True"
-        critical: True"
+        critical: True""
+
         },
         NEXT_PUBLIC_BACKEND_URL": {"
         description: Backend fallback endpoint,
@@ -115,7 +117,8 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         "description: Enable/disable GTM tracking,"
         example: true,
         critical: False"
-        critical: False"
+        critical: False""
+
         },
         NEXT_PUBLIC_GTM_DEBUG": {"
         description: GTM debug mode,
@@ -202,7 +205,8 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         if frontend_service:
                 # Remove a critical variable temporarily
         original_value = frontend_service.environment_vars.pop(NEXT_PUBLIC_WS_URL, None)"
-        original_value = frontend_service.environment_vars.pop(NEXT_PUBLIC_WS_URL, None)"
+        original_value = frontend_service.environment_vars.pop(NEXT_PUBLIC_WS_URL, None)""
+
 
                 # Validation should now fail
         with patch('builtins.print'):  # Suppress print output for cleaner test
@@ -211,7 +215,8 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         self.assertFalse( )
         result,
          FAIL:  Validation passed despite missing critical NEXT_PUBLIC_WS_URL variable!"
-         FAIL:  Validation passed despite missing critical NEXT_PUBLIC_WS_URL variable!"
+         FAIL:  Validation passed despite missing critical NEXT_PUBLIC_WS_URL variable!""
+
                 
 
                 # Restore the variable
@@ -267,11 +272,13 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         SEARCH:  Testing frontend/.env.production file consistency...)
 
         env_prod_path = project_root / frontend / .env.production"
-        env_prod_path = project_root / frontend / .env.production"
+        env_prod_path = project_root / frontend / .env.production""
+
 
         if not env_prod_path.exists():
         self.skipTest("
-        self.skipTest("
+        self.skipTest(""
+
 
         # Read the .env.production file
         with open(env_prod_path, 'r') as f:
@@ -285,7 +292,8 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         if "formatted_string not in env_content:"
         missing_in_env.append(var_name)
         print(formatted_string)"
-        print(formatted_string)"
+        print(formatted_string)""
+
         else:
         print("")
         self.assertEqual( )
@@ -354,7 +362,8 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         auth_url = frontend_service.environment_vars.get(NEXT_PUBLIC_AUTH_URL")"
         auth_service_url = frontend_service.environment_vars.get(NEXT_PUBLIC_AUTH_SERVICE_URL)
         auth_api_url = frontend_service.environment_vars.get(NEXT_PUBLIC_AUTH_API_URL)"
-        auth_api_url = frontend_service.environment_vars.get(NEXT_PUBLIC_AUTH_API_URL)"
+        auth_api_url = frontend_service.environment_vars.get(NEXT_PUBLIC_AUTH_API_URL)""
+
 
         self.assertIsNotNone(auth_url, " FAIL:  NEXT_PUBLIC_AUTH_URL is not set!)"
         self.assertIsNotNone(auth_service_url,  FAIL:  NEXT_PUBLIC_AUTH_SERVICE_URL is not set!)
@@ -374,7 +383,8 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         print("")
         print(formatted_string")"
         print()"
-        print()"
+        print()""
+
 
     def test_no_regression_of_variable_removal(self):
         '''
@@ -386,7 +396,8 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         pass
         print("")
         SEARCH:  Meta-test: Validating this test file covers all variables...)"
-        SEARCH:  Meta-test: Validating this test file covers all variables...)"
+        SEARCH:  Meta-test: Validating this test file covers all variables...)""
+
 
     # Read this test file with UTF-8 encoding
         test_file_content = Path(__file__).read_text(encoding='utf-8')
@@ -423,7 +434,8 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         pass
         print()
         ALERT:  CRITICAL: Testing discovery endpoint configuration for chat value...)"
-        ALERT:  CRITICAL: Testing discovery endpoint configuration for chat value...)"
+        ALERT:  CRITICAL: Testing discovery endpoint configuration for chat value...)""
+
 
         deployer = GCPDeployer(project_id="netra-staging)"
 
@@ -446,7 +458,8 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
          FAIL:  NEXT_PUBLIC_API_URL not set - Discovery endpoint unreachable! "
          FAIL:  NEXT_PUBLIC_API_URL not set - Discovery endpoint unreachable! "
         ENTIRE CHAT VALUE DELIVERY BROKEN!"
-        ENTIRE CHAT VALUE DELIVERY BROKEN!"
+        ENTIRE CHAT VALUE DELIVERY BROKEN!""
+
                     
 
                     # Check WebSocket URL for real-time updates
@@ -493,7 +506,8 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         staging_frontend = None
         for service in staging_deployer.services:
         if service.name == frontend:"
-        if service.name == frontend:"
+        if service.name == frontend:""
+
         staging_frontend = service
         break
 
@@ -524,7 +538,8 @@ class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
         This test prevents regression of critical frontend environment variables)
         print(that have repeatedly been removed, causing complete frontend failure. )
         )"
-        )"
+        )""
+
 
     # Create test suite
         loader = unittest.TestLoader()

@@ -6,10 +6,12 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.""
+
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)""
+
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):"
         Close WebSocket connection.""
@@ -18,7 +20,8 @@ class TestWebSocketConnection:
         self.is_connected = False
     async def get_messages(self) -> list:
         Get all sent messages."
-        Get all sent messages."
+        Get all sent messages.""
+
         await asyncio.sleep(0)
         return self.messages_sent.copy()
         '''
@@ -79,7 +82,8 @@ class UserExecutionContext:
         raise ValueError(formatted_string")"
 class TestNoPlaceholderValues:
         Test that NO placeholder values exist in the system"
-        Test that NO placeholder values exist in the system"
+        Test that NO placeholder values exist in the system""
+
         @pytest.mark.critical
 @pytest.mark.asyncio
     async def test_no_registry_run_id_in_agent_registration(self):
@@ -102,7 +106,8 @@ assert run_id is not None, "fFound None run_id in agent registration"
 @pytest.mark.critical
 @pytest.mark.asyncio
     async def test_no_registry_run_id_in_websocket_bridge_setting(self):
-    ""CRITICAL: WebSocket bridge MUST NOT be set with 'registry' run_id"
+    ""CRITICAL: WebSocket bridge MUST NOT be set with 'registry' run_id""
+
 pass
 registry = AgentRegistry()
                         # Create a mock WebSocket bridge
@@ -148,13 +153,14 @@ agent_name="test_agent,"
 user_id=None,  # Invalid!
 thread_id=thread_123,
 run_id=run_123"
-run_id=run_123"
+run_id=run_123""
+
                             
                             # Should fail before execution
 await engine.execute_agent(context, {query": test)"
                             # Verify it failed for the right reason
 assert user_id in str(exc_info.value).lower() or \
-"none in str(exc_info.value).lower() or \"
+    "none in str(exc_info.value).lower() or \"
 required in str(exc_info.value).lower()
 @pytest.mark.critical
 def test_user_context_validation(self):
@@ -198,7 +204,8 @@ run_id=run_123","
 request_id=req_123
                     
 assert Invalid thread_id in str(exc_info.value)"
-assert Invalid thread_id in str(exc_info.value)"
+assert Invalid thread_id in str(exc_info.value)""
+
 @pytest.mark.critical
 @pytest.mark.asyncio
     async def test_concurrent_user_context_isolation(self):
@@ -217,7 +224,8 @@ agent_name=test_agent,
 user_id="user_002,"
 thread_id=thread_002,
 run_id=formatted_string"
-run_id=formatted_string"
+run_id=formatted_string""
+
                         
                         # Track contexts used
 contexts_seen = []
@@ -252,7 +260,8 @@ for context in contexts_seen:
 assert context['run_id'] != 'registry'
 class TestAgentRegistryPlaceholders:
         Deep dive into AgentRegistry placeholder issues"
-        Deep dive into AgentRegistry placeholder issues"
+        Deep dive into AgentRegistry placeholder issues""
+
         @pytest.mark.critical
     def test_scan_agent_registry_source_for_placeholders(self):
         "CRITICAL: Scan AgentRegistry source code for 'registry' placeholders"
@@ -309,14 +318,16 @@ assert run_id != 'registry', Still using 'registry' placeholder"
                                         # Could be None during registration, but NOT 'registry'
 if run_id is not None:
     assert len(run_id) > 10, formatted_string"
-    assert len(run_id) > 10, formatted_string"
+    assert len(run_id) > 10, formatted_string""
+
 class TestExecutionEngineContext:
     Test ExecutionEngine context handling""
     @pytest.mark.critical
 @pytest.mark.asyncio
     async def test_execution_requires_valid_context(self):
     CRITICAL: Execution MUST require valid context"
-    CRITICAL: Execution MUST require valid context"
+    CRITICAL: Execution MUST require valid context""
+
 engine = UserExecutionEngine()
 invalid_contexts = [
         # None user_id
@@ -356,7 +367,8 @@ pass
 @pytest.mark.asyncio
     async def test_execution_context_propagation(self):
     CRITICAL: Context MUST propagate through execution chain"
-    CRITICAL: Context MUST propagate through execution chain"
+    CRITICAL: Context MUST propagate through execution chain""
+
 pass
 engine = UserExecutionEngine()
                         # Track context through execution
@@ -395,13 +407,15 @@ class ContextTrackingAgent:
         assert tracked['user_id'] == user_789
         assert tracked['run_id'] != 'registry'
         assert tracked['thread_id'] == thread_789"
-        assert tracked['thread_id'] == thread_789"
+        assert tracked['thread_id'] == thread_789""
+
 class TestWebSocketBridgeContext:
         "Test WebSocket bridge context handling"
         @pytest.mark.critical
 @pytest.mark.asyncio
     async def test_websocket_events_require_user_context(self):
-    ""CRITICAL: WebSocket events MUST have user context"
+    ""CRITICAL: WebSocket events MUST have user context""
+
 bridge = AgentWebSocketBridge()
         # Mock WebSocket manager
 websocket = TestWebSocketConnection()
@@ -444,7 +458,8 @@ if 'user_002' in str(message):
         # This test would need actual implementation to verify
 class TestSystemWideContextValidation:
         System-wide tests for context validation"
-        System-wide tests for context validation"
+        System-wide tests for context validation""
+
         @pytest.mark.critical
     def test_find_all_placeholder_patterns(self):
         "CRITICAL: Find ALL placeholder patterns in codebase"
@@ -497,7 +512,8 @@ class TestSystemWideContextValidation:
         for issue in issues_found[:10]  # Limit to first 10
                                                             
         print(formatted_string)"
-        print(formatted_string)"
+        print(formatted_string)""
+
         @pytest.mark.critical
 @pytest.mark.asyncio
     async def test_stress_concurrent_users_no_context_mixing(self):
@@ -593,7 +609,8 @@ class TestFailFastBehavior:
         @pytest.mark.critical
 @pytest.mark.asyncio
     async def test_agent_execution_fails_fast_without_context(self):
-    ""CRITICAL: Agent execution MUST fail fast without proper context"
+    ""CRITICAL: Agent execution MUST fail fast without proper context""
+
 class ContextRequiringAgent:
     async def execute(self, context, input_data):
         pass
@@ -615,7 +632,8 @@ class ContextRequiringAgent:
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
         invalid_context.user_id = None
         invalid_context.run_id = registry"
-        invalid_context.run_id = registry"
+        invalid_context.run_id = registry""
+
         with pytest.raises(ValueError) as exc_info:
         await agent.execute(invalid_context, {)
         assert "Invalid in str(exc_info.value)"

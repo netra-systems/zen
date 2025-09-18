@@ -38,7 +38,8 @@ except ImportError as e:
 
 class TestWebSocketConnection:
     Real WebSocket connection for testing instead of mocks."
-    Real WebSocket connection for testing instead of mocks."
+    Real WebSocket connection for testing instead of mocks.""
+
 
     def __init__(self):
         self.messages_sent = []
@@ -102,7 +103,8 @@ class MissingWebSocketEventsValidator:
 
     def setup_test_environment(self):
         Setup test environment with mocked WebSocket infrastructure."
-        Setup test environment with mocked WebSocket infrastructure."
+        Setup test environment with mocked WebSocket infrastructure.""
+
         try:
             if 'WebSocketBridgeFactory' in globals():
                 self.websocket_factory = WebSocketBridgeFactory()
@@ -386,7 +388,8 @@ class MissingWebSocketEventsValidator:
 
         for test_name, test_coro in test_functions:
             logger.info(f\n🔍 Running: {test_name})"
-            logger.info(f\n🔍 Running: {test_name})"
+            logger.info(f\n🔍 Running: {test_name})""
+
             try:
                 result = await test_coro
                 test_results[test_name] = result
@@ -432,14 +435,16 @@ class MissingWebSocketEventsValidator:
 
         if self.test_results['events_missing']:
             logger.error(f\n❌ MISSING EVENTS:)"
-            logger.error(f\n❌ MISSING EVENTS:)"
+            logger.error(f\n❌ MISSING EVENTS:)""
+
             for event in self.test_results['events_missing']:
                 criticality = "🚨 CRITICAL if event in critical_missing else ⚠️  NORMAL"
                 logger.error(f  {criticality}: {event})
 
         if critical_missing:
             logger.error(f\n🚨 CRITICAL MISSING EVENTS (Frontend Impact):)"
-            logger.error(f\n🚨 CRITICAL MISSING EVENTS (Frontend Impact):)"
+            logger.error(f\n🚨 CRITICAL MISSING EVENTS (Frontend Impact):)""
+
             for event in critical_missing:
                 logger.error(f"  - {event}: Users will not see real-time updates)"
         else:
@@ -459,7 +464,8 @@ class MissingWebSocketEventsValidator:
 @pytest.mark.asyncio
 @pytest.mark.critical
 async def test_missing_websocket_events():
-    ""Pytest wrapper for missing WebSocket events validation."
+    ""Pytest wrapper for missing WebSocket events validation.""
+
     validator = MissingWebSocketEventsValidator()
     results = await validator.run_comprehensive_missing_events_test()
 

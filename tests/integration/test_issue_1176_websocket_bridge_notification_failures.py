@@ -3,7 +3,7 @@
 TARGET: WebSocket Bridge Integration Conflicts - Timeout Notification Failures
 
 This module tests the WebSocket bridge notification failures identified in Issue #1176:
-1. WebSocket bridge timeout notifications during factory initialization
+    1. WebSocket bridge timeout notifications during factory initialization
 2. Service dependency failures causing bridge disconnection
 3. Auth service configuration breakdown affecting WebSocket establishment
 4. Message routing failures when bridge interfaces don't match'
@@ -12,9 +12,9 @@ These tests use real services (PostgreSQL, Redis) without Docker dependency.
 Tests are designed to FAIL when problems exist, not show false success.
 
 Business Value Justification:
-- Segment: Platform/All Users
+    - Segment: Platform/All Users
 - Business Goal: Golden Path Protection & Chat Functionality
-- Value Impact: Ensures WebSocket bridge works for $500K+ ARR chat functionality
+- Value Impact: Ensures WebSocket bridge works for $"500K" plus ARR chat functionality
 - Strategic Impact: Prevents bridge failures from breaking real-time user communication
 ""
 
@@ -87,7 +87,8 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
 
                 # If initialization takes too long, it indicates timeout issues
                 if init_duration > 3.0:
-                    self.fail(fWebSocket bridge initialization took {init_duration:.2f}s - timeout issue detected)
+                    self.fail(fWebSocket bridge initialization took {init_duration:."2f"}s - timeout issue detected)""
+
 
             except asyncio.TimeoutError:
                 # Expected in Issue #1176 - bridge initialization should timeout
@@ -428,7 +429,8 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
 
             # Verify event delivery timing
             if total_duration > 2.0:
-                self.fail(fWebSocket event delivery took {total_duration:.2f}s - performance issue detected)
+                self.fail(fWebSocket event delivery took {total_duration:."2f"}s - performance issue detected)""
+
 
             # Verify event ordering
             expected_order = [event_type for event_type, _ in critical_events]
@@ -441,5 +443,6 @@ class TestWebSocketBridgeNotificationFailures(SSotAsyncTestCase):
 
 if __name__ == __main__:
     pytest.main([__file__, -v, --tb=short")"
-"""
+""""
+
 ))))))

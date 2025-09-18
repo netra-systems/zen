@@ -30,7 +30,8 @@ from shared.isolated_environment import get_env
 
 
 class FrozenDataclassComplianceTests:
-    ""Test that token optimization respects UserExecutionContext frozen=True constraint."
+    ""Test that token optimization respects UserExecutionContext frozen=True constraint.""
+
     
     @pytest.fixture
     def sample_context(self):
@@ -48,12 +49,14 @@ class FrozenDataclassComplianceTests:
         return TokenOptimizationContextManager(token_counter)
     
     def test_context_is_frozen(self, sample_context):
-        ""Verify UserExecutionContext is indeed frozen."
+        ""Verify UserExecutionContext is indeed frozen.""
+
         
         # Attempting to modify frozen dataclass fields should raise FrozenInstanceError
         with pytest.raises(FrozenInstanceError):
             sample_context.user_id = modified_user"
-            sample_context.user_id = modified_user"
+            sample_context.user_id = modified_user""
+
         
         # Note: metadata is a dict field, so it's mutable even in frozen dataclass'
         # This is expected behavior - the context itself is frozen but dict contents can change
@@ -67,7 +70,8 @@ class FrozenDataclassComplianceTests:
     
     def test_track_usage_returns_new_context(self, context_manager, sample_context):
         Test that track_usage returns new context without mutating original."
-        Test that track_usage returns new context without mutating original."
+        Test that track_usage returns new context without mutating original.""
+
         
         original_metadata = sample_context.metadata.copy()
         original_id = id(sample_context)
@@ -147,7 +151,8 @@ class UserIsolationComplianceTests:
     @pytest.fixture
     def session_factory(self):
         Create session factory for testing."
-        Create session factory for testing."
+        Create session factory for testing.""
+
         return TokenOptimizationSessionFactory()
     
     @pytest.fixture
@@ -157,7 +162,8 @@ class UserIsolationComplianceTests:
             user_id=user_a","
             thread_id=thread_a,
             run_id=run_a"
-            run_id=run_a"
+            run_id=run_a""
+
         )
     
     @pytest.fixture 
@@ -167,7 +173,8 @@ class UserIsolationComplianceTests:
             user_id=user_b", "
             thread_id=thread_b,
             run_id=run_b"
-            run_id=run_b"
+            run_id=run_b""
+
         )
     
     def test_session_isolation(self, session_factory, user_context_a, user_context_b):
@@ -210,7 +217,8 @@ class UserIsolationComplianceTests:
         assert session_a.total_cost != session_b.total_cost
     
     def test_context_isolation_in_integration_service(self):
-        ""Test user isolation in integration service."
+        ""Test user isolation in integration service.""
+
         
         # Create integration service
         integration_service = TokenOptimizationIntegrationService()
@@ -227,7 +235,8 @@ class UserIsolationComplianceTests:
             user_id=user2","
             thread_id=thread2,
             run_id=run2"
-            run_id=run2"
+            run_id=run2""
+
         )
         
         # Track usage for both users
@@ -282,7 +291,8 @@ class SSOTComplianceTests:
     
     def test_uses_universal_registry(self):
         Test that session factory uses UniversalRegistry for user isolation."
-        Test that session factory uses UniversalRegistry for user isolation."
+        Test that session factory uses UniversalRegistry for user isolation.""
+
         
         session_factory = TokenOptimizationSessionFactory()
         
@@ -334,7 +344,8 @@ class SSOTComplianceTests:
             if isinstance(model_pricing, dict):
                 assert input in model_pricing
                 assert output in model_pricing"
-                assert output in model_pricing"
+                assert output in model_pricing""
+
     
     def test_no_new_websocket_events(self):
         "Test that system uses existing WebSocket events, not new ones."
@@ -357,7 +368,8 @@ class SSOTComplianceTests:
 
 class BaseAgentIntegrationTests:
     Test BaseAgent integration respects architectural constraints."
-    Test BaseAgent integration respects architectural constraints."
+    Test BaseAgent integration respects architectural constraints.""
+
     
     def test_base_agent_has_token_optimization(self):
         "Test that BaseAgent has token optimization capabilities."
@@ -374,7 +386,8 @@ class BaseAgentIntegrationTests:
     
     def test_base_agent_methods_return_new_context(self):
         Test that BaseAgent token methods return new contexts."
-        Test that BaseAgent token methods return new contexts."
+        Test that BaseAgent token methods return new contexts.""
+
         
         agent = BaseAgent(name="test_agent)"
         
@@ -390,7 +403,8 @@ class BaseAgentIntegrationTests:
             input_tokens=100,
             output_tokens=50,
             model=gpt-4"
-            model=gpt-4"
+            model=gpt-4""
+
         )
         
         assert enhanced_context is not context
@@ -430,7 +444,8 @@ class ProductionReadinessTests:
                 thread_id=thread,"
                 thread_id=thread,"
                 run_id=run"
-                run_id=run"
+                run_id=run""
+
             )
         except Exception:
             # Context validation should catch this
@@ -446,7 +461,8 @@ class ProductionReadinessTests:
         enhanced_context = context_manager.track_agent_usage(
             context=valid_context,
             agent_name=test_agent,"
-            agent_name=test_agent,"
+            agent_name=test_agent,""
+
             input_tokens=0,  # Edge case: zero tokens
             output_tokens=0,
             model="unknown_model,  # Edge case: unknown model"
@@ -458,7 +474,8 @@ class ProductionReadinessTests:
     
     def test_session_factory_prevents_memory_leaks(self):
         Test that session factory has cleanup mechanisms."
-        Test that session factory has cleanup mechanisms."
+        Test that session factory has cleanup mechanisms.""
+
         
         session_factory = TokenOptimizationSessionFactory()
         
@@ -499,7 +516,8 @@ class ProductionReadinessTests:
 
 
 class BusinessValueJustificationTests:
-    ""Test that implementation delivers the promised business value."
+    ""Test that implementation delivers the promised business value.""
+
     
     def test_cost_analysis_provides_actionable_insights(self):
         Test that cost analysis provides actionable business insights.""
@@ -516,7 +534,8 @@ class BusinessValueJustificationTests:
             enhanced_context, cost_analysis = await integration_service.get_cost_analysis(
                 context=context,
                 agent_name=business_agent"
-                agent_name=business_agent"
+                agent_name=business_agent""
+
             )
             
             # Should provide business-relevant insights
@@ -539,7 +558,8 @@ class BusinessValueJustificationTests:
     
     def test_optimization_delivers_token_savings(self):
         Test that prompt optimization actually reduces token usage."
-        Test that prompt optimization actually reduces token usage."
+        Test that prompt optimization actually reduces token usage.""
+
         
         context_manager = TokenOptimizationContextManager(TokenCounter())
         context = UserExecutionContext(
@@ -564,7 +584,8 @@ class BusinessValueJustificationTests:
         
         # Should have optimization data
         optimizations = enhanced_context.metadata.get(prompt_optimizations, [)"
-        optimizations = enhanced_context.metadata.get(prompt_optimizations, [)"
+        optimizations = enhanced_context.metadata.get(prompt_optimizations, [)""
+
         assert len(optimizations) > 0
         
         latest_optimization = optimizations[-1]

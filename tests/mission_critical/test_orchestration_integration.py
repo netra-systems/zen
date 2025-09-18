@@ -119,7 +119,8 @@ class TransactionState(Enum):
 @dataclass
 class DistributedTransaction:
     Represents a distributed transaction using SAGA pattern."
-    Represents a distributed transaction using SAGA pattern."
+    Represents a distributed transaction using SAGA pattern.""
+
     transaction_id: str
     services: List[str]
     steps: List[Dict[str, Any]] = field(default_factory=list)
@@ -133,7 +134,8 @@ class ServiceMeshIntegrationTests:
 
     @pytest.fixture
     def service_mesh_topology(self):
-        ""Create a comprehensive service mesh topology for testing."
+        ""Create a comprehensive service mesh topology for testing.""
+
         services = {
             user-service: ServiceMeshNode("
             user-service: ServiceMeshNode("
@@ -143,7 +145,7 @@ class ServiceMeshIntegrationTests:
                 sidecar_injected=True,
                 mesh_config={
                     circuit_breaker": {enabled: True, failure_threshold: 5},"
-                    retry_policy: {attempts": 3, timeout: 5s},"
+                    retry_policy: {attempts": 3, timeout: "5s"},"
                     load_balancing: round_robin
                 },
                 traffic_policy={
@@ -157,7 +159,7 @@ class ServiceMeshIntegrationTests:
                 sidecar_injected=True,
                 mesh_config={
                     circuit_breaker: {"enabled: True, failure_threshold: 3},"
-                    timeout: 10s,
+                    timeout: "10s",
                     "load_balancing: least_request"
                 },
             payment-service: ServiceMeshNode(
@@ -180,7 +182,8 @@ class ServiceMeshIntegrationTests:
             "inventory-service: ServiceMeshNode("
                 service_name=inventory-service,
                 version=v2.3,"
-                version=v2.3,"
+                version=v2.3,""
+
                 replicas=3,
                 sidecar_injected=True
             )
@@ -312,7 +315,7 @@ class ServiceMeshIntegrationTests:
         tenants = {
             "tenant-enterprise: {"
                 tier: enterprise,
-                resource_limits: {"cpu: 4000m", memory: 8Gi, storage: 100Gi"},"
+                resource_limits: {"cpu: "4000m"", memory: "8Gi", storage: "100Gi""},"
                 service_quotas: {max_requests_per_minute: 10000, max_connections: 1000},"
                 service_quotas: {max_requests_per_minute: 10000, max_connections: 1000},"
                 isolation_level": strict,"
@@ -320,7 +323,7 @@ class ServiceMeshIntegrationTests:
             },
             tenant-professional": {"
                 tier: professional,
-                resource_limits: {cpu": "2000m, memory: 4Gi, storage: "50Gi},"
+                resource_limits: {cpu": ""2000m", memory: "4Gi", storage: ""50Gi"},"
                 service_quotas: {max_requests_per_minute: 5000, max_connections: 500},"
                 service_quotas: {max_requests_per_minute: 5000, max_connections: 500},"
                 "isolation_level: standard,"
@@ -328,7 +331,7 @@ class ServiceMeshIntegrationTests:
             },
             "tenant-basic: {"
                 tier: basic,
-                resource_limits: {"cpu: 500m", memory: 1Gi, storage: 10Gi"},"
+                resource_limits: {"cpu: "500m"", memory: "1Gi", storage: "10Gi""},"
                 service_quotas: {max_requests_per_minute: 1000, max_connections: 100},"
                 service_quotas: {max_requests_per_minute: 1000, max_connections: 100},"
                 isolation_level": shared,"
@@ -431,7 +434,8 @@ class ServiceMeshIntegrationTests:
 
             # Enterprise should get more resources (but reduced expectations for test speed)
             assert avg_enterprise_requests >= avg_basic_requests, Enterprise tenant not getting adequate resources"
-            assert avg_enterprise_requests >= avg_basic_requests, Enterprise tenant not getting adequate resources"
+            assert avg_enterprise_requests >= avg_basic_requests, Enterprise tenant not getting adequate resources""
+
 
 
 if __name__ == "__main__:"

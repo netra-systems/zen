@@ -1,5 +1,5 @@
-"""
-"""
+""""
+
 CRITICAL TEST SUITE: AgentRegistry Isolation Issues
 ================================================================
 
@@ -7,24 +7,25 @@ This test suite is designed to FAIL with the current implementation to demonstra
 critical architectural problems with global singletons managing per-user state.
 
 CRITICAL PROBLEMS BEING DEMONSTRATED:
-1. User data leakage between concurrent requests (WebSocket bridge shared across users)
+    1. User data leakage between concurrent requests (WebSocket bridge shared across users)
 2. Global singleton blocking concurrent users
 3. Database session potential sharing across contexts
 4. WebSocket events going to wrong users
 5. Thread/User/Run ID confusion
 
 Business Value Justification:
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Stability & Security
 - Value Impact: Prevents user data leakage and supports 5+ concurrent users
 - Strategic Impact: Essential for multi-tenant security and scalability
 
 These tests are intentionally DIFFICULT and COMPREHENSIVE to expose all isolation bugs.
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import asyncio
 import logging
 import time
@@ -80,7 +81,8 @@ class TestWebSocketConnection:
         "Send JSON message."
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)""
+
         self.messages_sent.append(message)
 
     async def close(self, code: int = 1000, reason: str = "Normal closure):"
@@ -90,7 +92,8 @@ class TestWebSocketConnection:
 
     def get_messages(self) -> list:
         Get all sent messages."
-        Get all sent messages."
+        Get all sent messages.""
+
         return self.messages_sent.copy()
 
 
@@ -146,7 +149,8 @@ class IsolationViolationDetector:
 
     def detect_global_state_mutation(self, component: str, before_state: Any, after_state: Any):
         Detect mutations to global state that affect all users."
-        Detect mutations to global state that affect all users."
+        Detect mutations to global state that affect all users.""
+
         if before_state != after_state:
             self.global_state_mutations.append({
                 'component': component,
@@ -182,7 +186,8 @@ class IsolationViolationDetector:
 
 @pytest.mark.asyncio
 async def test_websocket_bridge_shared_across_users_FAILING():
-    """
+    """"
+
     CRITICAL FAILING TEST: Demonstrates WebSocket bridge being shared across all users.
 
     This test SHOULD FAIL because:
@@ -253,7 +258,8 @@ async def test_websocket_bridge_shared_across_users_FAILING():
 @pytest.mark.asyncio
 async def test_global_singleton_blocks_concurrent_users_FAILING():
         """
-    "
+    ""
+
     CRITICAL FAILING TEST: Demonstrates global singleton blocking concurrent execution.
 
     This test SHOULD FAIL because:
@@ -263,7 +269,8 @@ async def test_global_singleton_blocks_concurrent_users_FAILING():
 
     Expected Failure: Severe performance degradation with concurrent users
 "
-"
+""
+
 
     # Test with increasing numbers of concurrent users to show scaling issues
     user_counts = [1, 3, 5, 8, 10]
@@ -300,7 +307,7 @@ async def test_global_singleton_blocks_concurrent_users_FAILING():
         performance_metrics[user_count] = {
             'total_time': total_time,
             'time_per_user': total_time / user_count,
-            'theoretical_parallel_time': 2.0  # Each execution should take ~2s if truly parallel
+            'theoretical_parallel_time': 2.0  # Each execution should take ~"2s" if truly parallel
         }
 
     # CRITICAL ASSERTION: Performance should scale linearly with true isolation
@@ -327,7 +334,8 @@ async def test_global_singleton_blocks_concurrent_users_FAILING():
             assert time_per_user <= base_time_per_user * 2, \
                 f"CRITICAL SCALING FAILURE: Time per user increased from {base_time_per_user}s  \
                 fto {time_per_user}s with {user_count} users"
-                fto {time_per_user}s with {user_count} users"
+                fto {time_per_user}s with {user_count} users""
+
 
 
 # ============================================================================
@@ -337,7 +345,8 @@ async def test_global_singleton_blocks_concurrent_users_FAILING():
 @pytest.mark.asyncio
 async def test_websocket_events_wrong_users_FAILING():
         """
-    "
+    ""
+
     CRITICAL FAILING TEST: Demonstrates WebSocket events being sent to wrong users.
 
     This test SHOULD FAIL because:
@@ -347,7 +356,8 @@ async def test_websocket_events_wrong_users_FAILING():
 
     Expected Failure: Event routing violations between users
     "
-    "
+    ""
+
 
     # Create users with mock WebSocket connections
     users = [
@@ -477,7 +487,8 @@ async def simulate_user_agent_execution(user: MockUser, registry: AgentRegistry,
                 await bridge.notify_agent_started(user.run_id, test_agent, {)
                 violation_detector.record_websocket_event(
                     user.run_id, agent_started, user.user_id, user.user_id"
-                    user.run_id, agent_started, user.user_id, user.user_id"
+                    user.run_id, agent_started, user.user_id, user.user_id""
+
                 )
             except Exception as e:
                 pass  # Handle missing methods gracefully
@@ -497,18 +508,20 @@ async def simulate_user_agent_execution(user: MockUser, registry: AgentRegistry,
 
 
 async def simulate_blocking_agent_execution(user: MockUser, registry: AgentRegistry):
-    ""Simulate agent execution that reveals blocking behavior."
+    ""Simulate agent execution that reveals blocking behavior.""
+
 
     # Simulate multiple registry operations that could block other users
     for operation in range(5):
         # Registry operations that go through singleton
         agents = registry.list_agents()
         agent = registry.get(triage)"
-        agent = registry.get(triage)"
+        agent = registry.get(triage)""
+
         health = registry.get_registry_health()
 
         # Add delay to make blocking effects visible
-        await asyncio.sleep(0.4)  # 400ms per operation
+        await asyncio.sleep(0.4)  # "400ms" per operation
 
 
 # ============================================================================
@@ -518,7 +531,8 @@ async def simulate_blocking_agent_execution(user: MockUser, registry: AgentRegis
 @pytest.mark.asyncio
 async def test_comprehensive_isolation_audit_FAILING():
         """
-    "
+    ""
+
     MASTER FAILING TEST: Comprehensive audit of all isolation violations.
 
     This is the ultimate failing test that demonstrates ALL isolation problems
@@ -526,7 +540,8 @@ async def test_comprehensive_isolation_audit_FAILING():
 
     Expected Result: MASSIVE FAILURE showing all isolation bugs simultaneously
 "
-"
+""
+
 
     logger.critical("🚨 STARTING COMPREHENSIVE ISOLATION AUDIT - EXPECT MASSIVE FAILURES 🚨)"
 
@@ -635,14 +650,16 @@ async def test_comprehensive_isolation_audit_FAILING():
     assert max_execution_time <= avg_execution_time * 1.5, \
         f"CRITICAL PERFORMANCE SCALING VIOLATION: max_time={max_execution_time}s, avg_time={avg_execution_time}s.  \
         fGlobal singleton blocking detected!"
-        fGlobal singleton blocking detected!"
+        fGlobal singleton blocking detected!""
+
 
     # Check 3: Global state mutations (SHOULD FAIL)
     total_violations = len(violation_detector.get_isolation_violations())
     assert total_violations == 0, \
         fCRITICAL GLOBAL STATE VIOLATIONS: {total_violations} violations detected:\n + \
         \n.join(violation_detector.get_isolation_violations())"
-        \n.join(violation_detector.get_isolation_violations())"
+        \n.join(violation_detector.get_isolation_violations())""
+
 
     # Check 4: Exception handling (SHOULD FAIL if exceptions occurred)
     exceptions = [result for result in results if isinstance(result, Exception)]
@@ -651,7 +668,8 @@ async def test_comprehensive_isolation_audit_FAILING():
 
     logger.critical(🎯 IF YOU SEE THIS MESSAGE, THE ISOLATION BUGS HAVE BEEN FIXED!)
     logger.critical(🎯 THESE TESTS SHOULD FAIL WITH CURRENT SINGLETON ARCHITECTURE!)"
-    logger.critical(🎯 THESE TESTS SHOULD FAIL WITH CURRENT SINGLETON ARCHITECTURE!)"
+    logger.critical(🎯 THESE TESTS SHOULD FAIL WITH CURRENT SINGLETON ARCHITECTURE!)""
+
 
 
 if __name__ == __main__":"

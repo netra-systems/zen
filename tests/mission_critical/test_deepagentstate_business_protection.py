@@ -1,8 +1,8 @@
-"""
-"""
+""""
+
 MISSION CRITICAL TESTS: DeepAgentState Business Value Protection (Issue #871)
 
-These tests protect the $500K+ ARR business value by ensuring DeepAgentState SSOT violations
+These tests protect the $"500K" plus ARR business value by ensuring DeepAgentState SSOT violations
 don't compromise critical user experiences. Tests MUST PASS for deployment approval.'
 
 Tests will FAIL initially due to SSOT violations affecting business-critical functionality.
@@ -10,10 +10,11 @@ Tests will PASS after SSOT remediation ensures business continuity.
 
 DEPLOYMENT BLOCKER: These tests failing blocks all production deployments.
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import asyncio
 import json
 import pytest
@@ -27,11 +28,11 @@ from test_framework.websocket_helpers import WebSocketTestClient
 
 
 class DeepAgentStateBusinessProtectionTests(SSotAsyncTestCase):
-    "MISSION CRITICAL: Protecting $500K+ ARR from DeepAgentState SSOT violations"
+    "MISSION CRITICAL: Protecting $"500K" plus ARR from DeepAgentState SSOT violations"
 
     def setup_method(self, method):
         super().setup_method(method)
-        # Enterprise customers represent $500K+ ARR
+        # Enterprise customers represent $"500K" plus ARR
         self.enterprise_customers = [
             {"id: enterprise-alpha", mrr: 15000, tier: Enterprise},"
             {"id: enterprise-alpha", mrr: 15000, tier: Enterprise},"
@@ -47,7 +48,7 @@ class DeepAgentStateBusinessProtectionTests(SSotAsyncTestCase):
         
         MISSION CRITICAL: Enterprise customers must have perfect data isolation
 
-        BUSINESS IMPACT: $500K+ ARR at risk from data breach
+        BUSINESS IMPACT: $"500K" plus ARR at risk from data breach
         DEPLOYMENT BLOCKER: This test failing prevents all deployments
 ""
         # Execute enterprise customer scenarios concurrently
@@ -100,7 +101,8 @@ class DeepAgentStateBusinessProtectionTests(SSotAsyncTestCase):
             violation_report = '\n'.join(f  💰 {violation} for violation in business_critical_violations)
 
             pytest.fail(f"
-            pytest.fail(f"
+            pytest.fail(f""
+
 🚨🚨🚨 MISSION CRITICAL FAILURE - DEPLOYMENT BLOCKED 🚨🚨🚨
 
 BUSINESS PROTECTION VIOLATION: Enterprise customer data isolation compromised
@@ -128,12 +130,14 @@ IMMEDIATE ACTION REQUIRED: Fix Issue #871 DeepAgentState SSOT violations
     @pytest.mark.no_skip
     async def test_golden_path_chat_revenue_protection(self):
         """
-    "
+    ""
+
         MISSION CRITICAL: Golden Path chat functionality delivers 90% of platform value
 
         REVENUE PROTECTION: Chat is 90% of business value - must work flawlessly
         "
-        "
+        ""
+
         golden_path_violations = []
 
         # Test Golden Path for high-value customer scenario
@@ -149,7 +153,7 @@ IMMEDIATE ACTION REQUIRED: Fix Issue #871 DeepAgentState SSOT violations
                 # Send high-value customer request
                 await client.send_json({
                     type: agent_request","
-                    "message: Optimize our $2M annual cloud spend,"
+                    "message: Optimize our $"2M" annual cloud spend,"
                     customer_id: high_value_customer[id],
                     "priority: enterprise"
                 }
@@ -163,14 +167,16 @@ IMMEDIATE ACTION REQUIRED: Fix Issue #871 DeepAgentState SSOT violations
 
                 # Validate 5 critical WebSocket events
                 event_types = [event.get(type) for event in golden_path_events]"
-                event_types = [event.get(type) for event in golden_path_events]"
+                event_types = [event.get(type) for event in golden_path_events]""
+
                 required_events = [
                     agent_started","
                     agent_thinking,
                     tool_executing","
                     tool_completed,
                     agent_completed"
-                    agent_completed"
+                    agent_completed""
+
                 ]
 
                 for required_event in required_events:
@@ -195,7 +201,8 @@ IMMEDIATE ACTION REQUIRED: Fix Issue #871 DeepAgentState SSOT violations
                 final_event = golden_path_events[-1] if golden_path_events else None
                 if not final_event or final_event.get(type) != agent_completed:
                     golden_path_violations.append(Golden Path did not complete - no final response)"
-                    golden_path_violations.append(Golden Path did not complete - no final response)"
+                    golden_path_violations.append(Golden Path did not complete - no final response)""
+
 
                 elif result" not in final_event.get(data, {):"
                     golden_path_violations.append(Golden Path completed but no result delivered - customer gets nothing)
@@ -235,12 +242,14 @@ CRITICAL: Fix Issue #871 to restore chat functionality and protect revenue
     @pytest.mark.no_skip
     async def test_ssot_compliance_deployment_gate(self):
         """
-        "
+        ""
+
         MISSION CRITICAL: SSOT compliance gate for deployment approval
 
         DEPLOYMENT GATE: System must have single DeepAgentState source before deployment
 "
-"
+""
+
         ssot_compliance_violations = []
 
         # Test 1: Verify only one DeepAgentState definition exists
@@ -274,7 +283,8 @@ CRITICAL: Fix Issue #871 to restore chat functionality and protect revenue
         if not deprecated_exists and not ssot_exists:
             ssot_compliance_violations.append(
                 CRITICAL ERROR: No DeepAgentState found anywhere - system broken"
-                CRITICAL ERROR: No DeepAgentState found anywhere - system broken"
+                CRITICAL ERROR: No DeepAgentState found anywhere - system broken""
+
             )
 
         # Test 2: Verify production files use SSOT imports
@@ -295,7 +305,8 @@ CRITICAL: Fix Issue #871 to restore chat functionality and protect revenue
             violation_report = '\n'.join(f  📋 {violation} for violation in ssot_compliance_violations)
 
             pytest.fail(f"
-            pytest.fail(f"
+            pytest.fail(f""
+
 🚨🚨🚨 SSOT COMPLIANCE FAILURE - DEPLOYMENT GATE CLOSED 🚨🚨🚨
 
 SINGLE SOURCE OF TRUTH VIOLATIONS DETECTED:
@@ -355,10 +366,12 @@ ACTION REQUIRED: Complete Issue #871 DeepAgentState SSOT remediation
             for other_scenario in customer_scenarios:
                 if other_scenario[id] != customer_id:
                     if other_scenario[data_type] in result_str:"
-                    if other_scenario[data_type] in result_str:"
+                    if other_scenario[data_type] in result_str:""
+
                         trust_violations.append(
                             fTRUST BREACH: {customer_id) can see {other_scenario['id']) {other_scenario['data_type']) ({other_scenario['sensitivity'])"
-                            fTRUST BREACH: {customer_id) can see {other_scenario['id']) {other_scenario['data_type']) ({other_scenario['sensitivity'])"
+                            fTRUST BREACH: {customer_id) can see {other_scenario['id']) {other_scenario['data_type']) ({other_scenario['sensitivity'])""
+
                         )
 
             # Verify customer can access their own data
@@ -399,7 +412,8 @@ REMEDIATION: Complete Issue #871 SSOT fixes to restore customer trust
 
     def _file_has_deprecated_import(self, file_path: str) -> bool:
         Check if file has deprecated DeepAgentState import"
-        Check if file has deprecated DeepAgentState import"
+        Check if file has deprecated DeepAgentState import""
+
         try:
             from pathlib import Path
             full_path = Path(__file__).parent.parent.parent / file_path
@@ -446,7 +460,8 @@ REMEDIATION: Complete Issue #871 SSOT fixes to restore customer trust
 
     async def _execute_sensitive_customer_scenario(self, scenario: Dict[str, str) -> Dict[str, Any):
         Execute customer scenario with sensitive data"
-        Execute customer scenario with sensitive data"
+        Execute customer scenario with sensitive data""
+
         try:
             from netra_backend.app.schemas.agent_models import DeepAgentState
 
@@ -470,7 +485,8 @@ REMEDIATION: Complete Issue #871 SSOT fixes to restore customer trust
                 "data_type: getattr(state, 'data_type', None),"
                 compliance: getattr(state, 'data_classification', None),
                 processing_success: True"
-                processing_success: True"
+                processing_success: True""
+
             }
 
         except Exception as e:

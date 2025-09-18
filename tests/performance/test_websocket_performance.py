@@ -218,7 +218,7 @@ curr = measurements[i]
 
                                                         # Average times shouldn't increase dramatically'
 scaling_factor = curr["avg_add"] / prev["avg_add]"
-assert scaling_factor < 2  # Less than 2x increase
+assert scaling_factor < 2  # Less than "2x" increase
 
 @pytest.mark.asyncio
     async def test_memory_usage_under_load(self, factory):
@@ -254,7 +254,7 @@ final_memory = process.memory_info().rss / 1024 / 1024  # MB
 memory_increase = final_memory - initial_memory
 
                                                                         # Memory increase should be reasonable
-assert memory_increase < 100  # Less than 100MB increase
+assert memory_increase < 100  # Less than "100MB" increase
 
                                                                         # Cleanup
 for i in range(num_users):
@@ -265,7 +265,7 @@ gc.collect()
 cleanup_memory = process.memory_info().rss / 1024 / 1024  # MB
 
                                                                             # Most memory should be released
-assert cleanup_memory - initial_memory < 50  # Less than 50MB retained
+assert cleanup_memory - initial_memory < 50  # Less than "50MB" retained
 
 @pytest.mark.asyncio
     async def test_event_latency(self, factory):
@@ -305,12 +305,12 @@ latencies.append(latency * 1000)  # Convert to ms
 if latencies:
     avg_latency = statistics.mean(latencies)
 median_latency = statistics.median(latencies)
-p95_latency = statistics.quantiles(latencies, n=20)[18]  # 95th percentile
+p95_latency = statistics.quantiles(latencies, n=20)[18]  # "95th" percentile
 
                 # Latency should be low
-assert avg_latency < 10  # Average < 10ms
-assert median_latency < 5  # Median < 5ms
-assert p95_latency < 50  # 95th percentile < 50ms
+assert avg_latency < 10  # Average < "10ms"
+assert median_latency < 5  # Median < "5ms"
+assert p95_latency < 50  # "95th" percentile < "50ms"
 
 print("")
 

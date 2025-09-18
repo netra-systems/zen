@@ -5,7 +5,7 @@ These E2E tests validate complete end-to-end WebSocket flows with problematic us
 that currently cause Invalid user_id format" errors in production-like scenarios."
 
 Business Value Justification:
-- Segment: All User Segments + Platform/Internal
+    - Segment: All User Segments + Platform/Internal
 - Business Goal: Bug Fix & Complete User Experience Reliability
 - Value Impact: Ensures deployment/staging users can successfully connect via WebSocket for AI chat
 - Strategic Impact: Prevents production outages caused by ID validation failures
@@ -13,19 +13,19 @@ Business Value Justification:
 ROOT CAUSE: Missing regex pattern ^e2e-[a-zA-Z]+-[a-zA-Z0-9_-]+$ in ID validation
 
 CRITICAL BUG CONTEXT:
-- Issue: WebSocket error Invalid user_id format: e2e-staging_pipeline
+    - Issue: WebSocket error Invalid user_id format: e2e-staging_pipeline
 - End-to-End Impact: Complete WebSocket connection failure  ->  No AI chat capability
 - GitHub Issue: https://github.com/netra-systems/netra-apex/issues/105
 
 E2E SCOPE:
-- REAL authentication (JWT/OAuth) - MANDATORY per CLAUDE.md
+    - REAL authentication (JWT/OAuth) - MANDATORY per CLAUDE.md
 - REAL WebSocket connections to backend services  
 - REAL database connections and user sessions
 - REAL agent execution with WebSocket events
 - NO MOCKS (except where explicitly noted for test isolation)
 
 EXPECTED BEHAVIOR:
-- Tests 1-2: MUST FAIL initially (proving complete end-to-end bug impact)
+    - Tests 1-2: MUST FAIL initially (proving complete end-to-end bug impact)
 - Tests 3-4: MUST PASS (proving complete system works after fix)
 
 CRITICAL: ALL E2E tests MUST use authentication - no exceptions per CLAUDE.md requirements.
@@ -80,7 +80,8 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
     @pytest.mark.asyncio
     @pytest.mark.real_services
     async def test_complete_chat_flow_e2e_staging_user(self, auth_config):
-        """
+        """"
+
         TEST 1: CRITICAL - Complete end-to-end chat flow with failing user pattern.
         
         This test MUST FAIL initially, proving the bug blocks complete user workflows.
@@ -143,7 +144,7 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
     @pytest.mark.asyncio
     @pytest.mark.real_services
     async def test_agent_execution_with_deployment_users(self, failing_deployment_users, auth_config):
-"""Empty docstring."""
+    """Empty docstring."""
         TEST 2: Agent execution WebSocket events with multiple deployment user patterns.
         
         Tests that agent execution generates proper WebSocket events for deployment users.
@@ -186,7 +187,7 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
     @pytest.mark.asyncio
     @pytest.mark.real_services
     async def test_multi_user_websocket_connections(self, valid_deployment_users, auth_config):
-"""Empty docstring."""
+    """Empty docstring."""
         TEST 3: REGRESSION PREVENTION - Multiple valid users with concurrent WebSocket connections.
         
         Ensures existing user patterns continue to work with concurrent connections.
@@ -223,7 +224,7 @@ class WebSocketUserIDValidationE2ETests(BaseE2ETest):
     @pytest.mark.asyncio
     @pytest.mark.real_services
     async def test_websocket_pipeline_end_to_end(self, auth_config):
-"""Empty docstring."""
+    """Empty docstring."""
         TEST 4: Complete pipeline test simulating deployment environment.
         
         Tests the complete deployment pipeline workflow with WebSocket integration.
@@ -265,5 +266,6 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
-"""
+""""
+
 ))))

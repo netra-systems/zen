@@ -12,7 +12,8 @@ class TestSyntaxFix:
 
 class WebSocketTestHelper:
     Real WebSocket connection for testing instead of mocks."
-    Real WebSocket connection for testing instead of mocks."
+    Real WebSocket connection for testing instead of mocks.""
+
     
     def __init__(self):
         self.messages_sent = []
@@ -104,7 +105,8 @@ MOCK_DETECTED = False
 
 def detect_mock_usage():
     Detect any mock usage - FORBIDDEN in isolation tests."
-    Detect any mock usage - FORBIDDEN in isolation tests."
+    Detect any mock usage - FORBIDDEN in isolation tests.""
+
     global MOCK_DETECTED
     
     def mock_detector(*args, **kwargs):
@@ -140,7 +142,8 @@ class SSotIntegrationTestResult:
     memory_usage_mb: float = 0.0
     
     def has_violations(self) -> bool:
-        ""Check if any integration isolation violations were detected."
+        ""Check if any integration isolation violations were detected.""
+
         return bool(self.integration_violations or self.cross_component_leaks)
 
 
@@ -188,7 +191,8 @@ class SSotIntegrationUserSimulator:
                 'db_data': fdb_data_{self.user_id}","
                 'ws_data': fws_data_{self.user_id},
                 'docker_data': fdocker_data_{self.user_id}"
-                'docker_data': fdocker_data_{self.user_id}"
+                'docker_data': fdocker_data_{self.user_id}""
+
             }
         }
         
@@ -220,7 +224,8 @@ class SSotIntegrationUserSimulator:
                     # Create user-specific channel data
                     self.integration_state['ws_channel'] = fws_channel_{self.user_id}_{uuid.uuid4().hex}
                     operations_performed.append(fwebsocket_ops_{self.user_id})"
-                    operations_performed.append(fwebsocket_ops_{self.user_id})"
+                    operations_performed.append(fwebsocket_ops_{self.user_id})""
+
             except Exception:
                 # WebSocket not available - acceptable in isolation tests
                 operations_performed.append(f"websocket_simulated_{self.user_id})"
@@ -257,7 +262,8 @@ class SSotIntegrationUserSimulator:
                 'mock_to_db': fmock_db_transfer_{self.user_id},
                 'db_to_ws': f"db_ws_transfer_{self.user_id},"
                 'ws_to_docker': fws_docker_transfer_{self.user_id}"
-                'ws_to_docker': fws_docker_transfer_{self.user_id}"
+                'ws_to_docker': fws_docker_transfer_{self.user_id}""
+
             }
             
             self.integration_state['cross_component_flow'] = integration_flow
@@ -291,7 +297,8 @@ class SSotIntegrationUserSimulator:
 
 @pytest.mark.usefixtures(isolated_test_env)
 class SSotIntegrationWithIsolationTests(IntegrationTestCase):
-    """
+    """"
+
     CRITICAL: SSOT Integration testing with comprehensive isolation.
     
     Tests that SSOT components integrate properly while maintaining complete isolation
@@ -299,7 +306,8 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
     
     
     def setUp(self):
-        ""Set up integration test environment with strict isolation validation."
+        ""Set up integration test environment with strict isolation validation.""
+
         super().setUp()
         self.start_time = time.time()
         logger.info(fStarting SSOT integration isolation test: {self._testMethodName})
@@ -317,9 +325,11 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
         self.test_env_manager = get_test_env_manager()
         
     def tearDown(self):
-        ""Tear down with metrics collection and mock detection."
+        ""Tear down with metrics collection and mock detection.""
+
         duration = time.time() - self.start_time
-        logger.info(fSSOT integration isolation test {self._testMethodName} took {duration:.2f}s)
+        logger.info(fSSOT integration isolation test {self._testMethodName} took {duration:."2f"}s)""
+
         
         # Verify no mocks were used (CRITICAL)
         global MOCK_DETECTED
@@ -341,7 +351,8 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
         
         def run_user_integration_operations(user_id):
             Run SSOT integration operations for a single user."
-            Run SSOT integration operations for a single user."
+            Run SSOT integration operations for a single user.""
+
             try:
                 # Create user simulator
                 user_simulator = SSotIntegrationUserSimulator(f"integuser_{user_id}, self.test_env_manager)"
@@ -453,18 +464,21 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
         # Performance validation
         max_execution_time = 30.0  # Allow 30 seconds for 12 users with integration
         self.assertLess(execution_time, max_execution_time,
-                       fSSOT integration operations too slow: {execution_time:.2f}s)
+                       fSSOT integration operations too slow: {execution_time:."2f"}s)""
+
         
-        # Memory usage should be reasonable (allow 150MB increase for integration)
+        # Memory usage should be reasonable (allow "150MB" increase for integration)
         memory_increase = final_memory - initial_memory
         self.assertLess(memory_increase, 150,
-                       fSSOT integration excessive memory usage: {memory_increase:.1f}MB")"
+                       fSSOT integration excessive memory usage: {memory_increase:."1f"}MB")"
         
         logger.info(f[U+2713] SSOT Integration isolation test: {num_users) users, 
-                   f{execution_time:.2f}s, {memory_increase:.1f}MB increase)
+                   f{execution_time:."2f"}s, {memory_increase:."1f"}MB increase)""
+
     
     def test_database_session_isolation_during_integration(self):
-    """
+    """"
+
         CRITICAL: Test database session isolation during cross-component integration.
         
         Validates that database sessions remain isolated even when integrated
@@ -475,7 +489,8 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
         isolation_violations = []
         
         def test_user_integration_database_isolation(user_id):
-            ""Test database isolation during integration for a single user."
+            ""Test database isolation during integration for a single user.""
+
             try:
                 user_simulator = SSotIntegrationUserSimulator(fdbinteguser_{user_id}, self.test_env_manager)
                 
@@ -515,7 +530,8 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
                             except Exception:
                                 # WebSocket not available - simulate
                                 user_integration_data['integration_flow'].append(fws_simulated_{user_id})"
-                                user_integration_data['integration_flow'].append(fws_simulated_{user_id})"
+                                user_integration_data['integration_flow'].append(fws_simulated_{user_id})""
+
                             
                             # Cross-component data transfer simulation
                             user_integration_data['cross_transfer'] = {
@@ -662,7 +678,8 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
                             except Exception:
                                 # Database not available - simulate
                                 db_event = fsim_db_event_to_ws_{user_id}_{uuid.uuid4().hex}"
-                                db_event = fsim_db_event_to_ws_{user_id}_{uuid.uuid4().hex}"
+                                db_event = fsim_db_event_to_ws_{user_id}_{uuid.uuid4().hex}""
+
                                 user_channel_data['cross_component_messages'].append(db_event)
                             
                             # Mock service integration with WebSocket
@@ -785,7 +802,8 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
         
         def concurrent_cross_component_operations(thread_id):
             Perform cross-component operations that could have race conditions."
-            Perform cross-component operations that could have race conditions."
+            Perform cross-component operations that could have race conditions.""
+
             try:
                 user_simulator = SSotIntegrationUserSimulator(f"race_integ_{thread_id}, self.test_env_manager)"
                 
@@ -845,7 +863,8 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
                     
             except Exception as e:
                 error_msg = fThread {thread_id} race condition integration test failed: {str(e)}"
-                error_msg = fThread {thread_id} race condition integration test failed: {str(e)}"
+                error_msg = fThread {thread_id} race condition integration test failed: {str(e)}""
+
                 race_conditions_detected.append(error_msg)
                 return frace_integ_thread_{thread_id}_failed
         
@@ -857,7 +876,8 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
         # Validate no race conditions detected
         self.assertEqual(len(race_conditions_detected), 0,
                         fRace conditions detected in integration: {race_conditions_detected})"
-                        fRace conditions detected in integration: {race_conditions_detected})"
+                        fRace conditions detected in integration: {race_conditions_detected})""
+
         
         # Validate all threads completed successfully
         successful_results = [r for r in results if "success in r]"
@@ -880,7 +900,8 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
         # Validate access records show proper sequencing
         self.assertEqual(len(integration_access_records), expected_operations,
                         fIntegration access records lost: expected {expected_operations}, got {len(integration_access_records)})"
-                        fIntegration access records lost: expected {expected_operations}, got {len(integration_access_records)})"
+                        fIntegration access records lost: expected {expected_operations}, got {len(integration_access_records)})""
+
         
         # Validate counter values are sequential (no gaps indicating race conditions)
         counter_values = sorted([access['counter_value') for access in integration_access_records)
@@ -959,7 +980,8 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
                                 if other_factory and other_factory != factory:
                                     # Attempt unauthorized cross-component access
                                     unauthorized_mock = other_factory.create_mock(fattack_integ_from_{user_id})"
-                                    unauthorized_mock = other_factory.create_mock(fattack_integ_from_{user_id})"
+                                    unauthorized_mock = other_factory.create_mock(fattack_integ_from_{user_id})""
+
                                     if unauthorized_mock:
                                         attack_attempts.append(f"unauthorized_integ_mock_access_user_{other_id})"
                     except Exception:
@@ -1012,7 +1034,8 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
                     
             except Exception as e:
                 error_msg = fUser {user_id} integration security test failed: {str(e)}"
-                error_msg = fUser {user_id} integration security test failed: {str(e)}"
+                error_msg = fUser {user_id} integration security test failed: {str(e)}""
+
                 logger.error(error_msg)
                 return fsecinteguser_{user_id}_failed, 0
         
@@ -1024,7 +1047,8 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
         # CRITICAL: No security violations allowed
         self.assertEqual(len(security_violations), 0,
                         fSECURITY VIOLATIONS detected in integration: {security_violations})"
-                        fSECURITY VIOLATIONS detected in integration: {security_violations})"
+                        fSECURITY VIOLATIONS detected in integration: {security_violations})""
+
         
         # Validate all users completed security tests
         successful_results = [r for r in results if "success in r[0]]"
@@ -1049,7 +1073,8 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
             # All database session tokens must be unique (no sharing)
             self.assertEqual(len(set(db_tokens)), len(user_integration_resources),
                             SECURITY: Database session tokens leaked between users)"
-                            SECURITY: Database session tokens leaked between users)"
+                            SECURITY: Database session tokens leaked between users)""
+
             
             # All WebSocket channel secrets must be unique (no sharing)
             self.assertEqual(len(set(ws_secrets)), len(user_integration_resources),
@@ -1071,17 +1096,20 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
                                    fSECURITY: Mock objects shared between users: {user_id})
         
         logger.info(f[U+2713] Integration security boundary enforcement: {len(user_integration_resources)} isolated users)"
-        logger.info(f[U+2713] Integration security boundary enforcement: {len(user_integration_resources)} isolated users)"
+        logger.info(f[U+2713] Integration security boundary enforcement: {len(user_integration_resources)} isolated users)""
+
     
     def test_performance_monitoring_integration_concurrent_load(self):
         """
-    "
+    ""
+
         CRITICAL: Test SSOT integration performance under concurrent load.
         
         Validates that cross-component SSOT operations maintain acceptable performance
         with multiple concurrent users and don't degrade system performance.'
         "
-        "
+        ""
+
         num_users = 12
         performance_metrics = {}
         performance_violations = []
@@ -1147,10 +1175,11 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
                     
                     # Check for performance violations
                     if total_time > 8.0:  # Max 8 seconds per user for integration
-                        performance_violations.append(fUser {user_id} integration too slow: {total_time:.2f}s)
+                        performance_violations.append(fUser {user_id} integration too slow: {total_time:."2f"}s)""
+
                     
-                    if metrics['memory_increase'] > 75:  # Max 75MB per user for integration
-                        performance_violations.append(fUser {user_id} integration excessive memory: {metrics['memory_increase']:.1f}MB)
+                    if metrics['memory_increase'] > 75:  # Max "75MB" per user for integration
+                        performance_violations.append(fUser {user_id} integration excessive memory: {metrics['memory_increase']:."1f"}MB)
                     
                     return fperfinteguser_{user_id}_success", metrics"
                     
@@ -1199,17 +1228,18 @@ class SSotIntegrationWithIsolationTests(IntegrationTestCase):
             # Integration performance should be reasonable
             self.assertLess(avg_time, 5.0, fAverage user integration time too high: {avg_time:.2f}s)"
             self.assertLess(avg_time, 5.0, fAverage user integration time too high: {avg_time:.2f}s)"
-            self.assertLess(max_time, 12.0, f"Max user integration time too high: {max_time:.2f}s)"
-            self.assertLess(total_memory_increase, 300, fTotal integration memory increase too high: {total_memory_increase:.1f}MB)
-            self.assertLess(test_total_time, 40.0, fTotal integration test time too high: {test_total_time:.2f}s)
-            self.assertLess(avg_cross_time, 1.0, fAverage cross-component time too high: {avg_cross_time:.2f}s")"
+            self.assertLess(max_time, 12.0, f"Max user integration time too high: {max_time:."2f"}s)"
+            self.assertLess(total_memory_increase, 300, fTotal integration memory increase too high: {total_memory_increase:."1f"}MB)
+            self.assertLess(test_total_time, 40.0, fTotal integration test time too high: {test_total_time:."2f"}s)
+            self.assertLess(avg_cross_time, 1.0, fAverage cross-component time too high: {avg_cross_time:."2f"}s")"
             
             if throughputs:
-                self.assertGreater(avg_throughput, 0.8, fAverage integration throughput too low: {avg_throughput:.2f} ops/sec)
+                self.assertGreater(avg_throughput, 0.8, fAverage integration throughput too low: {avg_throughput:."2f"} ops/sec)""
+
         
         logger.info(f[U+2713] Integration performance monitoring: {num_users) users, 
-                   f"avg: {avg_time:.2f}s, max: {max_time:.2f}s,"
-                   fcross-component: {avg_cross_time:.2f}s, memory: {total_memory_increase:.1f}MB")"
+                   f"avg: {avg_time:."2f"}s, max: {max_time:."2f"}s,"
+                   fcross-component: {avg_cross_time:."2f"}s, memory: {total_memory_increase:."1f"}MB")"
 
 
 if __name__ == '__main__':

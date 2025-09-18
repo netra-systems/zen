@@ -169,7 +169,7 @@ class WebSocketConnectionLoopTest:
         # Simulate rapid connection attempts
         attempt_time = time.time() - start_time
         attempts_in_window.append(attempt_time)
-        time.sleep(0.1)  # 100ms between attempts (simulating the bug)
+        time.sleep(0.1)  # "100ms" between attempts (simulating the bug)
 
         rate = len(attempts_in_window) / duration_seconds
         return { }
@@ -221,7 +221,7 @@ loop_metrics = test_harness.measure_connection_loop_rate(duration_seconds=2)
 
                 Bug indicator 1: Multiple connection attempts from single auth change
 assert len(test_harness.connection_attempts) <= 1, \
-""
+    ""
 
                 # Bug indicator 2: Rapid reconnection rate (connection loop)
 assert not loop_metrics["is_looping], \"
@@ -229,8 +229,8 @@ assert not loop_metrics["is_looping], \"
 
                 # Bug indicator 3: Auth failures triggering immediate reconnects
 assert len(test_harness.auth_failures) == 0 or \
-len(test_harness.reconnection_attempts) < len(test_harness.auth_failures), \
-""
+    len(test_harness.reconnection_attempts) < len(test_harness.auth_failures), \
+    ""
 
 
 @pytest.mark.asyncio
@@ -262,7 +262,7 @@ await asyncio.gather(*connection_tasks, return_exceptions=True)
                             # SHOULD only connect once, but currently connects multiple times
 actual_calls = ws_service.connect.call_count
 assert actual_calls == 1, \
-""
+    ""
 
 
 @pytest.mark.asyncio
@@ -290,7 +290,7 @@ await asyncio.sleep(0.1)  # Minimal delay in test
 for i in range(1, len(reconnect_delays)):
     expected_increase = reconnect_delays[i] > reconnect_delays[i-1]
 assert expected_increase, \
-""
+    ""
 
 
 @pytest.mark.asyncio
@@ -331,7 +331,7 @@ connection_effects = [item for item in []]]
 
             # Should have coordinated effects, not duplicates
 assert len(connection_effects) <= len(auth_states) - 2, \
-""
+    ""
 
 
 def test_websocket_connection_race_condition():
@@ -381,7 +381,7 @@ for t in threads:
 
                 # Should have connection coordination, but doesn't'
 assert len(connection_log) == 1, \
-""
+    ""
 
 
 if __name__ == "__main__:"

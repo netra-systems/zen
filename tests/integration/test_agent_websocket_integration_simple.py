@@ -2,13 +2,13 @@
 Test Agent-WebSocket Integration - Simplified Version
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise) 
+    - Segment: All (Free, Early, Mid, Enterprise) 
 - Business Goal: Enable real-time agent communication for chat value delivery
 - Value Impact: Users see live agent progress, tool execution, and results
-- Strategic Impact: Core chat functionality that generates $500K+ ARR through substantive AI interactions
+- Strategic Impact: Core chat functionality that generates $"500K" plus ARR through substantive AI interactions
 
 CRITICAL REQUIREMENTS:
-1. Tests ALL 5 WebSocket events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)  
+    1. Tests ALL 5 WebSocket events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)  
 2. Uses REAL services (no mocks in integration tests per CLAUDE.md)
 3. Validates multi-user isolation with factory patterns
 4. Ensures WebSocket events enable substantive chat business value
@@ -41,7 +41,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_websocket_connection_basic(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test basic WebSocket connection to validate infrastructure.
         
         This test validates the foundational WebSocket connectivity required
@@ -66,7 +66,8 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_database_connectivity(self, real_services_fixture):
-    """
+    """"
+
         Test database connectivity for agent context storage.
         
         Validates that the database integration required for agent
@@ -83,7 +84,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_redis_connectivity(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test Redis connectivity for session management.
         
         Validates Redis integration required for user session isolation
@@ -105,7 +106,8 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_services_health_check(self, real_services_fixture):
-    """
+    """"
+
         Test overall health of required services for agent-websocket integration.
         
         This validates the complete infrastructure stack needed for
@@ -120,7 +122,7 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_websocket_event_structure_validation(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test WebSocket event structure validation.
         
         Validates the event structure patterns required for the 5 critical
@@ -140,7 +142,8 @@ class AgentWebSocketIntegrationTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_multi_user_isolation_preparation(self, real_services_fixture):
-    """
+    """"
+
         Test multi-user isolation infrastructure for concurrent agent execution.
         
         Validates that the infrastructure supports the factory patterns
@@ -162,5 +165,6 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
-"""
+""""
+
 )

@@ -5,13 +5,13 @@ Tests REAL WebSocket connections with JWT authentication and agent pipeline mess
 This is the definitive test for WebSocket infrastructure reliability.
 
 Business Value Justification (BVJ):
-1. Segment: ALL customer tiers (Free, Early, Mid, Enterprise) - Revenue impact: $100K+ MRR protection
+    1. Segment: ALL customer tiers (Free, Early, Mid, Enterprise) - Revenue impact: $"100K"+ MRR protection
 2. Business Goal: Ensure reliable real-time AI agent communication without interruptions  
 3. Value Impact: Validates core chat functionality that drives customer engagement and retention
 4. Revenue Impact: Protects revenue by ensuring WebSocket infrastructure works under all conditions
 
 CRITICAL VALIDATIONS:
-- REAL WebSocket connections to Backend service (ws://localhost:8000/ws)
+    - REAL WebSocket connections to Backend service (ws://localhost:8000/ws)
 - JWT authentication via WebSocket headers with proper token validation
 - Message routing through agent pipeline with bidirectional communication
 - Connection persistence and reconnection after disconnect scenarios
@@ -19,7 +19,7 @@ CRITICAL VALIDATIONS:
 - Agent response message flow validation
 
 ARCHITECTURAL COMPLIANCE:
-- File size: <500 lines (focused on critical WebSocket testing)
+    - File size: <500 lines (focused on critical WebSocket testing)
 - Function size: <25 lines each (modular WebSocket operations)
 - Real services only - NO MOCKS (Backend:8000, Auth:8001, WebSocket)
 - <10 seconds per test execution for rapid feedback
@@ -135,7 +135,8 @@ class WebSocketRealConnectionTester:
             {
                 type": user_message,"
                 payload: {
-                    "content": "Test agent pipeline connectivity","
+                    "content": "Test agent pipeline connectivity",""
+
                     thread_id: None,
                     user_id: "test-user"
                 }
@@ -401,7 +402,7 @@ class WebSocketRealConnectionTests:
             
             # Verify execution time - CRITICAL FIX: Account for Docker networking delays on Windows
             execution_time = time.time() - start_time
-            assert execution_time < 20.0, f"Test took {execution_time:.2f}s, expected <20s (Docker networking can be slow on Windows)"
+            assert execution_time < 20.0, f"Test took {execution_time:."2f"}s, expected <"20s" (Docker networking can be slow on Windows)"
             
         except Exception as e:
             error_msg = str(e).lower()
@@ -700,14 +701,14 @@ Segment: ALL customer tiers (Free, Early, Mid, Enterprise)
 - Verifies message routing through agent pipeline for reliable AI responses
 - Tests connection persistence and recovery for uninterrupted user experience
 
-Revenue Protection: $100K+ MRR
+Revenue Protection: $"100K"+ MRR
 - Prevents WebSocket authentication failures: 25% reduction in connection drops
 - Ensures reliable real-time agent communication: 30% improvement in response delivery  
 - Validates reconnection scenarios: 40% reduction in user session interruptions
 - Enterprise security compliance: enables high-value contract retention
 
 Test Coverage:
-- Real WebSocket connection to Backend service (ws://localhost:8000/ws)
+    - Real WebSocket connection to Backend service (ws://localhost:8000/ws)
 - JWT authentication via Authorization headers with token validation
 - Bidirectional message flow between client and server
 - Message routing through agent pipeline with response validation

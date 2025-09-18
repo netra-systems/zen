@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""
-"""
+""""
+
 P0 Mission Critical Test: Backend JWT SSOT Violation Detection
 =============================================================
 
@@ -9,29 +9,31 @@ that exist in the backend and MUST FAIL when violations are removed during
 refactor. This provides proof that violations exist and validates refactor success.
 
 Business Value:
-"""
-"""
-- Protects $500K+ ARR from JWT secret cascade failures
+    """
+""""
+
+- Protects $"500K" plus ARR from JWT secret cascade failures
 - Documents SSOT compliance baseline (current 40/100 score)
 - Validates that backend JWT decoding violations are removed during refactor
 - Ensures auth service becomes the exclusive JWT source
 
 PHASE A TESTS (Current State):
-These tests MUST PASS in current state (proving violations exist)
+    These tests MUST PASS in current state (proving violations exist)
 These tests MUST FAIL after refactor (proving violations removed)
 
 SSOT Violations Being Tested:
-1. Backend JWT secrets: netra_backend/app/core/configuration/unified_secrets.py:75-90
+    1. Backend JWT secrets: netra_backend/app/core/configuration/unified_secrets.py:75-90
 2. Backend JWT validation: netra_backend/app/clients/auth_client_core.py (JWT operations)
 3. WebSocket auth patterns in routes (fallback mechanisms)
 
 CRITICAL REQUIREMENTS:
-- NO Docker dependencies (unit-style tests only)
+    - NO Docker dependencies (unit-style tests only)
 - Tests prove violations exist by successfully using them
 - Clear documentation of why these are SSOT violations
-- Business impact quantification ($500K+ ARR protection)
+- Business impact quantification ($"500K" plus ARR protection)
 "
-"
+""
+
 
 import asyncio
 import importlib
@@ -65,14 +67,16 @@ logger = logging.getLogger(__name__)
 
 class BackendJWTViolationDetector:
     "
-    "
+    ""
+
     Detects and documents JWT SSOT violations in the backend.
     
     This class provides comprehensive analysis of JWT operations that violate
     SSOT principles by existing in the backend when they should only exist
     in the auth service.
 "
-"
+""
+
     
     def __init__(self):
         "Initialize JWT violation detector."
@@ -85,7 +89,8 @@ class BackendJWTViolationDetector:
         self.target_ssot_score = 95   # Post-refactor target
         
     def detect_backend_jwt_secret_access_violation(self) -> bool:
-        """
+        """"
+
         VIOLATION TEST: Detect backend JWT secret access (SSOT violation).
         
         SSOT PRINCIPLE: Only auth service should handle JWT secrets.
@@ -126,7 +131,7 @@ class BackendJWTViolationDetector:
                         # Document business impact
                         self.business_impact_notes.append(
                             fBackend JWT secret access enables mismatches with auth service, ""
-                            frisking $500K+ ARR from cascade authentication failures
+                            frisking $"500K" plus ARR from cascade authentication failures
                         )
                         
                     else:
@@ -144,13 +149,15 @@ class BackendJWTViolationDetector:
             logger.info(fBackend secrets manager not available: {e})
         except Exception as e:
             logger.error(fError testing backend JWT secret access: {e})"
-            logger.error(fError testing backend JWT secret access: {e})"
+            logger.error(fError testing backend JWT secret access: {e})""
+
             
         return violation_found
     
     def detect_backend_jwt_validation_methods(self) -> bool:
         """
-    "
+    ""
+
         VIOLATION TEST: Detect backend JWT validation methods (SSOT violation).
         
         SSOT PRINCIPLE: Only auth service should validate JWT tokens.
@@ -195,7 +202,8 @@ class BackendJWTViolationDetector:
                     }
                     
                     logger.warning(f PASS:  VIOLATION CONFIRMED: JWT validation methods found: {jwt_validation_methods})"
-                    logger.warning(f PASS:  VIOLATION CONFIRMED: JWT validation methods found: {jwt_validation_methods})"
+                    logger.warning(f PASS:  VIOLATION CONFIRMED: JWT validation methods found: {jwt_validation_methods})""
+
                     
                     # Document business impact
                     self.business_impact_notes.append(
@@ -209,7 +217,8 @@ class BackendJWTViolationDetector:
                 
                 # Test that JWT format validation works (proving violation exists)
                 test_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0In0.test"
-                test_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0In0.test"
+                test_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0In0.test""
+
                 if validate_jwt_format(test_token):
                     violation_found = True
                     self.violations_detected.append({
@@ -236,7 +245,8 @@ class BackendJWTViolationDetector:
         return violation_found
     
     def detect_websocket_auth_fallback_violations(self) -> bool:
-    """
+    """"
+
         VIOLATION TEST: Detect WebSocket authentication fallback logic (SSOT violation).
         
         SSOT PRINCIPLE: WebSocket auth should only use auth service.
@@ -305,20 +315,23 @@ class BackendJWTViolationDetector:
                 self.business_impact_notes.append(
                     f"WebSocket auth fallback patterns bypass proper auth service validation,"
                     fcreating security risks and inconsistent authentication behavior"
-                    fcreating security risks and inconsistent authentication behavior"
+                    fcreating security risks and inconsistent authentication behavior""
+
                 )
                 
         except ImportError as e:
             logger.info(fWebSocket routes not available: {e})
         except Exception as e:
             logger.error(fError testing WebSocket auth fallbacks: {e})"
-            logger.error(fError testing WebSocket auth fallbacks: {e})"
+            logger.error(fError testing WebSocket auth fallbacks: {e})""
+
             
         return violation_found
     
     def test_ssot_compliance_baseline(self) -> Dict[str, Any]:
         """
-    "
+    ""
+
         BASELINE TEST: Document current SSOT compliance score.
         
         This establishes the baseline that refactoring must improve.
@@ -350,18 +363,21 @@ class BackendJWTViolationDetector:
         
         logger.warning(f CHART:  SSOT Compliance Baseline: {current_score}/100 (Target: {self.target_ssot_score}/100))
         logger.warning(f ALERT:  Violations Found: {total_violations} (Critical: {critical_violations})"
-        logger.warning(f ALERT:  Violations Found: {total_violations} (Critical: {critical_violations})"
+        logger.warning(f ALERT:  Violations Found: {total_violations} (Critical: {critical_violations})""
+
         
         return baseline_report
     
     def generate_violation_inventory_report(self) -> Dict[str, Any]:
         """
-    "
+    ""
+
         Generate comprehensive violation inventory report.
         
         This documents all JWT SSOT violations for refactoring reference.
         "
-        "
+        ""
+
         return {
             'detection_timestamp': datetime.now(timezone.utc).isoformat(),
             'total_violations': len(self.violations_detected),
@@ -377,19 +393,21 @@ class BackendJWTViolationDetector:
                 'Achieve 95/100 SSOT compliance score'
             ],
             'validation_approach': 'These tests MUST FAIL after refactor (proving violations removed)',
-            'business_protection': '$500K+ ARR protected from JWT cascade failures'
+            'business_protection': '$"500K" plus ARR protected from JWT cascade failures'
         }
 
 
 class BackendJWTViolationDetectionTests(SSotBaseTestCase):
     "
-    "
+    ""
+
     P0 Mission Critical Test Suite: Backend JWT SSOT Violation Detection
     
     These tests document JWT authentication SSOT violations that exist in the
     backend. They MUST PASS in current state and MUST FAIL after refactor.
 "
-"
+""
+
     
     @pytest.fixture(autouse=True)
     def setup_violation_detector(self):
@@ -403,7 +421,8 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
         logger.info(= * 60)
     
     def test_backend_jwt_secret_access_exists(self):
-    """
+    """"
+
         CRITICAL: Test backend JWT secret access violation exists.
         
         SSOT VIOLATION: Backend has JWT secret access in unified_secrets.py
@@ -418,7 +437,7 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
             logger.critical( ALERT:  CONFIRMED: Backend JWT secret access violation EXISTS)
             logger.critical( PIN:  Location: netra_backend/app/core/configuration/unified_secrets.py:75-90)"
             logger.critical( PIN:  Location: netra_backend/app/core/configuration/unified_secrets.py:75-90)"
-            logger.critical(" WARNING: [U+FE0F] Business Impact: $500K+ ARR at risk from JWT secret mismatches)"
+            logger.critical(" WARNING: [U+FE0F] Business Impact: $"500K" plus ARR at risk from JWT secret mismatches)"
             logger.critical( TARGET:  REFACTOR TARGET: Remove backend JWT secret access)
         else:
             logger.error(" FAIL:  UNEXPECTED: Backend JWT secret access violation NOT FOUND)"
@@ -429,12 +448,14 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
             Backend JWT secret access violation must exist for refactor validation. "
             Backend JWT secret access violation must exist for refactor validation. "
             If this test fails, the violation may have been already fixed. "
-            If this test fails, the violation may have been already fixed. "
+            If this test fails, the violation may have been already fixed. ""
+
             Check netra_backend/app/core/configuration/unified_secrets.py:75-90
         )
     
     def test_backend_has_jwt_validation_methods(self):
-        """
+        """"
+
         CRITICAL: Test backend JWT validation methods violation exists.
         
         SSOT VIOLATION: Backend has JWT validation in auth_client_core.py
@@ -464,7 +485,8 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
         )
     
     def test_websocket_auth_fallback_logic_exists(self):
-    """
+    """"
+
         CRITICAL: Test WebSocket authentication fallback logic violation exists.
         
         SSOT VIOLATION: WebSocket routes may contain auth fallback patterns
@@ -490,7 +512,8 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
         logger.info(fWebSocket auth fallback test result: {'VIOLATION EXISTS' if violation_exists else 'NO VIOLATION'})
     
     def test_ssot_compliance_baseline(self):
-        """
+        """"
+
         CRITICAL: Document SSOT compliance baseline for refactor validation.
         
         BASELINE: Current 40/100 score  ->  Target 95/100 after refactor
@@ -519,14 +542,16 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
         assert baseline_report is not None, "SSOT compliance baseline must be documented"
         assert baseline_report['current_ssot_score'] >= 0, "Compliance score must be valid"
         assert baseline_report['total_violations'] >= 0, Violation count must be valid"
-        assert baseline_report['total_violations'] >= 0, Violation count must be valid"
+        assert baseline_report['total_violations'] >= 0, Violation count must be valid""
+
         
         # Store baseline for refactor comparison
         self.detector.baseline_report = baseline_report
     
     def test_comprehensive_violation_inventory(self):
         """
-        "
+        ""
+
         REPORTING: Generate comprehensive JWT SSOT violation inventory.
         
         This test creates detailed documentation of all violations found
@@ -548,13 +573,15 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
         logger.info("= * 80)"
         logger.info(JWT SSOT VIOLATION INVENTORY REPORT)
         logger.info(= * 80)"
-        logger.info(= * 80)"
+        logger.info(= * 80)""
+
         
         logger.critical(fDetection Timestamp: {inventory_report['detection_timestamp']}")"
         logger.critical(fTotal Violations Found: {inventory_report['total_violations']})
         
         logger.info(\nVIOLATION LOCATIONS:)"
-        logger.info(\nVIOLATION LOCATIONS:)"
+        logger.info(\nVIOLATION LOCATIONS:)""
+
         for location in inventory_report['violation_locations']:
             logger.critical(f"   PIN:  {location})"
             
@@ -570,14 +597,16 @@ class BackendJWTViolationDetectionTests(SSotBaseTestCase):
             logger.critical(f  [U+1F4B0] {impact})
             
         logger.info(\nREFACTOR REQUIREMENTS:)"
-        logger.info(\nREFACTOR REQUIREMENTS:)"
+        logger.info(\nREFACTOR REQUIREMENTS:)""
+
         for requirement in inventory_report['refactor_requirements']:
             logger.warning(f   TARGET:  {requirement}")"
             
         baseline = inventory_report['ssot_compliance_baseline']
         logger.info(f\nSSOT COMPLIANCE: {baseline['current_ssot_score']}/100  ->  {baseline['target_score']}/100)
         logger.critical(fBUSINESS PROTECTION: {inventory_report['business_protection']})"
-        logger.critical(fBUSINESS PROTECTION: {inventory_report['business_protection']})"
+        logger.critical(fBUSINESS PROTECTION: {inventory_report['business_protection']})""
+
         
         logger.info("= * 80)"
         
@@ -597,7 +626,7 @@ if __name__ == __main__:"
     print(= * 80")"
     print(PHASE A: Documenting violations that exist (tests must PASS))
     print(REFACTOR VALIDATION: Tests must FAIL after violations removed)
-    print("BUSINESS PROTECTION: $500K+ ARR from JWT cascade failures)"
+    print("BUSINESS PROTECTION: $"500K" plus ARR from JWT cascade failures)"
     print(= * 80)
     
     # Initialize detector

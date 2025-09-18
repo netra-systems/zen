@@ -5,13 +5,13 @@ and proper resource allocation through the SSOT consolidated pattern.
 It ensures resources are properly managed across user sessions.
 
 Business Value Justification:
-- Segment: Platform/Internal  
+    - Segment: Platform/Internal  
 - Business Goal: System Performance & Reliability
-- Value Impact: Ensures stable resource management for $500K+ ARR operations
+- Value Impact: Ensures stable resource management for $"500K" plus ARR operations
 - Strategic Impact: Validates production-ready resource management in SSOT consolidation
 
 Key Validation Areas:
-- ExecutionEngine lifecycle management (create, active, cleanup)
+    - ExecutionEngine lifecycle management (create, active, cleanup)
 - Resource allocation and limits enforcement
 - Memory cleanup and leak prevention
 - Factory lifecycle management
@@ -19,7 +19,7 @@ Key Validation Areas:
 - Cleanup under error conditions
 
 EXPECTED BEHAVIOR:
-This test should PASS if ExecutionEngine lifecycle management works correctly.
+    This test should PASS if ExecutionEngine lifecycle management works correctly.
 If it FAILS, it indicates resource management issues requiring immediate fix.
 ""
 
@@ -41,7 +41,8 @@ logger = central_logger.get_logger(__name__)
 
 class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
     Test ExecutionEngine lifecycle management and resource handling."
-    Test ExecutionEngine lifecycle management and resource handling."
+    Test ExecutionEngine lifecycle management and resource handling.""
+
     
     def setup_method(self, method=None):
         "Set up test environment for lifecycle testing."
@@ -55,7 +56,7 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
         self.initial_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
         self.initial_threads = threading.active_count()
         
-        logger.info(fStarting ExecutionEngine lifecycle testing - Initial memory: {self.initial_memory:.1f}MB, Threads: {self.initial_threads}")"
+        logger.info(fStarting ExecutionEngine lifecycle testing - Initial memory: {self.initial_memory:."1f"}MB, Threads: {self.initial_threads}")"
     
     def test_execution_engine_creation_lifecycle(self):
         Test ExecutionEngine creation and basic lifecycle."
@@ -104,7 +105,8 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 
                 # Validate creation performance
                 if creation_time > 1.0:  # Should create in under 1 second
-                    self.performance_issues.append(fSlow engine creation: {creation_time:.3f}s)
+                    self.performance_issues.append(fSlow engine creation: {creation_time:."3f"}s)""
+
                 
                 # Test engine state management
                 engine.set_agent_state("test_agent, initial_state)"
@@ -126,13 +128,15 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 
                 # Validate cleanup
                 self.assertFalse(engine.is_active(), Engine should be inactive after cleanup)"
-                self.assertFalse(engine.is_active(), Engine should be inactive after cleanup)"
+                self.assertFalse(engine.is_active(), Engine should be inactive after cleanup)""
+
                 
                 # Validate cleanup performance
                 if cleanup_time > 0.5:  # Should cleanup in under 0.5 seconds
-                    self.performance_issues.append(f"Slow engine cleanup: {cleanup_time:.3f}s)"
+                    self.performance_issues.append(f"Slow engine cleanup: {cleanup_time:."3f"}s)"
                 
-                logger.info(f✅ PASS: Engine lifecycle - Creation: {creation_time:.3f}s, Cleanup: {cleanup_time:.3f}s)
+                logger.info(f✅ PASS: Engine lifecycle - Creation: {creation_time:."3f"}s, Cleanup: {cleanup_time:."3f"}s)""
+
                 return True
                 
             except Exception as e:
@@ -184,7 +188,8 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 mid_metrics = factory.get_factory_metrics()
                 self.assertEqual(mid_metrics['active_engines_count'], 3, Factory should track 3 active engines)
                 self.assertEqual(mid_metrics['total_engines_created'], 3, Factory should have created 3 engines)"
-                self.assertEqual(mid_metrics['total_engines_created'], 3, Factory should have created 3 engines)"
+                self.assertEqual(mid_metrics['total_engines_created'], 3, Factory should have created 3 engines)""
+
                 
                 # Test factory summary
                 summary = factory.get_active_engines_summary()
@@ -223,7 +228,8 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 final_metrics = factory.get_factory_metrics()
                 self.assertEqual(final_metrics['active_engines_count'], 0, Factory should have 0 active engines after cleanup)
                 self.assertEqual(final_metrics['total_engines_cleaned'], final_metrics['total_engines_created'], All engines should be cleaned)"
-                self.assertEqual(final_metrics['total_engines_cleaned'], final_metrics['total_engines_created'], All engines should be cleaned)"
+                self.assertEqual(final_metrics['total_engines_cleaned'], final_metrics['total_engines_created'], All engines should be cleaned)""
+
                 
                 # Shutdown factory
                 await factory.shutdown()
@@ -234,7 +240,8 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
             except Exception as e:
                 self.lifecycle_violations.append(fFactory lifecycle test failed: {e})
                 logger.error(f❌ FAIL: ExecutionEngineFactory lifecycle broken - {e})"
-                logger.error(f❌ FAIL: ExecutionEngineFactory lifecycle broken - {e})"
+                logger.error(f❌ FAIL: ExecutionEngineFactory lifecycle broken - {e})""
+
                 return False
         
         result = asyncio.run(test_factory_lifecycle())
@@ -275,7 +282,7 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                     engines.append(engine)
                     
                     # Add some data to engine to use memory
-                    engine.set_agent_state(fmemory_agent_{i}, x * 1000)  # 1KB per engine
+                    engine.set_agent_state(fmemory_agent_{i}, x * 1000)  # "1KB" per engine
                     engine.set_agent_result(fmemory_result_{i), {"
                     engine.set_agent_result(fmemory_result_{i), {"
                         "large_data: list(range(100)),"
@@ -316,13 +323,14 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 
                 # Check for memory leaks (allowing some overhead)
                 memory_leak = memory_final - memory_before
-                if memory_leak > 10:  # Allow 10MB overhead
-                    self.resource_leaks.append(fPossible memory leak: {memory_leak:.1f}MB not released)
+                if memory_leak > 10:  # Allow "10MB" overhead
+                    self.resource_leaks.append(fPossible memory leak: {memory_leak:."1f"}MB not released)""
+
                 
                 # Shutdown factory
                 await factory.shutdown()
                 
-                logger.info(f✅ PASS: Resource monitoring - Used: {memory_used:.1f}MB, Final leak: {memory_leak:.1f}MB, Cleanup: {cleanup_time:.3f}s")"
+                logger.info(f✅ PASS: Resource monitoring - Used: {memory_used:."1f"}MB, Final leak: {memory_leak:."1f"}MB, Cleanup: {cleanup_time:."3f"}s")"
                 return True
                 
             except Exception as e:
@@ -397,7 +405,8 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                         self.assertIsNotNone(context_engine, Context engine should be created)
                         # Simulate exception in context
                         raise ValueError(Simulated processing error)"
-                        raise ValueError(Simulated processing error)"
+                        raise ValueError(Simulated processing error)""
+
                         
                 except ValueError as e:
                     # This is expected - context manager should still cleanup
@@ -551,7 +560,7 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
         logger.info(f  Resource Leaks: {lifecycle_summary['resource_leaks']})
         logger.info(f"  Cleanup Failures: {lifecycle_summary['cleanup_failures']})"
         logger.info(f  Performance Issues: {lifecycle_summary['performance_issues']}")"
-        logger.info(f  Memory Change: {memory_change:+.1f}MB)
+        logger.info(f  Memory Change: {memory_change:+."1f"}MB)
         logger.info(f  Thread Change: {thread_change:+d})"
         logger.info(f  Thread Change: {thread_change:+d})"
         logger.info(f"  Overall Status: {lifecycle_summary['lifecycle_status']})"
@@ -564,11 +573,12 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
                 logger.warning(f  ... and {len(all_issues) - 5} more issues")"
         
         # Check for significant resource leaks
-        resource_leak_detected = (memory_change > 20 or  # More than 20MB increase
+        resource_leak_detected = (memory_change > 20 or  # More than "20MB" increase
                                 thread_change > 5)       # More than 5 threads increase
         
         if resource_leak_detected:
-            self.resource_leaks.append(fSignificant resource leak: {memory_change:+.1f}MB, {thread_change:+d} threads)
+            self.resource_leaks.append(fSignificant resource leak: {memory_change:+."1f"}MB, {thread_change:+d} threads)""
+
         
         # This test should PASS if lifecycle management works correctly
         self.assertEqual(
@@ -576,7 +586,8 @@ class ExecutionEngineLifecycleTests(SSotAsyncTestCase):
             fExecutionEngine lifecycle management should work correctly. 
             f"Found {lifecycle_summary['total_issues']} issues."
             fResource changes: {memory_change:+.1f}MB, {thread_change:+d} threads"
-            fResource changes: {memory_change:+.1f}MB, {thread_change:+d} threads"
+            fResource changes: {memory_change:+.1f}MB, {thread_change:+d} threads""
+
         )
         
         logger.info(✅ SUCCESS: ExecutionEngine lifecycle management working correctly)

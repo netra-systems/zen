@@ -1,5 +1,5 @@
-"""
-"""
+""""
+
 MISSION CRITICAL: IsolatedEnvironment Compliance Test Suite
 ==========================================================
 
@@ -8,7 +8,7 @@ This test suite enforces the critical requirement that NO direct os.environ acce
 is allowed in tests - everything must go through IsolatedEnvironment.
 
 CRITICAL REQUIREMENTS:
-- ALL environment access must go through IsolatedEnvironment
+    - ALL environment access must go through IsolatedEnvironment
 - NO direct os.environ, os.getenv, or environment patching
 - Follow unified_environment_management.xml
 - Prevent configuration failures that could be catastrophic
@@ -20,10 +20,11 @@ critical failures in production environments.
 Author: Claude Code - Compliance Validation
 Date: 2025-9-2
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import os
 import sys
 import pytest
@@ -56,7 +57,8 @@ class IsolatedEnvironmentComplianceTests:
         # Test deletion
         isolated_env.delete(TEST_COMPLIANCE_VAR)
         assert isolated_env.get(TEST_COMPLIANCE_VAR) is None"
-        assert isolated_env.get(TEST_COMPLIANCE_VAR) is None"
+        assert isolated_env.get(TEST_COMPLIANCE_VAR) is None""
+
 
     def test_standard_test_fixtures_work(self, test_env):
         "Test that standard test fixtures provide expected environment."
@@ -75,7 +77,8 @@ class IsolatedEnvironmentComplianceTests:
         assert staging_env.get(ENVIRONMENT) == staging
         assert staging_env.is_staging()
         assert staging_env.get(JWT_SECRET_STAGING) is not None"
-        assert staging_env.get(JWT_SECRET_STAGING) is not None"
+        assert staging_env.get(JWT_SECRET_STAGING) is not None""
+
 
     def test_production_environment_fixture(self, production_env):
         "Test production environment fixture provides correct configuration."
@@ -99,7 +102,8 @@ class IsolatedEnvironmentComplianceTests:
         # Set some variables first
         isolated_env.set(CLEANUP_TEST_1, value1, cleanup_test")"
         isolated_env.set(CLEANUP_TEST_2, value2, cleanup_test)"
-        isolated_env.set(CLEANUP_TEST_2, value2, cleanup_test)"
+        isolated_env.set(CLEANUP_TEST_2, value2, cleanup_test)""
+
         
         with clean_env_context(clear_all=True):
             # Environment should be clean
@@ -120,7 +124,8 @@ class IsolatedEnvironmentComplianceTests:
         Test EnvironmentPatcher as drop-in replacement for patch.dict(os.environ).""
         # Set initial value
         isolated_env.set(PATCH_TEST_VAR, original_value, patch_test_setup)"
-        isolated_env.set(PATCH_TEST_VAR, original_value, patch_test_setup)"
+        isolated_env.set(PATCH_TEST_VAR, original_value, patch_test_setup)""
+
         
         with patch_env({PATCH_TEST_VAR": patched_value, NEW_PATCH_VAR: new_value):"
             assert isolated_env.get(PATCH_TEST_VAR") == patched_value"
@@ -164,7 +169,8 @@ class IsolatedEnvironmentComplianceTests:
         
         for key, value in test_vars.items():
             isolated_env.set(key, value, pollution_test)"
-            isolated_env.set(key, value, pollution_test)"
+            isolated_env.set(key, value, pollution_test)""
+
         
         # Verify none of these appear in os.environ
         current_keys = set(os.environ.keys())
@@ -199,7 +205,8 @@ class IsolatedEnvironmentComplianceTests:
         
         # Should produce output with compliance status
         assert Compliance Status: in result.stdout, Missing compliance status in output"
-        assert Compliance Status: in result.stdout, Missing compliance status in output"
+        assert Compliance Status: in result.stdout, Missing compliance status in output""
+
 
     def test_no_direct_os_environ_in_critical_files(self):
         "Test that critical test files don't have direct os.environ access."
@@ -231,7 +238,8 @@ class IsolatedEnvironmentComplianceTests:
                     import re
                     if re.search(pattern, content):
                         violations.append(f{rel_path}: Found forbidden pattern {pattern})"
-                        violations.append(f{rel_path}: Found forbidden pattern {pattern})"
+                        violations.append(f{rel_path}: Found forbidden pattern {pattern})""
+
             
             except Exception as e:
                 violations.append(f"{rel_path}: Error reading file - {e})"
@@ -270,7 +278,8 @@ class IsolatedEnvironmentComplianceTests:
         try:
             # Set a new variable
             isolated_env.set(CALLBACK_TEST, new_value, callback_test)"
-            isolated_env.set(CALLBACK_TEST, new_value, callback_test)"
+            isolated_env.set(CALLBACK_TEST, new_value, callback_test)""
+
             assert len(change_log) == 1
             assert change_log[0] == ("CALLBACK_TEST, None, new_value)"
             
@@ -279,7 +288,8 @@ class IsolatedEnvironmentComplianceTests:
             isolated_env.set(CALLBACK_TEST, updated_value, "callback_test)"
             assert len(change_log) == 1
             assert change_log[0] == (CALLBACK_TEST, new_value, updated_value)"
-            assert change_log[0] == (CALLBACK_TEST, new_value, updated_value)"
+            assert change_log[0] == (CALLBACK_TEST, new_value, updated_value)""
+
             
             # Delete the variable
             change_log.clear()
@@ -306,7 +316,8 @@ class IsolatedEnvironmentComplianceTests:
         result = isolated_env.set(PROTECTED_VAR, forced_value, "protection_test, force=True)"
         assert result, "Force modification of protected variable failed"
         assert isolated_env.get(PROTECTED_VAR) == forced_value"
-        assert isolated_env.get(PROTECTED_VAR) == forced_value"
+        assert isolated_env.get(PROTECTED_VAR) == forced_value""
+
         
         # Unprotect and modify should work
         isolated_env.unprotect_variable("PROTECTED_VAR)"

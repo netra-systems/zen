@@ -6,13 +6,13 @@ WebSocket readiness middleware fix for Issue #919 - startup_phase stuck at 'unkn
 in GCP environments causing legitimate connections to be rejected.
 
 BUSINESS VALIDATION:
-- Tests realistic GCP Cloud Run scenarios
+    - Tests realistic GCP Cloud Run scenarios
 - Validates actual WebSocket connection establishment 
 - Tests middleware integration with app lifecycle
 - Verifies security measures remain intact
 
 Business Value Justification:
-- Segment: Platform/Internal ($500K+ ARR protection)  
+    - Segment: Platform/Internal ($"500K" plus ARR protection)  
 - Business Goal: Platform Stability & Chat Value Delivery
 - Value Impact: Prevents WebSocket 1011 errors that block chat functionality
 - Strategic Impact: Enables reliable WebSocket connections in GCP Cloud Run
@@ -71,7 +71,8 @@ class WebSocketReadinessMiddlewareIntegrationTests:
                         assert data == 'connection_established'
 
     def test_issue_919_gcp_staging_graceful_degradation(self, mock_app_with_middleware):
-    """
+    """"
+
         ISSUE #919 FIX: Test graceful degradation in staging when services aren't ready.'
         
         SCENARIO: GCP staging environment without bypass but graceful degradation
@@ -116,7 +117,8 @@ class WebSocketReadinessMiddlewareIntegrationTests:
                                 pass
 
     def test_issue_919_non_gcp_environment_allows_connections(self, mock_app_with_middleware):
-    """
+    """"
+
         Test non-GCP environments allow WebSocket connections without validation.
         
         SCENARIO: Development/local environment

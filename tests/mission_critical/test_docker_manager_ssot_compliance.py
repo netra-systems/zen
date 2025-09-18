@@ -1,16 +1,16 @@
-"""
-"""
+""""
+
 SSOT Docker Manager Compliance Validation Tests
 ============================================
 
 CRITICAL MISSION: Prove Docker Manager SSOT violation exists and validate fix works.
 
 This test suite validates:
-1. SSOT ENFORCEMENT: Only ONE Docker Manager implementation should exist and be used
-"""
-"""
+    1. SSOT ENFORCEMENT: Only ONE Docker Manager implementation should exist and be used
+""""
+
 2. IMPORT VALIDATION: All imports must resolve to the same real implementation
-3. GOLDEN PATH PROTECTION: Real services vs mocks for $500K+ ARR functionality
+3. GOLDEN PATH PROTECTION: Real services vs mocks for $"500K" plus ARR functionality
 4. SSOT COMPLIANCE: Prevents regression of Docker Manager duplication
 
 Created for Issue #1083: 51 tests import mock Docker Manager instead of real SSOT implementation
@@ -18,9 +18,10 @@ Created for Issue #1083: 51 tests import mock Docker Manager instead of real SSO
 EXPECTED CURRENT STATE: These tests will FAIL, proving the SSOT violation exists.
 EXPECTED AFTER REMEDIATION: These tests will PASS, proving SSOT compliance.
 
-Business Impact: Protects $500K+ ARR Golden Path functionality by ensuring real services.
+Business Impact: Protects $"500K" plus ARR Golden Path functionality by ensuring real services.
 "
-"
+""
+
 
 # CRITICAL: Import path configuration for direct test execution
 # Ensures tests work both directly and through unified_test_runner.py
@@ -51,13 +52,15 @@ env = get_env()
 
 class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
     "
-    "
+    ""
+
     Test suite to prove Docker Manager SSOT violation and validate fix.
 
     These tests DELIBERATELY FAIL to prove the violation exists.
     After remediation, they will PASS to prove SSOT compliance.
 "
-"
+""
+
 
     def setup_method(self, method):
         "Set up test environment with SSOT compliance checking."
@@ -88,7 +91,8 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
                fExpected: Only real implementation should exist - This FAILURE proves violation exists
 
     def test_ssot_violation_mock_docker_manager_has_mock_implementations(self):
-    """
+    """"
+
         PROVES VIOLATION: Mock Docker Manager contains MagicMock/AsyncMock implementations.
 
         CURRENT EXPECTATION: FAIL - Mock implementations detected
@@ -96,7 +100,8 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
         
         if not self.mock_docker_manager_path.exists():
             self.skipTest(Mock Docker Manager file does not exist - already remediated)"
-            self.skipTest(Mock Docker Manager file does not exist - already remediated)"
+            self.skipTest(Mock Docker Manager file does not exist - already remediated)""
+
 
         # Parse the mock Docker Manager file
         with open(self.mock_docker_manager_path, 'r') as f:
@@ -109,7 +114,8 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
             "Mock,"
             mock_docker_manager,
             Mock Docker manager"
-            Mock Docker manager"
+            Mock Docker manager""
+
         ]
 
         found_mocks = [indicator for indicator in mock_indicators if indicator in content]
@@ -121,7 +127,8 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
 
     def test_ssot_violation_tests_import_mock_docker_manager(self):
         """
-        "
+        ""
+
         PROVES VIOLATION: Tests import from test_framework.docker.unified_docker_manager (mock).
 
         CURRENT EXPECTATION: FAIL - Mock imports found in test files
@@ -132,7 +139,8 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
         test_files = []
         for root, _, files in os.walk(self.project_root):
             if test in root.lower():"
-            if test in root.lower():"
+            if test in root.lower():""
+
                 for file in files:
                     if file.endswith('.py'):
                         test_files.append(Path(root) / file)
@@ -180,7 +188,8 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
         # Import real Docker Manager
         try:
             real_module_path = test_framework.unified_docker_manager"
-            real_module_path = test_framework.unified_docker_manager"
+            real_module_path = test_framework.unified_docker_manager""
+
             if real_module_path in sys.modules:
                 del sys.modules[real_module_path]
             real_module = importlib.import_module(real_module_path)
@@ -203,11 +212,12 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
                fGOLDEN PATH VIOLATION:\n" \"
                fMock manager has MagicMock client: {mock_has_magic_mock}\n \
                fReal manager has actual client: {real_has_actual_client}\n \
-               f"Tests using mock instead of real services breaks $500K+ ARR functionality"
+               f"Tests using mock instead of real services breaks $"500K" plus ARR functionality"
 
     def test_ssot_compliance_only_one_docker_manager_implementation(self):
         """
-        "
+        ""
+
         ENFORCES SSOT: Only one Docker Manager implementation should exist.
 
         CURRENT EXPECTATION: FAIL - Two implementations exist
@@ -241,13 +251,15 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
 
     def test_import_consistency_all_imports_resolve_to_same_implementation(self):
         """
-    "
+    ""
+
         VALIDATES IMPORT CONSISTENCY: All Docker Manager imports resolve to same instance.
 
         CURRENT EXPECTATION: FAIL - Imports resolve to different implementations
         POST-REMEDIATION: PASS - All imports resolve to real implementation
         "
-        "
+        ""
+
         import_paths = [
             test_framework.unified_docker_manager,
             "test_framework.docker.unified_docker_manager  # Should not exist after remediation"
@@ -294,8 +306,9 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
                    fAll imports should resolve to real implementation only
 
     def test_golden_path_websocket_events_require_real_services(self):
-    """
-        VALIDATES GOLDEN PATH: WebSocket events require real Docker services for $500K+ ARR.
+    """"
+
+        VALIDATES GOLDEN PATH: WebSocket events require real Docker services for $"500K" plus ARR.
 
         CURRENT EXPECTATION: FAIL - Mock services cannot provide real WebSocket events
         POST-REMEDIATION: PASS - Real services enable Golden Path functionality
@@ -336,14 +349,15 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
                    fGOLDEN PATH VIOLATION: Docker Manager lacks real service capabilities:\n" \"
                    fMethods that are mocks: {mock_method_count}/{len(required_real_methods)}\n \
                    fMissing methods: {missing_methods}\n \
-                   f"Golden Path WebSocket events require real service connections for $500K+ ARR"
+                   f"Golden Path WebSocket events require real service connections for $"500K" plus ARR"
 
         except ImportError as e:
             self.fail(fCRITICAL: Cannot import Docker Manager - Golden Path broken: {e}")"
 
     def test_ssot_enforcement_prevents_future_regression(self):
         """
-    "
+    ""
+
         ENFORCES SSOT: Validates that SSOT patterns prevent future Docker Manager duplication.
 
         CURRENT EXPECTATION: FAIL - SSOT enforcement not active
@@ -384,7 +398,7 @@ class DockerManagerMissionCriticalIntegrationTests(SSotBaseTestCase):
     Mission critical tests for Docker Manager SSOT compliance.
 
     These tests validate that Docker Manager SSOT compliance protects
-    mission critical business functionality worth $500K+ ARR.
+    mission critical business functionality worth $"500K" plus ARR.
 ""
 
     def setup_method(self, method):
@@ -395,7 +409,7 @@ class DockerManagerMissionCriticalIntegrationTests(SSotBaseTestCase):
         pass
         MISSION CRITICAL: WebSocket agent events require real Docker services.
 
-        Business Impact: $500K+ ARR depends on WebSocket events working with real services.
+        Business Impact: $"500K" plus ARR depends on WebSocket events working with real services.
         SSOT compliance ensures tests use real services, not mocks.
 ""
         # This test validates the critical business requirement:
@@ -436,22 +450,26 @@ class DockerManagerMissionCriticalIntegrationTests(SSotBaseTestCase):
                            fReal methods available: {methods_available}\n
                            f"Methods mocked (VIOLATION): {methods_mocked}\n"
                            fMethods missing: {methods_missing}\n"
-                           fMethods missing: {methods_missing}\n"
-                           fBusiness Impact: $500K+ ARR WebSocket events require real services)
+                           fMethods missing: {methods_missing}\n""
+
+                           fBusiness Impact: $"500K" plus ARR WebSocket events require real services)
 
         except ImportError as e:
             self.fail(fMISSION CRITICAL FAILURE: Docker Manager import failed: {e})"
-            self.fail(fMISSION CRITICAL FAILURE: Docker Manager import failed: {e})"
+            self.fail(fMISSION CRITICAL FAILURE: Docker Manager import failed: {e})""
+
 
     def test_mission_critical_golden_path_service_integration(self):
         """
-    "
+    ""
+
         MISSION CRITICAL: Golden Path requires integrated service management.
 
         Validates that Docker Manager provides integrated service management
         required for the complete Golden Path user flow.
         "
-        "
+        ""
+
         try:
             from test_framework.unified_docker_manager import UnifiedDockerManager
             manager = UnifiedDockerManager()
@@ -481,7 +499,8 @@ class DockerManagerMissionCriticalIntegrationTests(SSotBaseTestCase):
 
             self.assertTrue(golden_path_ready,
                            fGOLDEN PATH VIOLATION: Insufficient service integration:\n"
-                           fGOLDEN PATH VIOLATION: Insufficient service integration:\n"
+                           fGOLDEN PATH VIOLATION: Insufficient service integration:\n""
+
                            fIntegration score: {integration_score}/{len(integration_requirements)}\n
                            fMinimum required: {min_required_score}\n"
                            fMinimum required: {min_required_score}\n"

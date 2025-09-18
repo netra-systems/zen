@@ -5,7 +5,7 @@ Tests real message routing, state synchronization, reconnection scenarios,
 and error handling for frontend WebSocket communication flows.
 
 Business Value Justification (BVJ):
-1. Segment: All segments - Core real-time communication
+    1. Segment: All segments - Core real-time communication
 2. Business Goal: Ensure reliable message delivery and state sync
 3. Value Impact: Prevents message loss and improves user experience
 4. Revenue Impact: Critical for agent communication and real-time features
@@ -46,7 +46,8 @@ class WebSocketMessagingerTests:
         return self
     
     async def cleanup(self):
-        ""Clean up connections and test environment."
+        ""Clean up connections and test environment.""
+
         await self._close_all_connections()
         await self.harness.teardown()
     
@@ -304,5 +305,6 @@ async def test_websocket_agent_communication(messaging_tester):
     assert payload["request_id] == agent_request[request_id]"
     assert "result in payload or status in payload"
 
-"""
+""""
+
 )))))))

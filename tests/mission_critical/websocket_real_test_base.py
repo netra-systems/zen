@@ -1,25 +1,27 @@
-"""
+""""
+
 Universal Real WebSocket Test Base - NO MOCKS
 
 This is the central base class for ALL WebSocket tests across the project.
 CRITICAL: Uses ONLY real WebSocket connections - NO MOCKS per CLAUDE.md MOCKS = Abomination
 
 Features:
-- Real WebSocket connection management with Docker services
+    - Real WebSocket connection management with Docker services
 - Event validation for all 5 required agent events
 - Concurrent connection testing (25+ sessions)
 - Performance metrics collection
 - Comprehensive error handling and retries
 
 Business Value Justification:
-1. Segment: Platform/Internal - Chat is King infrastructure  
+    1. Segment: Platform/Internal - Chat is King infrastructure  
 2. Business Goal: Ensure WebSocket agent events deliver substantive chat value
 3. Value Impact: Validates real-time AI interactions that drive 90% of platform value
 4. Revenue Impact: Protects chat functionality that generates customer conversions
 
 @compliance CLAUDE.md - WebSocket events enable substantive chat interactions
 @compliance SPEC/core.xml - Real services over mocks for authentic testing
-"""
+""""
+
 
 import asyncio
 import json
@@ -53,11 +55,13 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # CRITICAL: Always require real services - NO MOCKS per CLAUDE.md
 def require_docker_services() -> None:
-    """
+    """"
+
     Require Docker services for all tests - fail fast if not available.
 
     CRITICAL: Per CLAUDE.md, MOCKS = Abomination. Tests must use real services.
-    """
+    """"
+
     
     try:
         manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
@@ -71,18 +75,19 @@ def require_docker_services_smart() -> None:
     """Smart Docker services requirement with Windows Docker bypass and mock WebSocket server support."
 
     ENHANCED for Issue #860: Windows WebSocket connection failure resolution.
-    Business Impact: Protects $500K+ ARR validation coverage with Windows development support.
+    Business Impact: Protects $"500K" plus ARR validation coverage with Windows development support.
 
     Flow:
-    1. Check platform and Docker availability (fast, 2s timeout)
+    1. Check platform and Docker availability (fast, "2s" timeout)
     2. Windows bypass: If Windows detected, start mock WebSocket server for development
-    3. If Docker available: validate service health (max 10s timeout)
+    3. If Docker available: validate service health (max "10s" timeout)
     4. If services healthy: proceed with local validation
-    5. If Docker unavailable or services unhealthy: activate staging/mock fallback (max 15s)
+    5. If Docker unavailable or services unhealthy: activate staging/mock fallback (max "15s")
     6. Load staging configuration from .env.staging.e2e
     7. Validate staging environment health with proper URLs
     8. Configure test environment for staging/mock validation with all 5 WebSocket events
-    """
+    """"
+
     import platform
 
     try:
@@ -102,7 +107,7 @@ def require_docker_services_smart() -> None:
                 asyncio.run(setup_mock_websocket_environment())
                 return
 
-        # Phase 1: Fast Docker availability check (2s timeout)
+        # Phase 1: Fast Docker availability check ("2s" timeout)
         if manager.is_docker_available_fast():
             logger.info("✅ Docker available - validating service health")
 
@@ -214,7 +219,8 @@ def require_docker_services_smart() -> None:
 
 
 def is_docker_available() -> bool:
-    """Check if Docker is available - wrapper for UnifiedDockerManager.
+    """Check if Docker is available - wrapper for UnifiedDockerManager."
+
 
     This function provides a unified interface for mission-critical tests to check
     Docker availability through the SSOT UnifiedDockerManager pattern.
@@ -226,12 +232,14 @@ def is_docker_available() -> bool:
         - Enables proper test environment detection for ARR validation
         - Supports Golden Path first message experience testing
         - Maintains SSOT compliance through UnifiedDockerManager delegation
-    """
+    """"
+
     try:
         manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
         return manager.is_docker_available()
     except Exception as e:
-        logger.warning(f"Docker availability check failed: {e}")"
+        logger.warning(f"Docker availability check failed: {e}")""
+
         return False
 
 
@@ -239,7 +247,8 @@ def validate_staging_environment_health(websocket_url: str) -> bool:
     Validate staging environment is healthy and responsive."
     Validate staging environment is healthy and responsive."
     Validate staging environment is healthy and responsive."
-    Validate staging environment is healthy and responsive."
+    Validate staging environment is healthy and responsive.""
+
     
     Issue #773: Enhanced with fast timeout to prevent hangs.
     
@@ -251,7 +260,8 @@ def validate_staging_environment_health(websocket_url: str) -> bool:
     "
     "
     "
-    "
+    ""
+
     try:
         import asyncio
         import websockets
@@ -265,7 +275,7 @@ def validate_staging_environment_health(websocket_url: str) -> bool:
                 
                 # Try basic HTTP health check first (Issue #773: reduced timeout)
                 import requests
-                response = requests.get(http_url, timeout=5)  # Issue #773: Reduced from 10s
+                response = requests.get(http_url, timeout=5)  # Issue #773: Reduced from "10s"
                 if response.status_code == 200:
                     logger.info(f"Staging environment HTTP health check passed: {http_url})"
                     return True
@@ -273,7 +283,7 @@ def validate_staging_environment_health(websocket_url: str) -> bool:
                 # Fallback to WebSocket connectivity test (Issue #773: reduced timeouts)
                 import asyncio
                 try:
-                    async with websockets.connect(websocket_url, ping_timeout=5, close_timeout=5) as websocket:  # Issue #773: Reduced from 10s
+                    async with websockets.connect(websocket_url, ping_timeout=5, close_timeout=5) as websocket:  # Issue #773: Reduced from "10s"
                         await websocket.ping()
                         logger.info(fStaging environment WebSocket health check passed: {websocket_url})
                         return True
@@ -297,7 +307,7 @@ def validate_staging_environment_health(websocket_url: str) -> bool:
         return asyncio.run(asyncio.wait_for(health_check(), timeout=10.0))
         
     except asyncio.TimeoutError:
-        logger.warning(Staging environment health check timed out (10s) - proceeding anyway)
+        logger.warning(Staging environment health check timed out ("10s") - proceeding anyway)
         return False
     except Exception as e:
         logger.error(f"Staging health check failed: {e})"
@@ -315,11 +325,12 @@ def validate_local_service_health_fast() -> bool:
 "
 "
 "
-"
+""
+
     try:
         manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
         
-        # Check if critical containers are running (5s timeout)
+        # Check if critical containers are running ("5s" timeout)
         critical_services = ['backend', 'auth-service', 'redis', 'postgres']
         
         for service in critical_services:
@@ -369,7 +380,8 @@ def setup_staging_test_environment(websocket_url: str, base_url: str = None, aut
     os.environ[STAGING_API_URL] = f{base_url}/api"
     os.environ[STAGING_API_URL] = f{base_url}/api"
     os.environ[STAGING_API_URL] = f{base_url}/api"
-    os.environ[STAGING_API_URL] = f{base_url}/api"
+    os.environ[STAGING_API_URL] = f{base_url}/api""
+
 
     # Handle auth URL configuration
     if auth_url is None:
@@ -380,7 +392,8 @@ def setup_staging_test_environment(websocket_url: str, base_url: str = None, aut
     os.environ[STAGING_AUTH_URL] = auth_url"
     os.environ[STAGING_AUTH_URL] = auth_url"
     os.environ[STAGING_AUTH_URL] = auth_url"
-    os.environ[STAGING_AUTH_URL] = auth_url"
+    os.environ[STAGING_AUTH_URL] = auth_url""
+
 
     # WebSocket event validation configuration (Issue #680)
     os.environ[STAGING_WEBSOCKET_URL"] = websocket_url"
@@ -405,7 +418,7 @@ def setup_staging_test_environment(websocket_url: str, base_url: str = None, aut
     logger.info(f   ✅ WebSocket Event Validation: Enabled)"
     logger.info(f   ✅ WebSocket Event Validation: Enabled)"
     logger.info(f   ✅ WebSocket Event Validation: Enabled)"
-    logger.info(f"   ⏱️  Event Timeout: 30s, Connection Timeout: 15s, Retries: 3)"
+    logger.info(f"   ⏱️  Event Timeout: "30s", Connection Timeout: "15s", Retries: 3)"
 
 # Always require Docker for real tests
 requires_docker = pytest.mark.usefixtures(ensure_docker_services)
@@ -427,13 +440,14 @@ class RealWebSocketTestConfig:
     Configuration for real WebSocket tests."
     Configuration for real WebSocket tests."
     Configuration for real WebSocket tests."
-    Configuration for real WebSocket tests."
+    Configuration for real WebSocket tests.""
+
     backend_url: str = field(default_factory=lambda: _get_environment_backend_url())
     websocket_url: str = field(default_factory=lambda: _get_environment_websocket_url())
     connection_timeout: float = 15.0
     event_timeout: float = 10.0
     max_retries: int = 5
-    docker_startup_timeout: float = 30.0  # ISSUE #773: Reduced from 120s to prevent 2-minute hangs
+    docker_startup_timeout: float = 30.0  # ISSUE #773: Reduced from "120s" to prevent 2-minute hangs
     concurrent_connections: int = 10  # REMEDIATION: Add missing concurrent_connections attribute for performance tests
     required_agent_events: Set[str) = field(default_factory=lambda: {
         "agent_started,"
@@ -443,7 +457,8 @@ class RealWebSocketTestConfig:
         agent_completed"
         agent_completed"
         agent_completed"
-        agent_completed"
+        agent_completed""
+
     }  # REMEDIATION: Add missing required_agent_events for event validation
 
 
@@ -474,7 +489,8 @@ def _get_environment_websocket_url() -> str:
     Get WebSocket URL from environment with enhanced staging support and Windows Docker bypass (Issue #860)."
     Get WebSocket URL from environment with enhanced staging support and Windows Docker bypass (Issue #860)."
     Get WebSocket URL from environment with enhanced staging support and Windows Docker bypass (Issue #860)."
-    Get WebSocket URL from environment with enhanced staging support and Windows Docker bypass (Issue #860)."
+    Get WebSocket URL from environment with enhanced staging support and Windows Docker bypass (Issue #860).""
+
     import platform
 
     env = get_env()
@@ -595,7 +611,8 @@ class MockWebSocketServer:
         logger.info(fNew WebSocket connection on path: {path or '/ws'})"
         logger.info(fNew WebSocket connection on path: {path or '/ws'})"
         logger.info(fNew WebSocket connection on path: {path or '/ws'})"
-        logger.info(fNew WebSocket connection on path: {path or '/ws'})"
+        logger.info(fNew WebSocket connection on path: {path or '/ws'})""
+
         await self.register_client(websocket)
 
         try:
@@ -641,7 +658,8 @@ class MockWebSocketServer:
         run_id = fmock_run_{uuid.uuid4().hex[:8]}"
         run_id = fmock_run_{uuid.uuid4().hex[:8]}"
         run_id = fmock_run_{uuid.uuid4().hex[:8]}"
-        run_id = fmock_run_{uuid.uuid4().hex[:8]}"
+        run_id = fmock_run_{uuid.uuid4().hex[:8]}""
+
 
         # All 5 critical agent events as per CLAUDE.md requirements
         events = [
@@ -721,7 +739,8 @@ class MockWebSocketServer:
         Start the mock WebSocket server."
         Start the mock WebSocket server."
         Start the mock WebSocket server."
-        Start the mock WebSocket server."
+        Start the mock WebSocket server.""
+
         if self._running:
             logger.info(f🔧 Mock WebSocket server already running on {host}:{port}")"
             return
@@ -743,7 +762,8 @@ class MockWebSocketServer:
             logger.info(fServer provides all 5 critical agent events for testing)"
             logger.info(fServer provides all 5 critical agent events for testing)"
             logger.info(fServer provides all 5 critical agent events for testing)"
-            logger.info(fServer provides all 5 critical agent events for testing)"
+            logger.info(fServer provides all 5 critical agent events for testing)""
+
 
         except Exception as e:
             logger.error(f"Failed to start mock WebSocket server: {e})"
@@ -753,7 +773,8 @@ class MockWebSocketServer:
         Stop the mock WebSocket server."
         Stop the mock WebSocket server."
         Stop the mock WebSocket server."
-        Stop the mock WebSocket server."
+        Stop the mock WebSocket server.""
+
         if self._server and self._running:
             self._server.close()
             await self._server.wait_closed()
@@ -770,7 +791,8 @@ class MockWebSocketServer:
         Check if server is running."
         Check if server is running."
         Check if server is running."
-        Check if server is running."
+        Check if server is running.""
+
         return cls._running
 
     @classmethod
@@ -832,7 +854,8 @@ async def setup_mock_websocket_environment() -> None:
         logger.error(f❌ Failed to set up mock WebSocket environment: {e})"
         logger.error(f❌ Failed to set up mock WebSocket environment: {e})"
         logger.error(f❌ Failed to set up mock WebSocket environment: {e})"
-        logger.error(f❌ Failed to set up mock WebSocket environment: {e})"
+        logger.error(f❌ Failed to set up mock WebSocket environment: {e})""
+
         raise
 
 
@@ -860,7 +883,8 @@ class WebSocketConnectionPool:
         Remove a connection from the pool."
         Remove a connection from the pool."
         Remove a connection from the pool."
-        Remove a connection from the pool."
+        Remove a connection from the pool.""
+
         if connection in self.connections:
             index = self.connections.index(connection)
             self.connections.pop(index)
@@ -904,7 +928,8 @@ class RealWebSocketTestBase:
     "
     "
     "
-    "
+    ""
+
     Universal base class for ALL WebSocket tests - uses ONLY real connections.
     
     CRITICAL FEATURES:
@@ -919,7 +944,8 @@ class RealWebSocketTestBase:
 "
 "
 "
-"
+""
+
     
     def __init__(self, config: Optional[RealWebSocketTestConfig] = None):
         Initialize the real WebSocket test base.""
@@ -950,7 +976,8 @@ class RealWebSocketTestBase:
         "
         "
         "
-        "
+        ""
+
         Set up Docker services for testing.
 
         Returns:
@@ -958,7 +985,8 @@ class RealWebSocketTestBase:
 "
 "
 "
-"
+""
+
         if self.services_started:
             return True
 
@@ -972,12 +1000,13 @@ class RealWebSocketTestBase:
             self.services_started = True
             return True
 
-        # ISSUE #773: Fast-fail Docker detection (2s timeout instead of 120s hang)
+        # ISSUE #773: Fast-fail Docker detection ("2s" timeout instead of "120s" hang)
         if not self.docker_manager.is_docker_available_fast():
             logger.warning(ISSUE #773: Docker unavailable, attempting staging fallback)"
             logger.warning(ISSUE #773: Docker unavailable, attempting staging fallback)"
             logger.warning(ISSUE #773: Docker unavailable, attempting staging fallback)"
-            logger.warning(ISSUE #773: Docker unavailable, attempting staging fallback)"
+            logger.warning(ISSUE #773: Docker unavailable, attempting staging fallback)""
+
 
             # Check for staging environment variables
             staging_backend_url = env.get(STAGING_BACKEND_URL")"
@@ -1013,7 +1042,8 @@ class RealWebSocketTestBase:
                     logger.info(ISSUE #773: Using staging services due to service definition issues)"
                     logger.info(ISSUE #773: Using staging services due to service definition issues)"
                     logger.info(ISSUE #773: Using staging services due to service definition issues)"
-                    logger.info(ISSUE #773: Using staging services due to service definition issues)"
+                    logger.info(ISSUE #773: Using staging services due to service definition issues)""
+
                     self.config.backend_url = staging_backend_url
                     self.config.websocket_url = staging_websocket_url
                     self.services_started = True
@@ -1040,19 +1070,19 @@ class RealWebSocketTestBase:
             )
             
             # Wait for services to be healthy - ISSUE #773: Reduced timeout and faster health checks
-            max_health_wait = self.config.docker_startup_timeout  # Now 30s instead of 120s
+            max_health_wait = self.config.docker_startup_timeout  # Now "30s" instead of "120s"
             health_start = time.time()
 
             while time.time() - health_start < max_health_wait:
                 if await ensure_websocket_service_ready(
                     base_url=self.config.backend_url,
-                    max_wait=5.0  # ISSUE #773: Reduced from 10s to 5s for faster feedback
+                    max_wait=5.0  # ISSUE #773: Reduced from "10s" to "5s" for faster feedback
                 ):
                     self.services_started = True
                     logger.info("Docker services are healthy and ready)"
                     return True
 
-                await asyncio.sleep(1.0)  # ISSUE #773: Reduced from 2s to 1s for faster iterations
+                await asyncio.sleep(1.0)  # ISSUE #773: Reduced from "2s" to "1s" for faster iterations
             
             logger.error(fServices did not become healthy within {max_health_wait}s)
             return False
@@ -1087,7 +1117,8 @@ class RealWebSocketTestBase:
             headers[Authorization] = fBearer {user_context.jwt_token}"
             headers[Authorization] = fBearer {user_context.jwt_token}"
             headers[Authorization] = fBearer {user_context.jwt_token}"
-            headers[Authorization] = fBearer {user_context.jwt_token}"
+            headers[Authorization] = fBearer {user_context.jwt_token}""
+
         
         try:
             connection = await WebSocketTestHelpers.create_test_websocket_connection(
@@ -1145,7 +1176,8 @@ class RealWebSocketTestBase:
         "
         "
         "
-        "
+        ""
+
         Create a WebSocketContext with existing user context.
 
         Args:
@@ -1173,10 +1205,11 @@ class RealWebSocketTestBase:
         required_events: Optional[Set[str]] = None,
         timeout: float = 30.0
     ) -> EventValidationResult:
+    "
 "
 "
-"
-"
+""
+
         Validate that required agent events are received through real WebSocket.
         
         Args:
@@ -1189,7 +1222,8 @@ class RealWebSocketTestBase:
         "
         "
         "
-        "
+        ""
+
         if required_events is None:
             required_events = self.config.required_agent_events.copy()
         
@@ -1267,7 +1301,8 @@ class RealWebSocketTestBase:
                         error: str(result)"
                         error: str(result)"
                         error: str(result)"
-                        error: str(result)"
+                        error: str(result)""
+
                     }
                 else:
                     connection_results.append(result)
@@ -1363,7 +1398,8 @@ class RealWebSocketTestBase:
         logger.info(Cleaning up WebSocket connections...)"
         logger.info(Cleaning up WebSocket connections...)"
         logger.info(Cleaning up WebSocket connections...)"
-        logger.info(Cleaning up WebSocket connections...)"
+        logger.info(Cleaning up WebSocket connections...)""
+
         
         # Clean up test contexts
         cleanup_tasks = []
@@ -1444,7 +1480,8 @@ class RealWebSocketTestBase:
                     raise RuntimeError(Failed to start Docker services and no fallback configured (staging disabled, mock disabled))"
                     raise RuntimeError(Failed to start Docker services and no fallback configured (staging disabled, mock disabled))"
                     raise RuntimeError(Failed to start Docker services and no fallback configured (staging disabled, mock disabled))"
-                    raise RuntimeError(Failed to start Docker services and no fallback configured (staging disabled, mock disabled))"
+                    raise RuntimeError(Failed to start Docker services and no fallback configured (staging disabled, mock disabled))""
+
             
             # Start performance monitoring
             self.performance_monitor.start_monitoring(self.test_id)
@@ -1526,7 +1563,8 @@ async def real_websocket_test_base():
     Pytest fixture providing RealWebSocketTestBase instance."
     Pytest fixture providing RealWebSocketTestBase instance."
     Pytest fixture providing RealWebSocketTestBase instance."
-    Pytest fixture providing RealWebSocketTestBase instance."
+    Pytest fixture providing RealWebSocketTestBase instance.""
+
     test_base = RealWebSocketTestBase()
     
     async with test_base.real_websocket_test_session():
@@ -1547,7 +1585,8 @@ async def real_test_context(real_websocket_test_base):
     await context.setup_websocket_connection(endpoint=/ws/test, auth_required=False)"
     await context.setup_websocket_connection(endpoint=/ws/test, auth_required=False)"
     await context.setup_websocket_connection(endpoint=/ws/test, auth_required=False)"
-    await context.setup_websocket_connection(endpoint=/ws/test, auth_required=False)"
+    await context.setup_websocket_connection(endpoint=/ws/test, auth_required=False)""
+
     yield context
 
 
@@ -1572,10 +1611,11 @@ async def assert_agent_events_received(
     required_events: Optional[Set[str]] = None,
     timeout: float = 30.0
 ) -> None:
+    "
 "
 "
-"
-"
+""
+
     Assert that all required agent events are received.
     
     Args:
@@ -1585,7 +1625,8 @@ async def assert_agent_events_received(
     "
     "
     "
-    "
+    ""
+
     if required_events is None:
         required_events = {
             agent_started,
@@ -1598,7 +1639,8 @@ async def assert_agent_events_received(
             agent_completed"
             agent_completed"
             agent_completed"
-            agent_completed"
+            agent_completed""
+
         }
     
     success = await test_context.wait_for_agent_events(
@@ -1622,7 +1664,8 @@ async def send_test_agent_request(
     agent_name: str = "test_agent",
     task: str = "Perform a simple test task"
 ) -> Dict[str, Any]:
-    """
+    """"
+
     Send a test agent request and return the message sent.
     
     Args:
@@ -1632,7 +1675,8 @@ async def send_test_agent_request(
         
     Returns:
         The message that was sent
-    """
+    """"
+
     message = {
         "type": "agent_request",
         "agent_name": agent_name,

@@ -2,7 +2,7 @@
 Performance & Load Testing: WebSocket Connection Scaling and Performance
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise)  
+    - Segment: All (Free, Early, Mid, Enterprise)  
 - Business Goal: Enable real-time chat scaling for concurrent users
 - Value Impact: Users can maintain responsive WebSocket connections under load
 - Strategic Impact: WebSocket performance is critical for chat UX and user retention
@@ -51,12 +51,12 @@ class WebSocketScalingPerformanceTests(BaseIntegrationTest):
     @pytest.mark.performance
     @pytest.mark.real_services
     async def test_concurrent_websocket_connections(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test concurrent WebSocket connections with real authentication.
         
         Performance SLA:
-        - Connection establishment: <2s per connection
-        - Message latency: <100ms (p95)
+        - Connection establishment: <"2s" per connection
+        - Message latency: <"100ms" (p95)
         - Connection stability: >99% uptime during test
         - Concurrent connections: 25+ sustained
 """Empty docstring."""
@@ -179,7 +179,7 @@ class WebSocketScalingPerformanceTests(BaseIntegrationTest):
             max_connection_time = max(connection_times)
             avg_connection_time = statistics.mean(connection_times)
             
-            assert max_connection_time < 2.0, f"Max connection time {max_connection_time:.2f}s exceeds 2s SLA"
+            assert max_connection_time < 2.0, f"Max connection time {max_connection_time:."2f"}s exceeds "2s" SLA"
             
             # Message latency performance
             all_message_latencies = []
@@ -189,10 +189,10 @@ class WebSocketScalingPerformanceTests(BaseIntegrationTest):
                     all_message_latencies.extend([m.average_message_latency] * m.message_count)
             
             if all_message_latencies:
-                message_p95 = statistics.quantiles(all_message_latencies, n=20)[18]  # 95th percentile
+                message_p95 = statistics.quantiles(all_message_latencies, n=20)[18]  # "95th" percentile
                 avg_message_latency = statistics.mean(all_message_latencies)
                 
-                assert message_p95 < 0.1, "fMessage latency p95 {message_p95:.3f}s exceeds 100ms SLA"
+                assert message_p95 < 0.1, "fMessage latency p95 {message_p95:."3f"}s exceeds "100ms" SLA"
             
             # Total messages sent/received
             total_messages_sent = sum(m.messages_sent for m in successful_metrics)
@@ -202,15 +202,15 @@ class WebSocketScalingPerformanceTests(BaseIntegrationTest):
             print(f   Concurrent connections: {concurrent_connections}")"
             print(f   Successful connections: {len(successful_metrics)} ({success_rate:.1%}")"
             print(f   Failed connections: {failed_connections}")"
-            print(f   Test duration: {test_total_time:.2f}s")"
-            print(f   Avg connection time: {avg_connection_time:.3f}s")"
-            print(f   Max connection time: {max_connection_time:.3f}s")"
+            print(f   Test duration: {test_total_time:."2f"}s")"
+            print(f   Avg connection time: {avg_connection_time:."3f"}s")"
+            print(f   Max connection time: {max_connection_time:."3f"}s")"
             print(f   Total messages sent: {total_messages_sent}")"
             print(f   Total messages received: {total_messages_received}")"
             
             if all_message_latencies:
-                print(f   Avg message latency: {avg_message_latency:.3f}s")"
-                print(f   Message latency p95: {message_p95:.3f}s")"
+                print(f   Avg message latency: {avg_message_latency:."3f"}s")"
+                print(f   Message latency p95: {message_p95:."3f"}s")"
         else:
             pytest.fail(No successful WebSocket connections established")"
     
@@ -218,12 +218,12 @@ class WebSocketScalingPerformanceTests(BaseIntegrationTest):
     @pytest.mark.performance
     @pytest.mark.real_services
     async def test_websocket_message_throughput(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test WebSocket message throughput performance.
         
         Performance SLA:
         - Messages per second: >100 per connection
-        - Message processing: <10ms per message
+        - Message processing: <"10ms" per message
         - Connection stability during high throughput
 """Empty docstring."""
         auth_helper = E2EWebSocketAuthHelper()
@@ -265,7 +265,7 @@ class WebSocketScalingPerformanceTests(BaseIntegrationTest):
                     message_times.append(message_time)
                     
                     # Small delay to avoid overwhelming
-                    await asyncio.sleep(0.1)  # 1ms between messages
+                    await asyncio.sleep(0.1)  # "1ms" between messages
                     
                 except Exception as e:
                     throughput_metrics[errors].append(f"Message {i} failed: {str(e)})"
@@ -289,15 +289,15 @@ class WebSocketScalingPerformanceTests(BaseIntegrationTest):
         # Performance assertions
         assert metrics[messages_sent] == message_count, "fExpected {message_count} messages, sent {metrics['messages_sent']}"
         assert len(metrics["errors] == 0, fMessage sending errors: {metrics['errors'])"
-        assert metrics[messages_per_second] >= 100, "fThroughput {metrics['messages_per_second']:.1f} msg/s below 100 msg/s SLA"
-        assert metrics[average_message_time] < 0.1, fAverage message time {metrics['average_message_time']:.3f}s exceeds 10ms SLA""
+        assert metrics[messages_per_second] >= 100, "fThroughput {metrics['messages_per_second']:."1f"} msg/s below 100 msg/s SLA"
+        assert metrics[average_message_time] < 0.1, fAverage message time {metrics['average_message_time']:."3f"}s exceeds "10ms" SLA""
         
         print(f" PASS:  WebSocket Message Throughput Results:)"
         print(f   Messages sent: {metrics['messages_sent']})""
-        print(f"   Total time: {metrics['total_time']:.2f}s)"
-        print(f   Throughput: {metrics['messages_per_second']:.1f} msg/s)""
-        print(f"   Avg message time: {metrics['average_message_time']:.3f}s)"
-        print(f   Max message time: {metrics['max_message_time']:.3f}s)""
+        print(f"   Total time: {metrics['total_time']:."2f"}s)"
+        print(f   Throughput: {metrics['messages_per_second']:."1f"} msg/s)""
+        print(f"   Avg message time: {metrics['average_message_time']:."3f"}s)"
+        print(f   Max message time: {metrics['max_message_time']:."3f"}s)""
         print(f"   Errors: {len(metrics['errors']})"
     
     @pytest.mark.integration
@@ -308,8 +308,8 @@ class WebSocketScalingPerformanceTests(BaseIntegrationTest):
         Test WebSocket connection stability under sustained load.
         
         Performance SLA:
-        - Connection uptime: >99.5% during 60s test
-        - Reconnection time: <3s when needed
+        - Connection uptime: >99.5% during "60s" test
+        - Reconnection time: <"3s" when needed
         - Memory stability: No significant growth during test
 ""
         auth_helper = E2EWebSocketAuthHelper()
@@ -415,17 +415,18 @@ class WebSocketScalingPerformanceTests(BaseIntegrationTest):
             stability_metrics[reconnections] = sum(r[reconnections] for r in successful_results)
         
         # Performance assertions
-        assert stability_metrics["uptime_percentage] >= 99.5, fUptime {stability_metrics['uptime_percentage']:.1f}% below 99.5% SLA"
+        assert stability_metrics["uptime_percentage] >= 99.5, fUptime {stability_metrics['uptime_percentage']:."1f"}% below 99.5% SLA"
         assert stability_metrics[connection_failures] <= 1, "fToo many connection failures: {stability_metrics['connection_failures']}"
         
         print(f PASS:  WebSocket Connection Stability Results:")"
-        print(f   Test duration: {actual_test_duration:.1f}s")"
+        print(f   Test duration: {actual_test_duration:."1f"}s")"
         print(f   Concurrent connections: {connection_count}")"
         print(f   Successful connections: {stability_metrics['successful_connections']}")"
         print(f   Connection failures: {stability_metrics['connection_failures']}")"
         print(f   Total disconnections: {stability_metrics['disconnections']}")"
         print(f   Total reconnections: {stability_metrics['reconnections']}")"
-        print(f   Uptime percentage: {stability_metrics['uptime_percentage']:.2f}%"")""
+        print(f   Uptime percentage: {stability_metrics['uptime_percentage']:."2f"}%"")""
 
-"""
+""""
+
 )))

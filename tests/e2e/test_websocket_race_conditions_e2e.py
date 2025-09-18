@@ -5,20 +5,20 @@ CRITICAL: These tests focus on full-stack WebSocket race conditions through Dock
 This is the final component of the comprehensive WebSocket Race Condition Tests Suite.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal  
+    - Segment: Platform/Internal  
 - Business Goal: Platform Stability - Prevent production WebSocket chat failures
 - Value Impact: Ensures reliable AI-powered chat delivery through complete system stack
-- Strategic/Revenue Impact: Prevents $500K+ ARR loss from production WebSocket failures
+- Strategic/Revenue Impact: Prevents $"500K" plus ARR loss from production WebSocket failures
 
 Key Full-Stack Race Conditions Tested:
-1. Handshake timing race conditions through Docker containers (Need to call 'accept' first")"
+    1. Handshake timing race conditions through Docker containers (Need to call 'accept' first")"
 2. Connection state persistence across full system boundaries (PostgreSQL/Redis/Backend/Auth)
 3. WebSocket event ordering through complete application stack
 4. Multi-user isolation in full production-like environment
 5. Service disruption and recovery through Docker orchestration
 
 E2E TEST REQUIREMENTS:
-- Uses REAL services through Docker containers (NO MOCKS)
+    - Uses REAL services through Docker containers (NO MOCKS)
 - MANDATORY authentication with JWT/OAuth for ALL tests
 - Tests full-stack WebSocket interactions through complete system
 - Validates mission-critical WebSocket events through entire pipeline
@@ -142,7 +142,7 @@ class WebSocketRaceConditionsE2EHandshakeTests:
     
     @pytest.mark.asyncio
     async def test_critical_user_handshake_race_condition_e2e(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         CRITICAL E2E: Test specific User ID 101463487227881885914 handshake race condition.
         
         This test reproduces the exact staging failure scenario through full Docker stack
@@ -460,7 +460,7 @@ class WebSocketRaceConditionsE2EAgentExecutionTests:
     
     @pytest.mark.asyncio
     async def test_concurrent_agent_execution_isolation_e2e(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         E2E test for concurrent agent execution isolation through full stack.
         
         This validates that multiple users can execute agents simultaneously
@@ -587,7 +587,8 @@ class WebSocketRaceConditionsE2EPerformanceTests:
     
     @pytest.mark.asyncio
     async def test_high_concurrency_websocket_performance_e2e(self, real_services_fixture):
-    """
+    """"
+
         E2E performance test under high concurrency through full Docker stack.
         
         This validates that the system maintains performance under high load
@@ -722,7 +723,8 @@ class WebSocketRaceConditionsE2EPerformanceTests:
 
 @pytest.mark.e2e
 class WebSocketRaceConditionsE2EGoldenPathTests:
-    """
+    """"
+
     E2E Golden Path tests for mission-critical WebSocket scenarios.
     
     These tests focus on the most important user journeys through full stack.
@@ -739,7 +741,7 @@ class WebSocketRaceConditionsE2EGoldenPathTests:
     
     @pytest.mark.asyncio
     async def test_new_user_first_interaction_golden_path_e2e(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         CRITICAL Golden Path E2E: New user's first WebSocket interaction.'
         
         This is the most critical business flow - new user connecting and 
@@ -943,7 +945,8 @@ class WebSocketRaceConditionsE2EGoldenPathTests:
             
     @pytest.mark.asyncio
     async def test_error_recovery_graceful_degradation_e2e(self, real_services_fixture):
-    """
+    """"
+
         Golden Path E2E: Error recovery and graceful degradation through full stack.
         
         This validates that the system gracefully handles errors without race conditions
@@ -1051,5 +1054,6 @@ class WebSocketRaceConditionsE2EGoldenPathTests:
         finally:
             await connection.close()
 
-"""
+""""
+
 )))))

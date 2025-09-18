@@ -3,7 +3,7 @@ WebSocket JWT Authentication Regression Test
 Tests for the JWT authentication issues identified in staging.
 
 This test reproduces and verifies fixes for:
-1. JWT secret mismatch between auth service and backend
+    1. JWT secret mismatch between auth service and backend
 2. Misleading error messages when JWT validation fails
 3. Dangerous fallback to singleton pattern
 """Empty docstring."""
@@ -23,7 +23,8 @@ class JWTSecretMismatchTests:
 
     @pytest.mark.asyncio
     async def test_jwt_extraction_vs_validation_error_messages(self):
-    """
+    """"
+
         Test that error messages correctly differentiate between:
         - JWT not found in headers/subprotocols (extraction failure)
         - JWT found but invalid (validation failure)
@@ -47,7 +48,8 @@ class JWTSecretMismatchTests:
 
     @pytest.mark.asyncio
     async def test_environment_specific_jwt_secret_loading(self):
-        ""Test that environment-specific JWT secrets are loaded correctly."
+        ""Test that environment-specific JWT secrets are loaded correctly.""
+
         with patch('shared.isolated_environment.get_env') as mock_env:
             mock_env.return_value.get.side_effect = lambda key, default=None: {'ENVIRONMENT': 'staging', 'JWT_SECRET_STAGING': 'staging_specific_secret_123', 'JWT_SECRET_KEY': 'generic_secret_456'}.get(key, default)
             extractor = UserContextExtractor()
@@ -109,7 +111,7 @@ class JWTSecretMismatchTests:
 
     @pytest.mark.asyncio
     async def test_error_message_clarity(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test that error messages clearly indicate the actual problem.
         This is the key issue - the error says No JWT found when it's actually Invalid JWT.'
 ""

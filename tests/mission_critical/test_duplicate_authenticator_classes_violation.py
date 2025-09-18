@@ -1,10 +1,10 @@
-"""
-"""
+""""
+
 Test for WebSocket Authentication SSOT Violation: Duplicate UnifiedWebSocketAuthenticator Classes
 
-BUSINESS IMPACT: $500K+ ARR - WebSocket authentication chaos blocking Golden Path
-"""
-"""
+BUSINESS IMPACT: $"500K" plus ARR - WebSocket authentication chaos blocking Golden Path
+""""
+
 ISSUE: #1076 - Two complete UnifiedWebSocketAuthenticator classes exist in unified_websocket_auth.py
 
 This test SHOULD FAIL INITIALLY (reproducing the SSOT violation) and PASS AFTER REMEDIATION.
@@ -13,10 +13,11 @@ SSOT Gardener Step 2.1: Detect that two complete UnifiedWebSocketAuthenticator c
 Lines 288-1492 (Primary SSOT) and Lines 1494-1656 (Duplicate Legacy)
 
 Expected Test Behavior:
-- FAILS NOW: Two class definitions detected
+    - FAILS NOW: Two class definitions detected
 - PASSES AFTER: Only one class definition remains after SSOT consolidation
 "
-"
+""
+
 
 import ast
 import os
@@ -27,13 +28,15 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 class DuplicateAuthenticatorClassesViolationTests(SSotAsyncTestCase):
     "
-    "
+    ""
+
     Mission Critical Test: WebSocket Authentication SSOT Violation Detection
     
     Tests that only one UnifiedWebSocketAuthenticator class exists in the codebase.
-    This is a business-critical test protecting $500K+ ARR chat functionality.
+    This is a business-critical test protecting $"500K" plus ARR chat functionality.
 "
-"
+""
+
     
     def setup_method(self, method):
         "Set up test environment for SSOT violation detection."
@@ -50,7 +53,8 @@ class DuplicateAuthenticatorClassesViolationTests(SSotAsyncTestCase):
     
     def test_only_one_unified_websocket_authenticator_class_exists(self):
         """
-    "
+    ""
+
         CRITICAL TEST: Should FAIL currently - detects duplicate UnifiedWebSocketAuthenticator classes.
         
         This test inspects the unified_websocket_auth.py file and counts occurrences of
@@ -59,7 +63,8 @@ class DuplicateAuthenticatorClassesViolationTests(SSotAsyncTestCase):
         
         Business Impact: Authentication chaos prevention for Golden Path user flow
         "
-        "
+        ""
+
         self.assertTrue(os.path.exists(self.target_file), 
                        fTarget file does not exist: {self.target_file})
         
@@ -77,20 +82,24 @@ class DuplicateAuthenticatorClassesViolationTests(SSotAsyncTestCase):
         self.assertEqual(len(class_definitions), 1,
                         f"SSOT VIOLATION DETECTED: Found {len(class_definitions)}"
                         f'{self.expected_class_name}' class definitions, expected exactly 1. "
-                        f'{self.expected_class_name}' class definitions, expected exactly 1. "
+                        f'{self.expected_class_name}' class definitions, expected exactly 1. ""
+
                         fLocations: {[f'Line {d['line_number']}' for d in class_definitions]} 
                         fThis indicates authentication SSOT violation blocking Golden Path.)"
-                        fThis indicates authentication SSOT violation blocking Golden Path.)"
+                        fThis indicates authentication SSOT violation blocking Golden Path.)""
+
     
     def test_class_definitions_line_ranges_non_overlapping(self):
         """
-    "
+    ""
+
         SUPPORTING TEST: Verify that if multiple classes exist, they don't overlap.'
         
         This test ensures that duplicate classes are actually separate definitions
         rather than parsing errors or nested classes.
         "
-        "
+        ""
+
         if not os.path.exists(self.target_file):
             self.skipTest(fTarget file does not exist: {self.target_file}")"
         
@@ -149,7 +158,8 @@ class DuplicateAuthenticatorClassesViolationTests(SSotAsyncTestCase):
         self.assertTrue(True, SSOT metadata validation completed)
     
     def _count_class_definitions(self, file_content: str, class_name: str) -> List[Dict[str, Any]]:
-        """
+        """"
+
         Count class definitions using AST parsing for accuracy.
         
         Args:
@@ -187,7 +197,8 @@ class DuplicateAuthenticatorClassesViolationTests(SSotAsyncTestCase):
     
     def _count_class_definitions_text_based(self, file_content: str, class_name: str) -> List[Dict[str, Any]]:
         """
-        "
+        ""
+
         Fallback method to count class definitions using text parsing.
         
         Args:
@@ -197,7 +208,8 @@ class DuplicateAuthenticatorClassesViolationTests(SSotAsyncTestCase):
         Returns:
             List of dictionaries with class definition details
 "
-"
+""
+
         class_definitions = []
         lines = file_content.split('\n')
         

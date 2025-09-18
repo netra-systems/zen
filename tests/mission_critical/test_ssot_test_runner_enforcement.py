@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""
-"""
+""""
+
 MISSION CRITICAL: SSOT Test Runner Enforcement
 ==============================================
 
 BUSINESS JUSTIFICATION:
-Platform/Internal - System Stability & Compliance (Critical Security)
+    Platform/Internal - System Stability & Compliance (Critical Security)
 
 This test prevents the creation of unauthorized test runners, enforcing the
 Single Source of Truth (SSOT) principle mandated by CLAUDE.md. Unauthorized
 test runners can bypass all SSOT protections, creating cascade failures that
-impact the $500K+ ARR Golden Path.
+impact the $"500K" plus ARR Golden Path.
 
 CRITICAL SECURITY: This is the #1 security vulnerability - unauthorized test 
 runners can bypass all SSOT protections and cause system-wide failures.
@@ -19,22 +19,24 @@ The ONLY allowed test runner is tests/unified_test_runner.py.
 Any additional test runners will cause system test execution failure.
 
 REQUIREMENTS:
-- Scan filesystem for unauthorized test runners
+    - Scan filesystem for unauthorized test runners
 - Detect direct pytest bypasses in CI/scripts
 - Enforce SSOT orchestration compliance
 - Provide clear remediation steps for violations
 - Fail hard with no silent failures
 
 VIOLATION IMPACT:
-- 150+ SSOT violations currently undetected
+    - 150+ SSOT violations currently undetected
 - Cascade failures in Golden Path user flows
 - Inconsistent test execution across environments
 - Security bypasses in critical business flows
 "
-"
+""
+
 
 """
-"""
+""""
+
 import sys
 from pathlib import Path
 
@@ -127,7 +129,8 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
         # Test that the SSOT runner exists
         assert ALLOWED_TEST_RUNNER.exists(), (
             fCRITICAL SSOT VIOLATION: Unified test runner missing at {ALLOWED_TEST_RUNNER}\n"
-            fCRITICAL SSOT VIOLATION: Unified test runner missing at {ALLOWED_TEST_RUNNER}\n"
+            fCRITICAL SSOT VIOLATION: Unified test runner missing at {ALLOWED_TEST_RUNNER}\n""
+
             fREMEDIATION: Restore tests/unified_test_runner.py from version control
         )
         
@@ -170,7 +173,8 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
 
     def test_no_direct_pytest_bypasses(self):
         CRITICAL: Prevent scripts calling pytest directly, bypassing SSOT."
-        CRITICAL: Prevent scripts calling pytest directly, bypassing SSOT."
+        CRITICAL: Prevent scripts calling pytest directly, bypassing SSOT.""
+
         pytest_bypasses = self._find_direct_pytest_bypasses()
         
         if pytest_bypasses:
@@ -298,7 +302,8 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
             
             if any(pattern in file_path.name.lower() for pattern in FORBIDDEN_RUNNER_PATTERNS):
                 reasons.append(Forbidden filename pattern)"
-                reasons.append(Forbidden filename pattern)"
+                reasons.append(Forbidden filename pattern)""
+
             
             if '__name__ == "__main__' in content.lower():"
                 reasons.append(Has main execution block)
@@ -311,7 +316,8 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
             
             if 'subprocess' in content.lower() and 'pytest' in content.lower():
                 reasons.append(Subprocess pytest execution)"
-                reasons.append(Subprocess pytest execution)"
+                reasons.append(Subprocess pytest execution)""
+
             
             return ; ".join(reasons) if reasons else General test runner behavior"
             
@@ -428,7 +434,8 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
 
     def _analyze_legacy_wrapper_violation(self, wrapper_path: Path) -> str:
         Analyze why a legacy wrapper is invalid."
-        Analyze why a legacy wrapper is invalid."
+        Analyze why a legacy wrapper is invalid.""
+
         try:
             content = wrapper_path.read_text(encoding='utf-8', errors='ignore')
             issues = []
@@ -446,7 +453,8 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
             
         except Exception:
             return File analysis failed"
-            return File analysis failed"
+            return File analysis failed""
+
 
     def _find_ci_script_violations(self) -> List[Tuple[Path, List[str]]]:
         "Find CI scripts that don't use SSOT runner (warning only)."
@@ -456,7 +464,8 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
             PROJECT_ROOT / ".github / workflows,"
             PROJECT_ROOT / .github / scripts, 
             PROJECT_ROOT / scripts,"
-            PROJECT_ROOT / scripts,"
+            PROJECT_ROOT / scripts,""
+
         ]
         
         for ci_path in ci_paths:
@@ -506,8 +515,9 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
         
         return (
             fCRITICAL SSOT VIOLATION: {len(violations)} unauthorized test runners found!\n\n"
-            fCRITICAL SSOT VIOLATION: {len(violations)} unauthorized test runners found!\n\n"
-            fThe Golden Path ($500K+ ARR) requires a Single Source of Truth for test execution.\n
+            fCRITICAL SSOT VIOLATION: {len(violations)} unauthorized test runners found!\n\n""
+
+            fThe Golden Path ($"500K" plus ARR) requires a Single Source of Truth for test execution.\n
             fOnly tests/unified_test_runner.py is allowed.\n\n"
             fOnly tests/unified_test_runner.py is allowed.\n\n"
             f"Unauthorized runners found:\n + \n.join(violation_list) + \n\n"
@@ -529,7 +539,8 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
         for file_path, file_violations in violations:
             relative_path = file_path.relative_to(PROJECT_ROOT)
             violation_details.append(f  {relative_path}:)"
-            violation_details.append(f  {relative_path}:)"
+            violation_details.append(f  {relative_path}:)""
+
             for violation in file_violations:
                 violation_details.append(f"    - {violation})"
             total_violations += len(file_violations)
@@ -544,7 +555,8 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
             f2. Update CI/CD scripts to use SSOT runner\n
             f"3. Remove subprocess pytest execution\n"
             f4. Use unified runner arguments for test selection\n\n"
-            f4. Use unified runner arguments for test selection\n\n"
+            f4. Use unified runner arguments for test selection\n\n""
+
             fSECURITY IMPACT: Direct pytest bypasses enable SSOT violation cascade failures.
         )
 
@@ -558,7 +570,8 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
             violation_details.append(f  {relative_path}:)
             for violation in file_violations:
                 violation_details.append(f    - {violation})"
-                violation_details.append(f    - {violation})"
+                violation_details.append(f    - {violation})""
+
             total_violations += len(file_violations)
         
         return (
@@ -570,7 +583,8 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
             f1. Replace try-except imports with SSOT orchestration imports\n
             f"2. Use from test_framework.ssot.orchestration import OrchestrationConfig\n"
             f3. Use from test_framework.ssot.orchestration_enums import ServiceType\n"
-            f3. Use from test_framework.ssot.orchestration_enums import ServiceType\n"
+            f3. Use from test_framework.ssot.orchestration_enums import ServiceType\n""
+
             f4. Remove availability checking with exception handling\n\n
             fSSOT IMPORTS:\n"
             fSSOT IMPORTS:\n"
@@ -580,7 +594,8 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
         )
 
     def _format_legacy_wrapper_violations(self, violations: List[Tuple[Path, str)) -> str:
-        ""Format legacy wrapper violations into failure message."
+        ""Format legacy wrapper violations into failure message.""
+
         violation_list = []
         for file_path, reason in violations:
             relative_path = file_path.relative_to(PROJECT_ROOT)
@@ -592,7 +607,8 @@ class SSOTTestRunnerEnforcementTests(SSotBaseTestCase):
             fInvalid wrappers:\n + \n.join(violation_list) + \n\n
             f"REQUIREMENTS FOR VALID LEGACY WRAPPERS:\n"
             f1. Must show DEPRECATION WARNING to users\n"
-            f1. Must show DEPRECATION WARNING to users\n"
+            f1. Must show DEPRECATION WARNING to users\n""
+
             f2. Must redirect to tests/unified_test_runner.py\n
             f3. Must not contain substantial test execution logic\n"
             f3. Must not contain substantial test execution logic\n"

@@ -1,21 +1,23 @@
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
-"""
-"""
+""""
+
 Mission Critical Server Message Validation Tests
 
 This module tests the MissionCriticalEventValidator's ability to handle'
 ServerMessage format structures where event data is nested in payload.
 
-BUSINESS IMPACT: $500K+ ARR depends on proper WebSocket event validation
+BUSINESS IMPACT: $"500K" plus ARR depends on proper WebSocket event validation
 to ensure Golden Path chat functionality works correctly.
 
 Issue #892: MissionCriticalEventValidator expects flat event structures
 but actual ServerMessage format has nested payload structure.
 "
-"
+""
+
 
 """
-"""
+""""
+
 import json
 from datetime import datetime, timezone
 from typing import Dict, Any
@@ -41,7 +43,8 @@ class ServerMessageValidationTests(SSotBaseTestCase):
             "user_id: test-user-123,"
             thread_id: test-thread-456, 
             timestamp: self.test_timestamp"
-            timestamp: self.test_timestamp"
+            timestamp: self.test_timestamp""
+
         }
         
         result = self.validator.validate_event_content_structure(flat_event, agent_started")"
@@ -77,7 +80,8 @@ class ServerMessageValidationTests(SSotBaseTestCase):
         self.assertEqual(len(self.validator.errors), 0, Should have no validation errors)
     
     def test_tool_executing_server_message_format_now_passes(self):
-        ""Test tool_executing event in ServerMessage format now passes after fix."
+        ""Test tool_executing event in ServerMessage format now passes after fix.""
+
         server_message = {
             type: tool_executing","
             "payload: {"
@@ -121,7 +125,8 @@ class ServerMessageValidationTests(SSotBaseTestCase):
         result = self.validator.validate_event_content_structure(server_message, "agent_completed)"
         self.assertTrue(result, fServerMessage agent_completed should now pass with fixed validator, errors: {self.validator.errors})
         self.assertEqual(len(self.validator.errors), 0, Should have no validation errors for agent_completed)"
-        self.assertEqual(len(self.validator.errors), 0, Should have no validation errors for agent_completed)"
+        self.assertEqual(len(self.validator.errors), 0, Should have no validation errors for agent_completed)""
+
     
     def test_mixed_format_handling(self):
         "Test that validator can handle both formats after fix."
@@ -130,7 +135,8 @@ class ServerMessageValidationTests(SSotBaseTestCase):
             "type: agent_thinking,"
             reasoning: Analyzing user request,
             timestamp: self.test_timestamp"
-            timestamp: self.test_timestamp"
+            timestamp: self.test_timestamp""
+
         }
         
         server_message = {
@@ -181,7 +187,8 @@ class ServerMessageValidationTests(SSotBaseTestCase):
         
         for msg in server_messages:
             event_type = msg[type]"
-            event_type = msg[type]"
+            event_type = msg[type]""
+
             self.validator.validate_event_content_structure(msg, event_type)
         
         report = self.validator.generate_report()

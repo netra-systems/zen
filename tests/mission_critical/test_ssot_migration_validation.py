@@ -1,19 +1,20 @@
-"""
-"""
+""""
+
 Issue #1097 SSOT Migration Completion Validation Test
 
 This test validates that all mission-critical files have been migrated
-"""
-"""
+""""
+
 from unittest.TestCase to SSotBaseTestCase patterns.
 
-BUSINESS IMPACT: $500K+ ARR depends on SSOT test infrastructure
+BUSINESS IMPACT: $"500K" plus ARR depends on SSOT test infrastructure
 compliance for reliable testing and deployment confidence.
 
 SHOULD PASS: When all mission-critical files use SSOT patterns
 SHOULD FAIL: When unittest.TestCase patterns are detected
 "
-"
+""
+
 
 import os
 import re
@@ -46,7 +47,8 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
         print(\n + =*70)
         print(ISSUE #1097 SSOT MIGRATION VALIDATION"")
         print(=*70)"
-        print(=*70)"
+        print(=*70)""
+
 
         for file_path in self.mission_critical_files:
             full_path = self.project_root / file_path
@@ -56,7 +58,8 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
                     'file': file_path,
                     'type': 'missing_file',
                     'details': fFile does not exist: {full_path}"
-                    'details': fFile does not exist: {full_path}"
+                    'details': fFile does not exist: {full_path}""
+
                 }
                 continue
 
@@ -76,7 +79,8 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
 
     def _validate_file_ssot_compliance(self, file_path: str, full_path: Path):
         Validate a single file for SSOT compliance."
-        Validate a single file for SSOT compliance."
+        Validate a single file for SSOT compliance.""
+
         try:
             with open(full_path, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -142,7 +146,8 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
 
     def _check_unittest_testcase_usage(self, content: str) -> bool:
         Check if file uses unittest.TestCase directly."
-        Check if file uses unittest.TestCase directly."
+        Check if file uses unittest.TestCase directly.""
+
         patterns = [
             r'class.*\(unittest\.TestCase\)',
             r'class.*\(TestCase\)',
@@ -169,7 +174,8 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
         return False
 
     def _report_validation_results(self):
-        ""Report validation results."
+        ""Report validation results.""
+
         total_files = len(self.mission_critical_files)
         compliant_files = total_files - len(self.violations)
         compliance_rate = (compliant_files / total_files) * 100
@@ -180,11 +186,12 @@ class SSotMigrationValidationTests(SSotBaseTestCase):
         print(fTotal mission-critical files: {total_files})
         print(fSSOT compliant files: {compliant_files}"")
         print(fNon-compliant files: {len(self.violations)})
-        print(fCompliance rate: {compliance_rate:.1f}%"")
+        print(fCompliance rate: {compliance_rate:."1f"}%"")
 
         if self.violations:
             print(\nVIOLATIONS DETECTED:)"
-            print(\nVIOLATIONS DETECTED:)"
+            print(\nVIOLATIONS DETECTED:)""
+
             for i, violation in enumerate(self.violations, 1):
                 print(f  {i}. {violation['file']}")"
                 print(f     Type: {violation['type']}")"

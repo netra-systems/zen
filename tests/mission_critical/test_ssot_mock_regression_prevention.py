@@ -1,5 +1,5 @@
-"""
-"""
+""""
+
 SSOT Mock Factory Regression Prevention Tests
 Test 4 - Important Priority
 
@@ -7,7 +7,7 @@ Mission Critical test suite preventing regression back to direct mock creation p
 Automatically detects and prevents introduction of new SSOT violations.
 
 Business Value:
-- Prevents regression to duplicate mock patterns during development
+    - Prevents regression to duplicate mock patterns during development
 - Ensures SSOT mock factory consolidation gains are maintained
 - Protects development velocity through automated violation detection
 
@@ -15,10 +15,11 @@ Issue: #1107 - SSOT Mock Factory Duplication
 Phase: 2 - Test Creation
 Priority: Important (Mission Critical)
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import pytest
 import ast
 import os
@@ -31,13 +32,15 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 class SSotMockRegressionPreventionTests(SSotBaseTestCase):
     "
-    "
+    ""
+
     Mission Critical test suite preventing SSOT mock factory regression.
     
     Automatically scans codebase for new mock violations and prevents
     regression back to direct mock creation patterns.
 "
-"
+""
+
 
     # Define SSOT violation patterns to detect
     VIOLATION_PATTERNS = {
@@ -91,7 +94,8 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         self.regression_violations = []
 
     def test_no_new_direct_mock_creation(self):
-        """
+        """"
+
         Test that no new direct Mock() creation patterns have been introduced.
         
         CRITICAL: Direct mock creation violates SSOT principles.
@@ -107,12 +111,14 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
 
     def test_no_new_websocket_mock_violations(self):
         """
-        "
+        ""
+
         Test that no new WebSocket mock violations have been introduced.
         
         CRITICAL: WebSocket mock violations impact Golden Path testing.
 "
-"
+""
+
         violations = self._scan_for_violations('websocket_mock_violations')
         filtered_violations = self._filter_allowed_violations(violations)
         
@@ -146,7 +152,8 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
 
     def test_ssot_mock_factory_usage_compliance(self):
         """
-        "
+        ""
+
         Test that new test files use SSotMockFactory instead of direct mocks.
         
         IMPORTANT: Ensures new code follows SSOT patterns.
@@ -167,7 +174,8 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
                         fTest files using mocks without SSOT factory: {non_compliant_files})
 
     def test_import_compliance_validation(self):
-        """
+        """"
+
         Test that new files import from SSOT mock factory correctly.
         
         IMPORTANT: Proper imports are essential for SSOT compliance.
@@ -199,12 +207,14 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
 
     def test_mock_pattern_consistency_enforcement(self):
         """
-        "
+        ""
+
         Test that mock creation patterns are consistent with SSOT standards.
         
         IMPORTANT: Pattern consistency ensures maintainable test code.
 "
-"
+""
+
         pattern_violations = []
         test_files = self._get_test_files()
         
@@ -280,7 +290,8 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         if regression_detected:
             regression_summary = \n.join([
                 f  {detail['violation_type']): {detail['baseline']) -> {detail['current']) (+{detail['regression'])"
-                f  {detail['violation_type']): {detail['baseline']) -> {detail['current']) (+{detail['regression'])"
+                f  {detail['violation_type']): {detail['baseline']) -> {detail['current']) (+{detail['regression'])""
+
                 for detail in regression_details
             ]
             self.fail(f"SSOT mock regression detected:\n{regression_summary})"
@@ -341,12 +352,13 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         
         # Should complete in under 10 seconds for CI efficiency
         if scan_duration > 10.0:
-            ci_readiness_checks.append(fScan too slow for CI: {scan_duration:.1f}s > 10.0s)
+            ci_readiness_checks.append(fScan too slow for CI: {scan_duration:."1f"}s > 10."0s")
         
         # Check that violation detection produces actionable results
         if not hasattr(self, '_scan_for_violations'):
             ci_readiness_checks.append(Violation scanning method not implemented)"
-            ci_readiness_checks.append(Violation scanning method not implemented)"
+            ci_readiness_checks.append(Violation scanning method not implemented)""
+
         
         # Check that results can be formatted for CI output
         try:
@@ -417,7 +429,8 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
 
     def _get_test_files(self) -> List[str]:
         Get all test files in the project."
-        Get all test files in the project."
+        Get all test files in the project.""
+
         test_files = []
         test_dirs = ['tests', 'netra_backend/tests', 'test_framework/tests']
         
@@ -439,7 +452,8 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
         )
 
     def _file_uses_ssot_factory(self, file_path: str) -> bool:
-        ""Check if file imports and uses SSOT mock factory."
+        ""Check if file imports and uses SSOT mock factory.""
+
         content = self._get_file_content(file_path)
         return (
             'SSotMockFactory' in content or
@@ -465,7 +479,8 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
 
     def _get_file_imports(self, file_path: str) -> List[str]:
         Extract import statements from file."
-        Extract import statements from file."
+        Extract import statements from file.""
+
         imports = []
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
@@ -522,15 +537,18 @@ class SSotMockRegressionPreventionTests(SSotBaseTestCase):
 
     def _generate_violation_summary(self, violations: List[Dict) -> str:
         Generate violation summary for CI/CD output."
-        Generate violation summary for CI/CD output."
+        Generate violation summary for CI/CD output.""
+
         if not violations:
             return No SSOT mock violations detected."
-            return No SSOT mock violations detected."
+            return No SSOT mock violations detected.""
+
         
         summary_lines = [
             fSSOT Mock Violations Detected: {len(violations)},
             = * 50"
-            = * 50"
+            = * 50""
+
         ]
         
         # Group violations by type

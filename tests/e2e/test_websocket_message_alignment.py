@@ -103,7 +103,8 @@ class WebSocketMessageAlignmentTest:
 
 @pytest.mark.asyncio
     async def test_all_backend_message_types():
-        ""Test that all backend MessageType enum values can be sent without frontend parse errors."
+        ""Test that all backend MessageType enum values can be sent without frontend parse errors.""
+
 
 
 tester = WebSocketMessageAlignmentTest()
@@ -198,7 +199,7 @@ actual_failures = [f['message_type'] for f in failed_messages]
 
                                                             # This assertion will fail, demonstrating the alignment issues
 assert set(actual_failures) == set(expected_failures), \
-formatted_string
+    formatted_string
 else:
     print()
 
@@ -220,7 +221,7 @@ MessageType.SYSTEM_MESSAGE,
 event: connection_established,
 connection_id: "conn_abc123,"
 user_id": user_123,"
-server_time: 2025-8-29T18:36:00Z,
+server_time: 2025-8-29T18:36:"00Z",
 config": }"
 heartbeat_interval: 45,
 max_message_size: 8192""
@@ -268,7 +269,7 @@ if success and tester.received_messages:
     processed_msg = tester.received_messages[-1]
 
 assert 'payload' in processed_msg or 'data' in processed_msg, \
-Message should have either payload or data field after processing""
+    Message should have either payload or data field after processing""
 
                                                                                     # Frontend should access the data through payload
 if 'payload' in processed_msg:

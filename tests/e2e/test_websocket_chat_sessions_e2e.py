@@ -3,7 +3,7 @@ E2E Tests for WebSocket Chat Sessions - Batch 3 WebSocket Infrastructure Suite
 =============================================================================
 
 Business Value Justification:
-- Segment: Free, Early, Mid, Enterprise (All customer segments)
+    - Segment: Free, Early, Mid, Enterprise (All customer segments)
 - Business Goal: Chat Business Value & User Retention
 - Value Impact: Validates complete chat experience delivers substantive AI value
 - Strategic Impact: Ensures chat is the primary value delivery mechanism
@@ -12,7 +12,7 @@ CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION per CLAUDE.md requirements.
 This ensures proper user isolation and real-world multi-user chat scenarios.
 
 CHAT BUSINESS VALUE VALIDATION:
-1. Real Solutions - AI agents solve actual problems with actionable results
+    1. Real Solutions - AI agents solve actual problems with actionable results
 2. Helpful Responses - Chat UI/UX provides timely, contextual updates
 3. Complete Value Chain - Full agent execution delivers business outcomes
 4. Data-Driven Insights - Users receive meaningful analysis and recommendations
@@ -89,7 +89,8 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
     @pytest.mark.e2e
     @pytest.mark.requires_auth
     async def test_complete_authenticated_chat_session(self, authenticated_chat_session):
-    """
+    """"
+
         Test complete authenticated chat session delivers business value.
         
         BUSINESS VALUE: Validates that authenticated users can have complete
@@ -193,7 +194,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
             assert result" in completion_data or summary in completion_data"
             
             # 7. Performance meets user expectations
-            assert chat_duration < 60.0, "fChat session took {chat_duration}s (should be < 60s)"
+            assert chat_duration < 60.0, "fChat session took {chat_duration}s (should be < "60s")"
             
             # 8. User receives complete business value
             total_events = sum(len(events) for events in received_events.values())
@@ -201,7 +202,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                 "Insufficient event detail for business transparency"
                 
         except asyncio.TimeoutError:
-            pytest.fail(fChat session timeout - business value not delivered within 45s)
+            pytest.fail(fChat session timeout - business value not delivered within "45s")
         
         finally:
             await session[ws_util].cleanup()""
@@ -209,7 +210,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
     @pytest.mark.e2e
     @pytest.mark.requires_auth 
     async def test_multi_user_chat_isolation(self, auth_helper):
-""""""
+    """"""
         Test multi-user chat sessions maintain proper isolation.
         
         BUSINESS VALUE: Enterprise customers need guaranteed conversation privacy.
@@ -319,7 +320,7 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
     @pytest.mark.e2e
     @pytest.mark.requires_auth
     async def test_chat_error_recovery_with_auth(self, authenticated_chat_session):
-""""""
+    """"""
         Test chat error scenarios provide good user experience with recovery.
         
         BUSINESS VALUE: When AI processing fails, authenticated users get clear
@@ -501,10 +502,11 @@ class WebSocketChatSessionsE2ETests(SSotBaseTestCase):
                 fPoor success rate under load: {success_rate:.1%) (should be  >= {min_success_rate:.1%)""
             
             assert avg_duration <= max_chat_duration, \
-                f"Chat sessions too slow: {avg_duration:.1f}s (should be  <= {max_chat_duration}s)"
+                f"Chat sessions too slow: {avg_duration:."1f"}s (should be  <= {max_chat_duration}s)"
             
             assert avg_latency <= max_avg_latency, \
-                fResponse latency too high: {avg_latency:.1f}s (should be  <= {max_avg_latency}s)
+                fResponse latency too high: {avg_latency:."1f"}s (should be  <= {max_avg_latency}s)""
+
                 
         finally:
             # Clean up all sessions

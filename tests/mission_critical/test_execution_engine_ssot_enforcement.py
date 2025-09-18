@@ -1,13 +1,13 @@
 "ExecutionEngine SSOT Enforcement - Mission Critical Validation"
 
 Business Value Justification:
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Stability & System Integrity 
-- Value Impact: Prevents ExecutionEngine duplication cascade failures affecting $500K+ ARR
+- Value Impact: Prevents ExecutionEngine duplication cascade failures affecting $"500K" plus ARR
 - Strategic Impact: Enables safe SSOT consolidation without breaking changes
 
 CRITICAL SSOT VALIDATION:
-This test enforces the single source of truth pattern for ExecutionEngine implementations,
+    This test enforces the single source of truth pattern for ExecutionEngine implementations,
 ensuring UserExecutionEngine remains the canonical implementation and preventing
 legacy adapter usage that could destabilize the Golden Path user flow.
 
@@ -31,7 +31,8 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 
 class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
     Validates ExecutionEngine SSOT compliance and prevents legacy adapter usage."
-    Validates ExecutionEngine SSOT compliance and prevents legacy adapter usage."
+    Validates ExecutionEngine SSOT compliance and prevents legacy adapter usage.""
+
 
     def setUp(self):
         "Set up SSOT validation test environment."
@@ -72,7 +73,8 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
             
         except ImportError as e:
             self.fail(fCRITICAL: Canonical UserExecutionEngine cannot be imported: {e})"
-            self.fail(fCRITICAL: Canonical UserExecutionEngine cannot be imported: {e})"
+            self.fail(fCRITICAL: Canonical UserExecutionEngine cannot be imported: {e})""
+
             
     def test_no_legacy_adapter_imports_in_production_code(self):
         "Validate no production code imports legacy ExecutionEngine adapters."
@@ -107,7 +109,8 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
             len(violations), 0,
             fSSOT VIOLATION: Legacy ExecutionEngine imports found in production code:\n + 
             \n.join(violations)"
-            \n.join(violations)"
+            \n.join(violations)""
+
         )
 
     def test_single_execution_engine_class_definition(self):
@@ -145,7 +148,8 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
             len(violations), 2,  # Allow some flexibility during transition
             fSSOT VIOLATION: Multiple ExecutionEngine implementations found (should only be UserExecutionEngine):\n +
             \n.join(violations)"
-            \n.join(violations)"
+            \n.join(violations)""
+
         )
 
     def test_legacy_files_marked_for_deprecation(self):
@@ -282,16 +286,19 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
         self.assertLessEqual(
             len(non_ssot_imports), 3,  # Allow some during transition period
             fSSOT VIOLATION: Non-canonical ExecutionEngine imports found:\n + "
-            fSSOT VIOLATION: Non-canonical ExecutionEngine imports found:\n + "
+            fSSOT VIOLATION: Non-canonical ExecutionEngine imports found:\n + ""
+
             \n.join(non_ssot_imports) +
             f\nAll ExecutionEngine imports should use canonical path: {canonical_import}"
-            f\nAll ExecutionEngine imports should use canonical path: {canonical_import}"
+            f\nAll ExecutionEngine imports should use canonical path: {canonical_import}""
+
         )
 
     def addWarning(self, message):
         "Add a warning message that doesn't fail the test."
         print(fWARNING: {message}"")"
-        print(fWARNING: {message}"")"
+        print(fWARNING: {message}"")""
+
 
 
 if __name__ == '__main__':

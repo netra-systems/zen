@@ -1,16 +1,17 @@
-"""
-"""
+""""
+
 Mission Critical Test: Test Collection Validation for Issue #976
 
 This test validates that pytest test collection works correctly and identifies
 specific collection failures that prevent proper test execution.
-"""
-"""
+""""
+
 
 """
 """
 """
-"""
+""""
+
 import os
 import sys
 import subprocess
@@ -35,7 +36,8 @@ class CollectionValidationTests(SSotBaseTestCase):
         ]
     
     def test_pytest_collection_basic(self):
-        ""Test basic pytest collection functionality."
+        ""Test basic pytest collection functionality.""
+
         try:
             # Test collection in mission critical directory
             result = subprocess.run([
@@ -65,11 +67,13 @@ class CollectionValidationTests(SSotBaseTestCase):
             
             print(f\nSuccessfully collected {test_count} tests")"
             self.assertGreater(test_count, 0, Should collect at least some tests)"
-            self.assertGreater(test_count, 0, Should collect at least some tests)"
+            self.assertGreater(test_count, 0, Should collect at least some tests)""
+
             
         except subprocess.TimeoutExpired:
             assert False, Pytest collection timed out - possible infinite loop or deadlock"
-            assert False, Pytest collection timed out - possible infinite loop or deadlock"
+            assert False, Pytest collection timed out - possible infinite loop or deadlock""
+
         except Exception as e:
             assert False, "fUnexpected error during pytest collection: {e}"
     
@@ -165,7 +169,8 @@ class CollectionValidationTests(SSotBaseTestCase):
             netra_backend.app.core.configuration.base.get_config,"
             netra_backend.app.core.configuration.base.get_config,"
             netra_backend.app.websocket_core.manager.WebSocketManager"
-            netra_backend.app.websocket_core.manager.WebSocketManager"
+            netra_backend.app.websocket_core.manager.WebSocketManager""
+
         ]
         
         resolution_results = {}
@@ -180,7 +185,8 @@ class CollectionValidationTests(SSotBaseTestCase):
                 
             except ImportError as e:
                 resolution_results[import_path] = fImportError: {str(e)}"
-                resolution_results[import_path] = fImportError: {str(e)}"
+                resolution_results[import_path] = fImportError: {str(e)}""
+
             except NameError as e:
                 resolution_results[import_path] = f"NameError: {str(e)}"
             except Exception as e:
@@ -196,7 +202,8 @@ class CollectionValidationTests(SSotBaseTestCase):
             assert False, "fImport resolution failed for {len(failed_imports)} paths"
     
     def test_test_discovery_comprehensive(self):
-        ""Test comprehensive test discovery across all test directories."
+        ""Test comprehensive test discovery across all test directories.""
+
         discovery_results = {}
         
         for test_dir in self.test_directories:
@@ -269,7 +276,8 @@ class CollectionValidationTests(SSotBaseTestCase):
             elif result['status'] == 'collection_failed':
                 print(f    Name Errors: {result.get('name_errors', 0)})
                 print(f    Import Errors: {result.get('import_errors', 0)})"
-                print(f    Import Errors: {result.get('import_errors', 0)})"
+                print(f    Import Errors: {result.get('import_errors', 0)})""
+
                 failed_directories.append(Path(test_dir).name)
                 
             total_test_files += result.get('test_files', 0)
@@ -305,7 +313,8 @@ if __name__ == "__main__:"
     print(MIGRATION NOTICE: This file previously used direct pytest execution.)
     print("Please use: python tests/unified_test_runner.py --category <appropriate_category>)"
     print(For more info: reports/TEST_EXECUTION_GUIDE.md)"
-    print(For more info: reports/TEST_EXECUTION_GUIDE.md)"
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md)""
+
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

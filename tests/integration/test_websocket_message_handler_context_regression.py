@@ -1,20 +1,20 @@
 "Integration Test for WebSocket Message Handler Context Regression - CRITICAL Business Impact"""
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free  ->  Enterprise) - Chat is the primary value delivery mechanism
+    - Segment: ALL (Free  ->  Enterprise) - Chat is the primary value delivery mechanism
 - Business Goal: Preserve conversation continuity in multi-turn chat interactions
 - Value Impact: CRITICAL - Prevents conversation history loss and broken user experience
-- Strategic/Revenue Impact: $500K+ ARR at risk - Chat experience is core product differentiation
+- Strategic/Revenue Impact: $"500K" plus ARR at risk - Chat experience is core product differentiation
 
 CRITICAL REGRESSION PREVENTION:
-This test validates that WebSocket message handlers maintain conversation continuity by:
-1. Using existing thread_id and run_id from messages instead of creating new ones
+    This test validates that WebSocket message handlers maintain conversation continuity by:
+    1. Using existing thread_id and run_id from messages instead of creating new ones
 2. Preserving session context across multiple WebSocket messages
 3. Ensuring user execution contexts are properly reused for conversation threads
 4. Preventing memory leaks from excessive context creation
 
 Test Scenarios Based on CONTEXT_CREATION_AUDIT_REPORT.md:
-- Lines 78-82, 137-141, 201-205 in message_handler.py: Context creation patterns
+    - Lines 78-82, 137-141, 201-205 in message_handler.py: Context creation patterns
 - Conversation continuity breaking when every message creates new contexts  
 - Thread ID and run ID preservation across messages
 - Session management violations that break user experience
@@ -359,7 +359,8 @@ class WebSocketMessageHandlerContextRegressionTests:
     @pytest.mark.integration
     @pytest.mark.performance
     async def test_context_creation_performance_regression(self):
-        ""Performance test to ensure efficient context reuse prevents memory leaks."
+        ""Performance test to ensure efficient context reuse prevents memory leaks.""
+
         
         Validates that proper context reuse prevents the performance regression
         described in the audit report (constant context recreation).
@@ -401,7 +402,8 @@ class WebSocketMessageHandlerContextRegressionTests:
         
         # Context reuse should not cause significant performance degradation
         assert avg_processing_time < 0.5, \
-            fMessage processing too slow: {avg_processing_time:.3f}s average
+            fMessage processing too slow: {avg_processing_time:."3f"}s average""
+
         
         # Validate context consistency across performance test
         final_context = get_user_execution_context(
@@ -413,8 +415,8 @@ class WebSocketMessageHandlerContextRegressionTests:
             Performance test broke thread context consistency
         
         print(f"\nPerformance Metrics:)"
-        print(fBaseline context creation: {baseline_time:.4f}s)
-        print(f"Average message processing: {avg_processing_time:.4f}s)"
+        print(fBaseline context creation: {baseline_time:."4f"}s)
+        print(f"Average message processing: {avg_processing_time:."4f"}s)"
         print(fMessages processed: {len(message_processing_times")})"
 
     @pytest.mark.integration
@@ -528,5 +530,6 @@ class WebSocketMessageHandlerContextRegressionTests:
         print(fUser 2: {user2_context.user_id}, Thread: {user2_context.thread_id})
         print(fRun ID isolation: {user1_context.run_id != user2_context.run_id}"")""
 
-"""
+""""
+
 )))))))

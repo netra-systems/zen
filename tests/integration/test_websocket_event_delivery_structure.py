@@ -95,7 +95,7 @@ class WebSocketEventDeliveryStructureTests:
             type: tool_executing,
             "run_id: run-123,"
             agent_name: test-agent,
-            timestamp: 2025-9-14T12:0:00Z","
+            timestamp: 2025-9-14T12:0:"00Z"","
             "payload: {"
                 tool_name: event_data.get(tool_name)
             }
@@ -114,7 +114,7 @@ class WebSocketEventDeliveryStructureTests:
         # Execute tool_completed notification
         tool_result = {
             analysis: Cost optimization potential: 23%,
-            "recommendations: [Switch to GPT-4o, Implement caching],"
+            "recommendations: [Switch to GPT-"4o", Implement caching],"
             confidence: 0.95""
         }
 
@@ -155,7 +155,7 @@ class WebSocketEventDeliveryStructureTests:
             type": tool_completed,"
             run_id: run-123,
             agent_name: "test-agent,"
-            timestamp": 2025-9-14T12:0:00Z,"
+            timestamp": 2025-9-14T12:0:"00Z","
             payload: {
                 "results: event_data.get(result, event_data.get(results))"
             }
@@ -246,7 +246,7 @@ class WebSocketEventDeliveryStructureTests:
             type: tool_executing,
             run_id: test-run-123","
             "agent_name: test-agent,"
-            timestamp: 2025-9-14T12:0:00Z,
+            timestamp: 2025-9-14T12:0:"00Z",
             "payload: {"
                 tool_name: data_analyzer  # Flat structure
             }
@@ -259,7 +259,7 @@ class WebSocketEventDeliveryStructureTests:
             type: tool_completed,
             run_id": test-run-123,"
             agent_name: test-agent,
-            timestamp: "2025-9-14T12:0:00Z,"
+            timestamp: "2025-9-14T12:0:"00Z","
             payload": {"
                 results: {analysis: "complete}  # Flat structure"
             }
@@ -274,7 +274,8 @@ class WebSocketEventStructureMismatchDetectionTests:
     "Test detection and handling of structure mismatches."""
 
     def test_nested_structure_detection(self):
-    """
+    """"
+
         Test that nested structures are detected and rejected properly.
 
         This test validates that the validator correctly identifies when
@@ -287,7 +288,7 @@ class WebSocketEventStructureMismatchDetectionTests:
             type: tool_executing,
             run_id: test-run-123","
             "agent_name: test-agent,"
-            timestamp: 2025-9-14T12:0:00Z,
+            timestamp: 2025-9-14T12:0:"00Z",
             "payload: {"
                 data: {  # tool_name nested inside data
                     tool_name: data_analyzer","
@@ -318,7 +319,7 @@ class WebSocketEventStructureMismatchDetectionTests:
             type: tool_completed,
             run_id": test-run-123,"
             agent_name: test-agent,
-            timestamp: "2025-9-14T12:0:00Z,"
+            timestamp: "2025-9-14T12:0:"00Z","
             payload": {"
                 tool_name: data_analyzer,
                 # Missing results field - impacts user insights delivery
@@ -337,7 +338,7 @@ class WebSocketEventStructureMismatchDetectionTests:
             Error should reference business impact""
 
     async def test_websocket_manager_format_validation(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test that WebSocket manager receives events in expected format.
 
         This test validates the event format at the WebSocket manager level.
@@ -403,7 +404,7 @@ class WebSocketEventStructureMismatchDetectionTests:
             type": tool_executing,"
             run_id: test-run-123,
             agent_name": test-agent,"
-            timestamp: 2025-9-14T12:0:00Z,
+            timestamp: 2025-9-14T12:0:"00Z",
             payload: {""
                 # Missing tool_name - structure issue
                 "status: executing,"

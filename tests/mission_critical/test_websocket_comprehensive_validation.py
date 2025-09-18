@@ -7,10 +7,12 @@ class WebSocketTestHelper:
         self._closed = False
         
     async def send_json(self, message: dict):
-        ""Send JSON message."
+        ""Send JSON message.""
+
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)""
+
         self.messages_sent.append(message)
         
     async def close(self, code: int = 1000, reason: str = Normal closure"):"
@@ -20,12 +22,14 @@ class WebSocketTestHelper:
         
     def get_messages(self) -> list:
         Get all sent messages."
-        Get all sent messages."
+        Get all sent messages.""
+
         return self.messages_sent.copy()
 
 #!/usr/bin/env python
 "
-"
+""
+
 MISSION CRITICAL: Comprehensive WebSocket Validation Test Suite
 
 This is the most rigorous test suite for WebSocket notifications in the Netra system.
@@ -33,11 +37,11 @@ It validates ALL critical WebSocket events are sent during agent execution under
 every conceivable scenario, including error conditions, concurrent execution,
 and high load scenarios.
 
-Business Value: $500K+ ARR - Core chat functionality depends on these events
+Business Value: $"500K" plus ARR - Core chat functionality depends on these events
 CRITICAL: These events enable substantive chat interactions - they serve the business goal
 
 Required WebSocket Events (MANDATORY):
-1. agent_started - User must see agent began processing 
+    1. agent_started - User must see agent began processing 
 2. agent_thinking - Real-time reasoning visibility
 3. tool_executing - Tool usage transparency  
 4. tool_completed - Tool results display
@@ -45,7 +49,8 @@ Required WebSocket Events (MANDATORY):
 
 ANY FAILURE HERE BLOCKS DEPLOYMENT.
 "
-"
+""
+
 
 import asyncio
 import json
@@ -189,7 +194,8 @@ class ComprehensiveEventValidator:
                 continue
                 
             event_types = [e.get(event_type) for e in events]"
-            event_types = [e.get(event_type) for e in events]"
+            event_types = [e.get(event_type) for e in events]""
+
             
             # First event should be agent_started
             if event_types and event_types[0] != "agent_started:"
@@ -200,7 +206,8 @@ class ComprehensiveEventValidator:
                 if event_type == "tool_executing:"
                     # Find matching tool_completed
                     tool_name = events[i].get(data, {}.get(tool_name, unknown)"
-                    tool_name = events[i].get(data, {}.get(tool_name, unknown)"
+                    tool_name = events[i].get(data, {}.get(tool_name, unknown)""
+
                     found_completion = False
                     for j in range(i + 1, len(event_types)):
                         if event_types[j] == "tool_completed:"
@@ -285,7 +292,8 @@ class WebSocketFactoryTestHarness:
             # Send agent events
             await emitter.notify_agent_started(agent_name, run_id)
             self._record_emitter_event(user_id, emitter, agent_started)"
-            self._record_emitter_event(user_id, emitter, agent_started)"
+            self._record_emitter_event(user_id, emitter, agent_started)""
+
             
             await emitter.notify_agent_thinking(agent_name, run_id, "Processing request...)"
             self._record_emitter_event(user_id, emitter, agent_thinking)
@@ -369,7 +377,8 @@ class WebSocketFactoryTestHarness:
 
 class UltraComprehensiveWebSocketValidationTests:
     The most comprehensive WebSocket validation test suite for factory architecture."
-    The most comprehensive WebSocket validation test suite for factory architecture."
+    The most comprehensive WebSocket validation test suite for factory architecture.""
+
     
     @pytest.fixture(autouse=True)
     async def setup_test_environment(self):
@@ -401,7 +410,8 @@ class UltraComprehensiveWebSocketValidationTests:
         success = await self.test_harness.simulate_complete_agent_flow(user_id)
         
         assert success, Single user agent flow simulation failed"
-        assert success, Single user agent flow simulation failed"
+        assert success, Single user agent flow simulation failed""
+
         
         # Validate results
         results = self.test_harness.get_comprehensive_results()
@@ -414,7 +424,8 @@ class UltraComprehensiveWebSocketValidationTests:
         assert factory_metrics["emitters_active] >= 1, Factory should have active emitters"
         
         print( PASS:  Comprehensive single user flow test passed)"
-        print( PASS:  Comprehensive single user flow test passed)"
+        print( PASS:  Comprehensive single user flow test passed)""
+
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -445,7 +456,8 @@ class UltraComprehensiveWebSocketValidationTests:
             fFactory should have created {user_count} emitters, got {factory_metrics['emitters_created']}
         
         print( PASS:  Comprehensive user isolation test passed)"
-        print( PASS:  Comprehensive user isolation test passed)"
+        print( PASS:  Comprehensive user isolation test passed)""
+
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -477,7 +489,8 @@ class UltraComprehensiveWebSocketValidationTests:
         
         # Should maintain high reliability even with network issues
         assert success_rate >= 0.8, fReliability too low with network issues: {success_rate}"
-        assert success_rate >= 0.8, fReliability too low with network issues: {success_rate}"
+        assert success_rate >= 0.8, fReliability too low with network issues: {success_rate}""
+
         
         # Validate events were delivered
         test_results = self.test_harness.get_comprehensive_results()
@@ -502,7 +515,8 @@ class UltraComprehensiveWebSocketValidationTests:
         assert high_load_results[duration_seconds] < 30, \"
         assert high_load_results[duration_seconds] < 30, \"
             fHigh load took too long: {high_load_results['duration_seconds']}s"
-            fHigh load took too long: {high_load_results['duration_seconds']}s"
+            fHigh load took too long: {high_load_results['duration_seconds']}s""
+
         
         # Validate comprehensive results
         results = self.test_harness.get_comprehensive_results()
@@ -517,7 +531,8 @@ class UltraComprehensiveWebSocketValidationTests:
         assert analysis["total_events] >= 75, Should process many events under load  # 25 users * 3 events minimum"
         
         print( PASS:  Comprehensive high load performance test passed)"
-        print( PASS:  Comprehensive high load performance test passed)"
+        print( PASS:  Comprehensive high load performance test passed)""
+
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -598,7 +613,8 @@ class UltraComprehensiveWebSocketValidationTests:
         # Should maintain excellent performance
         assert final_results[success_rate] >= 0.95, \
             fFinal validation success rate insufficient: {final_results['success_rate']}"
-            fFinal validation success rate insufficient: {final_results['success_rate']}"
+            fFinal validation success rate insufficient: {final_results['success_rate']}""
+
         
         # Get comprehensive results
         results = self.test_harness.get_comprehensive_results()
@@ -658,7 +674,8 @@ class FactoryPatternRegressionPreventionTests:
     @pytest.mark.critical
     async def test_factory_singleton_works_correctly(self):
         REGRESSION TEST: Factory singleton must work correctly."
-        REGRESSION TEST: Factory singleton must work correctly."
+        REGRESSION TEST: Factory singleton must work correctly.""
+
         
         # Test singleton behavior
         factory1 = get_websocket_bridge_factory()
@@ -684,7 +701,8 @@ class FactoryPatternRegressionPreventionTests:
             user_id="user2,"
             thread_id=thread2,
             connection_id=conn2"
-            connection_id=conn2"
+            connection_id=conn2""
+
         )
         
         # Contexts should be completely isolated
@@ -708,7 +726,8 @@ class FactoryPatternRegressionPreventionTests:
         
         user_id = isolation_test_user
         thread_id = isolation_test_thread"
-        thread_id = isolation_test_thread"
+        thread_id = isolation_test_thread""
+
         
         event = WebSocketEvent(
             event_type="agent_started,"

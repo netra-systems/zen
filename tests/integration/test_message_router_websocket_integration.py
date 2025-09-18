@@ -2,10 +2,10 @@
 Integration Tests for MessageRouter WebSocket Integration - GitHub Issue #217
 
 Business Value Justification:
-- Segment: Platform/Chat (90% of business value)
+    - Segment: Platform/Chat (90% of business value)
 - Business Goal: Chat reliability and user experience
 - Value Impact: Ensure stable message routing for real-time chat
-- Strategic Impact: Protect $500K+ ARR chat functionality
+- Strategic Impact: Protect $"500K" plus ARR chat functionality
 
 These tests are designed to FAIL initially to reproduce WebSocket routing issues.
 They test with REAL WebSocket connections (no mocks) as per SSOT testing standards.
@@ -50,7 +50,7 @@ class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
         await super().asyncTearDown()
         
     async def test_websocket_message_routing_with_real_connections(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test MessageRouter with real WebSocket connections.
         This should FAIL initially, revealing routing inconsistencies.
 """Empty docstring."""
@@ -109,7 +109,7 @@ class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
             )
             
     async def test_agent_router_communication_consistency(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test that agent communication through MessageRouter is consistent.
         This should FAIL initially, revealing agent-router communication issues.
 """Empty docstring."""
@@ -178,7 +178,7 @@ class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
             )
             
     async def test_golden_path_message_flow_validation(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test the complete golden path message flow through MessageRouter.
         This should FAIL initially, revealing breaks in the golden path.
 """Empty docstring."""
@@ -290,7 +290,8 @@ class MessageRouterWebSocketIntegrationTests(SSotAsyncTestCase):
             )
             
     async def test_concurrent_user_message_routing_isolation(self):
-    """
+    """"
+
         Test that concurrent users have isolated message routing.
         This should FAIL initially, revealing user isolation issues.
         
@@ -377,5 +378,6 @@ if __name__ == __main__":"
     import unittest
     unittest.main(verbosity=2)
 
-"""
+""""
+
 ))))))))))

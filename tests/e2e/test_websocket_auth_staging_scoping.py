@@ -6,13 +6,13 @@ in the staging environment under conditions that trigger the critical
 variable scoping bug affecting the GOLDEN PATH.
 
 Business Value Justification:
-- Segment: Platform/Internal - GOLDEN PATH Validation
+    - Segment: Platform/Internal - GOLDEN PATH Validation
 - Business Goal: Ensure users can login and complete getting a message back
 - Value Impact: Validates core chat functionality works in staging environment
 - Revenue Impact: Prevents production deployment of scoping bug that breaks user chat
 
 CRITICAL REQUIREMENTS PER CLAUDE.md:
-- ALL E2E tests MUST use real authentication (JWT/OAuth)
+    - ALL E2E tests MUST use real authentication (JWT/OAuth)
 - NO mocking allowed in E2E tests
 - Must validate GOLDEN PATH: login  ->  message  ->  response
 - Tests designed to FAIL HARD in every way
@@ -52,7 +52,7 @@ class StagingWebSocketAuthScopingE2ETests:
     @pytest.mark.golden_path
     @pytest.mark.asyncio
     async def test_golden_path_staging_websocket_auth(self, authenticated_e2e_session):
-""""""
+    """"""
         MISSION CRITICAL E2E TEST: Validate GOLDEN PATH in staging environment.
         
         This test validates the complete user flow:
@@ -155,7 +155,8 @@ class StagingWebSocketAuthScopingE2ETests:
     @pytest.mark.performance
     @pytest.mark.asyncio
     async def test_staging_performance_regression_validation(self, authenticated_e2e_session):
-    """
+    """"
+
         E2E performance test to ensure scoping bug fix doesn't introduce regressions.'
         
         This test validates that authentication performance remains acceptable
@@ -206,19 +207,19 @@ class StagingWebSocketAuthScopingE2ETests:
         max_context_time = max(context_extraction_times)
         max_auth_time = max(auth_times)
         max_total_time = max(total_flow_times)
-        assert avg_context_time < 100.0, "f'E2E context extraction too slow: {avg_context_time:.2f}ms average'"
-        assert avg_auth_time < 500.0, "f'Authentication too slow: {avg_auth_time:.2f}ms average'"
-        assert avg_total_time < 1000.0, "f'Total auth flow too slow: {avg_total_time:.2f}ms average'"
-        assert max_context_time < 200.0, "f'E2E context extraction max time too slow: {max_context_time:.2f}ms'"
-        assert max_auth_time < 1000.0, "f'Authentication max time too slow: {max_auth_time:.2f}ms'"
-        assert max_total_time < 2000.0, "f'Total auth flow max time too slow: {max_total_time:.2f}ms'"
+        assert avg_context_time < 100.0, "f'E2E context extraction too slow: {avg_context_time:."2f"}ms average'"
+        assert avg_auth_time < 500.0, "f'Authentication too slow: {avg_auth_time:."2f"}ms average'"
+        assert avg_total_time < 1000.0, "f'Total auth flow too slow: {avg_total_time:."2f"}ms average'"
+        assert max_context_time < 200.0, "f'E2E context extraction max time too slow: {max_context_time:."2f"}ms'"
+        assert max_auth_time < 1000.0, "f'Authentication max time too slow: {max_auth_time:."2f"}ms'"
+        assert max_total_time < 2000.0, "f'Total auth flow max time too slow: {max_total_time:."2f"}ms'"
         performance_report = {'context_extraction': {'average_ms': round(avg_context_time, 2), 'max_ms': round(max_context_time, 2), 'all_times': [round(t, 2) for t in context_extraction_times]}, 'authentication': {'average_ms': round(avg_auth_time, 2), 'max_ms': round(max_auth_time, 2), 'all_times': [round(t, 2) for t in auth_times]}, 'total_flow': {'average_ms': round(avg_total_time, 2), 'max_ms': round(max_total_time, 2), 'all_times': [round(t, 2) for t in total_flow_times]}}
         print(f' PASS:  PERFORMANCE VALIDATION PASSED: {json.dumps(performance_report, indent=2)}')
 
     @pytest.mark.e2e
     @pytest.mark.asyncio
     async def test_real_gcp_staging_environment_detection(self, authenticated_e2e_session):
-""""""
+    """"""
         E2E test simulating real GCP staging environment conditions.
         
         This test uses actual GCP environment variables and headers that would
@@ -295,7 +296,8 @@ class StagingScopingEdgeCasesTests:
         concurrent_staging_env = {'ENVIRONMENT': 'staging', 'GOOGLE_CLOUD_PROJECT': 'netra-staging-race-test', 'K_SERVICE': 'netra-backend-staging', 'PYTEST_XDIST_WORKER': 'gw0', 'CONCURRENT_E2E_SESSION_ID': 'race-test-session', 'E2E_TESTING': '1'}
 
         async def concurrent_auth_test(worker_id: int):
-            """Single concurrent authentication test.""
+            """Single concurrent authentication test."""
+
 
             class ConcurrentWebSocket:
                 pass
@@ -340,5 +342,6 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
-"""
+""""
+
 ))))))))

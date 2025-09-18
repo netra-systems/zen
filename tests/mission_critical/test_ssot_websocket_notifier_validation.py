@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""
-"""
+""""
+
 MISSION CRITICAL TEST SUITE: SSOT WebSocketNotifier Validation
 
-Business Value: Platform/Internal - $500K+ ARR Golden Path Protection
+Business Value: Platform/Internal - $"500K" plus ARR Golden Path Protection
 Prevents duplicate WebSocketNotifier implementations that cause agent event delivery failures.
 
 This test suite validates:
-"""
-"""
+    """
+""""
+
 1. Exactly 1 WebSocketNotifier class exists in production code
 2. No duplicate implementations in rollback utilities or deprecated files
 3. All critical WebSocket events work correctly
@@ -16,14 +17,15 @@ This test suite validates:
 5. No circular dependencies or import violations
 
 P0 SSOT Violations Detected:
-- agent_websocket_bridge.py:3209 (canonical SSOT source)
+    - agent_websocket_bridge.py:3209 (canonical SSOT source)
 
 CRITICAL: Tests must run without Docker dependency for CI/CD integration.
 
 Author: Agent Events Remediation Team
 Date: 2025-9-12
 "
-"
+""
+
 
 import ast
 import glob
@@ -96,7 +98,8 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
 
     def _is_excluded_file(self, file_path: str) -> bool:
         Check if file should be excluded from SSOT validation."
-        Check if file should be excluded from SSOT validation."
+        Check if file should be excluded from SSOT validation.""
+
         file_path_str = str(file_path).replace('\\', '/')
 
         # Exclude based on known patterns
@@ -125,7 +128,8 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
         return any(pattern in file_path_str for pattern in production_patterns)
 
     def _scan_for_websocket_notifier_classes(self) -> List[WebSocketNotifierValidation]:
-        ""Scan entire codebase for WebSocketNotifier class definitions."
+        ""Scan entire codebase for WebSocketNotifier class definitions.""
+
         results = []
 
         # Search for Python files containing WebSocketNotifier
@@ -168,7 +172,8 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
 
     def _generate_compliance_report(self, validations: List[WebSocketNotifierValidation) -> SSotComplianceReport:
         Generate SSOT compliance report from validation results."
-        Generate SSOT compliance report from validation results."
+        Generate SSOT compliance report from validation results.""
+
         production_impls = [v for v in validations if v.is_production_code and not v.is_test_file]
         rollback_impls = [v for v in validations if v.is_rollback_utility]
         deprecated_impls = [v for v in validations if v.is_deprecated]
@@ -235,7 +240,8 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
         logger.info(f  Deprecated implementations: {len(report.deprecated_implementations)}")"
         logger.info(f  Test implementations: {len(report.test_implementations)})
         logger.info(f  Compliance score: {report.compliance_score}%)"
-        logger.info(f  Compliance score: {report.compliance_score}%)"
+        logger.info(f  Compliance score: {report.compliance_score}%)""
+
 
         if report.violations:
             logger.error("SSOT Violations detected:)"
@@ -257,7 +263,8 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
         assert report.canonical_ssot_path, "No canonical WebSocketNotifier SSOT implementation found"
         assert 'agent_websocket_bridge.py' in report.canonical_ssot_path, (
             fWebSocketNotifier SSOT must be in agent_websocket_bridge.py, found in: {report.canonical_ssot_path}"
-            fWebSocketNotifier SSOT must be in agent_websocket_bridge.py, found in: {report.canonical_ssot_path}"
+            fWebSocketNotifier SSOT must be in agent_websocket_bridge.py, found in: {report.canonical_ssot_path}""
+
         )
 
         # Store results for further analysis
@@ -294,7 +301,8 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
             for method in required_methods:
                 assert hasattr(WebSocketNotifier, "method), ("
                     fWebSocketNotifier missing required method: {method}"
-                    fWebSocketNotifier missing required method: {method}"
+                    fWebSocketNotifier missing required method: {method}""
+
                 )
 
             logger.info("✅ WebSocketNotifier critical methods validated)"
@@ -305,7 +313,8 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
     def test_websocket_notifier_user_isolation_integrity(self):
         "Test that WebSocketNotifier maintains user isolation."
         logger.info(Testing WebSocketNotifier user isolation integrity)"
-        logger.info(Testing WebSocketNotifier user isolation integrity)"
+        logger.info(Testing WebSocketNotifier user isolation integrity)""
+
 
         try:
             from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
@@ -351,7 +360,8 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
 
             # Verify import succeeded without issues
             assert WebSocketNotifier is not None, WebSocketNotifier import returned None"
-            assert WebSocketNotifier is not None, WebSocketNotifier import returned None"
+            assert WebSocketNotifier is not None, WebSocketNotifier import returned None""
+
 
             logger.info(✅ WebSocketNotifier circular dependency validation passed)
 
@@ -392,7 +402,8 @@ class SSotWebSocketNotifierValidationTests(SSotBaseTestCase):
         )
         assert metrics['websocket_notifier_has_canonical_ssot') == 1, (
             Must have canonical SSOT WebSocketNotifier implementation"
-            Must have canonical SSOT WebSocketNotifier implementation"
+            Must have canonical SSOT WebSocketNotifier implementation""
+
         )
         assert metrics['golden_path_protection_status') == 'PROTECTED', (
             "Golden Path must be protected by SSOT compliance"

@@ -1,22 +1,23 @@
-"""
-"""
+""""
+
 PHASE 1: SSOT Violation Reproduction Tests
 Tests that expose current ConfigurationValidator SSOT violations and PASS before consolidation.
 
 These tests demonstrate the problem by showing inconsistent behavior across
 4 duplicate ConfigurationValidator implementations:
-1. shared/configuration/central_config_validator.py (SSOT Target - 1,403 lines)
+    1. shared/configuration/central_config_validator.py (SSOT Target - 1,403 lines)
 2. netra_backend/app/core/configuration_validator.py (Backend Duplicate - 572 lines) 
 3. test_framework/ssot/configuration_validator.py (Test Framework Duplicate - 542 lines)
 4. netra_backend/app/core/configuration/validator.py (Config Duplicate - 311 lines)
 
 CRITICAL: These tests PASS initially (showing violations exist) and will FAIL after SSOT consolidation.
-Business Impact: OAuth authentication failures threaten $500K+ ARR
+Business Impact: OAuth authentication failures threaten $"500K" plus ARR
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import asyncio
 import logging
 from typing import Dict, Any, Optional
@@ -36,13 +37,15 @@ logger = logging.getLogger(__name__)
 
 class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
     "
-    "
+    ""
+
     SSOT Violation Reproduction Tests
     
     These tests expose inconsistencies between duplicate ConfigurationValidator classes.
     They should PASS initially (proving violations exist) and FAIL after consolidation.
 "
-"
+""
+
 
     def setUp(self):
         "Set up test environment with isolated configuration."
@@ -65,13 +68,15 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
         self.env_patcher.start()
 
     def tearDown(self):
-        ""Clean up test environment."
+        ""Clean up test environment.""
+
         super().tearDown()
         if hasattr(self, 'env_patcher'):
             self.env_patcher.stop()
 
     def test_oauth_validation_inconsistency_reproduction(self):
-    """
+    """"
+
         Test OAuth validation consistency across different ConfigurationValidator implementations.
         
         POST-CONSOLIDATION: This test now verifies that all validators provide CONSISTENT results
@@ -159,18 +164,21 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
             SSOT Consolidation SUCCESS: OAuth validation should be consistent across all validators "
             SSOT Consolidation SUCCESS: OAuth validation should be consistent across all validators "
             after Phase 1 consolidation (all validators delegate to central SSOT)"
-            after Phase 1 consolidation (all validators delegate to central SSOT)"
+            after Phase 1 consolidation (all validators delegate to central SSOT)""
+
         )
 
     def test_environment_detection_duplication_reproduction(self):
         """
-    "
+    ""
+
         Test environment detection duplication across ConfigurationValidator implementations.
         
         Shows that multiple validators implement their own environment detection logic,
         creating SSOT violations and potential inconsistencies.
         "
-        "
+        ""
+
         test_environments = ['development', 'staging', 'production', 'test']
         
         environment_results = {}
@@ -215,7 +223,8 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
                         config_env = env  # Direct fallback
                 except Exception:
                     config_env = unknown"
-                    config_env = unknown"
+                    config_env = unknown""
+
                 
                 environment_results[env] = {
                     'central': central_env,
@@ -325,12 +334,14 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
             SSOT Consolidation SUCCESS: JWT validation should be consistent across validators "
             SSOT Consolidation SUCCESS: JWT validation should be consistent across validators "
             after Phase 1 consolidation"
-            after Phase 1 consolidation"
+            after Phase 1 consolidation""
+
         )
 
     def test_database_config_pattern_conflicts_reproduction(self):
         """
-    "
+    ""
+
         Test database configuration pattern conflicts across ConfigurationValidator implementations.
         
         Shows that different validators have conflicting database validation patterns,
@@ -425,7 +436,8 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
         )
 
     def test_golden_path_configuration_failures_reproduction(self):
-    """
+    """"
+
         Test Golden Path configuration failures due to SSOT violations.
         
         Reproduces end-to-end configuration failures that impact the Golden Path
@@ -499,7 +511,8 @@ class ConfigurationValidatorSSOTViolationsTests(SSotAsyncTestCase):
             has_failures = True
             for name, result in golden_path_results.items():
                 logger.warning(fGolden Path validation {name}: {result})"
-                logger.warning(fGolden Path validation {name}: {result})"
+                logger.warning(fGolden Path validation {name}: {result})""
+
         
         # Also check if any validator completely fails Golden Path validation
         if not all(validation_states):

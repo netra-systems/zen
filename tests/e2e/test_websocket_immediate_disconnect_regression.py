@@ -6,7 +6,7 @@ preventing the Loading chat..." issue where connections immediately disconnect"
 with ABNORMAL_CLOSURE (1006).
 
 To verify these tests catch the regression:
-1. Break either the state checking or subprotocol negotiation
+    1. Break either the state checking or subprotocol negotiation
 2. These tests should fail with connection closing immediately
 3. Restore both fixes
 4. Tests should pass with stable connections
@@ -42,7 +42,7 @@ class WebSocketImmediateDisconnectRegressionTests:
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_websocket_must_not_immediately_disconnect(self, backend_url, test_token):
-"""Empty docstring."""
+    """Empty docstring."""
         REGRESSION TEST: WebSocket must stay connected, not immediately disconnect.
         This is the primary symptom users experienced - immediate ABNORMAL_CLOSURE.
 """Empty docstring."""
@@ -86,7 +86,7 @@ class WebSocketImmediateDisconnectRegressionTests:
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_websocket_with_frontend_like_subprotocols(self, backend_url, test_token):
-"""Empty docstring."""
+    """Empty docstring."""
         REGRESSION TEST: Test with exact subprotocols the frontend sends.
         Frontend sends: jwt-auth, jwt.<token>, sometimes compression protocols.
 """Empty docstring."""
@@ -112,7 +112,7 @@ class WebSocketImmediateDisconnectRegressionTests:
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_websocket_message_exchange(self, backend_url, test_token):
-"""Empty docstring."""
+    """Empty docstring."""
         REGRESSION TEST: Full message exchange must work.
         Tests that connection stays open long enough for bidirectional communication.
 """Empty docstring."""
@@ -159,7 +159,7 @@ class WebSocketImmediateDisconnectRegressionTests:
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_multiple_concurrent_websocket_connections(self, backend_url, test_token):
-"""Empty docstring."""
+    """Empty docstring."""
         REGRESSION TEST: Multiple connections should work simultaneously.
         Tests that the fix works under concurrent connection load.
 """Empty docstring."""
@@ -193,7 +193,8 @@ class WebSocketImmediateDisconnectRegressionTests:
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_websocket_reconnection_after_disconnect(self, backend_url, test_token):
-    """
+    """"
+
         REGRESSION TEST: Reconnection should work after disconnect.
         Tests that the bug doesn't affect reconnection scenarios.'
         
@@ -220,12 +221,13 @@ class WebSocketImmediateDisconnectRegressionTests:
         logger.info('Both initial connection and reconnection successful')
 
 class WebSocketChatUIIntegrationTests:
-    ""Test that the fix resolves the actual Loading chat... issue."
+    ""Test that the fix resolves the actual Loading chat... issue.""
+
 
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
     async def test_chat_ui_websocket_connection(self):
-"""Empty docstring."""
+    """Empty docstring."""
         REGRESSION TEST: Simulate the exact chat UI connection flow.
         This should resolve the Loading chat... issue.
 """Empty docstring."""

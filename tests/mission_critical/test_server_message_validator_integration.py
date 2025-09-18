@@ -1,21 +1,23 @@
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
-"""
-"""
+""""
+
 Mission Critical Server Message Validator Integration Tests
 
 Integration tests that validate the MissionCriticalEventValidator works 
 with actual WebSocket messages in both flat and ServerMessage formats.
 
-BUSINESS IMPACT: $500K+ ARR depends on proper WebSocket event validation
+BUSINESS IMPACT: $"500K" plus ARR depends on proper WebSocket event validation
 to ensure Golden Path chat functionality works correctly.
 
 Issue #892: Integration validation that the validator fix works with
 real WebSocket message structures.
 "
-"
+""
+
 
 """
-"""
+""""
+
 import asyncio
 import json
 from datetime import datetime, timezone
@@ -103,7 +105,8 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
                 },
                 sender: system,
                 timestamp: self.test_timestamp"
-                timestamp: self.test_timestamp"
+                timestamp: self.test_timestamp""
+
             },
             {
                 type": tool_completed,"
@@ -117,7 +120,8 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
                 },
                 sender: system,
                 timestamp: self.test_timestamp"
-                timestamp: self.test_timestamp"
+                timestamp: self.test_timestamp""
+
             },
             {
                 "type: agent_completed,"
@@ -135,7 +139,8 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
     
     def test_flat_messages_validation_batch(self):
         Test that flat format messages all validate correctly."
-        Test that flat format messages all validate correctly."
+        Test that flat format messages all validate correctly.""
+
         all_passed = True
         failed_events = []
         
@@ -169,7 +174,8 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
                     "event_type: event_type,"
                     errors: self.validator.errors.copy(),
                     message: message"
-                    message: message"
+                    message: message""
+
                 }
         
         self.assertTrue(all_passed, fSome ServerMessage format messages failed validation: {failed_events}")"
@@ -300,7 +306,8 @@ class ServerMessageValidatorIntegrationTests(SSotBaseTestCase):
             # Each message should validate successfully
             self.assertTrue(result, 
                 fMessage {event_type} failed validation: {self.validator.errors})"
-                fMessage {event_type} failed validation: {self.validator.errors})"
+                fMessage {event_type} failed validation: {self.validator.errors})""
+
         
         # Verify all critical events are present
         event_types = [msg["type] for msg in execution_messages]"

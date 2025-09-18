@@ -1,26 +1,27 @@
-"""
-"""
+""""
+
 MISSION CRITICAL: Docker Manager SSOT Regression Prevention Tests
 
 BUSINESS VALUE JUSTIFICATION (BVJ):
-1. Segment: Platform/Infrastructure - Quality Assurance and Stability
+    1. Segment: Platform/Infrastructure - Quality Assurance and Stability
 2. Business Goal: Prevent future SSOT violations and maintain architectural integrity
 3. Value Impact: Ensures long-term maintainability, prevents developer confusion and bugs
-4. Revenue Impact: Protects $500K+ ARR by preventing regression of Docker infrastructure
+4. Revenue Impact: Protects $"500K" plus ARR by preventing regression of Docker infrastructure
 
 PURPOSE:
-This test suite implements proactive regression prevention for Docker Manager SSOT
+    This test suite implements proactive regression prevention for Docker Manager SSOT
 violations. These tests will enforce SSOT compliance and prevent future duplication.
 
 REGRESSION SCENARIOS PREVENTED:
-"""
-"""
+    """"
+
 1. Accidental creation of duplicate Docker Manager classes
 2. Import path fragmentation causing inconsistent behavior
 3. Mock implementations leaking into production code paths
 4. Configuration inconsistencies between test and production environments
 "
-"
+""
+
 
 # CRITICAL: Import path configuration for direct test execution
 # Ensures tests work both directly and through unified_test_runner.py
@@ -45,13 +46,15 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase):
     "
-    "
+    ""
+
     CRITICAL: Regression prevention tests for Docker Manager SSOT compliance.
 
     These tests enforce architectural rules to prevent SSOT violations
     from being reintroduced in the future.
 "
-"
+""
+
 
     def setUp(self):
         "Set up regression prevention test environment."
@@ -91,7 +94,8 @@ class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase
                     for node in ast.walk(tree):
                         if (isinstance(node, ast.ClassDef) and
                             node.name == UnifiedDockerManager):"
-                            node.name == UnifiedDockerManager):"
+                            node.name == UnifiedDockerManager):""
+
 
                             docker_manager_implementations.append({
                                 'file': str(python_file.relative_to(self.project_root)),
@@ -109,7 +113,8 @@ class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase
         self.assertLessEqual(
             len(docker_manager_implementations), 1,
             fSSOT REGRESSION DETECTED: Found {len(docker_manager_implementations)} "
-            fSSOT REGRESSION DETECTED: Found {len(docker_manager_implementations)} "
+            fSSOT REGRESSION DETECTED: Found {len(docker_manager_implementations)} ""
+
             fUnifiedDockerManager implementations. Maximum allowed: 1. 
             fImplementations: {docker_manager_implementations}. "
             fImplementations: {docker_manager_implementations}. "
@@ -152,7 +157,8 @@ class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase
 
         # Search for import violations
         for python_file in self.project_root.rglob(*.py):"
-        for python_file in self.project_root.rglob(*.py):"
+        for python_file in self.project_root.rglob(*.py):""
+
             if self._should_skip_file(python_file):
                 continue
 
@@ -185,7 +191,8 @@ class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase
         )
 
     def test_prevent_mock_implementation_leakage(self):
-        """
+        """"
+
         REGRESSION PREVENTION: Prevents mock implementations from leaking into production.
 
         PROTECTION GOAL:
@@ -247,7 +254,8 @@ class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase
 
     def test_prevent_configuration_inconsistencies(self):
         """
-        "
+        ""
+
         REGRESSION PREVENTION: Prevents Docker configuration inconsistencies.
 
         PROTECTION GOAL:
@@ -260,7 +268,8 @@ class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase
         - Configuration parameters must be standardized
         - No environment-specific behavior in core class
 "
-"
+""
+
         try:
             # Import the canonical Docker Manager
             from test_framework.unified_docker_manager import UnifiedDockerManager
@@ -294,19 +303,22 @@ class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase
                 CONSTRUCTOR REGRESSION: UnifiedDockerManager.__init__ signature not accessible. "
                 CONSTRUCTOR REGRESSION: UnifiedDockerManager.__init__ signature not accessible. "
                 Constructor must have well-defined interface."
-                Constructor must have well-defined interface."
+                Constructor must have well-defined interface.""
+
             )
 
         except ImportError as e:
             self.fail(
                 fIMPORT REGRESSION DETECTED: Cannot import canonical UnifiedDockerManager: {e}. 
                 fCanonical implementation must be importable for SSOT compliance."
-                fCanonical implementation must be importable for SSOT compliance."
+                fCanonical implementation must be importable for SSOT compliance.""
+
             )
 
     def test_enforce_docker_manager_naming_conventions(self):
         """
-    "
+    ""
+
         REGRESSION PREVENTION: Enforces Docker Manager naming conventions.
 
         PROTECTION GOAL:
@@ -319,7 +331,8 @@ class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase
         - No variations like DockerManager, DockerHelper, etc.
         - Clear distinction from other Docker utilities
 "
-"
+""
+
         docker_related_classes = []
 
         # Search for Docker-related class names that might circumvent SSOT
@@ -331,7 +344,8 @@ class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase
             DockerService","
             DockerController,
             ContainerManager"
-            ContainerManager"
+            ContainerManager""
+
         ]
 
         for python_file in self.project_root.rglob("*.py):"
@@ -376,13 +390,15 @@ class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase
             self.fail(
                 f"NAMING CONVENTION VIOLATION: Found {len(violations)} Docker-related classes"
                 fthat may circumvent SSOT. Classes: {violations}. "
-                fthat may circumvent SSOT. Classes: {violations}. "
+                fthat may circumvent SSOT. Classes: {violations}. ""
+
                 fEnsure these classes have distinct purposes or consolidate with UnifiedDockerManager.
             )
 
     def _should_skip_file(self, file_path: Path) -> bool:
         """
-        "
+        ""
+
         Determine if a file should be skipped during analysis.
 
         Args:
@@ -391,7 +407,8 @@ class DockerManagerRegressionPreventionTests(SSotBaseTestCase, unittest.TestCase
         Returns:
             True if file should be skipped, False otherwise
 """
-"""
+""""
+
         skip_patterns = [
             '__pycache__',
             '.git',

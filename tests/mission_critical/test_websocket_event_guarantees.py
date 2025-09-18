@@ -11,7 +11,7 @@ Per CLAUDE.md Section 6.1 - Required WebSocket Events for Substantive Chat Value
 5. agent_completed - User must know when valuable response is ready
 
 CRITICAL BUSINESS CONTEXT:
-- Chat is 90% of current business value delivery
+    - Chat is 90% of current business value delivery
 - WebSocket events enable user transparency and trust
 - Missing events = broken user experience = lost business value
 
@@ -42,7 +42,8 @@ from shared.isolated_environment import get_env
 @dataclass
 class WebSocketEventCapture:
     Captures WebSocket events for testing."
-    Captures WebSocket events for testing."
+    Captures WebSocket events for testing.""
+
     event_type: str
     timestamp: float
     run_id: str
@@ -67,7 +68,8 @@ class WebSocketEventCollector:
         self.event_lock = asyncio.Lock()
     
     async def capture_event(self, event_type: str, run_id: str, agent_name: str, data: Dict[str, Any):
-        ""Capture a WebSocket event."
+        ""Capture a WebSocket event.""
+
         async with self.event_lock:
             event = WebSocketEventCapture(
                 event_type=event_type,
@@ -87,7 +89,8 @@ class WebSocketEventCollector:
     
     def get_event_types(self) -> Set[str]:
         Get all unique event types captured."
-        Get all unique event types captured."
+        Get all unique event types captured.""
+
         return {e.event_type for e in self.events}
     
     def clear(self):
@@ -117,7 +120,8 @@ class MockWebSocketBridge:
     
     async def notify_agent_thinking(self, run_id: str, agent_name: str, thought: str, step_number: Optional[int] = None):
         Capture agent_thinking event."
-        Capture agent_thinking event."
+        Capture agent_thinking event.""
+
         await self.collector.capture_event('agent_thinking', run_id, agent_name, {
             'thought': thought, 'step_number': step_number
         }
@@ -129,7 +133,8 @@ class MockWebSocketBridge:
         }
     
     async def notify_tool_completed(self, run_id: str, agent_name: str, tool_name: str, result: Optional[Dict] = None):
-        ""Capture tool_completed event."
+        ""Capture tool_completed event.""
+
         await self.collector.capture_event('tool_completed', run_id, agent_name, {
             'tool_name': tool_name, 'result': result
         }
@@ -150,7 +155,8 @@ class MockWebSocketBridge:
     async def notify_error(self, run_id: str, agent_name: str, error_message: str, 
                           error_type: Optional[str] = None, error_details: Optional[Dict] = None):
         Capture error event."
-        Capture error event."
+        Capture error event.""
+
         await self.collector.capture_event('error', run_id, agent_name, {
             'error_message': error_message, 'error_type': error_type, 'error_details': error_details
         }
@@ -171,7 +177,8 @@ class CompleteWebSocketTestAgent(BaseAgent):
         # 1. CRITICAL: agent_started event
         if 'agent_started' not in self.skip_events:
             await self.emit_agent_started(fStarting {self.name} to process user request)"
-            await self.emit_agent_started(fStarting {self.name} to process user request)"
+            await self.emit_agent_started(fStarting {self.name} to process user request)""
+
         
         # 2. CRITICAL: agent_thinking events
         if 'agent_thinking' not in self.skip_events:
@@ -213,7 +220,8 @@ class CompleteWebSocketTestAgent(BaseAgent):
 
 class PartialWebSocketTestAgent(BaseAgent):
     Test agent that intentionally skips some WebSocket events."
-    Test agent that intentionally skips some WebSocket events."
+    Test agent that intentionally skips some WebSocket events.""
+
     
     async def __init__(self, missing_events: List[str], **kwargs):
         super().__init__(**kwargs)
@@ -255,7 +263,8 @@ class WebSocketEventGuaranteesTests:
     @pytest.fixture
     def mock_bridge(self, event_collector):
         Create mock WebSocket bridge."
-        Create mock WebSocket bridge."
+        Create mock WebSocket bridge.""
+
         return MockWebSocketBridge(event_collector)
     
     async def test_all_five_critical_events_must_be_emitted(self, event_collector, mock_bridge):
@@ -267,7 +276,8 @@ class WebSocketEventGuaranteesTests:
         # Create agent that emits all events
         agent = CompleteWebSocketTestAgent(name=CompleteEventAgent)
         agent.set_websocket_bridge(mock_bridge, test_run_complete)"
-        agent.set_websocket_bridge(mock_bridge, test_run_complete)"
+        agent.set_websocket_bridge(mock_bridge, test_run_complete)""
+
         
         # Execute agent
         context = ExecutionContext(
@@ -321,7 +331,8 @@ class WebSocketEventGuaranteesTests:
         agent = PartialWebSocketTestAgent(
             missing_events=['agent_started'],
             name=NoStartEventAgent"
-            name=NoStartEventAgent"
+            name=NoStartEventAgent""
+
         )
         agent.set_websocket_bridge(mock_bridge, "test_run_no_start)"
         
@@ -340,17 +351,20 @@ class WebSocketEventGuaranteesTests:
             pytest.fail("CRITICAL BUSINESS VALUE VIOLATION: agent_started event missing. "
                        Users must see that agent began processing their problem. 
                        This directly impacts user trust and chat experience.)"
-                       This directly impacts user trust and chat experience.)"
+                       This directly impacts user trust and chat experience.)""
+
         
         # Verify agent_started has meaningful content
         start_event = started_events[0]
         if not start_event.data.get('message'):
             pytest.fail(WEBSOCKET CONTENT VIOLATION: agent_started event lacks meaningful message. "
-            pytest.fail(WEBSOCKET CONTENT VIOLATION: agent_started event lacks meaningful message. "
+            pytest.fail(WEBSOCKET CONTENT VIOLATION: agent_started event lacks meaningful message. ""
+
                        Users need clear indication of what the AI is doing.)
     
     async def test_agent_thinking_event_violation_detection(self, event_collector, mock_bridge):
-        ""CRITICAL: Must detect missing agent_thinking events."
+        ""CRITICAL: Must detect missing agent_thinking events.""
+
         
         This test MUST FAIL if agent_thinking events are not emitted.
         Real-time reasoning visibility is essential for user transparency.
@@ -363,7 +377,8 @@ class WebSocketEventGuaranteesTests:
         
         context = ExecutionContext(
             run_id=test_run_no_thinking,"
-            run_id=test_run_no_thinking,"
+            run_id=test_run_no_thinking,""
+
             agent_name=agent.name,
             state=DeepAgentState()
         )
@@ -375,7 +390,8 @@ class WebSocketEventGuaranteesTests:
         
         if not thinking_events:
             pytest.fail(CRITICAL USER EXPERIENCE VIOLATION: agent_thinking events missing. "
-            pytest.fail(CRITICAL USER EXPERIENCE VIOLATION: agent_thinking events missing. "
+            pytest.fail(CRITICAL USER EXPERIENCE VIOLATION: agent_thinking events missing. ""
+
                        Users need real-time reasoning visibility to trust AI problem-solving. 
                        This is essential for substantive AI interactions.")"
         
@@ -397,7 +413,8 @@ class WebSocketEventGuaranteesTests:
         agent = PartialWebSocketTestAgent(
             missing_events=['tool_executing'],
             name=NoToolExecEventAgent"
-            name=NoToolExecEventAgent"
+            name=NoToolExecEventAgent""
+
         )
         agent.set_websocket_bridge(mock_bridge, test_run_no_tool_exec)
         
@@ -448,7 +465,8 @@ class WebSocketEventGuaranteesTests:
         agent = PartialWebSocketTestAgent(
             missing_events=['agent_completed'],
             name=NoCompleteEventAgent"
-            name=NoCompleteEventAgent"
+            name=NoCompleteEventAgent""
+
         )
         agent.set_websocket_bridge(mock_bridge, "test_run_no_complete)"
         
@@ -467,7 +485,8 @@ class WebSocketEventGuaranteesTests:
             pytest.fail("CRITICAL COMPLETION NOTIFICATION VIOLATION: agent_completed event missing. "
                        Users must know when valuable AI response is ready. This is essential 
                        for completing the AI interaction workflow and delivering business value.)"
-                       for completing the AI interaction workflow and delivering business value.)"
+                       for completing the AI interaction workflow and delivering business value.)""
+
         
         # Verify completion event has result data
         complete_event = completed_events[0]
@@ -475,11 +494,13 @@ class WebSocketEventGuaranteesTests:
         
         if not result_data:
             pytest.fail(WEBSOCKET CONTENT VIOLATION: agent_completed event lacks result data. "
-            pytest.fail(WEBSOCKET CONTENT VIOLATION: agent_completed event lacks result data. "
+            pytest.fail(WEBSOCKET CONTENT VIOLATION: agent_completed event lacks result data. ""
+
                        Users need to receive the actual AI-generated value, not just completion notification.)
     
     async def test_concurrent_websocket_event_integrity(self, event_collector, mock_bridge):
-        ""CRITICAL: Must detect WebSocket event integrity issues under concurrent load."
+        ""CRITICAL: Must detect WebSocket event integrity issues under concurrent load.""
+
         
         This test stresses concurrent event emission and MUST FAIL if
         events are lost, duplicated, or corrupted under load.
@@ -539,13 +560,15 @@ class WebSocketEventGuaranteesTests:
         
         if total_events < expected_events:
             pytest.fail(fCONCURRENT EVENT LOSS: Expected at least {expected_events) events, "
-            pytest.fail(fCONCURRENT EVENT LOSS: Expected at least {expected_events) events, "
+            pytest.fail(fCONCURRENT EVENT LOSS: Expected at least {expected_events) events, ""
+
                        fgot {total_events}. Events are being lost under concurrent load.)
         
         # Verify temporal ordering within each run
         for i in range(num_concurrent_agents):
             run_id = fconcurrent_run_{i}"
-            run_id = fconcurrent_run_{i}"
+            run_id = fconcurrent_run_{i}""
+
             sequence = event_collector.get_event_sequence(run_id)
             
             # Basic sequence validation
@@ -581,7 +604,8 @@ class WebSocketEventGuaranteesTests:
         async def failing_notify_thinking(*args, **kwargs):
             if mock_bridge.connection_failures > 2:
                 raise ConnectionError(WebSocket bridge connection failed)"
-                raise ConnectionError(WebSocket bridge connection failed)"
+                raise ConnectionError(WebSocket bridge connection failed)""
+
             return await original_notify_thinking(*args, **kwargs)
         
         mock_bridge.notify_agent_started = failing_notify_started
@@ -604,11 +628,13 @@ class WebSocketEventGuaranteesTests:
                 pytest.fail("RESILIENCE VIOLATION: Agent execution failed due to WebSocket issues. "
                            Agent processing must be resilient to communication failures to 
                            maintain business continuity.)"
-                           maintain business continuity.)"
+                           maintain business continuity.)""
+
                            
         except ConnectionError as e:
             pytest.fail(fRESILIENCE VIOLATION: Agent execution blocked by WebSocket failure: {e). "
-            pytest.fail(fRESILIENCE VIOLATION: Agent execution blocked by WebSocket failure: {e). "
+            pytest.fail(fRESILIENCE VIOLATION: Agent execution blocked by WebSocket failure: {e). ""
+
                        Core AI processing must continue even when event delivery fails, 
                        ensuring business value delivery is not interrupted.")"
         
@@ -662,7 +688,8 @@ class WebSocketEventGuaranteesTests:
             # Thinking should show actual problem-solving process
             if 'analyzing' not in thought.lower() and 'planning' not in thought.lower() and 'determining' not in thought.lower():
                 pytest.fail(fCONTENT RELEVANCE VIOLATION: agent_thinking lacks problem-solving "
-                pytest.fail(fCONTENT RELEVANCE VIOLATION: agent_thinking lacks problem-solving "
+                pytest.fail(fCONTENT RELEVANCE VIOLATION: agent_thinking lacks problem-solving ""
+
                            fkeywords: '{thought}'. Must show actual reasoning process.)
         
         # 3. tool execution content validation

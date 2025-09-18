@@ -1,12 +1,12 @@
-"""
-"""
+""""
+
 SSOT WebSocket Bridge Integration Protection Tests
 
-Issue #845: Critical P0 test suite protecting $500K+ ARR WebSocket functionality
+Issue #845: Critical P0 test suite protecting $"500K" plus ARR WebSocket functionality
 Business Impact: Ensures 5 critical WebSocket events work after AgentRegistry consolidation
 
 WebSocket Events Protected:
-- agent_started: User sees agent began processing  
+    - agent_started: User sees agent began processing  
 - agent_thinking: Real-time reasoning visibility
 - tool_executing: Tool usage transparency
 - tool_completed: Tool results display
@@ -15,10 +15,11 @@ WebSocket Events Protected:
 Created: 2025-1-13 - SSOT Gardner agents focus
 Priority: P0 (Critical/Blocking) - WebSocket events = chat functionality = 90% platform value
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import pytest
 import asyncio
 import json
@@ -42,7 +43,7 @@ from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 
 
 class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
-    "Critical P0 tests protecting $500K+ ARR WebSocket functionality during SSOT consolidation"
+    "Critical P0 tests protecting $"500K" plus ARR WebSocket functionality during SSOT consolidation"
     
     def setUp(self):
         "Set up WebSocket bridge test environment with SSOT patterns"
@@ -67,7 +68,8 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
             tool_completed,"
             tool_completed,"
             agent_completed"
-            agent_completed"
+            agent_completed""
+
         ]
         
         # Mock WebSocket manager for testing
@@ -75,10 +77,11 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
         
     async def test_websocket_events_delivery_consistency(self):
         """
-    "
+    ""
+
         CRITICAL: Validate all 5 critical events still deliver properly
         
-        Business Impact: $500K+ ARR depends on real-time chat functionality
+        Business Impact: $"500K" plus ARR depends on real-time chat functionality
         Expected: PASS - all events must be delivered after consolidation
         "
         "
@@ -111,7 +114,8 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
             await self.registry._emit_websocket_event(
                 self.test_user_id, "agent_started, "
                 {agent_type: test_agent, session_id: self.test_session_id}"
-                {agent_type: test_agent, session_id: self.test_session_id}"
+                {agent_type: test_agent, session_id: self.test_session_id}""
+
             
             # Trigger agent_thinking  
             await self.registry._emit_websocket_event(
@@ -127,7 +131,8 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
             await self.registry._emit_websocket_event(
                 self.test_user_id, tool_completed, 
                 {tool_name": "test_tool, result: success, session_id: self.test_session_id}"
-                {tool_name": "test_tool, result: success, session_id: self.test_session_id}"
+                {tool_name": "test_tool, result: success, session_id: self.test_session_id}""
+
             
             # Trigger agent_completed
             await self.registry._emit_websocket_event(
@@ -145,7 +150,8 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
         for critical_event in self.critical_events:
             self.assertIn(critical_event, delivered_event_types,
                          fCritical event {critical_event} was not delivered)"
-                         fCritical event {critical_event} was not delivered)"
+                         fCritical event {critical_event} was not delivered)""
+
         
         # Validate user isolation in events
         for event in delivered_events:
@@ -197,7 +203,8 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
 
     async def test_multi_user_websocket_isolation_preserved(self):
         """
-        "
+        ""
+
         CRITICAL: Ensure user isolation maintained in WebSocket events
         
         Business Impact: Users must not see each other's chat events'
@@ -211,7 +218,8 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
         user1_id = websocket-user-1"
         user1_id = websocket-user-1"
         user1_session_id = websocket-session-1"
-        user1_session_id = websocket-session-1"
+        user1_session_id = websocket-session-1""
+
         user2_id = websocket-user-2 
         user2_session_id = websocket-session-2""
         
@@ -267,7 +275,8 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
 
     async def test_real_time_event_delivery_validation(self):
         """
-        "
+        ""
+
         CRITICAL: Validate real-time event delivery performance
         
         Business Impact: Chat feels responsive and real-time to users
@@ -321,7 +330,8 @@ class WebSocketBridgeSSoTIntegrationTests(SSotAsyncTestCase):
         # Validate performance (should be very fast for mock)
         self.assertLess(total_duration, 1.0, 
                        Event delivery should be fast (< 1 second for 5 events))"
-                       Event delivery should be fast (< 1 second for 5 events))"
+                       Event delivery should be fast (< 1 second for 5 events))""
+
         
         # Validate all events delivered
         self.assertEqual(len(event_timings), len(self.critical_events),

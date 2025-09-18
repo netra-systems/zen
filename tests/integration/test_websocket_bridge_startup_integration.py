@@ -2,12 +2,12 @@
 WebSocket Bridge Startup Integration Test Suite
 
 Addresses WHY #4 from Five Whys Analysis:
-- Missing tests/checks for startup  ->  bridge  ->  supervisor flow
+    - Missing tests/checks for startup  ->  bridge  ->  supervisor flow
 - Need integration tests covering complete sequence
 - Validate contract enforcement for app_state dependencies
 
 This test ensures the complete flow works end-to-end with real services:
-1. System startup sequence initializes WebSocket bridge
+    1. System startup sequence initializes WebSocket bridge
 2. Bridge is properly configured and stored in app_state
 3. Supervisor factory can access bridge from app_state
 4. Agent execution can create WebSocket emitters
@@ -202,7 +202,7 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         return True
 
     async def test_04_user_execution_context_websocket_emitter_creation(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test that UserExecutionContext can create WebSocket emitters
         
         Validates the end-to-end flow:
@@ -259,7 +259,7 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         return True
 
     async def test_05_end_to_end_agent_websocket_event_flow(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test complete end-to-end agent execution with WebSocket events
         
         Validates:
@@ -450,7 +450,7 @@ class WebSocketBridgeStartupIntegrationTestSuite:
         test_results[success_rate] = success_rate
         test_results[overall_status] = "PASSED if success_rate == 100 else FAILED"
         
-        logger.info(f\n[U+1F3C1] Test Suite Complete: {test_results['passed_tests']}/{test_results['total_tests']} tests passed ({success_rate:.1f}%))
+        logger.info(f\n[U+1F3C1] Test Suite Complete: {test_results['passed_tests']}/{test_results['total_tests']} tests passed ({success_rate:."1f"}%))
         
         if test_results[overall_status] == "PASSED:"
             logger.info( CELEBRATION:  ALL INTEGRATION TESTS PASSED - WebSocket bridge startup flow is working correctly")"
@@ -463,7 +463,8 @@ class WebSocketBridgeStartupIntegrationTestSuite:
 # FastAPI-style test functions for pytest compatibility
 @pytest.mark.asyncio
 async def test_websocket_bridge_startup_integration_suite():
-    """
+    """"
+
     Main integration test for WebSocket bridge startup flow
     
     This test addresses WHY #4 from Five Whys analysis by providing comprehensive
@@ -497,7 +498,7 @@ if __name__ == __main__:
         
         print(f\n CHART:  INTEGRATION TEST RESULTS:")"
         print(fOverall Status: {results['overall_status']}")"
-        print(fSuccess Rate: {results['success_rate']:.1f}%")"
+        print(fSuccess Rate: {results['success_rate']:."1f"}%")"
         print(fTests: {results['passed_tests']}/{results['total_tests']} passed")"
         
         if results['overall_status'] == 'FAILED':
@@ -511,5 +512,6 @@ if __name__ == __main__:
     success = asyncio.run(main())
     exit(0 if success else 1)
 
-"""
+""""
+
 ))))))

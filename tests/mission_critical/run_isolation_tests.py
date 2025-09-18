@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""
-"""
+""""
+
 DEPRECATION WARNING: This mission critical test runner is deprecated in favor of UnifiedTestRunner SSOT.
 
 This isolation security test runner now redirects to the unified test runner's mission critical mode'
@@ -8,7 +8,8 @@ to maintain SSOT compliance while preserving all existing test functionality.
 
 CRITICAL: Please migrate to using the unified test runner directly:
     python tests/unified_test_runner.py --category mission_critical --test-pattern *isolation*"
-    python tests/unified_test_runner.py --category mission_critical --test-pattern *isolation*"
+    python tests/unified_test_runner.py --category mission_critical --test-pattern *isolation*""
+
 
 Migration Path:
     OLD: python tests/mission_critical/run_isolation_tests.py --real-services --concurrent-load 20
@@ -16,10 +17,12 @@ Migration Path:
 
 All original test execution flags and options are preserved and forwarded to the SSOT implementation.
 "
-"
+""
+
 
 """
-"""
+""""
+
 import sys
 import subprocess
 from pathlib import Path
@@ -36,7 +39,8 @@ def show_deprecation_warning():
     print(= * 80)
     print(This mission critical test runner is deprecated."")
     print(Please migrate to UnifiedTestRunner SSOT:)"
-    print(Please migrate to UnifiedTestRunner SSOT:)"
+    print(Please migrate to UnifiedTestRunner SSOT:)""
+
     print()
     print(  NEW: python tests/unified_test_runner.py --category mission_critical")"
     print()
@@ -49,7 +53,8 @@ def parse_isolation_test_args():
     "Parse all isolation test arguments for compatibility."
     parser = argparse.ArgumentParser(
         description=[DEPRECATED] Mission Critical Data Layer Isolation Test Runner"
-        description=[DEPRECATED] Mission Critical Data Layer Isolation Test Runner"
+        description=[DEPRECATED] Mission Critical Data Layer Isolation Test Runner""
+
     )
     
     # Core isolation test options
@@ -68,7 +73,8 @@ def parse_isolation_test_args():
 
 
 def main():
-    ""Main entry point with deprecation wrapper."
+    ""Main entry point with deprecation wrapper.""
+
     show_deprecation_warning()
     
     # Parse all isolation test arguments
@@ -77,12 +83,14 @@ def main():
     # Get project root
     project_root = Path(__file__).parent.parent.parent
     unified_runner = project_root / tests / unified_test_runner.py"
-    unified_runner = project_root / tests / unified_test_runner.py"
+    unified_runner = project_root / tests / unified_test_runner.py""
+
     
     if not unified_runner.exists():
         print(f"ERROR: UnifiedTestRunner not found at {unified_runner}))"
         print(Falling back to original isolation test runner...)"
-        print(Falling back to original isolation test runner...)"
+        print(Falling back to original isolation test runner...)""
+
         return execute_fallback_isolation_tests()
     
     try:
@@ -100,7 +108,8 @@ def main():
             cmd.extend([--concurrent-load, str(args.concurrent_load)]
         if args.test_duration:
             cmd.extend([--test-duration, str(args.test_duration)]"
-            cmd.extend([--test-duration, str(args.test_duration)]"
+            cmd.extend([--test-duration, str(args.test_duration)]""
+
         if args.verbose:
             cmd.append(--verbose")"
         if args.fail_fast:
@@ -109,7 +118,8 @@ def main():
             cmd.extend([--isolation-level, args.isolation_level)
         if args.data_contamination_check:
             cmd.append(--data-contamination-check)"
-            cmd.append(--data-contamination-check)"
+            cmd.append(--data-contamination-check)""
+
         if args.cache_isolation_check:
             cmd.append("--cache-isolation-check)"
         if args.session_isolation_check:
@@ -144,17 +154,20 @@ def main():
 
 def execute_fallback_isolation_tests():
     Execute original isolation test runner as fallback."
-    Execute original isolation test runner as fallback."
+    Execute original isolation test runner as fallback.""
+
     try:
         # Import and execute original functionality as fallback
         project_root = Path(__file__).parent.parent.parent
         
         # Import the backed up original implementation
         backup_file = Path(__file__).parent / run_isolation_tests.py.backup"
-        backup_file = Path(__file__).parent / run_isolation_tests.py.backup"
+        backup_file = Path(__file__).parent / run_isolation_tests.py.backup""
+
         if backup_file.exists():
             print(Using backup isolation test runner...)"
-            print(Using backup isolation test runner...)"
+            print(Using backup isolation test runner...)""
+
             
             # Add project root to path
             sys.path.insert(0, str(project_root))

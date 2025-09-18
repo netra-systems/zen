@@ -6,18 +6,18 @@ that the SSOT-compliant fix prevents these errors through defensive validation
 and graceful fallback handling.
 
 Business Value Justification:
-- Segment: Platform/Internal - Critical Infrastructure
+    - Segment: Platform/Internal - Critical Infrastructure
 - Business Goal: Prevent WebSocket 1011 errors that block user interactions
 - Value Impact: Ensures reliable WebSocket connectivity for chat functionality
-- Revenue Impact: Prevents loss of $120K+ MRR from WebSocket failures
+- Revenue Impact: Prevents loss of $"120K"+ MRR from WebSocket failures
 
 Root Cause Analysis:
-1. UserExecutionContext validation failures in websocket_manager_factory.py (lines 66-115)
+    1. UserExecutionContext validation failures in websocket_manager_factory.py (lines 66-115)
 2. Hard 1011 failures in websocket.py when factory creation fails (lines 334 & 769)
 3. Authentication result validation issues in unified_authentication_service.py (lines 464-482)
 
 Fix Implementation:
-- Defensive UserExecutionContext creation with validation
+    - Defensive UserExecutionContext creation with validation
 - Graceful fallback handling instead of hard 1011 failures
 - Enhanced authentication result validation with fallback patterns
 - Better error diagnostics and logging
@@ -104,7 +104,8 @@ class WebSocket1011ErrorFixValidationTests:
         assert len(user_context.thread_id.strip()) > 0
 
     async def test_defensive_creation_with_invalid_user_id_fails_gracefully(self):
-        ""Test that defensive creation fails gracefully with invalid user_id."
+        ""Test that defensive creation fails gracefully with invalid user_id.""
+
         invalid_user_ids = [None, '', '   ', 123, [], {}]
         for invalid_user_id in invalid_user_ids:
             with pytest.raises(ValueError) as exc_info:
@@ -211,7 +212,8 @@ class WebSocketValidationDefensiveMeasuresTests:
             assert 'ws_req_' in user_context.request_id
 
     async def test_auth_service_fallback_context_creation(self):
-        ""Test that auth service can create fallback context when primary creation fails."
+        ""Test that auth service can create fallback context when primary creation fails.""
+
         edge_case_auth_result = AuthResult(success=True, user_id=None, email='edge@example.com')
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.client = None
@@ -302,5 +304,6 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
-"""
+""""
+
 ))

@@ -38,7 +38,8 @@ class TestDevelopmentAuth:
 
     @classmethod
     def setup_class(cls):
-        ""Setup test environment"
+        ""Setup test environment""
+
         cls.env = IsolatedEnvironment.get_instance()
 
         # Ensure we're in development mode'
@@ -60,7 +61,8 @@ class TestDevelopmentAuth:
         # Service URLs for development
         cls.auth_url = http://localhost:8081
         cls.backend_url = http://localhost:8000"
-        cls.backend_url = http://localhost:8000"
+        cls.backend_url = http://localhost:8000""
+
 
     def test_jwt_secret_synchronization(self):
         "Test that JWT secrets are synchronized across services"
@@ -74,7 +76,8 @@ class TestDevelopmentAuth:
         assert auth_secret == shared_secret, "JWT secrets are not synchronized!"
 
         logger.info(✅ JWT secrets are synchronized)"
-        logger.info(✅ JWT secrets are synchronized)"
+        logger.info(✅ JWT secrets are synchronized)""
+
 
     def test_token_generation(self):
         "Test token generation"
@@ -113,7 +116,8 @@ class TestDevelopmentAuth:
         assert decoded.get(email) == "validate@example.com, Wrong email"
 
         logger.info(✅ Token validation successful)"
-        logger.info(✅ Token validation successful)"
+        logger.info(✅ Token validation successful)""
+
 
     def test_cross_service_validation(self):
         "Test that backend and auth use same JWT secret"
@@ -155,7 +159,8 @@ class TestDevelopmentAuth:
             assert user_id == cross_service_user, f"Wrong user ID: {user_id}"
 
             logger.info(✅ Cross-service validation successful - JWT secrets match!)"
-            logger.info(✅ Cross-service validation successful - JWT secrets match!)"
+            logger.info(✅ Cross-service validation successful - JWT secrets match!)""
+
 
         except jwt.InvalidTokenError as e:
             logger.error(fJWT secrets don't match between services: {e})'
@@ -168,7 +173,8 @@ class TestDevelopmentAuth:
     async def test_service_health_check(self):
         "Test service connectivity"
         logger.info(Testing service health checks...)"
-        logger.info(Testing service health checks...)"
+        logger.info(Testing service health checks...)""
+
 
         async with httpx.AsyncClient() as client:
             # Check auth service
@@ -193,7 +199,8 @@ class TestDevelopmentAuth:
     async def test_login_flow(self):
         ""Test complete login flow"
         logger.info(Testing login flow...)"
-        logger.info(Testing login flow...)"
+        logger.info(Testing login flow...)""
+
 
         async with httpx.AsyncClient() as client:
             # Register a test user
@@ -221,7 +228,8 @@ class TestDevelopmentAuth:
 
                     login_response = await client.post(
                         f{self.auth_url}/auth/token,"
-                        f{self.auth_url}/auth/token,"
+                        f{self.auth_url}/auth/token,""
+
                         data=login_data
                     )
 
@@ -257,7 +265,8 @@ def main():
         test_suite.test_token_validation()
         test_suite.test_cross_service_validation()
         logger.info(✅ All synchronous tests passed!)"
-        logger.info(✅ All synchronous tests passed!)"
+        logger.info(✅ All synchronous tests passed!)""
+
     except Exception as e:
         logger.error(f"Synchronous test failed: {e})"
         return 1

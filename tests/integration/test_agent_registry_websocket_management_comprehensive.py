@@ -2,7 +2,7 @@
 Comprehensive Integration Tests for Agent Registry and WebSocket Management
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise)
+    - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure Agent Registry properly manages agent lifecycles with WebSocket events for chat value
 - Value Impact: Validates that agents deliver real-time notifications enabling substantive user interactions
 - Strategic Impact: Core platform functionality ensuring 5 critical WebSocket events for business value delivery
@@ -12,7 +12,7 @@ delivers the 5 essential events (agent_started, agent_thinking, tool_executing, 
 that enable meaningful AI interactions and chat business value.
 
 Key Integration Areas Tested:
-1. Agent Registry initialization and configuration
+    1. Agent Registry initialization and configuration
 2. Agent registration and discovery processes  
 3. WebSocket manager integration with Agent Registry
 4. Agent execution context and WebSocket event emission
@@ -173,7 +173,8 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_01_agent_registry_initialization_with_websocket_integration(self, real_services_fixture):
-        """
+        """"
+
         Test Agent Registry initialization with WebSocket manager integration.
         
         Validates that Agent Registry properly initializes with WebSocket capabilities
@@ -231,7 +232,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services  
     async def test_03_user_isolated_agent_creation_with_websocket_events(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test user-isolated agent creation with WebSocket event emission.
         
         Validates that agents are created with proper user isolation and emit
@@ -289,7 +290,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_04_multi_user_agent_isolation_validation(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test multi-user agent isolation through Agent Registry.
         
         Validates that agents for different users are completely isolated
@@ -451,7 +452,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration  
     @pytest.mark.real_services
     async def test_06_websocket_event_ordering_validation(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test WebSocket event ordering for proper user experience.
         
         Validates that WebSocket events are emitted in the correct order
@@ -532,7 +533,8 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_07_agent_lifecycle_management_with_cleanup(self, real_services_fixture):
-    """
+    """"
+
         Test agent lifecycle management with proper resource cleanup.
         
         Validates that agents are properly created, managed, and cleaned up
@@ -587,7 +589,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services  
     async def test_08_memory_leak_prevention_monitoring(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test memory leak prevention and monitoring capabilities.
         
         Validates that Agent Registry monitors resource usage and prevents
@@ -644,7 +646,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_09_websocket_manager_failure_recovery(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test error handling when WebSocket manager fails or is unavailable.
         
         Validates that Agent Registry gracefully handles WebSocket failures
@@ -699,7 +701,8 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_10_agent_creation_error_handling(self, real_services_fixture):
-        """
+        """"
+
         Test error handling during agent creation with proper error reporting.
         
         Validates that Agent Registry provides clear error messages and
@@ -804,7 +807,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_12_universal_registry_integration_compliance(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test Universal Registry integration compliance and SSOT patterns.
         
         Validates that Agent Registry properly extends UniversalRegistry
@@ -846,7 +849,8 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_13_concurrent_agent_creation_performance(self, real_services_fixture):
-    """
+    """"
+
         Test concurrent agent creation performance and thread safety.
         
         Validates that Agent Registry can handle concurrent agent creation
@@ -893,7 +897,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         avg_time_per_creation = total_time / len(successful_creations) if successful_creations else float('inf')
         
         # Should create agents reasonably quickly (less than 1 second per agent on average)
-        assert avg_time_per_creation < 1.0, fAgent creation too slow: {avg_time_per_creation:.2f}s per agent""
+        assert avg_time_per_creation < 1.0, fAgent creation too slow: {avg_time_per_creation:."2f"}s per agent""
         
         # Verify no race conditions - all users should have their agents
         monitoring_report = await self.agent_registry.monitor_all_users()
@@ -905,12 +909,14 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
             for error in failed_creations[:3]:  # Log first few errors
                 self.logger.warning(fCreation error: {error})
         
-        self.logger.info(f PASS:  Concurrent performance validated: {len(successful_creations)}/{len(tasks)} agents created in {total_time:.2f}s)
+        self.logger.info(f PASS:  Concurrent performance validated: {len(successful_creations)}/{len(tasks)} agents created in {total_time:."2f"}s)""
+
     
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_14_websocket_event_throughput_validation(self, real_services_fixture):
-        """
+        """"
+
         Test WebSocket event throughput under concurrent load.
         
         Validates that WebSocket event system can handle high throughput
@@ -976,7 +982,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         event_delivery_rate = total_events_sent / expected_total_events if expected_total_events > 0 else 0
         
         assert event_delivery_rate >= 0.9, fEvent delivery rate too low: {event_delivery_rate:.2%}""
-        assert events_per_second >= 50, "fEvent throughput too low: {events_per_second:.1f} events/second"
+        assert events_per_second >= 50, "fEvent throughput too low: {events_per_second:."1f"} events/second"
         
         # Validate all events were captured
         total_received_events = len([e for e in self.websocket_events 
@@ -987,18 +993,20 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         
         # Validate throughput meets business requirements for real-time experience
         if events_per_second < 50:
-            self.logger.warning(fWebSocket throughput below optimal: {events_per_second:.1f} events/second")"
+            self.logger.warning(fWebSocket throughput below optimal: {events_per_second:."1f"} events/second")"
         if event_delivery_rate < 0.95:
             self.logger.warning(fEvent delivery rate concerning: {event_delivery_rate:.1%})
             
-        self.logger.info(f PASS:  WebSocket throughput validated: {events_per_second:.1f} events/second, {event_delivery_rate:.1%} delivery rate)
+        self.logger.info(f PASS:  WebSocket throughput validated: {events_per_second:."1f"} events/second, {event_delivery_rate:.1%} delivery rate)""
+
     
     # ===================== BUSINESS VALUE VALIDATION TESTS =====================
     
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_15_end_to_end_business_value_delivery(self, real_services_fixture):
-    """
+    """"
+
         Test end-to-end business value delivery through complete agent workflow.
         
         Validates that Agent Registry enables complete business value delivery
@@ -1293,7 +1301,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_17_agent_registry_database_persistence_integration(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test Agent Registry integration with real database services.
         
         Validates that agents created through Agent Registry can interact
@@ -1463,7 +1471,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_19_agent_registry_failure_resilience_comprehensive(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test Agent Registry resilience under various failure scenarios.
         
         Validates that Agent Registry maintains business value delivery
@@ -1558,7 +1566,8 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_20_comprehensive_business_value_integration_validation(self, real_services_fixture):
-    """
+    """"
+
         Final comprehensive test validating complete business value integration.
         
         This test validates the complete integration of Agent Registry with
@@ -1704,7 +1713,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                     Establish monitoring and optimization governance""
                 ],
                 comprehensive_integration_success: True,
-                total_business_value": $102,0 annual savings with 6.8x ROI"
+                total_business_value": $102,0 annual savings with 6."8x" ROI"
             }
             
             await bridge.emit_agent_completed(result=final_comprehensive_result)

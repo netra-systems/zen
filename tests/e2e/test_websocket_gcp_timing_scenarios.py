@@ -2,7 +2,7 @@
 E2E tests for WebSocket GCP timing scenarios - DESIGNED TO FAIL
 
 Business Value:
-- Reproduces import scope bugs under GCP Cloud Run timing constraints
+    - Reproduces import scope bugs under GCP Cloud Run timing constraints
 - Validates WebSocket authentication flows expose function-scoped import issues
 - Tests real production scenarios where import timing failures occur
 
@@ -26,7 +26,8 @@ from shared.isolated_environment import get_env
 
 @pytest.mark.e2e
 class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
-    """
+    """"
+
     E2E tests with REQUIRED AUTHENTICATION reproducing WebSocket import bugs under GCP conditions.
     
     These tests simulate real GCP Cloud Run timing constraints where function-scoped
@@ -59,7 +60,7 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_authenticated_websocket_gcp_timeout_import_scope_failure(self):
-""""""
+    """"""
         DESIGNED TO FAIL: Test GCP timeout conditions trigger import scope errors with auth.
         
         This E2E test reproduces the import scope bug under GCP Cloud Run timeout
@@ -116,7 +117,7 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_authenticated_concurrent_users_import_scope_race_conditions(self):
-""""""
+    """"""
         DESIGNED TO FAIL: Test concurrent authenticated users trigger import scope race conditions.
         
         This E2E test creates multiple authenticated users connecting simultaneously
@@ -183,7 +184,8 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_authenticated_websocket_agent_execution_import_scope_failure(self):
-        """
+        """"
+
         DESIGNED TO FAIL: Test authenticated agent execution triggers import scope failures.
         
         This E2E test reproduces import scope bugs during authenticated agent execution
@@ -241,7 +243,8 @@ class WebSocketGCPTimingScenariosTests(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_authenticated_websocket_error_recovery_import_scope_failure(self):
-    """
+    """"
+
         DESIGNED TO FAIL: Test authenticated error recovery triggers import scope failures.
         
         This E2E test reproduces import scope bugs in error recovery and exception
@@ -293,5 +296,6 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
-"""
+""""
+
 )))))))))

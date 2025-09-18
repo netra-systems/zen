@@ -2,29 +2,29 @@
 Integration Test for WebSocket Agent Handler Error Path Context Regression - CRITICAL Business Impact
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free  ->  Enterprise) - Error handling affects all user tiers during critical failures
+    - Segment: ALL (Free  ->  Enterprise) - Error handling affects all user tiers during critical failures
 - Business Goal: Maintain conversation continuity even during system errors and recovery scenarios  
 - Value Impact: CRITICAL - Prevents conversation context loss during error conditions and retry scenarios
-- Strategic/Revenue Impact: $750K+ ARR at risk - Error scenarios must maintain user experience integrity
+- Strategic/Revenue Impact: $"750K"+ ARR at risk - Error scenarios must maintain user experience integrity
 
 CRITICAL BUSINESS CONTEXT:
-Error handling paths in WebSocket agent handlers are critical to business continuity because:
-1. System errors MUST NOT break conversation context - users expect to retry failed operations
+    Error handling paths in WebSocket agent handlers are critical to business continuity because:
+    1. System errors MUST NOT break conversation context - users expect to retry failed operations
 2. Error recovery scenarios must preserve thread_id and run_id for conversation continuity
 3. Failed agent executions should allow seamless retry within same conversation thread
 4. WebSocket connection errors must maintain conversation state for reconnection scenarios
 5. Exception handling must preserve user isolation in multi-user environment
 
 CONTEXT REGRESSION SCENARIOS TESTED:
-Based on CONTEXT_CREATION_AUDIT_REPORT.md analysis of websocket_core/agent_handler.py:
-- Lines 161-164, 252-254: Exception handling in v3 and v2 message handling paths
+    Based on CONTEXT_CREATION_AUDIT_REPORT.md analysis of websocket_core/agent_handler.py:
+    - Lines 161-164, 252-254: Exception handling in v3 and v2 message handling paths
 - Lines 389-410: Error handling in _handle_message_v3 that may incorrectly create contexts
 - Lines 457-473: Error handling in _handle_message_v2 that may break session continuity
 - Lines 499-523, 549-573: Error handling in legacy methods that use wrong context patterns
 - Mixed patterns where main flow is correct but error paths create new contexts
 
 ERROR SCENARIOS VALIDATED:
-1. Agent execution failures must preserve existing thread_id/run_id from websocket_context
+    1. Agent execution failures must preserve existing thread_id/run_id from websocket_context
 2. WebSocket connection errors during agent processing must maintain conversation continuity  
 3. Database errors during agent execution must not create new contexts in error handling
 4. Timeout errors in agent processing must preserve original execution context for retry
@@ -161,7 +161,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
     @pytest.mark.integration
     @pytest.mark.critical
     async def test_agent_execution_error_preserves_websocket_context(self):
-"""Empty docstring."""
+    """Empty docstring."""
         CRITICAL: Test that agent execution errors preserve existing WebSocket context.
         
         Validates fix for audit report lines 389-410: Error handling in _handle_message_v3()
@@ -279,7 +279,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
     @pytest.mark.integration
     @pytest.mark.critical  
     async def test_websocket_connection_error_maintains_conversation_continuity(self):
-"""Empty docstring."""
+    """Empty docstring."""
         CRITICAL: Test that WebSocket connection errors maintain conversation continuity.
         
         Validates fix for audit report lines 161-164: Exception handling in _handle_message_v3_clean()
@@ -510,7 +510,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
     @pytest.mark.integration
     @pytest.mark.critical
     async def test_timeout_error_in_agent_execution_preserves_session_context(self):
-"""Empty docstring."""
+    """Empty docstring."""
         CRITICAL: Test that timeout errors in agent execution preserve session context.
         
         Validates error handling patterns that may incorrectly create new contexts during timeouts.
@@ -627,7 +627,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
         
         print(f" PASS:  CRITICAL: Agent timeout preserved enterprise analysis context)"
         print(f PASS:  BUSINESS CONTINUITY: Complex analysis retryable after timeout)
-        print(f" CHART:  Timeout handled in {timeout_duration:.3f}s)"
+        print(f" CHART:  Timeout handled in {timeout_duration:."3f"}s)"
 
     @pytest.mark.integration
     @pytest.mark.critical
@@ -789,7 +789,7 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
     @pytest.mark.integration
     @pytest.mark.critical
     async def test_mixed_error_scenarios_conversation_continuity(self):
-"""Empty docstring."""
+    """Empty docstring."""
         CRITICAL: Test mixed error scenarios that commonly occur in production.
         
         Validates that multiple error types in sequence preserve conversation continuity.
@@ -1045,18 +1045,20 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
         max_context_lookup = max(context_lookup_times)
         
         # Performance thresholds (business requirements)
-        max_acceptable_error_processing = 0.5  # 500ms max per error
-        max_acceptable_context_lookup = 0.1    # 100ms max for context lookup
+        max_acceptable_error_processing = 0.5  # "500ms" max per error
+        max_acceptable_context_lookup = 0.1    # "100ms" max for context lookup
         
         # PERFORMANCE VALIDATION: Error handling must not degrade context performance
         assert avg_error_processing < max_acceptable_error_processing, \
-            fError processing too slow: {avg_error_processing:.3f}s avg (max acceptable: {max_acceptable_error_processing}s)
+            fError processing too slow: {avg_error_processing:."3f"}s avg (max acceptable: {max_acceptable_error_processing}s)""
+
         
         assert avg_context_lookup < max_acceptable_context_lookup, \
-            fContext lookup too slow during errors: {avg_context_lookup:.3f}s avg (max acceptable: {max_acceptable_context_lookup}s)
+            fContext lookup too slow during errors: {avg_context_lookup:."3f"}s avg (max acceptable: {max_acceptable_context_lookup}s)""
+
         
         assert max_error_processing < 1.0, \
-            f"Slowest error processing too slow: {max_error_processing:.3f}s (max acceptable: 1.0s)"
+            f"Slowest error processing too slow: {max_error_processing:."3f"}s (max acceptable: 1."0s")"
         
         # Track performance metrics for business impact
         self.error_tracking[performance_during_errors").append({"
@@ -1070,10 +1072,10 @@ class WebSocketAgentHandlerErrorContextRegressionTests:
         }
         
         print(f\n PASS:  PERFORMANCE: Error handling meets business performance requirements)
-        print(f CHART:  Average error processing: {avg_error_processing*1000:.1f}ms")"
-        print(f CHART:  Average context lookup: {avg_context_lookup*1000:.1f}ms)
-        print(f CHART:  Max error processing: {max_error_processing*1000:.1f}ms") "
-        print(f CHART:  Max context lookup: {max_context_lookup*1000:.1f}ms)
+        print(f CHART:  Average error processing: {avg_error_processing*1000:."1f"}ms")"
+        print(f CHART:  Average context lookup: {avg_context_lookup*1000:."1f"}ms)
+        print(f CHART:  Max error processing: {max_error_processing*1000:."1f"}ms") "
+        print(f CHART:  Max context lookup: {max_context_lookup*1000:."1f"}ms)
         print(f TARGET:  Iterations tested: {num_performance_iterations}")"
 
     @pytest.mark.integration

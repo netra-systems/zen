@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 "MISSION CRITICAL: DatabaseManager SSOT Backup File Violation Detection"
 
-BUSINESS VALUE: $500K+ ARR - Database SSOT compliance is foundation for all operations
+BUSINESS VALUE: $"500K" plus ARR - Database SSOT compliance is foundation for all operations
 
 DESIGNED TO FAIL when:
-1. Multiple DatabaseManager implementations exist
+    1. Multiple DatabaseManager implementations exist
 2. Backup files are present in the system
 3. Import references point to non-existent backup files
 4. SSOT principles are violated
 
 DESIGNED TO PASS when:
-1. Single DatabaseManager source exists
+    1. Single DatabaseManager source exists
 2. No backup files present
 3. All imports are consistent
 4. SSOT compliance achieved
@@ -35,7 +35,8 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class DatabaseManagerBackupFileViolationsTests(SSotBaseTestCase):
-    ""Test suite to detect DatabaseManager SSOT backup file violations."
+    ""Test suite to detect DatabaseManager SSOT backup file violations.""
+
 
     def test_no_backup_files_exist(self):
         MUST FAIL if any database_manager backup files exist.""
@@ -106,7 +107,8 @@ class DatabaseManagerBackupFileViolationsTests(SSotBaseTestCase):
         # Should have exactly 1 implementation (the SSOT)
         if len(actual_implementations) == 0:
             pytest.fail(CRITICAL: No DatabaseManager implementation found!)"
-            pytest.fail(CRITICAL: No DatabaseManager implementation found!)"
+            pytest.fail(CRITICAL: No DatabaseManager implementation found!)""
+
         elif len(actual_implementations) > 1:
             impl_list = '\n'.join([f"  - {f) for f in actual_implementations]"
             pytest.fail(
@@ -115,7 +117,8 @@ class DatabaseManagerBackupFileViolationsTests(SSotBaseTestCase):
             )
 
     def test_database_manager_import_consistency(self):
-        ""MUST FAIL if imports reference non-existent backup files."
+        ""MUST FAIL if imports reference non-existent backup files.""
+
 
         Scans all Python files for import statements that reference
         DatabaseManager backup files that should not exist.
@@ -152,7 +155,8 @@ class DatabaseManagerBackupFileViolationsTests(SSotBaseTestCase):
             pytest.fail(
                 f"IMPORT VIOLATIONS: References to backup files found:\n{violation_list}\n"
                 fThese imports reference non-existent backup files and must be updated."
-                fThese imports reference non-existent backup files and must be updated."
+                fThese imports reference non-existent backup files and must be updated.""
+
             )
 
     def test_database_manager_canonical_location(self):
@@ -168,7 +172,8 @@ class DatabaseManagerBackupFileViolationsTests(SSotBaseTestCase):
                 fSSOT VIOLATION: Canonical DatabaseManager not found at expected location:\n
                 f"  Expected: {expected_path}\n"
                 fThe DatabaseManager MUST exist at the canonical SSOT location."
-                fThe DatabaseManager MUST exist at the canonical SSOT location."
+                fThe DatabaseManager MUST exist at the canonical SSOT location.""
+
             )
 
         # Verify it contains the actual DatabaseManager class
@@ -199,7 +204,8 @@ class DatabaseManagerBackupFileViolationsTests(SSotBaseTestCase):
         # Find all DatabaseManager implementations
         all_implementations = []
         for py_file in project_root.rglob(database_manager.py):"
-        for py_file in project_root.rglob(database_manager.py):"
+        for py_file in project_root.rglob(database_manager.py):""
+
             if py_file != canonical_path:
                 # Check if it actually contains DatabaseManager class
                 try:

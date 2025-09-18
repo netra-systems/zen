@@ -1,11 +1,11 @@
 """Empty docstring."""
 Integration tests to reproduce WebSocket authentication timeout issues (Issue #395).
 
-REPRODUCTION TARGET: WebSocket handshake failures due to 0.5s auth service timeout.
+REPRODUCTION TARGET: WebSocket handshake failures due to 0."5s" auth service timeout.
 These tests SHOULD FAIL initially to demonstrate the WebSocket-auth integration timeout problem.
 
 Key Integration Issues to Reproduce:
-1. WebSocket handshake blocked by auth service connectivity checks
+    1. WebSocket handshake blocked by auth service connectivity checks
 2. 179-second WebSocket latencies caused by auth service timeout waits  
 3. Chat functionality blocked by authentication failures
 4. Golden Path user flow disrupted by auth timeouts
@@ -69,7 +69,7 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_handshake_blocked_by_auth_timeout(self):
-"""Empty docstring."""
+    """Empty docstring."""
         REPRODUCTION TEST: WebSocket handshake blocked by auth service timeout.
         
         This test simulates WebSocket authentication during handshake
@@ -80,7 +80,7 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
         
         # Mock auth service that times out during connectivity check
         async def mock_timeout_connectivity(*args, **kwargs):
-            await asyncio.sleep(0.6)  # Above 0.5s staging timeout
+            await asyncio.sleep(0.6)  # Above 0."5s" staging timeout
             raise asyncio.TimeoutError(Auth service connectivity check timed out)
         
         with patch.object(self.auth_client, '_check_auth_service_connectivity') as mock_connectivity:
@@ -101,14 +101,16 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
                 
                 # REPRODUCTION ASSERTION: Auth timeout blocks WebSocket
                 self.assertGreater(duration, 0.5, 
-                                 f"Expected timeout after 0.5s, but failed after {duration:.3f}s)"
+                                 f"Expected timeout after 0."5s", but failed after {duration:."3f"}s)"
                 self.assertLess(duration, 1.0,
-                              fExpected quick timeout, but took {duration:.3f}s - 
+                              fExpected quick timeout, but took {duration:."3f"}s -""
+
                               fthis would block WebSocket handshake)
 
     @pytest.mark.asyncio  
     async def test_websocket_179_second_latency_reproduction(self):
-        """
+        """"
+
         REPRODUCTION TEST: 179-second WebSocket latency due to auth timeout waits.
         
         This test reproduces the reported issue where WebSocket connections
@@ -119,7 +121,7 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
         
         # Mock auth service with multiple timeout scenarios
         timeout_scenarios = [
-            0.6,  # First timeout (above 0.5s limit)
+            0.6,  # First timeout (above 0."5s" limit)
             1.2,  # Retry timeout
             2.5,  # Final timeout
         ]
@@ -151,7 +153,7 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
             start_time = time.time()
             
             try:
-                # This simulates the retry logic that leads to 179s delays
+                # This simulates the retry logic that leads to "179s" delays
                 max_retries = 3
                 last_exception = None
                 
@@ -162,26 +164,26 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
                     except Exception as e:
                         last_exception = e
                         if attempt < max_retries - 1:
-                            # Exponential backoff (contributes to 179s total)
+                            # Exponential backoff (contributes to "179s" total)
                             await asyncio.sleep(2 ** attempt)
                 
                 duration = time.time() - start_time
                 
-                # REPRODUCTION ASSERTION: Cumulative delays approach 179s problem
+                # REPRODUCTION ASSERTION: Cumulative delays approach "179s" problem
                 total_expected_delay = sum(timeout_scenarios) + sum(2**i for i in range(max_retries-1))
                 self.assertGreater(duration, 5.0,
-                                 fExpected significant cumulative delay, got {duration:.3f}s)""
+                                 fExpected significant cumulative delay, got {duration:."3f"}s)""
                 
                 # This demonstrates how timeouts cascade to extreme delays
                 self.assertGreater(total_expected_delay, 10.0,
-                                 f"Total timeout delays ({total_expected_delay:.3f}s) demonstrate "
-                                 fhow 179s WebSocket latencies occur)
+                                 f"Total timeout delays ({total_expected_delay:."3f"}s) demonstrate "
+                                 fhow "179s" WebSocket latencies occur)
                 
             except Exception as e:
                 duration = time.time() - start_time
                 # Even failure demonstrates the timeout cascade issue
                 self.assertGreater(duration, 3.0,
-                                 fAuth timeout cascade took {duration:.3f}s, 
+                                 fAuth timeout cascade took {duration:."3f"}s, 
                                  fdemonstrating WebSocket latency issue")"
 
     @pytest.mark.asyncio
@@ -230,7 +232,7 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_golden_path_user_flow_disruption(self):
-"""Empty docstring."""
+    """Empty docstring."""
         REPRODUCTION TEST: Golden Path user flow disrupted by auth timeouts.
         
         This test simulates the complete Golden Path user flow:
@@ -310,11 +312,12 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_auth_service_healthy_but_websocket_fails(self):
-    """
+    """"
+
         REPRODUCTION TEST: Auth service healthy but WebSocket still fails.
         
         This test reproduces the specific case where auth service responds
-        in 0.195s (healthy) but WebSocket authentication still fails due to
+        in 0."195s" (healthy) but WebSocket authentication still fails due to
         timeout configuration issues.
         
         EXPECTED RESULT: Should show timeout configuration vs actual performance mismatch.
@@ -338,7 +341,7 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
             timeout_threshold = 0.3  # WebSocket has even tighter timeout
             await asyncio.sleep(0.195)  # Auth service response time
             
-            # WebSocket timeout is more aggressive than 0.5s health check
+            # WebSocket timeout is more aggressive than 0."5s" health check
             websocket_timeout_calls.append(time.time())
             
             if 0.195 > timeout_threshold:
@@ -356,7 +359,7 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
                 # First test: Auth service validation (should succeed)
                 auth_result = await self.auth_client.validate_token(test_token)
                 self.assertTrue(auth_result.get("valid), "
-                              Auth service should validate successfully in 0.195s)
+                              Auth service should validate successfully in 0."195s")
                 
                 # Second test: WebSocket timeout check (should fail)
                 with patch.object(self.auth_client, '_check_auth_service_connectivity') as mock_ws_check:
@@ -372,7 +375,7 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
                         self.assertTrue(len(websocket_timeout_calls) > 0,
                                       WebSocket timeout occurred despite healthy auth service)""
                         
-                        self.fail(Auth service responds in 0.195s (healthy) but WebSocket ""
+                        self.fail(Auth service responds in 0."195s" (healthy) but WebSocket ""
                                 authentication fails due to timeout configuration mismatch)
                         
             except Exception as e:
@@ -432,5 +435,6 @@ class WebSocketAuthTimeoutIntegrationTests(SSotAsyncTestCase):
                              Expected circuit breaker to block WebSocket connections after 
                              repeated auth service timeout failures")"
 
-"""
+""""
+
 )

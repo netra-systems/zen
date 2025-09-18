@@ -2,13 +2,13 @@
 SSOT WebSocket Authentication Compliance Test Suite
 
 Business Value Justification:
-- Segment: Platform/Internal - Testing Infrastructure
+    - Segment: Platform/Internal - Testing Infrastructure
 - Business Goal: Validate SSOT compliance and eliminate authentication chaos
 - Value Impact: Prevents regression to duplicate authentication paths
-- Revenue Impact: Ensures $120K+ MRR remains unblocked by maintaining working WebSocket auth
+- Revenue Impact: Ensures $"120K"+ MRR remains unblocked by maintaining working WebSocket auth
 
 This test suite validates that:
-1. All WebSocket authentication uses SSOT unified authentication service
+    1. All WebSocket authentication uses SSOT unified authentication service
 2. No duplicate authentication paths exist
 3. Authentication works consistently across all environments
 4. Legacy authentication implementations are completely eliminated
@@ -76,7 +76,8 @@ class SSOTWebSocketAuthenticationComplianceTests:
 
     @pytest.mark.asyncio
     async def test_websocket_authentication_success_flow(self, mock_websocket):
-        ""Test successful WebSocket authentication using SSOT implementation."
+        ""Test successful WebSocket authentication using SSOT implementation.""
+
         with patch('netra_backend.app.clients.auth_client_core.AuthServiceClient.validate_token') as mock_validate:
             mock_validate.return_value = {'valid': True, 'user_id': 'test-user-123', 'email': 'test@example.com', 'permissions': ['read', 'write']}
             auth_result = await authenticate_websocket_ssot(mock_websocket)
@@ -221,7 +222,8 @@ class SSOTWebSocketAuthenticationEndToEndTests:
 
     @pytest.mark.asyncio
     async def test_full_websocket_auth_flow_integration(self):
-        ""Test complete WebSocket authentication flow with real services."
+        ""Test complete WebSocket authentication flow with real services.""
+
         pytest.importorskip('test_framework.conftest_real_services', reason='Requires real services')
         from test_framework.ssot.websocket import create_authenticated_websocket_connection
         try:
@@ -240,7 +242,8 @@ class SSOTWebSocketAuthenticationEndToEndTests:
     @pytest.mark.asyncio
     async def test_ssot_authentication_prevents_chaos_regression(self):
         Test that SSOT implementation prevents regression to authentication chaos."""
-        Test that SSOT implementation prevents regression to authentication chaos."""
+        Test that SSOT implementation prevents regression to authentication chaos.""""
+
         auth_service = get_unified_auth_service()
         test_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXItc3NvdCIsImVtYWlsIjoidGVzdEBzc290LmNvbSIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjo5OTk5OTk5OTk5fQ.test_signature'
         with patch('netra_backend.app.clients.auth_client_core.AuthServiceClient.validate_token') as mock_validate:

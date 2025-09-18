@@ -1,22 +1,23 @@
-"""
-"""
+""""
+
 SSOT Wrapper Function Detection Tests for Issue #1076
 
 Test Plan: Detect backward compatibility wrapper functions that create SSOT violations.
 Should FAIL initially (detecting violations) and PASS after remediation.
 
 Key violations to detect:
-1. Remaining wrapper functions in auth integration
+    1. Remaining wrapper functions in auth integration
 2. Backward compatibility functions that should be removed
 3. Functions that delegate to legacy patterns instead of using SSOT directly
 
 Related Issues: #1076 - SSOT compliance verification
 Priority: CRITICAL - These tests protect against regression during SSOT migration
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import pytest
 import ast
 import os
@@ -41,7 +42,8 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
 
     def test_auth_integration_wrapper_detection(self):
         """
-        "
+        ""
+
         CRITICAL: Detect wrapper functions in auth integration that bypass SSOT.
 
         EXPECTED: Should FAIL initially - detects remaining wrapper functions
@@ -98,18 +100,21 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
                 f1. Remove wrapper functions\n
                 f"2. Update callers to use SSOT auth service directly\n"
                 f3. Ensure auth_service is the single source of truth for auth operations"
-                f3. Ensure auth_service is the single source of truth for auth operations"
+                f3. Ensure auth_service is the single source of truth for auth operations""
+
             )
 
     def test_function_delegation_pattern_detection(self):
         """
-    "
+    ""
+
         CRITICAL: Detect functions that delegate to legacy patterns instead of SSOT.
 
         EXPECTED: Should FAIL initially - detects delegation violations
         REMEDIATION: Update functions to use SSOT directly
         "
-        "
+        ""
+
         delegation_violations = []
 
         # Search for functions that import and delegate to legacy modules
@@ -167,21 +172,25 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
                 f{'... and more' if len(delegation_violations) > 10 else ''}\n\n
                 f"REMEDIATION REQUIRED:\n"
                 f1. Replace legacy imports with SSOT imports\n"
-                f1. Replace legacy imports with SSOT imports\n"
+                f1. Replace legacy imports with SSOT imports\n""
+
                 f2. Update function implementations to use SSOT directly\n
                 f3. Remove all delegation to legacy modules"
-                f3. Remove all delegation to legacy modules"
+                f3. Remove all delegation to legacy modules""
+
             )
 
     def test_deprecated_import_pattern_detection(self):
         """
-    "
+    ""
+
         CRITICAL: Detect deprecated import patterns that should be updated.
 
         EXPECTED: Should FAIL initially - detects deprecated imports
         REMEDIATION: Update to SSOT import patterns
         "
-        "
+        ""
+
         deprecated_imports = []
 
         # Deprecated import patterns to detect
@@ -243,7 +252,8 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
                 f1. Update all deprecated imports to SSOT patterns\n
                 f"2. Remove backward compatibility imports\n"
                 f3. Ensure all modules use current SSOT architecture"
-                f3. Ensure all modules use current SSOT architecture"
+                f3. Ensure all modules use current SSOT architecture""
+
             )
 
     def _is_wrapper_function(self, node: ast.FunctionDef, content: str) -> bool:

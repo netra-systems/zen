@@ -2,9 +2,9 @@
 Integration Tests for WebSocket Handshake Race Condition Prevention
 
 Business Value Justification (BVJ):
-- Segment: Platform/Enterprise
+    - Segment: Platform/Enterprise
 - Business Goal: Prevent WebSocket race conditions causing user onboarding failures  
-- Value Impact: Protect $500K+ ARR by ensuring reliable WebSocket connections
+- Value Impact: Protect $"500K" plus ARR by ensuring reliable WebSocket connections
 - Strategic Impact: Enable chat functionality (90% of platform value)
 
 These integration tests use REAL SERVICE COMPONENTS but do not require Docker.
@@ -65,13 +65,15 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
         reset_timeout_manager()
     
     def teardown_method(self, method):
-        ""Clean up after each test."
+        ""Clean up after each test.""
+
         reset_timeout_manager()
         super().teardown_method(method)
     
     @pytest.mark.asyncio
     async def test_accept_then_validate_sequence_proper_order(self):
-    """
+    """"
+
         Test that WebSocket accept() -> validation -> message handling sequence is enforced.
         
         EXPECTED TO FAIL INITIALLY: Current implementation may start message handling
@@ -132,7 +134,8 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
     
     @pytest.mark.asyncio
     async def test_handshake_completion_validation_bidirectional_test(self):
-    """
+    """"
+
         Test handshake completion validation performs bidirectional communication test.
         
         EXPECTED TO FAIL INITIALLY: Validation may be incomplete or skip bidirectional test.
@@ -175,7 +178,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
             
             # Should take some time to perform validation
             assert duration >= 0.1, (
-                fHandshake validation too fast: {duration:.3f}s. ""
+                fHandshake validation too fast: {duration:."3f"}s. ""
                 fMay be skipping actual bidirectional test.
             )
     
@@ -225,14 +228,15 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
 ""
         mock_websocket = AsyncMock(spec=WebSocket)
         mock_websocket.client_state = WebSocketState.CONNECTED
-        mock_websocket.receive_text = AsyncMock(return_value='{"type": user_message, "content": "hello"}')"
+        mock_websocket.receive_text = AsyncMock(return_value='{"type": user_message, "content": "hello"}')""
+
         
         message_processing_started = False
         
         # Mock application state that becomes ready after delay
         class MockStateMachine:
             def __init__(self):
-                self.ready_time = time.time() + 0.1  # Ready after 100ms
+                self.ready_time = time.time() + 0.1  # Ready after "100ms"
                 
             def can_process_messages(self):
                 return time.time() >= self.ready_time
@@ -275,8 +279,8 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
                 
                 # CRITICAL: Should have waited for application readiness
                 assert processing_delay >= 0.9, (
-                    fMessage processing started too early: {processing_delay:.3f}s delay. 
-                    fShould wait for application state readiness (>=0.09s). 
+                    fMessage processing started too early: {processing_delay:."3f"}s delay. 
+                    fShould wait for application state readiness (>=0."09s"). 
                     Race condition: messages processed before application ready.""
                 )
                 
@@ -284,7 +288,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
     
     @pytest.mark.asyncio  
     async def test_gcp_service_readiness_prevents_connection_acceptance(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test that GCP service readiness is validated before accepting WebSocket connections.
         
         EXPECTED TO FAIL INITIALLY: May accept connections before services are ready.
@@ -419,7 +423,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
                 
             # CRITICAL: Agent execution should complete within WebSocket timeout
             assert execution_duration < websocket_timeout, (
-                fTimeout coordination failure: Agent execution ({execution_duration:.1f}s) ""
+                fTimeout coordination failure: Agent execution ({execution_duration:."1f"}s) ""
                 fexceeded WebSocket timeout ({websocket_timeout}s). Current timeouts: 
                 fWebSocket={websocket_timeout}s, Agent={agent_timeout}s. 
                 "This race condition causes premature WebSocket failures and 1011 errors."
@@ -428,7 +432,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
             # Verify proper hierarchy
             timeout_gap = websocket_timeout - agent_timeout
             assert timeout_gap >= 5, (
-                fInsufficient timeout buffer: {timeout_gap}s < 5s. 
+                fInsufficient timeout buffer: {timeout_gap}s < "5s". 
                 fWebSocket ({websocket_timeout}s) and Agent ({agent_timeout}s) timeouts 
                 need larger gap to prevent race conditions in Cloud Run environment.""
             )
@@ -509,7 +513,7 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
         
         # Verify reasonable timing
         assert total_duration < 10.0, (
-            fConcurrent handshakes took too long: {total_duration:.2f}s > 10s. ""
+            fConcurrent handshakes took too long: {total_duration:."2f"}s > "10s". ""
             May indicate locking or serialization issues.
         )
         
@@ -517,9 +521,10 @@ class WebSocketHandshakeRacePreventionTests(BaseIntegrationTest):
         timestamps = [r[timestamp"] for r in successful_connections]"
         timestamp_spread = max(timestamps) - min(timestamps)
         assert timestamp_spread < 1.0, (
-            f"Connection timestamps spread too wide: {timestamp_spread:.2f}s. "
+            f"Connection timestamps spread too wide: {timestamp_spread:."2f"}s. "
             Should execute concurrently, not serially.""
         )
 
-"""
+""""
+
 )))))

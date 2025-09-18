@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""
-"""
+""""
+
 Test suite for Issue #914: AgentRegistry SSOT Duplication
 
 This test suite demonstrates the SSOT violations in AgentRegistry implementations
@@ -8,14 +8,15 @@ across the codebase. These tests are designed to FAIL initially to prove the
 duplication problems exist.
 
 Business Impact:
-"""
-"""
-- $500K+ ARR Golden Path functionality at risk from registry inconsistencies
+    """
+""""
+
+- $"500K" plus ARR Golden Path functionality at risk from registry inconsistencies
 - Multi-user system stability compromised by duplicate implementations
 - WebSocket bridge integration broken due to registry interface violations
 
 Test Categories:
-1. Interface consistency across registry implementations
+    1. Interface consistency across registry implementations
 2. Import path violations and circular dependencies  
 3. Initialization pattern conflicts
 4. Thread safety and user isolation violations
@@ -24,7 +25,8 @@ Test Categories:
 Expected Result: Tests should FAIL initially, demonstrating the problems.
 After SSOT consolidation, tests should pass proving unified behavior.
 "
-"
+""
+
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 import sys
@@ -64,7 +66,8 @@ class AgentRegistrySSotDuplicationTests(SSotBaseTestCase):
     def test_01_multiple_agent_registry_classes_exist(self):
         "TEST EXPECTED TO FAIL: Multiple AgentRegistry classes should not exist."
         print(\n=== TEST 1: Multiple AgentRegistry Classes ===)"
-        print(\n=== TEST 1: Multiple AgentRegistry Classes ===)"
+        print(\n=== TEST 1: Multiple AgentRegistry Classes ===)""
+
         
         agent_registry_classes = []
         
@@ -86,7 +89,8 @@ class AgentRegistrySSotDuplicationTests(SSotBaseTestCase):
                         fSSOT VIOLATION: Found {len(agent_registry_classes")} AgentRegistry classes. "
                         fShould have exactly 1 SSOT implementation. 
                         fClasses found in: {[path for path, _ in agent_registry_classes]})"
-                        fClasses found in: {[path for path, _ in agent_registry_classes]})"
+                        fClasses found in: {[path for path, _ in agent_registry_classes]})""
+
     
     def test_02_interface_consistency_across_registries(self):
         "TEST EXPECTED TO FAIL: Registry interfaces should be consistent."
@@ -212,13 +216,15 @@ class AgentRegistrySSotDuplicationTests(SSotBaseTestCase):
             # EXPECTED FAILURE: Inconsistent factory patterns
             self.assertTrue(all(user_context_patterns) or not any(user_context_patterns"),"
                            fFACTORY PATTERN VIOLATION: Inconsistent user context handling across registries. "
-                           fFACTORY PATTERN VIOLATION: Inconsistent user context handling across registries. "
+                           fFACTORY PATTERN VIOLATION: Inconsistent user context handling across registries. ""
+
                            fPatterns: {factory_patterns})
     
     def test_05_websocket_integration_consistency(self):
         "TEST EXPECTED TO FAIL: WebSocket integration should be consistent."
         print(\n=== TEST 5: WebSocket Integration Consistency ===)"
-        print(\n=== TEST 5: WebSocket Integration Consistency ===)"
+        print(\n=== TEST 5: WebSocket Integration Consistency ===)""
+
         
         websocket_integrations = {}
         
@@ -298,13 +304,15 @@ class AgentRegistrySSotDuplicationTests(SSotBaseTestCase):
             consistent_threading = all(lock_patterns) or not any(lock_patterns")"
             self.assertTrue(consistent_threading,
                            fTHREAD SAFETY VIOLATION: Inconsistent thread safety implementations. "
-                           fTHREAD SAFETY VIOLATION: Inconsistent thread safety implementations. "
+                           fTHREAD SAFETY VIOLATION: Inconsistent thread safety implementations. ""
+
                            fPatterns: {thread_safety_patterns})
     
     def test_07_imports_ssot_compliance(self):
         "TEST EXPECTED TO FAIL: All registries should use SSOT imports."
         print(\n=== TEST 7: SSOT Import Compliance ===)"
-        print(\n=== TEST 7: SSOT Import Compliance ===)"
+        print(\n=== TEST 7: SSOT Import Compliance ===)""
+
         
         ssot_violations = []
         
@@ -339,7 +347,8 @@ class AgentRegistrySSotDuplicationTests(SSotBaseTestCase):
         self.assertEqual(len(ssot_violations), 0,
                         fSSOT IMPORT VIOLATIONS: Found non-SSOT imports. 
                         fViolations: {ssot_violations})"
-                        fViolations: {ssot_violations})"
+                        fViolations: {ssot_violations})""
+
     
     def test_08_initialization_pattern_conflicts(self):
         "TEST EXPECTED TO FAIL: Initialization patterns should be consistent."
@@ -419,7 +428,8 @@ class AgentRegistryRuntimeBehaviorInconsistenciesTests(SSotBaseTestCase):
     def test_03_websocket_bridge_integration(self):
         TEST EXPECTED TO FAIL: WebSocket bridge integration should work consistently.""
         print(\n=== RUNTIME TEST 3: WebSocket Bridge Integration ===)"
-        print(\n=== RUNTIME TEST 3: WebSocket Bridge Integration ===)"
+        print(\n=== RUNTIME TEST 3: WebSocket Bridge Integration ===)""
+
         
         # Mock WebSocket bridge for testing
         mock_bridge = MagicMock()
@@ -435,7 +445,8 @@ if __name__ == "__main__:"
     print(MIGRATION NOTICE: This file previously used direct pytest execution.)
     print("Please use: python tests/unified_test_runner.py --category <appropriate_category>)"
     print(For more info: reports/TEST_EXECUTION_GUIDE.md)"
-    print(For more info: reports/TEST_EXECUTION_GUIDE.md)"
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md)""
+
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

@@ -2,16 +2,16 @@
 Test WebSocket-Agent Integration Gap
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise)
+    - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure users receive real-time agent progress updates
 - Value Impact: WebSocket events provide transparency and trust in AI interactions
-- Strategic Impact: Core chat functionality that drives $500K+ ARR
+- Strategic Impact: Core chat functionality that drives $"500K" plus ARR
 
 CRITICAL: This test reproduces the integration gap where ExecutionEngine was not updated
 when AgentWebSocketBridge was migrated from singleton to per-request pattern.
 
 Based on Five Whys Root Cause Analysis:
-- Root Cause: Missing dependency orchestration between factory components
+    - Root Cause: Missing dependency orchestration between factory components
 - Impact: Users don't receive the 5 critical WebSocket events during agent execution'
 - Evidence: ExecutionEngine -> AgentWebSocketBridge -> UserWebSocketEmitter chain failure
 
@@ -43,7 +43,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_execution_engine_websocket_bridge_chain_failure(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test ExecutionEngine -> AgentWebSocketBridge -> UserWebSocketEmitter chain failure.
         
         EXPECTED: This test SHOULD FAIL because ExecutionEngine doesn't properly'
@@ -208,7 +208,7 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_factory_delegation_handoff_failure(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test the specific handoff point where ExecutionEngine should delegate to factories.
         
         EXPECTED: This test SHOULD FAIL because factory delegation is broken.
@@ -310,7 +310,8 @@ class WebSocketAgentIntegrationGapTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services  
     async def test_websocket_emitter_creation_failure_cascade(self, real_services_fixture):
-    """
+    """"
+
         Test the cascade failure when WebSocket emitter creation fails.
         
         EXPECTED: This test SHOULD FAIL due to dependency chain failures.

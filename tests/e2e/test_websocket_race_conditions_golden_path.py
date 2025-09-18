@@ -41,9 +41,9 @@ def lazy_import(module_path: str, component: str = None):
 WebSocket Race Conditions Golden Path E2E Tests - Phase 3 Implementation
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise) 
+    - Segment: All (Free, Early, Mid, Enterprise) 
 - Business Goal: Validate complete user chat experience without race conditions
-- Value Impact: Ensures core chat value delivery is reliable, protecting $500K+ ARR
+- Value Impact: Ensures core chat value delivery is reliable, protecting $"500K" plus ARR
 - Strategic/Revenue Impact: Protects primary business value delivery mechanism
 
 CRITICAL E2E REQUIREMENTS (CLAUDE.md Compliance):
@@ -55,13 +55,13 @@ CRITICAL E2E REQUIREMENTS (CLAUDE.md Compliance):
  PASS:  SYSTEM STABILITY: Proves no breaking changes introduced
 
 ROOT CAUSE ADDRESSED:
-- WebSocket 1011 errors in Cloud Run staging environments
+    - WebSocket 1011 errors in Cloud Run staging environments
 - Race conditions in rapid WebSocket connection scenarios
 - Missing business-critical WebSocket events breaking user chat
 - Multi-user concurrent chat sessions with isolation failures
 
 FULL SYSTEM REQUIREMENTS (Real Everything):
-- Full Docker stack (Backend, Auth, PostgreSQL, Redis)
+    - Full Docker stack (Backend, Auth, PostgreSQL, Redis)
 - Real WebSocket connections with proper authentication
 - Real agent execution with complete tool dispatching
 - Real business value delivery validation under stress
@@ -117,7 +117,8 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDisp
 @pytest.mark.mission_critical
 @pytest.mark.golden_path
 class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
-    """
+    """"
+
     E2E tests for WebSocket race conditions in complete golden path scenarios.
     
     Tests complete user chat experience with REAL services, REAL LLM,
@@ -138,7 +139,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
     
     @pytest.fixture(autouse=True)
     async def setup_e2e_environment(self, real_services_fixture):
-        ""Set up full E2E environment for golden path race condition testing."
+        ""Set up full E2E environment for golden path race condition testing.""
+
         self.services = real_services_fixture
         
         # Initialize authentication with Docker-compatible config
@@ -223,7 +225,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             return False
 
     async def test_001_rapid_websocket_connections_no_race(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test rapid WebSocket connections without race conditions.
         
         Validates that multiple rapid connections work without 1011 errors
@@ -306,7 +308,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                     pass
 
     async def test_002_websocket_authentication_real(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test WebSocket authentication with real services.
         
         CRITICAL: This addresses P1 WebSocket authentication timeout failures
@@ -354,7 +356,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 await websocket.close()
 
     async def test_003_multi_user_concurrent_chat_sessions(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test concurrent multi-user chat sessions with proper isolation.
         
         Validates that multiple users can chat simultaneously without
@@ -616,7 +618,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
         print(f PASS:  All {connection_cycles} race condition test cycles passed"")
 
     async def test_006_business_value_delivery_validation(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test complete business value delivery through WebSocket events.
         
         Validates that users receive substantive AI-powered results through
@@ -708,7 +710,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 await websocket.close()
 
     async def test_007_websocket_error_recovery_flow(self):
-        """
+        """"
+
         Test WebSocket error recovery and graceful degradation.
         
         Validates that WebSocket connections can recover from errors
@@ -781,7 +784,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 await recovery_websocket.close()
 
     async def test_008_performance_under_load(self):
-        """
+        """"
+
         Test WebSocket performance under concurrent load.
         
         Validates that the system maintains performance and event delivery
@@ -842,7 +846,7 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 
                 # Validate connection performance
                 assert metrics[connection_time] < 10.0, \""
-                    f"User {i} connection too slow: {metrics['connection_time']:.2f}s"
+                    f"User {i} connection too slow: {metrics['connection_time']:."2f"}s"
                 
                 # Validate event delivery
                 assert metrics[events_received] > 0, "fUser {i} received no events"
@@ -851,7 +855,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 if metrics[response_times]:
                     avg_response_time = sum(metrics["response_times) / len(metrics[response_times)"
                     assert avg_response_time < 5.0, \
-                        fUser {i} average response time too slow: {avg_response_time:.2f}s
+                        fUser {i} average response time too slow: {avg_response_time:."2f"}s""
+
             
             # Calculate overall performance metrics
             total_events = sum(m[events_received] for m in performance_metrics)
@@ -859,7 +864,8 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
             
             print(f PASS:  Performance test completed successfully)
             print(f" PASS:  {concurrent_users} concurrent users, {total_events} total events)"
-            print(f PASS:  Average connection time: {avg_connection_time:.2f}s)
+            print(f PASS:  Average connection time: {avg_connection_time:."2f"}s)""
+
             
         finally:
             # Clean up all sessions
@@ -912,5 +918,6 @@ class WebSocketRaceConditionsGoldenPathTests(BaseE2ETest):
                 print(fPerformance test error: {e}")"
                 break
 
-"""
+""""
+
 ))))))))))

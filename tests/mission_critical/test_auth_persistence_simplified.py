@@ -1,14 +1,16 @@
-"""
-"""
+""""
+
 Simplified test for authentication persistence in multi-agent workflows.
-"""
-"""
+""""
+
 Tests core auth persistence patterns without importing modules with singleton issues.
 """
-"""
+""""
+
 
 """
-"""
+""""
+
 import asyncio
 import uuid
 import jwt
@@ -51,7 +53,8 @@ class AuthPersistenceCoreTests:
             run_id=str(uuid.uuid4()),
             websocket_connection_id=ws-1,
             metadata={auth_token: valid_token}"
-            metadata={auth_token: valid_token}"
+            metadata={auth_token: valid_token}""
+
         
         # Verify context properly initialized
         assert context.user_id == user_id
@@ -102,7 +105,8 @@ class AuthPersistenceCoreTests:
         
         async def create_user_context(user_id: str):
             Create a context for a specific user."
-            Create a context for a specific user."
+            Create a context for a specific user.""
+
             context = UserExecutionContext(
                 user_id=user_id,
                 thread_id=fthread_{user_id}","
@@ -121,7 +125,8 @@ class AuthPersistenceCoreTests:
         # Verify all contexts are properly isolated
         for i, context in enumerate(contexts):
             expected_user_id = fuser_{i}"
-            expected_user_id = fuser_{i}"
+            expected_user_id = fuser_{i}""
+
             assert context.user_id == expected_user_id
             assert context.thread_id == f"thread_{expected_user_id}"
             assert context.metadata[user_data] == fdata_{expected_user_id}
@@ -136,7 +141,8 @@ class AuthPersistenceCoreTests:
         v3_enabled = os.getenv(USE_WEBSOCKET_SUPERVISOR_V3, true).lower() == true"
         v3_enabled = os.getenv(USE_WEBSOCKET_SUPERVISOR_V3, true).lower() == true"
         assert v3_enabled, WebSocket v3 pattern should be enabled by default for security"
-        assert v3_enabled, WebSocket v3 pattern should be enabled by default for security"
+        assert v3_enabled, WebSocket v3 pattern should be enabled by default for security""
+
     
     @pytest.mark.asyncio
     async def test_auth_token_in_websocket_message(self, valid_token):
@@ -155,7 +161,8 @@ class AuthPersistenceCoreTests:
         # Verify message contains auth
         assert message.payload[auth_token] == valid_token
         assert message.thread_id == test-thread"
-        assert message.thread_id == test-thread"
+        assert message.thread_id == test-thread""
+
     
     @pytest.mark.asyncio
     async def test_token_refresh_preserves_user_identity(self):

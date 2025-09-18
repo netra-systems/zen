@@ -5,13 +5,13 @@ PURPOSE: Detect WebSocket manager duplication across services
 These tests are designed to FAIL initially, proving current SSOT violations exist.
 
 MISSION: Validate WebSocket Manager consolidation for Golden Path reliability
-Business Value: $500K+ ARR Golden Path protection through unified WebSocket management
+Business Value: $"500K" plus ARR Golden Path protection through unified WebSocket management
 
 Expected Initial Behavior: ALL TESTS FAIL - proving WebSocket manager duplication exists
 After remediation: All tests should PASS confirming single WebSocket management authority
 
 Test Strategy:
-1. Detect multiple WebSocket manager implementations
+    1. Detect multiple WebSocket manager implementations
 2. Identify WebSocket factory wrapper duplication
 3. Validate WebSocket operations consolidation
 4. Confirm no legacy WebSocket manager imports remain
@@ -40,7 +40,7 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
 """Empty docstring."""
     WebSocket Manager SSOT Tests - Designed to FAIL initially
 
-    Business Value: Platform/Internal - $500K+ ARR Golden Path WebSocket Management
+    Business Value: Platform/Internal - $"500K" plus ARR Golden Path WebSocket Management
     These tests detect WebSocket manager duplication that fragments real-time communication.
 
     EXPECTED RESULT: ALL TESTS FAIL until SSOT remediation complete
@@ -57,7 +57,8 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
         self.logger.info(f'Starting WebSocket Manager SSOT test: {method.__name__}')
 
     def test_single_websocket_manager_implementation(self):
-        """
+        """"
+
         Test: Only ONE WebSocket manager implementation should exist across services
 
         EXPECTED: FAIL - Multiple WebSocket manager implementations exist
@@ -223,7 +224,8 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
         return legitimate
 
     def _scan_for_legacy_websocket_imports(self, path: Path, service_name: str, legacy_patterns: List[str), allowed_patterns: List[str) -> List[Dict[str, Any)):
-        ""Scan for legacy WebSocket manager imports."
+        ""Scan for legacy WebSocket manager imports.""
+
         violations = []
         if not path.exists():
             return violations
@@ -246,7 +248,8 @@ class WebSocketManagerSsotTests(SSotBaseTestCase):
 
     def teardown_method(self, method):
         Cleanup after WebSocket Manager SSOT tests."""
-        Cleanup after WebSocket Manager SSOT tests."""
+        Cleanup after WebSocket Manager SSOT tests.""""
+
         metrics = self.get_all_metrics()
         self.logger.info(f'WebSocket Manager SSOT test completed: {method.__name__}')
         self.logger.info(f'Test metrics: {metrics}')

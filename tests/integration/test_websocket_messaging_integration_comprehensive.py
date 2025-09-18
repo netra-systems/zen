@@ -2,7 +2,7 @@
 Comprehensive WebSocket Integration Tests for Netra Platform
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise) 
+    - Segment: All (Free, Early, Mid, Enterprise) 
 - Business Goal: Ensure WebSocket messaging delivers reliable AI chat value
 - Value Impact: WebSocket events enable real-time chat interactions and agent execution visibility
 - Strategic Impact: Core platform communication infrastructure for revenue delivery
@@ -50,7 +50,7 @@ class WebSocketConnectionManagementTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_websocket_connection_establishment_success(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test successful WebSocket connection with proper authentication.
         
         BVJ: Users must be able to connect to receive AI agent responses
@@ -88,7 +88,7 @@ class WebSocketConnectionManagementTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_websocket_connection_with_jwt_authentication(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test WebSocket connection with proper JWT authentication headers.
         
         BVJ: Authenticated users must connect securely to receive personalized AI insights
@@ -115,7 +115,8 @@ class WebSocketConnectionManagementTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_websocket_connection_failure_handling(self):
-    """
+    """"
+
         Test WebSocket connection failure scenarios and error handling.
         
         BVJ: Graceful failure handling prevents user frustration and provides clear feedback
@@ -139,7 +140,8 @@ class WebSocketConnectionManagementTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_websocket_connection_timeout_handling(self):
-        """
+        """"
+
         Test WebSocket connection timeout scenarios.
         
         BVJ: Timeout handling prevents users from waiting indefinitely for connections
@@ -174,7 +176,7 @@ class WebSocketMessageHandlingTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_websocket_message_serialization(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test WebSocket message serialization and structure.
         
         BVJ: Proper message format ensures consistent AI response delivery
@@ -211,7 +213,7 @@ class WebSocketMessageHandlingTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_websocket_message_sending(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test sending messages through WebSocket client.
         
         BVJ: Reliable message sending enables user requests to reach AI agents
@@ -249,7 +251,7 @@ class WebSocketMessageHandlingTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_websocket_message_receiving(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test receiving and parsing messages from WebSocket.
         
         BVJ: Accurate message parsing ensures users receive AI responses correctly
@@ -325,7 +327,8 @@ class WebSocketMessageHandlingTests(SSotBaseTestCase):
 
 
 class WebSocketAgentIntegrationTests(SSotBaseTestCase):
-    """
+    """"
+
     Test WebSocket integration with AI agents and the 5 critical events.
     
     BVJ: Agent integration enables real-time AI processing visibility for users
@@ -333,7 +336,8 @@ class WebSocketAgentIntegrationTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_agent_started_event(self):
-    """
+    """"
+
         Test agent_started event delivery - MISSION CRITICAL per CLAUDE.md.
         
         BVJ: Users must know when AI agent begins processing their request
@@ -497,7 +501,7 @@ class WebSocketAgentIntegrationTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_agent_completed_event(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test agent_completed event - final deliverable to user.
         
         BVJ: Users receive final AI analysis and actionable recommendations
@@ -565,7 +569,7 @@ class WebSocketAgentIntegrationTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_complete_agent_event_flow(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test complete agent execution flow with all 5 critical events.
         
         BVJ: Complete event flow ensures users have full visibility into AI processing
@@ -635,7 +639,7 @@ class WebSocketMultiUserIsolationTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_multi_user_websocket_isolation(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test that multiple users have isolated WebSocket sessions.
         
         BVJ: User data isolation prevents cross-contamination of AI contexts
@@ -688,7 +692,8 @@ class WebSocketMultiUserIsolationTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_websocket_authentication_security(self):
-        """
+        """"
+
         Test WebSocket authentication security and token validation.
         
         BVJ: Secure authentication prevents unauthorized access to AI services
@@ -719,7 +724,7 @@ class WebSocketMultiUserIsolationTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_websocket_concurrent_connections(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test handling of concurrent WebSocket connections.
         
         BVJ: Concurrent connection support enables multiple users simultaneously
@@ -804,14 +809,15 @@ class WebSocketPerformanceAndResilienceTests(SSotBaseTestCase):
             
             # Performance assertions
             assert messages_per_second > 10, "Should handle at least 10 messages/second"
-            assert avg_latency_per_message < 100, "Average message latency should be under 100ms"
+            assert avg_latency_per_message < 100, "Average message latency should be under "100ms""
             
             self.record_metric("messages_per_second, messages_per_second)"
             self.record_metric(avg_latency_ms, avg_latency_per_message)
     
     @pytest.mark.integration
     async def test_websocket_connection_resilience(self):
-    """
+    """"
+
         Test WebSocket connection resilience with reconnection.
         
         BVJ: Connection resilience ensures uninterrupted AI service availability
@@ -834,7 +840,8 @@ class WebSocketPerformanceAndResilienceTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_websocket_memory_usage_tracking(self):
-    """
+    """"
+
         Test WebSocket connection memory usage and cleanup.
         
         BVJ: Efficient memory usage prevents service degradation under load
@@ -860,7 +867,7 @@ class WebSocketPerformanceAndResilienceTests(SSotBaseTestCase):
             for client in test_clients:
                 await client.send_message(
                     WebSocketEventType.PING,
-                    {"memory_test: True, data: x * 1000},  # 1KB message"
+                    {"memory_test: True, data: x * 1000},  # "1KB" message"
                     user_id=client.headers.get(X-User-ID", unknown)"
                 )
             
@@ -879,7 +886,7 @@ class WebSocketPerformanceAndResilienceTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_websocket_error_handling_comprehensive(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test comprehensive WebSocket error handling scenarios.
         
         BVJ: Robust error handling prevents service disruption and user confusion
@@ -960,7 +967,7 @@ class WebSocketEventValidationTests(SSotBaseTestCase):
     
     @pytest.mark.integration
     async def test_websocket_message_integrity(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test WebSocket message data integrity and completeness.
         
         BVJ: Message integrity ensures users receive complete AI responses
@@ -1085,7 +1092,7 @@ class WebSocketConfigurationAndEnvironmentTests(SSotBaseTestCase):
         self.record_metric(environment_config, tested")"
     
     async def test_websocket_timeout_configuration(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test WebSocket timeout configuration.
         
         BVJ: Configurable timeouts prevent indefinite waits and improve user experience

@@ -1,23 +1,24 @@
-"""
-"""
+""""
+
 Issue #519: Pytest Configuration Management Tests - Phase 2
 
 This test suite validates pytest configuration management and plugin loading
 to ensure proper resolution of configuration conflicts.
 
 Focus Areas:
-- Plugin registration order and conflicts
+    - Plugin registration order and conflicts
 - Configuration file precedence and validation  
 - Hook function conflicts and resolution
 - Command-line option management
 
 Business Impact: HIGH - Enables Mission Critical test suite execution
-Priority: P0 - Required for $500K+ ARR protection
+Priority: P0 - Required for $"500K" plus ARR protection
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import subprocess
 import sys
 import pytest
@@ -60,7 +61,8 @@ class PytestPluginManagementTests:
             
             # Create a plugin file that defines the same option
             plugin_content = textwrap.dedent("
-            plugin_content = textwrap.dedent("
+            plugin_content = textwrap.dedent(""
+
                 import pytest
                 
                 def pytest_addoption(parser):
@@ -79,7 +81,8 @@ class PytestPluginManagementTests:
             
             # Create a minimal test file
             test_content = textwrap.dedent("
-            test_content = textwrap.dedent("
+            test_content = textwrap.dedent(""
+
                 def test_dummy():
                     assert True
             ")"
@@ -112,7 +115,8 @@ class PytestPluginManagementTests:
             assert any(keyword in error_output for keyword in [
                 already added", conflict, duplicate, option"
             ], fExpected option conflict error, got: {result.stderr}"
-            ], fExpected option conflict error, got: {result.stderr}"
+            ], fExpected option conflict error, got: {result.stderr}""
+
     
     def test_phase2_hook_function_conflicts(self):
         "PHASE 2: Test pytest hook function conflicts."
@@ -205,7 +209,8 @@ class ConfigurationValidationTests:
         Should initially FAIL if configuration has issues.
         
         pyproject_path = Path(__file__).parent.parent.parent / pyproject.toml"
-        pyproject_path = Path(__file__).parent.parent.parent / pyproject.toml"
+        pyproject_path = Path(__file__).parent.parent.parent / pyproject.toml""
+
         
         if not pyproject_path.exists():
             pytest.skip("pyproject.toml not found)"
@@ -253,7 +258,8 @@ class ConfigurationValidationTests:
             )
         
         assert True, pyproject.toml pytest configuration validated"
-        assert True, pyproject.toml pytest configuration validated"
+        assert True, pyproject.toml pytest configuration validated""
+
     
     def test_phase2_config_file_precedence(self):
         "PHASE 2: Test pytest configuration file precedence conflicts."
@@ -315,7 +321,8 @@ class CommandLineOptionsTests:
         
         # Search for pytest_addoption functions
         python_files = list(project_root.rglob(*.py))"
-        python_files = list(project_root.rglob(*.py))"
+        python_files = list(project_root.rglob(*.py))""
+
         
         for py_file in python_files:
             if 'venv' in str(py_file) or '__pycache__' in str(py_file):
@@ -363,11 +370,13 @@ class CommandLineOptionsTests:
     
     def test_phase2_specific_analyze_service_deps_conflict(self):
         PHASE 2: Test the specific --analyze-service-deps option conflict."
-        PHASE 2: Test the specific --analyze-service-deps option conflict."
+        PHASE 2: Test the specific --analyze-service-deps option conflict.""
+
         
         This is the exact issue reported in #519.
 "
-"
+""
+
         project_root = Path(__file__).parent.parent.parent
         
         # Find all files that define --analyze-service-deps
@@ -418,7 +427,8 @@ class CommandLineOptionsTests:
 
 
 class PluginLoadingSequenceTests:
-    ""Test the plugin loading sequence and conflicts."
+    ""Test the plugin loading sequence and conflicts.""
+
     
     def test_phase2_plugin_discovery_vs_explicit_import(self):
         PHASE 2: Test plugin auto-discovery vs explicit import conflicts.""

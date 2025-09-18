@@ -2,13 +2,13 @@
 Integration Tests: WebSocket Error Handling & Reconnection Patterns
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise)
+    - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Maintain real-time communication continuity during network failures
 - Value Impact: WebSocket resilience ensures uninterrupted AI chat and real-time updates
 - Strategic Impact: Foundation for reliable real-time AI service delivery and user engagement
 
 This test suite validates WebSocket error handling patterns with real services:
-- Connection failure detection and automatic reconnection with PostgreSQL logging
+    - Connection failure detection and automatic reconnection with PostgreSQL logging
 - Message queue persistence during disconnection with Redis buffering
 - Graceful connection degradation and recovery patterns
 - Concurrent user WebSocket isolation during failures
@@ -102,7 +102,8 @@ class ReconnectingWebSocketClient:
         self.on_reconnect_attempt = None
 
     async def connect(self) -> bool:
-        ""Establish WebSocket connection with authentication."
+        ""Establish WebSocket connection with authentication.""
+
         self.connection_attempts += 1
         connect_start = time.time()
         try:
@@ -239,7 +240,8 @@ class ReconnectingWebSocketClient:
             self.reconnection_events.append({'event': 'reconnection_attempt', 'timestamp': datetime.now(timezone.utc), 'attempt': self.reconnect_attempts}
             delay = self.reconnect_delay * 2 ** (self.reconnect_attempts - 1)
             delay = min(delay, 30)
-            logger.info(f'Attempting reconnection #{self.reconnect_attempts} after {delay:.1f}s')
+            logger.info(f'Attempting reconnection #{self.reconnect_attempts} after {delay:."1f"}s')""
+
             await asyncio.sleep(delay)
             if await self.connect():
                 logger.info(f'Reconnection successful after {self.reconnect_attempts} attempts')
@@ -276,7 +278,8 @@ class ReconnectingWebSocketClient:
         return {'current_state': self.state.value, 'connection_attempts': self.connection_attempts, 'successful_connections': self.successful_connections, 'connection_failures': self.connection_failures, 'reconnect_attempts': self.reconnect_attempts, 'messages_sent': self.messages_sent, 'messages_received': self.messages_received, 'queued_messages': len(self.message_queue), 'pending_messages': len(self.pending_messages), 'connection_success_rate': self.successful_connections / max(self.connection_attempts, 1), 'reconnection_events_count': len(self.reconnection_events), 'connection_id': self.connection_id}
 
 class WebSocketErrorHandlingTests(BaseIntegrationTest):
-    ""Integration tests for WebSocket error handling and reconnection patterns."
+    ""Integration tests for WebSocket error handling and reconnection patterns.""
+
 
     def setup_method(self):
         Set up test environment.""
@@ -328,7 +331,8 @@ class WebSocketErrorHandlingTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_automatic_reconnection_after_network_failure(self, real_services_fixture, authenticated_websocket_client):
-        ""Test automatic reconnection after simulated network failure."
+        ""Test automatic reconnection after simulated network failure.""
+
         client, user_context = authenticated_websocket_client
         redis = real_services_fixture['redis']
         reconnection_events = []
@@ -579,5 +583,6 @@ if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')
     print('Command: python tests/unified_test_runner.py --category <category>')
-"""
+""""
+
 )))))))))))))))))))

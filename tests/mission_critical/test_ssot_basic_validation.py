@@ -9,7 +9,7 @@ without requiring Docker services or complex setup. These tests focus on
 fundamental SSOT functionality and can run independently.
 
 Test Areas:
-1. SSOT module imports work correctly
+    1. SSOT module imports work correctly
 2. Singleton pattern functions properly
 3. Enum definitions are consolidated
 4. Basic availability checking works
@@ -56,7 +56,8 @@ class TestBasicSSOTFunctionality:
         Test that SSOT modules can be imported."
         Test that SSOT modules can be imported."
         assert SSOT_AVAILABLE, SSOT modules should be importable"
-        assert SSOT_AVAILABLE, SSOT modules should be importable"
+        assert SSOT_AVAILABLE, SSOT modules should be importable""
+
 
     # Test specific imports
         from test_framework.ssot.orchestration import OrchestrationConfig
@@ -79,7 +80,8 @@ class TestBasicSSOTFunctionality:
 
     def test_orchestration_config_has_required_properties(self):
         Test that OrchestrationConfig has required properties."
-        Test that OrchestrationConfig has required properties."
+        Test that OrchestrationConfig has required properties.""
+
         config = OrchestrationConfig()
 
     # Test required properties exist
@@ -119,7 +121,8 @@ class TestBasicSSOTFunctionality:
         assert BackgroundTaskStatus.QUEUED.value == queued"
         assert BackgroundTaskStatus.QUEUED.value == queued"
         assert BackgroundTaskStatus.RUNNING.value == running"
-        assert BackgroundTaskStatus.RUNNING.value == running"
+        assert BackgroundTaskStatus.RUNNING.value == running""
+
         assert BackgroundTaskStatus.COMPLETED.value == completed
 
     # E2ETestCategory
@@ -137,7 +140,8 @@ class TestBasicSSOTFunctionality:
 
     def test_enums_have_expected_members(self):
         Test that enums have expected members."
-        Test that enums have expected members."
+        Test that enums have expected members.""
+
         pass
     # BackgroundTaskStatus should have these members
         expected_statuses = ['QUEUED', 'STARTING', 'RUNNING', 'COMPLETED', 'FAILED', 'CANCELLED', 'TIMEOUT']
@@ -160,7 +164,8 @@ class TestBasicSSOTFunctionality:
         config = BackgroundTaskConfig( )
         category=E2ETestCategory.CYPRESS,
         environment=test,"
-        environment=test,"
+        environment=test,""
+
         timeout_minutes=30
     
 
@@ -182,7 +187,8 @@ class TestBasicSSOTFunctionality:
 
         for expected in expected_modes:
         assert expected in actual_modes, formatted_string"
-        assert expected in actual_modes, formatted_string"
+        assert expected in actual_modes, formatted_string""
+
 
         # Test values are lowercase
         for mode in ProgressOutputMode:

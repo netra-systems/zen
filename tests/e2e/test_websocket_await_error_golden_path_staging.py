@@ -84,7 +84,8 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_golden_path_agent_message_flow_staging(self):
-    """
+    """"
+
         E2E: Test complete agent message flow on staging.
 
         Validates that users can send messages to agents and receive responses
@@ -155,7 +156,7 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_golden_path_corpus_operations_staging(self):
-""""""
+    """"""
         E2E: Test corpus operations on staging.
 
         Validates that corpus operations (which have await errors at lines 134/174)
@@ -200,7 +201,8 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.staging
     async def test_golden_path_resilience_assessment_staging(self):
-        """
+        """"
+
         E2E: Comprehensive assessment of Golden Path resilience to await errors.
 
         This test provides a complete assessment of how await errors affect
@@ -326,5 +328,6 @@ class TestWebSocketAwaitErrorGoldenPathStaging(SSotAsyncTestCase):
 
 if __name__ == __main__:
     pytest.main([__file__, -v", "--tb=short")"
-"""
+""""
+
 )

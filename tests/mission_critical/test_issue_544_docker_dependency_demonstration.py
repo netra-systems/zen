@@ -5,14 +5,14 @@ This test suite demonstrates the specific Docker dependency problem that blocks
 all 39+ mission critical WebSocket tests from running.
 
 TEST PLAN PHASES:
-1. Phase 1: Demonstrate Docker dependency problem (this file)
+    1. Phase 1: Demonstrate Docker dependency problem (this file)
 2. Phase 2: Validate staging environment connectivity (separate test)
 
 Expected Behavior:
-- WITHOUT Docker: All tests in this file should SKIP with clear error messages
+    - WITHOUT Docker: All tests in this file should SKIP with clear error messages
 - WITH Docker: Tests should run normally and validate WebSocket functionality
 
-Business Impact: Blocking $500K+ ARR validation when Docker unavailable.
+Business Impact: Blocking $"500K" plus ARR validation when Docker unavailable.
 
 
 import asyncio
@@ -44,7 +44,8 @@ from tests.mission_critical.websocket_real_test_base import ()
 )
 
 class Issue544DockerDependencyDemonstrationTests:
-    ""Demonstrate how Docker dependency blocks mission critical tests."
+    ""Demonstrate how Docker dependency blocks mission critical tests.""
+
     
     def test_docker_availability_fast_check(self):
         Phase 1.1: Fast Docker availability check - should demonstrate blocking.""
@@ -59,7 +60,8 @@ class Issue544DockerDependencyDemonstrationTests:
             if not is_available:
                 logger.warning(
                     ISSUE #544 DEMONSTRATION: Docker unavailable via fast check. "
-                    ISSUE #544 DEMONSTRATION: Docker unavailable via fast check. "
+                    ISSUE #544 DEMONSTRATION: Docker unavailable via fast check. ""
+
                     This is the ROOT CAUSE of mission critical test blocking.
                 )
                 pytest.skip(Docker unavailable - demonstrating Issue #544 blocking behavior")"
@@ -97,7 +99,8 @@ class Issue544DockerDependencyDemonstrationTests:
         
         logger.info(fUSE_STAGING_FALLBACK: {staging_fallback})
         logger.info(fSTAGING_WEBSOCKET_URL: {staging_url})"
-        logger.info(fSTAGING_WEBSOCKET_URL: {staging_url})"
+        logger.info(fSTAGING_WEBSOCKET_URL: {staging_url})""
+
         
         try:
             # This should demonstrate fallback behavior or skip
@@ -111,7 +114,8 @@ class Issue544DockerDependencyDemonstrationTests:
     def test_websocket_test_base_dependency_demonstration(self):
         "Phase 1.4: Demonstrate RealWebSocketTestBase Docker dependency."
         logger.info(=== ISSUE #544 PHASE 1.4: WebSocket Test Base Dependency ===)"
-        logger.info(=== ISSUE #544 PHASE 1.4: WebSocket Test Base Dependency ===)"
+        logger.info(=== ISSUE #544 PHASE 1.4: WebSocket Test Base Dependency ===)""
+
         
         try:
             # Attempt to create WebSocket test base - this requires Docker
@@ -172,7 +176,8 @@ class Issue544DockerDependencyDemonstrationTests:
         
         logger.info(fFound {len(websocket_tests)} WebSocket-related mission critical tests)
         logger.info(These tests are affected by Issue #544 Docker dependency:)"
-        logger.info(These tests are affected by Issue #544 Docker dependency:)"
+        logger.info(These tests are affected by Issue #544 Docker dependency:)""
+
         for test in websocket_tests[:10]:  # Show first 10
             logger.info(f"  - {test})"
         
@@ -181,7 +186,8 @@ class Issue544DockerDependencyDemonstrationTests:
         
         # This test always passes - it's just informational'
         assert len(websocket_tests) > 0, Should have found WebSocket mission critical tests"
-        assert len(websocket_tests) > 0, Should have found WebSocket mission critical tests"
+        assert len(websocket_tests) > 0, Should have found WebSocket mission critical tests""
+
         
         logger.info(fISSUE #544 IMPACT: {len(websocket_tests)} mission critical tests blocked when Docker unavailable")"
 
@@ -230,7 +236,8 @@ class Issue544EnvironmentAnalysisTests:
         for var in staging_vars:
             value = env.get(var, NOT_SET)
             logger.info(f  {var}: {value})"
-            logger.info(f  {var}: {value})"
+            logger.info(f  {var}: {value})""
+
         
         logger.info("Test Configuration Variables:)"
         for var in test_vars:
@@ -244,7 +251,8 @@ class Issue544EnvironmentAnalysisTests:
         )
         
         logger.info(fStaging fallback properly configured: {staging_fallback_configured})"
-        logger.info(fStaging fallback properly configured: {staging_fallback_configured})"
+        logger.info(fStaging fallback properly configured: {staging_fallback_configured})""
+
         
         if not staging_fallback_configured:
             logger.warning(
@@ -296,7 +304,8 @@ def demonstrate_session_level_docker_requirement():
                 ISSUE #544 SESSION-LEVEL IMPACT: Docker unavailable. "
                 ISSUE #544 SESSION-LEVEL IMPACT: Docker unavailable. "
                 This would cause ALL mission critical WebSocket tests to skip."
-                This would cause ALL mission critical WebSocket tests to skip."
+                This would cause ALL mission critical WebSocket tests to skip.""
+
             )
             # Don't skip here - let individual tests demonstrate the behavior'
         else:

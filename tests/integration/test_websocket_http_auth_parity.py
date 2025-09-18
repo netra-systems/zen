@@ -44,7 +44,8 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
         self.websocket_authenticator = UnifiedWebSocketAuthenticator()
         
     def create_mock_websocket(self, headers: Dict[str, str) -> Mock:
-        ""Create mock WebSocket with specific headers."
+        ""Create mock WebSocket with specific headers.""
+
         websocket = Mock()
         websocket.headers = headers
         websocket.client = Mock()
@@ -169,7 +170,7 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
             )
 
     async def test_configuration_consistency_check(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test configuration consistency between HTTP and WebSocket auth systems.
         
         This test checks if both systems use the same configuration values.
@@ -272,7 +273,7 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
             raise AssertionError(fConfiguration inconsistencies detected: {inconsistencies})
 
     async def test_subprotocol_negotiation_comparison(self):
-"""Empty docstring."""
+    """Empty docstring."""
         Test subprotocol negotiation differences that might cause issues.
         
         HTTP doesn't have subprotocol negotiation, but WebSocket does.'
@@ -433,5 +434,6 @@ class WebSocketHttpAuthParityTests(SSotAsyncTestCase):
 if __name__ == '__main__':
     unittest.main()
 
-"""
+""""
+
 ))))))))))))))

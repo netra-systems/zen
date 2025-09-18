@@ -7,7 +7,6 @@ class TestWebSocketConnection:
         self.is_connected = True"""
         self.is_connected = True"""
 """
-"""
         """Send JSON message.""""""
         """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed)"
@@ -44,7 +43,8 @@ class TestWebSocketConnection:
         - Business Goal: System Stability (unified JSON handling)
         - Value Impact: Eliminates JSON serialization inconsistencies across WebSocket events
         - Strategic Impact: Single point of JSON handling reduces maintenance and bugs"""
-        - Strategic Impact: Single point of JSON handling reduces maintenance and bugs"""
+        - Strategic Impact: Single point of JSON handling reduces maintenance and bugs""""
+
 
 import asyncio
 import json
@@ -200,7 +200,8 @@ cost_benefit_analysis={"implementation_cost": 45000,, "annual_savings": 63372,, 
         attachments=[ )
         "cost_analysis_detailed.xlsx,"
         "performance_benchmarks.pdf,"
-        "implementation_roadmap.pdf"
+        "implementation_roadmap.pdf"""
+
     
     
 
@@ -356,7 +357,7 @@ context_tracking={"conversation_depth": 5,, "topic_coherence": 0.91,, "user_sati
 
 @pytest.mark.asyncio
     async def test_serialize_message_safely_async_performance(self, websocket_manager, complex_deep_agent_state):
-"""Test async serialization performance."""
+    """Test async serialization performance."""
 
         # Test with complex state
 start_time = time.time()
@@ -373,7 +374,7 @@ assert deserialized["optimizations_result"]["cost_savings] == 5280.95"
 
 @pytest.mark.asyncio
     async def test_serialize_message_safely_async_timeout(self, websocket_manager):
-"""Test async serialization timeout handling."""
+    """Test async serialization timeout handling."""
 
             # Create a mock that simulates slow serialization
 with patch.object(websocket_manager, '_serialize_message_safely') as mock_sync:"""
@@ -445,7 +446,7 @@ def test_serialize_message_safely_error_recovery(self, websocket_manager):
         """Test serialization with special characters and unicode."""
 """
 """
-special_message = {"type": "agent_message",, "payload": { ), "unicode_text": "Hello [U+4E16][U+754C]! [U+1F30D] [U+00D1]o[U+00F1]o caf[U+00E9] r[U+00E9]sum[U+00E9]",, "special_chars": ["@", "#", "$", "%", "^", "&", "*"],, "emojis": ["[U+1F600]", "[U+1F680]", " IDEA: ", " LIGHTNING: ", "[U+1F31F]"],, "quotes": ["'single'", '"double"', "`backtick`"],, "newlines_and_tabs": "Line 1}"
+special_message = {"type": "agent_message",, "payload": { ), "unicode_text": "Hello [U+4E16][U+"754C"]! [U+1F30D] [U+00D1]o[U+00F1]o caf[U+00E9] r[U+00E9]sum[U+00E9]",, "special_chars": ["@", "#", "$", "%", "^", "&", "*"],, "emojis": ["[U+1F600]", "[U+1F680]", " IDEA: ", " LIGHTNING: ", "[U+1F31F]"],, "quotes": ["'single'", '"double"', "`backtick`"],, "newlines_and_tabs": "Line 1}"
         Line 2\tTabbed","
         "null_and_empty": [None, "", "   ],"
         "control_chars": "\u0000\u0001\u0002"
@@ -459,7 +460,7 @@ special_message = {"type": "agent_message",, "payload": { ), "unicode_text": "He
         deserialized = json.loads(json_str)
 
     # Verify special characters are preserved
-        assert "[U+4E16][U+754C]" in deserialized["payload"]["unicode_text]"
+        assert "[U+4E16][U+"754C"]" in deserialized["payload"]["unicode_text]"
         assert "[U+1F30D]" in deserialized["payload"]["unicode_text]"
         assert len(deserialized["payload"]["emojis]) == 5"
 
@@ -496,7 +497,7 @@ deeply_nested = {"type": "deeply_nested",, "payload: create_nested_dict(10)}"
 
 @pytest.mark.asyncio
     async def test_serialize_message_safely_async_concurrent_calls(self, websocket_manager, complex_deep_agent_state):
-"""Test concurrent async serialization calls."""
+    """Test concurrent async serialization calls."""
 
                         # Create multiple complex messages for concurrent serialization"""
                         # Create multiple complex messages for concurrent serialization"""
@@ -521,7 +522,7 @@ assert len(results) == 20
 
                             # Verify each result is correct
 for i, result in enumerate(results):
-json_str = json.dumps(result)
+    json_str = json.dumps(result)
 deserialized = json.loads(json_str)
 assert deserialized["run_id"] == "formatted_string"
 assert deserialized["step_count] == i + 1"
@@ -549,14 +550,14 @@ def test_serialize_message_safely_very_large_messages(self, websocket_manager):
 """Test handling of very large messages."""
 """
 """
-large_array = ["x * 1000 for _ in range(1000)]  # 1MB of data"
+large_array = ["x * 1000 for _ in range(1000)]  # "1MB" of data"
 large_message = {"type": "large_message",, "payload": { ), "large_array": large_array,, "metadata": {"size": len(large_array), "item_size: 1000}}"
     # Should serialize (WebSocket manager doesn't enforce size limits during serialization)'
 result = websocket_manager._serialize_message_safely(large_message)
 
     # Should be JSON serializable
 json_str = json.dumps(result)
-assert len(json_str) > 1000000  # Should be > 1MB
+assert len(json_str) > 1000000  # Should be > "1MB"
 
     # Verify accuracy
 deserialized = json.loads(json_str)
@@ -608,7 +609,7 @@ assert "connection_id" in deserialized["details]"
 
 @pytest.mark.asyncio
     async def test_websocket_manager_integration_with_serialization(self, websocket_manager):
-"""Test integration between WebSocket manager methods and serialization.""""""
+    """Test integration between WebSocket manager methods and serialization.""""""
 """Test integration between WebSocket manager methods and serialization.""""""
         # Test send_to_thread method uses serialization properly"""
         # Test send_to_thread method uses serialization properly"""

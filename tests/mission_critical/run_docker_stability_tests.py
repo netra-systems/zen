@@ -52,7 +52,8 @@ try:
 
     if health:
         print(✅ PASS:  Docker rate limiter is healthy)"
-        print(✅ PASS:  Docker rate limiter is healthy)"
+        print(✅ PASS:  Docker rate limiter is healthy)""
+
     else:
         print(❌ FAIL:  Docker rate limiter unhealthy")"
         sys.exit(1)
@@ -67,7 +68,8 @@ try:
         sys.exit(1)
 
     print(📊 Testing Metrics Collection...)"
-    print(📊 Testing Metrics Collection...)"
+    print(📊 Testing Metrics Collection...)""
+
     metrics = DockerStabilityMetrics()
     metrics.record_operation("test_op, 1.5, True)"
     metrics.record_force_flag_violation()
@@ -78,7 +80,8 @@ try:
     print(fTotal operations: {report.total_operations})"
     print(f"Success rate: {report.success_rate:.2%}))"
     print(fForce flag violations: {report.force_flag_violations})"
-    print(fForce flag violations: {report.force_flag_violations})"
+    print(fForce flag violations: {report.force_flag_violations})""
+
 
     print("\n + = * 60)"
     print(✅ PASS:  DOCKER STABILITY TEST SUITE VALIDATION PASSED")"

@@ -8,7 +8,6 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
 """
-"""
         """Send JSON message.""""""
         """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed)"
@@ -26,14 +25,16 @@ class TestWebSocketConnection:
         return self.messages_sent.copy()"""
         return self.messages_sent.copy()"""
         """
-        """
+        """"
+
         Comprehensive test suite for TriageSubAgent SSOT violations.
 
         This test suite is designed to FAIL until all SSOT violations are fixed.
         Each test targets a specific violation pattern from the AGENT_SSOT_AUDIT_PLAN."""
         Each test targets a specific violation pattern from the AGENT_SSOT_AUDIT_PLAN."""
         Business Value: TriageSubAgent is first contact for ALL users - CRITICAL revenue impact."""
-        Business Value: TriageSubAgent is first contact for ALL users - CRITICAL revenue impact."""
+        Business Value: TriageSubAgent is first contact for ALL users - CRITICAL revenue impact.""""
+
 
 import asyncio
 import hashlib
@@ -89,7 +90,8 @@ class TestTriageAgentSSOTViolations(SSotAsyncTestCase):
 
     def test_violation_custom_hash_generation_in_cache_utils(self):
         """
-        """
+        """"
+
         pass
         VIOLATION: Custom hash generation using hashlib.md5 directly
         instead of using CacheHelpers.hash_key_data()"""
@@ -117,7 +119,8 @@ from netra_backend.app.agents.triage.unified_triage_agent import cache_utils
     def test_violation_not_using_canonical_cache_helpers(self):
         """"""
         instead of netra_backend.app.services.cache.cache_helpers"""
-        instead of netra_backend.app.services.cache.cache_helpers"""
+        instead of netra_backend.app.services.cache.cache_helpers""""
+
         pass
         core = TriageCore(self.context)
 
@@ -139,7 +142,8 @@ from netra_backend.app.services.cache.cache_helpers import CacheHelpers
         """
         VIOLATION: TriageSubAgent doesn"t extend BaseAgent"
         Missing inheritance from netra_backend.app.agents.base_agent.BaseAgent"""
-        Missing inheritance from netra_backend.app.agents.base_agent.BaseAgent"""
+        Missing inheritance from netra_backend.app.agents.base_agent.BaseAgent""""
+
         pass
 from netra_backend.app.agents.base_agent import BaseAgent
 
@@ -158,12 +162,14 @@ from netra_backend.app.agents.base_agent import BaseAgent
 
     def test_violation_using_extract_json_from_response(self):
         """
-        """
+        """"
+
         VIOLATION: Using custom extract_json_from_response
         instead of unified_json_handler.LLMResponseParser"""
         instead of unified_json_handler.LLMResponseParser"""
         Location: netra_backend/app/agents/triage_sub_agent/core.py:25"""
-        Location: netra_backend/app/agents/triage_sub_agent/core.py:25"""
+        Location: netra_backend/app/agents/triage_sub_agent/core.py:25""""
+
         pass
     # Check if the deprecated function is imported
 import netra_backend.app.agents.triage.unified_triage_agent.core as core_module
@@ -176,7 +182,8 @@ import netra_backend.app.agents.triage.unified_triage_agent.core as core_module
         """
         """
         VIOLATION: Custom JSON parsing logic instead of using unified handler"""
-        VIOLATION: Custom JSON parsing logic instead of using unified handler"""
+        VIOLATION: Custom JSON parsing logic instead of using unified handler""""
+
         pass
         core = TriageCore(self.context)
 """
@@ -199,7 +206,8 @@ from netra_backend.app.core.serialization.unified_json_handler import LLMRespons
         VIOLATION: Direct json.loads usage instead of safe_json_loads"""
         VIOLATION: Direct json.loads usage instead of safe_json_loads"""
         Location: netra_backend/app/agents/triage_sub_agent/core.py:187"""
-        Location: netra_backend/app/agents/triage_sub_agent/core.py:187"""
+        Location: netra_backend/app/agents/triage_sub_agent/core.py:187""""
+
         pass
         core = TriageCore(self.context)
 """
@@ -217,7 +225,8 @@ from netra_backend.app.core.serialization.unified_json_handler import LLMRespons
     def test_violation_not_using_websocket_bridge_adapter(self):
         """"""
         Should use the canonical WebSocket integration pattern"""
-        Should use the canonical WebSocket integration pattern"""
+        Should use the canonical WebSocket integration pattern""""
+
         pass
     # Check if agent has WebSocketBridgeAdapter
         self.assertTrue(hasattr(self.agent, '_websocket_adapter') or )"""
@@ -228,7 +237,8 @@ from netra_backend.app.core.serialization.unified_json_handler import LLMRespons
         """
         """
         VIOLATION: Custom WebSocket event emission instead of using adapter methods"""
-        VIOLATION: Custom WebSocket event emission instead of using adapter methods"""
+        VIOLATION: Custom WebSocket event emission instead of using adapter methods""""
+
         pass
         # Test that proper WebSocket events are sent"""
         # Test that proper WebSocket events are sent"""
@@ -244,7 +254,8 @@ from netra_backend.app.core.serialization.unified_json_handler import LLMRespons
         """
         """
         VIOLATION: Custom retry logic instead of UnifiedRetryHandler"""
-        VIOLATION: Custom retry logic instead of UnifiedRetryHandler"""
+        VIOLATION: Custom retry logic instead of UnifiedRetryHandler""""
+
         pass
         processor = TriageProcessor(TriageCore(self.context), None)
 
@@ -263,7 +274,8 @@ from netra_backend.app.core.resilience.unified_retry_handler import UnifiedRetry
         """
         """
         VIOLATION: Direct os.environ access instead of IsolatedEnvironment"""
-        VIOLATION: Direct os.environ access instead of IsolatedEnvironment"""
+        VIOLATION: Direct os.environ access instead of IsolatedEnvironment""""
+
         pass
     # Search for os.environ usage in the module
 import netra_backend.app.agents.triage.unified_triage_agent as triage_module
@@ -285,7 +297,8 @@ import netra_backend.app.agents.triage.unified_triage_agent as triage_module
     async def test_violation_storing_user_data_in_instance(self):
         """"""
         instead of passing through UserExecutionContext"""
-        instead of passing through UserExecutionContext"""
+        instead of passing through UserExecutionContext""""
+
         pass
                     # Check that agent doesn't store user data'
         await self.agent.execute(self.context)
@@ -303,7 +316,8 @@ import netra_backend.app.agents.triage.unified_triage_agent as triage_module
         """
         """
         VIOLATION: Custom error handling instead of agent_error_handler"""
-        VIOLATION: Custom error handling instead of agent_error_handler"""
+        VIOLATION: Custom error handling instead of agent_error_handler""""
+
         pass
 from netra_backend.app.core.unified_error_handler import agent_error_handler
 
@@ -318,7 +332,8 @@ from netra_backend.app.core.unified_error_handler import agent_error_handler
         """
         """
         VIOLATION: Methods not accepting UserExecutionContext parameter"""
-        VIOLATION: Methods not accepting UserExecutionContext parameter"""
+        VIOLATION: Methods not accepting UserExecutionContext parameter""""
+
         pass
         # Test that execute accepts context
 import inspect
@@ -336,7 +351,8 @@ import inspect
         """
         """
         VIOLATION: Direct config file reading instead of using configuration architecture"""
-        VIOLATION: Direct config file reading instead of using configuration architecture"""
+        VIOLATION: Direct config file reading instead of using configuration architecture""""
+
         pass
     # Check for direct file reading
         core = TriageCore(self.context)
@@ -357,7 +373,8 @@ import netra_backend.app.agents.triage.unified_triage_agent.core as core_module
     async def test_concurrent_request_isolation(self):
         """"""
         This tests multiple SSOT patterns together."""
-        This tests multiple SSOT patterns together."""
+        This tests multiple SSOT patterns together.""""
+
         pass
         # Create multiple contexts
         contexts = [ )"""
@@ -391,7 +408,8 @@ import netra_backend.app.agents.triage.unified_triage_agent.core as core_module
         """
         """
         Test that WebSocket events are properly sent with UserExecutionContext."""
-        Test that WebSocket events are properly sent with UserExecutionContext."""
+        Test that WebSocket events are properly sent with UserExecutionContext.""""
+
         pass
                             # Mock WebSocket adapter
         websocket = TestWebSocketConnection()  # Real WebSocket implementation

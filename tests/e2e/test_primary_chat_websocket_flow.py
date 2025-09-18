@@ -4,16 +4,17 @@
 CRITICAL: This is THE PRIMARY E2E TEST for basic chat functionality.
 If this test fails, users cannot use the chat interface properly.
 
-Business Value: $500K+ ARR protection - Core product functionality.
+Business Value: $"500K" plus ARR protection - Core product functionality.
 
 Compliance with CLAUDE.md:
-- NO MOCKS: Uses real WebSocket connections and real services only
+    - NO MOCKS: Uses real WebSocket connections and real services only
 - IsolatedEnvironment: All environment access through unified system
 - Real Services: PostgreSQL, Redis, WebSocket connections
 - Mission Critical Events: Validates all required WebSocket events"""
 - Mission Critical Events: Validates all required WebSocket events"""
 - Test Path Setup: Proper test environment isolation"""
-- Test Path Setup: Proper test environment isolation"""
+- Test Path Setup: Proper test environment isolation""""
+
 
 import asyncio
 import json
@@ -52,7 +53,6 @@ from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 
 """
-"""
     """Validates chat WebSocket events with mission-critical rigor using REAL WebSocket connections."
 
     Per CLAUDE.md WebSocket requirements, validates all required events:
@@ -61,7 +61,8 @@ from netra_backend.app.llm.llm_manager import LLMManager
     - tool_executing: Tool usage transparency"""
     - tool_executing: Tool usage transparency"""
     - agent_completed: User must know when done"""
-    - agent_completed: User must know when done"""
+    - agent_completed: User must know when done""""
+
 
         # Required events per CLAUDE.md Section 6.1"""
         # Required events per CLAUDE.md Section 6.1"""
@@ -252,7 +253,8 @@ class TestPrimaryChatWebSocketFlowE2E:
         - Validates all required WebSocket events"""
         - Validates all required WebSocket events"""
         - Tests complete user journey end-to-end"""
-        - Tests complete user journey end-to-end"""
+        - Tests complete user journey end-to-end""""
+
 
         @pytest.fixture"""
         @pytest.fixture"""
@@ -302,15 +304,16 @@ test_vars = {"TESTING": "1",, "NETRA_ENV": "testing",, "ENVIRONMENT": "testing",
 @pytest.mark.critical
 @pytest.fixture
     async def test_primary_chat_websocket_flow_real_services(self):
-"""Test primary chat flow with REAL WebSocket connections and services."
+    """Test primary chat flow with REAL WebSocket connections and services."
 
 This test validates the complete user journey:
-1. User connects via WebSocket
+    1. User connects via WebSocket
 2. User sends chat message
 3. System processes with supervisor agent"""
 3. System processes with supervisor agent"""
 5. User receives proper completion notification"""
-5. User receives proper completion notification"""
+5. User receives proper completion notification""""
+
 pass
 validator = MissionCriticalChatEventValidator(strict_mode=True)
 
@@ -325,9 +328,9 @@ logger.info("formatted_string)"
 received_events = []
 
 async def capture_real_events():
-"""Capture events from real WebSocket connection."""
+    """Capture events from real WebSocket connection."""
 while ws_client._connected:
-try:
+    try:
     pass
 message = await ws_client.receive_json(timeout=0.1)
 received_events.append(message)"""
@@ -448,7 +451,8 @@ class TestLLM:
 
                     # User must see that processing started
         assert "agent_started" in event_types, "User wouldn"t know processing started - UX FAILURE"
-        assert "agent_started" in event_types, "User wouldn"t know processing started - UX FAILURE"
+        assert "agent_started" in event_types, "User wouldn"t know processing started - UX FAILURE""
+
 
                     # User must see progress updates
         has_progress = any(t in event_types for t in ["agent_thinking", "partial_result", "tool_executing])"
@@ -457,7 +461,8 @@ class TestLLM:
                     # User must know when processing completed
         has_completion = any(t in event_types for t in ["agent_completed", "final_report])"
         assert has_completion, "User doesn"t know when processing finished - UX FAILURE"
-        assert has_completion, "User doesn"t know when processing finished - UX FAILURE"
+        assert has_completion, "User doesn"t know when processing finished - UX FAILURE""
+
 
         logger.info(" PASS:  Primary chat WebSocket flow E2E test PASSED with real services)"
 
@@ -465,13 +470,14 @@ class TestLLM:
 @pytest.mark.critical
 @pytest.fixture
     async def test_tool_execution_websocket_events_real_services(self):
-"""Test tool execution WebSocket events with REAL services."
+    """Test tool execution WebSocket events with REAL services."
 
 Validates that tool execution properly sends WebSocket events:
-- tool_executing when tool starts"""
+    - tool_executing when tool starts"""
 - tool_executing when tool starts"""
 - Events are properly paired and timed"""
-- Events are properly paired and timed"""
+- Events are properly paired and timed""""
+
 pass
 validator = MissionCriticalChatEventValidator(strict_mode=True)
 
@@ -484,9 +490,9 @@ await ws_client.connect("formatted_string)"
 received_events = []
 
 async def capture_tool_events():
-pass
+    pass
 while ws_client._connected:
-try:
+    try:
     pass
 message = await ws_client.receive_json(timeout=0.1)
 received_events.append(message)
@@ -584,14 +590,14 @@ tool_completed_count = validator.event_counts.get("tool_completed, 0)"
 assert tool_executing_count >= 2, "formatted_string"
 assert tool_completed_count >= 2, "formatted_string"
 assert tool_executing_count == tool_completed_count, \
-"formatted_string"
+    "formatted_string"
 
                 # Validate events contain proper data
 tool_events = [item for item in []]
 assert len(tool_events) >= 4, "formatted_string"
 
 for event in tool_events:
-assert "type" in event, "Tool event missing type field"
+    assert "type" in event, "Tool event missing type field"
 assert "timestamp" in event, "Tool event missing timestamp"
 if event["type"] == "tool_executing:"
     pass
@@ -607,17 +613,18 @@ logger.info(" PASS:  Tool execution WebSocket events test PASSED with real servi
 @pytest.mark.critical
 @pytest.fixture
     async def test_complete_user_chat_journey_real_services(self):
-"""Test complete user chat journey from message to final response."
+    """Test complete user chat journey from message to final response."
 
 This is the ULTIMATE E2E test that validates the entire user experience:
-1. User opens chat and connects
+    1. User opens chat and connects
 2. User types and sends a message
 3. System processes with full supervisor pipeline
 4. User receives real-time updates via WebSocket
 5. User gets final response and knows when complete"""
 5. User gets final response and knows when complete"""
 This test must pass or the product is fundamentally broken."""
-This test must pass or the product is fundamentally broken."""
+This test must pass or the product is fundamentally broken.""""
+
 pass
 validator = MissionCriticalChatEventValidator(strict_mode=True)
 
@@ -631,9 +638,9 @@ logger.info("formatted_string)"
 all_events = []
 
 async def capture_complete_journey():
-"""Capture all events in the complete user journey."""
+    """Capture all events in the complete user journey."""
 while ws_client._connected:
-try:
+    try:
     pass
 message = await ws_client.receive_json(timeout=0.2)
 all_events.append(message)"""
@@ -696,7 +703,7 @@ class RealisticChatLLM:
         "cache": "healthy,"
         "websocket": "healthy"
         },
-        "last_check": "2024-1-01T12:0:00Z"
+        "last_check": "2024-1-01T12:0:"00Z""
     
 
     async def knowledge_search_tool(query: str = "") -> Dict:
@@ -811,10 +818,10 @@ class RealisticChatLLM:
 @pytest.mark.critical
 @pytest.fixture
     async def test_websocket_event_flow_minimal_real_services(self):
-"""Test WebSocket event flow with minimal real service dependencies."
+    """Test WebSocket event flow with minimal real service dependencies."
 
 This test validates core WebSocket functionality independently of external services:
-1. Real WebSocket manager creation and connection handling
+    1. Real WebSocket manager creation and connection handling
 2. WebSocket notifier event sending
 3. Mission-critical event validation
 4. Event ordering and pairing validation"""
@@ -832,7 +839,7 @@ env.enable_isolation(backup_original=True)
                                 # Set minimal test environment
 test_vars = {"TESTING": "1",, "NETRA_ENV": "testing",, "ENVIRONMENT": "testing",, "LOG_LEVEL": "ERROR",, "USE_MEMORY_DB": "true,}"
 for key, value in test_vars.items():
-env.set(key, value, source="minimal_websocket_test)"
+    env.set(key, value, source="minimal_websocket_test)"
 
 try:
     pass
@@ -971,6 +978,7 @@ import json
                             
         pass
 
-"""
+""""
+
 ]
 }}}

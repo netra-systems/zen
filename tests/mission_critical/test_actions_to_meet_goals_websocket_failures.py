@@ -2,10 +2,10 @@
 
 MISSION CRITICAL: This test suite ensures ActionsToMeetGoalsSubAgent properly
 handles WebSocket event delivery during failures, protecting the Golden Path
-user experience worth 500K ARR.
+user experience worth "500K" ARR.
 
 Focus Areas:
-- WebSocket events during agent execution failures
+    - WebSocket events during agent execution failures
 - User feedback during error conditions  
 - Chat value delivery even when agent fails
 - Event sequence integrity during failures
@@ -15,7 +15,7 @@ Business Priority: Chat functionality delivers 90% of platform value.
 These tests ensure users get proper feedback even when backend agents fail.
 
 Test Strategy:
-- Real WebSocket connections (no mocks)
+    - Real WebSocket connections (no mocks)
 - Actual event sequence validation
 - User experience quality measurement
 - Failure recovery and feedback patterns
@@ -65,7 +65,8 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
 
     def setup_method(self, method):
         Setup mission critical WebSocket testing."
-        Setup mission critical WebSocket testing."
+        Setup mission critical WebSocket testing.""
+
         super().setup_method(method)
         
         # Mission critical test configuration
@@ -126,7 +127,8 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
             metadata={
                 user_request: Create action plan for critical infrastructure,
                 websocket_client_id: self.test_client_id"
-                websocket_client_id: self.test_client_id"
+                websocket_client_id: self.test_client_id""
+
             }
         
         # Execute agent and expect failure
@@ -141,7 +143,8 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
             # Record successful event delivery
             self.record_metric(critical_events_delivered, True)
             self.record_metric(user_feedback_complete, True)"
-            self.record_metric(user_feedback_complete, True)"
+            self.record_metric(user_feedback_complete, True)""
+
             
         except Exception as e:
             # On failure, verify critical events were still sent
@@ -163,7 +166,8 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_event_sequence_integrity_during_failure(self):
-        ""MISSION CRITICAL: WebSocket event sequence integrity during failures."
+        ""MISSION CRITICAL: WebSocket event sequence integrity during failures.""
+
         
         Event sequence must be logical even during failures:
         - No orphaned tool_completed without tool_executing
@@ -220,7 +224,8 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
             self._validate_failure_event_sequence(event_sequence)
             self.record_metric(event_sequence_partial_valid, True)
             self.record_metric(failure_handled_gracefully, True)"
-            self.record_metric(failure_handled_gracefully, True)"
+            self.record_metric(failure_handled_gracefully, True)""
+
 
     @pytest.mark.asyncio
     async def test_websocket_connection_robustness_during_agent_failure(self):
@@ -241,7 +246,8 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
             async def send_json(self, data: dict):
                 if not self.is_connected:
                     raise RuntimeError(Connection closed)"
-                    raise RuntimeError(Connection closed)"
+                    raise RuntimeError(Connection closed)""
+
                 self.messages_sent += 1
                 connection_states.append({
                     action": message_sent,"
@@ -278,7 +284,8 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
         mock_ws_adapter.emit_agent_started = AsyncMock(side_effect=lambda msg: health_tracker.send_json({event: "agent_started, data: msg})"
         mock_ws_adapter.emit_thinking = AsyncMock(side_effect=lambda msg: health_tracker.send_json({event: agent_thinking, "data: msg})"
         mock_ws_adapter.emit_error = AsyncMock(side_effect=lambda msg: health_tracker.send_json({event: error, data: msg})"
-        mock_ws_adapter.emit_error = AsyncMock(side_effect=lambda msg: health_tracker.send_json({event: error, data: msg})"
+        mock_ws_adapter.emit_error = AsyncMock(side_effect=lambda msg: health_tracker.send_json({event: error, data: msg})""
+
         
         # Replace agent's WebSocket adapter'
         agent._websocket_adapter = mock_ws_adapter
@@ -299,7 +306,8 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
             # If execution succeeds, verify connection remained healthy
             assert health_tracker.is_connected, "Connection should remain healthy on success"
             assert health_tracker.messages_sent > 0, Messages should have been sent"
-            assert health_tracker.messages_sent > 0, Messages should have been sent"
+            assert health_tracker.messages_sent > 0, Messages should have been sent""
+
             
             self.record_metric(connection_health_maintained", True)"
             self.record_metric(messages_sent_successfully, health_tracker.messages_sent)
@@ -363,7 +371,8 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
             
             # Verify reasonable response time
             assert ux_metrics[response_time] < 10.0, fResponse too slow: {ux_metrics['response_time']}s"
-            assert ux_metrics[response_time] < 10.0, fResponse too slow: {ux_metrics['response_time']}s"
+            assert ux_metrics[response_time] < 10.0, fResponse too slow: {ux_metrics['response_time']}s""
+
             
             # Verify meaningful result provided
             if result and "action_plan_result in result:"
@@ -386,7 +395,8 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
             error_msg = str(e).lower()
             technical_terms = [llm manager, "architectural migration, five_whys, none type]"
             ux_metrics[error_message_user_friendly] = not any(term in error_msg for term in technical_terms)"
-            ux_metrics[error_message_user_friendly] = not any(term in error_msg for term in technical_terms)"
+            ux_metrics[error_message_user_friendly] = not any(term in error_msg for term in technical_terms)""
+
             
             # If error message is too technical, that's a UX problem'
             if not ux_metrics["error_message_user_friendly]:"
@@ -403,7 +413,8 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
     def _validate_successful_event_sequence(self, events: List[Dict) -> None:
         ""Validate WebSocket event sequence for successful execution."
         event_types = [e[event_type] for e in events]"
-        event_types = [e[event_type] for e in events]"
+        event_types = [e[event_type] for e in events]""
+
         
         # Must have agent_started and agent_completed
         assert agent_started" in event_types, Missing agent_started event"
@@ -413,7 +424,8 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
         started_pos = next(i for i, e in enumerate(events) if e[event_type"] == agent_started)"
         completed_pos = next(i for i, e in enumerate(events) if e[event_type] == agent_completed)
         assert started_pos < completed_pos, agent_started must come before agent_completed"
-        assert started_pos < completed_pos, agent_started must come before agent_completed"
+        assert started_pos < completed_pos, agent_started must come before agent_completed""
+
         
         # Tool events should be paired
         executing_events = [e for e in events if e["event_type] == tool_executing]"
@@ -440,7 +452,8 @@ class ActionsToMeetGoalsWebSocketFailuresTests(SSotAsyncTestCase):
 
     def teardown_method(self, method):
         Cleanup after mission critical test."
-        Cleanup after mission critical test."
+        Cleanup after mission critical test.""
+
         super().teardown_method(method)
         
         # Ensure mission critical metrics were recorded

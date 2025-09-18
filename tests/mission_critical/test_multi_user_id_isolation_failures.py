@@ -1,33 +1,34 @@
-"""
-"""
+""""
+
 Mission Critical Test Suite for Multi-User ID Isolation Failures
 
 MISSION CRITICAL: This test suite validates that ID generation provides proper
 user isolation and prevents cross-user data contamination through ID conflicts.
 
 Business Value Justification:
-- Segment: ALL (Free  ->  Enterprise) - USER SECURITY CRITICAL
+    - Segment: ALL (Free  ->  Enterprise) - USER SECURITY CRITICAL
 - Business Goal: Prevent user data leakage and ensure complete user isolation
 - Value Impact: Protects user privacy and prevents catastrophic data breaches
 - Strategic Impact: CRITICAL for multi-user platform trust and regulatory compliance
 
 Test Strategy:
-These tests are designed to FAIL initially, exposing multi-user isolation violations
+    These tests are designed to FAIL initially, exposing multi-user isolation violations
 caused by inconsistent ID generation patterns. They simulate real concurrent
 multi-user scenarios to detect isolation breaches.
 
 Critical Violations to Detect:
-- ID collisions between different users
+    - ID collisions between different users
 - Shared ID generation causing predictable patterns
 - Cross-user context contamination via ID reuse
 - Thread/Run ID relationships that leak user data
 - WebSocket routing failures allowing cross-user message delivery
 - Session management failures due to ID format inconsistencies
 "
-"
+""
 
-"""
-"""
+
+""""
+
 import pytest
 import asyncio
 import uuid
@@ -66,7 +67,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
         self.active_user_contexts = []
         self.active_websocket_managers = []
         self.id_patterns = {
-            'uuid_v4': re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$', re.I),
+            'uuid_v4': re.compile(r'^[0-"9a"-f]{8}-[0-"9a"-f]{4}-4[0-"9a"-f]{3}-["89ab"][0-"9a"-f]{3}-[0-"9a"-f]{12}$', re.I),
             'ssot_structured': re.compile(r'^[a-z_]+_\d+_[a-f0-9]{8}$'),
         }
 
@@ -94,13 +95,15 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
     @pytest.mark.asyncio
     async def test_user_id_collision_violations_SHOULD_FAIL(self):
         """
-    "
+    ""
+
         EXPECTED TO FAIL: User ID generation allows collisions between different users.
         
         This test creates multiple users rapidly and checks for ID collisions
         that would cause user data contamination.
         "
-        "
+        ""
+
         collision_violations = []
         
         try:
@@ -153,7 +156,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
         
         except Exception as e:
             collision_violations.append(fUser ID collision testing failed: {e})"
-            collision_violations.append(fUser ID collision testing failed: {e})"
+            collision_violations.append(fUser ID collision testing failed: {e})""
+
         
         # This test SHOULD FAIL if collision risks are detected
         assert len(collision_violations) > 0, (
@@ -171,7 +175,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_cross_user_context_contamination_violations_SHOULD_FAIL(self):
-        """
+        """"
+
         EXPECTED TO FAIL: User contexts contaminate each other through shared ID generation.
         
         This test validates that user contexts maintain complete isolation
@@ -204,7 +209,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
                 if len(unique_values) != len(field_values):
                     duplicates = len(field_values) - len(unique_values)
                     contamination_violations.append(fCross-user {field_name} contamination: {duplicates} duplicates found)"
-                    contamination_violations.append(fCross-user {field_name} contamination: {duplicates} duplicates found)"
+                    contamination_violations.append(fCross-user {field_name} contamination: {duplicates} duplicates found)""
+
                 
                 # Check for shared prefixes that could indicate shared state
                 if len(field_values) > 1:
@@ -226,7 +232,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
                 # Create two users in rapid succession
                 ctx1 = await create_authenticated_user_context(user_email=temporal1@example.com)
                 ctx2 = await create_authenticated_user_context(user_email=temporal2@example.com)"
-                ctx2 = await create_authenticated_user_context(user_email=temporal2@example.com)"
+                ctx2 = await create_authenticated_user_context(user_email=temporal2@example.com)""
+
                 
                 self.active_user_contexts.extend([ctx1, ctx2)
                 
@@ -243,10 +250,11 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
                 
                 if ctx1_timestamp and ctx2_timestamp:
                     timestamp_diff = abs(ctx1_timestamp - ctx2_timestamp)
-                    if timestamp_diff < 100:  # Less than 100ms difference
+                    if timestamp_diff < 100:  # Less than "100ms" difference
                         contamination_violations.append(
                             fTemporal contamination: User contexts created {timestamp_diff}ms apart have similar timestamps"
-                            fTemporal contamination: User contexts created {timestamp_diff}ms apart have similar timestamps"
+                            fTemporal contamination: User contexts created {timestamp_diff}ms apart have similar timestamps""
+
                         )
             
             except Exception as temporal_error:
@@ -254,7 +262,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
         
         except Exception as e:
             contamination_violations.append(fCross-user contamination testing failed: {e})"
-            contamination_violations.append(fCross-user contamination testing failed: {e})"
+            contamination_violations.append(fCross-user contamination testing failed: {e})""
+
         
         # This test SHOULD FAIL if contamination is detected
         assert len(contamination_violations) > 0, (
@@ -274,7 +283,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
 
     @pytest.mark.asyncio
     async def test_websocket_multi_user_isolation_violations_SHOULD_FAIL(self):
-        """
+        """"
+
         EXPECTED TO FAIL: WebSocket isolation fails allowing cross-user message delivery.
         
         This test validates that WebSocket systems maintain complete user isolation
@@ -307,7 +317,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
                             if is_active:
                                 websocket_violations.append(
                                     fWebSocket manager {i} can access user {j}'s connection status"
-                                    fWebSocket manager {i} can access user {j}'s connection status"
+                                    fWebSocket manager {i} can access user {j}'s connection status""
+
                                 )
                         except Exception:
                             # Exception is good - indicates proper isolation
@@ -370,7 +381,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
                         ""data": {"operation_id": operation_id},"
                         user_id: ctx.user_id,
                         timestamp: datetime.utcnow().isoformat()"
-                        timestamp: datetime.utcnow().isoformat()"
+                        timestamp: datetime.utcnow().isoformat()""
+
                     }
                     await mgr.send_to_user(message)
                     return f"success_{operation_id}"
@@ -415,13 +427,15 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
     @pytest.mark.asyncio
     async def test_thread_run_relationship_isolation_violations_SHOULD_FAIL(self):
         """
-        "
+        ""
+
         EXPECTED TO FAIL: Thread/Run ID relationships allow cross-user data access.
         
         This test validates that thread and run ID relationships maintain proper
         user boundaries and don't allow access to other users' data.
 "
-"
+""
+
         relationship_violations = []
         
         try:
@@ -495,7 +509,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
                                     relationship_violations.append(
                                         f"Thread ID collision: User {user_id[:8]}... run references"
                                         fuser {other_ctx.user_id[:8]}... thread"
-                                        fuser {other_ctx.user_id[:8]}... thread"
+                                        fuser {other_ctx.user_id[:8]}... thread""
+
                                     )
                     
                     except Exception as extraction_error:
@@ -514,7 +529,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
             format_types = set(run_id_formats.values())
             if len(format_types) > 1:
                 relationship_violations.append(fMixed run ID formats across users: {dict(Counter(run_id_formats.values()))})"
-                relationship_violations.append(fMixed run ID formats across users: {dict(Counter(run_id_formats.values()))})"
+                relationship_violations.append(fMixed run ID formats across users: {dict(Counter(run_id_formats.values()))})""
+
             
             # Violation 4: Test predictable run ID generation
             # If run IDs are too predictable, users might guess other users' run IDs'
@@ -545,7 +561,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
             Expected thread/run relationship isolation violations. "
             Expected thread/run relationship isolation violations. "
             If this passes, thread/run relationships have proper user isolation!"
-            If this passes, thread/run relationships have proper user isolation!"
+            If this passes, thread/run relationships have proper user isolation!""
+
         )
         
         pytest.fail(
@@ -617,7 +634,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
                         
                     except Exception as e:
                         violations.append(fUser {user_idx} message {i} failed: {e})"
-                        violations.append(fUser {user_idx} message {i} failed: {e})"
+                        violations.append(fUser {user_idx} message {i} failed: {e})""
+
                 
                 return violations
             
@@ -637,7 +655,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
             # Concurrent Test 2: Simultaneous context operations
             async def concurrent_context_operations(user_idx, ctx):
                 Perform various context operations that might interfere with other users."
-                Perform various context operations that might interfere with other users."
+                Perform various context operations that might interfere with other users.""
+
                 violations = []
                 try:
                     # Simulate operations that read/modify context state
@@ -706,7 +725,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
         # This test SHOULD FAIL if concurrent violations are detected
         assert len(concurrent_violations) > 0, (
             Expected concurrent multi-user access violations. "
-            Expected concurrent multi-user access violations. "
+            Expected concurrent multi-user access violations. ""
+
             If this passes, the system handles concurrent multi-user access properly!
         )
         
@@ -714,7 +734,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
             fConcurrent multi-user access violations:\n" +"
             \n.join(concurrent_violations) +
             \n\nCRITICAL: Fix concurrent access handling to prevent multi-user isolation failures"
-            \n\nCRITICAL: Fix concurrent access handling to prevent multi-user isolation failures"
+            \n\nCRITICAL: Fix concurrent access handling to prevent multi-user isolation failures""
+
         )
 
     # =============================================================================
@@ -724,7 +745,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
     @pytest.mark.asyncio
     async def test_multi_user_isolation_compliance_SHOULD_PASS_AFTER_MIGRATION(self):
         """
-    "
+    ""
+
         This test should PASS after migration validates proper multi-user isolation.
         "
         "
@@ -736,7 +758,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
             for i in range(5):
                 ctx = await create_authenticated_user_context(
                     user_email=fcompliant_user_{i}@example.com"
-                    user_email=fcompliant_user_{i}@example.com"
+                    user_email=fcompliant_user_{i}@example.com""
+
                 )
                 mgr = await create_websocket_manager(ctx)
                 
@@ -794,10 +817,12 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
     @pytest.mark.asyncio
     async def test_concurrent_multi_user_compliance_SHOULD_PASS_AFTER_MIGRATION(self):
         """
-        "
+        ""
+
         This test should PASS after migration validates concurrent multi-user operations work properly.
 "
-"
+""
+
         num_users = 8
         user_contexts = []
         websocket_managers = []
@@ -844,7 +869,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
             
             # All should succeed
             assert len(results) == num_users, fAll {num_users} concurrent messages should succeed"
-            assert len(results) == num_users, fAll {num_users} concurrent messages should succeed"
+            assert len(results) == num_users, fAll {num_users} concurrent messages should succeed""
+
             for i, result in enumerate(results):
                 assert result == f"success_{i}, fMessage {i} should succeed"
         
@@ -870,7 +896,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
         # Test concurrent ID generation for multiple users
         async def generate_user_ids(user_count, operations_per_user):
             Generate IDs concurrently for multiple users."
-            Generate IDs concurrently for multiple users."
+            Generate IDs concurrently for multiple users.""
+
             async def user_id_operations(user_idx):
                 ids = []
                 for _ in range(operations_per_user):
@@ -892,7 +919,7 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
         ids_per_second = len(all_ids) / duration
         
         # Should be fast enough for multi-user scenarios
-        assert ids_per_second > 1000, "fMulti-user ID generation too slow: {ids_per_second:.2f} IDs/second"
+        assert ids_per_second > 1000, "fMulti-user ID generation too slow: {ids_per_second:."2f"} IDs/second"
         
         # All should be unique
         assert len(set(all_ids)) == len(all_ids), "fAll {len(all_ids)} generated IDs should be unique"
@@ -919,11 +946,13 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
     @pytest.mark.asyncio
     async def test_multi_user_system_health_check(self):
         """
-        "
+        ""
+
         Health check to validate basic multi-user functionality works.
         This test should always pass to ensure basic multi-user capability.
 "
-"
+""
+
         try:
             # Create a few users and verify basic isolation works
             user1_ctx = await create_authenticated_user_context(user_email=health1@example.com)"
@@ -1025,7 +1054,8 @@ class MultiUserIDIsolationFailuresTests(BaseTestCase):
             
             # This test should pass as it's generating a report'
             assert isinstance(violation_summary, dict), Should generate violation summary"
-            assert isinstance(violation_summary, dict), Should generate violation summary"
+            assert isinstance(violation_summary, dict), Should generate violation summary""
+
         
         except Exception as e:
             pytest.fail(fIsolation violation summary generation failed: {e}")"
