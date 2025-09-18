@@ -19,13 +19,8 @@ from shared.cors_config_builder import CORSConfigurationBuilder
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
 
-# Import dependency manager for Issue #1278 resilience
-from netra_backend.app.core.import_dependency_manager import (
-    ImportDependencyManager,
-    resilient_import,
-    import_auth_service_resilient,
-    log_startup_import_diagnostics
-)
+# Removed import_dependency_manager usage for Issue #1321 - WebSocket Import Isolation
+# Using direct imports with graceful error handling instead
 
 logger = logging.getLogger(__name__)
 
@@ -801,15 +796,8 @@ def setup_middleware(app: FastAPI) -> None:
         # CRITICAL FIX Issue #1278: Enhanced error handling and resilience for import failures
         logger.info("Starting middleware setup with enhanced error handling for Issue #1278")
 
-        # Pre-validate auth_service imports for Issue #1278
-        try:
-            auth_import_result = import_auth_service_resilient()
-            if auth_import_result["import_successful"]:
-                logger.info("✅ Auth service components pre-validated successfully")
-            else:
-                logger.warning("⚠️ Auth service components not available - middleware may use fallbacks")
-        except Exception as auth_check_error:
-            logger.warning(f"⚠️ Auth service pre-validation failed: {auth_check_error}")
+        # Note: Auth service validation removed for Issue #1321 service isolation
+        # Middleware now handles auth_service dependencies through HTTP integration layer
 
         # PHASE 1: Core Infrastructure Middleware (FIRST)
         # SESSION MIDDLEWARE MUST BE FIRST - All other middleware may depend on it
@@ -888,22 +876,16 @@ def setup_middleware(app: FastAPI) -> None:
         
         logger.info("Enhanced middleware setup completed with WebSocket exclusion and proper SessionMiddleware order")
 
-        # Log import diagnostics for Issue #1278 debugging
-        try:
-            log_startup_import_diagnostics()
-        except Exception as diag_error:
-            logger.warning(f"Failed to log import diagnostics: {diag_error}")
+        # Import diagnostics removed for Issue #1321 service isolation
+        logger.info("Middleware setup completed successfully with service isolation")
 
     except Exception as e:
         logger.error(f"CRITICAL: Enhanced middleware setup failed: {e}")
         # Enhanced error logging for debugging
         logger.error(f"Middleware setup failure details: {type(e).__name__}: {str(e)}", exc_info=e)
 
-        # Still log import diagnostics even on failure for debugging
-        try:
-            log_startup_import_diagnostics()
-        except Exception as diag_error:
-            logger.warning(f"Failed to log import diagnostics during error handling: {diag_error}")
+        # Import diagnostics removed for Issue #1321 service isolation
+        logger.error("Middleware setup failed - see previous error messages for details")
 
         raise RuntimeError(f"Failed to setup enhanced middleware with WebSocket exclusion: {e}")
 
@@ -923,30 +905,14 @@ def _add_websocket_exclusion_middleware(app: FastAPI) -> None:
     - Comprehensive error recovery for middleware conflicts
     - Resilient import handling for container startup reliability
     """
-    # Use resilient import for Issue #1278 reliability
-    module, source = resilient_import(
-        "netra_backend.app.middleware.uvicorn_protocol_enhancement",
-        fallback_modules=[],
-        fallback_factory=None
-    )
-
-    if module is not None:
-        try:
-            UvicornWebSocketExclusionMiddleware = getattr(module, "UvicornWebSocketExclusionMiddleware")
-            app.add_middleware(UvicornWebSocketExclusionMiddleware)
-            logger.info(f"✅ Enhanced uvicorn WebSocket exclusion middleware installed successfully (source: {source})")
-        except AttributeError as attr_error:
-            logger.error(f"❌ UvicornWebSocketExclusionMiddleware not found in module: {attr_error}")
-            logger.info("Falling back to enhanced inline middleware")
-            _create_enhanced_inline_websocket_exclusion_middleware(app)
-        except Exception as middleware_error:
-            logger.error(f"❌ Error installing UvicornWebSocketExclusionMiddleware: {middleware_error}")
-            logger.warning("Falling back to basic inline middleware")
-            _create_inline_websocket_exclusion_middleware(app)
-    else:
-        # Import failed completely - use fallback middleware
-        logger.warning(f"❌ uvicorn_protocol_enhancement import failed ({source}) - using fallback middleware")
-        logger.info("Creating enhanced WebSocket exclusion middleware inline (Issue #1278 fallback)")
+    # Try direct import with graceful fallback for Issue #1321 service isolation
+    try:
+        from netra_backend.app.middleware.uvicorn_protocol_enhancement import UvicornWebSocketExclusionMiddleware
+        app.add_middleware(UvicornWebSocketExclusionMiddleware)
+        logger.info("✅ Enhanced uvicorn WebSocket exclusion middleware installed successfully")
+    except ImportError as import_error:
+        logger.warning(f"❌ uvicorn_protocol_enhancement import failed: {import_error}")
+        logger.info("Creating enhanced WebSocket exclusion middleware inline (Issue #1321 fallback)")
         try:
             _create_enhanced_inline_websocket_exclusion_middleware(app)
             logger.info("✅ Enhanced inline WebSocket middleware created successfully")
@@ -954,6 +920,14 @@ def _add_websocket_exclusion_middleware(app: FastAPI) -> None:
             logger.error(f"❌ Enhanced inline middleware also failed: {fallback_error}")
             logger.warning("Creating basic WebSocket exclusion middleware as final fallback")
             _create_inline_websocket_exclusion_middleware(app)
+    except AttributeError as attr_error:
+        logger.error(f"❌ UvicornWebSocketExclusionMiddleware not found in module: {attr_error}")
+        logger.info("Falling back to enhanced inline middleware")
+        _create_enhanced_inline_websocket_exclusion_middleware(app)
+    except Exception as middleware_error:
+        logger.error(f"❌ Error installing UvicornWebSocketExclusionMiddleware: {middleware_error}")
+        logger.warning("Falling back to basic inline middleware")
+        _create_inline_websocket_exclusion_middleware(app)
 
 
 def _create_inline_websocket_exclusion_middleware(app: FastAPI) -> None:
@@ -1163,18 +1137,23 @@ def _create_inline_websocket_exclusion_middleware(app: FastAPI) -> None:
 
 def _create_enhanced_inline_websocket_exclusion_middleware(app: FastAPI) -> None:
     """Create enhanced WebSocket exclusion middleware inline for Issue #449 remediation.
-    
+
     CRITICAL FIX: Enhanced inline middleware with uvicorn protocol protection
-    when the dedicated module is not available.
+    when the dedicated module is not available. Uses fallback to basic middleware.
     """
-    from netra_backend.app.middleware.uvicorn_protocol_enhancement import (
-        UvicornWebSocketExclusionMiddleware
-    )
-    
-    # Create enhanced middleware instance inline
-    enhanced_middleware = UvicornWebSocketExclusionMiddleware
-    app.add_middleware(enhanced_middleware)
-    logger.info("Enhanced inline uvicorn WebSocket exclusion middleware created and installed (Issue #449)")
+    try:
+        from netra_backend.app.middleware.uvicorn_protocol_enhancement import (
+            UvicornWebSocketExclusionMiddleware
+        )
+
+        # Create enhanced middleware instance inline
+        enhanced_middleware = UvicornWebSocketExclusionMiddleware
+        app.add_middleware(enhanced_middleware)
+        logger.info("Enhanced inline uvicorn WebSocket exclusion middleware created and installed (Issue #449)")
+    except ImportError as e:
+        logger.warning(f"Enhanced middleware module not available: {e}")
+        logger.info("Falling back to basic WebSocket exclusion middleware")
+        _create_inline_websocket_exclusion_middleware(app)
 
 
 def _create_http_only_cors_redirect_middleware() -> Callable:
