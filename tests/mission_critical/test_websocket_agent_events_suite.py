@@ -425,7 +425,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
             assert validator.event_counts.get("agent_started", 0) >= 1, "Missing agent_started event"
             assert validator.event_counts.get("agent_completed", 0) >= 1, "Missing agent_completed event"
             
-            # logger.info(f"✅ WebSocket Agent Events Golden Path VALIDATED - {len(validator.events)} events received")"
+            # logger.info(f"✅ WebSocket Agent Events Golden Path VALIDATED - {len(validator.events)} events received")
             
         finally:
             await ws_client.disconnect()

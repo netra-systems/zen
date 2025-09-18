@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 '''
-'''
 MASTER TEST SUITE: Comprehensive WebSocket Notification Failure Detection
 
 CRITICAL BUSINESS REQUIREMENT:
