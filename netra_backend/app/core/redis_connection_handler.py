@@ -17,6 +17,7 @@ from shared.isolated_environment import get_env
 from shared.logging.unified_logging_ssot import get_logger
 
 from netra_backend.app.config import get_config
+from netra_backend.app.core.configuration.unified_secrets import get_secrets_manager
 
 logger = get_logger(__name__)
 

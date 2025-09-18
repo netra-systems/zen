@@ -108,26 +108,97 @@ class UnifiedSecretsManager:
             logger.error(f"Error retrieving secret '{secret_name}' from GCP Secret Manager: {e}")
             return None
 
+    def _map_env_to_gcp_secret(self, env_key: str) -> Optional[str]:
+        """Map environment variable names to GCP secret names."""
+        # Detect environment
+        environment = self.env.get("ENVIRONMENT", "staging").lower()
+
+        # Redis secret mappings
+        redis_mappings = {
+            "REDIS_HOST": f"redis-host-{environment}",
+            "REDIS_PORT": f"redis-port-{environment}",
+            "REDIS_PASSWORD": f"redis-password-{environment}",
+            "REDIS_URL": f"redis-url-{environment}",
+        }
+
+        # Database secret mappings
+        db_mappings = {
+            "POSTGRES_HOST": f"postgres-host-{environment}",
+            "POSTGRES_USER": f"postgres-user-{environment}",
+            "POSTGRES_PASSWORD": f"postgres-password-{environment}",
+            "POSTGRES_DB": f"postgres-db-{environment}",
+        }
+
+        # ClickHouse secret mappings
+        clickhouse_mappings = {
+            "CLICKHOUSE_PASSWORD": f"clickhouse-password-{environment}",
+        }
+
+        # JWT secret mappings
+        jwt_mappings = {
+            "JWT_SECRET": f"jwt-secret-{environment}",
+            "JWT_SECRET_KEY": f"jwt-secret-{environment}",
+        }
+
+        # OAuth secret mappings
+        oauth_mappings = {
+            "GOOGLE_CLIENT_ID": f"google-client-id-{environment}",
+            "GOOGLE_CLIENT_SECRET": f"google-client-secret-{environment}",
+        }
+
+        # Combine all mappings
+        all_mappings = {
+            **redis_mappings,
+            **db_mappings,
+            **clickhouse_mappings,
+            **jwt_mappings,
+            **oauth_mappings
+        }
+
+        return all_mappings.get(env_key)
+
     def get_secret(self, key: str, default: Optional[str] = None) -> Optional[str]:
         """
         Get a secret value by key.
-        
+
+        Priority order:
+        1. Cache (if enabled)
+        2. Environment variables
+        3. GCP Secret Manager (if enabled)
+        4. Default value
+
         Args:
             key: Secret key to retrieve
             default: Default value if secret not found
-            
+
         Returns:
             Secret value or default
         """
+        # Check cache first
         if self.config.cache_secrets and key in self._cache:
             return self._cache[key]
-        
+
         # Try environment variable first using SSOT environment access
-        value = self.env.get(key, default)
-        
+        value = self.env.get(key)
+
+        # If environment variable not found or explicitly disabled, try GCP secrets
+        if (value is None or value.lower() in ["disabled", "none", ""]) and self.config.use_gcp_secrets:
+            # Map environment variable names to GCP secret names
+            gcp_secret_name = self._map_env_to_gcp_secret(key)
+            if gcp_secret_name:
+                gcp_value = self._get_secret_from_gcp(gcp_secret_name)
+                if gcp_value:
+                    value = gcp_value
+                    logger.info(f"Successfully loaded secret '{key}' from GCP Secret Manager")
+
+        # Use default if still no value
+        if value is None:
+            value = default
+
+        # Cache the result if caching is enabled and value exists
         if self.config.cache_secrets and value is not None:
             self._cache[key] = value
-        
+
         return value
     
     def set_secret(self, key: str, value: str) -> None:
