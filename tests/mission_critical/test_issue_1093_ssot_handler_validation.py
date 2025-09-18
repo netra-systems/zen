@@ -24,9 +24,9 @@ from netra_backend.app.websocket_core.ssot_agent_message_handler import SSotAgen
 class TestSSotAgentMessageHandlerValidation(SSotAsyncTestCase):
     """Tests validating the SSOT agent message handler implementation."""
 
-    async def asyncSetUp(self):
+    def setUp(self):
         """Set up test fixtures."""
-        await super().asyncSetUp()
+        super().setUp()
 
         # Mock WebSocket
         self.mock_websocket = MagicMock()
@@ -49,13 +49,20 @@ class TestSSotAgentMessageHandlerValidation(SSotAsyncTestCase):
 
     async def test_ssot_handler_initialization(self):
         """Test that SSOT handler initializes with correct configuration."""
-        self.assertEqual(len(self.ssot_handler.supported_types), 3)
-        self.assertIn(MessageType.START_AGENT, self.ssot_handler.supported_types)
-        self.assertIn(MessageType.USER_MESSAGE, self.ssot_handler.supported_types)
-        self.assertIn(MessageType.CHAT, self.ssot_handler.supported_types)
+        # Create mocks
+        mock_service = MagicMock()
+        mock_websocket = MagicMock()
+
+        # Create handler directly in test
+        handler = SSotAgentMessageHandler(mock_service, mock_websocket)
+
+        self.assertEqual(len(handler.supported_types), 3)
+        self.assertIn(MessageType.START_AGENT, handler.supported_types)
+        self.assertIn(MessageType.USER_MESSAGE, handler.supported_types)
+        self.assertIn(MessageType.CHAT, handler.supported_types)
 
         # Check SSOT-specific stats
-        stats = self.ssot_handler.get_stats()
+        stats = handler.get_stats()
         self.assertEqual(stats["handler_type"], "SSOT_CANONICAL")
         self.assertEqual(stats["consolidation_issue"], "#1093")
         self.assertIn("golden_path_events_sent", stats)
@@ -64,14 +71,18 @@ class TestSSotAgentMessageHandlerValidation(SSotAsyncTestCase):
 
     async def test_ssot_handler_can_handle_all_message_types(self):
         """Test that SSOT handler can handle all required message types."""
+        mock_service = MagicMock()
+        mock_websocket = MagicMock()
+        handler = SSotAgentMessageHandler(mock_service, mock_websocket)
+
         # Test all supported types
-        self.assertTrue(self.ssot_handler.can_handle(MessageType.START_AGENT))
-        self.assertTrue(self.ssot_handler.can_handle(MessageType.USER_MESSAGE))
-        self.assertTrue(self.ssot_handler.can_handle(MessageType.CHAT))
+        self.assertTrue(handler.can_handle(MessageType.START_AGENT))
+        self.assertTrue(handler.can_handle(MessageType.USER_MESSAGE))
+        self.assertTrue(handler.can_handle(MessageType.CHAT))
 
         # Test unsupported types
-        self.assertFalse(self.ssot_handler.can_handle(MessageType.CONNECT))
-        self.assertFalse(self.ssot_handler.can_handle(MessageType.DISCONNECT))
+        self.assertFalse(handler.can_handle(MessageType.CONNECT))
+        self.assertFalse(handler.can_handle(MessageType.DISCONNECT))
 
     @patch('netra_backend.app.websocket_core.ssot_agent_message_handler.get_user_execution_context')
     @patch('netra_backend.app.websocket_core.ssot_agent_message_handler.create_websocket_manager')
