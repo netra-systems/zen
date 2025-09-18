@@ -391,10 +391,10 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
         )
         
         # CRITICAL ASSERTION 2: Must receive first response within reasonable time
-        assert results['first_response_received'), (
-            f FAIL:  GOLDEN PATH FAILURE: No first response received within ""
-            f{GOLDEN_PATH_CONFIG['agent_response_timeout']}s timeout. 
-            fThis indicates WebSocket connection or agent execution failure. 
+        assert results['first_response_received'], (
+            f"FAIL: GOLDEN PATH FAILURE: No first response received within "
+            f"{GOLDEN_PATH_CONFIG['agent_response_timeout']}s timeout. "
+            f"This indicates WebSocket connection or agent execution failure. "
             f"Customers will experience timeout and assume service is down."
         )
         

@@ -134,15 +134,13 @@ class JWTValidationMissionCriticalTests:
         mission_critical_jwt_validator,
         critical_test_logger
     ):
-        CRITICAL: Complete token creation and validation cycle MUST work."
-        CRITICAL: Complete token creation and validation cycle MUST work.""
+        """CRITICAL: Complete token creation and validation cycle MUST work."""
 
-        
-        critical_test_logger.info(Testing critical JWT token creation/validation cycle")"
-        
-        test_user_id = mission-critical-user
-        test_email = critical@example.com""
-        test_permissions = [critical, auth]
+        critical_test_logger.info("Testing critical JWT token creation/validation cycle")
+
+        test_user_id = "mission-critical-user"
+        test_email = "critical@example.com"
+        test_permissions = ["critical", "auth"]
         
         try:
             # Step 1: Token creation MUST work
@@ -157,42 +155,39 @@ class JWTValidationMissionCriticalTests:
             creation_time = time.time() - start_time
             
             # CRITICAL: Token must be created
-            assert access_token is not None,  ALERT:  CRITICAL: Token creation returned None"
-            assert access_token is not None,  ALERT:  CRITICAL: Token creation returned None"
-            assert isinstance(access_token, str), f ALERT:  CRITICAL: Token is not string: {type(access_token)}"
-            assert isinstance(access_token, str), f ALERT:  CRITICAL: Token is not string: {type(access_token)}"
-            assert len(access_token) > 50, "f ALERT:  CRITICAL: Token too short: {len(access_token)} chars"
+            assert access_token is not None, "ALERT: CRITICAL: Token creation returned None"
+            assert isinstance(access_token, str), f"ALERT: CRITICAL: Token is not string: {type(access_token)}"
+            assert len(access_token) > 50, f"ALERT: CRITICAL: Token too short: {len(access_token)} chars"
             
             # CRITICAL: Token creation must be fast (< 5 seconds)
-            assert creation_time < 5.0, f ALERT:  CRITICAL: Token creation too slow: {creation_time}s"
-            assert creation_time < 5.0, f ALERT:  CRITICAL: Token creation too slow: {creation_time}s""
+            assert creation_time < 5.0, f"ALERT: CRITICAL: Token creation too slow: {creation_time}s"
 
             
-            critical_test_logger.info(f" PASS:  Token created in {creation_time:.""2f""}s)"
-            
+            critical_test_logger.info(f"PASS: Token created in {creation_time:.2f}s")
+
             # Step 2: Token validation MUST work
             validation_start = time.time()
-            
+
             validation_result = await mission_critical_jwt_validator.validate_token_jwt(access_token)
-            
+
             validation_time = time.time() - validation_start
-            
+
             # CRITICAL: Validation must succeed
-            assert isinstance(validation_result, "TokenValidationResult),  ALERT:  CRITICAL: Invalid validation result type"
-            assert validation_result.valid is True, "f ALERT:  CRITICAL: Token validation failed: {validation_result.error}"
-            assert validation_result.user_id == test_user_id, f ALERT:  CRITICAL: Wrong user_id: {validation_result.user_id}""
-            assert validation_result.email == test_email, "f ALERT:  CRITICAL: Wrong email: {validation_result.email}"
-            assert validation_result.error is None, "f ALERT:  CRITICAL: Validation error: {validation_result.error}"
-            
+            assert validation_result is not None, "ALERT: CRITICAL: Token validation returned None"
+            assert validation_result.valid is True, f"ALERT: CRITICAL: Token validation failed: {validation_result.error}"
+            assert validation_result.user_id == test_user_id, f"ALERT: CRITICAL: Wrong user_id: {validation_result.user_id}"
+            assert validation_result.email == test_email, f"ALERT: CRITICAL: Wrong email: {validation_result.email}"
+            assert validation_result.error is None, f"ALERT: CRITICAL: Validation error: {validation_result.error}"
+
             # CRITICAL: Validation must be fast (< 3 seconds)
-            assert validation_time < 3.0, f" ALERT:  CRITICAL: Token validation too slow: {validation_time}s"
+            assert validation_time < 3.0, f"ALERT: CRITICAL: Token validation too slow: {validation_time}s"
             
-            critical_test_logger.info(f PASS:  Token validated in {validation_time:.""2f""}s")"
-            critical_test_logger.info( TARGET:  CRITICAL JWT CYCLE SUCCESSFUL)
+            critical_test_logger.info(f"PASS: Token validated in {validation_time:.2f}s")
+            critical_test_logger.info("TARGET: CRITICAL JWT CYCLE SUCCESSFUL")
             
         except Exception as e:
-            critical_test_logger.error(f ALERT:  CRITICAL JWT CYCLE FAILED: {e}")"
-            pytest.fail(f ALERT:  MISSION CRITICAL FAILURE: JWT token cycle failed: {e})
+            critical_test_logger.error(f"ALERT: CRITICAL JWT CYCLE FAILED: {e}")
+            pytest.fail(f"ALERT: MISSION CRITICAL FAILURE: JWT token cycle failed: {e}")
 
     @pytest.mark.asyncio
     async def test_mission_critical_refresh_token_flow(
