@@ -112,7 +112,7 @@ def test_command_budgets_without_overall_budget():
             # Verify the command budgets were set
             if hasattr(orchestrator.budget_manager, 'command_budgets'):
                 actual_budgets = orchestrator.budget_manager.command_budgets
-                print(f"✅ Command budgets successfully set: {list(actual_budgets.keys())}")
+                print(f"Command budgets successfully set: {list(actual_budgets.keys())}")
 
                 # Test that we can check a specific command budget
                 if '/test' in actual_budgets:
