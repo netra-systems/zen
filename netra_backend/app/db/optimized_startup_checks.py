@@ -324,7 +324,7 @@ class OptimizedStartupChecker:
                     
                     async with AsyncSession(engine) as session:
                         result = await session.execute(text("SELECT 1"))
-                        await result.fetchone()
+                        result.fetchone()
                     
                     return StartupCheckResult(
                         name=check_name, success=True, critical=True,
@@ -338,7 +338,7 @@ class OptimizedStartupChecker:
             if async_session_factory:
                 async with async_session_factory() as session:
                     result = await session.execute(text("SELECT 1"))
-                    await result.fetchone()
+                    result.fetchone()
                 return StartupCheckResult(
                     name=check_name, success=True, critical=True,
                     message="PostgreSQL connection successful"

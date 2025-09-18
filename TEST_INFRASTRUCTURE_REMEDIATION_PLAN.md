@@ -1,17 +1,47 @@
 # Test Infrastructure Remediation Plan
-## Comprehensive Solution for 500K+ ARR Business Value Protection
+**Issue #1341 - Focused Syntax Error Resolution**
 
 **Created:** 2025-09-15
-**Priority:** CRITICAL - Protecting 500K+ ARR business value
-**Status:** READY FOR EXECUTION
+**Updated:** 2025-09-18
+**Priority:** LOW - Isolated syntax issues, not systemic problems
+**Status:** REVISED SCOPE - 8 files, not 532
 
 ## Executive Summary
 
-The test infrastructure has several critical issues preventing proper test execution and validation of the Golden Path user flow. This plan provides atomic fixes to restore test functionality while maintaining system stability.
+**CORRECTED ANALYSIS:** After thorough investigation, we found only **8 test files with syntax errors** (not 532 as originally reported). This represents isolated syntax issues with straightforward fixes, not systemic infrastructure problems.
 
-**KEY PROBLEMS IDENTIFIED:**
-1. Missing SSOT imports (`HeartbeatConfig`, `RetryPolicy`) preventing test collection
-2. Docker dependency conflicts preventing non-Docker test execution
+**Actual Scope:** 8 test files with syntax errors
+**Estimated Time:** 2-3 hours for complete resolution
+**Business Impact:** LOW - These are isolated syntax issues
+**Confidence Level:** HIGH - All errors identified and have straightforward fixes
+
+## Detailed Analysis Results
+
+### Files with Syntax Errors (8 total)
+
+#### Group 1: Unterminated String Literals (6 files)
+**Pattern:** Docstrings starting with `""""` instead of `"""`
+
+1. `tests/mission_critical/test_issue_601_targeted_fix.py` - Line 10: unterminated string literal
+2. `tests/mission_critical/test_auth_service_coordination.py` - Line 26: unterminated string literal
+3. `tests/mission_critical/test_database_session_isolation.py` - Line 26: unterminated string literal
+4. `tests/mission_critical/test_redis_ssot_compliance_suite.py` - Line 23: unterminated string literal
+5. `tests/mission_critical/test_ssot_migration_validation.py` - Line 6: unterminated string literal
+6. `tests/mission_critical/test_websocket_unified_auth_interface_bypass.py` - Line 30: unterminated string literal
+
+**Fix:** Replace `""""` with `"""` at docstring start/end
+
+#### Group 2: Invalid Decimal Literals (2 files)
+**Pattern:** ARR references like `""500K""` causing parser confusion
+
+1. `tests/mission_critical/test_actions_to_meet_goals_websocket_failures.py` - Line 5: `""500K""`
+2. `tests/mission_critical/test_execution_engine_ssot_enforcement.py` - Line 6: `""500K""`
+
+**Fix:** Replace `""500K""` with `"$500K+"` or remove quotes entirely
+
+#### Group 3: Syntax Valid (2 files verified clean)
+1. `tests/mission_critical/test_ssot_compliance_suite.py` - ✅ PASSES
+2. `tests/mission_critical/test_websocket_agent_events_suite.py` - ✅ PASSES
 3. SSOT migration Phase 2 incomplete (440+ files with deprecated imports)
 4. Test collection failures causing 0 items collected
 5. Mission critical tests timing out due to dependency issues

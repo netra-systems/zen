@@ -197,7 +197,7 @@ class DatabaseManager:
                     async with engine.begin() as conn:
                         result = await conn.execute(text("SELECT 1"))
                         # Ensure we actually fetch the result to test complete round-trip
-                        await result.fetchone()
+                        result.fetchone()
                 
                 await asyncio.wait_for(test_connection(), timeout=connection_timeout)
                 attempt_duration = time.time() - attempt_start
