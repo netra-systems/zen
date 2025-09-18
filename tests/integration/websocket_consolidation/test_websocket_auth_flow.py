@@ -25,7 +25,7 @@ import time
 from unittest.mock import patch, MagicMock, AsyncMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from dev_launcher.isolated_environment import IsolatedEnvironment
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 try:
     from netra_backend.app.websocket_core.auth import WebSocketAuthValidator
     from netra_backend.app.websocket_core.manager import UnifiedWebSocketManager

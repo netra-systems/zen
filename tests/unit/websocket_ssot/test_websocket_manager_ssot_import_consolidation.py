@@ -127,7 +127,7 @@ class WebSocketManagerSSOTImportConsolidationTests(SSotBaseTestCase):
             # PRIMARY CANONICAL PATH (should be SSOT after fix)
             ImportPath(
                 module_path="netra_backend.app.websocket_core.websocket_manager",
-                import_statement="from netra_backend.app.websocket_core.websocket_manager import WebSocketManager",
+                import_statement="from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
                 class_name="WebSocketManager",
                 expected_to_work=True,
                 is_factory=False,
@@ -137,7 +137,7 @@ class WebSocketManagerSSOTImportConsolidationTests(SSotBaseTestCase):
             # FACTORY FUNCTION PATH (should redirect to SSOT after fix)
             ImportPath(
                 module_path="netra_backend.app.websocket_core.websocket_manager",
-                import_statement="from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager",
+                import_statement="from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager",
                 class_name="get_websocket_manager",
                 method_name="get_websocket_manager",
                 expected_to_work=True,
@@ -223,7 +223,7 @@ class WebSocketManagerSSOTImportConsolidationTests(SSotBaseTestCase):
                     if "factory function" in str(e) or "Direct instantiation not allowed" in str(e):
                         # This class enforces factory-only instantiation - use get_websocket_manager
                         try:
-                            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
                             instance = get_websocket_manager(user_context=user_context)
                         except Exception as factory_error:
                             result.error_message = f"Factory instantiation also failed: {factory_error}"

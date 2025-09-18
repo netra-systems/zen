@@ -22,7 +22,7 @@ from dataclasses import dataclass, field
 from shared.logging.unified_logging_ssot import get_logger
 # REMOVED: Singleton orchestrator import - replaced with per-request factory patterns
 # from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.thread_run_registry import get_thread_run_registry, ThreadRunRegistry
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 # PHASE 2 FIX: Import event delivery tracking for Issue #373 remediation
@@ -3892,7 +3892,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             validated_context = validate_user_context(actual_user_context)
 
             # Create isolated WebSocket manager for this user context using SSOT pattern
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, WebSocketManagerMode
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, WebSocketManagerMode
             import secrets
             isolated_manager = WebSocketManager(
                 mode=WebSocketManagerMode.UNIFIED,
@@ -3978,7 +3978,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         # Import from the actual location - use the create_scoped_emitter function
         from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
         
         # Create scoped emitter using the factory pattern for user isolation
         manager = WebSocketManager(user_context=user_context)
@@ -4122,7 +4122,7 @@ class WebSocketNotifier:
         if not emitter:
             try:
                 # Import here to avoid circular imports
-                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
                 import asyncio
                 
                 # Create WebSocket manager for the user - handle async

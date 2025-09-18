@@ -43,7 +43,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 
 # WebSocket Dependencies
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
 # Shared utilities
 from shared.isolated_environment import get_env

@@ -82,7 +82,7 @@ except ImportError:
 
 # WebSocket and Real-time Communication
 try:
-    from netra_backend.app.websocket_core.manager import WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
     REALTIME_AVAILABLE = True
 except ImportError:

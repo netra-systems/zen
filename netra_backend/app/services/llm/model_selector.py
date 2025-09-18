@@ -3,14 +3,14 @@ Model selection service for choosing optimal LLM models.
 Selects models based on requirements, performance, and cost constraints.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ModelCapability(Enum):

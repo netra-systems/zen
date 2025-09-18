@@ -5,7 +5,7 @@ from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
-'''Response Persistence and Recovery Integration Test
+"""Response Persistence and Recovery Integration Test
 
 env = get_env()
 Business Value Justification (BVJ):
@@ -15,10 +15,8 @@ Business Value Justification (BVJ):
 - Revenue Impact: Prevents $20K MRR churn from data loss incidents, ensures enterprise SLA compliance
 
 Test Overview:
-Validates response saving to database and recovery after failures, including transaction
-integrity, rollback scenarios, crash recovery, and data consistency checks.
-Tests both PostgreSQL and ClickHouse persistence where applicable.
-'''
+Validates response saving to database and recovery after failures, including transaction"""
+Tests both PostgreSQL and ClickHouse persistence where applicable."""
 
 import asyncio
 import json
@@ -54,8 +52,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 logger = central_logger.get_logger(__name__)
 
-
-def mock_justified(reason: str):
+"""
 """Mock justification decorator per SPEC/testing.xml"""
 def decorator(func):
 func._mock_justification = reason
@@ -63,13 +60,11 @@ return func
 return decorator
 
 
-@pytest.mark.e2e
-class TestResponsePersistenceRecovery:
+@pytest.mark.e2e"""
         """Integration test for response persistence and recovery mechanisms"""
         pass
 
-        @pytest.fixture
-    async def clickhouse_client(self):
+        @pytest.fixture"""
         """Create mocked ClickHouse client for testing"""
     # Mock: Generic component isolation for controlled unit testing
         client_mock = AsyncNone  # TODO: Use real service instead of Mock
@@ -82,25 +77,21 @@ class TestResponsePersistenceRecovery:
         await asyncio.sleep(0)
         return client_mock
 
-        @pytest.fixture
-    async def postgres_session(self):
+        @pytest.fixture"""
         """Create real PostgreSQL session for integration testing"""
         pass
         async with get_postgres_db() as session:
         yield session
 
-        @pytest.fixture
-    async def quality_service(self):
+        @pytest.fixture"""
         """Create quality service for response validation"""
         await asyncio.sleep(0)
         return QualityGateService()
 
         @pytest.fixture
-        @pytest.mark.e2e
-    async def test_thread(self, postgres_session):
+        @pytest.mark.e2e"""
         """Create test thread for message persistence"""
-        pass
-        thread = Thread( )
+        pass"""
         id="formatted_string",
         created_at=int(datetime.now(UTC).timestamp())
         
@@ -112,8 +103,7 @@ class TestResponsePersistenceRecovery:
         @pytest.fixture
         @pytest.mark.e2e
     async def test_assistant(self, postgres_session):
-        """Create test assistant for message persistence"""
-        assistant = Assistant( )
+        """Create test assistant for message persistence""""""
         id="formatted_string",
         created_at=int(datetime.now(UTC).timestamp()),
         model=LLMModel.GEMINI_2_5_FLASH.value,
@@ -129,8 +119,7 @@ class TestResponsePersistenceRecovery:
     async def test_message_persistence_transaction_integrity(self, postgres_session, test_thread, test_assistant):
 """Test message persistence maintains transaction integrity"""
 pass
-test_responses = [ )
-{ )
+test_responses = [ )"""
 "content": "GPU optimization: 24GB -> 16GB (33% reduction). Latency: 200ms -> 125ms (37.5% improvement).",
 "role": "assistant",
 "metadata": {"test_type": "transaction_integrity", "quality_validated": True}
@@ -186,12 +175,7 @@ logger.info("formatted_string")
 @pytest.mark.e2e
     async def test_response_persistence_rollback_scenario(self, postgres_session, test_thread, test_assistant):
 """Test response persistence handles rollback scenarios correctly"""
-valid_response = { )
-"content": "Memory allocation optimized: 32GB -> 20GB (37.5% reduction).",
-"role": "assistant",
-"metadata": {"test_type": "rollback_scenario"}
-                                        
-
+valid_response = {"content": "Memory allocation optimized: 32GB -> 20GB (37.5% reduction).",, "role": "assistant",, "metadata": {"test_type": "rollback_scenario"}}
                                         # Simulate transaction that should rollback
 rollback_occurred = False
 try:
@@ -213,7 +197,6 @@ raise SQLAlchemyError("Simulated database error for rollback test")
 
 except SQLAlchemyError as e:
 await postgres_session.rollback()
-rollback_occurred = True
 logger.info("formatted_string")
 
                                                     # Verify rollback worked - no messages should be persisted
@@ -258,8 +241,7 @@ logger.info("Rollback scenario and recovery validation completed")
 """Test crash recovery maintains data consistency"""
 pass
                                                                 # Simulate partial state before crash
-pre_crash_messages = [ )
-{ )
+pre_crash_messages = [ )"""
 "content": "GPU cluster optimization: 52% -> 89% utilization (+37pp).",
 "role": "assistant",
 "metadata": {"test_type": "crash_recovery", "status": "pre_crash"}
@@ -324,8 +306,7 @@ logger.info("Crash recovery and data consistency validation completed")
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_concurrent_persistence_consistency(self, postgres_session, test_thread, test_assistant):
-"""Test concurrent response persistence maintains consistency"""
-concurrent_responses = [ )
+"""Test concurrent response persistence maintains consistency""""""
 "formatted_string"
 for i in range(10)
                                                                                 
@@ -334,8 +315,7 @@ for i in range(10)
 async def persist_response(content: str, index: int) -> str:
 """Persist single response with potential concurrency"""
 pass
-async with get_postgres_db() as session:
-message = Message( )
+async with get_postgres_db() as session:"""
 id="formatted_string",
 created_at=int(datetime.now(UTC).timestamp()),
 thread_id=test_thread.id,
@@ -390,8 +370,7 @@ logger.info("formatted_string")
 @pytest.mark.e2e
     async def test_response_quality_persistence_integration(self, postgres_session, test_thread, test_assistant, quality_service):
 """Test integration of response quality validation with persistence"""
-quality_test_responses = [ )
-{ )
+quality_test_responses = [ )"""
 "content": "GPU memory: 24GB -> 16GB (33% reduction). Inference latency: 200ms -> 125ms (37.5% improvement). Cost: $2,400/month savings.",
 "expected_quality": "high",
 "should_persist": True
@@ -407,12 +386,7 @@ quality_integration_results = []
 
 for response in quality_test_responses:
                 # Validate quality first
-quality_result = await quality_service.validate_content( )
-content=response["content"],
-content_type=ContentType.OPTIMIZATION,
-context={"test_type": "quality_persistence_integration"}
-                
-
+quality_result = await quality_service.validate_content(content=response["content"],, content_type=ContentType.OPTIMIZATION,, context={"test_type": "quality_persistence_integration"})
                 # Persist based on quality validation
 if quality_result.passed and response["should_persist"]:
 message = Message( )
@@ -422,13 +396,7 @@ thread_id=test_thread.id,
 assistant_id=test_assistant.id,
 role="assistant",
 content=[{"type": "text", "text": response["content"]}],
-metadata_={ )
-"test_type": "quality_persistence_integration",
-"quality_score": quality_result.metrics.overall_score,
-"quality_level": quality_result.metrics.quality_level.value,
-"quality_validated": True
-                    
-                    
+metadata_={"test_type": "quality_persistence_integration",, "quality_score": quality_result.metrics.overall_score,, "quality_level": quality_result.metrics.quality_level.value,, "quality_validated": True}
 postgres_session.add(message)
 await postgres_session.commit()
 
@@ -467,16 +435,8 @@ logger.info("formatted_string")
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_multi_database_persistence_consistency(self, postgres_session, clickhouse_client):
-"""Test consistency across PostgreSQL and ClickHouse persistence"""
-pass
-multi_db_test_data = { )
-"message_id": "formatted_string",
-"thread_id": "formatted_string",
-"content": "Database optimization: Query time 850ms -> 180ms (78.8% improvement)",
-"timestamp": datetime.now(UTC),
-"metadata": {"test_type": "multi_db_consistency"}
-                            
-
+"""Test consistency across PostgreSQL and ClickHouse persistence""""""
+multi_db_test_data = {"message_id": "formatted_string",, "thread_id": "formatted_string",, "content": "Database optimization: Query time 850ms -> 180ms (78.8% improvement)",, "timestamp": datetime.now(UTC),, "metadata": {"test_type": "multi_db_consistency"}}
                             # Persist to PostgreSQL (transactional data)
 postgres_success = False
 try:
@@ -492,7 +452,6 @@ metadata_=multi_db_test_data["metadata"]
                                 
 postgres_session.add(message)
 await postgres_session.commit()
-postgres_success = True
 except Exception as e:
 logger.warning("formatted_string")
 
@@ -532,8 +491,7 @@ logger.info("Multi-database persistence consistency validated")
 @pytest.mark.asyncio
 @pytest.mark.e2e
     async def test_persistence_performance_under_load(self, postgres_session, test_thread, test_assistant):
-"""Test persistence performance under high load conditions"""
-load_test_responses = [ )
+"""Test persistence performance under high load conditions""""""
 "formatted_string"
 for i in range(50)  # Moderate load for testing
                                                     
@@ -546,8 +504,7 @@ async def batch_persist(batch_responses: List[str]) -> int:
 pass
 batch_count = 0
 async with get_postgres_db() as session:
-for content in batch_responses:
-message = Message( )
+for content in batch_responses:"""
 id="formatted_string",
 created_at=int(datetime.now(UTC).timestamp()),
 thread_id=test_thread.id,
@@ -597,8 +554,7 @@ logger.info("formatted_string")
 @pytest.mark.e2e
     async def test_data_recovery_after_partial_failure(self, postgres_session, test_thread, test_assistant):
 """Test data recovery mechanisms after partial system failures"""
-                    # Create baseline data
-baseline_message = Message( )
+                    # Create baseline data"""
 id="formatted_string",
 created_at=int(datetime.now(UTC).timestamp()),
 thread_id=test_thread.id,
@@ -668,18 +624,15 @@ logger.info("formatted_string")
 
 class TestWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
-
-    def __init__(self):
+"""
         """Use real service instance."""
     # TODO: Initialize real service
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
+"""
         """Send JSON message."""
-        pass
-        if self._closed:
+        pass"""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -687,9 +640,8 @@ class TestWebSocketConnection:
         """Close WebSocket connection."""
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         pass
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
+        return self.messages_sent.copy()"""

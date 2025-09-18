@@ -6,7 +6,7 @@ Provides table creation, verification, and management utilities
 import asyncio
 from typing import Dict, List, Optional, Any
 from datetime import datetime
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from pathlib import Path
 
 # Import transaction error handling for specific error types
@@ -34,7 +34,7 @@ except (ImportError, ModuleNotFoundError):
         TABLE_ALREADY_EXISTS = 57
         DATABASE_ALREADY_EXISTS = 81
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 

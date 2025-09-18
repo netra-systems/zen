@@ -11,7 +11,7 @@ system layers, ensuring proper ordering, rollback handling, and health monitorin
 """
 
 import asyncio
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 import time
 import uuid
 from typing import Dict, Any, List, Optional, Callable, Union
@@ -24,7 +24,7 @@ from netra_backend.app.monitoring.coordination_health_monitor import (
 )
 from netra_backend.app.core.agent_execution_tracker import ExecutionState
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class OperationType(Enum):

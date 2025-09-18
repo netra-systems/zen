@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,60 +16,54 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
         return self.messages_sent.copy()
+"""
+        """
+        Basic WebSocket Agent Events Test - MISSION CRITICAL"""
+        Minimal test to validate core WebSocket integration without any complex setup."""
 
-    #!/usr/bin/env python
-        '''
-        Basic WebSocket Agent Events Test - MISSION CRITICAL
-
-        Minimal test to validate core WebSocket integration without any complex setup.
-        '''
-
-        import os
-        import sys
-        import asyncio
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from auth_service.core.auth_manager import AuthManager
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from shared.isolated_environment import IsolatedEnvironment
+import os
+import sys
+import asyncio
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from test_framework.database.test_database_manager import DatabaseTestManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
     # CRITICAL: Add project root to Python path for imports
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
         if project_root not in sys.path:
         sys.path.insert(0, project_root)
-
-    def test_imports():
+"""
         """Test that all required WebSocket components can be imported."""
-        try:
-        from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
+        try:"""
         print("OK WebSocketNotifier import successful")
 
-        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-        from netra_backend.app.agents.websocket_tool_enhancement import enhance_tool_dispatcher_with_notifications
+from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
+from netra_backend.app.agents.websocket_tool_enhancement import enhance_tool_dispatcher_with_notifications
         print("OK UnifiedToolExecutionEngine import successful")
 
-        from netra_backend.app.core.registry.universal_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
         print("OK AgentRegistry import successful")
 
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         print("OK ExecutionEngine import successful")
 
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
         print("OK WebSocketManager import successful")
 
         return True
         except Exception as e:
         print("formatted_string")
-        import traceback
+import traceback
         traceback.print_exc()
         return False
 
@@ -79,8 +71,8 @@ class TestWebSocketConnection:
         """Test that WebSocketNotifier has all required methods."""
         pass
         try:
-        from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 
         ws_manager = WebSocketManager()
         notifier = WebSocketNotifier.create_for_user(ws_manager)
@@ -98,8 +90,7 @@ class TestWebSocketConnection:
         missing_methods = []
         for method in required_methods:
         if not hasattr(notifier, method):
-        missing_methods.append(method)
-        elif not callable(getattr(notifier, method)):
+        missing_methods.append(method)"""
         missing_methods.append("formatted_string")
 
         if missing_methods:
@@ -110,23 +101,22 @@ class TestWebSocketConnection:
         return True
         except Exception as e:
         print("formatted_string")
-        import traceback
+import traceback
         traceback.print_exc()
         return False
 
     def test_tool_dispatcher_enhancement():
         """Test that tool dispatcher enhancement works."""
         try:
-        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-        from netra_backend.app.agents.websocket_tool_enhancement import enhance_tool_dispatcher_with_notifications
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
+from netra_backend.app.agents.websocket_tool_enhancement import enhance_tool_dispatcher_with_notifications
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 
         dispatcher = ToolDispatcher()
         ws_manager = WebSocketManager()
 
-        # Check initial state
-        if not hasattr(dispatcher, 'executor'):
+        # Check initial state"""
         print("FAIL ToolDispatcher missing executor")
         return False
 
@@ -152,7 +142,7 @@ class TestWebSocketConnection:
         return True
         except Exception as e:
         print("formatted_string")
-        import traceback
+import traceback
         traceback.print_exc()
         return False
 
@@ -160,10 +150,10 @@ class TestWebSocketConnection:
         """Test that AgentRegistry properly integrates WebSocket."""
         pass
         try:
-        from netra_backend.app.core.registry.universal_registry import AgentRegistry
-        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
 
 class MockLLM:
         pass
@@ -175,8 +165,7 @@ class MockLLM:
     # Set WebSocket manager
         registry.set_websocket_manager(ws_manager)
 
-    # Check enhancement
-        if not isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine):
+    # Check enhancement"""
         print("formatted_string")
         return False
 
@@ -184,31 +173,30 @@ class MockLLM:
         return True
         except Exception as e:
         print("formatted_string")
-        import traceback
+import traceback
         traceback.print_exc()
         return False
 
     async def test_unified_tool_execution():
         """Test UnifiedToolExecutionEngine without real WebSocket connections."""
         try:
-        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
-        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-        from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+from netra_backend.app.schemas.agent_models import DeepAgentState
 
         ws_manager = WebSocketManager()
                     # Mock to avoid real WebSocket calls
         ws_manager.send_to_thread = AsyncMock(return_value=True)
 
                     # Create WebSocket bridge properly
-        from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
         websocket_bridge = AgentWebSocketBridge()
         websocket_bridge._websocket_manager = ws_manager
 
         enhanced_executor = UnifiedToolExecutionEngine(websocket_bridge=websocket_bridge)
 
-                    # Create test context with proper thread format
-        context = AgentExecutionContext( )
+                    # Create test context with proper thread format"""
         run_id="thread_test_user_session_123",
         thread_id="thread_test_user_session",
         user_id="test-user",
@@ -264,13 +252,12 @@ class MockLLM:
         return True
         except Exception as e:
         print("formatted_string")
-        import traceback
+import traceback
         traceback.print_exc()
         return False
 
     def main():
-        """Run all basic tests."""
-        pass
+        """Run all basic tests.""""""
         print("Running basic WebSocket integration tests...")
         print("=" * 60)
 

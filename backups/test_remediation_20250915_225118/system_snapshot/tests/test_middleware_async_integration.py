@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,41 +16,35 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
+        return self.messages_sent.copy()"""
+        """Test that async context manager fixes work correctly with middleware.
+"""
+        work correctly with our fixed async context manager patterns."""
 
-        '''Test that async context manager fixes work correctly with middleware.
+import pytest
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from auth_service.core.auth_manager import AuthManager
+from shared.isolated_environment import IsolatedEnvironment
 
-        This test verifies that the SecurityResponseMiddleware and other middleware
-        work correctly with our fixed async context manager patterns.
-        '''
-
-        import pytest
-        from fastapi import FastAPI, Request
-        from fastapi.responses import JSONResponse
-        from starlette.middleware.base import BaseHTTPMiddleware
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from auth_service.core.auth_manager import AuthManager
-        from shared.isolated_environment import IsolatedEnvironment
-
-        from netra_backend.app.middleware.security_response_middleware import SecurityResponseMiddleware
-        from netra_backend.app.database import get_db
-        from netra_backend.app.dependencies import get_request_scoped_db_session
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
+from netra_backend.app.middleware.security_response_middleware import SecurityResponseMiddleware
+from netra_backend.app.database import get_db
+from netra_backend.app.dependencies import get_request_scoped_db_session
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
-@pytest.mark.asyncio
-class TestMiddlewareAsyncIntegration:
+@pytest.mark.asyncio"""
     """Test middleware integration with async context managers."""
-
-    async def test_security_middleware_with_database_operation(self):
+"""
     """Test that SecurityResponseMiddleware works when database operations use async context managers."""
 
         # Create a mock app
@@ -61,8 +53,7 @@ class TestMiddlewareAsyncIntegration:
         # Add the security middleware
     middleware = SecurityResponseMiddleware(app)
 
-        # Create a mock request
-    request = MagicMock(spec=Request)
+        # Create a mock request"""
     request.url.path = "/api/test"
     request.state = Magic        request.state.authenticated = False
 
@@ -95,8 +86,7 @@ class TestMiddlewareAsyncIntegration:
 
         app = FastAPI()
         middleware = SecurityResponseMiddleware(app)
-
-        request = MagicMock(spec=Request)
+"""
         request.url.path = "/api/test"
 
                         # Create a call_next that raises an exception
@@ -116,8 +106,7 @@ class TestMiddlewareAsyncIntegration:
 
         app = FastAPI()
         middleware = SecurityResponseMiddleware(app)
-
-        request = MagicMock(spec=Request)
+"""
         request.url.path = "/health"
 
             # Create a simple mock response
@@ -151,8 +140,7 @@ class TestMiddlewareAsyncIntegration:
                     # If this works, we won't get _AsyncGeneratorContextManager errors
         pass
         except Exception as e:
-        errors_seen.append(str(e))
-                        # Database connection errors are OK
+        errors_seen.append(str(e))"""
         if "_AsyncGeneratorContextManager" in str(e):
         raise  # This would indicate our fix didn"t work
 
@@ -181,13 +169,12 @@ class TestMiddlewareAsyncIntegration:
     async def test_concurrent_requests_with_middleware(self):
         """Test that concurrent requests through middleware don't cause async issues."""
 
-        import asyncio
+import asyncio
 
         app = FastAPI()
         middleware = SecurityResponseMiddleware(app)
 
-    async def process_request(request_id: int):
-        request = MagicMock(spec=Request)
+    async def process_request(request_id: int):"""
         request.url.path = "formatted_string"
         request.state = Magic            request.state.authenticated = True  # Authenticated, so won"t convert
 

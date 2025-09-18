@@ -2325,46 +2325,17 @@ class UserContextManager:
         Returns:
             New isolated UserExecutionContext
         """
-        # Check if we're in an event loop and handle appropriately
-        try:
-            loop = asyncio.get_running_loop()
-            # We're in an async context, create synchronously
-            context = self._create_sync_isolated_context(user_id, request_id, **kwargs)
-        except RuntimeError:
-            # No running loop, can use asyncio.run
-            context = asyncio.run(create_isolated_execution_context(
-                user_id=user_id,
-                request_id=request_id,
-                **kwargs
-            ))
+        # Use SSOT factory for context creation
+        context = asyncio.run(create_isolated_execution_context(
+            user_id=user_id,
+            request_id=request_id,
+            **kwargs
+        ))
         
         # Set the context in manager
         self.set_context(f"{user_id}_{request_id}", context)
         
         return context
-    
-    def _create_sync_isolated_context(self, user_id: str, request_id: str, **kwargs) -> UserExecutionContext:
-        """Create context synchronously when in async context."""
-        # Create basic context without async dependencies
-        thread_id = kwargs.get('thread_id', str(uuid.uuid4()))
-        run_id = kwargs.get('run_id', str(uuid.uuid4()))
-        websocket_client_id = kwargs.get('websocket_client_id', str(uuid.uuid4()))
-        
-        agent_context = kwargs.get('agent_context', {})
-        
-        return UserExecutionContext(
-            user_id=user_id,
-            request_id=request_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            websocket_client_id=websocket_client_id,
-            agent_context=agent_context.copy(),
-            audit_metadata={
-                'context_created': datetime.now(timezone.utc).isoformat(),
-                'isolation_level': kwargs.get('isolation_level', 'standard'),
-                'manager_id': str(id(self))  # Convert to string to avoid serialization issues
-            }
-        )
     
     def create_context_with_unified_ids(self, user_id: str) -> UserExecutionContext:
         """
@@ -2433,7 +2404,7 @@ class UserContextManager:
         """
         try:
             # Import WebSocket manager (avoid circular imports)
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Get WebSocket connection for user
             ws_manager = WebSocketManager()

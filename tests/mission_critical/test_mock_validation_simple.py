@@ -1,9 +1,15 @@
 """
+"""
 Simple Mock Response Validation Test - Proof of Concept
 
 This test demonstrates that mock responses can be detected in the system.
 """
+"""
 
+"""
+"""
+"""
+"""
 import pytest
 import asyncio
 import aiohttp
@@ -14,7 +20,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.real_services
 @pytest.mark.asyncio
 async def test_simple_mock_detection():
-    """Simple test to prove mock responses can be detected"""
+    "Simple test to prove mock responses can be detected"
     
     # Create authenticated user
     auth_helper = E2EAuthHelper()
@@ -22,11 +28,12 @@ async def test_simple_mock_detection():
     
     # Mock patterns to detect
     mock_patterns = [
-        "i apologize",
-        "unable to process",
-        "service temporarily unavailable",
-        "please try again",
-        "encountered an error"
+        "i apologize,"
+        unable to process,
+        service temporarily unavailable,"
+        service temporarily unavailable,"
+        please try again","
+        encountered an error
     ]
     
     env = get_env()
@@ -37,12 +44,12 @@ async def test_simple_mock_detection():
         headers = auth_helper.get_auth_headers(user.jwt_token)
         
         test_payload = {
-            "user_id": user.user_id,
-            "prompt": "Generate comprehensive data analysis for Fortune 500 company",
-            "context": {"test": "mock_detection"}
+            user_id": user.user_id,"
+            prompt: Generate comprehensive data analysis for Fortune 500 company,
+            context: {test": "mock_detection}
         }
         
-        async with session.post(f"{backend_url}/api/v1/chat", json=test_payload, headers=headers) as response:
+        async with session.post(f{backend_url}/api/v1/chat, json=test_payload, headers=headers) as response:
             if response.status == 200:
                 result = await response.json()
                 response_text = str(result).lower()
@@ -54,18 +61,18 @@ async def test_simple_mock_detection():
                         detected_patterns.append(pattern)
                 
                 if detected_patterns:
-                    pytest.fail(f"MOCK RESPONSE DETECTED! Patterns found: {detected_patterns}")
+                    pytest.fail(f"MOCK RESPONSE DETECTED! Patterns found: {detected_patterns})"
                 else:
                     # Test passed - no mock responses detected
-                    print(" PASS:  No mock responses detected in this test")
+                    print( PASS:  No mock responses detected in this test")"
             else:
-                print(f"API returned status {response.status}")
+                print(fAPI returned status {response.status})
 
 @pytest.mark.e2e  
 @pytest.mark.real_services
 @pytest.mark.asyncio
-async def test_fallback_detection():
-    """Test to detect fallback responses in service failures"""
+async def test_fallback_detection("):"
+    "Test to detect fallback responses in service failures"
     
     auth_helper = E2EAuthHelper()
     user = await auth_helper.create_authenticated_user()
@@ -79,30 +86,31 @@ async def test_fallback_detection():
         
         # Request designed to potentially trigger fallback responses
         test_payload = {
-            "user_id": user.user_id,
-            "prompt": "TRIGGER_FALLBACK_TEST_" * 100,  # Intentionally problematic
-            "context": {"test": "fallback_detection"}
+            "user_id: user.user_id,"
+            prompt: TRIGGER_FALLBACK_TEST_ * 100,  # Intentionally problematic
+            context: {"test: fallback_detection"}
         }
         
         try:
-            async with session.post(f"{backend_url}/api/v1/chat", json=test_payload, headers=headers) as response:
+            async with session.post(f{backend_url}/api/v1/chat, json=test_payload, headers=headers) as response:
                 result = await response.json()
                 response_text = str(result).lower()
                 
                 fallback_indicators = [
-                    "fallback",
-                    "default response",
-                    "generic response",
+                    fallback,"
+                    fallback,"
+                    "default response,"
+                    generic response,
                     "template response"
                 ]
                 
                 detected = [indicator for indicator in fallback_indicators if indicator in response_text]
                 
                 if detected:
-                    pytest.fail(f"FALLBACK RESPONSE DETECTED! Indicators: {detected}")
+                    pytest.fail(fFALLBACK RESPONSE DETECTED! Indicators: {detected})
                 else:
-                    print(" PASS:  No fallback responses detected")
+                    print( PASS:  No fallback responses detected")"
                     
         except Exception as e:
             # Exception is acceptable - fallback responses are not
-            print(f"Exception occurred (acceptable): {e}")
+            print(fException occurred (acceptable): {e}")"

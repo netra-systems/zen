@@ -31,7 +31,7 @@ from enum import Enum
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from netra_backend.app.websocket_core.connection_state_machine import ApplicationConnectionState, ConnectionStateMachine, StateTransitionError, ConnectionStateMachineRegistry, get_connection_state_registry
 try:
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
     from netra_backend.app.routes.websocket import websocket_endpoint
 except ImportError:
     WebSocketManager = MagicMock

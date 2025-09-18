@@ -12,7 +12,7 @@ Full implementation should follow CLAUDE.md SSOT patterns.
 """
 
 import asyncio
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from contextlib import asynccontextmanager
 from typing import Dict, Optional, Any, AsyncGenerator
 from dataclasses import dataclass
@@ -24,7 +24,7 @@ from sqlalchemy.pool import AsyncAdaptedQueuePool
 from shared.isolated_environment import get_env
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass

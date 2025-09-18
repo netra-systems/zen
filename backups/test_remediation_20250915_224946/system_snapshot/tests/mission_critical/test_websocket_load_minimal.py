@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''REAL WEBSOCKET LOAD TEST - No Mocks, Real Connections Only
+"""REAL WEBSOCKET LOAD TEST - No Mocks, Real Connections Only
 
 This focused test validates WebSocket and concurrency fixes using REAL WebSocket connections
 and REAL services. All MockWebSocketConnection instances have been eliminated per CLAUDE.md.
@@ -9,10 +9,8 @@ CRITICAL: Tests the core chat responsiveness requirements:
 - All WebSocket events fire correctly under load using REAL connections
 - Zero message loss during normal operation
 - Connection recovery works within acceptable limits
-- Each concurrent user gets the complete event sequence
-
-Business Value: $500K+ ARR - Chat delivers 90% of user value
-'''
+- Each concurrent user gets the complete event sequence"""
+Business Value: $500K+ ARR - Chat delivers 90% of user value"""
 
 import asyncio
 import json
@@ -50,8 +48,7 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 
-@dataclass
-class RealWebSocketLoadMetrics:
+@dataclass"""
     """Metrics for real WebSocket load testing focused on actual system performance."""
     concurrent_users: int = 0
     successful_connections: int = 0
@@ -68,10 +65,8 @@ class RealWebSocketLoadMetrics:
     test_duration_ms: float = 0.0
     connection_failures: List[str] = field(default_factory=list)
     event_sequence_failures: List[str] = field(default_factory=list)
-
-    def calculate_stats(self):
-        """Calculate derived statistics - fails fast if no data."""
-        if not self.response_times_ms:
+"""
+        """Calculate derived statistics - fails fast if no data.""""""
         raise AssertionError("No response times recorded - WebSocket events not working")
 
         self.avg_response_time_ms = sum(self.response_times_ms) / len(self.response_times_ms)
@@ -92,21 +87,15 @@ class RealWebSocketConnection:
         self.connected = False
         self.messages_sent = []
         self.events_received = []
-        self.response_times = []
-        self.last_send_time = None
+        self.response_times = []"""
         self.connection_url = "formatted_string"
 
     async def connect(self) -> bool:
         """Connect to real WebSocket service - fails fast if connection fails."""
         try:
         self.websocket_client = self.services_manager.create_websocket_client()
-
-        # Connect to chat endpoint with user authentication
-        await self.websocket_client.connect( )
-        path="formatted_string",
-        headers={"Authorization": "formatted_string"}
-        
-
+"""
+        await self.websocket_client.connect(path="formatted_string",, headers={"Authorization": "formatted_string"})
         self.connected = True
         logger.debug("formatted_string")
         return True
@@ -117,8 +106,7 @@ class RealWebSocketConnection:
         raise AssertionError("formatted_string")
 
     async def send_message(self, message: Dict[str, Any]) -> None:
-        """Send message through REAL WebSocket connection - fails fast on error."""
-        if not self.connected or not self.websocket_client:
+        """Send message through REAL WebSocket connection - fails fast on error.""""""
         raise AssertionError("formatted_string")
 
         try:
@@ -131,8 +119,7 @@ class RealWebSocketConnection:
         raise AssertionError("formatted_string")
 
     async def receive_event_with_timeout(self, timeout: float = 5.0) -> Dict[str, Any]:
-        """Receive event from REAL WebSocket - fails fast if timeout or error."""
-        if not self.connected or not self.websocket_client:
+        """Receive event from REAL WebSocket - fails fast if timeout or error.""""""
         raise AssertionError("formatted_string")
 
         try:
@@ -162,11 +149,9 @@ class RealWebSocketConnection:
         self.websocket_client = None
         self.connected = False
 
-
-class RealWebSocketLoadTester:
+"""
         """Load tester using REAL WebSocket connections and REAL services only."""
-
-        REQUIRED_EVENTS = { )
+"""
         "agent_started",
         "agent_thinking",
         "tool_executing",
@@ -213,9 +198,8 @@ class RealWebSocketLoadTester:
         # Close all real service connections
         if self.services_manager:
         await self.services_manager.close_all()
-
-    async def test_real_websocket_event_flow_under_load(self, user_count:
-        '''
+"""
+        """
         Test REAL WebSocket event flow under concurrent load.
 
         This is the CRITICAL test - validates:
@@ -223,10 +207,8 @@ class RealWebSocketLoadTester:
         - All required events are emitted via REAL WebSocket connections
         - Response times are reasonable under concurrent load
         - No events are lost through REAL connections
-        - Each user gets the complete event sequence: agent_started  ->  agent_thinking  ->  tool_executing  ->  tool_completed  ->  agent_completed
-
-        FAILS FAST if any critical requirement is not met.
-        '''
+        - Each user gets the complete event sequence: agent_started  ->  agent_thinking  ->  tool_executing  ->  tool_completed  ->  agent_completed"""
+        FAILS FAST if any critical requirement is not met."""
         logger.info("formatted_string")
 
         test_start = time.time()
@@ -326,16 +308,8 @@ class RealWebSocketLoadTester:
 
     async def _execute_single_agent_flow(self, conn: RealWebSocketConnection, request_id: str) -> None:
         """Execute a single agent flow and validate complete event sequence."""
-
-    # Step 1: Send chat message to trigger agent
-        chat_message = { )
-        "type": "chat_message",
-        "content": "formatted_string",
-        "user_id": conn.user_id,
-        "request_id": request_id,
-        "timestamp": time.time()
-    
-
+"""
+chat_message = {"type": "chat_message",, "content": "formatted_string",, "user_id": conn.user_id,, "request_id": request_id,, "timestamp": time.time()}
         await conn.send_message(chat_message)
 
     # Step 2: Receive and validate the complete event sequence
@@ -384,8 +358,7 @@ class RealWebSocketLoadTester:
         self.metrics.events_received += len(conn.events_received)
         self.metrics.response_times_ms.extend(conn.response_times)
 
-            # Track event types
-        for event in conn.events_received:
+            # Track event types"""
         event_type = event.get("type", "unknown")
         all_event_types.add(event_type)
         self.metrics.websocket_events[event_type] = \
@@ -454,7 +427,7 @@ class RealWebSocketLoadTester:
 
 
     async def test_real_websocket_load():
-        '''
+        """
         CRITICAL TEST: Real WebSocket load test with REAL connections only.
 
         Validates core chat responsiveness requirements:
@@ -462,10 +435,8 @@ class RealWebSocketLoadTester:
         PASS:  All required WebSocket events are fired through REAL connections
         PASS:  Response times are reasonable under concurrent load
         PASS:  No event loss occurs through REAL connections
-        PASS:  Each user receives complete event sequence
-
-        FAILS FAST if any critical requirement is not met.
-        '''
+        PASS:  Each user receives complete event sequence"""
+        FAILS FAST if any critical requirement is not met."""
         pass
         tester = RealWebSocketLoadTester()
 
@@ -475,8 +446,7 @@ class RealWebSocketLoadTester:
                                                 # Run the REAL load test
         metrics = await tester.test_real_websocket_event_flow_under_load(user_count=8)
 
-                                                # Validate CRITICAL acceptance criteria - FAIL FAST
-        assert metrics.successful_connections >= 6, \
+                                                # Validate CRITICAL acceptance criteria - FAIL FAST"""
         "formatted_string"
 
         assert metrics.avg_response_time_ms <= 5000, \
@@ -509,15 +479,13 @@ class RealWebSocketLoadTester:
 
 
     async def test_real_websocket_concurrent_stress():
-        '''
+        """
         Test REAL WebSocket system under higher concurrent stress.
 
         Validates:
         - System handles 10 concurrent users through REAL connections
-        - Performance degrades gracefully under load
-        - No complete system failures occur
-        - Critical events still flow under stress
-        '''
+        - Performance degrades gracefully under load"""
+        - Critical events still flow under stress"""
         pass
         tester = RealWebSocketLoadTester()
 
@@ -528,8 +496,7 @@ class RealWebSocketLoadTester:
         user_count = 10
         metrics = await tester.test_real_websocket_event_flow_under_load(user_count=user_count)
 
-                                                                    # More lenient criteria under stress, but still FAIL FAST for critical issues
-        assert metrics.successful_connections >= user_count * 0.7, \
+                                                                    # More lenient criteria under stress, but still FAIL FAST for critical issues"""
         "formatted_string"
 
         assert metrics.avg_response_time_ms <= 10000, \

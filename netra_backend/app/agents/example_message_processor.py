@@ -54,7 +54,7 @@ class ExampleMessageProcessor(BaseAgent):
         """
         if user_context:
             try:
-                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
                 return get_websocket_manager(user_context)
             except Exception as e:
                 logger.error(f"Failed to create WebSocket manager: {e}")

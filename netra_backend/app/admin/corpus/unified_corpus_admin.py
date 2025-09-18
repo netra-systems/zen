@@ -7,7 +7,7 @@ Follows CLAUDE.md section 2.1 (SSOT principles) and 3.6 (refactoring process).
 """
 import asyncio
 import json
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 import os
 from datetime import datetime, timezone
 from enum import Enum
@@ -36,7 +36,7 @@ class CorpusAdminBase:
             # Fallback for contexts without metadata
             logger.debug(f"Context has no metadata field, storing {key} locally")
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 # ============================================================================

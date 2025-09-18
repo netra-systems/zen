@@ -37,7 +37,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, Us
 from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory, configure_agent_instance_factory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, create_agent_websocket_bridge
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 
 @pytest.fixture

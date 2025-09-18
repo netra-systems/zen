@@ -11,11 +11,11 @@ import asyncio
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock, patch
 import json
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 @pytest.mark.integration
 class WebSocketEventEmissionIntegrationTests(SSotAsyncTestCase):

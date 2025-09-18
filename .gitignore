@@ -101,6 +101,13 @@ tmp/
 temp/
 *.tmp
 
+# Temporary diagnostic files
+raw_gcp_logs_*.json
+*.backup_*
+github_*.sh
+github_*.md
+issue_*_session_*.md
+
 # Backup and legacy files
 *_old.*
 *_backup.*

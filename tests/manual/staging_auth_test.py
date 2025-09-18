@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 '''
+'''
 Comprehensive Auth Service Staging Tests
 Manual testing script for staging environment validation
+'''
 '''
 
 import asyncio
@@ -26,7 +28,7 @@ class StagingAuthTester:
         await self.client.aclose()
 
     def log_result(self, test_name: str, success: bool, details: str, response_data: Dict = None):
-        result = { )
+        result = { }
         "test": test_name,
         "success": success,
         "details": details,
@@ -34,7 +36,7 @@ class StagingAuthTester:
     
         self.results.append(result)
         status = "PASS" if success else "FAIL"
-        print("formatted_string")
+        print("")
 
     async def test_health_endpoints(self):
         """Test health check endpoints"""
@@ -46,23 +48,23 @@ class StagingAuthTester:
         self.log_result( )
         "Health Check - Ready",
         True,
-        "formatted_string",
+        "",
         data
                 
         else:
         self.log_result( )
         "Health Check - Ready",
         False,
-        "formatted_string"
+        ""
                     
         except Exception as e:
-        self.log_result("Health Check - Ready", False, "formatted_string")
+        self.log_result("Health Check - Ready", False, "")
 
     async def test_oauth_flow_initiation(self):
         """Test OAuth flow initiation"""
         try:
         response = await self.client.get( )
-        "formatted_string"
+        ""
                                 
 
         if response.status_code == 302:
@@ -89,36 +91,36 @@ class StagingAuthTester:
         self.log_result( )
         "OAuth Flow Initiation",
         False,
-        "formatted_string",
+        "",
         {"redirect_uri": redirect_uri}
                                                     
         else:
         self.log_result( )
         "OAuth Flow Initiation",
         False,
-        "formatted_string"
+        ""
                                                         
         else:
         self.log_result( )
         "OAuth Flow Initiation",
         False,
-        "formatted_string"
+        ""
                                                             
         else:
         self.log_result( )
         "OAuth Flow Initiation",
         False,
-        "formatted_string"
+        ""
                                                                 
         except Exception as e:
-        self.log_result("OAuth Flow Initiation", False, "formatted_string")
+        self.log_result("OAuth Flow Initiation", False, "")
 
     async def test_token_validation(self):
         """Test JWT token validation"""
                                                                         # Test with invalid token
         try:
         response = await self.client.post( )
-        "formatted_string",
+        "",
         json={"token": "invalid-test-token-12345"}
                                                                             
 
@@ -126,22 +128,22 @@ class StagingAuthTester:
         self.log_result( )
         "Token Validation - Invalid Token",
         True,
-        "formatted_string",
+        "",
         {"status_code": response.status_code, "response": response.text}
                                                                                 
         else:
         self.log_result( )
         "Token Validation - Invalid Token",
         False,
-        "formatted_string"
+        ""
                                                                                     
         except Exception as e:
-        self.log_result("Token Validation - Invalid Token", False, "formatted_string")
+        self.log_result("Token Validation - Invalid Token", False, "")
 
                                                                                         # Test with malformed request
         try:
         response = await self.client.post( )
-        "formatted_string",
+        "",
         json={"not_token": "malformed"}
                                                                                             
 
@@ -156,14 +158,14 @@ class StagingAuthTester:
         self.log_result( )
         "Token Validation - Malformed Request",
         False,
-        "formatted_string"
+        ""
                                                                                                 
         except Exception as e:
-        self.log_result("Token Validation - Malformed Request", False, "formatted_string")
+        self.log_result("Token Validation - Malformed Request", False, "")
 
     async def test_cors_configuration(self):
         """Test CORS configuration for staging domains"""
-        staging_origins = [ )
+        staging_origins = [ ]
         "https://app.staging.netrasystems.ai",
         "https://auth.staging.netrasystems.ai",
         "https://api.staging.netrasystems.ai"
@@ -172,8 +174,8 @@ class StagingAuthTester:
         for origin in staging_origins:
         try:
         response = await self.client.options( )
-        "formatted_string",
-        headers={ )
+        "",
+        headers={ }
         "Origin": origin,
         "Access-Control-Request-Method": "GET",
         "Access-Control-Request-Headers": "Content-Type"
@@ -184,32 +186,32 @@ class StagingAuthTester:
         allowed_origins = response.headers.get("Access-Control-Allow-Origin", "")
         if origin in allowed_origins or "*" in allowed_origins:
         self.log_result( )
-        "formatted_string",
+        "",
         True,
-        "formatted_string",
+        "",
         {"allowed_origin": allowed_origins}
                                                                                                                         
         else:
         self.log_result( )
-        "formatted_string",
+        "",
         False,
-        "formatted_string"
+        ""
                                                                                                                             
         else:
         self.log_result( )
-        "formatted_string",
+        "",
         False,
-        "formatted_string"
+        ""
                                                                                                                                 
         except Exception as e:
-        self.log_result("formatted_string", False, "formatted_string")
+        self.log_result("", False, "")
 
     async def test_security_headers(self):
         """Test security headers"""
         try:
         response = await self.client.get("formatted_string")
 
-        security_headers = { )
+        security_headers = { }
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
         "X-XSS-Protection": "1; mode=block"
@@ -223,7 +225,7 @@ class StagingAuthTester:
         if actual_value:
         present_headers[header] = actual_value
         if expected_value.lower() not in actual_value.lower():
-        missing_headers.append("formatted_string")
+        missing_headers.append("")
         else:
         missing_headers.append(header)
 
@@ -238,11 +240,11 @@ class StagingAuthTester:
         self.log_result( )
         "Security Headers",
         False,
-        "formatted_string",
+        "",
         present_headers
                                                                                                                                                                     
         except Exception as e:
-        self.log_result("Security Headers", False, "formatted_string")
+        self.log_result("Security Headers", False, "")
 
     async def test_database_connectivity(self):
         """Test database connectivity through health endpoint"""
@@ -264,17 +266,17 @@ class StagingAuthTester:
         self.log_result( )
         "Database Connectivity",
         False,
-        "formatted_string",
+        "",
         data
                                                                                                                                                                                             
         else:
         self.log_result( )
         "Database Connectivity",
         False,
-        "formatted_string"
+        ""
                                                                                                                                                                                                 
         except Exception as e:
-        self.log_result("Database Connectivity", False, "formatted_string")
+        self.log_result("Database Connectivity", False, "")
 
     async def test_service_metadata(self):
         """Test service metadata and environment detection"""
@@ -289,9 +291,9 @@ class StagingAuthTester:
 
         issues = []
         if environment != "staging":
-        issues.append("formatted_string")
+        issues.append("")
         if service != "auth-service":
-        issues.append("formatted_string")
+        issues.append("")
         if not version:
         issues.append("Version not specified")
 
@@ -299,24 +301,24 @@ class StagingAuthTester:
         self.log_result( )
         "Service Metadata",
         True,
-        "formatted_string",
+        "",
         data
                                                                                                                                                                                                                                 
         else:
         self.log_result( )
         "Service Metadata",
         False,
-        "formatted_string",
+        "",
         data
                                                                                                                                                                                                                                     
         else:
         self.log_result( )
         "Service Metadata",
         False,
-        "formatted_string"
+        ""
                                                                                                                                                                                                                                         
         except Exception as e:
-        self.log_result("Service Metadata", False, "formatted_string")
+        self.log_result("Service Metadata", False, "")
 
     async def run_all_tests(self):
         """Run all staging tests"""
@@ -338,14 +340,14 @@ class StagingAuthTester:
         total = len(self.results)
         success_rate = (passed / total * 100) if total > 0 else 0
 
-        print("formatted_string")
+        print("")
 
         if passed == total:
         print("All tests passed! Auth service is ready for staging use.")
         else:
         print("Some tests failed. Check the detailed results above.")
         failed_tests = [item for item in []]]
-        print("formatted_string")
+        print("")
 
         return success_rate >= 90  # 90% pass rate required
 
@@ -356,15 +358,15 @@ class StagingAuthTester:
 
         # Output detailed results as JSON for further analysis
         with open("staging_auth_test_results.json", "w") as f:
-        json.dump({ ))
-        "timestamp": "2025-08-26T04:30:00Z",
+        json.dump({ })
+        "timestamp": "2025-8-26T04:30:00Z",
         "service_url": AUTH_SERVICE_URL,
         "overall_success": success,
         "results": tester.results
         }, f, indent=2)
 
-        print(f" )
-        Detailed results saved to: staging_auth_test_results.json")
+        print(f" )"
+        Detailed results saved to: staging_auth_test_results.json")"
 
         return 0 if success else 1
 

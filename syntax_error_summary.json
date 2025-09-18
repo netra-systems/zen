@@ -1,0 +1,26 @@
+{
+  "total_files": 588,
+  "files_with_errors": 582,
+  "files_working": 6,
+  "success_rate": 1.0204081632653061,
+  "error_categories": {
+    "unterminated_string": 542,
+    "invalid_decimal": 19,
+    "mismatched_brackets": 9,
+    "invalid_syntax": 3,
+    "other_errors": 9,
+    "files_fixed": 6
+  },
+  "most_critical_files": [
+    "tests\\e2e\\test_websocket_agent_health_fragmentation.py",
+    "tests\\e2e\\test_websocket_auth_staging_scoping.py",
+    "tests\\e2e\\test_websocket_await_error_golden_path_staging.py",
+    "tests\\e2e\\test_websocket_connectionhandler_cloud.py",
+    "tests\\e2e\\test_websocket_dev_connectivity.py",
+    "tests\\e2e\\test_websocket_graceful_degradation_golden_path.py",
+    "tests\\e2e\\test_websocket_guarantees.py",
+    "tests\\e2e\\test_websocket_id_consistency_failures.py",
+    "tests\\e2e\\test_websocket_immediate_disconnect_regression.py",
+    "tests\\e2e\\test_websocket_integration.py"
+  ]
+}

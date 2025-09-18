@@ -49,7 +49,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 # Import business value components
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext, UserContextManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, create_agent_websocket_bridge
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
@@ -148,14 +148,14 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             connection_start = time.time()
             
             # Create user execution context (secure multi-tenant isolation)
-            user_id = ensure_user_id(f"golden_path_test_{uuid.uuid4().hex[:8]}")
-            thread_id = ensure_thread_id(f"thread_{uuid.uuid4().hex[:8]}")
+            user_id = ensure_user_id(str(uuid.uuid4()))
+            thread_id = ensure_thread_id(str(uuid.uuid4()))
             
             user_context = UserExecutionContext(
                 user_id=user_id,
                 thread_id=thread_id,
-                session_id=f"session_{uuid.uuid4().hex[:8]}",
-                trace_id=f"trace_{uuid.uuid4().hex[:8]}"
+                session_id=str(uuid.uuid4()),
+                trace_id=str(uuid.uuid4())
             )
             
             # Get WebSocket manager using SSOT pattern (NOT factory pattern)
@@ -179,7 +179,7 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             agent_context = AgentExecutionContext(
                 user_id=user_id,
                 thread_id=thread_id,
-                run_id=RunID(f"run_{uuid.uuid4().hex[:8]}"),
+                run_id=RunID(str(uuid.uuid4())),
                 message_content="Test message for Golden Path validation",
                 agent_type="data_helper",
                 execution_mode="standard"
@@ -300,9 +300,9 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             logger.info("📍 Phase 1: Validating WebSocketManager as canonical SSOT")
             
             user_context = UserExecutionContext(
-                user_id=ensure_user_id(f"ssot_test_{uuid.uuid4().hex[:8]}"),
-                thread_id=ensure_thread_id(f"thread_{uuid.uuid4().hex[:8]}"),
-                session_id=f"session_{uuid.uuid4().hex[:8]}"
+                user_id=ensure_user_id(str(uuid.uuid4())),
+                thread_id=ensure_thread_id(str(uuid.uuid4())),
+                session_id=str(uuid.uuid4())
             )
             
             # Get WebSocket manager - must be SSOT implementation
@@ -353,8 +353,8 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             
             # Test that canonical SSOT import path works
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as SSoTManager
-                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as ssot_getter
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as SSoTManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager as ssot_getter
                 
                 # Validate these are the same as what we're using
                 self.assertEqual(
@@ -374,13 +374,13 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             
             # Scan common locations for WebSocket manager duplicates
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 websocket_classes.append("UnifiedWebSocketManager")
             except ImportError:
                 pass
                 
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as LegacyManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as LegacyManager
                 websocket_classes.append("LegacyWebSocketManager")
             except ImportError:
                 pass
@@ -442,9 +442,9 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
         try:
             # Setup user context and WebSocket infrastructure
             user_context = UserExecutionContext(
-                user_id=ensure_user_id(f"events_test_{uuid.uuid4().hex[:8]}"),
-                thread_id=ensure_thread_id(f"thread_{uuid.uuid4().hex[:8]}"),
-                session_id=f"session_{uuid.uuid4().hex[:8]}"
+                user_id=ensure_user_id(str(uuid.uuid4())),
+                thread_id=ensure_thread_id(str(uuid.uuid4())),
+                session_id=str(uuid.uuid4())
             )
             
             websocket_manager = get_websocket_manager(user_context=user_context)
@@ -563,16 +563,16 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
         try:
             # Create two distinct enterprise users
             user_a_context = UserExecutionContext(
-                user_id=ensure_user_id(f"enterprise_user_a_{uuid.uuid4().hex[:8]}"),
-                thread_id=ensure_thread_id(f"thread_a_{uuid.uuid4().hex[:8]}"),
-                session_id=f"session_a_{uuid.uuid4().hex[:8]}",
+                user_id=ensure_user_id(str(uuid.uuid4())),
+                thread_id=ensure_thread_id(str(uuid.uuid4())),
+                session_id=str(uuid.uuid4()),
                 metadata={"customer_tier": "enterprise", "revenue": "$50K ARR"}
             )
             
             user_b_context = UserExecutionContext(
-                user_id=ensure_user_id(f"enterprise_user_b_{uuid.uuid4().hex[:8]}"),
-                thread_id=ensure_thread_id(f"thread_b_{uuid.uuid4().hex[:8]}"),
-                session_id=f"session_b_{uuid.uuid4().hex[:8]}",
+                user_id=ensure_user_id(str(uuid.uuid4())),
+                thread_id=ensure_thread_id(str(uuid.uuid4())),
+                session_id=str(uuid.uuid4()),
                 metadata={"customer_tier": "enterprise", "revenue": "$75K ARR"}
             )
             
@@ -723,9 +723,9 @@ class SSoTWebSocketComplianceTests(SSotAsyncTestCase):
             logger.info("📍 Phase 1: Testing normal connection establishment")
             
             user_context = UserExecutionContext(
-                user_id=ensure_user_id(f"reliability_test_{uuid.uuid4().hex[:8]}"),
-                thread_id=ensure_thread_id(f"thread_{uuid.uuid4().hex[:8]}"),
-                session_id=f"session_{uuid.uuid4().hex[:8]}"
+                user_id=ensure_user_id(str(uuid.uuid4())),
+                thread_id=ensure_thread_id(str(uuid.uuid4())),
+                session_id=str(uuid.uuid4())
             )
             
             connection_start = time.time()

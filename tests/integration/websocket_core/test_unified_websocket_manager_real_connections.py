@@ -49,12 +49,12 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import RealServicesTestFixtures
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, ConnectionID, WebSocketID, RequestID, ensure_user_id, ensure_thread_id, ensure_websocket_id
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager, WebSocketConnection, WebSocketManagerMode
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager, WebSocketConnection, WebSocketManagerMode
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from netra_backend.app.auth_integration.auth import validate_jwt_token
 from netra_backend.app.core.configuration.base import get_unified_config
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 logger = central_logger.get_logger(__name__)
 
 class RealWebSocketServer:

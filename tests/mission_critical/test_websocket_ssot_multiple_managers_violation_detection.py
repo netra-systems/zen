@@ -178,7 +178,7 @@ class WebSocketSSotMultipleManagersViolationDetectionTests(SSotBaseTestCase):
             logger.info("✓ Issue #1209: DemoWebSocketBridge imports successfully")
             
             # Test interface compatibility with consolidated manager
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Check if WebSocketManager has required interface for demo bridge
             required_methods = ['emit_agent_event', 'get_active_connections', 'send_message']

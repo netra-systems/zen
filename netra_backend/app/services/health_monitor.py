@@ -4,11 +4,11 @@ Monitors health status of services and instances
 """
 
 import asyncio
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 import time
 from typing import Any, Dict, Optional
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class HealthMonitor:

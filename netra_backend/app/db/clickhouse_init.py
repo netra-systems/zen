@@ -5,16 +5,16 @@ Creates required tables on application startup.
 
 from typing import List, Tuple
 
-from netra_backend.app.config import get_config
+from netra_backend.app.config import get_config, config_manager
 settings = get_config()
-from netra_backend.app.core.configuration.base import config_manager
 from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.db.models_clickhouse import (
     LOGS_TABLE_SCHEMA,
     SUPPLY_TABLE_SCHEMA,
     WORKLOAD_EVENTS_TABLE_SCHEMA,
 )
-from netra_backend.app.logging_config import central_logger as logger
+from shared.logging.unified_logging_ssot import get_logger
+logger = get_logger(__name__)
 
 # List of table schemas to create on startup
 CLICKHOUSE_TABLES: List[Tuple[str, str]] = [

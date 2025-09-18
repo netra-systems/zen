@@ -39,7 +39,7 @@ class BusinessValueMonitoringWebSocketIntegrationTests(SSotAsyncTestCase):
         """Test integration with WebSocket manager for business value alerts - WILL FAIL initially"""
         with pytest.raises((ImportError, AttributeError, ModuleNotFoundError)):
             from netra_backend.app.services.operational_business_value_monitor import OperationalBusinessValueMonitor
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Create real WebSocket manager instance (no mocks in integration tests)
             websocket_manager = WebSocketManager()
@@ -64,7 +64,7 @@ class BusinessValueMonitoringWebSocketIntegrationTests(SSotAsyncTestCase):
         """Test WebSocket events integration with Golden Path user flow - WILL FAIL initially"""
         with pytest.raises((ImportError, AttributeError, ModuleNotFoundError)):
             from netra_backend.app.services.operational_business_value_monitor import OperationalBusinessValueMonitor
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             websocket_manager = WebSocketManager()
             monitor = OperationalBusinessValueMonitor()
@@ -95,7 +95,7 @@ class BusinessValueMonitoringWebSocketIntegrationTests(SSotAsyncTestCase):
         """Test multi-user WebSocket alert isolation - WILL FAIL initially"""
         with pytest.raises((ImportError, AttributeError, ModuleNotFoundError)):
             from netra_backend.app.services.operational_business_value_monitor import OperationalBusinessValueMonitor
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             websocket_manager = WebSocketManager()
             monitor = OperationalBusinessValueMonitor()
@@ -260,7 +260,7 @@ class BusinessValueMonitoringDashboardIntegrationTests(SSotAsyncTestCase):
         """Test real-time dashboard updates via WebSocket - WILL FAIL initially"""
         with pytest.raises((ImportError, AttributeError, ModuleNotFoundError)):
             from netra_backend.app.services.operational_business_value_monitor import OperationalBusinessValueMonitor
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             monitor = OperationalBusinessValueMonitor()
             websocket_manager = WebSocketManager()
@@ -419,7 +419,7 @@ class BusinessValueMonitoringSystemIntegrationTests(SSotAsyncTestCase):
         """Test complete monitoring workflow integration - WILL FAIL initially"""
         with pytest.raises((ImportError, AttributeError, ModuleNotFoundError)):
             from netra_backend.app.services.operational_business_value_monitor import OperationalBusinessValueMonitor
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Set up complete monitoring system
             monitor = OperationalBusinessValueMonitor()

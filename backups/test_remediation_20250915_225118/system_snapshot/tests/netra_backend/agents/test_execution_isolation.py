@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,71 +16,63 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
-        '''
+        return self.messages_sent.copy()"""
+        """
         Tests for execution isolation with UserExecutionEngine and ExecutionEngineFactory.
 
         This test suite verifies that user execution isolation works correctly and prevents
-        state leakage between concurrent users.
+        state leakage between concurrent users."""
+        Business Value: Ensures production-ready concurrent user support with zero context leakage."""
 
-        Business Value: Ensures production-ready concurrent user support with zero context leakage.
-        '''
+import asyncio
+import pytest
+import uuid
+import time
+from datetime import datetime, timezone
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
-        import asyncio
-        import pytest
-        import uuid
-        import time
-        from datetime import datetime, timezone
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from auth_service.core.auth_manager import AuthManager
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from shared.isolated_environment import IsolatedEnvironment
-
-        from netra_backend.app.schemas.agent_models import DeepAgentState
-        from netra_backend.app.agents.supervisor.execution_context import ( )
+from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.agents.supervisor.execution_context import ( )
         AgentExecutionContext,
         AgentExecutionResult)
-        from netra_backend.app.agents.supervisor.user_execution_context import ( )
+from netra_backend.app.agents.supervisor.user_execution_context import ( )
         UserExecutionContext,
         InvalidContextError
     
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from netra_backend.app.agents.supervisor.execution_engine_factory import ( )
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.execution_engine_factory import ( )
         ExecutionEngineFactory,
         get_execution_engine_factory,
         user_execution_engine
     
-        from netra_backend.app.agents.supervisor.execution_state_store import ( )
+from netra_backend.app.agents.supervisor.execution_state_store import ( )
         ExecutionStateStore,
         get_execution_state_store
     
-        from netra_backend.app.agents.supervisor.agent_instance_factory import ( )
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
+from netra_backend.app.agents.supervisor.agent_instance_factory import ( )
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
         UserWebSocketEmitter,
         get_agent_instance_factory
     
 
-
-class TestUserExecutionEngine:
+"""
         """Test UserExecutionEngine for per-user isolation."""
 
-        @pytest.fixture
-    def user_context(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Create test user execution context."""
-        pass
-        return UserExecutionContext( )
+        pass"""
         user_id="test_user_123",
         thread_id="thread_456",
         run_id="run_789",
@@ -91,11 +81,9 @@ class TestUserExecutionEngine:
 
         @pytest.fixture
     def different_user_context(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance.""""""
         """Create different user execution context."""
-        pass
-        return UserExecutionContext( )
+        pass"""
         user_id="different_user_456",
         thread_id="thread_789",
         run_id="run_101112",
@@ -104,17 +92,14 @@ class TestUserExecutionEngine:
 
         @pytest.fixture
     def real_agent_factory():
-        """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance.""""""
         """Mock agent factory with required components."""
         pass
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
         return factory
 
-        @pytest.fixture
-    def real_websocket_emitter():
-        """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Mock UserWebSocketEmitter."""
         pass
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
@@ -124,13 +109,10 @@ class TestUserExecutionEngine:
         emitter.websocket = TestWebSocketConnection()
         return emitter
 
-        @pytest.fixture
-    def agent_execution_context(self, user_context):
-        """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Create agent execution context."""
-        pass
-        return AgentExecutionContext( )
+        pass"""
         agent_name="test_agent",
         user_id=user_context.user_id,
         thread_id=user_context.thread_id,
@@ -139,11 +121,9 @@ class TestUserExecutionEngine:
 
         @pytest.fixture
     def deep_agent_state(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance.""""""
         """Create deep agent state."""
-        pass
-        state = Mock(spec=DeepAgentState)
+        pass"""
         state.user_prompt = "Test prompt"
         return state
 
@@ -164,8 +144,7 @@ class TestUserExecutionEngine:
         assert len(engine.active_runs) == 0
         assert len(engine.run_history) == 0
         assert engine.max_concurrent == 3  # default
-
-    # Verify engine metadata
+"""
         assert engine.engine_id.startswith("user_engine_")
         assert user_context.user_id in engine.engine_id
         assert user_context.run_id in engine.engine_id
@@ -182,8 +161,7 @@ class TestUserExecutionEngine:
         
 
         # Test invalid context (wrong type)
-        with pytest.raises(TypeError):
-        UserExecutionEngine( )
+        with pytest.raises(TypeError):"""
         context="not_a_context",
         agent_factory=mock_agent_factory,
         websocket_emitter=mock_websocket_emitter
@@ -208,8 +186,7 @@ class TestUserExecutionEngine:
         websocket_emitter=mock_websocket_emitter
                     
 
-                    # Valid context (matches user)
-        valid_agent_context = AgentExecutionContext( )
+                    # Valid context (matches user)"""
         agent_name="test_agent",
         user_id=user_context.user_id,
         thread_id=user_context.thread_id,
@@ -259,8 +236,6 @@ class TestUserExecutionEngine:
 
                             # Get stats for each user
         stats1 = engine1.get_user_execution_stats()
-        stats2 = engine2.get_user_execution_stats()
-
                             # Verify isolation - stats should be different
         assert stats1['total_executions'] == 5
         assert stats1['user_id'] == user_context.user_id
@@ -275,8 +250,7 @@ class TestUserExecutionEngine:
         assert stats1['engine_id'] != stats2['engine_id']
         assert stats1['run_id'] != stats2['run_id']
 
-                            # Removed problematic line: async def test_active_runs_isolation(self, user_context, different_user_context,
-        mock_agent_factory, mock_websocket_emitter):
+                            # Removed problematic line: async def test_active_runs_isolation(self, user_context, different_user_context,"""
         """Test that active runs are isolated per user."""
                                 # Create engines for different users
         engine1 = UserExecutionEngine( )
@@ -290,8 +264,7 @@ class TestUserExecutionEngine:
         agent_factory=mock_agent_factory,
         websocket_emitter=mock_websocket_emitter
                                 
-
-                                # Add active runs to each engine
+"""
         execution_id_1 = "exec_1"
         execution_id_2 = "exec_2"
 
@@ -354,8 +327,7 @@ class TestUserExecutionEngine:
         assert engine1.websocket_emitter == emitter1
         assert engine2.websocket_emitter == emitter2
 
-                                    # Test sending notifications
-        context1 = AgentExecutionContext( )
+                                    # Test sending notifications"""
         agent_name="agent1",
         user_id=user_context.user_id,
         thread_id=user_context.thread_id,
@@ -387,14 +359,11 @@ class TestUserExecutionEngine:
 class TestExecutionEngineFactory:
         """Test ExecutionEngineFactory for managing user engines."""
 
-        @pytest.fixture
-    def user_context(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Create test user execution context."""
         pass
-        await asyncio.sleep(0)
-        return UserExecutionContext( )
+        await asyncio.sleep(0)"""
         user_id="factory_test_user",
         thread_id="factory_thread",
         run_id="factory_run",
@@ -403,19 +372,17 @@ class TestExecutionEngineFactory:
 
         @pytest.fixture
     def factory(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance.""""""
         """Create execution engine factory."""
         pass
         return ExecutionEngineFactory()
 
-        @pytest.fixture
-    async def configured_agent_factory(self):
+        @pytest.fixture"""
         """Mock configured agent instance factory."""
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
     # Mock the global factory
-        import netra_backend.app.agents.supervisor.agent_instance_factory as factory_module
+import netra_backend.app.agents.supervisor.agent_instance_factory as factory_module
         original_get_factory = factory_module.get_agent_instance_factory
         factory_module.get_agent_instance_factory = Mock(return_value=factory)
 
@@ -423,8 +390,7 @@ class TestExecutionEngineFactory:
 
     # Restore original
         factory_module.get_agent_instance_factory = original_get_factory
-
-    async def test_factory_create_for_user(self, factory, user_context, configured_agent_factory):
+"""
         """Test factory creates isolated engines for users."""
         pass
         # Create engine for user
@@ -439,12 +405,10 @@ class TestExecutionEngineFactory:
         assert len(factory._active_engines) == 1
         assert factory._factory_metrics['total_engines_created'] == 1
         assert factory._factory_metrics['active_engines_count'] == 1
-
-    async def test_factory_user_limits(self, factory, configured_agent_factory):
+"""
         """Test factory enforces per-user engine limits."""
             # Set low limit for testing
-        factory._max_engines_per_user = 2
-
+        factory._max_engines_per_user = 2"""
         user_id = "limited_user"
 
             # Create contexts for same user
@@ -482,11 +446,9 @@ class TestExecutionEngineFactory:
         assert not engine.is_active()
         assert len(factory._active_engines) == 0
         assert factory._factory_metrics['total_engines_cleaned'] == 1
-
-    async def test_concurrent_user_execution_scopes(self, factory, configured_agent_factory):
+"""
         """Test concurrent execution scopes for different users."""
-                            # Create contexts for different users
-        user1_context = UserExecutionContext( )
+                            # Create contexts for different users"""
         user_id="concurrent_user_1",
         thread_id="thread_1",
         run_id="run_1"
@@ -539,8 +501,7 @@ class TestExecutionEngineFactory:
 
     async def test_factory_metrics_tracking(self, factory, configured_agent_factory):
         """Test factory properly tracks metrics."""
-        pass
-        user_context = UserExecutionContext( )
+        pass"""
         user_id="metrics_user",
         thread_id="metrics_thread",
         run_id="metrics_run"
@@ -572,22 +533,17 @@ class TestExecutionEngineFactory:
 class TestExecutionStateStore:
         """Test ExecutionStateStore for global monitoring."""
 
-        @pytest.fixture
-    def store(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Create execution state store."""
         pass
         await asyncio.sleep(0)
         return ExecutionStateStore()
 
-        @pytest.fixture
-    def user_context(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Create test user context."""
-        pass
-        return UserExecutionContext( )
+        pass"""
         user_id="store_test_user",
         thread_id="store_thread",
         run_id="store_run"
@@ -599,13 +555,7 @@ class TestExecutionStateStore:
         agent_name = "test_agent"
 
         # Record execution start
-        await store.record_execution_start( )
-        execution_id=execution_id,
-        user_context=user_context,
-        agent_name=agent_name,
-        metadata={'test': True}
-        
-
+        await store.record_execution_start(execution_id=execution_id,, user_context=user_context,, agent_name=agent_name,, metadata={'test': True})
         # Verify record created
         assert execution_id in store._execution_records
         record = store._execution_records[execution_id]
@@ -634,8 +584,7 @@ class TestExecutionStateStore:
 
     async def test_user_stats_tracking(self, store):
         """Test user statistics tracking."""
-        pass
-        user_context1 = UserExecutionContext( )
+        pass"""
         user_id="stats_user_1",
         thread_id="thread_1",
         run_id="run_1"
@@ -710,8 +659,7 @@ class TestExecutionStateStore:
         assert stats['concurrent_executions'] == 3
         assert stats['active_users'] == 2  # user1 and user2 have concurrent > 0
         assert stats['total_users_seen'] == 3
-
-    def test_system_health_calculation(self, store):
+"""
         """Test system health score calculation."""
         pass
     # Set up stats for good health
@@ -722,8 +670,7 @@ class TestExecutionStateStore:
     # Add execution records with good times
         for i in range(10):
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
-        record.completed_at = datetime.now(timezone.utc)
-        record.duration_seconds = 5.0  # Good execution time
+        record.completed_at = datetime.now(timezone.utc)"""
         store._execution_records["formatted_string"] = record
 
         health = store.get_system_health()
@@ -753,14 +700,13 @@ class TestExecutionStateStore:
 class TestConcurrentUserIsolation:
         """Integration tests for concurrent user execution isolation."""
 
-        @pytest.fixture
-    async def configured_system(self):
+        @pytest.fixture"""
         """Set up configured system for integration testing."""
     # Mock agent factory
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
     # Mock global factory function
-        import netra_backend.app.agents.supervisor.agent_instance_factory as factory_module
+import netra_backend.app.agents.supervisor.agent_instance_factory as factory_module
         original_get_factory = factory_module.get_agent_instance_factory
         factory_module.get_agent_instance_factory = Mock(return_value=agent_factory)
 
@@ -768,13 +714,11 @@ class TestConcurrentUserIsolation:
 
     # Restore
         factory_module.get_agent_instance_factory = original_get_factory
-
-    async def test_concurrent_users_complete_isolation(self, configured_system):
+"""
         """Test that multiple concurrent users have complete isolation."""
         pass
         # Create contexts for multiple users
-        users = [ )
-        UserExecutionContext( )
+        users = [ )"""
         user_id="formatted_string",
         thread_id="formatted_string",
         run_id="formatted_string"
@@ -806,8 +750,7 @@ class TestConcurrentUserIsolation:
         engine.execution_stats['execution_times'] = [1.0, 2.0, 1.5]
 
         # Add some fake history
-        fake_result = AgentExecutionResult( )
-        success=True,
+        fake_result = AgentExecutionResult( )"""
         agent_name="test_agent",
         execution_time=1.5,
         data={'test': True}
@@ -865,9 +808,8 @@ class TestConcurrentUserIsolation:
     async def test_user_execution_engine_vs_legacy_isolation(self, configured_system):
         """Test isolation comparison between UserExecutionEngine and legacy ExecutionEngine."""
         pass
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
-
-        user_context = UserExecutionContext( )
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
+"""
         user_id="isolation_test_user",
         thread_id="isolation_thread",
         run_id="isolation_run"
@@ -893,8 +835,6 @@ class TestConcurrentUserIsolation:
 
                             Get stats from both legacy engines
         legacy_stats1 = await legacy_engine1.get_execution_stats()
-        legacy_stats2 = await legacy_engine2.get_execution_stats()
-
                             # Verify UserExecutionEngine isolation
         assert user_results['isolated']['total_executions'] == 10
         assert user_results['isolated']['user_id'] == user_context.user_id

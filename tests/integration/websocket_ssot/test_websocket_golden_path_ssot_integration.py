@@ -30,7 +30,7 @@ import uuid
 from typing import Dict, List, Any, Optional, Set
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from shared.types.core_types import UserID, ThreadID, ensure_user_id, ensure_thread_id
@@ -389,13 +389,13 @@ class WebSocketGoldenPathSSOTIntegrationTests(BaseIntegrationTest):
         """Create WebSocket Manager via SSOT path."""
         try:
             # Try the expected SSOT import path
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             return WebSocketManager()
 
         except ImportError:
             # Fallback to unified manager during transition
             try:
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
                 return get_websocket_manager(user_context=getattr(self, 'user_context', None))
             except ImportError:
                 # Last resort - factory pattern (should be eliminated after SSOT)

@@ -42,7 +42,7 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from auth_service.core.auth_manager import AuthManager
@@ -57,16 +57,16 @@ import pytest
 
 import jwt as jwt_lib
 
-# Use SSOT backend components instead of direct auth service imports
-from netra_backend.app.database.session_manager import SessionManager
-# Import auth service components dynamically in tests to avoid startup failures
-import importlib
-
-# These will be imported dynamically in test methods:
-# - auth_service.auth_core.core.jwt_handler.JWTHandler
-# - auth_service.auth_core.models.auth_models.*
-# - auth_service.auth_core.services.auth_service.AuthService
-# - auth_service.tests.factories.user_factory.UserFactory
+from auth_service.auth_core.core.jwt_handler import JWTHandler
+from auth_service.auth_core.core.session_manager import SessionManager
+from auth_service.auth_core.models.auth_models import (
+    AuthProvider,
+    LoginRequest,
+    LoginResponse,
+    TokenResponse,
+)
+from auth_service.auth_core.services.auth_service import AuthService
+from auth_service.tests.factories.user_factory import UserFactory
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient

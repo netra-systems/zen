@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """
+"""
 MISSION CRITICAL: WebSocket Message Queue Resilience Test
 
 This test validates that the WebSocket message queue never permanently loses messages
@@ -12,8 +13,11 @@ CRITICAL REQUIREMENTS VALIDATED:
 4. Dead Letter Queue captures and allows investigation of failed messages
 5. Background retry processor recovers failed messages
 6. Comprehensive state transitions and logging
-"""
+"
+"
 
+"""
+"""
 import asyncio
 import json
 import pytest
@@ -30,37 +34,39 @@ from shared.isolated_environment import get_env
 
 
 class MockHandler:
-    """Mock message handler for testing different failure scenarios"""
+    "Mock message handler for testing different failure scenarios"
     
     def __init__(self):
         self.call_count = 0
         self.failure_mode = None
         self.failure_count_limit = 0
     
-    async def __call__(self, user_id: str, payload: Dict[str, Any]):
+    async def __call__(self, user_id: str, payload: Dict[str, Any):
         self.call_count += 1
         
-        if self.failure_mode == "always_fail":
-            raise Exception(f"Simulated failure {self.call_count}")
+        if self.failure_mode == "always_fail:"
+            raise Exception(fSimulated failure {self.call_count})
         
-        if self.failure_mode == "fail_then_succeed" and self.call_count <= self.failure_count_limit:
-            raise Exception(f"Temporary failure {self.call_count}")
+        if self.failure_mode == fail_then_succeed and self.call_count <= self.failure_count_limit:"
+        if self.failure_mode == fail_then_succeed and self.call_count <= self.failure_count_limit:"
+            raise Exception(fTemporary failure {self.call_count}")"
         
-        if self.failure_mode == "timeout":
+        if self.failure_mode == timeout:
             await asyncio.sleep(60)  # Simulate timeout
         
         # Success case
-        return {"processed": True, "call_count": self.call_count}
+        return {processed": True, "call_count: self.call_count}
 
 
 @pytest.mark.mission_critical
 @pytest.mark.asyncio
 class WebSocketMessageQueueResilienceTests:
-    """Mission critical tests for WebSocket message queue resilience"""
+    Mission critical tests for WebSocket message queue resilience"
+    Mission critical tests for WebSocket message queue resilience"
 
     @pytest.fixture
     async def message_queue_with_mock_redis(self):
-        """Create message queue with comprehensive mocking"""
+        "Create message queue with comprehensive mocking"
         mock_redis = AsyncMock()
         
         # Redis storage simulation
@@ -69,13 +75,14 @@ class WebSocketMessageQueueResilienceTests:
         self.redis_zsets = {}
         
         async def mock_set(key, value, ex=None):
-            self.redis_storage[key] = {"value": value, "expires": time.time() + (ex or 3600)}
+            self.redis_storage[key] = {value": value, "expires: time.time() + (ex or 3600)}
         
         async def mock_get(key):
             if key in self.redis_storage:
                 entry = self.redis_storage[key]
-                if time.time() < entry["expires"]:
-                    return entry["value"]
+                if time.time() < entry[expires]:
+                    return entry[value]"
+                    return entry[value]"
                 else:
                     del self.redis_storage[key]
             return None
@@ -95,7 +102,7 @@ class WebSocketMessageQueueResilienceTests:
             return None
         
         async def mock_keys(pattern):
-            return [k for k in self.redis_storage.keys() if pattern.replace("*", "") in k]
+            return [k for k in self.redis_storage.keys() if pattern.replace(*", ) in k]"
         
         async def mock_zadd(key, mapping):
             if key not in self.redis_zsets:
@@ -142,13 +149,13 @@ class WebSocketMessageQueueResilienceTests:
 
     @pytest.fixture
     def test_messages(self):
-        """Create test messages for various scenarios"""
+        Create test messages for various scenarios""
         return [
             QueuedMessage(
-                id=f"test-msg-{i:03d}",
-                user_id=f"user-{i}",
-                type="test_message",
-                payload={"test_data": f"data-{i}", "index": i},
+                id=ftest-msg-{i:03d},
+                user_id=fuser-{i},
+                type="test_message,"
+                payload={test_data: fdata-{i}, index: i},
                 priority=MessagePriority.NORMAL
             )
             for i in range(1, 6)
@@ -156,18 +163,19 @@ class WebSocketMessageQueueResilienceTests:
 
     @pytest.mark.asyncio
     async def test_critical_no_permanent_message_loss(self, message_queue_with_mock_redis, test_messages):
-        """CRITICAL: Validate no messages are permanently lost - all either succeed or go to DLQ"""
+        "CRITICAL: Validate no messages are permanently lost - all either succeed or go to DLQ"
         queue, mock_redis = message_queue_with_mock_redis
         
         # Register handler that always fails
         failing_handler = MockHandler()
-        failing_handler.failure_mode = "always_fail"
-        queue.register_handler("test_message", failing_handler)
+        failing_handler.failure_mode = always_fail"
+        failing_handler.failure_mode = always_fail"
+        queue.register_handler("test_message, failing_handler)"
         
         # Enqueue test messages
         for message in test_messages:
             result = await queue.enqueue(message)
-            assert result is True, f"Failed to enqueue message {message.id}"
+            assert result is True, fFailed to enqueue message {message.id}
         
         # Start processing
         await queue.process_queue(worker_count=2)
@@ -194,14 +202,14 @@ class WebSocketMessageQueueResilienceTests:
         
         # Verify each message has proper DLQ structure
         for dlq_msg in dlq_messages:
-            assert "final_error" in dlq_msg, "DLQ message missing final_error"
-            assert "moved_to_dlq_at" in dlq_msg, "DLQ message missing timestamp"
-            assert "retry_history" in dlq_msg, "DLQ message missing retry history"
-            assert dlq_msg["status"] in [MessageStatus.DEAD_LETTER.value, MessageStatus.RETRY_EXHAUSTED.value]
+            assert final_error" in dlq_msg, DLQ message missing final_error"
+            assert moved_to_dlq_at in dlq_msg, DLQ message missing timestamp
+            assert retry_history" in dlq_msg, "DLQ message missing retry history
+            assert dlq_msg[status] in [MessageStatus.DEAD_LETTER.value, MessageStatus.RETRY_EXHAUSTED.value]
 
     @pytest.mark.asyncio
     async def test_critical_exponential_backoff_progression(self, message_queue_with_mock_redis, test_messages):
-        """CRITICAL: Validate exponential backoff prevents thundering herd"""
+        CRITICAL: Validate exponential backoff prevents thundering herd""
         queue, mock_redis = message_queue_with_mock_redis
         
         message = test_messages[0]
@@ -220,7 +228,7 @@ class WebSocketMessageQueueResilienceTests:
             delay = message.calculate_next_retry_delay()
             
             assert min_delay <= delay <= max_delay, \
-                f"Retry count {retry_count}: delay {delay} not in range [{min_delay}, {max_delay}]"
+                fRetry count {retry_count}: delay {delay} not in range [{min_delay}, {max_delay}]
         
         # Test jitter prevents identical delays (thundering herd prevention)
         message.retry_count = 3
@@ -231,11 +239,11 @@ class WebSocketMessageQueueResilienceTests:
         
         # All delays should be reasonable
         for delay in delays:
-            assert 1 <= delay <= 60, f"Delay {delay} outside reasonable bounds"
+            assert 1 <= delay <= 60, fDelay {delay} outside reasonable bounds
 
     @pytest.mark.asyncio
     async def test_critical_circuit_breaker_prevents_cascade_failures(self, message_queue_with_mock_redis, test_messages):
-        """CRITICAL: Circuit breaker prevents cascade failures"""
+        CRITICAL: Circuit breaker prevents cascade failures""
         queue, mock_redis = message_queue_with_mock_redis
         
         # Mock circuit breaker in open state
@@ -247,11 +255,11 @@ class WebSocketMessageQueueResilienceTests:
         result = await queue.enqueue(message)
         
         # Should still accept message but queue for circuit breaker retry
-        assert result is True, "Circuit breaker should gracefully handle messages, not reject them"
+        assert result is True, Circuit breaker should gracefully handle messages, not reject them
         
         # Verify message was queued for circuit breaker retry
-        cb_retry_keys = await mock_redis.keys("circuit_breaker_retry:*")
-        assert len(cb_retry_keys) > 0, "Message not queued for circuit breaker retry"
+        cb_retry_keys = await mock_redis.keys("circuit_breaker_retry:*)"
+        assert len(cb_retry_keys) > 0, Message not queued for circuit breaker retry
         
         # Simulate circuit breaker recovery
         circuit_breaker_open = False
@@ -264,7 +272,7 @@ class WebSocketMessageQueueResilienceTests:
 
     @pytest.mark.asyncio
     async def test_critical_dead_letter_queue_investigation_capability(self, message_queue_with_mock_redis, test_messages):
-        """CRITICAL: Dead Letter Queue provides comprehensive failure investigation data"""
+        CRITICAL: Dead Letter Queue provides comprehensive failure investigation data""
         queue, mock_redis = message_queue_with_mock_redis
         
         message = test_messages[0]
@@ -278,7 +286,7 @@ class WebSocketMessageQueueResilienceTests:
             now - timedelta(minutes=1),
         ]
         
-        final_error = "Critical business logic failure"
+        final_error = Critical business logic failure
         
         # Move to DLQ
         await queue._move_to_dead_letter_queue(message, final_error)
@@ -292,32 +300,36 @@ class WebSocketMessageQueueResilienceTests:
         
         # Verify comprehensive investigation data
         required_fields = [
-            "final_error", "moved_to_dlq_at", "retry_history", 
-            "total_processing_time", "id", "user_id", "type", "payload"
+            final_error, moved_to_dlq_at, retry_history, "
+            final_error, moved_to_dlq_at, retry_history, "
+            "total_processing_time, id, user_id, type, "payload"
+            "total_processing_time, id, user_id, type, "payload"
         ]
         
         for field in required_fields:
-            assert field in dlq_data, f"DLQ missing critical field: {field}"
+            assert field in dlq_data, fDLQ missing critical field: {field}
         
-        assert dlq_data["final_error"] == final_error
-        assert len(dlq_data["retry_history"]) == 3, "Retry history not preserved"
-        assert dlq_data["id"] == message.id
-        assert isinstance(dlq_data["total_processing_time"], (int, float))
+        assert dlq_data[final_error] == final_error"
+        assert dlq_data[final_error] == final_error"
+        assert len(dlq_data[retry_history") == 3, Retry history not preserved"
+        assert dlq_data[id] == message.id
+        assert isinstance(dlq_data["total_processing_time], (int, float))"
 
     @pytest.mark.asyncio
     async def test_critical_dlq_message_reprocessing(self, message_queue_with_mock_redis, test_messages):
-        """CRITICAL: Messages can be recovered from DLQ and reprocessed"""
+        CRITICAL: Messages can be recovered from DLQ and reprocessed"
+        CRITICAL: Messages can be recovered from DLQ and reprocessed"
         queue, mock_redis = message_queue_with_mock_redis
         
         # Put message in DLQ
         message = test_messages[0]
         message.status = MessageStatus.DEAD_LETTER
         message.permanent_failure = True
-        await queue._move_to_dead_letter_queue(message, "Test error")
+        await queue._move_to_dead_letter_queue(message, "Test error)"
         
         # Register successful handler
         success_handler = MockHandler()  # Default mode is success
-        queue.register_handler("test_message", success_handler)
+        queue.register_handler(test_message, success_handler)
         
         # Reprocess from DLQ
         success = await queue.reprocess_dead_letter_message(message.id)
@@ -326,20 +338,21 @@ class WebSocketMessageQueueResilienceTests:
         
         # Verify message was removed from DLQ
         dlq_messages = await queue.get_dead_letter_queue_messages()
-        dlq_ids = [msg["id"] for msg in dlq_messages]
+        dlq_ids = [msg[id] for msg in dlq_messages]
         
-        assert message.id not in dlq_ids, "Message not removed from DLQ after reprocessing"
+        assert message.id not in dlq_ids, Message not removed from DLQ after reprocessing"
+        assert message.id not in dlq_ids, Message not removed from DLQ after reprocessing"
 
     @pytest.mark.asyncio
     async def test_critical_retry_eventually_succeeds(self, message_queue_with_mock_redis, test_messages):
-        """CRITICAL: Transient failures eventually succeed through retry mechanism"""
+        "CRITICAL: Transient failures eventually succeed through retry mechanism"
         queue, mock_redis = message_queue_with_mock_redis
         
         # Register handler that fails 3 times then succeeds
         retry_handler = MockHandler()
         retry_handler.failure_mode = "fail_then_succeed"
         retry_handler.failure_count_limit = 3
-        queue.register_handler("test_message", retry_handler)
+        queue.register_handler(test_message, retry_handler)
         
         message = test_messages[0]
         await queue.enqueue(message)
@@ -351,7 +364,7 @@ class WebSocketMessageQueueResilienceTests:
         # Simulate multiple retry cycles
         for cycle in range(10):  # Up to 10 retry cycles
             await queue._process_retry_batch()
-            await asyncio.sleep(0.05)
+            await asyncio.sleep(0.5)
             
             # Check if message succeeded
             if retry_handler.call_count > 3:  # Should succeed after 3 failures
@@ -361,22 +374,24 @@ class WebSocketMessageQueueResilienceTests:
         
         # Verify handler was called more than failure limit (indicating success)
         assert retry_handler.call_count > 3, \
-            f"Handler called only {retry_handler.call_count} times, should succeed after 3 failures"
+            fHandler called only {retry_handler.call_count} times, should succeed after 3 failures
         
         # Verify no DLQ messages (should have succeeded)
         dlq_messages = await queue.get_dead_letter_queue_messages()
-        assert len(dlq_messages) == 0, "Message should not be in DLQ after successful retry"
+        assert len(dlq_messages) == 0, Message should not be in DLQ after successful retry""
 
     @pytest.mark.asyncio
     async def test_critical_comprehensive_logging_and_observability(self, message_queue_with_mock_redis, test_messages):
-        """CRITICAL: All state transitions are logged with comprehensive context"""
+        CRITICAL: All state transitions are logged with comprehensive context"
+        CRITICAL: All state transitions are logged with comprehensive context"
         queue, mock_redis = message_queue_with_mock_redis
         
         with patch('netra_backend.app.services.websocket.message_queue.logger') as mock_logger:
             # Register failing handler
             failing_handler = MockHandler()
-            failing_handler.failure_mode = "always_fail"
-            queue.register_handler("test_message", failing_handler)
+            failing_handler.failure_mode = always_fail"
+            failing_handler.failure_mode = always_fail"
+            queue.register_handler(test_message, failing_handler)
             
             message = test_messages[0]
             
@@ -385,38 +400,40 @@ class WebSocketMessageQueueResilienceTests:
             await queue._process_message(message)
             
             # Verify comprehensive logging was called
-            assert mock_logger.error.called, "Error logging not called for failed message"
+            assert mock_logger.error.called, Error logging not called for failed message""
             
             # Check structured logging data
             error_calls = [call for call in mock_logger.error.call_args_list 
                           if call[1] and 'extra' in call[1]]
             
-            assert len(error_calls) > 0, "No structured logging found"
+            assert len(error_calls) > 0, No structured logging found
             
             extra_data = error_calls[0][1]['extra']
             required_fields = ['message_id', 'message_type', 'retry_count', 'error_type', 'user_id']
             
             for field in required_fields:
-                assert field in extra_data, f"Missing required logging field: {field}"
+                assert field in extra_data, fMissing required logging field: {field}"
+                assert field in extra_data, fMissing required logging field: {field}"
 
     @pytest.mark.asyncio
     async def test_critical_background_retry_processor_resilience(self, message_queue_with_mock_redis, test_messages):
-        """CRITICAL: Background retry processor is resilient to errors"""
+        "CRITICAL: Background retry processor is resilient to errors"
         queue, mock_redis = message_queue_with_mock_redis
         
         # Start background processor
         await queue.process_queue(worker_count=1)
         
         # Verify retry task is running
-        assert queue._retry_task is not None, "Background retry task not started"
-        assert not queue._retry_task.done(), "Background retry task exited prematurely"
+        assert queue._retry_task is not None, Background retry task not started""
+        assert not queue._retry_task.done(), Background retry task exited prematurely
         
         # Simulate retry processor error (Redis failure)
         original_get = mock_redis.get
         
         async def failing_get(key):
-            if "retry:" in key:
-                raise Exception("Redis connection failed")
+            if retry: in key:"
+            if retry: in key:"
+                raise Exception("Redis connection failed)"
             return await original_get(key)
         
         mock_redis.get = failing_get
@@ -425,7 +442,7 @@ class WebSocketMessageQueueResilienceTests:
         await asyncio.sleep(0.1)
         
         # Verify retry task is still running despite errors
-        assert not queue._retry_task.done(), "Background retry task failed due to Redis error"
+        assert not queue._retry_task.done(), Background retry task failed due to Redis error
         
         # Restore Redis functionality
         mock_redis.get = original_get
@@ -434,7 +451,7 @@ class WebSocketMessageQueueResilienceTests:
 
     @pytest.mark.asyncio
     async def test_critical_message_lifecycle_state_integrity(self, message_queue_with_mock_redis, test_messages):
-        """CRITICAL: Message state transitions maintain integrity"""
+        "CRITICAL: Message state transitions maintain integrity"
         queue, mock_redis = message_queue_with_mock_redis
         
         message = test_messages[0]
@@ -453,7 +470,8 @@ class WebSocketMessageQueueResilienceTests:
         for from_status, to_status in valid_transitions:
             message.status = from_status
             message.status = to_status
-            assert message.status == to_status, f"Invalid transition {from_status} -> {to_status}"
+            assert message.status == to_status, fInvalid transition {from_status} -> {to_status}"
+            assert message.status == to_status, fInvalid transition {from_status} -> {to_status}"
         
         # Test retry eligibility logic
         message.retry_count = 0
@@ -462,14 +480,16 @@ class WebSocketMessageQueueResilienceTests:
         assert message.should_retry() is True, "Fresh message should be retryable"
         
         message.retry_count = 5  # max_retries
-        assert message.should_retry() is False, "Message at max retries should not retry"
+        assert message.should_retry() is False, Message at max retries should not retry
         
         message.permanent_failure = True
         message.retry_count = 2
         assert message.should_retry() is False, "Permanently failed message should not retry"
 
 
-if __name__ == "__main__":
+if __name__ == __main__":"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution
+
+))

@@ -1,8 +1,6 @@
-'''Test WebSocket connection race conditions in staging environment.
-
-This test reproduces the critical issue where messages are sent before
-WebSocket connections are established, causing complete chat failure.
-'''
+"""Test WebSocket connection race conditions in staging environment.
+"""
+WebSocket connections are established, causing complete chat failure."""
 
 import asyncio
 import pytest
@@ -16,41 +14,24 @@ from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
-UnifiedWebSocketManager,
-WebSocketConnection
-
-
-
-class TestWebSocketConnectionRaceCondition:
-    """Test suite for WebSocket connection race conditions."""
-
-    @pytest.fixture
-    def manager(self):
+UnifiedWebSocketManager,"""
+"""
+"""
+    """Test suite for WebSocket connection race conditions.""""""
+    @pytest.fixture"""
         """Create a UnifiedWebSocketManager instance."""
-        return UnifiedWebSocketManager()
-
-        @pytest.fixture
-    def mock_websocket(self):
+        return UnifiedWebSocketManager()"""
+        @pytest.fixture"""
         """Create a mock WebSocket connection."""
         pass
         websocket = TestWebSocketConnection()
         return ws
 
-@pytest.mark.asyncio
-    async def test_message_sent_before_connection_established(self, manager):
-'''Test that sending message before connection fails loudly.
-
-This reproduces the exact error seen in staging:
-'No WebSocket connections found for user startup_test_032e17dc-25d9-430e-8a74-7b87b2a70064'
-'''
-pass
+@pytest.mark.asyncio"""
+"""Test that sending message before connection fails loudly."""
+This reproduces the exact error seen in staging:"""""""""
 user_id = "startup_test_032e17dc-25d9-430e-8a74-7b87b2a70064"
-message = { )
-"type": "startup_test",
-"data": {"test": "data"},
-"timestamp": datetime.utcnow().isoformat()
-            
-
+message = {"type": "startup_test",, "data": {"test": "data"},, "timestamp": datetime.utcnow().isoformat()}
             # Attempt to send message with no connection
 with patch.object(manager, '_store_failed_message', new_callable=AsyncMock) as mock_store:
 with patch('netra_backend.app.websocket_core.unified_manager.logger') as mock_logger:
@@ -58,7 +39,6 @@ await manager.send_to_user(user_id, message)
 
                     # Verify critical error was logged
 mock_logger.critical.assert_called_once()
-error_msg = mock_logger.critical.call_args[0][0]
 assert "No WebSocket connections found for user" in error_msg
 assert user_id in error_msg
 assert "startup_test" in error_msg
@@ -68,16 +48,11 @@ mock_store.assert_called_once_with(user_id, message, "no_connections")
 
 @pytest.mark.asyncio
     async def test_connection_established_after_message_attempt(self, manager, mock_websocket):
-'''Test the staging scenario where connection is established after message send.
-
-Timeline:
-1. Backend starts (Phase 3)
-2. Startup message queued
-3. Message send attempted -> FAILS (no connection)
-4. WebSocket upgrade completes
-5. Connection registered -> TOO LATE
-'''
-pass
+"""Test the staging scenario where connection is established after message send.
+"""
+1. Backend starts (Phase 3)"""
+3. Message send attempted -> FAILS (no connection)"""
+5. Connection registered -> TOO LATE""""""
 user_id = "test_user_staging"
 connection_id = "conn_123"
 message = {"type": "agent_started", "data": {}}
@@ -103,14 +78,10 @@ mock_websocket.send_json.assert_not_called()
 
 @pytest.mark.asyncio
     async def test_cloud_run_cold_start_timing(self, manager, mock_websocket):
-'''Test WebSocket behavior during Cloud Run cold starts.
-
-Simulates the timing issues specific to GCP Cloud Run where:
-- Service takes time to warm up
-- WebSocket upgrade has additional latency
-- Messages may be queued during cold start
-'''
-pass
+"""Test WebSocket behavior during Cloud Run cold starts.
+"""
+- Service takes time to warm up"""
+- Messages may be queued during cold start""""""
 user_id = "cold_start_user"
 startup_messages = [ )
 {"type": "service_initializing", "data": {}},
@@ -136,14 +107,10 @@ assert reason == "no_connections"
 
 @pytest.mark.asyncio
     async def test_concurrent_connection_and_message(self, manager, mock_websocket):
-'''Test race condition when connection and message happen simultaneously.
-
-This can occur when:
-1. Frontend establishes WebSocket
-2. Backend immediately sends message
-3. Race between connection registration and message send
-'''
-pass
+"""Test race condition when connection and message happen simultaneously.
+"""
+1. Frontend establishes WebSocket"""
+3. Race between connection registration and message send""""""
 user_id = "concurrent_user"
 connection_id = "concurrent_conn"
 message = {"type": "immediate_message", "data": {}}
@@ -180,12 +147,9 @@ mock_store.assert_called_with(user_id, message, "no_connections")
 
 @pytest.mark.asyncio
     async def test_message_recovery_after_connection(self, manager, mock_websocket):
-'''Test that stored messages can be recovered after connection established.
-
-This is the recovery mechanism that should deliver messages that
-failed during the race condition.
-'''
-pass
+"""Test that stored messages can be recovered after connection established.
+"""
+failed during the race condition.""""""
 user_id = "recovery_user"
 connection_id = "recovery_conn"
 failed_messages = [ )
@@ -220,14 +184,10 @@ assert delivered == failed_messages
 
 @pytest.mark.asyncio
     async def test_staging_specific_timeout_handling(self, manager):
-'''Test staging-specific timeout scenarios.
-
-GCP staging has specific timeout characteristics:
-- Load balancer WebSocket timeout
-- Cloud Run request timeout
-- Inter-service communication delays
-'''
-pass
+"""Test staging-specific timeout scenarios.
+"""
+- Load balancer WebSocket timeout"""
+- Inter-service communication delays""""""
 user_id = "timeout_user"
 
                                     # Simulate waiting for connection with timeout
@@ -250,12 +210,9 @@ assert len(manager.get_user_connections(user_id)) == 0
 
 
 class TestWebSocketConnectionRetryLogic:
-        """Test the proposed retry logic for connection establishment."""
-
-@pytest.mark.asyncio
-    async def test_retry_logic_success_on_second_attempt(self):
-"""Test that retry logic succeeds when connection established on retry."""
-manager = UnifiedWebSocketManager()
+        """Test the proposed retry logic for connection establishment.""""""
+@pytest.mark.asyncio"""
+"""Test that retry logic succeeds when connection established on retry.""""""
 user_id = "retry_user"
 message = {"type": "test_message"}
 websocket = TestWebSocketConnection()
@@ -292,8 +249,7 @@ mock_ws.send_json.assert_called_once_with(message)
 @pytest.mark.asyncio
     async def test_retry_logic_all_attempts_fail(self):
 """Test that retry logic handles complete failure gracefully."""
-pass
-manager = UnifiedWebSocketManager()
+pass"""
 user_id = "always_fail_user"
 message = {"type": "doomed_message"}
 

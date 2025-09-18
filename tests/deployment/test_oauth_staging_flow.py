@@ -1,23 +1,287 @@
-#!/usr/bin/env python3
-"""
-Placeholder test file - original had syntax errors blocking test collection.
+from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
+'''
+'''
+Deployment test for OAuth flow in staging environment.
+This test verifies the complete OAuth flow works correctly when deployed.
+'''
+'''
 
-Original file: tests/deployment\test_oauth_staging_flow.py
-Replaced on: 2025-09-17
-Issue: Part of fixing 339 syntax errors in test collection (Issue #868)
+import asyncio
+import os
 
-TODO: Restore proper tests once syntax issues are resolved system-wide.
-"""
-
-import pytest
-
-
-def test_test_oauth_staging_flow_placeholder():
-    """Placeholder test to allow test collection to succeed."""
-    # Original file had syntax errors preventing test collection
-    # This placeholder allows the test runner to continue
-    assert True, "Placeholder test - original file had syntax errors"
+import httpx
 
 
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+class OAuthStagingTester:
+    """Tests OAuth flow in staging environment"""
+    pass
+
+    def __init__(self):
+        pass
+        self.auth_service_url = get_env().get( )
+        "AUTH_SERVICE_URL", "https://auth.staging.netrasystems.ai"
+    
+        self.frontend_url = get_env().get( )
+        "FRONTEND_URL", "https://app.staging.netrasystems.ai"
+    
+        self.api_url = get_env().get("API_URL", "https://api.staging.netrasystems.ai")
+
+    async def test_auth_service_health(self) -> bool:
+        """Test that auth service is healthy"""
+        async with httpx.AsyncClient() as client:
+        try:
+        response = await client.get("formatted_string")
+        if response.status_code != 200:
+        print("")
+        return False
+
+        data = response.json()
+        if data.get("status") != "healthy":
+        print("")
+        return False
+
+        print("[PASS] Auth service is healthy")
+        return True
+        except Exception as e:
+        print("")
+        return False
+
+    async def test_auth_config_endpoint(self) -> bool:
+        """Test that auth config endpoint returns OAuth configuration"""
+        async with httpx.AsyncClient() as client:
+        try:
+        response = await client.get("formatted_string")
+        if response.status_code != 200:
+        print( )
+        ""
+                                            
+        return False
+
+        data = response.json()
+
+                                            # Verify required fields
+        required_fields = [ ]
+        "google_client_id",
+        "endpoints",
+        "authorized_redirect_uris",
+                                            
+        for field in required_fields:
+        if field not in data:
+        print("")
+        return False
+
+                                                    # Verify Google client ID is set
+        if not data.get("google_client_id"):
+        print("[FAIL] Google client ID not configured")
+        return False
+
+                                                        # Verify redirect URI is correct
+        expected_callback = ""
+        if expected_callback not in data.get("authorized_redirect_uris", []):
+        print( )
+        ""
+                                                            
+        print("")
+        return False
+
+        print("[PASS] Auth config is properly configured")
+        print("")
+        print("")
+        return True
+
+        except Exception as e:
+        print("")
+        return False
+
+    async def test_oauth_initiation(self) -> bool:
+        """Test that OAuth login initiation redirects to Google"""
+        async with httpx.AsyncClient(follow_redirects=False) as client:
+        try:
+        response = await client.get( )
+        "", params={"provider": "google"}
+                                                                            
+
+        if response.status_code != 302:
+        print( )
+        f'[FAIL] OAuth initiation didn't redirect: { }
+        response.status_code}"
+        response.status_code}"
+                                                                                
+        return False
+
+        location = response.headers.get("location", "")
+        if not location.startswith("https://accounts.google.com/o/oauth2/"):
+        print("")
+        return False
+
+                                                                                    # Check for required OAuth parameters
+        if "client_id=" not in location:
+        print("[FAIL] Missing client_id in OAuth URL")
+        return False
+
+        if "redirect_uri=" not in location:
+        print("[FAIL] Missing redirect_uri in OAuth URL")
+        return False
+
+        if "" not in location:
+        print("[FAIL] Incorrect redirect_uri in OAuth URL")
+        return False
+
+        print("[PASS] OAuth initiation works correctly")
+        print("   Redirects to Google OAuth")
+        print( )
+        ""
+                                                                                                
+        return True
+
+        except Exception as e:
+        print("")
+        return False
+
+    async def test_frontend_chat_page(self) -> bool:
+        """Test that frontend chat page is accessible and can handle tokens"""
+        async with httpx.AsyncClient() as client:
+        try:
+                                                                                                                # Test chat page loads
+        response = await client.get("formatted_string")
+        if response.status_code != 200:
+        print( )
+        ""
+                                                                                                                    
+        return False
+
+                                                                                                                    # Check if page contains necessary OAuth handling code
+        content = response.text
+        if "localStorage" not in content and "jwt_token" not in content:
+        print("[WARN] Chat page may not have token handling code")
+                                                                                                                        # This is a warning, not a failure
+
+        print("[PASS] Frontend chat page is accessible")
+        return True
+
+        except Exception as e:
+        print("")
+        return False
+
+    async def test_token_validation_endpoint(self) -> bool:
+        """Test that token validation endpoint exists and responds"""
+        async with httpx.AsyncClient() as client:
+        try:
+                                                                                                                                        # Test with invalid token (should fail gracefully)
+        response = await client.post( )
+        "",
+        json={"token": "invalid-test-token"})
+
+                                                                                                                                        # Should return 401 for invalid token
+        if response.status_code == 401:
+        print( )
+        "[PASS] Token validation endpoint works (correctly rejects invalid token)"
+                                                                                                                                            
+        return True
+        elif response.status_code == 200:
+        data = response.json()
+        if not data.get("valid"):
+        print("[PASS] Token validation endpoint works (returns invalid)")
+        return True
+
+        print( )
+        ""
+                                                                                                                                                    
+        return False
+
+        except Exception as e:
+        print("")
+        return False
+
+    async def test_api_auth_integration(self) -> bool:
+        """Test that main API can communicate with auth service"""
+        async with httpx.AsyncClient() as client:
+        try:
+                                                                                                                                                                    # Test API health endpoint (should work without auth)
+        response = await client.get("formatted_string")
+        if response.status_code != 200:
+        print("")
+        return False
+
+                                                                                                                                                                        # Test protected endpoint without token (should fail)
+        response = await client.get("formatted_string")
+        if response.status_code == 401:
+        print("[PASS] API correctly requires authentication")
+        return True
+        elif response.status_code == 200:
+        print("[WARN] API endpoint accessible without authentication")
+        return True  # Not a failure, might be intentional
+
+        print("")
+        return False
+
+        except Exception as e:
+        print("")
+        return False
+
+    async def run_all_tests(self):
+        """Run all OAuth staging tests"""
+        print("")
+         + =" * 60)"
+        print("OAuth Staging Environment Tests")
+        print("=" * 60)
+        print("")
+        print("")
+        print("")
+        print("=" * 60 + " )"
+        ")"
+
+        tests = [ ]
+        ("Auth Service Health", self.test_auth_service_health),
+        ("Auth Config Endpoint", self.test_auth_config_endpoint),
+        ("OAuth Initiation", self.test_oauth_initiation),
+        ("Frontend Chat Page", self.test_frontend_chat_page),
+        ("Token Validation", self.test_token_validation_endpoint),
+        ("API Auth Integration", self.test_api_auth_integration),
+    
+
+        results = []
+        for test_name, test_func in tests:
+        print("")
+        print("-" * 40)
+        result = await test_func()
+        results.append((test_name, result))
+        print()
+
+        # Summary
+        print("")
+         + =" * 60)"
+        print("Test Summary")
+        print("=" * 60)
+
+        passed = sum(1 for _, result in results if result)
+        total = len(results)
+
+        for test_name, result in results:
+        status = "[PASS]" if result else "[FAIL]"
+        print("")
+
+        print("")
+
+        if passed == total:
+        print("")
+        [SUCCESS] All OAuth staging tests passed!")"
+        await asyncio.sleep(0)
+        return True
+        else:
+        print("")
+        return False
+
+
+    async def main():
+        """Main test runner"""
+        pass
+        tester = OAuthStagingTester()
+        success = await tester.run_all_tests()
+        await asyncio.sleep(0)
+        return 0 if success else 1
+
+
+        if __name__ == "__main__":
+        exit_code = asyncio.run(main())

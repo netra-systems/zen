@@ -4,11 +4,11 @@ Provides high availability and failover capabilities for auth services
 """
 
 import asyncio
-import logging
 import time
 from typing import Any, Dict, List, Optional
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class AuthFailoverService:

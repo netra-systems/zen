@@ -214,7 +214,7 @@ class WebSocketEventDeliveryFragmentationTests(SSotAsyncTestCase, unittest.TestC
 
         try:
             # Create managers for both users
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             manager1 = get_websocket_manager(user_context=user1_context)
             manager2 = get_websocket_manager(user_context=user2_context)
@@ -283,7 +283,7 @@ class WebSocketEventDeliveryFragmentationTests(SSotAsyncTestCase, unittest.TestC
 
         try:
             # Create multiple manager instances for same user (simulating fragmentation)
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             managers = []
             mock_websockets = []
@@ -414,7 +414,7 @@ class WebSocketManagerGoldenPathFragmentationTests(SSotAsyncTestCase, unittest.T
 
         try:
             # Test Golden Path with current (potentially fragmented) manager
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             manager = get_websocket_manager(user_context=golden_path_context)
 

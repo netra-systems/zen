@@ -4,8 +4,14 @@
 import ast
 import os
 import re
+import argparse
+import logging
 from pathlib import Path
 from typing import List, Tuple
+
+# Setup logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 def fix_unclosed_parenthesis(content: str) -> str:
@@ -153,32 +159,181 @@ def fix_invalid_syntax(content: str) -> str:
     """Fix various invalid syntax issues"""
     lines = content.split('\n')
     fixed_lines = []
-    
+
     i = 0
     while i < len(lines):
         line = lines[i]
-        
+        original_line = line
+
+        # CRITICAL FIX: Lone quote pattern (most common issue - 85%+ of errors)
+        # Pattern: Line starts with just '"' - this is the primary syntax error
+        if line.strip() == '"' and i < 10:  # Usually in first few lines
+            # This should be start of a docstring
+            line = '"""'
+            # Find the end of the docstring and close it properly
+            docstring_end_found = False
+            for j in range(i + 1, min(len(lines), i + 50)):  # Look ahead max 50 lines
+                if (lines[j].strip() and
+                    not lines[j].strip().startswith(('#', '"')) and
+                    any(keyword in lines[j] for keyword in ['import', 'from', 'def', 'class'])):
+                    # Insert closing docstring before imports/definitions
+                    lines.insert(j, '"""')
+                    docstring_end_found = True
+                    break
+            if not docstring_end_found:
+                # If no clear end found, add it after reasonable distance
+                insert_pos = min(i + 20, len(lines))
+                lines.insert(insert_pos, '"""')
+
+        # CRITICAL FIX: Pattern found in 808 errors - unterminated docstrings
+        # Pattern: "Real WebSocket connection for testing instead of mocks.""
+        if '"Real WebSocket connection for testing instead of mocks.""' in line:
+            line = line.replace(
+                '"Real WebSocket connection for testing instead of mocks.""',
+                '"""Real WebSocket connection for testing instead of mocks."""'
+            )
+
+        # Fix other common unterminated string patterns
+        if '"Test suite for ' in line and line.count('"') == 3 and line.endswith('""'):
+            # Pattern: "Test suite for backend login endpoint 500 error fixes.""
+            line = re.sub(r'^(\s*)"(.+)""$', r'\1"""\2"""', line)
+
+        # Fix unterminated string literals at line start
+        if line.strip().startswith('"') and not line.strip().startswith('"""'):
+            # Check if it's a single quote at start and ends with ""
+            if line.strip().endswith('""') and line.count('"') == 3:
+                line = re.sub(r'^(\s*)"(.+)""$', r'\1"""\2"""', line)
+
+        # Fix f-string unterminated literals
+        if 'logger.warning(f"' in line and line.count('"') == 1:
+            line = line.rstrip() + '")'
+        if 'print(f"' in line and line.count('"') == 1:
+            line = line.rstrip() + '")'
+
         # Fix incomplete import statements that end abruptly
-        if ('from ' in line and 
+        if ('from ' in line and
             ('import (' in line or line.strip().endswith('(')) and
             i + 1 < len(lines)):
-            
+
             # Look for the pattern where import statement is cut off
             next_line = lines[i + 1] if i + 1 < len(lines) else ""
-            
+
             # If next line starts with a new statement, close the import
-            if (next_line.strip().startswith('from ') or 
+            if (next_line.strip().startswith('from ') or
                 next_line.strip().startswith('import ') or
                 next_line.strip().startswith('class ') or
                 next_line.strip().startswith('def ') or
                 not next_line.strip()):
-                
+
                 if not line.strip().endswith(')'):
                     line = line.rstrip() + ')'
-        
+
+        # Fix unmatched brackets patterns
+        if '{ )' in line:
+            line = line.replace('{ )', '{ }')
+        if '[ )' in line:
+            line = line.replace('[ )', '[ ]')
+        if '( }' in line:
+            line = line.replace('( }', '( )')
+
+        # Fix unterminated print statements
+        if 'print(" )' in line:
+            line = line.replace('print(" )', 'print("")')
+        if "print(' )" in line:
+            line = line.replace("print(' )", "print('')")
+
+        # Fix Magic class declarations
+        if re.match(r'\s*(\w+)\s*=\s*Magic\s*$', line):
+            line = re.sub(r'(\s*)(\w+)\s*=\s*Magic\s*$', r'\1\2 = MagicMock()', line)
+        if 'Magic        mock_' in line:
+            line = line.replace('Magic        mock_', 'MagicMock(); mock_')
+        if 'mock_services_config = Magic mock_log' in line:
+            line = line.replace('mock_services_config = Magic mock_log', 'mock_services_config = MagicMock(); mock_log')
+
+        # Fix AsyncMock syntax issues
+        if 'AsyncMock( )' in line and 'status_code=' in line:
+            line = line.replace('AsyncMock( )', 'AsyncMock(')
+        if 'AsyncNone' in line:
+            line = line.replace('AsyncNone', 'MagicMock()')
+        if 'AuthManager()' in line and 'mock_' in line:
+            line = line.replace('AuthManager()', 'MagicMock()')
+
+        # Fix malformed function calls
+        if 'response = client.get( )' in line:
+            next_line = lines[i + 1] if i + 1 < len(lines) else ""
+            if '"formatted_string"' in next_line:
+                line = 'response = client.get("formatted_string")'
+                i += 1  # Skip the next line as we merged it
+
+        # Fix malformed dict syntax in return values
+        if 'return_value = { )' in line:
+            line = line.replace('return_value = { )', 'return_value = {')
+
+        # Fix specific variable assignments
+        if 'mock_user_response = mock_user_response_instance' in line:
+            line = line.replace('mock_user_response = mock_user_response_instance', 'mock_user_response = MagicMock()')
+        if 'mock_repo = mock_repo_instance' in line:
+            line = line.replace('mock_repo = mock_repo_instance', 'mock_repo = MagicMock()')
+        if 'mock_user = mock_user_instance' in line:
+            line = line.replace('mock_user = mock_user_instance', 'mock_user = MagicMock()')
+
+        # Fix string formatting issues
+        if '"formatted_string"' in line and not ('get(' in line or 'format(' in line):
+            line = line.replace('"formatted_string"', '""')
+
+        # Fix unterminated string concatenations
+        if '" + "' in line and line.count('"') % 2 != 0:
+            line = line.replace('" + "', ' + ')
+
+        # Fix malformed print statements with broken concatenation
+        if 'print("")' in line and 'print("' in lines[i-1] if i > 0 else False:
+            prev_line = lines[i-1] if i > 0 else ""
+            if 'print("' in prev_line and not prev_line.strip().endswith(')'):
+                # Merge broken print statement
+                merged_print = prev_line.strip().rstrip('"') + '")'
+                fixed_lines[-1] = merged_print  # Replace previous line
+                continue  # Skip current line
+
+        # Fix broken list/dict definitions
+        if line.strip() == '}' and i > 0:
+            prev_line = lines[i-1] if i > 0 else ""
+            if prev_line.strip().endswith(','):
+                # This might be a continuation
+                pass
+
+        # Fix indentation for print statements
+        if line.startswith('print("') and not line.startswith('    '):
+            # Check if this should be indented based on context
+            if i > 0:
+                prev_line = lines[i-1] if i > 0 else ""
+                if (prev_line.strip().endswith(':') or
+                    prev_line.startswith('    ') or
+                    'try:' in prev_line or 'except' in prev_line):
+                    line = '    ' + line
+
+        # Fix malformed list definitions
+        if 'files_to_check = [ ]' in line:
+            line = line.replace('files_to_check = [ ]', 'files_to_check = [')
+        if 'test_files = [ ]' in line:
+            line = line.replace('test_files = [ ]', 'test_files = [')
+        if 'coverage_areas = { }' in line:
+            line = line.replace('coverage_areas = { }', 'coverage_areas = {')
+
+        # Fix malformed string concatenation in print statements
+        if '[Test' in line and ']:' in line and line.count('"') == 1:
+            line = line.replace('[Test', '"[Test').replace(']:', ']:"')
+        if '[RUNNING' in line and line.count('"') == 0:
+            line = '"' + line + '")'
+
+        # Comment out misplaced pytest fixture decorators
+        if '@pytest.fixture' in line and i + 1 < len(lines):
+            next_line = lines[i + 1] if i + 1 < len(lines) else ""
+            if 'def test_' in next_line and not next_line.strip().startswith('def test_'):
+                line = line.replace('@pytest.fixture', '# @pytest.fixture')
+
         fixed_lines.append(line)
         i += 1
-    
+
     return '\n'.join(fixed_lines)
 
 def check_syntax(filepath: Path) -> List[str]:
@@ -221,49 +376,108 @@ def fix_file(filepath: Path) -> bool:
 
 def main():
     """Main function to fix syntax errors in test files"""
-    test_dirs = [
-        Path('app/tests'),
-        Path('tests'),
-        Path('auth_service/tests'),
-        Path('integration_tests')
-    ]
-    
-    test_files = []
-    for test_dir in test_dirs:
-        if test_dir.exists():
-            test_files.extend(test_dir.glob('**/*.py'))
-    
+    parser = argparse.ArgumentParser(description='Fix syntax errors in Python test files')
+    parser.add_argument('--file', help='Fix a specific file')
+    parser.add_argument('--directory', help='Fix all test files in directory')
+    parser.add_argument('--priority-files', action='store_true', help='Fix priority files first')
+    parser.add_argument('--validate-only', action='store_true', help='Only validate syntax, don\'t fix')
+
+    args = parser.parse_args()
+
+    if args.file:
+        filepath = Path(args.file)
+        if args.validate_only:
+            errors = check_syntax(filepath)
+            if errors:
+                print(f"INVALID: {filepath}")
+                for error in errors:
+                    print(f"  {error}")
+            else:
+                print(f"VALID: {filepath}")
+        else:
+            if fix_file(filepath):
+                print(f"Fixed: {filepath}")
+                # Re-check
+                errors = check_syntax(filepath)
+                if not errors:
+                    print(f"✓ Syntax validated: {filepath}")
+                else:
+                    print(f"Still has errors: {filepath}")
+            else:
+                print(f"No changes needed: {filepath}")
+        return
+
+    if args.directory:
+        test_dir = Path(args.directory)
+        test_files = list(test_dir.glob('**/*.py'))
+    elif args.priority_files:
+        # Priority files identified in the analysis
+        priority_files = [
+            'auth_service/tests/test_oauth_state_validation.py',
+            'tests/run_refresh_tests.py',
+            'tests/test_critical_dev_launcher_issues.py',
+            'auth_service/tests/test_redis_staging_connectivity_fixes.py',
+            'tests/integration_test_docker_rate_limiter.py'
+        ]
+        test_files = [Path(f) for f in priority_files if Path(f).exists()]
+        print(f"Priority files to fix: {len(test_files)}")
+    else:
+        # Default behavior - search all test directories
+        test_dirs = [
+            Path('netra_backend/tests'),
+            Path('tests'),
+            Path('auth_service/tests'),
+            Path('integration_tests'),
+            Path('test_framework'),
+            Path('frontend/tests')
+        ]
+
+        test_files = []
+        for test_dir in test_dirs:
+            if test_dir.exists():
+                test_files.extend(test_dir.glob('**/*.py'))
+
     print(f"Found {len(test_files)} test files")
-    
+
     # Check for syntax errors
     files_with_errors = []
     for filepath in test_files:
         errors = check_syntax(filepath)
         if errors:
             files_with_errors.append((filepath, errors))
-    
+
     print(f"Found {len(files_with_errors)} files with syntax errors")
-    
+
+    if args.validate_only:
+        for filepath, errors in files_with_errors:
+            print(f"INVALID: {filepath}")
+            for error in errors:
+                print(f"  {error}")
+        return
+
     # Fix errors
     fixed_count = 0
     for filepath, errors in files_with_errors:
+        logger.info(f"Fixing {filepath}")
         if fix_file(filepath):
             fixed_count += 1
             print(f"Fixed: {filepath}")
-    
+
     print(f"\nFixed {fixed_count} files")
-    
+
     # Re-check for remaining errors
     remaining_errors = []
     for filepath, _ in files_with_errors:
         errors = check_syntax(filepath)
         if errors:
             remaining_errors.extend(errors)
-    
+
     if remaining_errors:
         print(f"\n{len(remaining_errors)} syntax errors remain:")
-        for error in remaining_errors[:10]:  # Show first 10
+        for error in remaining_errors[:20]:  # Show first 20
             print(f"  - {error}")
+        if len(remaining_errors) > 20:
+            print(f"  ... and {len(remaining_errors) - 20} more")
     else:
         print("\nAll syntax errors fixed!")
 

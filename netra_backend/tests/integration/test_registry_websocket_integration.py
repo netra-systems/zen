@@ -47,7 +47,7 @@ from netra_backend.app.core.registry.universal_registry import (
     get_global_registry,
     create_scoped_registry
 )
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.unified_manager import (
     UnifiedWebSocketManager,
     WebSocketConnection,
     RegistryCompat

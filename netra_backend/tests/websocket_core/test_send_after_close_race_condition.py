@@ -15,7 +15,7 @@ import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone
 from typing import Dict, Any
-from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection
+from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from netra_backend.app.websocket_core.websocket_manager import create_websocket_manager
 from netra_backend.app.websocket_core.utils import safe_websocket_close
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator

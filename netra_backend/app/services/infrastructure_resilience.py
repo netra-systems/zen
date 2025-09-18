@@ -25,7 +25,7 @@ SSOT Compliance:
 """
 
 import asyncio
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 import time
 from datetime import datetime, timedelta
 from enum import Enum
@@ -39,7 +39,7 @@ from netra_backend.app.core.config import get_config
 from netra_backend.app.core.database_timeout_config import get_connection_monitor, monitor_connection_attempt
 from shared.isolated_environment import get_env
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ServiceStatus(Enum):

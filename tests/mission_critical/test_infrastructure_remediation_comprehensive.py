@@ -1,4 +1,5 @@
 """
+"""
 Mission Critical Test: Infrastructure Remediation Comprehensive Validation
 ==========================================================================
 
@@ -23,8 +24,11 @@ Success Criteria:
 - System maintains business continuity during failures
 - Real-time WebSocket events delivered correctly
 - Service-to-service communication reliable
-"""
+"
+"
 
+"""
+"""
 import asyncio
 import pytest
 import logging
@@ -54,31 +58,34 @@ logger = logging.getLogger(__name__)
 
 
 class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
-    """
+    "
+    "
     Comprehensive test suite for infrastructure remediation implementation
     
     Tests the complete unified remediation solution that addresses cluster 
     connectivity issues blocking the Golden Path user workflow.
-    """
+"
+"
 
     async def async_setup_method(self, method=None):
-        """Set up test infrastructure with real services"""
+        "Set up test infrastructure with real services"
         await super().async_setup_method(method)
         
         # Initialize database utilities for real service testing
         self.db_utilities = DatabaseTestUtilities()
         
-        logger.info("[U+1F680] INFRASTRUCTURE REMEDIATION TEST SUITE INITIALIZED")
-        logger.info(" TARGET:  MISSION: Validate $500K+ ARR Golden Path protection")
+        logger.info([U+1F680] INFRASTRUCTURE REMEDIATION TEST SUITE INITIALIZED")"
+        logger.info( TARGET:  MISSION: Validate $500K+ ARR Golden Path protection)
 
     async def async_teardown_method(self, method=None):
-        """Clean up test infrastructure"""
+        "Clean up test infrastructure"
         await super().async_teardown_method(method)
-        logger.info("[U+1F3C1] INFRASTRUCTURE REMEDIATION TEST SUITE COMPLETE")
+        logger.info([U+1F3C1] INFRASTRUCTURE REMEDIATION TEST SUITE COMPLETE)
 
     async def test_unified_remediation_validator_creation(self):
-        """Test that remediation validator can be created and initialized"""
-        logger.info("[U+1F527] Testing remediation validator creation")
+        ""Test that remediation validator can be created and initialized
+        logger.info([U+1F527] Testing remediation validator creation)"
+        logger.info([U+1F527] Testing remediation validator creation)"
         
         validator = InfrastructureRemediationValidator()
         
@@ -91,16 +98,17 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         self.assertIsNotNone(validator.drift_detector)
         self.assertIsNotNone(validator.websocket_auth_integration)
         
-        logger.info(" PASS:  Remediation validator created successfully")
+        logger.info( PASS:  Remediation validator created successfully")"
 
     async def test_vpc_connectivity_validation_functionality(self):
-        """Test VPC connectivity validation works correctly"""
-        logger.info("[U+1F310] Testing VPC connectivity validation")
+        Test VPC connectivity validation works correctly""
+        logger.info([U+1F310] Testing VPC connectivity validation)
         
         vpc_validator = VPCConnectivityValidator()
         
         # Test VPC connectivity validation for backend service
-        connectivity_status = await vpc_validator.validate_vpc_connectivity("netra-backend-service")
+        connectivity_status = await vpc_validator.validate_vpc_connectivity(netra-backend-service)"
+        connectivity_status = await vpc_validator.validate_vpc_connectivity(netra-backend-service)"
         
         # Validate response structure
         self.assertIsNotNone(connectivity_status)
@@ -109,32 +117,34 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         self.assertTrue(hasattr(connectivity_status, 'internal_url_reachable'))
         self.assertTrue(hasattr(connectivity_status, 'external_url_reachable'))
         
-        logger.info(f" PASS:  VPC connectivity status: {connectivity_status.is_healthy}")
+        logger.info(f PASS:  VPC connectivity status: {connectivity_status.is_healthy}")"
 
     async def test_websocket_auth_remediation_functionality(self):
-        """Test WebSocket authentication remediation works correctly"""
-        logger.info("[U+1F510] Testing WebSocket authentication remediation")
+        Test WebSocket authentication remediation works correctly""
+        logger.info([U+1F510] Testing WebSocket authentication remediation)
         
         websocket_auth_manager = WebSocketAuthManager()
         
         # Test authentication with demo token
         auth_result = await websocket_auth_manager.authenticate_websocket_connection(
-            token="demo_test_token",
-            connection_id="test_conn_001"
+            token=demo_test_token,"
+            token=demo_test_token,"
+            connection_id=test_conn_001"
+            connection_id=test_conn_001"
         )
         
         # Validate authentication result structure
         self.assertIsInstance(auth_result, dict)
-        self.assertIn("authenticated", auth_result)
+        self.assertIn(authenticated, auth_result)
         
         # For demo tokens, authentication should work
-        self.assertTrue(auth_result.get("authenticated", False))
+        self.assertTrue(auth_result.get(authenticated", False))"
         
-        logger.info(" PASS:  WebSocket authentication remediation functional")
+        logger.info( PASS:  WebSocket authentication remediation functional)
 
     async def test_infrastructure_health_monitoring(self):
-        """Test infrastructure health monitoring functionality"""
-        logger.info(" CHART:  Testing infrastructure health monitoring")
+        "Test infrastructure health monitoring functionality"
+        logger.info( CHART:  Testing infrastructure health monitoring)
         
         health_monitor = InfrastructureHealthMonitor()
         
@@ -143,23 +153,25 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         
         # Validate health report structure
         self.assertIsInstance(health_report, dict)
-        self.assertIn("vpc_connectivity", health_report)
-        self.assertIn("service_discovery", health_report) 
-        self.assertIn("database_connectivity", health_report)
-        self.assertIn("websocket_auth", health_report)
+        self.assertIn(vpc_connectivity", health_report)"
+        self.assertIn(service_discovery, health_report) 
+        self.assertIn(database_connectivity, health_report)"
+        self.assertIn(database_connectivity, health_report)"
+        self.assertIn("websocket_auth, health_report)"
         
         # Each component should have status and details
-        for component in ["vpc_connectivity", "service_discovery", "database_connectivity", "websocket_auth"]:
+        for component in [vpc_connectivity, service_discovery, database_connectivity", "websocket_auth]:
             component_health = health_report[component]
             self.assertIsInstance(component_health, dict)
-            self.assertIn("status", component_health)
-            self.assertIn("details", component_health)
+            self.assertIn(status, component_health)
+            self.assertIn(details, component_health)"
+            self.assertIn(details, component_health)"
         
-        logger.info(" PASS:  Infrastructure health monitoring operational")
+        logger.info( PASS:  Infrastructure health monitoring operational")"
 
     async def test_configuration_drift_detection(self):
-        """Test configuration drift detection functionality"""
-        logger.info(" SEARCH:  Testing configuration drift detection")
+        Test configuration drift detection functionality""
+        logger.info( SEARCH:  Testing configuration drift detection)
         
         drift_detector = ConfigurationDriftDetector()
         
@@ -168,27 +180,30 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         
         # Validate drift report structure
         self.assertIsInstance(drift_report, dict)
-        self.assertIn("drift_summary", drift_report)
-        self.assertIn("environment_validation", drift_report)
-        self.assertIn("service_configuration_validation", drift_report)
+        self.assertIn(drift_summary, drift_report)"
+        self.assertIn(drift_summary, drift_report)"
+        self.assertIn(environment_validation", drift_report)"
+        self.assertIn(service_configuration_validation, drift_report)
         
         # Drift summary should contain counts
-        drift_summary = drift_report["drift_summary"]
+        drift_summary = drift_report[drift_summary"]"
         self.assertIsInstance(drift_summary, dict)
-        self.assertIn("total_drifts_detected", drift_summary)
-        self.assertIn("critical_drifts", drift_summary)
+        self.assertIn(total_drifts_detected, drift_summary)
+        self.assertIn(critical_drifts, drift_summary)"
+        self.assertIn(critical_drifts, drift_summary)"
         
-        logger.info(f" PASS:  Configuration drift detection complete - {drift_summary.get('total_drifts_detected', 0)} drifts detected")
+        logger.info(f" PASS:  Configuration drift detection complete - {drift_summary.get('total_drifts_detected', 0)} drifts detected)"
 
     async def test_websocket_auth_integration_functionality(self):
-        """Test WebSocket authentication integration works correctly"""
-        logger.info("[U+1F517] Testing WebSocket authentication integration")
+        Test WebSocket authentication integration works correctly"
+        Test WebSocket authentication integration works correctly"
+        logger.info("[U+1F517] Testing WebSocket authentication integration)"
         
         websocket_auth_integration = WebSocketAuthIntegration()
         
         # Test authentication integration
         auth_result = await websocket_auth_integration.authenticate_websocket_connection(
-            token="integration_test_token",
+            token=integration_test_token,
             connection_id="integration_test_001"
         )
         
@@ -197,26 +212,28 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         
         # Should indicate authentication attempt (success or demo mode)
         auth_attempted = (
-            auth_result.get("authenticated", False) or 
-            auth_result.get("demo_mode_active", False)
+            auth_result.get(authenticated, False) or 
+            auth_result.get(demo_mode_active, False)"
+            auth_result.get(demo_mode_active, False)"
         )
-        self.assertTrue(auth_attempted, "WebSocket auth integration should attempt authentication")
+        self.assertTrue(auth_attempted, WebSocket auth integration should attempt authentication")"
         
-        logger.info(" PASS:  WebSocket authentication integration functional")
+        logger.info( PASS:  WebSocket authentication integration functional)
 
     async def test_user_context_isolation_with_remediation(self):
-        """Test user context isolation works correctly with remediation"""
-        logger.info("[U+1F465] Testing user context isolation with remediation")
+        ""Test user context isolation works correctly with remediation
+        logger.info([U+1F465] Testing user context isolation with remediation)"
+        logger.info([U+1F465] Testing user context isolation with remediation)"
         
         # Create isolated user contexts for testing
         user_context_1 = await UserContextManager.create_isolated_context(
-            user_id="test_user_1",
-            thread_id="remediation_test_thread_1"
+            user_id=test_user_1","
+            thread_id=remediation_test_thread_1
         )
         
         user_context_2 = await UserContextManager.create_isolated_context(
-            user_id="test_user_2", 
-            thread_id="remediation_test_thread_2"
+            user_id=test_user_2", "
+            thread_id=remediation_test_thread_2
         )
         
         # Validate contexts are properly isolated
@@ -227,12 +244,13 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         websocket_auth_integration = WebSocketAuthIntegration()
         
         auth_result_1 = await websocket_auth_integration.authenticate_websocket_connection(
-            token="user_1_token",
+            token=user_1_token,"
+            token=user_1_token,"
             connection_id="user_1_connection"
         )
         
         auth_result_2 = await websocket_auth_integration.authenticate_websocket_connection(
-            token="user_2_token", 
+            token=user_2_token, 
             connection_id="user_2_connection"
         )
         
@@ -240,11 +258,11 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         self.assertIsInstance(auth_result_1, dict)
         self.assertIsInstance(auth_result_2, dict)
         
-        logger.info(" PASS:  User context isolation maintained with remediation")
+        logger.info( PASS:  User context isolation maintained with remediation)
 
     async def test_comprehensive_remediation_validation(self):
-        """Test comprehensive remediation validation runs successfully"""
-        logger.info(" TROPHY:  Testing comprehensive remediation validation")
+        Test comprehensive remediation validation runs successfully""
+        logger.info( TROPHY:  Testing comprehensive remediation validation)
         
         validator = InfrastructureRemediationValidator()
         
@@ -263,37 +281,40 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         self.assertIsInstance(validation_report.critical_issues, list)
         
         # Validate that validation was attempted
-        self.assertGreater(len(validation_report.results), 0, "Validation should produce results")
-        self.assertGreater(validation_report.total_duration_ms, 0, "Validation should take time")
+        self.assertGreater(len(validation_report.results), 0, "Validation should produce results)"
+        self.assertGreater(validation_report.total_duration_ms, 0, Validation should take time)
         
         # Business continuity score should be reasonable (0-100)
         self.assertGreaterEqual(validation_report.business_continuity_score, 0)
         self.assertLessEqual(validation_report.business_continuity_score, 100)
         
         # Golden Path status should be set
-        self.assertIn("GOLDEN PATH", validation_report.golden_path_status.upper())
+        self.assertIn(GOLDEN PATH, validation_report.golden_path_status.upper())"
+        self.assertIn(GOLDEN PATH, validation_report.golden_path_status.upper())"
         
-        logger.info(f" PASS:  Comprehensive validation complete:")
-        logger.info(f"   Overall Success: {validation_report.overall_success}")
-        logger.info(f"   Golden Path Status: {validation_report.golden_path_status}")
-        logger.info(f"   Business Continuity Score: {validation_report.business_continuity_score:.1f}%")
-        logger.info(f"   Tests Executed: {len(validation_report.results)}")
+        logger.info(f PASS:  Comprehensive validation complete:")"
+        logger.info(f   Overall Success: {validation_report.overall_success})
+        logger.info(f   Golden Path Status: {validation_report.golden_path_status})"
+        logger.info(f   Golden Path Status: {validation_report.golden_path_status})"
+        logger.info(f"   Business Continuity Score: {validation_report.business_continuity_score:.1f}%)"
+        logger.info(f   Tests Executed: {len(validation_report.results)})
         
         # Log critical issues if any
         if validation_report.critical_issues:
-            logger.warning(f" WARNING: [U+FE0F] Critical Issues Found: {len(validation_report.critical_issues)}")
+            logger.warning(f WARNING: [U+FE0F] Critical Issues Found: {len(validation_report.critical_issues)})
             for issue in validation_report.critical_issues:
-                logger.warning(f"   [U+2022] {issue}")
+                logger.warning(f   [U+2022] {issue}")"
         
         # Log recommendations
         if validation_report.recommendations:
-            logger.info(f" IDEA:  Recommendations: {len(validation_report.recommendations)}")
+            logger.info(f IDEA:  Recommendations: {len(validation_report.recommendations)})
             for rec in validation_report.recommendations:
-                logger.info(f"   [U+2022] {rec}")
+                logger.info(f   [U+2022] {rec})
 
     async def test_validation_phase_coverage(self):
-        """Test that all validation phases are covered"""
-        logger.info("[U+1F4CB] Testing validation phase coverage")
+        "Test that all validation phases are covered"
+        logger.info([U+1F4CB] Testing validation phase coverage)"
+        logger.info([U+1F4CB] Testing validation phase coverage)"
         
         validator = InfrastructureRemediationValidator()
         validation_report = await validator.run_comprehensive_validation()
@@ -314,7 +335,7 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         # Verify all phases were tested
         missing_phases = expected_phases - tested_phases
         if missing_phases:
-            logger.warning(f" WARNING: [U+FE0F] Missing validation phases: {missing_phases}")
+            logger.warning(f" WARNING: [U+FE0F] Missing validation phases: {missing_phases})")
         
         # Should have tested major phases
         critical_phases = {
@@ -328,14 +349,15 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         self.assertGreaterEqual(
             len(tested_critical_phases), 
             len(critical_phases) * 0.75,  # At least 75% of critical phases
-            f"Should test most critical phases. Tested: {tested_critical_phases}, Expected: {critical_phases}"
+            fShould test most critical phases. Tested: {tested_critical_phases}, Expected: {critical_phases}
         )
         
-        logger.info(f" PASS:  Validation phase coverage: {len(tested_phases)}/{len(expected_phases)} phases tested")
+        logger.info(f PASS:  Validation phase coverage: {len(tested_phases)}/{len(expected_phases)} phases tested)
 
     async def test_golden_path_business_impact_validation(self):
-        """Test Golden Path business impact validation"""
-        logger.info("[U+1F4B0] Testing Golden Path business impact validation")
+        ""Test Golden Path business impact validation
+        logger.info([U+1F4B0] Testing Golden Path business impact validation)"
+        logger.info([U+1F4B0] Testing Golden Path business impact validation)"
         
         validator = InfrastructureRemediationValidator()
         validation_report = await validator.run_comprehensive_validation()
@@ -349,28 +371,30 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         # Should have Golden Path tests
         self.assertGreater(
             len(golden_path_results), 0, 
-            "Should have Golden Path end-to-end validation tests"
+            Should have Golden Path end-to-end validation tests"
+            Should have Golden Path end-to-end validation tests"
         )
         
         # Check business impact awareness
         business_impact_results = [
             result for result in validation_report.results
-            if result.business_impact and "$500K" in result.business_impact
+            if result.business_impact and $500K in result.business_impact
         ]
         
         self.assertGreater(
             len(business_impact_results), 0,
-            "Should have tests that understand business impact ($500K+ ARR)"
+            Should have tests that understand business impact ($500K+ ARR)""
         )
         
         # Golden Path status should reference business impact
-        self.assertIn("$500K", validation_report.golden_path_status)
+        self.assertIn($500K, validation_report.golden_path_status)
         
-        logger.info(" PASS:  Golden Path business impact validation confirmed")
+        logger.info( PASS:  Golden Path business impact validation confirmed)"
+        logger.info( PASS:  Golden Path business impact validation confirmed)"
 
     async def test_remediation_component_integration(self):
-        """Test that all remediation components integrate correctly"""
-        logger.info("[U+1F527] Testing remediation component integration")
+        "Test that all remediation components integrate correctly"
+        logger.info([U+1F527] Testing remediation component integration")"
         
         # Test individual components work together
         vpc_validator = VPCConnectivityValidator()
@@ -381,8 +405,8 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         # Run all components and verify they can execute simultaneously
         try:
             results = await asyncio.gather(
-                vpc_validator.validate_vpc_connectivity("test-service"),
-                websocket_auth_manager.authenticate_websocket_connection("test-token", "test-conn"),
+                vpc_validator.validate_vpc_connectivity(test-service),
+                websocket_auth_manager.authenticate_websocket_connection(test-token, "test-conn),"
                 health_monitor.run_comprehensive_health_check(),
                 drift_detector.detect_configuration_drift(),
                 return_exceptions=True
@@ -391,29 +415,31 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
             # Verify no exceptions were raised
             exceptions = [result for result in results if isinstance(result, Exception)]
             if exceptions:
-                logger.error(f" FAIL:  Component integration exceptions: {exceptions}")
-                self.fail(f"Component integration failed with exceptions: {exceptions}")
+                logger.error(f FAIL:  Component integration exceptions: {exceptions}")"
+                self.fail(fComponent integration failed with exceptions: {exceptions})
             
             # Verify all components returned results
-            self.assertEqual(len(results), 4, "Should have results from all 4 components")
+            self.assertEqual(len(results), 4, Should have results from all 4 components)"
+            self.assertEqual(len(results), 4, Should have results from all 4 components)"
             
-            logger.info(" PASS:  All remediation components integrate successfully")
+            logger.info(" PASS:  All remediation components integrate successfully)"
             
         except Exception as e:
-            logger.error(f" FAIL:  Component integration failed: {str(e)}")
-            self.fail(f"Component integration test failed: {str(e)}")
+            logger.error(f FAIL:  Component integration failed: {str(e)})
+            self.fail(f"Component integration test failed: {str(e)})"
 
     async def test_critical_websocket_events_supported(self):
-        """Test that critical WebSocket events are supported in remediation"""
-        logger.info("[U+1F4E1] Testing critical WebSocket events support")
+        "Test that critical WebSocket events are supported in remediation"
+        logger.info("[U+1F4E1] Testing critical WebSocket events support)"
         
         # Critical events that must be supported for Golden Path
         critical_events = [
-            "agent_started",
-            "agent_thinking", 
-            "tool_executing",
-            "tool_completed",
-            "agent_completed"
+            agent_started,
+            agent_thinking, "
+            agent_thinking, "
+            tool_executing","
+            tool_completed,
+            agent_completed""
         ]
         
         validator = InfrastructureRemediationValidator()
@@ -424,14 +450,15 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         # Look for WebSocket event delivery tests
         websocket_event_results = [
             result for result in validation_report.results
-            if "websocket_event" in result.test_name or "event_delivery" in result.test_name
+            if websocket_event in result.test_name or event_delivery in result.test_name
         ]
         
         # Should have WebSocket event testing
         if websocket_event_results:
-            logger.info(" PASS:  WebSocket event testing found in validation")
+            logger.info( PASS:  WebSocket event testing found in validation)"
+            logger.info( PASS:  WebSocket event testing found in validation)"
         else:
-            logger.warning(" WARNING: [U+FE0F] No specific WebSocket event delivery tests found")
+            logger.warning( WARNING: [U+FE0F] No specific WebSocket event delivery tests found")"
         
         # At minimum, should have WebSocket authentication tests
         websocket_auth_results = [
@@ -441,14 +468,15 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         
         self.assertGreater(
             len(websocket_auth_results), 0,
-            "Should have WebSocket authentication validation tests"
+            Should have WebSocket authentication validation tests
         )
         
-        logger.info(" PASS:  Critical WebSocket events support validated")
+        logger.info( PASS:  Critical WebSocket events support validated")"
 
     async def test_failure_scenario_handling(self):
-        """Test that remediation handles failure scenarios gracefully"""
-        logger.info("[U+1F6E1][U+FE0F] Testing failure scenario handling")
+        Test that remediation handles failure scenarios gracefully"
+        Test that remediation handles failure scenarios gracefully"
+        logger.info([U+1F6E1][U+FE0F] Testing failure scenario handling")"
         
         validator = InfrastructureRemediationValidator()
         validation_report = await validator.run_comprehensive_validation()
@@ -462,35 +490,38 @@ class InfrastructureRemediationComprehensiveTests(SSotAsyncTestCase):
         # Should have business continuity testing
         self.assertGreater(
             len(continuity_results), 0,
-            "Should have business continuity validation tests"
+            Should have business continuity validation tests
         )
         
         # Check for graceful degradation testing
         degradation_results = [
             result for result in continuity_results
-            if "degradation" in result.test_name or "recovery" in result.test_name
+            if degradation" in result.test_name or "recovery in result.test_name
         ]
         
         if degradation_results:
-            logger.info(" PASS:  Graceful degradation testing found")
+            logger.info( PASS:  Graceful degradation testing found)
         else:
-            logger.warning(" WARNING: [U+FE0F] No specific graceful degradation tests found")
+            logger.warning( WARNING: [U+FE0F] No specific graceful degradation tests found)"
+            logger.warning( WARNING: [U+FE0F] No specific graceful degradation tests found)"
         
         # Overall validation should complete even if some tests fail
         self.assertIsNotNone(validation_report.business_continuity_score)
         self.assertGreaterEqual(validation_report.business_continuity_score, 0)
         
-        logger.info(" PASS:  Failure scenario handling validated")
+        logger.info( PASS:  Failure scenario handling validated")"
 
 
 # Standalone test runner for mission critical validation
 async def run_mission_critical_infrastructure_remediation_test():
-    """
+    "
+    "
     Run mission critical infrastructure remediation test standalone
     
     This can be called independently to validate remediation deployment
-    """
-    logger.info("[U+1F680] RUNNING MISSION CRITICAL INFRASTRUCTURE REMEDIATION TEST")
+    "
+    "
+    logger.info([U+1F680] RUNNING MISSION CRITICAL INFRASTRUCTURE REMEDIATION TEST)
     
     test_suite = InfrastructureRemediationComprehensiveTests()
     await test_suite.async_setup_method()
@@ -498,18 +529,18 @@ async def run_mission_critical_infrastructure_remediation_test():
     try:
         # Run critical validation test
         await test_suite.test_comprehensive_remediation_validation()
-        logger.info(" PASS:  MISSION CRITICAL INFRASTRUCTURE REMEDIATION TEST PASSED")
+        logger.info(" PASS:  MISSION CRITICAL INFRASTRUCTURE REMEDIATION TEST PASSED)"
         return True
         
     except Exception as e:
-        logger.error(f" FAIL:  MISSION CRITICAL INFRASTRUCTURE REMEDIATION TEST FAILED: {str(e)}")
+        logger.error(f FAIL:  MISSION CRITICAL INFRASTRUCTURE REMEDIATION TEST FAILED: {str(e)})
         return False
         
     finally:
         await test_suite.async_teardown_method()
 
 
-if __name__ == "__main__":
+if __name__ == __main__":"
     # Run standalone mission critical test
     import sys
     

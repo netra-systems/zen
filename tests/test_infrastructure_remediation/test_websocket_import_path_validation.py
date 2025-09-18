@@ -31,7 +31,7 @@ class TestWebSocketManagerImportPaths:
     def test_canonical_websocket_manager_import_works(self):
         """Test that canonical WebSocket manager import works"""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             assert WebSocketManager is not None
         except ImportError as e:
             pytest.fail(f"Canonical WebSocket manager import failed: {e}")
@@ -39,7 +39,7 @@ class TestWebSocketManagerImportPaths:
     def test_unified_websocket_manager_import_works(self):
         """Test that unified WebSocket manager import works"""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
             assert UnifiedWebSocketManager is not None
         except ImportError as e:
             pytest.fail(f"Unified WebSocket manager import failed: {e}")
@@ -48,13 +48,13 @@ class TestWebSocketManagerImportPaths:
         """Test to find where get_websocket_manager function is located"""
         # Try canonical patterns first
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
             assert get_websocket_manager is not None
             assert callable(get_websocket_manager)
         except ImportError:
             # Try unified manager
             try:
-                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
                 assert get_websocket_manager is not None
                 assert callable(get_websocket_manager)
             except ImportError:
@@ -75,7 +75,7 @@ class TestWebSocketImportCompatibility:
         
         # Test canonical patterns approach
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             # Should have factory methods
             assert hasattr(WebSocketManager, '__init__')
         except ImportError:
@@ -83,7 +83,7 @@ class TestWebSocketImportCompatibility:
             
         # Test unified manager approach
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
             assert hasattr(UnifiedWebSocketManager, '__init__')
         except ImportError:
             pass  # Try next approach
@@ -121,14 +121,14 @@ class TestMissionCriticalWebSocketFixes:
         
         # Try canonical patterns
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             websocket_manager_found = True
         except ImportError:
             pass
             
         # Try unified manager 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
+            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
             websocket_manager_found = True
         except ImportError:
             pass

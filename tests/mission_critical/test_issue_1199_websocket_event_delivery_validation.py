@@ -33,7 +33,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # WebSocket implementation imports
 from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.canonical_import_patterns import (
     create_test_user_context,
     create_test_fallback_manager,
     check_websocket_service_available
@@ -159,7 +159,7 @@ class Issue1199LocalValidationTests(SSotAsyncTestCase):
         ]
 
         # Import and verify the utilities exist
-        from netra_backend.app.websocket_core.websocket_manager import (
+        from netra_backend.app.websocket_core.canonical_import_patterns import (
             create_test_user_context,
             create_test_fallback_manager,
             check_websocket_service_available
@@ -203,7 +203,7 @@ class Issue1199StartupValidationTests(SSotAsyncTestCase):
 
     def test_websocket_factory_pattern_enforcement(self):
         """Test that WebSocket factory pattern is properly enforced."""
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 
         # Test that direct instantiation is blocked
         with pytest.raises(RuntimeError) as exc_info:

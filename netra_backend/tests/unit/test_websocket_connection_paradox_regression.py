@@ -9,7 +9,7 @@ Reference: SPEC/learnings.xml
 """
 
 import pytest
-from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 import asyncio
 

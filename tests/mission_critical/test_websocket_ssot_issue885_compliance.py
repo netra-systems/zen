@@ -268,7 +268,7 @@ class TestWebSocketSSOTComplianceMissionCritical(SSotAsyncTestCase):
 
             # Test for shared state risks
             try:
-                from netra_backend.app.websocket_core.websocket_manager import _WebSocketManagerImplementation
+                from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation
 
                 # Check if class has potential shared state attributes
                 shared_state_risks = []
@@ -407,7 +407,7 @@ class TestWebSocketSSOTComplianceMissionCritical(SSotAsyncTestCase):
 
             # Check for duplicate implementation classes
             try:
-                from netra_backend.app.websocket_core.websocket_manager import _WebSocketManagerImplementation as UnifiedImpl
+                from netra_backend.app.websocket_core.unified_manager import _UnifiedWebSocketManagerImplementation as UnifiedImpl
                 from netra_backend.app.websocket_core.websocket_manager import _UnifiedWebSocketManagerImplementation as ManagerImpl
 
                 ssot_violation_indicators.append("Multiple _UnifiedWebSocketManagerImplementation classes detected")

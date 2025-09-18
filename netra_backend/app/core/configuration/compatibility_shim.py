@@ -22,16 +22,32 @@ Business Value Justification (BVJ):
 import warnings
 from typing import Any
 
-# Import the canonical SSOT UnifiedConfigManager
-from netra_backend.app.core.configuration.base import (
+# Import the canonical SSOT configuration
+from netra_backend.app.config import (
     UnifiedConfigManager as CanonicalConfigManager,
     config_manager as canonical_config_manager,
-    get_unified_config,
+    get_config as get_unified_config,
     get_config,
-    get_config_value,
-    set_config_value,
-    validate_config_value
+    reload_config,
+    validate_configuration
 )
+
+# Compatibility functions
+def get_config_value(key: str, default: Any = None) -> Any:
+    """Compatibility wrapper for get_config_value."""
+    return canonical_config_manager.get_config_value(key, default)
+
+def set_config_value(key: str, value: Any) -> None:
+    """Compatibility wrapper for set_config_value (read-only in SSOT)."""
+    warnings.warn("set_config_value is deprecated - configuration is read-only in SSOT pattern", DeprecationWarning, stacklevel=2)
+
+def validate_config_value(key: str, value: Any) -> bool:
+    """Compatibility wrapper for validate_config_value."""
+    try:
+        current_value = get_config_value(key)
+        return current_value is not None
+    except Exception:
+        return False
 
 # Configuration Manager Compatibility Classes
 class ConfigurationManagerCompatibility:

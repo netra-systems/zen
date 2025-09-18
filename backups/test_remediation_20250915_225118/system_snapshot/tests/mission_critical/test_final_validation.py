@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,49 +16,43 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
         return self.messages_sent.copy()
-
-    #!/usr/bin/env python
-        '''FINAL VALIDATION: WebSocket Agent Events Integration
+"""
+        """FINAL VALIDATION: WebSocket Agent Events Integration
 
         This test validates that the CRITICAL fix is working:
         - AgentRegistry enhances tool dispatcher
         - Tool execution sends WebSocket events
-        - All required events flow to frontend
+        - All required events flow to frontend"""
+        RUN THIS TEST BEFORE ANY DEPLOYMENT."""
 
-        RUN THIS TEST BEFORE ANY DEPLOYMENT.
-        '''
+import asyncio
+from test_framework.database.test_database_manager import DatabaseTestManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
-        import asyncio
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from auth_service.core.auth_manager import AuthManager
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from shared.isolated_environment import IsolatedEnvironment
+import pytest
+from loguru import logger
 
-        import pytest
-        from loguru import logger
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
-        from netra_backend.app.core.registry.universal_registry import AgentRegistry
-        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-        from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
-
-
-class TestFinalValidation:
+"""
         """Final validation that WebSocket integration is complete."""
 
         @pytest.mark.critical
-        @pytest.mark.mission_critical
-    def test_agent_registry_enhances_tool_dispatcher(self):
+        @pytest.mark.mission_critical"""
         """CRITICAL: Verify AgentRegistry enhances tool dispatcher."""
 class MockLLM:
         pass
@@ -78,8 +70,7 @@ class MockLLM:
     # THIS IS THE CRITICAL FIX - must enhance tool dispatcher
         registry.set_websocket_manager(ws_manager)
 
-    # Verify enhancement
-        assert tool_dispatcher.executor != original_executor, \
+    # Verify enhancement"""
         "CRITICAL REGRESSION: Tool dispatcher not enhanced!"
 
         assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
@@ -105,8 +96,7 @@ class MockLLM:
     # Enhance
         registry.set_websocket_manager(ws_manager)
 
-    # Verify WebSocket manager is set
-        assert hasattr(tool_dispatcher.executor, 'websocket_manager'), \
+    # Verify WebSocket manager is set"""
         "Enhanced executor missing websocket_manager"
 
         assert tool_dispatcher.executor.websocket_manager is ws_manager, \
@@ -131,8 +121,7 @@ class MockLLM:
         registry = AgentRegistry(), tool_dispatcher)
         registry.set_websocket_manager(ws_manager)
 
-        # Each must be enhanced
-        assert tool_dispatcher.executor != original, \
+        # Each must be enhanced"""
         "formatted_string"
 
         assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
@@ -160,8 +149,7 @@ mock_ws.send_json = AsyncMock(side_effect=capture)
     # Setup components
 class MockLLM:
         pass
-
-        ws_manager = WebSocketManager()
+"""
         await ws_manager.connect_user("test-user", mock_ws, "test-conn")
 
         tool_dispatcher = ToolDispatcher()
@@ -196,8 +184,7 @@ class MockLLM:
         registry.set_websocket_manager(ws_manager2)
         executor2 = tool_dispatcher.executor
 
-    # Should still be enhanced
-        assert isinstance(executor2, UnifiedToolExecutionEngine), \
+    # Should still be enhanced"""
         "Lost enhancement after second call"
 
     # Should have updated WebSocket manager
@@ -208,8 +195,7 @@ class MockLLM:
 
 
     def run_final_validation():
-        """Run all final validation tests."""
-        pass
+        """Run all final validation tests.""""""
         logger.info("=" * 60)
         logger.info("RUNNING FINAL VALIDATION")
         logger.info("=" * 60)

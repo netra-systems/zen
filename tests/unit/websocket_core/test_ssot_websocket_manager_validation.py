@@ -39,7 +39,7 @@ class WebSocketManagerSSOTSingletonEnforcementTests(SSotAsyncTestCase, unittest.
         super().setup_method(method)
         
         # Clear any existing managers to ensure clean test state
-        from netra_backend.app.websocket_core.websocket_manager import reset_manager_registry
+        from netra_backend.app.websocket_core.canonical_import_patterns import reset_manager_registry
         reset_manager_registry()
         
         method_name = method.__name__ if method else "unknown_method"
@@ -48,14 +48,14 @@ class WebSocketManagerSSOTSingletonEnforcementTests(SSotAsyncTestCase, unittest.
     def teardown_method(self, method):
         """Clean up test environment."""
         # Clear registry to prevent test pollution
-        from netra_backend.app.websocket_core.websocket_manager import reset_manager_registry
+        from netra_backend.app.websocket_core.canonical_import_patterns import reset_manager_registry
         reset_manager_registry()
         
         super().teardown_method(method)
 
     def test_singleton_pattern_enforcement_per_user(self):
         """Test that each user gets exactly one WebSocket manager instance."""
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         # Create user contexts with consistent IDs
         user1_context = type('MockUserContext', (), {
@@ -88,7 +88,7 @@ class WebSocketManagerSSOTSingletonEnforcementTests(SSotAsyncTestCase, unittest.
 
     def test_direct_instantiation_prevention(self):
         """Test that direct WebSocketManager instantiation is prevented."""
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
         
         # CRITICAL TEST: Direct instantiation should raise RuntimeError
         with self.assertRaises(RuntimeError) as context:
@@ -102,7 +102,7 @@ class WebSocketManagerSSOTSingletonEnforcementTests(SSotAsyncTestCase, unittest.
 
     def test_factory_bypass_detection(self):
         """Test detection of attempts to bypass factory pattern."""
-        from netra_backend.app.websocket_core.websocket_manager import _WebSocketManagerFactory
+        from netra_backend.app.websocket_core.canonical_import_patterns import _WebSocketManagerFactory
         
         # CRITICAL TEST: Factory class instantiation should be blocked
         with self.assertRaises(RuntimeError) as context:
@@ -115,7 +115,7 @@ class WebSocketManagerSSOTSingletonEnforcementTests(SSotAsyncTestCase, unittest.
 
     async def test_concurrent_manager_access_isolation(self):
         """Test user isolation under concurrent access patterns."""
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         results = {}
         errors = []
@@ -216,7 +216,7 @@ class WebSocketManagerImportPathFragmentationTests(SSotAsyncTestCase, unittest.T
         """Test that WebSocketManagerFactory is properly consolidated."""
         # Test that the factory is accessible from the main module
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManagerFactory
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManagerFactory
             
             # Verify factory methods are deprecated and redirect properly
             import warnings
@@ -332,7 +332,7 @@ class WebSocketManagerUserIsolationValidationTests(SSotAsyncTestCase, unittest.T
         super().setup_method(method)
         
         # Clear registry for clean test state
-        from netra_backend.app.websocket_core.websocket_manager import reset_manager_registry
+        from netra_backend.app.websocket_core.canonical_import_patterns import reset_manager_registry
         reset_manager_registry()
         
         method_name = method.__name__ if method else "unknown_method"
@@ -340,13 +340,13 @@ class WebSocketManagerUserIsolationValidationTests(SSotAsyncTestCase, unittest.T
 
     def teardown_method(self, method):
         """Clean up test environment."""
-        from netra_backend.app.websocket_core.websocket_manager import reset_manager_registry
+        from netra_backend.app.websocket_core.canonical_import_patterns import reset_manager_registry
         reset_manager_registry()
         super().teardown_method(method)
 
     async def test_user_session_state_isolation(self):
         """Test that user sessions maintain complete state isolation."""
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         
         # Create distinct user contexts
         user1_context = type('MockUserContext', (), {
@@ -388,7 +388,7 @@ class WebSocketManagerUserIsolationValidationTests(SSotAsyncTestCase, unittest.T
 
     def test_manager_registry_isolation_validation(self):
         """Test the manager registry properly isolates users."""
-        from netra_backend.app.websocket_core.websocket_manager import (
+        from netra_backend.app.websocket_core.canonical_import_patterns import (
             get_websocket_manager, 
             validate_no_duplicate_managers_for_user,
             get_manager_registry_status
@@ -431,7 +431,7 @@ class WebSocketManagerUserIsolationValidationTests(SSotAsyncTestCase, unittest.T
 
     def test_enum_mode_isolation_validation(self):
         """Test that WebSocketManagerMode enums are properly isolated between users."""
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+        from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
         from netra_backend.app.websocket_core.types import WebSocketManagerMode
         
         # Create user contexts with different modes

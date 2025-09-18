@@ -1,9 +1,7 @@
-'''
+"""
 Standalone WebSocket Bridge Performance Test - Clean Version (Windows Compatible)
-
-This test validates the performance test infrastructure and generates
-a baseline performance report without requiring the full application stack.
-'''
+"""
+a baseline performance report without requiring the full application stack."""
 
 import asyncio
 import json
@@ -22,8 +20,7 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
 
 
-@dataclass
-class PerformanceMetrics:
+@dataclass"""
     """Performance measurement data structure."""
     latencies: List[float]  # milliseconds
     throughput: float  # messages per second
@@ -34,53 +31,43 @@ class PerformanceMetrics:
     errors: int
     total_events: int
 
-    @property
-    def p50_latency(self) -> float:
+    @property"""
         """50th percentile latency."""
         return statistics.median(self.latencies) if self.latencies else 0
 
-        @property
-    def p90_latency(self) -> float:
+        @property"""
         """90th percentile latency."""
         return statistics.quantiles(self.latencies, n=10)[8] if len(self.latencies) >= 10 else max(self.latencies, default=0)
 
-        @property
-    def p95_latency(self) -> float:
+        @property"""
         """95th percentile latency."""
         return statistics.quantiles(self.latencies, n=20)[18] if len(self.latencies) >= 20 else max(self.latencies, default=0)
 
-        @property
-    def p99_latency(self) -> float:
+        @property"""
         """99th percentile latency."""
         return statistics.quantiles(self.latencies, n=100)[98] if len(self.latencies) >= 100 else max(self.latencies, default=0)
 
-        @property
-    def avg_latency(self) -> float:
+        @property"""
         """Average latency."""
         return statistics.mean(self.latencies) if self.latencies else 0
 
-        @property
-    def avg_connection_time(self) -> float:
+        @property"""
         """Average connection establishment time."""
         return statistics.mean(self.connection_times) if self.connection_times else 0
 
-        @property
-    def avg_cpu_usage(self) -> float:
+        @property"""
         """Average CPU usage."""
         return statistics.mean(self.cpu_usage) if self.cpu_usage else 0
 
-        @property
-    def avg_memory_usage(self) -> float:
+        @property"""
         """Average memory usage."""
         return statistics.mean(self.memory_usage) if self.memory_usage else 0
 
-        @property
-    def error_rate(self) -> float:
+        @property"""
         """Error rate percentage."""
         return (self.errors / self.total_events * 100) if self.total_events > 0 else 0
 
-
-class MockWebSocketEmitter:
+"""
         """Mock WebSocket emitter for performance testing."""
 
     def __init__(self, user_id: str, latency_ms: float = 0.1):
@@ -88,72 +75,31 @@ class MockWebSocketEmitter:
         self.latency_ms = latency_ms
         self.sent_events = []
         self.last_activity = time.time()
-
-    async def notify_agent_started(self, agent_name: str, run_id: str) -> None:
+"""
         """Mock agent started notification."""
-        await asyncio.sleep(self.latency_ms / 1000)  # Simulate processing time
-
-        event = { )
-        "event_type": "agent_started",
-        "user_id": self.user_id,
-        "data": { )
-        "agent_name": agent_name,
-        "run_id": run_id,
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    
-    
+        await asyncio.sleep(self.latency_ms / 1000)  # Simulate processing time"""
+event = {"event_type": "agent_started",, "user_id": self.user_id,, "data": { ), "agent_name": agent_name,, "run_id": run_id,, "timestamp": datetime.now(timezone.utc).isoformat()}
         self.sent_events.append(event)
         self.last_activity = time.time()
 
     async def notify_agent_thinking(self, agent_name: str, run_id: str, thinking: str) -> None:
         """Mock agent thinking notification."""
-        await asyncio.sleep(self.latency_ms / 1000)
-
-        event = { )
-        "event_type": "agent_thinking",
-        "user_id": self.user_id,
-        "data": { )
-        "agent_name": agent_name,
-        "run_id": run_id,
-        "thinking": thinking,
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    
-    
+        await asyncio.sleep(self.latency_ms / 1000)"""
+event = {"event_type": "agent_thinking",, "user_id": self.user_id,, "data": { ), "agent_name": agent_name,, "run_id": run_id,, "thinking": thinking,, "timestamp": datetime.now(timezone.utc).isoformat()}
         self.sent_events.append(event)
         self.last_activity = time.time()
 
     async def notify_tool_executing(self, agent_name: str, run_id: str, tool_name: str, tool_input: Dict[str, Any]) -> None:
         """Mock tool execution notification."""
-        await asyncio.sleep(self.latency_ms / 1000)
-
-        event = { )
-        "event_type": "tool_executing",
-        "user_id": self.user_id,
-        "data": { )
-        "agent_name": agent_name,
-        "run_id": run_id,
-        "tool_name": tool_name,
-        "tool_input": tool_input,
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    
-    
+        await asyncio.sleep(self.latency_ms / 1000)"""
+event = {"event_type": "tool_executing",, "user_id": self.user_id,, "data": { ), "agent_name": agent_name,, "run_id": run_id,, "tool_name": tool_name,, "tool_input": tool_input,, "timestamp": datetime.now(timezone.utc).isoformat()}
         self.sent_events.append(event)
         self.last_activity = time.time()
 
     async def notify_agent_completed(self, agent_name: str, run_id: str, result: Any) -> None:
         """Mock agent completion notification."""
-        await asyncio.sleep(self.latency_ms / 1000)
-
-        event = { )
-        "event_type": "agent_completed",
-        "user_id": self.user_id,
-        "data": { )
-        "agent_name": agent_name,
-        "run_id": run_id,
-        "result": result,
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    
-    
+        await asyncio.sleep(self.latency_ms / 1000)"""
+event = {"event_type": "agent_completed",, "user_id": self.user_id,, "data": { ), "agent_name": agent_name,, "run_id": run_id,, "result": result,, "timestamp": datetime.now(timezone.utc).isoformat()}
         self.sent_events.append(event)
         self.last_activity = time.time()
 
@@ -164,19 +110,13 @@ class PerformanceMonitor:
     def __init__(self):
         self.process = psutil.Process()
         self.monitoring = False
-        self.metrics = { )
-        'cpu_usage': [],
-        'memory_usage': [],
-        'timestamps': []
-    
+metrics = {'cpu_usage': [],, 'memory_usage': [],, 'timestamps': []}
         self._monitor_task = None
-
-    async def start_monitoring(self, interval: float = 0.1):
+"""
         """Start performance monitoring."""
         self.monitoring = True
         self._monitor_task = asyncio.create_task(self._monitor_loop(interval))
-
-    async def stop_monitoring(self):
+"""
         """Stop performance monitoring."""
         self.monitoring = False
         if self._monitor_task:
@@ -185,22 +125,18 @@ class PerformanceMonitor:
         await self._monitor_task
         except asyncio.CancelledError:
         pass
-
-    async def _monitor_loop(self, interval: float):
+"""
         """Performance monitoring loop."""
         try:
         while self.monitoring:
         try:
                 # Get CPU and memory usage
         cpu = self.process.cpu_percent()
-        memory = self.process.memory_info().rss / 1024 / 1024  # MB
-
         self.metrics['cpu_usage'].append(cpu)
         self.metrics['memory_usage'].append(memory)
         self.metrics['timestamps'].append(time.time())
 
-        await asyncio.sleep(interval)
-        except Exception as e:
+        await asyncio.sleep(interval)"""
         print("formatted_string")
         break
         except asyncio.CancelledError:
@@ -210,8 +146,7 @@ class PerformanceMonitor:
         """Get collected performance metrics."""
         return self.metrics.copy()
 
-
-    async def test_latency_baseline():
+"""
         """Test latency performance baseline."""
         print("Testing P99 latency baseline...")
 
@@ -224,13 +159,7 @@ class PerformanceMonitor:
         for i in range(num_samples):
         start_time = time.time()
 
-        await emitter.notify_agent_started( )
-        agent_name="performance_test",
-        run_id="formatted_string"
-            
-
-        end_time = time.time()
-        latency_ms = (end_time - start_time) * 1000
+        await emitter.notify_agent_started(agent_name="performance_test",, run_id="formatted_string", end_time = time.time(), latency_ms = (end_time - start_time) * 1000)
         latencies.append(latency_ms)
 
             # Small delay to avoid overwhelming the system
@@ -273,20 +202,13 @@ class PerformanceMonitor:
         for i in range(0, num_events, batch_size):
         batch_tasks = []
         for j in range(min(batch_size, num_events - i)):
-        task = emitter.notify_agent_thinking( )
-        agent_name="throughput_test",
-        run_id="formatted_string",
-        thinking="formatted_string"
-                            
+        task = emitter.notify_agent_thinking(agent_name="throughput_test",, run_id="formatted_string",, thinking="formatted_string")
         batch_tasks.append(task)
 
                             # Execute batch
         await asyncio.gather(*batch_tasks)
 
         end_time = time.time()
-        duration = end_time - start_time
-        throughput = num_events / duration
-
         print("formatted_string")
         print("formatted_string")
         print("formatted_string")
@@ -314,7 +236,6 @@ class PerformanceMonitor:
         await asyncio.sleep(0.001)  # Simulate connection overhead
 
         end_time = time.time()
-        connection_time_ms = (end_time - start_time) * 1000
         connection_times.append(connection_time_ms)
 
         if i % 10 == 0:
@@ -354,22 +275,13 @@ class PerformanceMonitor:
 
                                                 Send events from all users concurrently
         start_time = time.time()
-        all_latencies = []
-
     async def user_workload(user_id: str, emitter: MockWebSocketEmitter):
         """Workload for a single user."""
         user_latencies = []
 
         for i in range(events_per_user):
-        event_start = time.time()
-
-        await emitter.notify_agent_started( )
-        agent_name="formatted_string",
-        run_id="formatted_string"
-        
-
-        event_end = time.time()
-        latency_ms = (event_end - event_start) * 1000
+        event_start = time.time()"""
+        await emitter.notify_agent_started(agent_name="formatted_string",, run_id="formatted_string", event_end = time.time(), latency_ms = (event_end - event_start) * 1000)
         user_latencies.append(latency_ms)
 
         return user_latencies
@@ -383,8 +295,6 @@ class PerformanceMonitor:
         user_latencies_list = await asyncio.gather(*workload_tasks)
 
         end_time = time.time()
-        total_duration = end_time - start_time
-
         # Aggregate all latencies
         for user_latencies in user_latencies_list:
         all_latencies.extend(user_latencies)
@@ -500,13 +410,12 @@ class PerformanceMonitor:
 
 
     def generate_performance_report(metrics: PerformanceMetrics) -> str:
-        """Generate a comprehensive performance baseline report."""
-
+        """Generate a comprehensive performance baseline report.""""""
         p99_pass = "PASS" if metrics.p99_latency < 50.0 else "FAIL"
         throughput_pass = "PASS" if metrics.throughput > 1000.0 else "FAIL"
         connection_pass = "PASS" if metrics.avg_connection_time < 500.0 else "FAIL"
 
-        report = f'''
+        report = f"""
     # WebSocket Bridge Performance Baseline Report
 
         **Generated:** {datetime.now(timezone.utc).isoformat()}
@@ -561,16 +470,12 @@ class PerformanceMonitor:
         **Concurrent Load:** Tests with 30 concurrent users sending 50+ events each
         **Statistical Analysis:** P50, P90, P95, P99 percentile analysis
         **Resource Monitoring:** Real-time CPU and memory usage tracking
-
-        ---
-        *This report validates performance requirements for the Netra AI platform WebSocket infrastructure.*
-        '''
+"""
+        *This report validates performance requirements for the Netra AI platform WebSocket infrastructure.*"""
         return report
 
-
-    async def main():
-        """Main performance test runner."""
-        try:
+"""
+        """Main performance test runner.""""""
         print("Starting WebSocket Bridge Performance Baseline Tests...")
         print("This test validates performance without requiring the full application stack.")
         print("")
@@ -608,6 +513,6 @@ class PerformanceMonitor:
 
 
         if __name__ == "__main__":
-        import sys
+import sys
         result = asyncio.run(main())
         sys.exit(result)

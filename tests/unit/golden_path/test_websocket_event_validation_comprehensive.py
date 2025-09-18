@@ -36,7 +36,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from test_framework.ssot.websocket import WebSocketTestUtility
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.websocket_core.agent_handler import AgentHandler
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.base_agent import BaseAgent, AgentState
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent

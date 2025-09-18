@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,19 +16,16 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
-        '''
+        return self.messages_sent.copy()"""
+        """
         CRITICAL TEST: Agent Processing Death After Triage
         ==================================================
         This test reproduces a CRITICAL production bug where:
         1. Agent starts processing normally
-        2. Goes through triage successfully
-        3. Dies silently without error or proper health detection
+        2. Goes through triage successfully"""
         4. WebSocket continues to send empty responses with "..."
         5. Health service FAILS to detect the dead agent
         6. No errors are logged, system appears "healthy"
@@ -44,28 +39,26 @@ class TestWebSocketConnection:
         WHY THIS IS CRITICAL:
         - Users experience complete failure with no feedback
         - Health monitoring misses the failure completely
-        - Silent failures are the worst kind - no recovery possible
-        '''
+        - Silent failures are the worst kind - no recovery possible"""
 
-        import asyncio
-        import json
-        import pytest
-        import time
-        from datetime import datetime
-        from typing import Dict, Any, List, Optional
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from auth_service.core.auth_manager import AuthManager
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from shared.isolated_environment import IsolatedEnvironment
+import asyncio
+import json
+import pytest
+import time
+from datetime import datetime
+from typing import Dict, Any, List, Optional
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
-
-class AgentDeathDetector:
+"""
         """Monitors agent execution to detect silent deaths"""
 
     def __init__(self):
@@ -76,14 +69,12 @@ class AgentDeathDetector:
         self.last_meaningful_event: Optional[Dict[str, Any]] = None
         self.empty_response_count = 0
         self.health_check_failures = []
-
-    def record_event(self, event: Dict[str, Any]):
+"""
         """Record WebSocket events for analysis"""
         self.events.append({ ))
         **event,
         'timestamp': time.time()
-    
-
+    """
     # Detect death pattern: agent_response with "..." status
         if event.get('type') == 'agent_response':
         data = event.get('data', {})
@@ -113,18 +104,14 @@ class AgentDeathDetector:
     
 
 
-        @pytest.mark.critical
-class TestAgentDeathAfterTriage:
+        @pytest.mark.critical"""
         """Test suite for critical agent death after triage bug"""
 
 @pytest.mark.asyncio
-@pytest.fixture
-    async def test_agent_dies_after_triage_without_error(self):
-'''
-CRITICAL: Reproduce agent death after triage with no error handling
-
-This test MUST FAIL to prove the bug exists!
-'''
+@pytest.fixture"""
+"""
+CRITICAL: Reproduce agent death after triage with no error handling"""
+This test MUST FAIL to prove the bug exists!"""
 pass
 detector = AgentDeathDetector()
 
@@ -155,15 +142,7 @@ messages_sent.append(msg)
 detector.record_event(msg)
 
     # Process a user message
-user_message = { )
-'type': 'chat_message',
-'data': { )
-'message': 'Help me optimize my cloud costs',
-'thread_id': 'test-thread',
-'user_id': 'test-user'
-    
-    
-
+user_message = {'type': 'chat_message',, 'data': { ), 'message': 'Help me optimize my cloud costs',, 'thread_id': 'test-thread',, 'user_id': 'test-user'}
     # Start processing
     # Removed problematic line: await mock_send_message({)
 'type': 'agent_started',
@@ -195,8 +174,7 @@ detector.health_check_failures.append({ ))
 
         # Verify the bug exists
 report = detector.get_death_report()
-
-        # These assertions SHOULD FAIL in the current system
+"""
 assert report['death_detected'], "Agent death was not detected!"
 assert report['empty_responses'] > 0, "Empty responses not counted!"
 assert len(report["health_check_failures"]) > 0, "Health checks didn"t fail!"
@@ -219,14 +197,12 @@ print("="*80)
 
 @pytest.mark.asyncio
     async def test_websocket_continues_after_agent_death(self):
-'''
-Test that WebSocket remains "healthy" even when agent is dead
-'''
+"""
+Test that WebSocket remains "healthy" even when agent is dead"""
 pass
 ws_messages = []
 agent_dead = False
-
-async def simulate_websocket_session():
+"""
 """Simulate a WebSocket session with agent death"""
 
     # Initial connection successful
@@ -277,8 +253,7 @@ message_types = {}
 for msg in messages:
 msg_type = msg['type']
 message_types[msg_type] = message_types.get(msg_type, 0) + 1
-
-            # Verify the bug
+"""
 assert agent_dead, "Agent should be dead"
 assert message_types.get('ping', 0) > 0, "Pings still being sent"
 assert message_types.get('pong', 0) > 0, "Pongs still being received"
@@ -299,23 +274,15 @@ print("="*80)
 
 @pytest.mark.asyncio
     async def test_health_service_misses_agent_death(self):
-'''
-pass
-Test that health service completely misses agent death
-'''
-
-class FakeHealthService:
+""""""
+Test that health service completely misses agent death"""
+"""
     """Simulates current broken health service"""
 
     def __init__(self):
         pass
         self.checks_performed = 0
-        self.agent_states = { )
-        'supervisor': 'healthy',
-        'triage': 'healthy'
-    
-
-    async def check_agent_health(self, agent_name: str) -> Dict[str, Any]:
+agent_states = {'supervisor': 'healthy',, 'triage': 'healthy'}"""
         """Always returns healthy even when agent is dead"""
         self.checks_performed += 1
 
@@ -327,8 +294,7 @@ class FakeHealthService:
         'timestamp': time.time(),
         'checks_performed': self.checks_performed
     
-
-    async def kill_agent(self, agent_name: str):
+"""
         """Simulate agent death"""
         self.agent_states[agent_name] = 'DEAD'
     # But check_agent_health still returns healthy!
@@ -340,8 +306,7 @@ class FakeHealthService:
 
     # Health checks still await asyncio.sleep(0)
         return healthy (BUG!)
-        for _ in range(10):
-        health_status = await health_service.check_agent_health('triage')
+        for _ in range(10):"""
         assert health_status['status'] == 'healthy', "Health check should incorrectly report healthy"
 
         assert health_service.agent_states['triage'] == 'DEAD', "Agent is actually dead"
@@ -359,18 +324,14 @@ class FakeHealthService:
 
 @pytest.mark.asyncio
     async def test_missing_error_recovery_for_agent_death(self):
-'''
-pass
-Test that error recovery doesn"t trigger for silent agent death
-'''
+""""""
+Test that error recovery doesn"t trigger for silent agent death"""
 
 error_recovery_triggered = False
 recovery_attempts = []
-
-class FakeErrorRecovery:
+"""
     """Simulates error recovery that never triggers"""
-
-    async def handle_agent_failure(self, agent: str, error: Exception):
+"""
         """This never gets called because no exception is raised!"""
         nonlocal error_recovery_triggered
         error_recovery_triggered = True
@@ -382,11 +343,9 @@ class FakeErrorRecovery:
 
         recovery = FakeErrorRecovery()
 
-    # Simulate agent processing
-    async def process_with_silent_death():
+    # Simulate agent processing"""
         """Agent dies without raising exception"""
-        pass
-    # Start processing
+        pass"""
         print("Agent starting...")
 
     # Triage happens
@@ -424,32 +383,18 @@ class FakeErrorRecovery:
         await asyncio.sleep(0)
         return None  # Dead agent returns None
 
-@pytest.mark.asyncio
-    async def test_comprehensive_death_detection_requirements(self):
-'''
+@pytest.mark.asyncio"""
+"""
 pass
-Define what SHOULD happen to detect and recover from agent death
+Define what SHOULD happen to detect and recover from agent death"""
+This test defines the REQUIRED behavior to fix the bug."""
 
-This test defines the REQUIRED behavior to fix the bug.
-'''
-
-required_checks = { )
-'heartbeat': False,  # No heartbeat monitoring
-'timeout_detection': False,  # No timeout on agent execution
-'result_validation': False,  # No validation of agent results
-'execution_tracking': False,  # No tracking of execution state
-'error_boundaries': False,  # No error boundaries around execution
-'dead_letter_queue': False,  # No DLQ for failed messages
-'circuit_breaker': False,  # No circuit breaker pattern
-'supervisor_monitoring': False  # No supervisor health checks
-        
-
+required_checks = {'heartbeat': False,  # No heartbeat monitoring, 'timeout_detection': False,  # No timeout on agent execution, 'result_validation': False,  # No validation of agent results, 'execution_tracking': False,  # No tracking of execution state, 'error_boundaries': False,  # No error boundaries around execution, 'dead_letter_queue': False,  # No DLQ for failed messages, 'circuit_breaker': False,  # No circuit breaker pattern, 'supervisor_monitoring': False  # No supervisor health checks}
         # All these SHOULD be True but are currently False
 failed_requirements = [ )
 check for check, implemented in required_checks.items()
 if not implemented
-        
-
+        """
 print(" )
 " + "="*80)
 print("MISSING DEATH DETECTION MECHANISMS")

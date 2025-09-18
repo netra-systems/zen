@@ -1,8 +1,10 @@
 '''
+'''
 Comprehensive test suite for missing WebSocket events.
 Tests that the backend properly emits ALL expected events that frontend handlers are waiting for.
 
 CRITICAL: These events are currently NOT being emitted, causing frontend to have no real-time updates.
+'''
 '''
 
 import asyncio
@@ -31,11 +33,12 @@ try:
     from netra_backend.app.schemas.websocket_models import WebSocketMessage
     from netra_backend.app.logging_config import central_logger
 except ImportError as e:
-    logger.warning(f"Some imports failed: {e}. Test will use mock implementations.")
+    logger.warning(f"Some imports failed: {e}. Test will use mock implementations.)")
 
 
 class TestWebSocketConnection:
-    """Real WebSocket connection for testing instead of mocks."""
+    Real WebSocket connection for testing instead of mocks."
+    Real WebSocket connection for testing instead of mocks."
 
     def __init__(self):
         self.messages_sent = []
@@ -43,28 +46,28 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        """Send JSON message."""
+        "Send JSON message."
         if self._closed:
-            raise RuntimeError("WebSocket is closed")
+            raise RuntimeError(WebSocket is closed")"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
-        """Close WebSocket connection."""
+    async def close(self, code: int = 1000, reason: str = Normal closure):
+        "Close WebSocket connection."
         self._closed = True
         self.is_connected = False
 
     async def get_messages(self) -> list:
-        """Get all sent messages."""
+        Get all sent messages.""
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
 
 class MissingWebSocketEventsValidator:
-    """
+    pass
     Validates that all critical WebSocket events are being emitted by the backend.
 
     These events are essential for frontend real-time updates and user experience.
-    """
+""
 
     # Critical events that MUST be emitted
     REQUIRED_EVENTS = {
@@ -98,7 +101,8 @@ class MissingWebSocketEventsValidator:
         self.test_connection = TestWebSocketConnection()
 
     def setup_test_environment(self):
-        """Setup test environment with mocked WebSocket infrastructure."""
+        Setup test environment with mocked WebSocket infrastructure."
+        Setup test environment with mocked WebSocket infrastructure."
         try:
             if 'WebSocketBridgeFactory' in globals():
                 self.websocket_factory = WebSocketBridgeFactory()
@@ -109,10 +113,10 @@ class MissingWebSocketEventsValidator:
                     health_monitor=None
                 )
         except Exception as e:
-            logger.warning(f"Failed to setup WebSocket factory: {e}")
+            logger.warning(fFailed to setup WebSocket factory: {e}")"
 
     def _create_mock_pool(self):
-        """Create mock connection pool for testing."""
+        Create mock connection pool for testing.""
         class MockPool:
             def __init__(self, test_connection):
                 self.test_connection = test_connection
@@ -126,9 +130,10 @@ class MissingWebSocketEventsValidator:
         return MockPool(self.test_connection)
 
     async def test_agent_lifecycle_events(self) -> Dict[str, Any]:
-        """Test that all agent lifecycle events are properly emitted."""
+        Test that all agent lifecycle events are properly emitted."
+        Test that all agent lifecycle events are properly emitted."
         test_name = "agent_lifecycle_events"
-        logger.info(f"Testing {test_name}...")
+        logger.info(fTesting {test_name}...)
 
         result = {
             'test_name': test_name,
@@ -156,7 +161,7 @@ class MissingWebSocketEventsValidator:
                         'run_id': user_context['run_id'],
                         'timestamp': datetime.now(timezone.utc).isoformat()
                     }
-                }),
+                },
                 ('agent_thinking', {
                     'event_type': 'agent_thinking',
                     'data': {
@@ -165,7 +170,7 @@ class MissingWebSocketEventsValidator:
                         'thinking': 'Analyzing the request...',
                         'timestamp': datetime.now(timezone.utc).isoformat()
                     }
-                }),
+                },
                 ('agent_completed', {
                     'event_type': 'agent_completed',
                     'data': {
@@ -174,13 +179,13 @@ class MissingWebSocketEventsValidator:
                         'result': {'status': 'success', 'summary': 'Task completed'},
                         'timestamp': datetime.now(timezone.utc).isoformat()
                     }
-                })
+                }
             ]
 
             # Clear previous messages
             self.test_connection.messages_sent.clear()
 
-            # Send each event and verify it's captured
+            # Send each event and verify it's captured'
             for event_name, event_data in lifecycle_events:
                 await self.test_connection.send_json(event_data)
                 await asyncio.sleep(0.1)  # Allow processing
@@ -189,28 +194,28 @@ class MissingWebSocketEventsValidator:
                 messages = await self.test_connection.get_messages()
                 if messages and any(msg.get('event_type') == event_name for msg in messages):
                     result['events_received'].append(event_name)
-                    logger.info(f"✓ Event {event_name} captured successfully")
+                    logger.info(f"✓ Event {event_name} captured successfully)"
                 else:
                     result['events_missing'].append(event_name)
-                    logger.warning(f"✗ Event {event_name} NOT captured")
+                    logger.warning(f✗ Event {event_name} NOT captured")"
 
             # Determine success
-            result['success'] = len(result['events_missing']) == 0
+            result['success') = len(result['events_missing') == 0
 
         except Exception as e:
             result['error'] = str(e)
-            logger.error(f"Agent lifecycle test failed: {e}")
+            logger.error(fAgent lifecycle test failed: {e})
 
-        self.test_results['events_tested'].extend(result['events_expected'])
-        self.test_results['events_found'].extend(result['events_received'])
-        self.test_results['events_missing'].extend(result['events_missing'])
+        self.test_results['events_tested').extend(result['events_expected')
+        self.test_results['events_found').extend(result['events_received')
+        self.test_results['events_missing').extend(result['events_missing')
 
         return result
 
     async def test_tool_execution_events(self) -> Dict[str, Any]:
-        """Test that tool execution events are properly emitted."""
-        test_name = "tool_execution_events"
-        logger.info(f"Testing {test_name}...")
+        "Test that tool execution events are properly emitted."
+        test_name = tool_execution_events
+        logger.info(fTesting {test_name}...")"
 
         result = {
             'test_name': test_name,
@@ -239,7 +244,7 @@ class MissingWebSocketEventsValidator:
                         'params': {'query': 'test analysis'},
                         'timestamp': datetime.now(timezone.utc).isoformat()
                     }
-                }),
+                },
                 ('tool_completed', {
                     'event_type': 'tool_completed',
                     'data': {
@@ -249,13 +254,13 @@ class MissingWebSocketEventsValidator:
                         'result': {'status': 'success', 'data': 'analysis complete'},
                         'timestamp': datetime.now(timezone.utc).isoformat()
                     }
-                })
+                }
             ]
 
             # Clear previous messages
             self.test_connection.messages_sent.clear()
 
-            # Send each event and verify it's captured
+            # Send each event and verify it's captured'
             for event_name, event_data in tool_events:
                 await self.test_connection.send_json(event_data)
                 await asyncio.sleep(0.1)
@@ -264,27 +269,27 @@ class MissingWebSocketEventsValidator:
                 messages = await self.test_connection.get_messages()
                 if messages and any(msg.get('event_type') == event_name for msg in messages):
                     result['events_received'].append(event_name)
-                    logger.info(f"✓ Tool event {event_name} captured successfully")
+                    logger.info(f✓ Tool event {event_name} captured successfully)
                 else:
                     result['events_missing'].append(event_name)
-                    logger.warning(f"✗ Tool event {event_name} NOT captured")
+                    logger.warning(f✗ Tool event {event_name} NOT captured)
 
-            result['success'] = len(result['events_missing']) == 0
+            result['success') = len(result['events_missing') == 0
 
         except Exception as e:
             result['error'] = str(e)
-            logger.error(f"Tool execution test failed: {e}")
+            logger.error(f"Tool execution test failed: {e})"
 
-        self.test_results['events_tested'].extend(result['events_expected'])
-        self.test_results['events_found'].extend(result['events_received'])
-        self.test_results['events_missing'].extend(result['events_missing'])
+        self.test_results['events_tested').extend(result['events_expected')
+        self.test_results['events_found').extend(result['events_received')
+        self.test_results['events_missing').extend(result['events_missing')
 
         return result
 
     async def test_error_and_status_events(self) -> Dict[str, Any]:
-        """Test that error and status events are properly emitted."""
+        "Test that error and status events are properly emitted."
         test_name = "error_and_status_events"
-        logger.info(f"Testing {test_name}...")
+        logger.info(fTesting {test_name}...)
 
         result = {
             'test_name': test_name,
@@ -313,7 +318,7 @@ class MissingWebSocketEventsValidator:
                         'error_type': 'validation_error',
                         'timestamp': datetime.now(timezone.utc).isoformat()
                     }
-                }),
+                },
                 ('connection_status', {
                     'event_type': 'connection_status',
                     'data': {
@@ -321,7 +326,7 @@ class MissingWebSocketEventsValidator:
                         'connection_id': user_context['connection_id'],
                         'timestamp': datetime.now(timezone.utc).isoformat()
                     }
-                }),
+                },
                 ('system_status', {
                     'event_type': 'system_status',
                     'data': {
@@ -329,13 +334,13 @@ class MissingWebSocketEventsValidator:
                         'services': ['auth', 'backend', 'websocket'],
                         'timestamp': datetime.now(timezone.utc).isoformat()
                     }
-                })
+                }
             ]
 
             # Clear previous messages
             self.test_connection.messages_sent.clear()
 
-            # Send each event and verify it's captured
+            # Send each event and verify it's captured'
             for event_name, event_data in status_events:
                 await self.test_connection.send_json(event_data)
                 await asyncio.sleep(0.1)
@@ -344,28 +349,29 @@ class MissingWebSocketEventsValidator:
                 messages = await self.test_connection.get_messages()
                 if messages and any(msg.get('event_type') == event_name for msg in messages):
                     result['events_received'].append(event_name)
-                    logger.info(f"✓ Status event {event_name} captured successfully")
+                    logger.info(f✓ Status event {event_name} captured successfully)
                 else:
                     result['events_missing'].append(event_name)
-                    logger.warning(f"✗ Status event {event_name} NOT captured")
+                    logger.warning(f✗ Status event {event_name} NOT captured")"
 
-            result['success'] = len(result['events_missing']) == 0
+            result['success') = len(result['events_missing') == 0
 
         except Exception as e:
             result['error'] = str(e)
-            logger.error(f"Error and status test failed: {e}")
+            logger.error(fError and status test failed: {e})
 
-        self.test_results['events_tested'].extend(result['events_expected'])
-        self.test_results['events_found'].extend(result['events_received'])
-        self.test_results['events_missing'].extend(result['events_missing'])
+        self.test_results['events_tested').extend(result['events_expected')
+        self.test_results['events_found').extend(result['events_received')
+        self.test_results['events_missing').extend(result['events_missing')
 
         return result
 
     async def run_comprehensive_missing_events_test(self) -> Dict[str, Any]:
-        """Run all missing events tests and return comprehensive results."""
-        logger.info("\n" + "=" * 80)
-        logger.info("🔍 MISSING WEBSOCKET EVENTS VALIDATION SUITE")
-        logger.info("=" * 80)
+        Run all missing events tests and return comprehensive results.""
+        logger.info(\n + = * 80)
+        logger.info(🔍 MISSING WEBSOCKET EVENTS VALIDATION SUITE)"
+        logger.info(🔍 MISSING WEBSOCKET EVENTS VALIDATION SUITE)"
+        logger.info(=" * 80)"
 
         self.setup_test_environment()
 
@@ -373,24 +379,25 @@ class MissingWebSocketEventsValidator:
         test_results = {}
 
         test_functions = [
-            ("Agent Lifecycle Events", self.test_agent_lifecycle_events()),
-            ("Tool Execution Events", self.test_tool_execution_events()),
-            ("Error and Status Events", self.test_error_and_status_events()),
+            (Agent Lifecycle Events, self.test_agent_lifecycle_events()),
+            (Tool Execution Events", self.test_tool_execution_events()),"
+            (Error and Status Events, self.test_error_and_status_events()),
         ]
 
         for test_name, test_coro in test_functions:
-            logger.info(f"\n🔍 Running: {test_name}")
+            logger.info(f\n🔍 Running: {test_name})"
+            logger.info(f\n🔍 Running: {test_name})"
             try:
                 result = await test_coro
                 test_results[test_name] = result
 
                 if result.get('success', False):
-                    logger.info(f"✅ {test_name}: PASSED")
+                    logger.info(f"✅ {test_name}: PASSED)"
                 else:
-                    logger.error(f"❌ {test_name}: FAILED - Missing events: {result.get('events_missing', [])}")
+                    logger.error(f❌ {test_name}: FAILED - Missing events: {result.get('events_missing', []})
 
             except Exception as e:
-                logger.error(f"❌ {test_name}: EXCEPTION - {e}")
+                logger.error(f❌ {test_name}: EXCEPTION - {e})
                 test_results[test_name] = {
                     'test_name': test_name,
                     'success': False,
@@ -398,7 +405,7 @@ class MissingWebSocketEventsValidator:
                 }
 
         # Analyze critical missing events
-        all_missing = set(self.test_results['events_missing'])
+        all_missing = set(self.test_results['events_missing')
         critical_missing = all_missing.intersection(self.COMMONLY_MISSING_EVENTS)
 
         self.test_results['critical_missing'] = list(critical_missing)
@@ -413,61 +420,63 @@ class MissingWebSocketEventsValidator:
             'overall_success': len(critical_missing) == 0
         }
 
-    def _print_missing_events_summary(self, test_results: Dict, critical_missing: Set[str]):
-        """Print comprehensive summary of missing events."""
-        logger.info("\n" + "=" * 80)
-        logger.info("📊 MISSING WEBSOCKET EVENTS SUMMARY")
-        logger.info("=" * 80)
+    def _print_missing_events_summary(self, test_results: Dict, critical_missing: Set[str):
+        ""Print comprehensive summary of missing events.
+        logger.info(\n + =" * 80)"
+        logger.info("📊 MISSING WEBSOCKET EVENTS SUMMARY)"
+        logger.info(= * 80)
 
-        logger.info(f"Total Events Tested: {len(self.test_results['events_tested'])}")
-        logger.info(f"Events Found: {len(self.test_results['events_found'])}")
-        logger.info(f"Events Missing: {len(self.test_results['events_missing'])}")
+        logger.info(f"Total Events Tested: {len(self.test_results['events_tested']})"
+        logger.info(fEvents Found: {len(self.test_results['events_found']}")"
+        logger.info(fEvents Missing: {len(self.test_results['events_missing']})
 
         if self.test_results['events_missing']:
-            logger.error(f"\n❌ MISSING EVENTS:")
+            logger.error(f\n❌ MISSING EVENTS:)"
+            logger.error(f\n❌ MISSING EVENTS:)"
             for event in self.test_results['events_missing']:
-                criticality = "🚨 CRITICAL" if event in critical_missing else "⚠️  NORMAL"
-                logger.error(f"  {criticality}: {event}")
+                criticality = "🚨 CRITICAL if event in critical_missing else ⚠️  NORMAL"
+                logger.error(f  {criticality}: {event})
 
         if critical_missing:
-            logger.error(f"\n🚨 CRITICAL MISSING EVENTS (Frontend Impact):")
+            logger.error(f\n🚨 CRITICAL MISSING EVENTS (Frontend Impact):)"
+            logger.error(f\n🚨 CRITICAL MISSING EVENTS (Frontend Impact):)"
             for event in critical_missing:
-                logger.error(f"  - {event}: Users will not see real-time updates")
+                logger.error(f"  - {event}: Users will not see real-time updates)"
         else:
-            logger.info(f"\n✅ No critical events missing!")
+            logger.info(f\n✅ No critical events missing!)
 
         # Test-by-test breakdown
-        logger.info(f"\n📋 TEST BREAKDOWN:")
+        logger.info(f\n📋 TEST BREAKDOWN:)
         for test_name, result in test_results.items():
-            status = "✅ PASS" if result.get('success', False) else "❌ FAIL"
-            logger.info(f"  {status}: {test_name}")
+            status = ✅ PASS" if result.get('success', False) else "❌ FAIL
+            logger.info(f  {status}: {test_name})
             if not result.get('success', False) and 'events_missing' in result:
                 for missing in result['events_missing']:
-                    logger.info(f"    Missing: {missing}")
+                    logger.info(f    Missing: {missing})
 
 
 # Pytest integration
 @pytest.mark.asyncio
 @pytest.mark.critical
 async def test_missing_websocket_events():
-    """Pytest wrapper for missing WebSocket events validation."""
+    ""Pytest wrapper for missing WebSocket events validation.
     validator = MissingWebSocketEventsValidator()
     results = await validator.run_comprehensive_missing_events_test()
 
     # Assert no critical events are missing
     critical_missing = results['critical_missing']
-    assert len(critical_missing) == 0, f"Critical WebSocket events missing: {critical_missing}"
+    assert len(critical_missing) == 0, fCritical WebSocket events missing: {critical_missing}
 
     # Assert overall test success
-    assert results['overall_success'], "Missing WebSocket events test failed"
+    assert results['overall_success'], Missing WebSocket events test failed""
 
     # Assert specific critical events are working
-    events_found = set(results['summary']['events_found'])
+    events_found = set(results['summary')['events_found')
     for critical_event in ['agent_started', 'agent_thinking', 'tool_executing']:
         assert critical_event in events_found, f"Critical event {critical_event} not found"
 
 
-if __name__ == "__main__":
+if __name__ == __main__":"
     # Allow running directly for debugging
     async def main():
         validator = MissingWebSocketEventsValidator()
@@ -480,3 +489,4 @@ if __name__ == "__main__":
     import sys
     exit_code = asyncio.run(main())
     sys.exit(exit_code)
+)))))))))))))))))))))))))))

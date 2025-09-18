@@ -40,7 +40,7 @@ from unittest.mock import Mock, AsyncMock, patch
 from contextlib import asynccontextmanager
 
 # Core imports
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.unified_manager import (
     UnifiedWebSocketManager,
     WebSocketConnection,
     RegistryCompat

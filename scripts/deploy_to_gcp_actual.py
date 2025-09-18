@@ -1018,11 +1018,11 @@ CMD ["npm", "start"]
                         print(f"       WARNING: [U+FE0F] Missing {env_name} - deployment may fail")
             
             # Critical authentication secrets
-            # CRITICAL FIX: JWT_SECRET_KEY and JWT_SECRET_STAGING must both map to jwt-secret-staging
+            # SSOT STANDARD: JWT_SECRET_KEY is the canonical name, others are deprecated
             # This ensures WebSocket authentication works correctly
             auth_mappings = {
-                "JWT_SECRET_KEY": "jwt-secret-staging",      # CRITICAL: Same secret as JWT_SECRET_STAGING
-                "JWT_SECRET_STAGING": "jwt-secret-staging",  # Both names use same secret for consistency
+                "JWT_SECRET_KEY": "jwt-secret-staging",      # SSOT CANONICAL: Primary JWT secret
+                "JWT_SECRET_STAGING": "jwt-secret-staging",  # DEPRECATED: For migration compatibility only
                 "SECRET_KEY": "secret-key-staging",
                 "SERVICE_SECRET": "service-secret-staging",
                 "SERVICE_ID": "netra-backend"
@@ -1810,11 +1810,12 @@ CMD ["npm", "start"]
             'errors': []
         }
         
-        # Get JWT secret mappings from SecretConfig
+        # Get JWT secret mappings from SecretConfig  
+        # SSOT STANDARD: JWT_SECRET_KEY is canonical, others are deprecated
         jwt_secrets = {
-            'JWT_SECRET': 'jwt-secret-staging',
-            'JWT_SECRET_KEY': 'jwt-secret-staging',  # Must be same as JWT_SECRET
-            'JWT_SECRET_STAGING': 'jwt-secret-staging'  # Must be same as JWT_SECRET
+            'JWT_SECRET_KEY': 'jwt-secret-staging',     # SSOT CANONICAL: Primary JWT secret
+            'JWT_SECRET_STAGING': 'jwt-secret-staging', # DEPRECATED: Migration compatibility only
+            'JWT_SECRET': 'jwt-secret-staging'          # DEPRECATED: Legacy support only
         }
         
         jwt_values = {}

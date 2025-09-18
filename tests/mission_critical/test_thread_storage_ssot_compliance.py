@@ -14,7 +14,7 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 # Import SSOT WebSocket test utility
 from test_framework.ssot.websocket_connection_test_utility import TestWebSocketConnection
 
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment

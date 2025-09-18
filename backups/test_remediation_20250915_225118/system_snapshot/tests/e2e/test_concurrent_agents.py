@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,13 +16,11 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
-        '''Concurrent Agent Isolation Tests - Agent 15 Implementation
+        return self.messages_sent.copy()"""
+        """Concurrent Agent Isolation Tests - Agent 15 Implementation
 
         Tests concurrent user session isolation ensuring no state cross-contamination.
         Critical for multi-tenant enterprise security and performance validation.
@@ -33,47 +29,43 @@ class TestWebSocketConnection:
         - Segment: Enterprise (multi-tenant isolation requirements)
         - Business Goal: Ensure secure multi-tenant agent isolation
         - Value Impact: Prevents security breaches and data leaks between customers
-        - Revenue Impact: Enterprise trust required for $50K+ contracts
+        - Revenue Impact: Enterprise trust required for $50K+ contracts"""
+        Architecture: 450-line compliance through focused concurrent testing"""
 
-        Architecture: 450-line compliance through focused concurrent testing
-        '''
+import asyncio
+import uuid
+from concurrent.futures import as_completed
+from datetime import datetime, timezone
+from typing import Any, Dict, List
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
-        import asyncio
-        import uuid
-        from concurrent.futures import as_completed
-        from datetime import datetime, timezone
-        from typing import Any, Dict, List
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from auth_service.core.auth_manager import AuthManager
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from shared.isolated_environment import IsolatedEnvironment
+import pytest
 
-        import pytest
-
-        from tests.e2e.agent_orchestration_fixtures import ( )
+from tests.e2e.agent_orchestration_fixtures import ( )
         mock_sub_agents,
         mock_supervisor_agent,
         websocket_mock)
-        from tests.e2e.config import ( )
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
+from tests.e2e.config import ( )
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
         TEST_USERS,
         CustomerTier,
         create_unified_config)
 
 
-        @pytest.mark.e2e
-class TestConcurrentAgentStartup:
+        @pytest.mark.e2e"""
         """Test concurrent agent startup and isolation - BVJ: Multi-tenant security"""
         pass
 
 @pytest.mark.asyncio
-@pytest.mark.e2e
-    async def test_concurrent_agent_startup_isolation(self, mock_supervisor_agent):
+@pytest.mark.e2e"""
 """Test 10 concurrent user sessions with complete isolation"""
         # Setup mock execute method properly before test
         # Mock: Agent service isolation for testing without LLM agent execution
@@ -86,8 +78,7 @@ concurrent_sessions, mock_supervisor_agent
 self._validate_complete_isolation(session_results)
 self._validate_correct_routing(session_results)
 await self._validate_performance_under_load(session_results)
-
-async def _execute_concurrent_sessions(self, count: int, supervisor) -> List[Dict[str, Any]]:
+"""
 """Execute concurrent user sessions with separate agent instances"""
 pass
 tasks = []
@@ -99,10 +90,8 @@ tasks.append(task)
 results = await asyncio.gather(*tasks, return_exceptions=True)
 await asyncio.sleep(0)
 return self._process_session_results(results)
-
-def _create_isolated_user_session(self, index: int) -> Dict[str, Any]:
-"""Create isolated user session with unique state"""
-return { )
+"""
+"""Create isolated user session with unique state""""""
 "session_id": "formatted_string",
 "user_id": "formatted_string",
 "message": "formatted_string",
@@ -115,10 +104,8 @@ async def _simulate_user_session(self, session: Dict[str, Any], supervisor) -> D
 session_state = self._create_session_state(session)
 response = await self._get_agent_response(session, supervisor)
 return self._build_session_result(session, session_state, response)
-
-def _create_session_state(self, session: Dict[str, Any]) -> Dict[str, Any]:
-"""Create isolated session state"""
-return { )
+"""
+"""Create isolated session state""""""
 "agent_instance_id": str(uuid.uuid4()),
 "context": {"budget": 50000 + (int(session["session_id"].split('_')[1]) * 1000)},
 "isolation_key": "formatted_string"
@@ -126,13 +113,7 @@ return { )
 
 async def _get_agent_response(self, session: Dict[str, Any], supervisor) -> Dict[str, Any]:
 """Get agent response with session isolation"""
-mock_response = { )
-"response": "formatted_string",
-"session_context": session["session_id"],
-"agent_instance": "formatted_string",
-"isolated_data": {"cost_analysis": True, "user_specific": session["user_id"]}
-    
-
+mock_response = {"response": "formatted_string",, "session_context": session["session_id"],, "agent_instance": "formatted_string",, "isolated_data": {"cost_analysis": True, "user_specific": session["user_id"]}}
     # Add execute method if it doesn't exist and configure it properly
 if not hasattr(supervisor, 'execute'):
         # Mock: Async component isolation for testing without real async operations
@@ -149,10 +130,8 @@ for i, result in enumerate(results):
 if not isinstance(result, Exception) and result is not None:
 processed.append(result)
 return processed
-
-def _build_session_result(self, session: Dict[str, Any], state: Dict[str, Any], response: Dict[str, Any]) -> Dict[str, Any]:
-"""Build complete session result"""
-return { )
+"""
+"""Build complete session result""""""
 "session": session,
 "state": state,
 "response": response,
@@ -167,8 +146,7 @@ assert len(session_ids) == len(results), "Session ID collision detected"
 assert len(user_ids) == len(results), "User ID collision detected"
 
 def _validate_correct_routing(self, results: List[Dict[str, Any]]) -> None:
-"""Validate correct message routing for each session"""
-for result in results:
+"""Validate correct message routing for each session""""""
 assert "response" in result["response"], "Missing response in result"
 assert result["session"]["user_id"] in result["response"]["response"], "Routing error"
 
@@ -186,18 +164,15 @@ class TestAgentStateIsolation:
         pass
 
 @pytest.mark.asyncio
-@pytest.mark.e2e
-    async def test_no_shared_state_between_users(self, mock_supervisor_agent):
+@pytest.mark.e2e"""
 """Test no state contamination between concurrent users"""
         # Setup mock execute method properly before test
         # Mock: Agent service isolation for testing without LLM agent execution
 mock_supervisor_agent.websocket = TestWebSocketConnection()  # TODO: Use real service instead of Mock
 
 user_states = await self._create_distinct_user_states()
-contamination_results = await self._test_state_contamination(user_states, mock_supervisor_agent)
 self._validate_no_cross_contamination(contamination_results)
-
-async def _create_distinct_user_states(self) -> List[Dict[str, Any]]:
+"""
 """Create distinct user states for contamination testing"""
 pass
 states = []
@@ -206,10 +181,8 @@ state = self._create_unique_state(i)
 states.append(state)
 await asyncio.sleep(0)
 return states
-
-def _create_unique_state(self, index: int) -> Dict[str, Any]:
-"""Create unique state for contamination testing"""
-return { )
+"""
+"""Create unique state for contamination testing""""""
 "user_id": "formatted_string",
 "sensitive_data": "formatted_string",
 "budget": 10000 * (index + 1),
@@ -224,16 +197,9 @@ task = self._execute_contamination_test(state, i, supervisor)
 contamination_tasks.append(task)
 
 return await asyncio.gather(*contamination_tasks)
-
-async def _execute_contamination_test(self, state: Dict[str, Any], index: int, supervisor) -> Dict[str, Any]:
+"""
 """Execute contamination test for single user state"""
-expected_response = { )
-"user_data": state["sensitive_data"],
-"budget_analysis": state["budget"],
-"no_contamination": True,
-"isolation_verified": True
-    
-
+expected_response = {"user_data": state["sensitive_data"],, "budget_analysis": state["budget"],, "no_contamination": True,, "isolation_verified": True}
     # Add execute method if it doesn't exist and configure it properly
 if not hasattr(supervisor, 'execute'):
         # Mock: Async component isolation for testing without real async operations
@@ -245,8 +211,7 @@ result = await supervisor.execute("formatted_string")
 return {"state": state, "result": result, "index": index}
 
 def _validate_no_cross_contamination(self, results: List[Dict[str, Any]]) -> None:
-"""Validate no cross-contamination between user states"""
-for result in results:
+"""Validate no cross-contamination between user states""""""
 expected_data = result["state"]["sensitive_data"]
 actual_data = result["result"]["user_data"]
 assert expected_data == actual_data, "formatted_string"
@@ -258,21 +223,17 @@ class TestConcurrentMessageRouting:
         pass
 
 @pytest.mark.asyncio
-@pytest.mark.e2e
-    async def test_concurrent_message_routing_accuracy(self, mock_supervisor_agent, mock_sub_agents):
+@pytest.mark.e2e"""
 """Test messages route correctly under concurrent load"""
         # Setup mock route_request method properly before test
         # Mock: Agent service isolation for testing without LLM agent execution
 mock_supervisor_agent.websocket = TestWebSocketConnection()  # TODO: Use real service instead of Mock
 
 routing_scenarios = await self._create_routing_scenarios()
-routing_results = await self._execute_concurrent_routing(routing_scenarios, mock_supervisor_agent)
 self._validate_routing_accuracy(routing_results)
-
-async def _create_routing_scenarios(self) -> List[Dict[str, Any]]:
+"""
 """Create diverse routing scenarios for concurrent testing"""
-pass
-scenarios = [ )
+pass"""
 {"message": "Show cost data", "expected_route": "data", "user": "route_test_1"},
 {"message": "Optimize performance", "expected_route": "optimizations", "user": "route_test_2"},
 {"message": "Generate report", "expected_route": "reporting", "user": "route_test_3"},
@@ -283,8 +244,7 @@ await asyncio.sleep(0)
 return [self._enhance_routing_scenario(scenario, i) for i, scenario in enumerate(scenarios)]
 
 def _enhance_routing_scenario(self, scenario: Dict[str, Any], index: int) -> Dict[str, Any]:
-"""Enhance routing scenario with test metadata"""
-scenario.update({ ))
+"""Enhance routing scenario with test metadata""""""
 "session_id": "formatted_string",
 "timestamp": datetime.now(timezone.utc).isoformat(),
 "expected_isolation": True
@@ -299,22 +259,16 @@ task = self._test_single_routing(scenario, supervisor)
 routing_tasks.append(task)
 
 return await asyncio.gather(*routing_tasks)
-
-async def _test_single_routing(self, scenario: Dict[str, Any], supervisor) -> Dict[str, Any]:
+"""
 """Test single routing scenario"""
-expected_response = { )
-"routed_to": scenario["expected_route"],
-"user": scenario["user"],
-"routing_success": True
-    
+expected_response = {"routed_to": scenario["expected_route"],, "user": scenario["user"],, "routing_success": True}
 supervisor.route_request.return_value = scenario["expected_route"]
 
 route = await supervisor.route_request(scenario["message"])
 return {"scenario": scenario, "route": route, "routing_success": route == scenario["expected_route"]}
 
 def _validate_routing_accuracy(self, results: List[Dict[str, Any]]) -> None:
-"""Validate routing accuracy under concurrent load"""
-for result in results:
+"""Validate routing accuracy under concurrent load""""""
 assert result["routing_success"], "Routing failed under concurrent load"
 
 
@@ -324,22 +278,18 @@ class TestPerformanceUnderConcurrentLoad:
         pass
 
 @pytest.mark.asyncio
-@pytest.mark.e2e
-    async def test_performance_metrics_concurrent_agents(self, mock_supervisor_agent):
+@pytest.mark.e2e"""
 """Test system performance under concurrent agent load"""
         # Setup mock execute method properly before test
         # Mock: Agent service isolation for testing without LLM agent execution
 mock_supervisor_agent.websocket = TestWebSocketConnection()  # TODO: Use real service instead of Mock
 
 load_scenarios = self._create_load_test_scenarios()
-performance_results = await self._execute_load_tests(load_scenarios, mock_supervisor_agent)
 self._validate_performance_requirements(performance_results)
-
-def _create_load_test_scenarios(self) -> List[Dict[str, Any]]:
+"""
 """Create load test scenarios"""
 pass
-await asyncio.sleep(0)
-return [ )
+await asyncio.sleep(0)"""
 {"concurrent_users": 5, "expected_max_latency": 2000},
 {"concurrent_users": 10, "expected_max_latency": 3000},
 {"concurrent_users": 20, "expected_max_latency": 5000}
@@ -352,12 +302,10 @@ for scenario in scenarios:
 result = await self._execute_single_load_test(scenario, supervisor)
 results.append(result)
 return results
-
-async def _execute_single_load_test(self, scenario: Dict[str, Any], supervisor) -> Dict[str, Any]:
+"""
 """Execute single load test scenario"""
 start_time = datetime.now(timezone.utc)
-concurrent_tasks = []
-
+concurrent_tasks = []"""
 for i in range(scenario["concurrent_users"]):
 task = self._simulate_user_load(i, supervisor)
 concurrent_tasks.append(task)
@@ -383,8 +331,7 @@ return await supervisor.execute("formatted_string")
 def _calculate_performance_metrics(self, scenario: Dict[str, Any], results: List[Any], start: datetime, end: datetime) -> Dict[str, Any]:
 """Calculate performance metrics from load test"""
 execution_time = (end - start).total_seconds() * 1000
-successful_requests = len([item for item in []])
-return { )
+successful_requests = len([item for item in []])"""
 "scenario": scenario,
 "execution_time_ms": execution_time,
 "successful_requests": successful_requests,
@@ -393,7 +340,6 @@ return { )
     
 
 def _validate_performance_requirements(self, results: List[Dict[str, Any]]) -> None:
-"""Validate all performance requirements are met"""
-for result in results:
+"""Validate all performance requirements are met""""""
 assert result["success_rate"] >= 0.95, "formatted_string"
 assert result["performance_met"], "formatted_string"

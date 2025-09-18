@@ -3,12 +3,12 @@
 ⚠️  DEPRECATION WARNING - ISSUE #667 SSOT CONSOLIDATION ⚠️
 This file contains DUPLICATE configuration functionality that will be removed in a future release.
 
-CANONICAL SSOT LOCATION: netra_backend.app.core.configuration.base
-USE THIS INSTEAD: from netra_backend.app.core.configuration.base import get_unified_config
+CANONICAL SSOT LOCATION: netra_backend.app.config
+USE THIS INSTEAD: from netra_backend.app.config import get_config
 
 Migration Guide:
-1. Replace imports from this module with imports from netra_backend.app.core.configuration.base
-2. Use get_unified_config() for configuration access instead of custom loaders
+1. Replace imports from this module with imports from netra_backend.app.config
+2. Use get_config() for configuration access instead of custom loaders
 3. All environment access should go through the canonical SSOT patterns
 
 Business Impact: Using deprecated duplicates creates technical debt and maintenance overhead.
@@ -17,11 +17,11 @@ This migration protects the $500K+ ARR Golden Path by consolidating to proven SS
 ORIGINAL: Provides configuration management services.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 import warnings
 from typing import Any, Dict, Optional
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class EnvironmentConfigLoader:
@@ -117,7 +117,7 @@ class ConfigurationManager:
 
     Migration Guide:
     - Replace: from netra_backend.app.services.configuration_service import ConfigurationManager
-    - With: from netra_backend.app.core.configuration.base import UnifiedConfigManager
+    - With: from netra_backend.app.config import UnifiedConfigManager
     - Use: get_config_value(key, default) instead of get_config(key, default)
     """
 

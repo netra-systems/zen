@@ -48,7 +48,7 @@ from shared.isolated_environment import get_env
 # CRITICAL: Import REAL agent execution components (NO MOCKS per CLAUDE.md)
 try:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
-    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+    from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
     from shared.types.core_types import UserID, ThreadID, RunID, AgentExecutionContext
     from netra_backend.app.agents.base_agent import BaseAgent
     from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory

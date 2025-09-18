@@ -24,7 +24,7 @@ from netra_backend.app.services.websocket.quality_validation_handler import (
     QualityValidationHandler,
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager_async
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager_async
 
 logger = central_logger.get_logger(__name__)
 

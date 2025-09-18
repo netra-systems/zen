@@ -21,10 +21,10 @@ from typing import Dict, Any, List, Optional, Union
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from concurrent.futures import ThreadPoolExecutor
 import time
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 # Import all the WebSocket-related systems for integration testing
-from netra_backend.app.websocket_core.websocket_manager import (
+from netra_backend.app.websocket_core.unified_manager import (
     _serialize_message_safely,
     UnifiedWebSocketManager,
     WebSocketConnection

@@ -51,8 +51,8 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
         
         # Method 1: Direct import and instantiation
         try:
-            from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
-            from netra_backend.app.websocket_core.websocket_manager import create_test_user_context
+            from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import create_test_user_context
             
             user_context = create_test_user_context()
             manager1 = UnifiedWebSocketManager(user_context=user_context)
@@ -91,7 +91,7 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
         # Method 4: Bridge factory
         try:
             from netra_backend.app.services.websocket_bridge_factory import create_websocket_bridge
-            from netra_backend.app.websocket_core.websocket_manager import create_test_user_context
+            from netra_backend.app.websocket_core.canonical_import_patterns import create_test_user_context
             
             user_context = create_test_user_context()
             bridge = await create_websocket_bridge(user_context)
@@ -149,7 +149,7 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
         
         # Create multiple user contexts for isolation testing
         try:
-            from netra_backend.app.websocket_core.websocket_manager import create_test_user_context
+            from netra_backend.app.websocket_core.canonical_import_patterns import create_test_user_context
             
             user_context1 = create_test_user_context()
             user_context2 = create_test_user_context()
@@ -234,7 +234,7 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
         
         # Test event delivery with different manager patterns
         try:
-            from netra_backend.app.websocket_core.websocket_manager import create_test_user_context
+            from netra_backend.app.websocket_core.canonical_import_patterns import create_test_user_context
             
             user_context = create_test_user_context()
             
@@ -247,7 +247,7 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
             
             # Pattern 1: Direct unified manager
             try:
-                from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
                 manager1 = UnifiedWebSocketManager(user_context=user_context)
                 manager_patterns.append(('unified', manager1))
             except Exception as e:
@@ -346,7 +346,7 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
         lifecycle_results = {}
         
         try:
-            from netra_backend.app.websocket_core.websocket_manager import create_test_user_context
+            from netra_backend.app.websocket_core.canonical_import_patterns import create_test_user_context
             
             user_context = create_test_user_context()
             
@@ -355,7 +355,7 @@ class WebSocketFactoryPatternConsistencyTests(SSotAsyncTestCase):
             
             # Collect available manager patterns
             try:
-                from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
+                from netra_backend.app.websocket_core.canonical_import_patterns import UnifiedWebSocketManager
                 manager_patterns.append(('unified', UnifiedWebSocketManager))
             except ImportError:
                 pass

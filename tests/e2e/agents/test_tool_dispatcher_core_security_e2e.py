@@ -21,7 +21,7 @@ import asyncio
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any, List
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user
 from test_framework.base_e2e_test import BaseE2ETest
@@ -266,7 +266,7 @@ class ToolDispatcherCoreSecurityTests(BaseE2ETest):
                 pass
         
         # Create user contexts with WebSocket managers
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
         
         websocket_manager = get_websocket_manager(user_context=getattr(self, 'user_context', None))
         

@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,42 +16,38 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
-        '''Test suite for UniversalRegistry - SSOT registry pattern.
+        return self.messages_sent.copy()"""
+        """Test suite for UniversalRegistry - SSOT registry pattern.
 
         This test suite validates:
         - Thread-safe registration and retrieval
         - Factory pattern support
         - Singleton pattern support
-        - Freeze/immutability
-        - Metrics and health checks
-        - Specialized registry implementations
-        '''
+        - Freeze/immutability"""
+        - Specialized registry implementations"""
 
-        import pytest
-        import threading
-        import time
-        from datetime import datetime, timezone
-        from concurrent.futures import ThreadPoolExecutor, as_completed
-        from typing import Any
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        from shared.isolated_environment import IsolatedEnvironment
+import pytest
+import threading
+import time
+from datetime import datetime, timezone
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from shared.isolated_environment import IsolatedEnvironment
 
-        import sys
-        from pathlib import Path
+import sys
+from pathlib import Path
         sys.path.append(str(Path(__file__).parent.parent.parent))
 
-        from netra_backend.app.core.registry.universal_registry import ( )
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
-        import asyncio
+from netra_backend.app.core.registry.universal_registry import ( )
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+import asyncio
         UniversalRegistry,
         AgentRegistry,
         ToolRegistry,
@@ -64,18 +58,15 @@ class TestWebSocketConnection:
         RegistryItem
         
 
-
-class TestItem:
+"""
         """Test item for registry."""
     def __init__(self, name: str):
         pass
         self.name = name
 
-
-class TestUniversalRegistry:
+"""
         """Test UniversalRegistry base functionality."""
-
-    def test_registry_creation(self):
+"""
         """Test basic registry creation."""
         registry = UniversalRegistry[TestItem]("TestRegistry")
 
@@ -85,8 +76,7 @@ class TestUniversalRegistry:
         assert registry.get_metrics()['total_items'] == 0
 
     def test_singleton_registration(self):
-        """Test singleton item registration."""
-        pass
+        """Test singleton item registration.""""""
         registry = UniversalRegistry[TestItem]("TestRegistry")
         item = TestItem("test_item")
 
@@ -111,8 +101,7 @@ class TestUniversalRegistry:
         registry.register("test", item2)
 
     def test_override_allowed(self):
-        """Test override when explicitly allowed."""
-        pass
+        """Test override when explicitly allowed.""""""
         registry = UniversalRegistry[TestItem]("TestRegistry", allow_override=True)
         item1 = TestItem("item1")
         item2 = TestItem("item2")
@@ -148,8 +137,7 @@ class TestUniversalRegistry:
         assert metrics['metrics']['factory_creations'] == 1
 
     def test_get_with_context_prefers_factory(self):
-        """Test that get() uses factory when context provided."""
-        pass
+        """Test that get() uses factory when context provided.""""""
         registry = UniversalRegistry[TestItem]("TestRegistry")
         websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
@@ -200,8 +188,7 @@ class TestUniversalRegistry:
         assert registry.has("test")
 
     def test_tags_and_categories(self):
-        """Test tag-based categorization."""
-        pass
+        """Test tag-based categorization.""""""
         registry = UniversalRegistry[TestItem]("TestRegistry")
 
     # Register items with tags
@@ -237,8 +224,7 @@ class TestUniversalRegistry:
         assert metrics['metrics']['validation_failures'] == 1
 
     def test_remove_item(self):
-        """Test item removal."""
-        pass
+        """Test item removal.""""""
         registry = UniversalRegistry[TestItem]("TestRegistry")
 
         registry.register("test", TestItem("item"), tags=["category"])
@@ -270,8 +256,7 @@ class TestUniversalRegistry:
         assert registry.list_keys() == []
 
     def test_metrics_tracking(self):
-        """Test metrics collection."""
-        pass
+        """Test metrics collection.""""""
         registry = UniversalRegistry[TestItem]("TestRegistry", enable_metrics=True)
 
     # Perform operations
@@ -321,8 +306,7 @@ class TestUniversalRegistry:
         assert health['status'] != 'degraded'
 
     def test_thread_safety(self):
-        """Test thread-safe operations."""
-        pass
+        """Test thread-safe operations.""""""
         registry = UniversalRegistry[TestItem]("TestRegistry")
         errors = []
 
@@ -356,11 +340,9 @@ class TestUniversalRegistry:
 
 class TestSpecializedRegistries:
         """Test specialized registry implementations."""
-
-    def test_agent_registry(self):
+"""
         """Test AgentRegistry with WebSocket integration."""
-        registry = AgentRegistry()
-
+        registry = AgentRegistry()"""
         assert registry.name == "AgentRegistry"
 
     # Mock WebSocket manager
@@ -380,15 +362,13 @@ class TestSpecializedRegistries:
     def test_tool_registry(self):
         """Test ToolRegistry initialization."""
         pass
-        registry = ToolRegistry()
-
+        registry = ToolRegistry()"""
         assert registry.name == "ToolRegistry"
     # Default tools should be registered (mocked in implementation)
 
     def test_service_registry(self):
         """Test ServiceRegistry with service registration."""
-        registry = ServiceRegistry()
-
+        registry = ServiceRegistry()"""
         assert registry.name == "ServiceRegistry"
 
     # Register a service
@@ -408,8 +388,7 @@ class TestSpecializedRegistries:
     def test_strategy_registry(self):
         """Test StrategyRegistry."""
         pass
-        registry = StrategyRegistry()
-
+        registry = StrategyRegistry()"""
         assert registry.name == "StrategyRegistry"
 
     # Register a strategy
@@ -421,10 +400,8 @@ class TestSpecializedRegistries:
 
 class TestGlobalRegistries:
         """Test global registry management."""
-
-    def test_get_global_registry(self):
-        """Test global registry singleton pattern."""
-    # Get agent registry
+"""
+        """Test global registry singleton pattern.""""""
         registry1 = get_global_registry("agent")
         registry2 = get_global_registry("agent")
 
@@ -436,14 +413,12 @@ class TestGlobalRegistries:
         assert tool_registry is not registry1
 
     def test_unknown_registry_type(self):
-        """Test error for unknown registry type."""
-        pass
+        """Test error for unknown registry type.""""""
         with pytest.raises(ValueError, match="Unknown registry type"):
         get_global_registry("invalid_type")
 
     def test_create_scoped_registry(self):
-        """Test creating request-scoped registries."""
-    # Create scoped registries
+        """Test creating request-scoped registries.""""""
         registry1 = create_scoped_registry("agent", "request_123")
         registry2 = create_scoped_registry("agent", "request_456")
 
@@ -461,8 +436,7 @@ class TestGlobalRegistries:
 
 class TestConcurrentFactoryCreation:
         """Test concurrent factory usage for user isolation."""
-
-    def test_concurrent_factory_creation(self):
+"""
         """Test that factories create isolated instances concurrently."""
         registry = UniversalRegistry[TestItem]("TestRegistry")
         created_items = []

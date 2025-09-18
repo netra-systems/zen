@@ -15,11 +15,11 @@ Business Value Justification (BVJ):
 
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 
 from netra_backend.app.clients.circuit_breaker import get_all_circuit_breaker_stats
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 router = APIRouter(tags=["monitoring"])
 

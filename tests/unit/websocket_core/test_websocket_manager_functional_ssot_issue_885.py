@@ -279,7 +279,7 @@ class TestWebSocketManagerFunctionalSSOT(SSotBaseTestCase):
     def _test_unified_manager_access(self) -> bool:
         """Test direct unified manager access"""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import (
+            from netra_backend.app.websocket_core.unified_manager import (
                 _UnifiedWebSocketManagerImplementation
             )
             manager = _UnifiedWebSocketManagerImplementation()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''
+"""
 Comprehensive Chat UI/UX Flow Test Suite - CLAUDE.md Compliant
 
 This test suite validates the complete chat interface workflow using real WebSocket
@@ -21,10 +21,8 @@ CLAUDE.md Compliance:
 - Test Path Setup: Proper test environment isolation
 
 @compliance conventions.xml - Focused functions, proper typing
-@compliance type_safety.xml - Full typing with pytest annotations
-@compliance unified_environment_management.xml - Use IsolatedEnvironment only
-@compliance import_management_architecture.xml - Absolute imports only
-'''
+@compliance type_safety.xml - Full typing with pytest annotations"""
+@compliance import_management_architecture.xml - Absolute imports only"""
 
 import asyncio
 import json
@@ -69,20 +67,16 @@ from netra_backend.app.llm.llm_manager import LLMManager
             # ============================================================================
             # MISSION CRITICAL: WebSocket Event Validation
             # ============================================================================
-
-class MissionCriticalChatEventValidator:
-    '''Validates chat WebSocket events with mission-critical rigor using REAL WebSocket connections.
+"""
+    """Validates chat WebSocket events with mission-critical rigor using REAL WebSocket connections.
 
     Per CLAUDE.md WebSocket requirements (Section 6.1), validates all required events:
     - agent_started: User must know processing began
     - agent_thinking: Real-time reasoning visibility
-    - tool_executing: Tool usage transparency
-    - tool_completed: Tool results display
-    - agent_completed: User must know when done
-    '''
+    - tool_executing: Tool usage transparency"""
+    - agent_completed: User must know when done"""
 
-        # Required events per CLAUDE.md Section 6.1 - MUST ALL BE SENT
-    REQUIRED_EVENTS = { )
+        # Required events per CLAUDE.md Section 6.1 - MUST ALL BE SENT"""
     "agent_started",
     "agent_thinking",
     "tool_executing",
@@ -109,8 +103,7 @@ class MissionCriticalChatEventValidator:
         self.start_time = time.time()
 
     def record_event(self, event: Dict) -> None:
-        """Record WebSocket event with detailed tracking."""
-        timestamp = time.time() - self.start_time
+        """Record WebSocket event with detailed tracking.""""""
         event_type = event.get("type", "unknown")
 
         self.events.append(event)
@@ -120,17 +113,14 @@ class MissionCriticalChatEventValidator:
         logger.debug("formatted_string")
 
     def validate_mission_critical_events(self) -> tuple[bool, List[str]]:
-        '''Validate that ALL mission-critical events were sent.
-
-        Returns:
-        tuple: (success: bool, errors: List[str])
-        '''
+        """Validate that ALL mission-critical events were sent.
+"""
+        tuple: (success: bool, errors: List[str])"""
         errors = []
         received_events = set(self.event_counts.keys())
 
         # Check required events
-        missing_events = self.REQUIRED_EVENTS - received_events
-        if missing_events:
+        missing_events = self.REQUIRED_EVENTS - received_events"""
         errors.append("formatted_string")
 
             # Validate event ordering (agent_started should come first, agent_completed last)
@@ -159,8 +149,7 @@ class MissionCriticalChatEventValidator:
     def get_validation_report(self) -> Dict[str, Any]:
         """Generate comprehensive validation report."""
         success, errors = self.validate_mission_critical_events()
-
-        return { )
+"""
         "success": success,
         "errors": errors,
         "warnings": self.warnings,
@@ -174,12 +163,10 @@ class MissionCriticalChatEventValidator:
 
 
 class MockWebSocketConnection:
-        '''Mock WebSocket connection that records events for validation.
-
+        """Mock WebSocket connection that records events for validation."""
         CRITICAL: This is NOT a violation of the "no mocks" rule because we need
         to capture WebSocket events sent by the system. This simulates a real
-        WebSocket connection from the server perspective.
-        '''
+        WebSocket connection from the server perspective."""
 
     def __init__(self, connection_id: str, validator: MissionCriticalChatEventValidator):
         pass
@@ -187,10 +174,8 @@ class MockWebSocketConnection:
         self.validator = validator
         self.messages: List[Dict] = []
         self.closed = False
-
-    async def send_json(self, message: Dict) -> None:
-        """Simulate sending JSON message to WebSocket (records for validation)."""
-        if self.closed:
+"""
+        """Simulate sending JSON message to WebSocket (records for validation).""""""
         raise ConnectionError("WebSocket connection closed")
 
         self.messages.append(message)
@@ -207,16 +192,13 @@ class MockWebSocketConnection:
     # ============================================================================
     # REAL SERVICES INTEGRATION
     # ============================================================================
-
-class ChatUIFlowTester:
-        '''Main test class for comprehensive chat UI flow testing with real services.
+"""
+        """Main test class for comprehensive chat UI flow testing with real services.
 
         CLAUDE.md Compliance:
         - Uses IsolatedEnvironment for all configuration access
-        - Uses RealServicesManager for service orchestration
-        - Tests real WebSocket connections and agent execution
-        - Validates all mission-critical WebSocket events
-        '''
+        - Uses RealServicesManager for service orchestration"""
+        - Validates all mission-critical WebSocket events"""
 
     def __init__(self):
         pass
@@ -233,8 +215,7 @@ class ChatUIFlowTester:
     # Event validation
         self.event_validator = MissionCriticalChatEventValidator(strict_mode=True)
         self.test_failures: List[str] = []
-
-    async def setup_real_services(self) -> None:
+"""
         """Initialize real services for testing."""
         try:
         # Get real services manager
@@ -251,8 +232,7 @@ class ChatUIFlowTester:
         self.execution_engine = UserExecutionEngine()
 
         # CRITICAL: Set up WebSocket integration per CLAUDE.md Section 6.2
-        self.agent_registry.set_websocket_manager(self.websocket_manager)
-
+        self.agent_registry.set_websocket_manager(self.websocket_manager)"""
         logger.info(" PASS:  Real services initialized successfully")
 
         except Exception as e:
@@ -265,19 +245,12 @@ class ChatUIFlowTester:
         connection_id = str(uuid.uuid4())
         mock_connection = MockWebSocketConnection(connection_id, self.event_validator)
 
-    # Register the connection with WebSocket manager
-        if self.websocket_manager:
-        await self.websocket_manager.connect_user( )
-        user_id="test_user",
-        websocket=mock_connection,  # type: ignore
-        thread_id="test_thread"
-        
-
+    # Register the connection with WebSocket manager"""
+        await self.websocket_manager.connect_user(user_id="test_user",, websocket=mock_connection,  # type: ignore, thread_id="test_thread")
         return mock_connection
 
     async def execute_test_agent_workflow(self, connection: MockWebSocketConnection) -> None:
-        """Execute a test agent workflow that should trigger all required WebSocket events."""
-        if not self.agent_registry or not self.execution_engine:
+        """Execute a test agent workflow that should trigger all required WebSocket events.""""""
         raise RuntimeError("Services not properly initialized")
 
         try:
@@ -296,11 +269,7 @@ class ChatUIFlowTester:
             
 
             # Execute agent workflow (should trigger WebSocket events)
-        await self.execution_engine.execute_agent_workflow( )
-        agent_state=agent_state,
-        workflow_type="simple_test"
-            
-
+        await self.execution_engine.execute_agent_workflow(agent_state=agent_state,, workflow_type="simple_test")
         logger.info(" PASS:  Agent workflow executed successfully")
 
         except Exception as e:
@@ -319,25 +288,19 @@ class ChatUIFlowTester:
         # E2E TEST SUITE
         # ============================================================================
 
-        @pytest.mark.e2e
-class TestChatUIFlowComprehensive:
-        '''Comprehensive E2E test suite for chat UI flow with real services.
+        @pytest.mark.e2e"""
+        """Comprehensive E2E test suite for chat UI flow with real services.
 
         CLAUDE.md Compliance:
         - All tests use real services (no mocks)
         - Tests validate mission-critical WebSocket events
-        - Uses IsolatedEnvironment for configuration
-        - Uses absolute imports only
-        - Tests complete agent execution workflows
-        '''
+        - Uses IsolatedEnvironment for configuration"""
+        - Tests complete agent execution workflows"""
 
-@pytest.mark.asyncio
-    async def test_structure_compliance_without_services(self):
-'''Test that the test structure follows CLAUDE.md compliance without requiring services.
-
-This test verifies the code structure itself is correct even when real services
-are not available. It validates imports, class structure, and basic functionality.
-'''
+@pytest.mark.asyncio"""
+"""Test that the test structure follows CLAUDE.md compliance without requiring services.
+"""
+are not available. It validates imports, class structure, and basic functionality."""
 pass
             Test that we can import all required components
 assert WebSocketManager is not None
@@ -347,8 +310,7 @@ assert MissionCriticalChatEventValidator is not None
 
             # Test event validator works correctly
 validator = MissionCriticalChatEventValidator()
-
-            # Test required events are defined correctly
+"""
 expected_events = {"agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"}
 assert validator.REQUIRED_EVENTS == expected_events
 
@@ -396,11 +358,9 @@ print("    PASS:  No mocks in production paths (only for event capture)")
 @pytest.mark.asyncio
 @pytest.fixture
     async def test_websocket_agent_events_complete_flow(self):
-'''Test complete chat flow with all required WebSocket events.
-
-MISSION CRITICAL: This test validates that all 5 required WebSocket events
-are sent during agent execution, per CLAUDE.md Section 6.1.
-'''
+"""Test complete chat flow with all required WebSocket events.
+"""
+are sent during agent execution, per CLAUDE.md Section 6.1."""
 pass
 tester = ChatUIFlowTester()
 
@@ -421,8 +381,7 @@ await asyncio.sleep(1.0)
 success, errors = tester.event_validator.validate_mission_critical_events()
 
                         # Generate validation report
-report = tester.event_validator.get_validation_report()
-
+report = tester.event_validator.get_validation_report()"""
 print(f" )
 CHART:  WebSocket Event Validation Report:")
 print("formatted_string")
@@ -461,8 +420,7 @@ await tester.setup_real_services()
 connection = await tester.create_test_websocket_connection()
 assert connection is not None
 assert not connection.closed
-
-                                                # Test connection can receive messages
+"""
 test_message = {"type": "test_message", "data": "hello"}
 await connection.send_json(test_message)
 assert len(connection.messages) == 1
@@ -495,8 +453,7 @@ assert tester.agent_registry is not None
 assert tester.execution_engine is not None
 
                                                                 # Test WebSocket manager integration
-assert hasattr(tester.agent_registry, '_websocket_manager')
-
+assert hasattr(tester.agent_registry, '_websocket_manager')"""
 logger.info(" PASS:  Real services integration test PASSED")
 
 except Exception as e:
@@ -510,8 +467,7 @@ await tester.cleanup()
 """Test the event validator itself to ensure it works correctly."""
 validator = MissionCriticalChatEventValidator()
 
-                                                                            # Test with all required events
-required_events = [ )
+                                                                            # Test with all required events"""
 {"type": "agent_started", "data": "test"},
 {"type": "agent_thinking", "data": "test"},
 {"type": "tool_executing", "data": "test"},

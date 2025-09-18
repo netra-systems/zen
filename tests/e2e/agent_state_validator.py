@@ -1,7 +1,8 @@
-'''Agent State Validator - Unified System Testing Phase 5
+'''Agent State Validator - Unified System Testing Phase 5'
 Validates agent initialization, transitions, and resource usage.
 BVJ: Enterprise/Growth segment - $50K+ revenue protection from session failures.
 Architecture:  <= 300 lines,  <= 8 lines per function, modular validators.
+'''
 '''
 
 import asyncio
@@ -92,7 +93,7 @@ class AgentStateValidator:
         metrics.memory_usage_mb = memory_mb
         return memory_mb < self._get_memory_limit(agent_name)
         except Exception as e:
-        metrics.validation_errors.append("formatted_string")
+        metrics.validation_errors.append("")
         return False
 
 
@@ -114,7 +115,7 @@ class ContextValidator:
         return {}
         return state.metadata.execution_context
 
-        def _verify_context_preservation(self, original: Dict[str, Any],
+        def _verify_context_preservation(self, original: Dict[str, Any),
         injected: Dict[str, Any]) -> bool:
         """Verify context data preservation during injection"""
         for key, value in original.items():
@@ -243,13 +244,13 @@ class AgentStateValidatorTestSuite:
         value = getattr(state, field_name, None)
         valid = bool(value and value.strip()) if field_name == 'user_request' else value is not None
         if not valid:
-        metrics.validation_errors.append("formatted_string")
+        metrics.validation_errors.append("")
         return False
         return validation_passed
 
     def _get_base_transitions():
         """Get base state transitions"""
-        return { )
+        return { }
         ExecutionStatus.PENDING: [ExecutionStatus.INITIALIZING, ExecutionStatus.FAILED],
         ExecutionStatus.INITIALIZING: [ExecutionStatus.EXECUTING, ExecutionStatus.FAILED],
         ExecutionStatus.EXECUTING: [ExecutionStatus.COMPLETED, ExecutionStatus.FAILED, ExecutionStatus.RETRYING],
@@ -257,7 +258,7 @@ class AgentStateValidatorTestSuite:
         ExecutionStatus.FALLBACK: [ExecutionStatus.COMPLETED, ExecutionStatus.DEGRADED]}
 
     def _get_classification_keywords():
-        return { )
+        return { }
         'data': ['analyze', 'data', 'query', 'report'],
         'optimization': ['optimize', 'improve', 'reduce', 'costs'],
         'action': ['implement', 'execute', 'deploy', 'action']
@@ -285,7 +286,7 @@ class AgentStateValidatorTestSuite:
         return DeepAgentState(user_request="", metadata=None)
 
     def _create_test_metadata():
-        return AgentMetadata(execution_context={'test_mode': True},
+        return AgentMetadata(execution_context={'test_mode': True),
         custom_fields={'tier': CustomerTier.ENTERPRISE.value})
 
     def _get_context_params(test_state):
@@ -297,7 +298,7 @@ class AgentStateValidatorTestSuite:
 
 
     # Test collection for pytest discovery
-        __all__ = [ )
+        __all__ = [ ]
         'AgentStateValidator',
         'ContextValidator',
         'ResourceTracker',
@@ -307,3 +308,5 @@ class AgentStateValidatorTestSuite:
         'sample_agent_states',
         'execution_contexts'
     
+
+'''

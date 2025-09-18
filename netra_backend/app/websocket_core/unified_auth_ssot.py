@@ -347,19 +347,51 @@ class UnifiedWebSocketAuthenticator:
                 self._auth_service = None
         return self._auth_service
         
-    async def authenticate_websocket_connection(self, websocket: WebSocket) -> WebSocketAuthResult:
+    async def authenticate_websocket_connection(
+        self, 
+        websocket: WebSocket, 
+        connection_id: Optional[str] = None,
+        use_coordination: bool = True
+    ) -> WebSocketAuthResult:
         """
         CRITICAL: Single authentication pathway for all WebSocket connections.
         
         Authentication Priority (reliability-first approach):
-        1. jwt-auth subprotocol (most reliable in GCP)
-        2. Authorization header (may be stripped by load balancer)
-        3. Query parameter fallback (infrastructure workaround)
-        4. E2E bypass for testing (controlled environments only)
+        1. Coordination-based pre-auth (Issue #1313 - prevents race conditions)
+        2. jwt-auth subprotocol (most reliable in GCP)
+        3. Authorization header (may be stripped by load balancer)
+        4. Query parameter fallback (infrastructure workaround)
+        5. Ticket-based authentication (Issue #1293)
+        6. E2E bypass for testing (controlled environments only)
+        
+        Args:
+            websocket: WebSocket connection
+            connection_id: Unique connection ID for coordination
+            use_coordination: Enable coordination layer for race condition prevention
         
         Returns:
             WebSocketAuthResult: Standardized auth result with method used
         """
+        # METHOD 0: Coordination-based pre-auth (Issue #1313 - prevents race conditions)
+        if use_coordination and connection_id:
+            try:
+                from netra_backend.app.websocket_core.auth.websocket_ticket import get_prepared_auth_context
+                
+                prepared_context = await get_prepared_auth_context(connection_id)
+                if prepared_context:
+                    logger.info(f"✅ WebSocket auth SUCCESS via coordination for connection {connection_id}")
+                    return WebSocketAuthResult(
+                        success=True,
+                        user_id=prepared_context.get("user_id"),
+                        email=prepared_context.get("email"),
+                        permissions=prepared_context.get("permissions", []),
+                        auth_method="coordination-pre-auth"
+                    )
+            except ImportError:
+                logger.debug("WebSocket coordination not available - falling back to standard auth")
+            except Exception as e:
+                logger.warning(f"Coordination auth failed, falling back: {e}")
+        
         # METHOD 1: jwt-auth subprotocol (PRIMARY - most reliable)
         jwt_token = self._extract_jwt_from_subprotocol(websocket)
         if jwt_token:
@@ -752,7 +784,9 @@ async def authenticate_websocket(
     token: Optional[str] = None,
     headers: Optional[Dict[str, Any]] = None,
     environment: Optional[str] = None,
-    permissive: bool = False
+    permissive: bool = False,
+    connection_id: Optional[str] = None,
+    use_coordination: bool = True
 ) -> WebSocketAuthResult:
     """
     SSOT FUNCTION: Primary entry point for all WebSocket authentication
@@ -766,10 +800,16 @@ async def authenticate_websocket(
         headers: HTTP headers dict
         environment: Environment name for permissive mode logic
         permissive: Enable permissive mode for testing
+        connection_id: Unique connection ID for coordination (Issue #1313)
+        use_coordination: Enable coordination layer for race condition prevention
     """
     if websocket is not None:
         # Use WebSocket-based authentication (primary path)
-        return await websocket_authenticator.authenticate_websocket_connection(websocket)
+        return await websocket_authenticator.authenticate_websocket_connection(
+            websocket, 
+            connection_id=connection_id, 
+            use_coordination=use_coordination
+        )
     else:
         # Use manual authentication (for testing/validation)
         return await websocket_authenticator.authenticate_manual(

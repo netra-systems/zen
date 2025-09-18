@@ -36,7 +36,7 @@ class ClassExistenceValidationTests(SSotBaseTestCase):
         Business Impact: WebSocket functionality must work for Golden Path
         """
         try:
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             
             # Check required methods exist
             required_methods = [

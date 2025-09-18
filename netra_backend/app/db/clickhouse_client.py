@@ -9,9 +9,9 @@ The actual implementation is in clickhouse.py (SSOT).
 """
 
 import warnings
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # SSOT imports from the canonical ClickHouse implementation
 from netra_backend.app.db.clickhouse import (

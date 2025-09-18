@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,70 +16,58 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
-        '''
+        return self.messages_sent.copy()"""
+        """
         Comprehensive WebSocket Agent Events Test Suite
-        Tests for SSOT compliance and proper WebSocket event handling
+        Tests for SSOT compliance and proper WebSocket event handling"""
+        CRITICAL: These tests ensure WebSocket events (90% of business value) work correctly"""
 
-        CRITICAL: These tests ensure WebSocket events (90% of business value) work correctly
-        '''
+import asyncio
+import pytest
+from typing import Dict, Any, List
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
-        import asyncio
-        import pytest
-        from typing import Dict, Any, List
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from auth_service.core.auth_manager import AuthManager
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from shared.isolated_environment import IsolatedEnvironment
+from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
+from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
+from netra_backend.app.agents.base.interface import ExecutionContext
+from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
-        from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
-        from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
-        from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.schemas.agent_models import DeepAgentState
-        from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
-
-
-class TestWebSocketSSOT:
+"""
         """Test Suite for WebSocket SSOT Compliance"""
 
-        @pytest.fixture
-    def real_bridge():
-        """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Create mock WebSocket bridge"""
         pass
         bridge = AsyncMock(spec=AgentWebSocketBridge)
         bridge.websocket = TestWebSocketConnection()
         return bridge
 
-        @pytest.fixture
-    def real_websocket_manager():
-        """Use real service instance."""
-    # TODO: Initialize real service
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Create mock WebSocket manager"""
-        pass
-        websocket = TestWebSocketConnection()
+        pass"""
         manager._current_user_id = "test_user"
         return manager
 
         @pytest.fixture
     def execution_context(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
+        """Use real service instance.""""""
         """Create execution context"""
-        pass
-        return ExecutionContext( )
+        pass"""
         run_id="test_run_123",
         agent_name="test_agent",
         stream_updates=True,
@@ -112,8 +98,7 @@ for method in methods_to_check:
 count = 0
 locations = []
 
-if method in comm_methods:
-count += 1
+if method in comm_methods:"""
 locations.append("AgentCommunicationMixin")
 if method in lifecycle_methods:
 count += 1
@@ -132,8 +117,7 @@ assert not duplicates, "formatted_string"
                         # Test AgentCommunicationMixin
 class TestCommAgent(AgentCommunicationMixin):
     def __init__(self):
-        pass
-        self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        pass"""
         self.name = "test_agent"
         self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
         self._failed_updates = []
@@ -151,8 +135,7 @@ class TestCommAgent(AgentCommunicationMixin):
         # Check if WebSocketError is defined locally in agent_communication.py
 from netra_backend.app.agents import agent_communication
 
-        # This should fail if local definitions exist
-assert hasattr(agent_communication, 'WebSocketError'), \
+        # This should fail if local definitions exist"""
 "Local WebSocketError class found - should use centralized exception"
 
         # Check for centralized error handling
@@ -173,8 +156,7 @@ async def track_event(event_type, *args, **kwargs):
 pass
 events_received.append(event_type)
 await asyncio.sleep(0)
-return None
-
+return None"""
 mock_bridge.notify_agent_started.side_effect = lambda x: None track_event("agent_started", *a, **k)
 mock_bridge.notify_agent_thinking.side_effect = lambda x: None track_event("agent_thinking", *a, **k)
 mock_bridge.notify_tool_executing.side_effect = lambda x: None track_event("tool_executing", *a, **k)
@@ -210,8 +192,7 @@ class TestAgent(AgentLifecycleMixin):
         pass
 
     async def _send_update(self, run_id, data):
-        """Override to use Bridge"""
-        bridge = await get_agent_websocket_bridge()
+        """Override to use Bridge""""""
         status = data.get("status", "")
 
         if status == "starting":
@@ -250,8 +231,7 @@ class TestAgent(AgentLifecycleMixin):
 
 class TestAgent(AgentCommunicationMixin):
     def __init__(self):
-        pass
-        self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        pass"""
         self.name = "test_agent"
         self.websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
@@ -281,8 +261,7 @@ except ImportError:
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 
 from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent
-
-                        # Check for dead method that should be removed
+"""
 dead_method = "_setup_websocket_context_if_available"
 
                         # These assertions should FAIL if dead code still exists
@@ -301,8 +280,7 @@ patterns_found = set()
 
                             # Check AgentCommunicationMixin pattern
 from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
-comm_source = AgentCommunicationMixin._attempt_websocket_update.__code__.co_code
-if b'get_agent_websocket_bridge' in comm_source:
+comm_source = AgentCommunicationMixin._attempt_websocket_update.__code__.co_code"""
 patterns_found.add("bridge_pattern")
 
                                 # Check AgentLifecycleMixin pattern
@@ -329,16 +307,14 @@ base_classes = [item for item in []]]
 
                                         # Should have clean single inheritance or well-defined MRO
 execution_interfaces = [item for item in []]
-
-assert len(execution_interfaces) <= 1, \
+"""
 "formatted_string"
 
 @pytest.mark.asyncio
     async def test_import_organization(self):
 """Test that imports are properly organized at top of files"""
 
-                                            # Read validation_sub_agent.py
-import os
+                                            # Read validation_sub_agent.py"""
 file_path = "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\
 etra-core-generation-1\
 etra_backend\\app\\agents\\validation_sub_agent.py"
@@ -360,15 +336,13 @@ assert not late_imports, \
 class TestWebSocketCriticalPath:
     """Test the critical path for WebSocket events that deliver business value"""
 
-@pytest.mark.asyncio
-    async def test_chat_value_delivery_path(self, mock_bridge):
+@pytest.mark.asyncio"""
 """Test that chat functionality (90% of value) works end-to-end"""
 
 chat_events = []
 
         # Track chat-critical events
-async def track_chat_event(event_type, *args, **kwargs):
-chat_events.append({ ))
+async def track_chat_event(event_type, *args, **kwargs):"""
 "type": event_type,
 "args": args,
 "kwargs": kwargs
@@ -403,16 +377,14 @@ assert any(e["type"] == "completed" for e in chat_events), "No completion event 
 class TestWebSocketPerformance:
         """Test WebSocket performance and reliability"""
 
-@pytest.mark.asyncio
-    async def test_websocket_retry_mechanism(self, mock_bridge):
+@pytest.mark.asyncio"""
 """Test that WebSocket retries work correctly"""
 
 retry_count = 0
 
 async def failing_notify(*args, **kwargs):
 nonlocal retry_count
-retry_count += 1
-if retry_count < 3:
+retry_count += 1"""
 raise ConnectionError("WebSocket disconnected")
 await asyncio.sleep(0)
 return None
@@ -438,8 +410,7 @@ class TestAgent(AgentCommunicationMixin):
 @pytest.mark.asyncio
     async def test_websocket_failure_handling(self, mock_bridge):
 """Test graceful degradation when WebSocket fails"""
-
-        # Always fail
+"""
 mock_bridge.notify_agent_thinking = AsyncMock(side_effect=Exception("WebSocket error"))
 
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin

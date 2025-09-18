@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,16 +16,13 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
+        return self.messages_sent.copy()"""
+        """Mission Critical Test: Complete Request Isolation - EXPANDED COVERAGE
 
-        '''Mission Critical Test: Complete Request Isolation - EXPANDED COVERAGE
-
-        This test suite verifies that each request is completely isolated with 20+ comprehensive scenarios:
-        - Agent failures have ZERO impact on other requests
+        This test suite verifies that each request is completely isolated with 20+ comprehensive scenarios:"""
         - WebSocket failures don"t affect other connections
         - Thread failures are contained
         - Database session failures are isolated
@@ -37,58 +32,54 @@ class TestWebSocketConnection:
         - 100+ concurrent user scenarios
 
         Business Value: CRITICAL - System robustness depends on complete isolation
-        Test Coverage: 20+ scenarios including chaos engineering and load testing
-        '''
+        Test Coverage: 20+ scenarios including chaos engineering and load testing"""
 
-        import asyncio
-        import pytest
-        from typing import Dict, Any, List, Set, Optional
-        import uuid
-        from datetime import datetime, timezone
-        import psutil
-        import random
-        import time
-        import threading
-        import gc
-        import weakref
-        import resource
-        import statistics
-        import concurrent.futures
-        from collections import defaultdict, deque
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from auth_service.core.auth_manager import AuthManager
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from shared.isolated_environment import IsolatedEnvironment
+import asyncio
+import pytest
+from typing import Dict, Any, List, Set, Optional
+import uuid
+from datetime import datetime, timezone
+import psutil
+import random
+import time
+import threading
+import gc
+import weakref
+import resource
+import statistics
+import concurrent.futures
+from collections import defaultdict, deque
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from shared.isolated_environment import IsolatedEnvironment
 
-        from netra_backend.app.services.user_execution_context import UserExecutionContext
-        from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
-        from netra_backend.app.core.registry.universal_registry import AgentRegistry
-        from netra_backend.app.agents.base_agent import BaseAgent
-        from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
-        from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-        from netra_backend.app.logging_config import central_logger
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
+from netra_backend.app.agents.base_agent import BaseAgent
+from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
         logger = central_logger.get_logger(__name__)
 
-
-class TestCompleteRequestIsolation:
+"""
         """Core test suite for complete request isolation - fundamental scenarios."""
 
-@pytest.mark.asyncio
-    async def test_agent_instance_isolation(self):
+@pytest.mark.asyncio"""
 """Verify each request gets a completely fresh agent instance."""
 
         # Setup factory
 factory = AgentInstanceFactory()
 
-        # Create contexts for different users
-context1 = UserExecutionContext( )
+        # Create contexts for different users"""
 user_id="user1",
 thread_id="thread1",
 run_id="run1"
@@ -122,11 +113,9 @@ assert not hasattr(agent2, '_test_state'), "State leaked between instances!"
 
 factory = AgentInstanceFactory()
 results = []
-
-async def execute_request(user_id: str, should_fail: bool = False):
+"""
 """Execute a request, optionally forcing failure."""
-context = UserExecutionContext( )
-user_id=user_id,
+context = UserExecutionContext( )"""
 thread_id="formatted_string",
 run_id="formatted_string"
     
@@ -185,18 +174,11 @@ assert len(agent_ids) == len(set(agent_ids)), "Each request should have unique a
 factory = AgentInstanceFactory()
 websocket_bridge = Mock(spec=AgentWebSocketBridge)
 factory._websocket_bridge = websocket_bridge
-
-                        # Track WebSocket events per user
-events_by_user = { )
-"user1": [],
-"user2": [],
-"user3": []
-                        
-
+"""
+events_by_user = {"user1": [],, "user2": [],, "user3": []}
 def mock_send_event(event_type, data, user_id=None, **kwargs):
 """Track events by user."""
-if user_id in events_by_user:
-events_by_user[user_id].append({ ))
+if user_id in events_by_user:"""
 "type": event_type,
 "data": data
         
@@ -245,8 +227,7 @@ assert user_id in event["data"]["message"], \
 from netra_backend.app.dependencies import get_request_scoped_db_session
 
 sessions_created = []
-
-async def mock_get_session():
+"""
 """Mock database session creation."""
 websocket = TestWebSocketConnection()  # Real WebSocket implementation
 session.id = uuid.uuid4()
@@ -257,8 +238,7 @@ return session
     # Run multiple concurrent requests
 async def make_request(user_id: str):
 async with mock_get_session() as session:
-        # Verify session is unique
-assert session.id not in [s.id for s in sessions_created[:-1]], \
+        # Verify session is unique"""
 "Database session reused across requests!"
 
         # Simulate some database work
@@ -293,11 +273,9 @@ factory = AgentInstanceFactory()
             # Track resource lifecycle
 active_contexts = []
 active_agents = []
-
-async def execute_with_tracking(user_id: str):
+"""
 """Execute request with resource tracking."""
-context = UserExecutionContext( )
-user_id=user_id,
+context = UserExecutionContext( )"""
 thread_id="formatted_string",
 run_id="formatted_string"
     
@@ -333,8 +311,7 @@ assert len(active_agents) == 1, "Agent was created"
 
 factory = AgentInstanceFactory()
 import random
-
-async def simulate_request(request_id: int):
+"""
 """Simulate a request with random failure chance."""
 user_id = "formatted_string"
 context = UserExecutionContext( )
@@ -395,8 +372,7 @@ assert max(differences) > 1, "Failures appear to be cascading!"
 
                         # Use the legacy registry to test reset_state functionality
 registry = AgentRegistry(),
-                        # Create a test agent
-test_agent = TriageSubAgent()
+                        # Create a test agent"""
 registry.register("triage", test_agent)
 
                         # First request - set some state
@@ -419,8 +395,7 @@ reset_agent._internal_flag != "request1_data", \
 
 @pytest.fixture
 def real_factory():
-"""Use real service instance."""
-    # TODO: Initialize real service
+"""Use real service instance.""""""
 """Create a mock agent instance factory."""
 pass
 factory = AgentInstanceFactory()
@@ -429,15 +404,12 @@ await asyncio.sleep(0)
 return factory
 
 
-@pytest.fixture
-def user_contexts():
-"""Use real service instance."""
-    # TODO: Initialize real service
+@pytest.fixture"""
+"""Use real service instance.""""""
 """Create multiple user execution contexts."""
 pass
 contexts = []
-for i in range(1, 6):
-context = UserExecutionContext( )
+for i in range(1, 6):"""
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id="formatted_string"
@@ -449,16 +421,13 @@ return contexts
 class TestChaosEngineering:
         """Chaos engineering tests for extreme failure scenarios."""
 
-@pytest.mark.asyncio
-    async def test_random_agent_crashes_dont_cascade(self):
+@pytest.mark.asyncio"""
 """Test that random agent crashes don't affect other requests."""
 factory = AgentInstanceFactory()
 crash_probability = 0.3  # 30% crash rate
-
-async def chaotic_request(request_id: int) -> Dict[str, Any]:
+"""
 """Request that randomly crashes."""
-pass
-context = UserExecutionContext( )
+pass"""
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id="formatted_string"
@@ -505,7 +474,6 @@ return { )
 
                                     # Run 100 chaotic requests concurrently
 start_time = time.time()
-results = await asyncio.gather( )
 *[chaotic_request(i) for i in range(100)],
 return_exceptions=False
                                     
@@ -548,12 +516,10 @@ factory._websocket_bridge = websocket_bridge
                                                     # Track events per user with thread safety
 events_by_user = defaultdict(list)
 event_lock = threading.Lock()
-
-def chaotic_websocket_send(event_type, data, user_id=None, **kwargs):
+"""
 """WebSocket sender that randomly fails."""
 pass
-    # 20% failure rate for WebSocket events
-if random.random() < 0.2:
+    # 20% failure rate for WebSocket events"""
 raise ConnectionError("formatted_string")
 
 with event_lock:
@@ -567,8 +533,7 @@ websocket_bridge.send_event = chaotic_websocket_send
 
 async def chaotic_websocket_request(user_id: str) -> Dict[str, Any]:
 """Request that sends WebSocket events chaotically."""
-context = UserExecutionContext( )
-user_id=user_id,
+context = UserExecutionContext( )"""
 thread_id="formatted_string",
 run_id="formatted_string"
     
@@ -624,20 +589,17 @@ logger.info("formatted_string")
 class TestExtremeConcurrency:
         """Tests for extreme concurrency scenarios (100+ users)."""
 
-@pytest.mark.asyncio
-    async def test_100_concurrent_users_isolation(self):
+@pytest.mark.asyncio"""
 """Test complete isolation with 100+ concurrent users."""
 factory = AgentInstanceFactory()
 user_count = 150
 
         # Track resource usage
 start_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
-
-async def concurrent_user_request(user_id: str) -> Dict[str, Any]:
+"""
 """Simulate a full user request with multiple operations."""
 pass
-context = UserExecutionContext( )
-user_id=user_id,
+context = UserExecutionContext( )"""
 thread_id="formatted_string",
 run_id="formatted_string"
     
@@ -685,7 +647,6 @@ return { )
 
                     # Execute all users concurrently
 start_test_time = time.time()
-results = await asyncio.gather( )
 *[concurrent_user_request("formatted_string") for i in range(user_count)],
 return_exceptions=False
                     
@@ -735,13 +696,11 @@ factory = AgentInstanceFactory()
 request_count = 200
 
 response_times = []
-
-async def timed_request(request_id: int) -> float:
+"""
 """Request that measures response time."""
 pass
 start_time = time.time()
-
-context = UserExecutionContext( )
+"""
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id="formatted_string"
@@ -780,24 +739,19 @@ logger.info("formatted_string")
 class TestMemoryLeakDetection:
         """Tests for memory leak detection and prevention."""
 
-@pytest.mark.asyncio
-    async def test_no_memory_leaks_after_1000_requests(self):
+@pytest.mark.asyncio"""
 """Verify no memory leaks after 1000+ requests."""
 factory = AgentInstanceFactory()
 request_count = 1000
 
         # Force garbage collection before starting
 gc.collect()
-initial_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
-
         # Track weak references to detect object leaks
 agent_refs = []
 context_refs = []
-
-async def memory_tracked_request(request_id: int) -> Dict[str, Any]:
+"""
 """Request that tracks memory usage."""
-pass
-context = UserExecutionContext( )
+pass"""
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id="formatted_string"
@@ -871,11 +825,9 @@ factory = AgentInstanceFactory()
 open_files_before = len(psutil.Process().open_files())
 connections_before = len(psutil.Process().connections())
 threads_before = threading.active_count()
-
-async def resource_intensive_request(request_id: int) -> Dict[str, Any]:
+"""
 """Request that uses various resources."""
-pass
-context = UserExecutionContext( )
+pass"""
 user_id="formatted_string",
 thread_id="formatted_string",
 run_id="formatted_string"
@@ -927,19 +879,16 @@ logger.info("formatted_string")
 class TestDatabaseSessionIsolation:
         """Extended database session isolation tests."""
 
-@pytest.mark.asyncio
-    async def test_concurrent_database_session_isolation(self):
+@pytest.mark.asyncio"""
 """Verify database sessions never leak between concurrent requests."""
 session_tracker = defaultdict(set)
 session_lock = threading.Lock()
-
-async def database_request(user_id: str, operation_count: int = 10) -> Dict[str, Any]:
+"""
 """Request that performs multiple database operations."""
 pass
 session_ids_used = []
 
-for i in range(operation_count):
-        # Simulate getting a database session
+for i in range(operation_count):"""
 session_id = "formatted_string"
 
 with session_lock:
@@ -983,20 +932,17 @@ logger.info("formatted_string")
 class TestWebSocketEventIsolation:
         """Extended WebSocket event isolation tests."""
 
-@pytest.mark.asyncio
-    async def test_websocket_event_queue_isolation(self):
+@pytest.mark.asyncio"""
 """Verify WebSocket event queues are isolated per user."""
 factory = AgentInstanceFactory()
 
         # Track events with timestamps per user
 user_event_queues = defaultdict(deque)
 event_lock = threading.Lock()
-
-def isolated_websocket_handler(event_type: str, data: Dict[str, Any], user_id: str = None, **kwargs):
+"""
 """WebSocket handler that maintains per-user event isolation."""
 pass
-with event_lock:
-user_event_queues[user_id].append({ ))
+with event_lock:"""
 "event_type": event_type,
 "data": data,
 "timestamp": time.time(),
@@ -1010,8 +956,7 @@ factory._websocket_bridge = websocket_bridge
 
 async def websocket_intensive_request(user_id: str) -> Dict[str, Any]:
 """Request that generates many WebSocket events."""
-context = UserExecutionContext( )
-user_id=user_id,
+context = UserExecutionContext( )"""
 thread_id="formatted_string",
 run_id="formatted_string"
     
@@ -1077,19 +1022,16 @@ logger.info("formatted_string")
 class TestAgentStateIsolation:
         """Extended agent state isolation tests."""
 
-@pytest.mark.asyncio
-    async def test_agent_internal_state_isolation(self):
+@pytest.mark.asyncio"""
 """Verify agent internal state is completely isolated between requests."""
 factory = AgentInstanceFactory()
 
         # Track state contamination
 state_violations = []
-
-async def stateful_request(user_id: str, state_data: str) -> Dict[str, Any]:
+"""
 """Request that sets and checks agent state."""
 pass
-context = UserExecutionContext( )
-user_id=user_id,
+context = UserExecutionContext( )"""
 thread_id="formatted_string",
 run_id="formatted_string"
     

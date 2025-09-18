@@ -212,7 +212,7 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 WebSocketManager = UnifiedWebSocketManager
 
 # SSOT PHASE 2 FIX: Remove UnifiedWebSocketManager alias to eliminate duplication
-# CANONICAL LOCATION: Use 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager'
+# CANONICAL LOCATION: Use 'from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager'
 # For runtime usage, use get_websocket_manager() factory function
 
 # ISSUE #1182 REMEDIATION COMPLETED: WebSocketManagerFactory consolidated into get_websocket_manager()
@@ -803,14 +803,11 @@ def _validate_ssot_compliance():
                 # Use getattr with default to prevent AttributeError during iteration
                 for attr_name in dir(module):
                     attr = getattr(module, attr_name, None)
-                    # CRITICAL FIX: Use globals().get() to safely reference WebSocketManager
-                    # This prevents hanging during import when WebSocketManager isn't defined yet
-                    websocket_manager_class = globals().get('WebSocketManager')
                     if (attr is not None and
                         inspect.isclass(attr) and
                         'websocket' in attr_name.lower() and
                         'manager' in attr_name.lower() and
-                        (websocket_manager_class is None or attr != websocket_manager_class) and
+                        attr != WebSocketManager and
                         # SSOT PHASE 2 FIX: Exclude canonical SSOT classes and imported types
                         attr_name not in [
                             'UnifiedWebSocketManager',  # Canonical alias

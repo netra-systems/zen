@@ -55,7 +55,7 @@ from netra_backend.app.agents.supervisor.agent_registry import UserAgentSession
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
 from auth_service.auth_core.services.auth_service import AuthService
 from shared.types.core_types import UserID, ThreadID, RunID

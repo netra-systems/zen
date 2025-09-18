@@ -34,7 +34,6 @@ All changes must be made in websocket_ssot.py to maintain SSOT compliance.
 
 # PHASE 1 GOLDEN PATH REMEDIATION: Add required SSOT imports for test compliance
 from shared.logging.unified_logging_ssot import get_logger
-from netra_backend.app.core.configuration.base import get_config
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 

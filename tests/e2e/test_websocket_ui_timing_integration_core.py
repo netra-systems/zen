@@ -1,28 +1,29 @@
-"""Test module: test_websocket_ui_timing_integration_core.py
+"Test module: test_websocket_ui_timing_integration_core.py"""
 
 This file has been auto-generated to fix syntax errors.
 Original content had structural issues that prevented parsing.
-"""
+""
 from typing import Any, Dict, List, Optional
 from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 @pytest.mark.e2e
 class WebsocketUiTimingIntegrationCoreTests:
-    """Test class for websocket_ui_timing_integration_core"""
+    Test class for websocket_ui_timing_integration_core""
 
     def setup_method(self):
-        """Setup for each test method"""
+        "Setup for each test method"""
         pass
 
     @pytest.mark.e2e
     def test_placeholder(self):
-        """Placeholder test to ensure file is syntactically valid"""
+        ""Placeholder test to ensure file is syntactically valid
         assert True
 
     @pytest.mark.e2e
     def test_basic_functionality(self):
-        """Basic functionality test placeholder"""
+        Basic functionality test placeholder"""
+        Basic functionality test placeholder"""
         pass
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

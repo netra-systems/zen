@@ -1,4 +1,5 @@
 '''
+'''
 Dev Launcher Real System Integration for Testing
 Integrates with the actual dev_launcher module to start real services.
 
@@ -9,6 +10,7 @@ CRITICAL REQUIREMENTS:
 - Handles cleanup on test completion
 - Compatible with existing test infrastructure
 - Robust error handling and service management
+'''
 '''
 
 import asyncio
@@ -75,18 +77,18 @@ class DevLauncherRealSystem:
         await self._wait_for_health()
 
                 # Set service URLs
-        self.service_urls = { )
+        self.service_urls = { }
         "auth_service": "http://localhost:8081",  # Correct auth port
         "backend": "http://localhost:8000",
         "frontend": "http://localhost:3000" if not self.skip_frontend else None
                 
 
         elapsed = time.time() - self.start_time
-        logger.info("formatted_string")
+        logger.info("")
 
         except Exception as e:
         self._startup_errors.append(str(e))
-        logger.error("formatted_string")
+        logger.error("")
         raise
 
     def _create_test_config(self) -> LauncherConfig:
@@ -96,11 +98,11 @@ class DevLauncherRealSystem:
         config.frontend_port = 3000 if not self.skip_frontend else None
         config.dynamic_ports = False  # Use fixed ports for testing
         config.no_backend_reload = True  # No hot reload for tests
-        config.no_browser = True  # Don"t open browser
+        config.no_browser = True  # Don"t open browser"
         config.verbose = False  # Less output for tests
         config.non_interactive = True  # No prompts
         config.startup_mode = "minimal"  # Fast startup
-        config.no_secrets = True  # Don"t load secrets for tests
+        config.no_secrets = True  # Don"t load secrets for tests"
         config.parallel_startup = True  # Parallel startup for speed
         config.project_root = self._detect_project_root()
         return config
@@ -144,11 +146,11 @@ class DevLauncherRealSystem:
         result = await self.launcher.run()
         self._startup_success = (result == 0)
         if result != 0:
-        self._startup_errors.append("formatted_string")
+        self._startup_errors.append("")
         except Exception as e:
         self._startup_success = False
-        self._startup_errors.append("formatted_string")
-        logger.error("formatted_string")
+        self._startup_errors.append("")
+        logger.error("")
 
     async def _wait_for_startup_completion(self, timeout: int = 60) -> None:
         """Wait for startup to complete or fail."""
@@ -158,7 +160,7 @@ class DevLauncherRealSystem:
         if self._launcher_task and self._launcher_task.done():
             # Task completed, check result
         if not self._startup_success:
-        raise RuntimeError("formatted_string")
+        raise RuntimeError("")
         return
 
                 # Check if services are becoming available
@@ -169,7 +171,7 @@ class DevLauncherRealSystem:
 
         await asyncio.sleep(1)
 
-        raise TimeoutError("formatted_string")
+        raise TimeoutError("")
 
     async def _check_basic_health(self) -> bool:
         """Basic health check for core services."""
@@ -217,11 +219,11 @@ class DevLauncherRealSystem:
         return
 
         except Exception as e:
-        logger.debug("formatted_string")
+        logger.debug("")
 
         await asyncio.sleep(1)
 
-        raise TimeoutError("formatted_string")
+        raise TimeoutError("")
 
     async def stop_all_services(self) -> None:
         """Stop all services and cleanup."""
@@ -246,7 +248,7 @@ class DevLauncherRealSystem:
         elif hasattr(self.launcher, 'stop_services'):
         await self.launcher.stop_services()
         except Exception as e:
-        logger.warning("formatted_string")
+        logger.warning("")
         finally:
         self.launcher = None
 
@@ -264,36 +266,36 @@ class DevLauncherRealSystem:
         if sys.platform == "win32":
         try:
         result = subprocess.run( )
-        "formatted_string",
+        "",
         shell=True, capture_output=True, text=True
             
         if result.stdout:
-        lines = result.stdout.strip().split(" )
-        ")
+        lines = result.stdout.strip().split(" )"
+        ")"
         for line in lines:
         parts = line.split()
         if len(parts) >= 5:
         pid = parts[-1]
         if pid.isdigit():
-        subprocess.run("formatted_string", shell=True)
-        logger.debug("formatted_string")
+        subprocess.run("", shell=True)
+        logger.debug("")
         except Exception as e:
-        logger.debug("formatted_string")
+        logger.debug("")
         elif sys.platform == "darwin":
         try:
         result = subprocess.run( )
-        "formatted_string",
+        "",
         shell=True, capture_output=True, text=True
                                         
         if result.stdout:
-        pids = result.stdout.strip().split(" )
-        ")
+        pids = result.stdout.strip().split(" )"
+        ")"
         for pid in pids:
         if pid.isdigit():
-        subprocess.run("formatted_string", shell=True)
-        logger.debug("formatted_string")
+        subprocess.run("", shell=True)
+        logger.debug("")
         except Exception as e:
-        logger.debug("formatted_string")
+        logger.debug("")
 
     def get_service_urls(self) -> Dict[str, str]:
         """Get service URLs for testing."""
@@ -412,7 +414,7 @@ class DevLauncherTestContext:
         await self.services.start_all_services()
         logger.info("Test environment setup complete")
         except Exception as e:
-        logger.error("formatted_string")
+        logger.error("")
         await self.cleanup_test_environment()
         raise
 
@@ -423,7 +425,7 @@ class DevLauncherTestContext:
         self.services = None
 
         elapsed = time.time() - (self.start_time or time.time())
-        logger.info("formatted_string")
+        logger.info("")
 
     def get_service_url(self, service_name: str) -> Optional[str]:
         """Get URL for a specific service."""

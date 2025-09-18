@@ -8,9 +8,9 @@ CRITICAL: This ensures service independence and configuration consistency.
 """
 from typing import Optional, Dict, Any
 from shared.isolated_environment import IsolatedEnvironment, get_env
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class BackendEnvironment:

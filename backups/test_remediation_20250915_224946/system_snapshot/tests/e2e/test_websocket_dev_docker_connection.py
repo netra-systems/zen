@@ -32,8 +32,7 @@ pytestmark = pytest.mark.dev
 
 class TestWebSocketConnection:
     """Test harness for WebSocket connection issues."""
-
-    def setup_method(self):
+"""
         """Setup method called before each test method."""
         self.base_url = "http://localhost:8000"
         self.ws_url = "ws://localhost:8000/ws"
@@ -42,8 +41,7 @@ class TestWebSocketConnection:
         self.ws_app = None
 
     def on_message(self, ws, message):
-        """Handle WebSocket messages."""
-        pass
+        """Handle WebSocket messages.""""""
         print("formatted_string")
 
     def on_error(self, ws, error):
@@ -58,8 +56,7 @@ class TestWebSocketConnection:
     
 
     def on_close(self, ws, close_status_code, close_msg):
-        """Handle WebSocket close."""
-        pass
+        """Handle WebSocket close.""""""
         print("formatted_string")
         if close_status_code:
         self.error_logs.append({ ))
@@ -75,8 +72,7 @@ class TestWebSocketConnection:
 
         @pytest.mark.websocket
     def test_basic_connection(self) -> Dict[str, Any]:
-        """Test basic WebSocket connection without authentication."""
-        pass
+        """Test basic WebSocket connection without authentication.""""""
         print("formatted_string")
 
         try:
@@ -90,7 +86,7 @@ class TestWebSocketConnection:
         
 
         # Run with timeout
-        import threading
+import threading
     def run_ws():
         pass
         self.ws_app.run_forever(ping_interval=30, ping_timeout=10)
@@ -203,9 +199,7 @@ class TestWebSocketConnection:
         try:
         response = httpx.get( )
         "formatted_string",
-        headers={ )
-        "Upgrade": "websocket",
-        "Connection": "Upgrade",
+headers={"Upgrade": "websocket",, "Connection": "Upgrade",}
         "Sec-WebSocket-Key": "x3JJHMbDL1EzLkh9GBhXDw==",
         "Sec-WebSocket-Version": "13"
         },
@@ -230,22 +224,18 @@ class TestWebSocketConnection:
 class TestWebSocketDevDockerConnection:
         """E2E test suite for WebSocket connection issues in dev docker."""
 
-        @pytest.mark.websocket
-    def test_websocket_connection_failure(self):
-        '''
+        @pytest.mark.websocket"""
+        """
         Test that reproduces the WebSocket connection failure in dev docker.
 
         This test is expected to FAIL with the following errors:
-        - Connection refused or failed
-        - CORS origin validation errors
-        - WebSocket handshake failures
-        '''
+        - Connection refused or failed"""
+        - WebSocket handshake failures"""
         pass
         test_harness = WebSocketConnectionTest()
         test_harness.setup_method()
 
-        # Check backend availability first
-        backend_status = test_harness.test_backend_availability()
+        # Check backend availability first"""
         print("formatted_string")
 
         # Test basic connection (expected to fail)
@@ -257,13 +247,7 @@ class TestWebSocketDevDockerConnection:
         print("formatted_string")
 
         # Compile all errors
-        all_errors = { )
-        "backend_status": backend_status,
-        "connection_errors": connection_result["connection_errors"],
-        "error_logs": connection_result["error_logs"],
-        "cors_issues": cors_result["cors_issues"]
-        
-
+all_errors = {"backend_status": backend_status,, "connection_errors": connection_result["connection_errors"],, "error_logs": connection_result["error_logs"],, "cors_issues": cors_result["cors_issues"]}
         # Print summary
         print(" )
         " + "="*60)
@@ -312,13 +296,11 @@ class TestWebSocketDevDockerConnection:
 class TestWebSocketCORSValidation:
         """Specific tests for WebSocket CORS validation issues."""
 
-        @pytest.mark.websocket
-    def test_localhost_origin_validation(self):
+        @pytest.mark.websocket"""
         """Test that localhost origins are properly validated in dev environment."""
 
     # Test basic WebSocket connectivity without explicit Origin headers
-    # This avoids the duplicate Origin header issue with websocket-client library
-        test_cases = [ )
+    # This avoids the duplicate Origin header issue with websocket-client library"""
         ("Basic connection", "ws://localhost:8000/ws", True, "Main WebSocket endpoint"),
         ("Test endpoint", "ws://localhost:8000/ws/test", True, "Test WebSocket endpoint (no auth)"),
     
@@ -365,8 +347,7 @@ class TestWebSocketCORSValidation:
         max_retries = 3
         retry_delay = 2
         connection_attempts = []
-
-        for attempt in range(max_retries):
+"""
         print("formatted_string")
 
         try:
@@ -377,7 +358,7 @@ class TestWebSocketCORSValidation:
                                                 
 
                                                 # Try to send a test message
-        import json
+import json
         test_msg = json.dumps({"type": "ping"})
         ws.send(test_msg)
         response = ws.recv()
@@ -436,5 +417,5 @@ class TestWebSocketCORSValidation:
         print("formatted_string")
 
                                                                             # Run async test
-        import asyncio
+import asyncio
         asyncio.run(test_websocket_connection_with_retry())

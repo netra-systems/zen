@@ -64,10 +64,43 @@ python netra_backend/tests/unit/websocket_core/test_unified_manager.py
 3. **Performance Impact Test** - Validate no throughput degradation
 
 ## Remediation Plan
-1. Consolidate to single WebSocketManager class
-2. Remove compatibility layers
-3. Update all import paths
-4. Ensure backward compatibility during transition
+
+### Decision: Consolidate to `unified_manager.py` as SSOT
+
+**Why unified_manager.py:**
+- Contains actual implementation (`_UnifiedWebSocketManagerImplementation`)
+- websocket_manager.py is mostly factory functions
+- manager.py already configured as compatibility layer
+
+### Atomic Migration Strategy
+
+**Phase 1: Core Consolidation (Immediate)**
+1. Move factory logic from websocket_manager.py to unified_manager.py
+2. Convert websocket_manager.py to re-export facade
+3. Maintain all import paths for backward compatibility
+4. Single atomic commit for safety
+
+**Phase 2: Import Updates (1 week)**
+1. Update production code to use canonical imports
+2. Add deprecation warnings to legacy paths
+3. Update test imports incrementally
+
+**Phase 3: Cleanup (Optional, 1 month)**
+1. Remove manager.py compatibility layer
+2. Remove facade after all imports updated
+3. Final SSOT validation
+
+### Success Criteria
+- ✅ All 5 WebSocket events continue working
+- ✅ All 1,700+ imports remain functional
+- ✅ User isolation patterns preserved
+- ✅ New SSOT tests pass
+- ✅ No performance degradation
+
+### Risk Mitigation
+- **High Risk:** Golden Path - Test all WebSocket events before/after
+- **Medium Risk:** Import breaks - Phased migration with compatibility
+- **Low Risk:** Test updates - Incremental changes
 
 ## Test Execution Results
 

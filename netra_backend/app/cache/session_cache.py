@@ -3,10 +3,10 @@
 This module provides session caching functionality.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Any, Dict, Optional
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class SessionCache:

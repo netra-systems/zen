@@ -758,7 +758,7 @@ class E2EAgentHandler(BaseMessageHandler):
                 }
                 
                 # CRITICAL FIX: Use safe serialization to handle WebSocketState enums and other complex objects
-                from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
+                from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
                 safe_response_data = _serialize_message_safely(response_data)
                 
                 # Send to the current websocket as a simulation
@@ -989,7 +989,7 @@ class JsonRpcHandler(BaseMessageHandler):
             }
             
             # CRITICAL FIX: Use safe serialization to handle WebSocketState enums and other complex objects
-            from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
+            from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
             safe_response = _serialize_message_safely(response)
             
             # Check if websocket is connected or is a mock (for testing)
@@ -1902,7 +1902,7 @@ class CanonicalMessageRouter:
             }
             
             # CRITICAL FIX: Use safe serialization to handle WebSocketState enums and other complex objects
-            from netra_backend.app.websocket_core.websocket_manager import _serialize_message_safely
+            from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
             safe_ack_response = _serialize_message_safely(ack_response)
             
             # Check if websocket is connected or is a mock (for testing)

@@ -38,7 +38,7 @@ class TestAgentIntegrationViolations(SSotAsyncTestCase):
         registry_integration_violations = []
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             # Create WebSocket manager
             user_context = {"user_id": "agent_registry_test", "session_id": "registry_session"}
@@ -131,7 +131,7 @@ class TestAgentIntegrationViolations(SSotAsyncTestCase):
         ]
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             user_context = {"user_id": "event_test_user", "session_id": "event_session"}
             ws_manager = get_websocket_manager(user_context=user_context)
@@ -222,7 +222,7 @@ class TestAgentIntegrationViolations(SSotAsyncTestCase):
 
         try:
             # Test execution engine integration
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             user_context = {"user_id": "execution_test", "session_id": "execution_session"}
             ws_manager = get_websocket_manager(user_context=user_context)
@@ -332,7 +332,7 @@ class TestAgentIntegrationViolations(SSotAsyncTestCase):
         routing_integration_violations = []
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             user_context = {"user_id": "routing_test", "session_id": "routing_session"}
             ws_manager = get_websocket_manager(user_context=user_context)
@@ -442,7 +442,7 @@ class TestAgentIntegrationViolations(SSotAsyncTestCase):
         lifecycle_integration_violations = []
 
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+            from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager
 
             user_context = {"user_id": "lifecycle_test", "session_id": "lifecycle_session"}
             ws_manager = get_websocket_manager(user_context=user_context)

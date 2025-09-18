@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,14 +16,12 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
         return self.messages_sent.copy()
-
-    #!/usr/bin/env python
-        '''
+"""
+        """
         CRITICAL: WebSocket Performance and Load Failure Test Suite
 
         BUSINESS CRITICAL PERFORMANCE REQUIREMENTS:
@@ -42,47 +38,44 @@ class TestWebSocketConnection:
         4. Thread pool exhaustion during burst notification scenarios
         5. Queue overflow causing notification loss
         6. Performance degradation with increasing user count
+"""
+        SLA Impact: Violation of response time guarantees"""
 
-        Business Impact: Poor performance = user abandonment = revenue loss
-        SLA Impact: Violation of response time guarantees
-        '''
-
-        import asyncio
-        import gc
-        import json
-        import os
-        import psutil
-        import sys
-        import time
-        import threading
-        import uuid
-        import random
-        import statistics
-        from concurrent.futures import ThreadPoolExecutor, as_completed
-        from datetime import datetime, timedelta
-        from typing import Dict, List, Set, Any, Optional, Tuple, Callable
-        from dataclasses import dataclass, field
-        import pytest
-        from shared.isolated_environment import IsolatedEnvironment
+import asyncio
+import gc
+import json
+import os
+import psutil
+import sys
+import time
+import threading
+import uuid
+import random
+import statistics
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timedelta
+from typing import Dict, List, Set, Any, Optional, Tuple, Callable
+from dataclasses import dataclass, field
+import pytest
+from shared.isolated_environment import IsolatedEnvironment
 
             # Add project root to path
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
         if project_root not in sys.path:
         sys.path.insert(0, project_root)
 
-        from shared.isolated_environment import get_env
-        from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
-        from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-        from netra_backend.app.logging_config import central_logger
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager as WebSocketManager
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
         logger = central_logger.get_logger(__name__)
 
 
-        @dataclass
-class PerformanceMetric:
+        @dataclass"""
         """Records a performance measurement."""
         timestamp: float
         metric_name: str
@@ -91,8 +84,7 @@ class PerformanceMetric:
         context: Dict[str, Any] = field(default_factory=dict)
 
 
-        @dataclass
-class LoadTestResult:
+        @dataclass"""
         """Results from a load test scenario."""
         test_name: str
         start_time: float
@@ -109,8 +101,7 @@ class LoadTestResult:
         errors_encountered: int
         performance_violations: List[str] = field(default_factory=list)
 
-
-class PerformanceMonitor:
+"""
         """Monitors system performance during WebSocket notification tests."""
 
     def __init__(self):
@@ -125,15 +116,13 @@ class PerformanceMonitor:
         self.lock = threading.Lock()
         self._monitoring = False
         self._monitor_task = None
-
-    def start_monitoring(self):
+"""
         """Start continuous performance monitoring."""
         if not self._monitoring:
         self._monitoring = True
         self.start_memory_mb = self._get_memory_usage_mb()
         self._monitor_task = asyncio.create_task(self._continuous_monitor())
-
-    async def stop_monitoring(self):
+"""
         """Stop performance monitoring."""
         pass
         self._monitoring = False
@@ -142,8 +131,7 @@ class PerformanceMonitor:
         try:
         await self._monitor_task
         except asyncio.CancelledError:
-        pass
-
+        pass"""
         def record_metric(self, metric_name: str, value: float, user_id: str = "system",
         context: Dict[str, Any] = None):
         """Record a performance metric."""
@@ -157,8 +145,7 @@ class PerformanceMonitor:
 
         with self.lock:
         self.metrics.append(metric)
-
-        # Track specific metrics
+"""
         if metric_name == "notification_delivery_time_ms":
         self.delivery_times.append(value)
         elif metric_name == "memory_usage_mb":
@@ -176,13 +163,11 @@ class PerformanceMonitor:
         process = psutil.Process()
         await asyncio.sleep(0)
         return process.memory_info().rss / 1024 / 1024
-
-    async def _continuous_monitor(self):
+"""
         """Continuously monitor system resources."""
         while self._monitoring:
         try:
-            # Record memory usage
-        memory_mb = self._get_memory_usage_mb()
+            # Record memory usage"""
         self.record_metric("memory_usage_mb", memory_mb)
 
             # Record GC stats
@@ -211,8 +196,7 @@ class PerformanceMonitor:
         memory_leaked = peak_memory - self.start_memory_mb
 
     # Identify performance violations
-        violations = []
-        if avg_delivery > 500:  # 500ms threshold
+        violations = []"""
         violations.append("formatted_string")
         if p95_delivery > 1000:  # 1s threshold for P95
         violations.append("formatted_string")
@@ -248,17 +232,14 @@ class PerformanceMonitor:
         yield monitor
         await monitor.stop_monitoring()
 
-
-class TestNotificationDeliveryPerformance:
+"""
         """Test notification delivery performance under various loads."""
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.mark.slow
-    async def test_notification_delivery_latency_degradation(self, performance_monitor):
+@pytest.mark.slow"""
 """CRITICAL: Test notification delivery latency degrades with load."""
-        # This test SHOULD FAIL initially
-
+        # This test SHOULD FAIL initially"""
 test_name = "notification_latency_degradation"
 num_users = 50
 notifications_per_user = 20
@@ -280,10 +261,6 @@ delivery_start = time.time()
 try:
         # Queue size affects delivery time (performance issue!)
 queue_size = notification_queue.qsize()
-base_delay = 0.01  # 10ms base delay
-load_factor = queue_size / 10.0  # Delay increases with queue size
-delivery_delay = base_delay + (load_factor * 0.1)  # Up to 100ms additional delay
-
         # Put notification in queue
 await notification_queue.put((user_id, notification_data, delivery_start))
 
@@ -294,12 +271,9 @@ await asyncio.sleep(delivery_delay)
 await notification_queue.get()
 
 delivery_end = time.time()
-delivery_time_ms = (delivery_end - delivery_start) * 1000
-
 delivered_notifications += 1
 
-        # Record delivery time
-performance_monitor.record_metric( )
+        # Record delivery time"""
 "notification_delivery_time_ms",
 delivery_time_ms,
 user_id,
@@ -328,13 +302,7 @@ for user_num in range(num_users):
 user_id = "formatted_string"
 
 for notification_num in range(notifications_per_user):
-notification_data = { )
-"type": "tool_progress",
-"progress": notification_num * 5,
-"tool_name": "formatted_string",
-"timestamp": time.time()
-                        
-
+notification_data = {"type": "tool_progress",, "progress": notification_num * 5,, "tool_name": "formatted_string",, "timestamp": time.time()}
 tasks.append(slow_notification_delivery(user_id, notification_data))
 
                         # Execute all notifications concurrently
@@ -369,8 +337,7 @@ assert avg_high_load > avg_low_load * 1.5, "formatted_string"
 @pytest.mark.slow
     async def test_memory_leak_under_sustained_load(self, performance_monitor):
 """CRITICAL: Test memory leaks under sustained notification load."""
-                                # This test SHOULD FAIL initially
-
+                                # This test SHOULD FAIL initially"""
 test_name = "memory_leak_sustained_load"
 duration_seconds = 30  # 30 second test
 notifications_per_second = 20
@@ -386,8 +353,7 @@ delivered_notifications = 0
 async def leaky_notification_system(user_id: str, notification_data: Dict[str, Any]):
 """Notification system that leaks memory."""
 pass
-nonlocal sent_notifications, delivered_notifications
-
+nonlocal sent_notifications, delivered_notifications"""
 notification_id = "formatted_string"
 sent_notifications += 1
 
@@ -445,19 +411,11 @@ return True
 
         # Run sustained load test
 start_time = time.time()
-tasks = []
-
 while time.time() - start_time < duration_seconds:
             # Generate notifications for random users
 user_id = "formatted_string"
 
-notification_data = { )
-"type": "tool_update",
-"content": "formatted_string",
-"timestamp": time.time(),
-"large_data": ["x"] * 1000  # Add bulk data
-            
-
+notification_data = {"type": "tool_update",, "content": "formatted_string",, "timestamp": time.time(),, "large_data": ["x"] * 1000  # Add bulk data}
 task = asyncio.create_task(leaky_notification_system(user_id, notification_data))
 tasks.append(task)
 
@@ -503,8 +461,7 @@ assert len(memory_violations) > 0, "Expected memory leak violation"
 @pytest.mark.slow
     async def test_connection_instability_under_load(self, performance_monitor):
 """CRITICAL: Test WebSocket connection instability under high load."""
-                    # This test SHOULD FAIL initially
-
+                    # This test SHOULD FAIL initially"""
 test_name = "connection_instability_load"
 max_concurrent_connections = 100
 connection_churn_rate = 0.1  # 10% connections drop/reconnect per second
@@ -526,8 +483,7 @@ pass
 nonlocal dropped_connections, reconnection_attempts
 
     # Create connection with random stability
-connection_stability = random.uniform(0.7, 1.0)  # 70-100% stability
-connection_pool[connection_id] = { )
+connection_stability = random.uniform(0.7, 1.0)  # 70-100% stability"""
 "user_id": user_id,
 "created_at": time.time(),
 "stability": connection_stability,
@@ -572,8 +528,7 @@ nonlocal sent_notifications, delivered_notifications, failed_deliveries
 sent_notifications += 1
 
     # Find user's connection
-user_connections = [ )
-conn_id for conn_id, conn_data in connection_pool.items()
+user_connections = [ )"""
 if conn_data["user_id"] == user_id
     
 
@@ -614,8 +569,6 @@ connection_pool[connection_id]["message_count"] += 1
 connection_pool[connection_id]["last_activity"] = time.time()
 
 delivery_end = time.time()
-delivery_time_ms = (delivery_end - delivery_start) * 1000
-
 delivered_notifications += 1
 performance_monitor.record_metric("notification_delivery_time_ms", delivery_time_ms, user_id)
 
@@ -654,12 +607,7 @@ conn_data["user_id"] for conn_data in connection_pool.values()
 
 if active_users:
 target_user = random.choice(active_users)
-notification = { )
-"type": "tool_progress",
-"content": "formatted_string",
-"timestamp": time.time()
-                                    
-
+notification = {"type": "tool_progress",, "content": "formatted_string",, "timestamp": time.time()}
 notification_task = asyncio.create_task( )
 send_notification_to_unstable_connection(target_user, notification)
                                     
@@ -704,11 +652,9 @@ class TestConcurrentUserPerformance:
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.mark.slow
-    async def test_thread_pool_exhaustion_under_burst_load(self, performance_monitor):
+@pytest.mark.slow"""
 """CRITICAL: Test thread pool exhaustion during notification bursts."""
-        # This test SHOULD FAIL initially
-
+        # This test SHOULD FAIL initially"""
 test_name = "thread_pool_exhaustion"
 max_threads = 20  # Limited thread pool
 burst_size = 100  # More tasks than threads
@@ -728,8 +674,7 @@ def blocking_notification_processing(user_id: str, notification_data: Dict[str, 
 pass
 start_time = time.time()
 
-    # Simulate CPU-intensive work (blocking operation)
-result_data = []
+    # Simulate CPU-intensive work (blocking operation)"""
 for i in range(10000):  # CPU work that can"t be awaited
 result_data.append("formatted_string")
 
@@ -737,8 +682,6 @@ result_data.append("formatted_string")
 time.sleep(random.uniform(0.01, 0.05))
 
 end_time = time.time()
-processing_time_ms = (end_time - start_time) * 1000
-
 await asyncio.sleep(0)
 return True, processing_time_ms
 
@@ -751,7 +694,6 @@ sent_notifications += 1
 try:
         # Submit to thread pool (may block if pool is exhausted)
 loop = asyncio.get_event_loop()
-future = loop.run_in_executor( )
 thread_pool,
 blocking_notification_processing,
 user_id,
@@ -762,8 +704,7 @@ notification_data
 success, processing_time = await asyncio.wait_for(future, timeout=5.0)
 
 if success:
-delivered_notifications += 1
-performance_monitor.record_metric( )
+delivered_notifications += 1"""
 "notification_processing_time_ms",
 processing_time,
 user_id
@@ -792,14 +733,7 @@ burst_start = time.time()
 
 for i in range(burst_size):
 user_id = "formatted_string"
-notification_data = { )
-"type": "tool_result",
-"burst_num": burst_num,
-"item_num": i,
-"processing_required": True,
-"timestamp": time.time()
-                        
-
+notification_data = {"type": "tool_result",, "burst_num": burst_num,, "item_num": i,, "processing_required": True,, "timestamp": time.time()}
 task = asyncio.create_task( )
 send_notification_with_thread_pool(user_id, notification_data)
                         
@@ -855,8 +789,7 @@ assert timeout_errors > 10, "formatted_string"
     async def test_notification_queue_overflow_under_high_volume(self, performance_monitor):
 """CRITICAL: Test notification queue overflow under high volume."""
 pass
-                                # This test SHOULD FAIL initially
-
+                                # This test SHOULD FAIL initially"""
 test_name = "notification_queue_overflow"
 max_queue_size = 200
 notification_rate = 50  # 50 per second
@@ -890,8 +823,7 @@ delivered_notifications += 1
             # Record queue processing metrics
 processing_time_ms = (time.time() - enqueue_time) * 1000
 queue_size = notification_queue.qsize()
-
-performance_monitor.record_metric( )
+"""
 "queue_processing_time_ms",
 processing_time_ms,
 user_id
@@ -926,8 +858,7 @@ await asyncio.sleep(0)
 return True
 
 except asyncio.QueueFull:
-            # Queue overflow!
-queue_overflow_errors += 1
+            # Queue overflow!"""
 performance_monitor.record_metric("error_queue_overflow", 1, user_id)
 return False
 except Exception as e:
@@ -945,13 +876,7 @@ notification_interval = 1.0 / notification_rate
 
 while time.time() - start_time < test_duration_seconds:
 user_id = "formatted_string"
-notification_data = { )
-"type": "high_volume_update",
-"sequence": sent_notifications,
-"timestamp": time.time(),
-"data": ["x"] * 100  # Some bulk data
-                    
-
+notification_data = {"type": "high_volume_update",, "sequence": sent_notifications,, "timestamp": time.time(),, "data": ["x"] * 100  # Some bulk data}
 task = asyncio.create_task(enqueue_notification(user_id, notification_data))
 enqueue_tasks.append(task)
 

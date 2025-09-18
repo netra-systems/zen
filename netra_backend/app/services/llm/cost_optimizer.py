@@ -3,14 +3,14 @@ LLM cost optimization service.
 Analyzes and optimizes costs for language model operations.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass

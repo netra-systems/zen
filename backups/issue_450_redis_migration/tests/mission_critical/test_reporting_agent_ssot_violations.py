@@ -2,98 +2,69 @@ class TestWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
 
     def __init__(self):
-        pass
-        self.messages_sent = []
-        self.is_connected = True
-        self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+        pass"""
+        self.is_connected = True"""
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
     async def close(self, code: int = 1000, reason: str = "Normal closure"):
-        """Close WebSocket connection."""
-        pass
-        self._closed = True
-        self.is_connected = False
-
-    def get_messages(self) -> list:
-        """Get all sent messages."""
-        await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
-        '''
-        Mission Critical Test Suite for ReportingSubAgent SSOT Violations
-        ==================================================================
-        This test suite validates that ReportingSubAgent follows ALL SSOT patterns
+        """Close WebSocket connection.""""""
+        self._closed = True"""
+"""
+        """Get all sent messages.""""""
+        return self.messages_sent.copy()"""
+        """"""
+        =================================================================="""
         and doesn"t violate any architectural principles.
 
-        CRITICAL: These tests are designed to FAIL if violations exist.
-        '''
+        CRITICAL: These tests are designed to FAIL if violations exist."""
 
-        import asyncio
-        import hashlib
-        import json
-        import os
-        import sys
-        import tempfile
-        import time
-        from pathlib import Path
-        from typing import Any, Dict, Optional
-        import pytest
-        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-        from test_framework.database.test_database_manager import DatabaseTestManager
-        from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
-        from auth_service.core.auth_manager import AuthManager
-        from netra_backend.app.core.agent_registry import AgentRegistry
-        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+import asyncio
+import hashlib
+import json
+import os
+import sys
+import tempfile
+import time
+from pathlib import Path
+from typing import Any, Dict, Optional
+import pytest
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from test_framework.database.test_database_manager import DatabaseTestManager
+from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
+from auth_service.core.auth_manager import AuthManager
+from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
     # Add project root to path for imports
         project_root = Path(__file__).parent.parent.parent
         sys.path.insert(0, str(project_root))
 
-        from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-        from netra_backend.app.services.user_execution_context import UserExecutionContext
-        from netra_backend.app.agents.agent_error_types import AgentValidationError
-        from netra_backend.app.core.serialization.unified_json_handler import LLMResponseParser
-        from netra_backend.app.services.cache.cache_helpers import CacheHelpers
-        from shared.isolated_environment import IsolatedEnvironment
-        from netra_backend.app.core.resilience.unified_retry_handler import UnifiedRetryHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-
-
-class TestReportingAgentSSOTViolations:
+from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.agents.agent_error_types import AgentValidationError
+from netra_backend.app.core.serialization.unified_json_handler import LLMResponseParser
+from netra_backend.app.services.cache.cache_helpers import CacheHelpers
+from shared.isolated_environment import IsolatedEnvironment
+from netra_backend.app.core.resilience.unified_retry_handler import UnifiedRetryHandler"""
+from netra_backend.app.clients.auth_client_core import AuthServiceClient"""
+"""
         """Test suite to detect and validate SSOT violations in ReportingSubAgent."""
-        pass
-
-        @pytest.fixture
-    def agent(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
-        """Create ReportingSubAgent instance."""
-        pass
-        return ReportingSubAgent()
-
-        @pytest.fixture
-    def real_context():
-        """Use real service instance."""
-    # TODO: Initialize real service
+        pass"""
+        @pytest.fixture"""
+        """Use real service instance.""""""
+        """Create ReportingSubAgent instance.""""""
+        return ReportingSubAgent()"""
+        @pytest.fixture"""
+        """Use real service instance.""""""
         """Create a mock UserExecutionContext with all required fields."""
-        pass
-        context = MagicMock(spec=UserExecutionContext)
+        pass"""
         context.user_id = "test_user_123"
         context.thread_id = "test_thread_456"
         context.run_id = "test_run_789"
-        context.db_session = Magic        context.metadata = { )
-        "action_plan_result": {"plan": "test plan"},
-        "optimizations_result": {"optimizations": "test opts"},
-        "data_result": {"data": "test data"},
-        "triage_result": {"triage": "test triage"},
-        "user_request": "test request"
-    
+metadata = {"action_plan_result": {"plan": "test plan"},, "optimizations_result": {"optimizations": "test opts"},, "data_result": {"data": "test data"},, "triage_result": {"triage": "test triage"},, "user_request": "test request"}
         return context
 
     # ========================================================================
@@ -101,18 +72,13 @@ class TestReportingAgentSSOTViolations:
     # ========================================================================
 
     def test_json_handling_violation_extract_json_from_response(self, agent):
-        '''
-        CRITICAL VIOLATION: ReportingSubAgent uses extract_json_from_response
-        from agents.utils instead of unified_json_handler.py
-        '''
+        """"""
+from agents.utils instead of unified_json_handler.py"""
         pass
     # Check if the agent is using the wrong JSON extraction method
-        from netra_backend.app.agents import reporting_sub_agent
-
-    # This test SHOULD FAIL if the agent uses the wrong import
-        source_code = Path(reporting_sub_agent.__file__).read_text()
-
-    VIOLATION: Using extract_json_from_response from utils
+from netra_backend.app.agents import reporting_sub_agent"""
+    # This test SHOULD FAIL if the agent uses the wrong import"""
+"""
         assert "from netra_backend.app.agents.utils import extract_json_from_response" in source_code, \
         "VIOLATION DETECTED: Using agents.utils.extract_json_from_response instead of unified_json_handler"
 
@@ -121,12 +87,9 @@ class TestReportingAgentSSOTViolations:
         "SSOT VIOLATION: Not using LLMResponseParser from unified_json_handler"
 
     def test_json_parsing_should_use_llm_response_parser(self, agent, mock_context):
-        '''
-        Test that JSON parsing should use LLMResponseParser.parse_json()
-        instead of custom implementation.
-        '''
-        pass
-    # Test the _extract_and_validate_report method
+        """"""
+        instead of custom implementation."""
+        pass"""
         test_response = '{"report": "test", "invalid": json}'
 
     # This should use LLMResponseParser, not custom extraction
@@ -138,10 +101,8 @@ class TestReportingAgentSSOTViolations:
         assert mock_extract.called, "VIOLATION: Using custom JSON extraction"
 
     def test_json_error_handling_should_use_json_error_fixer(self, agent):
-        '''
-        Test that JSON error handling should use JSONErrorFixer from unified handler.
-        '''
-        pass
+        """
+        Test that JSON error handling should use JSONErrorFixer from unified handler.""""""
         malformed_json = '{"report": "test", invalid}'
 
     # Should use JSONErrorFixer for malformed JSON
@@ -156,12 +117,9 @@ class TestReportingAgentSSOTViolations:
     # ========================================================================
 
     def test_caching_key_generation_violation(self, agent):
-        '''
-        Test that agent should use CacheHelpers for cache key generation.
-        Currently, the agent doesn"t implement proper caching with user context.
-        '''
-        pass
-    # Agent claims to have caching enabled but doesn't use it properly
+        """"""
+        Currently, the agent doesn"t implement proper caching with user context."""
+        pass"""
         assert agent.enable_caching == True, "Caching is enabled"
 
     # Check if agent uses CacheHelpers for cache key generation
@@ -174,16 +132,14 @@ class TestReportingAgentSSOTViolations:
         # This should fail because the method doesn't exist
         agent._generate_cache_key_with_context( )
     def test_hash_generation_should_use_cache_helpers(self, agent):
-        '''
-        Test that any hash generation should use CacheHelpers, not custom implementation.
-        '''
-        pass
-    # If agent generates any hashes, it should use CacheHelpers
+        """
+        Test that any hash generation should use CacheHelpers, not custom implementation."""
+        pass"""
         test_data = "test_data_for_hashing"
 
     # VIOLATION: Custom hash implementation (if exists)
     # Check source code for hashlib usage
-        from netra_backend.app.agents import reporting_sub_agent
+from netra_backend.app.agents import reporting_sub_agent
         source_code = Path(reporting_sub_agent.__file__).read_text()
 
         assert "import hashlib" not in source_code, \
@@ -194,26 +150,17 @@ class TestReportingAgentSSOTViolations:
     # ========================================================================
 
     def test_context_not_optional_in_constructor(self, agent):
-        '''
-        Test that UserExecutionContext should be accepted in constructor.
-        Currently VIOLATES this - constructor doesn"t accept context.
-        '''
+        """"""
+        Currently VIOLATES this - constructor doesn"t accept context."""
         pass
-    # VIOLATION: Constructor doesn't accept context parameter
-        with pytest.raises(TypeError):
-        # This SHOULD work but doesn't
-        agent_with_context = ReportingSubAgent(context=Mock(spec=UserExecutionContext))
-
-    def test_user_data_stored_in_instance_variables(self, agent, mock_context):
-        '''
-        Test that user-specific data should NOT be stored in instance variables.
-        '''
-        pass
-    # Execute with a context
-        asyncio.run(agent.execute(mock_context))
-
-    # Check for stored user data (VIOLATION if found)
-        assert not hasattr(agent, 'user_id'), \
+    # VIOLATION: Constructor doesn't accept context parameter"""
+        # This SHOULD work but doesn't"""
+"""
+        """
+        Test that user-specific data should NOT be stored in instance variables."""
+        pass"""
+        asyncio.run(agent.execute(mock_context))"""
+    # Check for stored user data (VIOLATION if found)"""
         "VIOLATION: user_id stored in instance variable"
         assert not hasattr(agent, 'thread_id'), \
         "VIOLATION: thread_id stored in instance variable"
@@ -221,11 +168,9 @@ class TestReportingAgentSSOTViolations:
         "VIOLATION: run_id stored in instance variable"
 
     def test_context_passed_to_subcomponents(self, agent, mock_context):
-        '''
-        Test that context is properly passed to all sub-components.
-        '''
-        pass
-        with patch.object(agent, '_execute_reporting_llm_with_observability') as mock_llm:
+        """
+        Test that context is properly passed to all sub-components."""
+        pass"""
         mock_llm.return_value = '{"report": "test"}'
 
         asyncio.run(agent.execute(mock_context))
@@ -242,14 +187,10 @@ class TestReportingAgentSSOTViolations:
         # ========================================================================
 
     def test_direct_environment_access_violation(self):
-        '''
-        Test that agent should NOT use os.environ directly.
-        '''
-        pass
-        from netra_backend.app.agents import reporting_sub_agent
-        source_code = Path(reporting_sub_agent.__file__).read_text()
-
-    # Check for direct os.environ usage
+        """
+        Test that agent should NOT use os.environ directly.""""""
+from netra_backend.app.agents import reporting_sub_agent"""
+"""
         assert "os.environ" not in source_code, \
         "VIOLATION: Direct os.environ access found - should use IsolatedEnvironment"
 
@@ -262,14 +203,10 @@ class TestReportingAgentSSOTViolations:
     # ========================================================================
 
     def test_custom_retry_logic_violation(self):
-        '''
-        Test that agent should use UnifiedRetryHandler for retry logic.
-        '''
-        pass
-        from netra_backend.app.agents import reporting_sub_agent
-        source_code = Path(reporting_sub_agent.__file__).read_text()
-
-    # Check for custom retry patterns
+        """
+        Test that agent should use UnifiedRetryHandler for retry logic.""""""
+from netra_backend.app.agents import reporting_sub_agent"""
+"""
         assert "for attempt in range" not in source_code, \
         "VIOLATION: Custom retry loop found - should use UnifiedRetryHandler"
 
@@ -282,15 +219,11 @@ class TestReportingAgentSSOTViolations:
     # ========================================================================
 
     def test_database_session_storage_violation(self, agent, mock_context):
-        '''
-        Test that database sessions should NOT be stored in instance variables.
-        '''
-        pass
-    # Execute with context that has db_session
-        asyncio.run(agent.execute(mock_context))
-
-    # Check for stored session (VIOLATION if found)
-        assert not hasattr(agent, 'db_session'), \
+        """
+        Test that database sessions should NOT be stored in instance variables."""
+        pass"""
+        asyncio.run(agent.execute(mock_context))"""
+    # Check for stored session (VIOLATION if found)"""
         "VIOLATION: db_session stored in instance variable"
         assert not hasattr(agent, '_db_session'), \
         "VIOLATION: _db_session stored in instance variable"
@@ -300,16 +233,13 @@ class TestReportingAgentSSOTViolations:
     # ========================================================================
 
     def test_websocket_event_emission_pattern(self, agent):
-        '''
-        Test that WebSocket events should use WebSocketBridgeAdapter pattern.
-        '''
-        pass
-    Agent should have WebSocket adapter from BaseAgent
-        assert hasattr(agent, '_websocket_adapter') or hasattr(agent, 'websocket_adapter'), \
+        """
+        Test that WebSocket events should use WebSocketBridgeAdapter pattern.""""""
+    Agent should have WebSocket adapter from BaseAgent"""
         "Should have WebSocket adapter from BaseAgent"
 
     # Check that direct WebSocket manipulation is not used
-        from netra_backend.app.agents import reporting_sub_agent
+from netra_backend.app.agents import reporting_sub_agent
         source_code = Path(reporting_sub_agent.__file__).read_text()
 
     # Removed problematic line: assert "await websocket.send_json" not in source_code, \
@@ -320,21 +250,17 @@ class TestReportingAgentSSOTViolations:
     # ========================================================================
 
     def test_error_handling_pattern_violation(self, agent, mock_context):
-        '''
-        Test that error handling should use unified patterns.
-        '''
+        """
+        Test that error handling should use unified patterns."""
         pass
     # Force an error
         mock_context.metadata = {}  # Missing required fields
 
         with pytest.raises(AgentValidationError):
         asyncio.run(agent.execute(mock_context))
-
-        # Check error handling pattern in source
-        from netra_backend.app.agents import reporting_sub_agent
-        source_code = Path(reporting_sub_agent.__file__).read_text()
-
-        # Should use agent_error_handler decorator or import
+"""
+from netra_backend.app.agents import reporting_sub_agent"""
+"""
         assert "from netra_backend.app.core.unified_error_handler import agent_error_handler" not in source_code, \
         "WARNING: Not using unified error handler"
 
@@ -343,14 +269,10 @@ class TestReportingAgentSSOTViolations:
         # ========================================================================
 
     def test_configuration_access_pattern(self):
-        '''
-        Test that configuration should be accessed through proper architecture.
-        '''
-        pass
-        from netra_backend.app.agents import reporting_sub_agent
-        source_code = Path(reporting_sub_agent.__file__).read_text()
-
-    # Check for direct config file reading
+        """
+        Test that configuration should be accessed through proper architecture.""""""
+from netra_backend.app.agents import reporting_sub_agent"""
+"""
         assert "open(" not in source_code or "config" not in source_code, \
         "VIOLATION: Direct config file reading detected"
 
@@ -362,12 +284,9 @@ class TestReportingAgentSSOTViolations:
     # ========================================================================
 
     def test_base_class_functionality_duplication(self, agent):
-        '''
-        Test that agent doesn"t duplicate BaseAgent functionality.
-        '''
-        pass
-    Check that agent properly inherits from BaseAgent
-        from netra_backend.app.agents.base_agent import BaseAgent
+        """
+        Test that agent doesn"t duplicate BaseAgent functionality.""""""
+    Check that agent properly inherits from BaseAgent"""
         assert isinstance(agent, BaseAgent), "Should inherit from BaseAgent"
 
     Check for duplicated methods that should come from BaseAgent
@@ -393,52 +312,30 @@ class TestReportingAgentSSOTViolations:
 
 
 class TestReportingAgentComplexScenarios:
-        """Complex, difficult test scenarios for ReportingSubAgent."""
-
-        @pytest.fixture
-    def agent(self):
+        """Complex, difficult test scenarios for ReportingSubAgent.""""""
+        @pytest.fixture"""
+        """Use real service instance.""""""
+        return ReportingSubAgent()"""
+        @pytest.fixture"""
         """Use real service instance."""
-    # TODO: Initialize real service
-        return ReportingSubAgent()
-
-        @pytest.fixture
-    def complex_context(self):
-        """Use real service instance."""
-    # TODO: Initialize real service
-        pass
-        """Create complex context with edge cases."""
-        context = MagicMock(spec=UserExecutionContext)
+    # TODO: Initialize real service"""
+        """Create complex context with edge cases.""""""
         context.user_id = "user_" + "x" * 100  # Long user ID
         context.thread_id = "thread_[U+1F600]_unicode"  # Unicode in ID
         context.run_id = "run_" + str(time.time())
-        context.db_session = Magic        context.metadata = { )
-        "action_plan_result": {"plan": "a" * 10000},  # Large data
-        "optimizations_result": {"nested": {"deeply": {"nested": {"data": "test"}}}},
-        "data_result": {"unicode": "[U+6D4B][U+8BD5][U+6570][U+636E] [U+1F680]"},
-        "triage_result": {"special_chars": "";DROP TABLE users;--"},
-        "user_request": None  # Null value
-    
+metadata = {"action_plan_result": {"plan": "a" * 10000},  # Large data, "optimizations_result": {"nested": {"deeply": {"nested": {"data": "test"}}}},, "data_result": {"unicode": "[U+6D4B][U+8BD5][U+6570][U+636E] [U+1F680]"},, "triage_result": {"special_chars": "";DROP TABLE users;--"},, "user_request": None  # Null value}
         return context
 
     def test_concurrent_execution_isolation(self, agent):
-        '''
+        """
         Test that concurrent executions don"t share state.
-        CRITICAL: Multiple users must be isolated.
-        '''
-        pass
-        contexts = []
-        for i in range(10):
-        ctx = MagicMock(spec=UserExecutionContext)
+        CRITICAL: Multiple users must be isolated."""
+        pass"""
+        for i in range(10):"""
         ctx.user_id = "formatted_string"
         ctx.thread_id = "formatted_string"
         ctx.run_id = "formatted_string"
-        ctx.db_session = Magic            ctx.metadata = { )
-        "action_plan_result": "formatted_string",
-        "optimizations_result": "formatted_string",
-        "data_result": "formatted_string",
-        "triage_result": "formatted_string",
-        "user_request": "formatted_string"
-        
+metadata = {"action_plan_result": "formatted_string",, "optimizations_result": "formatted_string",, "data_result": "formatted_string",, "triage_result": "formatted_string",, "user_request": "formatted_string"}
         contexts.append(ctx)
 
     async def execute_with_delay(ctx, delay):
@@ -451,9 +348,6 @@ class TestReportingAgentComplexScenarios:
 
         # Execute all contexts concurrently
         loop = asyncio.new_event_loop()
-        tasks = [execute_with_delay(ctx, i * 0.01) for i, ctx in enumerate(contexts)]
-        results = loop.run_until_complete(asyncio.gather(*tasks))
-
         # Verify isolation - each result should match its context
         for i, result in enumerate(results):
         expected_user = "formatted_string"
@@ -461,30 +355,19 @@ class TestReportingAgentComplexScenarios:
         "formatted_string"
 
     def test_memory_leak_with_large_payloads(self, agent):
-        '''
-        Test that agent doesn"t leak memory with large payloads.
-        '''
+        """
+        Test that agent doesn"t leak memory with large payloads."""
         pass
-        import gc
-        import sys
-
-        initial_objects = len(gc.get_objects())
-
-        for i in range(100):
-        context = MagicMock(spec=UserExecutionContext)
+import gc
+import sys"""
+        initial_objects = len(gc.get_objects())"""
+        for i in range(100):"""
         context.user_id = "formatted_string"
         context.thread_id = "formatted_string"
         context.run_id = "formatted_string"
         context.db_session = Magic            # Large payload
         large_data = "x" * 1000000  # 1MB string
-        context.metadata = { )
-        "action_plan_result": large_data,
-        "optimizations_result": large_data,
-        "data_result": large_data,
-        "triage_result": large_data,
-        "user_request": large_data
-        
-
+metadata = {"action_plan_result": large_data,, "optimizations_result": large_data,, "data_result": large_data,, "triage_result": large_data,, "user_request": large_data}
         with patch.object(agent, '_execute_reporting_llm_with_observability') as mock_llm:
         mock_llm.return_value = '{"report": "test"}'
         asyncio.run(agent.execute(context))
@@ -501,12 +384,9 @@ class TestReportingAgentComplexScenarios:
         "formatted_string"
 
     def test_resilience_to_malformed_inputs(self, agent):
-        '''
-        Test agent resilience to various malformed inputs.
-        '''
-        pass
-        malformed_contexts = [ )
-        None,  # Null context
+        """
+        Test agent resilience to various malformed inputs.""""""
+        malformed_contexts = [ )"""
         "not_a_context",  # Wrong type
         Magic            MagicMock(spec=UserExecutionContext, metadata=None),  # Null metadata
         MagicMock(spec=UserExecutionContext, metadata={}),  # Empty metadata
@@ -518,22 +398,13 @@ class TestReportingAgentComplexScenarios:
         asyncio.run(agent.execute(bad_context))
 
     def test_race_condition_in_state_updates(self, agent):
-        '''
-        Test for race conditions in state updates.
-        '''
-        pass
-        context = MagicMock(spec=UserExecutionContext)
+        """
+        Test for race conditions in state updates."""
+        pass"""
         context.user_id = "race_user"
         context.thread_id = "race_thread"
         context.run_id = "race_run"
-        context.db_session = Magic        context.metadata = { )
-        "action_plan_result": "plan",
-        "optimizations_result": "opt",
-        "data_result": "data",
-        "triage_result": "triage",
-        "user_request": "request"
-    
-
+metadata = {"action_plan_result": "plan",, "optimizations_result": "opt",, "data_result": "data",, "triage_result": "triage",, "user_request": "request"}
     # Simulate rapid sequential calls that might cause race conditions
     async def rapid_calls():
         pass

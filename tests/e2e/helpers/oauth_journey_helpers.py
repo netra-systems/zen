@@ -9,7 +9,7 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+            raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
     async def close(self, code: int = 1000, reason: str = "Normal closure"):
@@ -20,73 +20,77 @@ class TestWebSocketConnection:
     def get_messages(self) -> list:
         """Get all sent messages."""
         return self.messages_sent.copy()
-        \n'''
-        OAuth Journey Helper Functions
 
-        Helper functions for OAuth authentication flow testing and validation.
-        Extracted from test_complete_oauth_chat_journey.py for modularity.
-        '''
 
-        import asyncio
-        import json
-        import time
-        import uuid
-        from typing import Any, Dict, Optional
-        from urllib.parse import parse_qs, urlparse
+'''
+'''
+OAuth Journey Helper Functions
 
-        import httpx
-        import websockets
+Helper functions for OAuth authentication flow testing and validation.
+Extracted from test_complete_oauth_chat_journey.py for modularity.
+'''
+'''
 
-        from test_framework.http_client import UnifiedHTTPClient, AuthHTTPClient
-        from test_framework.helpers.auth_helpers import OAuthFlowTester
-        from tests.e2e.oauth_test_providers import GoogleOAuthProvider
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
+import asyncio
+import json
+import time
+import uuid
+from typing import Any, Dict, Optional
+from urllib.parse import parse_qs, urlparse
+
+import httpx
+import websockets
+
+from test_framework.http_client import UnifiedHTTPClient, AuthHTTPClient
+from test_framework.helpers.auth_helpers import OAuthFlowTester
+from tests.e2e.oauth_test_providers import GoogleOAuthProvider
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
 
 
 class OAuthFlowHelper:
-        """Helper for OAuth authentication flow operations."""
+    """Helper for OAuth authentication flow operations."""
 
-        @staticmethod
+    @staticmethod
     def generate_oauth_user_data() -> Dict[str, Any]:
         """Generate unique OAuth user data for testing."""
-        unique_email = "formatted_string"
+        unique_email = f"oauth_test_{uuid.uuid4().hex[:8]}@test.com"
 
-        return { )
-        "id": "formatted_string",
-        "email": unique_email,
-        "name": "OAuth Journey User",
-        "picture": "https://example.com/oauth-avatar.jpg",
-        "verified_email": True,
-        "hd": "enterprise-test.com"
-    
+        return {
+            "id": f"oauth_user_{uuid.uuid4().hex[:8]}",
+            "email": unique_email,
+            "name": "OAuth Journey User",
+            "picture": "https://example.com/oauth-avatar.jpg",
+            "verified_email": True,
+            "hd": "enterprise-test.com"
+        }
 
-        @staticmethod
+    @staticmethod
     def generate_oauth_state_and_code() -> Dict[str, str]:
         """Generate OAuth state and code for testing."""
-        return { )
-        "oauth_state": "formatted_string",
-        "oauth_code": "formatted_string"
-    
+        return {
+            "oauth_state": f"state_{uuid.uuid4().hex[:16]}",
+            "oauth_code": f"code_{uuid.uuid4().hex[:16]}"
+        }
 
-        @staticmethod
+    @staticmethod
     def extract_tokens_from_redirect(redirect_url: str) -> Dict[str, str]:
         """Extract tokens from OAuth callback redirect URL."""
         parsed = urlparse(redirect_url)
         query_params = parse_qs(parsed.query)
 
-        return { )
-        "access_token": query_params.get("token", [None])[0],
-        "refresh_token": query_params.get("refresh", [None])[0]
-    
+        return {
+            "access_token": query_params.get("token", [None])[0],
+            "refresh_token": query_params.get("refresh", [None])[0]
+        }
 
 
 class OAuthAuthenticationHelper:
-        """Helper for OAuth authentication simulation."""
+    """Helper for OAuth authentication simulation."""
 
-        @staticmethod
+    @staticmethod
     async def execute_oauth_authentication_flow() -> Dict[str, Any]:
         """Execute OAuth authentication with simulated provider."""
         auth_start = time.time()
@@ -128,12 +132,12 @@ oauth_user_data: Dict[str, Any]
 callback_start = time.time()
 
 try:
-service_urls = services_manager.get_service_urls()
+    service_urls = services_manager.get_service_urls()
 auth_url = service_urls["auth"]
 
         # Mock Google OAuth API responses
 with patch('httpx.AsyncClient') as mock_client:
-websocket = TestWebSocketConnection()
+    websocket = TestWebSocketConnection()
 mock_client.return_value.__aenter__.return_value = mock_instance
 
             # Mock token exchange response
@@ -160,7 +164,7 @@ callback_time = time.time() - callback_start
 
             Extract tokens from redirect URL
 if response.status_code == 302:
-redirect_url = response.headers.get("location", "")
+    redirect_url = response.headers.get("location", "")
 tokens = OAuthFlowHelper.extract_tokens_from_redirect(redirect_url)
 
 return { )
@@ -173,7 +177,7 @@ return { )
 "user_created": True
                 
 else:
-return { )
+    return { )
 "success": False,
 "status_code": response.status_code,
 "response_text": response.text,
@@ -182,7 +186,7 @@ return { )
                     
 
 except Exception as e:
-return { )
+    return { )
 "success": False,
 "error": str(e),
 "callback_time": time.time() - callback_start
@@ -203,9 +207,9 @@ oauth_user_data: Dict[str, Any]
 sync_start = time.time()
 
 try:
-access_token = tokens.get("access_token")
+    access_token = tokens.get("access_token")
 if not access_token:
-return { )
+    return { )
 "success": False,
 "error": "No access token available",
 "sync_time": time.time() - sync_start
@@ -247,7 +251,7 @@ return { )
             
 
 except Exception as e:
-return { )
+    return { )
 "success": False,
 "error": str(e),
 "sync_time": time.time() - sync_start
@@ -309,3 +313,5 @@ class OAuthReturningUserHelper:
     "error": str(e),
     "returning_time": time.time() - returning_start
                     
+
+}}}}}}}}}}}}

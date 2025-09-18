@@ -3,7 +3,7 @@
 Calculates LLM usage costs based on token consumption and provider pricing.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from decimal import Decimal
 from enum import Enum
 from typing import Dict, Any, Optional
@@ -11,7 +11,7 @@ from dataclasses import dataclass
 
 from netra_backend.app.schemas.llm_types import LLMProvider, TokenUsage
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class CostTier(Enum):

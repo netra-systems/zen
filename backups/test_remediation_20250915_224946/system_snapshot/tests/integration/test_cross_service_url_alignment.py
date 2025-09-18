@@ -1,4 +1,4 @@
-'''
+"""
 Cross-service URL alignment tests.
 
 Ensures that backend, auth, and frontend services all agree on URLs
@@ -6,10 +6,8 @@ and can communicate properly in all environments.
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal
-- Business Goal: Enable reliable service-to-service communication
-- Value Impact: Prevents authentication and service discovery failures
-- Strategic Impact: Foundation for microservices architecture reliability
-'''
+- Business Goal: Enable reliable service-to-service communication"""
+- Strategic Impact: Foundation for microservices architecture reliability"""
 
 import pytest
 import os
@@ -24,12 +22,10 @@ from shared.isolated_environment import IsolatedEnvironment
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
-class TestServiceURLAlignment:
+"""
     """Test that all services agree on URLs."""
 
-    @pytest.fixture
-    def setup_method(self):
+    @pytest.fixture"""
         """Setup test environment."""
         self.original_env = os.environ.copy()
         self.modules_to_clear = [ )
@@ -43,15 +39,13 @@ class TestServiceURLAlignment:
         yield
         os.environ.clear()
         os.environ.update(self.original_env)
-
-    def _clear_module_cache(self):
+"""
         """Clear module cache to force reimport."""
         pass
         for module in self.modules_to_clear:
         if module in sys.modules:
         del sys.modules[module]
-
-    def test_backend_knows_correct_auth_url(self):
+"""
         """Test that backend service knows the correct auth service URL."""
         environments = ['development', 'staging', 'production']
 
@@ -60,16 +54,15 @@ class TestServiceURLAlignment:
         self._clear_module_cache()
 
             # Get auth service's own URL
-        from auth_service.auth_core.auth_environment import AuthEnvironment
+from auth_service.auth_core.auth_environment import AuthEnvironment
         auth_env = AuthEnvironment()
         auth_url = auth_env.get_auth_service_url()
 
             # Get backend's view of auth URL
-        from netra_backend.app.clients.auth_client_config import load_auth_client_config
+from netra_backend.app.clients.auth_client_config import load_auth_client_config
         backend_config = load_auth_client_config()
         backend_auth_url = backend_config.service_url
-
-            # Log for debugging
+"""
         logger.info("formatted_string")
         logger.info("formatted_string")
 
@@ -82,44 +75,32 @@ class TestServiceURLAlignment:
         pass
         environments = ['development', 'staging', 'production']
 
-        expected_urls = { )
-        'development': 'http://localhost:3000',
-        'staging': 'https://app.staging.netrasystems.ai',
-        'production': 'https://app.netrasystems.ai'
-    
-
+expected_urls = {'development': 'http://localhost:3000',, 'staging': 'https://app.staging.netrasystems.ai',, 'production': 'https://app.netrasystems.ai'}
         for env in environments:
         with patch.dict(os.environ, {'ENVIRONMENT': env}, clear=True):
         self._clear_module_cache()
 
-        from auth_service.auth_core.auth_environment import AuthEnvironment
+from auth_service.auth_core.auth_environment import AuthEnvironment
         auth_env = AuthEnvironment()
         frontend_url = auth_env.get_frontend_url()
 
-        expected = expected_urls[env]
-        assert frontend_url == expected, \
+        expected = expected_urls[env]"""
         "formatted_string"
 
     def test_auth_knows_correct_backend_url(self):
         """Test that auth service knows the correct backend URL for callbacks."""
         environments = ['development', 'staging', 'production']
 
-        expected_urls = { )
-        'development': 'http://localhost:8000',
-        'staging': 'https://api.staging.netrasystems.ai',
-        'production': 'https://backend.netrasystems.ai'
-    
-
+expected_urls = {'development': 'http://localhost:8000',, 'staging': 'https://api.staging.netrasystems.ai',, 'production': 'https://backend.netrasystems.ai'}
         for env in environments:
         with patch.dict(os.environ, {'ENVIRONMENT': env}, clear=True):
         self._clear_module_cache()
 
-        from auth_service.auth_core.auth_environment import AuthEnvironment
+from auth_service.auth_core.auth_environment import AuthEnvironment
         auth_env = AuthEnvironment()
         backend_url = auth_env.get_backend_url()
 
-        expected = expected_urls[env]
-        assert backend_url == expected, \
+        expected = expected_urls[env]"""
         "formatted_string"
 
     def test_service_url_consistency_matrix(self):
@@ -132,8 +113,8 @@ class TestServiceURLAlignment:
         self._clear_module_cache()
 
             # Import all service configs
-        from auth_service.auth_core.auth_environment import AuthEnvironment
-        from netra_backend.app.clients.auth_client_config import ( )
+from auth_service.auth_core.auth_environment import AuthEnvironment
+from netra_backend.app.clients.auth_client_config import ( )
         load_auth_client_config, OAuthConfigGenerator
             
 
@@ -142,17 +123,12 @@ class TestServiceURLAlignment:
         oauth_gen = OAuthConfigGenerator()
 
             # Build URL matrix
-        url_matrix = { )
-        'auth_view': { )
-        'frontend': auth_env.get_frontend_url(),
-        'backend': auth_env.get_backend_url(),
-        'auth': auth_env.get_auth_service_url()
+url_matrix = {'auth_view': { ), 'frontend': auth_env.get_frontend_url(),, 'backend': auth_env.get_backend_url(),, 'auth': auth_env.get_auth_service_url()}
         },
         'backend_view': { )
         'auth': backend_auth_config.service_url
             
-            
-
+            """
         logger.info("formatted_string")
         logger.info("formatted_string")
         logger.info("formatted_string")
@@ -171,8 +147,7 @@ class TestServiceURLAlignment:
         all_urls.extend(view.values())
 
             # All should be HTTPS
-        for url in all_urls:
-        assert url.startswith('https://'), \
+        for url in all_urls:"""
         "formatted_string"
 
                 # All should contain correct domain
@@ -189,8 +164,7 @@ class TestServiceURLAlignment:
 
 class TestOAuthURLAlignment:
         """Test OAuth configuration alignment across services."""
-
-    def test_oauth_redirect_uri_alignment(self):
+"""
         """Test that OAuth redirect URIs are aligned."""
         environments = ['development', 'staging', 'production']
 
@@ -203,16 +177,15 @@ class TestOAuthURLAlignment:
         del sys.modules[module]
 
                     # Get auth service OAuth redirect
-        from auth_service.auth_core.auth_environment import AuthEnvironment
+from auth_service.auth_core.auth_environment import AuthEnvironment
         auth_env = AuthEnvironment()
         auth_redirect = auth_env.get_oauth_redirect_uri()
 
                     # Get backend OAuth config
-        from netra_backend.app.clients.auth_client_config import OAuthConfigGenerator
+from netra_backend.app.clients.auth_client_config import OAuthConfigGenerator
         oauth_gen = OAuthConfigGenerator()
         backend_oauth = oauth_gen.generate(env)
-        backend_redirect = backend_oauth.get('google', {}).get('redirect_uri', '')
-
+        backend_redirect = backend_oauth.get('google', {}).get('redirect_uri', '')"""
         logger.info("formatted_string")
         logger.info("formatted_string")
         logger.info("formatted_string")
@@ -233,33 +206,26 @@ class TestOAuthURLAlignment:
 
         for env in environments:
         # Set up OAuth credentials
-        oauth_env = { )
-        'ENVIRONMENT': env,
-        'formatted_string': 'formatted_string',
-        'formatted_string': 'formatted_string'
-        
-
+oauth_env = {'ENVIRONMENT': env,, 'formatted_string': 'formatted_string',, 'formatted_string': 'formatted_string'}
         with patch.dict(os.environ, oauth_env, clear=True):
             # Clear module cache
         if 'auth_service.auth_core.auth_environment' in sys.modules:
         del sys.modules['auth_service.auth_core.auth_environment']
 
-        from auth_service.auth_core.auth_environment import AuthEnvironment
+from auth_service.auth_core.auth_environment import AuthEnvironment
         auth_env = AuthEnvironment()
 
         client_id = auth_env.get_oauth_google_client_id()
 
                 # Should get environment-specific client ID
         if env in ['staging', 'production']:
-        expected = 'formatted_string'
-        assert client_id == expected, \
+        expected = 'formatted_string'"""
         "formatted_string"
 
 
 class TestCORSAlignment:
         """Test CORS configuration alignment."""
-
-    def test_cors_includes_all_service_urls(self):
+"""
         """Test that CORS origins include all service URLs."""
         environments = ['development', 'staging', 'production']
 
@@ -269,12 +235,10 @@ class TestCORSAlignment:
         if 'auth_service.auth_core.auth_environment' in sys.modules:
         del sys.modules['auth_service.auth_core.auth_environment']
 
-        from auth_service.auth_core.auth_environment import AuthEnvironment
+from auth_service.auth_core.auth_environment import AuthEnvironment
         auth_env = AuthEnvironment()
 
         frontend_url = auth_env.get_frontend_url()
-        cors_origins = auth_env.get_cors_origins()
-
                 # Frontend URL should be in CORS origins
         frontend_base = frontend_url.rstrip('/')
 
@@ -284,45 +248,36 @@ class TestCORSAlignment:
         if origin.rstrip('/') == frontend_base:
         found = True
         break
-
-        assert found, \
+"""
         "formatted_string"
 
 
 class TestHealthCheckURLs:
         """Test health check URL construction."""
-
-    def test_health_check_urls_correct(self):
+"""
         """Test that health check URLs are correctly constructed."""
         environments = ['development', 'staging', 'production']
 
-        expected_health_urls = { )
-        'development': 'http://localhost:8081/health',
-        'staging': 'https://auth.staging.netrasystems.ai/health',
-        'production': 'https://auth.netrasystems.ai/health'
-    
-
+expected_health_urls = {'development': 'http://localhost:8081/health',, 'staging': 'https://auth.staging.netrasystems.ai/health',, 'production': 'https://auth.netrasystems.ai/health'}
         for env in environments:
         with patch.dict(os.environ, {'ENVIRONMENT': env}, clear=True):
             # Clear module cache
         if 'netra_backend.app.clients.auth_client_config' in sys.modules:
         del sys.modules['netra_backend.app.clients.auth_client_config']
 
-        from netra_backend.app.clients.auth_client_config import load_auth_client_config
+from netra_backend.app.clients.auth_client_config import load_auth_client_config
         config = load_auth_client_config()
 
         health_url = config.health_url
         expected = expected_health_urls.get(env)
 
-        if expected:
-        assert health_url == expected, \
+        if expected:"""
         "formatted_string"
 
 
 class TestEnvironmentIsolation:
         """Test that environments are properly isolated."""
-
-    def test_no_production_urls_in_staging(self):
+"""
         """Test that staging doesn't accidentally use production URLs."""
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=True):
         # Clear module cache
@@ -334,7 +289,7 @@ class TestEnvironmentIsolation:
         if module in sys.modules:
         del sys.modules[module]
 
-        from auth_service.auth_core.auth_environment import AuthEnvironment
+from auth_service.auth_core.auth_environment import AuthEnvironment
         auth_env = AuthEnvironment()
 
                 # Get all URLs
@@ -348,8 +303,7 @@ class TestEnvironmentIsolation:
                 # Check none contain production patterns
         for url in urls:
                     # Should not have production domain without staging
-        if 'netrasystems.ai' in url:
-        assert 'staging' in url, \
+        if 'netrasystems.ai' in url:"""
         "formatted_string"
 
                         # Should not be exactly the production URL
@@ -367,7 +321,7 @@ class TestEnvironmentIsolation:
         if 'auth_service.auth_core.auth_environment' in sys.modules:
         del sys.modules['auth_service.auth_core.auth_environment']
 
-        from auth_service.auth_core.auth_environment import AuthEnvironment
+from auth_service.auth_core.auth_environment import AuthEnvironment
         auth_env = AuthEnvironment()
 
             # Get all URLs
@@ -379,8 +333,7 @@ class TestEnvironmentIsolation:
             
 
             # Check none contain staging
-        for url in urls:
-        assert 'staging' not in url, \
+        for url in urls:"""
         "formatted_string"
 
 
@@ -408,9 +361,9 @@ class TestEnvironmentIsolation:
         del sys.modules[module]
 
                     # Import services
-        from auth_service.auth_core.auth_environment import AuthEnvironment
-        from auth_service.auth_core.config import AuthConfig
-        from netra_backend.app.clients.auth_client_config import load_auth_client_config
+from auth_service.auth_core.auth_environment import AuthEnvironment
+from auth_service.auth_core.config import AuthConfig
+from netra_backend.app.clients.auth_client_config import load_auth_client_config
 
         auth_env = AuthEnvironment()
         auth_config = AuthConfig()

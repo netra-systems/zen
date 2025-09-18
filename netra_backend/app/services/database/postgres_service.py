@@ -4,11 +4,11 @@ Provides high-level interface for PostgreSQL database interactions.
 """
 
 import asyncio
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass

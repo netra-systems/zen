@@ -3,11 +3,11 @@
 Provides caching services with consistency management.
 """
 
-import logging
+from shared.logging.unified_logging_ssot import get_logger
 from typing import Any, Dict, Optional, List
 from datetime import datetime, timedelta
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class CacheConsistencyManager:

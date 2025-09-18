@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,39 +16,35 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
-
+        return self.messages_sent.copy()"""
         """Test for Loguru GCP formatter fix to prevent format_map errors."""
 
-        import json
-        import sys
-        import os
-        from datetime import datetime, timezone
-        from io import StringIO
-        from shared.isolated_environment import IsolatedEnvironment
+import json
+import sys
+import os
+from datetime import datetime, timezone
+from io import StringIO
+from shared.isolated_environment import IsolatedEnvironment
 
     # Add project root to path
         sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-        import pytest
-        from loguru import logger
+import pytest
+from loguru import logger
 
-        from netra_backend.app.core.logging_formatters import LogFormatter, SensitiveDataFilter
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
-        import asyncio
+from netra_backend.app.core.logging_formatters import LogFormatter, SensitiveDataFilter
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+import asyncio
 
-
-class TestGCPFormatterFix:
+"""
         """Test the GCP JSON formatter handles Loguru record structures correctly."""
-
-    def test_gcp_formatter_handles_loguru_record_structure(self):
+"""
         """Test that the GCP formatter properly handles Loguru's record structure."""
         formatter = LogFormatter(SensitiveDataFilter())
 
@@ -65,16 +59,7 @@ class TestGCPFormatterFix:
         time_obj = datetime.now(timezone.utc)
 
     # Create a record similar to what Loguru provides
-        record = { )
-        'level': level_mock,
-        'time': time_obj,
-        'message': 'Test message',
-        'name': 'test_module',
-        'function': 'test_function',
-        'line': 42,
-        'extra': {'key': 'value'}
-    
-
+record = {'level': level_mock,, 'time': time_obj,, 'message': 'Test message',, 'name': 'test_module',, 'function': 'test_function',, 'line': 42,, 'extra': {'key': 'value'}}
     # Format the record - should not raise an error
         result = formatter.gcp_json_formatter(record)
 
@@ -86,17 +71,13 @@ class TestGCPFormatterFix:
         assert parsed['labels']['module'] == 'test_module'
         assert parsed['labels']['function'] == 'test_function'
         assert parsed['labels']['line'] == '42'
-
-    def test_gcp_formatter_handles_missing_fields(self):
+"""
         """Test that the formatter handles missing or None fields gracefully."""
         pass
         formatter = LogFormatter(SensitiveDataFilter())
 
     # Minimal record with missing fields
-        record = { )
-        'message': 'Minimal message'
-    
-
+record = {'message': 'Minimal message'}
     # Should not raise an error
         result = formatter.gcp_json_formatter(record)
         parsed = json.loads(result)
@@ -104,8 +85,7 @@ class TestGCPFormatterFix:
     # When level is missing, it defaults to 'DEFAULT' in mapping
         assert parsed['severity'] in ['DEFAULT', 'INFO', 'ERROR']  # May vary based on fallback
     # Message might be wrapped in error if there's an issue
-        assert 'message' in str(parsed['message'])
-        assert 'timestamp' in parsed  # Should have a fallback timestamp
+        assert 'message' in str(parsed['message'])"""
         assert parsed['labels']['module'] == ""
         assert parsed['labels']['function'] == ""
         assert parsed['labels']['line'] == ""
@@ -114,34 +94,22 @@ class TestGCPFormatterFix:
         """Test that the formatter handles level as a string."""
         formatter = LogFormatter(SensitiveDataFilter())
 
-        record = { )
-        'level': 'ERROR',  # String instead of namedtuple
-        'message': 'Error message',
-        'time': datetime.now(timezone.utc)
-    
-
+record = {'level': 'ERROR',  # String instead of namedtuple, 'message': 'Error message',, 'time': datetime.now(timezone.utc)}
         result = formatter.gcp_json_formatter(record)
         parsed = json.loads(result)
 
         assert parsed['severity'] == 'ERROR'
-
-    def test_gcp_formatter_handles_dict_level(self):
+"""
         """Test that the formatter handles level as a dict."""
         pass
         formatter = LogFormatter(SensitiveDataFilter())
 
-        record = { )
-        'level': {'name': 'WARNING'},  # Dict instead of namedtuple
-        'message': 'Warning message',
-        'time': datetime.now(timezone.utc)
-    
-
+record = {'level': {'name': 'WARNING'},  # Dict instead of namedtuple, 'message': 'Warning message',, 'time': datetime.now(timezone.utc)}
         result = formatter.gcp_json_formatter(record)
         parsed = json.loads(result)
 
         assert parsed['severity'] == 'WARNING'
-
-    def test_gcp_formatter_fallback_on_exception(self):
+"""
         """Test that the formatter has a proper fallback when an unexpected error occurs."""
         formatter = LogFormatter(SensitiveDataFilter())
 
@@ -156,8 +124,7 @@ class TestGCPFormatterFix:
         assert parsed['severity'] == 'ERROR'
         assert 'Logging formatter error' in parsed['message']
         assert 'formatter_error' in parsed['labels']
-
-    def test_gcp_formatter_with_exception_info(self):
+"""
         """Test that the formatter handles exception information correctly."""
         pass
         formatter = LogFormatter(SensitiveDataFilter())
@@ -166,22 +133,12 @@ class TestGCPFormatterFix:
         level_mock.name = 'ERROR'
 
     # Create exception info
-        websocket = TestWebSocketConnection()  # Real WebSocket implementation
-        exc_mock.type = ValueError
+        websocket = TestWebSocketConnection()  # Real WebSocket implementation"""
         exc_mock.value = ValueError("Test error")
         exc_mock.traceback = "Traceback line 1
         Traceback line 2"
 
-        record = { )
-        'level': level_mock,
-        'time': datetime.now(timezone.utc),
-        'message': 'Error with exception',
-        'name': 'test_module',
-        'function': 'test_function',
-        'line': 100,
-        'exception': exc_mock
-    
-
+record = {'level': level_mock,, 'time': datetime.now(timezone.utc),, 'message': 'Error with exception',, 'name': 'test_module',, 'function': 'test_function',, 'line': 100,, 'exception': exc_mock}
         result = formatter.gcp_json_formatter(record)
         parsed = json.loads(result)
 
@@ -196,7 +153,7 @@ class TestGCPFormatterFix:
         @pytest.mark.integration
     def test_gcp_formatter_with_real_loguru(self):
         """Integration test with real Loguru logger."""
-        from netra_backend.app.core.logging_formatters import LogHandlerConfig
+from netra_backend.app.core.logging_formatters import LogHandlerConfig
 
     # Capture output
         output = StringIO()
@@ -204,8 +161,7 @@ class TestGCPFormatterFix:
     # Create a custom formatter that writes to our StringIO
     def test_sink(message):
         formatter = LogFormatter(SensitiveDataFilter())
-        record = message.record
-        json_output = formatter.gcp_json_formatter(record)
+        record = message.record"""
         output.write(json_output + " )
         ")
 

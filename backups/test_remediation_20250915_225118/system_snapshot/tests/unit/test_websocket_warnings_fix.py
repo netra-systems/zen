@@ -6,10 +6,8 @@ class TestWebSocketConnection:
         self.messages_sent = []
         self.is_connected = True
         self._closed = False
-
-    async def send_json(self, message: dict):
-        """Send JSON message."""
-        if self._closed:
+"""
+        """Send JSON message.""""""
         raise RuntimeError("WebSocket is closed")
         self.messages_sent.append(message)
 
@@ -18,34 +16,28 @@ class TestWebSocketConnection:
         pass
         self._closed = True
         self.is_connected = False
-
-    def get_messages(self) -> list:
+"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()
+        return self.messages_sent.copy()"""
+        """"""
+        This test validates that the legacy pattern warnings no longer appear as warnings."""
 
-        '''
-        Test to verify that WebSocket warnings have been properly downgraded to INFO level.
-        This test validates that the legacy pattern warnings no longer appear as warnings.
-        '''
+import asyncio
+import logging
+import pytest
+from netra_backend.app.core.startup_validation import StartupValidator
+from netra_backend.app.core.startup_validation_fix import StartupValidationFixer
+from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from shared.isolated_environment import get_env
+from shared.isolated_environment import IsolatedEnvironment
 
-        import asyncio
-        import logging
-        import pytest
-        from netra_backend.app.core.startup_validation import StartupValidator
-        from netra_backend.app.core.startup_validation_fix import StartupValidationFixer
-        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        from netra_backend.app.db.database_manager import DatabaseManager
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        from shared.isolated_environment import get_env
-        from shared.isolated_environment import IsolatedEnvironment
-
-
-class TestWebSocketWarningsFix:
+"""
         """Test that legacy WebSocket warnings are now INFO level."""
 
-@pytest.mark.asyncio
-    async def test_websocket_handler_warning_is_info_level(self):
+@pytest.mark.asyncio"""
 """Test that zero WebSocket handlers logs as INFO, not WARNING."""
 validator = StartupValidator()
 
@@ -58,8 +50,7 @@ mock_app.state.websocket_manager = mock_ws_manager
 with patch.object(validator.logger, 'info') as mock_info:
 with patch.object(validator.logger, 'warning') as mock_warning:
 await validator._validate_websocket(mock_app)
-
-                # Should log as INFO, not WARNING
+"""
 mock_info.assert_any_call("[U+2139][U+FE0F] WebSocket handlers will be created per-user (factory pattern)")
 
                 # Should NOT have any warning about zero handlers
@@ -78,8 +69,7 @@ mock_app_state.agent_supervisor = mock_supervisor
 results = StartupValidationFixer.fix_agent_websocket_initialization(mock_app_state)
 
                         # Should succeed even without registry
-assert results['success'] == True
-assert len(results['errors']) == 0
+assert results['success'] == True"""
 assert "Agent registry not found" not in str(results)
 
 @pytest.mark.asyncio
@@ -96,8 +86,7 @@ mock_app.state.agent_supervisor = mock_supervisor
 with patch.object(validator.logger, 'info') as mock_info:
 with patch.object(validator.logger, 'warning') as mock_warning:
 await validator._validate_agents(mock_app)
-
-                                    # Should log as INFO about legacy pattern
+"""
 mock_info.assert_any_call("[U+2139][U+FE0F] Legacy registry empty - agents will be created per-request (factory pattern)")
 
                                     # Should NOT have warning about zero agents

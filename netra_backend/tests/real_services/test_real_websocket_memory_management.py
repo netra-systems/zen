@@ -33,7 +33,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState
 import uvicorn
 from test_framework.environment_isolation import get_test_env_manager
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
 from netra_backend.app.schemas.agent_models import DeepAgentState
 logger = logging.getLogger(__name__)
 MAX_CONNECTIONS_PER_USER = 5

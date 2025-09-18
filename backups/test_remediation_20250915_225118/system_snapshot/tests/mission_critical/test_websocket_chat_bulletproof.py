@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''MISSION CRITICAL: Bulletproof WebSocket Chat Event Tests
+"""MISSION CRITICAL: Bulletproof WebSocket Chat Event Tests
 
 Business Value: $500K+ ARR - Core chat functionality is KING
 Tests: Comprehensive real-world scenarios with extreme robustness
@@ -7,12 +7,9 @@ Tests: Comprehensive real-world scenarios with extreme robustness
 This test suite ensures:
 1. All critical WebSocket events are sent for chat UI using factory pattern
 2. Events arrive in correct order with proper data
-3. Error conditions are handled gracefully
-4. Concurrent users work correctly with complete isolation
-5. Reconnection preserves state per user
-6. Performance meets <2s response requirement
-7. Factory pattern provides complete user isolation
-'''
+3. Error conditions are handled gracefully"""
+5. Reconnection preserves state per user"""
+7. Factory pattern provides complete user isolation"""
 
 import asyncio
 import json
@@ -51,10 +48,8 @@ TestContext,
 TestUserContext,
 create_test_context,
 create_isolated_test_contexts
-            
-            # Import real WebSocket manager - NO MOCKS per CLAUDE.md
-from test_framework.real_websocket_manager import RealWebSocketManager
-except ImportError as e:
+            """
+from test_framework.real_websocket_manager import RealWebSocketManager"""
 pytest.skip("formatted_string", allow_module_level=True)
 
 
@@ -68,16 +63,8 @@ pytest.skip("formatted_string", allow_module_level=True)
 
 
 class BulletproofEventValidator:
-    """Extremely robust event validation with detailed diagnostics for factory pattern."""
-
-    CRITICAL_EVENTS = { )
-    "agent_started": {"required": True, "max_count": 1},
-    "agent_thinking": {"required": True, "max_count": None},
-    "tool_executing": {"required": True, "max_count": None},
-    "tool_completed": {"required": True, "max_count": None},
-    "agent_completed": {"required": True, "max_count": 1}
-    
-
+    """Extremely robust event validation with detailed diagnostics for factory pattern.""""""
+CRITICAL_EVENTS = {"agent_started": {"required": True, "max_count": 1},, "agent_thinking": {"required": True, "max_count": None},, "tool_executing": {"required": True, "max_count": None},, "tool_completed": {"required": True, "max_count": None},, "agent_completed": {"required": True, "max_count": 1}}
     def __init__(self):
         pass
         self.user_events: Dict[str, List[Dict]] = {}  # user_id -> events
@@ -89,8 +76,7 @@ class BulletproofEventValidator:
         self.start_time = time.time()
 
     def record_user_event(self, user_id: str, event: Dict) -> None:
-        """Record an event for a specific user with comprehensive tracking."""
-        timestamp = time.time() - self.start_time
+        """Record an event for a specific user with comprehensive tracking.""""""
         event_type = event.get("event_type", "unknown")
 
     # Store event per user
@@ -129,10 +115,8 @@ class BulletproofEventValidator:
 
     # 1. Validate user isolation
         isolation_errors = self._validate_user_isolation()
-        errors.extend(isolation_errors)
-
-    # 2. Validate required events per user
-        for user_id, events in self.user_events.items():
+        errors.extend(isolation_errors)"""
+    # 2. Validate required events per user"""
         user_event_types = set(e.get("event_type") for e in events)
 
         for event_type, config in self.CRITICAL_EVENTS.items():
@@ -154,27 +138,14 @@ class BulletproofEventValidator:
         warnings.extend(perf_warnings)
 
                         # Generate comprehensive diagnostics
-        diagnostics = { )
-        "total_users": len(self.user_events),
-        "total_events": sum(len(events) for events in self.user_events.values()),
-        "events_per_user": {user_id: len(events) for user_id, events in self.user_events.items()},
-        "event_counts": self.event_counts.copy(),
-        "user_event_counts": self.user_event_counts.copy(),
-        "performance_metrics": self.performance_metrics.copy(),
-        "errors": errors,
-        "warnings": warnings,
-        "isolation_valid": len([item for item in []]) == 0
-                        
-
+diagnostics = {"total_users": len(self.user_events),, "total_events": sum(len(events) for events in self.user_events.values()),, "events_per_user": {user_id: len(events) for user_id, events in self.user_events.items()},, "event_counts": self.event_counts.copy(),, "user_event_counts": self.user_event_counts.copy(),, "performance_metrics": self.performance_metrics.copy(),, "errors": errors,, "warnings": warnings,, "isolation_valid": len([item for item in []]) == 0}
         return len(errors) == 0, errors, diagnostics
 
     def _validate_user_isolation(self) -> List[str]:
         """Validate that users are properly isolated."""
         errors = []
-
-    # Check no cross-user contamination
-        for user_id, events in self.user_events.items():
-        for event in events:
+"""
+        for user_id, events in self.user_events.items():"""
         event_user_id = event.get("user_id")
         if event_user_id and event_user_id != user_id:
         errors.append("formatted_string")
@@ -185,10 +156,8 @@ class BulletproofEventValidator:
         """Validate event sequence for a specific user."""
         errors = []
         events = self.user_events[user_id]
-
-        if not events:
-        return errors
-
+"""
+        return errors"""
         event_types = [e.get("event_type") for e in events]
 
         # First event should be agent_started
@@ -211,10 +180,8 @@ class BulletproofEventValidator:
         return errors
 
     def _validate_performance(self) -> List[str]:
-        """Validate performance requirements."""
-        warnings = []
-
-        for user_id in self.user_events:
+        """Validate performance requirements.""""""
+"""
         duration_key = "formatted_string"
         if duration_key in self.performance_metrics:
         duration = self.performance_metrics[duration_key]
@@ -224,10 +191,8 @@ class BulletproofEventValidator:
         return warnings
 
     def generate_detailed_report(self) -> str:
-        """Generate comprehensive validation report for factory pattern."""
-        is_valid, errors, diagnostics = self.validate_comprehensive()
-
-        report_lines = [ )
+        """Generate comprehensive validation report for factory pattern.""""""
+"""
         "
         " + "=" * 80,
         "BULLETPROOF WEBSOCKET FACTORY VALIDATION REPORT",
@@ -275,10 +240,8 @@ class BulletproofEventValidator:
                                 # ============================================================================
 
 class TestBulletproofWebSocketChat:
-        """Bulletproof tests for WebSocket chat functionality using factory pattern."""
-
-        @pytest.fixture
-    async def setup_robust_environment(self):
+        """Bulletproof tests for WebSocket chat functionality using factory pattern.""""""
+        @pytest.fixture"""
         """Setup robust test environment with factory pattern components."""
     # Create factory and real WebSocket manager
         self.factory = WebSocketBridgeFactory()
@@ -289,40 +252,26 @@ class TestBulletproofWebSocketChat:
         await self._websocket_session.__aenter__()
 
     # Configure factory with mocked components
-        self.factory.configure( )
-        connection_pool=self.mock_pool,
-        agent_registry=type('MockRegistry', (), {})(),  # Mock registry
-        health_monitor=type('MockHealthMonitor', (), {})()  # Mock health monitor
-    
-
+        self.factory.configure(connection_pool=self.mock_pool,, agent_registry=type('MockRegistry', (), {})(),  # Mock registry, health_monitor=type('MockHealthMonitor', (), {})()  # Mock health monitor)
     # Track created emitters for cleanup
         self.user_emitters: Dict[str, UserWebSocketEmitter] = {}
 
         yield
 
-    # Cleanup
-        await self.cleanup_all_emitters()
-
-    async def cleanup_all_emitters(self):
+    # Cleanup"""
+"""
         """Clean up all test emitters."""
         pass
         for emitter in self.user_emitters.values():
         try:
         await emitter.cleanup()
-        except Exception:
-        pass
-        self.user_emitters.clear()
-
+        except Exception:"""
+        self.user_emitters.clear()"""
     async def create_user_emitter(self, user_id: str, connection_id: str = "default") -> UserWebSocketEmitter:
         """Create a user-specific emitter for testing."""
         thread_id = "formatted_string"
 
-        emitter = await self.factory.create_user_emitter( )
-        user_id=user_id,
-        thread_id=thread_id,
-        connection_id=connection_id
-    
-
+        emitter = await self.factory.create_user_emitter(user_id=user_id,, thread_id=thread_id,, connection_id=connection_id)
         self.user_emitters[user_id] = emitter
         await asyncio.sleep(0)
         return emitter
@@ -330,10 +279,8 @@ class TestBulletproofWebSocketChat:
 @pytest.mark.asyncio
 @pytest.mark.critical
     async def test_complete_chat_flow_with_factory_pattern(self):
-"""Test complete chat flow with factory pattern isolation."""
-validator = BulletproofEventValidator()
-
-        # Create user emitter
+"""Test complete chat flow with factory pattern isolation.""""""
+"""
 user_id = "chat_user_1"
 emitter = await self.create_user_emitter(user_id)
 run_id = "formatted_string"
@@ -380,10 +327,8 @@ pass
 validator = BulletproofEventValidator()
 
                 # Create multiple users with their own emitters
-num_users = 8
-user_emitters = {}
-
-for i in range(num_users):
+num_users = 8"""
+"""
 user_id = "formatted_string"
 emitter = await self.create_user_emitter(user_id)
 user_emitters[user_id] = emitter
@@ -440,10 +385,8 @@ assert factory_metrics["emitters_active"] >= num_users, "Factory should track ac
 @pytest.mark.critical
     async def test_error_recovery_with_user_isolation(self):
 """Test error recovery maintains user isolation."""
-validator = BulletproofEventValidator()
-
-            # Create users with different failure patterns
-users_config = [ )
+validator = BulletproofEventValidator()"""
+            # Create users with different failure patterns"""
 {"user_id": "stable_user", "should_fail": False},
 {"user_id": "failing_user", "should_fail": True, "failure_pattern": "intermittent"},
 {"user_id": "timeout_user", "should_fail": True, "failure_pattern": "timeout"}
@@ -458,12 +401,7 @@ user_emitters[user_id] = emitter
 
                 # Configure connection issues for this user only
 if config.get("should_fail"):
-self.mock_pool.configure_connection_issues( )
-user_id=user_id,
-should_fail=config["should_fail"],
-failure_pattern=config.get("failure_pattern")
-                    
-
+self.mock_pool.configure_connection_issues(user_id=user_id,, should_fail=config["should_fail"],, failure_pattern=config.get("failure_pattern"))
                     # Send events for all users
 async def send_with_error_handling(user_id: str, emitter: UserWebSocketEmitter):
 run_id = "formatted_string"
@@ -520,24 +458,16 @@ assert "isolation violation" not in error.lower(), "formatted_string"
 """Test WebSocket performance with concurrent users and high message volume."""
 pass
 start_time = time.time()
-validator = BulletproofEventValidator()
-
                             # Create many concurrent users
 num_users = 15
-events_per_user = 8
-user_emitters = {}
-
-for i in range(num_users):
+events_per_user = 8"""
+"""
 user_id = "formatted_string"
 emitter = await self.create_user_emitter(user_id)
 user_emitters[user_id] = emitter
 
                                 # Add some network latency simulation
-self.mock_pool.configure_connection_issues( )
-user_id=user_id,
-latency_ms=random.uniform(5, 25)
-                                
-
+self.mock_pool.configure_connection_issues(user_id=user_id,, latency_ms=random.uniform(5, 25))
                                 # Send high volume of events
 async def send_user_load(user_id: str, emitter: UserWebSocketEmitter):
 pass
@@ -596,10 +526,8 @@ assert factory_metrics["events_sent_total"] > total_events * 0.8, "Most events s
             # Create multiple users
 num_users = 6
 messages_per_user = 10
-user_emitters = {}
-user_expected_order = {}
-
-for i in range(num_users):
+user_emitters = {}"""
+"""
 user_id = "formatted_string"
 emitter = await self.create_user_emitter(user_id)
 user_emitters[user_id] = emitter
@@ -647,10 +575,8 @@ stress_cycles = 3
 emitters_per_cycle = 10
 
 for cycle in range(stress_cycles):
-cycle_emitters = []
-
-                            # Create emitters
-for i in range(emitters_per_cycle):
+cycle_emitters = []"""
+                            # Create emitters"""
 user_id = "formatted_string"
 emitter = await self.create_user_emitter(user_id)
 cycle_emitters.append((user_id, emitter))
@@ -695,10 +621,8 @@ assert final_metrics["events_sent_total"] > stress_cycles * emitters_per_cycle *
 
 class TestAdvancedEdgeCasesFactoryPattern:
     """Test advanced edge cases and failure scenarios for factory pattern."""
-
-@pytest.mark.asyncio
-@pytest.mark.critical
-    async def test_factory_singleton_behavior(self):
+"""
+@pytest.mark.critical"""
 """Test that factory singleton works correctly under concurrent access."""
         # Get factory instances concurrently
 async def get_factory_instance():
@@ -707,10 +631,8 @@ return get_websocket_bridge_factory()
 
 tasks = [get_factory_instance() for _ in range(10)]
 factory_instances = await asyncio.gather(*tasks)
-
-    # All instances should be the same object
-first_factory = factory_instances[0]
-for factory in factory_instances[1:]:
+"""
+first_factory = factory_instances[0]"""
 assert factory is first_factory, "Factory singleton not working correctly"
 
 assert isinstance(first_factory, WebSocketBridgeFactory), "Factory should be correct type"
@@ -725,10 +647,8 @@ contexts_isolated = 0
 
 for batch in range(5):  # 5 batches of contexts
 batch_contexts = []
-
-            # Create contexts
-for i in range(20):  # 20 contexts per batch
-context = UserWebSocketContext( )
+"""
+for i in range(20):  # 20 contexts per batch"""
 user_id="formatted_string",
 thread_id="formatted_string",
 connection_id="formatted_string"
@@ -772,12 +692,7 @@ assert contexts_created == contexts_isolated, "formatted_string"
 user_id = "immutability_user"
 thread_id = "immutability_thread"
 
-original_data = { )
-"message": "test message",
-"metadata": {"key": "value"},
-"nested": {"deep": {"value": 42}}
-                                
-
+original_data = {"message": "test message",, "metadata": {"key": "value"},, "nested": {"deep": {"value": 42}}}
                                 # Create event
 event = WebSocketEvent( )
 event_type="test_event",

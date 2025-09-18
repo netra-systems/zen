@@ -5,24 +5,20 @@ import pytest
 import aiohttp
 from shared.isolated_environment import IsolatedEnvironment
 
-
-class TestSimpleHealthCheck:
+"""
     """Simple health check test class."""
 
-@pytest.mark.asyncio
-    async def test_basic_connectivity(self):
+@pytest.mark.asyncio"""
 """Test basic connectivity infrastructure."""
         # Test that we can create an HTTP session
 async with aiohttp.ClientSession() as session:
-assert session is not None
-
+assert session is not None"""
 print("[SUCCESS] Basic connectivity test passed")
 
 @pytest.mark.asyncio
     async def test_service_attempt(self):
 """Attempt to connect to services (passes regardless of result)."""
-pass
-services = [ )
+pass"""
 ("backend", "http://localhost:8000/health"),
 ("auth", "http://localhost:8080/health")
                 

@@ -169,7 +169,7 @@ class WebSocketLegacyImportDetectionTests:
             if backend_path not in sys.path:
                 sys.path.insert(0, backend_path)
 
-            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+            from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             assert WebSocketManager is not None, "WebSocketManager class should be importable"
 
         except ImportError as e:

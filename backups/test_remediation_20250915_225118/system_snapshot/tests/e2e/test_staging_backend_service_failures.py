@@ -1,4 +1,4 @@
-'''
+"""
 Staging Backend Service Failures - Critical Issues Test Suite
 
 Business Value Justification (BVJ):
@@ -35,10 +35,8 @@ These tests use Test-Driven Correction (TDC) methodology:
 
 Root Causes to Validate:
 - Environment variable loading failures
-- Service provisioning gaps in staging
-- Configuration validation insufficient
-- External service connectivity requirements not enforced
-'''
+- Service provisioning gaps in staging"""
+- External service connectivity requirements not enforced"""
 
 import asyncio
 import json
@@ -60,15 +58,13 @@ from test_framework.environment_markers import env_requires, staging_only
 from tests.e2e.staging_test_helpers import StagingTestSuite, ServiceHealthStatus, get_staging_suite
 
 
-@dataclass
-class ServiceConnectivityResult:
+@dataclass"""
     """Result container for service connectivity tests."""
     service_name: str
     host: str
     port: int
     connectivity: bool
-    response_time_ms: int
-    error_message: Optional[str] = None
+    response_time_ms: int"""
     expected_behavior: str = "connection_success"
     actual_behavior: str = "unknown"
 
@@ -79,8 +75,7 @@ class ConfigurationValidationResult:
     config_key: str
     expected_value: Optional[str]
     actual_value: Optional[str]
-    is_valid: bool
-    validation_error: Optional[str] = None
+    is_valid: bool"""
     environment_source: str = "unknown"
 
 
@@ -88,14 +83,12 @@ class ConfigurationValidationResult:
 class TestStagingBackendServiceFailures:
     """Comprehensive test suite for staging backend service failures using TDC methodology."""
     pass
-
-    def setup_method(self):
+"""
         """Setup isolated test environment for each test."""
         self.env = IsolatedEnvironment()
         self.env.enable_isolation_mode()
         self.start_time = time.time()
-
-    def teardown_method(self):
+"""
         """Clean up test environment."""
         pass
         if hasattr(self, 'env'):
@@ -107,19 +100,15 @@ class TestStagingBackendServiceFailures:
 
         @pytest.fixture
         @pytest.mark.critical
-        @pytest.mark.e2e
-    def test_auth_service_database_url_not_configured_complete_failure(self):
-        '''
+        @pytest.mark.e2e"""
+        """
         EXPECTED TO FAIL - CRITICAL DATABASE CONFIG ISSUE
 
         Issue: Auth service #removed-legacynot configured causing complete auth service failure
         Expected: Auth service should have valid #removed-legacyfor staging database
-        Actual: #removed-legacyundefined or pointing to non-existent database
-
-        Business Impact: 100% authentication failure = 100% revenue loss
-        '''
-        pass
-    # Test that #removed-legacyis configured for auth service
+        Actual: #removed-legacyundefined or pointing to non-existent database"""
+        Business Impact: 100% authentication failure = 100% revenue loss"""
+        pass"""
         database_url = self.env.get("DATABASE_URL")
 
     # Should have a #removed-legacyconfigured
@@ -164,16 +153,13 @@ class TestStagingBackendServiceFailures:
         @pytest.mark.critical
         @pytest.mark.e2e
     def test_auth_service_database_connection_attempt_fails_completely(self):
-        '''
+        """
         EXPECTED TO FAIL - CRITICAL DATABASE CONNECTION ISSUE
 
         Issue: Auth service cannot connect to database specified in DATABASE_URL
         Expected: Successful database connection and table verification
-        Actual: Connection fails causing auth service startup failure
-
-        Root Cause: Database credentials invalid, database doesn"t exist, or network blocked
-        '''
-        pass
+        Actual: Connection fails causing auth service startup failure"""
+        Root Cause: Database credentials invalid, database doesn"t exist, or network blocked""""""
         database_url = self.env.get("DATABASE_URL")
 
         if not database_url:
@@ -181,21 +167,14 @@ class TestStagingBackendServiceFailures:
 
         # Test database connectivity using raw connection
         try:
-        import psycopg2
-        from urllib.parse import urlparse
+import psycopg2
+from urllib.parse import urlparse
 
             # Parse #removed-legacyto extract connection parameters
         parsed = urlparse(database_url)
 
             # Connection parameters
-        conn_params = { )
-        'host': parsed.hostname,
-        'port': parsed.port or 5432,
-        'database': parsed.path.lstrip('/') if parsed.path else None,
-        'user': parsed.username,
-        'password': parsed.password
-            
-
+conn_params = {'host': parsed.hostname,, 'port': parsed.port or 5432,, 'database': parsed.path.lstrip('/') if parsed.path else None,, 'user': parsed.username,, 'password': parsed.password}
             # Add SSL parameters for staging
         if "staging" in database_url or "cloudsql" in database_url:
         conn_params['sslmode'] = 'require'
@@ -205,8 +184,6 @@ class TestStagingBackendServiceFailures:
         try:
         conn = psycopg2.connect(**conn_params)
         conn.close()
-        connection_time = time.time() - start_time
-
                     # Connection succeeded - test database exists
         assert connection_time < 5.0, "formatted_string"
 
@@ -234,22 +211,16 @@ class TestStagingBackendServiceFailures:
         @pytest.mark.critical
         @pytest.mark.e2e
     def test_auth_service_environment_variable_loading_cascade_failure(self):
-        '''
+        """
         EXPECTED TO FAIL - CRITICAL ENV LOADING ISSUE
 
         Issue: Environment variables not loaded properly in auth service causing cascade failure
         Expected: All critical auth environment variables loaded from staging configuration
-        Actual: Environment variables missing or defaulting to development values
-
-        Cascade Effect: Missing env vars -> Wrong config -> Connection failures -> Service down
-        '''
+        Actual: Environment variables missing or defaulting to development values"""
+        Cascade Effect: Missing env vars -> Wrong config -> Connection failures -> Service down"""
         pass
     # Critical environment variables for auth service
-        critical_auth_vars = { )
-        'DATABASE_URL': { )
-        'required': True,
-        'validation': lambda x: None v.startswith(('postgresql://', 'postgres://')) and 'staging' in v,
-        'staging_requirement': 'Must point to staging database with Cloud SQL or staging host'
+critical_auth_vars = {'DATABASE_URL': { ), 'required': True,, 'validation': lambda x: None v.startswith(('postgresql://', 'postgres://')) and 'staging' in v,, 'staging_requirement': 'Must point to staging database with Cloud SQL or staging host'}
         },
         'JWT_SECRET_KEY': { )
         'required': True,
@@ -267,8 +238,7 @@ class TestStagingBackendServiceFailures:
         'staging_requirement': 'Must point to staging ClickHouse, not localhost'
         },
         'NETRA_ENVIRONMENT': { )
-        'required': True,
-        'validation': lambda x: None v in ['staging', 'production'],
+        'required': True,"""
         'staging_requirement': 'Must be "staging" to enforce staging behavior'
     
     
@@ -310,17 +280,14 @@ class TestStagingBackendServiceFailures:
         @pytest.mark.critical
         @pytest.mark.e2e
     def test_clickhouse_connectivity_timeout_staging_host_unreachable(self):
-        '''
+        """
         EXPECTED TO FAIL - CRITICAL CLICKHOUSE CONNECTIVITY ISSUE
 
         Issue: ClickHouse connections to clickhouse.staging.netrasystems.ai:8123 timeout
         Expected: ClickHouse accessible within 5 seconds for health checks
-        Actual: Connection timeout causing /health/ready to return 503
-
-        Business Impact: Analytics broken, deployment validation fails, monitoring gaps
-        '''
-        pass
-    # Test ClickHouse configuration loading
+        Actual: Connection timeout causing /health/ready to return 503"""
+        Business Impact: Analytics broken, deployment validation fails, monitoring gaps"""
+        pass"""
         clickhouse_url = self.env.get("CLICKHOUSE_URL")
         clickhouse_host = self.env.get("CLICKHOUSE_HOST", "clickhouse.staging.netrasystems.ai")
         clickhouse_port = int(self.env.get("CLICKHOUSE_PORT", "8123"))
@@ -341,8 +308,6 @@ class TestStagingBackendServiceFailures:
                     # Test socket connection with reasonable timeout
         sock = socket.create_connection((clickhouse_host, clickhouse_port), timeout=5.0)
         sock.close()
-        connection_time = time.time() - start_time
-
                     # Connection succeeded - ClickHouse is accessible
         assert connection_time < 2.0, "formatted_string"
         print("formatted_string")
@@ -377,20 +342,17 @@ class TestStagingBackendServiceFailures:
         @pytest.mark.critical
         @pytest.mark.e2e
     async def test_clickhouse_client_connection_timeout_health_check_failure(self):
-        '''
+        """
         EXPECTED TO FAIL - CRITICAL CLICKHOUSE CLIENT ISSUE
 
         Issue: ClickHouse client connection attempts timeout causing health check failures
         Expected: ClickHouse client connects successfully for health validation
-        Actual: Client connection timeout causes 503 responses and deployment blocks
-
-        This specifically tests the application-level ClickHouse client, not just raw connectivity
-        '''
+        Actual: Client connection timeout causes 503 responses and deployment blocks"""
+        This specifically tests the application-level ClickHouse client, not just raw connectivity"""
         pass
                                         # Test that ClickHouse client can be imported and instantiated
         try:
-        from netra_backend.app.db.clickhouse import ClickHouseService as ClickHouseClient
-        except ImportError as e:
+from netra_backend.app.db.clickhouse import ClickHouseService as ClickHouseClient"""
         assert False, "formatted_string"
 
                                                 # Test client configuration and connection
@@ -442,17 +404,14 @@ class TestStagingBackendServiceFailures:
         @pytest.mark.critical
         @pytest.mark.e2e
     def test_redis_connectivity_failure_cache_session_degradation(self):
-        '''
+        """
         EXPECTED TO FAIL - CRITICAL REDIS CONNECTIVITY ISSUE
 
         Issue: Redis connections fail causing cache and session degradation
         Expected: Redis accessible for caching and session management
-        Actual: Redis connection fails, service falls back to no-Redis mode
-
-        Business Impact: Performance degradation, session persistence broken, cache misses
-        '''
-        pass
-    # Test Redis configuration loading
+        Actual: Redis connection fails, service falls back to no-Redis mode"""
+        Business Impact: Performance degradation, session persistence broken, cache misses"""
+        pass"""
         redis_url = self.env.get("REDIS_URL")
         redis_host = self.env.get("REDIS_HOST")
         redis_port = self.env.get("REDIS_PORT")
@@ -502,8 +461,6 @@ class TestStagingBackendServiceFailures:
         try:
         sock = socket.create_connection((test_host, test_port), timeout=5.0)
         sock.close()
-        connection_time = time.time() - start_time
-
                                         # Connection succeeded
         assert connection_time < 2.0, "formatted_string"
         print("formatted_string")
@@ -538,17 +495,14 @@ class TestStagingBackendServiceFailures:
         @pytest.mark.critical
         @pytest.mark.e2e
     async def test_redis_client_connection_fallback_mode_masking_issue(self):
-        '''
+        """
         EXPECTED TO FAIL - CRITICAL REDIS FALLBACK ISSUE
 
         Issue: Redis connection failures trigger inappropriate fallback to no-Redis mode
         Expected: Redis failures should cause service startup failure in staging
-        Actual: Service continues without Redis, masking infrastructure problems
-
-        Anti-Pattern: Silent fallbacks in staging hide production readiness issues
-        '''
-        pass
-                                                            # Check if Redis fallback is inappropriately enabled in staging
+        Actual: Service continues without Redis, masking infrastructure problems"""
+        Anti-Pattern: Silent fallbacks in staging hide production readiness issues"""
+        pass"""
         redis_fallback_enabled = self.env.get("REDIS_FALLBACK_ENABLED", "true").lower() == "true"
         redis_required = self.env.get("REDIS_REQUIRED", "false").lower() == "true"
 
@@ -574,7 +528,7 @@ class TestStagingBackendServiceFailures:
 
                                                                 # Test Redis client behavior with forced failure
         try:
-        from netra_backend.app.redis_manager import RedisManager as RedisClient
+from netra_backend.app.redis_manager import RedisManager as RedisClient
 
                                                                     # Test that client exists and can be instantiated
         client = RedisClient()
@@ -600,17 +554,14 @@ class TestStagingBackendServiceFailures:
         @pytest.mark.critical
         @pytest.mark.e2e
     def test_redis_fallback_configuration_enforcement_staging_vs_development(self):
-        '''
+        """
         EXPECTED TO FAIL - CRITICAL ENVIRONMENT BEHAVIOR ISSUE
 
         Issue: Staging environment behaves like development with inappropriate fallbacks
         Expected: Staging should enforce strict service requirements like production
-        Actual: Staging allows fallback modes that hide infrastructure issues
-
-        Environment Divergence: Dev (permissive) != Staging (strict) != Prod (ultra-strict)
-        '''
-        pass
-    # Check environment detection
+        Actual: Staging allows fallback modes that hide infrastructure issues"""
+        Environment Divergence: Dev (permissive) != Staging (strict) != Prod (ultra-strict)"""
+        pass"""
         netra_env = self.env.get("NETRA_ENVIRONMENT", "unknown")
         k_service = self.env.get("K_SERVICE")
         google_cloud_project = self.env.get("GOOGLE_CLOUD_PROJECT")
@@ -627,14 +578,7 @@ class TestStagingBackendServiceFailures:
 
         if is_staging:
         # Staging should have strict service requirements
-        service_requirements = { )
-        'REDIS_FALLBACK_ENABLED': 'false',
-        'CLICKHOUSE_FALLBACK_ENABLED': 'false',
-        'DATABASE_FALLBACK_ENABLED': 'false',
-        'STRICT_SERVICE_VALIDATION': 'true',
-        'FAIL_FAST_ON_SERVICE_ERRORS': 'true'
-        
-
+service_requirements = {'REDIS_FALLBACK_ENABLED': 'false',, 'CLICKHOUSE_FALLBACK_ENABLED': 'false',, 'DATABASE_FALLBACK_ENABLED': 'false',, 'STRICT_SERVICE_VALIDATION': 'true',, 'FAIL_FAST_ON_SERVICE_ERRORS': 'true'}
         failures = []
         for var_name, expected_value in service_requirements.items():
         actual_value = self.env.get(var_name, "undefined")
@@ -662,18 +606,15 @@ class TestStagingBackendServiceFailures:
         @pytest.mark.critical
         @pytest.mark.e2e
     async def test_health_endpoints_return_503_due_to_external_service_failures(self):
-        '''
+        """
         EXPECTED TO FAIL - CRITICAL HEALTH CHECK ISSUE
 
                             # Removed problematic line: Issue: /health/ready endpoints await asyncio.sleep(0)
         return 503 due to external service connectivity failures
         Expected: Health endpoints return 200 when all required services accessible
-        Actual: Health checks fail due to ClickHouse/Redis connectivity issues
-
-        Business Impact: Deployment validation fails, monitoring alerts, service marked unhealthy
-        '''
-        pass
-                            # Test backend health endpoint
+        Actual: Health checks fail due to ClickHouse/Redis connectivity issues"""
+        Business Impact: Deployment validation fails, monitoring alerts, service marked unhealthy"""
+        pass"""
         backend_url = self.env.get("BACKEND_URL", "http://localhost:8000")
         health_url = "formatted_string"
 
@@ -707,7 +648,6 @@ class TestStagingBackendServiceFailures:
                                                                 # Expected failure - health check failing due to external services
         try:
         error_data = response.json()
-        error_details = json.dumps(error_data, indent=2)
         except:
         error_details = response.text
 
@@ -745,18 +685,15 @@ class TestStagingBackendServiceFailures:
         @pytest.mark.critical
         @pytest.mark.e2e
     def test_legacy_websocket_import_warnings_deprecated_patterns(self):
-        '''
+        """
         EXPECTED TO FAIL - MEDIUM IMPORT MODERNIZATION ISSUE
 
         Issue: Code uses deprecated starlette.websockets imports causing warnings
         Expected: All WebSocket imports use modern FastAPI patterns
-        Actual: Legacy starlette imports still present in codebase
-
-        Technical Debt: Inconsistent import patterns reduce maintainability
-        '''
+        Actual: Legacy starlette imports still present in codebase"""
+        Technical Debt: Inconsistent import patterns reduce maintainability"""
         pass
-    Search for deprecated import patterns in loaded modules
-        deprecated_patterns = [ )
+    Search for deprecated import patterns in loaded modules"""
         "from starlette.websockets import",
         "import starlette.websockets",
         "from starlette.websocket import",
@@ -817,25 +754,22 @@ class TestStagingBackendServiceFailures:
         @pytest.mark.critical
         @pytest.mark.e2e
     def test_websocket_import_consistency_validation(self):
-        '''
+        """
         EXPECTED TO FAIL - MEDIUM IMPORT CONSISTENCY ISSUE
 
         Issue: Inconsistent WebSocket import patterns across codebase
         Expected: Consistent modern FastAPI WebSocket imports throughout
-        Actual: Mixed legacy and modern import patterns
-
-        Maintenance Impact: Inconsistent patterns increase cognitive load and error risk
-        '''
+        Actual: Mixed legacy and modern import patterns"""
+        Maintenance Impact: Inconsistent patterns increase cognitive load and error risk"""
         pass
     # Test that modern imports are available and preferred
         modern_imports_available = True
         try:
-        from fastapi import WebSocket, WebSocketDisconnect
-        from fastapi.websockets import WebSocketState
+from fastapi import WebSocket, WebSocketDisconnect
+from fastapi.websockets import WebSocketState
         except ImportError:
         modern_imports_available = False
-
-        assert modern_imports_available, ( )
+"""
         "Modern FastAPI WebSocket imports should be available. "
         "Check FastAPI version and installation."
             
@@ -843,8 +777,8 @@ class TestStagingBackendServiceFailures:
             # Test that legacy imports still work for backwards compatibility
         legacy_imports_available = True
         try:
-        from starlette.websockets import WebSocket as LegacyWebSocket
-        from starlette.websockets import WebSocketDisconnect as LegacyDisconnect
+from starlette.websockets import WebSocket as LegacyWebSocket
+from starlette.websockets import WebSocketDisconnect as LegacyDisconnect
         except ImportError:
         legacy_imports_available = False
 
@@ -870,25 +804,15 @@ class TestStagingBackendServiceFailures:
         @pytest.mark.critical
         @pytest.mark.e2e
     def test_staging_environment_detection_and_strict_validation_enforcement(self):
-        '''
+        """
         EXPECTED TO FAIL - CRITICAL ENVIRONMENT DETECTION ISSUE
 
         Issue: Staging environment not properly detected, allowing development behavior
         Expected: Staging detection triggers strict validation and fail-fast behavior
-        Actual: Environment detection fails, inappropriate fallbacks allowed
-
-        Business Impact: Staging/production drift leads to production failures not caught in staging
-        '''
-        pass
-    # Test multiple environment detection methods
-        detection_methods = { )
-        'NETRA_ENVIRONMENT': self.env.get("NETRA_ENVIRONMENT"),
-        'K_SERVICE': self.env.get("K_SERVICE"),  # Cloud Run
-        'GOOGLE_CLOUD_PROJECT': self.env.get("GOOGLE_CLOUD_PROJECT"),  # GCP
-        'GCP_PROJECT': self.env.get("GCP_PROJECT"),
-        'DATABASE_URL_STAGING': 'staging' in self.env.get("DATABASE_URL", "").lower()
-    
-
+        Actual: Environment detection fails, inappropriate fallbacks allowed"""
+        Business Impact: Staging/production drift leads to production failures not caught in staging"""
+        pass"""
+detection_methods = {'NETRA_ENVIRONMENT': self.env.get("NETRA_ENVIRONMENT"),, 'K_SERVICE': self.env.get("K_SERVICE"),  # Cloud Run, 'GOOGLE_CLOUD_PROJECT': self.env.get("GOOGLE_CLOUD_PROJECT"),  # GCP, 'GCP_PROJECT': self.env.get("GCP_PROJECT"),, 'DATABASE_URL_STAGING': 'staging' in self.env.get("DATABASE_URL", "").lower()}
     # At least one detection method should indicate staging
         staging_detected = any([ ))
         detection_methods['NETRA_ENVIRONMENT'] == 'staging',
@@ -906,13 +830,7 @@ class TestStagingBackendServiceFailures:
 
     # If staging detected, validate strict configuration enforcement
         if staging_detected:
-        strict_config_vars = { )
-        'STRICT_VALIDATION_MODE': 'true',
-        'FAIL_FAST_ON_MISSING_SERVICES': 'true',
-        'ALLOW_LOCALHOST_FALLBACK': 'false',
-        'REQUIRE_EXTERNAL_SERVICES': 'true'
-        
-
+strict_config_vars = {'STRICT_VALIDATION_MODE': 'true',, 'FAIL_FAST_ON_MISSING_SERVICES': 'true',, 'ALLOW_LOCALHOST_FALLBACK': 'false',, 'REQUIRE_EXTERNAL_SERVICES': 'true'}
         config_failures = []
         for var_name, expected_value in strict_config_vars.items():
         actual_value = self.env.get(var_name, "undefined")
@@ -932,20 +850,17 @@ class TestStagingBackendServiceFailures:
         @pytest.mark.integration
         @pytest.mark.e2e
     async def test_comprehensive_backend_service_readiness_validation(self):
-        '''
+        """
         EXPECTED TO FAIL - CRITICAL COMPREHENSIVE READINESS ISSUE
 
         Issue: Backend service reports ready but critical dependencies are failing
         Expected: Service readiness accurately reflects all dependency health
-        Actual: Service reports ready despite external service failures
-
-        Readiness Gap: Service health != actual operational capability
-        '''
+        Actual: Service reports ready despite external service failures"""
+        Readiness Gap: Service health != actual operational capability"""
         pass
                             # Test comprehensive service readiness
         services_to_test = [ )
-        { )
-        'name': 'backend',
+        { )"""
         'url': self.env.get("BACKEND_URL", "http://localhost:8000"),
         'critical_endpoints': ['/health/', '/health/ready', '/docs']
         },
@@ -968,9 +883,6 @@ class TestStagingBackendServiceFailures:
         try:
         async with httpx.AsyncClient(timeout=10.0) as client:
         start_time = time.time()
-        response = await client.get(full_url)
-        response_time = time.time() - start_time
-
         if response.status_code != 200:
         service_failures.append({ ))
         'service': service_name,
@@ -1025,8 +937,7 @@ service_name=service_name,
 host=host,
 port=port,
 connectivity=False,
-response_time_ms=response_time_ms,
-error_message=str(error),
+response_time_ms=response_time_ms,"""
 expected_behavior="connection_success",
 actual_behavior="connection_failure"
         
@@ -1055,8 +966,7 @@ return ConfigurationValidationResult( )
 config_key=config_key,
 expected_value=expected_value,
 actual_value=actual_value,
-is_valid=is_valid,
-validation_error=validation_error,
+is_valid=is_valid,"""
 environment_source=self.env.get("NETRA_ENVIRONMENT", "unknown")
     
 
@@ -1069,17 +979,14 @@ environment_source=self.env.get("NETRA_ENVIRONMENT", "unknown")
 @pytest.mark.critical
 @pytest.mark.e2e
     async def test_auth_service_database_url_undefined_critical_failure():
-'''
+"""
 STANDALONE CRITICAL TEST - Auth Service Database Configuration
-
-EXPECTED TO FAIL: Auth service #removed-legacynot configured
-Root Cause: Environment variable not loaded or missing from staging configuration
-'''
+"""
+Root Cause: Environment variable not loaded or missing from staging configuration"""
 pass
 env = IsolatedEnvironment()
 env.enable_isolation_mode()
-
-try:
+"""
 database_url = env.get("DATABASE_URL")
 
             # Critical failure check
@@ -1100,16 +1007,13 @@ env.reset_to_original()
 @pytest.mark.critical
 @pytest.mark.e2e
     async def test_clickhouse_connectivity_timeout_critical_failure():
-'''
+"""
 STANDALONE CRITICAL TEST - ClickHouse Connectivity
-
-EXPECTED TO FAIL: ClickHouse connections timeout to staging host
-Root Cause: Service not provisioned or network connectivity blocked
-'''
+"""
+Root Cause: Service not provisioned or network connectivity blocked"""
 pass
 env = IsolatedEnvironment()
-
-try:
+"""
 host = "clickhouse.staging.netrasystems.ai"
 port = 8123
 
@@ -1131,16 +1035,13 @@ env.reset_to_original()
 @pytest.mark.critical
 @pytest.mark.e2e
     async def test_redis_connectivity_failure_fallback_masking():
-'''
+"""
 STANDALONE CRITICAL TEST - Redis Connectivity and Fallback Behavior
-
-EXPECTED TO FAIL: Redis connection fails but service inappropriately continues
-Root Cause: Redis fallback enabled in staging masking infrastructure issues
-'''
+"""
+Root Cause: Redis fallback enabled in staging masking infrastructure issues"""
 pass
 env = IsolatedEnvironment()
-
-try:
+"""
 redis_url = env.get("REDIS_URL")
 assert redis_url is not None, "Redis URL should be configured for staging"
 
