@@ -33,6 +33,7 @@ import argparse
 from datetime import datetime, timedelta
 import re
 from uuid import uuid4, UUID
+from enum import Enum
 
 # Add token budget imports with proper path handling
 sys.path.insert(0, str(Path(__file__).parent))
@@ -62,6 +63,24 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+class LogLevel(Enum):
+    """Log level configuration for zen orchestrator output"""
+    SILENT = "silent"      # Errors and final summary only
+    CONCISE = "concise"    # Essential progress + budget alerts (DEFAULT)
+    DETAILED = "detailed"  # All current logging
+
+def determine_log_level(args) -> LogLevel:
+    """Determine log level from arguments with backward compatibility."""
+    # Check explicit log_level first (highest priority)
+    if hasattr(args, 'log_level') and args.log_level:
+        return LogLevel[args.log_level.upper()]
+    elif hasattr(args, 'quiet') and args.quiet:
+        return LogLevel.SILENT
+    elif hasattr(args, 'verbose') and args.verbose:
+        return LogLevel.DETAILED
+    else:
+        return LogLevel.CONCISE  # New default
 
 @dataclass
 class InstanceConfig:
@@ -143,7 +162,8 @@ class ClaudeInstanceOrchestrator:
                  overall_token_budget: Optional[int] = None,
                  budget_enforcement_mode: str = "warn",
                  enable_budget_visuals: bool = True,
-                 has_command_budgets: bool = False):
+                 has_command_budgets: bool = False,
+                 log_level: LogLevel = LogLevel.CONCISE):
         self.workspace_dir = workspace_dir
         self.instances: Dict[str, InstanceConfig] = {}
         self.statuses: Dict[str, InstanceStatus] = {}
@@ -157,6 +177,7 @@ class ClaudeInstanceOrchestrator:
         self.status_report_task = None  # For the rolling status report task
         self.use_cloud_sql = use_cloud_sql
         self.quiet = quiet
+        self.log_level = log_level
         self.batch_id = str(uuid4())  # Generate batch ID for this orchestration run
         # Database client removed for security - local metrics only
         self.optimizer = None
@@ -193,6 +214,18 @@ class ClaudeInstanceOrchestrator:
         if use_cloud_sql:
             logger.warning("CloudSQL functionality has been disabled. Token metrics will be displayed locally only.")
             logger.info("For data persistence, consider upgrading to Netra Apex.")
+
+    def log_at_level(self, level: LogLevel, message: str, log_func=None):
+        """Log message only if current log level permits."""
+        if log_func is None:
+            log_func = logger.info
+
+        if self.log_level == LogLevel.SILENT and log_func != logger.error:
+            return
+        elif self.log_level == LogLevel.CONCISE and level == LogLevel.DETAILED:
+            return
+
+        log_func(message)
 
     def add_instance(self, config: InstanceConfig):
         """Add a new instance configuration"""
@@ -767,6 +800,28 @@ class ClaudeInstanceOrchestrator:
         else:
             return str(tokens)
 
+    def _get_budget_display(self, instance_name: str) -> str:
+        """Get budget display string for an instance (e.g., '1.2K/5K' or '-' if no budget)"""
+        if not self.budget_manager:
+            return "-"
+
+        # Get the command for this instance
+        if instance_name not in self.instances:
+            return "-"
+
+        command = self.instances[instance_name].command
+        base_command = command.rstrip(';').split()[0] if command else command
+
+        # Check if this command has a budget
+        if base_command not in self.budget_manager.command_budgets:
+            return "-"
+
+        budget_info = self.budget_manager.command_budgets[base_command]
+        used_formatted = self._format_tokens(budget_info.used)
+        limit_formatted = self._format_tokens(budget_info.limit)
+
+        return f"{used_formatted}/{limit_formatted}"
+
     def _calculate_token_median(self) -> float:
         """Calculate median token usage across all instances"""
         token_counts = [status.total_tokens for status in self.statuses.values() if status.total_tokens > 0]
@@ -856,8 +911,8 @@ class ClaudeInstanceOrchestrator:
         print(f"║")
         
         # Print column headers with separated cache metrics
-        print(f"║  {'Status':<8} {'Name':<30} {'Model':<10} {'Duration':<10} {'Overall':<8} {'Tokens':<8} {'Cache Cr':<8} {'Cache Rd':<8} {'Tools':<6}")
-        print(f"║  {'─'*8} {'─'*30} {'─'*10} {'─'*10} {'─'*8} {'─'*8} {'─'*8} {'─'*8} {'─'*6}")
+        print(f"║  {'Status':<8} {'Name':<30} {'Model':<10} {'Duration':<10} {'Overall':<8} {'Tokens':<8} {'Cache Cr':<8} {'Cache Rd':<8} {'Tools':<6} {'Budget':<10}")
+        print(f"║  {'─'*8} {'─'*30} {'─'*10} {'─'*10} {'─'*8} {'─'*8} {'─'*8} {'─'*8} {'─'*6} {'─'*10}")
 
         for name, status in self.statuses.items():
             # Status emoji
@@ -906,8 +961,11 @@ class ClaudeInstanceOrchestrator:
             # Format model name for display
             model_short = status.model_used.replace('claude-', '').replace('-', '') if status.model_used else "unknown"
 
+            # Get budget information for this instance
+            budget_info = self._get_budget_display(name)
+
             # Create detailed line with separated cache metrics
-            detail = f"  {emoji:<8} {name:<30} {model_short:<10} {time_info:<10} {overall_tokens:<8} {tokens_info:<8} {cache_creation_info:<8} {cache_read_info:<8} {tool_info:<6}"
+            detail = f"  {emoji:<8} {name:<30} {model_short:<10} {time_info:<10} {overall_tokens:<8} {tokens_info:<8} {cache_creation_info:<8} {cache_read_info:<8} {tool_info:<6} {budget_info:<10}"
 
             print(f"║{detail}")
 
@@ -1047,7 +1105,7 @@ class ClaudeInstanceOrchestrator:
 
         # DEBUG: Log lines with potential token information
         if line.strip() and any(keyword in line.lower() for keyword in ['token', 'usage', 'total', 'input', 'output']):
-            logger.debug(f"🔍 TOKEN PARSE [{instance_name}]: {line[:100]}{'...' if len(line) > 100 else ''}")
+            self.log_at_level(LogLevel.DETAILED, f"🔍 TOKEN PARSE [{instance_name}]: {line[:100]}{'...' if len(line) > 100 else ''}", logger.debug)
 
         # Track previous total for delta detection
         prev_total = status.total_tokens
@@ -1056,7 +1114,7 @@ class ClaudeInstanceOrchestrator:
         if self._try_parse_json_token_usage(line, status):
             # Check if tokens actually changed
             if status.total_tokens != prev_total:
-                logger.info(f"✅ JSON PARSE SUCCESS [{instance_name}]: tokens {prev_total} → {status.total_tokens}")
+                self.log_at_level(LogLevel.DETAILED, f"✅ JSON PARSE SUCCESS [{instance_name}]: tokens {prev_total} → {status.total_tokens}")
             self._update_budget_tracking(status, instance_name)
             return
 
@@ -1092,7 +1150,7 @@ class ClaudeInstanceOrchestrator:
         if self.budget_manager and current_billable_tokens > status._last_known_total_tokens:
             new_tokens = current_billable_tokens - status._last_known_total_tokens
 
-            logger.info(f"💰 BUDGET UPDATE [{instance_name}]: Recording {new_tokens} tokens for command '{base_command}'")
+            self.log_at_level(LogLevel.CONCISE, f"💰 BUDGET UPDATE [{instance_name}]: Recording {new_tokens} tokens for command '{base_command}'")
 
             # Record the usage
             self.budget_manager.record_usage(base_command, new_tokens)
@@ -1101,7 +1159,7 @@ class ClaudeInstanceOrchestrator:
             # Log the new budget state
             if base_command in self.budget_manager.command_budgets:
                 budget_info = self.budget_manager.command_budgets[base_command]
-                logger.info(f"📊 BUDGET STATE [{instance_name}]: {base_command} now at {budget_info.used}/{budget_info.limit} tokens ({budget_info.percentage:.1f}%)")
+                self.log_at_level(LogLevel.CONCISE, f"📊 BUDGET STATE [{instance_name}]: {base_command} now at {budget_info.used}/{budget_info.limit} tokens ({budget_info.percentage:.1f}%)")
 
             # RUNTIME BUDGET ENFORCEMENT - Check if we've exceeded budgets during execution
             self._check_runtime_budget_violation(status, instance_name, base_command)
@@ -1237,14 +1295,14 @@ class ClaudeInstanceOrchestrator:
             usage_data = None
             if 'usage' in json_data:
                 usage_data = json_data['usage']
-                logger.info(f"📊 TOKEN DATA: Found usage data: {usage_data}")
+                self.log_at_level(LogLevel.DETAILED, f"📊 TOKEN DATA: Found usage data: {usage_data}")
             elif 'message' in json_data and isinstance(json_data['message'], dict) and 'usage' in json_data['message']:
                 usage_data = json_data['message']['usage']
-                logger.info(f"📊 TOKEN DATA: Found nested usage data: {usage_data}")
+                self.log_at_level(LogLevel.DETAILED, f"📊 TOKEN DATA: Found nested usage data: {usage_data}")
             elif 'tokens' in json_data and isinstance(json_data['tokens'], dict):
                 # Handle structured token data format
                 usage_data = json_data['tokens']
-                logger.info(f"📊 TOKEN DATA: Found tokens data: {usage_data}")
+                self.log_at_level(LogLevel.DETAILED, f"📊 TOKEN DATA: Found tokens data: {usage_data}")
             else:
                 # Check for direct token fields at the top level
                 direct_tokens = {}
@@ -1254,9 +1312,9 @@ class ClaudeInstanceOrchestrator:
 
                 if direct_tokens:
                     usage_data = direct_tokens
-                    logger.info(f"📊 TOKEN DATA: Found direct token fields: {usage_data}")
+                    self.log_at_level(LogLevel.DETAILED, f"📊 TOKEN DATA: Found direct token fields: {usage_data}")
                 else:
-                    logger.debug(f"❌ NO TOKEN DATA: No usage fields found in JSON with keys: {list(json_data.keys())}")
+                    self.log_at_level(LogLevel.DETAILED, f"❌ NO TOKEN DATA: No usage fields found in JSON with keys: {list(json_data.keys())}", logger.debug)
 
             if usage_data and isinstance(usage_data, dict):
                 # FIXED: Use cumulative addition for progressive token counts, not max()
@@ -2058,6 +2116,10 @@ async def main():
                        help="Maximum recent lines to show per instance on console (default: 5)")
     parser.add_argument("--quiet", action="store_true",
                        help="Minimize console output, show only errors and final summaries")
+    parser.add_argument("--log-level", choices=["silent", "concise", "detailed"], default=None,
+                       help="Set log level: 'silent' (errors only), 'concise' (essential progress + budget alerts, default), 'detailed' (all logging)")
+    parser.add_argument("--verbose", action="store_true",
+                       help="Enable detailed logging (equivalent to --log-level detailed)")
     parser.add_argument("--startup-delay", type=float, default=5.0,
                        help="Delay in seconds between launching each instance (default: 5.0)")
     parser.add_argument("--max-line-length", type=int, default=800,
@@ -2143,6 +2205,9 @@ async def main():
         final_enable_visuals = not config_budget_settings["disable_visuals"]
         logger.info(f"Using budget visuals setting from config file: {final_enable_visuals}")
 
+    # Determine log level from arguments
+    log_level = determine_log_level(args)
+
     # Initialize orchestrator with console output settings
     max_lines = 0 if args.quiet else args.max_console_lines
 
@@ -2162,7 +2227,8 @@ async def main():
         overall_token_budget=final_overall_budget,
         budget_enforcement_mode=final_enforcement_mode,
         enable_budget_visuals=final_enable_visuals,
-        has_command_budgets=has_command_budgets
+        has_command_budgets=has_command_budgets,
+        log_level=log_level
     )
 
     # Process per-command budgets from config file first, then CLI args (CLI overrides config)

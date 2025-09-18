@@ -171,6 +171,32 @@ python -m zen_orchestrator --help
 # Option 2: Manually add to PATH (see Troubleshooting)
 ```
 
+## Understanding the Model Column in Status Reports
+
+### Model Column Behavior
+
+The **Model** column in Zen's status display shows the **actual model used** by Claude Code for each API response, not necessarily the model you configured in your settings.
+
+**Key Points:**
+- **Intentional Design**: This column reflects reality - what model Claude actually used to process your request
+- **Cost Tracking Value**: Knowing the actual model is critical for accurate cost calculation since different models have vastly different pricing (e.g., Opus costs 5x more than Sonnet)
+- **Dynamic Detection**: Zen automatically detects the model from Claude's API responses in real-time
+- **Fallback Behavior**: If model detection fails, it defaults to "claude-3-5-sonnet" for cost calculations
+
+**Why This Matters:**
+- Your configuration might specify Opus, but Claude might use Sonnet for simpler tasks
+- Accurate cost tracking requires knowing the actual model used, not just your preference
+- Budget management and token usage calculations depend on correct model identification
+
+**Example Status Display:**
+```
+║  Status   Name                Model      Duration  Overall  Tokens   Budget
+║  ✅        analyze-code        35sonnet   2m15s     45.2K    2.1K     85% used
+║  🏃        optimize-perf       opus4      1m30s     12.8K    800      45% used
+```
+
+This transparency helps you understand your actual AI spend and make informed decisions about model usage.
+
 ## Expected questions
 
 ### 1. Do I have to use /commands?

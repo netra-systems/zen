@@ -531,5 +531,93 @@ class TestDefaultInstances:
         assert any("/ultimate-test-deploy-loop" in cmd for cmd in commands)
 
 
+class TestBudgetDisplayFeature:
+    """Test the budget display functionality in the main table"""
+
+    def test_get_budget_display_no_budget_manager(self):
+        """Test budget display when no budget manager is available"""
+        orchestrator = ClaudeInstanceOrchestrator(Path("/tmp"), budget_enforcement_mode="warn")
+        result = orchestrator._get_budget_display("test_instance")
+        assert result == "-"
+
+    def test_get_budget_display_no_instance(self):
+        """Test budget display when instance doesn't exist"""
+        from zen.token_budget.budget_manager import TokenBudgetManager
+
+        orchestrator = ClaudeInstanceOrchestrator(Path("/tmp"), budget_enforcement_mode="warn")
+        orchestrator.budget_manager = TokenBudgetManager()
+
+        result = orchestrator._get_budget_display("nonexistent_instance")
+        assert result == "-"
+
+    def test_get_budget_display_no_command_budget(self):
+        """Test budget display when command has no budget configured"""
+        from zen.token_budget.budget_manager import TokenBudgetManager
+
+        orchestrator = ClaudeInstanceOrchestrator(Path("/tmp"), budget_enforcement_mode="warn")
+        orchestrator.budget_manager = TokenBudgetManager()
+
+        # Add an instance
+        config = InstanceConfig(command="/test-command")
+        orchestrator.instances["test_instance"] = config
+
+        result = orchestrator._get_budget_display("test_instance")
+        assert result == "-"
+
+    def test_get_budget_display_with_budget(self):
+        """Test budget display when command has budget configured"""
+        from zen.token_budget.budget_manager import TokenBudgetManager
+
+        orchestrator = ClaudeInstanceOrchestrator(Path("/tmp"), budget_enforcement_mode="warn")
+        orchestrator.budget_manager = TokenBudgetManager()
+
+        # Add an instance
+        config = InstanceConfig(command="/test-command")
+        orchestrator.instances["test_instance"] = config
+
+        # Set a budget for the command
+        orchestrator.budget_manager.set_command_budget("/test-command", 5000)
+        orchestrator.budget_manager.record_usage("/test-command", 1200)
+
+        result = orchestrator._get_budget_display("test_instance")
+        assert result == "1.2K/5.0K"
+
+    def test_get_budget_display_with_complex_command(self):
+        """Test budget display with command that has arguments"""
+        from zen.token_budget.budget_manager import TokenBudgetManager
+
+        orchestrator = ClaudeInstanceOrchestrator(Path("/tmp"), budget_enforcement_mode="warn")
+        orchestrator.budget_manager = TokenBudgetManager()
+
+        # Add an instance with command arguments
+        config = InstanceConfig(command="/test-command arg1 arg2")
+        orchestrator.instances["test_instance"] = config
+
+        # Set a budget for the base command only
+        orchestrator.budget_manager.set_command_budget("/test-command", 10000)
+        orchestrator.budget_manager.record_usage("/test-command", 2500)
+
+        result = orchestrator._get_budget_display("test_instance")
+        assert result == "2.5K/10.0K"
+
+    def test_get_budget_display_formatting_millions(self):
+        """Test budget display formatting with millions of tokens"""
+        from zen.token_budget.budget_manager import TokenBudgetManager
+
+        orchestrator = ClaudeInstanceOrchestrator(Path("/tmp"), budget_enforcement_mode="warn")
+        orchestrator.budget_manager = TokenBudgetManager()
+
+        # Add an instance
+        config = InstanceConfig(command="/big-command")
+        orchestrator.instances["test_instance"] = config
+
+        # Set a large budget
+        orchestrator.budget_manager.set_command_budget("/big-command", 2000000)
+        orchestrator.budget_manager.record_usage("/big-command", 1500000)
+
+        result = orchestrator._get_budget_display("test_instance")
+        assert result == "1.5M/2.0M"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
