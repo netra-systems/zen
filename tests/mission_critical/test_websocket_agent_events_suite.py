@@ -663,9 +663,10 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         for test_case in test_contexts:
             # Build execution context using private method (testing internal logic)
             exec_context = pipeline_executor._build_execution_context(
-                test_case[run_id],
-                test_case["context]"
-            
+                test_case["run_id"],
+                test_case["context"]
+            )
+
             # Verify execution context structure
             assert isinstance(exec_context, AgentExecutionContext)
             assert exec_context.run_id == test_case["run_id"]
@@ -678,9 +679,9 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
             )
 
             assert "run_id" in params
-            assert agent_name in params
-            assert params[run_id] == test_case["run_id]
-            assert params[agent_name"] == supervisor
+            assert "agent_name" in params
+            assert params["run_id"] == test_case["run_id"]
+            assert params["agent_name"] == "supervisor"
     
     # ============================================================================ 
     # PIPELINE FLOW CONTEXT PREPARATION TESTS
@@ -689,11 +690,11 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     @pytest.mark.unit
     @pytest.mark.flow_context
     async def test_flow_context_preparation_and_tracking(self):
-        
+        """
         Test flow context preparation and tracking for pipeline execution.
-        
+
         BVJ: Observability - enables tracking of pipeline execution flows
-""
+        """
         # Arrange: Create PipelineExecutor
         pipeline_executor = PipelineExecutor(
             engine=self.mock_execution_engine,
