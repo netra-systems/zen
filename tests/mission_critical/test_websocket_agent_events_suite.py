@@ -813,19 +813,19 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         
         # Arrange: Create multiple pipeline executors for different users (using mocks)
         user_context_1 = MagicMock()
-        user_context_1.user_id = concurrent_user_001""
-        user_context_1.thread_id = concurrent_thread_001
-        user_context_1.run_id = concurrent_run_001"
-        user_context_1.request_id = "concurrent_req_001
-        user_context_1.websocket_client_id = concurrent_ws_001
+        user_context_1.user_id = "concurrent_user_001"
+        user_context_1.thread_id = "concurrent_thread_001"
+        user_context_1.run_id = "concurrent_run_001"
+        user_context_1.request_id = "concurrent_req_001"
+        user_context_1.websocket_client_id = "concurrent_ws_001"
         user_context_1.add_execution_result = MagicMock()
         
         user_context_2 = MagicMock()
         user_context_2.user_id = "concurrent_user_002"
-        user_context_2.thread_id = concurrent_thread_002
-        user_context_2.run_id = concurrent_run_002"
-        user_context_2.request_id = concurrent_req_002"
-        user_context_2.websocket_client_id = concurrent_ws_002
+        user_context_2.thread_id = "concurrent_thread_002"
+        user_context_2.run_id = "concurrent_run_002"
+        user_context_2.request_id = "concurrent_req_002"
+        user_context_2.websocket_client_id = "concurrent_ws_002"
         user_context_2.add_execution_result = MagicMock()
         
         pipeline_executor_1 = PipelineExecutor(
@@ -842,33 +842,33 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         
         # Create different states for each user
         state_1 = DeepAgentState(
-            user_id=concurrent_user_001","
-            thread_id=concurrent_thread_001,
-            run_id=concurrent_run_001"
+            user_id="concurrent_user_001",
+            thread_id="concurrent_thread_001",
+            run_id="concurrent_run_001"
         )
-        state_1.user_request = "User 1 pipeline request
+        state_1.user_request = "User 1 pipeline request"
         
         state_2 = DeepAgentState(
             user_id=concurrent_user_002,
-            thread_id="concurrent_thread_002, "
+            thread_id="concurrent_thread_002",
             run_id=concurrent_run_002
         )
-        state_2.user_request = User 2 pipeline request"
+        state_2.user_request = "User 2 pipeline request"
         
         # Act: Execute both pipelines concurrently
         task_1 = pipeline_executor_1.execute_pipeline(
             pipeline=self.test_pipeline_steps,
             user_context=user_context_1,
-            run_id=concurrent_run_001",
-            context={user_id: concurrent_user_001, "thread_id: concurrent_thread_001"},
+            run_id="concurrent_run_001",
+            context={"user_id": "concurrent_user_001", "thread_id": "concurrent_thread_001"},
             db_session=self.mock_db_session
         )
 
         task_2 = pipeline_executor_2.execute_pipeline(
             pipeline=self.test_pipeline_steps,
             user_context=user_context_2,
-            run_id=concurrent_run_002, 
-            context={user_id: "concurrent_user_002, thread_id": concurrent_thread_002},
+            run_id="concurrent_run_002", 
+            context={"user_id": "concurrent_user_002", "thread_id": "concurrent_thread_002"},
             db_session=self.mock_db_session
         )
         
@@ -915,8 +915,9 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         large_pipeline = []
         for i in range(10):  # 10 steps
             step = PipelineStepConfig(
-                agent_name=fperformance_agent_{i:02d}",
-                metadata={step_number: i + 1, "performance_test: True}
+                agent_name=f"performance_agent_{i:02d}",
+                metadata={"step_number": i + 1, "performance_test": True}
+            )
             large_pipeline.append(step)
         
         # Act: Execute large pipeline and measure timing
@@ -925,8 +926,8 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         await pipeline_executor.execute_pipeline(
             pipeline=large_pipeline,
             user_context=self.test_user_context,
-            run_id=performance_run_001",
-            context={user_id: performance_user_001, "thread_id: performance_thread_001"},
+            run_id="performance_run_001",
+            context={"user_id": "performance_user_001", "thread_id": "performance_thread_001"},
             db_session=self.mock_db_session
         )
         
@@ -943,22 +944,22 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         expected_max_time = expected_min_time * 2  # Allow for 100% overhead
         
         assert total_execution_time >= expected_min_time * 0.8, \
-            fPipeline executed too quickly: {total_execution_time:0.3f}s < {expected_min_time * 0.8:0.3f}s"
+            f"Pipeline executed too quickly: {total_execution_time:0.3f}s < {expected_min_time * 0.8:0.3f}s"
         assert total_execution_time <= expected_max_time, \
             f"Pipeline executed too slowly: {total_execution_time:0.3f}s > {expected_max_time:0.3f}s"
         
         # Verify execution order was maintained
-        expected_agents = [f"perf"ormance_agent_{i:02d} for i in range(10")]
+        expected_agents = [f"performance_agent_{i:02d}" for i in range(10)]
         actual_agents = [event['agent_name'] for event in self.captured_execution_events]
-        assert actual_agents == expected_agents, Pipeline execution order not maintained"
+        assert actual_agents == expected_agents, "Pipeline execution order not maintained"
         
         # Performance logging
         avg_time_per_step = total_execution_time / len(large_pipeline)
         print(f"\nPipeline Performance Results:")
-        print(f"  Total steps: {len(large_pipeline")}")"
+        print(f"  Total steps: {len(large_pipeline)}")
         print(f"  Total execution time: {total_execution_time:0.3f}s")
-        print(f"  Average time per step: {avg_time_per_step:0.3f}s")"
-        print(f"  Steps per second: {len(large_pipeline") / total_execution_time:0.2f})
+        print(f"  Average time per step: {avg_time_per_step:0.3f}s")
+        print(f"  Steps per second: {len(large_pipeline) / total_execution_time:0.2f}")
     
 
 # ============================================================================
@@ -966,20 +967,21 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
 # ============================================================================
 
 class AgentWebSocketIntegrationEnhancedTests:
-    "Enhanced agent integration tests for WebSocket agent events.
-    
+    """Enhanced agent integration tests for WebSocket agent events.
+
     Business Value: Validates the complete agent execution lifecycle through WebSocket events.
     These tests ensure that the 5 critical agent events that enable $500K+ ARR chat functionality
     are properly delivered during real agent execution scenarios.
-"
+    """
 
     @pytest.mark.asyncio
     @pytest.mark.critical
     # @require_docker_services()  # Temporarily disabled - GCP integration regression
     async def test_agent_registry_websocket_manager_integration(self):
-        Test AgentRegistry.set_websocket_manager() critical integration point.""
-        
+        """Test AgentRegistry.set_websocket_manager() critical integration point.
+
         Business Value: Validates the SSOT bridge setup that enables agent-websocket coordination.
+        """
         
         config = RealWebSocketTestConfig()
         context = create_test_context()
@@ -992,8 +994,8 @@ class AgentWebSocketIntegrationEnhancedTests:
         agent_registry.set_websocket_manager(websocket_manager)
         
         # Verify the bridge is established
-        assert hasattr(agent_registry, '_websocket_manager'), WebSocket manager not set on AgentRegistry""
-        assert agent_registry._websocket_manager is websocket_manager, WebSocket manager ref"erence mismatch
+        assert hasattr(agent_registry, '_websocket_manager'), "WebSocket manager not set on AgentRegistry"
+        assert agent_registry._websocket_manager is websocket_manager, "WebSocket manager reference mismatch"
         
         # Test enhanced tool dispatcher creation with WebSocket integration
         user_context = UserExecutionContext.from_request(
