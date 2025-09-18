@@ -18,10 +18,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 
 class TestSimulator:
-    """Simulates test execution when services aren't available.""'"
+    """Simulates test execution when services aren't available."""
 
     def __init__(self):
-        self.results = }
+        self.results = {
         'total': 0,
         'passed': 0,
         'failed': 0,

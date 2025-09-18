@@ -14,16 +14,10 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
-    if module_path not in _lazy_imports:
-        try:
-            module = __import__(module_path, fromlist=[component] if component else [])
-            if component:
-                _lazy_imports[module_path] = getattr(module, component)
-            else:
-                _lazy_imports[module_path] = module
-        except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}""""
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+    return _lazy_imports.get(module_path)
+
+"""
 Test Complete Authentication Golden Path
 
 Business Value Justification (BVJ):

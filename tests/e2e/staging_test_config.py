@@ -165,7 +165,8 @@ class StagingConfig:
                 # PHASE 1 FIX: Don't set fallback subprotocol that causes negotiation failure
                 print(f"[STAGING PHASE1 FIX] No subprotocol set - using header auth only")
             
-            print(f"[STAGING AUTH FIX] Added JWT token to WebSocket headers (Authorization + subprotocol)""X-Test-Auth"] = "test-token-for-staging"
+            print(f"[STAGING AUTH FIX] Added JWT token to WebSocket headers (Authorization + subprotocol)")
+            headers["X-Test-Auth"] = "test-token-for-staging"
             # PHASE 1 FIX: Remove fallback subprotocol that causes negotiation failure
             # headers["sec-websocket-protocol"] = "e2e-testing"
             print(f"[WARNING] No JWT token available - using test header fallback without subprotocol")

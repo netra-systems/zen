@@ -152,7 +152,13 @@ def pytest_configure(config):
     
     # Issue tracking markers
     config.addinivalue_line(
-        "markers", "issue_395: mark test related to issue #395 (WebSocket auth golden path)""markers", "issue_426: mark test related to issue #426 (WebSocket subprotocol negotiation)""markers", "connectivity: mark test for connectivity validation"
+        "markers", "issue_395: mark test related to issue #395 (WebSocket auth golden path)"
+    )
+    config.addinivalue_line(
+        "markers", "issue_426: mark test related to issue #426 (WebSocket subprotocol negotiation)"
+    )
+    config.addinivalue_line(
+        "markers", "connectivity: mark test for connectivity validation"
     )
     config.addinivalue_line(
         "markers", "timeout: mark test with custom timeout"

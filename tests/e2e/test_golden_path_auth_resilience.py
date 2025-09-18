@@ -14,16 +14,10 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}""""Lazy import pattern for performance optimization"""
-    if module_path not in _lazy_imports:
-        try:
-            module = __import__(module_path, fromlist=[component] if component else [])
-            if component:
-                _lazy_imports[module_path] = getattr(module, component)
-            else:
-                _lazy_imports[module_path] = module
-        except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}""""
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+    return _lazy_imports.get(module_path)
+
+"""
 E2E tests for Golden Path auth resilience on GCP staging (Issue #395).
 
 REPRODUCTION TARGET: End-to-end Golden Path user flow failures due to auth service timeout.
@@ -104,7 +98,10 @@ class GoldenPathAuthResilienceTests(SSotAsyncTestCase):
                 else:
                     loop.run_until_complete(self.auth_client._client.aclose())
             except Exception as e:
-                print(f"Warning: Could not close auth client: {e}""""
+                print(f"Warning: Could not close auth client: {e}")
+
+    async def test_complete_golden_path_user_flow_timeout_staging_gcp_reproduce(self):
+        """
         E2E REPRODUCTION TEST: Complete Golden Path user flow timeout in GCP staging.
         
         This test reproduces the complete user journey that generates 500K+ ARR:

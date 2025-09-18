@@ -204,24 +204,24 @@ assert "Agent supervisor is None in str(exc_info.value)"
 @pytest.mark.asyncio
     async def test_phase3_websocket_enhancement_required(self, orchestrator):
         """Test that WebSocket enhancement is mandatory for agent supervisor."""
-                                                                                                                                                                                        # Mock successful phases 1 and 2
-with patch.object(orchestrator, '_phase1_foundation'):
-    with patch.object(orchestrator, '_phase2_core_services'):
-        with patch.object(orchestrator, '_initialize_tool_registry'):
-            with patch.object(orchestrator, '_initialize_websocket'):
-                with patch.object(orchestrator, '_initialize_agent_supervisor'):
-                    orchestrator.app.state.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+        # Mock successful phases 1 and 2
+        with patch.object(orchestrator, '_phase1_foundation'):
+            with patch.object(orchestrator, '_phase2_core_services'):
+                with patch.object(orchestrator, '_initialize_tool_registry'):
+                    with patch.object(orchestrator, '_initialize_websocket'):
+                        with patch.object(orchestrator, '_initialize_agent_supervisor'):
+                            orchestrator.app.state.websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
-                                                                                                                                                                                                            # Create mock supervisor without WebSocket enhancement
-websocket = TestWebSocketConnection()  # Real WebSocket implementation
-mock_supervisor.registry.tool_dispatcher._websocket_enhanced = False
-orchestrator.app.state.agent_supervisor = mock_supervisor
-orchestrator.app.state.websocket = TestWebSocketConnection()  # Real WebSocket implementation
+                            # Create mock supervisor without WebSocket enhancement
+                            websocket = TestWebSocketConnection()  # Real WebSocket implementation
+                            mock_supervisor.registry.tool_dispatcher._websocket_enhanced = False
+                            orchestrator.app.state.agent_supervisor = mock_supervisor
+                            orchestrator.app.state.websocket = TestWebSocketConnection()  # Real WebSocket implementation
 
-with pytest.raises(DeterministicStartupError) as exc_info:
-    await orchestrator.initialize_system()
+                            with pytest.raises(DeterministicStartupError) as exc_info:
+                                await orchestrator.initialize_system()
 
-assert "Tool dispatcher not enhanced with WebSocket" in str(exc_info.value)
+                            assert "Tool dispatcher not enhanced with WebSocket" in str(exc_info.value)
 
                                                                                                                                                                                                                 # ========== PHASE 4: Optional Services Tests ==========
 
