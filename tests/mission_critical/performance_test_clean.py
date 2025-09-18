@@ -1,5 +1,4 @@
-""""
-
+"""
 Standalone WebSocket Bridge Performance Test - Clean Version (Windows Compatible)
 
 This test validates the performance test infrastructure and generates
@@ -16,7 +15,7 @@ a baseline performance report without requiring the full application stack.
 - Throughput > 1000 events/second (scalability)
 - Connection time < "500ms" (quick user engagement)
 - Support 25+ concurrent users (business growth)
-""""
+"""
 
 
 import asyncio
