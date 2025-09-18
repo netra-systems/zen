@@ -2155,23 +2155,12 @@ class StartupOrchestrator:
             
             # 3. Initialize AgentWebSocketBridge
             # CRITICAL FIX: Always initialize websocket_factory to prevent "not associated with a value" error
-            websocket_factory = get_agent_websocket_bridge()
+            from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+            websocket_factory = create_agent_websocket_bridge()
             
-            # Configure with proper parameters including connection pool
-            if hasattr(self.app.state, 'agent_supervisor'):
-                # Create a simple health monitor for now
-                class SimpleHealthMonitor:
-                    async def check_health(self):
-                        return {"status": "healthy"}
-                
-                health_monitor = SimpleHealthMonitor()
-                
-                # Note: With UserExecutionContext pattern, registry is created per-request
-                websocket_factory.configure(
-                    connection_pool=connection_pool,
-                    agent_registry=None,  # Per-request in UserExecutionContext pattern
-                    health_monitor=health_monitor
-                )
+            # Note: AgentWebSocketBridge is self-configuring and creates its own dependencies
+            # Connection pool and registry are handled internally via dependency injection
+            # Health monitor is initialized automatically during bridge initialization
             self.app.state.websocket_bridge_factory = websocket_factory
             self.logger.info("    [U+2713] AgentWebSocketBridge configured with connection pool")
             
