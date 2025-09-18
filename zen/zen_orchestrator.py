@@ -387,6 +387,7 @@ class ClaudeInstanceOrchestrator:
 
             cmd = self.build_claude_command(config)
             logger.info(f"Command: {' '.join(cmd)}")
+            logger.info(f"Permission mode: {config.permission_mode} (Platform: {platform.system()})")
 
             # Create the async process with Mac-friendly environment
             env = os.environ.copy()
@@ -1952,13 +1953,13 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
     return [
         InstanceConfig(
             command="1+1 ",
-            permission_mode="bypassPermissions",
+            # permission_mode will be auto-set based on platform
             output_format=output_format,
             max_tokens_per_command=1000
         ),
         InstanceConfig(
             command="Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.",
-            permission_mode="bypassPermissions",
+            # permission_mode will be auto-set based on platform
             output_format=output_format,
             max_tokens_per_command=1000
         )
