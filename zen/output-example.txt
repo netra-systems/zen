@@ -16,12 +16,12 @@ anthony@Shivanginis-MacBook-Pro netra-apex % zen --overall-token-budget 50000 --
 2025-09-17 11:03:28,268 - zen_orchestrator - INFO - 🎯 Budget check for 1+1 : command=1+1, estimated=1000 tokens
 2025-09-17 11:03:28,268 - zen_orchestrator - INFO - ✅ Budget check passed for 1+1 : Within budget limits
 2025-09-17 11:03:28,268 - zen_orchestrator - INFO - Starting instance: 1+1 
-2025-09-17 11:03:28,268 - zen_orchestrator - INFO - Command: /usr/local/bin/claude -p 1+1  --output-format=stream-json --permission-mode=acceptEdits --verbose
+2025-09-17 11:03:28,268 - zen_orchestrator - INFO - Command: /usr/local/bin/claude -p 1+1  --output-format=stream-json --permission-mode=bypassPermissions --verbose
 2025-09-17 11:03:28,270 - zen_orchestrator - INFO - Waiting 5.0s before starting instance 'Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.'
 2025-09-17 11:03:28,270 - zen_orchestrator - INFO - Instance 1+1  started with PID 75889
 
 ╔═[1+1 ]════════════ STDOUT 
-║ {"type":"system","subtype":"init","cwd":"/Users/anthony/Desktop/netra-apex","session_id":"e5f44d5a-f390-4e2a-a73f-1efd918e3641","tools":["Task","Bash","Glob","Grep","ExitPlanMode","Read","Edit","MultiEdit","Write","NotebookEdit","WebFetch","TodoWrite","WebSearch","BashOutput","KillBash"],"mcp_servers":[],"model":"claude-opus-4-1-20250805","permissionMode":"acceptEdits","slash_commands":["gitcommitgardener","audit-gcp-logs","ultimate-test-deploy-loop","canary","issue-consolidation","run-demo","action","websocket-test","priority-test-create","clear-old-issue-locks","gitissueplannerv1","testgardener","gitissueprogressorv2","analyze-repository","refresh-issue-config","test-fix-REMOVED_SYNTAX_ERROR","gitissueprogressorv3","createtestsv2","issuecrush","compliance","pre-commit","stale-resolver...
+║ {"type":"system","subtype":"init","cwd":"/Users/anthony/Desktop/netra-apex","session_id":"e5f44d5a-f390-4e2a-a73f-1efd918e3641","tools":["Task","Bash","Glob","Grep","ExitPlanMode","Read","Edit","MultiEdit","Write","NotebookEdit","WebFetch","TodoWrite","WebSearch","BashOutput","KillBash"],"mcp_servers":[],"model":"claude-opus-4-1-20250805","permissionMode":"bypassPermissions","slash_commands":["gitcommitgardener","audit-gcp-logs","ultimate-test-deploy-loop","canary","issue-consolidation","run-demo","action","websocket-test","priority-test-create","clear-old-issue-locks","gitissueplannerv1","testgardener","gitissueprogressorv2","analyze-repository","refresh-issue-config","test-fix-REMOVED_SYNTAX_ERROR","gitissueprogressorv3","createtestsv2","issuecrush","compliance","pre-commit","stale-resolver...
 ╚═══════════════════════════
 
 2025-09-17 11:03:29,222 - zen_orchestrator - WARNING - 🚫 NO TOKENS [1+1 ]: total_tokens is still 0 - token detection may be failing
@@ -53,7 +53,7 @@ anthony@Shivanginis-MacBook-Pro netra-apex % zen --overall-token-budget 50000 --
 2025-09-17 11:03:33,272 - zen_orchestrator - INFO - 🎯 Budget check for Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.: command=Write, estimated=1000 tokens
 2025-09-17 11:03:33,272 - zen_orchestrator - INFO - ✅ Budget check passed for Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.: Within budget limits
 2025-09-17 11:03:33,272 - zen_orchestrator - INFO - Starting instance: Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.
-2025-09-17 11:03:33,272 - zen_orchestrator - INFO - Command: /usr/local/bin/claude -p Write 3 short stories about AI native engineering. Spawn a new sub agent for each story. --output-format=stream-json --permission-mode=acceptEdits --verbose
+2025-09-17 11:03:33,272 - zen_orchestrator - INFO - Command: /usr/local/bin/claude -p Write 3 short stories about AI native engineering. Spawn a new sub agent for each story. --output-format=stream-json --permission-mode=bypassPermissions --verbose
 
 ╔═══ STATUS REPORT [11:03:33] ═══╗
 ║ Total: 2 instances
@@ -74,7 +74,7 @@ anthony@Shivanginis-MacBook-Pro netra-apex % zen --overall-token-budget 50000 --
 2025-09-17 11:03:33,280 - zen_orchestrator - INFO - Instance Write 3 short stories about AI native engineering. Spawn a new sub agent for each story. started with PID 75951
 
 ╔═[Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.]═ STDOUT 
-║ {"type":"system","subtype":"init","cwd":"/Users/anthony/Desktop/netra-apex","session_id":"02328d28-a6ff-4c78-8b6b-4c1af23e395d","tools":["Task","Bash","Glob","Grep","ExitPlanMode","Read","Edit","MultiEdit","Write","NotebookEdit","WebFetch","TodoWrite","WebSearch","BashOutput","KillBash"],"mcp_servers":[],"model":"claude-opus-4-1-20250805","permissionMode":"acceptEdits","slash_commands":["gitcommitgardener","audit-gcp-logs","ultimate-test-deploy-loop","canary","issue-consolidation","run-demo","action","websocket-test","priority-test-create","clear-old-issue-locks","gitissueplannerv1","testgardener","gitissueprogressorv2","analyze-repository","refresh-issue-config","test-fix-REMOVED_SYNTAX_ERROR","gitissueprogressorv3","createtestsv2","issuecrush","compliance","pre-commit","stale-resolver...
+║ {"type":"system","subtype":"init","cwd":"/Users/anthony/Desktop/netra-apex","session_id":"02328d28-a6ff-4c78-8b6b-4c1af23e395d","tools":["Task","Bash","Glob","Grep","ExitPlanMode","Read","Edit","MultiEdit","Write","NotebookEdit","WebFetch","TodoWrite","WebSearch","BashOutput","KillBash"],"mcp_servers":[],"model":"claude-opus-4-1-20250805","permissionMode":"bypassPermissions","slash_commands":["gitcommitgardener","audit-gcp-logs","ultimate-test-deploy-loop","canary","issue-consolidation","run-demo","action","websocket-test","priority-test-create","clear-old-issue-locks","gitissueplannerv1","testgardener","gitissueprogressorv2","analyze-repository","refresh-issue-config","test-fix-REMOVED_SYNTAX_ERROR","gitissueprogressorv3","createtestsv2","issuecrush","compliance","pre-commit","stale-resolver...
 ╚════════════════════════════════════════════════════════════════════════════════════════════════════
 
 2025-09-17 11:03:34,164 - zen_orchestrator - WARNING - 🚫 NO TOKENS [Write 3 short stories about AI native engineering. Spawn a new sub agent for each story.]: total_tokens is still 0 - token detection may be failing

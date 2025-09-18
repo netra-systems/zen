@@ -31,14 +31,14 @@ Automated execution of Claude Code slash commands in headless mode with structur
         command="/createtestsv2",
         description="Run unit tests with real services",
         allowed_tools=["Bash", "Read", "Write", "Glob", "Grep"],
-        permission_mode="acceptEdits"
+        permission_mode="bypassPermissions"
     ),
     InstanceConfig(
         name="ssot",
         command="/ssotgardener",
         description="Deploy to GCP staging environment",
         allowed_tools=["Bash", "Read", "Write", "WebFetch"],
-        permission_mode="acceptEdits"
+        permission_mode="bypassPermissions"
     )
 ]
 ```
@@ -62,7 +62,7 @@ python scripts/claude-instance-orchestrator.py --output results.json
 ```
 
 ### Permission Modes
-- `"acceptEdits"` - Automatically accept all edit operations
+- `"bypassPermissions"` - Automatically accept all edit operations
 - `"ask"` - Prompt for confirmation on edits
 - `"denyEdits"` - Deny all edit operations
 
@@ -153,7 +153,7 @@ InstanceConfig(
         "WebFetch", "WebSearch", "Task", "TodoWrite", "NotebookEdit",
         "ExitPlanMode", "BashOutput", "KillShell"
     ],
-    permission_mode="acceptEdits"
+    permission_mode="bypassPermissions"
 )
 ```
 
@@ -164,7 +164,7 @@ InstanceConfig(
     command="/your-command",
     description="Instance with all permissions",
     allowed_tools=["*"],  # May not be supported - check Claude Code docs
-    permission_mode="acceptEdits"
+    permission_mode="bypassPermissions"
 )
 ```
 
@@ -175,7 +175,7 @@ InstanceConfig(
     command="/your-command",
     description="Instance with no tool restrictions",
     allowed_tools=[],  # Empty list may mean no restrictions
-    permission_mode="acceptEdits"
+    permission_mode="bypassPermissions"
 )
 ```
 
@@ -202,10 +202,10 @@ When launching Claude Code directly, you can use:
 claude --allowedTools="Bash,Read,Write,Edit,Glob,Grep,WebFetch"
 
 # Set permission mode
-claude --permission-mode="acceptEdits"
+claude --permission-mode="bypassPermissions"
 
 # Combine both
-claude --allowedTools="Bash,Read,Write,Edit" --permission-mode="acceptEdits"
+claude --allowedTools="Bash,Read,Write,Edit" --permission-mode="bypassPermissions"
 ```
 
 ---

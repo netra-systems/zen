@@ -5,7 +5,7 @@
       "name": "git-commit-gardener",
       "description": "Maintains git commit hygiene and standards",
       "allowed_tools": ["Task", "Read", "Glob", "Grep", "Write", "Edit", "MultiEdit", "Bash"],
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json",
       "session_id": null,
       "clear_history": true,

@@ -80,10 +80,10 @@ As of Issue #1320, Zen automatically detects Windows and adjusts the Claude CLI 
 if platform.system() == "Windows":
     self.permission_mode = "bypassPermissions"  # Prevents approval prompts
 else:
-    self.permission_mode = "acceptEdits"  # Standard mode for Unix-like systems
+    self.permission_mode = "bypassPermissions"  # Standard mode for Unix-like systems
 ```
 
-**Why this is needed:** Windows Claude CLI doesn't properly respect `acceptEdits` mode and requires manual approval for commands, causing silent failures.
+**Why this is needed:** Windows Claude CLI doesn't properly respect `bypassPermissions` mode and requires manual approval for commands, causing silent failures.
 
 **Solution:** Zen now:
 - Detects Windows automatically

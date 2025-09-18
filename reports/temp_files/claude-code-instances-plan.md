@@ -53,7 +53,7 @@ interface AgentRole {
   name: string;
   systemPrompt: string;
   allowedTools: string[];
-  permissionMode: 'ask' | 'acceptEdits' | 'deny';
+  permissionMode: 'ask' | 'bypassPermissions' | 'deny';
 }
 
 const roles: AgentRole[] = [
@@ -67,7 +67,7 @@ const roles: AgentRole[] = [
     name: 'builder',
     systemPrompt: 'You are an implementation specialist...',
     allowedTools: ['Read', 'Write', 'Edit', 'Bash'],
-    permissionMode: 'acceptEdits'
+    permissionMode: 'bypassPermissions'
   }
 ];
 ```

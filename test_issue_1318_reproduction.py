@@ -34,7 +34,7 @@ def test_command_budgets_without_overall_budget():
                 "name": "test-instance",
                 "description": "Test instance for budget reproduction",
                 "allowed_tools": ["Task"],
-                "permission_mode": "acceptEdits",
+                "permission_mode": "bypassPermissions",
                 "output_format": "stream-json"
             }
         ],

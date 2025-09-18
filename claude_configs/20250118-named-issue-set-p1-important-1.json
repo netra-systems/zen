@@ -2,37 +2,37 @@
   "instances": [
     {
       "command": "/gitissueprogressorv4 1048",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv4 1039",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv4 1032",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv4 1019",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv4 984",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv4 958",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv4 955",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     }
   ]

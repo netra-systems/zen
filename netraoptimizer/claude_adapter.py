@@ -45,7 +45,7 @@ async def execute_claude_command(
         claude_executable,
         "-p",  # headless mode (required for programmatic use)
         "--output-format=stream-json",  # JSON output for parsing metrics
-        "--permission-mode=acceptEdits",  # Accept edits automatically
+        "--permission-mode=bypassPermissions",  # Accept edits automatically
         "--verbose"  # Include usage metrics in output
     ]
 

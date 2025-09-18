@@ -41,7 +41,7 @@ class TestInstanceConfig:
         assert config.command == "/test-command"
         assert config.name == "/test-command"  # Default name
         assert config.description == "Execute /test-command"  # Default description
-        assert config.permission_mode == "acceptEdits"
+        assert config.permission_mode == "bypassPermissions"
         assert config.output_format == "stream-json"
         assert config.session_id is None
         assert config.clear_history is False
@@ -177,7 +177,7 @@ class TestInstanceConfig:
         # Test starting with defaults
         config = InstanceConfig(command="/base-command")
         assert config.max_tokens_per_command is None
-        assert config.permission_mode == "acceptEdits"
+        assert config.permission_mode == "bypassPermissions"
         assert config.output_format == "stream-json"
 
         # Simulate configuration file override
@@ -205,7 +205,7 @@ class TestInstanceConfig:
         config = InstanceConfig(
             command="/test-command",
             max_tokens_per_command=1000,
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format="stream-json"
         )
 
@@ -506,7 +506,7 @@ class TestDefaultInstances:
         for instance in instances:
             assert isinstance(instance, InstanceConfig)
             assert instance.command.startswith("/")  # All should be slash commands
-            assert instance.permission_mode == "acceptEdits"
+            assert instance.permission_mode == "bypassPermissions"
             assert instance.output_format == "stream-json"
 
     def test_create_default_instances_custom_format(self):

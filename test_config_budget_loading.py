@@ -23,7 +23,7 @@ def test_config_budget_loading():
                 "name": "test-instance",
                 "description": "Test instance",
                 "allowed_tools": ["Task"],
-                "permission_mode": "acceptEdits",
+                "permission_mode": "bypassPermissions",
                 "output_format": "stream-json"
             }
         ],

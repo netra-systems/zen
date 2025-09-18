@@ -109,7 +109,7 @@ Ad hoc questions or validating if a command is working as expected for now is be
 ### Platform-Specific Behavior
 Zen automatically adjusts permission modes based on your platform:
 - **Windows**: Uses `bypassPermissions` to avoid approval prompts
-- **Mac/Linux**: Uses standard `acceptEdits` mode
+- **Mac/Linux**: Uses standard `bypassPermissions` mode
 
 For more details, see [Cross-Platform Compatibility](docs/CROSS_PLATFORM_COMPATIBILITY.md).
 - All existing config stays the same unless expressly defined in Zen.

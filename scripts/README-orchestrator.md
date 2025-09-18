@@ -68,14 +68,14 @@ See `scripts/claude-orchestrator-config-example.json`:
       "name": "test-creator",
       "command": "/createtestsv2 unit", 
       "description": "Create unit tests for the project",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "name": "ssot-gardener",
       "command": "/ssotgardener",
       "description": "SSOT maintenance and cleanup", 
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     }
   ]
@@ -87,7 +87,7 @@ See `scripts/claude-orchestrator-config-example.json`:
 - **name**: Unique identifier for the instance
 - **command**: Slash command to execute (e.g., `/createtestsv2 unit`)
 - **description**: Human-readable description
-- **permission_mode**: `acceptEdits` (auto-accept) or `interactive` (prompt)
+- **permission_mode**: `bypassPermissions` (auto-accept) or `interactive` (prompt)
 - **output_format**: `stream-json` (real-time) or `json` (batch)
 - **allowed_tools**: Optional list of allowed tool names
 - **session_id**: Optional session identifier
@@ -187,7 +187,7 @@ python3 scripts/claude-instance-orchestrator.py --config - <<EOF
       "name": "quick-test",
       "command": "/createtestsv2 unit", 
       "description": "Quick test creation",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     }
   ]

@@ -321,7 +321,7 @@ class TestClaudeCommandBuilding:
         assert "-p" in cmd
         assert "/test-command" in cmd
         assert "--output-format=stream-json" in cmd
-        assert "--permission-mode=acceptEdits" in cmd
+        assert "--permission-mode=bypassPermissions" in cmd
         assert "--verbose" in cmd  # Required for stream-json
 
     @patch('shutil.which')

@@ -71,7 +71,7 @@ Execute multiple Claude Code instances simultaneously with intelligent coordinat
   "command": "/createtestsv2 unit",
   "name": "test-creator",
   "description": "Create comprehensive unit tests",
-  "permission_mode": "acceptEdits",
+  "permission_mode": "bypassPermissions",
   "output_format": "stream-json"
 }
 ```
@@ -165,7 +165,7 @@ Create a configuration file `my-config.json`:
       "name": "frontend-tests",
       "command": "/createtestsv2 frontend unit",
       "description": "Create frontend unit tests",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json",
       "max_tokens_per_command": 25000,
       "pre_commands": ["/clear", "/compact"]
@@ -174,7 +174,7 @@ Create a configuration file `my-config.json`:
       "name": "backend-integration",
       "command": "/createtestsv2 backend integration",
       "description": "Create backend integration tests",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json",
       "allowed_tools": ["Write", "Edit", "Bash", "Read"],
       "session_id": "backend-session-1"
@@ -183,7 +183,7 @@ Create a configuration file `my-config.json`:
       "name": "ssot-cleanup",
       "command": "/ssotgardener removing legacy",
       "description": "Clean up legacy code patterns",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json",
       "clear_history": true
     }
@@ -261,7 +261,7 @@ python3 claude_instance_orchestrator.py --inspect-command /createtestsv2
   "name": "string",                      // Optional: Instance identifier (defaults to command)
   "description": "string",               // Optional: Human-readable description
   "allowed_tools": ["string"],           // Optional: List of allowed tool names
-  "permission_mode": "string",           // Optional: "acceptEdits" or "interactive" (default: "acceptEdits")
+  "permission_mode": "string",           // Optional: "bypassPermissions" or "interactive" (default: "bypassPermissions")
   "output_format": "string",             // Optional: "stream-json" or "json" (default: "stream-json")
   "session_id": "string",                // Optional: Session identifier for Claude
   "clear_history": boolean,              // Optional: Clear history before running (default: false)
@@ -647,7 +647,7 @@ class InstanceConfig:
     name: Optional[str] = None                     # Instance name
     description: Optional[str] = None              # Description
     allowed_tools: List[str] = None               # Allowed tool names
-    permission_mode: str = "acceptEdits"          # Permission mode
+    permission_mode: str = "bypassPermissions"          # Permission mode
     output_format: str = "stream-json"            # Output format
     session_id: Optional[str] = None              # Session ID
     clear_history: bool = False                   # Clear history flag
@@ -719,7 +719,7 @@ class InstanceStatus:
       "name": "critical-tests",
       "command": "/createtestsv2 critical e2e",
       "description": "Critical E2E test creation",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json",
       "max_tokens_per_command": 75000,
       "clear_history": true,
@@ -729,7 +729,7 @@ class InstanceStatus:
       "name": "ssot-maintenance",
       "command": "/ssotgardener removing legacy",
       "description": "SSOT cleanup and maintenance",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json",
       "max_tokens_per_command": 50000,
       "pre_commands": ["/compact"]
