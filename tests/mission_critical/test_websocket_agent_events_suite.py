@@ -1106,8 +1106,8 @@ class AgentWebSocketIntegrationEnhancedTests:
         # Execute tool with WebSocket event capture
         try:
             await enhanced_tool_engine.execute_tool_with_websocket_events(
-                tool_name="test_tool,"
-                parameters={query: test query},
+                tool_name="test_tool",
+                parameters={"query": "test query"},
                 context=user_context
             )
         except Exception as e:
@@ -1138,7 +1138,7 @@ class AgentWebSocketIntegrationEnhancedTests:
         websocket_manager = await create_websocket_manager()
         
         # Verify manager is properly initialized
-        assert websocket_manager is not None, WebSocket manager creation failed
+        assert websocket_manager is not None, "WebSocket manager creation failed"
         
         # Test user context integration
         user_id = f"test_user_{uuid.uuid4().hex[:8]}
