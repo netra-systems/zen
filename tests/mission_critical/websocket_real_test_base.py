@@ -113,7 +113,7 @@ def require_docker_services_smart() -> None:
                 logger.info("✅ Local services healthy - proceeding with local validation")
                 return
             else:
-                logger.warning("⚠️ Docker available but services unhealthy - falling back to staging/mock)"
+                logger.warning("⚠️ Docker available but services unhealthy - falling back to staging/mock")
 
         # Phase 2: Enhanced staging environment fallback activation (Issues #680, #773, #860)
         logger.warning("🔄 Docker unavailable or unhealthy - activating enhanced fallback (Issues #680, #773, #860)")
