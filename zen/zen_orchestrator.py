@@ -858,9 +858,9 @@ class ClaudeInstanceOrchestrator:
 
         print(f"║")
         
-        # Print column headers with simplified metrics
-        print(f"║  {'Status':<8} {'Name':<30} {'Model':<10} {'Duration':<10} {'Overall':<8} {'Tokens':<8} {'Cache':<8} {'Tools':<6}")
-        print(f"║  {'─'*8} {'─'*30} {'─'*10} {'─'*10} {'─'*8} {'─'*8} {'─'*8} {'─'*6}")
+        # Print column headers with separated cache metrics
+        print(f"║  {'Status':<8} {'Name':<30} {'Model':<10} {'Duration':<10} {'Overall':<8} {'Tokens':<8} {'Cache Cr':<8} {'Cache Rd':<8} {'Tools':<6}")
+        print(f"║  {'─'*8} {'─'*30} {'─'*10} {'─'*10} {'─'*8} {'─'*8} {'─'*8} {'─'*8} {'─'*6}")
 
         for name, status in self.statuses.items():
             # Status emoji
@@ -883,12 +883,13 @@ class ClaudeInstanceOrchestrator:
             else:
                 time_info = "waiting"
 
-            # Format simplified token information for user-friendly display
-            # CHANGE LOG (v1.1.0): Simplified metrics display for better user understanding
-            # - Overall: Shows complete token count (was previously confusing as "Tokens")
+            # Format separated token information for user-friendly display
+            # CHANGE LOG (v1.2.0): Separated cache metrics display for better cost visibility
+            # - Overall: Shows complete token count (input + output + cache_read + cache_creation)
             # - Tokens: Shows only core processing tokens (input + output)
-            # - Cache: Shows only cache tokens (cache_read + cache_creation)
-            # - Formula: Overall = Tokens + Cache (intuitive breakdown)
+            # - Cache Cr: Shows cache creation tokens (expensive - the "golden ticket")
+            # - Cache Rd: Shows cache read tokens (cheap)
+            # - Formula: Overall = Tokens + Cache Cr + Cache Rd (detailed breakdown)
 
             # Overall = total_tokens (which includes input + output + cache_read + cache_creation)
             overall_tokens = self._format_tokens(status.total_tokens) if status.total_tokens > 0 else "0"
@@ -897,16 +898,19 @@ class ClaudeInstanceOrchestrator:
             core_tokens = status.input_tokens + status.output_tokens
             tokens_info = self._format_tokens(core_tokens) if core_tokens > 0 else "0"
 
-            # Cache = cache_read + cache_creation (simplified as cached_tokens)
-            cache_info = self._format_tokens(status.cached_tokens) if status.cached_tokens > 0 else "0"
+            # Cache Creation = cache_creation_tokens (expensive "golden ticket" tokens)
+            cache_creation_info = self._format_tokens(status.cache_creation_tokens) if status.cache_creation_tokens > 0 else "0"
+
+            # Cache Read = cache_read_tokens (cheap cache hits)
+            cache_read_info = self._format_tokens(status.cache_read_tokens) if status.cache_read_tokens > 0 else "0"
 
             tool_info = str(status.tool_calls) if status.tool_calls > 0 else "0"
 
             # Format model name for display
             model_short = status.model_used.replace('claude-', '').replace('-', '') if status.model_used else "unknown"
 
-            # Create detailed line with simplified metrics
-            detail = f"  {emoji:<8} {name:<30} {model_short:<10} {time_info:<10} {overall_tokens:<8} {tokens_info:<8} {cache_info:<8} {tool_info:<6}"
+            # Create detailed line with separated cache metrics
+            detail = f"  {emoji:<8} {name:<30} {model_short:<10} {time_info:<10} {overall_tokens:<8} {tokens_info:<8} {cache_creation_info:<8} {cache_read_info:<8} {tool_info:<6}"
 
             print(f"║{detail}")
 
@@ -967,8 +971,83 @@ class ClaudeInstanceOrchestrator:
 
         print()
 
+    def _detect_permission_error(self, line: str, status: InstanceStatus, instance_name: str) -> bool:
+        """Detect permission errors and command blocking issues - Issue #1320 fix"""
+        line_stripped = line.strip()
+        if not line_stripped:
+            return False
+
+        # Try to parse as JSON first
+        if line_stripped.startswith('{'):
+            try:
+                json_data = json.loads(line_stripped)
+
+                # Check for permission errors in tool results
+                if json_data.get('type') == 'user' and 'message' in json_data:
+                    message = json_data.get('message', {})
+                    if isinstance(message, dict) and 'content' in message:
+                        content_list = message.get('content', [])
+                        if isinstance(content_list, list):
+                            for item in content_list:
+                                if isinstance(item, dict) and item.get('type') == 'tool_result':
+                                    if item.get('is_error'):
+                                        error_content = item.get('content', '')
+                                        if any(phrase in error_content.lower() for phrase in [
+                                            'requires approval',
+                                            'permission denied',
+                                            'haven\'t granted it yet',
+                                            'claude requested permissions'
+                                        ]):
+                                            # CRITICAL ERROR - Make it VERY visible
+                                            error_msg = f"""
+╔════════════════════════════════════════════════════════════════════════════╗
+║ 🚨🚨🚨 PERMISSION ERROR DETECTED - COMMAND BLOCKED 🚨🚨🚨                  ║
+║ Instance: {instance_name:<60}║
+║ Error: {error_content[:68]:<68}║
+╠════════════════════════════════════════════════════════════════════════════╣
+║ SOLUTION: zen_orchestrator.py now uses platform-specific permission modes:  ║
+║   • Windows: bypassPermissions (to avoid this exact error)                  ║
+║   • Mac/Linux: acceptEdits (standard mode)                                  ║
+║                                                                              ║
+║ Current platform: {platform.system():<58}║
+║ Using permission mode: {self.instances[instance_name].permission_mode:<52}║
+╚════════════════════════════════════════════════════════════════════════════╝
+"""
+                                            print(error_msg, flush=True)
+                                            logger.critical(f"PERMISSION ERROR in {instance_name}: {error_content}")
+                                            status.error += f"\n[PERMISSION ERROR]: {error_content}\n"
+                                            return True
+            except json.JSONDecodeError:
+                pass
+
+        # Check for text-based error patterns
+        line_lower = line.lower()
+        if any(phrase in line_lower for phrase in [
+            'this command requires approval',
+            'permission denied',
+            'access denied',
+            'not authorized',
+            'insufficient permissions'
+        ]):
+            error_msg = f"""
+╔════════════════════════════════════════════════════════════════════════════╗
+║ ⚠️  PERMISSION WARNING DETECTED                                             ║
+║ Instance: {instance_name:<60}║
+║ Line: {line_stripped[:70]:<70}║
+╚════════════════════════════════════════════════════════════════════════════╝
+"""
+            print(error_msg, flush=True)
+            logger.warning(f"Permission warning in {instance_name}: {line_stripped}")
+            return True
+
+        return False
+
     def _parse_token_usage(self, line: str, status: InstanceStatus, instance_name: str):
         """Parse token usage information from Claude Code JSON output lines"""
+        # FIRST: Check for permission errors (Issue #1320)
+        if self._detect_permission_error(line, status, instance_name):
+            return  # Don't parse tokens if there's an error
+
         # DEBUG: Log lines with potential token information
         if line.strip() and any(keyword in line.lower() for keyword in ['token', 'usage', 'total', 'input', 'output']):
             logger.debug(f"🔍 TOKEN PARSE [{instance_name}]: {line[:100]}{'...' if len(line) > 100 else ''}")
@@ -2280,9 +2359,9 @@ async def main():
     print("="*120)
 
     if orchestrator.statuses:
-        # Table headers
-        headers = ["Instance", "Status", "Duration", "Total Tokens", "Input", "Output", "Cached", "Tools", "Cost"]
-        col_widths = [20, 10, 10, 12, 8, 8, 8, 6, 10]
+        # Table headers with separated cache metrics
+        headers = ["Instance", "Status", "Duration", "Total Tokens", "Input", "Output", "Cache Cr", "Cache Rd", "Tools", "Cost"]
+        col_widths = [20, 10, 10, 12, 8, 8, 8, 8, 6, 10]
 
         # Print header
         header_row = "║ " + " │ ".join(h.ljust(w) for h, w in zip(headers, col_widths)) + " ║"
@@ -2299,7 +2378,8 @@ async def main():
             total_tokens_str = f"{status.total_tokens:,}" if status.total_tokens > 0 else "0"
             input_tokens_str = f"{status.input_tokens:,}" if status.input_tokens > 0 else "0"
             output_tokens_str = f"{status.output_tokens:,}" if status.output_tokens > 0 else "0"
-            cached_tokens_str = f"{status.cached_tokens:,}" if status.cached_tokens > 0 else "0"
+            cache_creation_str = f"{status.cache_creation_tokens:,}" if status.cache_creation_tokens > 0 else "0"
+            cache_read_str = f"{status.cache_read_tokens:,}" if status.cache_read_tokens > 0 else "0"
             tools_str = str(status.tool_calls) if status.tool_calls > 0 else "0"
             # Calculate cost - use the pricing engine
             if status.total_cost_usd is not None:
@@ -2310,12 +2390,42 @@ async def main():
                 cost_str = f"${calculated_cost:.4f}" if calculated_cost > 0 else "N/A"
 
             row_data = [instance_name, status_str, duration_str, total_tokens_str, input_tokens_str,
-                       output_tokens_str, cached_tokens_str, tools_str, cost_str]
+                       output_tokens_str, cache_creation_str, cache_read_str, tools_str, cost_str]
 
             row = "║ " + " │ ".join(data.ljust(w) for data, w in zip(row_data, col_widths)) + " ║"
             print(row)
 
         print("╚" + "═" * (len(header_row) - 2) + "╝")
+
+        # Check for permission errors FIRST - Issue #1320
+        permission_errors = []
+        for name, status in orchestrator.statuses.items():
+            if status.error and any(phrase in status.error.lower() for phrase in [
+                'permission error', 'requires approval', 'permission denied'
+            ]):
+                permission_errors.append((name, status))
+
+        # Display CRITICAL permission errors prominently
+        if permission_errors:
+            print(f"""
+╔════════════════════════════════════════════════════════════════════════════════════════════╗
+║ 🚨🚨🚨 CRITICAL: {len(permission_errors)} PERMISSION ERROR(S) DETECTED - COMMANDS WERE BLOCKED! 🚨🚨🚨    ║
+╠════════════════════════════════════════════════════════════════════════════════════════════╣
+║ Platform: {platform.system():<80}║
+║ Permission Mode Used: {orchestrator.instances[permission_errors[0][0]].permission_mode if permission_errors else 'Unknown':<68}║
+╠════════════════════════════════════════════════════════════════════════════════════════════╣
+""")
+            for name, status in permission_errors:
+                error_preview = status.error.replace('\n', ' ')[:70]
+                print(f"║ ❌ {name:<20} │ {error_preview:<68} ║")
+            print(f"""╠════════════════════════════════════════════════════════════════════════════════════════════╣
+║ SOLUTION: zen_orchestrator.py now auto-detects platform and uses appropriate permission mode║
+║   • Windows → bypassPermissions (prevents approval prompts)                                 ║
+║   • Mac/Linux → acceptEdits (standard mode)                                                 ║
+║                                                                                              ║
+║ If still seeing errors, manually set permission mode in your config or update Claude Code.  ║
+╚════════════════════════════════════════════════════════════════════════════════════════════╝
+""")
 
         # Print additional details if there are outputs or errors
         print("\nAdditional Details:")
@@ -2333,7 +2443,11 @@ async def main():
                 if not has_details:
                     print(f"\n{name.upper()}:")
                     has_details = True
-                print(f"  Errors: {status.error[:150]}...")
+                # Highlight permission errors differently
+                if any(phrase in status.error.lower() for phrase in ['permission error', 'requires approval']):
+                    print(f"  ⚠️  PERMISSION ERROR: {status.error[:150]}...")
+                else:
+                    print(f"  Errors: {status.error[:150]}...")
 
             if status.tool_calls > 0 and status.tool_details:
                 if not has_details:
