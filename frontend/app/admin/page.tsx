@@ -1,9 +1,11 @@
 'use client';
 
 import { NextPage } from 'next';
+import { useState } from 'react';
 import { authService } from '@/auth';
 import { AuthGuard } from '@/components/AuthGuard';
-import { Shield, Settings, Users, Database, Activity, FileText, LucideIcon } from 'lucide-react';
+import WebSocketAuthMonitor from '@/components/admin/WebSocketAuthMonitor';
+import { Shield, Settings, Users, Database, Activity, FileText, LucideIcon, Wifi } from 'lucide-react';
 
 interface AdminStat {
   label: string;
