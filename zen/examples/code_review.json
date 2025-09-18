@@ -1,0 +1,104 @@
+{
+  "// Description": "Multi-file code review process with security, performance, and quality analysis",
+  "// Use Case": "Comprehensive code review for pull requests, security audits, and code quality assessment",
+  "// Best Practices": "Separates concerns into security, performance, architecture, and testing reviews",
+
+  "instances": [
+    {
+      "name": "security-reviewer",
+      "command": "/security-audit all code changes; Check for common vulnerabilities (SQL injection, XSS, authentication issues); Review API endpoints for security best practices; Identify potential data exposure risks",
+      "description": "Performs comprehensive security analysis of code changes",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 15000,
+      "allowed_tools": ["Read", "Glob", "Grep", "Write", "Task"],
+      "session_id": "security_review_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "/clear",
+        "Set context: I am performing a security-focused code review",
+        "Focus areas: Authentication, authorization, input validation, data protection, API security"
+      ]
+    },
+    {
+      "name": "performance-analyzer",
+      "command": "/analyze code performance; Review database queries for N+1 problems and optimization opportunities; Check for memory leaks and inefficient algorithms; Identify bottlenecks in critical paths",
+      "description": "Analyzes code for performance issues and optimization opportunities",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 12000,
+      "allowed_tools": ["Read", "Glob", "Grep", "Write", "Bash", "Task"],
+      "session_id": "performance_review_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am analyzing code for performance optimization",
+        "Focus areas: Database efficiency, algorithm complexity, memory usage, caching strategies"
+      ]
+    },
+    {
+      "name": "architecture-reviewer",
+      "command": "/review system architecture; Analyze code organization, design patterns, and SOLID principles adherence; Check for proper separation of concerns and maintainability; Identify technical debt",
+      "description": "Reviews architectural decisions and code organization",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 14000,
+      "allowed_tools": ["Read", "Glob", "Grep", "Write", "Task"],
+      "session_id": "architecture_review_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am reviewing code architecture and design patterns",
+        "Focus areas: SOLID principles, design patterns, code organization, maintainability, scalability"
+      ]
+    },
+    {
+      "name": "test-coverage-analyst",
+      "command": "/analyze test coverage; Review existing tests for completeness and quality; Identify missing test cases for critical functionality; Suggest improvements to test structure and organization",
+      "description": "Analyzes test coverage and quality",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 10000,
+      "allowed_tools": ["Read", "Glob", "Grep", "Write", "Bash", "Task"],
+      "session_id": "test_review_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am analyzing test coverage and quality",
+        "Focus areas: Unit test coverage, integration tests, edge cases, test maintainability"
+      ]
+    },
+    {
+      "name": "code-quality-synthesizer",
+      "command": "/synthesize all review findings; Create comprehensive review summary with prioritized recommendations; Generate action items categorized by severity; Provide overall code quality score",
+      "description": "Synthesizes all review findings into actionable recommendations",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 18000,
+      "allowed_tools": ["Read", "Write", "Edit", "MultiEdit", "Task"],
+      "session_id": "synthesis_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am synthesizing code review findings from security, performance, architecture, and testing analyses",
+        "Output format: Executive summary, prioritized issues (Critical/High/Medium/Low), action items, overall assessment"
+      ]
+    }
+  ],
+
+  "// Configuration Notes": {
+    "execution_strategy": "Parallel for individual reviews, then synthesis",
+    "review_scope": "Focus on changed files but consider system-wide impact",
+    "severity_levels": "Critical (security/data loss), High (performance/bugs), Medium (maintainability), Low (style)",
+    "token_distribution": "Synthesis gets most tokens for comprehensive summary",
+    "session_isolation": "Each reviewer maintains independent context for focused analysis",
+    "best_practices": [
+      "Run security review first for critical issues",
+      "Include both automated and manual review elements",
+      "Consider system-wide impact of local changes",
+      "Provide actionable, specific recommendations",
+      "Prioritize findings by business impact"
+    ]
+  }
+}
