@@ -33,10 +33,99 @@ Example portion of status report:
 ║  ⏳        quality-synthesizer    queued    0K
 ╚════════════════════════════════════════════╝
 ```
-Here you can see we are running 5 instances of claude.
-- 2 have completed
-- 2 are running
-- 1 is scheduled
+
+## Example Start
+```
++=== STATUS REPORT [14:47:39] ===+
+| Total: 2 instances
+| Running: 2, Completed: 0, Failed: 0, Pending: 0
+| Tokens: 0 total, 0 cached | Median: 0 | Tools: 0
+| 💰 Cost: $0.0000 total, $0.0000 avg/instance | Pricing: Claude compliant
+|
+| TOKEN BUDGET STATUS |
+| Overall: [--------------------] 0% 0/10.0K
+| Command Budgets:
+|                        /analyze-repository  [--------------------] 0% 0/5.0K
+|                        /README              [--------------------] 0% 0/1.0K
+|
+|  📝 Model shows actual Claude model used (critical for accurate cost tracking)
+|  💡 Tip: Model may differ from your config - Claude routes requests intelligently
+|  Status   Name                           Model      Duration   Overall  Tokens   Cache Cr Cache Rd Tools  Budget
+|  -------- ------------------------------ ---------- ---------- -------- -------- -------- -------- ------ ----------
+|  🏃        analyze-repo                   opus4      5.1s       0        0        0        0        0      0/5.0K
+|  🏃        help-overview                  sonnet4    0.0s       0        0        0        0        0      0/1.0K
++================================+
+```
+
+## Budget Warning Only
+```
++=== STATUS REPORT [14:47:44] ===+
+| Total: 2 instances
+| Running: 2, Completed: 0, Failed: 0, Pending: 0
+| Tokens: 32.2K total, 32.2K cached | Median: 32.2K | Tools: 1
+| 💰 Cost: $0.0818 total, $0.0409 avg/instance | Pricing: Claude compliant
+|
+| TOKEN BUDGET STATUS |
+| Overall: [####################] 100% 32.2K/10.0K
+| Command Budgets:
+|                        /analyze-repository  [####################] 100% 32.2K/5.0K
+|                        /README              [--------------------] 0% 0/1.0K
+|
+|  📝 Model shows actual Claude model used (critical for accurate cost tracking)
+|  💡 Tip: Model may differ from your config - Claude routes requests intelligently
+|  Status   Name                           Model      Duration   Overall  Tokens   Cache Cr Cache Rd Tools  Budget
+|  -------- ------------------------------ ---------- ---------- -------- -------- -------- -------- ------ ----------
+|  🏃        analyze-repo                   35sonnet   10.1s      32.2K    5        20.9K    11.4K    1      32.2K/5.0K
+|  🏃        help-overview                  opus4      5.0s       0        0        0        0        0      0/1.0K
++================================+
+
++=== TOOL USAGE DETAILS ===+
+| Tool Name            Uses     Tokens     Cost ($)   Used By
+| -------------------- -------- ---------- ---------- -----------------------------------
+| Bash                 1        33         0.0001     analyze-repo(1 uses, 33 tok)
+| -------------------- -------- ---------- ---------- -----------------------------------
+| TOTAL                1        33         0.0001
++===============================================================================================+
+```
+
+## Budget Block
+```
+2025-09-18 14:50:42,050 - zen_orchestrator - INFO - 💰 BUDGET UPDATE [analyze-repo]: Recording 32240 tokens for command '/analyze-repository'
+2025-09-18 14:50:42,050 - zen_orchestrator - INFO - 📊 BUDGET STATE [analyze-repo]: /analyze-repository now at 32240/5000 tokens (644.8%)
+2025-09-18 14:50:42,050 - zen_orchestrator - ERROR - 🚫 🔴 RUNTIME TERMINATION: Runtime budget violation for analyze-repo: Overall budget exceeded: 32240/10000 tokens
+2025-09-18 14:50:42,050 - zen_orchestrator - INFO - Terminating instance analyze-repo (PID: 88916): Terminated due to budget violation - Overall budget exceeded: 32240/10000 tokens
+2025-09-18 14:50:42,050 - zen_orchestrator - INFO - Sent SIGTERM to analyze-repo (PID: 88916)
+```
+
+```
++=== FINAL STATUS [14:50:57] ===+
+| Total: 2 instances
+| Running: 0, Completed: 0, Failed: 2, Pending: 0
+| Tokens: 85.6K total, 85.2K cached | Median: 42.8K | Tools: 1
+| 💰 Cost: $0.0889 total, $0.0444 avg/instance | Pricing: Claude compliant
+|
+| TOKEN BUDGET STATUS |
+| Overall: [####################] 100% 85.6K/10.0K
+| Command Budgets:
+|                        /analyze-repository  [####################] 100% 48.4K/5.0K
+|                        /README              [####################] 100% 37.2K/1.0K
+|
+|  📝 Model shows actual Claude model used (critical for accurate cost tracking)
+|  💡 Tip: Model may differ from your config - Claude routes requests intelligently
+|  Status   Name                           Model      Duration   Overall  Tokens   Cache Cr Cache Rd Tools  Budget
+|  -------- ------------------------------ ---------- ---------- -------- -------- -------- -------- ------ ----------
+|  ❌        analyze-repo                   sonnet4    22.5s      48.4K    31       16.1K    32.2K    1      48.4K/5.0K
+|  ❌        help-overview                  35sonnet   16.2s      37.2K    422      0        36.8K    0      37.2K/1.0K
++===============================+
+
++=== TOOL USAGE DETAILS ===+
+| Tool Name            Uses     Tokens     Cost ($)   Used By
+| -------------------- -------- ---------- ---------- -----------------------------------
+| Task                 1        348        0.0010     analyze-repo(1 uses, 348 tok)
+| -------------------- -------- ---------- ---------- -----------------------------------
+| TOTAL                1        348        0.0010
++===============================================================================================+
+```
 
 ## Inspiration and background
 While developing Netra Apex (commercial product)
