@@ -417,7 +417,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                     f"Missing events: {validator.REQUIRED_EVENTS - set(validator.event_counts.keys())}",
                     "Failures:",
                     *failures
-                ]
+                ])
                 pytest.fail(error_details)
             
             # Validate business requirements
