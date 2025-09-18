@@ -5,7 +5,7 @@ Test WebSocket Integration Regression Prevention
 Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Prevent future WebSocket integration breaks that damage user experience
-- Value Impact: Ensures reliable real-time updates that drive $""500K"" plus ARR
+- Value Impact: Ensures reliable real-time updates that drive $500K+ plus ARR
 - Strategic Impact: Mission-critical test suite to protect core chat functionality
 
 CRITICAL: This is a mission-critical test that prevents future integration breaks
@@ -571,7 +571,7 @@ class WebSocketIntegrationRegressionTests(BaseIntegrationTest):
                     fSuccess rate: {success_rate:.""1f""}%. 
                     fEvent delivery rate: {event_delivery_rate:.""1f""}%. 
                     fContinuity failures: {continuity_failures}. ""
-                    fThis regression damages $""500K"" plus ARR by breaking user trust and real-time experience.
+                    fThis regression damages $500K+ plus ARR by breaking user trust and real-time experience.
                 )
             
             if business_continuity_metrics[cross_user_contamination] > 0:

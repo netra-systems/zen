@@ -6,7 +6,7 @@ BUSINESS VALUE JUSTIFICATION:
     - Segment: Platform/Internal
 - Business Goal: Chat Functionality Reliability (90% of platform value)
 - Value Impact: Prevents WebSocket 1011 errors that break real-time chat
-- Strategic Impact: Protects $""500K"" plus ARR by ensuring reliable WebSocket connections
+- Strategic Impact: Protects $500K+ plus ARR by ensuring reliable WebSocket connections
 
 This test suite specifically targets the WebSocket 1011 error that was caused by:
     1. Competing Redis managers creating connection conflicts

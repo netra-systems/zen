@@ -6,7 +6,7 @@ CRITICAL: Validates the secondary timeout fixes that resolve ""60s""/""120s"" We
 After fixing the primary ""179s"" auth timeout, this test ensures all remaining timeout sources
 are optimized for <""5s"" WebSocket responsiveness.
 
-Business Value: $""30K""+ MRR chat functionality requires <""5s"" response times for user experience.
+Business Value: $30K+ MRR chat functionality requires <""5s"" response times for user experience.
 """
 
 

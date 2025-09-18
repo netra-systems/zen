@@ -3,7 +3,7 @@
 
 Business Value Justification:
     - Segment: Platform/Internal (Mission Critical Infrastructure)
-- Business Goal: Ensure $""500K"" plus ARR chat functionality scales under production load
+- Business Goal: Ensure $500K+ plus ARR chat functionality scales under production load
 - Value Impact: Validates WebSocket performance under concurrent user scenarios
 - Strategic Impact: Prevents system collapse under high load that causes revenue loss
 

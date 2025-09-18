@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
     - Segment: All (Free, Early, Mid, Enterprise, Platform)
 - Business Goal: Chat functionality delivers 90% of platform value
 - Value Impact: WebSocket events enable users to see real-time agent progress and results
-- Strategic Impact: $""500K"" plus ARR depends on reliable, consistent WebSocket event delivery
+- Strategic Impact: $500K+ plus ARR depends on reliable, consistent WebSocket event delivery
 
 PURPOSE: Validate that ExecutionEngine implementations consistently deliver all 5 critical WebSocket events
 in the correct order with proper content for every agent execution.

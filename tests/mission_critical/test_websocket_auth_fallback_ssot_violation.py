@@ -21,7 +21,7 @@ Business Value Justification (BVJ):
 """
 
 - Value Impact: Reduces auth bugs and security vulnerabilities from logic duplication
-- Revenue Impact: Auth fallback bugs could cause service outages ($""100K""+ revenue risk)
+- Revenue Impact: Auth fallback bugs could cause service outages ($100K+ revenue risk)
 
 CRITICAL FALLBACK SSOT REQUIREMENT:
     WebSocket MUST delegate ALL fallback/resilience to UnifiedAuthInterface - NO local patterns.

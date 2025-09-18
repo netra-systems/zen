@@ -10,7 +10,7 @@ This test suite validates:
 """
 
 2. IMPORT VALIDATION: All imports must resolve to the same real implementation
-3. GOLDEN PATH PROTECTION: Real services vs mocks for $""500K"" plus ARR functionality
+3. GOLDEN PATH PROTECTION: Real services vs mocks for $500K+ plus ARR functionality
 4. SSOT COMPLIANCE: Prevents regression of Docker Manager duplication
 
 Created for Issue #1083: 51 tests import mock Docker Manager instead of real SSOT implementation
@@ -18,7 +18,7 @@ Created for Issue #1083: 51 tests import mock Docker Manager instead of real SSO
 EXPECTED CURRENT STATE: These tests will FAIL, proving the SSOT violation exists.
 EXPECTED AFTER REMEDIATION: These tests will PASS, proving SSOT compliance.
 
-Business Impact: Protects $""500K"" plus ARR Golden Path functionality by ensuring real services.
+Business Impact: Protects $500K+ plus ARR Golden Path functionality by ensuring real services.
 "
 ""
 
@@ -212,7 +212,7 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
                fGOLDEN PATH VIOLATION:\n" \"
                fMock manager has MagicMock client: {mock_has_magic_mock}\n \
                fReal manager has actual client: {real_has_actual_client}\n \
-               f"Tests using mock instead of real services breaks $""500K"" plus ARR functionality"
+               f"Tests using mock instead of real services breaks $500K+ plus ARR functionality"
 
     def test_ssot_compliance_only_one_docker_manager_implementation(self):
         """
@@ -308,7 +308,7 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
     def test_golden_path_websocket_events_require_real_services(self):
     """
 
-        VALIDATES GOLDEN PATH: WebSocket events require real Docker services for $""500K"" plus ARR.
+        VALIDATES GOLDEN PATH: WebSocket events require real Docker services for $500K+ plus ARR.
 
         CURRENT EXPECTATION: FAIL - Mock services cannot provide real WebSocket events
         POST-REMEDIATION: PASS - Real services enable Golden Path functionality
@@ -349,7 +349,7 @@ class DockerManagerSSOTComplianceTests(SSotBaseTestCase):
                    fGOLDEN PATH VIOLATION: Docker Manager lacks real service capabilities:\n" \"
                    fMethods that are mocks: {mock_method_count}/{len(required_real_methods)}\n \
                    fMissing methods: {missing_methods}\n \
-                   f"Golden Path WebSocket events require real service connections for $""500K"" plus ARR"
+                   f"Golden Path WebSocket events require real service connections for $500K+ plus ARR"
 
         except ImportError as e:
             self.fail(fCRITICAL: Cannot import Docker Manager - Golden Path broken: {e}")"
@@ -398,7 +398,7 @@ class DockerManagerMissionCriticalIntegrationTests(SSotBaseTestCase):
     Mission critical tests for Docker Manager SSOT compliance.
 
     These tests validate that Docker Manager SSOT compliance protects
-    mission critical business functionality worth $""500K"" plus ARR.
+    mission critical business functionality worth $500K+ plus ARR.
 ""
 
     def setup_method(self, method):
@@ -409,7 +409,7 @@ class DockerManagerMissionCriticalIntegrationTests(SSotBaseTestCase):
         pass
         MISSION CRITICAL: WebSocket agent events require real Docker services.
 
-        Business Impact: $""500K"" plus ARR depends on WebSocket events working with real services.
+        Business Impact: $500K+ plus ARR depends on WebSocket events working with real services.
         SSOT compliance ensures tests use real services, not mocks.
 ""
         # This test validates the critical business requirement:
@@ -452,7 +452,7 @@ class DockerManagerMissionCriticalIntegrationTests(SSotBaseTestCase):
                            fMethods missing: {methods_missing}\n"
                            fMethods missing: {methods_missing}\n""
 
-                           fBusiness Impact: $""500K"" plus ARR WebSocket events require real services)
+                           fBusiness Impact: $500K+ plus ARR WebSocket events require real services)
 
         except ImportError as e:
             self.fail(fMISSION CRITICAL FAILURE: Docker Manager import failed: {e})"

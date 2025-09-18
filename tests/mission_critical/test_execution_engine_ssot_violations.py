@@ -8,7 +8,7 @@ Business Value Justification:
     - Segment: Platform/Internal  
 - Business Goal: Stability & System Integrity
 - Value Impact: Ensures reliable multi-user chat functionality by eliminating execution engine fragmentation
-- Strategic Impact: Critical foundation for $""500K"" plus ARR chat operations requiring zero user isolation failures
+- Strategic Impact: Critical foundation for $500K+ plus ARR chat operations requiring zero user isolation failures
 
 Key Detection Areas:
     - Multiple ExecutionEngine class definitions across modules
@@ -471,7 +471,7 @@ class ExecutionEngineSSotViolationsTests(SSotBaseTestCase):
         
         if total_violations > 50:
             severity = CRITICAL""
-            description = Severe ExecutionEngine fragmentation threatens $""500K"" plus ARR chat functionality
+            description = Severe ExecutionEngine fragmentation threatens $500K+ plus ARR chat functionality
         elif total_violations > 20:
             severity = HIGH"
             severity = HIGH"

@@ -6,7 +6,7 @@ Mission Critical Tests for WebSocket Authentication Chat Value Protection
 
 Business Value Justification (BVJ):
     - Segment: ALL (Free -> Enterprise) - Chat is 90% of platform value delivery
-- Business Goal: PROTECT $""120K""+ MRR by ensuring chat functionality never fails
+- Business Goal: PROTECT $120K+ MRR by ensuring chat functionality never fails
 - Value Impact: Chat downtime = immediate revenue loss and customer churn
 """
 
@@ -70,7 +70,7 @@ class WebSocketAuthChatValueProtectionTests:
      ALERT:  MISSION CRITICAL tests for WebSocket authentication chat value protection.
     
     CRITICAL: These tests ensure authentication ENABLES chat functionality
-    and NEVER blocks legitimate users from accessing $""120K""+ MRR chat platform.
+    and NEVER blocks legitimate users from accessing $120K+ MRR chat platform.
     
     Tests focus on:
     1. Zero false negatives - legitimate users always access chat

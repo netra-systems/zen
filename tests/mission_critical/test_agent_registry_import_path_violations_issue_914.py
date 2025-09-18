@@ -11,7 +11,7 @@ in AgentRegistry implementations. These tests validate that there is a single
 canonical import path for AgentRegistry functionality.
 
 Business Impact:
-    - $""500K"" plus ARR at risk from import path confusion causing runtime failures
+    - $500K+ plus ARR at risk from import path confusion causing runtime failures
 - Developer productivity lost due to unclear import patterns
 - Testing infrastructure broken by import ambiguity
 - WebSocket integration failures due to registry import conflicts

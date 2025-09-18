@@ -7,7 +7,7 @@ the end-to-end integration from login through agent execution to response.
 Business Value Justification:
     - Segment: Platform/Core Business Function
 - Business Goal: Revenue Protection & Customer Experience
-- Value Impact: Protects $""500K"" plus ARR by ensuring Golden Path reliability with SSOT execution engine
+- Value Impact: Protects $500K+ plus ARR by ensuring Golden Path reliability with SSOT execution engine
 - Strategic Impact: Critical foundation for all customer chat interactions and business value delivery
 
 EXPECTED BEHAVIOR:
@@ -564,7 +564,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
         if failure_count > 3:
             return {
                 'level': 'CRITICAL',
-                'description': 'Golden Path failures directly threaten $""500K"" plus ARR and customer retention'
+                'description': 'Golden Path failures directly threaten $500K+ plus ARR and customer retention'
             }
         elif failure_count > 1:
             return {
@@ -608,7 +608,7 @@ class ExecutionEngineGoldenPathIntegration1123Tests(SSotAsyncTestCase):
         if failure_count > 3:
             return {
                 'level': 'CRITICAL',
-                'description': 'Integration failures pose immediate risk to $""500K"" plus ARR and customer churn'
+                'description': 'Integration failures pose immediate risk to $500K+ plus ARR and customer churn'
             }
         elif failure_count > 1:
             return {

@@ -2,7 +2,7 @@
 "MISSION CRITICAL: DatabaseManager SSOT Consolidation Test Suite"
 
 THIS SUITE DETECTS DUPLICATE DATABASEMANAGER IMPLEMENTATIONS
-Business Value: $""500K"" plus ARR - Prevents cascade failures from inconsistent database access
+Business Value: $500K+ plus ARR - Prevents cascade failures from inconsistent database access
 
 CRITICAL VIOLATIONS TO DETECT:
     1. Multiple DatabaseManager classes across different modules (SSOT violation)

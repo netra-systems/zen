@@ -10,7 +10,7 @@ Business Value Justification:
 - Business Goal: Eliminate raw UUID violations causing ID collision risks
 """
 
-- Value Impact: Prevents user data leakage from ID collisions ($""100K""+ security risk)
+- Value Impact: Prevents user data leakage from ID collisions ($100K+ security risk)
 - Strategic Impact: CRITICAL - Foundation for entire platform ID migration
 
 PHASE 1 SCOPE: Auth Service Critical Path

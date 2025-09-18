@@ -7,7 +7,7 @@ multiple factory implementations that violate SSOT principles.
 Business Value Justification:
     - Segment: Platform/Infrastructure
 - Business Goal: System Integrity & Stability  
-- Value Impact: Protects $""500K"" plus ARR Golden Path by ensuring single execution engine factory
+- Value Impact: Protects $500K+ plus ARR Golden Path by ensuring single execution engine factory
 - Strategic Impact: Critical foundation for multi-user chat isolation and performance
 
 EXPECTED BEHAVIOR:
@@ -463,7 +463,7 @@ class ExecutionEngineFactorySSotUniqueness1123Tests(SSotBaseTestCase):
         
         if total_violations > 15:
             severity = "CRITICAL"
-            description = Severe factory fragmentation threatens $""500K"" plus ARR Golden Path reliability
+            description = Severe factory fragmentation threatens $500K+ plus ARR Golden Path reliability
         elif total_violations > 8:
             severity = HIGH"
             severity = HIGH"

@@ -8,7 +8,7 @@ Critical for multi-service authentication flow that all users depend on.
 Business Value Justification (BVJ):
     - Segment: ALL users (Free, Early, Mid, Enterprise) - 100% coverage
 - Business Goal: Seamless Authentication Experience - No auth friction
-- Value Impact: $""500K"" plus ARR - Poor auth UX = 40% user abandonment 
+- Value Impact: $500K+ plus ARR - Poor auth UX = 40% user abandonment 
 - Strategic Impact: Platform Reliability - Auth coordination enables all features
 
 CRITICAL SUCCESS CRITERIA:

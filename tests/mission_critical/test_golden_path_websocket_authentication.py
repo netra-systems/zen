@@ -43,7 +43,7 @@ Mission Critical Tests for Golden Path WebSocket Authentication
 
 Business Value Justification (BVJ):
     - Segment: ALL (Free -> Enterprise) - Golden Path delivers core platform value
-- Business Goal: PROTECT $""120K""+ MRR through reliable Golden Path user flow
+- Business Goal: PROTECT $120K+ MRR through reliable Golden Path user flow
 - Value Impact: Golden Path failure = complete platform value delivery failure
 - Strategic Impact: Golden Path authentication enables end-to-end user success
 
@@ -121,7 +121,7 @@ class GoldenPathWebSocketAuthenticationTests:
      TARGET:  MISSION CRITICAL Golden Path WebSocket Authentication tests.
     
     CRITICAL: These tests ensure the Golden Path user journey succeeds
-    with seamless authentication enabling $""120K""+ MRR value delivery.
+    with seamless authentication enabling $120K+ MRR value delivery.
     
     Tests focus on:
     1. Complete Golden Path user journey with zero authentication friction

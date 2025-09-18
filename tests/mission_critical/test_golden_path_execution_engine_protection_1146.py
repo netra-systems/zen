@@ -2,7 +2,7 @@
 
 Business Value Justification:
     - Segment: Platform/Business Critical
-- Business Goal: Protect $""500K"" plus ARR Golden Path functionality  
+- Business Goal: Protect $500K+ plus ARR Golden Path functionality  
 - Value Impact: Ensures execution engine consolidation doesn't break end-to-end user flow'
 - Strategic Impact: Critical protection for login -> AI response flow that delivers 90% platform value
 
@@ -136,7 +136,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
                 'step': 'apex_optimizer_agent',
                 'description': 'Generate AI optimization recommendations', 
                 'expected_output': 'Actionable recommendations produced',
-                'business_impact': 'User receives valuable AI insights ($""500K"" plus ARR value)'
+                'business_impact': 'User receives valuable AI insights ($500K+ plus ARR value)'
             }
         ]
         
@@ -236,7 +236,7 @@ class GoldenPathExecutionEngineProtection1146Tests(SSotAsyncTestCase):
         print(f"CHECK GOLDEN PATH PROTECTED: Complete user flow successful through UserExecutionEngine)"
         print(f   Total duration: {total_duration:.""2f""}s)
         print(f"   Steps completed: {len(golden_path_results)})"
-        print(f   Business value: $""500K"" plus ARR flow maintained)
+        print(f   Business value: $500K+ plus ARR flow maintained)
 
     async def test_golden_path_websocket_events_all_five_critical_events(self):
         "CRITICAL: Validate all 5 critical WebSocket events for Golden Path user experience."

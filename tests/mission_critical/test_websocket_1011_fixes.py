@@ -1,7 +1,7 @@
 "Mission Critical: WebSocket 1011 Error Resolution Tests"
 
 Specifically validates that Redis SSOT consolidation prevents WebSocket 1011 errors
-that were blocking $""500K"" plus ARR chat functionality.
+that were blocking $500K+ plus ARR chat functionality.
 
 Background:
     - WebSocket 1011 errors occurred due to competing Redis connection pools

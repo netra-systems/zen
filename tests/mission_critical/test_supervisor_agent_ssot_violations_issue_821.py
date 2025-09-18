@@ -1,6 +1,6 @@
 "SSOT Violation Tests for Issue #821 - SupervisorAgent Consolidation"
 
-Business Value: Protect $""500K"" plus ARR by ensuring single SupervisorAgent implementation
+Business Value: Protect $500K+ plus ARR by ensuring single SupervisorAgent implementation
 BVJ: ALL segments | Platform Stability | SSOT compliance prevents race conditions
 
 MISSION: Create tests that FAIL when multiple SupervisorAgent implementations exist

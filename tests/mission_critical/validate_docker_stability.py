@@ -34,7 +34,7 @@ class TestWebSocketConnection:
         1. Segment: Platform/Internal - Development Velocity, Risk Reduction
         2. Business Goal: Validate Docker infrastructure reliability for CI/CD and development
         3. Value Impact: Prevents 4-8 hours/week of developer downtime from Docker failures
-        4. Revenue Impact: Protects development velocity for $""2M""+ ARR platform
+        4. Revenue Impact: Protects development velocity for $2M+ ARR platform
         '''
         '''
         import asyncio

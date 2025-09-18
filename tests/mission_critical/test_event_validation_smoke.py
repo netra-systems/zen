@@ -334,7 +334,7 @@ create_mock_websocket_event(agent_completed, {
 "result: {"
 recommendations: [Implement efficiency improvements, Optimize workflow processes],""
 recommendations: [Implement efficiency improvements, Optimize workflow processes],""
-"expected_benefits: 15% efficiency gain, estimated $""50K"" annual savings"
+"expected_benefits: 15% efficiency gain, estimated $50K+ annual savings"
 
 summary: Completed comprehensive analysis with actionable recommendations for significant business impact
 

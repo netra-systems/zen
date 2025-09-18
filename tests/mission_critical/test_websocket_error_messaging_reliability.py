@@ -2,7 +2,7 @@
 
 Mission Critical WebSocket Error Messaging Reliability Tests
 
-BUSINESS CRITICAL: These tests protect $""500K"" plus ARR by ensuring WebSocket error messaging
+BUSINESS CRITICAL: These tests protect $500K+ plus ARR by ensuring WebSocket error messaging
 functions correctly in all scenarios. WebSocket errors breaking chat functionality
 directly impacts 90% of platform value delivery.
 

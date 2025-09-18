@@ -224,25 +224,32 @@ class AgentWebSocketBridge(MonitorableComponent):
         self._health_monitor = None
         logger.debug("Dependency references initialized")
 
-    def configure(self,
-                  connection_pool=None,
-                  agent_registry=None,
-                  health_monitor=None) -> None:
+    def configure(self, *args, **kwargs) -> None:
         """Configure AgentWebSocketBridge with infrastructure components.
+
+        Supports two calling patterns:
+        1. Legacy: configure(connection_pool=None, agent_registry=None, health_monitor=None)
+        2. WebSocket: configure(websocket, run_id, thread_id, user_id) - for backward compatibility
 
         This method provides post-initialization configuration of the bridge
         with external dependencies. It follows the same pattern as other
         factory classes in the system.
-
-        Args:
-            connection_pool: WebSocket connection pool for managing connections
-            agent_registry: Registry for agent instances and lifecycle management
-            health_monitor: Optional health monitor for external health tracking
-
-        Note:
-            This method can be called multiple times if needed to update configuration.
-            It's designed to be idempotent and safe for reconfiguration scenarios.
         """
+        # Handle positional arguments (websocket, run_id, thread_id, user_id pattern)
+        if len(args) >= 4:
+            websocket, run_id, thread_id, user_id = args[:4]
+            logger.info(f"[U+1F527] AgentWebSocketBridge configure called with WebSocket pattern: websocket={type(websocket).__name__}, run_id={run_id}, thread_id={thread_id}, user_id={user_id}")
+
+            # Store WebSocket session information for this user context
+            self._configure_websocket_session(websocket, run_id, thread_id, user_id)
+            logger.info("[U+2713] AgentWebSocketBridge WebSocket session configuration completed")
+            return
+
+        # Handle keyword arguments (standard configuration pattern)
+        connection_pool = kwargs.get('connection_pool')
+        agent_registry = kwargs.get('agent_registry')
+        health_monitor = kwargs.get('health_monitor')
+
         if connection_pool is not None:
             self._connection_pool = connection_pool
             logger.info(f"[U+1F527] AgentWebSocketBridge configured with connection pool: {type(connection_pool).__name__}")
@@ -256,6 +263,46 @@ class AgentWebSocketBridge(MonitorableComponent):
             logger.info(f"[U+1F527] AgentWebSocketBridge configured with health monitor: {type(health_monitor).__name__}")
 
         logger.info("[U+2713] AgentWebSocketBridge configuration completed successfully")
+
+    def _configure_websocket_session(self, websocket, run_id: str, thread_id: str, user_id: str) -> None:
+        """Configure WebSocket session for specific user context.
+
+        Args:
+            websocket: WebSocket connection object
+            run_id: Unique run identifier
+            thread_id: Thread identifier
+            user_id: User identifier
+        """
+        # Store session configuration
+        session_data = {
+            'websocket': websocket,
+            'run_id': run_id,
+            'thread_id': thread_id,
+            'user_id': user_id,
+            'configured_at': datetime.now(timezone.utc)
+        }
+
+        # Use run_id as key for session mapping
+        if not hasattr(self, '_websocket_sessions'):
+            self._websocket_sessions = {}
+
+        self._websocket_sessions[run_id] = session_data
+        logger.debug(f"WebSocket session configured for run_id={run_id}, user_id={user_id}")
+
+        # Register the run/thread mapping if registry is available
+        if hasattr(self, '_registry') and self._registry:
+            try:
+                # Attempt to register the mapping
+                if hasattr(self._registry, 'register_run_thread_mapping'):
+                    asyncio.create_task(self._registry.register_run_thread_mapping(
+                        run_id=run_id,
+                        thread_id=thread_id,
+                        metadata={'user_id': user_id, 'configured_via': 'configure_method'}
+                    ))
+                    logger.debug(f"Run-thread mapping registered for run_id={run_id}")
+            except Exception as e:
+                logger.warning(f"Could not register run-thread mapping: {e}")
+                # Continue without failing - this is non-critical
 
     @property
     def websocket_manager(self):

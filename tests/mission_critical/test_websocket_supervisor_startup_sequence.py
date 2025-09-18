@@ -2,7 +2,7 @@
 
 MISSION CRITICAL TESTS: WebSocket Supervisor Startup Sequence - 1011 Error Prevention
 
-MISSION CRITICAL STATUS: These tests protect $""500K"" plus ARR by validating the core
+MISSION CRITICAL STATUS: These tests protect $500K+ plus ARR by validating the core
 WebSocket supervisor startup sequence that enables chat functionality (90% of platform value).
 
 ROOT CAUSE PROTECTION: Prevents WebSocket 1011 errors in GCP Cloud Run by ensuring
@@ -12,7 +12,7 @@ This addresses the startup race condition that breaks chat functionality.
 BUSINESS IMPACT VALIDATION:
     - Segment: Platform/Revenue - Core Chat Infrastructure  
 - Business Goal: Revenue Protection & Platform Stability
-- Value Impact: Protects $""500K"" plus ARR dependent on reliable AI chat functionality
+- Value Impact: Protects $500K+ plus ARR dependent on reliable AI chat functionality
 - Strategic Impact: Ensures WebSocket-based chat works reliably in production GCP
 
 CRITICAL TEST REQUIREMENTS:

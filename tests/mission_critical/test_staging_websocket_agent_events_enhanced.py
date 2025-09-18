@@ -4,7 +4,7 @@
 MISSION CRITICAL TEST SUITE: Enhanced Staging WebSocket Agent Events - COMPREHENSIVE AUTH & USER JOURNEYS
 =====================================================================================================
 
-Business Value: $""500K"" plus ARR - Core chat functionality must work in production-like environment
+Business Value: $500K+ plus ARR - Core chat functionality must work in production-like environment
 
 COMPREHENSIVE COVERAGE:
     - 25+ Authentication Flow Tests with WebSocket Integration
@@ -739,7 +739,7 @@ if __name__ == __main__:
     print(ENHANCED STAGING WEBSOCKET AGENT EVENTS TEST SUITE)
     print("Environment: Staging (api-staging.netrasystems.ai))"
     print(Purpose: Production-readiness validation)
-    print(Business Impact: $""500K"" plus ARR revenue protection")"
+    print(Business Impact: $500K+ plus ARR revenue protection")"
     print("= * 80)"
 
     import pytest

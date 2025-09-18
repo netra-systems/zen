@@ -3,7 +3,7 @@
 
 Business Value Justification:
     - Segment: Platform/Internal (Mission Critical Infrastructure)
-- Business Goal: Provide real-time monitoring and analysis of $""500K"" plus ARR chat functionality
+- Business Goal: Provide real-time monitoring and analysis of $500K+ plus ARR chat functionality
 - Value Impact: Enables proactive detection of WebSocket issues before they impact users
 - Strategic Impact: Maintains chat quality that drives customer retention and conversions
 

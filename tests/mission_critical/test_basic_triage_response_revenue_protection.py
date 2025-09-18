@@ -3,13 +3,13 @@
 Mission Critical Tests for Basic Triage & Response Revenue Protection - Issue #135
 
 BUSINESS VALUE JUSTIFICATION (BVJ):
-    - Segment: All tiers - $""500K"" plus ARR protection
+    - Segment: All tiers - $500K+ plus ARR protection
 - Business Goal: Validate revenue-critical triage processing prevents business loss
 - Value Impact: Mission-critical validation of core chat functionality that generates 90% of platform value
 - Revenue Protection: Ensure triage failures don't block revenue-generating user interactions'
 
 PURPOSE: Mission-critical validation of basic triage and response processing
-that protects $""500K"" plus ARR chat functionality. These tests validate the core
+that protects $500K+ plus ARR chat functionality. These tests validate the core
 business value delivery mechanism that customers depend on.
 
 KEY COVERAGE:
@@ -92,7 +92,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
     revenue-generating user interactions and that business continuity
     is maintained even under adverse conditions.
     
-    CRITICAL: These tests protect $""500K"" plus ARR by ensuring chat functionality
+    CRITICAL: These tests protect $500K+ plus ARR by ensuring chat functionality
     delivers value to customers even when technical issues occur.
 "
 ""
@@ -166,7 +166,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_enterprise_customer_revenue_protection(self):
         
-        Test revenue protection for enterprise customers ($""5K""/month value).
+        Test revenue protection for enterprise customers ($5K+/month value).
         
         Business Impact: Enterprise customers generate highest revenue and
         have strictest SLA requirements. Failures directly impact business.
@@ -190,13 +190,13 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
             content: "URGENT: Need immediate cost optimization analysis for our production ML infrastructure."
             
             Current Setup:
-            - ""50x"" A100 GPUs ($""45K""/month)
+            - ""50x"" A100 GPUs ($45K+/month)
             - Multi-region deployment (US, EU, APAC)
             - 24/7 operations critical to business
             - Current utilization: 68%
             
             Requirements:
-            - Reduce costs by 25% ($""11K""/month savings)
+            - Reduce costs by 25% ($11K+/month savings)
             - Maintain 99.99% uptime SLA
             - Zero downtime migration
             - Results needed within 1 hour for board meeting
@@ -872,7 +872,7 @@ class BasicTriageResponseRevenueProtectionTests(SSotAsyncTestCase):
         Test comprehensive revenue protection across all business dimensions.
         
         Business Impact: Final validation that all revenue protection
-        mechanisms work together to safeguard $""500K"" plus ARR.
+        mechanisms work together to safeguard $500K+ plus ARR.
 "
 ""
 

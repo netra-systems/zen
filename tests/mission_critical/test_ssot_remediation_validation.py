@@ -6,7 +6,7 @@ Validates that Phase 1 emergency stabilization successfully addresses SSOT viola
 while maintaining business continuity for Golden Path validation.
 
 BUSINESS IMPACT:
-    - $""500K"" plus ARR protection through continued Golden Path testing
+    - $500K+ plus ARR protection through continued Golden Path testing
 """
 
 - SSOT compliance improvement from 0.4% to measurable progress
@@ -42,7 +42,7 @@ class SSOTRemediationValidationTests:
         BUSINESS PROTECTION:
         - Golden Path tests continue to import UnifiedTestRunner
         - No breaking changes during remediation
-        - $""500K"" plus ARR chat functionality testing preserved
+        - $500K+ plus ARR chat functionality testing preserved
         
         # Capture warnings to verify deprecation guidance
         with warnings.catch_warnings(record=True) as warning_list:

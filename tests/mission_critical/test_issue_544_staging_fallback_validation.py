@@ -15,7 +15,7 @@ Expected Behavior:
 - WebSocket events should be receivable from staging environment
 - Performance should be acceptable for validation purposes
 
-Business Impact: Provides $""500K"" plus ARR validation coverage when Docker unavailable.
+Business Impact: Provides $500K+ plus ARR validation coverage when Docker unavailable.
 
 
 import asyncio

@@ -9,7 +9,7 @@ factory pattern architecture for complete user isolation:
 - User experience validation with factory pattern
 - Event usefulness scoring per isolated user context
 
-Business Value: $""500K"" plus ARR - Prevents chat UI appearing broken
+Business Value: $500K+ plus ARR - Prevents chat UI appearing broken
 This is MISSION CRITICAL infrastructure that must NEVER regress.
 '''
 '''
@@ -1108,7 +1108,7 @@ Business Impact:
     - Prevents broken chat UI experience per user
 - Ensures user confidence in isolated contexts
 - Validates real-time feedback quality per session
-- Protects $""500K"" plus ARR from degradation
+- Protects $500K+ plus ARR from degradation
 - Factory pattern enables 25+ concurrent users
 '''
 '''

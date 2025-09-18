@@ -3,10 +3,10 @@
 
 MISSION CRITICAL TEST SUITE: WebSocket Agent Events Revenue Protection
 
-THIS TEST SUITE PROTECTS $""500K"" plus ARR - DEPLOYMENT BLOCKED IF FAILED
+THIS TEST SUITE PROTECTS $500K+ plus ARR - DEPLOYMENT BLOCKED IF FAILED
 
 Business Value Justification (BVJ):
-    - Segment: Platform/Internal - Core Chat Infrastructure ($""500K"" plus ARR)
+    - Segment: Platform/Internal - Core Chat Infrastructure ($500K+ plus ARR)
 - Business Goal: Revenue Protection - Ensure WebSocket events deliver substantive AI chat value
 - Value Impact: Validates the 5 critical events that power 90% of platform business value
 - Strategic Impact: Prevents silent failures that would block revenue-generating chat interactions
@@ -107,7 +107,7 @@ class WebSocketAgentEventsRevenueProtectionTests(SSotBaseTestCase):
     MISSION CRITICAL: WebSocket Agent Events Revenue Protection Test Suite
     
     This test class validates the 5 critical WebSocket events that deliver
-    90% of platform business value ($""500K"" plus ARR) through AI chat interactions.
+    90% of platform business value ($500K+ plus ARR) through AI chat interactions.
     
     CRITICAL: ALL tests in this class MUST pass or deployment is blocked.
     Each test failure represents potential revenue loss.

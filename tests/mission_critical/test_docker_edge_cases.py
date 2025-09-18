@@ -1,7 +1,7 @@
 '''
 '''
 MISSION CRITICAL: Docker Edge Cases & Failure Recovery Test Suite
-BUSINESS IMPACT: PROTECTS $""2M""+ ARR FROM DOCKER EDGE CASE FAILURES
+BUSINESS IMPACT: PROTECTS $2M+ ARR FROM DOCKER EDGE CASE FAILURES
 
 This test suite covers every possible Docker edge case and failure scenario.
 It validates our infrastructure can handle the most extreme and unusual Docker situations.
@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
     1. Segment: Platform/Internal - Risk Reduction & Reliability
 2. Business Goal: Ensure zero downtime from Docker edge cases and unexpected failures
 3. Value Impact: Prevents catastrophic Docker failures that could halt development
-4. Revenue Impact: Protects $""2M""+ ARR platform from infrastructure edge case failures
+4. Revenue Impact: Protects $2M+ ARR platform from infrastructure edge case failures
 
 CRITICAL COVERAGE:
     - Orphaned container cleanup and recovery

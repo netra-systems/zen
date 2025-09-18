@@ -1,6 +1,6 @@
 "Mission Critical test for Issue #722 SSOT fix validation."
 
-BUSINESS VALUE: Protects $""500K"" plus ARR authentication and chat functionality by
+BUSINESS VALUE: Protects $500K+ plus ARR authentication and chat functionality by
 ensuring SSOT fixes maintain system stability and Golden Path user flow.
 
 This test validates that after fixing Issue #722 legacy os.environ violations:
@@ -77,7 +77,7 @@ class Issue722SsotFixValidationTests(SSotAsyncTestCase):
         3. Corpus initialization
         4. Startup validation
 
-        This test MUST PASS to ensure $""500K"" plus ARR business continuity.
+        This test MUST PASS to ensure $500K+ plus ARR business continuity.
 
         golden_path_components = {
             'auth_tracing': {'status': 'unknown', 'critical': True},

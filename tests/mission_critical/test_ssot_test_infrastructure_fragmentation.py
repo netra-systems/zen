@@ -11,7 +11,7 @@ CRITICAL BUSINESS IMPACT: Test infrastructure fragmentation causes:
 """
 """
 
-- Risk to $""500K"" plus ARR from unreliable test coverage
+- Risk to $500K+ plus ARR from unreliable test coverage
 
 This test is designed to FAIL initially to prove the massive fragmentation exists.
 Expected: 6,96+ duplicate test implementations across the codebase.

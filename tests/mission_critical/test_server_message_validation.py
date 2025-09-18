@@ -6,7 +6,7 @@ Mission Critical Server Message Validation Tests
 This module tests the MissionCriticalEventValidator's ability to handle'
 ServerMessage format structures where event data is nested in payload.
 
-BUSINESS IMPACT: $""500K"" plus ARR depends on proper WebSocket event validation
+BUSINESS IMPACT: $500K+ plus ARR depends on proper WebSocket event validation
 to ensure Golden Path chat functionality works correctly.
 
 Issue #892: MissionCriticalEventValidator expects flat event structures
