@@ -14,7 +14,6 @@ This test suite:
 
 ANY FAILURE HERE INDICATES STAGING WEBSOCKET ISSUES THAT WILL AFFECT PRODUCTION.
 """
-"""
 import asyncio
 import json
 import os
@@ -182,8 +181,8 @@ class StagingWebSocketEventValidator:
 
         for event in self.REQUIRED_EVENTS:
             count = self.event_counts.get(event, 0)
-            status = PASS if count > 0 else "FAIL"
-            report.append(f  {status}: {event}: {count}")"
+            status = "PASS" if count > 0 else "FAIL"
+            report.append(f"  {status}: {event}: {count}")"
 
         if failures:
             report.extend(["", "STAGING FAILURES:"] + [f"  - {f}" for f in failures])
@@ -204,7 +203,6 @@ class StagingWebSocketEventValidator:
 
 class StagingWebSocketFlowTests:
     """Test WebSocket functionality against real staging environment."""
-    """Test WebSocket functionality against real staging environment."""
 
     @pytest.fixture(autouse=True)
     async def setup_staging_websocket(self):
@@ -214,7 +212,7 @@ class StagingWebSocketFlowTests:
 
         # Verify staging configuration
         if not self.config.validate_configuration():
-            pytest.skip(Staging configuration not valid")"
+            pytest.skip("Staging configuration not valid")"
 
         yield
 
@@ -423,7 +421,7 @@ class StagingRegressionPreventionTests:
         self.helper = StagingWebSocketTestHelper()
 
         if not self.config.validate_configuration():
-            pytest.skip(Staging configuration not valid")"
+            pytest.skip("Staging configuration not valid")"
 
         yield
 
