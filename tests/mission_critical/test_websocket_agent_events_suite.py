@@ -481,12 +481,12 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     @pytest.mark.unit
     @pytest.mark.observability
     async def test_flow_logging_and_observability_tracking(self):
-
+        """
         Test flow logging and observability tracking during pipeline execution.
-        
+
         BVJ: Platform monitoring - enables debugging and performance optimization
         Critical Path: Pipeline start  ->  Step tracking  ->  Flow completion
-        ""
+        """
         # Arrange: Create PipelineExecutor
         pipeline_executor = PipelineExecutor(
             engine=self.mock_execution_engine,
