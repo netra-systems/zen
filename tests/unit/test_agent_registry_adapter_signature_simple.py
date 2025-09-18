@@ -20,6 +20,8 @@ class AgentRegistryAdapterSignatureMismatchSimpleTests:
         """Set up minimal test fixtures."""
         self.mock_registry = Mock()
         self.mock_factory = Mock()
+        # Make the factory method async to match the real implementation
+        self.mock_factory.create_instance = AsyncMock()
         self.user_context = UserExecutionContext.from_request_supervisor(
             user_id="simple_test_user",
             thread_id="simple_thread",
@@ -89,32 +91,39 @@ class AgentRegistryAdapterSignatureMismatchSimpleTests:
         assert result == mock_agent_instance
         assert result.name == "working_agent"
 
-        # Verify factory was called with user context from adapter constructor
-        self.mock_factory.create_instance.assert_called_once()
-        call_args = self.mock_factory.create_instance.call_args
-        assert call_args[1]['user_context'] == self.user_context
+        # Verify factory was called with correct parameters
+        self.mock_factory.create_instance.assert_called_once_with(
+            "working_agent",
+            self.user_context,  # Should use adapter's context as default
+            agent_class=mock_agent_class
+        )
 
-    def test_signature_fix_specification(self):
-        """Document the exact signature fix required."""
-        # Current broken signature from the adapter
+    def test_signature_fix_verification(self):
+        """Verify that the signature fix has been applied correctly."""
+        # Current signature from the adapter (should be fixed now)
         current_signature = inspect.signature(self.adapter.get_async)
 
-        # Expected signature after fix:
+        # Expected signature is:
         # async def get_async(self, agent_name: str, context=None)
 
-        fix_specification = {
+        fix_verification = {
             "current_signature": str(current_signature),
             "current_params": list(current_signature.parameters.keys()),
-            "required_change": "Add 'context=None' parameter to get_async method",
-            "new_signature": "async def get_async(self, agent_name: str, context=None)",
-            "backward_compatibility": "context parameter must have default value None",
+            "signature_status": "FIXED",
+            "expected_signature": "async def get_async(self, agent_name: str, context=None)",
+            "backward_compatibility": "context parameter has default value None",
             "behavior": "When context provided, use it for agent creation; when None, use adapter's user_context"
         }
 
-        # Document the specification
-        assert fix_specification["current_params"] == ["agent_name"]
-        assert "context" not in fix_specification["current_params"]
-        assert fix_specification["required_change"] == "Add 'context=None' parameter to get_async method"
+        # Verify the fix is complete
+        assert fix_verification["current_params"] == ["agent_name", "context"], \
+            f"Expected both parameters, got: {fix_verification['current_params']}"
+        assert "context" in fix_verification["current_params"], "context parameter should be present"
+
+        # Verify context parameter has default value
+        context_param = current_signature.parameters.get('context')
+        assert context_param is not None, "context parameter should exist"
+        assert context_param.default is None, "context parameter should have default value None"
 
 
 if __name__ == "__main__":
