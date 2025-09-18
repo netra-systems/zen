@@ -1,11 +1,8 @@
 """
-"""
 Universal Real WebSocket Test Base - NO MOCKS
 
 This is the central base class for ALL WebSocket tests across the project.
 CRITICAL: Uses ONLY real WebSocket connections - NO MOCKS per CLAUDE.md MOCKS = Abomination
-"""
-"""
 
 Features:
 - Real WebSocket connection management with Docker services
@@ -22,6 +19,7 @@ Business Value Justification:
 
 @compliance CLAUDE.md - WebSocket events enable substantive chat interactions
 @compliance SPEC/core.xml - Real services over mocks for authentic testing
+"""
 
 import asyncio
 import json
@@ -55,9 +53,11 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # CRITICAL: Always require real services - NO MOCKS per CLAUDE.md
 def require_docker_services() -> None:
-    Require Docker services for all tests - fail fast if not available.""
-    
+    """
+    Require Docker services for all tests - fail fast if not available.
+
     CRITICAL: Per CLAUDE.md, MOCKS = Abomination. Tests must use real services.
+    """
     
     try:
         manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
@@ -1635,7 +1635,6 @@ async def send_test_agent_request(
     Returns:
         The message that was sent
     """
-    """
     message = {
         "type": "agent_request",
         "agent_name": agent_name,
@@ -1647,7 +1646,3 @@ async def send_test_agent_request(
     
     await test_context.send_message(message)
     return message
-"""
-)))
-]]
-}}}

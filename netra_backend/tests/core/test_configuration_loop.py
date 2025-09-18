@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch, MagicMock
 """Test to reproduce and fix configuration loop issue."""
 import unittest
 import logging
-from netra_backend.app.core.configuration.base import UnifiedConfigManager
+from netra_backend.app.config import config_manager
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.redis_manager import redis_manager
 
@@ -47,7 +47,7 @@ class ConfigurationLoopTests(SSotBaseTestCase):
         
         with patch('netra_backend.app.core.configuration.base.get_env', return_value = mock_env):
             # Create configuration manager
-            config_manager = UnifiedConfigManager()
+            # Use global SSOT config_manager instance
             
             # Clear the log calls
             self.log_calls.clear()
@@ -77,7 +77,7 @@ class ConfigurationLoopTests(SSotBaseTestCase):
 }.get(key, default)
         
         with patch('netra_backend.app.core.configuration.base.get_env', return_value = mock_test_env):
-            config_manager = UnifiedConfigManager()
+            # Use global SSOT config_manager instance
             self.log_calls.clear()
             
             # In test mode, clearing is expected
@@ -103,7 +103,7 @@ class ConfigurationLoopTests(SSotBaseTestCase):
 }.get(key, default)
         
         with patch('netra_backend.app.core.configuration.base.get_env', return_value = mock_prod_env):
-            config_manager = UnifiedConfigManager()
+            # Use global SSOT config_manager instance
             self.log_calls.clear()
             
             # Call get_config multiple times
