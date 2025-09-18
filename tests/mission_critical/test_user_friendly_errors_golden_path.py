@@ -34,9 +34,9 @@ from netra_backend.app.websocket_core.error_recovery_handler import (
 class TestUserFriendlyErrorsGoldenPath(SSotAsyncTestCase):
     """MISSION CRITICAL: Ensure user-friendly errors don't break core agent functionality."""
 
-    async def setup_method(self, method=None):
+    def setup_method(self, method=None):
         """Set up test fixtures."""
-        await super().setup_method(method)
+        super().setup_method(method)
         self.error_mapper = UserFriendlyErrorMapper()
 
     @pytest.mark.mission_critical
