@@ -3017,8 +3017,10 @@ class WebSocketManagerRaceConditionsTests(BaseTestCase):
             # Emit agent sequence
             for event_num in range(events_per_user):
                 try:
-                    # Random delay to create realistic timing patterns
-                    await asyncio.sleep(random.uniform(0.005, 0.02))
+                    # Deterministic delay to create realistic timing patterns without randomness
+                    # Use user ID and event number for deterministic but varied timing
+                    delay = (hash(str(user_id)) % 3 + event_num % 2) * 0.005 + 0.005  # 5-20ms deterministic delay
+                    await asyncio.sleep(delay)
                     
                     await emitter.emit_agent_thinking({
                         'thought': f'User {user_id} step {event_num}',
