@@ -761,7 +761,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                 success=True,
                 agent_name=context.agent_name,
                 duration=0.1,
-                data={"result: fSuccess from {context.agent_name}"}
+                data={"result": f"Success from {context.agent_name}"}
             
             self.captured_execution_events.append({
                 'agent_name': context.agent_name,
