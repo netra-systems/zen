@@ -2,7 +2,7 @@
 
 MISSION CRITICAL: This test suite ensures ActionsToMeetGoalsSubAgent properly
 handles WebSocket event delivery during failures, protecting the Golden Path
-user experience worth $500K+ ARR.
+user experience worth 500K ARR.
 
 Focus Areas:
 - WebSocket events during agent execution failures

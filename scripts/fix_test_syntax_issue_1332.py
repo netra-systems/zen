@@ -318,19 +318,19 @@ class TestSyntaxFixer:
 
         for file_path in test_files:
             rel_path = file_path.relative_to(project_root)
-            print(f"\n🔍 Processing: {rel_path}")
+            print(f"\n[PROCESSING] {rel_path}")
 
             result = self.fix_file(file_path)
             results[str(rel_path)] = result
 
             if result.success and result.fixes_applied:
-                print(f"   ✅ Applied {len(result.fixes_applied)} fixes")
+                print(f"   [SUCCESS] Applied {len(result.fixes_applied)} fixes")
                 for fix in result.fixes_applied:
                     print(f"      - Line {fix.line_number}: {fix.description}")
             elif result.success and not result.fixes_applied:
-                print(f"   ✅ No fixes needed (already valid)")
+                print(f"   [OK] No fixes needed (already valid)")
             else:
-                print(f"   ❌ Failed to fix: {result.error_message}")
+                print(f"   [FAILED] Failed to fix: {result.error_message}")
 
         return results
 
@@ -355,7 +355,7 @@ class TestSyntaxFixer:
         # Successful fixes
         successful_files = [path for path, result in results.items() if result.success and result.fixes_applied]
         if successful_files:
-            print(f"\n✅ SUCCESSFULLY FIXED FILES ({len(successful_files)}):")
+            print(f"\n[SUCCESS] SUCCESSFULLY FIXED FILES ({len(successful_files)}):")
             for file_path in successful_files:
                 result = results[file_path]
                 print(f"  - {file_path} ({len(result.fixes_applied)} fixes)")
@@ -363,14 +363,14 @@ class TestSyntaxFixer:
         # Files that were already valid
         already_valid = [path for path, result in results.items() if result.success and not result.fixes_applied]
         if already_valid:
-            print(f"\n✅ ALREADY VALID FILES ({len(already_valid)}):")
+            print(f"\n[OK] ALREADY VALID FILES ({len(already_valid)}):")
             for file_path in already_valid:
                 print(f"  - {file_path}")
 
         # Failed fixes
         failed_files = [path for path, result in results.items() if not result.success]
         if failed_files:
-            print(f"\n❌ FAILED TO FIX ({len(failed_files)}):")
+            print(f"\n[FAILED] FAILED TO FIX ({len(failed_files)}):")
             for file_path in failed_files:
                 result = results[file_path]
                 print(f"  - {file_path}")
@@ -378,7 +378,7 @@ class TestSyntaxFixer:
 
         # Detailed fix breakdown
         if total_fixes > 0:
-            print(f"\n📊 FIX TYPE BREAKDOWN:")
+            print(f"\n[BREAKDOWN] FIX TYPE BREAKDOWN:")
             fix_types = {}
             for result in results.values():
                 for fix in result.fixes_applied:
@@ -387,7 +387,7 @@ class TestSyntaxFixer:
             for fix_type, count in sorted(fix_types.items()):
                 print(f"  - {fix_type}: {count} fixes")
 
-        print(f"\n📁 BACKUP LOCATION: {self.backup_dir}")
+        print(f"\n[BACKUP] BACKUP LOCATION: {self.backup_dir}")
         print("   Original files backed up before modification")
 
         return successful_fixes, total_files
@@ -411,11 +411,11 @@ def main():
 
     # Exit with appropriate code
     if successful_fixes == total_files:
-        print(f"\n🎉 SUCCESS: All {total_files} files processed successfully!")
+        print(f"\n[COMPLETE] SUCCESS: All {total_files} files processed successfully!")
         sys.exit(0)
     else:
         failed_count = total_files - successful_fixes
-        print(f"\n⚠️  PARTIAL SUCCESS: {failed_count} files still need manual attention")
+        print(f"\n[PARTIAL] PARTIAL SUCCESS: {failed_count} files still need manual attention")
         sys.exit(1)
 
 

@@ -9,7 +9,7 @@ a baseline performance report without requiring the full application stack.
 - Segment: Platform
 - Goal: Stability & Performance validation
 - Value Impact: Ensures WebSocket infrastructure can handle 25+ concurrent users
-- Revenue Impact: Protects $500K+ ARR by preventing performance degradation
+- Revenue Impact: Protects 500K ARR by preventing performance degradation
 
 **Critical Requirements:**
 - P99 latency < 50ms (real-time user experience)

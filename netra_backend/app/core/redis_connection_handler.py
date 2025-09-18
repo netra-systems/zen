@@ -63,17 +63,25 @@ class RedisConnectionHandler:
                 host = get_env().get("REDIS_PRODUCTION_HOST") or "redis-production.internal"
                 logger.warning(f"Overriding localhost Redis with production host: {host}")
         
-        # Build connection info
+        # Build connection info with WebSocket authentication monitoring optimizations
         connection_info = {
             "host": host,
             "port": port,
             "db": db,
             "password": password if password else None,
             "environment": self.env,
-            "socket_timeout": 5,
-            "socket_connect_timeout": 5,
+            # Issue #1300: Enhanced timeout settings for WebSocket authentication monitoring
+            "socket_timeout": 10,  # Increased from 5s for reliable WebSocket auth checks
+            "socket_connect_timeout": 10,  # Increased from 5s for better connection stability
             "retry_on_timeout": True,
-            "health_check_interval": 30
+            "health_check_interval": 15,  # Reduced from 30s for faster failure detection
+            # Enhanced connection settings for WebSocket monitoring
+            "socket_keepalive": True,
+            "socket_keepalive_options": {
+                "TCP_KEEPIDLE": 1,
+                "TCP_KEEPINTVL": 3,
+                "TCP_KEEPCNT": 5
+            }
         }
         
         # Add SSL configuration for staging/production
@@ -95,6 +103,7 @@ class RedisConnectionHandler:
                 # Use SSOT Redis import pattern
                 import redis
                 
+                # Enhanced connection pool configuration for WebSocket authentication monitoring
                 pool_config = {
                     "host": self._connection_info["host"],
                     "port": self._connection_info["port"],
@@ -103,8 +112,16 @@ class RedisConnectionHandler:
                     "socket_connect_timeout": self._connection_info["socket_connect_timeout"],
                     "retry_on_timeout": self._connection_info["retry_on_timeout"],
                     "health_check_interval": self._connection_info["health_check_interval"],
-                    "max_connections": 20,
-                    "connection_class": redis.Connection
+                    # Issue #1300: Enhanced pool settings for WebSocket authentication monitoring
+                    "max_connections": 50,  # Increased for concurrent WebSocket sessions
+                    "connection_class": redis.Connection,
+                    # Connection pool optimizations for WebSocket monitoring
+                    "socket_keepalive": True,
+                    "socket_keepalive_options": {
+                        "TCP_KEEPIDLE": 1,
+                        "TCP_KEEPINTVL": 3,
+                        "TCP_KEEPCNT": 5
+                    }
                 }
                 
                 # Add password if provided

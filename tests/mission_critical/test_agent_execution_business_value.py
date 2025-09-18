@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) 
 - Business Goal: Core Platform Value Delivery - Agent execution MUST work
 - Value Impact: Validates agents execute successfully and deliver actionable business insights
-- Strategic Impact: $500K+ ARR depends on agents executing and delivering value through chat
+- Strategic Impact: 500K ARR depends on agents executing and delivering value through chat
 
 CRITICAL: If this test fails, the entire platform is worthless because:
 1. Agents don't execute successfully'

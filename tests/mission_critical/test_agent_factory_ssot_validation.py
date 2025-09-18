@@ -1,12 +1,12 @@
 "Mission Critical Agent Factory SSOT Validation Tests."
 
-CRITICAL MISSION: Protect $500K+ ARR Golden Path functionality through agent factory SSOT compliance.
+CRITICAL MISSION: Protect 500K ARR Golden Path functionality through agent factory SSOT compliance.
 
 This test suite validates that agent factory patterns follow SSOT principles and ensure
 complete user isolation. Factory pattern violations directly impact Golden Path business value.
 
 Business Impact:
-- Revenue Protection: $500K+ ARR depends on reliable agent execution
+- Revenue Protection: 500K ARR depends on reliable agent execution
 - User Experience: Chat functionality requires proper agent isolation
 - System Stability: Factory SSOT prevents race conditions and state contamination
 - Security: User isolation prevents data leakage between sessions
@@ -56,7 +56,7 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
         TEST FAILS: AgentRegistry factory allows shared state between users.""
 
         CRITICAL BUSINESS IMPACT: Shared state causes WebSocket events to be delivered
-        to wrong users, directly violating $500K+ ARR Golden Path user experience.
+        to wrong users, directly violating 500K ARR Golden Path user experience.
 
         EXPECTED FAILURE: Multiple users get same AgentRegistry instance.
         PASSES AFTER: Each user gets isolated AgentRegistry with unique WebSocket manager.
@@ -107,7 +107,7 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
             fFound {len(unique_ids)} unique instances for {len(registries)} users. "
             f"Instance IDs: {registry_ids}."
             fBUSINESS IMPACT: Shared state causes WebSocket events delivered to wrong users. 
-            fIssue #686: Factory must create isolated instances per user for $500K+ ARR protection.
+            fIssue #686: Factory must create isolated instances per user for 500K ARR protection.
         )
 
         # Validate user context isolation if available
@@ -196,7 +196,7 @@ class AgentFactorySsotValidationTests(SSotAsyncTestCase):
                         fCRITICAL SSOT VIOLATION: WebSocket managers shared between users. ""
                         fManager 1 ID: {id(ws_manager1)}, Manager 2 ID: {id(ws_manager2)}. 
                         fBUSINESS IMPACT: WebSocket events sent to wrong users breaks Golden Path. 
-                        f"Issue #686: WebSocket isolation critical for $500K+ ARR protection."
+                        f"Issue #686: WebSocket isolation critical for 500K ARR protection."
                     )
 
                     # Validate user ID isolation
