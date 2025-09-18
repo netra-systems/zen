@@ -2,8 +2,7 @@ from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 
 env = get_env()
-'''
-'''
+"""
 Authentication Cross-System Critical Failure Tests
 
 These tests are designed to FAIL initially to expose real authentication integration
@@ -782,7 +781,7 @@ return TestClient(netra_backend.app.main.app)
 
 # @pytest.fixture
     async def test_user_credentials(self, auth_service_client):
-            # Removed problematic line: '''Fixture to create test user and await asyncio.sleep(0)'
+            # Removed problematic line: Fixture to create test user and await asyncio.sleep(0)
 return credentials'''
 return credentials'''
 user_email = ""
