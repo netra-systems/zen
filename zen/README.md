@@ -2,6 +2,30 @@
 
 Zen runs multiple Code CLI instances for peaceful parallel task execution.
 
+## Installation
+
+### Recommended: Using pipx (handles PATH automatically)
+```bash
+pipx install zen-orchestrator
+zen --help
+```
+
+### Alternative: Using pip
+```bash
+pip install zen-orchestrator
+
+# If 'zen' command not found, use one of these:
+python -m zen_orchestrator --help  # Works everywhere
+# OR add to PATH manually (see Troubleshooting section)
+```
+
+### Development Installation
+```bash
+cd zen/
+pip install -e .
+python -m zen_orchestrator --help
+```
+
 ## What is Zen?
 
 Zen allows you to:
