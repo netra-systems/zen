@@ -83,17 +83,50 @@ class TestSyntaxFixer:
 
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
+                content = f.read()
+                lines = content.split('\n')
 
             modified = False
+
+            # Fix 0: Handle double docstrings at start of file
+            if len(lines) >= 3 and lines[0].strip() == '"""' and lines[1].strip() == '"""':
+                # Remove the second docstring marker
+                lines.pop(1)
+                fixes.append(SyntaxFix(
+                    file_path=str(file_path),
+                    line_number=2,
+                    issue_type="double_docstring",
+                    original_line='"""',
+                    fixed_line="(removed)",
+                    description="Removed duplicate docstring marker"
+                ))
+                modified = True
+
+            # Fix double docstrings at end of docstring blocks
+            for i in range(len(lines) - 1):
+                if (lines[i].strip() == '"""' and
+                    lines[i + 1].strip() == '"""' and
+                    i > 0):
+                    # Remove the second one
+                    lines.pop(i + 1)
+                    fixes.append(SyntaxFix(
+                        file_path=str(file_path),
+                        line_number=i + 2,
+                        issue_type="double_docstring",
+                        original_line='"""',
+                        fixed_line="(removed)",
+                        description="Removed duplicate docstring marker"
+                    ))
+                    modified = True
+                    break
 
             for i, line in enumerate(lines):
                 original_line = line
                 fixed_line = line
 
-                # Fix 1: Replace $500K+ with 500K in strings and comments
+                # Fix 1: Replace $500K+ with $500K+ in strings and comments
                 if '$500K+' in fixed_line:
-                    fixed_line = fixed_line.replace('$500K+', '500K')
+                    fixed_line = fixed_line.replace('$500K+', '$500K plus')
                     if fixed_line != original_line:
                         fixes.append(SyntaxFix(
                             file_path=str(file_path),
@@ -101,10 +134,31 @@ class TestSyntaxFixer:
                             issue_type="currency_format",
                             original_line=original_line.rstrip(),
                             fixed_line=fixed_line.rstrip(),
-                            description="Replaced $500K+ with 500K to prevent syntax issues"
+                            description="Replaced $500K+ with $500K plus to prevent syntax issues"
                         ))
                         lines[i] = fixed_line
                         modified = True
+
+                # Fix 1b: Replace standalone number+letter combinations that might be misinterpreted
+                import re
+                if re.search(r'\b\d+[A-Za-z]+\b', fixed_line) and '"""' not in fixed_line:
+                    # Look for patterns like 500K, 25+, etc. outside of strings
+                    # Only fix if not in a string literal
+                    in_string = False
+                    quote_count = fixed_line.count('"') + fixed_line.count("'")
+                    if quote_count % 2 == 0:  # Even number of quotes, likely not in string
+                        fixed_line = re.sub(r'\b(\d+)([A-Za-z]+)\b', r'"\1\2"', fixed_line)
+                        if fixed_line != original_line:
+                            fixes.append(SyntaxFix(
+                                file_path=str(file_path),
+                                line_number=i + 1,
+                                issue_type="number_literal",
+                                original_line=original_line.rstrip(),
+                                fixed_line=fixed_line.rstrip(),
+                                description="Quoted number-letter combinations to prevent invalid literals"
+                            ))
+                            lines[i] = fixed_line
+                            modified = True
 
                 # Fix 2: Fix unterminated f-strings
                 if re.search(r'f"[^"]*$', fixed_line.strip()) and not fixed_line.strip().endswith('\\'):
@@ -186,7 +240,7 @@ class TestSyntaxFixer:
             # Save modified file if changes were made
             if modified:
                 with open(file_path, 'w', encoding='utf-8') as f:
-                    f.writelines(lines)
+                    f.write('\n'.join(lines))
 
         except Exception as e:
             print(f"Error applying pattern fixes to {file_path}: {e}")

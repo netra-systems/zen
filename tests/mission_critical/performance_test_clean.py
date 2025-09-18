@@ -58,13 +58,12 @@ class PerformanceMetrics:
 
     @property
     def p95_latency(self) -> float:
-        95th percentile latency.""
+        """95th percentile latency."""
         return statistics.quantiles(self.latencies, n=20)[18] if len(self.latencies) >= 20 else max(self.latencies, default=0)
 
     @property
     def p99_latency(self) -> float:
-        99th percentile latency."
-        99th percentile latency."
+        """99th percentile latency."""
         return statistics.quantiles(self.latencies, n=100)[98] if len(self.latencies) >= 100 else max(self.latencies, default=0)
 
     @property
