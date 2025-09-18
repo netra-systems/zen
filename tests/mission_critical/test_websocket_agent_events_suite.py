@@ -417,7 +417,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                     f"Missing events: {validator.REQUIRED_EVENTS - set(validator.event_counts.keys())}",
                     "Failures:",
                     *failures
-                ]
+                ])
                 pytest.fail(error_details)
             
             # Validate business requirements
@@ -481,12 +481,12 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     @pytest.mark.unit
     @pytest.mark.observability
     async def test_flow_logging_and_observability_tracking(self):
-
+        """
         Test flow logging and observability tracking during pipeline execution.
-        
+
         BVJ: Platform monitoring - enables debugging and performance optimization
         Critical Path: Pipeline start  ->  Step tracking  ->  Flow completion
-        ""
+        """
         # Arrange: Create PipelineExecutor
         pipeline_executor = PipelineExecutor(
             engine=self.mock_execution_engine,
@@ -549,7 +549,7 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
             pipeline=self.test_pipeline_steps,
             user_context=self.test_user_context,
             run_id=pipeline_run_001,
-            context={"user_id: pipeline_user_001", thread_id: pipeline_thread_001},
+            context={"user_id": "pipeline_user_001", "thread_id": "pipeline_thread_001"},
             db_session=self.mock_db_session  # Session passed as parameter
         )
         
@@ -570,11 +570,12 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     @pytest.mark.unit
     @pytest.mark.isolation_critical
     async def test_user_context_isolation_factory_pattern(self):
-    ""
+        """
         Test user context isolation using factory pattern for pipeline execution.
-        
+
         BVJ: Enterprise security - ensures pipeline execution is user-isolated
         Critical Path: User context  ->  Factory pattern  ->  Isolated execution
+        """
         
         # Arrange: Create PipelineExecutor with user context
         pipeline_executor_with_context = PipelineExecutor(
@@ -626,10 +627,11 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     @pytest.mark.unit
     @pytest.mark.context_building
     async def test_execution_context_building_and_validation(self):
-    ""
+        """
         Test execution context building and validation logic.
-        
-        BVJ: System reliability - ensures proper context creation f"or agent execution
+
+        BVJ: System reliability - ensures proper context creation for agent execution
+        """
         
         # Arrange: Create PipelineExecutor
         pipeline_executor = PipelineExecutor(
@@ -641,18 +643,18 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         # Test context building with various inputs
         test_contexts = [
             {
-                run_id": "test_run_001,
-                context: {
-                    user_id: test_user_001",
-                    "thread_id: test_thread_001
-                }"
+                "run_id": "test_run_001",
+                "context": {
+                    "user_id": "test_user_001",
+                    "thread_id": "test_thread_001"
+                }
             },
             {
-                run_id: test_run_002, 
-                "context: {"
-                    user_id: test_user_002,
-                    thread_id: "test_thread_002,
-                    additional_param": extra_value
+                "run_id": "test_run_002",
+                "context": {
+                    "user_id": "test_user_002",
+                    "thread_id": "test_thread_002",
+                    "additional_param": "extra_value"
                 }
             }
         ]
@@ -661,23 +663,25 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
         for test_case in test_contexts:
             # Build execution context using private method (testing internal logic)
             exec_context = pipeline_executor._build_execution_context(
-                test_case[run_id],
-                test_case["context]"
-            
+                test_case["run_id"],
+                test_case["context"]
+            )
+
             # Verify execution context structure
             assert isinstance(exec_context, AgentExecutionContext)
-            assert exec_context.run_id == test_case[run_id]
-            assert exec_context.agent_name == supervisor  # Default agent name"
-            
+            assert exec_context.run_id == test_case["run_id"]
+            assert exec_context.agent_name == "supervisor"  # Default agent name
+
             # Verify context parameters were extracted correctly
             params = pipeline_executor._extract_context_params(
-                test_case[run_id"],
-                test_case[context]
-            
-            assert run_id" in params"
-            assert agent_name in params
-            assert params[run_id] == test_case["run_id]
-            assert params[agent_name"] == supervisor
+                test_case["run_id"],
+                test_case["context"]
+            )
+
+            assert "run_id" in params
+            assert "agent_name" in params
+            assert params["run_id"] == test_case["run_id"]
+            assert params["agent_name"] == "supervisor"
     
     # ============================================================================ 
     # PIPELINE FLOW CONTEXT PREPARATION TESTS
@@ -686,11 +690,11 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     @pytest.mark.unit
     @pytest.mark.flow_context
     async def test_flow_context_preparation_and_tracking(self):
-        
+        """
         Test flow context preparation and tracking for pipeline execution.
-        
+
         BVJ: Observability - enables tracking of pipeline execution flows
-""
+        """
         # Arrange: Create PipelineExecutor
         pipeline_executor = PipelineExecutor(
             engine=self.mock_execution_engine,
@@ -724,11 +728,11 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
     @pytest.mark.unit
     @pytest.mark.error_handling
     async def test_pipeline_error_handling_and_recovery(self):
-    "
+        """
         Test pipeline error handling and recovery mechanisms.
-        
+
         BVJ: System reliability - graceful handling of pipeline step failures
-        "
+        """
         # Arrange: Create PipelineExecutor
         pipeline_executor = PipelineExecutor(
             engine=self.mock_execution_engine,
@@ -749,34 +753,35 @@ class WebSocketAgentEventsComprehensiveTests(SSotAsyncTestCase):
                     'success': False,
                     'error': 'Simulated failure',
                     'timestamp': time.time()
-                }"
-                raise RuntimeError(Simulated agent execution failure)
+                })
+                raise RuntimeError('Simulated agent execution failure')
             
             # Success for other steps
             result = AgentExecutionResult(
                 success=True,
                 agent_name=context.agent_name,
                 duration=0.1,
-                data={"result: fSuccess from {context.agent_name}"}
-            
+                data={"result": f"Success from {context.agent_name}"}
+            )
+
             self.captured_execution_events.append({
                 'agent_name': context.agent_name,
                 'success': True,
                 'execution_time': 0.1,
                 'timestamp': time.time()
-            }
+            })
             
             return result
         
         self.mock_execution_engine.execute_agent = AsyncMock(side_effect=mock_execute_agent_with_failure)
         
         # Act & Assert: Expect pipeline to fail on second step
-        with pytest.raises(RuntimeError, match=Simulated agent execution failure):
+        with pytest.raises(RuntimeError, match="Simulated agent execution failure"):
             await pipeline_executor.execute_pipeline(
                 pipeline=self.test_pipeline_steps,
                 user_context=self.test_user_context,
-                run_id=pipeline_run_001,"
-                context={"user_id: pipeline_user_001, thread_id: pipeline_thread_001},
+                run_id="pipeline_run_001",
+                context={"user_id": "pipeline_user_001", "thread_id": "pipeline_thread_001"},
                 db_session=self.mock_db_session
             )
         
