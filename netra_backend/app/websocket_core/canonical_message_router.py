@@ -134,9 +134,13 @@ class CanonicalMessageRouter:
         # Initialize routing strategies
         self._setup_routing_strategies()
 
+        # Initialize built-in handlers for compatibility with MessageRouter tests
+        self._initialize_builtin_handlers()
+
         logger.info(
             f"CanonicalMessageRouter initialized - Issue #994 SSOT consolidation"
             f" - User context: {bool(self.user_context)}"
+            f" - Built-in handlers: {len(self._event_handlers)}"
         )
 
     def _setup_routing_strategies(self):
