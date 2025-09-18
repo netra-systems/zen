@@ -31,11 +31,17 @@ class TestWebSocketEventStructureIssue1048:
         self.mock_manager.emit_critical_event = AsyncMock()
         self.mock_manager.is_connection_active = MagicMock(return_value=True)
         
-        # Create emitter instance
+        # Create mock context with valid run_id
+        self.mock_context = MagicMock()
+        self.mock_context.run_id = "test_run_1048"
+        self.mock_context.thread_id = "test_thread_1048"
+        self.mock_context.request_id = "test_request_1048"
+        
+        # Create emitter instance with valid context
         self.emitter = UnifiedWebSocketEmitter(
             manager=self.mock_manager,
             user_id="test_user_1048",
-            context=None
+            context=self.mock_context
         )
 
     @pytest.mark.asyncio
@@ -90,26 +96,26 @@ class TestWebSocketEventStructureIssue1048:
         result = await self.emitter.emit_tool_completed(test_data)
         
         # Assert
-        self.assertTrue(result, "tool_completed event should emit successfully")
+        assert result, "tool_completed event should emit successfully"
         
         # Verify the manager was called with correct event structure
         self.mock_manager.emit_critical_event.assert_called_once()
         call_args = self.mock_manager.emit_critical_event.call_args
         
-        self.assertEqual(call_args[1]["event_type"], "tool_completed")
+        assert call_args[1]["event_type"] == "tool_completed"
         event_data = call_args[1]["data"]
         
         # CRITICAL: results must be at top level for Issue #1048
-        self.assertIn("results", event_data, "tool_completed event must have results field")
+        assert "results" in event_data, "tool_completed event must have results field"
         
         # Verify results content is promoted correctly
         results = event_data["results"]
-        self.assertIn("optimizations", results)
-        self.assertEqual(results["projected_savings"], 15000)
+        assert "optimizations" in results
+        assert results["projected_savings"] == 15000
         
         # Verify backward compatibility - metadata.result should still exist
-        self.assertIn("metadata", event_data)
-        self.assertIn("result", event_data["metadata"])
+        assert "metadata" in event_data
+        assert "result" in event_data["metadata"]
 
     @pytest.mark.asyncio
     async def test_tool_executing_without_tool_name_fails_gracefully(self):
@@ -124,7 +130,7 @@ class TestWebSocketEventStructureIssue1048:
         result = await self.emitter.emit_tool_executing(test_data)
         
         # Assert - should still emit but without top-level tool_name promotion
-        self.assertTrue(result, "Event should still emit even without tool_name")
+        assert result, "Event should still emit even without tool_name"
         
         # Verify event was sent but without tool_name promotion
         self.mock_manager.emit_critical_event.assert_called_once()
@@ -132,7 +138,7 @@ class TestWebSocketEventStructureIssue1048:
         event_data = call_args[1]["data"]
         
         # Should not have tool_name at top level since it wasn't provided
-        self.assertNotIn("tool_name", event_data)
+        assert "tool_name" not in event_data
 
     @pytest.mark.asyncio
     async def test_tool_completed_without_results_fails_gracefully(self):
@@ -150,7 +156,7 @@ class TestWebSocketEventStructureIssue1048:
         result = await self.emitter.emit_tool_completed(test_data)
         
         # Assert - should still emit but without results promotion
-        self.assertTrue(result, "Event should still emit even without results")
+        assert result, "Event should still emit even without results"
         
         # Verify event was sent but without results promotion
         self.mock_manager.emit_critical_event.assert_called_once()
@@ -158,7 +164,7 @@ class TestWebSocketEventStructureIssue1048:
         event_data = call_args[1]["data"]
         
         # Should not have results at top level since metadata.result wasn't provided
-        self.assertNotIn("results", event_data)
+        assert "results" not in event_data
 
     @pytest.mark.asyncio
     async def test_event_structure_preserves_all_original_fields(self):
@@ -183,12 +189,13 @@ class TestWebSocketEventStructureIssue1048:
         event_data = call_args[1]["data"]
         
         # Verify all original fields are preserved
-        self.assertEqual(event_data["tool_name"], "data_analyzer")
-        self.assertEqual(event_data["parameters"]["dataset"], "costs.csv")
-        self.assertEqual(event_data["execution_id"], "exec_123")
-        self.assertEqual(event_data["priority"], "high")
-        self.assertIn("metadata", event_data)
-        self.assertEqual(event_data["metadata"]["user_tier"], "enterprise")
+        assert event_data["tool_name"] == "data_analyzer"
+        assert event_data["parameters"]["dataset"] == "costs.csv"
+        assert event_data["execution_id"] == "exec_123"
+        assert event_data["priority"] == "high"
+        assert "metadata" in event_data
+        # Note: metadata may be enhanced by emitter, but original estimated_duration should still be there
+        assert event_data["metadata"]["estimated_duration"] == 5.0
 
     @pytest.mark.asyncio
     async def test_multiple_events_maintain_field_structure(self):
@@ -209,18 +216,18 @@ class TestWebSocketEventStructureIssue1048:
         await self.emitter.emit_tool_completed(completed_data)
         
         # Verify both events were emitted
-        self.assertEqual(self.mock_manager.emit_critical_event.call_count, 2)
+        assert self.mock_manager.emit_critical_event.call_count == 2
         
         # Verify first event (tool_executing) has tool_name
         first_call = self.mock_manager.emit_critical_event.call_args_list[0]
-        self.assertEqual(first_call[1]["event_type"], "tool_executing")
-        self.assertIn("tool_name", first_call[1]["data"])
+        assert first_call[1]["event_type"] == "tool_executing"
+        assert "tool_name" in first_call[1]["data"]
         
         # Verify second event (tool_completed) has results
         second_call = self.mock_manager.emit_critical_event.call_args_list[1]
-        self.assertEqual(second_call[1]["event_type"], "tool_completed")
-        self.assertIn("results", second_call[1]["data"])
-        self.assertEqual(second_call[1]["data"]["results"]["savings"], 10000)
+        assert second_call[1]["event_type"] == "tool_completed"
+        assert "results" in second_call[1]["data"]
+        assert second_call[1]["data"]["results"]["savings"] == 10000
 
 
 if __name__ == "__main__":

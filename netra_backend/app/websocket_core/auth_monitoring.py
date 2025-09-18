@@ -44,6 +44,20 @@ from netra_backend.app.websocket_core.websocket_metrics import (
 
 logger = get_logger(__name__)
 
+# Issue #1300: Import structured logging for auth events
+try:
+    from netra_backend.app.websocket_core.auth_structured_logger import (
+        get_auth_structured_logger,
+        log_auth_event,
+        log_security_event,
+        log_performance_event
+    )
+    _structured_logging_available = True
+    logger.info("Issue #1300: Structured authentication logging imported successfully")
+except ImportError as e:
+    logger.warning(f"Issue #1300: Structured authentication logging not available: {e}")
+    _structured_logging_available = False
+
 
 class AuthEventType(Enum):
     """Types of authentication events to track."""
@@ -603,6 +617,27 @@ class WebSocketAuthMonitor:
     async def _log_auth_event(self, event: AuthEvent) -> None:
         """Log authentication event with structured logging."""
         try:
+            # Issue #1300: Use structured logging if available
+            if _structured_logging_available:
+                try:
+                    log_auth_event(
+                        event_type=event.event_type,
+                        success=event.success,
+                        user_id=event.user_id,
+                        connection_id=event.connection_id,
+                        latency_ms=event.latency_ms,
+                        error_code=event.error_code,
+                        error_details=event.error_message,
+                        session_id=event.session_id,
+                        metadata=event.metadata,
+                        component="WebSocketAuthMonitor",
+                        issue="#1300"
+                    )
+                    return
+                except Exception as e:
+                    logger.warning(f"Issue #1300: Failed to use structured logging, falling back: {e}")
+            
+            # Fallback to traditional logging
             log_data = {
                 "event_type": "websocket_auth_event",
                 "auth_event": event.to_dict(),
@@ -648,6 +683,23 @@ class WebSocketAuthMonitor:
             # High latency alert
             if event.latency_ms > self._alert_thresholds["high_latency_ms"]:
                 logger.warning(f"HIGH LATENCY ALERT: {event.event_type.value} took {event.latency_ms:.1f}ms for user {event.user_id}")
+                
+                # Issue #1300: Log performance event for high latency
+                if _structured_logging_available:
+                    try:
+                        log_performance_event(
+                            operation=f"auth_{event.event_type.value}",
+                            duration_ms=event.latency_ms,
+                            user_id=event.user_id,
+                            connection_id=event.connection_id,
+                            performance_details={
+                                "threshold_ms": self._alert_thresholds["high_latency_ms"],
+                                "exceeded_by_ms": event.latency_ms - self._alert_thresholds["high_latency_ms"],
+                                "event_type": event.event_type.value
+                            }
+                        )
+                    except Exception as e:
+                        logger.warning(f"Issue #1300: Failed to log performance event: {e}")
             
             # Authentication failure pattern alerts
             if not event.success and event.event_type in [AuthEventType.LOGIN, AuthEventType.TOKEN_VALIDATION]:
@@ -655,7 +707,26 @@ class WebSocketAuthMonitor:
                 if event.user_id and event.user_id in self._user_metrics:
                     user_metrics = self._user_metrics[event.user_id]
                     if user_metrics.auth_attempts > 3 and user_metrics.auth_success_rate < 50.0:
-                        logger.critical(f"AUTH FAILURE PATTERN ALERT: User {event.user_id} has {user_metrics.auth_success_rate:.1f}% success rate over {user_metrics.auth_attempts} attempts")
+                        alert_msg = f"User {event.user_id} has {user_metrics.auth_success_rate:.1f}% success rate over {user_metrics.auth_attempts} attempts"
+                        logger.critical(f"AUTH FAILURE PATTERN ALERT: {alert_msg}")
+                        
+                        # Issue #1300: Log security event for failure patterns
+                        if _structured_logging_available:
+                            try:
+                                log_security_event(
+                                    event_description=f"Authentication failure pattern detected: {alert_msg}",
+                                    severity="critical",
+                                    user_id=event.user_id,
+                                    connection_id=event.connection_id,
+                                    security_details={
+                                        "pattern_type": "repeated_failures",
+                                        "failure_count": user_metrics.auth_failures,
+                                        "attempt_count": user_metrics.auth_attempts,
+                                        "success_rate": user_metrics.auth_success_rate
+                                    }
+                                )
+                            except Exception as e:
+                                logger.warning(f"Issue #1300: Failed to log security event: {e}")
             
             # Session timeout alerts
             if event.event_type == AuthEventType.SESSION_TIMEOUT:
