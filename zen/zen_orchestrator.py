@@ -2087,8 +2087,11 @@ async def main():
             for budget_str in args.command_budget:
                 try:
                     command_name, limit = budget_str.split('=', 1)
-                    # Keep command name as is - don't let it be expanded as path
+                    # Normalize command name by ensuring it starts with '/'
                     command_name = command_name.strip()
+                    if not command_name.startswith('/'):
+                        command_name = '/' + command_name
+
                     orchestrator.budget_manager.set_command_budget(command_name, int(limit))
                     logger.info(f"🎯 CLI BUDGET SET: {command_name} = {limit} tokens (overrides config)")
 

@@ -5,9 +5,9 @@ from typing import Dict, Optional
 class CommandBudgetInfo:
     """Tracks the budget status for a single command."""
 
-    def __init__(self, limit: int):
+    def __init__(self, limit: int, used: int = 0):
         self.limit = limit
-        self.used = 0
+        self.used = used
 
     @property
     def remaining(self) -> int:
