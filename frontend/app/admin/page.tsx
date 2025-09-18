@@ -181,15 +181,25 @@ const AdminDashboard = ({ setActiveTab }: { setActiveTab: (tab: string) => void 
   );
 };
 
-const createAdminSectionCard = (section: AdminSection, index: number) => {
+const createAdminSectionCard = (section: AdminSection, index: number, setActiveTab?: (tab: string) => void) => {
   const Icon = section.icon;
+
+  const handleClick = () => {
+    if (section.isTab && section.href && setActiveTab) {
+      setActiveTab(section.href);
+    }
+  };
+
   return (
     <motion.div
       key={section.title}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
-      className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow cursor-pointer"
+      onClick={handleClick}
+      className={`bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow cursor-pointer ${
+        section.isTab ? 'hover:border-blue-300' : ''
+      }`}
     >
       <div className="flex items-start space-x-4">
         <div className={`w-12 h-12 ${section.color} rounded-lg flex items-center justify-center`}>
@@ -198,6 +208,13 @@ const createAdminSectionCard = (section: AdminSection, index: number) => {
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">{section.title}</h3>
           <p className="text-sm text-gray-600">{section.description}</p>
+          {section.isTab && (
+            <div className="mt-2">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                Click to open
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

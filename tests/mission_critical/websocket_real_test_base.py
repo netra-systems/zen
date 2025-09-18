@@ -231,7 +231,7 @@ def is_docker_available() -> bool:
         - Enables proper test environment detection for ARR validation
         - Supports Golden Path first message experience testing
         - Maintains SSOT compliance through UnifiedDockerManager delegation
-    """"
+    """
 
     try:
         manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
@@ -243,23 +243,17 @@ def is_docker_available() -> bool:
 
 
 def validate_staging_environment_health(websocket_url: str) -> bool:
-    Validate staging environment is healthy and responsive."
-    Validate staging environment is healthy and responsive."
-    Validate staging environment is healthy and responsive."
-    Validate staging environment is healthy and responsive.""
+    """
+    Validate staging environment is healthy and responsive.
 
-    
     Issue #773: Enhanced with fast timeout to prevent hangs.
-    
+
     Args:
         websocket_url: WebSocket URL to check for connectivity
-        
+
     Returns:
         True if staging environment is healthy, False otherwise
-    "
-    "
-    "
-    ""
+    """
 
     try:
         import asyncio
