@@ -218,24 +218,23 @@ class ActionsAgentWebSocketComplianceTests:
         missing_events = self.REQUIRED_EVENTS - event_types_sent
         
         # This test documents the current broken state
-        assert len(missing_events) > 0, fExpected missing events but found all events sent: {event_types_sent}"
-        assert len(missing_events) > 0, fExpected missing events but found all events sent: {event_types_sent}"
+        assert len(missing_events) > 0, f"Expected missing events but found all events sent: {event_types_sent}"
         
         # Document the specific violations
         expected_missing = {
-            "agent_started,  # Never sent - users don't know processing started"
-            tool_executing, # Never sent - no tool transparency
-            "tool_completed, # Never sent - no tool results visibility"
+            "agent_started",  # Never sent - users don't know processing started
+            "tool_executing",  # Never sent - no tool transparency
+            "tool_completed",  # Never sent - no tool results visibility
         }
         
         actual_missing = missing_events
         assert expected_missing.issubset(actual_missing), \
-            fExpected these critical events to be missing: {expected_missing}, but missing: {actual_missing}
+            f"Expected these critical events to be missing: {expected_missing}, but missing: {actual_missing}"
     
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_actions_agent_business_impact_of_missing_events(self):
-        CRITICAL BUSINESS IMPACT: Test the user experience impact of missing WebSocket events.""
+        """CRITICAL BUSINESS IMPACT: Test the user experience impact of missing WebSocket events."""
         agent = ActionsToMeetGoalsSubAgent(self.mock_llm_manager, self.mock_tool_dispatcher)
         
         # Simulate what a user would see
@@ -254,45 +253,31 @@ class ActionsAgentWebSocketComplianceTests:
                     'provides_transparency': len(message) > 0,
                     'shows_progress': 'processing' in status or 'thinking' in message.lower(),
                     'shows_completion': 'completed' in status or 'done' in message.lower()
-                }
+                })
         
         # Mock the WebSocket calls
         with patch.object(agent, '_send_update', side_effect=capture_user_event):
             
             # Create realistic state
             state = DeepAgentState(
-                user_request=Analyze our system performance and create an optimization plan,
+                user_request="Analyze our system performance and create an optimization plan",
                 optimizations_result=OptimizationsResult(
-                    optimization_type=system_performance,"
-                    optimization_type=system_performance,"
+                    optimization_type="system_performance",
                     recommendations=[
-                        "Optimize database queries,"
-                        Implement caching strategy, 
+                        "Optimize database queries",
+                        "Implement caching strategy", 
                         "Scale horizontally"
                     ],
                     confidence_score=0.85
                 ),
                 data_result=DataAnalysisResponse(
-                    analysis_id=system-performance-analysis-1,
-                    status=completed,"
-                    status=completed,"
+                    analysis_id="system-performance-analysis-1",
+                    status="completed",
                     results={
-                        analysis_results": ["
-                            Database query time: 2.3s avg,
-                            Memory usage: 85%","
-                            CPU utilization: 70%
-                        ],
-                        insights: {"
-                        insights: {"
-                            "bottlenecks: [database, memory],"
-                            optimization_potential": "high
-                        },
-                        metadata: {analysis_date: 2025-9-2},"
-                        metadata: {analysis_date: 2025-9-2},"
-                        "recommendations: ["
-                            Add database indexes,
-                            "Implement Redis caching,"
-                            Monitor memory usage
+                        "analysis_results": [
+                            "Database query time: 2.3s avg",
+                            "Memory usage: 85%",
+                            "CPU utilization: 70%"
                         ]
                     },
                     metrics=PerformanceMetrics(duration_ms=1500.0),
@@ -301,14 +286,13 @@ class ActionsAgentWebSocketComplianceTests:
             )
             
             # Execute and capture user experience
-            await agent.execute(state, business-impact-test, stream_updates=True)"
-            await agent.execute(state, business-impact-test, stream_updates=True)"
+            await agent.execute(state, "business-impact-test", stream_updates=True)
         
         # Analyze user experience
         total_events = len(user_visible_events)
-        events_with_transparency = sum(1 for e in user_visible_events if e['provides_transparency')
-        events_showing_progress = sum(1 for e in user_visible_events if e['shows_progress')
-        events_showing_completion = sum(1 for e in user_visible_events if e['shows_completion')
+        events_with_transparency = sum(1 for e in user_visible_events if e['provides_transparency'])
+        events_showing_progress = sum(1 for e in user_visible_events if e['shows_progress'])
+        events_showing_completion = sum(1 for e in user_visible_events if e['shows_completion'])
         
         # BUSINESS IMPACT ANALYSIS
         transparency_score = (events_with_transparency / max(total_events, 1)) * 100
@@ -317,22 +301,21 @@ class ActionsAgentWebSocketComplianceTests:
         
         # Document the poor user experience
         assert transparency_score < 50, \
-            fUser transparency too low: {transparency_score}% (users get black-box AI experience)"
-            fUser transparency too low: {transparency_score}% (users get black-box AI experience)"
+            f"User transparency too low: {transparency_score}% (users get black-box AI experience)"
         
         # Users never see:
         # - That the agent started working (no agent_started event)
         # - What tools are being used (no tool_executing events)
         # - What results tools produced (no tool_completed events)
-        # - The agent's reasoning process (minimal thinking events)'
+        # - The agent's reasoning process (minimal thinking events)
         
         user_experience_issues = []
         if transparency_score < 80:
-            user_experience_issues.append(Low transparency - users don't see AI reasoning)'
+            user_experience_issues.append("Low transparency - users don't see AI reasoning")
         if progress_visibility_score < 60:
-            user_experience_issues.append(Poor progress visibility - users unsure if system is working")"
+            user_experience_issues.append("Poor progress visibility - users unsure if system is working")
         if completion_clarity_score < 80:
-            user_experience_issues.append(Unclear completion - users unsure when processing finished)
+            user_experience_issues.append("Unclear completion - users unsure when processing finished")
         
         # This documents the current business impact
         assert len(user_experience_issues) > 0, \
