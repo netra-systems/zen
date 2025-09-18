@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-"""
+
 Mission Critical: JWT Secret Hard Requirements Test
 
 Verifies that both auth and backend services FAIL HARD when environment-specific
@@ -11,10 +11,11 @@ before deployment.
 """
 """
 
+
 """
 """
 """
-"""
+
 import os
 import sys
 import pytest
@@ -87,7 +88,7 @@ class JWTSecretHardRequirementsTests:
             if secret:
                 # This test expects hard failure, but the implementation might have fallbacks
                 # For now, let's verify it's at least a secure length
-                assert len(secret) >= 32, fJWT secret too short for staging: {len(secret)} chars
+                assert len(secret) >= 32, "fJWT secret too short for staging: {len(secret)} chars"
         except (ValueError, KeyError):
             # This is what we expect - hard failure
             pass
@@ -119,7 +120,8 @@ class JWTSecretHardRequirementsTests:
             # If we get here, check if it's at least a secure length'
             if secret:
                 assert len(secret) >= 32, fJWT secret too short for production: {len(secret)} chars"
-                assert len(secret) >= 32, fJWT secret too short for production: {len(secret)} chars"
+                assert len(secret) >= 32, fJWT secret too short for production: {len(secret)} chars""
+
         except (ValueError, KeyError):
             # This is what we expect - hard failure
             pass

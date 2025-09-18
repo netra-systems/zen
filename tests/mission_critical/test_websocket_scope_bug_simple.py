@@ -2,20 +2,20 @@
 "MISSION CRITICAL TEST: WebSocket Scope Bug Simple Reproduction - Issue #165"
 
 THIS TEST PROVIDES A SIMPLE REPRODUCTION OF THE WEBSOCKET SCOPE BUG.
-Business Impact: $500K+ ARR - Complete WebSocket connection failure
+Business Impact: $500K+ plus ARR - Complete WebSocket connection failure
 
 Simplified Scope Bug Reproduction:
-- Focuses directly on the NameError at lines 1433 and 1452
+    - Focuses directly on the NameError at lines 1433 and 1452
 - Tests the exact variable scope violation without complex mocking
 - Reproduces the core issue: state_registry undefined in nested scope
 
 Expected Behavior: FAIL with exact NameError: name 'state_registry' is not defined
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise)
+    - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Document and reproduce critical scope violation
 - Value Impact: Prove exact technical cause of 100% WebSocket connection failures  
-- Strategic Impact: Enable targeted fix for $500K+ ARR blocking bug
+- Strategic Impact: Enable targeted fix for $500K+ plus ARR blocking bug
 
 
 import asyncio
@@ -30,7 +30,8 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 class WebSocketScopeBugSimpleTests:
-    ""
+    """
+
     Simple reproduction of WebSocket scope bug for Issue #165.
     
     This test directly demonstrates the variable scope violation that causes
@@ -40,7 +41,8 @@ class WebSocketScopeBugSimpleTests:
     @pytest.mark.mission_critical
     @pytest.mark.unit
     def test_scope_bug_code_analysis(self):
-    ""
+    """
+
         REPRODUCER: Direct code analysis of scope bug locations.
         
         This test analyzes the actual WebSocket route source code to
@@ -93,7 +95,8 @@ class WebSocketScopeBugSimpleTests:
                 logger.error(f ALERT:  FOUND scope violation at line {i}")"
                 logger.error(f   Content: {stripped_line})
                 logger.error(f   Indentation: {access_info['indentation']} spaces)"
-                logger.error(f   Indentation: {access_info['indentation']} spaces)"
+                logger.error(f   Indentation: {access_info['indentation']} spaces)""
+
                 
         # Analyze the scope issue
         logger.error(" CHART:  SCOPE BUG ANALYSIS:)"
@@ -106,7 +109,8 @@ class WebSocketScopeBugSimpleTests:
             logger.error(f FAIL:  DEFINITION: Not found in expected location)
             
         logger.error(f ALERT:  VIOLATIONS FOUND: {len(problem_lines)})"
-        logger.error(f ALERT:  VIOLATIONS FOUND: {len(problem_lines)})"
+        logger.error(f ALERT:  VIOLATIONS FOUND: {len(problem_lines)})""
+
         for violation in problem_lines:
             logger.error(f"   Line {violation['line_number']}: {violation['content']})"
             logger.error(f   Scope: {violation['scope_level']} ({violation['indentation']} spaces))
@@ -157,14 +161,15 @@ class WebSocketScopeBugSimpleTests:
             fCRITICAL SCOPE BUG CONFIRMED: Found {len(confirmed_violations)} confirmed violations ""
             fat lines {[v['line'] for v in confirmed_violations]} and {len(problem_lines)} total 
             fscope violations. This variable scope isolation bug causes 100% WebSocket connection 
-            f"failures, blocking $500K+ ARR and affecting all user tiers."
+            f"failures, blocking $500K+ plus ARR and affecting all user tiers."
         )
         
     @pytest.mark.mission_critical
     @pytest.mark.unit
     def test_scope_bug_demonstration_with_code_simulation(self):
-        "
-        "
+        """
+        ""
+
         REPRODUCER: Demonstrate scope bug with code simulation.
         
         This test simulates the exact scope issue that occurs in the WebSocket
@@ -182,8 +187,8 @@ class WebSocketScopeBugSimpleTests:
             def initialize_state_registry():
                 # This simulates line 319 in websocket.py
                 state_registry = mock_state_registry_instance
-                logger.info( PASS:  state_registry initialized in function scope)"
-                logger.info( PASS:  state_registry initialized in function scope)"
+                logger.info("PASS:  state_registry initialized in function scope))"
+                logger.info("PASS:  state_registry initialized in function scope))"
                 return state_registry
                 
             # Initialize state_registry in function scope (like line 319)
@@ -193,7 +198,8 @@ class WebSocketScopeBugSimpleTests:
             # Simulate nested exception handling (like lines 1433, 1452)
             def nested_exception_handler():
                 This simulates the nested scope where NameError occurs."
-                This simulates the nested scope where NameError occurs."
+                This simulates the nested scope where NameError occurs.""
+
                 try:
                     # Simulate some operation that fails
                     raise Exception("Simulated failure triggering emergency recovery)"
@@ -204,10 +210,11 @@ class WebSocketScopeBugSimpleTests:
                     # This simulates line 1433: state_registry.register_connection(...)
                     # This should cause NameError because state_registry is not in this scope
                     try:
-                        result = state_registry.register_connection("test_id, test_user")
+                        result = state_registry.register_connection("test_id, test_user)"
                         logger.error( FAIL:  UNEXPECTED: state_registry was accessible (scope bug not reproduced))
                         return fSUCCESS: {result}"
-                        return fSUCCESS: {result}"
+                        return fSUCCESS: {result}""
+
                     except NameError as name_error:
                         logger.error(f" ALERT:  SCOPE BUG REPRODUCED: {name_error})"
                         raise name_error
@@ -225,7 +232,8 @@ class WebSocketScopeBugSimpleTests:
                 Scope bug simulation failed - expected NameError for state_registry "
                 Scope bug simulation failed - expected NameError for state_registry "
                 but variable was accessible in nested scope. This suggests the "
-                but variable was accessible in nested scope. This suggests the "
+                but variable was accessible in nested scope. This suggests the ""
+
                 simulation doesn't match the actual WebSocket code structure.'
             )
             
@@ -241,12 +249,14 @@ class WebSocketScopeBugSimpleTests:
                 pytest.fail(
                     f"SCOPE BUG SUCCESSFULLY REPRODUCED: {e}. This demonstrates the exact"
                     fvariable scope isolation issue causing 100% WebSocket connection failures "
-                    fvariable scope isolation issue causing 100% WebSocket connection failures "
+                    fvariable scope isolation issue causing 100% WebSocket connection failures ""
+
                     fin the real websocket.py code at lines 1433 and 1452.
                 )
             else:
                 pytest.fail(fUnexpected NameError (not state_registry): {e})"
-                pytest.fail(fUnexpected NameError (not state_registry): {e})"
+                pytest.fail(fUnexpected NameError (not state_registry): {e})""
+
                 
         except Exception as e:
             pytest.fail(f"Unexpected error in scope simulation: {e})"
@@ -258,7 +268,7 @@ class WebSocketScopeBugSimpleTests:
         REPRODUCER: Document complete business impact of scope bug.
         
         This test quantifies and documents the business impact of the scope bug
-        to justify the urgency of the fix and validate the $500K+ ARR claim.
+        to justify the urgency of the fix and validate the $500K+ plus ARR claim.
         
         Expected Behavior: FAIL - Document severe business impact
 ""
@@ -273,7 +283,7 @@ class WebSocketScopeBugSimpleTests:
                 "affected_user_tiers: [Free", Early, Mid, Enterprise],"
                 connection_failure_rate": 100%,"
                 feature_accessibility: {
-                    "chat_functionality: COMPLETELY_BLOCKED",
+                    "chat_functionality: COMPLETELY_BLOCKED,"
                     agent_execution: COMPLETELY_BLOCKED,
                     real_time_updates: COMPLETELY_BLOCKED","
                     "websocket_events: COMPLETELY_BLOCKED"
@@ -281,7 +291,7 @@ class WebSocketScopeBugSimpleTests:
                 user_experience: COMPLETE_SERVICE_FAILURE
             },
             "revenue_impact: {"
-                immediate_arr_at_risk: 500000,  # $500K+
+                immediate_arr_at_risk: 500000,  # $500K+ plus
                 affected_revenue_streams: ["
                 affected_revenue_streams: ["
                     Subscription revenue (blocked user access)","
@@ -293,13 +303,13 @@ class WebSocketScopeBugSimpleTests:
                 churn_probability_increase": 75%"
             },
             operational_impact: {
-                "support_ticket_volume_increase: 500%",
+                "support_ticket_volume_increase: 500%,"
                 engineering_productivity_loss: 100%,
                 customer_satisfaction_score_impact: -80%","
                 "deployment_confidence: ZERO"
             },
             competitive_impact: {
-                market_position_risk": "HIGH,
+                market_position_risk": HIGH,"
                 customer_trust_damage: SEVERE,
                 reputation_impact: "NEGATIVE"
             }
@@ -309,7 +319,7 @@ class WebSocketScopeBugSimpleTests:
         technical_debt = {
             fix_complexity": LOW,"
             fix_risk: MINIMAL, 
-            estimated_fix_time": "15 minutes,
+            estimated_fix_time": 15 minutes,"
             testing_effort: 2 hours,
             deployment_risk: "LOW,"
             root_cause": Variable scope isolation - 4 lines of code issue"
@@ -333,7 +343,8 @@ class WebSocketScopeBugSimpleTests:
             logger.error(f   [U+2022] {feature}: {status})
             
         logger.error([U+1F4B0] REVENUE IMPACT:)"
-        logger.error([U+1F4B0] REVENUE IMPACT:)"
+        logger.error([U+1F4B0] REVENUE IMPACT:)""
+
         revenue = impact_assessment['revenue_impact']
         logger.error(f"   [U+2022] Immediate ARR at risk: ${revenue['immediate_arr_at_risk']:,})"
         logger.error(f   [U+2022] Churn probability increase: {revenue['churn_probability_increase']})
@@ -360,15 +371,16 @@ class WebSocketScopeBugSimpleTests:
         severity_multipliers = {
             connection_failure_rate: 1.0,  # 100% failure = max impact
             affected_tiers": len(user_impact['affected_user_tiers') / 4,  # All 4 tiers affected"
-            revenue_impact: 1.0,  # $500K+ = max impact
+            revenue_impact: 1.0,  # $500K+ plus = max impact
             fix_difficulty: 0.1   # Easy fix but critical impact"
-            fix_difficulty: 0.1   # Easy fix but critical impact"
+            fix_difficulty: 0.1   # Easy fix but critical impact""
+
         }
         
         overall_severity = sum(severity_multipliers.values()) / len(severity_multipliers)
         
         logger.error(" TARGET:  OVERALL ASSESSMENT:)"
-        logger.error(f   [U+2022] Severity score: {overall_severity:.2f}/1.0 (MAXIMUM))
+        logger.error(f   [U+2022] Severity score: {overall_severity:.""2f""}/1.0 (MAXIMUM))
         logger.error(f"   [U+2022] Business priority: P0 - CRITICAL)"
         logger.error(f   [U+2022] Fix urgency: IMMEDIATE")"
         logger.error(f   [U+2022] Deployment blocker: YES)
@@ -380,21 +392,22 @@ class WebSocketScopeBugSimpleTests:
             f"failure affecting ALL user tiers ({', '.join(user_impact['affected_user_tiers'])."
             f${revenue['immediate_arr_at_risk']:,} ARR at immediate risk. 
             fAll core features ({', '.join(user_impact['feature_accessibility'].keys())} 
-            fcompletely blocked. Overall severity: {overall_severity:.2f}/1.0. ""
+            fcompletely blocked. Overall severity: {overall_severity:.""2f""}/1.0. ""
             fThis is a P0 deployment blocker requiring immediate fix.
         )
 
 
 if __name__ == __main__:
-    ""
+    """
+
     Direct execution for scope bug analysis and reproduction.
     Run: python tests/mission_critical/test_websocket_scope_bug_simple.py
     
     logger.info( ALERT:  DIRECT EXECUTION: Simple WebSocket Scope Bug Reproduction")"
     logger.info( SEARCH:  PURPOSE: Analyze and reproduce exact scope violation)
-    logger.info([U+1F4B0] BUSINESS IMPACT: Document $500K+ ARR blocking scope bug)"
-    logger.info([U+1F4B0] BUSINESS IMPACT: Document $500K+ ARR blocking scope bug)"
-    logger.info(" TARGET:  FOCUS: Direct code analysis and scope demonstration")
+    logger.info([U+1F4B0] BUSINESS IMPACT: Document $500K plus ARR blocking scope bug)"
+    logger.info([U+1F4B0] BUSINESS IMPACT: Document $500K plus ARR blocking scope bug)"
+    logger.info(" TARGET:  FOCUS: Direct code analysis and scope demonstration)"
     
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

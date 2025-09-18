@@ -326,7 +326,7 @@ class WebSocketManagerInterfaceConsolidationTests(SSotBaseTestCase):
                         'missing_methods': missing_methods
                     })
 
-                    logger.warning(f"⚠️ INCOMPLETE INTERFACE: {manager_name}")
+                    logger.warning(f"WARNING️ INCOMPLETE INTERFACE: {manager_name}")
                     logger.warning(f"  Missing methods: {missing_methods}")
 
         # Log interface completeness statistics
@@ -347,9 +347,9 @@ class WebSocketManagerInterfaceConsolidationTests(SSotBaseTestCase):
         # This test provides information but doesn't fail
         # It helps guide the remediation process
         if incomplete_interfaces:
-            logger.warning(f"⚠️ {len(incomplete_interfaces)} managers have incomplete interfaces")
+            logger.warning(f"WARNING️ {len(incomplete_interfaces)} managers have incomplete interfaces")
         else:
-            logger.info("✅ All WebSocket managers have complete interfaces")
+            logger.info("CHECK All WebSocket managers have complete interfaces")
 
     def _load_manager_classes(self):
         """Load WebSocket manager classes for analysis."""
@@ -360,12 +360,12 @@ class WebSocketManagerInterfaceConsolidationTests(SSotBaseTestCase):
                     manager_class = getattr(module, class_name)
                     manager_key = f"{module_path}.{class_name}"
                     self.manager_classes[manager_key] = manager_class
-                    logger.info(f"✓ Loaded manager class: {manager_key}")
+                    logger.info(f"CHECK Loaded manager class: {manager_key}")
                 else:
-                    logger.warning(f"⚠️ Class {class_name} not found in {module_path}")
+                    logger.warning(f"WARNING️ Class {class_name} not found in {module_path}")
                     self.manager_classes[f"{module_path}.{class_name}"] = None
             except ImportError as e:
-                logger.warning(f"⚠️ Could not import {module_path}: {e}")
+                logger.warning(f"WARNING️ Could not import {module_path}: {e}")
                 self.manager_classes[f"{module_path}.{class_name}"] = None
 
     def teardown_method(self, method):
@@ -387,7 +387,7 @@ class WebSocketManagerInterfaceConsolidationTests(SSotBaseTestCase):
                 logger.error(f"🚨 TOTAL INTERFACE VIOLATIONS: {total_violations}")
                 logger.error("💡 Consolidation required to standardize WebSocket manager interfaces")
             else:
-                logger.info("✅ No interface violations detected - interfaces are consistent")
+                logger.info("CHECK No interface violations detected - interfaces are consistent")
 
         super().teardown_method(method)
 

@@ -1,14 +1,14 @@
 """
-"""
+
 SSOT File Reference Migration Tests for Issue #1076
 
 """
-"""
+
 Test Plan: Detect files that still reference deprecated import paths or modules.
 Should FAIL initially (detecting remaining references) and PASS after migration.
 
 Key violations to detect:
-1. Files still importing from deprecated logging_config
+    1. Files still importing from deprecated logging_config
 2. Files using legacy auth patterns instead of SSOT auth service
 3. Files referencing non-SSOT configuration modules
 4. Import path consistency across the codebase
@@ -16,7 +16,8 @@ Key violations to detect:
 Related Issues: #1076 - SSOT compliance verification
 Priority: CRITICAL - These tests ensure complete migration to SSOT patterns
 "
-"
+""
+
 
 import pytest
 from pathlib import Path
@@ -40,14 +41,16 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
         return Path(__file__).parent.parent.parent
 
     def test_logging_config_migration_completion(self):
-        "
-        "
+        """
+        ""
+
         CRITICAL: Ensure all files have migrated from deprecated logging_config.
 
         EXPECTED: Should FAIL initially - detects remaining logging_config references
         REMEDIATION: Replace with 'from shared.logging.unified_logging_ssot import get_logger'
 "
-"
+""
+
         remaining_references = []
 
         # Search patterns for deprecated logging imports
@@ -111,19 +114,22 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
                 f1. Replace 'from netra_backend.app.logging_config import central_logger' with:\n
                 f"   'from shared.logging.unified_logging_ssot import get_logger'\n"
                 f2. Update logger usage: logger = get_logger(__name__)\n"
-                f2. Update logger usage: logger = get_logger(__name__)\n"
+                f2. Update logger usage: logger = get_logger(__name__)\n""
+
                 f3. Update all central_logger references to use the new logger
             )
 
     def test_auth_service_import_consistency(self):
-        "
-        "
+        """
+        ""
+
         CRITICAL: Ensure consistent auth service import patterns across codebase.
 
         EXPECTED: Should FAIL initially - detects inconsistent auth imports
         REMEDIATION: Standardize on SSOT auth service patterns
 "
-"
+""
+
         auth_import_violations = []
         auth_import_patterns = {}
 
@@ -145,10 +151,11 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
 
         # Search in key directories
         search_paths = [
-            self.project_root / netra_backend" / "app,
+            self.project_root / netra_backend" / app,"
             self.project_root / auth_service,
             self.project_root / shared"
-            self.project_root / shared"
+            self.project_root / shared""
+
         ]
 
         for search_path in search_paths:
@@ -201,19 +208,22 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
                 fREMEDIATION REQUIRED:\n
                 f"1. Replace deprecated auth imports with SSOT auth service imports\n"
                 f2. Use direct auth_service imports instead of backend wrappers\n"
-                f2. Use direct auth_service imports instead of backend wrappers\n"
+                f2. Use direct auth_service imports instead of backend wrappers\n""
+
                 f3. Ensure auth_service is the single source of truth for auth operations
             )
 
     def test_configuration_import_migration(self):
-        "
-        "
+        """
+        ""
+
         CRITICAL: Ensure all files use SSOT configuration patterns.
 
         EXPECTED: Should FAIL initially - detects non-SSOT config imports
         REMEDIATION: Migrate to unified configuration architecture
 "
-"
+""
+
         config_violations = []
 
         # Deprecated configuration patterns
@@ -234,10 +244,11 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
         ]
 
         search_paths = [
-            self.project_root / netra_backend" / "app,
+            self.project_root / netra_backend" / app,"
             self.project_root / auth_service,
             self.project_root / shared"
-            self.project_root / shared"
+            self.project_root / shared""
+
         ]
 
         for search_path in search_paths:
@@ -287,19 +298,22 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
                 fREMEDIATION REQUIRED:\n
                 f"1. Replace direct os.environ access with IsolatedEnvironment\n"
                 f2. Use SSOT configuration modules from netra_backend.app.core.configuration\n"
-                f2. Use SSOT configuration modules from netra_backend.app.core.configuration\n"
+                f2. Use SSOT configuration modules from netra_backend.app.core.configuration\n""
+
                 f3. Ensure environment access follows SSOT patterns
             )
 
     def test_websocket_import_consistency(self):
-        "
-        "
+        """
+        ""
+
         CRITICAL: Ensure WebSocket imports use SSOT patterns consistently.
 
         EXPECTED: Should FAIL initially - detects inconsistent WebSocket imports
         REMEDIATION: Standardize WebSocket imports to SSOT patterns
 "
-"
+""
+
         websocket_violations = []
 
         # Deprecated WebSocket import patterns
@@ -319,7 +333,7 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
         ]
 
         search_paths = [
-            self.project_root / netra_backend" / "app,
+            self.project_root / netra_backend" / app,"
             self.project_root / shared
         ]
 
@@ -362,7 +376,8 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
 
             self.fail(
                 fSSOT VIOLATION: Found {len(websocket_violations)} deprecated WebSocket import patterns:\n"
-                fSSOT VIOLATION: Found {len(websocket_violations)} deprecated WebSocket import patterns:\n"
+                fSSOT VIOLATION: Found {len(websocket_violations)} deprecated WebSocket import patterns:\n""
+
                 f{violation_details}\n
                 f{'... and more' if len(websocket_violations) > 10 else ''}\n\n"
                 f{'... and more' if len(websocket_violations) > 10 else ''}\n\n"
@@ -388,7 +403,8 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
             self.project_root / auth_service,"
             self.project_root / auth_service,"
             self.project_root / shared"
-            self.project_root / shared"
+            self.project_root / shared""
+
         ]
 
         for search_path in search_paths:
@@ -396,7 +412,7 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
                 continue
 
             for py_file in search_path.rglob(*.py):
-                if py_file.name.startswith(__") or "test in py_file.name.lower():
+                if py_file.name.startswith(__") or test in py_file.name.lower():"
                     continue
 
                 try:
@@ -458,7 +474,8 @@ class SSotFileReferenceMigrationTests(SSotBaseTestCase):
                 f{'... and more' if len(import_inconsistencies) > 15 else ''}\n\n
                 f"REMEDIATION REQUIRED:\n"
                 f1. Resolve mixed patterns within individual files\n"
-                f1. Resolve mixed patterns within individual files\n"
+                f1. Resolve mixed patterns within individual files\n""
+
                 f2. Choose SSOT pattern consistently throughout each file\n
                 f3. Remove all deprecated import patterns\n"
                 f3. Remove all deprecated import patterns\n"

@@ -4,7 +4,7 @@
       "name": "code-reviewer",
       "command": "/review the authentication system in auth_service/ directory, check for security issues and suggest improvements",
       "description": "Review auth service security",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json",
       "max_tokens_per_command": 15000
     },

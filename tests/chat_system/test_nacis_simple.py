@@ -46,7 +46,7 @@ def test_imports():
         try:
             module = __import__(module_path, fromlist=[class_name])
             cls = getattr(module, class_name)
-            print(f"✓ PASS: {name}: Available")
+            print(f"CHECK PASS: {name}: Available")
             success_count += 1
         except Exception as e:
             print(f"✗ FAIL: {name}: {e}")
@@ -71,7 +71,7 @@ def test_guardrails():
         cleaned = filters.redact_pii(text_with_pii)
 
         if "4111-1111-1111-1111" not in cleaned:
-            print("✓ PASS: PII Redaction: Working")
+            print("CHECK PASS: PII Redaction: Working")
         else:
             print("✗ FAIL: PII Redaction: Failed")
 
@@ -80,7 +80,7 @@ def test_guardrails():
         is_jailbreak = filters.is_jailbreak_attempt(jailbreak_text)
 
         if is_jailbreak:
-            print("✓ PASS: Jailbreak Detection: Working")
+            print("CHECK PASS: Jailbreak Detection: Working")
         else:
             print("✗ FAIL: Jailbreak Detection: Failed")
 
@@ -141,7 +141,7 @@ def test_reliability_scorer():
         for source_type, expected_score in sources:
             print(f"  {source_type}: ~{expected_score}")
 
-        print("✓ PASS: Reliability scorer initialized successfully")
+        print("CHECK PASS: Reliability scorer initialized successfully")
         return True
     except Exception as e:
         print(f"✗ FAIL: Reliability Scorer error: {e}")
@@ -177,12 +177,12 @@ def test_environment_variables():
 
         # Check if env vars are being read
         if get_env().get("NACIS_TIER1_MODEL") == "test_value":
-            print("✓ PASS: NACIS_TIER1_MODEL: Recognized")
+            print("CHECK PASS: NACIS_TIER1_MODEL: Recognized")
 
         from netra_backend.app.guardrails.input_filters import InputFilters
         filters = InputFilters()
         if hasattr(filters, 'enabled'):
-            print("✓ PASS: GUARDRAILS_ENABLED: Recognized")
+            print("CHECK PASS: GUARDRAILS_ENABLED: Recognized")
 
         return True
     except Exception as e:
@@ -225,7 +225,7 @@ def main():
     total = len(results)
 
     for test_name, result in results:
-        status = "✓ PASS: PASSED" if result else "✗ FAIL: FAILED"
+        status = "CHECK PASS: PASSED" if result else "✗ FAIL: FAILED"
         print(f"{status}: {test_name}")
 
     print(f"\nOverall: {passed}/{total} tests passed")
@@ -233,7 +233,7 @@ def main():
     if passed == total:
         print("🎉 CELEBRATION: All tests passed! NACIS is ready for use.")
     else:
-        print(f"⚠️  WARNING: {total - passed} tests failed. Check configuration.")
+        print(f"WARNING️  WARNING: {total - passed} tests failed. Check configuration.")
 
     print('''
 Next Steps to Test NACIS Fully:

@@ -868,6 +868,42 @@ class WebSocketSSOTRouter:
             logger.info(f" SEARCH:  AUTH SUCCESS CONTEXT: {json.dumps(auth_success_context, indent=2)}")
             logger.info(f"[MAIN MODE] Authentication success: user={user_id[:8] if user_id else 'unknown'}")
             
+            # ISSUE #1061 FIX: Initialize connection state machine with proper state transitions
+            # This ensures proper WebSocket connection lifecycle: CONNECTING -> ACCEPTED -> AUTHENTICATED -> READY
+            try:
+                from netra_backend.app.websocket_core.connection_state_machine import (
+                    get_connection_state_registry,
+                    ApplicationConnectionState
+                )
+                
+                # Get the state machine registry and register this connection
+                registry = get_connection_state_registry()
+                state_machine = registry.register_connection(connection_id, user_id)
+                
+                # Transition through proper states: ACCEPTED (transport ready) -> AUTHENTICATED (auth complete)
+                state_machine.transition_to(
+                    ApplicationConnectionState.ACCEPTED,
+                    reason="WebSocket transport accepted",
+                    metadata={"connection_id": connection_id, "timestamp": datetime.now(timezone.utc).isoformat()}
+                )
+                
+                state_machine.transition_to(
+                    ApplicationConnectionState.AUTHENTICATED,
+                    reason="User authentication completed",
+                    metadata={
+                        "connection_id": connection_id, 
+                        "user_id": user_id[:8] + "..." if user_id else "unknown",
+                        "auth_method": getattr(auth_result, 'auth_method', 'unknown'),
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    }
+                )
+                
+                logger.info(f"[ISSUE #1061 FIX] Connection {connection_id} transitioned through ACCEPTED -> AUTHENTICATED states")
+                
+            except Exception as state_error:
+                logger.warning(f"[ISSUE #1061] Failed to initialize state machine for {connection_id}: {state_error}")
+                # Continue with connection - state machine is for lifecycle tracking, not critical for basic operation
+            
             # Step 3: Create WebSocket Manager (with emergency fallback)
             logger.info(f"[U+1F527] GOLDEN PATH MANAGER: Creating WebSocket manager for user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
             
@@ -900,6 +936,39 @@ class WebSocketSSOTRouter:
             
             # Step 5: Agent registration and handler setup
             await self._setup_agent_handlers(ws_manager, user_context)
+            
+            # ISSUE #1061 FIX: Complete state machine transitions to PROCESSING_READY
+            # This ensures the connection is fully ready for message processing
+            try:
+                if 'state_machine' in locals():
+                    # Transition to SERVICES_READY (all required services initialized)
+                    state_machine.transition_to(
+                        ApplicationConnectionState.SERVICES_READY,
+                        reason="WebSocket manager and agent handlers initialized",
+                        metadata={
+                            "connection_id": connection_id,
+                            "user_id": user_id[:8] + "..." if user_id else "unknown",
+                            "timestamp": datetime.now(timezone.utc).isoformat()
+                        }
+                    )
+                    
+                    # Transition to PROCESSING_READY (fully operational for message processing)
+                    state_machine.transition_to(
+                        ApplicationConnectionState.PROCESSING_READY,
+                        reason="Connection fully operational for message processing",
+                        metadata={
+                            "connection_id": connection_id,
+                            "user_id": user_id[:8] + "..." if user_id else "unknown",
+                            "golden_path_events": ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"],
+                            "timestamp": datetime.now(timezone.utc).isoformat()
+                        }
+                    )
+                    
+                    logger.info(f"[ISSUE #1061 FIX] Connection {connection_id} reached PROCESSING_READY state - ready for messages")
+                    
+            except Exception as final_state_error:
+                logger.warning(f"[ISSUE #1061] Failed to complete state transitions for {connection_id}: {final_state_error}")
+                # Continue - connection is functional even without perfect state tracking
             
             # Step 6: Send connection success with all 5 critical events capability
             success_message = create_server_message({

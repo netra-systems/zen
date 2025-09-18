@@ -3,7 +3,7 @@ Golden Path Integration Test Suite 1: Auth Token Cascade Failures (Issue #1176)
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise) 
-- Business Goal: Ensure Golden Path login → get AI responses works
+- Business Goal: Ensure Golden Path login -> get AI responses works
 - Value Impact: Auth token validation cascades cause Golden Path failures
 - Strategic Impact: Core platform functionality ($500K+ ARR at risk)
 

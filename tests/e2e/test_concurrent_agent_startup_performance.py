@@ -10,10 +10,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -86,9 +86,9 @@ class MockConcurrentTestOrchestrator:
         responses = []
         for user in users:
         response = { }
-        "user_id": user.user_id,
-        "response": "",
-        "timestamp": time.time()
+        "user_id": "user.user_id,"
+        "response": ","
+        "timestamp: time.time()"
         
         responses.append(response)
         logger.info("")
@@ -242,7 +242,7 @@ Success Criteria:
 '''
 '''
 
-logger.info("Starting Test Case 3: Performance Under Concurrent Load")
+logger.info("Starting Test Case 3: Performance Under Concurrent Load)"
 
 orchestrator = MockConcurrentTestOrchestrator(concurrent_test_environment)
 
@@ -285,7 +285,7 @@ assert performance_summary['max_memory_usage_mb'] / 1024 <= thresholds['max_memo
 assert performance_summary['avg_cpu_usage_percent'] <= thresholds['max_cpu_usage_percent'], \
 ""
 
-logger.info(f"Test Case 3 completed: Performance within SLA thresholds")
+logger.info(f"Test Case 3 completed: Performance within SLA thresholds)"
 
 logger.info("")
 

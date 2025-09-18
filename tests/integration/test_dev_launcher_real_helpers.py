@@ -102,7 +102,7 @@ issues.append("")
         # Check auth port
 if not self._is_port_in_use(8081):
     pass
-issues.append("Auth port 8081 not in use")
+issues.append("Auth port 8081 not in use)"
 
             # Check frontend port (if enabled)
 if self.config.frontend_port:
@@ -132,7 +132,7 @@ issues = []
 
 if not self.start_time:
     pass
-issues.append("Start time not recorded")
+issues.append("Start time not recorded)"
 return False, issues
 
 elapsed = time.time() - self.start_time
@@ -160,7 +160,7 @@ def _force_free_port(self, port: int):
     pass
 """Force free a specific port."""
 pass
-if sys.platform == "win32":
+if sys.platform == "win32:"
     pass
 try:
     pass

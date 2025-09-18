@@ -30,7 +30,6 @@ from enum import Enum
 import pytest
 import httpx
 import json
-import jwt
 from urllib.parse import urlparse
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -183,7 +182,7 @@ class ImprovedAuthVerifier:
         success=False,
         response_time=time.time() - start_time,
         timestamp=time.time(),
-        error="All health endpoints failed",
+        error="All health endpoints failed,"
         details={'endpoints_tried': health_endpoints},
         confidence_score=0.0
                                         
@@ -619,25 +618,25 @@ class AuthVerificationImprover:
         failed_strategies = [item for item in []]
 
         if AuthVerificationStrategy.SERVICE_CONNECTIVITY.value in failed_strategies:
-        recommendations.append("Check if auth service is running and accessible")
+        recommendations.append("Check if auth service is running and accessible)"
 
         if AuthVerificationStrategy.HEALTH_CHECK.value in failed_strategies:
-        recommendations.append("Investigate auth service health endpoint issues")
+        recommendations.append("Investigate auth service health endpoint issues)"
 
         if AuthVerificationStrategy.ENDPOINT_AVAILABILITY.value in failed_strategies:
-        recommendations.append("Verify auth service endpoint configuration")
+        recommendations.append("Verify auth service endpoint configuration)"
 
         if AuthVerificationStrategy.TOKEN_VALIDATION.value in failed_strategies:
-        recommendations.append("Check JWT token validation service configuration")
+        recommendations.append("Check JWT token validation service configuration)"
 
         if AuthVerificationStrategy.OAUTH_FLOW.value in failed_strategies:
-        recommendations.append("Verify OAuth configuration and provider setup")
+        recommendations.append("Verify OAuth configuration and provider setup)"
 
         if state.confidence_score < 0.8:
-        recommendations.append("Auth service verification has low confidence - monitor closely")
+        recommendations.append("Auth service verification has low confidence - monitor closely)"
 
         if state.consecutive_failures > 3:
-        recommendations.append("Auth service has consecutive verification failures - investigate urgently")
+        recommendations.append("Auth service has consecutive verification failures - investigate urgently)"
 
         return recommendations
 
@@ -756,7 +755,7 @@ print(f" )"
 auth_service_url = get_env().get('AUTH_SERVICE_URL', 'http://localhost:8001')
 
                                                     # Standard verification (simplified)
-    print("1. Standard auth verification:")
+    print("1. Standard auth verification:)"
 standard_start = time.time()
 standard_result = await self._perform_standard_auth_verification(auth_service_url)
 standard_time = time.time() - standard_start
@@ -788,18 +787,18 @@ both_failed = not resilient_result['auth_verified'] and not standard_result['ver
 
 if improvement_detected:
     pass
-print(f" PASS:  IMPROVEMENT DETECTED: Resilient verification succeeded where standard failed")
-print(f"   This demonstrates the value of multi-strategy verification")
+print(f" PASS:  IMPROVEMENT DETECTED: Resilient verification succeeded where standard failed)"
+print(f"   This demonstrates the value of multi-strategy verification)"
 elif both_successful:
     pass
-print(f" PASS:  BOTH SUCCESSFUL: Auth service is healthy according to both methods")
+print(f" PASS:  BOTH SUCCESSFUL: Auth service is healthy according to both methods)"
 print("")
 elif both_failed:
     pass
-print(f" WARNING: [U+FE0F]  BOTH FAILED: Auth service appears to have genuine issues")
+print(f" WARNING: [U+FE0F]  BOTH FAILED: Auth service appears to have genuine issues)"
 else:
     pass
-print(f" WARNING: [U+FE0F]  UNEXPECTED: Standard succeeded but resilient failed")
+print(f" WARNING: [U+FE0F]  UNEXPECTED: Standard succeeded but resilient failed)"
 
                                                                         # Show recommendations if available
 recommendations = resilient_result.get('recommendations', [])
@@ -827,7 +826,7 @@ async def _perform_standard_auth_verification(self, auth_service_url: str) -> Di
 try:
         # Simple health check
 async with httpx.AsyncClient(timeout=5.0) as client:
-response = await client.get("formatted_string")
+response = await client.get("formatted_string)"
 
 if response.status_code == 200:
     pass
@@ -889,14 +888,14 @@ print("")
 if len(verification_results) >= 2:
     pass
 trend_analysis = self._analyze_verification_trends(verification_results)
-print(f"Trend analysis:")
+print(f"Trend analysis:)"
 print("")
 print("")
 print("")
 
 if trend_analysis['recommendations']:
     pass
-print(f"  Trending recommendations:")
+print(f"  Trending recommendations:)"
 for rec in trend_analysis['recommendations']:
     print("")
 
@@ -959,18 +958,18 @@ stability = "unstable"
 
                                                         # Generate recommendations
 recommendations = []
-if pattern == "consistently_unhealthy":
+if pattern == "consistently_unhealthy:"
     pass
-recommendations.append("Auth service consistently failing verification - investigate immediately")
-elif pattern == "degrading":
+recommendations.append("Auth service consistently failing verification - investigate immediately)"
+elif pattern == "degrading:"
     pass
-recommendations.append("Auth service verification degrading - monitor closely")
-elif pattern == "unstable":
+recommendations.append("Auth service verification degrading - monitor closely)"
+elif pattern == "unstable:"
     pass
-recommendations.append("Auth service verification unstable - check for intermittent issues")
-elif confidence_trend == "decreasing":
+recommendations.append("Auth service verification unstable - check for intermittent issues)"
+elif confidence_trend == "decreasing:"
     pass
-recommendations.append("Verification confidence decreasing - review service health")
+recommendations.append("Verification confidence decreasing - review service health)"
 
 await asyncio.sleep(0)
 return { }
@@ -983,6 +982,6 @@ return { }
                                                                         
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                                                                             # Run auth verification logic improvement tests
-pytest.main([__file__, "-v", "-s", "--tb=short"])
+pytest.main([__file__, "-v", "-s", "--tb=short])"

@@ -153,7 +153,7 @@ class TestInfrastructureIssueReproduction(BaseIntegrationTest):
         FAILING TEST: Reproduce SSOT auth policy violation in staging environment
         
         This test should FAIL until E2E bypass propagation is fixed through the entire
-        SSOT authentication chain (WebSocket layer → SSOT service → Auth client).
+        SSOT authentication chain (WebSocket layer -> SSOT service -> Auth client).
         
         Issue: E2E testing context is detected at WebSocket level but not propagated
         to auth client layer, causing staging E2E tests to fail with policy violations.
@@ -479,7 +479,7 @@ class TestInfrastructureIssueReproduction(BaseIntegrationTest):
         self.logger.info(f"Failed pathways: {len(failed_pathways)}")
         
         for result in pathway_results:
-            status = "✓ PASS" if result["success"] else "✗ FAIL"
+            status = "CHECK PASS" if result["success"] else "✗ FAIL"
             self.logger.info(f"  Pathway {result['pathway_id']} ({result['pathway_name']}): {status}")
             if not result["success"]:
                 self.logger.error(f"    Error: {result['error']}")
@@ -534,7 +534,7 @@ class TestInfrastructureFixValidation(BaseIntegrationTest):
         assert auth_result.success, "Authentication should succeed when load balancer preserves headers"
         assert user_context is not None, "UserExecutionContext should be created"
         
-        self.logger.info("✓ VALIDATION PASSED: Load balancer preserves Authorization headers")
+        self.logger.info("CHECK VALIDATION PASSED: Load balancer preserves Authorization headers")
 
     async def test_e2e_bypass_propagation_validation(self):
         """
@@ -564,4 +564,4 @@ class TestInfrastructureFixValidation(BaseIntegrationTest):
         assert auth_result.success, "E2E bypass should work in staging environment"
         assert "e2e_bypass" in auth_result.metadata, "E2E bypass should be documented in metadata"
         
-        self.logger.info("✓ VALIDATION PASSED: E2E bypass propagates through SSOT chain")
+        self.logger.info("CHECK VALIDATION PASSED: E2E bypass propagates through SSOT chain")

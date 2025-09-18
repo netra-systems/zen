@@ -28,7 +28,7 @@ def lazy_import(module_path: str, component: str=None):
             print(f'Warning: Failed to lazy load {module_path}: {e}')
             _lazy_imports[module_path] = None
     return _lazy_imports[module_path]
-'\nE2E tests for complete Golden Path workflow in staging GCP environment\n\nPurpose: Validate complete user workflow from login to AI response in staging\nIssue: #426 - E2E golden path tests failing due to service dependencies\nApproach: Real staging GCP services, complete end-to-end validation\n\nMISSION CRITICAL: This test validates the complete Golden Path that delivers\n$500K+ ARR through chat functionality. Must work in staging environment.\n\nGolden Path Flow: Login → WebSocket Connection → Agent Execution → AI Response\nBusiness Impact: 90% of platform value delivered through this workflow\n'
+'\nE2E tests for complete Golden Path workflow in staging GCP environment\n\nPurpose: Validate complete user workflow from login to AI response in staging\nIssue: #426 - E2E golden path tests failing due to service dependencies\nApproach: Real staging GCP services, complete end-to-end validation\n\nMISSION CRITICAL: This test validates the complete Golden Path that delivers\n$500K+ ARR through chat functionality. Must work in staging environment.\n\nGolden Path Flow: Login -> WebSocket Connection -> Agent Execution -> AI Response\nBusiness Impact: 90% of platform value delivered through this workflow\n'
 import pytest
 import asyncio
 import json
@@ -105,7 +105,7 @@ class GoldenPathCompleteStagingTests(SSotAsyncTestCase):
     @pytest.mark.mission_critical
     async def test_complete_golden_path_staging_workflow(self):
         """
-        Test complete Golden Path workflow in staging: Login → AI Response
+        Test complete Golden Path workflow in staging: Login -> AI Response
         
         Issue: #426 - E2E golden path tests failing due to service dependencies
         Difficulty: Very High (60 minutes)

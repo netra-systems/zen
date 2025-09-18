@@ -1,7 +1,7 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
-'''
-'''
+
+"""
 Test suite to expose health route duplication and legacy issues.
 
 This test suite is designed to FAIL and expose the following issues:
@@ -10,8 +10,7 @@ This test suite is designed to FAIL and expose the following issues:
 3. Legacy import patterns and compatibility wrappers
 4. Multiple health check systems with overlapping functionality
 5. Inconsistent response formats across services
-'''
-'''
+"""
 
 import asyncio
 import json
@@ -233,7 +232,7 @@ class TestHealthRouteDuplicationAudit:
         assert len(auditor.legacy_imports) == 0, ""
 
     async def test_multiple_health_systems(self):
-        """Test that we don't have multiple health check systems - SHOULD FAIL."""'
+        """Test that we don't have multiple health check systems - SHOULD FAIL.""'"
         project_root = Path(__file__).parent.parent.parent
 
         health_systems = []
@@ -332,10 +331,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -419,7 +418,7 @@ class TestHealthEndpointPerformance:
         ""
 
     async def test_health_check_database_connections(self):
-        """Test that health checks don't leak database connections - SHOULD FAIL."""'
+        """Test that health checks don't leak database connections - SHOULD FAIL.""'"
         pass
                                     # This test would need actual database setup to properly test
                                     # For now, we check for proper connection cleanup patterns
@@ -444,8 +443,8 @@ class TestHealthEndpointPerformance:
         assert len(missing_cleanup) == 0, ""
 
 
-        if __name__ == "__main__":
-        pytest.main([__file__, "-v", "--tb=short"])
+        if __name__ == "__main__:"
+        pytest.main([__file__, "-v", "--tb=short])"
 
 )
 ]

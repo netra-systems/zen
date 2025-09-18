@@ -11,7 +11,7 @@ TEST DESIGN:
 - End-to-end Golden Path user flow testing
 - Real staging GCP environment validation
 - No Docker required - uses staging services
-- Tests complete user login → WebSocket → chat → AI response flow
+- Tests complete user login -> WebSocket -> chat -> AI response flow
 - Validates SSOT compliance protects revenue-generating functionality
 
 Business Value: Platform/Internal - Revenue Protection & User Experience
@@ -178,7 +178,7 @@ class WebSocketSSOTGoldenPathProtectionTests(SSotAsyncTestCase):
         Test complete end-to-end Golden Path user flow with SSOT configuration
         
         CRITICAL: Tests complete user journey that generates revenue
-        Simulates: User Login → WebSocket Connect → Chat Interface → AI Response
+        Simulates: User Login -> WebSocket Connect -> Chat Interface -> AI Response
         """
         with patch.dict('os.environ', self.golden_path_config, clear=False):
             env = IsolatedEnvironment()

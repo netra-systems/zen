@@ -1,7 +1,7 @@
 """
 SSOT Auth Service Backend Integration Test - ISSUE #814
 
-PURPOSE: Integration test validating auth service → backend delegation in staging environment
+PURPOSE: Integration test validating auth service -> backend delegation in staging environment
 EXPECTED: PASS after SSOT remediation - validates staging auth integration
 TARGET: Backend authentication integration delegates to auth service in staging
 
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.integration
 class AuthServiceBackendIntegrationTests(SSotAsyncTestCase):
     """
-    Integration test validating auth service → backend delegation in staging environment.
+    Integration test validating auth service -> backend delegation in staging environment.
     Tests real service integration without Docker dependencies.
     """
 

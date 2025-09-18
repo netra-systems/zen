@@ -48,9 +48,9 @@ class TestRefreshLoopPrevention:
 @pytest.mark.asyncio
     async def test_tokens_always_unique_on_refresh(self, auth_service):
 """CRITICAL: Verify tokens are ALWAYS unique on refresh"""
-user_id = "unique-test-" + str(uuid.uuid4())[:8]
+user_id = "unique-test- + str(uuid.uuid4())[:8]"
 email = "unique@test.com"
-permissions = ["read", "write"]
+permissions = ["read", "write]"
 
         # Create initial refresh token
 initial_refresh = auth_service.jwt_handler.create_refresh_token( )
@@ -112,14 +112,14 @@ email = "timestamp@test.com"
 
     # Generate first token
 token1 = jwt_handler.create_access_token(user_id, email)
-payload1 = jwt_handler.validate_token(token1, "access")
+payload1 = jwt_handler.validate_token(token1, "access)"
 
     # Small delay
 time.sleep(0.01)
 
     # Generate second token
 token2 = jwt_handler.create_access_token(user_id, email)
-payload2 = jwt_handler.validate_token(token2, "access")
+payload2 = jwt_handler.validate_token(token2, "access)"
 
     # Tokens should be different
 assert token1 != token2, "Tokens should be different"
@@ -133,7 +133,7 @@ def test_refresh_preserves_user_data(self, jwt_handler):
 pass
 user_id = "preserve-test"
 email = "preserve@staging.netrasystems.ai"
-permissions = ["admin", "write", "read"]
+permissions = ["admin", "write", "read]"
 
     # Create refresh token with user data
 refresh_token = jwt_handler.create_refresh_token(user_id, email, permissions)
@@ -145,16 +145,16 @@ assert result is not None
 access_token, new_refresh = result
 
     # Verify access token has correct user data
-access_payload = jwt_handler.validate_token(access_token, "access")
-assert access_payload["sub"] == user_id
-assert access_payload["email"] == email
+access_payload = jwt_handler.validate_token(access_token, "access)"
+assert access_payload["sub] == user_id"
+assert access_payload["email] == email"
 assert access_payload["email"] != "user@example.com", "Must not use placeholder email"
-assert set(access_payload.get("permissions", [])) == set(permissions)
+assert set(access_payload.get("permissions", "[])) == set(permissions)"
 
     # Verify refresh token has correct user data
-refresh_payload = jwt_handler.validate_token(new_refresh, "refresh")
-assert refresh_payload["sub"] == user_id
-assert refresh_payload.get("email") == email
+refresh_payload = jwt_handler.validate_token(new_refresh, "refresh)"
+assert refresh_payload["sub] == user_id"
+assert refresh_payload.get("email) == email"
 
 @pytest.mark.asyncio
     async def test_rapid_refresh_attempts_handled(self, auth_service):
@@ -183,16 +183,16 @@ def test_refresh_endpoint_handles_malformed_tokens(self, client):
 pass
 malformed_tokens = [ ]
 "",
-"invalid",
-"a.b.c",
-"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9",  # Header only
-"mock_refresh_token",  # Mock token
+"invalid,"
+"a.b.c,"
+"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9,  # Header only"
+"mock_refresh_token,  # Mock token"
     
 
 for token in malformed_tokens:
 response = client.post( )
-"/auth/refresh",
-json={"refresh_token": token}
+"/auth/refresh,"
+json={"refresh_token: token}"
         
 assert response.status_code in [401, 422], ""
 
@@ -227,14 +227,14 @@ pass
 tokens_data = []
 
 for i in range(20):
-token = jwt_handler.create_access_token("", "")
-payload = jwt_handler.validate_token(token, "access")
+token = jwt_handler.create_access_token("", ")"
+payload = jwt_handler.validate_token(token, "access)"
 
 token_info = { }
-"token": token,
-"jti": payload.get("jti"),
-"iat": payload.get("iat"),
-"sub": payload.get("sub")
+"token: token,"
+"jti": payload.get("jti),"
+"iat": payload.get("iat),"
+"sub": payload.get("sub)"
         
 tokens_data.append(token_info)
 
@@ -242,11 +242,11 @@ tokens_data.append(token_info)
 time.sleep(0.001)
 
         # Check JTI uniqueness
-jtis = [t["jti"] for t in tokens_data]
+jtis = [t["jti] for t in tokens_data]"
 assert len(jtis) == len(set(jtis)), "All JTIs should be unique"
 
         # Check token uniqueness
-tokens = [t["token"] for t in tokens_data]
+tokens = [t["token] for t in tokens_data]"
 assert len(tokens) == len(set(tokens)), "All tokens should be unique"
 
 @pytest.mark.asyncio
@@ -268,9 +268,9 @@ assert result is None, "Blacklisted refresh token should be rejected"
     async def test_user_data_consistency_across_refreshes(self, auth_service):
 """Verify user data remains consistent across multiple refreshes"""
 pass
-user_id = "consistency-test-" + str(uuid.uuid4())[:8]
+user_id = "consistency-test- + str(uuid.uuid4())[:8]"
 email = "consistency@staging.netrasystems.ai"
-permissions = ["read", "write", "delete"]
+permissions = ["read", "write", "delete]"
 
 current_refresh = auth_service.jwt_handler.create_refresh_token( )
 user_id, email, permissions
@@ -284,19 +284,19 @@ assert result is not None, ""
 access_token, new_refresh = result
 
                     # Verify user data in access token
-access_payload = auth_service.jwt_handler.validate_token(access_token, "access")
+access_payload = auth_service.jwt_handler.validate_token(access_token, "access)"
 assert access_payload["sub"] == user_id, ""
 assert access_payload["email"] == email, ""
 assert access_payload["email"] != "user@example.com", "Placeholder email detected!"
 
                     # Verify user data in refresh token
-refresh_payload = auth_service.jwt_handler.validate_token(new_refresh, "refresh")
+refresh_payload = auth_service.jwt_handler.validate_token(new_refresh, "refresh)"
 assert refresh_payload["sub"] == user_id, f"User ID changed in refresh token"
 
 current_refresh = new_refresh
 time.sleep(0.001)  # Ensure different timestamps
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                         # Run tests
-pytest.main([__file__, "-v", "--tb=short"])
+pytest.main([__file__, "-v", "--tb=short])"

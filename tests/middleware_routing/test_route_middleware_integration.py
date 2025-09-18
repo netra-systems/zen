@@ -365,7 +365,7 @@ class RouteMiddlewareIntegrationTests:
                 elif 'middleware_stack' in error_msg:
                     print('🎯 CLOSE MATCH: middleware_stack error - likely related to target issue')
                 elif 'routing' in error_msg.lower():
-                    print('⚠️ ROUTING RELATED: May be related to the target issue')
+                    print('WARNING️ ROUTING RELATED: May be related to the target issue')
                 print('-' * 60)
         if self.middleware_interactions:
             print('\n=== MIDDLEWARE INTERACTION ANALYSIS ===')

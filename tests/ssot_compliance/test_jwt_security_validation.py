@@ -129,7 +129,7 @@ class JWTSecurityValidationComplianceTests(BaseIntegrationTest):
                 f"JWT secrets must not be exposed in backend code. Exposures: {secret_exposures}"
             )
         else:
-            logger.info("✅ ISSUE #1195 SECURITY COMPLIANCE: No JWT secret exposures found in backend code")
+            logger.info("CHECK ISSUE #1195 SECURITY COMPLIANCE: No JWT secret exposures found in backend code")
 
     @pytest.mark.ssot_compliance
     @pytest.mark.security
@@ -201,7 +201,7 @@ class JWTSecurityValidationComplianceTests(BaseIntegrationTest):
         
         # Check for consistency across validation points
         if len(validation_behaviors) < 2:
-            logger.warning("⚠️ ISSUE #1195 WARNING: Insufficient validation points found for consistency check")
+            logger.warning("WARNING️ ISSUE #1195 WARNING: Insufficient validation points found for consistency check")
             return
             
         # All validation points should have delegation patterns
@@ -225,7 +225,7 @@ class JWTSecurityValidationComplianceTests(BaseIntegrationTest):
                 f"All validation points must use auth service delegation. Details: {violation_details}"
             )
         else:
-            logger.info("✅ ISSUE #1195 SECURITY COMPLIANCE: JWT validation patterns are consistent across services")
+            logger.info("CHECK ISSUE #1195 SECURITY COMPLIANCE: JWT validation patterns are consistent across services")
 
     @pytest.mark.ssot_compliance
     @pytest.mark.security 
@@ -294,7 +294,7 @@ class JWTSecurityValidationComplianceTests(BaseIntegrationTest):
                 f"Only auth service should generate/sign JWTs. Violations: {jwt_control_violations}"
             )
         else:
-            logger.info("✅ ISSUE #1195 SECURITY COMPLIANCE: No unauthorized JWT control operations found")
+            logger.info("CHECK ISSUE #1195 SECURITY COMPLIANCE: No unauthorized JWT control operations found")
 
     @pytest.mark.ssot_compliance
     @pytest.mark.security
@@ -363,7 +363,7 @@ class JWTSecurityValidationComplianceTests(BaseIntegrationTest):
         
         if bypass_violations:
             logger.warning(
-                f"⚠️ ISSUE #1195 SECURITY WARNING: Found {len(bypass_violations)} potential validation bypasses. "
+                f"WARNING️ ISSUE #1195 SECURITY WARNING: Found {len(bypass_violations)} potential validation bypasses. "
                 f"Manual review required to confirm security implications."
             )
             
@@ -371,7 +371,7 @@ class JWTSecurityValidationComplianceTests(BaseIntegrationTest):
                 logger.warning(f"Potential validation bypass: {violation}")
                 # Note: These are warnings, not hard failures, as they need manual review
         else:
-            logger.info("✅ ISSUE #1195 SECURITY COMPLIANCE: No obvious validation bypasses found")
+            logger.info("CHECK ISSUE #1195 SECURITY COMPLIANCE: No obvious validation bypasses found")
 
     @pytest.mark.ssot_compliance
     @pytest.mark.security
@@ -476,7 +476,7 @@ class JWTSecurityValidationComplianceTests(BaseIntegrationTest):
                 f"Sensitive information must not be exposed. Leaks: {information_leaks}"
             )
         else:
-            logger.info("✅ ISSUE #1195 SECURITY COMPLIANCE: No information leaks detected in JWT error handling")
+            logger.info("CHECK ISSUE #1195 SECURITY COMPLIANCE: No information leaks detected in JWT error handling")
 
     @pytest.mark.ssot_compliance
     @pytest.mark.security
@@ -533,13 +533,13 @@ class JWTSecurityValidationComplianceTests(BaseIntegrationTest):
             }
             
             logger.warning(
-                f"⚠️ ISSUE #1195 SECURITY WARNING: Auth service communication security score: {security_score:.2f}. "
+                f"WARNING️ ISSUE #1195 SECURITY WARNING: Auth service communication security score: {security_score:.2f}. "
                 f"Recommendations: {security_concern['recommendations']}"
             )
             
             # This is a warning, not a hard failure, as security practices may be implemented elsewhere
         else:
-            logger.info(f"✅ ISSUE #1195 SECURITY COMPLIANCE: Auth service communication security score: {security_score:.2f}")
+            logger.info(f"CHECK ISSUE #1195 SECURITY COMPLIANCE: Auth service communication security score: {security_score:.2f}")
 
     def teardown_method(self):
         """Teardown for each test method."""

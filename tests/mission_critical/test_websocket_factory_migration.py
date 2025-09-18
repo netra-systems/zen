@@ -2,26 +2,26 @@
 "MISSION CRITICAL: WebSocket Factory Migration Validation Tests"
 
 THIS SUITE VALIDATES THE WEBSOCKET FACTORY MIGRATION PROCESS ITSELF.
-Business Value: $500K+ ARR - Ensures migration doesn't break Golden Path'
+Business Value: $500K+ plus ARR - Ensures migration doesn't break Golden Path'
 
 PURPOSE:
-- Test that reproduces the current violations (expected to fail during migration)
+    - Test that reproduces the current violations (expected to fail during migration)
 - Test that verifies SSOT pattern works after migration (should pass post-migration)
 - Test race conditions prevented by proper SSOT implementation
 - Validate that migration preserves all business-critical functionality
 
 MIGRATION TARGETS:
-- websocket_ssot.py lines 1439, 1470, 1496 (health check functions)
+    - websocket_ssot.py lines 1439, 1470, 1496 (health check functions)
 - 49+ files across codebase using deprecated patterns
 - Health check, configuration, and statistics endpoints
 
 VALIDATION STRATEGY:
-1. PRE-MIGRATION: Tests demonstrate current violations and race conditions
+    1. PRE-MIGRATION: Tests demonstrate current violations and race conditions
 2. DURING-MIGRATION: Tests track progress and prevent regressions
 3. POST-MIGRATION: Tests validate successful remediation and functionality
 
 BUSINESS IMPACT:
-These tests protect the Golden Path (users login → get AI responses) during
+    These tests protect the Golden Path (users login -> get AI responses) during
 the migration process, ensuring zero business downtime.
 
 
@@ -55,7 +55,8 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
-    ""Mission Critical: WebSocket Factory Migration Validation Tests
+    ""Mission Critical: WebSocket Factory Migration Validation Tests""
+
     
     These tests validate the migration process itself:
     1. Demonstrate current violations exist (pre-migration)
@@ -82,7 +83,8 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
         # Track critical files that need migration
         self.critical_violation_files = [
             netra_backend/app/routes/websocket_ssot.py"
-            netra_backend/app/routes/websocket_ssot.py"
+            netra_backend/app/routes/websocket_ssot.py""
+
         ]
         
         logger.info(f[MIGRATION TEST] Setup complete for user: {self.test_user_id}")"
@@ -155,7 +157,7 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
                                 "function: violation[function],"
                                 description: violation[description]
                             }
-                            logger.warning(f"[VIOLATION FOUND] Line {i + 1}: {violation['description']})")
+                            logger.warning(f"[VIOLATION FOUND] Line {i + 1}: {violation['description']}))"
         
         # MIGRATION STATE LOGIC:
         if violations_found:
@@ -166,12 +168,13 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
                 
             # During migration phase, finding violations is expected and indicates test is working
             assert len(violations_found) > 0, Critical violations found - migration needed"
-            assert len(violations_found) > 0, Critical violations found - migration needed"
+            assert len(violations_found) > 0, Critical violations found - migration needed""
+
             
         else:
             # POST-MIGRATION STATE: No violations should exist
             logger.info("[POST-MIGRATION STATE] No violations found - migration appears complete!)"
-            assert len(violations_found) == 0, No violations found - migration successful
+            assert len(violations_found) == 0, "No violations found - migration successful"
 
     @pytest.mark.asyncio
     async def test_health_check_endpoint_migration(self):
@@ -198,9 +201,9 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
             health_result = await route_instance.websocket_health_check()
             
             # Validate health check returns expected structure
-            assert isinstance(health_result, dict), Health check must return dict
-            assert status" in health_result, "Health check must include status
-            assert timestamp in health_result, Health check must include timestamp
+            assert isinstance(health_result, "dict), Health check must return dict"
+            assert status" in health_result, Health check must include status"
+            assert timestamp in health_result, "Health check must include timestamp"
             
             # Check if the result indicates healthy status
             if health_result.get(status) == "healthy:"
@@ -253,13 +256,14 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
             config_result = await route_instance.get_websocket_config()
             
             # Validate config returns expected structure
-            assert isinstance(config_result, dict), Config endpoint must return dict
+            assert isinstance(config_result, "dict), Config endpoint must return dict"
             
             # Check for expected configuration structure
             if websocket_config" in config_result:"
                 config = config_result[websocket_config]
                 logger.info([CONFIG SUCCESS] WebSocket configuration retrieved)"
-                logger.info([CONFIG SUCCESS] WebSocket configuration retrieved)"
+                logger.info([CONFIG SUCCESS] WebSocket configuration retrieved)""
+
                 
                 # Validate expected config keys exist
                 expected_keys = ["heartbeat_interval, connection_timeout, max_message_size]"
@@ -268,7 +272,7 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
                         logger.info(f[CONFIG PARAM] {key}: {config[key]}")"
                 
                 # Config retrieval success indicates migration preserved functionality
-                assert heartbeat_interval in config, Missing heartbeat_interval config
+                assert heartbeat_interval in config, "Missing heartbeat_interval config"
                 
             elif error in config_result:"
             elif error in config_result:"
@@ -303,7 +307,8 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
             
             # Validate stats returns expected structure
             assert isinstance(stats_result, dict), Stats endpoint must return dict"
-            assert isinstance(stats_result, dict), Stats endpoint must return dict"
+            assert isinstance(stats_result, dict), Stats endpoint must return dict""
+
             
             # Check for expected statistics structure
             if "ssot_stats in stats_result:"
@@ -354,7 +359,8 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
             # Create multiple user contexts rapidly (simulates concurrent requests)
             for i in range(5):
                 user_id = frace_test_user_{i}_{uuid.uuid4().hex[:6]}"
-                user_id = frace_test_user_{i}_{uuid.uuid4().hex[:6]}"
+                user_id = frace_test_user_{i}_{uuid.uuid4().hex[:6]}""
+
                 user_ids.append(user_id)
                 
                 context = UserExecutionContext(
@@ -369,13 +375,15 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
             unique_user_ids = set(context_user_ids)
             
             assert len(unique_user_ids) == len(context_user_ids), CRITICAL: User context race condition detected"
-            assert len(unique_user_ids) == len(context_user_ids), CRITICAL: User context race condition detected"
+            assert len(unique_user_ids) == len(context_user_ids), CRITICAL: User context race condition detected""
+
             
             # Validate each context maintains its identity
             for i, context in enumerate(concurrent_contexts):
                 expected_user_id = user_ids[i]
                 assert context.user_id == expected_user_id, fContext {i} identity corrupted: expected {expected_user_id}, got {context.user_id}"
-                assert context.user_id == expected_user_id, fContext {i} identity corrupted: expected {expected_user_id}, got {context.user_id}"
+                assert context.user_id == expected_user_id, fContext {i} identity corrupted: expected {expected_user_id}, got {context.user_id}""
+
             
             logger.info(f[RACE CONDITION SUCCESS] {len(concurrent_contexts)} concurrent contexts properly isolated)
             
@@ -387,7 +395,8 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
                 expected_user_id = user_ids[i]
                 actual_user_id = context.user_id
                 assert actual_user_id == expected_user_id, fContext {i} user ID contaminated: expected {expected_user_id}, got {actual_user_id}"
-                assert actual_user_id == expected_user_id, fContext {i} user ID contaminated: expected {expected_user_id}, got {actual_user_id}"
+                assert actual_user_id == expected_user_id, fContext {i} user ID contaminated: expected {expected_user_id}, got {actual_user_id}""
+
                 
                 # Verify contexts have unique agent_context objects (isolation test)
                 for j, other_context in enumerate(concurrent_contexts):
@@ -402,14 +411,16 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
 
     def test_migration_progress_tracking(self):
         TEST: Track and validate migration progress across codebase"
-        TEST: Track and validate migration progress across codebase"
+        TEST: Track and validate migration progress across codebase""
+
         
         PURPOSE: Provides visibility into migration progress by scanning for
         deprecated patterns across the entire codebase.
         
         BUSINESS VALUE: Ensures comprehensive migration coverage.
         "
-        "
+        ""
+
         logger.info([MIGRATION PROGRESS] Tracking migration progress...)
         
         # Define directories to scan for deprecated patterns
@@ -417,7 +428,8 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
             "netra_backend/app,"
             auth_service, 
             shared"
-            shared"
+            shared""
+
         ]
         
         total_files_scanned = 0
@@ -457,7 +469,8 @@ class WebSocketFactoryMigrationTests(SSotAsyncTestCase):
                                                     line: line_num,
                                                     pattern: pattern,"
                                                     pattern: pattern,"
-                                                    "content: line.strip()"
+                                                    "content": "line.strip()"""
+
                                                 }
                                                 total_violations += 1
                                 
@@ -497,7 +510,8 @@ if __name__ == __main__:
     print(MIGRATION NOTICE: This file previously used direct pytest execution.")"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)
     print(For more info: reports/TEST_EXECUTION_GUIDE.md"")"
-    print(For more info: reports/TEST_EXECUTION_GUIDE.md"")"
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md"")""
+
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

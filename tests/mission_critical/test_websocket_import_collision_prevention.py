@@ -1,5 +1,5 @@
 """
-"""
+
 Mission Critical Test: WebSocket Import Collision Prevention - Deployment Gate
 
 # This test serves as a DEPLOYMENT GATE to prevent the WebSocket coroutine error from # Incomplete import statement
@@ -7,19 +7,19 @@ reaching production. It validates that the critical chat infrastructure function
 correctly under all conditions, preventing business impact.
 
 CRITICAL BUSINESS IMPACT:
-'coroutine' object has no attribute 'get'" at websocket.py:557 causes:"
+    'coroutine' object has no attribute 'get'" at websocket.py:557 causes:"
 - 100% WebSocket connection failures
 - Complete chat system breakdown
-- $500K+ ARR customer impact
+- $500K+ plus ARR customer impact
 - 90% of platform value delivery blocked
 
 Business Value: All Tiers (Free  ->  Enterprise) - Mission Critical System Stability
 """
-"""
+
 This test protects the primary value delivery channel (chat) from coroutine errors.
 
 Deployment Gate Rules:
-1. This test MUST PASS before any staging/production deployment
+    1. This test MUST PASS before any staging/production deployment
 2. Test failure blocks deployment pipeline automatically  
 3. Covers end-to-end WebSocket  ->  Agent  ->  Response flow
 4. Validates business-critical WebSocket events are sent correctly
@@ -28,17 +28,18 @@ GitHub Issue: https://github.com/netra-systems/netra-apex/issues/164
 Golden Path Dependency: GOLDEN_PATH_USER_FLOW_COMPLETE.md - Race Condition #3
 
 TEST EXECUTION:
-- Command: python tests/mission_critical/test_websocket_import_collision_prevention.py
+    - Command: python tests/mission_critical/test_websocket_import_collision_prevention.py
 - CI Integration: python tests/unified_test_runner.py --category mission_critical
 - Status: MUST PASS (0 failures) for deployment approval
 
 EXPECTED FAILURE MODE (before fix):
-- Test will FAIL with coroutine attribution errors
+    - Test will FAIL with coroutine attribution errors
 - WebSocket event delivery will be blocked
 - Chat system will be completely non-functional
 - Test PASSING indicates production readiness
 "
-"
+""
+
 
 import asyncio
 import time
@@ -54,7 +55,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Mission critical imports - Core business functionality
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager_factory import (
+from netra_backend.app.websocket_core.websocket_manager_factory import ()
     validate_websocket_component_health,
     WebSocketManagerFactory
 )
@@ -63,7 +64,8 @@ from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
 from netra_backend.app.config import get_config
 
 class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
-    ""
+    """
+
     MISSION CRITICAL: Deployment gate for WebSocket coroutine error prevention.
     
     This test ensures that the core chat infrastructure (WebSocket  ->  Agent  ->  Response)
@@ -88,10 +90,11 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
         )
         
         self.logger.info( ALERT:  MISSION CRITICAL: WebSocket coroutine prevention test starting)
-        self.logger.info(f TARGET:  BUSINESS GOAL: Protect $500K+ ARR chat functionality from coroutine errors)
+        self.logger.info(f TARGET:  BUSINESS GOAL: Protect $500K+ plus ARR chat functionality from coroutine errors)
     
     def test_mission_critical_health_report_dict_guarantee(self):
-        ""
+        """
+
         DEPLOYMENT GATE 1: health_report MUST be dict under all conditions.
         
         This is the core failure point causing 100% WebSocket connection failures.
@@ -139,18 +142,20 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
                     if coroutine in str(e) and "get in str(e):"
                         self.fail(
                             fDEPLOYMENT BLOCKER: Coroutine error in scenario '{scenario_name}': {e}. "
-                            fDEPLOYMENT BLOCKER: Coroutine error in scenario '{scenario_name}': {e}. "
+                            fDEPLOYMENT BLOCKER: Coroutine error in scenario '{scenario_name}': {e}. ""
+
                             fThis exact error breaks all WebSocket connections in production.
                         )
                     else:
                         raise
         
-        self.logger.info( PASS:  MISSION CRITICAL SUCCESS: health_report dict guarantee validated)"
-        self.logger.info( PASS:  MISSION CRITICAL SUCCESS: health_report dict guarantee validated)"
+        self.logger.info("PASS:  MISSION CRITICAL SUCCESS: health_report dict guarantee validated))"
+        self.logger.info("PASS:  MISSION CRITICAL SUCCESS: health_report dict guarantee validated))"
     
     def test_mission_critical_websocket_error_handler_resilience(self):
-    "
-    "
+        """
+    ""
+
         DEPLOYMENT GATE 2: WebSocket error handlers MUST work without coroutine errors.
         
         This validates the exact error handler code paths from websocket.py that
@@ -167,7 +172,7 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
         error_simulation_configs = [
             {
                 name: database_failure, 
-                "config_override: {database_url": invalid://connection},
+                "config_override: {database_url: invalid://connection},"
                 expected_component: "environment"
             },
             {
@@ -178,7 +183,7 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
             {
                 name: auth_failure","
                 "config_override: {auth_service_url: http://invalid:8001},"
-                expected_component": "auth
+                expected_component": auth"
             }
         ]
         
@@ -229,7 +234,8 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
                             
                             # If we reach here, error handler works correctly
                             self.assertIsInstance(error_response[suggestions], list)"
-                            self.assertIsInstance(error_response[suggestions], list)"
+                            self.assertIsInstance(error_response[suggestions], list)""
+
                             
                     except AttributeError as e:
                         if coroutine" in str(e) and get in str(e):"
@@ -244,8 +250,9 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
     
     @pytest.mark.asyncio
     async def test_mission_critical_end_to_end_chat_flow(self):
-    "
-    "
+        """
+    ""
+
         DEPLOYMENT GATE 3: Complete chat flow MUST work without coroutine errors.
         
         This validates the full business value chain:
@@ -256,7 +263,8 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
         BUSINESS IMPACT: End-to-end chat failure = complete business value loss.
         DEPLOYMENT: BLOCKS deployment if chat flow has coroutine attribution issues.
         "
-        "
+        ""
+
         self.logger.info( ALERT:  MISSION CRITICAL: Validating end-to-end chat flow)
         
         try:
@@ -269,7 +277,7 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
             
             self.assertIsNotNone(
                 websocket_manager,
-                DEPLOYMENT BLOCKER: WebSocket manager creation failed, chat system non-functional
+                DEPLOYMENT BLOCKER: "WebSocket manager creation failed, chat system non-functional"
             )
             
             # STEP 2: Health Validation (the core coroutine error point)
@@ -279,7 +287,8 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
                 health_report,
                 dict,
                 DEPLOYMENT BLOCKER: End-to-end flow requires dict health_report"
-                DEPLOYMENT BLOCKER: End-to-end flow requires dict health_report"
+                DEPLOYMENT BLOCKER: End-to-end flow requires dict health_report""
+
             )
             
             # STEP 3: Event Monitor Validation (critical for chat events)
@@ -290,13 +299,14 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
                 monitor_health,
                 dict,
                 DEPLOYMENT BLOCKER: Event monitor health must be dict for chat functionality"
-                DEPLOYMENT BLOCKER: Event monitor health must be dict for chat functionality"
+                DEPLOYMENT BLOCKER: Event monitor health must be dict for chat functionality""
+
             )
             
             # STEP 4: Critical WebSocket Operations (exact production usage)
             # These are the operations that fail in production due to coroutine errors
             error_suggestions = health_report.get(error_suggestions, [)
-            component_health = health_report.get(summary", "Chat system health check)
+            component_health = health_report.get(summary", Chat system health check)"
             failed_components = health_report.get(failed_components, [)
             
             # Validate all critical operations succeeded
@@ -304,15 +314,16 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
             self.assertIsInstance(component_health, str)
             self.assertIsInstance(failed_components, list)
             
-            self.logger.info( PASS:  MISSION CRITICAL SUCCESS: End-to-end chat flow validated)"
-            self.logger.info( PASS:  MISSION CRITICAL SUCCESS: End-to-end chat flow validated)"
+            self.logger.info("PASS:  MISSION CRITICAL SUCCESS: End-to-end chat flow validated))"
+            self.logger.info("PASS:  MISSION CRITICAL SUCCESS: End-to-end chat flow validated))"
             
         except AttributeError as e:
             if coroutine" in str(e) and (get in str(e) or attribute in str(e)):"
                 self.fail(
                     f"DEPLOYMENT BLOCKER: End-to-end chat flow coroutine error: {e}."
                     fThis breaks the complete customer experience and business value delivery."
-                    fThis breaks the complete customer experience and business value delivery."
+                    fThis breaks the complete customer experience and business value delivery.""
+
                 )
             else:
                 raise
@@ -322,8 +333,9 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
             pass
     
     def test_mission_critical_concurrent_user_protection(self):
-        "
-        "
+        """
+        ""
+
         DEPLOYMENT GATE 4: Concurrent users MUST not cause coroutine contamination.
         
         This validates that multiple simultaneous users don't create race conditions'
@@ -334,7 +346,8 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
 "
 "
         self.logger.info( ALERT:  MISSION CRITICAL: Validating concurrent user protection)"
-        self.logger.info( ALERT:  MISSION CRITICAL: Validating concurrent user protection)"
+        self.logger.info( ALERT:  MISSION CRITICAL: Validating concurrent user protection)""
+
         
         # Simulate multiple concurrent users (realistic production load)
         concurrent_users = []
@@ -387,20 +400,22 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
             len(concurrent_users),
             f"DEPLOYMENT BLOCKER: Only {successful_validations}/{len(concurrent_users)}"
             fconcurrent users succeeded. All must succeed for production readiness."
-            fconcurrent users succeeded. All must succeed for production readiness."
+            fconcurrent users succeeded. All must succeed for production readiness.""
+
         )
         
         self.logger.info( PASS:  MISSION CRITICAL SUCCESS: Concurrent user protection validated)
     
     def test_mission_critical_deployment_readiness_summary(self):
-        ""
+        """
+
         DEPLOYMENT GATE SUMMARY: Overall system readiness validation.
         
         This provides a final summary of all critical validations, ensuring
         the WebSocket coroutine error is completely resolved and the chat
         system is production-ready.
         
-        BUSINESS IMPACT: Final validation of $500K+ ARR chat system stability.
+        BUSINESS IMPACT: Final validation of $500K+ plus ARR chat system stability.
         DEPLOYMENT: Final gate - comprehensive readiness check.
 
         self.logger.info(" ALERT:  MISSION CRITICAL: Final deployment readiness validation)"
@@ -446,7 +461,8 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
             
         except AttributeError as e:
             if coroutine in str(e):"
-            if coroutine in str(e):"
+            if coroutine in str(e):""
+
                 self.fail(
                     f"DEPLOYMENT BLOCKER: Final readiness check failed with coroutine error: {e}."
                     fSystem is NOT production-ready.
@@ -466,8 +482,8 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
         
         # SUCCESS: System is production ready
         self.logger.info(f PASS:  MISSION CRITICAL SUCCESS: Deployment readiness validated)
-        self.logger.info(f" TARGET:  BUSINESS OUTCOME: $500K+ ARR chat functionality protected)"
-        self.logger.info(f[U+23F1][U+FE0F] Test Duration: {test_duration:.2f}s")"
+        self.logger.info(f" TARGET:  BUSINESS OUTCOME: $500K+ plus ARR chat functionality protected)"
+        self.logger.info(f[U+23F1][U+FE0F] Test Duration: {test_duration:.""2f""}s")"
         self.logger.info(f[U+1F680] DEPLOYMENT STATUS: APPROVED - WebSocket coroutine error resolved)
     
     def _create_concurrent_user_context(self, user_num: int) -> UserExecutionContext:
@@ -485,7 +501,7 @@ class WebSocketImportCollisionPreventionTests(SSotAsyncTestCase):
         total_duration = time.time() - self.test_start_time
         self.logger.info([U+1F3C1] MISSION CRITICAL COMPLETE: WebSocket import collision prevention finished)"
         self.logger.info([U+1F3C1] MISSION CRITICAL COMPLETE: WebSocket import collision prevention finished)"
-        self.logger.info(f[U+23F1][U+FE0F] Total Mission Critical Duration: {total_duration:.2f}s")"
+        self.logger.info(f[U+23F1][U+FE0F] Total Mission Critical Duration: {total_duration:.""2f""}s")"
 
 
 if __name__ == '__main__':
@@ -500,7 +516,7 @@ if __name__ == '__main__':
     
     print( ALERT:  MISSION CRITICAL: WebSocket Coroutine Error Prevention Test)"
     print( ALERT:  MISSION CRITICAL: WebSocket Coroutine Error Prevention Test)"
-    print( TARGET:  PURPOSE: Deployment gate for $500K+ ARR chat functionality")"
+    print( TARGET:  PURPOSE: Deployment gate for $500K+ plus ARR chat functionality")"
     print( WARNING: [U+FE0F] REQUIREMENT: This test MUST PASS for production deployment")"
     print()
     

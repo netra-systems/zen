@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """
-"""
+
 Mission Critical Test Suite: Tool Dispatcher SSOT Compliance
 
 Business Value: Platform/Internal - System Reliability & SSOT Compliance
-Critical for $500K+ ARR protection through tool dispatcher SSOT compliance.
+Critical for $500K+ plus ARR protection through tool dispatcher SSOT compliance.
 
 This test suite validates:
-1. Single tool dispatcher implementation pattern (UnifiedToolDispatcher)
+    1. Single tool dispatcher implementation pattern (UnifiedToolDispatcher)
 """
 """
+
 2. No direct imports bypassing UniversalRegistry
 3. Factory pattern usage for user isolation
 4. WebSocket event delivery through proper channels
@@ -20,7 +21,8 @@ The tests FAIL with current violations and PASS after SSOT fixes.
 Author: Claude Code SSOT Compliance Test Generator
 Date: 2025-9-10
 "
-"
+""
+
 
 import asyncio
 import ast
@@ -91,14 +93,16 @@ class ToolDispatcherSSotComplianceTests:
         self.source_dirs = [
             self.project_root / netra_backend / app,
             self.project_root / tests"
-            self.project_root / tests"
+            self.project_root / tests""
+
         ]
         self.tool_dispatcher_files = []
         self.violations = []
 
     def test_single_tool_dispatcher_implementation(self):
-    "
-    "
+        """
+    ""
+
         CRITICAL: Test that only ONE tool dispatcher implementation exists.
         
         Current State: SHOULD FAIL - Multiple implementations exist:
@@ -108,17 +112,20 @@ class ToolDispatcherSSotComplianceTests:
         
         Expected After Fix: SHOULD PASS - Only UnifiedToolDispatcher exists
         "
-        "
+        ""
+
         tool_dispatcher_classes = self._find_tool_dispatcher_classes()
         
         # This test MUST FAIL currently due to multiple implementations
         if len(tool_dispatcher_classes) == 1:
             raise AssertionError(
                 TEST VALIDATION ERROR: Expected to find multiple ToolDispatcher "
-                TEST VALIDATION ERROR: Expected to find multiple ToolDispatcher "
+                TEST VALIDATION ERROR: Expected to find multiple ToolDispatcher ""
+
                 fimplementations (violations), but found only: {tool_dispatcher_classes}. 
                 This suggests SSOT violations have already been fixed, or test is incorrect."
-                This suggests SSOT violations have already been fixed, or test is incorrect."
+                This suggests SSOT violations have already been fixed, or test is incorrect.""
+
             )
         
         # Document current violations
@@ -208,14 +215,16 @@ class ToolDispatcherSSotComplianceTests:
             )
 
     async def test_factory_pattern_enforcement(self):
-        "
-        "
+        """
+        ""
+
         CRITICAL: Test that tool dispatchers use factory patterns for user isolation.
         
         Current State: SHOULD FAIL - Direct instantiation exists
         Expected After Fix: SHOULD PASS - Only factory methods used
 "
-"
+""
+
         direct_instantiation_violations = self._find_direct_instantiation_patterns()
         
         # This test MUST FAIL currently due to direct instantiation
@@ -238,7 +247,8 @@ class ToolDispatcherSSotComplianceTests:
             )
 
     async def test_websocket_event_ssot_compliance(self):
-        ""
+        """
+
         CRITICAL: Test that WebSocket events flow through SSOT channels.
         
         Current State: SHOULD FAIL - Multiple event channels exist
@@ -252,7 +262,8 @@ class ToolDispatcherSSotComplianceTests:
                 "TEST VALIDATION ERROR: Expected to find WebSocket event violations "
                 (multiple channels), but found none. This suggests SSOT violations 
                 have already been fixed, or test is scanning incorrectly."
-                have already been fixed, or test is scanning incorrectly."
+                have already been fixed, or test is scanning incorrectly.""
+
             )
         
         # Document violations
@@ -263,7 +274,8 @@ class ToolDispatcherSSotComplianceTests:
         if not len(websocket_violations) > 0:
             raise AssertionError(
                 fSSOT VIOLATION DETECTED: Found {len(websocket_violations)} "
-                fSSOT VIOLATION DETECTED: Found {len(websocket_violations)} "
+                fSSOT VIOLATION DETECTED: Found {len(websocket_violations)} ""
+
                 fWebSocket event violations: {websocket_violations}
             )
 
@@ -308,7 +320,7 @@ class ToolDispatcherSSotComplianceTests:
         print(f\n{'='*80})
         print(fTOOL DISPATCHER SSOT COMPLIANCE REPORT")"
         print(f{'='*80})
-        print(fOverall Compliance Score: {compliance_score:.1f}%")"
+        print(fOverall Compliance Score: {compliance_score:.""1f""}%")"
         print(fTotal Violations: {total_count})
         print(fCritical Violations: {critical_count}")"
         print(fHigh Violations: {high_count})
@@ -327,7 +339,8 @@ class ToolDispatcherSSotComplianceTests:
 
     def _find_tool_dispatcher_classes(self) -> List[Dict[str, Any]]:
         Find all tool dispatcher class definitions."
-        Find all tool dispatcher class definitions."
+        Find all tool dispatcher class definitions.""
+
         tool_dispatcher_classes = []
         
         for source_dir in self.source_dirs:
@@ -354,7 +367,8 @@ class ToolDispatcherSSotComplianceTests:
 
     def _find_direct_tool_dispatcher_imports(self) -> List[ToolDispatcherViolation]:
         Find direct imports of tool dispatcher classes."
-        Find direct imports of tool dispatcher classes."
+        Find direct imports of tool dispatcher classes.""
+
         violations = []
         
         for source_dir in self.source_dirs:
@@ -379,7 +393,8 @@ class ToolDispatcherSSotComplianceTests:
                                 severity=HIGH,
                                 code_snippet=line,
                                 business_impact=Bypasses SSOT pattern, creates maintenance issues"
-                                business_impact=Bypasses SSOT pattern, creates maintenance issues"
+                                business_impact=Bypasses SSOT pattern, creates maintenance issues""
+
                             ))
                             
                 except Exception as e:
@@ -436,7 +451,8 @@ class ToolDispatcherSSotComplianceTests:
         
         for source_dir in self.source_dirs:
             for py_file in source_dir.rglob(*.py):"
-            for py_file in source_dir.rglob(*.py):"
+            for py_file in source_dir.rglob(*.py):""
+
                 try:
                     with open(py_file, 'r', encoding='utf-8') as f:
                         content = f.read()
@@ -473,7 +489,8 @@ class ToolDispatcherSSotComplianceTests:
             notify_tool_completed","
             websocket_bridge,
             websocket_manager"
-            websocket_manager"
+            websocket_manager""
+
         ]
         
         # Track which files use which patterns
@@ -535,6 +552,7 @@ if __name__ == __main__:
     # Generate report
     report = test_case.test_generate_ssot_compliance_report()
     print(f\nCompliance Score: {report.overall_compliance_score:.1f}%"")"
-    print(f\nCompliance Score: {report.overall_compliance_score:.1f}%"")"
+    print(f\nCompliance Score: {report.overall_compliance_score:."1f"}%"")""
+
 
 )))))))))

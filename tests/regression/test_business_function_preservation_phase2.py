@@ -376,8 +376,8 @@ class BusinessFunctionPreservationPhase2Tests(SSotBaseTestCase):
                 })
 
         print(f"  📊 Agent workflow execution results:")
-        print(f"     ✅ Successful workflows: {len(successful_workflows)}")
-        print(f"     ❌ Failed workflows: {len(workflow_failures)}")
+        print(f"     CHECK Successful workflows: {len(successful_workflows)}")
+        print(f"     X Failed workflows: {len(workflow_failures)}")
 
         # Validate workflow quality
         for workflow_result in successful_workflows:
@@ -411,7 +411,7 @@ class BusinessFunctionPreservationPhase2Tests(SSotBaseTestCase):
 
         print(f"  🚨 Workflow failure summary:")
         for failure in workflow_failures:
-            print(f"     ❌ {failure['failure_type']}: {failure['user_id']}")
+            print(f"     X {failure['failure_type']}: {failure['user_id']}")
             print(f"        {failure['error']}")
 
         self.business_function_results['agent_workflows'] = {
@@ -424,7 +424,7 @@ class BusinessFunctionPreservationPhase2Tests(SSotBaseTestCase):
         self.assertEqual(
             len(workflow_failures),
             0,
-            f"✅ AGENT WORKFLOW PRESERVATION: Found {len(workflow_failures)} workflow failures. "
+            f"CHECK AGENT WORKFLOW PRESERVATION: Found {len(workflow_failures)} workflow failures. "
             f"Expected 0 for business function preservation. "
             f"Agent workflows are CRITICAL for $500K+ ARR business value."
         )
@@ -520,8 +520,8 @@ class BusinessFunctionPreservationPhase2Tests(SSotBaseTestCase):
                 })
 
         print(f"  📊 WebSocket event delivery results:")
-        print(f"     ✅ Successful event deliveries: {len(successful_event_deliveries)}")
-        print(f"     ❌ Failed event deliveries: {len(event_delivery_failures)}")
+        print(f"     CHECK Successful event deliveries: {len(successful_event_deliveries)}")
+        print(f"     X Failed event deliveries: {len(event_delivery_failures)}")
 
         # Validate critical events for each user
         for event_result in successful_event_deliveries:
@@ -564,7 +564,7 @@ class BusinessFunctionPreservationPhase2Tests(SSotBaseTestCase):
 
         print(f"  🚨 WebSocket event delivery failure summary:")
         for failure in event_delivery_failures:
-            print(f"     ❌ {failure['failure_type']}: {failure['user_id']}")
+            print(f"     X {failure['failure_type']}: {failure['user_id']}")
             print(f"        {failure['error']}")
 
         # Validate overall event delivery statistics
@@ -593,7 +593,7 @@ class BusinessFunctionPreservationPhase2Tests(SSotBaseTestCase):
         self.assertEqual(
             len(event_delivery_failures),
             0,
-            f"✅ WEBSOCKET EVENT PRESERVATION: Found {len(event_delivery_failures)} event delivery failures. "
+            f"CHECK WEBSOCKET EVENT PRESERVATION: Found {len(event_delivery_failures)} event delivery failures. "
             f"Expected 0 for chat functionality preservation. "
             f"WebSocket events are CRITICAL for chat UX ($500K+ ARR)."
         )
@@ -705,8 +705,8 @@ class BusinessFunctionPreservationPhase2Tests(SSotBaseTestCase):
                 })
 
         print(f"  📊 Multi-user chat functionality results:")
-        print(f"     ✅ Successful chat sessions: {len(concurrent_user_results)}")
-        print(f"     ❌ Failed chat sessions: {len(multi_user_failures)}")
+        print(f"     CHECK Successful chat sessions: {len(concurrent_user_results)}")
+        print(f"     X Failed chat sessions: {len(multi_user_failures)}")
 
         # Validate chat session quality and isolation
         user_session_data = {}
@@ -776,7 +776,7 @@ class BusinessFunctionPreservationPhase2Tests(SSotBaseTestCase):
 
         print(f"  🚨 Multi-user chat failure summary:")
         for failure in multi_user_failures:
-            print(f"     ❌ {failure['failure_type']}: {failure['user_id']}")
+            print(f"     X {failure['failure_type']}: {failure['user_id']}")
             print(f"        {failure['error']}")
 
         self.business_function_results['multi_user_chat'] = {
@@ -790,7 +790,7 @@ class BusinessFunctionPreservationPhase2Tests(SSotBaseTestCase):
         self.assertEqual(
             len(multi_user_failures),
             0,
-            f"✅ MULTI-USER CHAT PRESERVATION: Found {len(multi_user_failures)} multi-user chat failures. "
+            f"CHECK MULTI-USER CHAT PRESERVATION: Found {len(multi_user_failures)} multi-user chat failures. "
             f"Expected 0 for concurrent user support preservation. "
             f"Multi-user chat is CRITICAL for business scalability ($500K+ ARR)."
         )
@@ -954,8 +954,8 @@ class BusinessFunctionPreservationPhase2Tests(SSotBaseTestCase):
                 })
 
         print(f"  📊 Database operations results:")
-        print(f"     ✅ Successful database operations: {len(successful_db_operations)}")
-        print(f"     ❌ Failed database operations: {len(database_failures)}")
+        print(f"     CHECK Successful database operations: {len(successful_db_operations)}")
+        print(f"     X Failed database operations: {len(database_failures)}")
 
         # Validate database integrity and isolation
         session_ids = set()
@@ -1001,7 +1001,7 @@ class BusinessFunctionPreservationPhase2Tests(SSotBaseTestCase):
 
         print(f"  🚨 Database operation failure summary:")
         for failure in database_failures:
-            print(f"     ❌ {failure['failure_type']}: {failure['user_id']}")
+            print(f"     X {failure['failure_type']}: {failure['user_id']}")
             print(f"        {failure['error']}")
 
         self.business_function_results['database_operations'] = {
@@ -1016,7 +1016,7 @@ class BusinessFunctionPreservationPhase2Tests(SSotBaseTestCase):
         self.assertEqual(
             len(database_failures),
             0,
-            f"✅ DATABASE OPERATIONS PRESERVATION: Found {len(database_failures)} database operation failures. "
+            f"CHECK DATABASE OPERATIONS PRESERVATION: Found {len(database_failures)} database operation failures. "
             f"Expected 0 for data integrity preservation. "
             f"Database operations are CRITICAL for persistent state management."
         )
@@ -1105,13 +1105,13 @@ class BusinessFunctionPreservationPhase2Tests(SSotBaseTestCase):
 
         print(f"\n📊 COMPONENT ANALYSIS:")
         for component, score_data in comprehensive_analysis['component_scores'].items():
-            status_icon = "✅" if score_data['status'] == 'PASS' else "❌"
+            status_icon = "CHECK" if score_data['status'] == 'PASS' else "X"
             print(f"  {status_icon} {component.replace('_', ' ').title()}: {score_data['success_rate']:.1f}%")
 
         if comprehensive_analysis['critical_failures']:
             print(f"\n🚨 CRITICAL BUSINESS FAILURES:")
             for failure in comprehensive_analysis['critical_failures']:
-                print(f"  ❌ {failure['component']}: {failure['success_rate']:.1f}% success rate")
+                print(f"  X {failure['component']}: {failure['success_rate']:.1f}% success rate")
                 print(f"     💼 {failure['business_impact']}")
 
         # Calculate estimated revenue impact
@@ -1127,7 +1127,7 @@ class BusinessFunctionPreservationPhase2Tests(SSotBaseTestCase):
         self.assertGreaterEqual(
             overall_rate,
             95.0,
-            f"✅ COMPREHENSIVE BUSINESS FUNCTION PRESERVATION: Overall success rate {overall_rate:.1f}%. "
+            f"CHECK COMPREHENSIVE BUSINESS FUNCTION PRESERVATION: Overall success rate {overall_rate:.1f}%. "
             f"Required ≥95% for safe factory cleanup. "
             f"Business function preservation is CRITICAL for $500K+ ARR protection."
         )

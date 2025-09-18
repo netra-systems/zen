@@ -90,9 +90,9 @@ class DockerManagerImplementationCountRefinedTests(unittest.TestCase):
         self.assertGreater(len(implementation_analysis), 0, "Should find at least one implementation")
 
         if len(types_found) > 1:
-            print(f"✅ SSOT VIOLATION: Multiple implementations with different characteristics")
+            print(f"CHECK SSOT VIOLATION: Multiple implementations with different characteristics")
         elif len(types_found) == 1 and len(implementation_analysis) > 1:
-            print(f"✅ SSOT VIOLATION: Multiple identical implementations (duplication)")
+            print(f"CHECK SSOT VIOLATION: Multiple identical implementations (duplication)")
         else:
             print(f"ℹ️  Single implementation found")
 

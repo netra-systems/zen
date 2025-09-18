@@ -1,5 +1,5 @@
 """
-"""
+
 MISSION CRITICAL: EventValidator SSOT Violation Detection Test
 
 PURPOSE: This test is DESIGNED TO FAIL initially to prove that SSOT violations exist.
@@ -11,15 +11,16 @@ Issue #231: EventValidator SSOT violations blocking Golden Path
 - Creates inconsistent behavior across the platform
 
 Expected Behavior:
-- This test SHOULD FAIL when run against current codebase
+    - This test SHOULD FAIL when run against current codebase
 - Failure proves SSOT violations exist and need consolidation
 - After SSOT migration, this test SHOULD PASS
 
 """
-"""
-Business Value Impact: $500K+ ARR at risk from inconsistent event validation
+
+Business Value Impact: $500K+ plus ARR at risk from inconsistent event validation
 "
-"
+""
+
 
 import pytest
 import sys
@@ -39,35 +40,39 @@ logger = central_logger.get_logger(__name__)
 
 class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
     "
-    "
+    ""
+
     Test that detects SSOT violations in EventValidator implementations.
     
     This test is DESIGNED TO FAIL initially to prove violations exist.
 "
-"
+""
+
     
     def setUp(self):
         super().setUp()
         self.sample_valid_event = {
             "type: agent_started,"
             run_id: test-run-123,
-            "agent_name: test-agent",
+            "agent_name: test-agent,"
             timestamp: datetime.now(timezone.utc).isoformat(),
-            payload: {"status: started", agent: test-agent}
+            payload: {"status: started, agent: test-agent}"
         }
         
         self.sample_invalid_event = {
-            "type: agent_started",
+            "type: agent_started,"
             # Missing required fields: run_id, agent_name, timestamp, payload
         }
         
         self.test_user_id = test-user-ssot-violation
         self.test_connection_id = conn-ssot-test"
-        self.test_connection_id = conn-ssot-test"
+        self.test_connection_id = conn-ssot-test""
+
         
     def test_multiple_eventvalidator_implementations_exist(self):
-    "
-    "
+        """
+    ""
+
         Test that multiple EventValidator implementations exist - proving SSOT violation.
         
         This test SHOULD FAIL, proving that SSOT violations exist.
@@ -95,7 +100,7 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
                 "criticality: unified_result.criticality.value if hasattr(unified_result.criticality, 'value') else str(unified_result.criticality)"
             }
             logger.info(f[U+2713] UnifiedEventValidator found and tested)
-            print(f"DEBUG: UnifiedEventValidator found - {unified_result.is_valid}")
+            print(f"DEBUG: UnifiedEventValidator found - {unified_result.is_valid})"
         except ImportError as e:
             logger.error(f FAIL:  Cannot import UnifiedEventValidator: {e})
             print(fDEBUG: UnifiedEventValidator import failed: {e}")"
@@ -165,7 +170,7 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             logger.critical( ALERT:  SSOT VIOLATION DETECTED: Multiple EventValidator implementations exist!)"
             logger.critical( ALERT:  SSOT VIOLATION DETECTED: Multiple EventValidator implementations exist!)"
             logger.critical(" ALERT:  This proves Issue #231: EventValidator SSOT violations)"
-            logger.critical( ALERT:  BUSINESS IMPACT: $500K+ ARR at risk from inconsistent validation)
+            logger.critical( ALERT:  BUSINESS IMPACT: $500K+ plus ARR at risk from inconsistent validation)
             
             # Test that they give different results (proving violation)
             if len(validation_results) > 1:
@@ -173,7 +178,8 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
                 unified_approach = validation_results.get("unified, {)"
                 production_approach = validation_results.get(production, {)
                 ssot_framework_approach = validation_results.get(ssot_framework, {)"
-                ssot_framework_approach = validation_results.get(ssot_framework, {)"
+                ssot_framework_approach = validation_results.get(ssot_framework, {)""
+
                 
                 approaches_different = False
                 if unified_approach and production_approach:
@@ -198,8 +204,9 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             )
         
     def test_eventvalidator_result_inconsistency(self):
-        "
-        "
+        """
+        ""
+
         Test that different validators give inconsistent results - proving SSOT violation.
         
         This test SHOULD FAIL, proving that validation results are inconsistent.
@@ -221,7 +228,7 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             unified_validator = UnifiedEventValidator()
             unified_result = unified_validator.validate_event(invalid_event, self.test_user_id)
             results.append({
-                validator": "UnifiedEventValidator,
+                validator": UnifiedEventValidator,"
                 is_valid: unified_result.is_valid,
                 has_business_value_score: hasattr(unified_result, 'business_value_score'),"
                 has_business_value_score: hasattr(unified_result, 'business_value_score'),"
@@ -255,7 +262,7 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             second_result = results[1]
             
             inconsistencies = []
-            if first_result["has_business_value_score] != second_result[has_business_value_score"]:
+            if first_result["has_business_value_score] != second_result[has_business_value_score]:"
                 inconsistencies.append(business_value_score capability differs)
             if first_result[has_revenue_impact] != second_result["has_revenue_impact]:"
                 inconsistencies.append(revenue_impact capability differs")"
@@ -272,12 +279,14 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
                 self.fail(
                     fSSOT VIOLATION: EventValidator implementations have inconsistent capabilities: {inconsistencies}. 
                     fThis proves Issue #231 - different validators provide different features, blocking Golden Path."
-                    fThis proves Issue #231 - different validators provide different features, blocking Golden Path."
+                    fThis proves Issue #231 - different validators provide different features, blocking Golden Path.""
+
                 )
         
     def test_golden_path_impact_validation(self):
-    "
-    "
+        """
+    ""
+
         Test that SSOT violations impact Golden Path functionality.
         
         This validates the 5 critical events are handled consistently.
@@ -319,7 +328,8 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             production_validator = WebSocketEventValidator()
             production_critical = production_validator.MISSION_CRITICAL_EVENTS
             validator_support[production] = production_critical"
-            validator_support[production] = production_critical"
+            validator_support[production] = production_critical""
+
         except Exception as e:
             logger.error(f"Production validator critical events test failed: {e})"
             
@@ -331,7 +341,7 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
             if len(set(str(sorted(events)) for events in event_support_sets)) > 1:
                 logger.critical( ALERT:  GOLDEN PATH VIOLATION: Different validators support different critical events!)"
                 logger.critical( ALERT:  GOLDEN PATH VIOLATION: Different validators support different critical events!)"
-                logger.critical( ALERT:  This directly impacts $500K+ ARR chat functionality")"
+                logger.critical( ALERT:  This directly impacts $500K+ plus ARR chat functionality")"
                 logger.critical( ALERT:  Critical events must be consistently validated across all implementations)
                 
                 # Show the differences
@@ -341,7 +351,7 @@ class EventValidatorSSOTViolationsTests(SSotBaseTestCase):
                 # FAIL TO PROVE GOLDEN PATH IMPACT
                 self.fail(
                     fGOLDEN PATH VIOLATION: EventValidator implementations support different critical events. 
-                    fThis blocks consistent $500K+ ARR chat functionality. 
+                    fThis blocks consistent $500K+ plus ARR chat functionality. 
                     f"Validator support: {validator_support}"
                 )
 

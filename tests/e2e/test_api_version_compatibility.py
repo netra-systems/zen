@@ -39,29 +39,29 @@ versioning_failures = []
         # Test different API version formats
 version_test_cases = [ ]
 { }
-"version": "current",
-"header_format": "Accept-Version",
+"version": "current,"
+"header_format": "Accept-Version,"
 "expected_response_header": "API-Version"
 },
 { }
-"version": "1.0",
-"header_format": "API-Version",
+"version": "1.0,"
+"header_format": "API-Version,"
 "expected_response_header": "API-Version"
 },
 { }
-"version": "2024-8-1",
-"header_format": "Accept-Version",
+"version": "2024-8-1,"
+"header_format": "Accept-Version,"
 "expected_response_header": "API-Version"
         
         
 
 async with aiohttp.ClientSession() as session:
-    print(" CYCLE:  Testing API version negotiation...")
+    print(" CYCLE:  Testing API version negotiation...)"
 
 for test_case in version_test_cases:
-version_str = test_case["version"]
-header_format = test_case["header_format"]
-expected_header = test_case["expected_response_header"]
+version_str = test_case["version]"
+header_format = test_case["header_format]"
+expected_header = test_case["expected_response_header]"
 
 print("")
 
@@ -90,16 +90,16 @@ if response.status == 200:
 data = await response.json()
 
                                     # Current API should have proper format
-if version_str == "current":
+if version_str == "current:"
     pass
-if "status" not in data:
+if "status not in data:"
     pass
-versioning_failures.append("Current API should include 'status' field")
+versioning_failures.append("Current API should include 'status' field)"
 
                                             # Newer versions should have extended format
-elif version_str in ["1.0", "2024-8-1"]:
+elif version_str in ["1.0", "2024-8-1]:"
     pass
-if "version_info" not in data:
+if "version_info not in data:"
     pass
 versioning_failures.append("")
 else:
@@ -134,7 +134,7 @@ versioning_failures.append("")
 
 if versioning_failures:
     pass
-failure_report = [" CYCLE:  API Version Negotiation Failures:"]
+failure_report = [" CYCLE:  API Version Negotiation Failures:]"
 for failure in versioning_failures:
 failure_report.append("")
 
@@ -142,7 +142,7 @@ pytest.fail(f"API version negotiation test failed: )"
 " + "
 ".join(failure_report))"
 
-print(" PASS:  API version negotiation test passed")
+print(" PASS:  API version negotiation test passed)"
 
 
 @pytest.mark.e2e
@@ -160,41 +160,41 @@ compatibility_failures = []
                                                                                             # Define deprecated endpoints that should still work
 deprecated_endpoints = [ ]
 { }
-"path": "/api/user/profile",
-"method": "GET",
-"new_path": "/api/user/profile",
-"deprecated_version": "legacy",
+"path": "/api/user/profile,"
+"method": "GET,"
+"new_path": "/api/user/profile,"
+"deprecated_version": "legacy,"
 "current_version": "current"
 },
 { }
-"path": "/api/threads",
-"method": "GET",
-"new_path": "/api/threads",
-"deprecated_version": "legacy",
+"path": "/api/threads,"
+"method": "GET,"
+"new_path": "/api/threads,"
+"deprecated_version": "legacy,"
 "current_version": "current"
 },
 { }
-"path": "/api/agent/run_agent",
-"method": "POST",
-"new_path": "/api/agent/run_agent",
-"deprecated_version": "legacy",
+"path": "/api/agent/run_agent,"
+"method": "POST,"
+"new_path": "/api/agent/run_agent,"
+"deprecated_version": "legacy,"
 "current_version": "current"
                                                                                             
                                                                                             
 
 async with aiohttp.ClientSession() as session:
-    print(" WARNING: [U+FE0F] Testing backward compatibility for deprecated endpoints...")
+    print(" WARNING: [U+FE0F] Testing backward compatibility for deprecated endpoints...)"
 
 for endpoint in deprecated_endpoints:
-path = endpoint["path"]
-method = endpoint["method"].upper()
-new_path = endpoint["new_path"]
+path = endpoint["path]"
+method = endpoint["method].upper()"
+new_path = endpoint["new_path]"
 
 print("")
 
 try:
                                                                                                         # Test deprecated endpoint
-if method == "GET":
+if method == "GET:"
     pass
 async with session.get( )
 "",
@@ -202,9 +202,9 @@ timeout=aiohttp.ClientTimeout(total=10)
 ) as response:
 await _check_deprecated_response(response, endpoint, compatibility_failures)
 
-elif method == "POST":
+elif method == "POST:"
     pass
-test_data = {"test": "data"}
+test_data = {"test": "data}"
 async with session.post( )
 "",
 json=test_data,
@@ -219,7 +219,7 @@ compatibility_failures.append("")
                                                                                                                             # Test that new endpoint also works
 try:
     pass
-if method == "GET":
+if method == "GET:"
     pass
 async with session.get( )
 "",
@@ -237,7 +237,7 @@ compatibility_failures.append("")
 
 if compatibility_failures:
     pass
-failure_report = [" WARNING: [U+FE0F] Backward Compatibility Failures:"]
+failure_report = [" WARNING: [U+FE0F] Backward Compatibility Failures:]"
 for failure in compatibility_failures:
 failure_report.append("")
 
@@ -245,20 +245,20 @@ pytest.fail(f"Backward compatibility test failed: )"
 " + "
 ".join(failure_report))"
 
-print(" PASS:  Backward compatibility test passed")
+print(" PASS:  Backward compatibility test passed)"
 
 
 async def _check_deprecated_response(response, endpoint, compatibility_failures):
 """Helper to check deprecated endpoint response."""
-path = endpoint["path"]
+path = endpoint["path]"
 
     # Should include deprecation warning header
-if "Deprecation" not in response.headers and "X-API-Deprecation" not in response.headers:
+if "Deprecation" not in response.headers and "X-API-Deprecation not in response.headers:"
     pass
 compatibility_failures.append("")
 
         # Should include sunset/replacement information
-if "Sunset" not in response.headers and "X-API-Replacement" not in response.headers:
+if "Sunset" not in response.headers and "X-API-Replacement not in response.headers:"
     pass
 compatibility_failures.append("")
 
@@ -291,50 +291,50 @@ schema_failures = []
                         # Test different API versions with schema changes
 schema_test_cases = [ ]
 { }
-"endpoint": "/api/user/profile",
-"version": "current",
-"required_fields": ["id", "email", "name"],
-"optional_fields": [],
-"forbidden_fields": ["internal_id", "password_hash"]
+"endpoint": "/api/user/profile,"
+"version": "current,"
+"required_fields": ["id", "email", "name],"
+"optional_fields: [],"
+"forbidden_fields": ["internal_id", "password_hash]"
 },
 { }
-"endpoint": "/api/user/profile",
-"version": "v2",
-"required_fields": ["id", "email", "name", "created_at"],
-"optional_fields": ["preferences", "subscription"],
-"forbidden_fields": ["password_hash", "internal_notes"]
+"endpoint": "/api/user/profile,"
+"version": "v2,"
+"required_fields": ["id", "email", "name", "created_at],"
+"optional_fields": ["preferences", "subscription],"
+"forbidden_fields": ["password_hash", "internal_notes]"
 },
 { }
-"endpoint": "/api/threads",
-"version": "current",
-"required_fields": ["id", "title", "created_at"],
-"optional_fields": ["messages"],
-"forbidden_fields": ["internal_metadata"]
+"endpoint": "/api/threads,"
+"version": "current,"
+"required_fields": ["id", "title", "created_at],"
+"optional_fields": ["messages],"
+"forbidden_fields": ["internal_metadata]"
 },
 { }
-"endpoint": "/api/threads",
-"version": "v2",
-"required_fields": ["id", "title", "created_at", "status"],
-"optional_fields": ["messages", "agents", "metadata"],
-"forbidden_fields": ["internal_metadata", "debug_info"]
+"endpoint": "/api/threads,"
+"version": "v2,"
+"required_fields": ["id", "title", "created_at", "status],"
+"optional_fields": ["messages", "agents", "metadata],"
+"forbidden_fields": ["internal_metadata", "debug_info]"
                         
                         
 
 async with aiohttp.ClientSession() as session:
-    print("[U+1F4CB] Testing API schema evolution...")
+    print("[U+1F4CB] Testing API schema evolution...)"
 
 for test_case in schema_test_cases:
-endpoint = test_case["endpoint"]
-version = test_case["version"]
-required_fields = test_case["required_fields"]
-optional_fields = test_case["optional_fields"]
-forbidden_fields = test_case["forbidden_fields"]
+endpoint = test_case["endpoint]"
+version = test_case["version]"
+required_fields = test_case["required_fields]"
+optional_fields = test_case["optional_fields]"
+forbidden_fields = test_case["forbidden_fields]"
 
 print("")
 
 try:
     pass
-headers = {"Accept-Version": version}
+headers = {"Accept-Version: version}"
 async with session.get( )
 "",
 headers=headers,
@@ -370,12 +370,12 @@ if field in item:
 schema_failures.append("")
 
                                                                         # Ensure backward compatibility (current fields work)
-if version == "v2":
+if version == "v2:"
     pass
-current_case = next((tc for tc in schema_test_cases if tc["endpoint"] == endpoint and tc["version"] == "current"), None)
+current_case = next((tc for tc in schema_test_cases if tc["endpoint"] == endpoint and tc["version"] == "current), None)"
 if current_case:
     pass
-for current_field in current_case["required_fields"]:
+for current_field in current_case["required_fields]:"
 if current_field not in item:
     pass
 schema_failures.append("")
@@ -397,7 +397,7 @@ schema_failures.append("")
 
 if schema_failures:
     pass
-failure_report = ["[U+1F4CB] API Schema Evolution Failures:"]
+failure_report = ["[U+1F4CB] API Schema Evolution Failures:]"
 for failure in schema_failures:
 failure_report.append("")
 
@@ -405,7 +405,7 @@ pytest.fail(f"API schema evolution test failed: )"
 " + "
 ".join(failure_report))"
 
-print(" PASS:  API schema evolution test passed")
+print(" PASS:  API schema evolution test passed)"
 
 
 @pytest.mark.e2e
@@ -423,54 +423,54 @@ negotiation_failures = []
                                                                                                                     # Test different content types
 content_test_cases = [ ]
 { }
-"accept_header": "application/json",
-"expected_content_type": "application/json",
-"should_work": True
+"accept_header": "application/json,"
+"expected_content_type": "application/json,"
+"should_work: True"
 },
 { }
-"accept_header": "application/vnd.api+json",
-"expected_content_type": "application/vnd.api+json",
-"should_work": False  # May not be implemented yet
+"accept_header": "application/vnd.api+json,"
+"expected_content_type": "application/vnd.api+json,"
+"should_work: False  # May not be implemented yet"
 },
 { }
-"accept_header": "text/xml",
-"expected_content_type": "text/xml",
-"should_work": False  # May not be implemented yet
+"accept_header": "text/xml,"
+"expected_content_type": "text/xml,"
+"should_work: False  # May not be implemented yet"
 },
 { }
-"accept_header": "application/hal+json",
-"expected_content_type": "application/hal+json",
-"should_work": False  # May not be implemented yet
+"accept_header": "application/hal+json,"
+"expected_content_type": "application/hal+json,"
+"should_work: False  # May not be implemented yet"
                                                                                                                     
                                                                                                                     
 
 test_endpoints = [ ]
-"/api/health",
-"/api/user/profile",
+"/api/health,"
+"/api/user/profile,"
 "/api/threads"
                                                                                                                     
 
 async with aiohttp.ClientSession() as session:
-    print(" CYCLE:  Testing content negotiation...")
+    print(" CYCLE:  Testing content negotiation...)"
 
 for endpoint in test_endpoints:
 for test_case in content_test_cases:
-accept_header = test_case["accept_header"]
-expected_content_type = test_case["expected_content_type"]
-should_work = test_case["should_work"]
+accept_header = test_case["accept_header]"
+expected_content_type = test_case["expected_content_type]"
+should_work = test_case["should_work]"
 
 print("")
 
 try:
     pass
-headers = {"Accept": accept_header}
+headers = {"Accept: accept_header}"
 async with session.get( )
 "",
 headers=headers,
 timeout=aiohttp.ClientTimeout(total=10)
 ) as response:
 
-actual_content_type = response.headers.get("Content-Type", "").split(";")[0]
+actual_content_type = response.headers.get("Content-Type", "").split(";)[0]"
 
 if should_work:
     pass
@@ -499,7 +499,7 @@ negotiation_failures.append("")
 
 if negotiation_failures:
     pass
-failure_report = [" CYCLE:  Content Negotiation Failures:"]
+failure_report = [" CYCLE:  Content Negotiation Failures:]"
 for failure in negotiation_failures:
 failure_report.append("")
 
@@ -507,9 +507,9 @@ pytest.fail(f"Content negotiation test failed: )"
 " + "
 ".join(failure_report))"
 
-print(" PASS:  Content negotiation test passed")
+print(" PASS:  Content negotiation test passed)"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
-pytest.main([__file__, "-v", "--tb=short"])
+pytest.main([__file__, "-v", "--tb=short])"

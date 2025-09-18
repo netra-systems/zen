@@ -134,7 +134,7 @@ class WebSocketManagerFactoryConsolidationTests(SSotBaseTestCase):
                             logger.error(f"  Expected SSOT module: unified_manager")
 
                 except Exception as e:
-                    logger.warning(f"⚠️ Could not test factory {factory_name}: {e}")
+                    logger.warning(f"WARNING️ Could not test factory {factory_name}: {e}")
                     delegation_violations.append({
                         'factory_name': factory_name,
                         'violation_type': 'factory_test_failure',
@@ -181,7 +181,7 @@ class WebSocketManagerFactoryConsolidationTests(SSotBaseTestCase):
                         }
 
                 except Exception as e:
-                    logger.warning(f"⚠️ Could not get instance from factory {factory_name}: {e}")
+                    logger.warning(f"WARNING️ Could not get instance from factory {factory_name}: {e}")
 
         # Analyze instance sharing
         if len(factory_instances) > 1:
@@ -244,7 +244,7 @@ class WebSocketManagerFactoryConsolidationTests(SSotBaseTestCase):
                             }
 
                     except Exception as e:
-                        logger.warning(f"⚠️ Could not test context binding for {factory_name} with {context}: {e}")
+                        logger.warning(f"WARNING️ Could not test context binding for {factory_name} with {context}: {e}")
 
                 # Analyze user context isolation
                 if len(context_instances) > 1:
@@ -337,12 +337,12 @@ class WebSocketManagerFactoryConsolidationTests(SSotBaseTestCase):
                         'parameters': list(parameters.keys())
                     }
 
-                    logger.info(f"✓ Factory analysis: {factory_name}")
+                    logger.info(f"CHECK Factory analysis: {factory_name}")
                     logger.info(f"  Signature: {signature}")
                     logger.info(f"  User context parameter: {has_user_context}")
 
                 except Exception as e:
-                    logger.warning(f"⚠️ Could not analyze factory {factory_name}: {e}")
+                    logger.warning(f"WARNING️ Could not analyze factory {factory_name}: {e}")
 
         # Log injection pattern analysis
         logger.info("📊 Factory Dependency Injection Analysis:")
@@ -366,12 +366,12 @@ class WebSocketManagerFactoryConsolidationTests(SSotBaseTestCase):
                     factory_func = getattr(module, function_name)
                     factory_key = f"{module_path}.{function_name}"
                     self.factory_functions[factory_key] = factory_func
-                    logger.info(f"✓ Loaded factory function: {factory_key}")
+                    logger.info(f"CHECK Loaded factory function: {factory_key}")
                 else:
-                    logger.warning(f"⚠️ Function {function_name} not found in {module_path}")
+                    logger.warning(f"WARNING️ Function {function_name} not found in {module_path}")
                     self.factory_functions[f"{module_path}.{function_name}"] = None
             except ImportError as e:
-                logger.warning(f"⚠️ Could not import {module_path}: {e}")
+                logger.warning(f"WARNING️ Could not import {module_path}: {e}")
                 self.factory_functions[f"{module_path}.{function_name}"] = None
 
     def _test_sync_factory_delegation(self, factory_func, user_context):
@@ -438,7 +438,7 @@ class WebSocketManagerFactoryConsolidationTests(SSotBaseTestCase):
                 logger.error(f"🚨 TOTAL FACTORY VIOLATIONS: {total_violations}")
                 logger.error("💡 Factory consolidation required for SSOT compliance")
             else:
-                logger.info("✅ No factory violations detected - delegation patterns are SSOT compliant")
+                logger.info("CHECK No factory violations detected - delegation patterns are SSOT compliant")
 
         super().teardown_method(method)
 

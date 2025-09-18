@@ -8,17 +8,17 @@ Business Value: $500K+ ARR - Ensures complete user journey works after SSOT cons
 
 PURPOSE:
 - Validate complete Golden Path user journey with SSOT WebSocket manager
-- Test end-to-end flow: User Login → Agent Execution → AI Response → Event Delivery
+- Test end-to-end flow: User Login -> Agent Execution -> AI Response -> Event Delivery
 - Verify all 5 critical WebSocket events delivered in correct sequence
 - Test real-time user experience with SSOT unified WebSocket manager
 - Validate no degradation in Golden Path functionality post-SSOT
 
 GOLDEN PATH FLOW VALIDATION:
-1. User Authentication → agent_started event
-2. AI Analysis → agent_thinking event  
-3. Tool Execution → tool_executing event
-4. Tool Results → tool_completed event
-5. Final Response → agent_completed event
+1. User Authentication -> agent_started event
+2. AI Analysis -> agent_thinking event  
+3. Tool Execution -> tool_executing event
+4. Tool Results -> tool_completed event
+5. Final Response -> agent_completed event
 
 TEST STRATEGY:
 1. Simulate complete user journey from login to AI response
@@ -227,7 +227,7 @@ class MockGoldenPathSupervisor:
             
             self.events_sent.append(event_record)
             
-            logger.info(f"Golden Path Stage: {stage.value} → {event_type} (seq: {sequence_number})")
+            logger.info(f"Golden Path Stage: {stage.value} -> {event_type} (seq: {sequence_number})")
             
         except Exception as e:
             logger.error(f"Golden Path stage {stage.value} failed: {e}")
@@ -331,7 +331,7 @@ class WebSocketSSotGoldenPathE2EValidationTests(SSotAsyncTestCase):
             # Validate user experience quality
             await self._validate_golden_path_user_experience(golden_path_supervisor)
             
-            logger.info(f"✅ Golden Path E2E validation successful: "
+            logger.info(f"CHECK Golden Path E2E validation successful: "
                        f"{golden_path_result['stages_completed']} stages, "
                        f"{golden_path_result['events_sent']} events, "
                        f"{self.golden_path_metrics['total_duration']:.2f}s")
@@ -417,7 +417,7 @@ class WebSocketSSotGoldenPathE2EValidationTests(SSotAsyncTestCase):
             # Validate user isolation
             await self._validate_concurrent_golden_path_isolation(concurrent_journeys)
             
-            logger.info(f"✅ Concurrent Golden Path validation successful: "
+            logger.info(f"CHECK Concurrent Golden Path validation successful: "
                        f"{successful_journeys}/{num_concurrent_users} users completed journey in {concurrent_duration:.2f}s")
             
         except Exception as e:
@@ -459,11 +459,11 @@ class WebSocketSSotGoldenPathE2EValidationTests(SSotAsyncTestCase):
             # Validate graceful degradation
             if recovery_result['status'] == 'golden_path_success':
                 # Full recovery - ideal outcome
-                logger.info("✅ Golden Path achieved full error recovery")
+                logger.info("CHECK Golden Path achieved full error recovery")
                 
             elif recovery_result.get('stages_completed', 0) >= 3:
                 # Partial success - acceptable degradation
-                logger.info(f"✅ Golden Path achieved partial recovery: {recovery_result['stages_completed']} stages")
+                logger.info(f"CHECK Golden Path achieved partial recovery: {recovery_result['stages_completed']} stages")
                 
                 # At least core functionality should work
                 assert recovery_result['events_sent'] >= 3, (
@@ -479,7 +479,7 @@ class WebSocketSSotGoldenPathE2EValidationTests(SSotAsyncTestCase):
                     f"BUSINESS IMPACT: Users get no value when system has issues."
                 )
             
-            logger.info("✅ Golden Path error recovery validation successful")
+            logger.info("CHECK Golden Path error recovery validation successful")
             
         except Exception as e:
             pytest.fail(f"CRITICAL: Golden Path error recovery validation failed: {e}")
@@ -722,10 +722,10 @@ class WebSocketSSotGoldenPathE2EValidationTests(SSotAsyncTestCase):
         # Final validation status
         if (self.golden_path_metrics.get('total_duration', 0) > 0 and 
             len(self.golden_path_metrics['events_delivered']) >= 5):
-            logger.info("✅ GOLDEN PATH E2E VALIDATION: SUCCESSFUL")
+            logger.info("CHECK GOLDEN PATH E2E VALIDATION: SUCCESSFUL")
             logger.info("🚀 BUSINESS VALUE CONFIRMED: Users can login and get complete AI responses")
         else:
-            logger.warning("⚠️ GOLDEN PATH E2E VALIDATION: INCOMPLETE")
+            logger.warning("WARNING️ GOLDEN PATH E2E VALIDATION: INCOMPLETE")
         
         super().teardown_method(method)
 

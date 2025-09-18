@@ -136,13 +136,13 @@ class RuntimeValidationTests(SSotAsyncTestCase):
         if violations:
             print("   Runtime Violations:")
             for violation in violations:
-                print(f"      ❌ {violation}")
+                print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - Runtime violations detected
         self.assertGreater(
             len(violations),
             0,
-            f"❌ SSOT VIOLATION: Found {len(violations)} runtime execution engine violations. "
+            f"X SSOT VIOLATION: Found {len(violations)} runtime execution engine violations. "
             f"Only {self.ssot_execution_engine} should be instantiated at runtime."
         )
 
@@ -156,13 +156,13 @@ class RuntimeValidationTests(SSotAsyncTestCase):
         if concurrent_violations:
             print("   Concurrent Usage Violations:")
             for violation in concurrent_violations:
-                print(f"      ❌ {violation}")
+                print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - Concurrent usage violations detected
         self.assertGreater(
             len(concurrent_violations),
             0,
-            f"❌ SSOT VIOLATION: Found {len(concurrent_violations)} concurrent usage violations. "
+            f"X SSOT VIOLATION: Found {len(concurrent_violations)} concurrent usage violations. "
             "Multiple engine types should not be used concurrently."
         )
 
@@ -176,13 +176,13 @@ class RuntimeValidationTests(SSotAsyncTestCase):
         if memory_violations:
             print("   Memory Violations:")
             for violation in memory_violations:
-                print(f"      ❌ {violation}")
+                print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - Memory footprint violations detected
         self.assertGreater(
             len(memory_violations),
             0,
-            f"❌ SSOT VIOLATION: Found {len(memory_violations)} memory footprint violations. "
+            f"X SSOT VIOLATION: Found {len(memory_violations)} memory footprint violations. "
             "Non-SSOT engines detected in memory."
         )
 
@@ -196,13 +196,13 @@ class RuntimeValidationTests(SSotAsyncTestCase):
         if isolation_violations:
             print("   Context Isolation Violations:")
             for violation in isolation_violations:
-                print(f"      ❌ {violation}")
+                print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - Context isolation violations detected
         self.assertGreater(
             len(isolation_violations),
             0,
-            f"❌ SSOT VIOLATION: Found {len(isolation_violations)} context isolation violations. "
+            f"X SSOT VIOLATION: Found {len(isolation_violations)} context isolation violations. "
             "Non-SSOT engines break user context isolation."
         )
 
@@ -216,13 +216,13 @@ class RuntimeValidationTests(SSotAsyncTestCase):
         if websocket_violations:
             print("   WebSocket Binding Violations:")
             for violation in websocket_violations:
-                print(f"      ❌ {violation}")
+                print(f"      X {violation}")
 
         # TEST SHOULD FAIL NOW - WebSocket binding violations detected
         self.assertGreater(
             len(websocket_violations),
             0,
-            f"❌ SSOT VIOLATION: Found {len(websocket_violations)} WebSocket binding violations. "
+            f"X SSOT VIOLATION: Found {len(websocket_violations)} WebSocket binding violations. "
             "Non-SSOT engines detected in WebSocket event delivery."
         )
 

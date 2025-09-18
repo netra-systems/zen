@@ -252,18 +252,18 @@ if __name__ == "__main__":
     
     try:
         test_detect_broken_user_execution_engine_imports()
-        print("✅ Import path detection test PASSED")
+        print("CHECK Import path detection test PASSED")
     except AssertionError as e:
-        print(f"❌ Import path detection test FAILED: {e}")
+        print(f"X Import path detection test FAILED: {e}")
     
     try:
         test_user_execution_engine_import_validation()
-        print("✅ Import validation test PASSED") 
+        print("CHECK Import validation test PASSED") 
     except AssertionError as e:
-        print(f"❌ Import validation test FAILED: {e}")
+        print(f"X Import validation test FAILED: {e}")
         
     try:
         test_execution_engine_import_patterns_across_codebase()
-        print("✅ Import patterns test PASSED")
+        print("CHECK Import patterns test PASSED")
     except AssertionError as e:
-        print(f"❌ Import patterns test FAILED: {e}")
+        print(f"X Import patterns test FAILED: {e}")

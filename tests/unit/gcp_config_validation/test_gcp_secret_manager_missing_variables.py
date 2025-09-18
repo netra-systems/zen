@@ -91,7 +91,7 @@ class GCPSecretManagerMissingVariablesTests(SSotBaseTestCase):
                    ("GEMINI_API_KEY required" in error_message), \
                 f"Missing actionable error message. Got: {error_message}"
             
-            logger.error(f"✅ EXPECTED FAILURE: {error_message}")
+            logger.error(f"CHECK EXPECTED FAILURE: {error_message}")
             logger.info("🔧 REMEDIATION: Configure 'staging-gemini-api-key' in GCP Secret Manager")
 
     def test_service_secret_missing_in_staging_fails_validation(self):
@@ -128,7 +128,7 @@ class GCPSecretManagerMissingVariablesTests(SSotBaseTestCase):
                    ("SERVICE_SECRET required" in error_message), \
                 f"Missing actionable error message. Got: {error_message}"
             
-            logger.error(f"✅ EXPECTED FAILURE: {error_message}")
+            logger.error(f"CHECK EXPECTED FAILURE: {error_message}")
             logger.info("🔧 REMEDIATION: Configure 'staging-service-secret' in GCP Secret Manager")
 
     def test_fernet_key_missing_in_staging_fails_validation(self):
@@ -159,7 +159,7 @@ class GCPSecretManagerMissingVariablesTests(SSotBaseTestCase):
                    "encryption" in error_message, \
                 f"Missing actionable error message. Got: {error_message}"
             
-            logger.error(f"✅ EXPECTED FAILURE: {error_message}")
+            logger.error(f"CHECK EXPECTED FAILURE: {error_message}")
             logger.info("🔧 REMEDIATION: Configure 'staging-fernet-key' in GCP Secret Manager")
 
     def test_oauth_client_secret_staging_missing_fails_validation(self):
@@ -190,7 +190,7 @@ class GCPSecretManagerMissingVariablesTests(SSotBaseTestCase):
                    "OAuth" in error_message, \
                 f"Missing actionable error message. Got: {error_message}"
             
-            logger.error(f"✅ EXPECTED FAILURE: {error_message}")
+            logger.error(f"CHECK EXPECTED FAILURE: {error_message}")
             logger.info("🔧 REMEDIATION: Configure 'staging-oauth-client-secret' in GCP Secret Manager")
 
     def test_redis_password_missing_in_staging_fails_validation(self):
@@ -221,7 +221,7 @@ class GCPSecretManagerMissingVariablesTests(SSotBaseTestCase):
                    "8+ characters" in error_message, \
                 f"Missing actionable error message. Got: {error_message}"
             
-            logger.error(f"✅ EXPECTED FAILURE: {error_message}")
+            logger.error(f"CHECK EXPECTED FAILURE: {error_message}")
             logger.info("🔧 REMEDIATION: Configure 'staging-redis-password' in GCP Secret Manager")
 
     def test_jwt_secret_staging_missing_fails_validation(self):
@@ -252,7 +252,7 @@ class GCPSecretManagerMissingVariablesTests(SSotBaseTestCase):
                    "Secret Manager" in error_message, \
                 f"Missing actionable error message. Got: {error_message}"
             
-            logger.error(f"✅ EXPECTED FAILURE: {error_message}")
+            logger.error(f"CHECK EXPECTED FAILURE: {error_message}")
             logger.info("🔧 REMEDIATION: Configure 'staging-jwt-secret' in GCP Secret Manager")
 
     def test_redis_host_missing_in_staging_fails_validation(self):
@@ -283,7 +283,7 @@ class GCPSecretManagerMissingVariablesTests(SSotBaseTestCase):
                    "Cannot be localhost or empty" in error_message, \
                 f"Missing actionable error message. Got: {error_message}"
             
-            logger.error(f"✅ EXPECTED FAILURE: {error_message}")
+            logger.error(f"CHECK EXPECTED FAILURE: {error_message}")
             logger.info("🔧 REMEDIATION: Configure 'staging-redis-host' in GCP Secret Manager")
 
     def test_multiple_missing_variables_comprehensive_failure(self):
@@ -324,7 +324,7 @@ class GCPSecretManagerMissingVariablesTests(SSotBaseTestCase):
             assert missing_count >= 3, \
                 f"Error should mention multiple missing variables. Found {missing_count} of {len(missing_variables)}. Got: {error_message}"
             
-            logger.error(f"✅ EXPECTED COMPREHENSIVE FAILURE: {error_message}")
+            logger.error(f"CHECK EXPECTED COMPREHENSIVE FAILURE: {error_message}")
             logger.info("🔧 REMEDIATION: Configure all missing secrets in GCP Secret Manager:")
             for var in missing_variables:
                 logger.info(f"   - {var} -> 'staging-{var.lower().replace('_', '-')}'")
@@ -360,11 +360,11 @@ class GCPSecretManagerMissingVariablesTests(SSotBaseTestCase):
                     validator = CentralConfigurationValidator()
                     
                     # If we get here without error, that's also valuable information
-                    logger.warning("⚠️ UNEXPECTED: No error detected for missing GCP Secret Manager connectivity")
+                    logger.warning("WARNING️ UNEXPECTED: No error detected for missing GCP Secret Manager connectivity")
                     logger.info("🔧 RECOMMENDATION: Implement GCP Secret Manager connectivity validation")
                     
                 except Exception as e:
-                    logger.error(f"✅ EXPECTED FAILURE: GCP connectivity issue detected: {e}")
+                    logger.error(f"CHECK EXPECTED FAILURE: GCP connectivity issue detected: {e}")
                     logger.info("🔧 REMEDIATION: Configure GCP service account and Secret Manager API access")
 
     def test_placeholder_values_in_gcp_secrets_fail_validation(self):
@@ -406,7 +406,7 @@ class GCPSecretManagerMissingVariablesTests(SSotBaseTestCase):
             assert placeholder_detected, \
                 f"Error should detect placeholder values. Got: {error_message}"
             
-            logger.error(f"✅ EXPECTED FAILURE: Placeholder values detected: {error_message}")
+            logger.error(f"CHECK EXPECTED FAILURE: Placeholder values detected: {error_message}")
             logger.info("🔧 REMEDIATION: Replace placeholder values with actual secrets in GCP Secret Manager")
 
 
@@ -434,7 +434,7 @@ class GCPSecretManagerValidationRequirementsTests(SSotBaseTestCase):
             assert detected_env == Environment.STAGING, \
                 f"Expected STAGING environment, got {detected_env}"
             
-            logger.info(f"✅ SUCCESS: Environment correctly detected as {detected_env}")
+            logger.info(f"CHECK SUCCESS: Environment correctly detected as {detected_env}")
 
     def test_config_validation_rules_include_all_required_variables(self):
         """
@@ -461,10 +461,10 @@ class GCPSecretManagerValidationRequirementsTests(SSotBaseTestCase):
         missing_rules = set(required_variables) - rule_variables
         
         if missing_rules:
-            logger.error(f"❌ FAILURE: Missing validation rules for: {missing_rules}")
+            logger.error(f"X FAILURE: Missing validation rules for: {missing_rules}")
             pytest.fail(f"Configuration validation rules missing for: {missing_rules}")
         else:
-            logger.info("✅ SUCCESS: All required variables have validation rules")
+            logger.info("CHECK SUCCESS: All required variables have validation rules")
 
     def test_error_messages_provide_gcp_secret_manager_guidance(self):
         """
@@ -492,6 +492,6 @@ class GCPSecretManagerValidationRequirementsTests(SSotBaseTestCase):
                     ])
                     
                     if has_guidance:
-                        logger.info(f"✅ SUCCESS: {var} has actionable error message")
+                        logger.info(f"CHECK SUCCESS: {var} has actionable error message")
                     else:
-                        logger.warning(f"⚠️ IMPROVEMENT: {var} error message could include Secret Manager guidance")
+                        logger.warning(f"WARNING️ IMPROVEMENT: {var} error message could include Secret Manager guidance")

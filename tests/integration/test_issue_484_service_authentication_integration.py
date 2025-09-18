@@ -156,7 +156,7 @@ class TestIssue484ServiceAuthenticationIntegration:
             try:
                 async with session_factory.get_request_scoped_session("system", "test-req-1") as session:
                     assert session is not None
-                    print("✓ System user authentication works")
+                    print("CHECK System user authentication works")
                     
             except Exception as e:
                 pytest.fail(f"System user authentication failed: {e}")
@@ -173,7 +173,7 @@ class TestIssue484ServiceAuthenticationIntegration:
                         pytest.fail("Service user should fail without proper authentication config")
                         
                 except Exception as e:
-                    print(f"✓ Service user authentication fails as expected: {e}")
+                    print(f"CHECK Service user authentication fails as expected: {e}")
                     assert True  # Expected failure
     
     @pytest.mark.asyncio
@@ -253,7 +253,7 @@ class TestIssue484ServiceAuthenticationIntegration:
                         except Exception as e:
                             assert "403 Not authenticated" in str(e)
                             assert "Issue #484" in str(e)
-                            print("✓ Reproduced complete agent execution failure due to Issue #484")
+                            print("CHECK Reproduced complete agent execution failure due to Issue #484")
                             
                 except Exception as e:
                     pytest.fail(f"Context creation failed: {e}")
@@ -302,7 +302,7 @@ class TestIssue484ServiceAuthenticationIntegration:
                 try:
                     async with session_factory.get_request_scoped_session("service:netra-backend", "test-req") as session:
                         assert session is not None
-                        print("✓ Service user session creation works with proper authentication")
+                        print("CHECK Service user session creation works with proper authentication")
                         
                 except Exception as e:
                     pytest.fail(f"Fixed service authentication should work: {e}")
@@ -351,10 +351,10 @@ class TestIssue484ServiceAuthenticationIntegration:
                     if scenario["expected_failure"]:
                         assert result["valid"] is False
                         assert result["error"] == "missing_service_credentials"
-                        print(f"✓ Scenario '{scenario['name']}' fails as expected")
+                        print(f"CHECK Scenario '{scenario['name']}' fails as expected")
                     else:
                         assert result["valid"] is True
-                        print(f"✓ Scenario '{scenario['name']}' succeeds as expected")
+                        print(f"CHECK Scenario '{scenario['name']}' succeeds as expected")
     
     @pytest.mark.asyncio
     async def test_concurrent_service_sessions_auth_failure(self):
@@ -388,7 +388,7 @@ class TestIssue484ServiceAuthenticationIntegration:
                 # All should fail due to Issue #484
                 for result in results:
                     assert "failed" in result
-                    print(f"✓ Concurrent session failure: {result}")
+                    print(f"CHECK Concurrent session failure: {result}")
                 
                 # This demonstrates the scale of the issue - ALL service operations fail
 

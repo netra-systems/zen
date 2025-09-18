@@ -54,25 +54,25 @@ class ConfigurationConsolidationIntegrationTests(SSotAsyncTestCase):
         try:
             from netra_backend.app.core.configuration.base import UnifiedConfigManager
             managers['canonical'] = UnifiedConfigManager()
-            print("✓ Canonical SSOT configuration manager initialized")
+            print("CHECK Canonical SSOT configuration manager initialized")
         except Exception as e:
-            print(f"⚠ Canonical configuration manager failed: {e}")
+            print(f"WARNING Canonical configuration manager failed: {e}")
             managers['canonical'] = None
 
         try:
             from netra_backend.app.core.configuration.base import UnifiedConfigManager
             managers['mega_class'] = UnifiedConfigurationManager()
-            print("✓ Mega class configuration manager initialized")
+            print("CHECK Mega class configuration manager initialized")
         except Exception as e:
-            print(f"⚠ Mega class configuration manager failed: {e}")
+            print(f"WARNING Mega class configuration manager failed: {e}")
             managers['mega_class'] = None
 
         try:
             from netra_backend.app.services.configuration_service import EnvironmentConfigLoader
             managers['service'] = EnvironmentConfigLoader()
-            print("✓ Service configuration manager initialized")
+            print("CHECK Service configuration manager initialized")
         except Exception as e:
-            print(f"⚠ Service configuration manager failed: {e}")
+            print(f"WARNING Service configuration manager failed: {e}")
             managers['service'] = None
 
         return managers
@@ -277,11 +277,11 @@ class ConfigurationConsolidationIntegrationTests(SSotAsyncTestCase):
 
         # Validate WebSocket configuration availability
         if websocket_configs:
-            print(f"✓ WebSocket configuration available from {len(websocket_configs)} managers")
+            print(f"CHECK WebSocket configuration available from {len(websocket_configs)} managers")
             for manager_name, config in websocket_configs.items():
                 print(f"  {manager_name}: {config}")
         else:
-            print("⚠ No WebSocket configuration found - may need specific WebSocket config handling")
+            print("WARNING No WebSocket configuration found - may need specific WebSocket config handling")
 
         # Test passes if we completed the check
         self.assertTrue(True, "WebSocket configuration check completed")
@@ -410,7 +410,7 @@ class ConfigurationConsolidationIntegrationTests(SSotAsyncTestCase):
             unique_urls = set(url for url in urls if url)
 
             if len(unique_urls) > 1:
-                print(f"⚠ Multiple Redis URLs found: {unique_urls}")
+                print(f"WARNING Multiple Redis URLs found: {unique_urls}")
                 # This might be expected for different environments
 
         # Test passes if we completed the Redis configuration check

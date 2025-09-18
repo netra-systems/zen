@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-"""
+
 Comprehensive Chat Responsiveness Under Load Tests - Issue #976 Restoration
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free/Early/Mid/Enterprise/Platform)
-- Business Goal: Validate $500K+ ARR chat functionality maintains responsiveness under concurrent load
+    - Segment: ALL (Free/Early/Mid/Enterprise/Platform)
+- Business Goal: Validate $500K+ plus ARR chat functionality maintains responsiveness under concurrent load
 - Value Impact: Ensures chat system delivers reliable AI responses even with multiple concurrent users
 - Revenue Impact: Protects core business functionality that drives customer retention and conversion
 
@@ -13,22 +13,24 @@ CRITICAL: This test file was corrupted and is being restored to validate concurr
 No Docker dependencies - uses staging validation and real service integration testing.
 
 Test Coverage:
-1. Concurrent user chat sessions with proper isolation
+    1. Concurrent user chat sessions with proper isolation
 2. Response time validation under load conditions
 3. WebSocket event delivery consistency during high load
 4. User context isolation during concurrent operations
 5. Message throughput and quality under stress conditions
 
 SSOT Compliance:
-- Uses test_framework.ssot.base_test_case.SSotAsyncTestCase
+    - Uses test_framework.ssot.base_test_case.SSotAsyncTestCase
 - Follows UserExecutionContext patterns for proper multi-user isolation
 - Real services testing with staging environment validation
 - No mocks for business-critical chat functionality
 "
-"
+""
+
 
 """
 """
+
 import asyncio
 import time
 import uuid
@@ -51,7 +53,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 try:
     from netra_backend.app.websocket_core.manager import WebSocketManager
     from netra_backend.app.agents.registry import AgentRegistry
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
     from netra_backend.app.routes.message_router import MessageRouter
     REAL_SERVICES_AVAILABLE = True
 except ImportError as e:
@@ -67,7 +69,8 @@ logger = get_logger(__name__)
 
 
 class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
-    ""
+    """
+
     Comprehensive tests for chat responsiveness under concurrent load conditions.
 
     Validates that the chat system maintains proper responsiveness and isolation
@@ -106,11 +109,13 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
         # Log test metrics for analysis
         if self.test_metrics['response_times']:
             avg_response_time = statistics.mean(self.test_metrics['response_times')
-            logger.info(fTest {method.__name__) metrics: avg_response_time={avg_response_time:.2f)s, 
+            logger.info(fTest {method.__name__) metrics: avg_response_time={avg_response_time:.""2f"")s,""
+
                        fsuccess_rate={self.test_metrics['successful_messages']/(self.test_metrics['successful_messages'] + self.test_metrics['failed_messages']:.2%})
 
     async def _create_user_execution_context(self, user_id: str) -> UserExecutionContext:
-        ""Create isolated user execution context for testing.
+        ""Create isolated user execution context for testing.""
+
         try:
             context = UserExecutionContext.create_from_request(
                 user_id=user_id,
@@ -174,7 +179,8 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
         except Exception as e:
             session_metrics['errors'].append(fSession setup failed: {e})
             logger.error(fChat session failed for user {user_id}: {e})"
-            logger.error(fChat session failed for user {user_id}: {e})"
+            logger.error(fChat session failed for user {user_id}: {e})""
+
 
         return session_metrics
 
@@ -214,7 +220,7 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
         # Create concurrent user sessions
         tasks = []
         for user_idx in range(self.CONCURRENT_USERS):
-            user_id = fload_test_user_{user_idx:03d}
+            user_id = fload_test_user_{user_idx:""03d""}
             task = self._simulate_user_chat_session(user_id, self.MESSAGES_PER_USER)
             tasks.append(task)
 
@@ -250,13 +256,14 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
         self.test_metrics['failed_messages'] = total_messages - total_successful_messages
 
         # Log comprehensive results
-        logger.info(fConcurrent load test completed in {total_time:.2f}s:)
+        logger.info(fConcurrent load test completed in {total_time:.""2f""}s:)
         logger.info(f  Sessions: {successful_sessions}/{self.CONCURRENT_USERS} successful ({session_success_rate:.1%})
         logger.info(f"  Messages: {total_successful_messages}/{total_messages} successful ({message_success_rate:.1%})"
-        logger.info(f  Avg response time: {avg_response_time:.2f}s")"
+        logger.info(f  Avg response time: {avg_response_time:.""2f""}s")"
         logger.info(f  User contexts created: {self.test_metrics['user_contexts_created']})
         logger.info(f  WebSocket events: {self.test_metrics['websocket_events_received']})"
-        logger.info(f  WebSocket events: {self.test_metrics['websocket_events_received']})"
+        logger.info(f  WebSocket events: {self.test_metrics['websocket_events_received']})""
+
 
         # Validate performance requirements
         assert session_success_rate >= self.ACCEPTABLE_SUCCESS_RATE, \
@@ -266,11 +273,13 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
             fMessage success rate {message_success_rate:.1%} below threshold {self.ACCEPTABLE_SUCCESS_RATE:.1%}
 
         assert avg_response_time <= self.MAX_RESPONSE_TIME_SECONDS, \
-            fAverage response time {avg_response_time:.2f}s exceeds threshold {self.MAX_RESPONSE_TIME_SECONDS}s
+            fAverage response time {avg_response_time:.""2f""}s exceeds threshold {self.MAX_RESPONSE_TIME_SECONDS}s""
+
 
     @pytest.mark.asyncio
     async def test_user_context_isolation_under_load(self):
-        ""
+        """
+
         Test that user contexts remain properly isolated during concurrent operations.
 
         Validates that concurrent user sessions don't interfere with each other'
@@ -280,7 +289,7 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
 
         # Create multiple user contexts simultaneously
         user_contexts = []
-        user_ids = [fisolation_test_user_{i:03d} for i in range(self.CONCURRENT_USERS)]
+        user_ids = [fisolation_test_user_{i:""03d""} for i in range(self.CONCURRENT_USERS)]
 
         # Create contexts concurrently
         context_tasks = [self._create_user_execution_context(user_id) for user_id in user_ids]
@@ -293,9 +302,9 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
 
         for context in created_contexts:
             # Check uniqueness
-            assert context.user_id not in seen_user_ids, fDuplicate user_id: {context.user_id}
+            assert context.user_id not in seen_user_ids, "fDuplicate user_id: {context.user_id}"
             assert context.thread_id not in seen_thread_ids, fDuplicate thread_id: {context.thread_id}""
-            assert context.session_id not in seen_session_ids, fDuplicate session_id: {context.session_id}
+            assert context.session_id not in seen_session_ids, "fDuplicate session_id: {context.session_id}"
 
             # Add to seen sets
             seen_user_ids.add(context.user_id)
@@ -303,21 +312,23 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
             seen_session_ids.add(context.session_id)
 
             # Validate context integrity
-            assert context.is_authenticated, User context should be authenticated
+            assert context.is_authenticated, "User context should be authenticated"
             assert context.user_id in user_ids, f"Unexpected user_id: {context.user_id}"
 
         logger.info(fSuccessfully validated isolation for {len(created_contexts)} concurrent user contexts")"
 
     @pytest.mark.asyncio
     async def test_response_time_consistency_under_load(self):
-    "
-    "
+        """
+    ""
+
         Test that response times remain consistent under load conditions.
 
         Validates that the system maintains reasonable performance even
         with concurrent user activity.
         "
-        "
+        ""
+
         logger.info(Testing response time consistency under load)
 
         # Baseline: Single user performance
@@ -328,7 +339,7 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
         # Load test: Multiple concurrent users
         concurrent_tasks = []
         for user_idx in range(self.CONCURRENT_USERS // 2):  # Use fewer users for this specific test
-            user_id = fconsistency_test_user_{user_idx:03d}
+            user_id = fconsistency_test_user_{user_idx:""03d""}
             task = self._simulate_user_chat_session(user_id, 3)
             concurrent_tasks.append(task)
 
@@ -348,23 +359,25 @@ class ChatResponsivenessUnderLoadTests(SSotAsyncTestCase):
             performance_ratio = concurrent_avg_time / baseline_avg_time
 
             logger.info(fResponse time analysis:)
-            logger.info(f  Baseline average: {baseline_avg_time:.2f}s")"
-            logger.info(f  Concurrent average: {concurrent_avg_time:.2f}s)
-            logger.info(f  Performance ratio: {performance_ratio:.2f}x)
-            logger.info(f"  Standard deviation: {concurrent_std_dev:.2f}s)"
+            logger.info(f  Baseline average: {baseline_avg_time:.""2f""}s")"
+            logger.info(f  Concurrent average: {concurrent_avg_time:.""2f""}s)
+            logger.info(f  Performance ratio: {performance_ratio:.""2f""}x)
+            logger.info(f"  Standard deviation: {concurrent_std_dev:.""2f""}s)"
 
-            # Validate reasonable performance degradation (max 3x slower under load)
+            # Validate reasonable performance degradation (max ""3x"" slower under load)
             assert performance_ratio <= 3.0, \
                 fPerformance degradation too high: {performance_ratio:.2f}x (max 3.0x allowed)"
-                fPerformance degradation too high: {performance_ratio:.2f}x (max 3.0x allowed)"
+                fPerformance degradation too high: {performance_ratio:."2f"}x (max 3."0x" allowed)""
+
 
             # Validate response time consistency (std dev should be reasonable)
             assert concurrent_std_dev <= baseline_avg_time * 2, \
-                fResponse time variance too high: {concurrent_std_dev:.2f}s
+                fResponse time variance too high: {concurrent_std_dev:.""2f""}s""
+
 
 
 if __name__ == __main__:"
 if __name__ == __main__:"
     # Support direct execution for debugging
-    pytest.main([__file__, "-v, -s")
+    pytest.main([__file__, "-v, -s)"
 )))))))))

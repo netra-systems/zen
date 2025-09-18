@@ -45,7 +45,7 @@ class Issue862FixesValidationTests:
         assert execution_info is not None, "get_execution_info should work before setup"
         assert "execution_mode" in execution_info, "execution_info should contain mode"
         
-        print(f"✅ Fix validated: ServiceIndependentIntegrationTest initializes properly")
+        print(f"CHECK Fix validated: ServiceIndependentIntegrationTest initializes properly")
         print(f"   Execution mode: {test_instance.execution_mode.value}")
         print(f"   Confidence: {test_instance.execution_strategy.execution_confidence:.1%}")
         
@@ -59,19 +59,19 @@ class Issue862FixesValidationTests:
         try:
             # This should now work without AttributeError
             test_instance.assert_execution_confidence_acceptable(min_confidence=0.5)
-            print("✅ Fix validated: assert_execution_confidence_acceptable works during collection")
+            print("CHECK Fix validated: assert_execution_confidence_acceptable works during collection")
         except AttributeError:
             pytest.fail("AttributeError should be resolved by Issue #862 fix")
         except AssertionError:
             # AssertionError is fine - means the method is working, just confidence is low
-            print("✅ Fix validated: Method works, low confidence assertion is expected")
+            print("CHECK Fix validated: Method works, low confidence assertion is expected")
         
         # Service getters should work without AttributeError
         database_service = test_instance.get_database_service()
         websocket_service = test_instance.get_websocket_service() 
         
         # They may return None (no real services), but should not raise AttributeError
-        print(f"✅ Fix validated: Service getters work (database: {database_service}, websocket: {websocket_service})")
+        print(f"CHECK Fix validated: Service getters work (database: {database_service}, websocket: {websocket_service})")
         
     def test_all_base_classes_initialize_correctly(self):
         """Test all service-independent base classes initialize without AttributeError."""
@@ -99,7 +99,7 @@ class Issue862FixesValidationTests:
             execution_info = test_instance.get_execution_info()
             assert execution_info is not None, f"{base_class.__name__} get_execution_info failed"
             
-            print(f"✅ Fix validated: {base_class.__name__} initializes correctly")
+            print(f"CHECK Fix validated: {base_class.__name__} initializes correctly")
         
     def test_service_getters_work_without_attribute_error(self):
         """Test all service getter methods work without AttributeError."""
@@ -119,7 +119,7 @@ class Issue862FixesValidationTests:
             try:
                 service = getter_method()
                 # Service may be None (no real services available), but should not raise AttributeError
-                print(f"✅ Fix validated: {getter_name} works (returned: {service})")
+                print(f"CHECK Fix validated: {getter_name} works (returned: {service})")
             except AttributeError as e:
                 pytest.fail(f"{getter_name} should not raise AttributeError after Issue #862 fix: {e}")
                 
@@ -143,7 +143,7 @@ class Issue862FixesValidationTests:
             else:
                 test_instance.skip_if_mock_mode()  # Should not skip
                 
-            print("✅ Fix validated: Skip methods work without AttributeError")
+            print("CHECK Fix validated: Skip methods work without AttributeError")
         except AttributeError as e:
             pytest.fail(f"Skip methods should not raise AttributeError after Issue #862 fix: {e}")
             
@@ -160,12 +160,12 @@ class Issue862FixesValidationTests:
             }
             
             test_instance.assert_business_value_delivered(test_result, "cost_savings")
-            print("✅ Fix validated: assert_business_value_delivered works without AttributeError")
+            print("CHECK Fix validated: assert_business_value_delivered works without AttributeError")
         except AttributeError as e:
             pytest.fail(f"assert_business_value_delivered should not raise AttributeError after Issue #862 fix: {e}")
         except AssertionError:
             # AssertionError is fine - means the method is working
-            print("✅ Fix validated: assert_business_value_delivered works (assertion logic is functional)")
+            print("CHECK Fix validated: assert_business_value_delivered works (assertion logic is functional)")
             
 
 class Issue862BeforeAfterComparisonTests:
@@ -207,9 +207,9 @@ class Issue862BeforeAfterComparisonTests:
             try:
                 result = attr_accessor()
                 attribute_fixes += 1
-                print(f"✅ Fixed attribute: {attr_name} (value: {result})")
+                print(f"CHECK Fixed attribute: {attr_name} (value: {result})")
             except AttributeError:
-                print(f"❌ Still broken: {attr_name}")
+                print(f"X Still broken: {attr_name}")
                 
         # Test all previously broken methods
         method_fixes = 0
@@ -217,13 +217,13 @@ class Issue862BeforeAfterComparisonTests:
             try:
                 result = method_accessor()
                 method_fixes += 1
-                print(f"✅ Fixed method: {method_name}")
+                print(f"CHECK Fixed method: {method_name}")
             except AttributeError:
-                print(f"❌ Still broken: {method_name}")
+                print(f"X Still broken: {method_name}")
             except (AssertionError, pytest.skip.Exception):
                 # These are expected - method works, just logic fails
                 method_fixes += 1
-                print(f"✅ Fixed method: {method_name} (logic works, expected assertion/skip)")
+                print(f"CHECK Fixed method: {method_name} (logic works, expected assertion/skip)")
                 
         print(f"\n=== Issue #862 Fix Summary ===")
         print(f"Fixed attributes: {attribute_fixes}/{len(fixed_attributes)} ({attribute_fixes/len(fixed_attributes):.1%})")
@@ -271,7 +271,7 @@ class Issue862PytestCollectionValidationTests:
             assert strategy is not None, f"{test_class.__name__} execution_strategy should not be None during collection"
             assert mode is not None, f"{test_class.__name__} execution_mode should not be None during collection"
             
-            print(f"✅ Pytest collection compatible: {test_class.__name__}")
+            print(f"CHECK Pytest collection compatible: {test_class.__name__}")
         
         print("🎉 All test classes are pytest collection compatible after Issue #862 fix!")
         
@@ -292,7 +292,7 @@ class Issue862PytestCollectionValidationTests:
         sig = inspect.signature(test_instance.assert_execution_confidence_acceptable)
         assert 'min_confidence' in sig.parameters
         
-        print("✅ Method introspection works without AttributeError")
+        print("CHECK Method introspection works without AttributeError")
         
     def test_pytest_compatible_test_discovery(self):
         """Test that pytest can discover test methods properly."""
@@ -305,11 +305,11 @@ class Issue862PytestCollectionValidationTests:
         test_methods = [method for method in dir(test_instance) if method.startswith('test_')]
         
         assert len(test_methods) > 0, "Should find test methods"
-        print(f"✅ Pytest discovery works: found {len(test_methods)} test methods")
+        print(f"CHECK Pytest discovery works: found {len(test_methods)} test methods")
         
         # Should be able to check method existence without AttributeError
         for method_name in test_methods:
             method = getattr(test_instance, method_name)
             assert callable(method), f"Test method {method_name} should be callable"
             
-        print("✅ All test methods are discoverable and callable")
+        print("CHECK All test methods are discoverable and callable")

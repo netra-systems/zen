@@ -22,7 +22,8 @@ def run_quick_ssot_validation():
     "Run SSOT validation without external dependencies."
 print(QUICK SSOT COMPLIANCE VALIDATION"")
 print(= * 50)"
-print(= * 50)"
+print(= * 50)""
+
 
 suite = SSotComplianceSuite()
 
@@ -32,7 +33,8 @@ websocket_violations = suite.validate_websocket_manager_consolidation()
 print("")
 
 print(2. JWT Validation Security)"
-print(2. JWT Validation Security)"
+print(2. JWT Validation Security)""
+
 jwt_violations = suite.validate_jwt_validation_security()
 print("")
 print(
@@ -49,7 +51,8 @@ print(
 5. Session Management Consolidation")"
 session_violations = suite.validate_session_management_consolidation()
 print()"
-print()"
+print()""
+
 
 print(
 6. Tool Execution Consolidation")"
@@ -58,7 +61,8 @@ print("")
 
 print(
 7. Direct os.environ Access)"
-7. Direct os.environ Access)"
+7. Direct os.environ Access)""
+
 os_violations = suite.validate_direct_os_environ_access()
 print("")
     # Calculate results
@@ -72,8 +76,8 @@ high_count = sum(1 for v in all_violations if v.severity == 'HIGH')
     # Calculate compliance score
 max_score = 100
 deductions = (critical_count * 50) + (high_count * 30) + \
-(sum(1 for v in all_violations if v.severity == 'MEDIUM') * 15) + \
-(sum(1 for v in all_violations if v.severity == 'LOW') * 5)
+    (sum(1 for v in all_violations if v.severity == 'MEDIUM') * 15) + \
+    (sum(1 for v in all_violations if v.severity == 'LOW') * 5)
 
 compliance_score = max(0, max_score - deductions)
 
@@ -96,7 +100,7 @@ for i, violation in enumerate(critical_violations[:10], 1):
     print(")"
 print(formatted_string)
 
-print(f" ")
+print(f" )"
  + = * 50)
 
 if compliance_score >= 85:
@@ -104,7 +108,8 @@ if compliance_score >= 85:
 return True
 else:
     print(STATUS: FAILED - Critical SSOT violations must be fixed"")"
-    print(STATUS: FAILED - Critical SSOT violations must be fixed"")"
+    print(STATUS: FAILED - Critical SSOT violations must be fixed"")""
+
 return False
 
 

@@ -61,11 +61,11 @@ class DevLauncherImportIssuesReproductionTests(SSotBaseTestCase):
         try:
             # Simulate the problematic import from demo.py line 8
             from dev_launcher.isolated_environment import IsolatedEnvironment
-            print("❌ REPRODUCTION FAILED: Import should have failed but succeeded")
+            print("X REPRODUCTION FAILED: Import should have failed but succeeded")
         except ImportError as e:
             import_failed = True
             error_message = str(e)
-            print(f"✅ REPRODUCTION CONFIRMED: ImportError as expected")
+            print(f"CHECK REPRODUCTION CONFIRMED: ImportError as expected")
             print(f"   Error: {error_message}")
             
         self.assertTrue(import_failed, "Expected ImportError but import succeeded")
@@ -96,11 +96,11 @@ class DevLauncherImportIssuesReproductionTests(SSotBaseTestCase):
             # Simulate the problematic import from test_configuration_integration.py line 129
             from dev_launcher.isolated_environment import IsolatedEnvironment
             env = IsolatedEnvironment()
-            print("❌ REPRODUCTION FAILED: Import should have failed but succeeded")
+            print("X REPRODUCTION FAILED: Import should have failed but succeeded")
         except ImportError as e:
             import_failed = True
             error_message = str(e)
-            print(f"✅ REPRODUCTION CONFIRMED: ImportError as expected")
+            print(f"CHECK REPRODUCTION CONFIRMED: ImportError as expected")
             print(f"   Error: {error_message}")
             
         self.assertTrue(import_failed, "Expected ImportError but import succeeded")
@@ -133,18 +133,18 @@ class DevLauncherImportIssuesReproductionTests(SSotBaseTestCase):
                 # This would be unexpected - the issue is it doesn't exist
                 self.fail("dev_launcher.isolated_environment exists - this contradicts the expected import failure")
             else:
-                print("✅ REPRODUCTION CONFIRMED: isolated_environment not found in dev_launcher")
+                print("CHECK REPRODUCTION CONFIRMED: isolated_environment not found in dev_launcher")
                 
             # Try to import the specific module that should fail
             try:
                 from dev_launcher.isolated_environment import IsolatedEnvironment
                 self.fail("Expected ImportError but import succeeded")
             except ImportError as e:
-                print(f"✅ REPRODUCTION CONFIRMED: ImportError as expected: {e}")
+                print(f"CHECK REPRODUCTION CONFIRMED: ImportError as expected: {e}")
             
         except ImportError as e:
             # If dev_launcher itself doesn't exist, that's also a valid reproduction
-            print(f"✅ REPRODUCTION CONFIRMED: dev_launcher module import failed: {e}")
+            print(f"CHECK REPRODUCTION CONFIRMED: dev_launcher module import failed: {e}")
             
     def test_attempt_to_use_problematic_import_pattern(self):
         """
@@ -174,11 +174,11 @@ def get_demo_config():
 
 config = get_demo_config()
 """)
-            print("❌ REPRODUCTION FAILED: Exec should have failed but succeeded")
+            print("X REPRODUCTION FAILED: Exec should have failed but succeeded")
         except ImportError as e:
             exec_failed = True
             error_message = str(e)
-            print(f"✅ REPRODUCTION CONFIRMED: ImportError in exec as expected")
+            print(f"CHECK REPRODUCTION CONFIRMED: ImportError in exec as expected")
             print(f"   Error: {error_message}")
             
         self.assertTrue(exec_failed, "Expected ImportError in exec but it succeeded")
@@ -192,7 +192,7 @@ config = get_demo_config()
         
         EXPECTED: This test should PASS - proves correct import path works
         """
-        print("\n✅ VERIFICATION TEST: Shared IsolatedEnvironment exists...")
+        print("\nCHECK VERIFICATION TEST: Shared IsolatedEnvironment exists...")
         
         try:
             # This should work - it's the correct SSOT path
@@ -210,7 +210,7 @@ config = get_demo_config()
                     f"IsolatedEnvironment missing expected method: {method}"
                 )
             
-            print(f"✅ VERIFICATION PASSED: shared.isolated_environment.IsolatedEnvironment works correctly")
+            print(f"CHECK VERIFICATION PASSED: shared.isolated_environment.IsolatedEnvironment works correctly")
             print(f"   Available methods: {[m for m in expected_methods if hasattr(env, m)]}")
             
         except ImportError as e:
@@ -260,7 +260,7 @@ env = dev_launcher.isolated_environment.IsolatedEnvironment()
             
             try:
                 exec(scenario['code'])
-                print(f"    ❌ {scenario['name']}: FAILED - Expected ImportError but code executed")
+                print(f"    X {scenario['name']}: FAILED - Expected ImportError but code executed")
                 
             except (ImportError, AttributeError) as e:
                 error_analysis = {
@@ -271,7 +271,7 @@ env = dev_launcher.isolated_environment.IsolatedEnvironment()
                     "contains_isolated_environment": "isolated_environment" in str(e).lower()
                 }
                 
-                print(f"     ✅ ImportError confirmed: {error_analysis['error_message']}")
+                print(f"     CHECK ImportError confirmed: {error_analysis['error_message']}")
                 print(f"     📊 Error analysis: {error_analysis}")
                 
                 # Verify expected error characteristics
@@ -295,7 +295,7 @@ env = dev_launcher.isolated_environment.IsolatedEnvironment()
             from dev_launcher.isolated_environment import IsolatedEnvironment as BrokenIE
             broken_import_worked = True
         except ImportError as e:
-            print(f"  ❌ BROKEN IMPORT (expected): {e}")
+            print(f"  X BROKEN IMPORT (expected): {e}")
             
         self.assertFalse(broken_import_worked, "Broken import unexpectedly succeeded")
         
@@ -304,7 +304,7 @@ env = dev_launcher.isolated_environment.IsolatedEnvironment()
         try:
             from shared.isolated_environment import IsolatedEnvironment as WorkingIE
             working_import_worked = True
-            print(f"  ✅ WORKING IMPORT: shared.isolated_environment.IsolatedEnvironment")
+            print(f"  CHECK WORKING IMPORT: shared.isolated_environment.IsolatedEnvironment")
             
             # Test basic functionality
             env = WorkingIE()
@@ -312,7 +312,7 @@ env = dev_launcher.isolated_environment.IsolatedEnvironment()
             print(f"     🧪 Basic functionality test: get() returned '{test_result}'")
             
         except ImportError as e:
-            print(f"  ❌ WORKING IMPORT FAILED (unexpected): {e}")
+            print(f"  X WORKING IMPORT FAILED (unexpected): {e}")
             
         self.assertTrue(working_import_worked, "Working import unexpectedly failed")
         

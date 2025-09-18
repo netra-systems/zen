@@ -50,7 +50,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            print(f"Warning: Failed to lazy load {module_path}: {e})"
             _lazy_imports[module_path] = None
     
     return _lazy_imports[module_path]
@@ -67,7 +67,7 @@ def lazy_import(module_path: str, component: str = None):
             else:
                 _lazy_imports[module_path] = module
         except ImportError as e:
-            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            print(f"Warning: Failed to lazy load {module_path}: {e})"
             _lazy_imports[module_path] = None
     
     return _lazy_imports[module_path]
@@ -103,7 +103,7 @@ def get_available_port(start_port: int = 8000) -> int:
                 return port
         except OSError:
             continue
-    raise RuntimeError("No available ports found")
+    raise RuntimeError("No available ports found)"
 
 def kill_process_tree(pid: int):
     """Kill process tree."""
@@ -116,11 +116,11 @@ def kill_process_tree(pid: int):
     except:
         pass
 
-def create_test_user_with_oauth(email: str = "test@example.com"):
+def create_test_user_with_oauth(email: str = "test@example.com):"
     """Create test user with OAuth."""
     return {
-        "id": "test_user_123",
-        "email": email,
+        "id": "test_user_123,"
+        "email: email,"
         "oauth_provider": "test"
     }
 
@@ -165,18 +165,18 @@ class SystemInitializationTestBase:
 
     def cleanup_processes(self):
         """Kill all test-related processes."""
-        processes_to_kill = ["uvicorn", "node", "next", "dev_launcher"]
+        processes_to_kill = ["uvicorn", "node", "next", "dev_launcher]"
         for proc_name in processes_to_kill:
         try:
         if self.is_windows:
         subprocess.run( )
-        ["taskkill", "/F", "/IM", ""],
+        ["taskkill", "/F", "/IM", "],"
         capture_output=True,
         timeout=5
                 
         else:
         subprocess.run( )
-        ["pkill", "-f", proc_name],
+        ["pkill", "-f, proc_name],"
         capture_output=True,
         timeout=5
                     
@@ -188,10 +188,10 @@ class SystemInitializationTestBase:
         pass
         try:
         # Reset PostgreSQL
-        engine = create_engine(get_env().get("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/netra_test"))
+        engine = create_engine(get_env().get("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/netra_test))"
         with engine.connect() as conn:
-        conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE"))
-        conn.execute(text("CREATE SCHEMA public"))
+        conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE))"
+        conn.execute(text("CREATE SCHEMA public))"
         conn.commit()
         except Exception as e:
         print("")
@@ -206,8 +206,8 @@ class SystemInitializationTestBase:
     def clear_service_discovery(self):
         """Clear service discovery files."""
         discovery_files = [ ]
-        ".service_discovery.json",
-        ".dev_services.json",
+        ".service_discovery.json,"
+        ".dev_services.json,"
         ".service_ports.json"
     
         for file in discovery_files:
@@ -220,10 +220,10 @@ class SystemInitializationTestBase:
         """Start dev launcher with specified arguments."""
         pass
         if args is None:
-        args = ["--minimal", "--no-browser", "--non-interactive"]
+        args = ["--minimal", "--no-browser", "--non-interactive]"
 
         process = subprocess.Popen( )
-        ["python", str(self.dev_launcher)] + args,
+        ["python, str(self.dev_launcher)] + args,"
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True
@@ -239,7 +239,7 @@ class SystemInitializationTestBase:
         yield process
         finally:
         if self.is_windows:
-        subprocess.run(["taskkill", "/F", "/T", "/PID", str(process.pid)], capture_output=True)
+        subprocess.run(["taskkill", "/F", "/T", "/PID, str(process.pid)], capture_output=True)"
         else:
         process.terminate()
         process.wait(timeout=5)
@@ -248,12 +248,12 @@ class SystemInitializationTestBase:
         """Check if all services are ready."""
         try:
         # Check backend
-        response = httpx.get("formatted_string", timeout=2)
+        response = httpx.get("formatted_string, timeout=2)"
         if response.status_code != 200:
         return False
 
             # Check auth service
-        response = httpx.get("formatted_string", timeout=2)
+        response = httpx.get("formatted_string, timeout=2)"
         if response.status_code != 200:
         return False
 
@@ -281,7 +281,7 @@ class SystemInitializationTestBase:
         headers["Authorization"] = ""
 
         ws = websocket.create_connection( )
-        "ws://localhost:8000/ws",
+        "ws://localhost:8000/ws,"
         header=headers,
         timeout=10
         
@@ -301,20 +301,20 @@ class TestCriticalPath(SystemInitializationTestBase):
         self.clear_service_discovery()
 
     # Remove all environment-specific files
-        env_files = [".env.local", ".env.development", ".env.test", ".env.mock"]
+        env_files = [".env.local", ".env.development", ".env.test", ".env.mock]"
         for env_file in env_files:
         file_path = self.project_root / env_file
         if file_path.exists():
         file_path.unlink()
 
             Start system from completely clean state
-        with self.start_dev_launcher(["--minimal", "--no-browser"]) as proc:
+        with self.start_dev_launcher(["--minimal", "--no-browser]) as proc:"
                 # Verify all services start
         assert self.wait_for_service(""), "Backend failed to start"
         assert self.wait_for_service(""), "Auth service failed to start"
 
                 # Verify database tables created
-        engine = create_engine(get_env().get("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/netra_test"))
+        engine = create_engine(get_env().get("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/netra_test))"
         with engine.connect() as conn:
         result = conn.execute(text( ))
         "SELECT COUNT(*) FROM information_schema.tables "
@@ -336,7 +336,7 @@ class TestCriticalPath(SystemInitializationTestBase):
 
     # Try to start backend without auth service
         backend_proc = subprocess.Popen( )
-        ["python", "-m", "uvicorn", "netra_backend.app.main:app", "--port", "8000"],
+        ["python", "-m", "uvicorn", "netra_backend.app.main:app", "--port", "8000],"
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         cwd=self.project_root
@@ -347,7 +347,7 @@ class TestCriticalPath(SystemInitializationTestBase):
     # Backend should either wait for auth or fail gracefully
     # Now start auth service
         auth_proc = subprocess.Popen( )
-        ["python", "-m", "uvicorn", "auth_service.main:app", "--port", "8081"],
+        ["python", "-m", "uvicorn", "auth_service.main:app", "--port", "8081],"
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         cwd=self.project_root
@@ -355,11 +355,11 @@ class TestCriticalPath(SystemInitializationTestBase):
 
         try:
         # Both services should eventually become healthy
-        assert self.wait_for_service("", timeout=20)
-        assert self.wait_for_service("", timeout=20)
+        assert self.wait_for_service("", "timeout=20)"
+        assert self.wait_for_service("", "timeout=20)"
 
         # Verify cross-service communication works
-        response = httpx.get("formatted_string")
+        response = httpx.get("formatted_string)"
         assert response.status_code in [200, 401], "Cross-service auth check failed"
         finally:
         backend_proc.terminate()
@@ -373,20 +373,20 @@ class TestCriticalPath(SystemInitializationTestBase):
 
         with self.start_dev_launcher() as proc:
         # Check database migrations ran
-        engine = create_engine(get_env().get("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/netra_test"))
+        engine = create_engine(get_env().get("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/netra_test))"
         with engine.connect() as conn:
             # Check core tables exist
         tables_to_check = [ ]
-        "users",
-        "threads",
-        "messages",
-        "oauth_providers",
+        "users,"
+        "threads,"
+        "messages,"
+        "oauth_providers,"
         "sessions"
             
 
         for table in tables_to_check:
         result = conn.execute(text( ))
-        f"SELECT EXISTS (SELECT 1 FROM information_schema.tables " )
+        f"SELECT EXISTS (SELECT 1 FROM information_schema.tables  )"
         ""
                 
         exists = result.scalar()
@@ -408,21 +408,21 @@ class TestCriticalPath(SystemInitializationTestBase):
         # Create token in auth service
         auth_response = httpx.post( )
         "",
-        json={"email": "test@example.com", "password": "password"}
+        json={"email": "test@example.com", "password": "password}"
         
 
         if auth_response.status_code == 200:
-        token = auth_response.json().get("access_token")
+        token = auth_response.json().get("access_token)"
 
             # Validate token in backend service
         backend_response = httpx.get( )
         "",
-        headers={"Authorization": ""}
+        headers={"Authorization": "}"
             
         assert backend_response.status_code in [200, 401], "Token validation failed"
 
             # Test OAuth provider configuration
-        oauth_response = httpx.get("formatted_string")
+        oauth_response = httpx.get("formatted_string)"
         assert oauth_response.status_code == 200, "OAuth providers not configured"
         providers = oauth_response.json()
         assert len(providers) > 0, "No OAuth providers available"
@@ -434,10 +434,10 @@ class TestCriticalPath(SystemInitializationTestBase):
         # Test unauthenticated connection
         try:
         ws = websocket.create_connection( )
-        "ws://localhost:8000/ws",
+        "ws://localhost:8000/ws,"
         timeout=10
             
-        ws.send(json.dumps({"type": "ping"}))
+        ws.send(json.dumps({"type": "ping}))"
         response = ws.recv()
         ws.close()
         assert response, "WebSocket connection failed"
@@ -449,24 +449,24 @@ class TestCriticalPath(SystemInitializationTestBase):
         auth_response = httpx.post( )
         "",
         json={ }
-        "email": "",
+        "email": ","
         "password": "TestPass123!"
                 
                 
 
         if auth_response.status_code == 200:
-        token = auth_response.json().get("access_token")
+        token = auth_response.json().get("access_token)"
 
                     # Connect with authentication
         ws = websocket.create_connection( )
-        "ws://localhost:8000/ws",
-        header={"Authorization": ""},
+        "ws://localhost:8000/ws,"
+        header={"Authorization": "},"
         timeout=10
                     
-        ws.send(json.dumps({"type": "authenticate", "token": token}))
+        ws.send(json.dumps({"type": "authenticate", "token: token}))"
         response = ws.recv()
         ws.close()
-        assert "authenticated" in response.lower() or "success" in response.lower()
+        assert "authenticated" in response.lower() or "success in response.lower()"
 
         @pytest.mark.e2e
     def test_06_real_time_message_processing_pipeline(self):
@@ -477,25 +477,25 @@ class TestCriticalPath(SystemInitializationTestBase):
         auth_response = httpx.post( )
         "",
         json={ }
-        "email": "",
+        "email": ","
         "password": "TestPass123!"
         
         
 
         if auth_response.status_code == 200:
-        token = auth_response.json().get("access_token")
+        token = auth_response.json().get("access_token)"
 
             # Create WebSocket connection
         ws = websocket.create_connection( )
-        "ws://localhost:8000/ws",
-        header={"Authorization": ""},
+        "ws://localhost:8000/ws,"
+        header={"Authorization": "},"
         timeout=30
             
 
             # Send chat message
         message = { }
-        "type": "chat_message",
-        "content": "Hello, this is a test message",
+        "type": "chat_message,"
+        "content": "Hello, this is a test message,"
         "thread_id": "test_thread_001"
             
         ws.send(json.dumps(message))
@@ -507,7 +507,7 @@ class TestCriticalPath(SystemInitializationTestBase):
         try:
         response = ws.recv()
         responses_received.append(response)
-        if "complete" in response.lower() or "done" in response.lower():
+        if "complete" in response.lower() or "done in response.lower():"
         break
         except websocket.WebSocketTimeoutException:
         break
@@ -518,16 +518,16 @@ class TestCriticalPath(SystemInitializationTestBase):
         @pytest.mark.e2e
     def test_07_frontend_static_asset_loading_and_api_connection(self):
         """Test 7: Next.js compilation and API endpoint discovery."""
-        with self.start_dev_launcher(["--frontend-port", "3000"]) as proc:
+        with self.start_dev_launcher(["--frontend-port", "3000]) as proc:"
         # Wait for frontend to compile
         assert self.wait_for_service("", timeout=60), "Frontend failed to start"
 
         # Check static assets are served
-        response = httpx.get("formatted_string", follow_redirects=True)
+        response = httpx.get("formatted_string, follow_redirects=True)"
         assert response.status_code in [200, 304], "Frontend assets not served"
 
         # Check API configuration
-        response = httpx.get("formatted_string", timeout=5)
+        response = httpx.get("formatted_string, timeout=5)"
         assert response.status_code in [200, 404], "Frontend API route check failed"
 
         # Verify frontend can reach backend
@@ -535,7 +535,7 @@ class TestCriticalPath(SystemInitializationTestBase):
         response = httpx.options( )
         "",
         headers={ }
-        "Origin": self.frontend_url,
+        "Origin: self.frontend_url,"
         "Access-Control-Request-Method": "GET"
         
         
@@ -548,12 +548,12 @@ class TestCriticalPath(SystemInitializationTestBase):
         with self.start_dev_launcher() as proc:
         # Check each service's health endpoint'
         services = [ ]
-        (self.backend_url, "backend"),
-        (self.auth_url, "auth"),
+        (self.backend_url, "backend),"
+        (self.auth_url, "auth),"
         
 
         for url, name in services:
-        response = httpx.get("formatted_string", timeout=5)
+        response = httpx.get("formatted_string, timeout=5)"
         assert response.status_code == 200, ""
 
         health_data = response.json()
@@ -561,8 +561,8 @@ class TestCriticalPath(SystemInitializationTestBase):
         assert health_data["status"] in ["healthy", "ok"], ""
 
             # Check dependency health reporting
-        if "dependencies" in health_data:
-        for dep_name, dep_status in health_data["dependencies"].items():
+        if "dependencies in health_data:"
+        for dep_name, dep_status in health_data["dependencies].items():"
         assert dep_status in ["healthy", "ok", "connected"], ""
 
 
@@ -576,19 +576,19 @@ class TestServiceDependencies(SystemInitializationTestBase):
     # Stop Redis if running
         try:
         if self.is_windows:
-        subprocess.run(["taskkill", "/F", "/IM", "redis-server.exe"], capture_output=True)
+        subprocess.run(["taskkill", "/F", "/IM", "redis-server.exe], capture_output=True)"
         else:
-        subprocess.run(["pkill", "redis-server"], capture_output=True)
+        subprocess.run(["pkill", "redis-server], capture_output=True)"
         except Exception:
         pass
 
                     # Start services without Redis
-        with self.start_dev_launcher(["--set-redis", "mock"]) as proc:
+        with self.start_dev_launcher(["--set-redis", "mock]) as proc:"
                         # Services should start even without Redis
         assert self.wait_for_service(""), "Backend failed without Redis"
 
                         # Test fallback caching behavior
-        response = httpx.get("formatted_string")
+        response = httpx.get("formatted_string)"
         assert response.status_code in [200, 501], "Cache fallback not working"
 
         @pytest.mark.e2e
@@ -596,17 +596,17 @@ class TestServiceDependencies(SystemInitializationTestBase):
         """Test 10: Test all ClickHouse port configurations."""
         pass
         clickhouse_ports = { }
-        "http": 8123,
-        "native": 9000,
-        "https": 8443
+        "http: 8123,"
+        "native: 9000,"
+        "https: 8443"
     
 
         with self.start_dev_launcher() as proc:
         for protocol, port in clickhouse_ports.items():
             # Test connection on each port
         try:
-        if protocol == "http":
-        response = httpx.get("formatted_string", timeout=2)
+        if protocol == "http:"
+        response = httpx.get("formatted_string, timeout=2)"
         if response.status_code == 200:
         print("")
         except Exception:
@@ -621,18 +621,18 @@ class TestServiceDependencies(SystemInitializationTestBase):
         auth_response = httpx.post( )
         "",
         json={ }
-        "email": "",
+        "email": ","
         "password": "TestPass123!"
         
         
 
         assert auth_response.status_code == 200, "Registration failed"
-        auth_token = auth_response.json().get("access_token")
+        auth_token = auth_response.json().get("access_token)"
 
         # Validate token in backend
         backend_response = httpx.get( )
         "",
-        headers={"Authorization": ""}
+        headers={"Authorization": "}"
         
 
         # Should either validate successfully or return proper auth error
@@ -641,7 +641,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
         # Test with invalid token
         invalid_response = httpx.get( )
         "",
-        headers={"Authorization": "Bearer invalid_token_12345"}
+        headers={"Authorization": "Bearer invalid_token_12345}"
         
         assert invalid_response.status_code == 401, "Invalid token not rejected"
 
@@ -659,7 +659,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
         occupied_sockets.append(s1)
 
         # Start services - should use dynamic ports
-        with self.start_dev_launcher(["--dynamic"]) as proc:
+        with self.start_dev_launcher(["--dynamic]) as proc:"
             # Check service discovery file created
         discovery_file = self.project_root / ".service_discovery.json"
         assert discovery_file.exists(), "Service discovery file not created"
@@ -668,7 +668,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
         discovery = json.load(f)
 
                 # Verify services on different ports
-        backend_port = discovery.get("backend", {}).get("port")
+        backend_port = discovery.get("backend", {}).get("port)"
         assert backend_port != 8000, "Backend didn"t use dynamic port"
         assert backend_port != 8000, "Backend didn"t use dynamic port"
 
@@ -687,7 +687,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
 
     def make_db_request(index):
         try:
-        response = httpx.get("formatted_string", timeout=5)
+        response = httpx.get("formatted_string, timeout=5)"
         return response.status_code
         except Exception as e:
         return str(e)
@@ -709,23 +709,23 @@ class TestServiceDependencies(SystemInitializationTestBase):
         auth_response = httpx.post( )
         "",
         json={ }
-        "email": "",
+        "email": ","
         "password": "TestPass123!"
         
         
 
-        token = auth_response.json().get("access_token")
+        token = auth_response.json().get("access_token)"
 
         # Test token in different services
         services_to_test = [ ]
-        ("", "backend"),
-        ("", "auth"),
+        ("", "backend),"
+        ("", "auth),"
         
 
         for url, service_name in services_to_test:
         response = httpx.get( )
         url,
-        headers={"Authorization": ""}
+        headers={"Authorization": "}"
             
         assert response.status_code in [200, 404], ""
 
@@ -739,14 +739,14 @@ class TestServiceDependencies(SystemInitializationTestBase):
             # Create multiple WebSocket connections
         for i in range(10):
         ws = websocket.create_connection( )
-        "ws://localhost:8000/ws",
+        "ws://localhost:8000/ws,"
         timeout=5
                 
         connections.append(ws)
 
                 # Send messages on all connections
         for i, ws in enumerate(connections):
-        ws.send(json.dumps({"type": "ping", "id": i}))
+        ws.send(json.dumps({"type": "ping", "id: i}))"
 
                     # Verify all connections receive responses
         for ws in connections:
@@ -775,8 +775,8 @@ class TestUserJourney(SystemInitializationTestBase):
         response = httpx.post( )
         "",
         json={ }
-        "email": email,
-        "password": "NewUser123!",
+        "email: email,"
+        "password": "NewUser123!,"
         "name": "New User"
         
         
@@ -790,7 +790,7 @@ class TestUserJourney(SystemInitializationTestBase):
         login_response = httpx.post( )
         "",
         json={ }
-        "email": email,
+        "email: email,"
         "password": "NewUser123!"
         
         
@@ -805,27 +805,27 @@ class TestUserJourney(SystemInitializationTestBase):
         email = ""
         auth_response = httpx.post( )
         "",
-        json={"email": email, "password": "ChatUser123!"}
+        json={"email": email, "password": "ChatUser123!}"
         
 
-        token = auth_response.json().get("access_token")
+        token = auth_response.json().get("access_token)"
 
         # Create chat thread
         thread_response = httpx.post( )
         "",
-        headers={"Authorization": ""},
-        json={"title": "My First Chat"}
+        headers={"Authorization": "},"
+        json={"title": "My First Chat}"
         
 
         assert thread_response.status_code in [200, 201], "Thread creation failed"
         thread_data = thread_response.json()
-        thread_id = thread_data.get("id")
+        thread_id = thread_data.get("id)"
 
         # Send first message
         message_response = httpx.post( )
         "",
-        headers={"Authorization": ""},
-        json={"content": "Hello, this is my first message!"}
+        headers={"Authorization": "},"
+        json={"content": "Hello, this is my first message!}"
         
 
         assert message_response.status_code in [200, 201], "Message creation failed"
@@ -833,17 +833,17 @@ class TestUserJourney(SystemInitializationTestBase):
         @pytest.mark.e2e
     def test_18_frontend_authentication_state(self):
         """Test 18: Frontend loads and manages auth state."""
-        with self.start_dev_launcher(["--frontend-port", "3001"]) as proc:
+        with self.start_dev_launcher(["--frontend-port", "3001]) as proc:"
         # Wait for frontend
-        assert self.wait_for_service("http://localhost:3001", timeout=60)
+        assert self.wait_for_service("http://localhost:3001", "timeout=60)"
 
         # Check frontend serves auth pages
-        response = httpx.get("http://localhost:3001", follow_redirects=True)
+        response = httpx.get("http://localhost:3001, follow_redirects=True)"
         assert response.status_code == 200, "Frontend not accessible"
 
         # Frontend should have auth endpoints configured
         # Check if API routes are set up
-        api_response = httpx.get("http://localhost:3001/auth/session")
+        api_response = httpx.get("http://localhost:3001/auth/session)"
         assert api_response.status_code in [200, 401, 404], "Auth API routes not configured"
 
         @pytest.mark.e2e
@@ -855,22 +855,22 @@ class TestUserJourney(SystemInitializationTestBase):
         email = ""
         auth_response = httpx.post( )
         "",
-        json={"email": email, "password": "Realtime123!"}
+        json={"email": email, "password": "Realtime123!}"
         
 
-        token = auth_response.json().get("access_token")
+        token = auth_response.json().get("access_token)"
 
         # Create WebSocket connection
         ws = websocket.create_connection( )
-        "ws://localhost:8000/ws",
-        header={"Authorization": ""},
+        "ws://localhost:8000/ws,"
+        header={"Authorization": "},"
         timeout=30
         
 
         # Send chat message
         ws.send(json.dumps({ }))
-        "type": "chat_message",
-        "content": "What is 2+2?",
+        "type": "chat_message,"
+        "content": "What is 2+2?,"
         "thread_id": "realtime_thread"
         
 
@@ -897,11 +897,11 @@ class TestUserJourney(SystemInitializationTestBase):
         email = ""
         auth_response = httpx.post( )
         "",
-        json={"email": email, "password": "Persist123!"}
+        json={"email": email, "password": "Persist123!}"
         
 
-        token = auth_response.json().get("access_token")
-        refresh_token = auth_response.json().get("refresh_token")
+        token = auth_response.json().get("access_token)"
+        refresh_token = auth_response.json().get("refresh_token)"
 
         # Simulate browser restart - use refresh token
         time.sleep(2)
@@ -909,16 +909,16 @@ class TestUserJourney(SystemInitializationTestBase):
         if refresh_token:
         refresh_response = httpx.post( )
         "",
-        json={"refresh_token": refresh_token}
+        json={"refresh_token: refresh_token}"
             
 
         assert refresh_response.status_code == 200, "Session refresh failed"
-        new_token = refresh_response.json().get("access_token")
+        new_token = refresh_response.json().get("access_token)"
 
             # Verify new token works
         me_response = httpx.get( )
         "",
-        headers={"Authorization": ""}
+        headers={"Authorization": "}"
             
         assert me_response.status_code in [200, 404], "New token not valid"
 
@@ -931,32 +931,32 @@ class TestUserJourney(SystemInitializationTestBase):
         email = ""
         auth_response = httpx.post( )
         "",
-        json={"email": email, "password": "MultiTab123!"}
+        json={"email": email, "password": "MultiTab123!}"
         
 
-        token = auth_response.json().get("access_token")
+        token = auth_response.json().get("access_token)"
 
         # Simulate multiple tabs with WebSocket connections
         ws1 = websocket.create_connection( )
-        "ws://localhost:8000/ws",
-        header={"Authorization": ""}
+        "ws://localhost:8000/ws,"
+        header={"Authorization": "}"
         
 
         ws2 = websocket.create_connection( )
-        "ws://localhost:8000/ws",
-        header={"Authorization": ""}
+        "ws://localhost:8000/ws,"
+        header={"Authorization": "}"
         
 
         Send message from tab 1
         ws1.send(json.dumps({ }))
-        "type": "chat_message",
-        "content": "Message from tab 1",
+        "type": "chat_message,"
+        "content": "Message from tab 1,"
         "thread_id": "shared_thread"
         
 
         # Both connections should be maintained
-        ws1.send(json.dumps({"type": "ping"}))
-        ws2.send(json.dumps({"type": "ping"}))
+        ws1.send(json.dumps({"type": "ping}))"
+        ws2.send(json.dumps({"type": "ping}))"
 
         response1 = ws1.recv()
         response2 = ws2.recv()
@@ -976,13 +976,13 @@ class TestRecoveryResilience(SystemInitializationTestBase):
         """Test 22: Database reconnection after network partition."""
         with self.start_dev_launcher() as proc:
         # Verify initial connectivity
-        response = httpx.get("formatted_string")
+        response = httpx.get("formatted_string)"
         assert response.status_code == 200
 
         # Simulate database connection loss (would need actual network control)
         # For now, test that health check reports database status
         health_data = response.json()
-        if "dependencies" in health_data:
+        if "dependencies in health_data:"
         assert "database" in health_data["dependencies"], "Database health not monitored"
 
         @pytest.mark.e2e
@@ -994,19 +994,19 @@ class TestRecoveryResilience(SystemInitializationTestBase):
         email = ""
         auth_response = httpx.post( )
         "",
-        json={"email": email, "password": "Restart123!"}
+        json={"email": email, "password": "Restart123!}"
         
 
-        token = auth_response.json().get("access_token")
+        token = auth_response.json().get("access_token)"
 
         # Create thread
         thread_response = httpx.post( )
         "",
-        headers={"Authorization": ""},
-        json={"title": "Persistent Thread"}
+        headers={"Authorization": "},"
+        json={"title": "Persistent Thread}"
         
 
-        thread_id = thread_response.json().get("id")
+        thread_id = thread_response.json().get("id)"
 
         # Simulate backend restart by calling health check
         # In real scenario, would kill and restart process
@@ -1014,7 +1014,7 @@ class TestRecoveryResilience(SystemInitializationTestBase):
         # Verify thread still exists after "restart"
         get_thread_response = httpx.get( )
         "",
-        headers={"Authorization": ""}
+        headers={"Authorization": "}"
         
 
         assert get_thread_response.status_code in [200, 404], "Thread retrieval failed"
@@ -1023,16 +1023,16 @@ class TestRecoveryResilience(SystemInitializationTestBase):
     def test_24_redis_failover_inmemory_fallback(self):
         """Test 24: Redis failure with in-memory cache fallback."""
     # Start without Redis
-        with self.start_dev_launcher(["--set-redis", "mock"]) as proc:
+        with self.start_dev_launcher(["--set-redis", "mock]) as proc:"
         # Test caching operations work without Redis
-        response = httpx.get("formatted_string")
+        response = httpx.get("formatted_string)"
         assert response.status_code == 200, "Service not healthy without Redis"
 
         # Create data that would normally be cached
         email = ""
         auth_response = httpx.post( )
         "",
-        json={"email": email, "password": "Cache123!"}
+        json={"email": email, "password": "Cache123!}"
         
 
         assert auth_response.status_code == 200, "Registration failed without Redis"
@@ -1046,15 +1046,15 @@ class TestRecoveryResilience(SystemInitializationTestBase):
         email = ""
         auth_response = httpx.post( )
         "",
-        json={"email": email, "password": "Recovery123!"}
+        json={"email": email, "password": "Recovery123!}"
         
 
-        token = auth_response.json().get("access_token")
+        token = auth_response.json().get("access_token)"
 
         # Token should still be valid (JWT is stateless)
         me_response = httpx.get( )
         "",
-        headers={"Authorization": ""}
+        headers={"Authorization": "}"
         
 
         assert me_response.status_code in [200, 401, 404], "Token validation failed"
@@ -1062,12 +1062,12 @@ class TestRecoveryResilience(SystemInitializationTestBase):
         @pytest.mark.e2e
     def test_26_frontend_hot_reload_development(self):
         """Test 26: Frontend hot reload preserves state."""
-        with self.start_dev_launcher(["--dev", "--frontend-port", "3002"]) as proc:
+        with self.start_dev_launcher(["--dev", "--frontend-port", "3002]) as proc:"
         # Wait for frontend
-        assert self.wait_for_service("http://localhost:3002", timeout=60)
+        assert self.wait_for_service("http://localhost:3002", "timeout=60)"
 
         # Check development mode enabled
-        response = httpx.get("http://localhost:3002")
+        response = httpx.get("http://localhost:3002)"
         assert response.status_code == 200, "Frontend not running in dev mode"
 
         # In real test, would modify a file and verify hot reload
@@ -1103,15 +1103,15 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
         finally:
         env_test.unlink(missing_ok=True)
         env_local.unlink(missing_ok=True)
-        env.delete("TEST_VAR", "test")
+        env.delete("TEST_VAR", "test)"
 
         @pytest.mark.e2e
     def test_28_secrets_management_gcp_integration(self):
         """Test 28: Secrets loading with fallback mechanisms."""
         pass
-        with self.start_dev_launcher(["--no-secrets"]) as proc:
+        with self.start_dev_launcher(["--no-secrets]) as proc:"
         # Should work without GCP secrets
-        response = httpx.get("formatted_string")
+        response = httpx.get("formatted_string)"
         assert response.status_code == 200, "Service failed without GCP secrets"
 
         # Verify local secrets are used
@@ -1119,7 +1119,7 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
         auth_response = httpx.post( )
         "",
         json={ }
-        "email": "",
+        "email": ","
         "password": "Secrets123!"
         
         
@@ -1130,13 +1130,13 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
     def test_29_cors_configuration_dynamic_ports(self):
         """Test 29: CORS allows connections with dynamic ports."""
     # Start with dynamic ports
-        with self.start_dev_launcher(["--dynamic"]) as proc:
+        with self.start_dev_launcher(["--dynamic]) as proc:"
         Get actual ports from service discovery
         discovery_file = self.project_root / ".service_discovery.json"
         if discovery_file.exists():
         with open(discovery_file) as f:
         discovery = json.load(f)
-        backend_port = discovery.get("backend", {}).get("port", 8000)
+        backend_port = discovery.get("backend", {}).get("port, 8000)"
         else:
         backend_port = 8000
 
@@ -1144,8 +1144,8 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
         response = httpx.options( )
         "",
         headers={ }
-        "Origin": "http://localhost:3000",
-        "Access-Control-Request-Method": "GET",
+        "Origin": "http://localhost:3000,"
+        "Access-Control-Request-Method": "GET,"
         "Access-Control-Request-Headers": "Authorization"
                     
                     
@@ -1153,7 +1153,7 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
         assert response.status_code in [200, 204], "CORS preflight failed"
 
                     # Check CORS headers
-        assert "access-control-allow-origin" in response.headers or \
+        assert "access-control-allow-origin in response.headers or \"
         "Access-Control-Allow-Origin" in response.headers, "CORS headers missing"
 
         @pytest.mark.e2e
@@ -1163,8 +1163,8 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
         with self.start_dev_launcher() as proc:
         # Test all health endpoints match container expectations
         health_endpoints = [ ]
-        ("", "backend"),
-        ("", "auth"),
+        ("", "backend),"
+        ("", "auth),"
         
 
         for endpoint, service in health_endpoints:
@@ -1176,12 +1176,12 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
         assert "status" in data, ""
 
             # Check for required container health check fields
-        if service == "backend":
+        if service == "backend:"
                 # Backend should report comprehensive health
-        assert any(k in data for k in ["version", "uptime", "timestamp"]), \
+        assert any(k in data for k in ["version", "uptime", "timestamp]), \"
         "Backend health missing container fields"
 
 
                 # Test runner
-        if __name__ == "__main__":
-        pytest.main([__file__, "-v", "--tb=short"])
+        if __name__ == "__main__:"
+        pytest.main([__file__, "-v", "--tb=short])"

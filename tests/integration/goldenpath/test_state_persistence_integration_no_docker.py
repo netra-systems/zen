@@ -261,7 +261,7 @@ class GoldenPathStatePersistenceNonDockerTests(SSotAsyncTestCase):
             self.record_metric("clickhouse_retrieval_ms", cold_retrieval_time * 1000)
             self.record_metric("three_tier_consistency_verified", True)
             
-            self.logger.info("✅ PASS: 3-tier persistence architecture validated - Redis/PostgreSQL/ClickHouse")
+            self.logger.info("CHECK PASS: 3-tier persistence architecture validated - Redis/PostgreSQL/ClickHouse")
             
         finally:
             await persistence_manager.cleanup()
@@ -335,9 +335,9 @@ class GoldenPathStatePersistenceNonDockerTests(SSotAsyncTestCase):
                         cached_state = await recovery_manager.get_hot_cache(recovery_key)
                         if cached_state:  # Cache might still be available
                             self.assertEqual(cached_state["user_id"], self.test_user_id)
-                            self.logger.info("✓ Recovered from cache during simulated DB loss")
+                            self.logger.info("CHECK Recovered from cache during simulated DB loss")
                         else:
-                            self.logger.info("✓ Cache miss during DB loss - graceful handling expected")
+                            self.logger.info("CHECK Cache miss during DB loss - graceful handling expected")
                             
                     elif scenario["simulation"] == "service_restart":
                         # Test full recovery after complete service restart
@@ -348,7 +348,7 @@ class GoldenPathStatePersistenceNonDockerTests(SSotAsyncTestCase):
                             self.assertEqual(recovered_warm["user_id"], self.test_user_id)
                             self.assertEqual(recovered_warm["session_id"], self.test_session_id)
                             self.assertIn("conversation_history", recovered_warm)
-                            self.logger.info("✓ Full state recovery successful after restart")
+                            self.logger.info("CHECK Full state recovery successful after restart")
                         else:
                             self.logger.warning("Full recovery failed - investigating...")
                     
@@ -366,7 +366,7 @@ class GoldenPathStatePersistenceNonDockerTests(SSotAsyncTestCase):
                             restored_cache = await recovery_manager.get_hot_cache(f"{recovery_key}_restored")
                             self.assertIsNotNone(restored_cache, "State should be restored to cache")
                     
-                    self.logger.info(f"✓ Recovery scenario '{scenario['name']}' handled successfully")
+                    self.logger.info(f"CHECK Recovery scenario '{scenario['name']}' handled successfully")
                     
                 finally:
                     await recovery_manager.cleanup()
@@ -394,7 +394,7 @@ class GoldenPathStatePersistenceNonDockerTests(SSotAsyncTestCase):
                 self.record_metric("business_continuity_verified", True)
                 self.record_metric("state_recovery_successful", True)
                 
-                self.logger.info("✅ PASS: State recovery after service interruption successful")
+                self.logger.info("CHECK PASS: State recovery after service interruption successful")
                 
             finally:
                 await final_manager.cleanup()
@@ -556,7 +556,7 @@ class GoldenPathStatePersistenceNonDockerTests(SSotAsyncTestCase):
             self.record_metric("data_consistency_failures", len(consistency_failures))
             self.record_metric("concurrent_total_time", concurrent_total_time)
             
-            self.logger.info(f"✅ PASS: Concurrent state operations successful - {len(successful_operations)}/{total_expected_operations} operations")
+            self.logger.info(f"CHECK PASS: Concurrent state operations successful - {len(successful_operations)}/{total_expected_operations} operations")
             
         finally:
             await persistence_manager.cleanup()
@@ -703,7 +703,7 @@ class GoldenPathStatePersistenceNonDockerTests(SSotAsyncTestCase):
             self.record_metric("tier_consistency_verified", True)
             self.record_metric("modification_consistency_verified", True)
             
-            self.logger.info("✅ PASS: State consistency across all 3 tiers validated")
+            self.logger.info("CHECK PASS: State consistency across all 3 tiers validated")
             
         finally:
             await persistence_manager.cleanup()
@@ -807,12 +807,12 @@ class GoldenPathStatePersistenceNonDockerTests(SSotAsyncTestCase):
                 if scenario.get("should_expire", False):
                     expired_state = await persistence_manager.get_hot_cache(scenario["storage_key"])
                     self.assertIsNone(expired_state, f"Expired state '{scenario['name']}' should be cleaned up")
-                    self.logger.info(f"✓ Expired state '{scenario['name']}' properly cleaned up")
+                    self.logger.info(f"CHECK Expired state '{scenario['name']}' properly cleaned up")
                 
                 elif scenario.get("tier") == "redis" and not scenario.get("should_expire", True):
                     active_state = await persistence_manager.get_hot_cache(scenario["storage_key"])
                     self.assertIsNotNone(active_state, f"Active state '{scenario['name']}' should remain")
-                    self.logger.info(f"✓ Active state '{scenario['name']}' properly retained")
+                    self.logger.info(f"CHECK Active state '{scenario['name']}' properly retained")
             
             # Test batch cleanup simulation for PostgreSQL
             self.logger.info("Testing PostgreSQL batch cleanup...")
@@ -825,7 +825,7 @@ class GoldenPathStatePersistenceNonDockerTests(SSotAsyncTestCase):
                 stored_state = await persistence_manager.get_warm_storage(candidate["storage_key"])
                 if stored_state and stored_state.get("simulated_age_days", 0) > 7:
                     # In real implementation, this would move to archive table
-                    self.logger.info(f"✓ Archive candidate '{candidate['name']}' identified (age: {stored_state['simulated_age_days']} days)")
+                    self.logger.info(f"CHECK Archive candidate '{candidate['name']}' identified (age: {stored_state['simulated_age_days']} days)")
                     cleanup_count += 1
             
             self.assertGreater(cleanup_count, 0, "Should identify archive candidates")
@@ -849,7 +849,7 @@ class GoldenPathStatePersistenceNonDockerTests(SSotAsyncTestCase):
                     if old_analytics and len(old_analytics) > 0:
                         age_days = old_analytics[0].get("simulated_age_days", 0)
                         if age_days > 30:
-                            self.logger.info(f"✓ Compression candidate '{candidate['name']}' identified (age: {age_days} days)")
+                            self.logger.info(f"CHECK Compression candidate '{candidate['name']}' identified (age: {age_days} days)")
             
             # Test resource usage tracking
             resource_usage = {
@@ -886,7 +886,7 @@ class GoldenPathStatePersistenceNonDockerTests(SSotAsyncTestCase):
             self.record_metric("archive_identification_working", cleanup_count > 0)
             self.record_metric("business_continuity_after_cleanup", True)
             
-            self.logger.info("✅ PASS: State cleanup and garbage collection successful")
+            self.logger.info("CHECK PASS: State cleanup and garbage collection successful")
             
         finally:
             await persistence_manager.cleanup()

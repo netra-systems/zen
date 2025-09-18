@@ -77,10 +77,10 @@ class TestIssue1278ConfigurationValidation(SSotBaseTestCase):
             assert "postgresql://" in db_url, "Database URL must be PostgreSQL"
             assert "sslmode=require" in db_url, "SSL must be required"
             
-            logger.info("✅ Database configuration validation passed")
+            logger.info("CHECK Database configuration validation passed")
             
         except Exception as e:
-            logger.error(f"❌ Database configuration validation failed: {e}")
+            logger.error(f"X Database configuration validation failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: Database config drift - {e}")
     
@@ -111,10 +111,10 @@ class TestIssue1278ConfigurationValidation(SSotBaseTestCase):
             # Validate WebSocket protocol
             assert websocket_url.startswith("wss://"), f"WebSocket must use WSS: {websocket_url}"
             
-            logger.info("✅ Domain configuration validation passed")
+            logger.info("CHECK Domain configuration validation passed")
             
         except Exception as e:
-            logger.error(f"❌ Domain configuration validation failed: {e}")
+            logger.error(f"X Domain configuration validation failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: SSL/Domain config issue - {e}")
             
@@ -152,10 +152,10 @@ class TestIssue1278ConfigurationValidation(SSotBaseTestCase):
             cors_origins = self.env.get_env_var("CORS_ORIGINS")
             assert cors_origins, "CORS origins not configured"
             
-            logger.info("✅ Environment variable consistency validation passed")
+            logger.info("CHECK Environment variable consistency validation passed")
             
         except Exception as e:
-            logger.error(f"❌ Environment variable consistency failed: {e}")
+            logger.error(f"X Environment variable consistency failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: Environment variable drift - {e}")
     
@@ -182,10 +182,10 @@ class TestIssue1278ConfigurationValidation(SSotBaseTestCase):
             if "password" in redis_url:
                 assert len(redis_url.split("@")[0].split(":")[-1]) > 8, "Redis password too short"
             
-            logger.info("✅ Redis connectivity configuration passed")
+            logger.info("CHECK Redis connectivity configuration passed")
             
         except Exception as e:
-            logger.error(f"❌ Redis connectivity configuration failed: {e}")
+            logger.error(f"X Redis connectivity configuration failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: Redis config issue - {e}")
     
@@ -221,10 +221,10 @@ class TestIssue1278ConfigurationValidation(SSotBaseTestCase):
                 port_found = any(port in origin for origin in allowed_origins)
                 assert port_found, f"Required port {port} not in allowed origins"
             
-            logger.info("✅ Authentication service configuration passed")
+            logger.info("CHECK Authentication service configuration passed")
             
         except Exception as e:
-            logger.error(f"❌ Authentication service configuration failed: {e}")
+            logger.error(f"X Authentication service configuration failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: Auth config issue - {e}")
 
@@ -254,10 +254,10 @@ class TestIssue1278ServiceHealthChecks(SSotBaseTestCase):
             assert int(startup_timeout) >= 600, \
                 f"Startup timeout too short: {startup_timeout}s (need 600s+)"
             
-            logger.info("✅ Load balancer health check configuration passed")
+            logger.info("CHECK Load balancer health check configuration passed")
             
         except Exception as e:
-            logger.error(f"❌ Load balancer health check configuration failed: {e}")
+            logger.error(f"X Load balancer health check configuration failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: Health check config issue - {e}")
     
@@ -282,10 +282,10 @@ class TestIssue1278ServiceHealthChecks(SSotBaseTestCase):
             metrics_enabled = self.env.get_env_var("ENABLE_METRICS", "false")
             assert metrics_enabled.lower() == "true", "Metrics should be enabled in staging"
             
-            logger.info("✅ Monitoring configuration passed")
+            logger.info("CHECK Monitoring configuration passed")
             
         except Exception as e:
-            logger.error(f"❌ Monitoring configuration failed: {e}")
+            logger.error(f"X Monitoring configuration failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: Monitoring config issue - {e}")
 

@@ -2,10 +2,11 @@
 Unit tests for circuit_breaker
 Coverage Target: 80%
 Business Value: Platform stability and performance
-"""""
+"""
 
 import pytest
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
+from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitConfig
 from shared.isolated_environment import IsolatedEnvironment
 
 class CircuitBreakerTests:
@@ -14,9 +15,14 @@ class CircuitBreakerTests:
     @pytest.fixture
     def instance(self):
         """Use real service instance."""
-        # TODO: Initialize real service
-        """Create test instance"""
-        return CircuitBreaker()
+        # Create test instance with UnifiedCircuitConfig
+        config = UnifiedCircuitConfig(
+            name="test_circuit_breaker",
+            failure_threshold=3,
+            recovery_timeout=60,
+            timeout_seconds=30.0
+        )
+        return CircuitBreaker(config)
 
     def test_initialization(self, instance):
         """Test proper initialization"""

@@ -80,7 +80,7 @@ class Issue1186UserExecutionEngineImportValidationTests(unittest.TestCase):
             self.assertTrue(hasattr(UserExecutionEngine, '__module__'),
                           "UserExecutionEngine must have proper module attribution")
 
-            print(f"✅ UserExecutionEngine canonical import: {import_time:.3f}s (baseline: {self.import_performance_baseline}s)")
+            print(f"CHECK UserExecutionEngine canonical import: {import_time:.3f}s (baseline: {self.import_performance_baseline}s)")
 
         except ImportError as e:
             self.fail(f"CRITICAL: Canonical UserExecutionEngine import failed: {e}")
@@ -119,10 +119,10 @@ class Issue1186UserExecutionEngineImportValidationTests(unittest.TestCase):
                 self.assertLess(total_import_time, self.import_performance_baseline * 2,
                               f"Combined factory imports took {total_import_time:.3f}s, exceeds baseline")
 
-                print(f"✅ ExecutionEngineFactory imports: primary={primary_import_time:.3f}s, alternate={alternate_import_time:.3f}s")
+                print(f"CHECK ExecutionEngineFactory imports: primary={primary_import_time:.3f}s, alternate={alternate_import_time:.3f}s")
 
             except ImportError:
-                print(f"✅ ExecutionEngineFactory single import: {primary_import_time:.3f}s (unified factory not found)")
+                print(f"CHECK ExecutionEngineFactory single import: {primary_import_time:.3f}s (unified factory not found)")
 
         except ImportError as e:
             self.fail(f"CRITICAL: ExecutionEngineFactory import failed: {e}")
@@ -221,7 +221,7 @@ class Issue1186UserExecutionEngineImportValidationTests(unittest.TestCase):
             self.assertLess(result['import_time'], self.import_performance_baseline,
                           f"SSOT pattern {pattern} import too slow: {result['import_time']:.3f}s")
 
-            print(f"✅ SSOT Pattern {pattern}: {result['import_time']:.3f}s - {result['class_name']}")
+            print(f"CHECK SSOT Pattern {pattern}: {result['import_time']:.3f}s - {result['class_name']}")
 
     def test_business_functionality_preservation_during_consolidation(self):
         """Test that business-critical functionality is preserved during import consolidation.
@@ -261,7 +261,7 @@ class Issue1186UserExecutionEngineImportValidationTests(unittest.TestCase):
                     self.assertIsNotNone(engine_class,
                                        "UserExecutionEngine class must be constructible")
 
-                print("✅ Business functionality preservation validated")
+                print("CHECK Business functionality preservation validated")
 
             except Exception as e:
                 self.fail(f"BUSINESS CRITICAL: UserExecutionEngine construction failed: {e}")
@@ -289,7 +289,7 @@ class Issue1186UserExecutionEngineImportValidationTests(unittest.TestCase):
             if actual_module != expected_module:
                 ssot_violations.append(f"UserExecutionEngine module mismatch: expected {expected_module}, got {actual_module}")
             else:
-                ssot_compliance_checks.append(f"✅ UserExecutionEngine module: {actual_module}")
+                ssot_compliance_checks.append(f"CHECK UserExecutionEngine module: {actual_module}")
 
             # Check class naming compliance
             expected_class_name = "UserExecutionEngine"
@@ -298,13 +298,13 @@ class Issue1186UserExecutionEngineImportValidationTests(unittest.TestCase):
             if actual_class_name != expected_class_name:
                 ssot_violations.append(f"UserExecutionEngine class name mismatch: expected {expected_class_name}, got {actual_class_name}")
             else:
-                ssot_compliance_checks.append(f"✅ UserExecutionEngine class: {actual_class_name}")
+                ssot_compliance_checks.append(f"CHECK UserExecutionEngine class: {actual_class_name}")
 
             # Check for singleton pattern violations (SSOT requirement)
             if hasattr(UserExecutionEngine, '_instance'):
                 ssot_violations.append("UserExecutionEngine has singleton pattern (_instance attribute)")
             else:
-                ssot_compliance_checks.append("✅ UserExecutionEngine: No singleton pattern detected")
+                ssot_compliance_checks.append("CHECK UserExecutionEngine: No singleton pattern detected")
 
             # Print compliance results
             for check in ssot_compliance_checks:
@@ -312,10 +312,10 @@ class Issue1186UserExecutionEngineImportValidationTests(unittest.TestCase):
 
             # Assert no SSOT violations
             if ssot_violations:
-                violation_message = "\n".join([f"❌ {v}" for v in ssot_violations])
+                violation_message = "\n".join([f"X {v}" for v in ssot_violations])
                 self.fail(f"SSOT VIOLATIONS DETECTED:\n{violation_message}")
             else:
-                print("✅ SSOT Compliance: All checks passed")
+                print("CHECK SSOT Compliance: All checks passed")
 
         except ImportError as e:
             self.fail(f"SSOT COMPLIANCE FAILED: Cannot import UserExecutionEngine: {e}")

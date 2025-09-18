@@ -638,15 +638,15 @@
 
             # REMOVED_SYNTAX_ERROR: elif isinstance(timestamp_value, str):
                 # Check various string timestamp formats
-                # REMOVED_SYNTAX_ERROR: if re.match(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$', timestamp_value):
+                # REMOVED_SYNTAX_ERROR: if re.match(r'^\\\\\1{4}-\\\\\1{2}-\\\\\1{2}T\\\\\1{2}:\\\\\1{2}:\\\\\1{2}(\\\\\1\\\\\1+)?(Z|[+-]\\\\\1{2}:\\\\\1{2})$', timestamp_value):
                     # REMOVED_SYNTAX_ERROR: return 'iso8601_with_timezone'
-                    # REMOVED_SYNTAX_ERROR: elif re.match(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?$', timestamp_value):
+                    # REMOVED_SYNTAX_ERROR: elif re.match(r'^\\\\\1{4}-\\\\\1{2}-\\\\\1{2}T\\\\\1{2}:\\\\\1{2}:\\\\\1{2}(\\\\\1\\\\\1+)?$', timestamp_value):
                         # REMOVED_SYNTAX_ERROR: return 'iso8601_without_timezone'
-                        # REMOVED_SYNTAX_ERROR: elif re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$', timestamp_value):
+                        # REMOVED_SYNTAX_ERROR: elif re.match(r'^\\\\\1{4}-\\\\\1{2}-\\\\\1{2} \\\\\1{2}:\\\\\1{2}:\\\\\1{2}$', timestamp_value):
                             # REMOVED_SYNTAX_ERROR: return 'datetime_space_separated'
-                            # REMOVED_SYNTAX_ERROR: elif re.match(r'^\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2}$', timestamp_value):
+                            # REMOVED_SYNTAX_ERROR: elif re.match(r'^\\\\\1{2}/\\\\\1{2}/\\\\\1{4} \\\\\1{2}:\\\\\1{2}:\\\\\1{2}$', timestamp_value):
                                 # REMOVED_SYNTAX_ERROR: return 'american_datetime'
-                                # REMOVED_SYNTAX_ERROR: elif re.match(r'^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$', timestamp_value):
+                                # REMOVED_SYNTAX_ERROR: elif re.match(r'^\\\\\1{2}-\\\\\1{2}-\\\\\1{4} \\\\\1{2}:\\\\\1{2}:\\\\\1{2}$', timestamp_value):
                                     # REMOVED_SYNTAX_ERROR: return 'european_datetime'
                                     # REMOVED_SYNTAX_ERROR: else:
                                         # REMOVED_SYNTAX_ERROR: return 'string_unknown'

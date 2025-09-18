@@ -18,10 +18,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 async def run_tests():
     """Run all refresh-related tests."""
     print("")
-    print("="*70)
-    print("[RUNNING PAGE REFRESH TEST SUITE]")
+    print("=*70)"
+    print("[RUNNING PAGE REFRESH TEST SUITE])"
     print("")
-    print("="*70)
+    print("=*70)"
 
     results = {
         'total': 0,
@@ -33,7 +33,7 @@ async def run_tests():
     # Test 1: WebSocket Service Unit Tests
     print("")
 [Test 1: WebSocket Service Enhancements]")"
-print("-"*50)
+print("-*50)"
 try:
         # Check if the enhanced files exist
 files_to_check = [
@@ -53,11 +53,11 @@ all_exist = False
 if all_exist:
     pass
 results['passed'] += 1
-print("[PASS] WebSocket service enhancements verified")
+print("[PASS] WebSocket service enhancements verified)"
 else:
     pass
 results['failed'] += 1
-print("[FAIL] Some enhanced files missing")
+print("[FAIL] Some enhanced files missing)"
 except Exception as e:
     print("")
 results['failed'] += 1
@@ -68,7 +68,7 @@ results['total'] += 1
                                     # Test 2: Test File Creation Verification
     print("")
 [Test 2: Test Coverage Files]")"
-print("-"*50)
+print("-*50)"
 try:
     pass
 test_files = [
@@ -92,11 +92,11 @@ all_test_files_exist = False
 if all_test_files_exist:
     pass
 results['passed'] += 1
-print("[PASS] All test coverage files created")
+print("[PASS] All test coverage files created)"
 else:
     pass
 results['failed'] += 1
-print("[FAIL] Some test files missing")
+print("[FAIL] Some test files missing)"
 except Exception as e:
     print("")
 results['failed'] += 1
@@ -107,7 +107,7 @@ results['total'] += 1
                                                                         # Test 3: Key Feature Validation
     print("")
 [Test 3: Key Features Implementation]")"
-print("-"*50)
+print("-*50)"
 features = []
 
 try:
@@ -115,29 +115,29 @@ try:
 with open('../frontend/services/webSocketService.ts', 'r', encoding='utf-8') as f:
 content = f.read()
 if 'exponential backoff' in content.lower() or 'Math.pow(2' in content: )
-features.append("[OK] Exponential backoff implemented")
+features.append("[OK] Exponential backoff implemented)"
 results['passed'] += 1
 else:
     pass
-features.append("[FAIL] Exponential backoff not found")
+features.append("[FAIL] Exponential backoff not found)"
 results['failed'] += 1
 
 if 'saveSessionState' in content:
     pass
-features.append("[OK] Session state saving implemented")
+features.append("[OK] Session state saving implemented)"
 results['passed'] += 1
 else:
     pass
-features.append("[FAIL] Session state saving not found")
+features.append("[FAIL] Session state saving not found)"
 results['failed'] += 1
 
 if 'handlePageUnload' in content or 'beforeunload' in content:
     pass
-features.append("[OK] Graceful disconnect on unload")
+features.append("[OK] Graceful disconnect on unload)"
 results['passed'] += 1
 else:
     pass
-features.append("[FAIL] Page unload handler not found")
+features.append("[FAIL] Page unload handler not found)"
 results['failed'] += 1
 
                                                                                                     # Check chat state persistence
@@ -145,11 +145,11 @@ with open('../frontend/services/chatStatePersistence.ts', 'r', encoding='utf-8')
 content = f.read()
 if 'localStorage' in content and 'getRestorableState' in content:
     pass
-features.append("[OK] Chat state persistence service")
+features.append("[OK] Chat state persistence service)"
 results['passed'] += 1
 else:
     pass
-features.append("[FAIL] Chat persistence incomplete")
+features.append("[FAIL] Chat persistence incomplete)"
 results['failed'] += 1
 
                                                                                                                 # Check WebSocketProvider integration
@@ -157,11 +157,11 @@ with open('../frontend/providers/WebSocketProvider.tsx', 'r', encoding='utf-8') 
 content = f.read()
 if 'chatStatePersistence' in content:
     pass
-features.append("[OK] Provider integrated with persistence")
+features.append("[OK] Provider integrated with persistence)"
 results['passed'] += 1
 else:
     pass
-features.append("[FAIL] Provider not integrated")
+features.append("[FAIL] Provider not integrated)"
 results['failed'] += 1
 
 for feature in features:
@@ -177,7 +177,7 @@ results['total'] += 1
                                                                                                                                     # Test 4: Test Structure Validation
     print("")
 [Test 4: Test Structure and Coverage]")"
-print("-"*50)
+print("-*50)"
 try:
     pass
 coverage_areas = {
@@ -212,8 +212,8 @@ results['total'] += 1
                                                                                                                                                                     # Summary
     print("")
  + ="*70)"
-print("[TEST SUMMARY]")
-print("="*70)
+print("[TEST SUMMARY])"
+print("=*70)"
 print("")
 print("")
 print("")
@@ -223,22 +223,22 @@ print("")
     print("")
 [OVERALL ASSESSMENT]:")"
 if results['failed'] == 0:
-    print("[EXCELLENT] - All refresh robustness improvements verified!")
-    print("   - WebSocket reconnection enhanced with exponential backoff")
-    print("   - Chat state persistence implemented")
-print("   - Comprehensive test coverage created")
-print("   - System is now robust against page refreshes")
+    print("[EXCELLENT] - All refresh robustness improvements verified!)"
+    print("   - WebSocket reconnection enhanced with exponential backoff)"
+    print("   - Chat state persistence implemented)"
+print("   - Comprehensive test coverage created)"
+print("   - System is now robust against page refreshes)"
 elif results['passed'] >= results['total'] * 0.8:
-    print("[GOOD] - Most improvements successfully implemented")
+    print("[GOOD] - Most improvements successfully implemented)"
     print("")
-    print("   - Core functionality enhanced")
-print("   - Minor issues may need attention")
+    print("   - Core functionality enhanced)"
+print("   - Minor issues may need attention)"
 elif results['passed'] >= results['total'] * 0.6:
-    print("[ACCEPTABLE] - Basic improvements in place")
+    print("[ACCEPTABLE] - Basic improvements in place)"
     print("")
-    print("   - Review failed items for completion")
+    print("   - Review failed items for completion)"
 else:
-    print("[NEEDS WORK] - Significant improvements needed")
+    print("[NEEDS WORK] - Significant improvements needed)"
     print("")
 
 return results
@@ -248,22 +248,22 @@ async def check_playwright_tests():
 """Try to run actual Playwright tests if environment allows."""
 print("")
  + ="*70)"
-print("[PLAYWRIGHT TEST VALIDATION]")
-print("="*70)
+print("[PLAYWRIGHT TEST VALIDATION])"
+print("=*70)"
 
 try:
     pass
 from playwright.async_api import async_playwright
 
-print("[OK] Playwright is available")
+print("[OK] Playwright is available)"
 
         # Try a simple browser launch test
 async with async_playwright() as p:
-    print("[INFO] Testing browser launch capability...")
+    print("[INFO] Testing browser launch capability...)"
 try:
     pass
 browser = await p.chromium.launch(headless=True)
-print("[OK] Browser launch successful")
+print("[OK] Browser launch successful)"
 
                 # Create a simple test page
 page = await browser.new_page()
@@ -273,20 +273,20 @@ page = await browser.new_page()
 localStorage.setItem('test_key', 'test_value');
 localStorage.getItem('test_key');
 ''')'
-print("[OK] localStorage operations work")
+print("[OK] localStorage operations work)"
 
 await browser.close()
-print("[OK] Playwright tests can be executed")
+print("[OK] Playwright tests can be executed)"
 return True
 
 except Exception as e:
     print("")
-    print("   Tests would need actual frontend running")
+    print("   Tests would need actual frontend running)"
 return False
 
 except ImportError:
-    print("[WARNING] Playwright not fully configured")
-    print("   Run: playwright install chromium")
+    print("[WARNING] Playwright not fully configured)"
+    print("   Run: playwright install chromium)"
 return False
 
 
@@ -300,8 +300,8 @@ can_run_browser_tests = await check_playwright_tests()
 
 print("")
  + ="*70)"
-print("[FINAL REPORT]")
-print("="*70)
+print("[FINAL REPORT])"
+print("=*70)"
 
 print("")
 "[Test Implementation Status]:"")"
@@ -311,18 +311,18 @@ print("")
 
 print("")
 [Key Achievements]:")"
-print("   1. WebSocket service enhanced with reconnection logic")
-print("   2. Chat state persistence service created")
-print("   3. Comprehensive test suites developed")
-print("   4. Stress testing framework established")
+print("   1. WebSocket service enhanced with reconnection logic)"
+print("   2. Chat state persistence service created)"
+print("   3. Comprehensive test suites developed)"
+print("   4. Stress testing framework established)"
 
 print("")
 [Recommendations]:")"
 if not can_run_browser_tests:
-    print("   - Install Playwright browsers: playwright install chromium")
-    print("   - Run frontend: cd frontend && npm run dev")
-    print("   - Run backend: docker-compose up")
-print("   - Execute full test suite when services are running")
+    print("   - Install Playwright browsers: playwright install chromium)"
+    print("   - Run frontend: cd frontend && npm run dev)"
+    print("   - Run backend: docker-compose up)"
+print("   - Execute full test suite when services are running)"
 
         # Exit code based on results
 if results['failed'] == 0:
@@ -334,7 +334,7 @@ else:
 return 1
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
 exit_code = asyncio.run(main())
 sys.exit(exit_code)

@@ -11,7 +11,8 @@ from test_framework.fixtures.real_services import *
 
 # Import unified WebSocket mock fixtures
 from test_framework.fixtures.websocket_manager_mock import *
-from test_framework.fixtures.websocket_test_helpers import *
+# Note: websocket_test_helpers.py doesn't exist in fixtures directory
+# from test_framework.fixtures.websocket_test_helpers import *
 
 # CRITICAL: Import ExecutionEngineFactory fixtures for integration tests
 try:

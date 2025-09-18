@@ -97,6 +97,39 @@ class CircuitBreakerConfig:
     enable_alerts: bool = True
     alert_on_state_change: bool = True
     performance_tracking: bool = True
+    
+    @classmethod
+    def for_infrastructure_service(cls, service_name: str, environment: str = "development") -> "CircuitBreakerConfig":
+        """Create infrastructure-aware circuit breaker configuration."""
+        # Base configuration
+        config = cls()
+        
+        # Environment-specific adjustments for infrastructure pressure
+        if environment in ["staging", "production"]:
+            # Cloud environments need more tolerance for infrastructure delays
+            config.timeout_threshold = 60.0  # Longer timeout for cloud infrastructure
+            config.recovery_timeout = 120.0  # Longer recovery window
+            config.failure_threshold = 7  # More failures before opening (infrastructure can be slow)
+            config.slow_call_threshold = 30.0  # Higher threshold for "slow" calls
+        else:
+            # Development environment can be more aggressive
+            config.timeout_threshold = 15.0
+            config.recovery_timeout = 30.0
+            config.failure_threshold = 3
+            config.slow_call_threshold = 5.0
+        
+        # Service-specific optimizations
+        if service_name in ["database", "auth_service"]:
+            # Critical services get extra tolerance but faster alerting
+            config.failure_threshold += 2
+            config.alert_on_state_change = True
+            config.enable_alerts = True
+        elif service_name == "websocket":
+            # WebSocket needs faster recovery for user experience
+            config.recovery_timeout *= 0.5
+            config.half_open_max_requests = 10
+        
+        return config
 
 
 @dataclass
@@ -483,7 +516,19 @@ class CircuitBreaker:
 
         self._trigger_state_change_handlers(old_state, self._state, reason)
 
-        logger.warning(f"Circuit breaker {self.name} opened: {reason}")
+        # Enhanced logging for infrastructure debugging
+        logger.warning(f"🔴 CIRCUIT BREAKER OPENED: {self.name}")
+        logger.warning(f"  Reason: {reason}")
+        logger.warning(f"  Previous state: {old_state.value}")
+        logger.warning(f"  Failure count: {self._failure_count}")
+        logger.warning(f"  Last failure: {self._last_failure_time}")
+        logger.warning(f"  Last failure reason: {self._last_failure_reason}")
+        logger.warning(f"  This service is now FAILING FAST - check infrastructure status")
+        
+        # Critical infrastructure warning
+        if self.name in ["database", "auth_service", "websocket"]:
+            logger.critical(f"CRITICAL: {self.name} circuit breaker opened - CHAT FUNCTIONALITY IMPACTED")
+            logger.critical(f"Infrastructure team attention required: {self.name} service degraded")
 
     def _transition_to_half_open(self, reason: str) -> None:
         """Transition circuit breaker to HALF_OPEN state."""
@@ -512,7 +557,16 @@ class CircuitBreaker:
 
         self._trigger_state_change_handlers(old_state, self._state, reason)
 
-        logger.info(f"Circuit breaker {self.name} closed: {reason}")
+        # Enhanced recovery logging for infrastructure debugging
+        logger.info(f"✅ CIRCUIT BREAKER RECOVERED: {self.name}")
+        logger.info(f"  Reason: {reason}")
+        logger.info(f"  Previous state: {old_state.value}")
+        logger.info(f"  Service restored to normal operation")
+        
+        # Critical infrastructure recovery notification
+        if self.name in ["database", "auth_service", "websocket"]:
+            logger.info(f"🎉 INFRASTRUCTURE RECOVERY: {self.name} service restored - chat functionality available")
+            logger.info(f"Infrastructure team: {self.name} service health restored")
 
     def _trigger_state_change_handlers(self, old_state: CircuitBreakerState,
                                       new_state: CircuitBreakerState, reason: str) -> None:

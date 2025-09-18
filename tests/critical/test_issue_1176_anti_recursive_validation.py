@@ -79,7 +79,7 @@ total_tests_run = 0
 all_succeeded = True  # Categories might claim success but no tests ran
 
 if total_tests_run == 0:
-    print("❌ FAILURE: No tests were executed - this indicates infrastructure failure")
+    print("X FAILURE: No tests were executed - this indicates infrastructure failure")
     sys.exit(1)
 else:
     sys.exit(0)
@@ -154,7 +154,7 @@ else:
                 "UNVALIDATED",
                 "NEEDS VERIFICATION",
                 "CLAIMS NEED VERIFICATION",
-                "❌ CRITICAL"
+                "X CRITICAL"
             ]
 
             # Ensure documentation reflects reality, not aspirational claims
@@ -246,7 +246,7 @@ all_succeeded = all(r["success"] for r in results.values())
 if not all_succeeded:
     sys.exit(1)
 elif total_tests_run == 0:
-    print("❌ FAILURE: No tests were executed - this indicates infrastructure failure")
+    print("X FAILURE: No tests were executed - this indicates infrastructure failure")
     sys.exit(1)  # This is the fix - must fail when no tests run
 else:
     sys.exit(0)

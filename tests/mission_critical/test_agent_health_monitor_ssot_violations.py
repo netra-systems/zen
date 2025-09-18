@@ -1,29 +1,30 @@
 """
-"""
+
 AgentHealthMonitor SSOT Violations Reproduction Test
 
 PURPOSE: Expose multiple AgentHealthMonitor implementations with inconsistent death detection thresholds.
 This test is DESIGNED TO FAIL before SSOT remediation to demonstrate the violations.
 
 BUSINESS IMPACT:
-- Segment: Platform (affects all user tiers)
+    - Segment: Platform (affects all user tiers)
 - Goal: Stability - prevent inconsistent agent death detection
 - Value Impact: Inconsistent thresholds create silent agent failures affecting 90% of chat value
 """
-"""
+
 - Revenue Impact: Prevents user churn from unreliable AI interactions
 
 EXPECTED BEHAVIOR:
-- SHOULD FAIL: Different timeout thresholds across health monitors (10s vs 30s vs 60s)
+    - SHOULD FAIL: Different timeout thresholds across health monitors (""10s"" vs ""30s"" vs ""60s"")
 - SHOULD FAIL: Multiple implementations create conflicting death detection logic
 - SHOULD FAIL: Performance overhead from multiple concurrent monitors
 
 After SSOT consolidation, this test should demonstrate:
-- Single death detection threshold (standardized)
+    - Single death detection threshold (standardized)
 - One health monitoring implementation
 - Consistent agent status tracking
 "
-"
+""
+
 
 import asyncio
 import time
@@ -48,11 +49,13 @@ except ImportError:
 
 class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
     "
-    "
+    ""
+
     Reproduction tests for AgentHealthMonitor SSOT violations.
     These tests SHOULD FAIL with current fragmented implementation.
 "
-"
+""
+
 
     async def asyncSetUp(self):
         "Set up test fixtures."
@@ -71,11 +74,12 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
         self.mock_execution_tracker = Mock()
 
     async def test_multiple_implementations_inconsistent_death_thresholds(self):
-        "
-        "
+        """
+        ""
+
         REPRODUCTION TEST: Expose different death detection thresholds across implementations.
         
-        Expected to FAIL: Shows 10s vs 30s vs 60s timeout inconsistencies.
+        Expected to FAIL: Shows ""10s"" vs ""30s"" vs ""60s"" timeout inconsistencies.
         After SSOT fix: Should have single consistent threshold.
 "
 "
@@ -87,15 +91,15 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
             last_heartbeat=last_heartbeat,
             execution_context={"test: True}"
         
-        # This SHOULD detect death (12s > 10s threshold)
+        # This SHOULD detect death (""12s"" > ""10s"" threshold)
         self.assertTrue(
             core_death_detected, 
-            Core monitor should detect death after 12s (>10s threshold)
+            Core monitor should detect death after ""12s"" (>""10s"" threshold)
         )
         
         # If dev monitors are available, test their different thresholds
         if DEV_MONITORS_AVAILABLE:
-            # Dev launcher health monitors have different grace periods (30s, 90s)
+            # Dev launcher health monitors have different grace periods (""30s"", ""90s"")
             # This exposes the SSOT violation - different components use different thresholds
             
             dev_status = DevHealthStatus(
@@ -105,14 +109,14 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
                 grace_period_seconds=30  # Different threshold!
             )
             
-            # Grace period of 30s means agent wouldn't be considered dead at 12s'
+            # Grace period of ""30s"" means agent wouldn't be considered dead at ""12s""'
             time_in_grace = 12  # seconds since start
             grace_period_over = time_in_grace > 30
             
             # This exposes the violation: core monitor says dead, dev monitor says alive
             self.assertFalse(
                 grace_period_over,
-                "SSOT VIOLATION EXPOSED: Dev monitor uses 30s, core uses 10s"
+                "SSOT VIOLATION EXPOSED: Dev monitor uses ""30s"", core uses ""10s"""
             )
             
             # Record the violation for analysis
@@ -136,8 +140,9 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
             )
 
     async def test_multiple_health_status_implementations_conflict(self):
-        "
-        "
+        """
+        ""
+
         REPRODUCTION TEST: Show conflicting health status from multiple implementations.
         
         Expected to FAIL: Different health status objects and calculation methods.
@@ -163,7 +168,8 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
         # Record operation times to affect health calculation
         self.core_monitor.record_successful_operation(test_op, 2.5)
         self.core_monitor.record_successful_operation(test_op, 3.0)"
-        self.core_monitor.record_successful_operation(test_op, 3.0)"
+        self.core_monitor.record_successful_operation(test_op, 3.0)""
+
         
         # Get updated status
         updated_status = self.core_monitor.get_comprehensive_health_status(
@@ -224,7 +230,8 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
                     agent_name=agent,
                     last_heartbeat=datetime.now(timezone.utc) - timedelta(seconds=5),
                     execution_context={test: True}"
-                    execution_context={test: True}"
+                    execution_context={test: True}""
+
         core_monitor_time = time.perf_counter() - start_time
         
         # The SSOT violation is that we have multiple monitoring systems
@@ -247,25 +254,28 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
             }
             
             # This SHOULD FAIL to expose the performance violation
-            if theoretical_overhead > 0.1:  # If total time would exceed 100ms
+            if theoretical_overhead > 0.1:  # If total time would exceed ""100ms""
                 self.fail(
                     fSSOT VIOLATION: Multiple monitors create performance overhead. ""
-                    fCore monitor: {performance_analysis['core_monitor_time']:.4f}s, 
+                    fCore monitor: {performance_analysis['core_monitor_time']:.""4f""}s, 
                     fTheoretical total with {performance_analysis['simulated_monitors']} monitors: 
-                    f"{performance_analysis['theoretical_total_time']:.4f}s"
+                    f"{performance_analysis['theoretical_total_time']:.""4f""}s"
                     f({performance_analysis['overhead_multiplier']}x overhead)"
-                    f({performance_analysis['overhead_multiplier']}x overhead)"
+                    f({performance_analysis['overhead_multiplier']}x overhead)""
+
                 )
         
         # Even with just core monitor, record baseline for comparison
         self.assertLess(
             core_monitor_time, 0.5, 
-            fCore monitor baseline too slow: {core_monitor_time:.4f}s for {num_agents * num_checks} checks
+            fCore monitor baseline too slow: {core_monitor_time:.""4f""}s for {num_agents * num_checks} checks""
+
         )
 
     async def test_inconsistent_error_history_tracking(self):
-        "
-        "
+        """
+        ""
+
         REPRODUCTION TEST: Show scattered error history tracking across multiple systems.
         
         Expected to FAIL: Different error tracking mechanisms create state divergence.
@@ -296,14 +306,14 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
             dev_error_tracking = {
                 "consecutive_failures: 2,  # Different tracking method"
                 last_failure_time: datetime.now(),
-                "failure_types: [startup_failure", health_check_failure],  # Different error types
-                error_count_method: "consecutive  # vs. core's total_errors"'
+                "failure_types: [startup_failure, health_check_failure],  # Different error types"
+                error_count_method: "consecutive  # vs. core's total_errors'"
             }
             
             # Compare tracking methods
             tracking_differences = {
                 core_total_errors: core_summary[total_errors],
-                "core_recent_errors: core_summary[recent_errors"],
+                "core_recent_errors: core_summary[recent_errors],"
                 core_error_types: list(core_summary[error_types].keys()),
                 dev_consecutive_failures: dev_error_tracking[consecutive_failures"],"
                 "dev_failure_types: dev_error_tracking[failure_types],"
@@ -355,7 +365,7 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
         )
         
         # Core monitor should detect dead agent
-        self.assertEqual(core_status.status, dead", "Core monitor should detect dead agent)
+        self.assertEqual(core_status.status, dead", Core monitor should detect dead agent)"
         
         if DEV_MONITORS_AVAILABLE:
             # Dev monitor might see agent as still in grace period or monitoring
@@ -390,7 +400,8 @@ class AgentHealthMonitorSSOTViolationsTests(SSotAsyncTestCase):
                 fSSOT VIOLATION: Agent state synchronization failure detected. 
                 f"Core monitor status: '{state_synchronization_failure['core_status']}'"
                 f(health: {state_synchronization_failure['core_overall_health']:.2f), "
-                f(health: {state_synchronization_failure['core_overall_health']:.2f), "
+                f(health: {state_synchronization_failure['core_overall_health']:."2f"), ""
+
                 fDev monitor state: '{state_synchronization_failure['dev_state']}' 
                 f(healthy: {state_synchronization_failure['dev_is_healthy']), "
                 f(healthy: {state_synchronization_failure['dev_is_healthy']), "

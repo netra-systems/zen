@@ -246,7 +246,7 @@ class AdvancedUserScenariosE2ETests(SSotAsyncTestCase):
             self.logger.info(f'   Scenarios tested: {len(scenario_results)}')
             self.logger.info(f'   Success rate: {sum((r.success for r in scenario_results)) / len(scenario_results):.1%}')
         except Exception as e:
-            self.logger.error(f'❌ Enterprise FinTech scenario failed: {e}')
+            self.logger.error(f'X Enterprise FinTech scenario failed: {e}')
             raise AssertionError(f'Enterprise FinTech scenario failed: {e}. This breaks high-value financial industry capabilities.')
 
     async def test_healthcare_compliance_scenario(self):
@@ -293,7 +293,7 @@ class AdvancedUserScenariosE2ETests(SSotAsyncTestCase):
             self.logger.info(f'   Scenarios tested: {len(scenario_results)}')
             self.logger.info(f'   Success rate: {sum((r.success for r in scenario_results)) / len(scenario_results):.1%}')
         except Exception as e:
-            self.logger.error(f'❌ Healthcare compliance scenario failed: {e}')
+            self.logger.error(f'X Healthcare compliance scenario failed: {e}')
             raise AssertionError(f'Healthcare compliance scenario failed: {e}. This breaks specialized healthcare industry capabilities.')
 
     async def test_multi_turn_complex_conversation(self):
@@ -385,7 +385,7 @@ class AdvancedUserScenariosE2ETests(SSotAsyncTestCase):
             for turn_result in turn_responses:
                 self.logger.info(f"   Turn {turn_result['turn']}: {turn_result['processing_time']:.2f}s, {turn_result['response_length']} chars, context: {turn_result['context_preserved']:.1%}")
         except Exception as e:
-            self.logger.error(f'❌ Multi-turn complex conversation failed: {e}')
+            self.logger.error(f'X Multi-turn complex conversation failed: {e}')
             raise AssertionError(f'Multi-turn complex conversation failed: {e}. This breaks advanced conversational AI capabilities.')
 
     async def test_comprehensive_enterprise_scenarios_suite(self):
@@ -433,11 +433,11 @@ class AdvancedUserScenariosE2ETests(SSotAsyncTestCase):
             self.logger.info(f'   Enterprise readiness rate: {enterprise_readiness_rate:.1%}')
             self.logger.info(f'   Industries covered: {[i.value for i in industries_covered]}')
             for result in all_results:
-                status = '✅ SUCCESS' if result.success else '❌ FAILED'
+                status = 'CHECK SUCCESS' if result.success else 'X FAILED'
                 enterprise = '🏢 ENTERPRISE READY' if result.enterprise_readiness else ''
                 self.logger.info(f'   {status} {result.scenario_type.value}: BV={result.business_value_score:.2f}, Soph={result.sophistication_score:.2f} {enterprise}')
         except Exception as e:
-            self.logger.error(f'❌ Comprehensive enterprise scenarios suite failed: {e}')
+            self.logger.error(f'X Comprehensive enterprise scenarios suite failed: {e}')
             raise AssertionError(f'Comprehensive enterprise scenarios suite failed: {e}. This indicates platform is not ready for enterprise deployment.')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

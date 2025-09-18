@@ -1,26 +1,27 @@
 """
-"""
+
 WebSocket Factory User Isolation SSOT Compliance Test
 
 PURPOSE: Enterprise user isolation validation with SSOT patterns
 SHOULD FAIL: Because user isolation is compromised by dual patterns
 SHOULD PASS: When SSOT factory ensures proper user isolation
 
-Business Impact: $500K+ ARR at risk - Enterprise compliance (HIPAA, SOC2, SEC)
+Business Impact: $500K+ plus ARR at risk - Enterprise compliance (HIPAA, SOC2, SEC)
 GitHub Issue: #1144 - WebSocket Factory Dual Pattern Blocking Golden Path
 
 This test validates that:
-1. User isolation is maintained across all WebSocket factory patterns
+    1. User isolation is maintained across all WebSocket factory patterns
 2. No shared state contamination between concurrent users
 3. Enterprise security requirements are met
 4. Factory patterns follow SSOT user isolation standards
 
 CRITICAL: This is a mission critical test protecting enterprise compliance.
 "
-"
+""
+
 
 """
-"""
+
 import asyncio
 import threading
 import time
@@ -54,7 +55,8 @@ class WebSocketTestConnection:
 
 class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
     "
-    "
+    ""
+
     Mission Critical Test: WebSocket Factory User Isolation SSOT Compliance.
     
     This test MUST FAIL with current dual pattern implementation to prove
@@ -62,7 +64,8 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
     
     Enterprise Impact: HIPAA, SOC2, SEC compliance requirements.
 "
-"
+""
+
     
     def setup_method(self, method):
         Set up test environment for user isolation validation.""
@@ -104,8 +107,9 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
         self.test_connections.clear()
     
     def test_websocket_factory_user_state_isolation_violation(self):
-    "
-    "
+        """
+    ""
+
         CRITICAL: Test detecting user state isolation violations in factory pattern.
         
         This test MUST FAIL because:
@@ -164,8 +168,9 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
         )
     
     def test_websocket_factory_concurrent_session_contamination_detection(self):
-        "
-        "
+        """
+        ""
+
         CRITICAL: Test detecting session contamination in concurrent access.
         
         This test MUST FAIL because:
@@ -179,13 +184,14 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
         # Test concurrent session isolation
         session_contamination = self._test_concurrent_session_isolation()
         
-        print(f"\nDETECTED SESSION CONTAMINATION VIOLATIONS: {len(session_contamination)})")
+        print(f"\nDETECTED SESSION CONTAMINATION VIOLATIONS: {len(session_contamination)}))"
         for contamination in session_contamination:
             print(f  - Session {contamination['source_session']} contaminated {contamination['target_session']})"
             print(f  - Session {contamination['source_session']} contaminated {contamination['target_session']})"
-            print(f"    Contamination type: {contamination['contamination_type']})")
+            print(f"    Contamination type: {contamination['contamination_type']}))"
             print(f    Data affected: {contamination['affected_data']})"
-            print(f    Data affected: {contamination['affected_data']})"
+            print(f    Data affected: {contamination['affected_data']})""
+
         
         # This assertion SHOULD FAIL with current session contamination
         # Expected failure: Session state contamination detected
@@ -197,7 +203,8 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
         )
     
     def test_websocket_factory_security_clearance_isolation_violation(self):
-        ""
+        """
+
         CRITICAL: Test detecting security clearance isolation violations.
         
         This test MUST FAIL because:
@@ -210,10 +217,10 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
         # Test security clearance isolation
         clearance_violations = self._test_security_clearance_isolation()
         
-        print(f"\nDETECTED SECURITY CLEARANCE VIOLATIONS: {len(clearance_violations)}")
+        print(f"\nDETECTED SECURITY CLEARANCE VIOLATIONS: {len(clearance_violations)})"
         for violation in clearance_violations:
             print(f  - User {violation['user_id']} (clearance: {violation['user_clearance']})
-            print(f"    Accessed data requiring: {violation['required_clearance']}")
+            print(f"    Accessed data requiring: {violation['required_clearance']})"
             print(f    Violation severity: {violation['severity']})
         
         # This assertion SHOULD FAIL with current clearance violations
@@ -222,13 +229,15 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
             len(clearance_violations), 0,
             f"ENTERPRISE SECURITY VIOLATION: Found {len(clearance_violations)} security clearance violations."
             fThis violates government/enterprise security requirements. "
-            fThis violates government/enterprise security requirements. "
+            fThis violates government/enterprise security requirements. ""
+
             fAffected clearances: {list(set(v['required_clearance'] for v in clearance_violations))}
         )
     
     def test_websocket_factory_memory_isolation_violation(self):
-        "
-        "
+        """
+        ""
+
         CRITICAL: Test detecting memory isolation violations in factory pattern.
         
         This test MUST FAIL because:
@@ -372,7 +381,8 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
                         'target_session': session_user.session_id,
                         'contamination_type': 'session_creation_failure',
                         'affected_data': fSession creation failed: {str(e)}"
-                        'affected_data': fSession creation failed: {str(e)}"
+                        'affected_data': fSession creation failed: {str(e)}""
+
                     }
         
         # Check for cross-session contamination
@@ -426,7 +436,8 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
     
     def _test_memory_isolation(self) -> List[Dict]:
         Test memory isolation between user sessions."
-        Test memory isolation between user sessions."
+        Test memory isolation between user sessions.""
+
         violations = []
         
         # Create and destroy connections to test memory cleanup
@@ -525,7 +536,8 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
     
     def _check_for_cross_tenant_data(self, connection: WebSocketTestConnection, current_tenant: str) -> List[Dict]:
         Check for cross-tenant data in connection."
-        Check for cross-tenant data in connection."
+        Check for cross-tenant data in connection.""
+
         cross_tenant_data = []
         
         # Check state data for other tenant data
@@ -573,7 +585,8 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
     def _inject_clearance_test_data(self, connection: WebSocketTestConnection, clearance: str):
         "Inject clearance-appropriate test data."
         test_data = f{clearance}_classified_data_{uuid.uuid4().hex[:8]}"
-        test_data = f{clearance}_classified_data_{uuid.uuid4().hex[:8]}"
+        test_data = f{clearance}_classified_data_{uuid.uuid4().hex[:8]}""
+
         connection.state_data[f'clearance_data_{clearance}'] = test_data
     
     def _can_access_clearance_data(self, connection: WebSocketTestConnection, target_clearance: str) -> bool:
@@ -583,7 +596,8 @@ class WebSocketFactoryUserIsolationSSotComplianceTest(SSotBaseTestCase):
         return target_key in connection.state_data
     
     def _inject_user_memory_data(self, connection: WebSocketTestConnection, user_data: str):
-        ""Inject user-specific data into memory.
+        ""Inject user-specific data into memory.""
+
         connection.state_data['user_memory_data'] = user_data
     
     def _capture_memory_snapshot(self, connection: WebSocketTestConnection) -> Dict:

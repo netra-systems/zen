@@ -1,28 +1,30 @@
 #!/usr/bin/env python3
 """
-"""
+
 SSOT Compliance Validation Test Suite - Issue #1075 Implementation
 Tests designed to FAIL initially and detect the specific SSOT violations identified in the analysis.
 
-CRITICAL BUSINESS IMPACT: These tests protect $500K+ ARR by ensuring SSOT architectural compliance.
+CRITICAL BUSINESS IMPACT: These tests protect $500K+ plus ARR by ensuring SSOT architectural compliance.
 Violations detected lead to system instability, development inefficiency, and technical debt accumulation.
 
 Test Implementation Strategy:
-1. Unit tests for individual compliance validation (no Docker required)
+    1. Unit tests for individual compliance validation (no Docker required)
 2. Integration tests for cross-module SSOT issues
 3. Tests initially FAIL to prove violations exist
 4. Detailed violation reporting with specific counts and locations
 
 SSOT Violations to Detect:
-- Production compliance gap: 16.6% between claimed vs actual
+    - Production compliance gap: 16.6% between claimed vs actual
 """
 """
+
 - 89 duplicate type definitions across modules
 - Test infrastructure fragmentation: -1981.6% compliance
 - Configuration manager duplicates
 - Authentication service violations
 "
-"
+""
+
 
 import os
 import sys
@@ -84,8 +86,9 @@ class SsotComplianceValidator:
                 self.production_files.add(file_path)
 
     def validate_production_ssot_compliance(self) -> List[SsotComplianceViolation]:
-        "
-        "
+        """
+        ""
+
         Validate production SSOT compliance to detect 16.6% gap
 
         This test is designed to FAIL initially to prove the violations exist.
@@ -94,7 +97,8 @@ class SsotComplianceValidator:
         - Multiple import patterns for same functionality
         - Inconsistent singleton vs factory patterns
 "
-"
+""
+
         violations = []
 
         # Track duplicate class definitions
@@ -124,7 +128,8 @@ class SsotComplianceValidator:
                 # Add violation for unparseable files
                 violations.append(SsotComplianceViolation(
                     violation_type=parse_error,"
-                    violation_type=parse_error,"
+                    violation_type=parse_error,""
+
                     location=str(file_path),
                     description=fUnable to parse production file: {e}","
                     severity=critical
@@ -146,9 +151,10 @@ class SsotComplianceValidator:
 
         # Detect SSOT pattern violations
         ssot_patterns = [
-            BaseTestCase, MockFactory, ConfigManager", "DatabaseManager,
+            BaseTestCase, MockFactory, ConfigManager", DatabaseManager,"
             WebSocketManager, AuthService, ExecutionEngine"
-            WebSocketManager, AuthService, ExecutionEngine"
+            WebSocketManager, AuthService, ExecutionEngine""
+
         ]
 
         for pattern in ssot_patterns:
@@ -159,14 +165,16 @@ class SsotComplianceValidator:
                     location=Multiple files,
                     description=f"Multiple implementations of SSOT pattern '{pattern}': {matching_classes},"
                     severity=critical"
-                    severity=critical"
+                    severity=critical""
+
                 ))
 
         return violations
 
     def validate_duplicate_type_definitions(self) -> List[SsotComplianceViolation]:
-    "
-    "
+        """
+    ""
+
         Detect 89 duplicate type definitions identified in the analysis
 
         This test should FAIL initially and report specific duplicates including:
@@ -174,13 +182,14 @@ class SsotComplianceValidator:
         - Duplicate configuration classes
         - Multiple agent registry implementations
         "
-        "
+        ""
+
         violations = []
         type_definitions = defaultdict(list)
 
         # Known SSOT violation patterns to specifically detect
         critical_duplicates = [
-            BaseTestCase, AsyncTestCase, MockFactory", "ConfigManager,
+            BaseTestCase, AsyncTestCase, MockFactory", ConfigManager,"
             DatabaseManager, WebSocketManager, AgentRegistry, "AuthService,"
             ExecutionEngine", UserExecutionContext, TestMetrics"
         ]
@@ -232,7 +241,8 @@ class SsotComplianceValidator:
         return violations
 
     def validate_test_infrastructure_compliance(self) -> List[SsotComplianceViolation]:
-    ""
+    """
+
         Detect test infrastructure fragmentation leading to -1981.6% compliance
 
         This test should FAIL initially and report:
@@ -299,14 +309,16 @@ class SsotComplianceValidator:
                 location=file_path,
                 description=Direct pytest import detected (should use unified test runner),
                 severity=medium"
-                severity=medium"
+                severity=medium""
+
             ))
 
         return violations
 
     def validate_auth_service_ssot_compliance(self) -> List[SsotComplianceViolation]:
-    "
-    "
+        """
+    ""
+
         Validate auth service SSOT compliance
 
         Expected violations:
@@ -314,12 +326,13 @@ class SsotComplianceValidator:
         - Duplicate authentication logic
         - Backend auth integration violations
         "
-        "
+        ""
+
         violations = []
 
         auth_patterns = [
             JWTHandler", TokenValidator, AuthService, SessionManager,"
-            Authenticator", "AuthMiddleware
+            Authenticator", AuthMiddleware"
         ]
 
         auth_implementations = defaultdict(list)
@@ -327,7 +340,7 @@ class SsotComplianceValidator:
         # Scan auth service and backend auth integration files
         auth_paths = [
             self.project_root / auth_service,
-            self.project_root / netra_backend / app" / "auth_integration
+            self.project_root / netra_backend / app" / auth_integration"
         ]
 
         for auth_path in auth_paths:
@@ -361,7 +374,8 @@ class SsotComplianceValidator:
 
     def run_all_validations(self) -> Dict[str, List[SsotComplianceViolation]]:
         Run all SSOT compliance validations"
-        Run all SSOT compliance validations"
+        Run all SSOT compliance validations""
+
         self.scan_project_structure()
 
         results = {
@@ -376,13 +390,15 @@ class SsotComplianceValidator:
 
 class TestSsotComplianceValidationSuite(SSotBaseTestCase):
     "
-    "
+    ""
+
     SSOT Compliance Validation Test Suite
 
     These tests are designed to FAIL initially and detect specific SSOT violations.
-    Business Value: Protects $500K+ ARR by ensuring architectural compliance.
+    Business Value: Protects $500K+ plus ARR by ensuring architectural compliance.
 "
-"
+""
+
 
     @classmethod
     def setup_class(cls):
@@ -392,13 +408,14 @@ class TestSsotComplianceValidationSuite(SSotBaseTestCase):
         cls.validator = SsotComplianceValidator(cls.project_root)
 
     def test_unit_production_ssot_compliance_gap_detection(self):
-        ""
+        """
+
         Unit Test: Detect 16.6% production SSOT compliance gap
 
         This test is designed to FAIL initially to prove the violations exist.
         Expected: 50+ violations in production code
 
-        self.record_metric("test_type, unit")
+        self.record_metric("test_type, unit)"
         self.record_metric(expected_outcome, FAIL - prove violations exist)
 
         violations = self.validator.validate_production_ssot_compliance()
@@ -435,13 +452,14 @@ class TestSsotComplianceValidationSuite(SSotBaseTestCase):
                      Expected SSOT pattern violations)
 
     def test_unit_duplicate_type_definitions_detection(self):
-        ""
+        """
+
         Unit Test: Detect 89 duplicate type definitions
 
         This test should FAIL initially and report specific duplicates.
         Expected: 89+ duplicate type definitions across modules
 
-        self.record_metric("test_type, unit")
+        self.record_metric("test_type, unit)"
         self.record_metric(expected_duplicate_count, 89)
 
         violations = self.validator.validate_duplicate_type_definitions()
@@ -468,19 +486,21 @@ class TestSsotComplianceValidationSuite(SSotBaseTestCase):
 
         # Check for specific critical duplicates
         violation_descriptions = [v.description for v in violations]
-        critical_patterns = ["BaseTestCase, MockFactory", ConfigManager]
+        critical_patterns = ["BaseTestCase, MockFactory, ConfigManager]"
 
         for pattern in critical_patterns:
             matching_violations = [desc for desc in violation_descriptions if pattern in desc]
             self.assertGreater(
                 len(matching_violations), 0,
                 fExpected violations for critical SSOT pattern '{pattern}' but found none"
-                fExpected violations for critical SSOT pattern '{pattern}' but found none"
+                fExpected violations for critical SSOT pattern '{pattern}' but found none""
+
             )
 
     def test_integration_test_infrastructure_fragmentation(self):
-    "
-    "
+        """
+    ""
+
         Integration Test: Detect test infrastructure fragmentation (-1981.6% compliance)
 
         This test should FAIL initially and report massive fragmentation.
@@ -507,7 +527,7 @@ class TestSsotComplianceValidationSuite(SSotBaseTestCase):
         # Log test infrastructure violations
         if violations:
             print(f\n=== TEST INFRASTRUCTURE FRAGMENTATION ({len(violations)} total) ===)
-            print(fDuplicate base classes: {len(duplicate_base_classes")}")
+            print(fDuplicate base classes: {len(duplicate_base_classes")})"
             print(fDuplicate mock implementations: {len(duplicate_mocks)})
             print(fDirect pytest usage: {len(direct_pytest)}")"
             print()
@@ -523,7 +543,8 @@ class TestSsotComplianceValidationSuite(SSotBaseTestCase):
             len(violations), 50,  # Expect significant fragmentation
             fExpected 50+ test infrastructure violations but found {len(violations)}. 
             fTest infrastructure should be heavily fragmented according to analysis."
-            fTest infrastructure should be heavily fragmented according to analysis."
+            fTest infrastructure should be heavily fragmented according to analysis.""
+
         )
 
         # Specific checks for known fragmentation
@@ -568,8 +589,9 @@ class TestSsotComplianceValidationSuite(SSotBaseTestCase):
             )
 
     def test_comprehensive_ssot_compliance_summary(self):
-        "
-        "
+        """
+        ""
+
         Comprehensive Test: Generate complete SSOT compliance summary
 
         This test runs all validations and provides a complete violation summary.
@@ -593,28 +615,28 @@ class TestSsotComplianceValidationSuite(SSotBaseTestCase):
 
         # Generate comprehensive report
         print(f\n{'='*80})
-        print(f"COMPREHENSIVE SSOT COMPLIANCE VALIDATION REPORT")
+        print(f"COMPREHENSIVE SSOT COMPLIANCE VALIDATION REPORT)"
         print(f{'='*80})
-        print(f"Total Violations: {total_violations}")
+        print(f"Total Violations: {total_violations})"
         print(fCritical Violations: {critical_violations})
         print()
 
         for category, violations in all_results.items():
-            print(f"{category.upper().replace('_', ' ')}: {len(violations)} violations")
+            print(f"{category.upper().replace('_', ' ')}: {len(violations)} violations)"
             if violations:
                 critical_count = len([v for v in violations if v.severity == critical)
                 high_count = len([v for v in violations if v.severity == high)"
                 high_count = len([v for v in violations if v.severity == high)"
                 print(f  - Critical: {critical_count}")"
                 print(f  - High: {high_count})
-                print(f  - Other: {len(violations") - critical_count - high_count}")
+                print(f  - Other: {len(violations") - critical_count - high_count})"
             print()
 
         # Business impact assessment
         compliance_percentage = max(0, 100 - (total_violations / 10))  # Rough calculation
         self.record_metric(estimated_compliance_percentage, compliance_percentage)
 
-        print(fEstimated SSOT Compliance: {compliance_percentage:.1f}%"")
+        print(fEstimated SSOT Compliance: {compliance_percentage:.""1f""}%"")
         print(fBusiness Risk Level: {'CRITICAL' if compliance_percentage < 70 else 'HIGH' if compliance_percentage < 85 else 'MEDIUM'})
         print()
 
@@ -633,7 +655,7 @@ class TestSsotComplianceValidationSuite(SSotBaseTestCase):
         )
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # Run the tests
     unittest.main(verbosity=2)
 )))))))))))

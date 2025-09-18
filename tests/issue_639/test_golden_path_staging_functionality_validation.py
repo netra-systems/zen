@@ -117,7 +117,7 @@ class Issue639GoldenPathFunctionalityValidationTests(SSotAsyncTestCase):
                 value = self.staging_test.staging_config[key]
                 assert value is not None and value != "", f"staging_config[{key}] should not be empty"
                 
-                logger.info(f"✅ CONFIG VALIDATED: {key} = {value}")
+                logger.info(f"CHECK CONFIG VALIDATED: {key} = {value}")
             
             # Validate test users configuration
             assert hasattr(self.staging_test, 'test_users'), "test_users should be set after setup"
@@ -130,7 +130,7 @@ class Issue639GoldenPathFunctionalityValidationTests(SSotAsyncTestCase):
             assert test_user['email'] is not None, "Test user email should not be None"
             assert test_user['password'] is not None, "Test user password should not be None"
             
-            logger.info(f"✅ TEST USER VALIDATED: email = {test_user['email']}")
+            logger.info(f"CHECK TEST USER VALIDATED: email = {test_user['email']}")
             
             # Validate SLA requirements configuration
             assert hasattr(self.staging_test, 'sla_requirements'), "sla_requirements should be set after setup"
@@ -148,16 +148,16 @@ class Issue639GoldenPathFunctionalityValidationTests(SSotAsyncTestCase):
                 assert isinstance(value, (int, float)), f"SLA requirement {sla_key} should be numeric"
                 assert value > 0, f"SLA requirement {sla_key} should be positive"
                 
-                logger.info(f"✅ SLA VALIDATED: {sla_key} = {value}")
+                logger.info(f"CHECK SLA VALIDATED: {sla_key} = {value}")
             
             # Store success result
             self.functionality_results['initialization_success'] = True
             self.functionality_results['staging_config'] = self.staging_test.staging_config.copy()
             
-            logger.info("✅ STAGING TEST INITIALIZATION SUCCEEDED AFTER FIXES")
+            logger.info("CHECK STAGING TEST INITIALIZATION SUCCEEDED AFTER FIXES")
             
         except Exception as e:
-            logger.error(f"❌ STAGING TEST INITIALIZATION FAILED: {type(e).__name__}: {e}")
+            logger.error(f"X STAGING TEST INITIALIZATION FAILED: {type(e).__name__}: {e}")
             self.functionality_results['initialization_success'] = False
             self.functionality_results['initialization_error'] = str(e)
             raise
@@ -226,7 +226,7 @@ class Issue639GoldenPathFunctionalityValidationTests(SSotAsyncTestCase):
         assert config_validation_results['api_url']['is_https'], "API URL should use HTTPS"
         assert config_validation_results['auth_url']['is_https'], "Auth URL should use HTTPS"
         
-        logger.info("✅ ALL STAGING CONFIGURATION VALUES ARE PROPERLY FORMATTED")
+        logger.info("CHECK ALL STAGING CONFIGURATION VALUES ARE PROPERLY FORMATTED")
 
     @pytest.mark.integration
     @pytest.mark.issue_639
@@ -253,12 +253,12 @@ class Issue639GoldenPathFunctionalityValidationTests(SSotAsyncTestCase):
                 logger.info(f"  Has JWT Token: {test_user.get('jwt_token') is not None}")
             
             self.functionality_results['async_setup_success'] = True
-            logger.info("✅ STAGING ASYNC SETUP METHOD SUCCEEDED")
+            logger.info("CHECK STAGING ASYNC SETUP METHOD SUCCEEDED")
             
         except Exception as e:
             # Async setup might fail due to missing staging authentication
             # This is acceptable for validation purposes
-            logger.warning(f"⚠️ ASYNC SETUP FAILED (May be expected): {type(e).__name__}: {e}")
+            logger.warning(f"WARNING️ ASYNC SETUP FAILED (May be expected): {type(e).__name__}: {e}")
             self.functionality_results['async_setup_success'] = False
             self.functionality_results['async_setup_error'] = str(e)
             
@@ -308,7 +308,7 @@ class Issue639GoldenPathFunctionalityValidationTests(SSotAsyncTestCase):
                     'ready_for_invocation': True
                 }
                 
-                logger.info(f"✅ METHOD READY: {method_name} (async: {is_async})")
+                logger.info(f"CHECK METHOD READY: {method_name} (async: {is_async})")
                 
             except Exception as e:
                 method_readiness_results[method_name] = {
@@ -319,7 +319,7 @@ class Issue639GoldenPathFunctionalityValidationTests(SSotAsyncTestCase):
                     'error': str(e)
                 }
                 
-                logger.error(f"❌ METHOD NOT READY: {method_name} - {e}")
+                logger.error(f"X METHOD NOT READY: {method_name} - {e}")
         
         # Store results
         self.functionality_results['method_readiness'] = method_readiness_results
@@ -335,7 +335,7 @@ class Issue639GoldenPathFunctionalityValidationTests(SSotAsyncTestCase):
             f"Ready methods: {ready_methods}"
         )
         
-        logger.info(f"✅ ALL 3 GOLDEN PATH STAGING TEST METHODS ARE READY FOR INVOCATION")
+        logger.info(f"CHECK ALL 3 GOLDEN PATH STAGING TEST METHODS ARE READY FOR INVOCATION")
 
     @pytest.mark.unit
     @pytest.mark.issue_639
@@ -373,7 +373,7 @@ class Issue639GoldenPathFunctionalityValidationTests(SSotAsyncTestCase):
             assert validation['is_not_empty'], f"Event {event_name} should not be empty"
             assert validation['follows_naming_pattern'], f"Event {event_name} should follow agent_ naming pattern"
         
-        logger.info("✅ ALL WEBSOCKET EVENTS CONSTANTS ARE PROPERLY DEFINED")
+        logger.info("CHECK ALL WEBSOCKET EVENTS CONSTANTS ARE PROPERLY DEFINED")
 
     def teardown_method(self, method):
         """Cleanup and comprehensive results summary."""

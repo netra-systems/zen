@@ -27,12 +27,12 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 import pytest
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.websocket_core.connection_info import ConnectionInfo, ConnectionState
 from netra_backend.app.websocket_core import WebSocketManager as ConnectionManager, get_connection_monitor
 from netra_backend.app.websocket_core.reconnection_handler import ReconnectionContext, get_reconnection_handler
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 @dataclass
 class WebSocketTestSession:
@@ -341,13 +341,17 @@ class WebSocketStateManagementTests:
         return conn_info
 
     async def _generate_test_jwt_token(self, session):
-        """Generate test JWT token."""
-        import time
-        import jwt
-        payload = {'user_id': session.user_id, 'session_id': session.session_id, 'iat': int(time.time()), 'exp': int(time.time()) + 3600, 'scope': 'websocket_access'}
-        test_secret = 'test_websocket_secret_key_2024'
-        token = jwt.encode(payload, test_secret, algorithm='HS256')
-        return token
+        """Generate test JWT token through auth service."""
+        from netra_backend.app.clients.auth_client_core import AuthServiceClient
+        auth_client = AuthServiceClient()
+        
+        # Create token through auth service
+        result = await auth_client.create_access_token(session.user_id, f"test-{session.user_id}@netrasystems.ai")
+        if result and "access_token" in result:
+            return result["access_token"]
+        
+        # Fallback for offline testing
+        return f"test-token-{session.user_id}-{session.session_id}"
 
     async def _store_auth_context(self, session, jwt_token):
         """Store authentication context for reconnection."""

@@ -9,10 +9,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         self._closed = True
         self.is_connected = False
@@ -70,11 +70,11 @@ class ReconnectionTestFixture:
     def record_reconnection_attempt(self, connection_id: str, success: bool, reason: str) -> None:
         """Record reconnection attempt for analysis."""
         attempt = { }
-        "connection_id": connection_id,
-        "success": success,
-        "reason": reason,
-        "timestamp": datetime.now(UTC),
-        "attempt_number": len(self.reconnection_attempts) + 1
+        "connection_id: connection_id,"
+        "success: success,"
+        "reason: reason,"
+        "timestamp: datetime.now(UTC),"
+        "attempt_number: len(self.reconnection_attempts) + 1"
     
         self.reconnection_attempts.append(attempt)
 

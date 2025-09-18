@@ -9,7 +9,7 @@ Business Context:
 - Chat represents 90% of platform value delivery
 - Users pay for AI-powered optimization insights, not just chat functionality
 - Response quality directly impacts user retention and revenue
-- Substantive responses drive conversion from Free → Paid tiers
+- Substantive responses drive conversion from Free -> Paid tiers
 
 Success Criteria:
 - Responses contain actionable business insights

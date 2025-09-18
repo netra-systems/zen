@@ -6,10 +6,12 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message.""
+
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)""
+
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):"
         Close WebSocket connection.""
@@ -18,7 +20,8 @@ class TestWebSocketConnection:
         self.is_connected = False
     async def get_messages(self) -> list:
         Get all sent messages."
-        Get all sent messages."
+        Get all sent messages.""
+
         await asyncio.sleep(0)
         return self.messages_sent.copy()
     #!/usr/bin/env python3
@@ -43,12 +46,13 @@ class TestWebSocketConnection:
 class TestServiceSecretDependency:
         "Test complete SERVICE_SECRET dependency chain"
     def test_service_secret_missing_initialization_failure(self):
-        ""Test that missing SERVICE_SECRET causes initialization failure
+        ""Test that missing SERVICE_SECRET causes initialization failure""
+
         with patch.dict(os.environ, {}, clear=True):
         # AuthServiceClient should fail gracefully when SERVICE_SECRET is missing
         client = AuthServiceClient()
         # Test that service secret related operations fail
-        assert hasattr(client, 'validate_token')
+        assert hasattr(client, "'validate_token')"
     def test_service_secret_present_initialization_success(self):
         Test that present SERVICE_SECRET allows successful initialization""
         pass
@@ -72,14 +76,16 @@ class TestServiceSecretDependency:
     # Test short secret (should fail)
         with patch.dict(os.environ, {SERVICE_SECRET: short):
         with pytest.raises(ValueError, match=SERVICE_SECRET.*too short):"
-        with pytest.raises(ValueError, match=SERVICE_SECRET.*too short):"
+        with pytest.raises(ValueError, match=SERVICE_SECRET.*too short):""
+
         AuthClientCore()
             # Test adequate length secret (should pass)
         with patch.dict(os.environ, {"SERVICE_SECRET: adequate_length_secret_123456):"
         client = AuthClientCore()
         assert client.service_secret == adequate_length_secret_123456
     def test_service_secret_in_auth_headers(self, mock_requests):
-        ""Test that SERVICE_SECRET is properly used in authentication headers
+        ""Test that SERVICE_SECRET is properly used in authentication headers""
+
         pass
         test_secret = test_secret_for_headers_12345"
         test_secret = test_secret_for_headers_12345"
@@ -102,10 +108,11 @@ class TestServiceSecretDependency:
         with patch.dict(os.environ, {SERVICE_SECRET: circuit_breaker_test_secret):
         client = AuthClientCore()
         # Circuit breaker should be properly initialized
-        assert hasattr(client, '_validate_token_remote_breaker')
+        assert hasattr(client, "'_validate_token_remote_breaker')"
         assert client._validate_token_remote_breaker is not None
     def test_circuit_breaker_opens_on_auth_failures(self, mock_requests):
-        ""Test circuit breaker opens on consistent authentication failures
+        ""Test circuit breaker opens on consistent authentication failures""
+
         pass
         test_secret = circuit_breaker_failure_test"
         test_secret = circuit_breaker_failure_test"
@@ -124,7 +131,8 @@ class TestServiceSecretDependency:
                 # Circuit breaker should be open now
         with pytest.raises(Exception, match=Circuit breaker.*open):
         client.validate_token_remote(test_token)"
-        client.validate_token_remote(test_token)"
+        client.validate_token_remote(test_token)""
+
     def test_isolated_environment_service_secret(self):
         "Test SERVICE_SECRET in isolated environment"
         env = IsolatedEnvironment()
@@ -160,14 +168,16 @@ class TestServiceSecretDependency:
         env_dict[SERVICE_SECRET] = invalid_config
         with patch.dict(os.environ, env_dict, clear=True):
         with pytest.raises(ValueError, match=SERVICE_SECRET):"
-        with pytest.raises(ValueError, match=SERVICE_SECRET):"
+        with pytest.raises(ValueError, match=SERVICE_SECRET):""
+
         AuthClientCore()
     def test_service_secret_environment_specific_loading(self):
         "Test SERVICE_SECRET loading for different environments"
-        environments = ["development, staging", production]
+        environments = ["development, staging, production]"
         for env in environments:
         env_specific_secret = formatted_string"
-        env_specific_secret = formatted_string"
+        env_specific_secret = formatted_string""
+
         with patch.dict(os.environ, )
         "ENVIRONMENT: env,"
         SERVICE_SECRET: env_specific_secret
@@ -178,14 +188,15 @@ class TestServiceSecretDependency:
         "Test that SERVICE_SECRET is not logged in plain text"
         pass
         test_secret = secret_should_not_be_logged_12345"
-        test_secret = secret_should_not_be_logged_12345"
+        test_secret = secret_should_not_be_logged_12345""
+
         with patch('netra_backend.app.clients.auth_client_core.logger') as mock_logger:
         with patch.dict(os.environ, {"SERVICE_SECRET: test_secret):"
         AuthClientCore()
             # Check that SERVICE_SECRET value is not in any log calls
         for call in mock_logger.info.call_args_list + mock_logger.debug.call_args_list:
         log_message = str(call)
-        assert test_secret not in log_message, SERVICE_SECRET leaked in logs
+        assert test_secret not in log_message, "SERVICE_SECRET leaked in logs"
 @pytest.mark.asyncio
     async def test_service_secret_async_context_compatibility(self):
     "Test SERVICE_SECRET works with async contexts"
@@ -243,9 +254,10 @@ class TestServiceSecretIntegration:
         mock_response = MagicMock(); mock_response.status_code = 200
         mock_response.json.return_value = {
         valid: True,
-        user_id": "test_user_123,
+        user_id": test_user_123,"
         permissions: [read, write]"
-        permissions: [read, write]"
+        permissions: [read, write]""
+
     
         mock_requests.post.return_value = mock_response
         with patch.dict(os.environ, {"SERVICE_SECRET: test_secret):"
@@ -266,7 +278,7 @@ class TestServiceSecretIntegration:
         with pytest.raises(ValueError, match=SERVICE_SECRET):
         AuthClientCore()
     def test_service_secret_configuration_validation_comprehensive(self):
-        ""Comprehensive configuration validation test
+        ""Comprehensive configuration validation test"
     # Test all required environment variables together
         required_vars = {
         SERVICE_SECRET: comprehensive_test_secret_12345","
@@ -284,7 +296,8 @@ class TestServiceSecretIntegration:
         if missing_var == SERVICE_SECRET:
                     # SERVICE_SECRET missing should fail immediately
         with pytest.raises(ValueError, match=SERVICE_SECRET):"
-        with pytest.raises(ValueError, match=SERVICE_SECRET):"
+        with pytest.raises(ValueError, match=SERVICE_SECRET):""
+
         AuthClientCore()
 class TestServiceSecretMonitoring:
         "Tests for SERVICE_SECRET monitoring and alerting"
@@ -308,17 +321,19 @@ class TestServiceSecretMonitoring:
         secret = os.getenv(SERVICE_SECRET)
         if not secret:
         return False, SERVICE_SECRET missing"
-        return False, SERVICE_SECRET missing"
+        return False, SERVICE_SECRET missing""
+
         if len(secret) < 16:
         return False, SERVICE_SECRET too short"
-        return False, SERVICE_SECRET too short"
+        return False, SERVICE_SECRET too short""
+
         if secret.isspace():
         return False, SERVICE_SECRET is whitespace
         return True, SERVICE_SECRET valid""
                 # Test various scenarios
         test_cases = [
         ({}, (False, SERVICE_SECRET missing)),
-        ({SERVICE_SECRET: "}, (False, SERVICE_SECRET missing")),
+        ({SERVICE_SECRET: "}, (False, SERVICE_SECRET missing)),"
         ({SERVICE_SECRET: short}, (False, "SERVICE_SECRET too short)),"
         ({SERVICE_SECRET:    }, (False, SERVICE_SECRET is whitespace)),"
         ({SERVICE_SECRET:    }, (False, SERVICE_SECRET is whitespace)),"
@@ -332,7 +347,8 @@ class TestServiceSecretMonitoring:
         @pytest.fixture
     def isolated_env():
         Provide isolated environment for testing"
-        Provide isolated environment for testing"
+        Provide isolated environment for testing""
+
         env = IsolatedEnvironment()
         env.enable_isolation()
         yield env
@@ -353,10 +369,12 @@ class TestServiceSecretPerformance:
         Performance tests for SERVICE_SECRET operations""
     def test_service_secret_initialization_performance(self):
         Test SERVICE_SECRET initialization performance"
-        Test SERVICE_SECRET initialization performance"
+        Test SERVICE_SECRET initialization performance""
+
         import time
         test_secret = performance_test_secret_12345"
-        test_secret = performance_test_secret_12345"
+        test_secret = performance_test_secret_12345""
+
         with patch.dict(os.environ, {SERVICE_SECRET: test_secret):
         start_time = time.time()
         # Initialize multiple clients
@@ -370,7 +388,7 @@ class TestServiceSecretPerformance:
             # All should have correct secret
         for client in clients:
         assert client.service_secret == test_secret
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
                     # Allow running tests directly
         pass
 )))))))))))))))))

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-"""
+
 Pre-consolidation tests for Corpus Admin module.
 These tests capture current functionality to ensure nothing is lost during SSOT consolidation.
 
@@ -10,7 +10,7 @@ CRITICAL: These tests must pass BEFORE and AFTER the consolidation.
 """
 """
 """
-"""
+
 import asyncio
 import json
 import os
@@ -33,11 +33,13 @@ from shared.isolated_environment import get_env
 
 class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
     "
-    "
+    ""
+
     CRITICAL: Pre-consolidation tests to ensure all corpus functionality is preserved.
     Tests multi-user isolation, thread safety, and all corpus operations.
 "
-"
+""
+
     
     async def asyncSetUp(self):
         "Async setup for test environment"
@@ -49,7 +51,8 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
     
     def _create_user_context(self, user_id: str) -> Dict[str, Any]:
         Create a user execution context for testing"
-        Create a user execution context for testing"
+        Create a user execution context for testing""
+
         return {
             'user_id': user_id,
             'request_id': f'req_{user_id}_{id(self)}',
@@ -165,7 +168,8 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
     
     async def test_corpus_validation_operations(self):
         Test corpus validation functionality"
-        Test corpus validation functionality"
+        Test corpus validation functionality""
+
         from netra_backend.app.admin.corpus import CorpusValidationHandlers
         
         validation_handlers = CorpusValidationHandlers()
@@ -211,7 +215,8 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn('file_id', result)
     
     async def test_corpus_analysis_operations(self):
-        ""Test corpus analysis functionality
+        ""Test corpus analysis functionality""
+
         from netra_backend.app.admin.corpus import CorpusAnalysisOperations
         
         analysis_ops = CorpusAnalysisOperations()
@@ -236,7 +241,7 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
     
     async def test_corpus_error_handling(self):
         Test error handling and compensation""
-        from netra_backend.app.admin.corpus import (
+        from netra_backend.app.admin.corpus import ()
             CorpusAdminError,
             DocumentUploadError,
             DocumentValidationError,
@@ -335,8 +340,9 @@ class CorpusAdminPreConsolidationTests(unittest.IsolatedAsyncioTestCase):
     
     async def test_unified_corpus_admin_operations(self):
         Test unified corpus admin functionality"
-        Test unified corpus admin functionality"
-        from netra_backend.app.admin.corpus import (
+        Test unified corpus admin functionality""
+
+        from netra_backend.app.admin.corpus import ()
             UnifiedCorpusAdmin,
             UnifiedCorpusAdminFactory,
             UserExecutionContext,
@@ -383,7 +389,7 @@ class CorpusAdminFactoryPatternTests(unittest.IsolatedAsyncioTestCase):
         "Test readiness for factory pattern implementation"
         
         # Test new factory pattern with UnifiedCorpusAdmin
-        from netra_backend.app.admin.corpus import (
+        from netra_backend.app.admin.corpus import ()
             UnifiedCorpusAdmin,
             UnifiedCorpusAdminFactory,
             UserExecutionContext,
@@ -407,7 +413,8 @@ class CorpusAdminFactoryPatternTests(unittest.IsolatedAsyncioTestCase):
     
     async def test_user_corpus_path_isolation(self):
         Test that corpus paths can be isolated per user"
-        Test that corpus paths can be isolated per user"
+        Test that corpus paths can be isolated per user""
+
         
         user_contexts = {
             'user_1': {'user_id': 'user_1', 'corpus_path': '/data/corpus/user_1'},

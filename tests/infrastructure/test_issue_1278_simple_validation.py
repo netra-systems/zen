@@ -54,16 +54,16 @@ class TestIssue1278SimpleValidation(SSotBaseTestCase):
                 if not value:
                     missing_vars.append(var)
                 else:
-                    logger.info(f"✓ {var}: {value[:50]}...")
+                    logger.info(f"CHECK {var}: {value[:50]}...")
             
             if missing_vars:
-                logger.error(f"❌ Missing environment variables: {missing_vars}")
+                logger.error(f"X Missing environment variables: {missing_vars}")
                 raise AssertionError(f"Issue #1278 reproduction: Missing vars - {missing_vars}")
             
-            logger.info("✅ Basic environment validation passed")
+            logger.info("CHECK Basic environment validation passed")
             
         except Exception as e:
-            logger.error(f"❌ Basic environment validation failed: {e}")
+            logger.error(f"X Basic environment validation failed: {e}")
             raise AssertionError(f"Issue #1278 reproduction: Environment validation failure - {e}")
 
 

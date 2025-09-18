@@ -80,7 +80,7 @@ class TestUnifiedTestRunnerPatternFiltering(SSotBaseTestCase):
                             f"Database category should not have pattern filtering applied. "
                             f"Command: {built_command}")
 
-            print(f"✓ Database command (correct): {built_command}")
+            print(f"CHECK Database command (correct): {built_command}")
 
         except Exception as e:
             # If the method fails due to missing attributes, use a simpler test
@@ -108,7 +108,7 @@ class TestUnifiedTestRunnerPatternFiltering(SSotBaseTestCase):
                          f"WebSocket category should have pattern filtering applied. "
                          f"Command: {built_command}")
 
-            print(f"✓ WebSocket command (correct): {built_command}")
+            print(f"CHECK WebSocket command (correct): {built_command}")
 
         except Exception as e:
             # If the method fails due to missing attributes, use a simpler test
@@ -117,7 +117,7 @@ class TestUnifiedTestRunnerPatternFiltering(SSotBaseTestCase):
                            "WebSocket category should use pattern filtering")
 
         # Verify that websocket category correctly uses pattern filtering
-        print(f"✓ WebSocket category correctly uses pattern filtering")
+        print(f"CHECK WebSocket category correctly uses pattern filtering")
 
     def test_pattern_filtering_command_generation_fix(self):
         """
@@ -153,11 +153,11 @@ class TestUnifiedTestRunnerPatternFiltering(SSotBaseTestCase):
             if config["should_use_pattern"]:
                 self.assertTrue(uses_pattern_filtering,
                     f"Category '{category_name}' should use pattern filtering")
-                print(f"✓ {category_name}: correctly uses pattern filtering")
+                print(f"CHECK {category_name}: correctly uses pattern filtering")
             else:
                 self.assertFalse(uses_pattern_filtering,
                     f"Category '{category_name}' should not use pattern filtering")
-                print(f"✓ {category_name}: correctly does NOT use pattern filtering")
+                print(f"CHECK {category_name}: correctly does NOT use pattern filtering")
 
     def test_database_category_specific_files_no_pattern_conflict(self):
         """
@@ -188,7 +188,7 @@ class TestUnifiedTestRunnerPatternFiltering(SSotBaseTestCase):
                            f"Database category should not apply exclusion patterns that could "
                            f"conflict with specific file selection. Command: {built_command}")
 
-            print(f"✓ Database command (no conflict): {built_command}")
+            print(f"CHECK Database command (no conflict): {built_command}")
 
         except Exception as e:
             # If command building fails, at least verify the pattern filtering logic

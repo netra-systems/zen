@@ -322,7 +322,7 @@ class ConcurrentLoadTests(SSotAsyncTestCase):
                 pass
 
         except Exception as e:
-            print(f"❌ LOAD TEST SCENARIO FAILED: {scenario['name']} - {e}")
+            print(f"X LOAD TEST SCENARIO FAILED: {scenario['name']} - {e}")
             monitoring_task.cancel()
             raise
 
@@ -401,7 +401,7 @@ class ConcurrentLoadTests(SSotAsyncTestCase):
             "resource_snapshots": resource_snapshots[-10:] if resource_snapshots else []  # Last 10 snapshots
         })
 
-        print(f"✅ LOAD TEST COMPLETED: {scenario['name']}")
+        print(f"CHECK LOAD TEST COMPLETED: {scenario['name']}")
         print(f"   - Success Rate: {success_rate:.1f}%")
         print(f"   - Avg Response: {avg_response_time:.3f}s")
         print(f"   - Throughput: {throughput_rps:.2f} RPS")
@@ -591,7 +591,7 @@ class ConcurrentLoadTests(SSotAsyncTestCase):
                     f"{CONCURRENT_LOAD_SLA['max_concurrent_response_time']}s for {scenario['concurrent_users']} users"
                 )
 
-        print(f"✅ PROGRESSIVE LOAD TEST COMPLETED: {len(self.load_test_results)} scenarios executed")
+        print(f"CHECK PROGRESSIVE LOAD TEST COMPLETED: {len(self.load_test_results)} scenarios executed")
 
     @pytest.mark.asyncio
     @pytest.mark.performance
@@ -650,7 +650,7 @@ class ConcurrentLoadTests(SSotAsyncTestCase):
             f"{CONCURRENT_LOAD_SLA['max_memory_per_concurrent_user_mb']}MB per concurrent user"
         )
 
-        print(f"✅ RESOURCE UTILIZATION TEST COMPLETED: Memory and CPU within limits")
+        print(f"CHECK RESOURCE UTILIZATION TEST COMPLETED: Memory and CPU within limits")
 
     @pytest.mark.asyncio
     @pytest.mark.performance
@@ -707,7 +707,7 @@ class ConcurrentLoadTests(SSotAsyncTestCase):
             f"{CONCURRENT_LOAD_SLA['max_p99_latency_ms']}ms under {scenario['concurrent_users']} user load"
         )
 
-        print(f"✅ THROUGHPUT AND LATENCY TEST COMPLETED: Performance within SLA limits")
+        print(f"CHECK THROUGHPUT AND LATENCY TEST COMPLETED: Performance within SLA limits")
 
     @pytest.mark.asyncio
     @pytest.mark.performance
@@ -760,4 +760,4 @@ class ConcurrentLoadTests(SSotAsyncTestCase):
             f"{CONCURRENT_LOAD_SLA['min_system_availability_percent']}% under {stress_scenario['concurrent_users']} user stress load"
         )
 
-        print(f"✅ STRESS LOAD TEST COMPLETED: System stability maintained under {stress_scenario['concurrent_users']} user load")
+        print(f"CHECK STRESS LOAD TEST COMPLETED: System stability maintained under {stress_scenario['concurrent_users']} user load")

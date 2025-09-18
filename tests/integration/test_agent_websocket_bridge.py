@@ -304,7 +304,7 @@ class AgentWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
         self.record_metric("avg_bridge_latency_ms", avg_latency * 1000)
         self.record_metric("max_bridge_latency_ms", max_latency * 1000)
         
-        print(f"  ✅ Basic bridge communication successful - {len(self.bridge_events)} events")
+        print(f"  CHECK Basic bridge communication successful - {len(self.bridge_events)} events")
         print(f"  ⚡ Bridge performance: avg {avg_latency * 1000:.1f}ms, max {max_latency * 1000:.1f}ms")
 
     @pytest.mark.asyncio
@@ -399,7 +399,7 @@ class AgentWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
         self.record_metric("max_delivery_time_ms", max_delivery_time * 1000)
         self.record_metric("streaming_thinking_events", len(thinking_events))
         
-        print(f"  ✅ Real-time delivery successful - {len(self.bridge_events)} events")
+        print(f"  CHECK Real-time delivery successful - {len(self.bridge_events)} events")
         print(f"  ⚡ Performance: avg {avg_delivery_time * 1000:.1f}ms, max {max_delivery_time * 1000:.1f}ms")
         print(f"  📊 Streaming events: {len(thinking_events)} thinking updates")
 
@@ -529,8 +529,8 @@ class AgentWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
         self.record_metric("total_coordination_events", len(self.bridge_events))
         self.record_metric("coordination_phases", 3)
         
-        print(f"  ✅ Multi-agent coordination successful - {len(agents)} agents, {len(self.bridge_events)} events")
-        print(f"  🔄 Coordination flow: Coordinator → Analyzer → Optimizer")
+        print(f"  CHECK Multi-agent coordination successful - {len(agents)} agents, {len(self.bridge_events)} events")
+        print(f"  🔄 Coordination flow: Coordinator -> Analyzer -> Optimizer")
         print(f"  📊 Events per agent: Coord {len(coord_steps)}, Analyzer {len(analyzer_steps)}, Optimizer {len(optimizer_steps)}")
 
     @pytest.mark.asyncio
@@ -571,7 +571,7 @@ class AgentWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
             
             if step_type == "handle_error":
                 error_count += 1
-                print(f"  ⚠️ Error handled: {step_data.get('error_type', 'unknown')} -> {step_data.get('recovery_action', 'unknown')}")
+                print(f"  WARNING️ Error handled: {step_data.get('error_type', 'unknown')} -> {step_data.get('recovery_action', 'unknown')}")
             elif "recovery" in str(step_data):
                 recovery_count += 1
                 print(f"  🔄 Recovery: {step_type}")
@@ -631,7 +631,7 @@ class AgentWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
         self.record_metric("error_recovery_ratio", recovery_count / max(error_count, 1))
         self.record_metric("completion_despite_errors", 1)
         
-        print(f"  ✅ Bridge error handling successful - {error_count} errors, {recovery_count} recoveries")
+        print(f"  CHECK Bridge error handling successful - {error_count} errors, {recovery_count} recoveries")
         print(f"  🛡️ Error recovery ratio: {recovery_count}/{error_count} = {recovery_count/max(error_count, 1):.1f}")
         print(f"  🎯 Successful completion maintained despite {error_count} errors")
 
@@ -770,7 +770,7 @@ class AgentWebSocketBridgeIntegrationTests(SSotAsyncTestCase):
         self.record_metric("events_per_second", events_per_second)
         self.record_metric("executions_per_second", executions_per_second)
         
-        print(f"  ✅ Concurrent load test successful - {total_events} events, {total_executions} executions")
+        print(f"  CHECK Concurrent load test successful - {total_events} events, {total_executions} executions")
         print(f"  🚀 Throughput: {events_per_second:.1f} events/sec, {executions_per_second:.1f} executions/sec")
         print(f"  ⚡ Performance: avg {avg_execution_time * 1000:.1f}ms, max {max_execution_time * 1000:.1f}ms")
         print(f"  🕒 Total duration: {total_load_time * 1000:.1f}ms")

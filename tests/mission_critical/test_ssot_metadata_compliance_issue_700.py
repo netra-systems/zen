@@ -2,7 +2,7 @@
 "MISSION CRITICAL TEST SUITE: SSOT Metadata Compliance - Issue #700"
 
 THIS SUITE MUST PASS OR THE PRODUCT IS BROKEN.
-Business Value: $500K+ ARR - Prevents SSOT regression blocking Golden Path
+Business Value: $500K+ plus ARR - Prevents SSOT regression blocking Golden Path
 
 PURPOSE: Detect and prevent agents bypassing store_metadata_result() SSOT method
 
@@ -10,11 +10,11 @@ Issue #700: SSOT-regression-TriageAgent-metadata-bypass-blocking-Golden-Path
 Priority: P0 - CRITICAL blocking Golden Path
 
 AFFECTED AGENTS:
-- synthetic_data_sub_agent.py - 4 direct metadata assignments (lines 181, 182, 183, 199)
+    - synthetic_data_sub_agent.py - 4 direct metadata assignments (lines 181, 182, 183, 199)
 - optimizations_core_sub_agent.py - 2 direct assignments (lines 154, 156)
 
 CRITICAL SSOT VIOLATION PATTERNS:
-1. context.metadata['key'] = value  # FORBIDDEN - bypasses SSOT
+    1. context.metadata['key'] = value  # FORBIDDEN - bypasses SSOT
 2. self.store_metadata_result(context, 'key', value)  # REQUIRED - SSOT method
 
 ANY FAILURE HERE BLOCKS DEPLOYMENT.
@@ -54,7 +54,8 @@ from shared.isolated_environment import IsolatedEnvironment
 
 @dataclass
 class MetadataViolation:
-    ""Represents a metadata SSOT violation
+    ""Represents a metadata SSOT violation""
+
     file_path: str
     line_number: int
     line_content: str
@@ -87,7 +88,8 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
         self.env = IsolatedEnvironment()
         self.project_root = Path(project_root)
         self.agent_dir = self.project_root / netra_backend / app / agents"
-        self.agent_dir = self.project_root / netra_backend / app / agents"
+        self.agent_dir = self.project_root / netra_backend / app / agents""
+
 
         # Known violation files from Issue #700 analysis
         self.known_violation_files = {
@@ -130,8 +132,9 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
             )
 
         # If no violations found, this means the issue was already fixed
-        logger.info(✅ No metadata bypass violations found in synthetic_data_sub_agent.py)"
-        logger.info(✅ No metadata bypass violations found in synthetic_data_sub_agent.py)"
+        logger.info(CHECK No metadata bypass violations found in synthetic_data_sub_agent.py)"
+        logger.info(CHECK No metadata bypass violations found in synthetic_data_sub_agent.py)""
+
 
     def test_detect_optimizations_agent_metadata_bypass_violations(self):
         "FAILS when optimizations_core_sub_agent bypasses SSOT metadata storage"
@@ -139,10 +142,11 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
         This test MUST FAIL with current code to prove it detects violations.
 
         Expected violations:
-        - Line 154: context.metadata['data_result'] = {"test_data": synthetic_data_for_testing}
+        - Line 154: context.metadata['data_result'] = {"test_data: synthetic_data_for_testing}"
         - Line 156: context.metadata['triage_result'] = {category: optimization, priority": medium}"
         "
-        "
+        ""
+
         violations = self._scan_agent_file_for_metadata_violations('optimizations_core_sub_agent.py')
 
         # This test MUST FAIL if violations exist
@@ -161,7 +165,7 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
             )
 
         # If no violations found, this means the issue was already fixed
-        logger.info(✅ No metadata bypass violations found in optimizations_core_sub_agent.py)
+        logger.info(CHECK No metadata bypass violations found in optimizations_core_sub_agent.py)
 
     def test_comprehensive_agent_metadata_ssot_compliance_scan(self):
         "Comprehensive scan of ALL agent files for metadata SSOT violations"
@@ -169,7 +173,8 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
         This test scans the entire agents directory for any direct metadata
         assignments that bypass the SSOT store_metadata_result() method.
 "
-"
+""
+
         report = self._generate_comprehensive_compliance_report()
 
         # Log scan results
@@ -185,7 +190,8 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
                 if violation.severity == 'CRITICAL':
                     violation_summary.append(
                         f  {violation.agent_name} (Line {violation.line_number}: {violation.line_content.strip()}"
-                        f  {violation.agent_name} (Line {violation.line_number}: {violation.line_content.strip()}"
+                        f  {violation.agent_name} (Line {violation.line_number}: {violation.line_content.strip()}""
+
                     )
 
             pytest.fail(
@@ -204,7 +210,7 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
         "Validates BaseAgent has store_metadata_result SSOT method"
 
         # Test that BaseAgent has the required method
-        assert hasattr(BaseAgent, 'store_metadata_result'), \
+        assert hasattr(BaseAgent, "'store_metadata_result'), \"
             BaseAgent must have store_metadata_result SSOT method
 
         # Test method signature
@@ -214,11 +220,12 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
         # Expected parameters: self, context, key, value, ensure_serializable=True
         param_names = list(sig.parameters.keys())
         assert 'context' in param_names, store_metadata_result must accept 'context' parameter""
-        assert 'key' in param_names, store_metadata_result must accept 'key' parameter
+        assert 'key' in param_names, "store_metadata_result must accept 'key' parameter"
         assert 'value' in param_names, store_metadata_result must accept 'value' parameter"
-        assert 'value' in param_names, store_metadata_result must accept 'value' parameter"
+        assert 'value' in param_names, store_metadata_result must accept 'value' parameter""
 
-        logger.info("✅ BaseAgent.store_metadata_result method exists with correct signature)"
+
+        logger.info("CHECK BaseAgent.store_metadata_result method exists with correct signature)"
 
     async def test_store_metadata_result_properly_stores_data(self):
         Validates store_metadata_result method correctly stores metadata""
@@ -243,15 +250,15 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
 
         # Test storing metadata via SSOT method
         test_key = test_result
-        test_value = {data: "test_data, status": complete}
+        test_value = {data: "test_data, status: complete}"
 
         agent.store_metadata_result(context, test_key, test_value)
 
         # Verify data was stored correctly
-        assert test_key in context.metadata, fKey '{test_key}' should be in context.metadata
+        assert test_key in context.metadata, "fKey '{test_key}' should be in context.metadata"
         assert context.metadata[test_key] == test_value, "Stored value should match input"
 
-        logger.info(✅ store_metadata_result correctly stores metadata)
+        logger.info(CHECK store_metadata_result correctly stores metadata)
 
     async def test_store_metadata_result_handles_serialization(self):
         Validates store_metadata_result handles JSON serialization properly""
@@ -276,7 +283,7 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
 
         # Test with complex data that needs serialization
         test_data = {
-            datetime: 2025-9-12T10:0:00Z,
+            datetime: 2025-9-12T10:0:""00Z"",
             nested": {"list: [1, 2, 3], dict: {key: value}},"
             nested": {"list: [1, 2, 3], dict: {key: value}},"
             "status: processing"
@@ -289,9 +296,10 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
         assert complex_data" in context.metadata"
         stored_data = context.metadata[complex_data]
         assert isinstance(stored_data, (dict, str)), Data should be stored as dict or serialized string"
-        assert isinstance(stored_data, (dict, str)), Data should be stored as dict or serialized string"
+        assert isinstance(stored_data, (dict, str)), Data should be stored as dict or serialized string""
 
-        logger.info("✅ store_metadata_result handles serialization correctly)"
+
+        logger.info("CHECK store_metadata_result handles serialization correctly)"
 
     # ========================================================================
     # C. INTEGRATION WORKFLOW TESTS - Agent Coordination with SSOT
@@ -325,11 +333,12 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
             async def _execute_implementation(self, context, **kwargs):
                 # Agent 2: Read data and store processing result using SSOT
                 data_result = context.metadata.get("data_result)"
-                assert data_result is not None, Should have data from previous agent
+                assert data_result is not None, "Should have data from previous agent"
 
-                processed = {"input_count: data_result[count"], processed_count: data_result[count] * 2}
+                processed = {"input_count: data_result[count], processed_count: data_result[count] * 2}"
                 self.store_metadata_result(context, processed_result, processed)"
-                self.store_metadata_result(context, processed_result, processed)"
+                self.store_metadata_result(context, processed_result, processed)""
+
 
         # Execute agent workflow
         data_agent = DataAgent()
@@ -341,11 +350,12 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
         # Verify both results are in metadata
         assert data_result" in context.metadata"
         assert processed_result in context.metadata
-        assert context.metadata[processed_result"]["input_count] == 100
+        assert context.metadata[processed_result"][input_count] == 100"
         assert context.metadata[processed_result][processed_count] == 200
 
-        logger.info(✅ Agent-to-agent metadata flow works with SSOT methods)"
-        logger.info(✅ Agent-to-agent metadata flow works with SSOT methods)"
+        logger.info(CHECK Agent-to-agent metadata flow works with SSOT methods)"
+        logger.info(CHECK Agent-to-agent metadata flow works with SSOT methods)""
+
 
     async def test_websocket_events_access_ssot_stored_metadata(self):
         "Tests WebSocket events can access metadata stored via SSOT methods"
@@ -367,21 +377,23 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
 
             async def _execute_implementation(self, context, **kwargs):
                 # Store result using SSOT method
-                result = {status": "completed, data: websocket_test}
+                result = {status": completed, data: websocket_test}"
                 self.store_metadata_result(context, websocket_result, result)"
-                self.store_metadata_result(context, websocket_result, result)"
+                self.store_metadata_result(context, websocket_result, result)""
+
 
         agent = WebSocketAgent()
         await agent._execute_implementation(context)
 
         # Simulate WebSocket event trying to access the stored metadata
         websocket_data = context.metadata.get("websocket_result)"
-        assert websocket_data is not None, WebSocket should access SSOT-stored metadata
+        assert websocket_data is not None, "WebSocket should access SSOT-stored metadata"
         assert websocket_data["status] == completed"
         assert websocket_data[data] == websocket_test
 
-        logger.info(✅ WebSocket events can access SSOT-stored metadata)"
-        logger.info(✅ WebSocket events can access SSOT-stored metadata)"
+        logger.info(CHECK WebSocket events can access SSOT-stored metadata)"
+        logger.info(CHECK WebSocket events can access SSOT-stored metadata)""
+
 
     # ========================================================================
     # D. AUDIT TRAIL TESTS - Metadata Change Tracking
@@ -408,8 +420,8 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
 
             async def _execute_implementation(self, context, **kwargs):
                 # Multiple SSOT method calls
-                self.store_metadata_result(context, "step_1, {action": data_validation)
-                self.store_metadata_result(context, step_2, {"action: data_processing")
+                self.store_metadata_result(context, "step_1, {action: data_validation)"
+                self.store_metadata_result(context, step_2, {"action: data_processing)"
                 self.store_metadata_result(context, final_result, {status: "success)"
 
         agent = AuditableAgent()
@@ -424,9 +436,9 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
 
         # Verify audit metadata exists (if supported by implementation)
         if hasattr(context, 'audit_metadata'):
-            assert len(context.audit_metadata) >= 0, Audit metadata should be tracked
+            assert len(context.audit_metadata) >= 0, "Audit metadata should be tracked"
 
-        logger.info(✅ Metadata changes via SSOT method are properly tracked")"
+        logger.info(CHECK Metadata changes via SSOT method are properly tracked")"
 
     # ========================================================================
     # HELPER METHODS - Static Analysis and Compliance Scanning
@@ -434,7 +446,8 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
 
     def _scan_agent_file_for_metadata_violations(self, filename: str) -> List[MetadataViolation]:
         Scan a specific agent file for metadata SSOT violations"
-        Scan a specific agent file for metadata SSOT violations"
+        Scan a specific agent file for metadata SSOT violations""
+
 
         file_path = self.agent_dir / filename
         if not file_path.exists():
@@ -493,7 +506,8 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
 
     def _generate_comprehensive_compliance_report(self) -> MetadataComplianceReport:
         Generate comprehensive metadata compliance report for all agents"
-        Generate comprehensive metadata compliance report for all agents"
+        Generate comprehensive metadata compliance report for all agents""
+
 
         all_violations = []
         files_scanned = 0
@@ -521,7 +535,7 @@ class SSotMetadataComplianceIssue700Tests(SSotAsyncTestCase):
         )
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # Enable running individual tests
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

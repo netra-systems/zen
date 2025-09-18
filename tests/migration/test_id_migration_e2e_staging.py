@@ -13,7 +13,7 @@ STRATEGY: Real GCP staging environment testing (non-Docker)
 VALIDATION: Complete user journeys with ID tracking across all services
 
 CRITICAL E2E WORKFLOWS:
-1. User registration → authentication → chat session
+1. User registration -> authentication -> chat session
 2. Multi-user concurrent chat with proper isolation
 3. Agent execution with consistent thread/run relationships
 4. WebSocket connection lifecycle with proper cleanup
@@ -374,7 +374,7 @@ class IDMigrationE2EStagingWorkflowsTests(SSotAsyncTestCase):
         if total_issues > 0:
             print(f'\n🔍 E2E STAGING VALIDATION: {total_issues} ID consistency issues detected')
             print('🎯 Focus: Complete user workflows in staging environment')
-            print('📊 Coverage: User registration → authentication → chat → agent execution')
+            print('📊 Coverage: User registration -> authentication -> chat -> agent execution')
         super().tearDown()
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

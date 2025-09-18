@@ -87,7 +87,7 @@ class TestLegacyHandlerBaseline:
         assert hasattr(handler, 'get_message_type')
         assert callable(handler.handle)
         
-        print("✅ Legacy StartAgentHandler baseline functionality validated")
+        print("CHECK Legacy StartAgentHandler baseline functionality validated")
     
     @pytest.mark.asyncio 
     async def test_legacy_user_message_handler_baseline(self, mock_supervisor, mock_db_session_factory):
@@ -125,7 +125,7 @@ class TestLegacyHandlerBaseline:
             assert text == "test message"
             assert refs == []
         
-        print("✅ Legacy UserMessageHandler baseline functionality validated")
+        print("CHECK Legacy UserMessageHandler baseline functionality validated")
     
     @pytest.mark.asyncio
     async def test_legacy_thread_history_handler_baseline(self, mock_db_session_factory):
@@ -159,7 +159,7 @@ class TestLegacyHandlerBaseline:
                     await handler.handle("user_123", payload)
                     mock_manager.return_value.send_error.assert_called_once()
         
-        print("✅ Legacy ThreadHistoryHandler baseline functionality validated")
+        print("CHECK Legacy ThreadHistoryHandler baseline functionality validated")
     
     @pytest.mark.asyncio
     async def test_legacy_stop_agent_handler_baseline(self, mock_supervisor):
@@ -188,7 +188,7 @@ class TestLegacyHandlerBaseline:
                 assert call_args[0][0] == "user_123"  # user_id
                 assert call_args[0][1]["type"] == "agent_stopped"  # message type
         
-        print("✅ Legacy StopAgentHandler baseline functionality validated")
+        print("CHECK Legacy StopAgentHandler baseline functionality validated")
     
     @pytest.mark.asyncio
     async def test_legacy_message_handler_service_baseline(self, mock_supervisor, mock_db_session_factory):
@@ -232,7 +232,7 @@ class TestLegacyHandlerBaseline:
                 await service.handle_message("user_123", message)
                 mock_error.assert_called_once()
         
-        print("✅ Legacy MessageHandlerService baseline functionality validated")
+        print("CHECK Legacy MessageHandlerService baseline functionality validated")
     
     @pytest.mark.asyncio
     async def test_legacy_handler_thread_safety_baseline(self, mock_supervisor, mock_db_session_factory):
@@ -263,7 +263,7 @@ class TestLegacyHandlerBaseline:
             error_handler = await create_handler_safely(handler_type, mock_supervisor, mock_db_session_factory)
             assert error_handler is None
         
-        print("✅ Legacy handler thread safety baseline validated")
+        print("CHECK Legacy handler thread safety baseline validated")
     
     @pytest.mark.asyncio
     async def test_legacy_message_queue_integration_baseline(self, mock_supervisor, mock_db_session_factory):
@@ -301,7 +301,7 @@ class TestLegacyHandlerBaseline:
             priority = service._get_message_priority(high_priority_message)
             assert priority == "high"
         
-        print("✅ Legacy message queue integration baseline validated")
+        print("CHECK Legacy message queue integration baseline validated")
     
     def test_legacy_handler_interface_compliance_baseline(self):
         """
@@ -337,7 +337,7 @@ class TestLegacyHandlerBaseline:
             assert isinstance(message_type, str)
             assert len(message_type) > 0
         
-        print("✅ Legacy handler interface compliance baseline validated")
+        print("CHECK Legacy handler interface compliance baseline validated")
     
     def test_legacy_handler_performance_baseline(self):
         """
@@ -371,7 +371,7 @@ class TestLegacyHandlerBaseline:
         # Baseline: Message type retrieval should be very fast (< 10ms for 10 calls)
         assert retrieval_time < 0.01  # 10ms
         
-        print(f"✅ Legacy handler performance baseline validated: "
+        print(f"CHECK Legacy handler performance baseline validated: "
               f"creation={creation_time:.3f}s, retrieval={retrieval_time:.3f}s")
     
     @pytest.mark.asyncio
@@ -407,7 +407,7 @@ class TestLegacyHandlerBaseline:
                 await service.handle_message("user_123", {"type": "start_agent"})
                 mock_error.assert_called_once()
         
-        print("✅ Legacy error handling patterns baseline validated")
+        print("CHECK Legacy error handling patterns baseline validated")
 
 
 class TestLegacyHandlerContextBehavior:
@@ -445,7 +445,7 @@ class TestLegacyHandlerContextBehavior:
                 await handler.handle(user, payload)
                 assert mock_process.call_args[0][0] == user
         
-        print("✅ Legacy user context handling baseline validated")
+        print("CHECK Legacy user context handling baseline validated")
     
     @pytest.mark.asyncio
     async def test_legacy_payload_structure_handling_baseline(self, mock_supervisor, mock_db_session_factory):
@@ -483,7 +483,7 @@ class TestLegacyHandlerContextBehavior:
                 assert text == payload["message"]
                 assert refs == payload.get("references", [])
         
-        print("✅ Legacy payload structure handling baseline validated")
+        print("CHECK Legacy payload structure handling baseline validated")
     
     @pytest.mark.asyncio 
     async def test_legacy_database_session_management_baseline(self, mock_supervisor, mock_db_session_factory):
@@ -517,7 +517,7 @@ class TestLegacyHandlerContextBehavior:
                 await history_handler.handle("user_123", {"thread_id": "thread_123"})
                 mock_uow.assert_called_once()
         
-        print("✅ Legacy database session management baseline validated")
+        print("CHECK Legacy database session management baseline validated")
 
 
 @pytest.fixture
@@ -544,11 +544,11 @@ if __name__ == "__main__":
     ])
     
     if exit_code == 0:
-        print("\n✅ LEGACY HANDLER BASELINE ESTABLISHED")
+        print("\nCHECK LEGACY HANDLER BASELINE ESTABLISHED")
         print("All legacy handlers working correctly in isolation")
         print("Baseline ready for SSOT migration validation")
     else:
-        print("\n❌ LEGACY HANDLER BASELINE FAILED")
+        print("\nX LEGACY HANDLER BASELINE FAILED")
         print("Legacy handlers have issues that must be fixed before migration")
     
     exit(exit_code)

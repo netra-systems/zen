@@ -5,20 +5,20 @@ users through the consolidated ExecutionEngine pattern. It ensures user-specific
 event delivery and prevents cross-user event leakage.
 
 Business Value Justification:
-- Segment: Platform/Internal  
+    - Segment: Platform/Internal  
 - Business Goal: User Experience & Security
-- Value Impact: Ensures real-time chat events reach correct users for $500K+ ARR operations
+- Value Impact: Ensures real-time chat events reach correct users for $500K+ plus ARR operations
 - Strategic Impact: Validates WebSocket integration in SSOT ExecutionEngine consolidation
 
 Key Validation Areas:
-- User-specific WebSocket event routing
+    - User-specific WebSocket event routing
 - Prevention of cross-user event leakage
 - Real-time event delivery through ExecutionEngine
 - WebSocket event data integrity
 - Concurrent user event handling
 
 EXPECTED BEHAVIOR:
-This test should PASS if WebSocket events are properly routed through UserExecutionEngine.
+    This test should PASS if WebSocket events are properly routed through UserExecutionEngine.
 If it FAILS, it indicates WebSocket integration issues in SSOT consolidation.
 ""
 
@@ -37,7 +37,8 @@ logger = central_logger.get_logger(__name__)
 
 class WebSocketEventsRoutingTests(SSotBaseTestCase):
     Test WebSocket events routing through UserExecutionEngine."
-    Test WebSocket events routing through UserExecutionEngine."
+    Test WebSocket events routing through UserExecutionEngine.""
+
     
     def setup_method(self, method):
         "Set up test environment for WebSocket routing tests."
@@ -130,7 +131,8 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                     await emitter.notify_agent_started(fagent_{i)", {"
                         user_specific_data: fdata_for_user_{i},
                         agent_id: fagent_{i}"
-                        agent_id: fagent_{i}"
+                        agent_id: fagent_{i}""
+
                     }
                     
                     await emitter.notify_agent_thinking(f"agent_{i}, fUser {i} is thinking, i+1)"
@@ -146,7 +148,7 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                     }
                     
                     await emitter.notify_agent_completed(fagent_{i), {
-                        "final_result: fcompleted_for_user_{i}",
+                        "final_result: fcompleted_for_user_{i},"
                         user_id: user_id
                     }
                 
@@ -162,7 +164,8 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                     if len(events) == 0:
                         all_users_received_events = False
                         self.event_delivery_issues.append(fUser {user_id} received no events)"
-                        self.event_delivery_issues.append(fUser {user_id} received no events)"
+                        self.event_delivery_issues.append(fUser {user_id} received no events)""
+
                         continue
                     
                     # Verify events contain correct user-specific data
@@ -199,13 +202,13 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                 self.assertTrue(all_users_received_events, All users should receive their events)
                 self.assertFalse(cross_user_contamination, No cross-user event contamination should occur")"
                 
-                logger.info(✅ PASS: User-specific event delivery working correctly)
+                logger.info(CHECK PASS: User-specific event delivery working correctly)
                 return True
                 
             except Exception as e:
                 self.routing_violations.append(fEvent delivery test failed: {e})"
                 self.routing_violations.append(fEvent delivery test failed: {e})"
-                logger.error(f"❌ FAIL: User-specific event delivery broken - {e})"
+                logger.error(f"X FAIL: User-specific event delivery broken - {e})"
                 return False
         
         result = asyncio.run(test_event_delivery())
@@ -326,7 +329,8 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                     logger.info(fUser {result['user_index']}: Sent {result['events_sent']}/{result['expected_events']} events)
                 else:
                     self.performance_issues.append(fConcurrent event test failed: {result})"
-                    self.performance_issues.append(fConcurrent event test failed: {result})"
+                    self.performance_issues.append(fConcurrent event test failed: {result})""
+
             
             total_time = end_time - start_time
             events_per_second = total_events_sent / total_time if total_time > 0 else 0
@@ -334,15 +338,16 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
             # Performance validation
             if events_per_second < 100:  # Should handle at least 100 events/sec
                 performance_ok = False
-                self.performance_issues.append(f"Low event throughput: {events_per_second:.1f} events/sec)"
+                self.performance_issues.append(f"Low event throughput: {events_per_second:.""1f""} events/sec)"
             
             # Validate results
             expected_total_events = user_count * events_per_user
             self.assertEqual(successful_users, user_count, fAll {user_count} users should complete successfully)
             self.assertEqual(total_events_sent, expected_total_events, fAll {expected_total_events} events should be sent)
-            self.assertTrue(performance_ok, fEvent throughput should be adequate (got {events_per_second:.1f} events/sec)")"
+            self.assertTrue(performance_ok, fEvent throughput should be adequate (got {events_per_second:.""1f""} events/sec)")"
             
-            logger.info(f✅ PASS: Concurrent events handled - {total_events_sent} events in {total_time:.3f}s ({events_per_second:.1f} events/sec))
+            logger.info(fCHECK PASS: Concurrent events handled - {total_events_sent} events in {total_time:.""3f""}s ({events_per_second:.""1f""} events/sec))""
+
             return True
         
         result = asyncio.run(test_concurrent_events())
@@ -351,7 +356,8 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
     def test_websocket_event_data_integrity(self):
         "Test that WebSocket event data maintains integrity through ExecutionEngine."
         logger.info(🔒 INTEGRITY TEST: Validating WebSocket event data integrity)"
-        logger.info(🔒 INTEGRITY TEST: Validating WebSocket event data integrity)"
+        logger.info(🔒 INTEGRITY TEST: Validating WebSocket event data integrity)""
+
         
         async def test_data_integrity():
             try:
@@ -397,25 +403,26 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                 # Test data integrity with complex data structures
                 test_data_sets = [
                     # Simple data
-                    {"simple: value", number: 42},
+                    {"simple: value, number: 42},"
                     
                     # Complex nested data
                     {
                         nested: {"
                         nested: {"
                             "level1: {"
-                                level2: [item1, item2", {"level3: True}]
+                                level2: [item1, item2", {level3: True}]"
                             }
                         },
                         array: [1, 2, 3, {nested_in_array: value}]"
-                        array: [1, 2, 3, {nested_in_array: value}]"
+                        array: [1, 2, 3, {nested_in_array: value}]""
+
                     },
                     
                     # Special characters and unicode
                     {
                         "special_chars: !@#$%^&*(),"
                         unicode: 🚀 测试 データ,
-                        "quotes: 'Single double" quotes'
+                        "quotes: 'Single double quotes'"
                     },
                     
                     # Large data
@@ -438,11 +445,12 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                     await websocket_emitter.notify_tool_executing(f"integrity_tool_{i), {"
                         original_data: test_data,
                         test_index: i"
-                        test_index: i"
+                        test_index: i""
+
                     }
                     await websocket_emitter.notify_agent_completed(fintegrity_agent_{i)", {"
                         result: test_data,
-                        integrity_check": f"test_{i}_complete
+                        integrity_check": ftest_{i}_complete"
                     }
                 
                 # Validate data integrity
@@ -471,7 +479,8 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                         if 🚀 not in str(event_data) or 測試 not in str(event_data):
                             data_corruption_found = True
                             self.event_delivery_issues.append(fEvent {i}: Unicode characters corrupted)"
-                            self.event_delivery_issues.append(fEvent {i}: Unicode characters corrupted)"
+                            self.event_delivery_issues.append(fEvent {i}: Unicode characters corrupted)""
+
                     
                     # Check user context preservation
                     user_context_found = user_id in str(event_data)
@@ -485,12 +494,12 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                 # Validate overall integrity
                 self.assertFalse(data_corruption_found, "No data corruption should be found)"
                 
-                logger.info(f✅ PASS: Data integrity maintained - {len(captured_events)} events validated)
+                logger.info(fCHECK PASS: Data integrity maintained - {len(captured_events)} events validated)
                 return True
                 
             except Exception as e:
                 self.event_delivery_issues.append(fData integrity test failed: {e})
-                logger.error(f❌ FAIL: WebSocket event data integrity broken - {e}")"
+                logger.error(fX FAIL: WebSocket event data integrity broken - {e}")"
                 return False
         
         result = asyncio.run(test_data_integrity())
@@ -555,7 +564,8 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                 # Tool execution
                 await websocket_emitter.notify_tool_executing(ordering_tool, {step: 2)
                 expected_sequence.append(tool_executing)"
-                expected_sequence.append(tool_executing)"
+                expected_sequence.append(tool_executing)""
+
                 
                 # Tool completed
                 await websocket_emitter.notify_tool_completed("ordering_tool, {step: 3, result: success)"
@@ -564,7 +574,8 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                 # More thinking
                 await websocket_emitter.notify_agent_thinking(ordering_agent, Processing results, 2)
                 expected_sequence.append(agent_thinking)"
-                expected_sequence.append(agent_thinking)"
+                expected_sequence.append(agent_thinking)""
+
                 
                 # Agent completed
                 await websocket_emitter.notify_agent_completed("ordering_agent, {step: 4, final: True)"
@@ -577,7 +588,8 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                 for i, (event, expected_type) in enumerate(zip(ordered_events, expected_sequence)):
                     if expected_type not in event['event_type']:
                         ordering_violations.append(fPosition {i}: Expected {expected_type}, got {event['event_type']})"
-                        ordering_violations.append(fPosition {i}: Expected {expected_type}, got {event['event_type']})"
+                        ordering_violations.append(fPosition {i}: Expected {expected_type}, got {event['event_type']})""
+
                     
                     # Check sequential timestamps (allowing for small timing variations)
                     if i > 0:
@@ -592,12 +604,12 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                 # Validate ordering
                 self.assertEqual(len(ordering_violations), 0, fEvent ordering violations: {ordering_violations})
                 
-                logger.info(f✅ PASS: Event ordering maintained - {len(ordered_events)} events in correct sequence)
+                logger.info(fCHECK PASS: Event ordering maintained - {len(ordered_events)} events in correct sequence)
                 return True
                 
             except Exception as e:
                 self.routing_violations.append(fEvent ordering test failed: {e}")"
-                logger.error(f❌ FAIL: WebSocket event ordering broken - {e})
+                logger.error(fX FAIL: WebSocket event ordering broken - {e})
                 return False
         
         result = asyncio.run(test_event_ordering())
@@ -606,7 +618,8 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
     def test_comprehensive_websocket_routing_report(self):
         "Generate comprehensive WebSocket routing test report."
         logger.info(📊 COMPREHENSIVE WEBSOCKET ROUTING REPORT)"
-        logger.info(📊 COMPREHENSIVE WEBSOCKET ROUTING REPORT)"
+        logger.info(📊 COMPREHENSIVE WEBSOCKET ROUTING REPORT)""
+
         
         all_issues = (self.routing_violations + self.event_delivery_issues + 
                      self.cross_user_leaks + self.performance_issues)
@@ -636,7 +649,8 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
                 logger.warning(f  {i}. {issue})
             if len(all_issues) > 5:
                 logger.warning(f  ... and {len(all_issues) - 5} more issues)"
-                logger.warning(f  ... and {len(all_issues) - 5} more issues)"
+                logger.warning(f  ... and {len(all_issues) - 5} more issues)""
+
         
         # This test should PASS if WebSocket routing works correctly
         self.assertEqual(
@@ -646,7 +660,7 @@ class WebSocketEventsRoutingTests(SSotBaseTestCase):
             fPerformance Risk: {routing_summary['performance_risk']}
         )
         
-        logger.info(✅ SUCCESS: WebSocket events routing working correctly through UserExecutionEngine")"
+        logger.info(CHECK SUCCESS: WebSocket events routing working correctly through UserExecutionEngine")"
 
 
 if __name__ == '__main__':

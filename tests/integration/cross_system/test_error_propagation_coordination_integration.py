@@ -42,6 +42,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.config import get_config
 from netra_backend.app.core.error_handler import ErrorHandler
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
+from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitConfig
 
 
 class ErrorSeverity(Enum):
@@ -125,7 +126,13 @@ class ErrorPropagationCoordinationIntegrationTests(SSotAsyncTestCase):
         
         # Initialize error handling systems
         self.error_handler = ErrorHandler()
-        self.circuit_breaker = CircuitBreaker()
+        config = UnifiedCircuitConfig(
+            name="test_error_propagation_circuit",
+            failure_threshold=3,
+            recovery_timeout=60,
+            timeout_seconds=30.0
+        )
+        self.circuit_breaker = CircuitBreaker(config)
         
         # Add cleanup
         self.add_cleanup(self._cleanup_error_handling_systems)

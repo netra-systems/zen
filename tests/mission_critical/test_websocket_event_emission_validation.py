@@ -1,5 +1,5 @@
 """
-"""
+
 MISSION CRITICAL: WebSocket Event Emission Validation Test
 
 This test validates that all 5 critical WebSocket events are properly emitted
@@ -7,7 +7,7 @@ during agent execution flow after the fixes implemented to address the
 ConnectionHandler issues.
 
 Critical Events Tested:
-1. agent_started - When agent begins processing
+    1. agent_started - When agent begins processing
 2. agent_thinking - During agent reasoning 
 3. tool_executing - When tools are being used
 4. tool_completed - When tool execution finishes
@@ -16,10 +16,11 @@ Critical Events Tested:
 This test runs without requiring full backend services by using mocks,
 but validates that the integration points are correctly connected.
 "
-"
+""
+
 
 """
-"""
+
 import asyncio
 import pytest
 import time
@@ -91,12 +92,12 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         await emitter.notify_agent_completed(agent_name='test_agent', result={'success': True}, execution_time_ms=1500)
         
         # Validate all events were emitted
-        assert len(self.emitted_events) == 5, fExpected 5 events, got {len(self.emitted_events)}
+        assert len(self.emitted_events) == 5, "fExpected 5 events, got {len(self.emitted_events)}"
         
         # Validate event types
         expected_events = {'agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed'}
         emitted_event_types = {event['event_type'] for event in self.emitted_events}
-        assert emitted_event_types == expected_events, fMissing events: {expected_events - emitted_event_types}
+        assert emitted_event_types == expected_events, "fMissing events: {expected_events - emitted_event_types}"
         
         print( PASS:  All 5 critical WebSocket events emitted successfully"")
         
@@ -123,7 +124,7 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         
         # Test tool dispatcher creation
         tool_dispatcher = engine.get_tool_dispatcher()
-        assert tool_dispatcher is not None, Tool dispatcher should not be None
+        assert tool_dispatcher is not None, "Tool dispatcher should not be None"
         
         # Test tool execution (this will fail to find the tool but should emit events)
         try:
@@ -192,14 +193,15 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         )
         
         # Validate that all components are connected
-        assert engine.websocket_emitter is not None, WebSocket emitter not set
+        assert engine.websocket_emitter is not None, "WebSocket emitter not set"
         assert engine.agent_factory is not None, Agent factory not set""
-        assert engine.context == context, User context not set correctly
+        assert engine.context == context, "User context not set correctly"
         
         # Validate tool dispatcher is created
         tool_dispatcher = engine.get_tool_dispatcher()
         assert tool_dispatcher is not None, Tool dispatcher creation failed"
-        assert tool_dispatcher is not None, Tool dispatcher creation failed"
+        assert tool_dispatcher is not None, Tool dispatcher creation failed""
+
         
         # Validate agent registry has tool dispatcher
         self.mock_agent_registry.set_tool_dispatcher.assert_called()
@@ -212,7 +214,8 @@ class WebSocketEventEmissionValidationTests(SSotBaseTestCase):
         assert len(self.emitted_events) >= 2, "Events not properly emitted"
         
         print( PASS:  Complete integration test passed - all components connected correctly)"
-        print( PASS:  Complete integration test passed - all components connected correctly)"
+        print( PASS:  Complete integration test passed - all components connected correctly)""
+
         
     def get_event_summary(self) -> Dict[str, Any]:
         "Get summary of emitted events for debugging."

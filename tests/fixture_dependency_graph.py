@@ -30,8 +30,8 @@ class FixtureNode:
         self.line_number = line_number
         self.dependencies: List[str] = []  # Fixtures this depends on
         self.dependents: List[str] = []    # Fixtures that depend on this
-        self.scope: str = "function"       # function, class, module, session
-        self.memory_impact: str = "UNKNOWN"  # LOW, MEDIUM, HIGH, VERY_HIGH
+        self.scope: str = "function       # function, class, module, session"
+        self.memory_impact: str = "UNKNOWN  # LOW, MEDIUM, HIGH, VERY_HIGH"
         self.memory_description: str = ""
         self.is_autouse: bool = False
         self.is_async: bool = False
@@ -42,7 +42,7 @@ class FixtureNode:
 class FixtureDependencyGraph:
         """Analyzes fixture dependencies across pytest conftest files."""
 
-    def __init__(self, test_root: str = "tests"):
+    def __init__(self, test_root: str = "tests):"
         self.test_root = Path(test_root)
         self.nodes: Dict[str, FixtureNode] = {}
         self.circular_dependencies: List[List[str]] = []
@@ -55,7 +55,7 @@ class FixtureDependencyGraph:
     # Find all conftest files
         for root, dirs, files in os.walk(self.test_root):
         for file in files:
-        if file.startswith("conftest") and file.endswith(".py"):
+        if file.startswith("conftest") and file.endswith(".py):"
         conftest_files.append(Path(root) / file)
 
                 # Parse each conftest file
@@ -168,7 +168,7 @@ class FixtureDependencyGraph:
         memory_description = decorator.args[0].value
 
                                                                                 Try to infer memory impact from function content/docstring
-        if memory_impact == "UNKNOWN":
+        if memory_impact == "UNKNOWN:"
         memory_impact = self._infer_memory_impact(node, content)
 
         return { }
@@ -229,7 +229,7 @@ class FixtureDependencyGraph:
         if 'mock' in func_content or 'magicmock' in func_content:
         return "LOW"
 
-        return "LOW"  # Default to LOW if no indicators found
+        return "LOW  # Default to LOW if no indicators found"
 
     def _build_dependency_relationships(self) -> None:
         """Build bidirectional dependency relationships."""
@@ -277,7 +277,7 @@ class FixtureDependencyGraph:
     def _detect_heavy_chains(self) -> None:
         """Detect chains of fixtures with high memory impact."""
     def get_chain_impact_score(chain: List[str]) -> Tuple[int, str]:
-        impact_scores = {"LOW": 1, "MEDIUM": 3, "HIGH": 5, "VERY_HIGH": 10, "UNKNOWN": 2}
+        impact_scores = {"LOW": 1, "MEDIUM": 3, "HIGH": 5, "VERY_HIGH": 10, "UNKNOWN: 2}"
         total_score = 0
         impact_details = []
 
@@ -336,7 +336,7 @@ class FixtureDependencyGraph:
     def generate_report(self) -> str:
         """Generate a comprehensive fixture dependency report."""
         report = []
-        report.append("# Fixture Dependency Analysis Report")
+        report.append("# Fixture Dependency Analysis Report)"
         report.append("")
         report.append("")
         report.append("")
@@ -346,40 +346,40 @@ class FixtureDependencyGraph:
         for node in self.nodes.values():
         impact_counts[node.memory_impact] += 1
 
-        report.append("## Memory Impact Summary")
-        for impact in ["VERY_HIGH", "HIGH", "MEDIUM", "LOW", "UNKNOWN"]:
+        report.append("## Memory Impact Summary)"
+        for impact in ["VERY_HIGH", "HIGH", "MEDIUM", "LOW", "UNKNOWN]:"
         count = impact_counts[impact]
         if count > 0:
         report.append("")
         report.append("")
 
                 # Circular dependencies
-        report.append("## Circular Dependencies")
+        report.append("## Circular Dependencies)"
         if self.circular_dependencies:
-        report.append("WARNING: **CRITICAL: Circular dependencies detected!**")
+        report.append("WARNING: **CRITICAL: Circular dependencies detected!**)"
         for i, cycle in enumerate(self.circular_dependencies):
         report.append("")
         else:
-        report.append("OK: No circular dependencies detected")
+        report.append("OK: No circular dependencies detected)"
         report.append("")
 
                             # Heavy fixture chains
-        report.append("## Heavy Memory Impact Chains")
+        report.append("## Heavy Memory Impact Chains)"
         if self.heavy_chains:
-        report.append("These fixture chains have high memory usage:")
+        report.append("These fixture chains have high memory usage:)"
         for i, (chain, description) in enumerate(self.heavy_chains[:5]):  # Top 5
         report.append("")
         else:
-        report.append("OK: No heavy fixture chains detected")
+        report.append("OK: No heavy fixture chains detected)"
         report.append("")
 
                                     # High impact fixtures
-        report.append("## High Impact Fixtures")
+        report.append("## High Impact Fixtures)"
         high_impact_fixtures = [ ]
         node for node in self.nodes.values()
-        if node.memory_impact in ["HIGH", "VERY_HIGH"]
+        if node.memory_impact in ["HIGH", "VERY_HIGH]"
                                     
-        high_impact_fixtures.sort(key=lambda x: None (x.memory_impact == "VERY_HIGH", x.memory_impact), reverse=True)
+        high_impact_fixtures.sort(key=lambda x: None (x.memory_impact == "VERY_HIGH, x.memory_impact), reverse=True)"
 
         for fixture in high_impact_fixtures[:10]:  # Top 10
         report.append("")
@@ -392,38 +392,38 @@ class FixtureDependencyGraph:
         report.append("")
 
                                             # Session-scoped fixtures (potential memory retention)
-        report.append("## Session-Scoped Fixtures")
+        report.append("## Session-Scoped Fixtures)"
         session_fixtures = [item for item in []]
         if session_fixtures:
-        report.append("These fixtures persist for the entire test session:")
+        report.append("These fixtures persist for the entire test session:)"
         for fixture in session_fixtures:
         report.append("")
         if fixture.is_autouse:
-        report.append("  - WARNING: Auto-use fixture (runs automatically)")
+        report.append("  - WARNING: Auto-use fixture (runs automatically))"
         if fixture.memory_description:
         report.append("")
         else:
-        report.append("OK: No session-scoped fixtures detected")
+        report.append("OK: No session-scoped fixtures detected)"
         report.append("")
 
                                                                 # Recommendations
-        report.append("## Optimization Recommendations")
+        report.append("## Optimization Recommendations)"
 
         if self.circular_dependencies:
-        report.append("1. **CRITICAL**: Fix circular dependencies to prevent memory leaks")
+        report.append("1. **CRITICAL**: Fix circular dependencies to prevent memory leaks)"
 
         if len([item for item in []]) > 3:
-        report.append("2. Consider reducing the number of VERY_HIGH impact fixtures")
+        report.append("2. Consider reducing the number of VERY_HIGH impact fixtures)"
 
         if len(session_fixtures) > 5:
-        report.append("3. Review session-scoped fixtures - consider function scope when possible")
+        report.append("3. Review session-scoped fixtures - consider function scope when possible)"
 
         if len([item for item in []]) > 2:
-        report.append("4. Review auto-use fixtures - they increase memory usage for all tests")
+        report.append("4. Review auto-use fixtures - they increase memory usage for all tests)"
 
         heavy_imports = len([item for item in []])
         if heavy_imports > 10:
-        report.append("5. Consider implementing lazy loading for heavy imports in E2E fixtures")
+        report.append("5. Consider implementing lazy loading for heavy imports in E2E fixtures)"
 
         return "
         return "
@@ -456,10 +456,10 @@ class FixtureDependencyGraph:
         """Main entry point for fixture dependency analysis."""
         import argparse
 
-        parser = argparse.ArgumentParser(description="Analyze pytest fixture dependencies")
-        parser.add_argument("--test-root", default="tests", help="Root directory for tests")
-        parser.add_argument("--output", help="Output file for report")
-        parser.add_argument("--json", action="store_true", help="Output as JSON")
+        parser = argparse.ArgumentParser(description="Analyze pytest fixture dependencies)"
+        parser.add_argument("--test-root", default="tests", help="Root directory for tests)"
+        parser.add_argument("--output", help="Output file for report)"
+        parser.add_argument("--json", action="store_true", help="Output as JSON)"
 
         args = parser.parse_args()
 
@@ -481,5 +481,5 @@ class FixtureDependencyGraph:
         else:
         print(output)
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         main()

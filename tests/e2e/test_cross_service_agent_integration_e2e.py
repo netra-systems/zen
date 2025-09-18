@@ -258,7 +258,7 @@ class CrossServiceAgentIntegrationTester:
                 if missing_events:
                     report.append(f'     WARNING: MISSING REQUIRED EVENTS: {missing_events}')
                 else:
-                    report.append('    ✓ All required WebSocket events received')
+                    report.append('    CHECK All required WebSocket events received')
                 report.append('    Integration Timing:')
                 if val.time_to_auth_validation:
                     report.append(f'      - Auth validation: {val.time_to_auth_validation:.3f}s')
@@ -271,13 +271,13 @@ class CrossServiceAgentIntegrationTester:
                 if val.time_to_integration_completion:
                     report.append(f'      - Integration completion: {val.time_to_integration_completion:.2f}s')
                 report.append('    Service Integration Results:')
-                report.append(f'      ✓ Auth integration: {val.auth_integration_successful}')
-                report.append(f'      ✓ WebSocket integration: {val.websocket_integration_successful}')
-                report.append(f'      ✓ Database integration: {val.database_integration_successful}')
-                report.append(f'      ✓ Analytics integration: {val.analytics_integration_successful}')
-                report.append(f'      ✓ Session persistence: {val.session_persistence_successful}')
-                report.append(f'      ✓ Data consistency: {val.data_consistency_maintained}')
-                report.append(f'      ✓ End-to-end success: {val.end_to_end_integration_successful}')
+                report.append(f'      CHECK Auth integration: {val.auth_integration_successful}')
+                report.append(f'      CHECK WebSocket integration: {val.websocket_integration_successful}')
+                report.append(f'      CHECK Database integration: {val.database_integration_successful}')
+                report.append(f'      CHECK Analytics integration: {val.analytics_integration_successful}')
+                report.append(f'      CHECK Session persistence: {val.session_persistence_successful}')
+                report.append(f'      CHECK Data consistency: {val.data_consistency_maintained}')
+                report.append(f'      CHECK End-to-end success: {val.end_to_end_integration_successful}')
                 report.append('    Service Interactions:')
                 report.append(f'      - Total service calls: {val.total_service_calls}')
                 report.append(f'      - Failed service calls: {val.failed_service_calls}')

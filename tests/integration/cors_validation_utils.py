@@ -1,6 +1,5 @@
 from shared.isolated_environment import get_env
-'''
-'''
+"""
 CORS Validation Utilities for Integration Tests
 
 Business Value Justification (BVJ):
@@ -10,323 +9,314 @@ Business Value Justification (BVJ):
 - Strategic Impact: Systematic testing prevents service integration failures
 
 This module provides utilities to validate CORS headers in integration tests.
-'''
-'''
+"""
 
 from typing import Dict, List, Optional, Any
 import os
 
 
-def validate_cors_headers( )
-response_headers: Dict[str, str],
-request_origin: str,
-environment: str = "development"
+def validate_cors_headers(
+    response_headers: Dict[str, str],
+    request_origin: str,
+    environment: str = "development"
 ) -> Dict[str, Any]:
-'''
-'''
-Validate CORS headers in a response.
+    """
+    Validate CORS headers in a response.
 
-Args:
-response_headers: HTTP response headers
-request_origin: Origin header from the request
-environment: Environment being tested
+    Args:
+        response_headers: HTTP response headers
+        request_origin: Origin header from the request
+        environment: Environment configuration to use
 
-Returns:
-Dictionary with validation results
-'''
-'''
-validation_results = { }
-"valid": True,
-"errors": [],
-"warnings": [],
-"headers_found": {},
-"missing_headers": []
-            
+    Returns:
+        Dict containing validation results and details
+    """
+    validation_results = {
+        "valid": True,
+        "errors": [],
+        "warnings": [],
+        "headers_found": {},
+        "expected_headers": {}
+    }
 
-            # Normalize header names (case-insensitive)
-normalized_headers = {k.lower(): v for k, v in response_headers.items()}
+    # Extract CORS headers
+    cors_headers = {
+        "access-control-allow-origin": response_headers.get("Access-Control-Allow-Origin", ""),
+        "access-control-allow-methods": response_headers.get("Access-Control-Allow-Methods", ""),
+        "access-control-allow-headers": response_headers.get("Access-Control-Allow-Headers", ""),
+        "access-control-allow-credentials": response_headers.get("Access-Control-Allow-Credentials", ""),
+        "access-control-max-age": response_headers.get("Access-Control-Max-Age", "")
+    }
 
-            # Required CORS headers
-cors_headers = { }
-"access-control-allow-origin": request_origin,
-"access-control-allow-credentials": "true",
-"access-control-allow-methods": None,  # Should contain common methods
-"access-control-allow-headers": None,  # Should contain required headers
-"access-control-max-age": None,  # Should be present for preflight
-            
+    validation_results["headers_found"] = cors_headers
 
-for header, expected_value in cors_headers.items():
-if header in normalized_headers:
-    pass
-validation_results["headers_found"][header] = normalized_headers[header]
+    # Validate Access-Control-Allow-Origin
+    expected_origin = request_origin
+    actual_origin = cors_headers["access-control-allow-origin"]
 
-if expected_value and normalized_headers[header] != expected_value:
-    pass
-if header == "access-control-allow-origin":
-                            # Special case: check if origin is allowed
-actual_origin = normalized_headers[header]
-if actual_origin != request_origin and actual_origin != "*":
-    pass
-validation_results["errors"].append( )
-""
-                                
-validation_results["valid"] = False
-else:
-    pass
-validation_results["warnings"].append( )
-""
-                                    
-else:
-    pass
-validation_results["missing_headers"].append(header)
-if header in ["access-control-allow-origin", "access-control-allow-credentials"]:
-    pass
-validation_results["errors"].append("")
-validation_results["valid"] = False
+    if actual_origin != expected_origin and actual_origin != "*":
+        validation_results["valid"] = False
+        validation_results["errors"].append({
+            "type": "origin_mismatch",
+            "expected": expected_origin,
+            "actual": actual_origin,
+            "message": f"Expected origin '{expected_origin}' but got '{actual_origin}'"
+        })
 
-                                            # Validate specific header content
-if "access-control-allow-methods" in normalized_headers:
-    pass
-methods = normalized_headers["access-control-allow-methods"]
-required_methods = ["GET", "POST", "OPTIONS"]
-for method in required_methods:
-if method not in methods:
-    pass
-validation_results["warnings"].append("")
+    # Validate required methods
+    required_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allowed_methods = cors_headers["access-control-allow-methods"].upper().split(", ")
 
-if "access-control-allow-headers" in normalized_headers:
-    pass
-headers = normalized_headers["access-control-allow-headers"]
-required_headers = ["Authorization", "Content-Type"]
-for header in required_headers:
-if header not in headers:
-    pass
-validation_results["warnings"].append("")
+    missing_methods = [method for method in required_methods if method not in allowed_methods]
+    if missing_methods:
+        validation_results["warnings"].append({
+            "type": "missing_methods",
+            "missing": missing_methods,
+            "message": f"Missing required methods: {', '.join(missing_methods)}"
+        })
 
-                                                                    # Check for security headers
-security_headers = ["vary", "x-content-type-options", "x-frame-options"]
-for header in security_headers:
-if header in normalized_headers:
-    pass
-validation_results["headers_found"][header] = normalized_headers[header]
-else:
-    pass
-validation_results["warnings"].append("")
+    # Validate common headers
+    required_headers = ["Content-Type", "Authorization", "X-Requested-With"]
+    allowed_headers_str = cors_headers["access-control-allow-headers"].lower()
 
-return validation_results
+    missing_headers = []
+    for header in required_headers:
+        if header.lower() not in allowed_headers_str:
+            missing_headers.append(header)
+
+    if missing_headers:
+        validation_results["warnings"].append({
+            "type": "missing_headers",
+            "missing": missing_headers,
+            "message": f"Missing common headers: {', '.join(missing_headers)}"
+        })
+
+    # Environment-specific validation
+    if environment == "production":
+        if actual_origin == "*":
+            validation_results["errors"].append({
+                "type": "wildcard_origin_production",
+                "message": "Wildcard origin (*) should not be used in production"
+            })
+            validation_results["valid"] = False
+
+    return validation_results
 
 
 def get_test_origins(environment: str = "development") -> List[str]:
-    pass
-'''
-'''
-Get test origins for the specified environment.
+    """
+    Get test origins for the specified environment.
 
-Args:
-environment: Environment to get origins for
+    Args:
+        environment: Environment to get origins for
 
-Returns:
-List of test origins for the environment
-'''
-'''
-origins = { }
-"development": [ ]
-"http://localhost:3000",
-"http://localhost:3001",
-"http://127.0.0.1:3000",
-"https://localhost:3000",
-"http://[::1]:3000",  # IPv6
-],
-"staging": [ ]
-"https://app.staging.netrasystems.ai",
-"https://auth.staging.netrasystems.ai",
-"http://localhost:3000",  # Local testing
-],
-"production": [ ]
-"https://netrasystems.ai",
-"https://app.netrasystems.ai",
-"https://auth.netrasystems.ai",
-            
-            
+    Returns:
+        List of test origins for the environment
+    """
+    origins = {
+        "development": [
+            "http://localhost:3000",
+            "http://localhost:3001",
+            "http://127.0.0.1:3000",
+            "https://localhost:3000",
+            "http://[::1]:3000"  # IPv6
+        ],
+        "staging": [
+            "https://app.staging.netrasystems.ai",
+            "https://auth.staging.netrasystems.ai",
+            "http://localhost:3000"  # Local testing
+        ],
+        "production": [
+            "https://netrasystems.ai",
+            "https://app.netrasystems.ai",
+            "https://auth.netrasystems.ai"
+        ]
+    }
 
-return origins.get(environment, origins["development"])
+    return origins.get(environment, origins["development"])
 
 
 def create_cors_request_headers(origin: str, method: str = "GET") -> Dict[str, str]:
-    pass
-'''
-'''
-Create request headers for testing CORS.
+    """
+    Create request headers for testing CORS.
 
-Args:
-origin: Origin header value
-method: HTTP method for preflight requests
+    Args:
+        origin: Origin header value
+        method: HTTP method for preflight requests
 
-Returns:
-Dictionary of request headers
-'''
-'''
-if method == "OPTIONS":  # Preflight request
-return { }
-"Origin": origin,
-"Access-Control-Request-Method": "POST",
-"Access-Control-Request-Headers": "Authorization, Content-Type"
-            
-else:  # Actual request
-return { }
-"Origin": origin,
-"Content-Type": "application/json"
-            
+    Returns:
+        Dict of request headers for CORS testing
+    """
+    headers = {
+        "Origin": origin,
+        "User-Agent": "Mozilla/5.0 (CORS Test Client)"
+    }
+
+    # Add preflight headers for non-simple requests
+    if method.upper() not in ["GET", "HEAD", "POST"]:
+        headers["Access-Control-Request-Method"] = method.upper()
+        headers["Access-Control-Request-Headers"] = "Content-Type, Authorization, X-Requested-With"
+
+    return headers
 
 
-def assert_cors_valid(response, request_origin: str, environment: str = "development") -> None:
-    pass
-'''
-'''
-Assert that a response has valid CORS headers.
+def validate_preflight_response(
+    response_headers: Dict[str, str],
+    request_method: str,
+    request_headers: List[str],
+    origin: str
+) -> Dict[str, Any]:
+    """
+    Validate a CORS preflight response.
 
-Args:
-response: HTTP response object
-request_origin: Origin that was sent in the request
-environment: Environment being tested
+    Args:
+        response_headers: Response headers from OPTIONS request
+        request_method: Method that will be used in actual request
+        request_headers: Headers that will be sent in actual request
+        origin: Origin making the request
 
-Raises:
-AssertionError: If CORS validation fails
-'''
-'''
-headers = dict(response.headers) if hasattr(response, 'headers') else {}
-validation = validate_cors_headers(headers, request_origin, environment)
+    Returns:
+        Dict containing validation results
+    """
+    validation_results = {
+        "valid": True,
+        "errors": [],
+        "preflight_approved": False
+    }
 
-if not validation["valid"]:
-    pass
-error_msg = ""
-error_msg += ""
-error_msg += ""
-error_msg += ""
-raise AssertionError(error_msg)
+    # Check if method is allowed
+    allowed_methods = response_headers.get("Access-Control-Allow-Methods", "").upper().split(", ")
+    if request_method.upper() not in allowed_methods:
+        validation_results["valid"] = False
+        validation_results["errors"].append({
+            "type": "method_not_allowed",
+            "method": request_method,
+            "allowed": allowed_methods,
+            "message": f"Method {request_method} not allowed. Allowed: {', '.join(allowed_methods)}"
+        })
 
-                    # Check for warnings in development/staging
-if environment != "production" and validation["warnings"]:
-    print("")
+    # Check if headers are allowed
+    allowed_headers_str = response_headers.get("Access-Control-Allow-Headers", "").lower()
+    allowed_headers = [h.strip() for h in allowed_headers_str.split(",")]
+
+    for header in request_headers:
+        if header.lower() not in allowed_headers:
+            validation_results["valid"] = False
+            validation_results["errors"].append({
+                "type": "header_not_allowed",
+                "header": header,
+                "allowed": allowed_headers,
+                "message": f"Header {header} not allowed"
+            })
+
+    # Check origin
+    allowed_origin = response_headers.get("Access-Control-Allow-Origin", "")
+    if allowed_origin != origin and allowed_origin != "*":
+        validation_results["valid"] = False
+        validation_results["errors"].append({
+            "type": "origin_not_allowed",
+            "origin": origin,
+            "allowed": allowed_origin,
+            "message": f"Origin {origin} not allowed"
+        })
+
+    if validation_results["valid"]:
+        validation_results["preflight_approved"] = True
+
+    return validation_results
 
 
-def cors_test_decorator(origins: Optional[List[str]] = None, environment: str = "development"):
-    pass
-'''
-'''
-Decorator to add CORS validation to test methods.
+def get_cors_test_scenarios(environment: str = "development") -> List[Dict[str, Any]]:
+    """
+    Get common CORS test scenarios for the environment.
 
-Args:
-origins: List of origins to test. If None, uses default for environment
-environment: Environment being tested
+    Args:
+        environment: Environment to get scenarios for
 
-Returns:
-Decorator function
-'''
-'''
-def decorator(test_func):
-    pass
-async def wrapper(*args, **kwargs):
-    # Run original test
-result = await test_func(*args, **kwargs)
+    Returns:
+        List of test scenario configurations
+    """
+    test_origins = get_test_origins(environment)
 
-    # Additional CORS validation can be added here if needed
-return result
+    scenarios = []
 
-wrapper.__name__ = test_func.__name__
-wrapper.__doc__ = test_func.__doc__
-return wrapper
+    # Basic GET requests
+    for origin in test_origins:
+        scenarios.append({
+            "name": f"GET request from {origin}",
+            "origin": origin,
+            "method": "GET",
+            "headers": [],
+            "expect_preflight": False
+        })
 
-return decorator
+    # POST with JSON
+    for origin in test_origins[:2]:  # Limit to first 2 origins
+        scenarios.append({
+            "name": f"POST JSON from {origin}",
+            "origin": origin,
+            "method": "POST",
+            "headers": ["Content-Type"],
+            "content_type": "application/json",
+            "expect_preflight": True
+        })
+
+    # Authenticated requests
+    for origin in test_origins[:1]:  # Limit to first origin
+        scenarios.append({
+            "name": f"Authenticated request from {origin}",
+            "origin": origin,
+            "method": "GET",
+            "headers": ["Authorization"],
+            "expect_preflight": True
+        })
+
+    return scenarios
 
 
-class CORSTestMixin:
-        """Mixin class to add CORS testing capabilities to test classes."""
+def format_cors_validation_report(validation_results: Dict[str, Any]) -> str:
+    """
+    Format validation results into a readable report.
 
-    def setUp_cors(self, environment: str = "development"):
-        """Set up CORS testing configuration."""
-        self.cors_environment = environment
-        self.test_origins = get_test_origins(environment)
+    Args:
+        validation_results: Results from validate_cors_headers
 
-    async def assert_cors_response(self, client, endpoint: str, origin: str, method: str = "GET"):
-        """Test and assert CORS for a specific endpoint and origin."""
-        headers = create_cors_request_headers(origin, method)
+    Returns:
+        Formatted string report
+    """
+    report_lines = []
 
-        if method == "OPTIONS":
-        response = await client.options(endpoint, headers=headers)
+    if validation_results["valid"]:
+        report_lines.append("CHECK CORS Validation: PASSED")
+    else:
+        report_lines.append("X CORS Validation: FAILED")
+
+    report_lines.append("")
+
+    # Headers found
+    headers = validation_results.get("headers_found", {})
+    report_lines.append("Headers Found:")
+    for header, value in headers.items():
+        if value:
+            report_lines.append(f"  {header}: {value}")
         else:
-        response = await client.get(endpoint, headers=headers)
+            report_lines.append(f"  {header}: (not set)")
 
-            # Allow 404s for endpoints that don't exist in test environment'
-        if response.status_code not in [200, 204, 404]:
-        raise AssertionError("")
+    report_lines.append("")
 
-        assert_cors_valid(response, origin, self.cors_environment)
-        return response
+    # Errors
+    errors = validation_results.get("errors", [])
+    if errors:
+        report_lines.append("Errors:")
+        for error in errors:
+            report_lines.append(f"  X {error.get('message', str(error))}")
+        report_lines.append("")
 
-    async def test_cors_for_all_origins(self, client, endpoint:
-        """Test CORS for all configured origins for an endpoint."""
-        for origin in self.test_origins[:3]:  # Test first 3 origins to keep tests manageable
-        await self.assert_cors_response(client, endpoint, origin, "OPTIONS")  # Preflight
-        await self.assert_cors_response(client, endpoint, origin, "GET")      # Actual request
+    # Warnings
+    warnings = validation_results.get("warnings", [])
+    if warnings:
+        report_lines.append("Warnings:")
+        for warning in warnings:
+            report_lines.append(f"  WARNING️ {warning.get('message', str(warning))}")
 
-
-    def cors_integration_test(environment: str = "development"):
-        '''
-        '''
-        Class decorator to add CORS testing to integration test classes.
-
-        Usage:
-        @pytest.fixture
-class TestMyAPI:
-    async def test_my_endpoint(self, client):
-        # Test endpoint functionality
-        response = await client.get("/api/test")
-
-        # CORS validation is automatically added
-        '''
-        '''
-    def class_decorator(cls):
-    # Add CORSTestMixin to the class
-        if not issubclass(cls, CORSTestMixin):
-        cls = type(cls.__name__, (cls, CORSTestMixin), dict(cls.__dict__))
-
-        # Override setUp if it exists, or create one
-        original_setup = getattr(cls, 'setUp', None)
-
-    def new_setup(self):
-        if original_setup:
-        original_setup(self)
-        self.setUp_cors(environment)
-
-        cls.setUp = new_setup
-        return cls
-
-        return class_decorator
-
-
-        # Environment detection for automatic CORS testing
-    def get_current_test_environment() -> str:
-        """Get the current test environment from environment variables."""
-        return get_env().get("ENVIRONMENT", get_env().get("NETRA_ENV", "development")).lower()
-
-
-    # Example usage in integration tests:
-        '''
-        '''
-        from tests.integration.cors_validation_utils import cors_integration_test, CORSTestMixin
-
-        @pytest.fixture
-class TestAPIEndpoints(CORSTestMixin):
-    pass
-    async def test_health_endpoint(self, client):
-        # Test the functionality
-        response = await client.get("/health")
-        assert response.status_code == 200
-
-        # Test CORS for this endpoint
-        await self.test_cors_for_all_origins(client, "/health")
-        '''
-        '''
-
-)
+    return "\n".join(report_lines)

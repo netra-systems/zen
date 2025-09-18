@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-"""
+
 Issue #690 - Staging Backend Health Validation Failure Reproduction Test
 =========================================================================
 
@@ -8,10 +8,10 @@ CRITICAL: This test reproduces the exact 1 critical services unhealthy" failure"
 identified in Issue #690 staging deployment logs.
 
 BVJ (Business Value Justification):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: System Reliability
 - Value Impact: Prevents chat functionality outages in staging
-- Strategic Impact: Protects $500K+ ARR by ensuring reliable staging deployments
+- Strategic Impact: Protects $500K+ plus ARR by ensuring reliable staging deployments
 
 EXPECTED TO FAIL: These tests demonstrate the exact Phase 7 health validation
 issues observed in staging deployment logs, specifically:
@@ -21,9 +21,11 @@ issues observed in staging deployment logs, specifically:
 3. External dependency blocking health checks
 """
 """
+
 4. 503 Service Unavailable from staging backend health endpoint
 "
-"
+""
+
 
 import asyncio
 import logging
@@ -34,7 +36,7 @@ import pytest
 import aiohttp
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from netra_backend.app.startup_health_checks import (
+from netra_backend.app.startup_health_checks import ()
     StartupHealthChecker,
     ServiceStatus,
     HealthCheckResult,
@@ -67,8 +69,9 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
     @pytest.mark.mission_critical
     async def test_phase7_health_validation_returns_1_critical_service_unhealthy(self):
-        "
-        "
+        """
+        ""
+
         EXPECTED TO FAIL - CRITICAL ISSUE REPRODUCTION
 
         Test reproduces: Phase 7 health validation failing with 1 critical services unhealthy
@@ -108,7 +111,8 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
             # This should fail with exactly 1 critical service unhealthy (reproducing Issue #690)
             with pytest.raises(AssertionError) as exc_info:
                 assert all_healthy, fExpected all services healthy, but {len(unhealthy_critical)} critical services unhealthy"
-                assert all_healthy, fExpected all services healthy, but {len(unhealthy_critical)} critical services unhealthy"
+                assert all_healthy, fExpected all services healthy, but {len(unhealthy_critical)} critical services unhealthy""
+
 
             # Verify we reproduced the exact 1 critical services unhealthy error
             assert len(unhealthy_critical) == 1, fExpected 1 critical service unhealthy (Issue #690), got {len(unhealthy_critical)}"
@@ -119,8 +123,9 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
     @pytest.mark.mission_critical
     async def test_llm_manager_health_check_staging_failure(self):
-        "
-        "
+        """
+        ""
+
         EXPECTED TO FAIL - LLM MANAGER ISSUE
 
         Test reproduces: LLM manager health check failing in staging environment
@@ -131,7 +136,8 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 "
 "
         logger.info(=== REPRODUCING LLM MANAGER HEALTH CHECK FAILURE ===)"
-        logger.info(=== REPRODUCING LLM MANAGER HEALTH CHECK FAILURE ===)"
+        logger.info(=== REPRODUCING LLM MANAGER HEALTH CHECK FAILURE ===)""
+
 
         # Simulate staging LLM manager initialization issues
         self.app.state.llm_manager = None
@@ -144,12 +150,13 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
         # Test expects healthy LLM manager but gets unhealthy
         with pytest.raises(AssertionError):
-            assert result.status == ServiceStatus.HEALTHY, fLLM manager should be healthy: {result.message}
+            assert result.status == ServiceStatus.HEALTHY, "fLLM manager should be healthy: {result.message}"
 
         # Verify we get the exact failure pattern from staging
         assert result.status == ServiceStatus.UNHEALTHY
         assert LLM manager is None and no factory available in result.message"
-        assert LLM manager is None and no factory available in result.message"
+        assert LLM manager is None and no factory available in result.message""
+
 
         logger.info(" REPRODUCES: LLM manager factory initialization failure in staging)"
 
@@ -175,7 +182,7 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
             # Test expects optional Redis dependency but gets critical failure
             with pytest.raises(AssertionError):
-                assert result.status in [ServiceStatus.HEALTHY, ServiceStatus.DEGRADED], \
+                assert result.status in [ServiceStatus.HEALTHY, "ServiceStatus.DEGRADED], \"
                     fRedis should be optional in staging: {result.message}
 
             # Verify Redis is treated as critical (causing unnecessary failures)
@@ -198,7 +205,8 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
         logger.info(=== REPRODUCING STAGING 503 SERVICE UNAVAILABLE ===)
 
         staging_backend_url = https://api.staging.netrasystems.ai"
-        staging_backend_url = https://api.staging.netrasystems.ai"
+        staging_backend_url = https://api.staging.netrasystems.ai""
+
 
         async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as session:
             try:
@@ -206,18 +214,20 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
                 async with session.get(f"{staging_backend_url}/health) as resp:"
                     response_time = (time.time() - start_time) * 1000
 
-                    logger.error(fStaging health response: {resp.status} in {response_time:.1f}ms)
+                    logger.error(fStaging health response: {resp.status} in {response_time:.""1f""}ms)""
+
 
                     # Test expects 200 OK but staging returns 503
                     with pytest.raises(AssertionError):
-                        assert resp.status == 200, fStaging health endpoint should return 200, got {resp.status}
+                        assert resp.status == 200, "fStaging health endpoint should return 200, got {resp.status}"
 
                     # Verify we get the exact 503 error from staging
                     assert resp.status == 503, fExpected 503 Service Unavailable, got {resp.status}""
 
                     # Check if response time indicates timeout issues
                     if response_time > 5000:
-                        logger.error(f  WARNING: Slow response time {response_time:.1f}ms indicates timeout issues)
+                        logger.error(f  WARNING: Slow response time {response_time:.""1f""}ms indicates timeout issues)""
+
 
                     logger.info(f REPRODUCES ISSUE #690: Staging backend returns 503 Service Unavailable)
 
@@ -228,12 +238,14 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
             except Exception as e:
                 logger.error(fStaging health check failed: {e})
                 pytest.fail(fStaging health check error: {e})"
-                pytest.fail(fStaging health check error: {e})"
+                pytest.fail(fStaging health check error: {e})""
+
 
     @pytest.mark.mission_critical
     async def test_validate_startup_health_with_critical_failures(self):
-    "
-    "
+        """
+    ""
+
         EXPECTED TO FAIL - STARTUP VALIDATION FAILURE
 
         Test reproduces: validate_startup_health() failing with critical services
@@ -266,7 +278,8 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
     @pytest.mark.mission_critical
     async def test_health_check_timeout_configuration_staging_specific(self):
-    ""
+    """
+
         EXPECTED TO FAIL - TIMEOUT CONFIGURATION ISSUE
 
         Test reproduces: Health checks timing out due to inappropriate timeouts for staging
@@ -289,7 +302,7 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
         # Simulate staging database response time (slower than local)
         async def slow_execute(query):
-            await asyncio.sleep(0.5)  # 500ms latency
+            await asyncio.sleep(0.5)  # ""500ms"" latency
             mock_result = Mock()
             mock_result.scalar.return_value = 1
             return mock_result
@@ -304,7 +317,8 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
         result = await checker.check_database()
         total_time = time.time() - start_time
 
-        logger.info(fDatabase health check took {total_time:.3f}s)
+        logger.info(fDatabase health check took {total_time:.""3f""}s)""
+
         logger.info(fDatabase health: {result.status} - {result.message})
 
         # Test expects fast health check but staging has higher latency
@@ -321,7 +335,8 @@ class Issue690Phase7HealthFailureReproductionTests(SSotBaseTestCase):
 
 @pytest.mark.asyncio
 class Issue690RemedationStrategyValidationTests:
-    ""
+    """
+
     Tests to validate remediation strategies for Issue #690.
 
     These tests should PASS after remediation is implemented.
@@ -329,8 +344,9 @@ class Issue690RemedationStrategyValidationTests:
 
     @pytest.mark.mission_critical
     async def test_environment_aware_health_checks_proposed_fix(self):
-        "
-        "
+        """
+        ""
+
         SHOULD PASS AFTER REMEDIATION
 
         Test validates: Environment-aware health check configuration
@@ -339,7 +355,8 @@ class Issue690RemedationStrategyValidationTests:
 "
 "
         logger.info(=== VALIDATING ENVIRONMENT-AWARE HEALTH CHECKS ===)"
-        logger.info(=== VALIDATING ENVIRONMENT-AWARE HEALTH CHECKS ===)"
+        logger.info(=== VALIDATING ENVIRONMENT-AWARE HEALTH CHECKS ===)""
+
 
         # This test validates the proposed remediation strategy
         # In staging, some services should be optional that are critical in production
@@ -350,7 +367,8 @@ class Issue690RemedationStrategyValidationTests:
         # Proposed: Environment-specific service criticality
         assert 'llm_manager' in staging_optional_services, \
             PROPOSED FIX: LLM manager should be optional in staging environment"
-            PROPOSED FIX: LLM manager should be optional in staging environment"
+            PROPOSED FIX: LLM manager should be optional in staging environment""
+
         assert 'redis' in staging_optional_services, \
             PROPOSED FIX: Redis should be optional in staging environment
         assert 'database' in staging_critical_services, \
@@ -360,8 +378,9 @@ class Issue690RemedationStrategyValidationTests:
 
     @pytest.mark.mission_critical
     async def test_graceful_degradation_proposed_fix(self):
-        "
-        "
+        """
+        ""
+
         SHOULD PASS AFTER REMEDIATION
 
         Test validates: Graceful degradation for optional service failures
@@ -370,7 +389,8 @@ class Issue690RemedationStrategyValidationTests:
 "
 "
         logger.info(=== VALIDATING GRACEFUL DEGRADATION STRATEGY ===)"
-        logger.info(=== VALIDATING GRACEFUL DEGRADATION STRATEGY ===)"
+        logger.info(=== VALIDATING GRACEFUL DEGRADATION STRATEGY ===)""
+
 
         # Proposed remediation: Return 'degraded' status for optional service failures
         proposed_responses = {
@@ -378,7 +398,7 @@ class Issue690RemedationStrategyValidationTests:
             database: {status: "healthy},"
             redis: {status: degraded, "required: False},  # Optional"
             clickhouse": {status: degraded, required: False},  # Optional"
-            llm_manager": {"status: degraded, required: False},  # Optional in staging
+            llm_manager": {status: degraded, required: False},  # Optional in staging"
             overall_status: "degraded,  # Not unhealthy"
             traffic_routing": allow  # Still serve traffic"
         }
@@ -400,7 +420,7 @@ if __name__ == __main__:
     async def main():
         print(=== ISSUE #690 PHASE 7 HEALTH FAILURE REPRODUCTION ===")"
         print(CRITICAL: These tests reproduce the staging deployment failures)
-        print("Expected: Tests should FAIL, demonstrating the issues\n")
+        print("Expected: Tests should FAIL, demonstrating the issues\n)"
 
         # Run a simple reproduction test
         test_instance = Issue690Phase7HealthFailureReproductionTests()
@@ -409,14 +429,16 @@ if __name__ == __main__:
         try:
             await test_instance.test_phase7_health_validation_returns_1_critical_service_unhealthy()
             print( UNEXPECTED: Test passed - issue may be resolved)"
-            print( UNEXPECTED: Test passed - issue may be resolved)"
+            print( UNEXPECTED: Test passed - issue may be resolved)""
+
             return 0
         except AssertionError as e:
-            print(f" REPRODUCED ISSUE #690: {e})")
+            print(f" REPRODUCED ISSUE #690: {e}))"
             return 1
         except Exception as e:
             print(f ERROR: Unexpected failure: {e})"
-            print(f ERROR: Unexpected failure: {e})"
+            print(f ERROR: Unexpected failure: {e})""
+
             return 1
 
     import asyncio

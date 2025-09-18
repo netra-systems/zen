@@ -1,5 +1,5 @@
 """
-"""
+
 Test Configuration Manager SSOT Violations for Issue #683 (Mission Critical)
 
 This mission critical test reproduces SSOT violations in configuration management
@@ -7,17 +7,18 @@ that contribute to staging environment configuration validation failures. These
 violations break the Single Source of Truth principle and cause configuration
 inconsistencies.
 
-Business Impact: Protects $500K+ ARR staging validation pipeline
+Business Impact: Protects $500K+ plus ARR staging validation pipeline
 Priority: P0 - Mission Critical
 
 Issue #683: Staging environment configuration validation failures
 Root Cause: SSOT violations in configuration management causing inconsistent state
 Test Strategy: Detect SSOT violations that contribute to configuration validation failures
 "
-"
+""
+
 
 """
-"""
+
 import pytest
 import os
 import importlib
@@ -28,13 +29,15 @@ from shared.isolated_environment import IsolatedEnvironment
 
 class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
     "
-    "
+    ""
+
     Mission critical tests to detect SSOT violations in configuration management.
 
     These tests identify SSOT violations that contribute to staging configuration
     validation failures by creating inconsistent configuration state.
 "
-"
+""
+
 
     def setup_method(self, method):
         "Set up mission critical test environment for SSOT violation detection."
@@ -44,7 +47,7 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
         self.original_env = self.env.copy()
 
     def teardown_method(self, method):
-        ""Clean up mission critical test environment.
+        ""Clean up mission critical test environment."
         # Restore original environment
         for key in list(self.env._env.keys()):
             if key not in self.original_env:
@@ -54,7 +57,8 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
         super().teardown_method(method)
 
     def test_multiple_config_managers_ssot_violation(self):
-    ""
+    """
+
         CRITICAL SSOT VIOLATION: Test detection of multiple configuration manager instances.
 
         This detects the critical SSOT violation where multiple configuration managers
@@ -95,7 +99,8 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
             for module_name, attr_name, attr in config_manager_instances:
                 manager_type = type(attr).__name__
                 unique_managers.add(f{module_name}.{attr_name}:{manager_type})"
-                unique_managers.add(f{module_name}.{attr_name}:{manager_type})"
+                unique_managers.add(f{module_name}.{attr_name}:{manager_type})""
+
 
             if len(unique_managers) > 1:
                 ssot_violations.append(f"Multiple configuration manager instances detected: {unique_managers})"
@@ -161,8 +166,9 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
                       f"This causes inconsistent secret configuration in staging: {ssot_violations})"
 
     def test_configuration_schema_duplication_ssot_violation(self):
-        "
-        "
+        """
+        ""
+
         CRITICAL SSOT VIOLATION: Test detection of duplicate configuration schema definitions.
 
         This detects SSOT violations where configuration schemas are duplicated,
@@ -225,14 +231,16 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
                       f"This causes inconsistent validation in staging environment: {ssot_violations})"
 
     def test_environment_access_ssot_violations(self):
-        "
-        "
+        """
+        ""
+
         CRITICAL SSOT VIOLATION: Test detection of direct os.environ access bypassing SSOT.
 
         This detects SSOT violations where configuration modules directly access os.environ
         instead of using IsolatedEnvironment, causing inconsistent environment state.
 "
-"
+""
+
         import ast
         import os as os_module
         from pathlib import Path
@@ -277,7 +285,8 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
                                     node.value.value.id == 'os' and
                                     node.value.attr == 'environ'):
                                     self.violations.append(Direct os.environ subscript access)"
-                                    self.violations.append(Direct os.environ subscript access)"
+                                    self.violations.append(Direct os.environ subscript access)""
+
                                 self.generic_visit(node)
 
                         visitor = EnvironAccessVisitor()
@@ -309,7 +318,8 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
                         for i, line in enumerate(lines):
                             if ('os.environ[' in line or 'os.environ.get(' in line) and not line.strip().startswith('#'):
                                 ssot_violations.append(f{config_file}:Line {i+1}: Direct os.environ access)"
-                                ssot_violations.append(f{config_file}:Line {i+1}: Direct os.environ access)"
+                                ssot_violations.append(f{config_file}:Line {i+1}: Direct os.environ access)""
+
 
                 except Exception:
                     continue
@@ -319,7 +329,8 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
                       fThis causes inconsistent environment state in staging: {ssot_violations})
 
     def test_configuration_loader_ssot_violations(self):
-    ""
+    """
+
         CRITICAL SSOT VIOLATION: Test detection of multiple configuration loader implementations.
 
         This detects SSOT violations where multiple configuration loaders exist,
@@ -433,8 +444,9 @@ class ConfigManagerSsotViolationsIssue683Tests(SSotBaseTestCase):
                       f"This causes inconsistent secret management in staging: {ssot_violations})"
 
     def test_configuration_validation_ssot_violations(self):
-        "
-        "
+        """
+        ""
+
         CRITICAL SSOT VIOLATION: Test detection of multiple configuration validator implementations.
 
         This detects SSOT violations where multiple configuration validators exist,

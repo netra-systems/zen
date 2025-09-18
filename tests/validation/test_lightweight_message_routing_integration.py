@@ -210,7 +210,7 @@ class TestLightweightMessageRoutingIntegration:
             actual_pattern = event_types[i:i+5]
             assert actual_pattern == expected_pattern
 
-        print(f"✅ Single User Workflow: {len(traces)} events delivered in correct order")
+        print(f"CHECK Single User Workflow: {len(traces)} events delivered in correct order")
 
     @pytest.mark.asyncio
     async def test_multi_user_isolation(self, integration_harness):
@@ -247,7 +247,7 @@ class TestLightweightMessageRoutingIntegration:
             assert stats['active_connections'] == 1  # Only this user's connection
 
         total_traces = sum(len(traces) for traces in all_traces)
-        print(f"✅ Multi-User Isolation: {total_traces} events across {len(users)} users, no cross-contamination")
+        print(f"CHECK Multi-User Isolation: {total_traces} events across {len(users)} users, no cross-contamination")
 
     @pytest.mark.asyncio
     async def test_concurrent_load_performance(self, integration_harness):
@@ -284,7 +284,7 @@ class TestLightweightMessageRoutingIntegration:
         total_errors = sum(user.errors_encountered for user in users)
         assert total_errors == 0, f"Errors under load: {total_errors}"
 
-        print(f"✅ Concurrent Load Performance: {total_messages} messages in {total_time:.2f}s ({messages_per_second:.1f} msg/s)")
+        print(f"CHECK Concurrent Load Performance: {total_messages} messages in {total_time:.2f}s ({messages_per_second:.1f} msg/s)")
 
     @pytest.mark.asyncio
     async def test_message_ordering_consistency(self, integration_harness):
@@ -307,7 +307,7 @@ class TestLightweightMessageRoutingIntegration:
         message_ids = [trace.message_id for trace in traces]
         assert len(message_ids) == len(set(message_ids)), "Duplicate message IDs detected"
 
-        print(f"✅ Message Ordering Consistency: {len(traces)} messages in correct sequence, max delivery {max_delivery_time:.1f}ms")
+        print(f"CHECK Message Ordering Consistency: {len(traces)} messages in correct sequence, max delivery {max_delivery_time:.1f}ms")
 
     @pytest.mark.asyncio
     async def test_routing_strategy_variations(self, integration_harness):
@@ -345,7 +345,7 @@ class TestLightweightMessageRoutingIntegration:
             connections = await user.router.route_message(message, context)
             assert len(connections) >= 0, f"Routing failed for strategy {strategy.value}"
 
-        print(f"✅ Routing Strategy Variations: All {len(strategies)} strategies functional")
+        print(f"CHECK Routing Strategy Variations: All {len(strategies)} strategies functional")
 
     def test_factory_pattern_isolation_verification(self, integration_harness):
         """Test factory pattern prevents shared state"""
@@ -366,7 +366,7 @@ class TestLightweightMessageRoutingIntegration:
                     assert context1 is not context2, f"User contexts {i} and {j} are shared"
                     assert context1.get('user_id') != context2.get('user_id'), f"User IDs not isolated"
 
-        print(f"✅ Factory Pattern Isolation: {len(routers)} routers with isolated state")
+        print(f"CHECK Factory Pattern Isolation: {len(routers)} routers with isolated state")
 
     @pytest.mark.asyncio
     async def test_error_handling_and_recovery(self, integration_harness):
@@ -403,7 +403,7 @@ class TestLightweightMessageRoutingIntegration:
         stats = user.router.get_stats()
         assert 'routing_errors' in stats
 
-        print("✅ Error Handling and Recovery: Router handles invalid input gracefully")
+        print("CHECK Error Handling and Recovery: Router handles invalid input gracefully")
 
     def test_ssot_metadata_validation(self):
         """Test SSOT metadata and compliance"""
@@ -420,7 +420,7 @@ class TestLightweightMessageRoutingIntegration:
         # Validate issue tracking
         assert SSOT_INFO['issue'].startswith('#'), "Issue number not properly formatted"
 
-        print(f"✅ SSOT Metadata Validation: All {len(required_fields)} required fields present")
+        print(f"CHECK SSOT Metadata Validation: All {len(required_fields)} required fields present")
 
 
 def test_integration_summary_report():
@@ -461,7 +461,7 @@ def test_integration_summary_report():
     assert summary['error_rate'] == 0.0
     assert summary['ssot_compliance'] is True
 
-    print("✅ Integration Summary Report:")
+    print("CHECK Integration Summary Report:")
     print(f"   Users tested: {summary['total_users_tested']}")
     print(f"   Messages routed: {summary['total_messages_routed']}")
     print(f"   Error rate: {summary['error_rate']:.1%}")

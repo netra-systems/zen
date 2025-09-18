@@ -3,7 +3,7 @@ Golden Path E2E Test Suite: Complete User Journey Validation (Issue #1176)
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
-- Business Goal: Ensure complete Golden Path: login → get AI responses works end-to-end
+- Business Goal: Ensure complete Golden Path: login -> get AI responses works end-to-end
 - Value Impact: Complete user journey validation covers entire business value chain
 - Strategic Impact: Core platform functionality ($500K+ ARR at risk)
 
@@ -47,7 +47,7 @@ class GoldenPathCompleteUserJourneyTests(BaseE2ETest):
         prevent the complete user journey from working despite individual components
         working correctly in isolation.
         
-        Golden Path: User opens app → logs in → sends message → gets AI response
+        Golden Path: User opens app -> logs in -> sends message -> gets AI response
         """
         # STEP 1: User Authentication (should work but integration issues occur)
         auth_result = await self._authenticate_user_in_staging()

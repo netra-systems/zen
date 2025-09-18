@@ -60,7 +60,7 @@ class WebSocketAuthenticationConsolidationTests(SSotAsyncTestCase):
         assert connection_id is not None, 'WebSocket connection failed'
         assert self.test_client_id in connection_id, "Connection ID doesn't contain client ID"
         assert self.websocket_auth.user_id == self.test_user_id, 'User ID not set in compatibility layer'
-        logger.info('✅ WebSocket authenticator properly delegates to SSOT implementation')
+        logger.info('CHECK WebSocket authenticator properly delegates to SSOT implementation')
 
     async def test_unified_websocket_authenticator_core_functionality(self):
         """
@@ -72,7 +72,7 @@ class WebSocketAuthenticationConsolidationTests(SSotAsyncTestCase):
         assert hasattr(self.unified_auth, 'authenticate_connection'), 'Missing authenticate_connection method'
         assert hasattr(self.unified_auth, 'validate_websocket_token'), 'Missing validate_websocket_token method'
         assert callable(self.unified_auth.authenticate_connection), 'authenticate_connection not callable'
-        logger.info('✅ Unified WebSocket authenticator core functionality verified')
+        logger.info('CHECK Unified WebSocket authenticator core functionality verified')
 
     async def test_websocket_auth_consistency_across_connection_types(self):
         """
@@ -89,7 +89,7 @@ class WebSocketAuthenticationConsolidationTests(SSotAsyncTestCase):
             assert ssot_result.success is True
             assert ssot_result.user_id == self.test_user_id
         assert compat_connection is not None, 'Compatibility layer connection failed'
-        logger.info('✅ WebSocket authentication consistency verified across connection types')
+        logger.info('CHECK WebSocket authentication consistency verified across connection types')
 
     async def test_websocket_jwt_validation_integration(self):
         """
@@ -106,7 +106,7 @@ class WebSocketAuthenticationConsolidationTests(SSotAsyncTestCase):
                 if result:
                     assert result.get('valid') is True
                     assert result.get('user_id') == self.test_user_id
-        logger.info('✅ WebSocket JWT validation integration verified')
+        logger.info('CHECK WebSocket JWT validation integration verified')
 
     async def test_websocket_auth_error_handling_consolidation(self):
         """
@@ -125,7 +125,7 @@ class WebSocketAuthenticationConsolidationTests(SSotAsyncTestCase):
             assert result.success is False
             assert result.error == 'invalid_token'
             assert result.user_id is None
-        logger.info('✅ WebSocket authentication error handling consolidation verified')
+        logger.info('CHECK WebSocket authentication error handling consolidation verified')
 
     async def test_websocket_user_context_integration(self):
         """
@@ -141,7 +141,7 @@ class WebSocketAuthenticationConsolidationTests(SSotAsyncTestCase):
         connection_id = await self.websocket_auth.connect(self.test_client_id, self.test_user_id)
         assert connection_id is not None
         assert self.websocket_auth.user_id == self.test_user_id
-        logger.info('✅ WebSocket user context integration verified')
+        logger.info('CHECK WebSocket user context integration verified')
 
     async def test_websocket_auth_performance_consolidation(self):
         """
@@ -161,7 +161,7 @@ class WebSocketAuthenticationConsolidationTests(SSotAsyncTestCase):
             assert connection_id is not None, f'Connection {i} failed'
         avg_connection_time = sum(connection_times) / len(connection_times)
         assert avg_connection_time < 0.1, f'WebSocket connections too slow: {avg_connection_time}s average'
-        logger.info(f'✅ WebSocket authentication performance verified: {avg_connection_time:.3f}s average')
+        logger.info(f'CHECK WebSocket authentication performance verified: {avg_connection_time:.3f}s average')
 
     async def test_websocket_auth_session_management(self):
         """
@@ -175,7 +175,7 @@ class WebSocketAuthenticationConsolidationTests(SSotAsyncTestCase):
         assert self.websocket_auth.user_id == self.test_user_id
         await self.websocket_auth.disconnect(self.test_client_id)
         assert self.websocket_auth.user_id is None
-        logger.info('✅ WebSocket authentication session management verified')
+        logger.info('CHECK WebSocket authentication session management verified')
 
 class WebSocketAuthenticationFragmentationDetectionTests(SSotAsyncTestCase):
     """
@@ -212,7 +212,7 @@ class WebSocketAuthenticationFragmentationDetectionTests(SSotAsyncTestCase):
         assert 'ssot_authenticator' in websocket_auth_classes, 'SSOT authenticator not found'
         compat_auth = websocket_auth_classes['compatibility_authenticator']()
         assert hasattr(compat_auth, '_ssot_authenticator'), 'Compatibility layer missing SSOT delegation'
-        logger.info('✅ WebSocket authentication implementation structure verified')
+        logger.info('CHECK WebSocket authentication implementation structure verified')
 
     async def test_websocket_auth_interface_consistency(self):
         """
@@ -231,7 +231,7 @@ class WebSocketAuthenticationFragmentationDetectionTests(SSotAsyncTestCase):
         for method_name in ssot_required_methods:
             if hasattr(ssot_auth, method_name):
                 assert callable(getattr(ssot_auth, method_name)), f'SSOT {method_name} not callable'
-        logger.info('✅ WebSocket authentication interface consistency verified')
+        logger.info('CHECK WebSocket authentication interface consistency verified')
 
     async def test_websocket_auth_configuration_consolidation(self):
         """
@@ -247,7 +247,7 @@ class WebSocketAuthenticationFragmentationDetectionTests(SSotAsyncTestCase):
         for config_key in websocket_config_keys:
             value = env.get(config_key)
             logger.debug(f'WebSocket config {config_key}: {value}')
-        logger.info('✅ WebSocket authentication configuration consolidation verified')
+        logger.info('CHECK WebSocket authentication configuration consolidation verified')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

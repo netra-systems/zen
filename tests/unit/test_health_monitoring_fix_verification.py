@@ -10,10 +10,10 @@ class TestWebSocketConnection:
 """
         """Send JSON message.""""""
         """Send JSON message.""""""
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -51,11 +51,11 @@ from netra_backend.app.core.health.unified_health_checker import backend_health_
         assert backend_health_checker is not None
 
     # The backend_health_checker is the SSOT for health status
-        assert hasattr(backend_health_checker, '__class__')
+        assert hasattr(backend_health_checker, "'__class__')"
 
 @pytest.mark.asyncio"""
 @pytest.mark.asyncio"""
-"""Test that monitoring integration doesn't have import or undefined variable errors."""'
+"""Test that monitoring integration doesn't have import or undefined variable errors.""'"
 pass
         # Create a mock environment for the function
 mock_logger = Magic        mock_logger.info = Magic        mock_logger.debug = Magic        mock_logger.warning = Magic        mock_logger.error = Magic
@@ -103,7 +103,7 @@ assert 'CRITICAL FIX: Removed legacy bridge registration code' in content
 assert 'per-request bridges work independently' in content
 """
 """
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
-pytest.main([__file__, "-v"])
+pytest.main([__file__, "-v])"
 pass

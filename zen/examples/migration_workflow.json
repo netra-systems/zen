@@ -1,0 +1,133 @@
+{
+  "// Description": "Database and code migration workflow with safety checks and rollback planning",
+  "// Use Case": "Schema migrations, data migrations, code refactoring, and system upgrades",
+  "// Best Practices": "Emphasizes safety, validation, and rollback planning throughout the process",
+
+  "instances": [
+    {
+      "name": "migration-planner",
+      "command": "/analyze migration requirements and create comprehensive plan; Assess current state, define target state, identify risks and dependencies; Create step-by-step migration strategy with rollback procedures",
+      "description": "Creates detailed migration plan with risk assessment and rollback strategy",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 15000,
+      "allowed_tools": ["Read", "Glob", "Grep", "Write", "Task"],
+      "session_id": "migration_planning_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "/clear",
+        "Set context: I am planning a comprehensive migration with safety and rollback considerations",
+        "Focus: Current state analysis, risk assessment, step-by-step plan, rollback procedures"
+      ]
+    },
+    {
+      "name": "backup-validator",
+      "command": "/create and validate comprehensive backups; Verify backup integrity and completeness; Test restore procedures; Document backup and restore processes for rollback scenarios",
+      "description": "Ensures reliable backup and restore capabilities",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 10000,
+      "allowed_tools": ["Bash", "Read", "Write", "Task"],
+      "session_id": "backup_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am creating and validating backups for safe migration",
+        "Focus: Data backup, schema backup, configuration backup, restore testing"
+      ]
+    },
+    {
+      "name": "migration-executor",
+      "command": "/execute migration steps carefully; Apply schema changes, migrate data, update configurations; Monitor progress and validate each step; Implement checkpoints for safe rollback points",
+      "description": "Executes migration steps with careful monitoring and validation",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 18000,
+      "allowed_tools": ["Bash", "Read", "Write", "Edit", "Task"],
+      "session_id": "migration_execution_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am executing migration steps with careful monitoring",
+        "Safety: Validate each step, create checkpoints, monitor for errors"
+      ]
+    },
+    {
+      "name": "validation-tester",
+      "command": "/validate migration results comprehensively; Test data integrity, functionality, and performance; Compare pre and post-migration states; Identify any issues or inconsistencies",
+      "description": "Performs comprehensive validation of migration results",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 12000,
+      "allowed_tools": ["Bash", "Read", "Write", "Grep", "Task"],
+      "session_id": "validation_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am validating migration results and testing functionality",
+        "Focus: Data integrity, functionality tests, performance validation, comparison analysis"
+      ]
+    },
+    {
+      "name": "rollback-preparer",
+      "command": "/prepare rollback procedures; Create detailed rollback scripts and documentation; Test rollback procedures in safe environment; Document emergency rollback processes",
+      "description": "Prepares and validates rollback procedures for emergency scenarios",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 10000,
+      "allowed_tools": ["Read", "Write", "Edit", "Bash", "Task"],
+      "session_id": "rollback_preparation_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am preparing rollback procedures for migration safety",
+        "Focus: Rollback scripts, emergency procedures, testing rollback process"
+      ]
+    },
+    {
+      "name": "documentation-recorder",
+      "command": "/document complete migration process; Record all changes, decisions, and outcomes; Create migration log with timestamps and validation results; Update system documentation",
+      "description": "Documents the complete migration process and outcomes",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 12000,
+      "allowed_tools": ["Read", "Write", "Edit", "MultiEdit", "Task"],
+      "session_id": "documentation_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am documenting the complete migration process",
+        "Include: Change log, validation results, lessons learned, updated documentation"
+      ]
+    }
+  ],
+
+  "// Migration Safety Guidelines": {
+    "backup_requirements": "Full database backup, configuration backup, code backup",
+    "validation_checkpoints": "After each major step, before final commit",
+    "rollback_triggers": "Data loss, functionality failure, performance degradation >50%",
+    "testing_requirements": "Full functionality test, performance test, integration test"
+  },
+
+  "// Risk Management": {
+    "risk_levels": "Low: Configuration changes, Medium: Schema changes, High: Data transformations",
+    "safety_measures": "Staged rollout, canary testing, monitoring alerts",
+    "rollback_timeframes": "Emergency: <15min, Planned: <2hrs, Complex: <24hrs",
+    "approval_gates": "Planning review, backup validation, execution approval, final sign-off"
+  },
+
+  "// Configuration Notes": {
+    "execution_model": "Sequential with validation gates between phases",
+    "safety_first": "Every step includes validation and rollback preparation",
+    "documentation_focus": "Comprehensive logging for compliance and future reference",
+    "token_allocation": "Execution gets most tokens, planning and documentation get substantial allocation",
+    "best_practices": [
+      "Always create and test backups before starting",
+      "Execute migrations in small, reversible steps",
+      "Validate each step before proceeding",
+      "Prepare rollback procedures before execution",
+      "Document everything for future reference and compliance"
+    ]
+  }
+}

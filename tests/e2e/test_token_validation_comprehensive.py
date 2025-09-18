@@ -56,7 +56,7 @@ class TestTokenValidationComprehensive:
         try:
         self.real_jwt_token = create_real_jwt_token( )
         self.test_user_id,
-        ["read", "write", "agent_execute"]
+        ["read", "write", "agent_execute]"
         
         self.real_jwt_available = True
         except Exception as e:
@@ -91,12 +91,12 @@ class TestTokenValidationComprehensive:
         print("")
 
         except ImportError:
-        print("WARNING: Security monitoring not available in this environment")
+        print("WARNING: Security monitoring not available in this environment)"
 
     def test_real_jwt_token_structure(self):
         """Test that real JWT tokens have proper structure."""
         if not self.real_jwt_available:
-        pytest.skip("Real JWT creation not available in this environment")
+        pytest.skip("Real JWT creation not available in this environment)"
 
         # JWT tokens should have 3 segments separated by dots
         segments = self.real_jwt_token.split('.')
@@ -118,11 +118,11 @@ class TestTokenValidationComprehensive:
         jwt_manager_real = create_mock_jwt_manager(use_real_jwt=True)
 
     # Generate a token
-        token = jwt_manager_real.generate_token(self.test_user_id, ["admin"])
+        token = jwt_manager_real.generate_token(self.test_user_id, ["admin])"
 
     # Verify token structure
-        if token.startswith("mock_"):
-        print("WARNING: JWT manager using mock tokens (JWT library not available)")
+        if token.startswith("mock_):"
+        print("WARNING: JWT manager using mock tokens (JWT library not available))"
         else:
         segments = token.split('.')
         assert len(segments) == 3, "Real JWT should have 3 segments"
@@ -150,10 +150,10 @@ class TestTokenValidationComprehensive:
         result = handler.validate_token(mock_token)
         assert result is None, "Mock token should be rejected by JWT handler"
 
-        print("PASS: Auth service correctly rejects mock tokens")
+        print("PASS: Auth service correctly rejects mock tokens)"
 
         except ImportError:
-        print("WARNING: Auth service not available in test environment")
+        print("WARNING: Auth service not available in test environment)"
 
     def test_websocket_auth_validation(self):
         """Test WebSocket authentication with real vs mock tokens."""
@@ -171,7 +171,7 @@ class TestTokenValidationComprehensive:
 
         # Note: We can't fully test token extraction without a real WebSocket connection,'
         # but we've validated the integration points exist'
-        print("PASS: WebSocket authenticator module loaded and configured")
+        print("PASS: WebSocket authenticator module loaded and configured)"
 
         except ImportError as e:
         print("")
@@ -180,10 +180,10 @@ class TestTokenValidationComprehensive:
         """Test environment-based token validation."""
     # Test that environment variables control token validation
         environments = { }
-        "production": False,  # Should reject mock tokens
-        "staging": False,     # Should reject mock tokens
-        "development": True,  # May allow mock tokens
-        "test": True,         # May allow mock tokens
+        "production: False,  # Should reject mock tokens"
+        "staging: False,     # Should reject mock tokens"
+        "development: True,  # May allow mock tokens"
+        "test: True,         # May allow mock tokens"
     
 
         for env, should_allow_mock in environments.items():
@@ -191,7 +191,7 @@ class TestTokenValidationComprehensive:
         # but we document the expected behavior
         print("")
 
-        print("PASS: Environment-based validation rules documented")
+        print("PASS: Environment-based validation rules documented)"
 
     def test_test_framework_fixtures(self):
         """Test that test framework fixtures work correctly."""
@@ -203,15 +203,15 @@ class TestTokenValidationComprehensive:
 
     # Test with real JWT tokens
         real_token = create_test_user_token(self.test_user_id, use_real_jwt=True)
-        if real_token.token.startswith("mock_"):
-        print("WARNING: Real JWT creation unavailable, using mock fallback")
+        if real_token.token.startswith("mock_):"
+        print("WARNING: Real JWT creation unavailable, using mock fallback)"
         else:
         segments = real_token.token.split('.')
         assert len(segments) == 3, "Real JWT should have 3 segments"
         print("")
 
     def test_auth_client_core_security(self):
-        """Test that auth_client_core doesn't create mock tokens."""'
+        """Test that auth_client_core doesn't create mock tokens.""'"
         try:
         from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
@@ -220,13 +220,13 @@ class TestTokenValidationComprehensive:
 
         # Check that mock token creation is not accessible
         if hasattr(client, '_create_mock_token'):
-        print("WARNING: WARNING: _create_mock_token method still exists in auth_client_core")
+        print("WARNING: WARNING: _create_mock_token method still exists in auth_client_core)"
             # In production, this should raise an error
         else:
-        print("PASS: Mock token creation method not found in auth_client_core")
+        print("PASS: Mock token creation method not found in auth_client_core)"
 
         except ImportError:
-        print("WARNING: Auth client core not available in test environment")
+        print("WARNING: Auth client core not available in test environment)"
 
     def test_security_monitoring_integration(self):
         """Test security monitoring integration."""
@@ -243,13 +243,13 @@ class TestTokenValidationComprehensive:
 
         # Check metrics
         metrics = monitor.get_security_metrics()
-        assert "total_events" in metrics
-        assert "mock_tokens_detected" in metrics
+        assert "total_events in metrics"
+        assert "mock_tokens_detected in metrics"
 
         print("")
 
         except ImportError:
-        print("WARNING: Security monitoring not available in test environment")
+        print("WARNING: Security monitoring not available in test environment)"
 
     def test_end_to_end_token_flow(self):
         """Test complete token flow from creation to validation."""
@@ -257,7 +257,7 @@ class TestTokenValidationComprehensive:
         === End-to-End Token Flow Test ===")"
 
     # Step 1: Create tokens
-        print("1. Creating test tokens...")
+        print("1. Creating test tokens...)"
         mock_token = create_test_user_token(self.test_user_id, use_real_jwt=False)
         real_token = create_test_user_token(self.test_user_id, use_real_jwt=True)
 
@@ -265,33 +265,33 @@ class TestTokenValidationComprehensive:
         print("")
 
     # Step 2: Validate token structures
-        print("2. Validating token structures...")
+        print("2. Validating token structures...)"
         assert mock_token.token.startswith("mock_"), "Mock token should start with 'mock_'"
 
-        if not real_token.token.startswith("mock_"):
+        if not real_token.token.startswith("mock_):"
         segments = real_token.token.split('.')
         assert len(segments) == 3, "Real JWT should have 3 segments"
         print("")
         else:
-        print("   WARNING: Real JWT unavailable, using mock fallback")
+        print("   WARNING: Real JWT unavailable, using mock fallback)"
 
             # Step 3: Test security detection
-        print("3. Testing security detection...")
+        print("3. Testing security detection...)"
         try:
         from netra_backend.app.core.security_monitoring import SecurityMonitoringManager
         monitor = SecurityMonitoringManager()
 
                 # Mock token should be detected
         assert monitor.detect_mock_token(mock_token.token), "Mock token not detected"
-        print(f"   PASS: Mock token correctly identified as security risk")
+        print(f"   PASS: Mock token correctly identified as security risk)"
 
                 # Real token should not be detected as mock
-        if not real_token.token.startswith("mock_"):
+        if not real_token.token.startswith("mock_):"
         assert not monitor.detect_mock_token(real_token.token), "Real token incorrectly flagged"
-        print(f"   PASS: Real JWT token passed security check")
+        print(f"   PASS: Real JWT token passed security check)"
 
         except ImportError:
-        print("   WARNING: Security monitoring not available")
+        print("   WARNING: Security monitoring not available)"
 
         print("")
         PASS: End-to-end token flow test completed successfully")"
@@ -301,17 +301,17 @@ class TestTokenValidationComprehensive:
         pass
         print("")
          + ="*60)"
-        print("COMPREHENSIVE TOKEN VALIDATION TEST SUMMARY")
-        print("="*60)
+        print("COMPREHENSIVE TOKEN VALIDATION TEST SUMMARY)"
+        print("=*60)"
 
         results = { }
-        "Mock Token Detection": "PASS",
-        "Real JWT Creation": "PASS" if self.real_jwt_available else "N/A",
-        "Security Monitoring": "PASS",
-        "Environment Validation": "PASS",
-        "Test Framework": "PASS",
-        "WebSocket Auth": "PASS",
-        "Auth Service": "PASS",
+        "Mock Token Detection": "PASS,"
+        "Real JWT Creation": "PASS" if self.real_jwt_available else "N/A,"
+        "Security Monitoring": "PASS,"
+        "Environment Validation": "PASS,"
+        "Test Framework": "PASS,"
+        "WebSocket Auth": "PASS,"
+        "Auth Service": "PASS,"
         "End-to-End Flow": "PASS"
     
 
@@ -320,14 +320,14 @@ class TestTokenValidationComprehensive:
 
         print("")
          + ="*60)"
-        print("SECURITY IMPLEMENTATION STATUS: COMPLETE")
-        print("="*60)
+        print("SECURITY IMPLEMENTATION STATUS: COMPLETE)"
+        print("=*60)"
 
         # All critical components should be working
         critical_components = [ ]
-        "Mock Token Detection",
-        "Security Monitoring",
-        "Environment Validation",
+        "Mock Token Detection,"
+        "Security Monitoring,"
+        "Environment Validation,"
         "Test Framework"
         
 
@@ -338,7 +338,7 @@ class TestTokenValidationComprehensive:
         SUCCESS: All critical security components validated successfully!")"
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
                 # Run the test suite
         import pytest
-        pytest.main([__file__, "-v", "-s"])
+        pytest.main([__file__, "-v", "-s])"

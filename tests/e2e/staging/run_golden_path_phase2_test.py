@@ -50,12 +50,12 @@ def validate_environment():
         issues.append("Staging environment not available")
     
     if issues:
-        print("❌ Environment validation failed:")
+        print("X Environment validation failed:")
         for issue in issues:
             print(f"   • {issue}")
         return False
     
-    print("✅ Environment validation passed")
+    print("CHECK Environment validation passed")
     return True
 
 
@@ -93,9 +93,9 @@ def run_test_command(test_pattern: str, description: str):
         print(result.stdout)
 
     if result.returncode == 0:
-        print(f"✅ {description} PASSED ({duration:.1f}s)")
+        print(f"CHECK {description} PASSED ({duration:.1f}s)")
     else:
-        print(f"❌ {description} FAILED ({duration:.1f}s)")
+        print(f"X {description} FAILED ({duration:.1f}s)")
 
     return result.returncode == 0
 
@@ -139,7 +139,7 @@ def run_full_test_suite():
         results.append((description, success))
         
         if not success:
-            print(f"\n⚠️  Test failure detected. Continuing with remaining tests...")
+            print(f"\nWARNING️  Test failure detected. Continuing with remaining tests...")
     
     total_duration = time.time() - total_start
     
@@ -155,17 +155,17 @@ def run_full_test_suite():
     print(f"Tests passed: {passed}/{total}")
     
     for description, success in results:
-        status = "✅ PASS" if success else "❌ FAIL"
+        status = "CHECK PASS" if success else "X FAIL"
         print(f"   {status} {description}")
     
     if passed == total:
         print(f"\n🎉 ALL GOLDEN PATH PHASE 2 TESTS PASSED!")
-        print("✅ $500K+ ARR Golden Path is protected and ready for MessageRouter proxy removal")
+        print("CHECK $500K+ ARR Golden Path is protected and ready for MessageRouter proxy removal")
         return True
     else:
         print(f"\n🚨 GOLDEN PATH PHASE 2 TESTS FAILED!")
-        print("❌ DO NOT PROCEED with MessageRouter proxy removal until all tests pass")
-        print(f"❌ {total - passed} test(s) failed - investigate and fix before migration")
+        print("X DO NOT PROCEED with MessageRouter proxy removal until all tests pass")
+        print(f"X {total - passed} test(s) failed - investigate and fix before migration")
         return False
 
 
@@ -192,7 +192,7 @@ def main():
     
     # Validate environment
     if not validate_environment():
-        print("\n❌ Environment validation failed. Cannot run Golden Path tests.")
+        print("\nX Environment validation failed. Cannot run Golden Path tests.")
         return 1
     
     # Set test environment variables
@@ -213,10 +213,10 @@ def main():
     
     # Exit with appropriate code
     if success:
-        print(f"\n✅ Golden Path Phase 2 testing completed successfully!")
+        print(f"\nCHECK Golden Path Phase 2 testing completed successfully!")
         return 0
     else:
-        print(f"\n❌ Golden Path Phase 2 testing failed!")
+        print(f"\nX Golden Path Phase 2 testing failed!")
         return 1
 
 

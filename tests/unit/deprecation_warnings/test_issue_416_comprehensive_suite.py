@@ -120,7 +120,7 @@ class Issue416ComprehensiveSuiteTests(SSotBaseTestCase):
         print(f"\n📊 Overall Business Impact: {business_impact_percentage:.1f}%")
         
         if business_impact_percentage > 70:
-            print("⚠️  HIGH PRIORITY: Immediate remediation recommended")
+            print("WARNING️  HIGH PRIORITY: Immediate remediation recommended")
         elif business_impact_percentage > 40:
             print("🟡 MEDIUM PRIORITY: Plan remediation within sprint")
         else:
@@ -165,7 +165,7 @@ class Issue416ComprehensiveSuiteTests(SSotBaseTestCase):
                 ]
                 
                 strategy_components['detection_capability'] = len(issue_1144_warnings) > 0
-                print(f"  ✓ Detection capability: {len(issue_1144_warnings)} warnings found")
+                print(f"  CHECK Detection capability: {len(issue_1144_warnings)} warnings found")
                 
         except Exception as e:
             print(f"  ✗ Detection capability failed: {e}")
@@ -174,22 +174,22 @@ class Issue416ComprehensiveSuiteTests(SSotBaseTestCase):
         try:
             from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
             strategy_components['migration_paths_validated'] = True
-            print("  ✓ Migration paths validated")
+            print("  CHECK Migration paths validated")
         except Exception as e:
             print(f"  ✗ Migration paths failed: {e}")
         
         # Test regression prevention (assume test files exist)
         test_files = list(Path("/Users/anthony/Desktop/netra-apex/tests/unit/deprecation_warnings").glob("test_*.py"))
         strategy_components['regression_prevention'] = len(test_files) >= 4
-        print(f"  {'✓' if len(test_files) >= 4 else '✗'} Regression prevention: {len(test_files)} test files")
+        print(f"  {'CHECK' if len(test_files) >= 4 else '✗'} Regression prevention: {len(test_files)} test files")
         
         # Test comprehensive coverage
         strategy_components['comprehensive_coverage'] = len(test_files) >= 4
-        print(f"  {'✓' if len(test_files) >= 4 else '✗'} Comprehensive coverage")
+        print(f"  {'CHECK' if len(test_files) >= 4 else '✗'} Comprehensive coverage")
         
         # Test automation readiness
         strategy_components['automation_ready'] = True  # Assume CI/CD can run these tests
-        print("  ✓ Automation ready")
+        print("  CHECK Automation ready")
         
         strategy_score = sum(strategy_components.values()) / len(strategy_components)
         print(f"\n📊 Strategy Effectiveness: {strategy_score:.1%}")
@@ -300,9 +300,9 @@ class Issue416ComprehensiveSuiteTests(SSotBaseTestCase):
         
         print(f"⏱️  Execution Time: {elapsed_time:.2f} seconds")
         print(f"🧪 Total Tests: {total_tests}")
-        print(f"❌ Total Failures: {total_failures}")
+        print(f"X Total Failures: {total_failures}")
         print(f"🔥 Total Errors: {total_errors}")
-        print(f"✅ Overall Success Rate: {((total_tests - total_failures - total_errors) / total_tests * 100) if total_tests > 0 else 0:.1f}%")
+        print(f"CHECK Overall Success Rate: {((total_tests - total_failures - total_errors) / total_tests * 100) if total_tests > 0 else 0:.1f}%")
         
         print(f"\n📋 Phase Breakdown:")
         for phase_name, results in self.suite_results.items():
@@ -315,9 +315,9 @@ class Issue416ComprehensiveSuiteTests(SSotBaseTestCase):
         detection_found_issues = self.suite_results.get('detection', {}).get('failures', 0) > 0
         migration_validated = self.suite_results.get('migration', {}).get('success_rate', 0) > 0.7
         
-        print(f"  Detection capability: {'✓' if detection_found_issues else '✗'}")
-        print(f"  Migration validation: {'✓' if migration_validated else '✗'}")
-        print(f"  Comprehensive coverage: ✓")  # We have all test categories
+        print(f"  Detection capability: {'CHECK' if detection_found_issues else '✗'}")
+        print(f"  Migration validation: {'CHECK' if migration_validated else '✗'}")
+        print(f"  Comprehensive coverage: CHECK")  # We have all test categories
         
         # Store summary
         self.suite_results['summary'] = {
@@ -353,11 +353,11 @@ class Issue416ComprehensiveSuiteTests(SSotBaseTestCase):
             "Migration paths should be validated and functional"
         )
         
-        print(f"\n✅ TEST SUITE VALIDATION COMPLETE")
+        print(f"\nCHECK TEST SUITE VALIDATION COMPLETE")
         print(f"   - Comprehensive coverage: {summary['total_tests']} tests")
-        print(f"   - Detection capability: {'✓' if summary['detection_found_issues'] else '✗'}")
-        print(f"   - Migration validation: {'✓' if summary['migration_validated'] else '✗'}")
-        print(f"   - Ready for Issue #416 remediation: ✓")
+        print(f"   - Detection capability: {'CHECK' if summary['detection_found_issues'] else '✗'}")
+        print(f"   - Migration validation: {'CHECK' if summary['migration_validated'] else '✗'}")
+        print(f"   - Ready for Issue #416 remediation: CHECK")
 
 
 if __name__ == '__main__':

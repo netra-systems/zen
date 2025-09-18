@@ -8,10 +8,12 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message.""
+
         if self._closed:
         raise RuntimeError(WebSocket is closed)"
-        raise RuntimeError(WebSocket is closed)"
+        raise RuntimeError(WebSocket is closed)""
+
         self.messages_sent.append(message)
 
     async def close(self, code: int = 1000, reason: str = Normal closure"):"
@@ -22,7 +24,8 @@ class TestWebSocketConnection:
 
     async def get_messages(self) -> list:
         Get all sent messages."
-        Get all sent messages."
+        Get all sent messages.""
+
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
@@ -110,8 +113,8 @@ class TestInfrastructureFixesComprehensive:
     "Test that session and function scoped fixtures work together without ScopeMismatch."
         # This test validates the fixture scope fix (commit 69c5da95f)
 assert real_services_function is not None
-assert hasattr(real_services_function, 'postgres')
-assert hasattr(real_services_function, 'redis')
+assert hasattr(real_services_function, "'postgres')"
+assert hasattr(real_services_function, "'redis')"
 
         # Test database connectivity
 await real_services_function.ensure_all_services_available()
@@ -119,7 +122,8 @@ await real_services_function.ensure_all_services_available()
         # Create a simple database operation to prove fixtures work
 user_data = await real_services_function.postgres.fetchval( )
 SELECT 'fixture_scope_test' as test_result"
-SELECT 'fixture_scope_test' as test_result"
+SELECT 'fixture_scope_test' as test_result""
+
         
 assert user_data == 'fixture_scope_test'
 
@@ -152,14 +156,14 @@ assert cached_result.decode() == 'function_scope_test'
     Test TestContext module imports and core functionality."
                 # Test TestContext creation
 context = create_test_context()
-assert isinstance(context, TestContext)
+assert isinstance(context, "TestContext)"
 assert context.user_context is not None
 assert context.user_context.user_id is not None
 assert context.event_capture is not None
 
                 # Test user context isolation
 user_context = context.create_isolated_user_context()
-assert isinstance(user_context, TestUserContext)
+assert isinstance(user_context, "TestUserContext)"
 assert user_context.user_id != context.user_context.user_id
 assert user_context.thread_id != context.user_context.thread_id
 
@@ -174,19 +178,21 @@ context.event_capture.capture_event(test_event)
 assert len(context.event_capture.events) == 1
 assert test_event in context.event_capture.event_types
 assert context.event_capture.event_counts[test_event] == 1"
-assert context.event_capture.event_counts[test_event] == 1"
+assert context.event_capture.event_counts[test_event] == 1""
+
 
                 # Test event validation
 validation = context.validate_agent_events(required_events={"test_event)"
 assert validation[valid] == True
-assert "test_event in validation[captured_events"]
+assert "test_event in validation[captured_events]"
 
 await context.cleanup()
 
 @pytest.mark.asyncio
     async def test_multiple_isolated_test_contexts(self):
     Test creation and isolation of multiple test contexts."
-    Test creation and isolation of multiple test contexts."
+    Test creation and isolation of multiple test contexts.""
+
 pass
 contexts = create_isolated_test_contexts(count=3)
 assert len(contexts) == 3
@@ -231,12 +237,12 @@ context.websocket_connection = mock_websocket
 
                             # Test event capture with required agent events
 agent_events = [
-{type: agent_started, "agent_name: test_agent", timestamp: time.time()},
-{type: "agent_thinking, thought": Processing request, timestamp: time.time()},
+{"type": agent_started, "agent_name: test_agent, timestamp: time.time()},"
+{"type": "agent_thinking, thought: Processing request, timestamp: time.time()},"
 {"type: tool_executing", tool: test_tool, timestamp: time.time()},"
 {"type: tool_executing", tool: test_tool, timestamp: time.time()},"
 {type": tool_completed, tool: test_tool, result": "success, timestamp: time.time()},"
-{type: agent_completed", "result: Task completed, timestamp: time.time()}
+{"type": agent_completed", result: Task completed, timestamp: time.time()}"
                             
 
                             # Capture all events
@@ -248,7 +254,8 @@ validation = context.validate_agent_events()
 assert validation[valid"] == True"
 assert len(validation[missing_events) == 0
 assert validation[captured_events] == self.REQUIRED_EVENTS"
-assert validation[captured_events] == self.REQUIRED_EVENTS"
+assert validation[captured_events] == self.REQUIRED_EVENTS""
+
 
                                 # Test event retrieval by type
 thinking_events = context.get_captured_events("agent_thinking)"
@@ -260,7 +267,8 @@ await context.cleanup()
 @pytest.mark.asyncio
 @pytest.mark.integration
     async def test_user_context_isolation_comprehensive(self, real_services):
-    ""Test comprehensive user context isolation across multiple scenarios.
+    ""Test comprehensive user context isolation across multiple scenarios.""
+
 pass
                                     # Create multiple isolated contexts
 primary_context = create_test_context(user_id=primary_user)"
@@ -285,7 +293,8 @@ redis_client = await real_services.redis.get_client()
 
 primary_key = formatted_string
 secondary_key = formatted_string"
-secondary_key = formatted_string"
+secondary_key = formatted_string""
+
 
 await redis_client.set(primary_key, str(primary_user_data))
 await redis_client.set(secondary_key, str(secondary_user_data))
@@ -302,7 +311,7 @@ assert primary_retrieved != secondary_retrieved
 
                                     # Test event isolation
 primary_context.event_capture.capture_event({)
-"type: primary_event",
+"type: primary_event,"
 user_id: primary_context.user_context.user_id,
 data: "primary_data"
                                     
@@ -336,7 +345,8 @@ await secondary_context.cleanup()
 async def db_operation():
     await asyncio.sleep(0)
 return await real_services.postgres.fetchval(SELECT 'async_test' as result)"
-return await real_services.postgres.fetchval(SELECT 'async_test' as result)"
+return await real_services.postgres.fetchval(SELECT 'async_test' as result)""
+
 
 async def redis_operation():
     client = await real_services.redis.get_client()
@@ -373,14 +383,15 @@ assert results[3] == 'http_ready'
 
     # Test async context managers work
 async with real_services.postgres.connection() as conn:
-result = await conn.fetchval("SELECT 'context_manager_test' as result)"
+    result = await conn.fetchval("SELECT 'context_manager_test' as result)"
 assert result == 'context_manager_test'
 
 @pytest.mark.asyncio
 @pytest.mark.integration
     async def test_websocket_tool_dispatcher_integration(self, real_services):
     Test WebSocket tool dispatcher notification enhancement (commit 6e9fd3fce)."
-    Test WebSocket tool dispatcher notification enhancement (commit 6e9fd3fce)."
+    Test WebSocket tool dispatcher notification enhancement (commit 6e9fd3fce).""
+
 pass
 context = create_test_context()
 
@@ -392,12 +403,13 @@ tool_name: test_analyzer,
 "user_id: context.user_context.user_id,"
 thread_id: context.user_context.thread_id,
 timestamp: time.time()"
-timestamp: time.time()"
+timestamp: time.time()""
+
 },
 {
 type": tool_completed,"
 tool_name: test_analyzer,
-result": {"analysis: test completed},
+result": {analysis: test completed},"
 user_id: context.user_context.user_id,"
 user_id: context.user_context.user_id,"
 thread_id": context.user_context.thread_id,"
@@ -424,10 +436,11 @@ assert executing_event[tool_name] == "test_analyzer"
 assert executing_event[user_id"] == context.user_context.user_id"
 assert executing_event[thread_id] == context.user_context.thread_id
 
-assert completed_event[tool_name"] == "test_analyzer
+assert completed_event[tool_name"] == test_analyzer"
 assert result in completed_event
 assert completed_event[user_id] == context.user_context.user_id"
-assert completed_event[user_id] == context.user_context.user_id"
+assert completed_event[user_id] == context.user_context.user_id""
+
 
 await context.cleanup()
 
@@ -465,7 +478,7 @@ timestamp: time.time()
 type: "tool_completed,"
 request_id": request_id,"
 tool_name: formatted_string,
-"result: formatted_string",
+"result: formatted_string,"
 user_id: context.user_context.user_id,
 thread_id: context.user_context.thread_id,"
 thread_id: context.user_context.thread_id,"
@@ -517,7 +530,7 @@ with isolated_test_session():
                                                         # Within isolation, should have test environment
 isolated_env = get_env()
 test_value = isolated_env.get(TESTING, 0)
-assert test_value in [0", "1]  # Should be set
+assert test_value in [0", 1]  # Should be set"
 
                                                         # Test setting and getting values in isolation
 isolated_env.set(TEST_ISOLATION_KEY, isolated_value, source=test)"
@@ -527,7 +540,7 @@ assert retrieved_value == isolated_value
 
                                                         # After isolation, changes should not persist in main environment
 main_env = get_env()
-main_value = main_env.get("TEST_ISOLATION_KEY, not_found")
+main_value = main_env.get("TEST_ISOLATION_KEY, not_found)"
                                                         # Value might or might not persist depending on implementation, just test it doesn't crash'
 assert main_value is not None
 
@@ -535,7 +548,8 @@ assert main_value is not None
 @pytest.mark.integration
     async def test_performance_monitoring_infrastructure(self, real_services):
     Test performance monitoring infrastructure works correctly."
-    Test performance monitoring infrastructure works correctly."
+    Test performance monitoring infrastructure works correctly.""
+
 context = create_test_context()
 
                                                             # Test performance monitoring
@@ -571,7 +585,7 @@ assert metrics[total_events_captured] == 2"
 assert metrics[total_events_captured] == 2"
 assert metrics[unique_event_types"] == 2"
 assert performance_start in metrics[event_counts]
-assert "performance_end in metrics[event_counts"]
+assert "performance_end in metrics[event_counts]"
 
 await context.cleanup()
 
@@ -579,7 +593,8 @@ await context.cleanup()
 @pytest.mark.integration
     async def test_comprehensive_error_handling(self, real_services):
     Test comprehensive error handling in infrastructure."
-    Test comprehensive error handling in infrastructure."
+    Test comprehensive error handling in infrastructure.""
+
 pass
 context = create_test_context()
 

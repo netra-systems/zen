@@ -10,10 +10,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -66,7 +66,7 @@ class MockCollaborationSubAgent(BaseAgent):
         self.state = SubAgentLifecycle.RUNNING
         await asyncio.sleep(0.5)
         state.messages.append({ })
-        "role": "assistant",
+        "role": "assistant,"
         "content": ""
     
         self.state = SubAgentLifecycle.COMPLETED
@@ -95,28 +95,28 @@ class TestMultiAgentCollaboration:
 
         await asyncio.sleep(0)
         return { }
-        "supervisor": supervisor,
-        "llm_manager": llm_manager,
-        "websocket_manager": websocket_manager,
-        "config": config
+        "supervisor: supervisor,"
+        "llm_manager: llm_manager,"
+        "websocket_manager: websocket_manager,"
+        "config: config"
     
 
         @pytest.mark.e2e
     async def test_supervisor_to_subagent_flow(self, collaboration_setup):
         """Test complete Supervisor  ->  SubAgent  ->  Tool execution flow."""
         pass
-        supervisor = collaboration_setup["supervisor"]
+        supervisor = collaboration_setup["supervisor]"
 
         # Create mock sub-agent
         sub_agent = MockCollaborationSubAgent( )
-        llm_manager=collaboration_setup["llm_manager"],
-        name="TestSubAgent",
+        llm_manager=collaboration_setup["llm_manager],"
+        name="TestSubAgent,"
         description="Test collaboration sub-agent"
         
 
         # Mock tool execution
         with patch.object(ToolDispatcher, 'execute_tool') as mock_tool:
-        mock_tool.return_value = {"status": "success", "data": "optimization_result"}
+        mock_tool.return_value = {"status": "success", "data": "optimization_result}"
 
             # Execute collaboration flow
         start_time = time.time()
@@ -125,19 +125,19 @@ class TestMultiAgentCollaboration:
 
             # Validate collaboration results
         assert result["status"] == "completed"
-        assert result["sub_agent_execution"]["success"] is True
-        assert result["tool_results"] is not None
+        assert result["sub_agent_execution"]["success] is True"
+        assert result["tool_results] is not None"
         assert execution_time < 5.0  # Performance requirement
 
         @pytest.mark.e2e
     async def test_result_aggregation_flow(self, collaboration_setup):
         """Test multi-agent result aggregation."""
-        supervisor = collaboration_setup["supervisor"]
+        supervisor = collaboration_setup["supervisor]"
 
                 # Create multiple mock agents
         agents = [ ]
         BaseAgent( )
-        llm_manager=collaboration_setup["llm_manager"],
+        llm_manager=collaboration_setup["llm_manager],"
         name="",
         description=""
         ) for i in range(3)
@@ -148,59 +148,59 @@ class TestMultiAgentCollaboration:
 
                 # Validate aggregation
         assert len(results) == 3
-        assert all(r["success"] for r in results)
-        assert "aggregated_result" in results[0]
+        assert all(r["success] for r in results)"
+        assert "aggregated_result in results[0]"
 
         @pytest.mark.e2e
     async def test_collaboration_error_handling(self, collaboration_setup):
         """Test error handling in collaboration flow."""
         pass
-        supervisor = collaboration_setup["supervisor"]
+        supervisor = collaboration_setup["supervisor]"
 
                     # Create failing sub-agent
         failing_agent = BaseAgent( )
-        llm_manager=collaboration_setup["llm_manager"],
-        name="FailingAgent",
+        llm_manager=collaboration_setup["llm_manager],"
+        name="FailingAgent,"
         description="Agent that fails"
                     
 
                     # Test error recovery
         with patch.object(failing_agent, 'execute') as mock_execute:
-        mock_execute.side_effect = Exception("Simulated failure")
+        mock_execute.side_effect = Exception("Simulated failure)"
 
         result = await self._execute_collaboration_with_errors(supervisor, failing_agent)
 
                         # Validate error handling
-        assert result["error_handled"] is True
-        assert result["recovery_successful"] is True
+        assert result["error_handled] is True"
+        assert result["recovery_successful] is True"
 
         @pytest.mark.e2e
     async def test_context_isolation_between_agents(self, collaboration_setup):
         """Test context isolation between collaborating agents."""
-        supervisor = collaboration_setup["supervisor"]
+        supervisor = collaboration_setup["supervisor]"
 
                             # Create agents with different contexts
         agent1 = BaseAgent( )
-        llm_manager=collaboration_setup["llm_manager"],
-        name="Agent1",
+        llm_manager=collaboration_setup["llm_manager],"
+        name="Agent1,"
         description="First context agent"
                             
         agent2 = BaseAgent( )
-        llm_manager=collaboration_setup["llm_manager"],
-        name="Agent2",
+        llm_manager=collaboration_setup["llm_manager],"
+        name="Agent2,"
         description="Second context agent"
                             
 
                             # Set different contexts
-        agent1.context = {"task": "optimization", "scope": "limited"}
-        agent2.context = {"task": "analysis", "scope": "full"}
+        agent1.context = {"task": "optimization", "scope": "limited}"
+        agent2.context = {"task": "analysis", "scope": "full}"
 
                             # Execute and validate isolation
         isolation_result = await self._test_context_isolation(agent1, agent2)
 
-        assert isolation_result["agent1_context_preserved"] is True
-        assert isolation_result["agent2_context_preserved"] is True
-        assert isolation_result["no_context_bleeding"] is True
+        assert isolation_result["agent1_context_preserved] is True"
+        assert isolation_result["agent2_context_preserved] is True"
+        assert isolation_result["no_context_bleeding] is True"
 
         async def _execute_collaboration_flow(self, supervisor: SupervisorAgent,
         sub_agent: BaseAgent) -> Dict[str, Any]:
@@ -208,7 +208,7 @@ class TestMultiAgentCollaboration:
         pass
         try:
         # Step 1: Supervisor delegates to sub-agent
-        delegation_result = await supervisor.delegate_to_subagent(sub_agent, "optimization_task")
+        delegation_result = await supervisor.delegate_to_subagent(sub_agent, "optimization_task)"
 
         # Step 2: Sub-agent executes with tools
         execution_result = await sub_agent.execute()
@@ -218,14 +218,14 @@ class TestMultiAgentCollaboration:
 
         await asyncio.sleep(0)
         return { }
-        "status": "completed",
-        "delegation_result": delegation_result,
-        "sub_agent_execution": {"success": True},
-        "tool_results": execution_result,
-        "aggregated_result": aggregated_result
+        "status": "completed,"
+        "delegation_result: delegation_result,"
+        "sub_agent_execution": {"success: True},"
+        "tool_results: execution_result,"
+        "aggregated_result: aggregated_result"
         
         except Exception as e:
-        return {"status": "failed", "error": str(e)}
+        return {"status": "failed", "error: str(e)}"
 
         async def _execute_parallel_agents(self, supervisor: SupervisorAgent,
         agents: List[BaseAgent]) -> List[Dict[str, Any]]:
@@ -238,9 +238,9 @@ class TestMultiAgentCollaboration:
 
         return [ ]
         { }
-        "success": not isinstance(r, Exception),
-        "result": r if not isinstance(r, Exception) else None,
-        "aggregated_result": aggregated
+        "success: not isinstance(r, Exception),"
+        "result: r if not isinstance(r, Exception) else None,"
+        "aggregated_result: aggregated"
     
         for r in results
     
@@ -251,13 +251,13 @@ class TestMultiAgentCollaboration:
         try:
         # Attempt execution that will fail
         await failing_agent.execute()
-        return {"error_handled": False, "recovery_successful": False}
+        return {"error_handled": False, "recovery_successful: False}"
         except Exception:
             # Test error recovery
         recovery_result = await supervisor.handle_agent_failure(failing_agent)
         return { }
-        "error_handled": True,
-        "recovery_successful": recovery_result is not None
+        "error_handled: True,"
+        "recovery_successful: recovery_result is not None"
             
 
         async def _test_context_isolation(self, agent1: BaseAgent,
@@ -279,9 +279,9 @@ class TestMultiAgentCollaboration:
         no_bleeding = agent1.context != agent2.context
 
         return { }
-        "agent1_context_preserved": context1_preserved,
-        "agent2_context_preserved": context2_preserved,
-        "no_context_bleeding": no_bleeding
+        "agent1_context_preserved: context1_preserved,"
+        "agent2_context_preserved: context2_preserved,"
+        "no_context_bleeding: no_bleeding"
     
 
 
@@ -292,17 +292,17 @@ class TestMultiAgentCollaboration:
         config = get_config()
         llm_manager = LLMManager(config)
 
-        agent = BaseAgent(llm_manager=llm_manager, name="ToolTestAgent")
+        agent = BaseAgent(llm_manager=llm_manager, name="ToolTestAgent)"
         tool_dispatcher = ToolDispatcher()
 
         # Mock successful tool execution
         with patch.object(tool_dispatcher, 'execute_tool') as mock_execute:
-        mock_execute.return_value = {"status": "success", "data": "test_result"}
+        mock_execute.return_value = {"status": "success", "data": "test_result}"
 
-        result = await tool_dispatcher.execute_tool("test_tool", {"param": "value"})
+        result = await tool_dispatcher.execute_tool("test_tool", {"param": "value})"
 
         assert result["status"] == "success"
-        assert "data" in result
+        assert "data in result"
 
 
         @pytest.mark.integration
@@ -320,11 +320,11 @@ class TestMultiAgentCollaboration:
         tool_dispatcher = MagicNone  # TODO: Use real service instead of Mock
 
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
-        sub_agent = BaseAgent(llm_manager=llm_manager, name="PerfTestAgent")
+        sub_agent = BaseAgent(llm_manager=llm_manager, name="PerfTestAgent)"
 
                 # Test delegation speed
         start_time = time.time()
-        result = await supervisor.delegate_to_subagent(sub_agent, "performance_test")
+        result = await supervisor.delegate_to_subagent(sub_agent, "performance_test)"
         delegation_time = time.time() - start_time
 
                 # Performance requirements

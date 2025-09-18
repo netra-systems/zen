@@ -171,7 +171,7 @@ Size Distribution:
 - Small (26-50 lines): {len(size_distribution["small"])} factories
 - Medium (51-100 lines): {len(size_distribution["medium"])} factories
 - Large (101-200 lines): {len(size_distribution["large"])} factories
-- Oversized (>200 lines): {len(size_distribution["oversized"])} factories ⚠️
+- Oversized (>200 lines): {len(size_distribution["oversized"])} factories WARNING️
 
 """
 
@@ -196,7 +196,7 @@ Size Distribution:
         largest_factories = sorted(factory_analysis, key=lambda x: x["total_lines"], reverse=True)[:10]
         report += f"\n\nTOP 10 LARGEST FACTORIES:\n"
         for i, factory in enumerate(largest_factories, 1):
-            status = "✗ OVERSIZED" if factory["total_lines"] > complex_threshold else "✓ ACCEPTABLE"
+            status = "✗ OVERSIZED" if factory["total_lines"] > complex_threshold else "CHECK ACCEPTABLE"
             report += f"{i:2d}. {factory['name']}: {factory['total_lines']} lines {status}\n"
 
         print(report)
@@ -264,7 +264,7 @@ Method Count Distribution:
 - Minimal (1-3 methods): {len(method_distribution["minimal"])} factories
 - Standard (4-5 methods): {len(method_distribution["standard"])} factories
 - Complex (6-10 methods): {len(method_distribution["complex"])} factories
-- Excessive (>10 methods): {len(method_distribution["excessive"])} factories ⚠️
+- Excessive (>10 methods): {len(method_distribution["excessive"])} factories WARNING️
 
 """
 
@@ -313,7 +313,7 @@ Method Count Distribution:
         top_method_factories = sorted(factory_analysis, key=lambda x: x["method_count"], reverse=True)[:10]
         report += f"\n\nTOP 10 FACTORIES BY METHOD COUNT:\n"
         for i, factory in enumerate(top_method_factories, 1):
-            status = "✗ EXCESSIVE" if factory["method_count"] > complex_threshold else "✓ ACCEPTABLE"
+            status = "✗ EXCESSIVE" if factory["method_count"] > complex_threshold else "CHECK ACCEPTABLE"
             report += f"{i:2d}. {factory['name']}: {factory['method_count']} methods {status}\n"
 
         print(report)
@@ -373,9 +373,9 @@ FACTORY STATIC METHOD RATIO ANALYSIS
 Total Factories Analyzed: {len(factory_analysis)}
 
 Static Method Ratio Distribution:
-- Instance-Heavy (0-25% static): {len(ratio_distribution["instance_heavy"])} factories ✓
-- Balanced (26-50% static): {len(ratio_distribution["balanced"])} factories ✓
-- Static-Heavy (51-75% static): {len(ratio_distribution["static_heavy"])} factories ⚠️
+- Instance-Heavy (0-25% static): {len(ratio_distribution["instance_heavy"])} factories CHECK
+- Balanced (26-50% static): {len(ratio_distribution["balanced"])} factories CHECK
+- Static-Heavy (51-75% static): {len(ratio_distribution["static_heavy"])} factories WARNING️
 - Utility-Like (76-100% static): {len(ratio_distribution["utility_like"])} factories ✗
 
 """
@@ -426,7 +426,7 @@ Static Method Ratio Distribution:
         report += f"\n\nTOP 10 FACTORIES BY STATIC METHOD RATIO:\n"
         for i, factory in enumerate(top_static_factories, 1):
             static_pct = factory["static_ratio"] * 100
-            status = "✗ UTILITY-LIKE" if factory["static_ratio"] > 0.75 else "✓ FACTORY-LIKE"
+            status = "✗ UTILITY-LIKE" if factory["static_ratio"] > 0.75 else "CHECK FACTORY-LIKE"
             report += f"{i:2d}. {factory['name']}: {static_pct:.0f}% static {status}\n"
 
         print(report)

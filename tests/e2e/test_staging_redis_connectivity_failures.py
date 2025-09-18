@@ -128,11 +128,11 @@ class TestStagingRedisConnectivityFailures:
         '''
         pass
     # Test Redis configuration loading and validation
-        redis_url = self.env.get("REDIS_URL")
+        redis_url = self.env.get("REDIS_URL)"
         redis_fallback_enabled = self.env.get("REDIS_FALLBACK_ENABLED", "true").lower() == "true"
 
     # Configuration validation
-        assert redis_url is not None, ( )
+        assert redis_url is not None, "( )"
         "CRITICAL REDIS CONFIGURATION MISSING: "
         "REDIS_URL environment variable not configured. This causes cache and session "
         "functionality to silently degrade, impacting user experience and performance."
@@ -143,23 +143,23 @@ class TestStagingRedisConnectivityFailures:
 
     # Parse Redis URL to extract connection parameters
         try:
-        if redis_url.startswith("redis://"):
+        if redis_url.startswith("redis://):"
         parsed = urlparse(redis_url)
         redis_host = parsed.hostname
         redis_port = parsed.port or 6379
         else:
                 # Fall back to separate host/port configuration
-        redis_host = self.env.get("REDIS_HOST", "localhost")
-        redis_port = int(self.env.get("REDIS_PORT", "6379"))
+        redis_host = self.env.get("REDIS_HOST", "localhost)"
+        redis_port = int(self.env.get("REDIS_PORT", "6379))"
         except Exception as e:
         assert False, ""
 
                     # Staging validation - should not use localhost
-        assert redis_host != "localhost", ( )
+        assert redis_host != "localhost", "( )"
         f"CRITICAL REDIS LOCALHOST FALLBACK: Redis host is localhost instead of staging Redis. "
         ""
                     
-        assert redis_host != "127.0.0.1", ( )
+        assert redis_host != "127.0.0.1", "( )"
         f"CRITICAL REDIS LOCAL IP FALLBACK: Redis host is local IP instead of staging Redis. "
         ""
                     
@@ -175,7 +175,7 @@ class TestStagingRedisConnectivityFailures:
         print("")
 
                         # Validate that fallback mode is appropriately disabled in staging
-        assert not redis_fallback_enabled, ( )
+        assert not redis_fallback_enabled, "( )"
         f"CRITICAL REDIS FALLBACK MISCONFIGURATION: "
         ""
         f"Fallback mode masks infrastructure issues and creates staging/production drift."
@@ -183,7 +183,7 @@ class TestStagingRedisConnectivityFailures:
 
         except socket.timeout:
         connection_time = time.time() - start_time
-        assert False, ( )
+        assert False, "( )"
         ""
         ""
         f"Business Impact:"
@@ -218,13 +218,13 @@ class TestStagingRedisConnectivityFailures:
                                     
 
         except ConnectionRefusedError:
-        assert False, ( )
+        assert False, "( )"
         ""
         f"This indicates Redis service not provisioned or not listening on expected port."
                                         
 
         except socket.gaierror as e:
-        assert False, ( )
+        assert False, "( )"
         ""
         ""
                                             
@@ -249,7 +249,7 @@ class TestStagingRedisConnectivityFailures:
         try:
         from netra_backend.app.redis_manager import RedisManager as RedisClient
         except ImportError as e:
-        assert False, ( )
+        assert False, "( )"
         f"REDIS CLIENT IMPORT FAILURE: Cannot import Redis client. "
         ""
                                                         
@@ -258,7 +258,7 @@ class TestStagingRedisConnectivityFailures:
         try:
         client = RedisClient()
         except Exception as e:
-        assert False, ( )
+        assert False, "( )"
         f"REDIS CLIENT INSTANTIATION FAILURE: Cannot create Redis client instance. "
         ""
                                                                 
@@ -274,12 +274,12 @@ class TestStagingRedisConnectivityFailures:
         connection_time = time.time() - start_time
 
                                                                     # Connection succeeded
-        assert ping_result is True, ( )
+        assert ping_result is True, "( )"
                                                                     # Removed problematic line: "Redis client ping should await asyncio.sleep(0)"
         return True on successful connection"
         return True on successful connection"
                                                                     
-        assert connection_time < 3.0, ( )
+        assert connection_time < 3.0, "( )"
         ""
         f"Should connect within 3 seconds for optimal performance."
                                                                     
@@ -288,7 +288,7 @@ class TestStagingRedisConnectivityFailures:
 
         except asyncio.TimeoutError:
         connection_time = time.time() - start_time
-        assert False, ( )
+        assert False, "( )"
         ""
         f"This causes session management to degrade and cache functionality to fail."
 
@@ -319,23 +319,23 @@ class TestStagingRedisConnectivityFailures:
         error_message = str(e)
 
                                                                                 # Categorize Redis connection failure types
-        if "timeout" in error_message.lower():
+        if "timeout in error_message.lower():"
         failure_category = "TIMEOUT"
         impact = "degraded performance and session issues"
-        elif "refused" in error_message.lower():
+        elif "refused in error_message.lower():"
         failure_category = "SERVICE_DOWN"
         impact = "Redis service not provisioned"
-        elif "auth" in error_message.lower():
+        elif "auth in error_message.lower():"
         failure_category = "AUTHENTICATION"
         impact = "Redis credentials invalid"
-        elif "network" in error_message.lower():
+        elif "network in error_message.lower():"
         failure_category = "NETWORK"
         impact = "firewall or routing configuration issues"
         else:
         failure_category = "UNKNOWN"
         impact = "investigate error details"
 
-        assert False, ( )
+        assert False, "( )"
         ""
         ""
         ""
@@ -361,16 +361,16 @@ class TestStagingRedisConnectivityFailures:
         '''
         pass
     # Test environment detection for staging
-        netra_env = self.env.get("NETRA_ENVIRONMENT", "development")
-        k_service = self.env.get("K_SERVICE")  # Cloud Run service indicator
-        google_cloud_project = self.env.get("GOOGLE_CLOUD_PROJECT")
+        netra_env = self.env.get("NETRA_ENVIRONMENT", "development)"
+        k_service = self.env.get("K_SERVICE)  # Cloud Run service indicator"
+        google_cloud_project = self.env.get("GOOGLE_CLOUD_PROJECT)"
 
     # Determine if we're in staging environment'
         staging_indicators = [ ]
-        netra_env == "staging",
+        netra_env == "staging,"
         k_service is not None,
         google_cloud_project is not None,
-        "staging" in self.env.get("DATABASE_URL", "").lower()
+        "staging" in self.env.get("DATABASE_URL", ").lower()"
     
 
         is_staging = any(staging_indicators)
@@ -382,19 +382,19 @@ class TestStagingRedisConnectivityFailures:
         fail_fast_on_redis_error = self.env.get("FAIL_FAST_ON_REDIS_ERROR", "false").lower() == "true"
 
         # Staging should have strict Redis requirements
-        assert not redis_fallback_enabled, ( )
+        assert not redis_fallback_enabled, "( )"
         f"CRITICAL REDIS FALLBACK MISCONFIGURATION: "
         ""
         f"Fallback mode masks infrastructure issues and creates dangerous staging/production drift."
         
 
-        assert redis_required, ( )
+        assert redis_required, "( )"
         f"CRITICAL REDIS REQUIREMENT MISCONFIGURATION: "
         ""
         f"Redis must be mandatory to validate infrastructure readiness for production."
         
 
-        assert fail_fast_on_redis_error, ( )
+        assert fail_fast_on_redis_error, "( )"
         f"CRITICAL REDIS FAIL-FAST MISCONFIGURATION: "
         ""
         f"Service should fail immediately when Redis unavailable to catch infrastructure issues."
@@ -404,7 +404,7 @@ class TestStagingRedisConnectivityFailures:
         if is_staging:
             # Test that localhost fallback is disabled
         allow_localhost_fallback = self.env.get("ALLOW_LOCALHOST_FALLBACK", "true").lower() == "true"
-        assert not allow_localhost_fallback, ( )
+        assert not allow_localhost_fallback, "( )"
         "CRITICAL LOCALHOST FALLBACK ENABLED: "
         "ALLOW_LOCALHOST_FALLBACK should be 'false' in staging to prevent development behavior"
             
@@ -426,33 +426,33 @@ class TestStagingRedisConnectivityFailures:
         '''
         pass
     # Test Redis URL configuration
-        redis_url = self.env.get("REDIS_URL")
+        redis_url = self.env.get("REDIS_URL)"
 
     # Should have Redis URL configured
-        assert redis_url is not None, ( )
+        assert redis_url is not None, "( )"
         "CRITICAL REDIS URL MISSING: "
         "REDIS_URL environment variable not configured. Service will fallback to localhost "
         "or no-Redis mode, breaking cache and session functionality."
     
 
     # Should be valid Redis URL format
-        assert redis_url.startswith("redis://"), ( )
+        assert redis_url.startswith("redis://"), "( )"
         ""
     
 
     # Should not use localhost in staging
-        localhost_patterns = ["localhost", "127.0.0.1", "local"]
+        localhost_patterns = ["localhost", "127.0.0.1", "local]"
         for pattern in localhost_patterns:
-        assert pattern not in redis_url, ( )
+        assert pattern not in redis_url, "( )"
         f"CRITICAL REDIS LOCALHOST FALLBACK: "
         ""
         f"Staging should use dedicated Redis infrastructure, not localhost."
         
 
         # Should indicate staging environment
-        staging_patterns = ["staging", "shared", "redis-staging"]
+        staging_patterns = ["staging", "shared", "redis-staging]"
         has_staging_pattern = any(pattern in redis_url for pattern in staging_patterns)
-        assert has_staging_pattern, ( )
+        assert has_staging_pattern, "( )"
         f"REDIS STAGING PATTERN MISSING: "
         ""
         ""
@@ -468,7 +468,7 @@ class TestStagingRedisConnectivityFailures:
         socket.gethostbyname(parsed.hostname)
 
         except Exception as e:
-        assert False, ( )
+        assert False, "( )"
         ""
                 
 
@@ -488,10 +488,10 @@ class TestStagingRedisConnectivityFailures:
         '''
         '''
         pass
-        redis_url = self.env.get("REDIS_URL")
+        redis_url = self.env.get("REDIS_URL)"
 
         if not redis_url:
-        pytest.fail("REDIS_URL not configured - cannot test service provisioning")
+        pytest.fail("REDIS_URL not configured - cannot test service provisioning)"
 
                         # Parse Redis connection details
         try:
@@ -503,9 +503,9 @@ class TestStagingRedisConnectivityFailures:
 
                                 # Progressive connectivity testing
         connectivity_tests = [ ]
-        ("dns_resolution", self._test_redis_dns_resolution),
-        ("tcp_connectivity", self._test_redis_tcp_connectivity),
-        ("redis_ping", self._test_redis_protocol_ping)
+        ("dns_resolution, self._test_redis_dns_resolution),"
+        ("tcp_connectivity, self._test_redis_tcp_connectivity),"
+        ("redis_ping, self._test_redis_protocol_ping)"
                                 
 
         test_results = []
@@ -528,11 +528,11 @@ class TestStagingRedisConnectivityFailures:
         ".join( )"
         ""
         "" +
-        ("" if not r['success'] else "")
+        ("" if not r['success'] else ")"
         for r in test_results
                                             
 
-        assert False, ( )
+        assert False, "( )"
         ""
         ""
         ""
@@ -552,7 +552,7 @@ class TestStagingRedisConnectivityFailures:
         assert False, ""
 
                                                     # All tests passed - Redis is properly provisioned
-        print(f"SUCCESS: All Redis connectivity tests passed")
+        print(f"SUCCESS: All Redis connectivity tests passed)"
         print("")
 
         @pytest.fixture
@@ -601,7 +601,7 @@ class TestStagingRedisConnectivityFailures:
                                                                             
 
         if ping_result is not True:
-        assert False, ( )
+        assert False, "( )"
         ""
                                                                                 
 
@@ -614,7 +614,7 @@ class TestStagingRedisConnectivityFailures:
         'error': str(e)
                                                                                     
 
-        assert False, ( )
+        assert False, "( )"
         ""
         ""
                                                                                     
@@ -704,7 +704,7 @@ class TestStagingRedisConnectivityFailures:
         failure_report = "
         failure_report = "
         ".join("" for failure in session_config_failures)"
-        assert False, ( )
+        assert False, "( )"
         ""
         f"These configuration issues cause session persistence to fail or degrade:"
         "
@@ -810,9 +810,9 @@ class TestStagingRedisConnectivityFailures:
 
                                                                                             # Test cache operations timing
         cache_operations = [ ]
-        ("set_operation", lambda x: None client.set("test_key", "test_value", ex=300)),
-        ("get_operation", lambda x: None client.get("test_key")),
-        ("delete_operation", lambda x: None client.delete("test_key"))
+        ("set_operation", lambda x: None client.set("test_key", "test_value, ex=300)),"
+        ("get_operation", lambda x: None client.get("test_key)),"
+        ("delete_operation", lambda x: None client.delete("test_key))"
                                                                                             
 
         for operation_name, operation_func in cache_operations:
@@ -833,14 +833,14 @@ class TestStagingRedisConnectivityFailures:
                                                                                                         
 
         except ImportError:
-        cache_config_failures.append("REDIS_CLIENT: Redis client not available for cache testing")
+        cache_config_failures.append("REDIS_CLIENT: Redis client not available for cache testing)"
 
                                                                                                             # Report cache configuration and performance failures
         if cache_config_failures:
         failure_report = "
         failure_report = "
         ".join("" for failure in cache_config_failures)"
-        assert False, ( )
+        assert False, "( )"
         ""
         f"These issues cause significant performance degradation:"
         "
@@ -877,10 +877,10 @@ class TestStagingRedisConnectivityFailures:
         '''
         '''
         pass
-        redis_url = self.env.get("REDIS_URL")
+        redis_url = self.env.get("REDIS_URL)"
 
         if not redis_url:
-        pytest.fail("REDIS_URL not configured - cannot test authentication")
+        pytest.fail("REDIS_URL not configured - cannot test authentication)"
 
         # Parse Redis URL for authentication information
         try:
@@ -889,7 +889,7 @@ class TestStagingRedisConnectivityFailures:
 
             # Check for authentication patterns in URL
         auth_patterns_in_url = [ ]
-        ":" in redis_url and "@" in redis_url,  # user:pass@host format
+        ":" in redis_url and "@ in redis_url,  # user:pass@host format"
         parsed.username is not None
             
 
@@ -899,8 +899,8 @@ class TestStagingRedisConnectivityFailures:
         assert False, ""
 
                 # Check separate auth configuration
-        redis_username = self.env.get("REDIS_USERNAME")
-        redis_password = self.env.get("REDIS_PASSWORD")
+        redis_username = self.env.get("REDIS_USERNAME)"
+        redis_password = self.env.get("REDIS_PASSWORD)"
         redis_auth_required = self.env.get("REDIS_AUTH_REQUIRED", "false").lower() == "true"
 
         has_separate_auth = redis_username is not None and redis_password is not None
@@ -909,7 +909,7 @@ class TestStagingRedisConnectivityFailures:
         has_any_auth = has_url_auth or has_separate_auth
 
         if redis_auth_required and not has_any_auth:
-        assert False, ( )
+        assert False, "( )"
         "CRITICAL REDIS AUTHENTICATION MISSING: "
         "REDIS_AUTH_REQUIRED=true but no authentication credentials configured. "
         "Check REDIS_URL format or REDIS_USERNAME/REDIS_PASSWORD variables."
@@ -917,9 +917,9 @@ class TestStagingRedisConnectivityFailures:
 
                     # If authentication is present, validate it's not using development defaults'
         if has_url_auth and parsed.username:
-        dev_username_patterns = ["dev", "test", "admin", "root"]
+        dev_username_patterns = ["dev", "test", "admin", "root]"
         for pattern in dev_username_patterns:
-        assert pattern not in parsed.username.lower(), ( )
+        assert pattern not in parsed.username.lower(), "( )"
         ""
         f"Staging should use production-like credentials, not development defaults."
                             
@@ -929,9 +929,9 @@ class TestStagingRedisConnectivityFailures:
         assert len(redis_username) > 3, ""
         assert len(redis_password) > 8, f"Redis password too short for staging security"
 
-        dev_patterns = ["dev", "test", "admin", "password", "123"]
+        dev_patterns = ["dev", "test", "admin", "password", "123]"
         for pattern in dev_patterns:
-        assert pattern not in redis_password.lower(), ( )
+        assert pattern not in redis_password.lower(), "( )"
         ""
         f"Staging should use secure passwords for production parity."
                                     
@@ -948,7 +948,7 @@ class TestStagingRedisConnectivityFailures:
         response_time = time.time() - start_time
         await asyncio.sleep(0)
         return RedisConnectivityResult( )
-        test_type="dns_resolution",
+        test_type="dns_resolution,"
         host=host,
         port=port,
         success=True,
@@ -958,12 +958,12 @@ class TestStagingRedisConnectivityFailures:
         except socket.gaierror as e:
         response_time = time.time() - start_time
         return RedisConnectivityResult( )
-        test_type="dns_resolution",
+        test_type="dns_resolution,"
         host=host,
         port=port,
         success=False,
         response_time_seconds=response_time,
-        error_type="DNSResolutionError",
+        error_type="DNSResolutionError,"
         error_message="",
         business_impact="service_discovery_failure"
             
@@ -976,7 +976,7 @@ class TestStagingRedisConnectivityFailures:
         sock.close()
         response_time = time.time() - start_time
         return RedisConnectivityResult( )
-        test_type="tcp_connectivity",
+        test_type="tcp_connectivity,"
         host=host,
         port=port,
         success=True,
@@ -986,7 +986,7 @@ class TestStagingRedisConnectivityFailures:
         except Exception as e:
         response_time = time.time() - start_time
         return RedisConnectivityResult( )
-        test_type="tcp_connectivity",
+        test_type="tcp_connectivity,"
         host=host,
         port=port,
         success=False,
@@ -1012,10 +1012,10 @@ class TestStagingRedisConnectivityFailures:
         response_time = time.time() - start_time
 
         # Check for Redis PONG response
-        success = b"PONG" in response or b"+PONG" in response
+        success = b"PONG" in response or b"+PONG in response"
 
         return RedisConnectivityResult( )
-        test_type="redis_protocol_ping",
+        test_type="redis_protocol_ping,"
         host=host,
         port=port,
         success=success,
@@ -1027,7 +1027,7 @@ class TestStagingRedisConnectivityFailures:
         except Exception as e:
         response_time = time.time() - start_time
         return RedisConnectivityResult( )
-        test_type="redis_protocol_ping",
+        test_type="redis_protocol_ping,"
         host=host,
         port=port,
         success=False,
@@ -1058,11 +1058,11 @@ class TestStagingRedisConnectivityFailures:
         env = IsolatedEnvironment()
 
         try:
-        redis_url = env.get("REDIS_URL")
+        redis_url = env.get("REDIS_URL)"
         assert redis_url is not None, "Redis URL should be configured for staging"
 
                     # Quick connectivity test
-        if redis_url.startswith("redis://"):
+        if redis_url.startswith("redis://):"
         parsed = urlparse(redis_url)
         host = parsed.hostname
         port = parsed.port or 6379
@@ -1098,15 +1098,15 @@ class TestStagingRedisConnectivityFailures:
         env = IsolatedEnvironment()
 
         try:
-        session_store = env.get("SESSION_STORE_TYPE", "memory")
-        assert session_store == "redis", ( )
+        session_store = env.get("SESSION_STORE_TYPE", "memory)"
+        assert session_store == "redis", "( )"
         ""
                                         
 
         session_fallback = env.get("SESSION_FALLBACK_TO_MEMORY", "true").lower() == "true"
         assert not session_fallback, "Session memory fallback should be disabled in staging"
 
-        print("SUCCESS: Redis session store configuration validated")
+        print("SUCCESS: Redis session store configuration validated)"
 
         except Exception as e:
         assert False, ""
@@ -1114,9 +1114,9 @@ class TestStagingRedisConnectivityFailures:
         env.reset_to_original()
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         """Direct execution for rapid testing during development."""
-        print("Running Redis connectivity failure tests...")
+        print("Running Redis connectivity failure tests...)"
 
                                                     # Environment validation
         env = IsolatedEnvironment()
@@ -1132,4 +1132,4 @@ class TestStagingRedisConnectivityFailures:
         except Exception as e:
         print("")
 
-        print("Redis connectivity failure tests completed.")
+        print("Redis connectivity failure tests completed.)"

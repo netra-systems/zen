@@ -10,10 +10,10 @@ class TestWebSocketConnection:
 """
         """Send JSON message.""""""
         """Send JSON message.""""""
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -57,8 +57,8 @@ from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 """
 """
-CONCURRENT_TEST_CONFIG = {"agent_startup_timeout": 30.0,, "max_concurrent_users": 50}
-SERVICE_ENDPOINTS = {"redis": "redis://localhost:6379",, "postgres": "postgresql://localhost:5432/test",, "backend": "http://localhost:8000",, "websocket": "ws://localhost:8000/ws",, "auth_service": "http://localhost:8081"}
+CONCURRENT_TEST_CONFIG = {"agent_startup_timeout": 30.0,, "max_concurrent_users: 50}"
+SERVICE_ENDPOINTS = {"redis": "redis://localhost:6379",, "postgres": "postgresql://localhost:5432/test",, "backend": "http://localhost:8000",, "websocket": "ws://localhost:8000/ws",, "auth_service": "http://localhost:8081}"
         logger = logging.getLogger(__name__)
 
 
@@ -149,15 +149,15 @@ class IsolationReport:
 
         self.incidents.append({ ))"""
         self.incidents.append({ ))"""
-        "source_user": source_user,
+        "source_user: source_user,"
 
-        "target_user": target_user,
+        "target_user: target_user,"
 
-        "contaminated_data": contaminated_data,
+        "contaminated_data: contaminated_data,"
 
-        "detection_context": detection_context,
+        "detection_context: detection_context,"
 
-        "timestamp": time.time()
+        "timestamp: time.time()"
 
     
 
@@ -220,13 +220,13 @@ class TestConcurrentEnvironment:
     async def initialize(self):"""
         """Initialize test environment.""""""
         """Initialize test environment.""""""
-        logger.info("Initializing concurrent test environment...")
+        logger.info("Initializing concurrent test environment...)"
 
     # Initialize Redis connection (async)
 
         self.redis_client = redis.asyncio.Redis.from_url( )
 
-        SERVICE_ENDPOINTS["redis"],
+        SERVICE_ENDPOINTS["redis],"
 
         decode_responses=True,
 
@@ -238,7 +238,7 @@ class TestConcurrentEnvironment:
 
         self.db_pool = await asyncpg.create_pool( )
 
-        SERVICE_ENDPOINTS["postgres"],
+        SERVICE_ENDPOINTS["postgres],"
 
         min_size=10,
 
@@ -252,7 +252,7 @@ class TestConcurrentEnvironment:
 
         await self._verify_services()
 
-        logger.info("Concurrent test environment initialized successfully")
+        logger.info("Concurrent test environment initialized successfully)"
 
     async def _verify_services(self):
 
@@ -265,36 +265,36 @@ class TestConcurrentEnvironment:
 
         async with self.db_pool.acquire() as conn:"""
         async with self.db_pool.acquire() as conn:"""
-        await conn.fetchval("SELECT 1")
+        await conn.fetchval("SELECT 1)"
 
         # Test HTTP services
 
         async with httpx.AsyncClient(follow_redirects=True) as client:
             # Check backend service
 
-        backend_response = await client.get("formatted_string", timeout=10)
+        backend_response = await client.get("formatted_string, timeout=10)"
 
         if backend_response.status_code != 200:
             pass
-        raise RuntimeError("formatted_string")
+        raise RuntimeError("formatted_string)"
 
                 # Auth service check (optional for now)
 
         try:
             pass
-        auth_response = await client.get("formatted_string", timeout=5)
+        auth_response = await client.get("formatted_string, timeout=5)"
 
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
 
         except Exception as e:
             pass
-        logger.warning("formatted_string")
+        logger.warning("formatted_string)"
 
     async def seed_user_data(self, users: List[TestUser]):
 
         """Seed user data in databases.""""""
         """Seed user data in databases.""""""
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
 
     # Seed in parallel batches of 20 to avoid overwhelming database
 
@@ -308,11 +308,11 @@ class TestConcurrentEnvironment:
 
         await asyncio.gather(*tasks, return_exceptions=True)
 
-        logger.info("User data seeding completed")
+        logger.info("User data seeding completed)"
 
     async def _seed_single_user(self, user: TestUser):
 
-    #         """Seed data for a single user.""" # Possibly broken comprehension
+    #         """Seed data for a single user."" # Possibly broken comprehension"
 
         async with self.db_pool.acquire() as conn:
         # Insert user record"""
@@ -330,7 +330,7 @@ class TestConcurrentEnvironment:
 
         await self.redis_client.hset( )"""
         await self.redis_client.hset( )"""
-        "formatted_string",
+        "formatted_string,"
 
         mapping=user.context_data
         
@@ -340,7 +340,7 @@ class TestConcurrentEnvironment:
 
         """Clean up user data from databases.""""""
         """Clean up user data from databases.""""""
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
 
         user_ids = [user.user_id for user in users]
 
@@ -350,21 +350,21 @@ class TestConcurrentEnvironment:
 
         await conn.execute( )
 
-        "DELETE FROM users WHERE id = ANY($1)",
+        "DELETE FROM users WHERE id = ANY($1),"
 
         user_ids
         
 
         await conn.execute( )
 
-        "DELETE FROM user_sessions WHERE user_id = ANY($1)",
+        "DELETE FROM user_sessions WHERE user_id = ANY($1),"
 
         user_ids
         
 
         await conn.execute( )
 
-        "DELETE FROM agent_states WHERE user_id = ANY($1)",
+        "DELETE FROM agent_states WHERE user_id = ANY($1),"
 
         user_ids
         
@@ -372,13 +372,13 @@ class TestConcurrentEnvironment:
 
         # Clean Redis
 
-        redis_keys = ["formatted_string" for user_id in user_ids]
+        redis_keys = ["formatted_string for user_id in user_ids]"
 
         if redis_keys:
             pass
         await self.redis_client.delete(*redis_keys)
 
-        logger.info("User data cleanup completed")
+        logger.info("User data cleanup completed)"
 
     async def cleanup(self):
 
@@ -428,11 +428,11 @@ class CrossContaminationDetector:
 
         user.sensitive_data.update({ ))
 
-        'secret_api_key': "formatted_string",
+        'secret_api_key': "formatted_string,"
 
         'private_budget': 10000 * (hash(user.user_id) % 100 + 1),  # Use hash instead of parsing hex
 
-        'confidential_metrics': {"formatted_string": secrets.randbelow(1000) for i in range(5)}
+        'confidential_metrics': {"formatted_string: secrets.randbelow(1000) for i in range(5)}"
 
         
 
@@ -441,7 +441,7 @@ class CrossContaminationDetector:
 
     async def scan_for_contamination(self, responses: List[Dict[str, Any]], user_markers: Dict[str, Set[str]]) -> ContaminationReport:
 
-    #         """Scan agent responses for cross-user contamination.""" # Possibly broken comprehension
+    #         """Scan agent responses for cross-user contamination."" # Possibly broken comprehension"
 
         contamination_report = ContaminationReport()
 
@@ -482,21 +482,21 @@ class TestConcurrentOrchestrator:
 
         users = []"""
         users = []"""
-        regions = ["us-east-1", "us-west-2", "eu-west-1", "ap-southeast-1"]
+        regions = ["us-east-1", "us-west-2", "eu-west-1", "ap-southeast-1]"
 
         for i in range(count):
 
         user = TestUser( )
 
-        user_id="formatted_string",
+        user_id="formatted_string,"
 
-        email="formatted_string",
+        email="formatted_string,"
 
-        session_id="formatted_string",
+        session_id="formatted_string,"
 
-        auth_token=self._generate_test_jwt("formatted_string"),
+        auth_token=self._generate_test_jwt("formatted_string),"
 
-context_data={"budget": 50000 + (i * 1000),  # Unique budget per user, "region": regions[i % len(regions)],, "tier": "enterprise",, "unique_identifier": "formatted_string",, "user_preferences": { ), "optimization_focus": "formatted_string",, "risk_tolerance": "medium",, "notification_settings": {"email": True, "sms": False}}
+context_data={"budget": 50000 + (i * 1000),  # Unique budget per user, "region": regions[i % len(regions)],, "tier": "enterprise",, "unique_identifier": "formatted_string",, "user_preferences": { ), "optimization_focus": "formatted_string",, "risk_tolerance": "medium",, "notification_settings": {"email": True, "sms: False}}"
         users.append(user)
 
         # Inject contamination markers
@@ -507,12 +507,12 @@ context_data={"budget": 50000 + (i * 1000),  # Unique budget per user, "region":
 
     def _generate_test_jwt(self, user_id: str) -> str:
         """Generate test JWT token for user."""
-payload = {"sub": user_id,, "iat": int(time.time()),, "exp": int(time.time()) + 3600,, "user_id": user_id}
-        return jwt.encode(payload, "test-secret", algorithm="HS256")
+payload = {"sub": user_id,, "iat": int(time.time()),, "exp": int(time.time()) + 3600,, "user_id: user_id}"
+        return jwt.encode(payload, "test-secret", algorithm="HS256)"
 
     async def establish_websocket_connections(self, users: List[TestUser]) -> int:
         """Establish WebSocket connections for all users concurrently."""
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
 
     # Mock implementation - just mark as connected
         successful_connections = 0
@@ -522,22 +522,22 @@ payload = {"sub": user_id,, "iat": int(time.time()),, "exp": int(time.time()) + 
         user.websocket_client = Magic            user.startup_metrics['websocket_connection_time'] = 0.1
         successful_connections += 1
 
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
         return successful_connections
 
     async def send_concurrent_first_messages(self, users: List[TestUser]) -> List[Dict[str, Any]]:
         """Send first messages concurrently to all connected users."""
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
 
     # Mock implementation
         responses = []
         for user in users:
         if user.websocket_client:
             pass
-response = {'user_id': user.user_id,, 'session_id': user.session_id,, 'response': {"message": "Mock response", "agent_instance_id": "formatted_string"},, 'startup_time': 0.5,, 'agent_instance_id': "formatted_string"}
+response = {'user_id': user.user_id,, 'session_id': user.session_id,, 'response': {"message": "Mock response", "agent_instance_id": "formatted_string"},, 'startup_time': 0.5,, 'agent_instance_id': "formatted_string}"
         responses.append(response)
 
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
         return responses
 
 
@@ -550,14 +550,14 @@ class TestSyntaxFix:
     def _generate_test_jwt(self, user_id: str) -> str:"""
         """Generate test JWT token for user.""""""
         """Generate test JWT token for user.""""""
-payload = {"sub": user_id,, "iat": int(time.time()),, "exp": int(time.time()) + 3600,, "user_id": user_id}
-        return jwt.encode(payload, "test-secret", algorithm="HS256")
+payload = {"sub": user_id,, "iat": int(time.time()),, "exp": int(time.time()) + 3600,, "user_id: user_id}"
+        return jwt.encode(payload, "test-secret", algorithm="HS256)"
 
     async def establish_websocket_connections(self, users: List[TestUser]) -> int:
 
         """Establish WebSocket connections for all users concurrently.""""""
         """Establish WebSocket connections for all users concurrently.""""""
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
 
     # Connect in batches to avoid overwhelming the server
 
@@ -585,7 +585,7 @@ payload = {"sub": user_id,, "iat": int(time.time()),, "exp": int(time.time()) + 
 
         if isinstance(result, Exception):
             pass
-        logger.warning("formatted_string")
+        logger.warning("formatted_string)"
 
         elif result:
             pass
@@ -597,13 +597,13 @@ payload = {"sub": user_id,, "iat": int(time.time()),, "exp": int(time.time()) + 
             pass
         await asyncio.sleep(0.5)
 
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
 
         return successful_connections
 
     async def _establish_single_connection(self, user: TestUser) -> bool:
 
-    #         """Establish WebSocket connection for a single user.""" # Possibly broken comprehension
+    #         """Establish WebSocket connection for a single user."" # Possibly broken comprehension"
 
         try:
             pass
@@ -615,7 +615,7 @@ payload = {"sub": user_id,, "iat": int(time.time()),, "exp": int(time.time()) + 
 
         user.websocket_client = await websockets.connect( )
         uri,
-        close_timeout=CONCURRENT_TEST_CONFIG["agent_startup_timeout"]
+        close_timeout=CONCURRENT_TEST_CONFIG["agent_startup_timeout]"
         
         user.startup_metrics['websocket_connection_time'] = time.time() - start_time
 
@@ -623,7 +623,7 @@ payload = {"sub": user_id,, "iat": int(time.time()),, "exp": int(time.time()) + 
 
         except Exception as e:
             pass
-        logger.warning("formatted_string")
+        logger.warning("formatted_string)"
 
         user.startup_metrics['error'] = str(e)
 
@@ -633,7 +633,7 @@ payload = {"sub": user_id,, "iat": int(time.time()),, "exp": int(time.time()) + 
 
         """Send first messages concurrently to all connected users.""""""
         """Send first messages concurrently to all connected users.""""""
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
 
     # Filter users with active connections
 
@@ -641,7 +641,7 @@ payload = {"sub": user_id,, "iat": int(time.time()),, "exp": int(time.time()) + 
 
         if not connected_users:
             pass
-        logger.error("No connected users available for message sending")
+        logger.error("No connected users available for message sending)"
 
         return []
 
@@ -665,13 +665,13 @@ payload = {"sub": user_id,, "iat": int(time.time()),, "exp": int(time.time()) + 
 
         if isinstance(response, Exception):
             pass
-        logger.warning("formatted_string")
+        logger.warning("formatted_string)"
 
         else:
             pass
         valid_responses.append(response)
 
-        logger.info("formatted_string")
+        logger.info("formatted_string)"
 
         return valid_responses
 
@@ -681,13 +681,13 @@ payload = {"sub": user_id,, "iat": int(time.time()),, "exp": int(time.time()) + 
 
         if not user.websocket_client:"""
         if not user.websocket_client:"""
-        raise RuntimeError("formatted_string")
+        raise RuntimeError("formatted_string)"
 
         start_time = time.time()
 
         # Create user-specific message with sensitive data
 
-message = {"type": "chat_message",, "content": "formatted_string",, "session_id": user.session_id,, "user_data": user.sensitive_data,, "context": user.context_data}
+message = {"type": "chat_message",, "content": "formatted_string",, "session_id": user.session_id,, "user_data": user.sensitive_data,, "context: user.context_data}"
         # Send message
 
         await user.websocket_client.send(json.dumps(message))
@@ -696,7 +696,7 @@ message = {"type": "chat_message",, "content": "formatted_string",, "session_id"
 
         response_raw = await asyncio.wait_for( )
         user.websocket_client.recv(),
-        timeout=CONCURRENT_TEST_CONFIG["agent_startup_timeout"]
+        timeout=CONCURRENT_TEST_CONFIG["agent_startup_timeout]"
         
         response = json.loads(response_raw)
 
@@ -754,7 +754,7 @@ message = {"type": "chat_message",, "content": "formatted_string",, "session_id"
 
         - Memory isolation validated at agent instance level
 """"""
-        logger.info("Starting Test Case 2: Cross-Contamination Detection")
+        logger.info("Starting Test Case 2: Cross-Contamination Detection)"
 
         orchestrator = TestConcurrentOrchestrator(concurrent_test_environment)
 
@@ -784,7 +784,7 @@ message = {"type": "chat_message",, "content": "formatted_string",, "session_id"
 
         assert unauthorized_access_count == 0, "formatted_string"
 
-        logger.info("Test Case 2 completed: No contamination detected")
+        logger.info("Test Case 2 completed: No contamination detected)"
 
         @pytest.mark.e2e
                     # Removed problematic line: async def test_state_persistence_isolation( )
@@ -807,7 +807,7 @@ message = {"type": "chat_message",, "content": "formatted_string",, "session_id"
 """
 """
 """"""
-        logger.info("Starting Test Case 5: State Persistence Isolation")
+        logger.info("Starting Test Case 5: State Persistence Isolation)"
 
         orchestrator = TestConcurrentOrchestrator(concurrent_test_environment)
 
@@ -844,7 +844,7 @@ message = {"type": "chat_message",, "content": "formatted_string",, "session_id"
 
         assert integrity_violations == 0, "formatted_string"
 
-        logger.info("Test Case 5 completed: State persistence isolation validated")
+        logger.info("Test Case 5 completed: State persistence isolation validated)"
 
 ]]
 }}}}}

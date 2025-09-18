@@ -136,7 +136,7 @@ async def test_websocket_manager_basic_functionality():
             pytest.fail("Should have raised ValueError for None user_context")
         except ValueError as e:
             assert "UserExecutionContext" in str(e)
-            logger.info("✅ FIXED: get_websocket_manager() properly awaited - no coroutine warning")
+            logger.info("CHECK FIXED: get_websocket_manager() properly awaited - no coroutine warning")
 
         logger.info("WebSocket manager basic functionality test completed successfully")
 
@@ -171,7 +171,7 @@ async def test_agent_websocket_events_mission_critical():
             pytest.fail("Should have raised ValueError for None user_context")
         except ValueError as e:
             assert "UserExecutionContext" in str(e)
-            logger.info("✅ FIXED: get_websocket_manager() properly awaited in mission critical test")
+            logger.info("CHECK FIXED: get_websocket_manager() properly awaited in mission critical test")
 
         # Skip the rest of the WebSocket integration test to focus on the coroutine fix
         pytest.skip("Async coroutine fix validated - skipping full WebSocket integration test")

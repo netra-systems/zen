@@ -19,7 +19,7 @@ class SSOTComplianceFinalValidationTests:
         """FINAL: Deprecated configuration manager completely removed"""
         deprecated_path = Path('netra_backend/app/core/managers/unified_configuration_manager.py')
         assert not deprecated_path.exists(), f'SSOT VIOLATION: Deprecated configuration manager still exists at {deprecated_path}. SSOT compliance requires complete removal of duplicate implementations.'
-        print('✅ Deprecated configuration manager completely removed')
+        print('CHECK Deprecated configuration manager completely removed')
 
     def test_canonical_ssot_is_only_configuration_source_FINAL(self):
         """FINAL: Canonical SSOT is the only configuration source"""
@@ -35,7 +35,7 @@ class SSOTComplianceFinalValidationTests:
             except ImportError:
                 deprecated_import_failed = True
             assert deprecated_import_failed, f'SSOT VIOLATION: Deprecated configuration manager still importable. SSOT requires single source of truth for configuration.'
-            print('✅ Canonical UnifiedConfigManager is the only configuration source')
+            print('CHECK Canonical UnifiedConfigManager is the only configuration source')
         except ImportError as e:
             pytest.fail(f'Canonical UnifiedConfigManager not available: {e}')
 
@@ -60,7 +60,7 @@ class SSOTComplianceFinalValidationTests:
                 except Exception:
                     continue
         assert len(deprecated_import_references) == 0, f'SSOT VIOLATION: Code still references deprecated configuration manager: {deprecated_import_references[:10]}... All references must be updated to canonical UnifiedConfigManager.'
-        print('✅ No code references deprecated configuration manager')
+        print('CHECK No code references deprecated configuration manager')
 
     def test_canonical_configuration_provides_complete_interface_FINAL(self):
         """FINAL: Canonical configuration provides complete required interface"""
@@ -83,7 +83,7 @@ class SSOTComplianceFinalValidationTests:
                     accessible_interface[attr_name] = f'error: {str(e)[:30]}'
             successful_access = sum((1 for result in accessible_interface.values() if not result.startswith('error')))
             assert successful_access >= len(public_interface) * 0.8, f'Canonical UnifiedConfigManager interface partially broken: {accessible_interface}. SSOT requires fully functional replacement.'
-            print(f'✅ Canonical UnifiedConfigManager provides complete interface: {successful_access}/{len(public_interface)} attributes accessible')
+            print(f'CHECK Canonical UnifiedConfigManager provides complete interface: {successful_access}/{len(public_interface)} attributes accessible')
         except ImportError as e:
             pytest.fail(f'Cannot validate canonical configuration interface: {e}')
 
@@ -109,7 +109,7 @@ class SSOTComplianceFinalValidationTests:
             if refs['mixed']:
                 ssot_violations.append(f'{file_path}: mixed configuration references')
         assert len(ssot_violations) == 0, f'DEPLOYMENT SSOT VIOLATIONS: {ssot_violations}. All deployment scripts must use canonical configuration only.'
-        print(f'✅ All deployment scripts comply with SSOT: {len(deployment_config_references)} files checked')
+        print(f'CHECK All deployment scripts comply with SSOT: {len(deployment_config_references)} files checked')
 
     def test_test_files_use_canonical_configuration_FINAL(self):
         """FINAL: Test files use canonical configuration (with migration tolerance)"""
@@ -142,10 +142,10 @@ class SSOTComplianceFinalValidationTests:
             canonical_percentage = test_config_usage['canonical_usage'] / total_files * 100
             excessive_deprecated_usage = deprecated_percentage > 10
             if excessive_deprecated_usage:
-                print(f"⚠️ High deprecated configuration usage in tests: {deprecated_percentage:.1f}% ({test_config_usage['deprecated_usage']}/{total_files})")
+                print(f"WARNING️ High deprecated configuration usage in tests: {deprecated_percentage:.1f}% ({test_config_usage['deprecated_usage']}/{total_files})")
                 print(f'Files using deprecated config: {deprecated_test_files[:5]}...')
             assert not excessive_deprecated_usage, f'EXCESSIVE DEPRECATED CONFIG USAGE IN TESTS: {deprecated_percentage:.1f}% of test files still use deprecated configuration. SSOT requires migration to canonical configuration.'
-            print(f"✅ Test configuration usage acceptable: {canonical_percentage:.1f}% canonical, {deprecated_percentage:.1f}% deprecated, {test_config_usage['no_config_usage'] / total_files * 100:.1f}% no config")
+            print(f"CHECK Test configuration usage acceptable: {canonical_percentage:.1f}% canonical, {deprecated_percentage:.1f}% deprecated, {test_config_usage['no_config_usage'] / total_files * 100:.1f}% no config")
 
     def test_configuration_architecture_coherence_FINAL(self):
         """FINAL: Configuration architecture is coherent and well-structured"""
@@ -160,7 +160,7 @@ class SSOTComplianceFinalValidationTests:
         config_architecture = {'base_config': base_config_file.exists(), 'directory_exists': canonical_config_dir.exists(), 'sufficient_files': len(config_files) >= 1, 'substantial_implementation': base_config_size >= 1000}
         architecture_score = sum(config_architecture.values())
         assert architecture_score >= 4, f'Configuration architecture incomplete: {config_architecture}'
-        print(f'✅ Configuration architecture coherent: {len(config_files)} files, {base_config_size} bytes base config')
+        print(f'CHECK Configuration architecture coherent: {len(config_files)} files, {base_config_size} bytes base config')
 
     def test_ssot_principles_fully_implemented_FINAL(self):
         """FINAL: SSOT principles fully implemented for configuration"""
@@ -186,7 +186,7 @@ class SSOTComplianceFinalValidationTests:
         ssot_score = sum(ssot_compliance_checks.values())
         total_checks = len(ssot_compliance_checks)
         assert ssot_score >= total_checks, f'SSOT PRINCIPLES NOT FULLY IMPLEMENTED: {ssot_compliance_checks}. Score: {ssot_score}/{total_checks}. Full SSOT compliance required.'
-        print(f'✅ SSOT principles fully implemented: {ssot_score}/{total_checks} checks passed')
+        print(f'CHECK SSOT principles fully implemented: {ssot_score}/{total_checks} checks passed')
         print(f'SSOT compliance details: {ssot_compliance_checks}')
 
 @pytest.mark.unit
@@ -212,7 +212,7 @@ class ConfigurationMigrationCompletenessTests:
                     print(f'Stability test {attempt + 1} failed: {e}')
             stability_score = sum(stability_results)
             assert stability_score >= len(stability_results), f'SYSTEM UNSTABLE AFTER MIGRATION: {stability_results}. Configuration migration has introduced instability.'
-            print(f'✅ System stable after migration: {stability_score}/{len(stability_results)} tests passed')
+            print(f'CHECK System stable after migration: {stability_score}/{len(stability_results)} tests passed')
         except ImportError as e:
             pytest.fail(f'System stability test failed - cannot import canonical configuration: {e}')
 
@@ -239,7 +239,7 @@ class ConfigurationMigrationCompletenessTests:
                 business_continuity_checks['interface_complete'] = False
             continuity_score = sum(business_continuity_checks.values())
             assert continuity_score >= len(business_continuity_checks), f'BUSINESS CONTINUITY COMPROMISED: {business_continuity_checks}. Configuration migration has affected business operations.'
-            print(f'✅ Business continuity preserved: {continuity_score}/{len(business_continuity_checks)} checks passed')
+            print(f'CHECK Business continuity preserved: {continuity_score}/{len(business_continuity_checks)} checks passed')
         except ImportError as e:
             pytest.fail(f'Business continuity test failed: {e}')
 
@@ -259,7 +259,7 @@ class ConfigurationMigrationCompletenessTests:
             requirements_covered = sum((1 for count in golden_path_support.values() if count > 0))
             sufficient_support = total_support >= 10 or requirements_covered >= 3
             assert sufficient_support, f'INSUFFICIENT GOLDEN PATH CONFIGURATION SUPPORT: {golden_path_support}. Configuration must support critical Golden Path requirements for $500K+ ARR.'
-            print(f'✅ Golden Path configuration support adequate: {requirements_covered}/{len(golden_path_requirements)} requirements covered, {total_support} total related methods')
+            print(f'CHECK Golden Path configuration support adequate: {requirements_covered}/{len(golden_path_requirements)} requirements covered, {total_support} total related methods')
         except ImportError as e:
             pytest.fail(f'Golden Path configuration support test failed: {e}')
 if __name__ == '__main__':

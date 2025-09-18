@@ -13,7 +13,7 @@ CRITICAL VIOLATIONS TESTED:
 Business Value Justification (BVJ):
 - Segment: Platform Infrastructure (affects ALL user segments)
 - Business Goal: Prevent configuration-related Golden Path authentication failures  
-- Value Impact: Validates SSOT patterns prevent environment drift causing login→AI response failures
+- Value Impact: Validates SSOT patterns prevent environment drift causing login->AI response failures
 - Strategic Impact: Protects $500K+ ARR through consistent environment behavior
 
 EXPECTED BEHAVIOR:
@@ -151,7 +151,7 @@ class Issue724SSotViolationsTests(SSotBaseTestCase):
         assert missing_value == 'default_value'
         env_name = self.env.get_environment_name()
         assert env_name is not None
-        print('✅ IsolatedEnvironment SSOT patterns working correctly')
+        print('CHECK IsolatedEnvironment SSOT patterns working correctly')
 
     def test_ssot_violation_summary_report(self):
         """

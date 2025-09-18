@@ -1,32 +1,33 @@
 """
-"""
+
  ALERT:  MISSION CRITICAL: WebSocket JWT Bypass Violation Reproduction Test
 
 SSOT VIOLATION REPRODUCTION - Test #1 of 5
 This test EXPOSES the violation where WebSocket accepts invalid tokens due to verify_signature=False.
 
 VIOLATION DETAILS:
-- File: netra_backend/app/websocket_core/user_context_extractor.py
+    - File: netra_backend/app/websocket_core/user_context_extractor.py
 - Lines: 193-196 (JWT decode with verify_signature=False)
 - Issue: WebSocket accepts ANY JWT token without signature validation
 
 EXPECTED BEHAVIOR:
-- BEFORE SSOT FIX: Test PASSES (proving violation exists - invalid tokens accepted)  
+    - BEFORE SSOT FIX: Test PASSES (proving violation exists - invalid tokens accepted)  
 - AFTER SSOT FIX: Test FAILS (proving violation fixed - invalid tokens rejected)
 
 Business Value Justification (BVJ):
-- Segment: Enterprise/Security-conscious customers
+    - Segment: Enterprise/Security-conscious customers
 - Business Goal: Security compliance and customer trust
-- Value Impact: Prevents unauthorized access to $500K+ ARR chat functionality
+- Value Impact: Prevents unauthorized access to $500K+ plus ARR chat functionality
 - Revenue Impact: Security breach could cost entire customer base
 
 AUTH SSOT REQUIREMENT:
-All JWT operations MUST go through UnifiedAuthInterface - NO local JWT validation.
+    All JWT operations MUST go through UnifiedAuthInterface - NO local JWT validation.
 "
-"
+""
+
 
 """
-"""
+
 import asyncio
 import json
 import logging
@@ -48,19 +49,22 @@ logger = logging.getLogger(__name__)
 
 class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
     "
-    "
+    ""
+
     SSOT Violation Reproduction: Tests that WebSocket currently accepts invalid JWT tokens.
     
     This test proves the SSOT violation exists by showing that invalid/expired/malformed 
     JWT tokens are accepted due to verify_signature=False bypass logic.
 "
-"
+""
+
     
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_websocket_accepts_invalid_jwt_signature_violation(self):
-    "
-    "
+        """
+    ""
+
         VIOLATION REPRODUCTION: WebSocket accepts tokens with invalid signatures.
         
         CURRENT VIOLATION: user_context_extractor.py lines 193-196
@@ -70,13 +74,14 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
 "
 "
         logger.info( ALERT:  TESTING SSOT VIOLATION: Invalid JWT signature accepted)"
-        logger.info( ALERT:  TESTING SSOT VIOLATION: Invalid JWT signature accepted)"
+        logger.info( ALERT:  TESTING SSOT VIOLATION: Invalid JWT signature accepted)""
+
         
         # Create a JWT token with WRONG signature (should be rejected)
         fake_payload = {
             sub": test_user_123,"
             iss: netra-auth-service,
-            aud": "netra-backend,
+            aud": netra-backend,"
             exp: int((datetime.now() + timedelta(hours=1)).timestamp()),
             iat: int(datetime.now().timestamp()),"
             iat: int(datetime.now().timestamp()),"
@@ -122,7 +127,8 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
             # If token is rejected, violation might be fixed
             logger.info(f PASS:  Token properly rejected: {e})
             pytest.fail(VIOLATION NOT REPRODUCED: Invalid token was rejected (violation may be fixed))"
-            pytest.fail(VIOLATION NOT REPRODUCED: Invalid token was rejected (violation may be fixed))"
+            pytest.fail(VIOLATION NOT REPRODUCED: Invalid token was rejected (violation may be fixed))""
+
         
         # Shouldn't reach here'
         pytest.fail("VIOLATION TEST INCONCLUSIVE: Unable to determine violation status)"
@@ -139,19 +145,20 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
         
         # Create an EXPIRED JWT token
         expired_payload = {
-            sub": "expired_user_456, 
+            sub": expired_user_456, "
             iss: netra-auth-service,
             aud: "netra-backend,"
             exp": int((datetime.now() - timedelta(hours=1)).timestamp()),  # EXPIRED 1 hour ago"
             iat: int((datetime.now() - timedelta(hours=2)).timestamp()),
-            email": "expired@example.com
+            email": expired@example.com"
         }
         
         # Create expired token (even with correct secret, should be rejected due to expiry)
         env = get_env()
         jwt_secret = env.get(JWT_SECRET_KEY, default-test-secret)
         expired_token = jwt.encode(expired_payload, jwt_secret, algorithm=HS256)"
-        expired_token = jwt.encode(expired_payload, jwt_secret, algorithm=HS256)"
+        expired_token = jwt.encode(expired_payload, jwt_secret, algorithm=HS256)""
+
         
         logger.info(f" SEARCH:  Created expired token: {expired_token[:50]}...)"
         
@@ -167,7 +174,7 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
                 logger.error(f ALERT:  Extracted user context from expired token: {user_context})
                 
                 # Assertion that proves violation exists
-                assert user_context.get(sub") == "expired_user_456, \
+                assert user_context.get(sub") == expired_user_456, \"
                     SSOT VIOLATION: WebSocket accepted expired JWT token
                     
                 logger.critical( ALERT:  SECURITY VIOLATION: WebSocket accepted expired JWT token)"
@@ -179,13 +186,15 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
         except Exception as e:
             logger.info(f PASS:  Expired token properly rejected: {e})
             pytest.fail(VIOLATION NOT REPRODUCED: Expired token was rejected)"
-            pytest.fail(VIOLATION NOT REPRODUCED: Expired token was rejected)"
+            pytest.fail(VIOLATION NOT REPRODUCED: Expired token was rejected)""
+
     
     @pytest.mark.asyncio
     @pytest.mark.unit  
     async def test_websocket_accepts_malformed_jwt_token_violation(self):
-    "
-    "
+        """
+    ""
+
         VIOLATION REPRODUCTION: WebSocket accepts completely malformed JWT tokens.
         
         This test proves that even malformed/garbage tokens might be processed
@@ -227,7 +236,7 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
             logger.critical( ALERT:  SSOT VIOLATION CONFIRMED: Malformed tokens were accepted)"
             logger.critical( ALERT:  SSOT VIOLATION CONFIRMED: Malformed tokens were accepted)"
             logger.critical(" ALERT:  THIS TEST PASSES = VIOLATION EXISTS)"
-            assert True, SSOT VIOLATION: WebSocket accepted malformed JWT tokens
+            assert True, "SSOT VIOLATION: WebSocket accepted malformed JWT tokens"
         else:
             pytest.fail("VIOLATION NOT REPRODUCED: All malformed tokens were rejected)"
 
@@ -244,25 +253,27 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
             pytest.skip(Integration test requires services)
             
         logger.info( ALERT:  TESTING BUSINESS IMPACT: Unauthorized WebSocket access via JWT bypass)"
-        logger.info( ALERT:  TESTING BUSINESS IMPACT: Unauthorized WebSocket access via JWT bypass)"
+        logger.info( ALERT:  TESTING BUSINESS IMPACT: Unauthorized WebSocket access via JWT bypass)""
+
         
         # Create fake user token that would normally be unauthorized
         fake_admin_payload = {
             "sub: fake_admin_999,"
             iss: netra-auth-service, 
-            "aud: netra-backend",
+            "aud: netra-backend,"
             exp: int((datetime.now() + timedelta(hours=1)).timestamp()),
             iat: int(datetime.now().timestamp()),"
             iat: int(datetime.now().timestamp()),"
             "email: fake_admin@malicious.com,"
-            permissions: [admin, "chat, premium"]  # Elevated permissions
+            permissions: [admin, "chat, premium]  # Elevated permissions"
         }
         
         # Create token with wrong secret but proper structure
         fake_token = jwt.encode(fake_admin_payload, MALICIOUS_SECRET, algorithm=HS256)
         
         logger.info( SEARCH:  Testing unauthorized access with fake admin token)"
-        logger.info( SEARCH:  Testing unauthorized access with fake admin token)"
+        logger.info( SEARCH:  Testing unauthorized access with fake admin token)""
+
         
         from netra_backend.app.websocket_core.user_context_extractor import WebSocketUserContextExtractor
         extractor = WebSocketUserContextExtractor()
@@ -281,7 +292,7 @@ class WebSocketJwtBypassViolationTests(SSotAsyncTestCase):
                     logger.critical( ALERT:  FAKE ADMIN PERMISSIONS ACCEPTED - MASSIVE SECURITY BREACH")"
                 
                 # Business impact assertion
-                assert True, CRITICAL VIOLATION: JWT bypass enables unauthorized access to $500K+ ARR platform
+                assert True, "CRITICAL VIOLATION: JWT bypass enables unauthorized access to $500K+ plus ARR platform"
                 return True
                 
         except Exception as e:

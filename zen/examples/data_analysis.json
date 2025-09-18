@@ -1,0 +1,86 @@
+{
+  "// Description": "Scientific data processing workflow with statistical analysis and visualization",
+  "// Use Case": "Processing research datasets, generating insights, and creating reports",
+  "// Best Practices": "Separates data collection, analysis, and reporting into distinct agents for better organization",
+
+  "instances": [
+    {
+      "name": "data-collector",
+      "command": "/analyze dataset structure and quality; Read all CSV and JSON files in data/ directory; Generate data quality report with statistics on missing values, outliers, and data types",
+      "description": "Analyzes raw dataset structure and generates quality assessment",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 8000,
+      "allowed_tools": ["Read", "Glob", "Grep", "Write", "Task"],
+      "session_id": "data_collection_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "/clear",
+        "Set context: I am analyzing scientific datasets for quality and structure assessment"
+      ]
+    },
+    {
+      "name": "statistical-analyzer",
+      "command": "/perform comprehensive statistical analysis; Calculate descriptive statistics, correlation matrices, and identify significant patterns; Create visualizations for key findings",
+      "description": "Performs statistical analysis and identifies patterns in the data",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 12000,
+      "allowed_tools": ["Read", "Write", "Edit", "Bash", "Task"],
+      "session_id": "statistical_analysis_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am performing statistical analysis on preprocessed scientific data",
+        "Focus on: Descriptive statistics, correlation analysis, trend identification"
+      ]
+    },
+    {
+      "name": "insight-reporter",
+      "command": "/generate comprehensive research report; Synthesize findings from data quality assessment and statistical analysis; Create executive summary with key insights and recommendations",
+      "description": "Generates comprehensive reports combining all analysis results",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 15000,
+      "allowed_tools": ["Read", "Write", "Edit", "MultiEdit", "Task"],
+      "session_id": "reporting_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am creating a comprehensive research report based on completed data analysis",
+        "Include: Executive summary, methodology, key findings, visualizations, recommendations"
+      ]
+    },
+    {
+      "name": "visualization-specialist",
+      "command": "/create data visualizations; Generate charts, graphs, and plots to illustrate key findings; Export visualizations in multiple formats for presentations and reports",
+      "description": "Creates professional visualizations for the analyzed data",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 10000,
+      "allowed_tools": ["Read", "Write", "Bash", "Task"],
+      "session_id": "visualization_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am creating professional data visualizations for scientific research",
+        "Focus on: Clear, publication-ready charts that effectively communicate insights"
+      ]
+    }
+  ],
+
+  "// Configuration Notes": {
+    "execution_order": "Sequential - data-collector → statistical-analyzer → insight-reporter → visualization-specialist",
+    "session_management": "Each agent maintains its own session for context continuity",
+    "token_allocation": "Distributed based on complexity: reporting gets most tokens, collection gets least",
+    "tool_permissions": "Carefully selected based on each agent's specific needs",
+    "best_practices": [
+      "Always start with data quality assessment",
+      "Use separate sessions to maintain focused contexts",
+      "Allocate tokens based on expected output complexity",
+      "Include pre-commands to set proper context",
+      "Use compact_history to manage memory efficiently"
+    ]
+  }
+}

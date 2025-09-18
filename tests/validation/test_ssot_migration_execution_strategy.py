@@ -132,9 +132,9 @@ class SsotMigrationExecutionStrategyTests(SSotBaseTestCase):
         print(f"   Expected migration target: {self.get_metric('expected_files_to_migrate')}")
         
         if files_needing_migration == self.get_metric('expected_files_to_migrate'):
-            print("   ✅ File count matches Issue #1097 expectations")
+            print("   CHECK File count matches Issue #1097 expectations")
         else:
-            print(f"   ⚠️  File count differs from expectations")
+            print(f"   WARNING️  File count differs from expectations")
             print(f"   This may indicate progress or scope changes")
         
         # Validate baseline establishment
@@ -276,7 +276,7 @@ class LegacyExampleTests(SSotBaseTestCase):
         }
         
         for validation, passed in migration_validations.items():
-            status = "✅" if passed else "❌"
+            status = "CHECK" if passed else "X"
             print(f"   {status} {validation}: {passed}")
         
         # Record migration pattern metrics
@@ -293,7 +293,7 @@ class LegacyExampleTests(SSotBaseTestCase):
         # Migration pattern must be successful
         assert migration_success_rate >= 90, f"Migration pattern success rate {migration_success_rate:.1f}% below 90% threshold"
         
-        print("   ✅ Migration pattern validation successful")
+        print("   CHECK Migration pattern validation successful")
         print("\n" + "="*70)
     
     def test_batch_migration_strategy(self):
@@ -449,7 +449,7 @@ class LegacyExampleTests(SSotBaseTestCase):
         print(f"\n4. Strategy Validation:")
         print(f"   Total files in strategy: {total_files_to_migrate}")
         print(f"   Migration phases: {len(batch_strategy)}")
-        print("   ✅ Batch migration strategy validated")
+        print("   CHECK Batch migration strategy validated")
         
         print("\n" + "="*70)
     
@@ -551,7 +551,7 @@ class LegacyExampleTests(SSotBaseTestCase):
         assert original_hash == rollback_hash, "Rollback simulation failed"
         assert modified_hash != rollback_hash, "Rollback simulation invalid"
         
-        print("   ✅ Rollback simulation successful")
+        print("   CHECK Rollback simulation successful")
         
         # Record rollback strategy metrics
         self.record_metric("rollback_levels", len(rollback_strategy))
@@ -560,12 +560,12 @@ class LegacyExampleTests(SSotBaseTestCase):
         self.record_metric("rollback_simulation_passed", True)
         
         print("\n5. Strategy Completeness Validation:")
-        print("   ✅ File-level rollback strategy defined")
-        print("   ✅ Batch-level rollback strategy defined")  
-        print("   ✅ Phase-level rollback strategy defined")
-        print("   ✅ Emergency rollback strategy defined")
-        print("   ✅ Business value protection validated")
-        print("   ✅ Rollback simulation passed")
+        print("   CHECK File-level rollback strategy defined")
+        print("   CHECK Batch-level rollback strategy defined")  
+        print("   CHECK Phase-level rollback strategy defined")
+        print("   CHECK Emergency rollback strategy defined")
+        print("   CHECK Business value protection validated")
+        print("   CHECK Rollback simulation passed")
         
         print("\n" + "="*70)
     
@@ -613,7 +613,7 @@ if __name__ == "__main__":
         print("\n🧪 Running rollback and recovery strategy validation...")
         test_instance.test_rollback_and_recovery_strategy()
         
-        print("\n✅ All execution strategy tests completed successfully!")
+        print("\nCHECK All execution strategy tests completed successfully!")
         
         # Display strategy summary
         print("\n" + "="*70)
@@ -630,7 +630,7 @@ if __name__ == "__main__":
         print("\n📋 Ready for Issue #1097 SSOT migration execution!")
         
     except Exception as e:
-        print(f"\n❌ Execution strategy test failed: {e}")
+        print(f"\nX Execution strategy test failed: {e}")
         raise
         
     finally:

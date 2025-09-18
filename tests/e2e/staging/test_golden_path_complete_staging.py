@@ -24,7 +24,7 @@ Approach: Real staging GCP services, complete end-to-end validation
 MISSION CRITICAL: This test validates the complete Golden Path that delivers
 $500K+ ARR through chat functionality. Must work in staging environment.
 
-Golden Path Flow: Login → WebSocket Connection → Agent Execution → AI Response
+Golden Path Flow: Login -> WebSocket Connection -> Agent Execution -> AI Response
 Business Impact: 90% of platform value delivered through this workflow
 
 PHASE 1 REMEDIATION: Removed try/except blocks that hide failures.
@@ -101,7 +101,7 @@ class GoldenPathCompleteStagingTests(SSotAsyncTestCase):
     @pytest.mark.mission_critical
     async def test_complete_golden_path_staging_workflow(self):
         """
-        Test complete Golden Path workflow in staging: Login → AI Response
+        Test complete Golden Path workflow in staging: Login -> AI Response
         
         Issue: #426 - E2E golden path tests failing due to service dependencies
         Difficulty: Very High (60 minutes)

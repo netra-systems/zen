@@ -1,0 +1,117 @@
+{
+  "// Description": "Comprehensive test suite execution and analysis workflow",
+  "// Use Case": "Running test suites, analyzing results, generating coverage reports, and creating test improvements",
+  "// Best Practices": "Separates test execution, analysis, coverage, and improvement planning",
+
+  "instances": [
+    {
+      "name": "test-executor",
+      "command": "/execute comprehensive test suite; Run unit tests, integration tests, and e2e tests; Capture detailed results including failures, warnings, and performance metrics; Generate execution summary",
+      "description": "Executes full test suite and captures comprehensive results",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 15000,
+      "allowed_tools": ["Bash", "Read", "Write", "Task"],
+      "session_id": "test_execution_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "/clear",
+        "Set context: I am executing comprehensive test suites",
+        "Focus: Unit tests, integration tests, e2e tests, performance metrics"
+      ]
+    },
+    {
+      "name": "failure-analyzer",
+      "command": "/analyze test failures and errors; Categorize failures by type (flaky, environmental, code issues); Identify root causes and suggest fixes; Prioritize failures by impact and frequency",
+      "description": "Analyzes test failures and provides remediation guidance",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 12000,
+      "allowed_tools": ["Read", "Grep", "Write", "Task"],
+      "session_id": "failure_analysis_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am analyzing test failures and identifying root causes",
+        "Categories: Code bugs, environmental issues, flaky tests, configuration problems"
+      ]
+    },
+    {
+      "name": "coverage-analyst",
+      "command": "/analyze test coverage metrics; Review code coverage reports for completeness; Identify untested critical paths and edge cases; Generate coverage improvement recommendations",
+      "description": "Analyzes test coverage and identifies gaps",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 10000,
+      "allowed_tools": ["Read", "Bash", "Grep", "Write", "Task"],
+      "session_id": "coverage_analysis_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am analyzing test coverage and identifying gaps",
+        "Focus: Line coverage, branch coverage, critical paths, edge cases"
+      ]
+    },
+    {
+      "name": "performance-monitor",
+      "command": "/monitor test performance and trends; Analyze test execution times and identify slow tests; Track performance regression over time; Suggest performance optimizations for test suite",
+      "description": "Monitors test performance and identifies optimization opportunities",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 8000,
+      "allowed_tools": ["Read", "Bash", "Write", "Task"],
+      "session_id": "performance_monitoring_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am monitoring test performance and identifying optimization opportunities",
+        "Focus: Execution times, performance trends, bottlenecks, optimization strategies"
+      ]
+    },
+    {
+      "name": "test-improvement-planner",
+      "command": "/create comprehensive test improvement plan; Synthesize findings from execution, failures, coverage, and performance analysis; Prioritize improvements by impact and effort; Generate actionable roadmap",
+      "description": "Creates comprehensive test improvement strategy",
+      "permission_mode": "bypassPermissions",
+      "output_format": "stream-json",
+      "max_tokens_per_command": 16000,
+      "allowed_tools": ["Read", "Write", "Edit", "MultiEdit", "Task"],
+      "session_id": "improvement_planning_session",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [
+        "Set context: I am creating a comprehensive test improvement plan",
+        "Output: Prioritized roadmap with specific actions, effort estimates, and impact assessment"
+      ]
+    }
+  ],
+
+  "// Test Configuration": {
+    "test_types": ["unit", "integration", "e2e", "performance", "security"],
+    "coverage_targets": "Unit: 90%+, Integration: 80%+, E2E: Critical paths 100%",
+    "performance_thresholds": "Unit: <100ms, Integration: <5s, E2E: <30s",
+    "failure_tolerance": "0% for critical paths, <5% for non-critical"
+  },
+
+  "// Execution Strategy": {
+    "parallel_execution": "Run test categories in parallel where possible",
+    "failure_handling": "Continue execution to capture all failures",
+    "reporting_format": "JUnit XML, coverage reports, performance metrics",
+    "artifact_management": "Save test artifacts for analysis and debugging"
+  },
+
+  "// Configuration Notes": {
+    "workflow_type": "Parallel analysis with final synthesis",
+    "session_management": "Each analyzer maintains focused context",
+    "token_allocation": "Improvement planning gets most tokens for comprehensive roadmap",
+    "tool_integration": "Bash for execution, analysis tools for processing results",
+    "best_practices": [
+      "Execute tests in isolated environments",
+      "Capture comprehensive metrics for analysis",
+      "Categorize failures by type and severity",
+      "Focus on actionable improvement recommendations",
+      "Track trends over time for continuous improvement"
+    ]
+  }
+}

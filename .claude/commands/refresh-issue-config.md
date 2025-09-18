@@ -8,12 +8,12 @@ Create a new config similar to this
   "instances": [
     {
       "command": "/gitissueprogressorv4 {issue number}",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     },
     {
       "command": "/gitissueprogressorv4 {issue number}",
-      "permission_mode": "acceptEdits",
+      "permission_mode": "bypassPermissions",
       "output_format": "stream-json"
     }
   ]

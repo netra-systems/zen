@@ -47,7 +47,7 @@ class FactoryLayerDeprecationComplianceTests(SSotAsyncTestCase):
         self.assertIn("SSOT", module_doc.upper(),
                      "Factory module should mention SSOT in deprecation notice")
 
-        logger.info("✅ Factory module contains proper deprecation notices")
+        logger.info("CHECK Factory module contains proper deprecation notices")
 
     def test_factory_functions_emit_deprecation_warnings(self):
         """Test that factory functions emit proper deprecation warnings."""
@@ -74,7 +74,7 @@ class FactoryLayerDeprecationComplianceTests(SSotAsyncTestCase):
 
                     # Should have at least one deprecation warning
                     if len(deprecation_warnings) == 0:
-                        logger.warning("⚠ No deprecation warning emitted - checking function documentation")
+                        logger.warning("WARNING No deprecation warning emitted - checking function documentation")
 
                         # Check if function at least documents the deprecation
                         func_doc = create_websocket_manager.__doc__ or ""
@@ -85,16 +85,16 @@ class FactoryLayerDeprecationComplianceTests(SSotAsyncTestCase):
                         warning_message = str(deprecation_warnings[0].message)
                         self.assertIn("deprecated", warning_message.lower(),
                                      "Warning message should mention deprecation")
-                        logger.info(f"✓ Deprecation warning emitted: {warning_message}")
+                        logger.info(f"CHECK Deprecation warning emitted: {warning_message}")
 
                 except Exception as e:
-                    logger.warning(f"⚠ Factory function call failed (expected during migration): {e}")
+                    logger.warning(f"WARNING Factory function call failed (expected during migration): {e}")
                     # Verify function is at least documented as deprecated
                     func_doc = create_websocket_manager.__doc__ or ""
                     self.assertIn("DEPRECATED", func_doc.upper(),
                                  "Factory function should be documented as deprecated")
 
-        logger.info("✅ Factory deprecation warnings validated")
+        logger.info("CHECK Factory deprecation warnings validated")
 
     def test_factory_redirects_to_canonical_ssot(self):
         """Test that factory functions redirect to canonical SSOT implementation."""
@@ -117,10 +117,10 @@ class FactoryLayerDeprecationComplianceTests(SSotAsyncTestCase):
                 self.assertTrue(mock_canonical.called,
                                "Factory should delegate to canonical WebSocketManager")
 
-                logger.info("✓ Factory successfully redirects to canonical SSOT")
+                logger.info("CHECK Factory successfully redirects to canonical SSOT")
 
             except Exception as e:
-                logger.warning(f"⚠ Factory redirection test failed (expected during migration): {e}")
+                logger.warning(f"WARNING Factory redirection test failed (expected during migration): {e}")
 
                 # At minimum, verify that the factory imports from canonical source
                 factory_module = sys.modules.get(self.factory_module_path)
@@ -129,7 +129,7 @@ class FactoryLayerDeprecationComplianceTests(SSotAsyncTestCase):
                     self.assertIn("unified_manager", factory_source.lower(),
                                  "Factory should import from unified_manager")
 
-        logger.info("✅ Factory redirection to SSOT validated")
+        logger.info("CHECK Factory redirection to SSOT validated")
 
     def test_factory_migration_phase_identification(self):
         """Test that factory clearly identifies current migration phase."""
@@ -159,7 +159,7 @@ class FactoryLayerDeprecationComplianceTests(SSotAsyncTestCase):
         self.assertIn("unified_manager", module_doc.lower(),
                      "Factory should reference canonical unified_manager import")
 
-        logger.info(f"✅ Factory identifies migration {found_phase} with clear instructions")
+        logger.info(f"CHECK Factory identifies migration {found_phase} with clear instructions")
 
     def test_factory_deprecation_timeline(self):
         """Test that factory includes clear deprecation timeline."""
@@ -186,7 +186,7 @@ class FactoryLayerDeprecationComplianceTests(SSotAsyncTestCase):
         self.assertTrue(found_next_step,
                        "Factory should indicate next steps in deprecation timeline")
 
-        logger.info("✅ Factory deprecation timeline properly documented")
+        logger.info("CHECK Factory deprecation timeline properly documented")
 
     def test_no_new_factory_patterns_created(self):
         """Test that no new factory patterns are being created for WebSocket Manager."""
@@ -213,7 +213,7 @@ class FactoryLayerDeprecationComplianceTests(SSotAsyncTestCase):
         if unexpected_factories:
             self.fail(f"SSOT VIOLATION: Unexpected WebSocket factory modules found: {unexpected_factories}")
 
-        logger.info("✅ No unexpected WebSocket factory patterns detected")
+        logger.info("CHECK No unexpected WebSocket factory patterns detected")
 
     def test_factory_backward_compatibility(self):
         """Test that factory maintains backward compatibility during migration."""
@@ -238,7 +238,7 @@ class FactoryLayerDeprecationComplianceTests(SSotAsyncTestCase):
             self.assertIn("MIGRATION", func_doc.upper(),
                          "If parameters changed, should document migration path")
 
-        logger.info("✅ Factory backward compatibility considerations validated")
+        logger.info("CHECK Factory backward compatibility considerations validated")
 
 
 if __name__ == '__main__':

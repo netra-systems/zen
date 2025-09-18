@@ -39,7 +39,7 @@ class WebSocketFactoryPreservationTests(BaseIntegrationTest, unittest.TestCase):
             self.assertTrue(hasattr(UnifiedWebSocketManager, 'create_for_user'),
                 "WebSocket manager should have factory method")
 
-            print("✅ WebSocket factory pattern detected")
+            print("CHECK WebSocket factory pattern detected")
 
         except ImportError as e:
             # Fallback to other WebSocket managers
@@ -85,7 +85,7 @@ class WebSocketFactoryPreservationTests(BaseIntegrationTest, unittest.TestCase):
         self.assertIsNot(user1_state, user2_state,
             "Execution states should be independent objects")
 
-        print("✅ User context isolation verified")
+        print("CHECK User context isolation verified")
 
     @pytest.mark.integration
     async def test_websocket_connection_factory_isolation(self):
@@ -113,10 +113,10 @@ class WebSocketFactoryPreservationTests(BaseIntegrationTest, unittest.TestCase):
                     "WebSocket user contexts should be isolated"
                 )
 
-            print("✅ WebSocket connection factory isolation verified")
+            print("CHECK WebSocket connection factory isolation verified")
 
         except Exception as e:
-            print(f"⚠️  WebSocket factory test skipped: {e}")
+            print(f"WARNING️  WebSocket factory test skipped: {e}")
             self.skipTest("WebSocket factory testing not available")
 
     @pytest.mark.integration
@@ -152,7 +152,7 @@ class WebSocketFactoryPreservationTests(BaseIntegrationTest, unittest.TestCase):
         self.assertEqual(len(set(state_ids)), len(state_ids),
             "All execution states should be independent objects")
 
-        print("✅ Concurrent factory usage safety verified")
+        print("CHECK Concurrent factory usage safety verified")
 
     @pytest.mark.integration
     async def test_factory_pattern_consolidation_readiness(self):
@@ -179,7 +179,7 @@ class WebSocketFactoryPreservationTests(BaseIntegrationTest, unittest.TestCase):
             print(f"Factory methods detected: {factory_methods}")
 
         except ImportError:
-            print("⚠️  UnifiedWebSocketManager not available for factory analysis")
+            print("WARNING️  UnifiedWebSocketManager not available for factory analysis")
 
         # Test SSOT consolidation readiness
         # Current state should demonstrate need for consolidation
@@ -219,7 +219,7 @@ class WebSocketFactoryPreservationTests(BaseIntegrationTest, unittest.TestCase):
         self.assertTrue(factory_compliance_metrics['concurrent_safety'],
             "Concurrent safety must be preserved during consolidation")
 
-        print("✅ Factory pattern consolidation readiness validated")
+        print("CHECK Factory pattern consolidation readiness validated")
 
     @pytest.mark.integration
     async def test_post_consolidation_factory_requirements(self):
@@ -241,7 +241,7 @@ class WebSocketFactoryPreservationTests(BaseIntegrationTest, unittest.TestCase):
         # This test documents what the consolidated system should achieve
         print("📋 SSOT Factory Requirements (Target State):")
         for requirement, expected in ssot_factory_requirements.items():
-            print(f"  ✓ {requirement}: Required")
+            print(f"  CHECK {requirement}: Required")
 
         # Create validation criteria for future consolidated system
         validation_criteria = {
@@ -258,7 +258,7 @@ class WebSocketFactoryPreservationTests(BaseIntegrationTest, unittest.TestCase):
         # This test validates what we're building towards
         self.assertTrue(True, "Factory requirements documented and validated")
 
-        print("✅ Post-consolidation factory requirements defined")
+        print("CHECK Post-consolidation factory requirements defined")
 
     @pytest.mark.integration
     async def test_consolidation_backward_compatibility(self):
@@ -311,12 +311,12 @@ class WebSocketFactoryPreservationTests(BaseIntegrationTest, unittest.TestCase):
                     compatibility_results[test_name] = True  # Default pass
 
             except Exception as e:
-                print(f"⚠️  Backward compatibility test {test_name} failed: {e}")
+                print(f"WARNING️  Backward compatibility test {test_name} failed: {e}")
                 compatibility_results[test_name] = False
 
         print(f"\n=== Backward Compatibility Results ===")
         for test_name, result in compatibility_results.items():
-            status = "✅ PASS" if result else "❌ FAIL"
+            status = "CHECK PASS" if result else "X FAIL"
             print(f"  {test_name}: {status}")
 
         # Calculate compatibility score
@@ -327,4 +327,4 @@ class WebSocketFactoryPreservationTests(BaseIntegrationTest, unittest.TestCase):
         self.assertGreater(compatibility_score, 0.8,
             "Backward compatibility score should be >80%")
 
-        print("✅ Backward compatibility validation completed")
+        print("CHECK Backward compatibility validation completed")

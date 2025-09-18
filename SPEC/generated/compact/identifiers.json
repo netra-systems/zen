@@ -30206,7 +30206,7 @@
     "accept",
     "accept-encoding",
     "accept-language",
-    "acceptEdits",
+    "bypassPermissions",
     "acceptable",
     "acceptable_for_environment",
     "acceptance",

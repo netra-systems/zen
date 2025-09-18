@@ -114,7 +114,18 @@ class StandardWebSocketBridge:
 
 class WebSocketBridgeFactory:
     """
-    Factory class for creating WebSocket bridge components with proper dependency injection.
+    DEPRECATED: Unnecessary factory abstraction for WebSocket bridge components.
+
+    This factory adds no value over direct instantiation and has been deprecated
+    as part of Issue #1194 factory pattern over-engineering cleanup.
+
+    MIGRATION PATH:
+    - Replace WebSocketBridgeFactory.create_standard_bridge() with StandardWebSocketBridge()
+    - Replace WebSocketBridgeFactory.create_bridge_adapter() with WebSocketBridgeAdapter()
+    - Replace WebSocketBridgeFactory.create_agent_bridge() with create_agent_websocket_bridge()
+
+    This class is maintained temporarily for backward compatibility but will be
+    removed in a future release.
     """
 
     @staticmethod
@@ -123,7 +134,20 @@ class WebSocketBridgeFactory:
         user_context: Optional[UserExecutionContext] = None,
         bridge_id: Optional[str] = None
     ) -> StandardWebSocketBridge:
-        """Create a StandardWebSocketBridge instance."""
+        """
+        DEPRECATED: Use StandardWebSocketBridge() directly.
+
+        Example:
+            # OLD (over-engineered)
+            bridge = WebSocketBridgeFactory.create_standard_bridge(manager, context, id)
+
+            # NEW (direct instantiation)
+            bridge = StandardWebSocketBridge(manager, context, id)
+        """
+        logger.warning(
+            "WebSocketBridgeFactory.create_standard_bridge() is deprecated. "
+            "Use StandardWebSocketBridge() directly for Issue #1194 compliance."
+        )
         return StandardWebSocketBridge(
             websocket_manager=websocket_manager,
             user_context=user_context,
@@ -135,8 +159,20 @@ class WebSocketBridgeFactory:
         websocket_manager: Optional["WebSocketManager"] = None,
         user_context: Optional[UserExecutionContext] = None
     ) -> WebSocketBridgeAdapter:
-        """Create a WebSocketBridgeAdapter instance."""
-        # The WebSocketBridgeAdapter from request_scoped_tool_dispatcher expects specific parameters
+        """
+        DEPRECATED: Use WebSocketBridgeAdapter() directly.
+
+        Example:
+            # OLD (over-engineered)
+            adapter = WebSocketBridgeFactory.create_bridge_adapter(manager)
+
+            # NEW (direct instantiation)
+            adapter = WebSocketBridgeAdapter(websocket_manager=manager)
+        """
+        logger.warning(
+            "WebSocketBridgeFactory.create_bridge_adapter() is deprecated. "
+            "Use WebSocketBridgeAdapter() directly for Issue #1194 compliance."
+        )
         return WebSocketBridgeAdapter(
             websocket_manager=websocket_manager
         )
@@ -146,7 +182,20 @@ class WebSocketBridgeFactory:
         websocket_manager: Optional["WebSocketManager"] = None,
         user_context: Optional[UserExecutionContext] = None
     ) -> AgentWebSocketBridge:
-        """Create an AgentWebSocketBridge instance."""
+        """
+        DEPRECATED: Use create_agent_websocket_bridge() function directly.
+
+        Example:
+            # OLD (over-engineered)
+            bridge = WebSocketBridgeFactory.create_agent_bridge(manager, context)
+
+            # NEW (direct function call)
+            bridge = create_agent_websocket_bridge(manager, context)
+        """
+        logger.warning(
+            "WebSocketBridgeFactory.create_agent_bridge() is deprecated. "
+            "Use create_agent_websocket_bridge() directly for Issue #1194 compliance."
+        )
         if websocket_manager and user_context:
             return create_agent_websocket_bridge(
                 websocket_manager=websocket_manager,
@@ -157,14 +206,23 @@ class WebSocketBridgeFactory:
             return AgentWebSocketBridge()
 
 
-# Factory function aliases for backward compatibility and easier imports
+# DEPRECATED: Factory function aliases - use direct instantiation instead
 def create_standard_websocket_bridge(
     websocket_manager: Optional["WebSocketManager"] = None,
     user_context: Optional[UserExecutionContext] = None,
     bridge_id: Optional[str] = None
 ) -> StandardWebSocketBridge:
-    """Factory function to create a StandardWebSocketBridge."""
-    return WebSocketBridgeFactory.create_standard_bridge(
+    """
+    DEPRECATED: Factory function wrapper adds no value.
+
+    Use StandardWebSocketBridge() directly instead of this function wrapper.
+    This eliminates unnecessary indirection per Issue #1194 factory cleanup.
+    """
+    logger.warning(
+        "create_standard_websocket_bridge() is deprecated. "
+        "Use StandardWebSocketBridge() directly for Issue #1194 compliance."
+    )
+    return StandardWebSocketBridge(
         websocket_manager=websocket_manager,
         user_context=user_context,
         bridge_id=bridge_id
@@ -175,27 +233,82 @@ def create_agent_bridge_adapter(
     websocket_manager: Optional["WebSocketManager"] = None,
     user_context: Optional[UserExecutionContext] = None
 ) -> WebSocketBridgeAdapter:
-    """Factory function to create a WebSocketBridgeAdapter."""
-    return WebSocketBridgeFactory.create_bridge_adapter(
-        websocket_manager=websocket_manager,
-        user_context=user_context
+    """
+    DEPRECATED: Factory function wrapper adds no value.
+
+    Use WebSocketBridgeAdapter() directly instead of this function wrapper.
+    This eliminates unnecessary indirection per Issue #1194 factory cleanup.
+    """
+    logger.warning(
+        "create_agent_bridge_adapter() is deprecated. "
+        "Use WebSocketBridgeAdapter() directly for Issue #1194 compliance."
+    )
+    return WebSocketBridgeAdapter(
+        websocket_manager=websocket_manager
     )
 
 
-# Additional factory functions for common patterns
+# DEPRECATED: Additional factory wrapper functions
 def create_websocket_bridge_for_testing() -> StandardWebSocketBridge:
-    """Create a minimal WebSocket bridge suitable for testing scenarios."""
+    """
+    DEPRECATED: Use StandardWebSocketBridge(bridge_id="test_bridge") directly.
+
+    This wrapper function adds no value over direct instantiation.
+    """
+    logger.warning(
+        "create_websocket_bridge_for_testing() is deprecated. "
+        "Use StandardWebSocketBridge(bridge_id='test_bridge') directly."
+    )
     return StandardWebSocketBridge(bridge_id="test_bridge")
 
 
 def create_websocket_bridge_with_context(
     user_context: UserExecutionContext
 ) -> StandardWebSocketBridge:
-    """Create a WebSocket bridge with user context but without WebSocket manager."""
+    """
+    DEPRECATED: Use StandardWebSocketBridge(user_context=context, bridge_id=...) directly.
+
+    This wrapper function adds no value over direct instantiation.
+    """
+    logger.warning(
+        "create_websocket_bridge_with_context() is deprecated. "
+        "Use StandardWebSocketBridge() constructor directly."
+    )
     return StandardWebSocketBridge(
         user_context=user_context,
         bridge_id=f"ctx_bridge_{user_context.user_id[:8] if user_context.user_id else 'unknown'}"
     )
+
+
+def get_websocket_bridge_factory() -> WebSocketBridgeFactory:
+    """
+    DEPRECATED: WebSocketBridgeFactory adds no value over direct instantiation.
+
+    This function exists only for backward compatibility and will be removed.
+    Use direct instantiation instead.
+    """
+    logger.warning(
+        "get_websocket_bridge_factory() is deprecated. "
+        "Use direct instantiation instead of factory pattern."
+    )
+    return WebSocketBridgeFactory()
+
+
+def reset_websocket_bridge_factory() -> None:
+    """Reset any global factory state - FOR TESTING ONLY.
+
+    This function provides compatibility with testing infrastructure that expects
+    a reset function for factory patterns. Currently this factory doesn't maintain
+    global state, but this function is provided for consistency and future-proofing.
+
+    Note: This factory is deprecated as part of Issue #1194 factory cleanup.
+    """
+    logger.info("WebSocket bridge factory reset called - no global state to reset")
+    # Note: This factory doesn't currently maintain global state like the
+    # WebSocketManagerFactory does, but this function is provided for:
+    # 1. Backward compatibility with existing test infrastructure
+    # 2. Consistency with other factory reset patterns
+    # 3. Future-proofing if global state is added later
 
 
 # Export all public classes and functions
@@ -207,6 +320,8 @@ __all__ = [
     "create_agent_bridge_adapter",
     "create_websocket_bridge_for_testing",
     "create_websocket_bridge_with_context",
+    "get_websocket_bridge_factory",
+    "reset_websocket_bridge_factory",  # Added missing function
     # Re-export AgentWebSocketBridge for convenience
     "AgentWebSocketBridge",
     "create_agent_websocket_bridge",

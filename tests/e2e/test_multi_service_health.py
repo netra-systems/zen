@@ -45,27 +45,27 @@ logger = central_logger.get_logger(__name__)
 
         # Service endpoints and timeouts
 SERVICE_ENDPOINTS = { }
-"auth": { }
-"url": "http://localhost:8081/health",
-"timeout": 5.0,
+"auth: { }"
+"url": "http://localhost:8081/health,"
+"timeout: 5.0,"
 "expected_service": "auth-service"
 },
-"backend": { }
-"url": "http://localhost:8000/health",
-"timeout": 5.0,
+"backend: { }"
+"url": "http://localhost:8000/health,"
+"timeout: 5.0,"
 "expected_service": "netra-ai-platform"
 },
-"frontend": { }
-"url": "http://localhost:3000",
-"timeout": 10.0,
+"frontend: { }"
+"url": "http://localhost:3000,"
+"timeout: 10.0,"
 "check_type": "build_verification"
         
         
 
 DATABASE_TIMEOUTS = { }
-"postgres": 3.0,
-"clickhouse": 5.0,
-"redis": 2.0
+"postgres: 3.0,"
+"clickhouse: 5.0,"
+"redis: 2.0"
         
 
 
@@ -95,48 +95,48 @@ class MultiServiceHealthChecker:
         start_time = time.time()
 
         try:
-        async with httpx.AsyncClient(timeout=config["timeout"], follow_redirects=True) as client:
-        response = await client.get(config["url"])
+        async with httpx.AsyncClient(timeout=config["timeout], follow_redirects=True) as client:"
+        response = await client.get(config["url])"
         response_time_ms = (time.time() - start_time) * 1000
 
         if response.status_code == 200:
         response_data = response.json()
-        expected_service = config.get("expected_service")
+        expected_service = config.get("expected_service)"
 
-        if expected_service and response_data.get("service") == expected_service:
+        if expected_service and response_data.get("service) == expected_service:"
         return HealthCheckResult( )
         service=service_name,
-        status="healthy",
+        status="healthy,"
         response_time_ms=response_time_ms,
         details=response_data
                     
         elif not expected_service:
         return HealthCheckResult( )
         service=service_name,
-        status="healthy",
+        status="healthy,"
         response_time_ms=response_time_ms,
-        details={"status_code": response.status_code}
+        details={"status_code: response.status_code}"
                         
         else:
         return HealthCheckResult( )
         service=service_name,
-        status="unhealthy",
+        status="unhealthy,"
         response_time_ms=response_time_ms,
         error=""
                             
         else:
         return HealthCheckResult( )
         service=service_name,
-        status="unhealthy",
+        status="unhealthy,"
         response_time_ms=response_time_ms,
         error=""
                                 
 
         except asyncio.TimeoutError:
-        response_time_ms = config["timeout"] * 1000
+        response_time_ms = config["timeout] * 1000"
         return HealthCheckResult( )
         service=service_name,
-        status="timeout",
+        status="timeout,"
         response_time_ms=response_time_ms,
         error="Request timeout"
                                     
@@ -144,7 +144,7 @@ class MultiServiceHealthChecker:
         response_time_ms = (time.time() - start_time) * 1000
         return HealthCheckResult( )
         service=service_name,
-        status="error",
+        status="error,"
         response_time_ms=response_time_ms,
         error=str(e)
                                         
@@ -154,39 +154,39 @@ class MultiServiceHealthChecker:
         start_time = time.time()
 
         try:
-        async with asyncio.timeout(DATABASE_TIMEOUTS["postgres"]):
+        async with asyncio.timeout(DATABASE_TIMEOUTS["postgres]):"
         async with async_engine.begin() as conn:
-        result = await conn.execute(text("SELECT 1 as test"))
+        result = await conn.execute(text("SELECT 1 as test))"
         test_value = result.scalar_one_or_none()
         response_time_ms = (time.time() - start_time) * 1000
 
         if test_value == 1:
         return HealthCheckResult( )
-        service="postgres",
-        status="healthy",
+        service="postgres,"
+        status="healthy,"
         response_time_ms=response_time_ms,
-        details={"connection": "successful", "test_query": "passed"}
+        details={"connection": "successful", "test_query": "passed}"
                     
         else:
         return HealthCheckResult( )
-        service="postgres",
-        status="unhealthy",
+        service="postgres,"
+        status="unhealthy,"
         response_time_ms=response_time_ms,
         error="Test query failed"
                         
 
         except asyncio.TimeoutError:
         return HealthCheckResult( )
-        service="postgres",
-        status="timeout",
-        response_time_ms=DATABASE_TIMEOUTS["postgres"] * 1000,
+        service="postgres,"
+        status="timeout,"
+        response_time_ms=DATABASE_TIMEOUTS["postgres] * 1000,"
         error="Connection timeout"
                             
         except Exception as e:
         response_time_ms = (time.time() - start_time) * 1000
         return HealthCheckResult( )
-        service="postgres",
-        status="error",
+        service="postgres,"
+        status="error,"
         response_time_ms=response_time_ms,
         error=str(e)
                                 
@@ -198,37 +198,37 @@ class MultiServiceHealthChecker:
         try:
         if get_env().get('SKIP_CLICKHOUSE_INIT', 'false').lower() == 'true':
         return HealthCheckResult( )
-        service="clickhouse",
-        status="skipped",
+        service="clickhouse,"
+        status="skipped,"
         response_time_ms=0,
-        details={"reason": "SKIP_CLICKHOUSE_INIT=true"}
+        details={"reason": "SKIP_CLICKHOUSE_INIT=true}"
             
 
-        async with asyncio.timeout(DATABASE_TIMEOUTS["clickhouse"]):
+        async with asyncio.timeout(DATABASE_TIMEOUTS["clickhouse]):"
         from netra_backend.app.db.clickhouse import get_clickhouse_client
         async with get_clickhouse_client() as client:
         await client.test_connection()
         response_time_ms = (time.time() - start_time) * 1000
 
         return HealthCheckResult( )
-        service="clickhouse",
-        status="healthy",
+        service="clickhouse,"
+        status="healthy,"
         response_time_ms=response_time_ms,
-        details={"connection": "successful"}
+        details={"connection": "successful}"
                     
 
         except asyncio.TimeoutError:
         return HealthCheckResult( )
-        service="clickhouse",
-        status="timeout",
-        response_time_ms=DATABASE_TIMEOUTS["clickhouse"] * 1000,
+        service="clickhouse,"
+        status="timeout,"
+        response_time_ms=DATABASE_TIMEOUTS["clickhouse] * 1000,"
         error="Connection timeout"
                         
         except Exception as e:
         response_time_ms = (time.time() - start_time) * 1000
         return HealthCheckResult( )
-        service="clickhouse",
-        status="error",
+        service="clickhouse,"
+        status="error,"
         response_time_ms=response_time_ms,
         error=str(e)
                             
@@ -239,45 +239,45 @@ class MultiServiceHealthChecker:
 
         if not self.redis_manager.enabled:
         return HealthCheckResult( )
-        service="redis",
-        status="disabled",
+        service="redis,"
+        status="disabled,"
         response_time_ms=0,
-        details={"reason": "Redis disabled by configuration"}
+        details={"reason": "Redis disabled by configuration}"
         
 
         try:
-        async with asyncio.timeout(DATABASE_TIMEOUTS["redis"]):
+        async with asyncio.timeout(DATABASE_TIMEOUTS["redis]):"
         await self.redis_manager.connect()
         if self.redis_manager.redis_client:
         await self.redis_manager.redis_client.ping()
         response_time_ms = (time.time() - start_time) * 1000
 
         return HealthCheckResult( )
-        service="redis",
-        status="healthy",
+        service="redis,"
+        status="healthy,"
         response_time_ms=response_time_ms,
-        details={"connection": "successful", "ping": "ok"}
+        details={"connection": "successful", "ping": "ok}"
                     
         else:
         return HealthCheckResult( )
-        service="redis",
-        status="unhealthy",
+        service="redis,"
+        status="unhealthy,"
         response_time_ms=(time.time() - start_time) * 1000,
         error="Client connection failed"
                         
 
         except asyncio.TimeoutError:
         return HealthCheckResult( )
-        service="redis",
-        status="timeout",
-        response_time_ms=DATABASE_TIMEOUTS["redis"] * 1000,
+        service="redis,"
+        status="timeout,"
+        response_time_ms=DATABASE_TIMEOUTS["redis] * 1000,"
         error="Connection timeout"
                             
         except Exception as e:
         response_time_ms = (time.time() - start_time) * 1000
         return HealthCheckResult( )
-        service="redis",
-        status="error",
+        service="redis,"
+        status="error,"
         response_time_ms=response_time_ms,
         error=str(e)
                                 
@@ -288,31 +288,31 @@ class MultiServiceHealthChecker:
 
         try:
         # Test auth service accessibility
-        auth_config = SERVICE_ENDPOINTS["auth"]
-        async with httpx.AsyncClient(timeout=auth_config["timeout"], follow_redirects=True) as client:
-        auth_response = await client.get(auth_config["url"])
+        auth_config = SERVICE_ENDPOINTS["auth]"
+        async with httpx.AsyncClient(timeout=auth_config["timeout], follow_redirects=True) as client:"
+        auth_response = await client.get(auth_config["url])"
 
         if auth_response.status_code == 200:
                 # Test backend service accessibility
-        backend_config = SERVICE_ENDPOINTS["backend"]
-        backend_response = await client.get(backend_config["url"])
+        backend_config = SERVICE_ENDPOINTS["backend]"
+        backend_response = await client.get(backend_config["url])"
 
         if backend_response.status_code == 200:
         response_time_ms = (time.time() - start_time) * 1000
         return HealthCheckResult( )
-        service="inter_service",
-        status="healthy",
+        service="inter_service,"
+        status="healthy,"
         response_time_ms=response_time_ms,
         details={ }
-        "auth_to_backend": "accessible",
+        "auth_to_backend": "accessible,"
         "backend_to_auth": "accessible"
                     
                     
 
         response_time_ms = (time.time() - start_time) * 1000
         return HealthCheckResult( )
-        service="inter_service",
-        status="unhealthy",
+        service="inter_service,"
+        status="unhealthy,"
         response_time_ms=response_time_ms,
         error="Service communication failed"
                     
@@ -320,8 +320,8 @@ class MultiServiceHealthChecker:
         except Exception as e:
         response_time_ms = (time.time() - start_time) * 1000
         return HealthCheckResult( )
-        service="inter_service",
-        status="error",
+        service="inter_service,"
+        status="error,"
         response_time_ms=response_time_ms,
         error=str(e)
                         
@@ -332,7 +332,7 @@ class MultiServiceHealthChecker:
 
     # Service endpoint checks
         for service_name, config in SERVICE_ENDPOINTS.items():
-        if service_name != "frontend":  # Skip frontend for now
+        if service_name != "frontend:  # Skip frontend for now"
         tasks.append(self.check_service_endpoint(service_name, config))
 
         # Database connection checks
@@ -354,7 +354,7 @@ class MultiServiceHealthChecker:
         if isinstance(result, Exception):
         processed_results.append(HealthCheckResult( ))
         service="",
-        status="error",
+        status="error,"
         response_time_ms=0,
         error=str(result)
                 
@@ -374,7 +374,7 @@ results = await checker.run_comprehensive_health_check()
 
                         # Validate we got results for all expected services
 service_names = [r.service for r in results]
-expected_services = ["auth", "backend", "postgres", "clickhouse", "redis", "inter_service"]
+expected_services = ["auth", "backend", "postgres", "clickhouse", "redis", "inter_service]"
 
 for expected_service in expected_services:
 assert expected_service in service_names, ""
@@ -384,7 +384,7 @@ total_response_time = sum(r.response_time_ms for r in results)
 assert total_response_time < 30000, ""
 
                             # Log detailed results for operational monitoring
-healthy_count = sum(1 for r in results if r.status == "healthy")
+healthy_count = sum(1 for r in results if r.status == "healthy)"
 logger.info("")
 
 for result in results:
@@ -405,7 +405,7 @@ checker = MultiServiceHealthChecker()
 results = await checker.run_comprehensive_health_check()
 
                                         # Critical services must be healthy for system operation
-critical_services = ["auth", "backend", "postgres"]
+critical_services = ["auth", "backend", "postgres]"
 
 for result in results:
 if result.service in critical_services:
@@ -414,7 +414,7 @@ assert result.status in ["healthy", "disabled"], ""
 
                                                 # Validate critical services response times
 for result in results:
-if result.service in critical_services and result.status == "healthy":
+if result.service in critical_services and result.status == "healthy:"
     pass
 assert result.response_time_ms < 5000, ""
 
@@ -427,21 +427,21 @@ assert result.response_time_ms < 5000, ""
 checker = MultiServiceHealthChecker()
 
                                                             # Test with very short timeout (should cause timeout)
-original_timeout = SERVICE_ENDPOINTS["backend"]["timeout"]
-SERVICE_ENDPOINTS["backend"]["timeout"] = 0.1  # 1ms timeout
+original_timeout = SERVICE_ENDPOINTS["backend"]["timeout]"
+SERVICE_ENDPOINTS["backend"]["timeout] = 0.1  # 1ms timeout"
 
 try:
     pass
-result = await checker.check_service_endpoint("backend", SERVICE_ENDPOINTS["backend"])
+result = await checker.check_service_endpoint("backend", SERVICE_ENDPOINTS["backend])"
                                                                 # Should either timeout or complete very quickly
 assert result.status in ["timeout", "healthy", "error"], ""
 
 finally:
                                                                     # Restore original timeout
-SERVICE_ENDPOINTS["backend"]["timeout"] = original_timeout
+SERVICE_ENDPOINTS["backend"]["timeout] = original_timeout"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                                                                         # Direct execution for debugging
 async def main():
 checker = MultiServiceHealthChecker()
@@ -450,7 +450,7 @@ results = await checker.run_comprehensive_health_check()
 print("")
 === Multi-Service Health Check Results ===")"
 for result in results:
-status_symbol = {"healthy": "[OK]", "unhealthy": "[FAIL]", "timeout": "[TIMEOUT]", "error": "[ERROR]", "disabled": "[DISABLED]", "skipped": "[SKIP]"}.get(result.status, "[?]")
+status_symbol = {"healthy": "[OK]", "unhealthy": "[FAIL]", "timeout": "[TIMEOUT]", "error": "[ERROR]", "disabled": "[DISABLED]", "skipped": "[SKIP]"}.get(result.status, "[?])"
 print("")
 if result.error:
     print("")

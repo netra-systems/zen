@@ -1122,7 +1122,7 @@ pass
         # REMOVED_SYNTAX_ERROR: "missing_comma": json_str.replace('", "', '" "'),
         # REMOVED_SYNTAX_ERROR: "unclosed_brace": json_str[:-1],
         # REMOVED_SYNTAX_ERROR: "extra_comma": json_str.replace("}", ",}"),
-        # REMOVED_SYNTAX_ERROR: "null_bytes": json_str + "\x00"
+        # REMOVED_SYNTAX_ERROR: "null_bytes": json_str + "\\\\\100"
         
         # REMOVED_SYNTAX_ERROR: return {"error": "Cannot create malformed JSON from non-dict"}
 
@@ -1133,7 +1133,7 @@ pass
     # REMOVED_SYNTAX_ERROR: "sql_injection": ""; DROP TABLE messages; --",
     # REMOVED_SYNTAX_ERROR: "command_injection": "; rm -rf / #",
     # REMOVED_SYNTAX_ERROR: "json_injection": '{"injected": true}',
-    # REMOVED_SYNTAX_ERROR: "unicode_injection": "\u202E\u0000\u000D\u000A"
+    # REMOVED_SYNTAX_ERROR: "unicode_injection": "\\\\\1202E\\\\\10000\\\\\1000D\\\\\1000A"
     
 
     # REMOVED_SYNTAX_ERROR: if isinstance(message, dict):

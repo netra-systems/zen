@@ -61,7 +61,7 @@ class ServiceConfig:
     cpu: str = "1"
     min_instances: int = 0
     max_instances: int = 10
-    timeout: int = 600   # Reduced to 10 minutes with better resource allocation (Issue #128)
+    timeout: int = 600   # Issue #1300: Optimized for WebSocket authentication monitoring (10 minutes minimum)
 
 
 class GCPDeployer:
@@ -100,6 +100,7 @@ class GCPDeployer:
                 cpu=backend_cpu,
                 min_instances=2,  # Issue #1278 remediation - increased from 1 to 2 for better availability
                 max_instances=15,  # Issue #1278 remediation - reduced from 20 to 15 for resource optimization
+                timeout=900,  # Issue #1300: Extended timeout (15 minutes) for WebSocket authentication monitoring
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
@@ -125,9 +126,15 @@ class GCPDeployer:
                     "WEBSOCKET_STALE_TIMEOUT": "240",       # 4 minutes before marking connection stale (consistent with connection timeout)
                     # NEW: Additional timeout optimizations for Issue #128 WebSocket connectivity
                     "WEBSOCKET_CONNECT_TIMEOUT": "10",      # 10s max for initial connection establishment
-                    "WEBSOCKET_HANDSHAKE_TIMEOUT": "15",    # 15s max for WebSocket handshake completion  
+                    "WEBSOCKET_HANDSHAKE_TIMEOUT": "15",    # 15s max for WebSocket handshake completion
                     "WEBSOCKET_PING_TIMEOUT": "5",          # 5s timeout for ping/pong messages
                     "WEBSOCKET_CLOSE_TIMEOUT": "10",        # 10s timeout for graceful connection close
+                    # Issue #1300: WebSocket authentication monitoring configuration
+                    "WEBSOCKET_AUTH_MONITORING_ENABLED": "true",    # Enable WebSocket auth monitoring
+                    "WEBSOCKET_AUTH_CHECK_INTERVAL": "30",          # Check auth status every 30 seconds
+                    "WEBSOCKET_AUTH_FAILURE_THRESHOLD": "3",        # Allow 3 auth failures before disconnect
+                    "WEBSOCKET_SESSION_MONITORING_ENABLED": "true", # Enable session monitoring
+                    "REDIS_CONNECTION_POOL_SIZE": "50",             # Match Redis pool optimization
                 }
             ),
             ServiceConfig(

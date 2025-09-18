@@ -110,13 +110,13 @@ class Issue962GcpStagingConfigurationValidationTests(SSotAsyncTestCase, unittest
 
             if config_response and config_response.get("status") == "healthy":
                 staging_results["config_import_works"] = True
-                print(f"✅ SSOT configuration import: WORKS in GCP staging")
+                print(f"CHECK SSOT configuration import: WORKS in GCP staging")
             else:
-                print(f"❌ SSOT configuration import: FAILED in GCP staging")
+                print(f"X SSOT configuration import: FAILED in GCP staging")
                 self.deployment_blockers.append("SSOT config import fails in GCP staging")
 
         except Exception as e:
-            print(f"❌ SSOT configuration import: EXCEPTION - {e}")
+            print(f"X SSOT configuration import: EXCEPTION - {e}")
             self.deployment_blockers.append(f"SSOT config import exception: {e}")
 
         # TEST 2: Deprecated configuration imports blocked in staging
@@ -126,13 +126,13 @@ class Issue962GcpStagingConfigurationValidationTests(SSotAsyncTestCase, unittest
 
             if deprecated_response and deprecated_response.get("deprecated_accessible") == False:
                 staging_results["deprecated_imports_blocked"] = True
-                print(f"✅ Deprecated imports: BLOCKED in GCP staging")
+                print(f"CHECK Deprecated imports: BLOCKED in GCP staging")
             else:
-                print(f"❌ Deprecated imports: STILL ACCESSIBLE in GCP staging")
+                print(f"X Deprecated imports: STILL ACCESSIBLE in GCP staging")
                 self.deployment_blockers.append("Deprecated config imports still work in staging")
 
         except Exception as e:
-            print(f"⚠️ Deprecated import test: Could not verify - {e}")
+            print(f"WARNING️ Deprecated import test: Could not verify - {e}")
             # Not a critical failure if endpoint doesn't exist
 
         # TEST 3: Required configuration values loaded
@@ -143,15 +143,15 @@ class Issue962GcpStagingConfigurationValidationTests(SSotAsyncTestCase, unittest
 
             if config_status["all_present"]:
                 staging_results["required_configs_loaded"] = True
-                print(f"✅ Required configs: ALL LOADED in GCP staging")
+                print(f"CHECK Required configs: ALL LOADED in GCP staging")
                 print(f"   Loaded configs: {config_status['loaded_count']}/{len(required_configs)}")
             else:
-                print(f"❌ Required configs: MISSING in GCP staging")
+                print(f"X Required configs: MISSING in GCP staging")
                 print(f"   Missing configs: {config_status['missing_configs']}")
                 self.deployment_blockers.append(f"Missing configs in staging: {config_status['missing_configs']}")
 
         except Exception as e:
-            print(f"❌ Required configs test: FAILED - {e}")
+            print(f"X Required configs test: FAILED - {e}")
             self.deployment_blockers.append(f"Config validation failed: {e}")
 
         # TEST 4: Configuration loading performance
@@ -161,13 +161,13 @@ class Issue962GcpStagingConfigurationValidationTests(SSotAsyncTestCase, unittest
 
             if perf_result["load_time"] < 2.0:  # Must load within 2 seconds
                 staging_results["performance_acceptable"] = True
-                print(f"✅ Config performance: {perf_result['load_time']:.2f}s (acceptable)")
+                print(f"CHECK Config performance: {perf_result['load_time']:.2f}s (acceptable)")
             else:
-                print(f"❌ Config performance: {perf_result['load_time']:.2f}s (too slow)")
+                print(f"X Config performance: {perf_result['load_time']:.2f}s (too slow)")
                 self.deployment_blockers.append(f"Config loading too slow: {perf_result['load_time']:.2f}s")
 
         except Exception as e:
-            print(f"❌ Performance test: FAILED - {e}")
+            print(f"X Performance test: FAILED - {e}")
             self.deployment_blockers.append(f"Performance test failed: {e}")
 
         # Calculate staging readiness score
@@ -194,7 +194,7 @@ class Issue962GcpStagingConfigurationValidationTests(SSotAsyncTestCase, unittest
         )
 
         # SUCCESS: GCP staging ready for production
-        print(f"\n✅ GCP STAGING SUCCESS: SSOT configuration production-ready")
+        print(f"\nCHECK GCP STAGING SUCCESS: SSOT configuration production-ready")
 
     async def test_staging_authentication_flows_end_to_end(self):
         """
@@ -234,13 +234,13 @@ class Issue962GcpStagingConfigurationValidationTests(SSotAsyncTestCase, unittest
                 auth_results[step_name] = success
 
                 if success:
-                    print(f"✅ {step_name}: PASS")
+                    print(f"CHECK {step_name}: PASS")
                 else:
-                    print(f"❌ {step_name}: FAIL")
+                    print(f"X {step_name}: FAIL")
                     auth_failures.append(f"{step_name}: Authentication failed")
 
             except Exception as e:
-                print(f"❌ {step_name}: EXCEPTION - {e}")
+                print(f"X {step_name}: EXCEPTION - {e}")
                 auth_results[step_name] = False
                 auth_failures.append(f"{step_name}: Exception - {e}")
 
@@ -269,7 +269,7 @@ class Issue962GcpStagingConfigurationValidationTests(SSotAsyncTestCase, unittest
         )
 
         # SUCCESS: Authentication works perfectly in staging
-        print(f"\n✅ STAGING AUTH SUCCESS: Golden Path authentication 100% working in GCP")
+        print(f"\nCHECK STAGING AUTH SUCCESS: Golden Path authentication 100% working in GCP")
 
     async def test_staging_websocket_events_with_ssot_configuration(self):
         """
@@ -307,13 +307,13 @@ class Issue962GcpStagingConfigurationValidationTests(SSotAsyncTestCase, unittest
                 websocket_results[test_name] = success
 
                 if success:
-                    print(f"✅ {test_name}: PASS")
+                    print(f"CHECK {test_name}: PASS")
                 else:
-                    print(f"❌ {test_name}: FAIL")
+                    print(f"X {test_name}: FAIL")
                     websocket_failures.append(f"{test_name}: WebSocket failed")
 
             except Exception as e:
-                print(f"❌ {test_name}: EXCEPTION - {e}")
+                print(f"X {test_name}: EXCEPTION - {e}")
                 websocket_results[test_name] = False
                 websocket_failures.append(f"{test_name}: Exception - {e}")
 
@@ -343,13 +343,13 @@ class Issue962GcpStagingConfigurationValidationTests(SSotAsyncTestCase, unittest
 
         # Warn if not perfect
         if websocket_success_rate < 100.0:
-            print(f"\n⚠️ WARNING: WebSocket not perfect in staging - monitor in production")
+            print(f"\nWARNING️ WARNING: WebSocket not perfect in staging - monitor in production")
 
         # SUCCESS or WARNING
         if websocket_success_rate == 100.0:
-            print(f"\n✅ STAGING WEBSOCKET SUCCESS: Real-time functionality perfect in GCP")
+            print(f"\nCHECK STAGING WEBSOCKET SUCCESS: Real-time functionality perfect in GCP")
         else:
-            print(f"\n⚠️ STAGING WEBSOCKET PARTIAL: {websocket_success_rate:.1f}% success - acceptable for production")
+            print(f"\nWARNING️ STAGING WEBSOCKET PARTIAL: {websocket_success_rate:.1f}% success - acceptable for production")
 
     # HELPER METHODS FOR STAGING VALIDATION
 

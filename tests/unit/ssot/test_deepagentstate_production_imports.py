@@ -239,7 +239,7 @@ Clean Percentage: {files_clean_percentage:.1f}%
 Total Violations: {total_violations}
 Known Critical Files: {len(self.known_violation_files)}
 
-Progress Status: {"🔴 REMEDIATION NEEDED" if files_with_violations > 0 else "✅ MIGRATION COMPLETE"}
+Progress Status: {"🔴 REMEDIATION NEEDED" if files_with_violations > 0 else "CHECK MIGRATION COMPLETE"}
         """
 
         self.logger.info(progress_report)
@@ -338,7 +338,7 @@ Progress Status: {"🔴 REMEDIATION NEEDED" if files_with_violations > 0 else "�
         for file_path, file_violations in violations.items():
             report_lines.append(f"📁 {file_path}:")
             for violation in file_violations:
-                report_lines.append(f"   ⚠️  {violation}")
+                report_lines.append(f"   WARNING️  {violation}")
             report_lines.append("")
 
         return '\n'.join(report_lines)

@@ -4,7 +4,7 @@
 Mission Critical Test Suite: No SSOT Violations with Comprehensive Isolation Testing
 
 Business Value: Platform/Internal - System Reliability & Data Integrity
-Critical for $500K+ ARR protection through comprehensive isolation and SSOT compliance.
+Critical for $500K+ plus ARR protection through comprehensive isolation and SSOT compliance.
 
 This comprehensive test suite validates:
     1. SSOT compliance across all services
@@ -53,7 +53,8 @@ except ImportError as e:
 @dataclass
 class IsolationTestResult:
     Results from isolation testing."
-    Results from isolation testing."
+    Results from isolation testing.""
+
     test_name: str
     user_count: int
     success: bool
@@ -74,7 +75,8 @@ class UserContextSimulator:
         self.errors = []
     
     def execute_user_operation(self, operation_data: Dict[str, Any) -> Dict[str, Any):
-        ""Execute operation within user context.
+        ""Execute operation within user context.""
+
         try:
             # Simulate user-specific data processing
             result = {
@@ -95,14 +97,15 @@ class UserContextSimulator:
 @pytest.mark.mission_critical
 class NoSSotViolationsWithIsolationTests:
     CRITICAL: Comprehensive SSOT compliance and isolation testing."
-    CRITICAL: Comprehensive SSOT compliance and isolation testing."
+    CRITICAL: Comprehensive SSOT compliance and isolation testing.""
+
 
     @pytest.fixture
     def setup_test_environment(self):
         "Setup isolated test environment for all tests."
         try:
             env = IsolatedEnvironment()
-            env.set(USE_REAL_SERVICES", "true)
+            env.set(USE_REAL_SERVICES", true)"
             env.set(TEST_CONCURRENT_USERS, 15)
             env.set(TEST_ISOLATION_ENABLED, "true)"
 
@@ -131,7 +134,7 @@ class NoSSotViolationsWithIsolationTests:
                 # Create user-specific data
                 user_data = {
                     type: sensitive_operation,
-                    key": f"secret_key_{user.user_id},
+                    key": fsecret_key_{user.user_id},"
                     secret_value: fsecret_value_{user.user_id}
                 }
 
@@ -160,13 +163,13 @@ class NoSSotViolationsWithIsolationTests:
         user_ids = {result[user_id] for result in results}"
         session_ids = {result[session_id"] for result in results}"
 
-        assert len(user_ids) == user_count, fExpected {user_count} unique user IDs, got {len(user_ids)}
+        assert len(user_ids) == user_count, "fExpected {user_count} unique user IDs, got {len(user_ids)}"
         assert len(session_ids) == user_count, fExpected {user_count} unique session IDs, got {len(session_ids)}"
         assert len(session_ids) == user_count, fExpected {user_count} unique session IDs, got {len(session_ids)}"
         assert len(errors) == 0, f"Errors occurred during execution: {errors}"
 
         # Performance validation
-        assert execution_time < 10.0, fExecution took too long: {execution_time}s
+        assert execution_time < 10.0, "fExecution took too long: {execution_time}s"
 
     def test_user_context_thread_safety(self, setup_test_environment):
         CRITICAL: Verify thread safety in user context operations.""
@@ -208,7 +211,8 @@ class NoSSotViolationsWithIsolationTests:
         # Verify thread safety
         expected_counter = thread_count * 100
         assert shared_counter['value'] == expected_counter, fThread safety violated. Expected {expected_counter}, got {shared_counter['value']}"
-        assert shared_counter['value'] == expected_counter, fThread safety violated. Expected {expected_counter}, got {shared_counter['value']}"
+        assert shared_counter['value'] == expected_counter, fThread safety violated. Expected {expected_counter}, got {shared_counter['value']}""
+
 
         # Verify user isolation
         user_operations = defaultdict(int)
@@ -219,7 +223,8 @@ class NoSSotViolationsWithIsolationTests:
 
     def test_websocket_channel_user_separation(self, setup_test_environment):
         CRITICAL: Verify WebSocket channels maintain user separation."
-        CRITICAL: Verify WebSocket channels maintain user separation."
+        CRITICAL: Verify WebSocket channels maintain user separation.""
+
         user_count = 8
         websocket_channels = {}
         message_routing = defaultdict(list)
@@ -233,7 +238,8 @@ class NoSSotViolationsWithIsolationTests:
         # Simulate WebSocket message routing
         for user_id, channel_id in websocket_channels.items():
             test_messages = [
-                {type: user_message", "content: fmessage_{j}_from_{user_id}, user_id: user_id}
+                {"type": user_message", "content": "fmessage_{j}_from_{user_id}, user_id: user_id}""
+
                 for j in range(5)
             ]
 

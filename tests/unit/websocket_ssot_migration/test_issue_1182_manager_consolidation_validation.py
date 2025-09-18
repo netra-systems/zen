@@ -96,10 +96,10 @@ class WebSocketManagerConsolidationValidationTests(SSotBaseTestCase):
                         discovered_implementations[class_id]['import_paths'].append(import_path)
                         implementation_sources.add(cls.__module__)
                         
-                        logger.info(f"  ✓ Found {class_name} -> {class_id}")
+                        logger.info(f"  CHECK Found {class_name} -> {class_id}")
                         
             except ImportError as e:
-                logger.warning(f"⚠️  Could not import {import_path}: {e}")
+                logger.warning(f"WARNING️  Could not import {import_path}: {e}")
                 continue
         
         # Log all discovered implementations
@@ -163,10 +163,10 @@ class WebSocketManagerConsolidationValidationTests(SSotBaseTestCase):
                         'class_id': f"{cls.__module__}.{cls.__qualname__}",
                         'memory_address': id(cls)
                     }
-                    logger.info(f"✓ {class_key} -> {cls}")
+                    logger.info(f"CHECK {class_key} -> {cls}")
                     
             except ImportError as e:
-                logger.warning(f"⚠️  Could not import {module_path}: {e}")
+                logger.warning(f"WARNING️  Could not import {module_path}: {e}")
                 continue
         
         # Analyze resolution patterns
@@ -224,13 +224,13 @@ class WebSocketManagerConsolidationValidationTests(SSotBaseTestCase):
                     # Verify class is callable and has expected interface
                     self.assertTrue(inspect.isclass(cls), f"{class_name} should be a class")
                     working_imports.append((module_path, class_name))
-                    logger.info(f"✓ Legacy import working: {module_path}.{class_name}")
+                    logger.info(f"CHECK Legacy import working: {module_path}.{class_name}")
                 else:
                     broken_imports.append((module_path, class_name, "Class not found"))
                     
             except ImportError as e:
                 broken_imports.append((module_path, class_name, str(e)))
-                logger.error(f"❌ Legacy import broken: {module_path}.{class_name} - {e}")
+                logger.error(f"X Legacy import broken: {module_path}.{class_name} - {e}")
         
         logger.info(f"📊 Compatibility Analysis:")
         logger.info(f"   Working imports: {len(working_imports)}")
@@ -324,13 +324,13 @@ class WebSocketManagerConsolidationValidationTests(SSotBaseTestCase):
             
             for method_name, method_info in analysis['methods'].items():
                 if method_info['exists']:
-                    match_status = "✓" if method_info['matches_expected'] else "❌"
+                    match_status = "CHECK" if method_info['matches_expected'] else "X"
                     logger.info(f"   {match_status} {method_name}: {method_info['type']} - {method_info['signature']}")
                     
                     if not method_info['matches_expected']:
                         inconsistencies.append(f"{class_key}.{method_name}")
                 else:
-                    logger.info(f"   ❌ {method_name}: MISSING")
+                    logger.info(f"   X {method_name}: MISSING")
                     inconsistencies.append(f"{class_key}.{method_name}")
             
             if analysis['missing_methods']:
@@ -369,7 +369,7 @@ class WebSocketManagerConsolidationValidationTests(SSotBaseTestCase):
             # Test DemoWebSocketBridge import and compatibility
             from netra_backend.app.routes.demo_websocket import execute_real_agent_workflow
             demo_bridge_compatibility['import_success'] = True
-            logger.info("✓ DemoWebSocketBridge imports successfully")
+            logger.info("CHECK DemoWebSocketBridge imports successfully")
             
             # Test WebSocket manager compatibility with demo bridge
             from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager
@@ -386,19 +386,19 @@ class WebSocketManagerConsolidationValidationTests(SSotBaseTestCase):
                 manager_instance = WebSocketManager(websocket=mock_websocket, user_id="demo_user")
                 demo_bridge_compatibility['instantiation_success'] = True
                 demo_bridge_compatibility['interface_match'] = True
-                logger.info("✓ WebSocketManager compatible with DemoWebSocketBridge pattern")
+                logger.info("CHECK WebSocketManager compatible with DemoWebSocketBridge pattern")
                 
             except Exception as e:
                 demo_bridge_compatibility['error_details'].append(f"Instantiation failed: {e}")
-                logger.error(f"❌ WebSocketManager instantiation failed: {e}")
+                logger.error(f"X WebSocketManager instantiation failed: {e}")
                 
         except ImportError as e:
             demo_bridge_compatibility['error_details'].append(f"Import failed: {e}")
-            logger.error(f"❌ DemoWebSocketBridge import failed: {e}")
+            logger.error(f"X DemoWebSocketBridge import failed: {e}")
             
         except Exception as e:
             demo_bridge_compatibility['error_details'].append(f"Compatibility test failed: {e}")
-            logger.error(f"❌ DemoWebSocketBridge compatibility test failed: {e}")
+            logger.error(f"X DemoWebSocketBridge compatibility test failed: {e}")
         
         logger.info(f"📊 DemoWebSocketBridge Compatibility Report:")
         logger.info(f"   Import success: {demo_bridge_compatibility['import_success']}")

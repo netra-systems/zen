@@ -56,7 +56,7 @@ class TestImportFragmentationTracking(unittest.TestCase):
         self.assertGreaterEqual(
             canonical_usage_percentage,
             self.target_canonical_usage,
-            f"❌ EXPECTED FAILURE: Canonical import usage is {canonical_usage_percentage:.1f}%, "
+            f"X EXPECTED FAILURE: Canonical import usage is {canonical_usage_percentage:.1f}%, "
             f"target is >{self.target_canonical_usage}%. "
             f"Issue #1186 Phase 4 reported 87.5% usage. Import patterns found:\n"
             + '\n'.join([f"  - '{pattern}': {count} files ({count/sum(import_analysis.values())*100:.1f}%)"
@@ -78,7 +78,7 @@ class TestImportFragmentationTracking(unittest.TestCase):
         self.assertLess(
             fragmentation_count,
             self.target_fragmentation_count,
-            f"❌ EXPECTED FAILURE: Found {fragmentation_count} fragmented imports, "
+            f"X EXPECTED FAILURE: Found {fragmentation_count} fragmented imports, "
             f"target is <{self.target_fragmentation_count}. "
             f"Issue #1186 Phase 4 identified 414 fragmented imports. Examples:\n"
             + '\n'.join([f"  - {path}: {pattern}" for path, pattern in fragmented_imports[:10]])
@@ -99,7 +99,7 @@ class TestImportFragmentationTracking(unittest.TestCase):
         self.assertEqual(
             len(deprecated_imports),
             0,
-            f"❌ EXPECTED FAILURE: Found {len(deprecated_imports)} deprecated imports. "
+            f"X EXPECTED FAILURE: Found {len(deprecated_imports)} deprecated imports. "
             f"These should be eliminated as part of SSOT consolidation:\n"
             + '\n'.join([f"  - {path}: {deprecated_import}" for path, deprecated_import in deprecated_imports[:5]])
             + (f"\n  ... and {len(deprecated_imports) - 5} more" if len(deprecated_imports) > 5 else "")
@@ -120,7 +120,7 @@ class TestImportFragmentationTracking(unittest.TestCase):
         self.assertLessEqual(
             unique_patterns,
             1,
-            f"❌ EXPECTED FAILURE: Found {unique_patterns} different import patterns for UserExecutionEngine. "
+            f"X EXPECTED FAILURE: Found {unique_patterns} different import patterns for UserExecutionEngine. "
             f"SSOT requires exactly 1 canonical pattern. Patterns found:\n"
             + '\n'.join([f"  - '{pattern}': {files} files" for pattern, files in pattern_consistency.items()])
         )
@@ -139,7 +139,7 @@ class TestImportFragmentationTracking(unittest.TestCase):
         self.assertEqual(
             len(legacy_paths),
             0,
-            f"❌ EXPECTED FAILURE: Found {len(legacy_paths)} legacy execution engine import paths. "
+            f"X EXPECTED FAILURE: Found {len(legacy_paths)} legacy execution engine import paths. "
             f"These should be migrated to canonical UserExecutionEngine imports:\n"
             + '\n'.join([f"  - {path}: {legacy_import}" for path, legacy_import in legacy_paths[:5]])
             + (f"\n  ... and {len(legacy_paths) - 5} more" if len(legacy_paths) > 5 else "")
@@ -368,21 +368,21 @@ class TestImportFragmentationMetrics(unittest.TestCase):
                 self.assertGreaterEqual(
                     actual_value,
                     expected_value,
-                    f"❌ EXPECTED FAILURE: {metric} = {actual_value}%, expected >={expected_value}%. "
+                    f"X EXPECTED FAILURE: {metric} = {actual_value}%, expected >={expected_value}%. "
                     f"Issue #1186 Phase 4 reported 87.5% canonical usage."
                 )
             elif metric == 'total_fragmented_imports':
                 self.assertLess(
                     actual_value,
                     expected_value,
-                    f"❌ EXPECTED FAILURE: {metric} = {actual_value}, expected <{expected_value}. "
+                    f"X EXPECTED FAILURE: {metric} = {actual_value}, expected <{expected_value}. "
                     f"Issue #1186 Phase 4 reported 414 fragmented imports."
                 )
             else:
                 self.assertEqual(
                     actual_value,
                     expected_value,
-                    f"❌ EXPECTED FAILURE: {metric} = {actual_value}, expected {expected_value}. "
+                    f"X EXPECTED FAILURE: {metric} = {actual_value}, expected {expected_value}. "
                     f"This indicates incomplete import fragmentation consolidation."
                 )
 
@@ -399,7 +399,7 @@ class TestImportFragmentationMetrics(unittest.TestCase):
         # This test should FAIL to demonstrate SSOT compliance gaps
         self.assertTrue(
             ssot_compliance['is_compliant'],
-            f"❌ EXPECTED FAILURE: SSOT import compliance failed. "
+            f"X EXPECTED FAILURE: SSOT import compliance failed. "
             f"Violations found: {ssot_compliance['violation_count']}. "
             f"Details:\n" + '\n'.join([f"  - {violation}" for violation in ssot_compliance['violations'][:5]])
             + (f"\n  ... and {ssot_compliance['violation_count'] - 5} more" if ssot_compliance['violation_count'] > 5 else "")
@@ -480,7 +480,7 @@ class TestImportFragmentationMetrics(unittest.TestCase):
 if __name__ == '__main__':
     print("🚨 Issue #1186 Import Fragmentation Tracking - SSOT Consolidation Tests")
     print("=" * 80)
-    print("⚠️  WARNING: These tests are DESIGNED TO FAIL to demonstrate current fragmentation")
+    print("WARNING️  WARNING: These tests are DESIGNED TO FAIL to demonstrate current fragmentation")
     print("📊 Expected: Test failures showing 414 fragmented imports (target: <5)")
     print("🎯 Current: 87.5% canonical usage (target: >95%)")
     print("🔧 Goal: Measure and track progress toward SSOT import compliance")

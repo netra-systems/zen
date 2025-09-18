@@ -45,7 +45,7 @@ class MiddlewareOrderValidationTests(SSotBaseTestCase):
         # So SessionMiddleware should be at a high index to run first
         assert session_middleware_position >= 0, f"SessionMiddleware position invalid: {session_middleware_position}"
 
-        print(f"✅ SessionMiddleware found at position {session_middleware_position} in middleware stack")
+        print(f"CHECK SessionMiddleware found at position {session_middleware_position} in middleware stack")
 
     def test_middleware_dependency_order(self):
         """Test that middleware that depends on sessions is ordered after SessionMiddleware.
@@ -89,7 +89,7 @@ class MiddlewareOrderValidationTests(SSotBaseTestCase):
                 assert session_pos > dependent_pos, \
                     f"SessionMiddleware (pos {session_pos}) must be installed before {dependent} middleware (pos {dependent_pos})"
 
-        print(f"✅ Middleware dependency order validated for {len(dependent_middleware)} dependent middleware")
+        print(f"CHECK Middleware dependency order validated for {len(dependent_middleware)} dependent middleware")
 
     def test_session_access_order_in_middleware_chain(self):
         """Test session access works correctly through the middleware chain.
@@ -164,7 +164,7 @@ class MiddlewareOrderValidationTests(SSotBaseTestCase):
             for access in session_access_log:
                 assert access["success"] is True, f"Session access failed at level {access}: {access.get('error')}"
 
-        print(f"✅ Session access works through {len(session_access_log)} levels of middleware chain")
+        print(f"CHECK Session access works through {len(session_access_log)} levels of middleware chain")
 
     def test_middleware_order_prevents_session_errors(self):
         """Test that proper middleware order prevents session access errors.
@@ -236,7 +236,7 @@ class MiddlewareOrderValidationTests(SSotBaseTestCase):
                 assert not attempt.get("is_session_middleware_error", False), \
                     "Got Issue #1127 SessionMiddleware error despite proper ordering"
 
-        print(f"✅ Middleware ordering prevents session access errors (Issue #1127 resolved)")
+        print(f"CHECK Middleware ordering prevents session access errors (Issue #1127 resolved)")
 
     def test_middleware_initialization_sequence(self):
         """Test the complete middleware initialization sequence.
@@ -289,7 +289,7 @@ class MiddlewareOrderValidationTests(SSotBaseTestCase):
             assert session_pos > gcp_auth_pos, \
                 f"SessionMiddleware must come after GCP auth middleware in middleware stack"
 
-        print(f"✅ SSOT middleware initialization sequence is correct")
+        print(f"CHECK SSOT middleware initialization sequence is correct")
 
     def test_production_environment_middleware_order(self):
         """Test middleware order in production-like environment configuration.
@@ -345,4 +345,4 @@ class MiddlewareOrderValidationTests(SSotBaseTestCase):
             assert response.status_code in [200, 404], \
                 f"Production environment request failed: {response.status_code} - {response.text}"
 
-        print("✅ Production environment middleware order is correct")
+        print("CHECK Production environment middleware order is correct")

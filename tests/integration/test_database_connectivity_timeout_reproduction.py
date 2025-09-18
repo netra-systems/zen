@@ -84,7 +84,7 @@ class TestDatabaseConnectivityTimeoutIssue1278(SSotAsyncTestCase):
             # If connection takes longer than 15s but succeeds, it's still a problem
             if connection_time > self.database_timeout_threshold:
                 pytest.fail(
-                    f"✅ ISSUE #1278 REPRODUCED: PostgreSQL connection took {connection_time:.2f}s "
+                    f"CHECK ISSUE #1278 REPRODUCED: PostgreSQL connection took {connection_time:.2f}s "
                     f"(> {self.database_timeout_threshold}s threshold). "
                     "This confirms database connectivity timing issues."
                 )
@@ -96,7 +96,7 @@ class TestDatabaseConnectivityTimeoutIssue1278(SSotAsyncTestCase):
             self.record_metric("postgres_connection_timeout", timeout_duration)
 
             pytest.fail(
-                f"✅ ISSUE #1278 REPRODUCED: PostgreSQL connection timed out after {timeout_duration:.2f}s. "
+                f"CHECK ISSUE #1278 REPRODUCED: PostgreSQL connection timed out after {timeout_duration:.2f}s. "
                 "This confirms database connection timeout issues from Issue #1278."
             )
 
@@ -108,7 +108,7 @@ class TestDatabaseConnectivityTimeoutIssue1278(SSotAsyncTestCase):
             self.record_metric("postgres_connection_error_time", attempt_duration)
 
             pytest.fail(
-                f"✅ ISSUE #1278 REPRODUCED: PostgreSQL connection failed after {attempt_duration:.2f}s: {e}. "
+                f"CHECK ISSUE #1278 REPRODUCED: PostgreSQL connection failed after {attempt_duration:.2f}s: {e}. "
                 "This confirms database connectivity problems."
             )
 
@@ -153,7 +153,7 @@ class TestDatabaseConnectivityTimeoutIssue1278(SSotAsyncTestCase):
             # If initialization takes longer than 15s, it reproduces the timing issue
             if initialization_time > self.database_timeout_threshold:
                 pytest.fail(
-                    f"✅ ISSUE #1278 REPRODUCED: DatabaseManager initialization took {initialization_time:.2f}s "
+                    f"CHECK ISSUE #1278 REPRODUCED: DatabaseManager initialization took {initialization_time:.2f}s "
                     f"(> {self.database_timeout_threshold}s threshold). "
                     "This confirms database initialization timing issues."
                 )
@@ -165,7 +165,7 @@ class TestDatabaseConnectivityTimeoutIssue1278(SSotAsyncTestCase):
             self.record_metric("database_manager_timeout", timeout_duration)
 
             pytest.fail(
-                f"✅ ISSUE #1278 REPRODUCED: DatabaseManager initialization timed out after {timeout_duration:.2f}s. "
+                f"CHECK ISSUE #1278 REPRODUCED: DatabaseManager initialization timed out after {timeout_duration:.2f}s. "
                 "This confirms database manager timeout issues from Issue #1278."
             )
 
@@ -177,7 +177,7 @@ class TestDatabaseConnectivityTimeoutIssue1278(SSotAsyncTestCase):
             self.record_metric("database_manager_error_time", error_duration)
 
             pytest.fail(
-                f"✅ ISSUE #1278 REPRODUCED: DatabaseManager failed after {error_duration:.2f}s: {e}. "
+                f"CHECK ISSUE #1278 REPRODUCED: DatabaseManager failed after {error_duration:.2f}s: {e}. "
                 "This confirms database manager initialization problems."
             )
 
@@ -219,7 +219,7 @@ class TestDatabaseConnectivityTimeoutIssue1278(SSotAsyncTestCase):
             # If verification takes longer than 15s, it reproduces timing issues
             if verification_time > self.database_timeout_threshold:
                 pytest.fail(
-                    f"✅ ISSUE #1278 REPRODUCED: Auth service database verification took {verification_time:.2f}s "
+                    f"CHECK ISSUE #1278 REPRODUCED: Auth service database verification took {verification_time:.2f}s "
                     f"(> {self.database_timeout_threshold}s threshold). "
                     "This confirms auth service database timing issues."
                 )
@@ -231,7 +231,7 @@ class TestDatabaseConnectivityTimeoutIssue1278(SSotAsyncTestCase):
             self.record_metric("auth_db_timeout", timeout_duration)
 
             pytest.fail(
-                f"✅ ISSUE #1278 REPRODUCED: Auth service database verification timed out after {timeout_duration:.2f}s. "
+                f"CHECK ISSUE #1278 REPRODUCED: Auth service database verification timed out after {timeout_duration:.2f}s. "
                 "This confirms auth service database timeout from Issue #1278."
             )
 
@@ -243,7 +243,7 @@ class TestDatabaseConnectivityTimeoutIssue1278(SSotAsyncTestCase):
             self.record_metric("auth_db_error_time", error_duration)
 
             pytest.fail(
-                f"✅ ISSUE #1278 REPRODUCED: Auth service database verification failed after {error_duration:.2f}s: {e}. "
+                f"CHECK ISSUE #1278 REPRODUCED: Auth service database verification failed after {error_duration:.2f}s: {e}. "
                 "This confirms auth service database connectivity problems."
             )
 
@@ -317,7 +317,7 @@ class TestDatabaseConnectivityTimeoutIssue1278(SSotAsyncTestCase):
             ])
 
             pytest.fail(
-                f"✅ ISSUE #1278 REPRODUCED: {len(failed_connections)} VPC database connections failed:\n"
+                f"CHECK ISSUE #1278 REPRODUCED: {len(failed_connections)} VPC database connections failed:\n"
                 f"{failure_details}\n"
                 "This confirms VPC connector database connectivity issues from Issue #1278."
             )
@@ -422,7 +422,7 @@ class TestDatabaseConnectivityTimeoutIssue1278(SSotAsyncTestCase):
                 failure_details += f"Total duration {total_duration:.2f}s > {self.database_timeout_threshold}s threshold\n"
 
             pytest.fail(
-                f"✅ ISSUE #1278 REPRODUCED: Concurrent database connection problems:\n"
+                f"CHECK ISSUE #1278 REPRODUCED: Concurrent database connection problems:\n"
                 f"{failure_details}"
                 "This confirms concurrent connection timeout issues from Issue #1278."
             )
@@ -471,7 +471,7 @@ class TestDatabaseConnectivityTimeoutIssue1278(SSotAsyncTestCase):
             # If health check takes too long or fails, it reproduces Issue #1278
             if health_check_time > self.database_timeout_threshold or not health_result:
                 pytest.fail(
-                    f"✅ ISSUE #1278 REPRODUCED: Database health check took {health_check_time:.2f}s "
+                    f"CHECK ISSUE #1278 REPRODUCED: Database health check took {health_check_time:.2f}s "
                     f"or failed (result: {health_result}). "
                     "This confirms database health check issues from Issue #1278."
                 )
@@ -483,7 +483,7 @@ class TestDatabaseConnectivityTimeoutIssue1278(SSotAsyncTestCase):
             self.record_metric("database_health_timeout", timeout_duration)
 
             pytest.fail(
-                f"✅ ISSUE #1278 REPRODUCED: Database health check timed out after {timeout_duration:.2f}s. "
+                f"CHECK ISSUE #1278 REPRODUCED: Database health check timed out after {timeout_duration:.2f}s. "
                 "This confirms database health check timeout from Issue #1278."
             )
 
@@ -495,6 +495,6 @@ class TestDatabaseConnectivityTimeoutIssue1278(SSotAsyncTestCase):
             self.record_metric("database_health_error_time", error_duration)
 
             pytest.fail(
-                f"✅ ISSUE #1278 REPRODUCED: Database health check failed after {error_duration:.2f}s: {e}. "
+                f"CHECK ISSUE #1278 REPRODUCED: Database health check failed after {error_duration:.2f}s: {e}. "
                 "This confirms database health check problems from Issue #1278."
             )

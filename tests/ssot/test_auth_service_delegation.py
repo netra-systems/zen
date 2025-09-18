@@ -13,7 +13,7 @@ BUSINESS VALUE: Enterprise/Platform - Security Architecture & Audit Compliance
 - Maintains proper service boundaries and separation of concerns
 - Enables centralized security policy enforcement
 
-EXPECTED STATUS: FAIL (before SSOT refactor) → PASS (after SSOT refactor)
+EXPECTED STATUS: FAIL (before SSOT refactor) -> PASS (after SSOT refactor)
 
 These tests validate proper auth service delegation by:
 1. Verifying auth_client is used for all JWT operations

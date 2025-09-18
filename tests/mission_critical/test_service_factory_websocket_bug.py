@@ -6,10 +6,12 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message.""
+
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)""
+
         self.messages_sent.append(message)
     async def close(self, code: int = 1000, reason: str = Normal closure"):"
         Close WebSocket connection.""
@@ -18,7 +20,8 @@ class TestWebSocketConnection:
         self.is_connected = False
     async def get_messages(self) -> list:
         Get all sent messages."
-        Get all sent messages."
+        Get all sent messages.""
+
         await asyncio.sleep(0)
         return self.messages_sent.copy()
         '''Test that reproduces the WebSocket bridge initialization bug in service factory.'
@@ -134,7 +137,8 @@ class TestServiceFactoryWebSocketBug:
         try:
         test_suite.test_agent_service_creation_properly_fails()
         print([U+2717] Test should have raised NotImplementedError!)"
-        print([U+2717] Test should have raised NotImplementedError!)"
+        print([U+2717] Test should have raised NotImplementedError!)""
+
         except NotImplementedError as e:
         print(formatted_string")"
                         # Test 2: MCP service creation without agent service

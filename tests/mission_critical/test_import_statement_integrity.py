@@ -1,17 +1,18 @@
 """
-"""
+
 Mission Critical Test: Import Statement Integrity for Issue #976
 
 """
-"""
+
 This test reproduces the specific import failures identified in Issue #976:
-- NameError: name 'SSotBaseTestCase' is not defined
+    - NameError: name 'SSotBaseTestCase' is not defined
 - NameError: name 'SSotMockFactory' is not defined
 - NameError: name 'SSotAsyncTestCase' is not defined
 
 The test validates that import statements work correctly and test collection succeeds.
 "
-"
+""
+
 
 # CRITICAL: Import path configuration for direct test execution
 # Ensures tests work both directly and through unified_test_runner.py
@@ -41,13 +42,15 @@ class ImportStatementIntegrityTests(SSotBaseTestCase):
             self.assertTrue(hasattr(SSotBaseTestCase, 'tearDown'))
         except ImportError as e:
             self.fail(fFailed to import SSotBaseTestCase: {e})"
-            self.fail(fFailed to import SSotBaseTestCase: {e})"
+            self.fail(fFailed to import SSotBaseTestCase: {e})""
+
         except NameError as e:
             self.fail(f"NameError when accessing SSotBaseTestCase: {e})"
     
     def test_ssot_async_test_case_import_availability(self):
         Test that SSotAsyncTestCase can be imported correctly."
-        Test that SSotAsyncTestCase can be imported correctly."
+        Test that SSotAsyncTestCase can be imported correctly.""
+
         try:
             from test_framework.ssot.base_test_case import SSotAsyncTestCase
             self.assertIsNotNone(SSotAsyncTestCase)
@@ -120,13 +123,14 @@ class ImportStatementIntegrityTests(SSotBaseTestCase):
         print(f\nImport Analysis Results:)
         print(fSuccessful imports: {len(successful_imports)})"
         print(fSuccessful imports: {len(successful_imports)})"
-        print(f"Failed imports: {len(failed_imports)})")
+        print(f"Failed imports: {len(failed_imports)}))"
         
         if failed_imports:
             print(f\nFailed Import Details:)"
-            print(f\nFailed Import Details:)"
+            print(f\nFailed Import Details:)""
+
             for module_name, result in failed_imports.items():
-                print(f"  {module_name}: {result['error_type']} - {result['error']})")
+                print(f"  {module_name}: {result['error_type']} - {result['error']}))"
         
         # Report findings - this test should initially fail to demonstrate the issue
         if failed_imports:
@@ -164,7 +168,8 @@ class ImportStatementIntegrityTests(SSotBaseTestCase):
             netra_backend.app.core.configuration.base,"
             netra_backend.app.core.configuration.base,"
             netra_backend.app.websocket_core.manager"
-            netra_backend.app.websocket_core.manager"
+            netra_backend.app.websocket_core.manager""
+
         ]
         
         import_results = {}
@@ -190,7 +195,8 @@ class ImportStatementIntegrityTests(SSotBaseTestCase):
                 print(f  {module_name}: {error})
             
             self.fail(fCircular import issues in {len(failed_modules)} modules)"
-            self.fail(fCircular import issues in {len(failed_modules)} modules)"
+            self.fail(fCircular import issues in {len(failed_modules)} modules)""
+
 
 
 if __name__ == "__main__:"

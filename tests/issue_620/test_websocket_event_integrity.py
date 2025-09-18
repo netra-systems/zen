@@ -76,7 +76,7 @@ class WebSocketEventIntegrityTests(SSotAsyncTestCase):
                 result = await self._execute_agent_with_comprehensive_monitoring(engine, agent_context, user_context, monitor)
                 await self._validate_comprehensive_websocket_events(monitor, pattern['name'])
                 await self._validate_websocket_event_flow(monitor, pattern['name'])
-                logger.info(f"✅ WebSocket events validated for {pattern['name']}")
+                logger.info(f"CHECK WebSocket events validated for {pattern['name']}")
             except Exception as e:
                 logger.error(f"WebSocket test failed for {pattern['name']}: {e}")
                 if 'not available' not in str(e).lower():
@@ -99,7 +99,7 @@ class WebSocketEventIntegrityTests(SSotAsyncTestCase):
         critical_events = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
         await self._validate_critical_event_sequence(monitor, critical_events)
         await self._validate_event_timing_constraints(monitor)
-        logger.info(f'✅ Critical WebSocket event sequence validated: {len(monitor.get_events())} events')
+        logger.info(f'CHECK Critical WebSocket event sequence validated: {len(monitor.get_events())} events')
         await self._cleanup_websocket_engine(engine)
 
     async def test_websocket_event_isolation_per_user(self):
@@ -138,7 +138,7 @@ class WebSocketEventIntegrityTests(SSotAsyncTestCase):
                     if run_id not in str(event_args[0]):
                         logger.warning(f'Event for user {i} missing run_id: {event}')
         await self._validate_no_cross_user_events(user_monitors, user_contexts)
-        logger.info(f'✅ WebSocket event isolation validated for {num_users} users')
+        logger.info(f'CHECK WebSocket event isolation validated for {num_users} users')
         for engine in user_engines:
             await self._cleanup_websocket_engine(engine)
 
@@ -160,8 +160,8 @@ class WebSocketEventIntegrityTests(SSotAsyncTestCase):
             pytest.fail('WEBSOCKET RECOVERY FAILURE: No events delivered after error recovery')
         recovery_events = [e for e in events if 'recovery' in e.get('type', '')]
         if recovery_events:
-            logger.info(f'✅ WebSocket error recovery detected: {len(recovery_events)} recovery events')
-        logger.info(f'✅ WebSocket error recovery validated: {len(successful_events)}/{len(events)} events successful')
+            logger.info(f'CHECK WebSocket error recovery detected: {len(recovery_events)} recovery events')
+        logger.info(f'CHECK WebSocket error recovery validated: {len(successful_events)}/{len(events)} events successful')
         await self._cleanup_websocket_engine(engine)
 
     async def test_websocket_event_performance_during_migration(self):
@@ -196,7 +196,7 @@ class WebSocketEventIntegrityTests(SSotAsyncTestCase):
             pytest.fail(f"WEBSOCKET PERFORMANCE FAILURE: Event delivery too slow: {performance_metrics['events_per_second']:.2f} events/sec < 1.0 events/sec minimum")
         if performance_metrics['max_event_gap'] > 5.0:
             pytest.fail(f"WEBSOCKET PERFORMANCE FAILURE: Event gap too large: {performance_metrics['max_event_gap']:.2f}s > 5.0s maximum")
-        logger.info(f'✅ WebSocket performance validated: {performance_metrics}')
+        logger.info(f'CHECK WebSocket performance validated: {performance_metrics}')
         await self._cleanup_websocket_engine(engine)
 
     def _create_websocket_test_user_context(self, test_name: str) -> UserExecutionContext:
@@ -328,7 +328,7 @@ class WebSocketEventIntegrityTests(SSotAsyncTestCase):
             matching_events = [e for e in events if e['type'] == required_event]
             if len(matching_events) == 0:
                 pytest.fail(f"WEBSOCKET INTEGRITY FAILURE [{pattern_name}]: Required event '{required_event}' not delivered. Captured events: {captured_event_types}. Real-time chat experience broken.")
-        logger.info(f'✅ All {len(required_events)} required WebSocket events delivered for {pattern_name}')
+        logger.info(f'CHECK All {len(required_events)} required WebSocket events delivered for {pattern_name}')
 
     async def _validate_websocket_event_flow(self, monitor: WebSocketEventMonitor, pattern_name: str):
         """Validate WebSocket event flow and timing."""
@@ -348,7 +348,7 @@ class WebSocketEventIntegrityTests(SSotAsyncTestCase):
             pytest.fail(f'WEBSOCKET TIMING FAILURE [{pattern_name}]: Events too close together ({total_duration:.3f}s). Timeline: {event_timeline}')
         if total_duration > 10.0:
             pytest.fail(f'WEBSOCKET TIMING FAILURE [{pattern_name}]: Events too spread out ({total_duration:.3f}s). Timeline: {event_timeline}')
-        logger.info(f'✅ WebSocket event flow validated for {pattern_name}: {total_duration:.3f}s duration')
+        logger.info(f'CHECK WebSocket event flow validated for {pattern_name}: {total_duration:.3f}s duration')
 
     async def _execute_with_critical_event_sequence(self, engine, agent_context: AgentExecutionContext, user_context: UserExecutionContext, monitor: WebSocketEventMonitor):
         """Execute agent with critical event sequence monitoring."""
@@ -370,7 +370,7 @@ class WebSocketEventIntegrityTests(SSotAsyncTestCase):
         positions = [pos for _, pos in critical_positions]
         if positions != sorted(positions):
             pytest.fail(f'CRITICAL EVENT SEQUENCE VIOLATION: Events not in correct order. Expected: {critical_events}, Positions: {critical_positions}')
-        logger.info(f'✅ Critical event sequence validated: {critical_events}')
+        logger.info(f'CHECK Critical event sequence validated: {critical_events}')
 
     async def _validate_event_timing_constraints(self, monitor: WebSocketEventMonitor):
         """Validate event timing constraints."""
@@ -385,7 +385,7 @@ class WebSocketEventIntegrityTests(SSotAsyncTestCase):
             pytest.fail(f'EVENT TIMING CONSTRAINT VIOLATION: Events too close together ({duration:.3f}s < 0.05s). May indicate synchronous rather than real-time delivery.')
         if duration > 30.0:
             pytest.fail(f'EVENT TIMING CONSTRAINT VIOLATION: Events too slow ({duration:.3f}s > 30s). User experience degraded.')
-        logger.info(f'✅ Event timing constraints validated: {duration:.3f}s duration')
+        logger.info(f'CHECK Event timing constraints validated: {duration:.3f}s duration')
 
     async def _create_isolated_websocket_engine(self, user_context: UserExecutionContext, monitor: WebSocketEventMonitor, user_index: int):
         """Create isolated WebSocket engine for specific user."""
@@ -431,7 +431,7 @@ class WebSocketEventIntegrityTests(SSotAsyncTestCase):
                     event_user_id = event_kwargs['user_id']
                     if event_user_id != user_context.user_id:
                         pytest.fail(f"WEBSOCKET CROSS-USER CONTAMINATION: User {i} received event for user {event_user_id}. Event: {event['type']}, Expected User: {user_context.user_id}")
-        logger.info('✅ No cross-user WebSocket event contamination detected')
+        logger.info('CHECK No cross-user WebSocket event contamination detected')
 
     async def _create_error_recovery_websocket_engine(self, user_context: UserExecutionContext, monitor: WebSocketEventMonitor):
         """Create WebSocket engine with error recovery simulation."""

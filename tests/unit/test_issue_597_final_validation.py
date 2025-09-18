@@ -33,16 +33,16 @@ def test_wrong_import_fails():
     
     try:
         from netra_backend.app.core.auth_startup_validator import validate_auth_at_startup
-        print("❌ UNEXPECTED: Wrong function name imported successfully")
+        print("X UNEXPECTED: Wrong function name imported successfully")
         print("   This should NOT happen - the function should not exist")
         return False
     except ImportError as e:
-        print("✅ EXPECTED FAILURE: ImportError caught as expected")
+        print("CHECK EXPECTED FAILURE: ImportError caught as expected")
         print(f"   Error message: {e}")
         print("   This proves the issue exists in the codebase")
         return True
     except Exception as e:
-        print(f"❌ UNEXPECTED ERROR: {type(e).__name__}: {e}")
+        print(f"X UNEXPECTED ERROR: {type(e).__name__}: {e}")
         return False
 
 
@@ -58,30 +58,30 @@ def test_correct_import_succeeds():
     
     try:
         from netra_backend.app.core.auth_startup_validator import validate_auth_startup
-        print("✅ SUCCESS: validate_auth_startup imported successfully")
+        print("CHECK SUCCESS: validate_auth_startup imported successfully")
         
         # Validate it's callable
         if callable(validate_auth_startup):
-            print("✅ SUCCESS: Function is callable")
+            print("CHECK SUCCESS: Function is callable")
         else:
-            print("❌ FAIL: Function is not callable")
+            print("X FAIL: Function is not callable")
             return False
             
         # Validate it's async
         import inspect
         if inspect.iscoroutinefunction(validate_auth_startup):
-            print("✅ SUCCESS: Function is async (as expected)")
+            print("CHECK SUCCESS: Function is async (as expected)")
         else:
-            print("❌ FAIL: Function is not async")
+            print("X FAIL: Function is not async")
             return False
             
         return True
         
     except ImportError as e:
-        print(f"❌ FAIL: Correct function name import failed: {e}")
+        print(f"X FAIL: Correct function name import failed: {e}")
         return False
     except Exception as e:
-        print(f"❌ UNEXPECTED ERROR: {type(e).__name__}: {e}")
+        print(f"X UNEXPECTED ERROR: {type(e).__name__}: {e}")
         return False
 
 
@@ -108,18 +108,18 @@ def test_module_contents():
         has_wrong = hasattr(auth_module, 'validate_auth_at_startup')
         
         print(f"\n📋 Function availability check:")
-        print(f"   ✅ validate_auth_startup: {has_correct}")
-        print(f"   ❌ validate_auth_at_startup: {has_wrong}")
+        print(f"   CHECK validate_auth_startup: {has_correct}")
+        print(f"   X validate_auth_at_startup: {has_wrong}")
         
         if has_correct and not has_wrong:
-            print("✅ SUCCESS: Module has correct function name only")
+            print("CHECK SUCCESS: Module has correct function name only")
             return True
         else:
-            print("❌ FAIL: Module function availability incorrect")
+            print("X FAIL: Module function availability incorrect")
             return False
             
     except Exception as e:
-        print(f"❌ ERROR: Module analysis failed: {e}")
+        print(f"X ERROR: Module analysis failed: {e}")
         return False
 
 
@@ -148,12 +148,12 @@ async def test_function_execution():
             
             # Try to call the function
             await validate_auth_startup()
-            print("✅ SUCCESS: Function executed without errors")
+            print("CHECK SUCCESS: Function executed without errors")
             print("   This proves the function signature and implementation are correct")
             return True
             
     except Exception as e:
-        print(f"❌ FAIL: Function execution failed: {e}")
+        print(f"X FAIL: Function execution failed: {e}")
         print(f"   Traceback: {traceback.format_exc()}")
         return False
 
@@ -185,26 +185,26 @@ def test_consumer_import_patterns():
     for pattern in working_patterns:
         try:
             exec(pattern)
-            print(f"   ✅ SUCCESS: {pattern}")
+            print(f"   CHECK SUCCESS: {pattern}")
             success_count += 1
         except ImportError as e:
-            print(f"   ❌ FAIL: {pattern} - {e}")
+            print(f"   X FAIL: {pattern} - {e}")
     
     print("\n📋 Testing failing patterns (should fail):")
     for pattern in failing_patterns:
         try:
             exec(pattern)
-            print(f"   ❌ UNEXPECTED: {pattern} - Should have failed!")
+            print(f"   X UNEXPECTED: {pattern} - Should have failed!")
         except ImportError as e:
-            print(f"   ✅ EXPECTED FAILURE: {pattern} - {e}")
+            print(f"   CHECK EXPECTED FAILURE: {pattern} - {e}")
             success_count += 1
     
     expected_successes = len(working_patterns) + len(failing_patterns)
     if success_count == expected_successes:
-        print(f"\n✅ SUCCESS: All import patterns behaved as expected ({success_count}/{expected_successes})")
+        print(f"\nCHECK SUCCESS: All import patterns behaved as expected ({success_count}/{expected_successes})")
         return True
     else:
-        print(f"\n❌ FAIL: Import patterns did not behave as expected ({success_count}/{expected_successes})")
+        print(f"\nX FAIL: Import patterns did not behave as expected ({success_count}/{expected_successes})")
         return False
 
 
@@ -232,7 +232,7 @@ def main():
             result = test_func()
             results.append((test_name, result))
         except Exception as e:
-            print(f"❌ ERROR in {test_name}: {e}")
+            print(f"X ERROR in {test_name}: {e}")
             results.append((test_name, False))
     
     # Summary report
@@ -244,18 +244,18 @@ def main():
     total = len(results)
     
     for test_name, result in results:
-        status = "✅ PASS" if result else "❌ FAIL"
+        status = "CHECK PASS" if result else "X FAIL"
         print(f"{status}: {test_name}")
     
     print(f"\nTotal: {passed}/{total} tests passed")
     
     if passed == total:
         print("\n🎉 ALL TESTS PASSED!")
-        print("✅ Issue #597 has been comprehensively validated")
-        print("✅ ImportError issue confirmed and solution validated")
+        print("CHECK Issue #597 has been comprehensively validated")
+        print("CHECK ImportError issue confirmed and solution validated")
     else:
-        print(f"\n⚠️  {total - passed} tests failed")
-        print("❌ Further investigation needed")
+        print(f"\nWARNING️  {total - passed} tests failed")
+        print("X Further investigation needed")
     
     print("\n" + "="*80)
     print("🔍 CONCLUSION FOR ISSUE #597:")

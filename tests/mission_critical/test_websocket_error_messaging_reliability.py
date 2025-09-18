@@ -1,29 +1,30 @@
 """
-"""
+
 Mission Critical WebSocket Error Messaging Reliability Tests
 
-BUSINESS CRITICAL: These tests protect $500K+ ARR by ensuring WebSocket error messaging
+BUSINESS CRITICAL: These tests protect $500K+ plus ARR by ensuring WebSocket error messaging
 functions correctly in all scenarios. WebSocket errors breaking chat functionality
 directly impacts 90% of platform value delivery.
 
 PURPOSE:
-- Validate WebSocket error messaging doesn't break due to function signature mismatches'
+    - Validate WebSocket error messaging doesn't break due to function signature mismatches'
 - Ensure critical error scenarios are properly communicated to users
 - Protect against regression of WebSocket message creation failures
 - Validate end-to-end error handling preserves business continuity
 
 FAILURE IMPACT:
-- Chat functionality degraded (90% of platform value)
+    - Chat functionality degraded (90% of platform value)
 - User authentication failures not communicated
 - Service initialization errors cause silent failures
 - Customer experience severely impacted
 
 This test suite MUST pass before any deployment to production.
 "
-"
+""
+
 
 """
-"""
+
 import asyncio
 import json
 import time
@@ -33,13 +34,15 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
     "
-    "
+    ""
+
     MISSION CRITICAL: WebSocket error messaging reliability tests.
     
     These tests validate that WebSocket error messaging works correctly
     in all critical business scenarios.
 "
-"
+""
+
     
     async def setUp(self):
         "Set up mission critical test environment."
@@ -50,28 +53,28 @@ class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
         # Mission critical error scenarios
         self.critical_error_scenarios = [
             {
-                name": "authentication_failure,
+                name": authentication_failure,"
                 error_code: AUTH_FAILED,
                 error_message: "Authentication failed,"
                 expected_close_code": 1008,"
                 business_impact: Users cannot access chat functionality
             },
             {
-                "name: service_initialization_failure", 
+                "name: service_initialization_failure, "
                 error_code: SERVICE_INIT_FAILED,
                 error_message: Service initialization failed","
                 "expected_close_code: 1011,"
                 business_impact: WebSocket service unavailable
             },
             {
-                name": "cleanup_failure,
+                name": cleanup_failure,"
                 error_code: CLEANUP_FAILED, 
                 error_message: "Error during cleanup,"
                 expected_close_code": 1000,"
                 business_impact: Resource cleanup issues
             },
             {
-                "name: json_parsing_failure",
+                "name: json_parsing_failure,"
                 error_code: INVALID_JSON,
                 error_message: Invalid JSON format","
                 "expected_close_code: 1003,"
@@ -80,7 +83,8 @@ class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
         ]
         
     def create_test_user_context(self):
-        ""Create a test user context for mission critical testing.
+        ""Create a test user context for mission critical testing.""
+
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         return UserExecutionContext(
@@ -91,7 +95,8 @@ class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
         )
     
     async def test_mission_critical_error_message_function_signatures(self):
-        ""
+        """
+
         MISSION CRITICAL: Validate that all error message creation functions work correctly.
         
         This test MUST pass to ensure error messaging doesn't break due to signature mismatches.'
@@ -106,7 +111,8 @@ class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
             error_message = scenario[error_message]
             
             with self.subTest(scenario=scenario[name):"
-            with self.subTest(scenario=scenario[name):"
+            with self.subTest(scenario=scenario[name):""
+
                 
                 # Test 1: Real implementation MUST work with correct signature
                 try:
@@ -204,7 +210,8 @@ class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
                 with patch.object(endpoint, '_create_websocket_manager', return_value=None):
                     try:
                         await endpoint.websocket_endpoint(self.websocket_mock, mode=main)"
-                        await endpoint.websocket_endpoint(self.websocket_mock, mode=main)"
+                        await endpoint.websocket_endpoint(self.websocket_mock, mode=main)""
+
                     except Exception as e:
                         if missing 1 required positional argument" in str(e):"
                             self.fail(fMISSION CRITICAL: Function signature error in {scenario_name}: {e})
@@ -240,7 +247,8 @@ class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
                     
                     # Mock invalid JSON
                     self.websocket_mock.receive_text.return_value = invalid json"
-                    self.websocket_mock.receive_text.return_value = invalid json"
+                    self.websocket_mock.receive_text.return_value = invalid json""
+
                     
                     try:
                         await endpoint.websocket_endpoint(self.websocket_mock, mode=main)
@@ -252,7 +260,8 @@ class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
         Validate that error message meets mission critical requirements.""
         expected_error_code = scenario[error_code]
         expected_error_message = scenario[error_message]"
-        expected_error_message = scenario[error_message]"
+        expected_error_message = scenario[error_message]""
+
         
         if hasattr(error_message, 'error_code'):
             # Real implementation (pydantic model)
@@ -272,13 +281,15 @@ class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
             self.fail(f"MISSION CRITICAL: Invalid error message type for {scenario['name']}: {type(error_message)})"
     
     async def test_mission_critical_websocket_function_signature_regression_prevention(self):
-        "
-        "
+        """
+        ""
+
         MISSION CRITICAL: Prevent regression of function signature issues.
         
         This test scans the codebase to ensure no new single-parameter calls are introduced.
 "
-"
+""
+
         import ast
         import os
         
@@ -348,7 +359,8 @@ class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
         # Performance requirement: Should create 100 error messages in < 1 second
         self.assertLess(creation_time, 1.0,
                        fError message creation too slow: {creation_time:.3f}s for 100 messages)"
-                       fError message creation too slow: {creation_time:.3f}s for 100 messages)"
+                       fError message creation too slow: {creation_time:."3f"}s for 100 messages)""
+
         
         # Validate all messages are unique and properly formed
         self.assertEqual(len(error_messages), 100)
@@ -376,16 +388,16 @@ class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
                 function: create_error_message,
                 "real_impl: real_error,"
                 fallback_impl: fallback_error,
-                test_args: (TEST_ERROR", "Test message),
+                test_args: (TEST_ERROR", Test message),"
                 single_arg: (Test message,)
             },
             {
-                function": "create_server_message, 
+                function": create_server_message, "
                 real_impl: real_server,
                 fallback_impl: fallback_server,"
                 fallback_impl: fallback_server,"
                 test_args": (test_type, {data: test),"
-                single_arg": ("test_type,)
+                single_arg": (test_type,)"
             }
         ]
         
@@ -429,16 +441,19 @@ class WebSocketErrorMessagingReliabilityTests(SSotAsyncTestCase):
 
 class WebSocketErrorMessagingBusinessContinuityTests(SSotAsyncTestCase):
     "
-    "
+    ""
+
     MISSION CRITICAL: Business continuity tests for WebSocket error messaging.
     
     Validates that business operations continue even when errors occur.
 "
-"
+""
+
     
     async def test_chat_functionality_preserved_during_error_conditions(self):
-    "
-    "
+        """
+    ""
+
         MISSION CRITICAL: Ensure chat functionality is preserved during error conditions.
         
         Chat is 90% of platform value - it MUST continue working even with error messages.
@@ -468,7 +483,8 @@ class WebSocketErrorMessagingBusinessContinuityTests(SSotAsyncTestCase):
             self.fail(fMISSION CRITICAL: Error message creation interfered with chat functionality: {e})
     
     async def test_error_message_escalation_path(self):
-        ""
+        """
+
         MISSION CRITICAL: Test error message escalation for business critical failures.
         
         Ensures that critical errors are properly escalated for business continuity.
@@ -477,7 +493,7 @@ class WebSocketErrorMessagingBusinessContinuityTests(SSotAsyncTestCase):
         error_scenarios = [
             {"level: WARNING", code: RATE_LIMITED, message: Rate limit exceeded"},"
             {"level: ERROR, code: AUTH_FAILED, "message: Authentication failed"},"
-            {level: CRITICAL, code: SERVICE_DOWN", "message: Service unavailable},
+            {level: CRITICAL, code: SERVICE_DOWN", message: Service unavailable},"
         ]
         
         from netra_backend.app.websocket_core.types import create_error_message
@@ -485,13 +501,14 @@ class WebSocketErrorMessagingBusinessContinuityTests(SSotAsyncTestCase):
         for scenario in error_scenarios:
             with self.subTest(level=scenario[level):
                 try:
-                    error_msg = create_error_message(scenario[code"), scenario["message)
+                    error_msg = create_error_message(scenario[code"), scenario[message)"
                     
                     # Validate error message structure
                     self.assertIsNotNone(error_msg)
                     self.assertEqual(error_msg.error_code, scenario[code)
                     self.assertEqual(error_msg.error_message, scenario[message)"
-                    self.assertEqual(error_msg.error_message, scenario[message)"
+                    self.assertEqual(error_msg.error_message, scenario[message)""
+
                     
                     # Critical errors should have additional details
                     if scenario[level"] == CRITICAL:"
@@ -512,7 +529,8 @@ if __name__ == __main__:
     print(MIGRATION NOTICE: This file previously used direct pytest execution.")"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)
     print(For more info: reports/TEST_EXECUTION_GUIDE.md"")"
-    print(For more info: reports/TEST_EXECUTION_GUIDE.md"")"
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md"")""
+
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

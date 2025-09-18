@@ -158,7 +158,7 @@ class ConfigurationGapDemonstrationTests(unittest.TestCase):
             # GAP 1: Variable Mapping Gaps
             if test_vars['TEST_BACKEND_URL'] and context_vars['backend_url'] != test_vars['TEST_BACKEND_URL']:
                 gap_analysis['gap_categories']['variable_mapping_gaps'].append({
-                    'gap': 'TEST_BACKEND_URL → BACKEND_URL mapping missing',
+                    'gap': 'TEST_BACKEND_URL -> BACKEND_URL mapping missing',
                     'test_value': test_vars['TEST_BACKEND_URL'],
                     'context_value': context_vars['backend_url'],
                     'impact': 'TestContext uses default instead of test-specific URL'
@@ -517,7 +517,7 @@ class ConfigurationGapDemonstrationTests(unittest.TestCase):
         
         # Fix requirement 1: Variable mapping resolution
         resolution_requirements['required_fixes'].append({
-            'fix': 'Implement TEST_BACKEND_URL → BACKEND_URL variable mapping',
+            'fix': 'Implement TEST_BACKEND_URL -> BACKEND_URL variable mapping',
             'priority': 'P0 - Critical',
             'description': 'TestContext should check TEST_BACKEND_URL when BACKEND_URL is empty',
             'implementation': 'Add environment variable resolution priority in TestContext.__init__',
@@ -553,7 +553,7 @@ class ConfigurationGapDemonstrationTests(unittest.TestCase):
         
         # Implementation priorities
         resolution_requirements['implementation_priorities'] = [
-            'P0: Variable mapping (TEST_BACKEND_URL → BACKEND_URL)',
+            'P0: Variable mapping (TEST_BACKEND_URL -> BACKEND_URL)',
             'P0: Docker port detection (DOCKER_BACKEND_PORT usage)',
             'P1: Staging fallback (USE_STAGING_SERVICES support)',
             'P1: Environment-specific resolution (test environment priority)',

@@ -123,7 +123,7 @@ class Issue700MetadataBypassSSoTRegressionTests:
         CRITICAL TEST: Validate that this regression blocks the Golden Path
         
         This test confirms that the metadata bypass SSOT regression directly
-        impacts the Golden Path (login → AI responses) functionality.
+        impacts the Golden Path (login -> AI responses) functionality.
         """
         critical_metadata_keys = ['triage_result', 'triage_category', 'data_sufficiency', 'triage_priority', 'next_agents']
         base_agent = BaseAgent(llm_manager=self.mock_llm_manager, name='TestAgent')

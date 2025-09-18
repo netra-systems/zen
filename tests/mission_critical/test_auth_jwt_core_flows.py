@@ -1,18 +1,18 @@
 """
-"""
+
 [U+1F534] MISSION CRITICAL: Authentication JWT Core Flows Test Suite
 
 Tests the most fundamental authentication paths that ALL users must traverse.
 These are the HIGHEST BUSINESS VALUE authentication flows.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free, Early, Mid, Enterprise) - 100% of users
+    - Segment: ALL (Free, Early, Mid, Enterprise) - 100% of users
 - Business Goal: User Onboarding & Retention - Enable all user access
-- Value Impact: $500K+ ARR - Without auth, ZERO revenue possible
+- Value Impact: $500K+ plus ARR - Without auth, ZERO revenue possible
 - Strategic Impact: Platform Foundation - Auth enables all other features
 
 CRITICAL SUCCESS CRITERIA:
-1. JWT token generation MUST work (no users can authenticate without this)
+    1. JWT token generation MUST work (no users can authenticate without this)
 2. JWT token validation MUST work (no API calls work without this)
 3. Cross-service JWT consistency MUST work (backend/auth must use same secret)
 4. Token expiration handling MUST work (prevents security issues)
@@ -20,10 +20,11 @@ CRITICAL SUCCESS CRITERIA:
 
 FAILURE = COMPLETE SYSTEM UNAVAILABLE
 "
-"
+""
+
 
 """
-"""
+
 import asyncio
 import json
 import logging
@@ -58,14 +59,15 @@ class AuthJWTCoreFlowValidator:
             # Decode without verification to check structure
             header = jwt.get_unverified_header(token)
             payload = jwt.decode(token, options={verify_signature: False)"
-            payload = jwt.decode(token, options={verify_signature: False)"
+            payload = jwt.decode(token, options={verify_signature: False)""
+
             
             validation = {
                 "valid_structure: True,"
-                has_required_claims: all(claim in payload for claim in [sub, email", "iat, exp),
-                has_algorithm: header.get(alg") == "HS256,
+                has_required_claims: all(claim in payload for claim in [sub, email", iat, exp),"
+                has_algorithm: header.get(alg") == HS256,"
                 user_id: payload.get(sub),
-                email": payload.get("email),
+                email": payload.get(email),"
                 expires_at: payload.get(exp),
                 issued_at: payload.get("iat)"
             }
@@ -84,7 +86,7 @@ class AuthJWTCoreFlowValidator:
             return {
                 valid_structure": False,"
                 error: str(e),
-                business_impact": f"CRITICAL: Token decode failed - {str(e)}
+                business_impact": fCRITICAL: Token decode failed - {str(e)}"
             }
     
     def validate_cross_service_consistency(self, token: str) -> Dict[str, Any]:
@@ -110,11 +112,12 @@ class AuthJWTCoreFlowValidator:
             validation[secrets_match] = True"
             validation[user_data"] = {"
                 user_id: decoded.get(sub),
-                "email: decoded.get(email"),
+                "email: decoded.get(email),"
                 permissions: decoded.get(permissions, [)
             }
             validation[business_impact] = NONE: Cross-service consistency validated"
-            validation[business_impact] = NONE: Cross-service consistency validated"
+            validation[business_impact] = NONE: Cross-service consistency validated""
+
             
         except jwt.ExpiredSignatureError:
             validation["business_impact] = WARNING: Token expired - user needs to login again"
@@ -127,7 +130,8 @@ class AuthJWTCoreFlowValidator:
     
     def validate_multi_user_isolation(self, tokens: List[str) -> Dict[str, Any):
         Validate that different user tokens are properly isolated."
-        Validate that different user tokens are properly isolated."
+        Validate that different user tokens are properly isolated.""
+
         validation = {
             unique_user_ids": set(),"
             unique_emails: set(),
@@ -148,7 +152,7 @@ class AuthJWTCoreFlowValidator:
                 validation[business_impact] = "CRITICAL: User ID collision - data leak risk"
             elif len(validation[unique_emails"] != len(tokens):"
                 validation[isolation_valid] = False
-                validation[business_impact"] = "CRITICAL: Email collision - user confusion risk
+                validation[business_impact"] = CRITICAL: Email collision - user confusion risk"
             else:
                 validation[business_impact] = NONE: Multi-user isolation properly maintained
                 
@@ -168,7 +172,8 @@ class AuthJWTCoreFlowsTests(BaseIntegrationTest):
     @pytest.fixture(autouse=True)
     async def setup_test_environment(self, real_services_fixture):
         Setup real services for mission critical auth testing."
-        Setup real services for mission critical auth testing."
+        Setup real services for mission critical auth testing.""
+
         self.services = real_services_fixture
         self.validator = AuthJWTCoreFlowValidator()
         self.auth_helper = E2EAuthHelper()
@@ -178,7 +183,8 @@ class AuthJWTCoreFlowsTests(BaseIntegrationTest):
             pytest.skip(Database required for mission critical auth tests)
     
     async def test_jwt_token_generation_core_business_flow(self):
-    ""
+    """
+
         MISSION CRITICAL: JWT token generation for user authentication.
         
         BUSINESS IMPACT: Without this, ZERO users can authenticate = $0 revenue
@@ -192,7 +198,7 @@ class AuthJWTCoreFlowsTests(BaseIntegrationTest):
         token = self.auth_helper.create_test_jwt_token(
             user_id=user_id,
             email=email,
-            permissions=["read, write", agent:execute],
+            permissions=["read, write, agent:execute],"
             exp_minutes=30
         )
         
@@ -200,12 +206,12 @@ class AuthJWTCoreFlowsTests(BaseIntegrationTest):
         assert token is not None, MISSION CRITICAL FAILURE: JWT token generation failed"
         assert token is not None, MISSION CRITICAL FAILURE: JWT token generation failed"
         assert isinstance(token, str), "MISSION CRITICAL FAILURE: Token must be string"
-        assert len(token) > 50, MISSION CRITICAL FAILURE: Token too short - likely invalid
+        assert len(token) > 50, "MISSION CRITICAL FAILURE: Token too short - likely invalid"
         
         # Validate token structure for business operations
         validation = self.validator.validate_jwt_structure(token)
         assert validation["valid_structure], fBUSINESS CRITICAL: {validation.get('business_impact', 'Token structure invalid')}"
-        assert validation[has_required_claims], BUSINESS CRITICAL: Missing user identification claims
+        assert validation[has_required_claims], "BUSINESS CRITICAL: Missing user identification claims"
         assert validation[user_id] == user_id, BUSINESS CRITICAL: User ID mismatch in token"
         assert validation[user_id] == user_id, BUSINESS CRITICAL: User ID mismatch in token"
         assert validation["email] == email, BUSINESS CRITICAL: Email mismatch in token"
@@ -213,7 +219,8 @@ class AuthJWTCoreFlowsTests(BaseIntegrationTest):
         logger.info( PASS:  MISSION CRITICAL: JWT token generation validated)
         
     async def test_jwt_token_validation_core_business_flow(self):
-        ""
+        """
+
         MISSION CRITICAL: JWT token validation for API access.
         
         BUSINESS IMPACT: Without this, users can't access ANY features = $0 value delivery'
@@ -236,7 +243,7 @@ class AuthJWTCoreFlowsTests(BaseIntegrationTest):
             secret = get_unified_jwt_secret()
             decoded = jwt.decode(token, secret, algorithms=[HS256")"
             
-            assert decoded[sub] == user_id, BUSINESS CRITICAL: User ID validation failed
+            assert decoded[sub] == user_id, "BUSINESS CRITICAL: User ID validation failed"
             assert decoded[email] == email, BUSINESS CRITICAL: Email validation failed"
             assert decoded[email] == email, BUSINESS CRITICAL: Email validation failed"
             assert decoded["exp] > time.time(), BUSINESS CRITICAL: Token already expired"
@@ -251,7 +258,8 @@ class AuthJWTCoreFlowsTests(BaseIntegrationTest):
         logger.info( PASS:  MISSION CRITICAL: JWT token validation confirmed)
         
     async def test_cross_service_jwt_consistency_revenue_critical(self):
-    ""
+    """
+
         MISSION CRITICAL: JWT consistency between auth and backend services.
         
         BUSINESS IMPACT: Inconsistency breaks ALL API calls = Complete service failure
@@ -265,7 +273,7 @@ class AuthJWTCoreFlowsTests(BaseIntegrationTest):
         token = self.auth_helper.create_test_jwt_token(
             user_id=user_id,
             email=email,
-            permissions=["read, write", agent:execute]
+            permissions=["read, write, agent:execute]"
         
         # CRITICAL VALIDATION: Token must work across services
         validation = self.validator.validate_cross_service_consistency(token)
@@ -274,30 +282,33 @@ class AuthJWTCoreFlowsTests(BaseIntegrationTest):
         if not validation[secrets_match]:"
             pytest.fail(f"MISSION CRITICAL FAILURE: {validation['business_impact']})"
             
-        assert validation[auth_service_valid], MISSION CRITICAL: Auth service cannot validate token
+        assert validation[auth_service_valid], "MISSION CRITICAL: Auth service cannot validate token"
         assert validation[backend_service_valid], "MISSION CRITICAL: Backend service cannot validate token"
         
         # Verify user data consistency
         user_data = validation.get(user_data", {)"
-        assert user_data.get(user_id) == user_id, BUSINESS CRITICAL: User ID inconsistent across services
+        assert user_data.get(user_id) == user_id, "BUSINESS CRITICAL: User ID inconsistent across services"
         assert user_data.get("email) == email, BUSINESS CRITICAL: Email inconsistent across services"
         
         logger.info( PASS:  MISSION CRITICAL: Cross-service JWT consistency validated)
     
     async def test_token_expiration_security_compliance(self):
-        "
-        "
+        """
+        ""
+
         MISSION CRITICAL: Token expiration prevents security vulnerabilities.
         
         BUSINESS IMPACT: Without expiration, compromised tokens = Security breach risk
 "
 "
         logger.info([U+1F534] MISSION CRITICAL: Testing token expiration security)"
-        logger.info([U+1F534] MISSION CRITICAL: Testing token expiration security)"
+        logger.info([U+1F534] MISSION CRITICAL: Testing token expiration security)""
+
         
         # Create short-lived token (1 second)
         user_id = fexpiration-test-{uuid.uuid4().hex[:8]}"
-        user_id = fexpiration-test-{uuid.uuid4().hex[:8]}"
+        user_id = fexpiration-test-{uuid.uuid4().hex[:8]}""
+
         token = self.auth_helper.create_test_jwt_token(
             user_id=user_id,
             email=fexpiration-{int(time.time())}@netra.test,
@@ -356,12 +367,13 @@ class AuthJWTCoreFlowsTests(BaseIntegrationTest):
         
         # Verify each user has unique identity
         assert len(validation["unique_user_ids) == user_count, CRITICAL: User ID collision detected"
-        assert len(validation[unique_emails) == user_count, CRITICAL: Email collision detected
+        assert len(validation[unique_emails) == user_count, "CRITICAL: Email collision detected"
         
         logger.info(f PASS:  MISSION CRITICAL: Multi-user isolation validated for {user_count} users)
         
     async def test_auth_performance_under_load_revenue_impact(self):
-        ""
+        """
+
         MISSION CRITICAL: Authentication performance under user load.
         
         BUSINESS IMPACT: Slow auth = User abandonment = Revenue loss
@@ -374,7 +386,8 @@ class AuthJWTCoreFlowsTests(BaseIntegrationTest):
         
         async def create_and_validate_token(user_index: int) -> Dict[str, Any]:
             Create and validate token for one user."
-            Create and validate token for one user."
+            Create and validate token for one user.""
+
             start_time = time.time()
             
             user_id = f"load-test-{user_index}-{uuid.uuid4().hex[:6]}"
@@ -413,12 +426,13 @@ class AuthJWTCoreFlowsTests(BaseIntegrationTest):
         max_duration = max(r[duration"] for r in results)"
         
         # Business requirements
-        assert successful_auths == concurrent_users, fMISSION CRITICAL: {concurrent_users - successful_auths} auth failures
+        assert successful_auths == concurrent_users, "fMISSION CRITICAL: {concurrent_users - successful_auths} auth failures"
         assert avg_duration < 0.1, fBUSINESS CRITICAL: Average auth time {avg_duration:.3f}s > 100ms - users will abandon"
         assert avg_duration < 0.1, fBUSINESS CRITICAL: Average auth time {avg_duration:.3f}s > 100ms - users will abandon"
-        assert max_duration < 0.5, f"BUSINESS CRITICAL: Max auth time {max_duration:.3f}s > 500ms - unacceptable UX"
+        assert max_duration < 0.5, f"BUSINESS CRITICAL: Max auth time {max_duration:.""3f""}s > ""500ms"" - unacceptable UX"
         
-        logger.info(f PASS:  MISSION CRITICAL: Auth performance validated - {successful_auths} users, avg {avg_duration:.3f}s)
+        logger.info(f PASS:  MISSION CRITICAL: Auth performance validated - {successful_auths} users, avg {avg_duration:.""3f""}s)""
+
 
 
 @pytest.mark.mission_critical
@@ -448,7 +462,8 @@ class AuthJWTBusinessContinuityTests(BaseIntegrationTest):
         # Validate pre-restart token works
         validation_pre = self.validator.validate_jwt_structure(pre_restart_token)
         assert validation_pre[valid_structure], SETUP FAILURE: Pre-restart token invalid"
-        assert validation_pre[valid_structure], SETUP FAILURE: Pre-restart token invalid"
+        assert validation_pre[valid_structure], SETUP FAILURE: Pre-restart token invalid""
+
         
         # Simulate service restart by creating new auth helper instance
         post_restart_helper = E2EAuthHelper()
@@ -468,25 +483,28 @@ class AuthJWTBusinessContinuityTests(BaseIntegrationTest):
         cross_validation_pre = self.validator.validate_cross_service_consistency(pre_restart_token)
         cross_validation_post = self.validator.validate_cross_service_consistency(post_restart_token)
         
-        assert cross_validation_pre[secrets_match], MISSION CRITICAL: Pre-restart token fails cross-service validation
+        assert cross_validation_pre[secrets_match], "MISSION CRITICAL: Pre-restart token fails cross-service validation"
         assert cross_validation_post["secrets_match], MISSION CRITICAL: Post-restart token fails cross-service validation"
         
         logger.info( PASS:  MISSION CRITICAL: Auth service restart continuity validated)
     
     async def test_database_connectivity_auth_resilience(self):
-        "
-        "
+        """
+        ""
+
         MISSION CRITICAL: Authentication handles database connectivity issues.
         
         BUSINESS IMPACT: DB issues should not prevent JWT validation = Service availability
 "
 "
         logger.info([U+1F534] MISSION CRITICAL: Testing auth resilience to database issues)"
-        logger.info([U+1F534] MISSION CRITICAL: Testing auth resilience to database issues)"
+        logger.info([U+1F534] MISSION CRITICAL: Testing auth resilience to database issues)""
+
         
         # Create valid JWT token (should work without database)
         user_id = fdb-resilience-{uuid.uuid4().hex[:8]}"
-        user_id = fdb-resilience-{uuid.uuid4().hex[:8]}"
+        user_id = fdb-resilience-{uuid.uuid4().hex[:8]}""
+
         token = self.auth_helper.create_test_jwt_token(
             user_id=user_id,
             email=fdb-resilience-{int(time.time())}@netra.test
@@ -498,7 +516,7 @@ class AuthJWTBusinessContinuityTests(BaseIntegrationTest):
         
         assert validation[secrets_match], "MISSION CRITICAL: JWT validation requires database (should be stateless)"
         assert validation[auth_service_valid"], MISSION CRITICAL: Auth validation fails without database"
-        assert validation[backend_service_valid], MISSION CRITICAL: Backend validation fails without database
+        assert validation[backend_service_valid], "MISSION CRITICAL: Backend validation fails without database"
         
         logger.info( PASS:  MISSION CRITICAL: Auth resilience to database issues validated")"
 

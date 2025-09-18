@@ -371,7 +371,7 @@ class TestAsyncExecution:
         )
         self.orchestrator.add_instance(config)
 
-        # This will actually run 'echo -p "Hello World" --output-format=json --permission-mode=acceptEdits'
+        # This will actually run 'echo -p "Hello World" --output-format=json --permission-mode=bypassPermissions'
         # which is safe and should complete quickly
         result = await self.orchestrator.run_instance("test-real")
 

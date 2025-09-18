@@ -135,7 +135,7 @@ class TestSSotComplianceMeasurement(SSotBaseTestCase):
         
         # ASSERTION DESIGNED TO FAIL INITIALLY
         assert compliance_report.overall_compliance_percentage >= self.target_compliance, (
-            f"❌ EXPECTED FAILURE: SSOT compliance is {compliance_report.overall_compliance_percentage:.1f}%, "
+            f"X EXPECTED FAILURE: SSOT compliance is {compliance_report.overall_compliance_percentage:.1f}%, "
             f"below target of {self.target_compliance}%.\n"
             f"Compliance gap: {compliance_report.compliance_gap:.1f}%\n"
             f"Total violations: {compliance_report.total_violations}\n"
@@ -171,7 +171,7 @@ class TestSSotComplianceMeasurement(SSotBaseTestCase):
         
         # ASSERTION DESIGNED TO FAIL INITIALLY
         assert import_compliance['compliance_percentage'] >= 100.0, (
-            f"❌ EXPECTED FAILURE: Import pattern compliance is {import_compliance['compliance_percentage']:.1f}%, "
+            f"X EXPECTED FAILURE: Import pattern compliance is {import_compliance['compliance_percentage']:.1f}%, "
             f"below target of 100%.\n"
             f"Violations: {len(import_compliance['violations'])}\n"
             f"Canonical pattern: {import_compliance['canonical_pattern']}\n"
@@ -203,7 +203,7 @@ class TestSSotComplianceMeasurement(SSotBaseTestCase):
         
         # ASSERTION DESIGNED TO FAIL INITIALLY
         assert factory_compliance['compliance_percentage'] >= 100.0, (
-            f"❌ EXPECTED FAILURE: Factory pattern compliance is {factory_compliance['compliance_percentage']:.1f}%, "
+            f"X EXPECTED FAILURE: Factory pattern compliance is {factory_compliance['compliance_percentage']:.1f}%, "
             f"below target of 100%.\n"
             f"Violations: {len(factory_compliance['violations'])}\n"
             f"Canonical pattern: {factory_compliance['canonical_pattern']}\n"
@@ -232,7 +232,7 @@ class TestSSotComplianceMeasurement(SSotBaseTestCase):
         
         # ASSERTION DESIGNED TO FAIL INITIALLY
         assert auth_compliance['compliance_percentage'] >= 100.0, (
-            f"❌ EXPECTED FAILURE: Authentication pattern compliance is {auth_compliance['compliance_percentage']:.1f}%, "
+            f"X EXPECTED FAILURE: Authentication pattern compliance is {auth_compliance['compliance_percentage']:.1f}%, "
             f"below target of 100%.\n"
             f"Violations: {len(auth_compliance['violations'])}\n"
             f"Canonical pattern: {auth_compliance['canonical_pattern']}\n"
@@ -264,7 +264,7 @@ class TestSSotComplianceMeasurement(SSotBaseTestCase):
         
         # ASSERTION DESIGNED TO FAIL INITIALLY
         assert progress_report['progress_percentage'] >= 100.0, (
-            f"❌ EXPECTED FAILURE: SSOT consolidation progress is {progress_report['progress_percentage']:.1f}%, "
+            f"X EXPECTED FAILURE: SSOT consolidation progress is {progress_report['progress_percentage']:.1f}%, "
             f"not yet complete.\n"
             f"Current compliance: {progress_report['current_compliance']:.1f}%\n"
             f"Baseline compliance: {self.current_baseline}%\n"
@@ -455,7 +455,7 @@ class TestSSotComplianceMeasurement(SSotBaseTestCase):
 if __name__ == '__main__':
     print("🚨 Issue #1186 SSOT Compliance Measurement")
     print("=" * 80)
-    print("⚠️  WARNING: These tests are DESIGNED TO FAIL to demonstrate <100% compliance")
+    print("WARNING️  WARNING: These tests are DESIGNED TO FAIL to demonstrate <100% compliance")
     print("📊 Expected: Multiple test failures showing compliance gaps")
     print("🎯 Goal: Measure compliance baseline before SSOT consolidation")
     print("=" * 80)

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-"""
+
 Mission Critical Test Suite: Direct # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution Bypass Violation Reproduction - Issue #1075
 
 Business Value: Platform/Internal - Test Infrastructure SSOT Compliance
-Critical for $500K+ ARR protection through proper test execution patterns and SSOT compliance.
+Critical for $500K+ plus ARR protection through proper test execution patterns and SSOT compliance.
 
 This test reproduces the critical violation where 20+ files directly execute # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
@@ -14,14 +14,14 @@ This test reproduces the critical violation where 20+ files directly execute # M
 bypassing the SSOT unified_test_runner.py, compromising test infrastructure consistency.
 
 VIOLATION BEING REPRODUCED:
-- Direct # MIGRATED: Use SSOT unified test runner
+    - Direct # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution calls bypassing unified_test_runner.py
 - Inconsistent test execution patterns across the codebase
 - Fragmented test infrastructure violating SSOT principles
 
 EXPECTED BEHAVIOR AFTER REMEDIATION:
-- All test execution goes through unified_test_runner.py (SSOT)
+    - All test execution goes through unified_test_runner.py (SSOT)
 - No direct # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution calls in production test files
@@ -30,10 +30,12 @@ EXPECTED BEHAVIOR AFTER REMEDIATION:
 Author: SSOT Gardener Agent - Issue #1075 Step 1
 Date: 2025-9-14
 "
-"
+""
+
 
 """
 """
+
 import ast
 import os
 import sys
@@ -61,7 +63,8 @@ class PytestBypassViolation:
 
 
 class DirectPytestBypassReproductionTests(SSotBaseTestCase):
-    ""
+    """
+
     Test suite to reproduce and validate direct # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution bypass violations.
@@ -83,7 +86,8 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
         ]
 
     def scan_file_for_pytest_bypass_violations(self, file_path: Path) -> List[PytestBypassViolation]:
-        ""
+        """
+
         Scan a Python file for direct # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution bypass violations.
@@ -221,12 +225,14 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
         return all_violations
 
     def validate_unified_test_runner_functionality(self) -> bool:
-    "
-    "
+        """
+    ""
+
         Validate that the SSOT unified_test_runner.py exists and is functional.
         This should PASS even before remediation.
 "
-"
+""
+
         unified_runner_path = self.project_root / 'tests' / 'unified_test_runner.py'
         
         # Check file exists
@@ -261,8 +267,9 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
             return False
 
     def test_reproduce_direct_pytest_bypass_violations(self):
-        "
-        "
+        """
+        ""
+
         REPRODUCTION TEST: This test WILL FAIL until violations are remediated.
         
         Scans codebase and identifies all files that directly call # MIGRATED: Use SSOT unified test runner
@@ -270,7 +277,8 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
     pass  # TODO: Replace with appropriate SSOT test execution
         bypassing the SSOT unified_test_runner.py pattern.
         "
-        "
+        ""
+
         violations = self.scan_codebase_for_pytest_bypass_violations()
         self.violations_found = violations
         
@@ -290,7 +298,8 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
         )
 
     def test_validate_unified_test_runner_ssot_functionality(self):
-        ""
+        """
+
         VALIDATION TEST: This test should PASS both before and after remediation.
         
         Validates that the SSOT unified_test_runner.py exists and is functional.
@@ -301,12 +310,14 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
             is_functional,
             CRITICAL: SSOT unified_test_runner.py must be functional. 
             This is the canonical way to run tests in the system."
-            This is the canonical way to run tests in the system."
+            This is the canonical way to run tests in the system.""
+
         )
 
     def test_ssot_pattern_compliance_detection(self):
-    "
-    "
+        """
+    ""
+
         COMPLIANCE TEST: Validates detection of SSOT-compliant test execution patterns.
         
         This test should PASS - it validates our ability to detect proper patterns.
@@ -327,8 +338,9 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
     def generate_violation_report(self, violations: List[PytestBypassViolation) -> str:
         Generate detailed report of pytest bypass violations.
         if not violations:
-            return ✅ NO VIOLATIONS FOUND - All test execution follows SSOT patterns"
-            return ✅ NO VIOLATIONS FOUND - All test execution follows SSOT patterns"
+            return CHECK NO VIOLATIONS FOUND - All test execution follows SSOT patterns"
+            return CHECK NO VIOLATIONS FOUND - All test execution follows SSOT patterns""
+
             
         report_lines = [
             f🚨 CRITICAL VIOLATIONS FOUND: {len(violations)} pytest bypass violations,
@@ -349,7 +361,8 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
         report_lines.extend([
             ,
             DETAILED VIOLATIONS (first 20):"
-            DETAILED VIOLATIONS (first 20):"
+            DETAILED VIOLATIONS (first 20):""
+
         ]
         
         for i, violation in enumerate(violations[:20):
@@ -372,7 +385,7 @@ class DirectPytestBypassReproductionTests(SSotBaseTestCase):
             4. Maintain SSOT compliance for test infrastructure
         ]
         
-        return "\n".join(report_lines)
+        return "\n.join(report_lines)"
 
     def import_module_from_path(self, module_name: str, file_path: str):
         Helper to import module from file path.

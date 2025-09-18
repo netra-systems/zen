@@ -84,10 +84,10 @@ class MessageRouterInterfaceCompletenessTests(SSotBaseTestCase):
             for violation in interface_violations:
                 self.logger.error(f'  Interface violation: {violation}')
         if len(interface_violations) == 0:
-            self.logger.info('✅ SSOT COMPLIANCE: All MessageRouter implementations have complete required interfaces')
+            self.logger.info('CHECK SSOT COMPLIANCE: All MessageRouter implementations have complete required interfaces')
         else:
             violation_msg = f'SSOT VIOLATION: {len(interface_violations)} interface completeness violations detected'
-            self.logger.error(f'❌ {violation_msg}')
+            self.logger.error(f'X {violation_msg}')
             self.fail(f'SSOT VIOLATION: All MessageRouter implementations must have complete interfaces. Found {len(interface_violations)} interface violations proving incomplete implementations.')
 
     def _check_interface_requirement(self, path: str, router_class: type, router_instance: Any, requirement: InterfaceRequirement) -> Optional[Dict]:
@@ -180,10 +180,10 @@ class MessageRouterInterfaceCompletenessTests(SSotBaseTestCase):
             for inconsistency in signature_inconsistencies:
                 self.logger.error(f'  Signature inconsistency: {inconsistency}')
         if len(signature_inconsistencies) == 0:
-            self.logger.info('✅ SSOT COMPLIANCE: All MessageRouter implementations have consistent method signatures')
+            self.logger.info('CHECK SSOT COMPLIANCE: All MessageRouter implementations have consistent method signatures')
         else:
             violation_msg = f'SSOT VIOLATION: {len(signature_inconsistencies)} method signature inconsistencies detected'
-            self.logger.error(f'❌ {violation_msg}')
+            self.logger.error(f'X {violation_msg}')
             self.fail(f'SSOT VIOLATION: MessageRouter implementations must have consistent method signatures. Found {len(signature_inconsistencies)} signature inconsistencies proving fragmented interfaces.')
 
     def test_interface_compatibility_matrix(self):
@@ -215,7 +215,7 @@ class MessageRouterInterfaceCompletenessTests(SSotBaseTestCase):
                 compliance_by_impl[path] = is_compliant
             compliant_count = sum((1 for c in compliance_by_impl.values() if c))
             total_count = len(compliance_by_impl)
-            status = '✅' if compliant_count == total_count else '❌'
+            status = 'CHECK' if compliant_count == total_count else 'X'
             required_marker = '*' if requirement.required else ''
             self.logger.info(f'  {status} {requirement.name}{required_marker}: {compliant_count}/{total_count} implementations compliant')
         total_checks = len(all_requirements) * len(loaded_implementations)

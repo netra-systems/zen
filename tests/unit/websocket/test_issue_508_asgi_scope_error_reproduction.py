@@ -192,7 +192,7 @@ class Issue508GoldenPathBusinessImpactTests(SSotAsyncTestCase):
         BUSINESS IMPACT: Prove this bug affects Golden Path chat functionality
         
         This test validates that WebSocket ASGI scope errors break the 
-        critical user login → AI response chat flow
+        critical user login -> AI response chat flow
         """
         websocket_url = 'ws://localhost:8000/ws/chat?token=jwt_token_here&user_id=12345&thread_id=abc-123'
         mock_websocket = Mock(spec=WebSocket)

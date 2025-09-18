@@ -66,10 +66,10 @@ class ParallelDockerTest:
         if not success:
         logger.error("")
         return { }
-        "env_id": env_id,
-        "success": False,
-        "error": "Failed to start services",
-        "duration": time.time() - start_time
+        "env_id: env_id,"
+        "success: False,"
+        "error": "Failed to start services,"
+        "duration: time.time() - start_time"
             
 
             # Get project name and network info
@@ -83,7 +83,7 @@ class ParallelDockerTest:
         logger.info("")
 
             # Verify services are actually running
-        cmd = ["docker", "ps", "--filter", "", "--format", "table {{.Names}}\t{{.Status}}"]
+        cmd = ["docker", "ps", "--filter", "", "--format", "table {{.Names}}\t{{.Status}}]"
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         running_containers = result.stdout
@@ -97,22 +97,22 @@ class ParallelDockerTest:
         await manager.cleanup_services()
 
         return { }
-        "env_id": env_id,
-        "success": True,
-        "project_name": project_name,
-        "network_name": network_name,
-        "allocated_ports": allocated_ports,
-        "duration": time.time() - start_time,
-        "containers": running_containers
+        "env_id: env_id,"
+        "success: True,"
+        "project_name: project_name,"
+        "network_name: network_name,"
+        "allocated_ports: allocated_ports,"
+        "duration: time.time() - start_time,"
+        "containers: running_containers"
             
 
         except Exception as e:
         logger.error("")
         return { }
-        "env_id": env_id,
-        "success": False,
-        "error": str(e),
-        "duration": time.time() - start_time
+        "env_id: env_id,"
+        "success: False,"
+        "error: str(e),"
+        "duration: time.time() - start_time"
                 
 
     async def run_parallel_test(self) -> bool:
@@ -139,7 +139,7 @@ class ParallelDockerTest:
         failed += 1
         logger.error("")
         elif isinstance(result, dict):
-        if result.get("success"):
+        if result.get("success):"
         successful += 1
         logger.info("")
         else:
@@ -147,19 +147,19 @@ class ParallelDockerTest:
         logger.error("")
 
                             # Print summary
-        logger.info("=" * 60)
-        logger.info(f"Parallel Docker Test Summary:")
+        logger.info("= * 60)"
+        logger.info(f"Parallel Docker Test Summary:)"
         logger.info("")
         logger.info("")
         logger.info("")
         logger.info("")
-        logger.info("=" * 60)
+        logger.info("= * 60)"
 
                             # Check for port conflicts
         all_ports = {}
         for result in results:
-        if isinstance(result, dict) and result.get("success"):
-        env_ports = result.get("allocated_ports", {})
+        if isinstance(result, dict) and result.get("success):"
+        env_ports = result.get("allocated_ports, {})"
         for service, port in env_ports.items():
         if port in all_ports:
         logger.error("")
@@ -169,8 +169,8 @@ class ParallelDockerTest:
                                                 # Check for network conflicts
         networks = set()
         for result in results:
-        if isinstance(result, dict) and result.get("success"):
-        network = result.get("network_name")
+        if isinstance(result, dict) and result.get("success):"
+        network = result.get("network_name)"
         if network and network in networks:
         logger.error("")
         elif network:
@@ -180,7 +180,7 @@ class ParallelDockerTest:
 
     async def cleanup_all(self):
         """Clean up all remaining resources."""
-        logger.info("Performing final cleanup...")
+        logger.info("Performing final cleanup...)"
 
     # Clean up any remaining containers
         for manager in self.managers:
@@ -190,8 +190,8 @@ class ParallelDockerTest:
         logger.warning("")
 
                 # Prune Docker resources
-        execute_docker_command(["docker", "container", "prune", "-f"], timeout=30)
-        execute_docker_command(["docker", "network", "prune", "-f"], timeout=30)
+        execute_docker_command(["docker", "container", "prune", "-f], timeout=30)"
+        execute_docker_command(["docker", "network", "prune", "-f], timeout=30)"
 
 
     async def main():
@@ -199,9 +199,9 @@ class ParallelDockerTest:
         pass
     # Test with different numbers of parallel environments
         test_configs = [ ]
-        (2, "Basic parallel test"),
-        (3, "Medium parallel test"),
-        (5, "High parallel test")
+        (2, "Basic parallel test),"
+        (3, "Medium parallel test),"
+        (5, "High parallel test)"
     
 
         all_passed = True
@@ -234,15 +234,15 @@ class ParallelDockerTest:
                             # Final summary
         logger.info("")
         if all_passed:
-        logger.info(" PASS:  ALL PARALLEL DOCKER TESTS PASSED")
+        logger.info(" PASS:  ALL PARALLEL DOCKER TESTS PASSED)"
         else:
-        logger.error(" FAIL:  SOME PARALLEL DOCKER TESTS FAILED")
+        logger.error(" FAIL:  SOME PARALLEL DOCKER TESTS FAILED)"
         logger.info("")
 
         await asyncio.sleep(0)
         return 0 if all_passed else 1
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         exit_code = asyncio.run(main())
         sys.exit(exit_code)

@@ -20,7 +20,7 @@ class TestThreadsFixIntegration:
         """Create a test database engine."""
         # Use SQLite for testing (in-memory)
         engine = create_async_engine(
-            "sqlite+aiosqlite:///:memory:",
+            "sqlite+aiosqlite:///:memory:,"
             echo=False
         )
 
@@ -54,7 +54,7 @@ class TestThreadsFixIntegration:
         """Helper to create a test thread."""
         thread = Thread(
             id=thread_id,
-            object="thread",
+            object="thread,"
             created_at=1000000,
             metadata_=metadata
         )
@@ -67,12 +67,13 @@ class TestThreadsFixIntegration:
     async def test_normal_case_with_proper_metadata(self, db_session, thread_repo):
         """Test normal case: thread with proper metadata."""
         # Create thread with proper metadata
-user_id = 7c5e1032-ed21-4aea-b12a-aeddf3622bec
+user_id = 7c5e1032-ed21-""4aea""-b12a-aeddf3622bec
 await self.create_test_thread( )
 db_session,
 "thread_1,"
 {user_id: user_id, title: Test Thread}"
-{user_id: user_id, title: Test Thread}"
+{user_id: user_id, title: Test Thread}""
+
         
 
         # Query threads for user
@@ -85,11 +86,12 @@ assert threads[0].metadata_[user_id] == user_id
 
 @pytest.mark.asyncio
     async def test_null_metadata_handled_gracefully(self, db_session, thread_repo):
-    "Test NULL metadata doesn't crash."'
+    "Test NULL metadata doesn't crash.'"
 pass
             # Create thread with NULL metadata
 await self.create_test_thread(db_session, thread_null, None)"
-await self.create_test_thread(db_session, thread_null, None)"
+await self.create_test_thread(db_session, thread_null, None)""
+
 
             # Create thread with proper metadata for same user
 user_id = "test-user-123"
@@ -121,7 +123,8 @@ assert len(threads) == 0
 @pytest.mark.asyncio
     async def test_mixed_metadata_scenarios(self, db_session, thread_repo):
     Test multiple threads with various metadata states."
-    Test multiple threads with various metadata states."
+    Test multiple threads with various metadata states.""
+
 pass
 user_id = "test-user-456"
 
@@ -129,8 +132,8 @@ user_id = "test-user-456"
 await self.create_test_thread(db_session, thread_1, {user_id: user_id)
 await self.create_test_thread(db_session, thread_2", None)  # NULL"
 await self.create_test_thread(db_session, thread_3, {)  # Empty
-await self.create_test_thread(db_session, thread_4, {"user_id: other-user")
-await self.create_test_thread(db_session, thread_5, {user_id: user_id, "extra: data")
+await self.create_test_thread(db_session, thread_4, {"user_id: other-user)"
+await self.create_test_thread(db_session, thread_5, {user_id: user_id, "extra: data)"
 
                     # Query for specific user
 threads = await thread_repo.find_by_user(db_session, user_id)
@@ -138,7 +141,7 @@ threads = await thread_repo.find_by_user(db_session, user_id)
                     # Should find only threads 1 and 5
 assert len(threads) == 2
 thread_ids = {t.id for t in threads}
-assert thread_ids == {thread_1, thread_5}
+assert thread_ids == {thread_1, "thread_5}"
 
 @pytest.mark.asyncio
     async def test_uuid_normalization(self, db_session, thread_repo):
@@ -171,7 +174,7 @@ pass
 await self.create_test_thread( )
 db_session,
 thread_space,
-{"user_id:   user-with-spaces  "}
+{"user_id:   user-with-spaces  }"
                             
 
                             # Query with whitespace should normalize and find it
@@ -180,7 +183,8 @@ assert len(threads) == 1
 
                             # Query without whitespace should also find it
 threads = await thread_repo.find_by_user(db_session, user-with-spaces)"
-threads = await thread_repo.find_by_user(db_session, user-with-spaces)"
+threads = await thread_repo.find_by_user(db_session, user-with-spaces)""
+
 assert len(threads) == 1
 
 @pytest.mark.asyncio
@@ -215,7 +219,7 @@ duration = time.time() - start
 assert len(threads) == 25
 
                                             # Should be reasonably fast (under 1 second even with fallback)
-assert duration < 1.0, formatted_string
+assert duration < 1.0, "formatted_string"
 
 print("")
 
@@ -226,7 +230,8 @@ class TestActualPostgreSQLBehavior:
 @pytest.mark.asyncio
     async def test_jsonb_query_simulation(self):
     Simulate what happens with PostgreSQL JSONB queries."
-    Simulate what happens with PostgreSQL JSONB queries."
+    Simulate what happens with PostgreSQL JSONB queries.""
+
 
         # Simulate thread data as it would be in PostgreSQL
 threads_data = [
@@ -241,7 +246,8 @@ threads_data = [
         
 
 async def jsonb_extract(metadata, key):
-    ""Simulate PostgreSQL's ->> operator.'
+    ""Simulate PostgreSQL's ->> operator.'""
+
 pass
 if metadata is None:
     await asyncio.sleep(0)
@@ -252,7 +258,8 @@ return str(metadata.get(key)) if key in metadata else None
 
             # Simulate query: WHERE metadata_->>'user_id' = 'user123'
 target_user = user123"
-target_user = user123"
+target_user = user123""
+
 matched = []
 
 for thread in threads_data:
@@ -272,7 +279,7 @@ target_user = 123
 matched = []
 
 for thread in threads_data:
-    extracted = jsonb_extract(thread["metadata_"], user_id)
+    extracted = jsonb_extract(thread["metadata_], user_id)"
 if extracted == target_user:
     matched.append(thread)
 
@@ -283,7 +290,7 @@ assert matched[0][id] == t5
 print([U+2713] JSONB simulation: Integer user_id normalized correctly"")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                                 # Run the tests
 
 ))))

@@ -33,7 +33,7 @@ async def validate_environment_detection():
     
     assert dev_test.current_env == 'development', f"Expected development, got {dev_test.current_env}"
     assert 'localhost' in dev_test.auth_base_url, f"Development should use localhost, got {dev_test.auth_base_url}"
-    print("✓ Development environment detection: PASSED")
+    print("CHECK Development environment detection: PASSED")
     
     # Test 2: Staging environment detection
     os.environ['ENVIRONMENT'] = 'staging'
@@ -43,12 +43,12 @@ async def validate_environment_detection():
     
     assert staging_test.current_env == 'staging', f"Expected staging, got {staging_test.current_env}"
     assert 'staging.netrasystems.ai' in staging_test.auth_base_url, f"Staging should use staging domain, got {staging_test.auth_base_url}"
-    print("✓ Staging environment detection: PASSED")
+    print("CHECK Staging environment detection: PASSED")
     
     # Test 3: Validate URL differences
     assert dev_test.auth_base_url != staging_test.auth_base_url, "Development and staging auth URLs should differ"
     assert dev_test.backend_url != staging_test.backend_url, "Development and staging backend URLs should differ"
-    print("✓ Environment URL separation: PASSED")
+    print("CHECK Environment URL separation: PASSED")
     
     return True
 
@@ -70,18 +70,18 @@ async def validate_configuration_separation():
         # Validate JWT secret is not a default development value
         forbidden_values = ['your-secret-key', 'dev_secret', 'secret', 'test']
         if jwt_secret.lower() in forbidden_values:
-            print("⚠ WARNING: JWT_SECRET_KEY appears to be a development/default value")
+            print("WARNING WARNING: JWT_SECRET_KEY appears to be a development/default value")
         else:
-            print("✓ JWT secret appears to be environment-specific")
+            print("CHECK JWT secret appears to be environment-specific")
     else:
-        print("⚠ WARNING: JWT_SECRET_KEY not configured")
+        print("WARNING WARNING: JWT_SECRET_KEY not configured")
         
     # Check OAuth configuration
     google_client_id = test_instance.env.get('GOOGLE_CLIENT_ID')
     if google_client_id and 'localhost' not in google_client_id:
-        print("✓ Google OAuth client ID appears to be environment-specific")
+        print("CHECK Google OAuth client ID appears to be environment-specific")
     else:
-        print("⚠ WARNING: Google OAuth configuration may not be environment-specific")
+        print("WARNING WARNING: Google OAuth configuration may not be environment-specific")
         
     return True
 
@@ -96,7 +96,7 @@ async def validate_test_framework_integration():
     base_classes = [base.__name__ for base in test_class.__mro__]
     
     if 'SSotAsyncTestCase' in base_classes:
-        print("✓ Test correctly inherits from SSotAsyncTestCase")
+        print("CHECK Test correctly inherits from SSotAsyncTestCase")
     else:
         print("✗ ERROR: Test does not inherit from SSotAsyncTestCase")
         return False
@@ -111,7 +111,7 @@ async def validate_test_framework_integration():
     
     for method_name in required_methods:
         if hasattr(test_class, method_name):
-            print(f"✓ Required test method {method_name}: FOUND")
+            print(f"CHECK Required test method {method_name}: FOUND")
         else:
             print(f"✗ ERROR: Required test method {method_name}: MISSING")
             return False

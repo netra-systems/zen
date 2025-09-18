@@ -169,9 +169,9 @@ class Issue1040ImportRegistryComplianceTests(SSotBaseTestCase):
 
         # Look for validation status indicators
         status_patterns = [
-            r'✅\s*VERIFIED',
-            r'❌\s*BROKEN',
-            r'⚠️\s*WARNING',
+            r'CHECK\s*VERIFIED',
+            r'X\s*BROKEN',
+            r'WARNING️\s*WARNING',
             r'🔧\s*NEEDS_FIX'
         ]
 
@@ -197,7 +197,7 @@ class Issue1040ImportRegistryComplianceTests(SSotBaseTestCase):
                         import_line = import_matches[0]
                         # Should have positive status
                         self.assertTrue(
-                            any(re.search(r'✅|VERIFIED', import_line) for _ in [None]),
+                            any(re.search(r'CHECK|VERIFIED', import_line) for _ in [None]),
                             f"Working import should be marked as verified: {import_path}"
                         )
 
@@ -256,7 +256,7 @@ class Issue1040ImportRegistryComplianceTests(SSotBaseTestCase):
             if import_lines:
                 import_line = import_lines[0]
                 # Should be marked as broken or needing fix
-                broken_indicators = ['❌', 'BROKEN', '🔧', 'NEEDS_FIX', 'MISSING']
+                broken_indicators = ['X', 'BROKEN', '🔧', 'NEEDS_FIX', 'MISSING']
                 has_broken_indicator = any(indicator in import_line for indicator in broken_indicators)
 
                 if not has_broken_indicator:
@@ -270,7 +270,7 @@ class Issue1040ImportRegistryComplianceTests(SSotBaseTestCase):
         """
         post_fix_requirements = {
             "service_availability_ssot_import": "test_framework.ssot.orchestration_enums.ServiceAvailability",
-            "verification_status": "✅ VERIFIED",
+            "verification_status": "CHECK VERIFIED",
             "description": "Service availability states for integration testing",
             "consolidation_note": "CONSOLIDATED from test_framework.service_abstraction.integration_service_abstraction"
         }
@@ -356,7 +356,7 @@ class Issue1040ImportRegistryPostFixTests(SSotBaseTestCase):
 
         if import_lines:
             import_line = import_lines[0]
-            verified_indicators = ['✅', 'VERIFIED']
+            verified_indicators = ['CHECK', 'VERIFIED']
             has_verified_indicator = any(indicator in import_line for indicator in verified_indicators)
             self.assertTrue(has_verified_indicator,
                            "ServiceAvailability SSOT import should be marked as verified after fix")
@@ -380,7 +380,7 @@ class Issue1040ImportRegistryPostFixTests(SSotBaseTestCase):
 
             if import_lines:
                 import_line = import_lines[0]
-                deprecation_indicators = ['DEPRECATED', 'USE_SSOT_INSTEAD', '⚠️', 'LEGACY']
+                deprecation_indicators = ['DEPRECATED', 'USE_SSOT_INSTEAD', 'WARNING️', 'LEGACY']
                 has_deprecation_indicator = any(indicator in import_line for indicator in deprecation_indicators)
 
                 if not has_deprecation_indicator:

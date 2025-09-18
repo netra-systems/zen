@@ -54,7 +54,7 @@ class TestWebSocketActualState(SSotBaseTestCase):
         print(f"\n=== WEBSOCKET MANAGER IMPLEMENTATIONS FOUND ===")
         print(f"Total implementations: {len(implementations)}")
         for impl in implementations:
-            print(f"  ✓ {impl['path']} ({impl['type']})")
+            print(f"  CHECK {impl['path']} ({impl['type']})")
 
         print(f"\n=== IMPORT FAILURES ===")
         for failure in import_failures:
@@ -62,13 +62,13 @@ class TestWebSocketActualState(SSotBaseTestCase):
 
         # Determine SSOT compliance
         if len(implementations) == 1:
-            print(f"\n✅ SSOT COMPLIANT: Only 1 implementation found")
+            print(f"\nCHECK SSOT COMPLIANT: Only 1 implementation found")
             ssot_compliant = True
         elif len(implementations) > 1:
-            print(f"\n❌ SSOT VIOLATION: {len(implementations)} implementations found")
+            print(f"\nX SSOT VIOLATION: {len(implementations)} implementations found")
             ssot_compliant = False
         else:
-            print(f"\n⚠️  NO IMPLEMENTATIONS: This suggests import issues")
+            print(f"\nWARNING️  NO IMPLEMENTATIONS: This suggests import issues")
             ssot_compliant = False
 
         return {
@@ -108,7 +108,7 @@ class TestWebSocketActualState(SSotBaseTestCase):
         print(f"\n=== FACTORY PATTERNS FOUND ===")
         print(f"Total factories: {len(factories)}")
         for factory in factories:
-            print(f"  ✓ {factory['path']} (callable: {factory['callable']})")
+            print(f"  CHECK {factory['path']} (callable: {factory['callable']})")
 
         return {
             'factories': factories,
@@ -172,14 +172,14 @@ class TestWebSocketActualState(SSotBaseTestCase):
             print(f"\n=== USER ISOLATION TEST RESULTS ===")
             violations = 0
             for result in isolation_test_results:
-                status = "❌ VIOLATION" if result['violation'] else "✅ OK"
+                status = "X VIOLATION" if result['violation'] else "CHECK OK"
                 print(f"  {result['test']}: {result['result']} - {status}")
                 if result['violation']:
                     violations += 1
                     self.findings.append(f"ISOLATION VIOLATION: {result['test']}")
 
             isolation_compliant = violations == 0
-            print(f"\nUser Isolation: {'✅ COMPLIANT' if isolation_compliant else f'❌ {violations} VIOLATIONS'}")
+            print(f"\nUser Isolation: {'CHECK COMPLIANT' if isolation_compliant else f'X {violations} VIOLATIONS'}")
 
             return {
                 'isolation_results': isolation_test_results,
@@ -188,7 +188,7 @@ class TestWebSocketActualState(SSotBaseTestCase):
             }
 
         except Exception as e:
-            print(f"\n❌ USER ISOLATION TEST FAILED: {e}")
+            print(f"\nX USER ISOLATION TEST FAILED: {e}")
             self.findings.append(f"ISOLATION TEST ERROR: {e}")
             return {
                 'isolation_results': [],
@@ -237,13 +237,13 @@ class TestWebSocketActualState(SSotBaseTestCase):
         print(f"Overall SSOT Compliance: {overall_compliance:.1f}%")
 
         if overall_compliance >= 90:
-            assessment = "✅ EXCELLENT - High SSOT compliance"
+            assessment = "CHECK EXCELLENT - High SSOT compliance"
         elif overall_compliance >= 70:
-            assessment = "⚠️  GOOD - Some SSOT violations need attention"
+            assessment = "WARNING️  GOOD - Some SSOT violations need attention"
         elif overall_compliance >= 50:
-            assessment = "❌ POOR - Significant SSOT violations"
+            assessment = "X POOR - Significant SSOT violations"
         else:
-            assessment = "❌ CRITICAL - Major SSOT violations"
+            assessment = "X CRITICAL - Major SSOT violations"
 
         print(f"Assessment: {assessment}")
 
@@ -256,10 +256,10 @@ class TestWebSocketActualState(SSotBaseTestCase):
         print(f"Actual Compliance: {actual_compliance:.1f}%")
 
         if actual_compliance <= 10:
-            print("✅ ISSUE #885 CLAIM VALIDATED - Compliance is indeed near 0%")
+            print("CHECK ISSUE #885 CLAIM VALIDATED - Compliance is indeed near 0%")
             issue_validated = True
         else:
-            print("❌ ISSUE #885 CLAIM DISPUTED - Compliance is higher than claimed")
+            print("X ISSUE #885 CLAIM DISPUTED - Compliance is higher than claimed")
             issue_validated = False
 
         print(f"{'='*80}")

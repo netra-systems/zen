@@ -67,7 +67,7 @@ class TestIssue1278ApplicationConfigValidation(BaseTestCase):
             assert host, "Host is required in connection string"
             assert database, "Database name is required in connection string"
 
-        self.logger.info("✅ Database connection string format validation passed")
+        self.logger.info("CHECK Database connection string format validation passed")
 
     @pytest.mark.unit
     @pytest.mark.issue_1278
@@ -116,7 +116,7 @@ class TestIssue1278ApplicationConfigValidation(BaseTestCase):
         assert egress_setting in valid_egress_settings, \
             f"Invalid egress setting: {egress_setting}. Valid: {valid_egress_settings}"
 
-        self.logger.info("✅ VPC connector configuration validation passed")
+        self.logger.info("CHECK VPC connector configuration validation passed")
 
     @pytest.mark.unit
     @pytest.mark.issue_1278
@@ -159,7 +159,7 @@ class TestIssue1278ApplicationConfigValidation(BaseTestCase):
             if 'staging.staging' in domain:
                 assert False, f"Deprecated double staging domain detected: {domain}"
 
-        self.logger.info("✅ SSL certificate domain configuration validation passed")
+        self.logger.info("CHECK SSL certificate domain configuration validation passed")
 
     @pytest.mark.unit
     @pytest.mark.issue_1278
@@ -203,7 +203,7 @@ class TestIssue1278ApplicationConfigValidation(BaseTestCase):
         assert db_timeout >= 300, \
             f"Database timeout should be >= 300s for Cloud SQL: {db_timeout}"
 
-        self.logger.info("✅ Timeout configuration validation passed")
+        self.logger.info("CHECK Timeout configuration validation passed")
 
     @pytest.mark.unit
     @pytest.mark.issue_1278
@@ -259,7 +259,7 @@ class TestIssue1278ApplicationConfigValidation(BaseTestCase):
                     assert re.match(domain_pattern, expected_value), \
                         f"Invalid domain format: {expected_value}"
 
-        self.logger.info("✅ Environment variable configuration validation passed")
+        self.logger.info("CHECK Environment variable configuration validation passed")
 
     @pytest.mark.unit
     @pytest.mark.issue_1278
@@ -327,7 +327,7 @@ class TestIssue1278ApplicationConfigValidation(BaseTestCase):
             assert 60 <= timeout <= 3600, \
                 f"Service timeout should be 60-3600s: {timeout}"
 
-        self.logger.info("✅ Cloud Run service configuration validation passed")
+        self.logger.info("CHECK Cloud Run service configuration validation passed")
 
     @pytest.mark.unit
     @pytest.mark.issue_1278
@@ -384,4 +384,4 @@ class TestIssue1278ApplicationConfigValidation(BaseTestCase):
         assert pool_config['server_side_cursors'] is False, \
             "Server-side cursors should be disabled for Cloud SQL compatibility"
 
-        self.logger.info("✅ Database pool configuration validation passed")
+        self.logger.info("CHECK Database pool configuration validation passed")

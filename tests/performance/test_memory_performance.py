@@ -485,7 +485,7 @@ class MemoryPerformanceTests(SSotAsyncTestCase):
 
         leak_analysis = self.memory_performance_data.get("leak_analysis", {})
         if leak_analysis.get("leaks_detected", False):
-            print(f"\n❌ MEMORY LEAKS DETECTED:")
+            print(f"\nX MEMORY LEAKS DETECTED:")
             print(f"  - Leak Rate: {leak_analysis.get('leak_rate_mb_per_minute', 0):.2f}MB/minute")
             print(f"  - Leaked Objects: {leak_analysis.get('total_leaked_objects', 0)}")
             if leak_analysis.get('leaked_object_types'):
@@ -599,7 +599,7 @@ class MemoryPerformanceTests(SSotAsyncTestCase):
         # Store scenario results
         self.memory_performance_data["memory_scenarios"].append(scenario_results)
 
-        print(f"✅ MEMORY SCENARIO COMPLETED: {scenario['name']}")
+        print(f"CHECK MEMORY SCENARIO COMPLETED: {scenario['name']}")
         print(f"   - Memory Increase: {memory_increase_mb:.1f}MB ({memory_increase_percent:.1f}%)")
         print(f"   - Memory Per User: {scenario_results['memory_per_user_mb']:.1f}MB")
         print(f"   - Cleanup Effectiveness: {cleanup_effectiveness:.1f}%")
@@ -760,7 +760,7 @@ class MemoryPerformanceTests(SSotAsyncTestCase):
             f"{MEMORY_PERFORMANCE_SLA['max_memory_per_user_mb']}MB limit for single user"
         )
 
-        print(f"✅ BASELINE MEMORY FOOTPRINT: {results['memory_increase_mb']:.1f}MB for single user")
+        print(f"CHECK BASELINE MEMORY FOOTPRINT: {results['memory_increase_mb']:.1f}MB for single user")
 
     @pytest.mark.asyncio
     @pytest.mark.performance
@@ -797,7 +797,7 @@ class MemoryPerformanceTests(SSotAsyncTestCase):
             f"{MEMORY_PERFORMANCE_SLA['min_gc_effectiveness_percent']}% cleanup effectiveness"
         )
 
-        print(f"✅ MULTI-USER MEMORY ISOLATION: {results['memory_per_user_mb']:.1f}MB per user, "
+        print(f"CHECK MULTI-USER MEMORY ISOLATION: {results['memory_per_user_mb']:.1f}MB per user, "
               f"{results['cleanup_effectiveness_percent']:.1f}% cleanup effectiveness")
 
     @pytest.mark.asyncio
@@ -847,7 +847,7 @@ class MemoryPerformanceTests(SSotAsyncTestCase):
         # Store leak analysis results
         self.memory_performance_data["leak_detections"].append(leak_analysis)
 
-        print(f"✅ MEMORY LEAK DETECTION: {leak_analysis.get('leak_rate_mb_per_minute', 0):.2f}MB/min leak rate, "
+        print(f"CHECK MEMORY LEAK DETECTION: {leak_analysis.get('leak_rate_mb_per_minute', 0):.2f}MB/min leak rate, "
               f"{leak_analysis.get('total_leaked_objects', 0)} leaked objects detected")
 
     @pytest.mark.asyncio
@@ -892,7 +892,7 @@ class MemoryPerformanceTests(SSotAsyncTestCase):
                 f"(should be near 0% for zero memory leaks)"
             )
 
-        print(f"✅ MEMORY CLEANUP VALIDATION: {results['cleanup_effectiveness_percent']:.1f}% session cleanup, "
+        print(f"CHECK MEMORY CLEANUP VALIDATION: {results['cleanup_effectiveness_percent']:.1f}% session cleanup, "
               f"{cleanup_analysis['cleanup_effectiveness_percent']:.1f}% GC effectiveness")
 
     @pytest.mark.asyncio
@@ -943,5 +943,5 @@ class MemoryPerformanceTests(SSotAsyncTestCase):
             f"{MEMORY_PERFORMANCE_SLA['max_memory_pressure_events']} maximum allowed"
         )
 
-        print(f"✅ SERVICE MEMORY BOUNDARY VALIDATION: {current_memory_snapshot.rss_memory_mb:.1f}MB / "
+        print(f"CHECK SERVICE MEMORY BOUNDARY VALIDATION: {current_memory_snapshot.rss_memory_mb:.1f}MB / "
               f"{MEMORY_PERFORMANCE_SLA['max_service_memory_mb']}MB limit ({(current_memory_snapshot.rss_memory_mb / MEMORY_PERFORMANCE_SLA['max_service_memory_mb'] * 100):.1f}% utilization)")

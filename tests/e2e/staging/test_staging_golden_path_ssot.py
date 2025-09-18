@@ -14,7 +14,7 @@ ENVIRONMENT REQUIREMENTS:
 - GCP Staging Environment (https://staging.netrasystems.ai)
 - Real authentication tokens
 - Real WebSocket connections
-- Complete Golden Path: Login → Message → AI Response
+- Complete Golden Path: Login -> Message -> AI Response
 
 FAILING TEST STRATEGY:
 1. Test initially FAILS proving staging uses factory patterns
@@ -83,7 +83,7 @@ class TestStagingGoldenPathSSoT(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_complete_user_journey_ssot_staging(self):
         """
-        Test complete user journey: login → message → AI response (SSOT)
+        Test complete user journey: login -> message -> AI response (SSOT)
 
         CRITICAL: Must detect if staging environment uses factory patterns
         """

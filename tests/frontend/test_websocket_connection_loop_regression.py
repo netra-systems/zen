@@ -10,10 +10,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -70,7 +70,7 @@ class MockWebSocket:
     def send(self, data: str):
         pass
         if self.readyState != self.OPEN:
-        raise Exception("WebSocket is not open")
+        raise Exception("WebSocket is not open)"
         self._messages_sent.append(data)
 
     def close(self, code: int = 1000, reason: str = ""):
@@ -103,7 +103,7 @@ class WebSocketConnectionLoopTest:
     def simulate_auth_delay(self, delay_ms: int = 500):
         """Simulate delayed auth initialization"""
         time.sleep(delay_ms / 1000)
-        return {"token": "test_token_123", "initialized": True}
+        return {"token": "test_token_123", "initialized: True}"
 
     def simulate_websocket_provider_effects(self, auth_state):
         '''
@@ -116,18 +116,18 @@ class WebSocketConnectionLoopTest:
         effects_triggered = []
 
     # Effect 1: Main connection effect (line 109 in WebSocketProvider)
-        if auth_state.get("initialized") and auth_state.get("token"):
+        if auth_state.get("initialized") and auth_state.get("token):"
         effects_triggered.append({ })
-        "type": "main_effect",
-        "timestamp": time.time(),
+        "type": "main_effect,"
+        "timestamp: time.time(),"
         "trigger": "auth_initialized && token"
         
 
         # Effect 2: Token synchronization effect (line 307)
-        if auth_state.get("token"):
+        if auth_state.get("token):"
         effects_triggered.append({ })
-        "type": "token_sync_effect",
-        "timestamp": time.time(),
+        "type": "token_sync_effect,"
+        "timestamp: time.time(),"
         "trigger": "token_changed"
             
 
@@ -136,8 +136,8 @@ class WebSocketConnectionLoopTest:
     def simulate_connection_attempt(self, ws_service_mock, attempt_number: int):
         """Simulate a WebSocket connection attempt"""
         connection_record = { }
-        "attempt": attempt_number,
-        "timestamp": time.time(),
+        "attempt: attempt_number,"
+        "timestamp: time.time(),"
         "state": "connecting"
     
         self.connection_attempts.append(connection_record)
@@ -146,13 +146,13 @@ class WebSocketConnectionLoopTest:
         if attempt_number > 0 and attempt_number % 2 == 0:
         # Every second attempt fails with auth error
         self.auth_failures.append({ })
-        "attempt": attempt_number,
-        "code": 1008,
+        "attempt: attempt_number,"
+        "code: 1008,"
         "reason": "Policy Violation - Token expired"
         
-        return {"success": False, "code": 1008}
+        return {"success": False, "code: 1008}"
 
-        return {"success": True}
+        return {"success: True}"
 
     def measure_connection_loop_rate(self, duration_seconds: int = 5) -> Dict[str, Any]:
         '''
@@ -169,14 +169,14 @@ class WebSocketConnectionLoopTest:
         # Simulate rapid connection attempts
         attempt_time = time.time() - start_time
         attempts_in_window.append(attempt_time)
-        time.sleep(0.1)  # 100ms between attempts (simulating the bug)
+        time.sleep(0.1)  # ""100ms"" between attempts (simulating the bug)
 
         rate = len(attempts_in_window) / duration_seconds
         return { }
-        "total_attempts": len(attempts_in_window),
-        "duration": duration_seconds,
-        "rate_per_second": rate,
-        "is_looping": rate > 2  # More than 2 attempts per second indicates a loop
+        "total_attempts: len(attempts_in_window),"
+        "duration: duration_seconds,"
+        "rate_per_second: rate,"
+        "is_looping: rate > 2  # More than 2 attempts per second indicates a loop"
         
 
 
@@ -193,7 +193,7 @@ pass
 test_harness = WebSocketConnectionLoopTest()
 
             # Step 1: Simulate delayed auth initialization
-auth_state = {"initialized": False, "token": None}
+auth_state = {"initialized": False, "token: None}"
 
             # Step 2: Simulate WebSocketProvider mounting
 initial_effects = test_harness.simulate_websocket_provider_effects(auth_state)
@@ -221,16 +221,16 @@ loop_metrics = test_harness.measure_connection_loop_rate(duration_seconds=2)
 
                 Bug indicator 1: Multiple connection attempts from single auth change
 assert len(test_harness.connection_attempts) <= 1, \
-""
+    ""
 
                 # Bug indicator 2: Rapid reconnection rate (connection loop)
-assert not loop_metrics["is_looping"], \
+assert not loop_metrics["is_looping], \"
 ""
 
                 # Bug indicator 3: Auth failures triggering immediate reconnects
 assert len(test_harness.auth_failures) == 0 or \
-len(test_harness.reconnection_attempts) < len(test_harness.auth_failures), \
-""
+    len(test_harness.reconnection_attempts) < len(test_harness.auth_failures), \
+    ""
 
 
 @pytest.mark.asyncio
@@ -262,7 +262,7 @@ await asyncio.gather(*connection_tasks, return_exceptions=True)
                             # SHOULD only connect once, but currently connects multiple times
 actual_calls = ws_service.connect.call_count
 assert actual_calls == 1, \
-""
+    ""
 
 
 @pytest.mark.asyncio
@@ -280,7 +280,7 @@ reconnect_delays = []
                                 # Simulate series of auth failures
 for attempt in range(5):
     result = test_harness.simulate_connection_attempt( )
-if not result["success"] and result["code"] == 1008:
+if not result["success"] and result["code] == 1008:"
                                         # Measure time until next reconnect attempt
 reconnect_delay = 0.1 * (2 ** attempt)  # Expected exponential backoff
 reconnect_delays.append(reconnect_delay)
@@ -290,7 +290,7 @@ await asyncio.sleep(0.1)  # Minimal delay in test
 for i in range(1, len(reconnect_delays)):
     expected_increase = reconnect_delays[i] > reconnect_delays[i-1]
 assert expected_increase, \
-""
+    ""
 
 
 @pytest.mark.asyncio
@@ -308,30 +308,30 @@ effect_executions = []
 def track_effect(effect_name: str):
     pass
 effect_executions.append({ })
-"name": effect_name,
-"timestamp": time.time()
+"name: effect_name,"
+"timestamp: time.time()"
     
 
     # Simulate auth state changes triggering effects
 auth_states = [ ]
-{"initialized": False, "token": None},
-{"initialized": True, "token": None},
-{"initialized": True, "token": "token1"},
-{"initialized": True, "token": "token2"},  # Token refresh
+{"initialized": False, "token: None},"
+{"initialized": True, "token: None},"
+{"initialized": True, "token": "token1},"
+{"initialized": True, "token": "token2},  # Token refresh"
     
 
 for state in auth_states:
-    if state["initialized"] and state["token"]:
+    if state["initialized"] and state["token]:"
             # Both effects trigger (the bug)
-track_effect("main_connection_effect")
-track_effect("token_sync_effect")
+track_effect("main_connection_effect)"
+track_effect("token_sync_effect)"
 
             # Check for duplicate connection triggers
 connection_effects = [item for item in []]]
 
             # Should have coordinated effects, not duplicates
 assert len(connection_effects) <= len(auth_states) - 2, \
-""
+    ""
 
 
 def test_websocket_connection_race_condition():
@@ -351,24 +351,24 @@ def connect_websocket(source: str):
     pass
 with lock:
     connection_log.append({ })
-"source": source,
-"timestamp": time.time(),
-"thread": threading.current_thread().name
+"source: source,"
+"timestamp: time.time(),"
+"thread: threading.current_thread().name"
         
 
         # Simulate race condition with multiple threads
 threads = []
 
         # Thread 1: Auth completion triggers connection
-t1 = threading.Thread(target=lambda x: None connect_websocket("auth_complete"), name="auth_effect")
+t1 = threading.Thread(target=lambda x: None connect_websocket("auth_complete"), name="auth_effect)"
 threads.append(t1)
 
         # Thread 2: Token sync triggers connection
-t2 = threading.Thread(target=lambda x: None connect_websocket("token_sync"), name="token_effect")
+t2 = threading.Thread(target=lambda x: None connect_websocket("token_sync"), name="token_effect)"
 threads.append(t2)
 
         # Thread 3: Manual reconnect attempt
-t3 = threading.Thread(target=lambda x: None connect_websocket("manual_reconnect"), name="reconnect")
+t3 = threading.Thread(target=lambda x: None connect_websocket("manual_reconnect"), name="reconnect)"
 threads.append(t3)
 
         # Start all threads simultaneously (race condition)
@@ -381,17 +381,17 @@ for t in threads:
 
                 # Should have connection coordination, but doesn't'
 assert len(connection_log) == 1, \
-""
+    ""
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                     # Run the tests - these should PASS after the SSOT fix
 import sys
 
-print("Running WebSocket Connection Loop Bug Tests...")
-print("=" * 60)
-print("These tests verify the SSOT fix is working correctly.")
-print("=" * 60)
+print("Running WebSocket Connection Loop Bug Tests...)"
+print("= * 60)"
+print("These tests verify the SSOT fix is working correctly.)"
+print("= * 60)"
 
                     # Run async tests
 asyncio.run(test_websocket_connection_loop_bug())

@@ -442,7 +442,7 @@ class AgentResponseQualityValidationTests(BaseIntegrationTest):
                     )
                     
                     # Log comprehensive business value metrics
-                    logger.info(f"✅ Enhanced Business Value Validated:")
+                    logger.info(f"CHECK Enhanced Business Value Validated:")
                     logger.info(f"   Business Score: {business_assessment.overall_score:.2f}/1.0 ({business_assessment.customer_satisfaction_tier})")
                     logger.info(f"   Chat Substance: {business_assessment.chat_substance_quality:.2f}/1.0")
                     logger.info(f"   Problem Solving: {problem_solving_score:.2f}/1.0")

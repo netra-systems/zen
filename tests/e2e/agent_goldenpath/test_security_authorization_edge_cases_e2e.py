@@ -182,7 +182,7 @@ class SecurityAuthorizationEdgeCasesE2ETests(SSotAsyncTestCase):
             auth_error_indicators = ['unauthorized', 'forbidden', 'invalid', 'expired', 'token']
             has_auth_error = any((indicator in error_lower for indicator in auth_error_indicators))
             assert has_auth_error, f"Should receive authentication-related error for expired token. Error: {connection_result['error']}"
-        self.logger.info('✅ Expired token rejection validated')
+        self.logger.info('CHECK Expired token rejection validated')
 
     async def test_invalid_token_format_rejection(self):
         """
@@ -225,7 +225,7 @@ class SecurityAuthorizationEdgeCasesE2ETests(SSotAsyncTestCase):
                 crash_indicators = ['internal server error', '500', 'crash', 'exception']
                 has_crash_error = any((indicator in error_msg for indicator in crash_indicators))
                 assert not has_crash_error, f"Invalid token should not cause system errors. Token: {result['token_type']}, Error: {result['result']['error']}"
-        self.logger.info('✅ Invalid token format rejection validated')
+        self.logger.info('CHECK Invalid token format rejection validated')
 
     async def test_unauthorized_user_isolation(self):
         """
@@ -308,7 +308,7 @@ class SecurityAuthorizationEdgeCasesE2ETests(SSotAsyncTestCase):
         isolation_success_rate = len(successful_isolations) / len(unauthorized_attempts)
         assert isolation_success_rate == 1.0, f"User isolation must be 100% effective. Success rate: {isolation_success_rate:.1%}. Data breaches: {[r['scenario'] for r in data_breaches]}"
         assert len(data_breaches) == 0, f'No unauthorized data access should be possible. Breaches: {data_breaches}'
-        self.logger.info('✅ Unauthorized user isolation validated')
+        self.logger.info('CHECK Unauthorized user isolation validated')
 
     async def test_malicious_request_payload_rejection(self):
         """
@@ -387,7 +387,7 @@ class SecurityAuthorizationEdgeCasesE2ETests(SSotAsyncTestCase):
         security_success_rate = len(secure_rejections) / len(malicious_payloads)
         assert security_success_rate == 1.0, f"Malicious payload security must be 100% effective. Success rate: {security_success_rate:.1%}. Compromises: {[r['attack'] for r in security_compromises]}"
         assert len(security_compromises) == 0, f'No security compromises should be possible through malicious payloads. Compromises: {security_compromises}'
-        self.logger.info('✅ Malicious request payload rejection validated')
+        self.logger.info('CHECK Malicious request payload rejection validated')
 
     def _create_deeply_nested_payload(self, depth: int) -> Dict[str, Any]:
         """Create deeply nested payload for testing parsing limits."""
@@ -446,7 +446,7 @@ class SecurityAuthorizationEdgeCasesE2ETests(SSotAsyncTestCase):
         await asyncio.sleep(10)
         recovery_result = await self._attempt_agent_request_with_auth(self.legitimate_access_token, should_succeed=True, timeout=30.0)
         assert recovery_result['success'], f'Should recover from rate limiting after cool-down period. Recovery result: {recovery_result}'
-        self.logger.info('✅ Rate limiting and abuse prevention validated')
+        self.logger.info('CHECK Rate limiting and abuse prevention validated')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

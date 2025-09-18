@@ -1,23 +1,23 @@
 """
-"""
+
 Mission Critical Test: Authentication Persistence in Multi-Agent Workflows
 
 Tests that authentication context is properly maintained across:
-1. Agent handoffs
+    1. Agent handoffs
 2. WebSocket reconnections
 3. Token refreshes during agent execution
 4. Concurrent multi-user agent operations
 """
-"""
+
 
 """
 """
 """
-"""
+
 import asyncio
 import uuid
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Any
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -25,9 +25,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 from netra_backend.app.websocket_core.context import WebSocketContext
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class AuthPersistenceMultiAgentTests:
@@ -48,10 +48,11 @@ class AuthPersistenceMultiAgentTests:
         "Generate a valid JWT token for testing."
         payload = {
             sub: test-user-123,
-            "email: test@example.com",
-            exp: datetime.utcnow() + timedelta(hours=1),
-            iat: datetime.utcnow()"
-            iat: datetime.utcnow()"
+            "email: test@example.com,"
+            exp: datetime.now(timezone.utc) + timedelta(hours=1),
+            iat: datetime.now(timezone.utc)"
+            iat: datetime.now(timezone.utc)""
+
         }
         return jwt.encode(payload, "test-secret, algorithm=HS256)"
     
@@ -201,19 +202,19 @@ class AuthPersistenceMultiAgentTests:
         thread_id = refresh-thread
         
         # Create token that will expire soon
-        soon_expiry = datetime.utcnow() + timedelta(seconds=30)
+        soon_expiry = datetime.now(timezone.utc) + timedelta(seconds=30)
         expiring_token = jwt.encode({
             "sub: user_id,"
             exp: soon_expiry,
-            iat: datetime.utcnow()"
-            iat: datetime.utcnow()"
+            iat: datetime.now(timezone.utc)"
+            iat: datetime.now(timezone.utc)"
         }, test-secret", algorithm=HS256)"
         
         # New refreshed token
         refreshed_token = jwt.encode({
             sub: user_id,
-            "exp: datetime.utcnow() + timedelta(hours=1),"
-            iat: datetime.utcnow()
+            "exp: datetime.now(timezone.utc) + timedelta(hours=1),"
+            iat: datetime.now(timezone.utc)
         }, test-secret, algorithm=HS256")"
         
         handler = AgentMessageHandler(AsyncMock(), mock_websocket)
@@ -224,7 +225,7 @@ class AuthPersistenceMultiAgentTests:
             payload={
                 "thread_id: thread_id,"
                 agent_name: long_running_agent,
-                content": "Process large dataset
+                content": Process large dataset"
             },
             thread_id=thread_id
         )

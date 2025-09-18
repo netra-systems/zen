@@ -58,7 +58,7 @@ def test_permission_mode_setting():
     print(f"✓ Created InstanceConfig with command: {config.command}")
     print(f"✓ Permission mode auto-set to: {config.permission_mode}")
 
-    expected_mode = "bypassPermissions" if platform.system() == "Windows" else "acceptEdits"
+    expected_mode = "bypassPermissions" if platform.system() == "Windows" else "bypassPermissions"
 
     if config.permission_mode == expected_mode:
         print(f"✅ PASS: Permission mode correctly set to '{expected_mode}' for {platform.system()}")

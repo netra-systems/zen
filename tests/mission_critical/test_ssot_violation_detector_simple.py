@@ -1,5 +1,5 @@
 """
-"""
+
 Simple SSOT Violation Detection Test
 
 This is a simplified test to validate the SSOT violation detection concept.
@@ -8,12 +8,12 @@ It directly tests the violation at test_framework/ssot/database.py:596.
 EXPECTED BEHAVIOR: This test should FAIL initially, exposing the SSOT violation.
 After remediation, the test should PASS.
 """
-"""
+
 
 """
 """
 """
-"""
+
 import asyncio
 import sys
 import time
@@ -36,14 +36,16 @@ from netra_backend.app.db.models_postgres import Message
 
 class SSOTViolationDetectionTests:
     "
-    "
+    ""
+
     Simple SSOT Violation Detection Test
     
     This test compares message creation between:
     1. Proper SSOT MessageRepository (correct method)
     2. Test framework DatabaseTestUtilities (violation method)
 "
-"
+""
+
     
     def __init__(self):
         self.message_repository = MessageRepository()
@@ -52,7 +54,8 @@ class SSOTViolationDetectionTests:
         
     @pytest.mark.asyncio
     async def test_ssot_violation_structure_difference(self):
-    ""
+    """
+
         CRITICAL TEST: Expose SSOT violation through structure comparison.
         
         This test should FAIL initially because the test framework
@@ -87,7 +90,8 @@ class SSOTViolationDetectionTests:
                 role=user,"
                 role=user,"
                 content=[{type": text, text: {value: Test framework violation message"}}],"
-                content=[{type": text, text: {value: Test framework violation message"}}],"
+                content=[{type": text, text: {value: Test framework violation message"}}],""
+
                 metadata_={source: test_framework}
             await session.commit()
             
@@ -154,7 +158,7 @@ if __name__ == __main__:
     async def run_test():
         try:
             await test_instance.test_ssot_violation_structure_difference()
-            print("\n CELEBRATION:  TEST PASSED - SSOT compliance verified!")
+            print("\n CELEBRATION:  TEST PASSED - SSOT compliance verified!)"
         except AssertionError as e:
             print(f\n ALERT:  TEST FAILED - SSOT violation detected: {e})"
             print(f\n ALERT:  TEST FAILED - SSOT violation detected: {e})"

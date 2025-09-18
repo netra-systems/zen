@@ -1165,9 +1165,9 @@ class UnifiedTestRunner:
                             "test_count": len(tests)
                         }
                     
-                    print(f"✅ Fast collection completed: {sum(len(r.get('output', '').split()) for r in results.values())} files")
+                    print(f"CHECK Fast collection completed: {sum(len(r.get('output', '').split()) for r in results.values())} files")
                     # CRITICAL FIX Issue #1176: Fast collection does NOT run tests - must return failure
-                    print("❌ FAILURE: Fast collection mode discovered tests but did NOT execute them")
+                    print("X FAILURE: Fast collection mode discovered tests but did NOT execute them")
                     print("   This is test discovery only, not actual test execution")
                     print("   Remove --fast-collection flag to actually run tests")
                     return 1  # Collection is not execution - must fail
@@ -1382,7 +1382,7 @@ class UnifiedTestRunner:
                 if not all_succeeded:
                     return 1  # Test failures
                 elif total_tests_run == 0:
-                    print("\n❌ FAILURE: No tests were executed - this indicates infrastructure failure")
+                    print("\nX FAILURE: No tests were executed - this indicates infrastructure failure")
                     print("   Check import issues, test collection failures, or configuration problems")
                     return 1  # No tests run is a failure
                 else:
@@ -1392,7 +1392,7 @@ class UnifiedTestRunner:
                 # Fallback to original behavior if execution plan doesn't have requested_categories
                 # CRITICAL FIX: Also require tests to be run in fallback mode
                 if not results:
-                    print("\n❌ FAILURE: No test categories were executed")
+                    print("\nX FAILURE: No test categories were executed")
                     return 1
 
                 # Check if any tests were actually run
@@ -1405,7 +1405,7 @@ class UnifiedTestRunner:
                 if not all_succeeded:
                     return 1  # Test failures
                 elif total_tests_run == 0:
-                    print("\n❌ FAILURE: No tests were executed - this indicates infrastructure failure")
+                    print("\nX FAILURE: No tests were executed - this indicates infrastructure failure")
                     return 1  # No tests run is a failure
                 else:
                     return 0  # Success with actual test execution
@@ -4347,26 +4347,26 @@ def infrastructure_resilience_check():
                 for host in test_hosts:
                     try:
                         socket.gethostbyname(host)
-                        print(f"[INFRASTRUCTURE] ✅ DNS resolution successful for {host}")
+                        print(f"[INFRASTRUCTURE] CHECK DNS resolution successful for {host}")
                     except socket.gaierror:
-                        print(f"[INFRASTRUCTURE] ⚠️ DNS resolution failed for {host} (may be normal in CI)")
+                        print(f"[INFRASTRUCTURE] WARNING️ DNS resolution failed for {host} (may be normal in CI)")
 
             except Exception as connectivity_error:
                 print(f"[INFRASTRUCTURE] Connectivity test failed: {connectivity_error}")
                 # Don't fail on connectivity test - infrastructure might still work
 
-            print("[INFRASTRUCTURE] ✅ Emergency resilience check complete")
+            print("[INFRASTRUCTURE] CHECK Emergency resilience check complete")
             return True
 
         except Exception as attempt_error:
-            print(f"[INFRASTRUCTURE] ❌ Warmup attempt {attempt + 1} failed: {attempt_error}")
+            print(f"[INFRASTRUCTURE] X Warmup attempt {attempt + 1} failed: {attempt_error}")
             if attempt < INFRASTRUCTURE_RETRY_ATTEMPTS - 1:
                 print(f"[INFRASTRUCTURE] Retrying in {INFRASTRUCTURE_RETRY_DELAY}s...")
                 time.sleep(INFRASTRUCTURE_RETRY_DELAY)
             else:
-                print("[INFRASTRUCTURE] ❌ All warmup attempts failed")
+                print("[INFRASTRUCTURE] X All warmup attempts failed")
                 # For emergency situations, allow execution to proceed with warning
-                print("[INFRASTRUCTURE] ⚠️ EMERGENCY FALLBACK: Proceeding despite infrastructure warnings")
+                print("[INFRASTRUCTURE] WARNING️ EMERGENCY FALLBACK: Proceeding despite infrastructure warnings")
                 print("[INFRASTRUCTURE] Test execution may be unstable but will attempt to continue")
                 return True  # Don't block test execution in emergency
 
@@ -5087,9 +5087,9 @@ def main():
                 total_files += len(valid_files)
                 print(f"Found {len(valid_files)} test files in {test_dir.name}")
         
-        print(f"✅ Fast collection completed: {total_files} test files discovered")
+        print(f"CHECK Fast collection completed: {total_files} test files discovered")
         # CRITICAL FIX Issue #1176: Fast collection does NOT run tests - must return failure
-        print("❌ FAILURE: Fast collection mode discovered tests but did NOT execute them")
+        print("X FAILURE: Fast collection mode discovered tests but did NOT execute them")
         print("   This is test discovery only, not actual test execution")
         print("   Remove --fast-collection flag to actually run tests")
         return 1  # Collection is not execution - must fail

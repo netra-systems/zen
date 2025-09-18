@@ -29,6 +29,92 @@ The market is moving quickly, codex is getting better and other Code CLIs are co
 
 Commercial users who wish to may seemlessly use Zen with Netra Apex (Commercial Product) for the most effective usage and control of business AI spend.
 
+## Limitations
+
+### Budget Enforcement Behavior
+
+**Important:** Zen's budget constraints are client-side only and not enforced server-side by Claude Code or other CLI tools.
+
+- **Local Monitoring Only**: Budgets defined in `zen.yaml` or command-line flags are tracked locally by Zen but cannot prevent the underlying CLI from consuming tokens beyond the limit
+- **Team Usage**: When multiple team members use Zen, each instance tracks its own budget independently - there is no shared budget enforcement across users
+- **Budget Exceeded Behavior**:
+  - `warn` mode: Zen logs warnings but continues execution
+  - `block` mode: Zen prevents launching new instances but cannot stop running instances mid-execution
+- **Token Counting**: Budget calculations are based on estimates and may not match exact billing from Claude/OpenAI
+
+### Target Audience and Use Cases
+
+**Zen is designed for internal developer productivity and is not suitable for all use cases:**
+
+**✅ Supported Use Cases:**
+- Internal development workflows and automation
+- Parallel execution of development tasks
+- Managing multiple Claude Code instances for team productivity
+- Development environment orchestration
+- CI/CD integration for development teams
+
+**❌ Not Recommended For:**
+- External integration or customer-facing applications
+- Production systems requiring guaranteed uptime
+- Mission-critical deployments without fallback mechanisms
+- Real-time applications requiring sub-second response times
+- Applications requiring strict budget enforcement at the API level
+
+### System Limitations
+
+**Conversation History Management:**
+- No persistent conversation history across Zen restarts
+- Each Claude Code instance maintains its own isolated context
+- No cross-instance memory or shared context between parallel executions
+
+**State Persistence:**
+- Zen does not persist execution state between sessions
+- Interrupted executions cannot be resumed from checkpoints
+- No automatic recovery from partial completions
+
+**Parallel Execution Constraints:**
+- Limited by system resources (CPU, memory, network bandwidth)
+- No built-in load balancing or resource allocation
+- Concurrent API rate limits apply to all instances collectively
+- Startup delays between instances may be necessary to avoid rate limiting
+
+**Error Handling Limitations:**
+- Individual instance failures do not automatically retry
+- No circuit breaker pattern for cascading failures
+- Limited error aggregation across multiple instances
+- Debugging parallel execution can be complex due to interleaved output
+
+### Known Issues
+
+**Windows Permission Issues (Issue #1320):**
+- **Problem**: Commands may fail with "This command requires approval" on Windows
+- **Workaround**: Zen automatically enables `bypassPermissions` mode on Windows
+- **Status**: Partially resolved, see [Issue #1320 Documentation](../docs/issues/ISSUE_1320_ZEN_PERMISSION_ERROR_FIX.md)
+
+**Output Truncation:**
+- **Problem**: Long outputs may be truncated in console display
+- **Workaround**: Use `--max-console-lines` and `--max-line-length` parameters, or redirect output to files
+- **Impact**: Full execution logs are preserved but may not be visible in real-time
+
+**Token Budget Accuracy:**
+- **Problem**: Budget calculations may not exactly match actual API billing
+- **Cause**: Estimates based on local token counting vs. server-side billing
+- **Workaround**: Use conservative budget limits and monitor actual usage through provider dashboards
+
+**Scheduling Precision:**
+- **Problem**: `--start-at` timing may have minor delays (±30 seconds)
+- **Cause**: System scheduling overhead and startup time variations
+- **Workaround**: Account for potential delays in time-sensitive workflows
+
+**Configuration File Validation:**
+- **Problem**: Limited validation of JSON configuration files
+- **Impact**: Invalid configurations may cause runtime errors
+- **Workaround**: Use `--dry-run` to validate configurations before execution
+
+**Resource Cleanup:**
+- **Problem**: Interrupted executions may leave background processes running
+- **Workaround**: Monitor system processes and manually terminate if necessary
+- **Planned Fix**: Improved signal handling and cleanup in future versions
 
 ## Installation
 
@@ -85,6 +171,32 @@ python -m zen_orchestrator --help
 # Option 2: Manually add to PATH (see Troubleshooting)
 ```
 
+## Understanding the Model Column in Status Reports
+
+### Model Column Behavior
+
+The **Model** column in Zen's status display shows the **actual model used** by Claude Code for each API response, not necessarily the model you configured in your settings.
+
+**Key Points:**
+- **Intentional Design**: This column reflects reality - what model Claude actually used to process your request
+- **Cost Tracking Value**: Knowing the actual model is critical for accurate cost calculation since different models have vastly different pricing (e.g., Opus costs 5x more than Sonnet)
+- **Dynamic Detection**: Zen automatically detects the model from Claude's API responses in real-time
+- **Fallback Behavior**: If model detection fails, it defaults to "claude-3-5-sonnet" for cost calculations
+
+**Why This Matters:**
+- Your configuration might specify Opus, but Claude might use Sonnet for simpler tasks
+- Accurate cost tracking requires knowing the actual model used, not just your preference
+- Budget management and token usage calculations depend on correct model identification
+
+**Example Status Display:**
+```
+║  Status   Name                Model      Duration  Overall  Tokens   Budget
+║  ✅        analyze-code        35sonnet   2m15s     45.2K    2.1K     85% used
+║  🏃        optimize-perf       opus4      1m30s     12.8K    800      45% used
+```
+
+This transparency helps you understand your actual AI spend and make informed decisions about model usage.
+
 ## Expected questions
 
 ### 1. Do I have to use /commands?
@@ -109,7 +221,7 @@ Ad hoc questions or validating if a command is working as expected for now is be
 ### Platform-Specific Behavior
 Zen automatically adjusts permission modes based on your platform:
 - **Windows**: Uses `bypassPermissions` to avoid approval prompts
-- **Mac/Linux**: Uses standard `acceptEdits` mode
+- **Mac/Linux**: Uses standard `bypassPermissions` mode
 
 For more details, see [Cross-Platform Compatibility](docs/CROSS_PLATFORM_COMPATIBILITY.md).
 - All existing config stays the same unless expressly defined in Zen.
@@ -268,7 +380,35 @@ pip install -e .
 
 ## Basic Usage
 
-### 1. Quick Test
+### 1. Direct Command Execution (NEW)
+Execute commands directly without config files:
+```bash
+# Execute a single command directly
+zen "/help"
+
+# Execute with custom workspace
+zen "/analyze-code" --workspace ~/my-project
+
+# Execute with custom instance name
+zen "/debug-issue" --instance-name "debug-session"
+
+# Execute with session continuity
+zen "/optimize-performance" --session-id "perf-session-1"
+
+# Execute with history management
+zen "/generate-docs" --clear-history --compact-history
+
+# Execute with token budget
+zen "/complex-analysis" --overall-token-budget 5000
+```
+
+**Direct Command Features:**
+- **No Config Required**: Skip JSON file creation for simple tasks
+- **Custom Options**: Set instance name, description, session ID
+- **History Control**: Clear or compact history before execution
+- **Budget Integration**: Works with all existing budget features
+
+### 2. Quick Test
 ```bash
 # List available commands
 zen --list-commands
@@ -280,7 +420,7 @@ zen --dry-run
 zen
 ```
 
-### 2. Custom Configuration
+### 3. Custom Configuration
 Create a `config.json` file:
 ```json
 {
@@ -302,7 +442,7 @@ Run with configuration:
 zen --config config.json
 ```
 
-### 3. Workspace Management
+### 4. Workspace Management
 ```bash
 # Use specific workspace
 zen --workspace ~/projects/myapp
@@ -311,7 +451,7 @@ zen --workspace ~/projects/myapp
 zen --timeout 300 --workspace ~/projects/myapp
 ```
 
-### 4. Token Budget Control
+### 5. Token Budget Control
 ```bash
 # Set overall budget
 zen --overall-token-budget 100000
@@ -324,7 +464,7 @@ zen --budget-enforcement-mode block  # Stop when exceeded
 zen --budget-enforcement-mode warn   # Warn but continue
 ```
 
-### 5. Scheduled Execution
+### 6. Scheduled Execution
 ```bash
 # Start in 2 hours
 zen --start-at "2h"
@@ -332,6 +472,33 @@ zen --start-at "2h"
 # Start at specific time
 zen --start-at "14:30"  # 2:30 PM today
 zen --start-at "1am"    # 1 AM tomorrow
+```
+
+### 7. Execution Mode Precedence
+Zen supports three execution modes with clear precedence rules:
+
+1. **Direct Command** (Highest Priority)
+   ```bash
+   zen "/analyze-code"  # Executes direct command
+   ```
+
+2. **Config File** (Medium Priority)
+   ```bash
+   zen --config my-config.json  # Uses config file
+   ```
+
+3. **Default Instances** (Lowest Priority)
+   ```bash
+   zen  # Uses built-in default commands
+   ```
+
+**Mixed Usage:**
+```bash
+# Direct command overrides config file
+zen "/direct-cmd" --config my-config.json  # Executes /direct-cmd, ignores config
+
+# Config file overrides defaults
+zen --config my-config.json  # Uses config, ignores defaults
 ```
 
 ## Advanced Features

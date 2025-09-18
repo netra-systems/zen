@@ -45,7 +45,7 @@ business value through real-time AI chat interactions. These tests ensure the 5 
 WebSocket events are properly sent and received during agent execution.
 
 Required Events:
-1. agent_started - User sees agent began processing
+    1. agent_started - User sees agent began processing
 2. agent_thinking - Real-time reasoning visibility  
 3. tool_executing - Tool usage transparency
 4. tool_completed - Tool results display
@@ -79,7 +79,7 @@ os.environ['SKIP_REAL_SERVICES'] = 'false'
 
 try:
     from shared.isolated_environment import get_env
-    from netra_backend.app.websocket_core import (
+    from netra_backend.app.websocket_core import ()
         get_websocket_manager,
         WebSocketManager,
         WebSocketMessage,
@@ -90,7 +90,7 @@ try:
     generate_run_id = lambda thread_id: UnifiedIDManager.generate_run_id(thread_id)
     extract_thread_id_from_run_id = lambda run_id: UnifiedIDManager.extract_thread_id(run_id)
     validate_run_id_format = lambda run_id: UnifiedIDManager.validate_run_id(run_id)
-    from test_framework.test_context import (
+    from test_framework.test_context import ()
         TestContext,
         TestUserContext,
         create_test_context,
@@ -102,7 +102,8 @@ except ImportError as e:
 
 class WebSocketEventTracker:
     Track WebSocket events for testing - uses REAL WebSocket manager underneath."
-    Track WebSocket events for testing - uses REAL WebSocket manager underneath."
+    Track WebSocket events for testing - uses REAL WebSocket manager underneath.""
+
     
     def __init__(self):
         self.events_captured: List[Dict[str, Any]] = []
@@ -118,7 +119,8 @@ class WebSocketEventTracker:
             tool_executing", "
             tool_completed,
             agent_completed"
-            agent_completed"
+            agent_completed""
+
         }
     
     async def send_agent_event(self, thread_id: str, event_type: str, data: Dict[str, Any) -> bool:
@@ -165,7 +167,8 @@ class WebSocketEventTracker:
     
     def has_required_events_for_thread(self, thread_id: str) -> bool:
         Check if thread has all required agent events."
-        Check if thread has all required agent events."
+        Check if thread has all required agent events.""
+
         thread_events = self.get_events_for_thread(thread_id)
         thread_event_types = {event['type'] for event in thread_events}
         return self.required_events.issubset(thread_event_types)
@@ -177,7 +180,8 @@ class WebSocketEventTracker:
         return self.required_events - thread_event_types
     
     def clear_events(self):
-        ""Clear all tracked events.
+        ""Clear all tracked events.""
+
         self.events_captured.clear()
         self.events_by_thread.clear()
         self.event_counts.clear()
@@ -203,7 +207,8 @@ class WebSocketCriticalValidationTests:
     @pytest.mark.asyncio
     async def test_all_required_agent_events_sent(self):
         CRITICAL: Verify all 5 required agent events are sent during agent execution."
-        CRITICAL: Verify all 5 required agent events are sent during agent execution."
+        CRITICAL: Verify all 5 required agent events are sent during agent execution.""
+
         
         # Setup test scenario
         user_context = self.test_contexts[0].user_context
@@ -235,7 +240,7 @@ class WebSocketCriticalValidationTests:
                 agent_name: agent_name,"
                 "run_id: run_id,"
                 user_id: user_context.user_id,
-                "tool_name: validation_tool",
+                "tool_name: validation_tool,"
                 parameters: {test_mode: True}
             },
             (tool_completed, {"
@@ -244,7 +249,7 @@ class WebSocketCriticalValidationTests:
                 run_id: run_id,
                 user_id": user_context.user_id,"
                 tool_name: validation_tool,
-                result: {success": True, "validation: passed}
+                result: {success": True, validation: passed}"
             },
             (agent_completed, {
                 agent_name": agent_name,"
@@ -252,7 +257,8 @@ class WebSocketCriticalValidationTests:
                 user_id: user_context.user_id,"
                 user_id: user_context.user_id,"
                 "result: {status: success, message: "Critical validation complete}"
-                "result: {status: success, message: "Critical validation complete}"
+                "result: {status: success, message: "Critical validation complete}""
+
             }
         ]
         
@@ -267,7 +273,7 @@ class WebSocketCriticalValidationTests:
             await asyncio.sleep(0.1)
         
         # Verify all events were sent successfully
-        assert successful_sends == len(events_to_send), fOnly {successful_sends}/{len(events_to_send)} events sent successfully
+        assert successful_sends == len(events_to_send), "fOnly {successful_sends}/{len(events_to_send)} events sent successfully"
         
         # Verify all required events are captured
         assert self.event_tracker.has_required_events_for_thread(thread_id), \
@@ -279,15 +285,16 @@ class WebSocketCriticalValidationTests:
         
         # Verify each event has proper structure
         for event in thread_events:
-            assert 'type' in event, Event should have type
+            assert 'type' in event, "Event should have type"
             assert 'thread_id' in event, Event should have thread_id "
             assert 'thread_id' in event, Event should have thread_id "
             assert event['thread_id'] == thread_id, "Event should have correct thread_id"
-            assert 'data' in event, Event should have data
+            assert 'data' in event, "Event should have data"
             assert 'timestamp' in event, "Event should have timestamp"
-            assert event['data']['run_id'] == run_id, Event data should have correct run_id
+            assert event['data']['run_id'] == run_id, "Event data should have correct run_id"
             assert event['data']['agent_name'] == agent_name, Event data should have correct agent_name"
-            assert event['data']['agent_name'] == agent_name, Event data should have correct agent_name"
+            assert event['data']['agent_name'] == agent_name, Event data should have correct agent_name""
+
         
         print( PASS:  All required agent events sent and validated")"
     
@@ -317,9 +324,9 @@ class WebSocketCriticalValidationTests:
             events = [
                 (agent_started, {task: f"Isolation test for {scenario['agent_name'])),"
                 (agent_thinking", {reasoning: Processing isolated request),"
-                ("tool_executing, {tool_name": isolation_tool, user_specific: True),
-                (tool_completed, {tool_name": "isolation_tool, result: {isolated: True)),
-                (agent_completed", {"status: isolation_verified)
+                ("tool_executing, {tool_name: isolation_tool, user_specific: True),"
+                (tool_completed, {tool_name": isolation_tool, result: {isolated: True)),"
+                (agent_completed", {status: isolation_verified)"
             ]
             
             for event_type, event_data in events:
@@ -357,11 +364,13 @@ class WebSocketCriticalValidationTests:
         # Verify isolation - each user should have their own events
         for i, scenario in enumerate(user_scenarios):
             thread_events = self.event_tracker.get_events_for_thread(scenario[thread_id)"
-            thread_events = self.event_tracker.get_events_for_thread(scenario[thread_id)"
+            thread_events = self.event_tracker.get_events_for_thread(scenario[thread_id)""
+
             
             # Should have events for this user
             assert len(thread_events) >= 4, fUser {i} should have at least 4 events"
-            assert len(thread_events) >= 4, fUser {i} should have at least 4 events"
+            assert len(thread_events) >= 4, fUser {i} should have at least 4 events""
+
             
             # All events should belong to this user only
             for event in thread_events:
@@ -369,7 +378,8 @@ class WebSocketCriticalValidationTests:
                     fEvent isolation violated: user {i} received event for different user
                 assert event['data']['agent_name'] == scenario['agent_name'], \
                     fAgent isolation violated: user {i} received event for different agent"
-                    fAgent isolation violated: user {i} received event for different agent"
+                    fAgent isolation violated: user {i} received event for different agent""
+
                 assert event['data']['run_id'] == scenario['run_id'], \
                     f"Run ID isolation violated: user {i} received event for different run"
         
@@ -384,21 +394,22 @@ class WebSocketCriticalValidationTests:
         # Each user should have roughly equal number of events
         for scenario in user_scenarios:
             user_count = user_event_counts.get(scenario['user_id'], 0)
-            assert user_count >= 4, fUser {scenario['user_id']} should have at least 4 events
+            assert user_count >= 4, "fUser {scenario['user_id']} should have at least 4 events"
         
         print( PASS:  Concurrent user event isolation verified")"
     
     @pytest.mark.asyncio  
     async def test_event_ordering_and_timing(self):
         CRITICAL: Verify WebSocket events maintain correct order and timing."
-        CRITICAL: Verify WebSocket events maintain correct order and timing."
+        CRITICAL: Verify WebSocket events maintain correct order and timing.""
+
         
         user_context = self.test_contexts[0].user_context
         thread_id = user_context.thread_id
         run_id = generate_run_id(thread_id, "ordering_test)"
         agent_name = OrderingTestAgent
         
-        print(f"[U+1F4CB] Testing event ordering and timing for thread: {thread_id}")
+        print(f"[U+1F4CB] Testing event ordering and timing for thread: {thread_id})"
         
         # Record timing for each event
         event_times = []
@@ -407,12 +418,12 @@ class WebSocketCriticalValidationTests:
         ordered_events = [
             (agent_started, {context: {task: "Ordering test)),"
             (agent_thinking", {reasoning: Step 1: Initial analysis),"
-            ("tool_executing, {tool_name": step1_tool),
-            (tool_completed, {"tool_name: step1_tool", result: {step: 1)),
-            ("agent_thinking, {reasoning": Step 2: Processing results),
-            (tool_executing, {"tool_name: step2_tool"),
-            (tool_completed, {tool_name: "step2_tool, result": {step: 2)),
-            (agent_completed, {"result: {steps_completed": 2))
+            ("tool_executing, {tool_name: step1_tool),"
+            (tool_completed, {"tool_name: step1_tool, result: {step: 1)),"
+            ("agent_thinking, {reasoning: Step 2: Processing results),"
+            (tool_executing, {"tool_name: step2_tool),"
+            (tool_completed, {tool_name: "step2_tool, result: {step: 2)),"
+            (agent_completed, {"result: {steps_completed: 2))"
         ]
         
         for event_type, event_data in ordered_events:
@@ -441,7 +452,7 @@ class WebSocketCriticalValidationTests:
         
         # Verify events were captured in order
         thread_events = self.event_tracker.get_events_for_thread(thread_id)
-        assert len(thread_events) >= 7, fShould capture at least 7 events, got {len(thread_events)}
+        assert len(thread_events) >= 7, "fShould capture at least 7 events, got {len(thread_events)}"
         
         # Verify chronological order
         event_timestamps = []
@@ -478,11 +489,12 @@ class WebSocketCriticalValidationTests:
         for exec_idx, comp_idx in zip(tool_executing_indices, tool_completed_indices):
             assert comp_idx > exec_idx, \
                 ftool_completed (index {comp_idx) should come after tool_executing (index {exec_idx)"
-                ftool_completed (index {comp_idx) should come after tool_executing (index {exec_idx)"
+                ftool_completed (index {comp_idx) should come after tool_executing (index {exec_idx)""
+
         
         # Performance validation - events should be delivered quickly
         avg_duration = sum(timing['duration_ms'] for timing in event_times) / len(event_times)
-        assert avg_duration < 100, f"Average event delivery too slow: {avg_duration:.2f}ms"
+        assert avg_duration < 100, f"Average event delivery too slow: {avg_duration:.""2f""}ms"
         
         print( PASS:  Event ordering and timing verified)
     
@@ -523,10 +535,10 @@ class WebSocketCriticalValidationTests:
                     event_data = {"reasoning: fLoad test step {event_idx}}"
                 elif event_type_idx == 1:
                     event_type = tool_executing 
-                    event_data = {tool_name": f"load_tool_{event_idx}}
+                    event_data = {tool_name": fload_tool_{event_idx}}"
                 elif event_type_idx == 2:
                     event_type = tool_completed
-                    event_data = {tool_name: fload_tool_{event_idx}, "result: {index": event_idx}}
+                    event_data = {tool_name: fload_tool_{event_idx}, "result: {index: event_idx}}"
                 else:
                     event_type = agent_started
                     event_data = {context: {"load_test: event_idx}}"
@@ -535,7 +547,7 @@ class WebSocketCriticalValidationTests:
                     **event_data,
                     agent_name": thread_info[agent_name],"
                     run_id: thread_info[run_id],
-                    user_id": thread_info["user_id]
+                    user_id": thread_info[user_id]"
                 }
                 
                 success = await self.event_tracker.send_agent_event(
@@ -559,9 +571,9 @@ class WebSocketCriticalValidationTests:
         success_rate = total_sent / total_events
         
         # Performance assertions
-        assert success_rate > 0.90, fSuccess rate too low under load: {success_rate:.2%}
-        assert events_per_second > 50, fEvent throughput too low: {events_per_second:.1f} events/sec""
-        assert total_time < 30, fLoad test took too long: {total_time:.2f}s
+        assert success_rate > 0.90, "fSuccess rate too low under load: {success_rate:.2%}"
+        assert events_per_second > 50, fEvent throughput too low: {events_per_second:.""1f""} events/sec""
+        assert total_time < 30, "fLoad test took too long: {total_time:.""2f""}s"
         
         # Verify events were properly isolated
         for thread_info in test_threads:
@@ -574,13 +586,16 @@ class WebSocketCriticalValidationTests:
             for event in thread_events:
                 assert event['data']['user_id'] == thread_info['user_id'], \
                     Load test event isolation violation"
-                    Load test event isolation violation"
+                    Load test event isolation violation""
+
         
-        print(f PASS:  Performance under load: {total_sent}/{total_events} events sent in {total_time:.2f}s ({events_per_second:.1f} events/sec))
+        print(f PASS:  Performance under load: {total_sent}/{total_events} events sent in {total_time:.""2f""}s ({events_per_second:.""1f""} events/sec))""
+
     
     @pytest.mark.asyncio
     async def test_run_id_generation_and_validation(self):
-        ""CRITICAL: Test run ID generation follows SSOT standards.
+        ""CRITICAL: Test run ID generation follows SSOT standards.""
+
         
         print([U+1F194] Testing run ID generation and validation")"
         
@@ -601,8 +616,8 @@ class WebSocketCriticalValidationTests:
             run_id = generate_run_id(thread_id, "validation_test)"
             
             # Verify format compliance
-            assert run_id.startswith(RUN_ID_PREFIX), fRun ID should start with prefix: {run_id}
-            assert RUN_ID_SEPARATOR in run_id, fRun ID should contain separator: {run_id}
+            assert run_id.startswith(RUN_ID_PREFIX), "fRun ID should start with prefix: {run_id}"
+            assert RUN_ID_SEPARATOR in run_id, "fRun ID should contain separator: {run_id}"
             
             # Verify thread extraction works
             extracted_thread = extract_thread_id_from_run_id(run_id)
@@ -611,20 +626,20 @@ class WebSocketCriticalValidationTests:
             
             # Verify validation passes
             is_valid = validate_run_id_format(run_id, thread_id)
-            assert is_valid, fRun ID validation failed: {run_id}
+            assert is_valid, "fRun ID validation failed: {run_id}"
             
             # Test using run ID in WebSocket event
             success = await self.event_tracker.send_agent_event(
                 thread_id,
                 agent_started,
                 {
-                    "agent_name: ValidationAgent",
+                    "agent_name: ValidationAgent,"
                     run_id: run_id,
                     user_id: "validation_user,"
                     context": {validation: True}"
                 }
             
-            assert success, fWebSocket event with run ID should succeed: {run_id}
+            assert success, "fWebSocket event with run ID should succeed: {run_id}"
         
         # Verify all events were captured with proper run IDs
         all_events = self.event_tracker.events_captured
@@ -637,18 +652,20 @@ class WebSocketCriticalValidationTests:
             
             # Verify run ID format
             assert run_id.startswith(RUN_ID_PREFIX), fEvent run ID should have proper format: {run_id}"
-            assert run_id.startswith(RUN_ID_PREFIX), fEvent run ID should have proper format: {run_id}"
+            assert run_id.startswith(RUN_ID_PREFIX), fEvent run ID should have proper format: {run_id}""
+
             
             # Verify thread extraction still works
             extracted = extract_thread_id_from_run_id(run_id)
-            assert extracted == thread_id, fEvent run ID thread extraction failed: {run_id}
+            assert extracted == thread_id, "fEvent run ID thread extraction failed: {run_id}"
         
         print( PASS:  Run ID generation and validation completed")"
 
 
 class WebSocketEventContentTests:
     Test WebSocket event content validation."
-    Test WebSocket event content validation."
+    Test WebSocket event content validation.""
+
     
     @pytest.fixture(autouse=True)
     async def setup_content_testing(self):
@@ -666,7 +683,8 @@ class WebSocketEventContentTests:
         
         thread_id = self.test_context.user_context.thread_id
         run_id = generate_run_id(thread_id, integrity_test)"
-        run_id = generate_run_id(thread_id, integrity_test)"
+        run_id = generate_run_id(thread_id, integrity_test)""
+
         
         # Test data with various types and structures
         test_data = {
@@ -680,9 +698,10 @@ class WebSocketEventContentTests:
                     number_value: 42,
                     boolean_value": True,"
                     array_value: [1, 2, 3, four, {five: 5}]"
-                    array_value: [1, 2, 3, four, {five: 5}]"
+                    array_value: [1, 2, 3, four, {five: 5}]""
+
                 },
-                unicode_test": Test with [U+00E9]mojis [U+1F680] and sp[U+00EB]cial ch[U+00E0]rs,"
+                unicode_test": Test with [U+00E9]mojis [U+1F680] and sp[U+""00EB""]cial ch[U+00E0]rs,"
                 large_text: A * 1000  # Test large content
             },
             metadata": {"
@@ -703,7 +722,7 @@ class WebSocketEventContentTests:
         
         # Retrieve and verify data integrity
         events = self.event_tracker.get_events_for_thread(thread_id)
-        assert len(events) == 1, Should capture exactly one event
+        assert len(events) == 1, "Should capture exactly one event"
         
         captured_event = events[0]
         captured_data = captured_event['data']
@@ -715,13 +734,14 @@ class WebSocketEventContentTests:
         
         # Verify nested data integrity
         assert captured_data['complex_data']['nested_object']['string_value'] == test_string"
-        assert captured_data['complex_data']['nested_object']['string_value'] == test_string"
+        assert captured_data['complex_data']['nested_object']['string_value'] == test_string""
+
         assert captured_data['complex_data']['nested_object']['number_value'] == 42
         assert captured_data['complex_data']['nested_object']['boolean_value'] is True
         assert captured_data['complex_data']['nested_object']['array_value'] == [1, 2, 3, four", {five: 5}]"
         
         # Verify unicode handling
-        assert captured_data['complex_data']['unicode_test'] == Test with [U+00E9]mojis [U+1F680] and sp[U+00EB]cial ch[U+00E0]rs
+        assert captured_data['complex_data']['unicode_test'] == Test with [U+00E9]mojis [U+1F680] and sp[U+""00EB""]cial ch[U+00E0]rs
         
         # Verify large content
         assert captured_data['complex_data']['large_text'] == "A * 1000"
@@ -729,7 +749,8 @@ class WebSocketEventContentTests:
         # Verify metadata
         assert captured_data['metadata']['version'] == 1.0.0
         assert captured_data['metadata']['source'] == integrity_test"
-        assert captured_data['metadata']['source'] == integrity_test"
+        assert captured_data['metadata']['source'] == integrity_test""
+
         
         print( PASS:  Agent event data integrity verified")"
     
@@ -742,7 +763,7 @@ class WebSocketEventContentTests:
         
         # Send a standard event
         event_data = {
-            "agent_name: StructureTestAgent",
+            "agent_name: StructureTestAgent,"
             run_id: run_id,
             user_id: self.test_context.user_context.user_id,"
             user_id: self.test_context.user_context.user_id,"
@@ -757,31 +778,34 @@ class WebSocketEventContentTests:
         )
         
         assert success, Structure test event should be sent successfully"
-        assert success, Structure test event should be sent successfully"
+        assert success, Structure test event should be sent successfully""
+
         
         # Verify captured event structure
         events = self.event_tracker.get_events_for_thread(thread_id)
         assert len(events) == 1, Should capture exactly one event"
-        assert len(events) == 1, Should capture exactly one event"
+        assert len(events) == 1, Should capture exactly one event""
+
         
         event = events[0]
         
         # Verify top-level structure
         required_fields = ['type', 'thread_id', 'data', 'timestamp', 'message']
         for field in required_fields:
-            assert field in event, fEvent should have {field} field
+            assert field in event, "fEvent should have {field} field"
         
         # Verify field types and values
         assert isinstance(event['type'], str), Event type should be string"
         assert isinstance(event['type'], str), Event type should be string"
         assert event['type'] == 'tool_executing', "Event should have correct type"
         
-        assert isinstance(event['thread_id'], str), Thread ID should be string
+        assert isinstance(event['thread_id'], "str), Thread ID should be string"
         assert event['thread_id'] == thread_id, "Event should have correct thread_id"
         
-        assert isinstance(event['data'], dict), Event data should be dictionary
+        assert isinstance(event['data'], "dict), Event data should be dictionary"
         assert event['data']['run_id'] == run_id, Event data should have correct run_id"
-        assert event['data']['run_id'] == run_id, Event data should have correct run_id"
+        assert event['data']['run_id'] == run_id, Event data should have correct run_id""
+
         
         assert isinstance(event['timestamp'], str), Timestamp should be string"
         assert isinstance(event['timestamp'], str), Timestamp should be string"
@@ -790,7 +814,7 @@ class WebSocketEventContentTests:
         
         # Verify WebSocket message structure
         message = event['message']
-        assert isinstance(message, dict), WebSocket message should be dictionary
+        assert isinstance(message, "dict), WebSocket message should be dictionary"
         
         # Standard WebSocket message should have required fields
         message_required_fields = ['type', 'data', 'timestamp']

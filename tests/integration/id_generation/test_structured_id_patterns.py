@@ -68,11 +68,11 @@ class StructuredIdPatternsTests(SSotBaseTestCase):
         api_sessions = filter_by_user_prefix(structured_session_ids, 'api')
         assert len(admin_sessions) == 1, f'ADMIN QUERY FAILURE: Expected 1, got {len(admin_sessions)}'
         assert len(api_sessions) == 1, f'API QUERY FAILURE: Expected 1, got {len(api_sessions)}'
-        print(f'\n✅ SESSION ID STRUCTURED PATTERN SUCCESS:')
+        print(f'\nCHECK SESSION ID STRUCTURED PATTERN SUCCESS:')
         for session_id, user_id, request_id in structured_session_ids:
-            print(f'   ✓ {user_id} -> {session_id}')
-        print(f'   ✓ All session IDs follow structured pattern')
-        print(f'   ✓ Query filtering by user prefix functional')
+            print(f'   CHECK {user_id} -> {session_id}')
+        print(f'   CHECK All session IDs follow structured pattern')
+        print(f'   CHECK Query filtering by user prefix functional')
         print(f'   Status: Session ID structured patterns validated')
 
     def test_connection_id_structured_pattern_validation_post_migration(self):
@@ -116,11 +116,11 @@ class StructuredIdPatternsTests(SSotBaseTestCase):
         assert len(ws_connections) == 1, f'WS ROUTING FAILURE: Expected 1, got {len(ws_connections)}'
         assert len(chat_connections) == 1, f'CHAT ROUTING FAILURE: Expected 1, got {len(chat_connections)}'
         assert len(stream_connections) == 1, f'STREAM ROUTING FAILURE: Expected 1, got {len(stream_connections)}'
-        print(f'\n✅ CONNECTION ID STRUCTURED PATTERN SUCCESS:')
+        print(f'\nCHECK CONNECTION ID STRUCTURED PATTERN SUCCESS:')
         for connection_id, user_id, session_ref in structured_connection_ids:
-            print(f'   ✓ {user_id} -> {connection_id}')
-        print(f'   ✓ All connection IDs follow structured pattern')
-        print(f'   ✓ WebSocket routing by user pattern functional')
+            print(f'   CHECK {user_id} -> {connection_id}')
+        print(f'   CHECK All connection IDs follow structured pattern')
+        print(f'   CHECK WebSocket routing by user pattern functional')
         print(f'   Status: Connection ID structured patterns validated')
 
     def test_client_id_structured_pattern_validation_post_migration(self):
@@ -166,12 +166,12 @@ class StructuredIdPatternsTests(SSotBaseTestCase):
         clickhouse_clients = [cid for cid, service, _, _ in structured_client_ids if service == 'clickhouse']
         assert len(redis_clients) == 2, f'REDIS ISOLATION FAILURE: Expected 2, got {len(redis_clients)}'
         assert len(clickhouse_clients) == 2, f'CLICKHOUSE ISOLATION FAILURE: Expected 2, got {len(clickhouse_clients)}'
-        print(f'\n✅ CLIENT ID STRUCTURED PATTERN SUCCESS:')
+        print(f'\nCHECK CLIENT ID STRUCTURED PATTERN SUCCESS:')
         for client_id, service, user_id, request_id in structured_client_ids:
-            print(f'   ✓ {service}:{user_id} -> {client_id}')
-        print(f'   ✓ All client IDs follow structured pattern')
-        print(f'   ✓ Resource management by service/user functional')
-        print(f'   ✓ Service isolation maintained')
+            print(f'   CHECK {service}:{user_id} -> {client_id}')
+        print(f'   CHECK All client IDs follow structured pattern')
+        print(f'   CHECK Resource management by service/user functional')
+        print(f'   CHECK Service isolation maintained')
         print(f'   Status: Client ID structured patterns validated')
 
     def test_audit_id_structured_pattern_validation_post_migration(self):
@@ -231,12 +231,12 @@ class StructuredIdPatternsTests(SSotBaseTestCase):
         for record_type, timestamps in timeline_analysis.items():
             assert len(timestamps) == 1, f'TIMELINE COUNT ERROR: {record_type} has {len(timestamps)} entries'
             assert timestamps[0] > 0, f'TIMELINE VALIDITY ERROR: {record_type} has invalid timestamp'
-        print(f'\n✅ AUDIT ID STRUCTURED PATTERN SUCCESS:')
+        print(f'\nCHECK AUDIT ID STRUCTURED PATTERN SUCCESS:')
         for audit_id, record_type, user_id, resource_id in structured_audit_ids:
-            print(f'   ✓ {record_type}:{user_id} -> {audit_id}')
-        print(f'   ✓ All audit IDs follow structured pattern')
-        print(f'   ✓ Compliance reporting by type/user functional')
-        print(f'   ✓ Timeline analysis capabilities validated')
+            print(f'   CHECK {record_type}:{user_id} -> {audit_id}')
+        print(f'   CHECK All audit IDs follow structured pattern')
+        print(f'   CHECK Compliance reporting by type/user functional')
+        print(f'   CHECK Timeline analysis capabilities validated')
         print(f'   Status: Audit ID structured patterns validated')
 
     def test_structured_pattern_performance_optimization_post_migration(self):
@@ -293,12 +293,12 @@ class StructuredIdPatternsTests(SSotBaseTestCase):
         query_rate = 6 / query_time
         assert generation_rate > 1000, f'GENERATION PERFORMANCE: {generation_rate:.0f} IDs/sec (expected > 1000)'
         assert query_rate > 100, f'QUERY PERFORMANCE: {query_rate:.0f} queries/sec (expected > 100)'
-        print(f'\n✅ STRUCTURED PATTERN PERFORMANCE SUCCESS:')
-        print(f'   ✓ Generated {total_ids_generated} structured IDs in {generation_time:.3f}s ({generation_rate:.0f} IDs/sec)')
-        print(f'   ✓ Executed 6 structured queries in {query_time:.3f}s ({query_rate:.0f} queries/sec)')
-        print(f'   ✓ User filtering: {len(user_1_sessions)} + {len(user_50_connections)} results')
-        print(f'   ✓ Service filtering: {len(redis_clients)} Redis + {len(clickhouse_clients)} ClickHouse')
-        print(f'   ✓ Audit filtering: {len(security_audits)} Security + {len(access_audits)} Access')
+        print(f'\nCHECK STRUCTURED PATTERN PERFORMANCE SUCCESS:')
+        print(f'   CHECK Generated {total_ids_generated} structured IDs in {generation_time:.3f}s ({generation_rate:.0f} IDs/sec)')
+        print(f'   CHECK Executed 6 structured queries in {query_time:.3f}s ({query_rate:.0f} queries/sec)')
+        print(f'   CHECK User filtering: {len(user_1_sessions)} + {len(user_50_connections)} results')
+        print(f'   CHECK Service filtering: {len(redis_clients)} Redis + {len(clickhouse_clients)} ClickHouse')
+        print(f'   CHECK Audit filtering: {len(security_audits)} Security + {len(access_audits)} Access')
         print(f'   Status: Structured pattern performance optimization validated')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

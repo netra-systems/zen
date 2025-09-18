@@ -67,20 +67,20 @@ if __name__ == "__main__":
     
     try:
         from netra_backend.app.core.environment_context.environment_context_service import EnvironmentContextService
-        print("✅ Correct import path works")
+        print("CHECK Correct import path works")
     except Exception as e:
-        print(f"❌ Correct import failed: {e}")
+        print(f"X Correct import failed: {e}")
         
     try:
         from netra_backend.app.services.environment_context_service import EnvironmentContextService
-        print("❌ Old import path should have failed but didn't")
+        print("X Old import path should have failed but didn't")
     except ModuleNotFoundError:
-        print("✅ Old import path correctly fails")
+        print("CHECK Old import path correctly fails")
         
     try:
         from netra_backend.app.smd import StartupOrchestrator
-        print("✅ SMD StartupOrchestrator import works")
+        print("CHECK SMD StartupOrchestrator import works")
     except Exception as e:
-        print(f"❌ SMD import failed: {e}")
+        print(f"X SMD import failed: {e}")
         
     print("Test validation complete!")

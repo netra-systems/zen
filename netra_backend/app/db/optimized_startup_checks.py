@@ -20,11 +20,12 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable, Dict, List, NamedTuple, Optional
+from sqlalchemy import text
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from netra_backend.app.startup_checks.models import StartupCheckResult
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class CheckPriority(Enum):
@@ -323,7 +324,7 @@ class OptimizedStartupChecker:
                     
                     async with AsyncSession(engine) as session:
                         result = await session.execute(text("SELECT 1"))
-                        await result.fetchone()
+                        result.fetchone()
                     
                     return StartupCheckResult(
                         name=check_name, success=True, critical=True,
@@ -336,8 +337,8 @@ class OptimizedStartupChecker:
             from netra_backend.app.db.postgres import async_session_factory
             if async_session_factory:
                 async with async_session_factory() as session:
-                    result = await session.execute("SELECT 1")
-                    await result.fetchone()
+                    result = await session.execute(text("SELECT 1"))
+                    result.fetchone()
                 return StartupCheckResult(
                     name=check_name, success=True, critical=True,
                     message="PostgreSQL connection successful"
@@ -377,7 +378,7 @@ class OptimizedStartupChecker:
             async with app.state.db_session_factory() as session:
                 for table in critical_tables:
                     result = await session.execute(
-                        f"SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '{table}')"
+                        text(f"SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '{table}')")
                     )
                     exists = result.scalar()
                     if not exists:

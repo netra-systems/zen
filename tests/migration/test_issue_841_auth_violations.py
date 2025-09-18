@@ -176,7 +176,7 @@ class Issue841AuthenticationViolationsTests(SSotBaseTestCase):
             report_lines.append(f"🔄 SCENARIO: {integration_violation['scenario']}")
             for violation in integration_violation.get('violations', []):
                 if 'error' in violation:
-                    report_lines.append(f"   ❌ {violation['error']}")
+                    report_lines.append(f"   X {violation['error']}")
                 else:
                     report_lines.extend([f"   🔧 {violation['id_type']}: {violation['id_value'][:30]}...", f"      Issue: {violation['violation']}"])
             report_lines.append('')

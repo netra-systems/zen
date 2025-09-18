@@ -36,6 +36,11 @@ class ComplianceResults:
     violations: List[Violation]
     summary: Dict[str, Union[int, str, float]]
     category_scores: Dict[str, Dict[str, Union[int, float]]] = None
+    # CI/CD specific fields
+    violations_by_severity: Dict[str, int] = None
+    threshold_violations: Dict[str, bool] = None
+    exit_code: int = 0
+    actionable_fixes: List[str] = None
 
 
 class ComplianceConfig:
@@ -243,12 +248,21 @@ def create_compliance_results(violations: List[Violation], total_files: int,
                             category_scores: Dict[str, Dict] = None) -> ComplianceResults:
     """Create compliance results object"""
     import time
-    summary = _build_summary(violations, total_files, compliance_score, 
+    summary = _build_summary(violations, total_files, compliance_score,
                             max_file_lines, max_function_lines)
+
+    # Calculate violations by severity for CI/CD
+    violations_by_severity = _calculate_violations_by_severity(violations)
+
+    # Generate actionable fixes
+    actionable_fixes = _generate_actionable_fixes(violations)
+
     return ComplianceResults(
         total_violations=len(violations), compliance_score=compliance_score,
         timestamp=time.strftime("%Y-%m-%d %H:%M:%S"), violations_by_type=violations_by_type,
-        violations=violations, summary=summary, category_scores=category_scores
+        violations=violations, summary=summary, category_scores=category_scores,
+        violations_by_severity=violations_by_severity,
+        actionable_fixes=actionable_fixes
     )
 
 
@@ -262,3 +276,50 @@ def _build_summary(violations: List[Violation], total_files: int, compliance_sco
         "max_function_lines": max_function_lines,
         "compliance_score": compliance_score
     }
+
+
+def _calculate_violations_by_severity(violations: List[Violation]) -> Dict[str, int]:
+    """Calculate violations by severity for CI/CD reporting"""
+    severity_counts = {
+        "critical": 0,
+        "high": 0,
+        "medium": 0,
+        "low": 0
+    }
+
+    for violation in violations:
+        severity = violation.severity.lower()
+        if severity in severity_counts:
+            severity_counts[severity] += 1
+
+    return severity_counts
+
+
+def _generate_actionable_fixes(violations: List[Violation]) -> List[str]:
+    """Generate actionable fix commands for CI/CD"""
+    fixes = []
+
+    # Group violations by type to provide bulk fixes
+    file_violations = [v for v in violations if "file_size" in v.violation_type]
+    function_violations = [v for v in violations if "function" in v.violation_type]
+    duplicate_violations = [v for v in violations if "duplicate" in v.violation_type]
+    test_violations = [v for v in violations if "test" in v.violation_type]
+
+    if file_violations:
+        fixes.append("🔧 Split large files: Use 'python scripts/split_large_files.py' to automate file splitting")
+
+    if function_violations:
+        fixes.append("🔧 Refactor functions: Use 'python scripts/refactor_functions.py' to extract smaller functions")
+
+    if duplicate_violations:
+        fixes.append("🔧 Consolidate duplicates: Review SSOT patterns and consolidate duplicate implementations")
+
+    if test_violations:
+        fixes.append("🔧 Fix test violations: Replace stubs with real implementations, remove bypassing logic")
+
+    # Add critical-specific fixes
+    critical_violations = [v for v in violations if v.severity == "critical"]
+    if critical_violations:
+        fixes.insert(0, "🚨 CRITICAL: Fix security violations immediately - deployment blocked")
+
+    return fixes

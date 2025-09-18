@@ -38,7 +38,8 @@ class TestDevelopmentAuth:
 
     @classmethod
     def setup_class(cls):
-        ""Setup test environment
+        ""Setup test environment""
+
         cls.env = IsolatedEnvironment.get_instance()
 
         # Ensure we're in development mode'
@@ -47,7 +48,7 @@ class TestDevelopmentAuth:
         # Set required secrets for development (must be at least 32 chars)
         cls.env.set("SERVICE_SECRET, dev-service-secret-for-testing-purposes-only)"
         cls.env.set(JWT_SECRET_KEY, dev-jwt-secret-for-testing-only-must-be-32-chars)
-        cls.env.set("SERVICE_ID, test-service-id")
+        cls.env.set("SERVICE_ID, test-service-id)"
 
         # Clear any cached secrets
         SharedJWTSecretManager.clear_cache()
@@ -60,7 +61,8 @@ class TestDevelopmentAuth:
         # Service URLs for development
         cls.auth_url = http://localhost:8081
         cls.backend_url = http://localhost:8000"
-        cls.backend_url = http://localhost:8000"
+        cls.backend_url = http://localhost:8000""
+
 
     def test_jwt_secret_synchronization(self):
         "Test that JWT secrets are synchronized across services"
@@ -71,10 +73,11 @@ class TestDevelopmentAuth:
         shared_secret = SharedJWTSecretManager.get_jwt_secret()
 
         # They should be the same
-        assert auth_secret == shared_secret, JWT secrets are not synchronized!
+        assert auth_secret == shared_secret, "JWT secrets are not synchronized!"
 
-        logger.info(✅ JWT secrets are synchronized)"
-        logger.info(✅ JWT secrets are synchronized)"
+        logger.info(CHECK JWT secrets are synchronized)"
+        logger.info(CHECK JWT secrets are synchronized)""
+
 
     def test_token_generation(self):
         "Test token generation"
@@ -87,10 +90,10 @@ class TestDevelopmentAuth:
             email=test@example.com,"
             permissions=["read, write]"
 
-        assert token is not None, Failed to generate token
+        assert token is not None, "Failed to generate token"
         assert isinstance(token, str), Token should be a string""
 
-        logger.info(f✅ Token generated successfully: {token[:20]}...)
+        logger.info(fCHECK Token generated successfully: {token[:20]}...)
 
     def test_token_validation(self):
         Test token validation""
@@ -112,8 +115,9 @@ class TestDevelopmentAuth:
         assert user_id == test_user_456, f"Wrong user ID: {user_id}"
         assert decoded.get(email) == "validate@example.com, Wrong email"
 
-        logger.info(✅ Token validation successful)"
-        logger.info(✅ Token validation successful)"
+        logger.info(CHECK Token validation successful)"
+        logger.info(CHECK Token validation successful)""
+
 
     def test_cross_service_validation(self):
         "Test that backend and auth use same JWT secret"
@@ -154,8 +158,9 @@ class TestDevelopmentAuth:
             user_id = decoded.get(sub) or decoded.get(user_id)
             assert user_id == cross_service_user, f"Wrong user ID: {user_id}"
 
-            logger.info(✅ Cross-service validation successful - JWT secrets match!)"
-            logger.info(✅ Cross-service validation successful - JWT secrets match!)"
+            logger.info(CHECK Cross-service validation successful - JWT secrets match!)"
+            logger.info(CHECK Cross-service validation successful - JWT secrets match!)""
+
 
         except jwt.InvalidTokenError as e:
             logger.error(fJWT secrets don't match between services: {e})'
@@ -168,14 +173,15 @@ class TestDevelopmentAuth:
     async def test_service_health_check(self):
         "Test service connectivity"
         logger.info(Testing service health checks...)"
-        logger.info(Testing service health checks...)"
+        logger.info(Testing service health checks...)""
+
 
         async with httpx.AsyncClient() as client:
             # Check auth service
             try:
                 auth_response = await client.get(f"{self.auth_url}/health)"
                 logger.info(fAuth service health: {auth_response.status_code})
-                assert auth_response.status_code == 200, fAuth service unhealthy: {auth_response.status_code}
+                assert auth_response.status_code == 200, "fAuth service unhealthy: {auth_response.status_code}"
             except (httpx.ConnectError, httpx.RequestError) as e:
                 logger.warning(fAuth service connection failed: {e}")"
 
@@ -187,13 +193,14 @@ class TestDevelopmentAuth:
             except (httpx.ConnectError, httpx.RequestError) as e:
                 logger.warning(fBackend service connection failed: {e}")"
 
-        logger.info(✅ Service health checks completed)
+        logger.info(CHECK Service health checks completed)
 
     @pytest.mark.asyncio
     async def test_login_flow(self):
-        ""Test complete login flow
+        ""Test complete login flow"
         logger.info(Testing login flow...)"
-        logger.info(Testing login flow...)"
+        logger.info(Testing login flow...)""
+
 
         async with httpx.AsyncClient() as client:
             # Register a test user
@@ -211,25 +218,26 @@ class TestDevelopmentAuth:
                 )
 
                 if reg_response.status_code == 200:
-                    logger.info(✅ User registration successful)
+                    logger.info(CHECK User registration successful)
 
                     # Login
                     login_data = {
-                        username": register_data["email],
+                        username": register_data[email],"
                         password: register_data[password]
                     }
 
                     login_response = await client.post(
                         f{self.auth_url}/auth/token,"
-                        f{self.auth_url}/auth/token,"
+                        f{self.auth_url}/auth/token,""
+
                         data=login_data
                     )
 
                     if login_response.status_code == 200:
                         result = login_response.json()
                         assert "access_token in result, No access token in response"
-                        assert token_type in result, No token type in response
-                        logger.info("✅ Login successful)"
+                        assert token_type in result, "No token type in response"
+                        logger.info("CHECK Login successful)"
                     else:
                         logger.warning(fLogin failed: {login_response.status_code})
                 else:
@@ -238,7 +246,7 @@ class TestDevelopmentAuth:
             except (httpx.ConnectError, httpx.RequestError) as e:
                 logger.warning(fLogin flow failed due to connection: {e}")"
 
-        logger.info(✅ Login flow test completed)
+        logger.info(CHECK Login flow test completed)
 
 
 def main():
@@ -256,8 +264,9 @@ def main():
         test_suite.test_token_generation()
         test_suite.test_token_validation()
         test_suite.test_cross_service_validation()
-        logger.info(✅ All synchronous tests passed!)"
-        logger.info(✅ All synchronous tests passed!)"
+        logger.info(CHECK All synchronous tests passed!)"
+        logger.info(CHECK All synchronous tests passed!)""
+
     except Exception as e:
         logger.error(f"Synchronous test failed: {e})"
         return 1
@@ -266,7 +275,7 @@ def main():
     try:
         asyncio.run(test_suite.test_service_health_check())
         asyncio.run(test_suite.test_login_flow())
-        logger.info(✅ All async tests completed!)
+        logger.info(CHECK All async tests completed!)
     except Exception as e:
         logger.error(fAsync test failed: {e})
         return 1

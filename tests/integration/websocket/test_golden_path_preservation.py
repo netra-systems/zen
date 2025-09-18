@@ -9,7 +9,7 @@ event delivery pipeline that delivers 90% of platform business value.
 
 Business Value: $500K+ ARR Protection - Golden Path Chat Functionality
 Validates that SSOT compliance changes don't break the critical user journey:
-User login → Send message → Get AI response → See progress updates
+User login -> Send message -> Get AI response -> See progress updates
 
 Test Strategy:
 - Integration test with real WebSocket connections (no Docker required)
@@ -119,14 +119,14 @@ class TestGoldenPathWebSocketPreservation(SSotAsyncTestCase):
                     missing_events.append(required_event)
 
             if missing_events:
-                self.assertLog(f"⚠️ Missing business-critical events: {missing_events}")
+                self.assertLog(f"WARNING️ Missing business-critical events: {missing_events}")
                 # Don't fail immediately - log for tracking but consider test environment
                 if len(missing_events) <= 2:  # Allow some tolerance during migration
-                    self.assertLog("⚠️ Partial event delivery (acceptable during SSOT migration)")
+                    self.assertLog("WARNING️ Partial event delivery (acceptable during SSOT migration)")
                 else:
                     self.fail(f"Too many missing critical events: {missing_events}")
             else:
-                self.assertLog("✅ All 5 business-critical events delivered successfully")
+                self.assertLog("CHECK All 5 business-critical events delivered successfully")
 
         except Exception as e:
             self.assertLog(f"Warning: Golden Path events test failed: {e}")
@@ -177,7 +177,7 @@ class TestGoldenPathWebSocketPreservation(SSotAsyncTestCase):
             self.assertGreater(len(first_user_events), 0, "First user should receive events")
             self.assertEqual(len(second_user_events), 0, "Second user should not receive events from first user")
 
-            self.assertLog("✅ User isolation validated in WebSocket events")
+            self.assertLog("CHECK User isolation validated in WebSocket events")
 
         except Exception as e:
             self.assertLog(f"Warning: User isolation test failed: {e}")
@@ -200,18 +200,18 @@ class TestGoldenPathWebSocketPreservation(SSotAsyncTestCase):
                 self.skipTest("SSOT WebSocket connection not available")
 
             self.assertIsNotNone(connection)
-            self.assertLog("✅ WebSocket connection created through SSOT patterns")
+            self.assertLog("CHECK WebSocket connection created through SSOT patterns")
 
             # Test basic connection functionality
             if hasattr(connection, 'send'):
                 test_message = {"type": "ping", "user_id": test_user_id}
                 await connection.send(json.dumps(test_message))
-                self.assertLog("✅ Message sent through SSOT connection")
+                self.assertLog("CHECK Message sent through SSOT connection")
 
             # Test connection state
             if hasattr(connection, 'closed'):
                 self.assertFalse(connection.closed, "Connection should be open")
-                self.assertLog("✅ Connection state verified")
+                self.assertLog("CHECK Connection state verified")
 
         except Exception as e:
             self.assertLog(f"Warning: SSOT connection test failed: {e}")
@@ -237,12 +237,12 @@ class TestGoldenPathWebSocketPreservation(SSotAsyncTestCase):
             )
 
             self.assertIsNotNone(manager)
-            self.assertLog("✅ WebSocket manager created through SSOT")
+            self.assertLog("CHECK WebSocket manager created through SSOT")
 
             # Test manager functionality
             if hasattr(manager, 'user_id'):
                 self.assertEqual(manager.user_id, test_user_id)
-                self.assertLog("✅ Manager user isolation verified")
+                self.assertLog("CHECK Manager user isolation verified")
 
             # Test event sending capability (if available)
             if hasattr(manager, 'send_event'):
@@ -254,7 +254,7 @@ class TestGoldenPathWebSocketPreservation(SSotAsyncTestCase):
 
                 try:
                     await manager.send_event(test_event)
-                    self.assertLog("✅ Event sending through manager works")
+                    self.assertLog("CHECK Event sending through manager works")
                 except Exception as e:
                     self.assertLog(f"Event sending not available (expected during migration): {e}")
 
@@ -278,7 +278,7 @@ class TestGoldenPathWebSocketPreservation(SSotAsyncTestCase):
             if connection is None:
                 self.skipTest("Golden Path connection not available")
 
-            self.assertLog("✅ Step 1: WebSocket connection established")
+            self.assertLog("CHECK Step 1: WebSocket connection established")
 
             # Step 2: Set up event monitoring
             self.received_events = []
@@ -293,7 +293,7 @@ class TestGoldenPathWebSocketPreservation(SSotAsyncTestCase):
             }
 
             await connection.send(json.dumps(user_message))
-            self.assertLog("✅ Step 2: User message sent")
+            self.assertLog("CHECK Step 2: User message sent")
 
             # Step 4: Wait for agent execution events
             await asyncio.sleep(3.0)  # Allow time for processing
@@ -301,20 +301,20 @@ class TestGoldenPathWebSocketPreservation(SSotAsyncTestCase):
             # Step 5: Validate event sequence
             event_types = [event.get('type') for event in self.received_events]
 
-            self.assertLog(f"✅ Step 3: Received {len(event_types)} events: {event_types}")
+            self.assertLog(f"CHECK Step 3: Received {len(event_types)} events: {event_types}")
 
             # Check for reasonable event sequence
             if 'agent_started' in event_types:
-                self.assertLog("✅ Agent execution initiated")
+                self.assertLog("CHECK Agent execution initiated")
 
             if 'agent_completed' in event_types:
-                self.assertLog("✅ Agent execution completed")
+                self.assertLog("CHECK Agent execution completed")
 
             # Validate minimum functionality
             if len(event_types) >= 1:
-                self.assertLog("✅ Step 4: Golden Path shows activity (minimum viable)")
+                self.assertLog("CHECK Step 4: Golden Path shows activity (minimum viable)")
             else:
-                self.assertLog("⚠️ No events received - may indicate issue")
+                self.assertLog("WARNING️ No events received - may indicate issue")
 
         except Exception as e:
             self.assertLog(f"Warning: End-to-end flow test failed: {e}")
@@ -360,7 +360,7 @@ class TestGoldenPathWebSocketPreservation(SSotAsyncTestCase):
                     f"Event schema compliance below acceptable threshold: {compliance_ratio:.1%}"
                 )
 
-                self.assertLog("✅ Event schema compliance validated")
+                self.assertLog("CHECK Event schema compliance validated")
             else:
                 self.assertLog("No events received for schema validation")
 

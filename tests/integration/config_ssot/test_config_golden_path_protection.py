@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 
 PURPOSE: These tests are EXPECTED TO FAIL until Issue #667 is resolved.
 They demonstrate how configuration manager SSOT violations break the Golden Path:
-User Login → Send Message → Agent Response → WebSocket Events → Complete Chat Flow
+User Login -> Send Message -> Agent Response -> WebSocket Events -> Complete Chat Flow
 
 Test Strategy:
 1. Test complete user authentication flow with different config managers
@@ -409,7 +409,7 @@ class ConfigGoldenPathProtectionTests(BaseIntegrationTest):
 
         This test simulates the complete Golden Path user journey and demonstrates
         how configuration manager SSOT violations break the end-to-end flow:
-        Login → WebSocket Connect → Send Message → Agent Response → Success
+        Login -> WebSocket Connect -> Send Message -> Agent Response -> Success
         """
         if len(self.config_managers) < 2:
             pytest.skip("Need at least 2 configuration managers for end-to-end testing")
@@ -497,7 +497,7 @@ class ConfigGoldenPathProtectionTests(BaseIntegrationTest):
         # CRITICAL ASSERTION: Should fail if Golden Path is broken or inconsistent
         assert len(golden_path_failures) == 0, (
             f"GOLDEN PATH CONFIGURATION FAILURES DETECTED: {golden_path_failures}. "
-            f"The complete Golden Path user flow (Login → WebSocket → Agent Response) "
+            f"The complete Golden Path user flow (Login -> WebSocket -> Agent Response) "
             f"fails or behaves inconsistently depending on which configuration manager is used. "
             f"This creates unpredictable user experience and directly threatens $500K+ ARR. "
             f"Golden Path requires consistent configuration across all managers to ensure "

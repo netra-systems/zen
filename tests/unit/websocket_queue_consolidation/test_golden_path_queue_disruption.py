@@ -6,7 +6,7 @@ Issue #1011 WebSocket Message Queue Consolidation - Golden Path Disruption Tests
 This test module focuses specifically on how the fragmented queue implementations
 disrupt the core Golden Path user flow that generates $500K+ ARR business value:
 
-Golden Path Flow: User Login → Agent Processing → Real-time Updates → AI Response
+Golden Path Flow: User Login -> Agent Processing -> Real-time Updates -> AI Response
 
 These tests demonstrate how queue fragmentation breaks this critical business flow
 by causing message loss, ordering issues, and state corruption that directly

@@ -13,7 +13,7 @@ login through AI response delivery, including all critical integration points
 and business value delivery mechanisms.
 
 CRITICAL DESIGN:
-- Tests complete user journey: login → message → AI response → session management
+- Tests complete user journey: login -> message -> AI response -> session management
 - Validates business value delivery through substantive AI interactions
 - Tests all 5 critical WebSocket events in proper sequence
 - Validates performance, reliability, and user experience end-to-end
@@ -73,8 +73,8 @@ class AgentGoldenPathComprehensiveTests(SSotAsyncTestCase):
         """
         COMPREHENSIVE TEST: Complete golden path user journey validation.
         
-        Tests the entire user journey: authentication → WebSocket connection →
-        message sending → agent processing → AI response delivery.
+        Tests the entire user journey: authentication -> WebSocket connection ->
+        message sending -> agent processing -> AI response delivery.
         This is the core business value flow that must work reliably.
         """
         test_start_time = time.time()
@@ -98,18 +98,18 @@ class AgentGoldenPathComprehensiveTests(SSotAsyncTestCase):
             auth_start_time = time.time()
             authentication_working = True
             journey_metrics['authentication_time'] = time.time() - auth_start_time
-            print(f"[GOLDEN-PATH] Phase 1: Authentication ✓ ({journey_metrics['authentication_time']:.2f}s)")
+            print(f"[GOLDEN-PATH] Phase 1: Authentication CHECK ({journey_metrics['authentication_time']:.2f}s)")
             connection_start_time = time.time()
             async with websockets.connect(self.websocket_url, additional_headers=websocket_headers, open_timeout=self.connection_timeout, ping_interval=30, ping_timeout=10) as websocket:
                 journey_metrics['connection_time'] = time.time() - connection_start_time
                 websocket_connection_working = True
-                print(f"[GOLDEN-PATH] Phase 2: WebSocket Connection ✓ ({journey_metrics['connection_time']:.2f}s)")
+                print(f"[GOLDEN-PATH] Phase 2: WebSocket Connection CHECK ({journey_metrics['connection_time']:.2f}s)")
                 message_start_time = time.time()
                 golden_path_message = {'type': 'golden_path_complete_journey', 'action': 'complete_user_journey_test', 'message': 'This is a comprehensive golden path test. Please provide a detailed analysis of AI infrastructure optimization strategies, including specific recommendations for performance improvements, cost optimization, and scalability enhancements. Include tool usage and comprehensive insights.', 'user_id': golden_user.user_id, 'session_id': f'golden_journey_{int(time.time())}', 'expects_comprehensive_response': True, 'requires_tool_usage': True, 'business_value_test': True, 'comprehensive_test': True, 'timestamp': datetime.now(timezone.utc).isoformat()}
                 await websocket.send(json.dumps(golden_path_message))
                 journey_metrics['message_sent_time'] = time.time() - message_start_time
                 message_pipeline_working = True
-                print(f"[GOLDEN-PATH] Phase 3: Message Sent ✓ ({journey_metrics['message_sent_time']:.2f}s)")
+                print(f"[GOLDEN-PATH] Phase 3: Message Sent CHECK ({journey_metrics['message_sent_time']:.2f}s)")
                 processing_start_time = time.time()
                 first_response_received = False
                 agent_completion_detected = False
@@ -156,15 +156,15 @@ class AgentGoldenPathComprehensiveTests(SSotAsyncTestCase):
                 if journey_metrics['total_journey_time'] <= self.golden_path_sla:
                     sla_compliance = True
                 print(f'[GOLDEN-PATH] Journey Assessment:')
-                print(f"  - Authentication: {('✓' if authentication_working else '✗')}")
-                print(f"  - WebSocket Connection: {('✓' if websocket_connection_working else '✗')}")
-                print(f"  - Message Pipeline: {('✓' if message_pipeline_working else '✗')}")
-                print(f"  - Agent Processing: {('✓' if agent_processing_working else '✗')}")
-                print(f"  - AI Response: {('✓' if ai_response_delivered else '✗')}")
-                print(f"  - Business Value: {('✓' if business_value_delivered else '✗')}")
+                print(f"  - Authentication: {('CHECK' if authentication_working else '✗')}")
+                print(f"  - WebSocket Connection: {('CHECK' if websocket_connection_working else '✗')}")
+                print(f"  - Message Pipeline: {('CHECK' if message_pipeline_working else '✗')}")
+                print(f"  - Agent Processing: {('CHECK' if agent_processing_working else '✗')}")
+                print(f"  - AI Response: {('CHECK' if ai_response_delivered else '✗')}")
+                print(f"  - Business Value: {('CHECK' if business_value_delivered else '✗')}")
                 print(f'  - Events Received: {received_events}')
                 print(f"  - Total Time: {journey_metrics['total_journey_time']:.2f}s")
-                print(f"  - SLA Compliance: {('✓' if sla_compliance else '✗')} (target: {self.golden_path_sla}s)")
+                print(f"  - SLA Compliance: {('CHECK' if sla_compliance else '✗')} (target: {self.golden_path_sla}s)")
         except Exception as e:
             elapsed = time.time() - test_start_time
             journey_metrics['total_journey_time'] = elapsed
@@ -174,14 +174,14 @@ class AgentGoldenPathComprehensiveTests(SSotAsyncTestCase):
         self.assertTrue(journey_successful, f"GOLDEN PATH FAILURE: Complete user journey not working. Core business value delivery is broken. Journey components: Auth({authentication_working}), WebSocket({websocket_connection_working}), Messages({message_pipeline_working}), Agent({agent_processing_working}), AI Response({ai_response_delivered}). Total time: {journey_metrics['total_journey_time']:.2f}s")
         self.assertTrue(ai_response_delivered, f'GOLDEN PATH FAILURE: AI responses not delivered to users. The core product value (AI assistance) is not working. Users cannot get help from the AI platform. Events received: {received_events}, Response content samples: {len(ai_response_content)}')
         if business_value_delivered:
-            print(f'[GOLDEN-PATH] ✓ Business value delivery confirmed - AI provides substantive responses')
+            print(f'[GOLDEN-PATH] CHECK Business value delivery confirmed - AI provides substantive responses')
         else:
             print(f'[GOLDEN-PATH] WARNING: Business value indicators not detected in AI responses')
         if sla_compliance:
-            print(f'[GOLDEN-PATH] ✓ SLA compliance achieved - journey completed within {self.golden_path_sla}s')
+            print(f'[GOLDEN-PATH] CHECK SLA compliance achieved - journey completed within {self.golden_path_sla}s')
         else:
             print(f"[GOLDEN-PATH] WARNING: SLA not met - journey took {journey_metrics['total_journey_time']:.2f}s (target: {self.golden_path_sla}s)")
-        print(f"[GOLDEN-PATH] ✓ Complete golden path user journey validated in {journey_metrics['total_journey_time']:.2f}s")
+        print(f"[GOLDEN-PATH] CHECK Complete golden path user journey validated in {journey_metrics['total_journey_time']:.2f}s")
 
     async def test_golden_path_reliability_under_realistic_load(self):
         """
@@ -254,7 +254,7 @@ class AgentGoldenPathComprehensiveTests(SSotAsyncTestCase):
         total_time = time.time() - test_start_time
         print(f'[RELIABILITY] Realistic load reliability test completed in {total_time:.2f}s')
         self.assertTrue(reliability_validated or concurrent_reliability_working, f'RELIABILITY FAILURE: Golden path not reliable under realistic load. System may not handle production usage patterns. Reliability components: validated({reliability_validated}), concurrent({concurrent_reliability_working}), performance({realistic_performance_acceptable})')
-        print(f'[RELIABILITY] ✓ Golden path reliability under realistic load validated in {total_time:.2f}s')
+        print(f'[RELIABILITY] CHECK Golden path reliability under realistic load validated in {total_time:.2f}s')
 
     async def _monitor_golden_path_response(self, websocket, timeout: float):
         """Monitor WebSocket for golden path response with timeout."""

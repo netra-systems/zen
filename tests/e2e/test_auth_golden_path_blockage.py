@@ -75,7 +75,7 @@ class AuthGoldenPathBlockageStagingTests(SSotAsyncTestCase, StagingTestBase):
             if not auth_result or not auth_result.get('access_token'):
                 pytest.skip('Cannot obtain staging auth token - skipping E2E test')
             jwt_token = auth_result['access_token']
-            print(f'✓ Obtained staging JWT token: {jwt_token[:20]}...')
+            print(f'CHECK Obtained staging JWT token: {jwt_token[:20]}...')
             auth_interface = get_unified_auth()
             with pytest.raises(AttributeError) as exc_info:
                 validation_result = auth_interface.validateTokenAndGetUser(jwt_token)
@@ -86,7 +86,7 @@ class AuthGoldenPathBlockageStagingTests(SSotAsyncTestCase, StagingTestBase):
             print('STAGING E2E FAILURE CONFIRMED:')
             print(json.dumps(staging_failure_report, indent=2))
             assert 'validateTokenAndGetUser' in error_message
-            print('✓ E2E Staging test confirms Golden Path blockage due to missing method')
+            print('CHECK E2E Staging test confirms Golden Path blockage due to missing method')
         except Exception as e:
             staging_error_report = {'test_type': 'E2E Staging Error', 'environment': 'staging', 'error_type': type(e).__name__, 'error_message': str(e), 'traceback': traceback.format_exc(), 'expected_error': 'AttributeError for validateTokenAndGetUser', 'timestamp': time.time()}
             print('UNEXPECTED STAGING ERROR:')
@@ -112,7 +112,7 @@ class AuthGoldenPathBlockageStagingTests(SSotAsyncTestCase, StagingTestBase):
             print('STAGING WORKAROUND VALIDATION:')
             print(json.dumps(workaround_report, indent=2))
             assert len(workaround_report['available_methods']) >= 4
-            print('✓ Staging environment supports implementation of missing method')
+            print('CHECK Staging environment supports implementation of missing method')
         except Exception as e:
             print(f'Staging workaround validation failed: {e}')
             infrastructure_issue = {'staging_infrastructure_issue': str(e), 'impact': 'May affect implementation testing in staging', 'recommendation': 'Verify staging auth service configuration'}
@@ -147,7 +147,7 @@ class AuthGoldenPathBlockageStagingTests(SSotAsyncTestCase, StagingTestBase):
         print('COMPLETE FLOW FAILURE SIMULATION:')
         print(json.dumps(complete_flow_failure, indent=2))
         assert 'validateTokenAndGetUser' in error_message
-        print('✓ Complete Golden Path authentication flow failure reproduced in staging')
+        print('CHECK Complete Golden Path authentication flow failure reproduced in staging')
 
     @pytest.mark.asyncio
     async def test_staging_business_impact_validation(self):
@@ -161,7 +161,7 @@ class AuthGoldenPathBlockageStagingTests(SSotAsyncTestCase, StagingTestBase):
         assert business_impact_analysis['business_metrics']['affected_revenue'] == '$500K+ ARR'
         assert business_impact_analysis['technical_impact']['golden_path_flow'] == 'Blocked at user authentication stage'
         assert business_impact_analysis['staging_validation']['error_reproduction'] == 'SUCCESS'
-        print('✓ Business impact validated and documented in staging environment')
+        print('CHECK Business impact validated and documented in staging environment')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

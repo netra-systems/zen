@@ -2,7 +2,7 @@
 Factory Pattern Migration Deprecation Test - Priority 1 Golden Path Critical
 
 This test reproduces and validates deprecation warnings related to factory pattern
-migrations, specifically SupervisorExecutionEngineFactory → UnifiedExecutionEngineFactory
+migrations, specifically SupervisorExecutionEngineFactory -> UnifiedExecutionEngineFactory
 transitions that impact the Golden Path user flow ($500K+ ARR).
 
 Business Value Justification (BVJ):
@@ -17,7 +17,7 @@ Test Purpose:
 3. Provide guidance for migration to unified factory patterns
 
 Priority 1 patterns targeted:
-- SupervisorExecutionEngineFactory → UnifiedExecutionEngineFactory migration
+- SupervisorExecutionEngineFactory -> UnifiedExecutionEngineFactory migration
 - Legacy agent factory patterns that bypass SSOT
 - Non-isolated factory instantiation that breaks multi-user contexts
 
@@ -352,7 +352,7 @@ class FactoryPatternMigrationGuidanceTests(SSotBaseTestCase):
     @pytest.mark.unit
     def test_migration_to_unified_execution_engine_factory(self):
         """
-        Test migration guidance: SupervisorExecutionEngineFactory → UnifiedExecutionEngineFactory.
+        Test migration guidance: SupervisorExecutionEngineFactory -> UnifiedExecutionEngineFactory.
 
         This test demonstrates the correct migration path and should PASS.
         """
@@ -533,7 +533,7 @@ if __name__ == "__main__":
     print("=" * 60)
 
     # Note: These tests are designed to FAIL initially to prove reproduction
-    print("⚠️  WARNING: These tests are designed to FAIL initially")
+    print("WARNING️  WARNING: These tests are designed to FAIL initially")
     print("   This proves that deprecated factory patterns are reproduced")
     print("   After remediation, tests should pass")
     print("=" * 60)

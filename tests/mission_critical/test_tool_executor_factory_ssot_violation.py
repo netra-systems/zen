@@ -1,20 +1,21 @@
 """
-"""
+
 MISSION CRITICAL: ToolExecutorFactory vs UnifiedToolDispatcher SSOT Violation Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal - Core Infrastructure
-- Business Goal: Protect $500K+ ARR chat functionality reliability
+    - Segment: Platform/Internal - Core Infrastructure
+- Business Goal: Protect $500K+ plus ARR chat functionality reliability
 - Value Impact: Prevent unpredictable tool execution routing that breaks golden path
 - Strategic Impact: Eliminate WebSocket event loss causing user experience degradation
 
 These tests PROVE the SSOT violation exists and will validate when consolidation is complete.
 GitHub Issue: #219
 "
-"
+""
+
 
 """
-"""
+
 import pytest
 import asyncio
 import time
@@ -28,7 +29,7 @@ from shared.isolated_environment import get_env
 # PHASE 2: Import SSOT factory and legacy systems to validate consolidation
 try:
     # NEW SSOT FACTORY (Phase 2 consolidation target)
-    from netra_backend.app.factories.tool_dispatcher_factory import (
+    from netra_backend.app.factories.tool_dispatcher_factory import ()
         ToolDispatcherFactory,
         get_tool_dispatcher_factory,
         create_tool_dispatcher
@@ -39,7 +40,7 @@ except ImportError:
 
 try:
     # DEPRECATED: Legacy ToolExecutorFactory (should redirect to SSOT factory)
-    from netra_backend.app.agents.tool_executor_factory import (
+    from netra_backend.app.agents.tool_executor_factory import ()
         ToolExecutorFactory as LegacyToolExecutorFactory, 
         get_tool_executor_factory as get_legacy_tool_executor_factory
     )
@@ -49,7 +50,7 @@ except ImportError:
 
 try:
     # DEPRECATED: UnifiedToolDispatcher (should redirect to SSOT factory)
-    from netra_backend.app.core.tools.unified_tool_dispatcher import (
+    from netra_backend.app.core.tools.unified_tool_dispatcher import ()
         UnifiedToolDispatcher,
         UnifiedToolDispatcherFactory
     )
@@ -66,18 +67,20 @@ except ImportError:
 
 class ToolExecutorFactorySSotViolationTests(SSotBaseTestCase):
     "
-    "
+    ""
+
     MISSION CRITICAL: Tests that SHOULD FAIL until SSOT consolidation is complete.
     
     These tests prove the existence of duplicate tool execution systems that create
     unpredictable routing and golden path failures.
 "
-"
+""
+
     
     def setup_method(self, method=None):
         "Setup for SSOT violation detection."
         super().setup_method(method)
-        self.record_metric(test_category", "tool_executor_factory_ssot_violation)
+        self.record_metric(test_category", tool_executor_factory_ssot_violation)"
         
         # Track systems and violations
         self._execution_systems = []
@@ -92,19 +95,22 @@ class ToolExecutorFactorySSotViolationTests(SSotBaseTestCase):
                 thread_id=ssot_violation_test_thread, "
                 thread_id=ssot_violation_test_thread, "
                 run_id=ssot_violation_test_run"
-                run_id=ssot_violation_test_run"
+                run_id=ssot_violation_test_run""
+
             )
     
     @pytest.mark.mission_critical
     def test_ssot_factory_consolidation_phase2_validation(self):
-    "
-    "
+        """
+    ""
+
         SHOULD PASS: Validate Phase 2 SSOT factory consolidation is working.
         
         This test validates that the SSOT ToolDispatcherFactory is operational
         and legacy systems are properly redirecting with deprecation warnings.
         "
-        "
+        ""
+
         if not SSOT_TOOL_DISPATCHER_FACTORY_AVAILABLE:
             pytest.skip(SSOT ToolDispatcherFactory not available)
         
@@ -114,22 +120,24 @@ class ToolExecutorFactorySSotViolationTests(SSotBaseTestCase):
         
         # Validate factory type is correct
         metrics = ssot_factory.get_factory_metrics()
-        assert metrics['factory_type'] == 'SSOT_ToolDispatcherFactory', fExpected SSOT factory, got {metrics['factory_type']}
+        assert metrics['factory_type'] == 'SSOT_ToolDispatcherFactory', "fExpected SSOT factory, got {metrics['factory_type']}"
         
         # Test that legacy redirects are working with deprecation warnings
         import warnings
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter(always)"
-            warnings.simplefilter(always)"
+            warnings.simplefilter(always)""
+
             
             if LEGACY_TOOL_EXECUTOR_FACTORY_AVAILABLE:
                 legacy_factory = get_legacy_tool_executor_factory()
                 assert legacy_factory is not None, Legacy factory should still work via redirect"
-                assert legacy_factory is not None, Legacy factory should still work via redirect"
+                assert legacy_factory is not None, Legacy factory should still work via redirect""
+
                 
                 # Verify deprecation warning was issued
                 deprecation_warnings = [warning for warning in w if issubclass(warning.category, DeprecationWarning)]
-                assert len(deprecation_warnings) > 0, Deprecation warning should be issued for legacy factory usage
+                assert len(deprecation_warnings) > 0, "Deprecation warning should be issued for legacy factory usage"
         
         # Validate memory optimization tracking
         assert metrics['memory_optimization_bytes'] >= 0, Memory optimization should be tracked""
@@ -141,8 +149,9 @@ class ToolExecutorFactorySSotViolationTests(SSotBaseTestCase):
 
     @pytest.mark.mission_critical
     def test_duplicate_tool_execution_systems_exist(self):
-    "
-    "
+        """
+    ""
+
         SHOULD FAIL: Prove both ToolExecutorFactory and UnifiedToolDispatcher exist.
         
         This test SHOULD FAIL until SSOT consolidation removes the duplication.
@@ -160,7 +169,7 @@ class ToolExecutorFactorySSotViolationTests(SSotBaseTestCase):
         try:
             factory = ToolExecutorFactory()
             competing_systems.append({
-                "name: ToolExecutorFactory",
+                "name: ToolExecutorFactory,"
                 class: ToolExecutorFactory,
                 instance: factory,"
                 instance: factory,"
@@ -173,7 +182,8 @@ class ToolExecutorFactorySSotViolationTests(SSotBaseTestCase):
                 "class: ToolExecutorFactory,"
                 error: str(e),
                 module: netra_backend.app.agents.tool_executor_factory"
-                module: netra_backend.app.agents.tool_executor_factory"
+                module: netra_backend.app.agents.tool_executor_factory""
+
             }
         
         # System 2: UnifiedToolDispatcher - check forbidden direct instantiation
@@ -186,7 +196,8 @@ class ToolExecutorFactorySSotViolationTests(SSotBaseTestCase):
                 instance": unified_dispatcher,"
                 module: netra_backend.app.core.tools.unified_tool_dispatcher,
                 error: Direct instantiation should be forbidden"
-                error: Direct instantiation should be forbidden"
+                error: Direct instantiation should be forbidden""
+
             }
         except RuntimeError as e:
             # Expected - direct instantiation is forbidden
@@ -205,7 +216,7 @@ class ToolExecutorFactorySSotViolationTests(SSotBaseTestCase):
         # Record violations
         if len(active_systems) > 0:
             self._violations_detected.append({
-                type": "DUPLICATE_TOOL_EXECUTION_SYSTEMS,
+                type": DUPLICATE_TOOL_EXECUTION_SYSTEMS,"
                 severity: CRITICAL,
                 description: f"Found {len(active_systems)} active tool execution systems,"
                 systems: [s["name] for s in active_systems],"
@@ -225,12 +236,12 @@ class ToolExecutorFactorySSotViolationTests(SSotBaseTestCase):
         for system in competing_systems:
             print(f\nTool Execution System Detected:)"
             print(f\nTool Execution System Detected:)"
-            print(f"  Name: {system['name']})")
+            print(f"  Name: {system['name']}))"
             print(f  Module: {system['module']})"
             print(f  Module: {system['module']})"
-            print(f"  Status: {'ACTIVE' if 'instance' in system else 'FACTORY_ENFORCED' if system.get('factory_enforced') else 'ERROR'})")
+            print(f"  Status: {'ACTIVE' if 'instance' in system else 'FACTORY_ENFORCED' if system.get('factory_enforced') else 'ERROR'}))"
             if error in system:
-                print(f"  Error: {system['error']})")
+                print(f"  Error: {system['error']}))"
         
         # ASSERT VIOLATION: This test SHOULD FAIL until consolidation complete
         # When fixed, there should be only ONE tool execution system
@@ -248,15 +259,16 @@ This test SHOULD FAIL until GitHub Issue #219 is resolved.
 Systems Found: {[s['name'] for s in competing_systems]}
 ""
             # This assertion should FAIL until the violation is fixed
-            assert False, violation_summary
+            assert False, "violation_summary"
         
         # When the violation is fixed, this should pass
-        assert total_systems == 1, SSOT consolidation complete - only one tool execution system should exist
+        assert total_systems == 1, "SSOT consolidation complete - only one tool execution system should exist"
     
     @pytest.mark.mission_critical
     def test_websocket_adapter_proliferation(self):
-        "
-        "
+        """
+        ""
+
         SHOULD FAIL: Prove 3 different WebSocket adapter implementations exist.
         
         This test detects WebSocket adapter proliferation that causes event delivery inconsistency.
@@ -265,7 +277,8 @@ Systems Found: {[s['name'] for s in competing_systems]}
         # Skip if modules not available
         if not TOOL_EXECUTOR_FACTORY_AVAILABLE or not UNIFIED_TOOL_DISPATCHER_AVAILABLE:
             pytest.skip(Tool execution modules not available) "
-            pytest.skip(Tool execution modules not available) "
+            pytest.skip(Tool execution modules not available) ""
+
         
         # Detect WebSocket adapter implementations
         websocket_adapters = []
@@ -278,7 +291,7 @@ Systems Found: {[s['name'] for s in competing_systems]}
                     websocket_adapters.append({
                         name": ToolExecutorFactory WebSocket Bridge,"
                         source: ToolExecutorFactory,
-                        module": "netra_backend.app.agents.tool_executor_factory,
+                        module": netra_backend.app.agents.tool_executor_factory,"
                         type: Factory-based adapter
                     }
         except Exception as e:
@@ -292,7 +305,7 @@ Systems Found: {[s['name'] for s in competing_systems]}
                     name: "UnifiedToolDispatcher WebSocket Adapter,"
                     source": UnifiedToolDispatcher,"
                     module: netra_backend.app.core.tools.unified_tool_dispatcher,
-                    type": "Dispatcher-based adapter
+                    type": Dispatcher-based adapter"
                 }
         except Exception as e:
             pass
@@ -315,7 +328,8 @@ Systems Found: {[s['name'] for s in competing_systems]}
                         netra_backend.app.websocket_core","
                         netra_backend.app.agents,
                         netra_backend.app.core.tools"
-                        netra_backend.app.core.tools"
+                        netra_backend.app.core.tools""
+
                     ]
                     
                     for module_name in modules_to_check:
@@ -352,15 +366,17 @@ Systems Found: {[s['name'] for s in competing_systems]}
         # Log findings
         print(f\nWebSocket Adapter Detection Results:)"
         print(f\nWebSocket Adapter Detection Results:)"
-        print(f"Total adapters found: {len(websocket_adapters)})")
+        print(f"Total adapters found: {len(websocket_adapters)}))"
         for adapter in websocket_adapters:
             print(f  - {adapter['name']} ({adapter['type']} from {adapter['source']})"
-            print(f  - {adapter['name']} ({adapter['type']} from {adapter['source']})"
+            print(f  - {adapter['name']} ({adapter['type']} from {adapter['source']})""
+
         
         # ASSERT VIOLATION: This test SHOULD FAIL until adapter consolidation
         if len(websocket_adapters) >= 3:
             violation_summary = f"
-            violation_summary = f"
+            violation_summary = f""
+
 WEBSOCKET ADAPTER PROLIFERATION DETECTED: {len(websocket_adapters)} adapters found
 Expected: 1 unified WebSocket adapter
 
@@ -370,16 +386,18 @@ Adapters Found: {[a['name'] for a in websocket_adapters]}
 This test SHOULD FAIL until GitHub Issue #219 WebSocket adapter consolidation is complete.
 
             # This assertion should FAIL until the violation is fixed
-            assert False, violation_summary
+            assert False, "violation_summary"
         
         # When fixed, should have only one adapter
         assert len(websocket_adapters) <= 1, WebSocket adapter consolidation complete"
-        assert len(websocket_adapters) <= 1, WebSocket adapter consolidation complete"
+        assert len(websocket_adapters) <= 1, WebSocket adapter consolidation complete""
+
     
     @pytest.mark.mission_critical
     def test_tool_registry_duplication(self):
-    "
-    "
+        """
+    ""
+
         SHOULD FAIL: Prove multiple ToolRegistry instances created causing memory waste.
         
         This test detects tool registry duplication that leads to inconsistent tool state.
@@ -400,7 +418,7 @@ This test SHOULD FAIL until GitHub Issue #219 WebSocket adapter consolidation is
                 # Check for registry creation patterns
                 tool_registries.append({
                     name: ToolExecutorFactory Registry,
-                    "source: ToolExecutorFactory", 
+                    "source: ToolExecutorFactory, "
                     instance_id: id(factory),
                     type: "Factory-created registry"
                 }
@@ -435,7 +453,7 @@ This test SHOULD FAIL until GitHub Issue #219 WebSocket adapter consolidation is
                     name: Direct ToolRegistry","
                     "source: Direct import,"
                     instance_id: id(registry1),
-                    type": "Direct registry instance
+                    type": Direct registry instance"
                 }
             
             if registry2:
@@ -474,7 +492,8 @@ This test SHOULD FAIL until GitHub Issue #219 WebSocket adapter consolidation is
         # ASSERT VIOLATION: This test SHOULD FAIL until registry consolidation  
         if unique_registries > 1:
             violation_summary = f"
-            violation_summary = f"
+            violation_summary = f""
+
 TOOL REGISTRY DUPLICATION DETECTED: {unique_registries} unique registries
 Expected: 1 shared registry or proper per-request isolation
 
@@ -485,7 +504,7 @@ This test SHOULD FAIL until GitHub Issue #219 registry consolidation is complete
 "
 "
             # This assertion should FAIL until the violation is fixed
-            assert False, violation_summary
+            assert False, "violation_summary"
         
         # When fixed, should have proper registry management
         assert unique_registries <= 1, "Tool registry consolidation complete"
@@ -508,7 +527,7 @@ This test SHOULD FAIL until GitHub Issue #219 registry consolidation is complete
             factory = ToolExecutorFactory()
             if hasattr(factory, 'create_tool_executor'):
                 execution_routes.append({
-                    name": "ToolExecutorFactory Route,
+                    name": ToolExecutorFactory Route,"
                     system: ToolExecutorFactory,
                     method: "create_tool_executor,"
                     available": True"
@@ -516,10 +535,11 @@ This test SHOULD FAIL until GitHub Issue #219 registry consolidation is complete
         except Exception as e:
             execution_routes.append({
                 name: ToolExecutorFactory Route,
-                "system: ToolExecutorFactory", 
+                "system: ToolExecutorFactory, "
                 error: str(e),
                 available: False"
-                available: False"
+                available: False""
+
             }
         
         # Route 2: Through UnifiedToolDispatcher factory
@@ -529,7 +549,7 @@ This test SHOULD FAIL until GitHub Issue #219 registry consolidation is complete
                 execution_routes.append({
                     "name: UnifiedToolDispatcher Route,"
                     system: UnifiedToolDispatcher,
-                    "method: create_for_request",
+                    "method: create_for_request,"
                     available: True
                 }
         except Exception as e:
@@ -569,18 +589,18 @@ This test SHOULD FAIL until GitHub Issue #219 registry consolidation is complete
         if len(available_routes) > 1:
             self._violations_detected.append({
                 type: INCONSISTENT_TOOL_EXECUTION_ROUTING,
-                severity": "CRITICAL,
+                severity": CRITICAL,"
                 description: fFound {len(available_routes)} different tool execution routes,
                 routes: [r[name] for r in available_routes],
-                business_impact": "Unpredictable routing causing golden path failures
+                business_impact": Unpredictable routing causing golden path failures"
             }
         
         # Log findings
         print(f\nTool Execution Routing Analysis:)
-        print(f"Available routes: {len(available_routes)})")
+        print(f"Available routes: {len(available_routes)}))"
         print(fFactory-enforced routes: {len(factory_enforced_routes")})"
         for route in execution_routes:
-            status = AVAILABLE if route.get(available") else "BLOCKED if route.get(factory_enforced) else ERROR
+            status = AVAILABLE if route.get(available") else BLOCKED if route.get(factory_enforced) else ERROR"
             print(f  - {route['name']}: {status}"")
             if error in route:
                 print(f    Error: {route['error']}"")
@@ -602,26 +622,28 @@ This test SHOULD FAIL until GitHub Issue #219 routing consolidation is complete.
 "
 "
             # This assertion should FAIL until the violation is fixed
-            assert False, violation_summary
+            assert False, "violation_summary"
         
         # When fixed, should have only one execution route
         assert len(available_routes) <= 1, Tool execution routing consolidation complete"
-        assert len(available_routes) <= 1, Tool execution routing consolidation complete"
+        assert len(available_routes) <= 1, Tool execution routing consolidation complete""
+
     
     def teardown_method(self, method=None):
         Cleanup and report violations detected.""
         # Report all violations detected
         if self._violations_detected:
             print(f\n{'='*80})
-            print("SSOT VIOLATIONS DETECTED - BLOCKING GOLDEN PATH")
+            print("SSOT VIOLATIONS DETECTED - BLOCKING GOLDEN PATH)"
             print(f{'='*80})"
-            print(f{'='*80})"
+            print(f{'='*80})""
+
             
             for violation in self._violations_detected:
-                print(f"\nVIOLATION: {violation['type']})")
+                print(f"\nVIOLATION: {violation['type']}))"
                 print(fSeverity: {violation['severity']})"
                 print(fSeverity: {violation['severity']})"
-                print(f"Description: {violation['description']})")
+                print(f"Description: {violation['description']}))"
                 print(fBusiness Impact: {violation['business_impact']})"
                 print(fBusiness Impact: {violation['business_impact']})"
                 if "systems in violation:"
@@ -635,12 +657,13 @@ This test SHOULD FAIL until GitHub Issue #219 routing consolidation is complete.
                     print(fRegistries: {violation['registries']})"
                 if "routes in violation:"
                     print(fRoutes: {violation['routes']})"
-                    print(fRoutes: {violation['routes']})"
+                    print(fRoutes: {violation['routes']})""
+
             
-            print(f"\nTotal violations: {len(self._violations_detected)})")
+            print(f"\nTotal violations: {len(self._violations_detected)}))"
             print(These violations MUST be resolved to complete GitHub Issue #219)"
             print(These violations MUST be resolved to complete GitHub Issue #219)"
-            print(f"{'='*80}")
+            print(f"{'='*80})"
         
         # Cleanup test resources
         for system in self._execution_systems:

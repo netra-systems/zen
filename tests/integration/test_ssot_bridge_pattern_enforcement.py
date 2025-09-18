@@ -179,7 +179,7 @@ class SSOTBridgePatternEnforcementTests(SSotAsyncTestCase):
             from netra_backend.app.agents.github_analyzer.agent import GitHubAnalyzerAgent
         except ImportError as e:
             # This failure indicates import-level violations
-            pytest.fail(f"❌ IMPORT FAILURE INDICATES BRIDGE BYPASS VIOLATIONS: {e}")
+            pytest.fail(f"X IMPORT FAILURE INDICATES BRIDGE BYPASS VIOLATIONS: {e}")
 
         # Test scenario 1: Simulate agent sending WebSocket events
         bridge_usage_detected = 0
@@ -265,7 +265,7 @@ class SSOTBridgePatternEnforcementTests(SSotAsyncTestCase):
         # Bridge pattern enforcement requires 100% bridge usage (0% direct usage)
         if direct_usage_detected > 0 or bridge_compliance_ratio < 1.0:
             failure_message = [
-                f"❌ WEBSOCKET EVENTS NOT EXCLUSIVELY THROUGH AGENT REGISTRY BRIDGE ❌",
+                f"X WEBSOCKET EVENTS NOT EXCLUSIVELY THROUGH AGENT REGISTRY BRIDGE X",
                 f"",
                 f"Bridge Compliance: {bridge_compliance_ratio:.1%} (Target: 100%)",
                 f"Bridge Usage: {bridge_usage_detected} events",
@@ -279,42 +279,42 @@ class SSOTBridgePatternEnforcementTests(SSotAsyncTestCase):
 
             for event_type, calls in self.bridge_calls.items():
                 if calls:
-                    failure_message.append(f"✅ {event_type}: {len(calls)} bridge calls")
+                    failure_message.append(f"CHECK {event_type}: {len(calls)} bridge calls")
 
             if direct_websocket_usage_patterns:
                 failure_message.append(f"")
                 failure_message.append(f"DIRECT USAGE VIOLATIONS DETECTED:")
                 for pattern in direct_websocket_usage_patterns:
-                    failure_message.append(f"❌ {pattern['scenario']}: {pattern['event']} via {pattern['pattern']}")
+                    failure_message.append(f"X {pattern['scenario']}: {pattern['event']} via {pattern['pattern']}")
 
             if self.direct_calls:
                 failure_message.append(f"")
                 failure_message.append(f"DIRECT CALL BREAKDOWN:")
                 for event_type, calls in self.direct_calls.items():
                     if calls:
-                        failure_message.append(f"❌ {event_type}: {len(calls)} direct calls")
+                        failure_message.append(f"X {event_type}: {len(calls)} direct calls")
 
             failure_message.extend([
                 f"",
                 f"🔧 BRIDGE PATTERN ENFORCEMENT REMEDIATION:",
                 f"",
                 f"1. Eliminate direct WebSocketManager imports in agents:",
-                f"   ❌ from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
-                f"   ✅ # No direct WebSocket imports needed",
+                f"   X from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
+                f"   CHECK # No direct WebSocket imports needed",
                 f"",
                 f"2. Use AgentRegistry bridge exclusively:",
-                f"   ❌ websocket_manager.send_agent_started(...)",
-                f"   ✅ bridge = await registry.get_websocket_bridge(user_id)",
-                f"   ✅ await bridge.send_agent_started(...)",
+                f"   X websocket_manager.send_agent_started(...)",
+                f"   CHECK bridge = await registry.get_websocket_bridge(user_id)",
+                f"   CHECK await bridge.send_agent_started(...)",
                 f"",
                 f"3. Update agent constructors:",
-                f"   ❌ def __init__(self, websocket_manager: WebSocketManager)",
-                f"   ✅ def __init__(self, registry: AgentRegistry)",
+                f"   X def __init__(self, websocket_manager: WebSocketManager)",
+                f"   CHECK def __init__(self, registry: AgentRegistry)",
                 f"",
                 f"4. Ensure proper user isolation:",
-                f"   ✅ Each user gets isolated bridge instance",
-                f"   ✅ User ID passed through all bridge calls",
-                f"   ✅ No shared state between user bridges",
+                f"   CHECK Each user gets isolated bridge instance",
+                f"   CHECK User ID passed through all bridge calls",
+                f"   CHECK No shared state between user bridges",
                 f"",
                 f"🎯 INTEGRATION SUCCESS CRITERIA:",
                 f"• 100% bridge usage (0% direct usage)",
@@ -327,9 +327,9 @@ class SSOTBridgePatternEnforcementTests(SSotAsyncTestCase):
 
         # Success state (POST-REMEDIATION)
         self.record_metric("bridge_pattern_enforced", True)
-        print("✅ ALL WEBSOCKET EVENTS THROUGH AGENT REGISTRY BRIDGE")
-        print(f"✅ Bridge Compliance: {bridge_compliance_ratio:.1%}")
-        print(f"✅ Bridge Usage: {bridge_usage_detected} events")
+        print("CHECK ALL WEBSOCKET EVENTS THROUGH AGENT REGISTRY BRIDGE")
+        print(f"CHECK Bridge Compliance: {bridge_compliance_ratio:.1%}")
+        print(f"CHECK Bridge Usage: {bridge_usage_detected} events")
 
     @pytest.mark.asyncio
     async def test_user_isolation_through_bridge_pattern(self):
@@ -450,7 +450,7 @@ class SSOTBridgePatternEnforcementTests(SSotAsyncTestCase):
         # User isolation requires 100% proper isolation (0% violations)
         if isolation_violation_count > 0 or user_isolation_ratio < 1.0 or unique_bridge_instances != expected_unique_bridges:
             failure_message = [
-                f"❌ USER ISOLATION THROUGH BRIDGE PATTERN FAILED ❌",
+                f"X USER ISOLATION THROUGH BRIDGE PATTERN FAILED X",
                 f"",
                 f"User Isolation: {user_isolation_ratio:.1%} (Target: 100%)",
                 f"Properly Isolated Users: {properly_isolated_users}/{total_users_tested}",
@@ -463,7 +463,7 @@ class SSOTBridgePatternEnforcementTests(SSotAsyncTestCase):
             ]
 
             for isolation in proper_isolations:
-                failure_message.append(f"✅ User {isolation['user_id']}: {isolation['scenario']} "
+                failure_message.append(f"CHECK User {isolation['user_id']}: {isolation['scenario']} "
                                      f"(bridge {isolation['bridge_id']}, {isolation['calls_made']} calls)")
 
             if isolation_violations:
@@ -471,29 +471,29 @@ class SSOTBridgePatternEnforcementTests(SSotAsyncTestCase):
                 failure_message.append(f"ISOLATION VIOLATIONS DETECTED:")
                 for violation in isolation_violations:
                     if isinstance(violation, dict):
-                        failure_message.append(f"❌ User {violation.get('user_id', 'unknown')}: {violation.get('issue', 'unknown')}")
+                        failure_message.append(f"X User {violation.get('user_id', 'unknown')}: {violation.get('issue', 'unknown')}")
                         if 'error' in violation:
                             failure_message.append(f"   Error: {violation['error']}")
                     else:
-                        failure_message.append(f"❌ {violation}")
+                        failure_message.append(f"X {violation}")
 
             failure_message.extend([
                 f"",
                 f"🔧 USER ISOLATION REMEDIATION:",
                 f"",
                 f"1. Ensure unique bridge instances per user:",
-                f"   ✅ registry.get_websocket_bridge(user1) != registry.get_websocket_bridge(user2)",
+                f"   CHECK registry.get_websocket_bridge(user1) != registry.get_websocket_bridge(user2)",
                 f"",
                 f"2. Validate user ID consistency:",
-                f"   ✅ bridge.user_id matches requested user_id",
+                f"   CHECK bridge.user_id matches requested user_id",
                 f"",
                 f"3. Prevent cross-user contamination:",
-                f"   ✅ User1 bridge cannot send messages to User2",
-                f"   ✅ Each bridge maintains separate state",
+                f"   CHECK User1 bridge cannot send messages to User2",
+                f"   CHECK Each bridge maintains separate state",
                 f"",
                 f"4. Implement proper bridge factory:",
-                f"   ✅ create_agent_websocket_bridge(user_id) returns isolated instance",
-                f"   ✅ Bridge registry maintains user-specific mappings",
+                f"   CHECK create_agent_websocket_bridge(user_id) returns isolated instance",
+                f"   CHECK Bridge registry maintains user-specific mappings",
                 f"",
                 f"🎯 USER ISOLATION SUCCESS CRITERIA:",
                 f"• 100% user isolation (0% violations)",
@@ -506,9 +506,9 @@ class SSOTBridgePatternEnforcementTests(SSotAsyncTestCase):
 
         # Success state
         self.record_metric("user_isolation_achieved", True)
-        print("✅ USER ISOLATION THROUGH BRIDGE PATTERN ACHIEVED")
-        print(f"✅ User Isolation: {user_isolation_ratio:.1%}")
-        print(f"✅ Unique Bridges: {unique_bridge_instances}/{expected_unique_bridges}")
+        print("CHECK USER ISOLATION THROUGH BRIDGE PATTERN ACHIEVED")
+        print(f"CHECK User Isolation: {user_isolation_ratio:.1%}")
+        print(f"CHECK Unique Bridges: {unique_bridge_instances}/{expected_unique_bridges}")
 
     @pytest.mark.asyncio
     async def test_bridge_pattern_prevents_websocket_manager_proliferation(self):
@@ -608,7 +608,7 @@ class SSOTBridgePatternEnforcementTests(SSotAsyncTestCase):
             unique_users_accessing < len(test_users)):
 
             failure_message = [
-                f"❌ BRIDGE PATTERN DOES NOT PREVENT WEBSOCKET MANAGER PROLIFERATION ❌",
+                f"X BRIDGE PATTERN DOES NOT PREVENT WEBSOCKET MANAGER PROLIFERATION X",
                 f"",
                 f"Bridge Usage: {bridge_usage_ratio:.1%} (Target: {target_bridge_usage:.0%}+)",
                 f"Manager Proliferation: {manager_proliferation_ratio:.1%} (Max Allowed: {max_allowed_proliferation:.0%})",
@@ -628,27 +628,27 @@ class SSOTBridgePatternEnforcementTests(SSotAsyncTestCase):
                 failure_message.append(f"")
                 failure_message.append(f"DIRECT INSTANTIATION VIOLATIONS:")
                 for i, instance in enumerate(manager_instances[:5], 1):  # Show first 5
-                    failure_message.append(f"❌ Instance {instance['instance_id']}: {instance['created_by']}")
+                    failure_message.append(f"X Instance {instance['instance_id']}: {instance['created_by']}")
                 if len(manager_instances) > 5:
-                    failure_message.append(f"❌ ... and {len(manager_instances) - 5} more instances")
+                    failure_message.append(f"X ... and {len(manager_instances) - 5} more instances")
 
             failure_message.extend([
                 f"",
                 f"🔧 ANTI-PROLIFERATION REMEDIATION:",
                 f"",
                 f"1. Eliminate direct WebSocketManager instantiation:",
-                f"   ❌ manager = WebSocketManager(config)",
-                f"   ❌ self.websocket_manager = WebSocketManager()",
-                f"   ✅ # No direct instantiation needed",
+                f"   X manager = WebSocketManager(config)",
+                f"   X self.websocket_manager = WebSocketManager()",
+                f"   CHECK # No direct instantiation needed",
                 f"",
                 f"2. Use bridge pattern exclusively:",
-                f"   ✅ bridge = await registry.get_websocket_bridge(user_id)",
-                f"   ✅ await bridge.send_*(...)",
+                f"   CHECK bridge = await registry.get_websocket_bridge(user_id)",
+                f"   CHECK await bridge.send_*(...)",
                 f"",
                 f"3. Implement singleton WebSocketManager with bridge facade:",
-                f"   ✅ Single WebSocketManager instance behind bridges",
-                f"   ✅ Bridges provide user-isolated access to single manager",
-                f"   ✅ No agent needs direct manager access",
+                f"   CHECK Single WebSocketManager instance behind bridges",
+                f"   CHECK Bridges provide user-isolated access to single manager",
+                f"   CHECK No agent needs direct manager access",
                 f"",
                 f"4. Bridge pattern architecture benefits:",
                 f"   • Prevents manager instance proliferation",
@@ -667,9 +667,9 @@ class SSOTBridgePatternEnforcementTests(SSotAsyncTestCase):
 
         # Success state
         self.record_metric("manager_proliferation_prevented", True)
-        print("✅ BRIDGE PATTERN PREVENTS WEBSOCKET MANAGER PROLIFERATION")
-        print(f"✅ Bridge Usage: {bridge_usage_ratio:.1%}")
-        print(f"✅ Manager Proliferation: {manager_proliferation_ratio:.1%}")
+        print("CHECK BRIDGE PATTERN PREVENTS WEBSOCKET MANAGER PROLIFERATION")
+        print(f"CHECK Bridge Usage: {bridge_usage_ratio:.1%}")
+        print(f"CHECK Manager Proliferation: {manager_proliferation_ratio:.1%}")
 
     @pytest.mark.asyncio
     async def test_comprehensive_bridge_pattern_integration_validation(self):
@@ -805,7 +805,7 @@ class SSOTBridgePatternEnforcementTests(SSotAsyncTestCase):
 
         if failed_requirements:
             failure_message = [
-                f"❌ COMPREHENSIVE BRIDGE PATTERN INTEGRATION VALIDATION FAILED ❌",
+                f"X COMPREHENSIVE BRIDGE PATTERN INTEGRATION VALIDATION FAILED X",
                 f"",
                 f"Bridge Exclusivity: {bridge_exclusivity_ratio:.1%} (Target: 100%)",
                 f"User Isolation Success: {user_isolation_success_ratio:.1%} (Target: 100%)",
@@ -822,15 +822,15 @@ class SSOTBridgePatternEnforcementTests(SSotAsyncTestCase):
             ]
 
             for requirement in failed_requirements:
-                failure_message.append(f"❌ {requirement}")
+                failure_message.append(f"X {requirement}")
 
             if integration_metrics["integration_errors"]:
                 failure_message.append(f"")
                 failure_message.append(f"INTEGRATION ERRORS:")
                 for error in integration_metrics["integration_errors"][:5]:  # Show first 5
-                    failure_message.append(f"❌ {error}")
+                    failure_message.append(f"X {error}")
                 if len(integration_metrics["integration_errors"]) > 5:
-                    failure_message.append(f"❌ ... and {len(integration_metrics['integration_errors']) - 5} more errors")
+                    failure_message.append(f"X ... and {len(integration_metrics['integration_errors']) - 5} more errors")
 
             failure_message.extend([
                 f"",
@@ -855,10 +855,10 @@ class SSOTBridgePatternEnforcementTests(SSotAsyncTestCase):
         self.record_metric("bridge_pattern_integration_compliant", True)
 
         print("🏆 COMPREHENSIVE BRIDGE PATTERN INTEGRATION VALIDATION COMPLETE")
-        print(f"✅ Bridge Exclusivity: {bridge_exclusivity_ratio:.1%}")
-        print(f"✅ User Isolation Success: {user_isolation_success_ratio:.1%}")
-        print("✅ All integration requirements satisfied")
-        print("✅ WebSocket bridge pattern integration COMPLETE")
+        print(f"CHECK Bridge Exclusivity: {bridge_exclusivity_ratio:.1%}")
+        print(f"CHECK User Isolation Success: {user_isolation_success_ratio:.1%}")
+        print("CHECK All integration requirements satisfied")
+        print("CHECK WebSocket bridge pattern integration COMPLETE")
 
     def teardown_method(self, method=None):
         """Clean up after bridge pattern enforcement integration tests."""

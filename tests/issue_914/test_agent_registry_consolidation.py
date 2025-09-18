@@ -85,7 +85,7 @@ class AgentRegistrySSotConsolidationTests(SSotAsyncTestCase):
         # After consolidation, we should have clear canonical path
         if len(registry_classes) == 1:
             canonical_path, canonical_class = registry_classes[0]
-            print(f"✅ SSOT SUCCESS: Single canonical AgentRegistry at {canonical_path}")
+            print(f"CHECK SSOT SUCCESS: Single canonical AgentRegistry at {canonical_path}")
 
             # Test that canonical registry has all required capabilities
             registry_instance = canonical_class()
@@ -107,10 +107,10 @@ class AgentRegistrySSotConsolidationTests(SSotAsyncTestCase):
 
             # Test if they're the same class (one imports from other)
             if class1 is class2:
-                print("✅ SSOT SUCCESS: One registry imports from the other (redirection)")
+                print("CHECK SSOT SUCCESS: One registry imports from the other (redirection)")
                 return True
             else:
-                print("⚠️  CONSOLIDATION PENDING: Two different AgentRegistry classes still exist")
+                print("WARNING️  CONSOLIDATION PENDING: Two different AgentRegistry classes still exist")
                 print(f"   Class 1: {class1} from {path1}")
                 print(f"   Class 2: {class2} from {path2}")
                 # This might be expected during transition phase
@@ -168,14 +168,14 @@ class AgentRegistrySSotConsolidationTests(SSotAsyncTestCase):
                     missing_methods.append((method_name, description))
 
             # Report results
-            print(f"✅ Present methods: {len(present_methods)}/{len(essential_methods)}")
+            print(f"CHECK Present methods: {len(present_methods)}/{len(essential_methods)}")
             for method, desc in present_methods[:5]:  # Show first 5
-                print(f"   ✓ {method}: {desc}")
+                print(f"   CHECK {method}: {desc}")
             if len(present_methods) > 5:
                 print(f"   ... and {len(present_methods) - 5} more")
 
             if missing_methods:
-                print(f"❌ Missing methods: {len(missing_methods)}")
+                print(f"X Missing methods: {len(missing_methods)}")
                 for method, desc in missing_methods:
                     print(f"   ✗ {method}: {desc}")
 
@@ -183,7 +183,7 @@ class AgentRegistrySSotConsolidationTests(SSotAsyncTestCase):
             self.assertEqual(len(missing_methods), 0,
                            f"Consolidated registry missing essential methods: {missing_methods}")
 
-            print("✅ CONSOLIDATION SUCCESS: All essential functionality present")
+            print("CHECK CONSOLIDATION SUCCESS: All essential functionality present")
 
         except ImportError as e:
             self.fail(f"Could not import consolidated AgentRegistry: {e}")
@@ -227,8 +227,8 @@ class AgentRegistrySSotConsolidationTests(SSotAsyncTestCase):
                 cleanup_results.append(result)
                 self.assertEqual(result['status'], 'cleaned')
 
-            print(f"✅ User isolation test passed for {len(test_users)} users")
-            print(f"✅ All sessions cleaned successfully")
+            print(f"CHECK User isolation test passed for {len(test_users)} users")
+            print(f"CHECK All sessions cleaned successfully")
 
         except Exception as e:
             self.fail(f"User isolation test failed: {e}")
@@ -252,7 +252,7 @@ class AgentRegistrySSotConsolidationTests(SSotAsyncTestCase):
             try:
                 registry.set_websocket_manager(mock_websocket_manager)
                 self.assertIsNotNone(registry.websocket_manager)
-                print("✅ Synchronous WebSocket setup successful")
+                print("CHECK Synchronous WebSocket setup successful")
             except Exception as e:
                 self.fail(f"Synchronous WebSocket setup failed: {e}")
 
@@ -260,7 +260,7 @@ class AgentRegistrySSotConsolidationTests(SSotAsyncTestCase):
             try:
                 await registry.set_websocket_manager_async(mock_websocket_manager)
                 self.assertIsNotNone(registry.websocket_manager)
-                print("✅ Asynchronous WebSocket setup successful")
+                print("CHECK Asynchronous WebSocket setup successful")
             except Exception as e:
                 self.fail(f"Asynchronous WebSocket setup failed: {e}")
 
@@ -270,7 +270,7 @@ class AgentRegistrySSotConsolidationTests(SSotAsyncTestCase):
                 self.assertIsInstance(diagnosis, dict)
                 self.assertIn('registry_has_websocket_manager', diagnosis)
                 self.assertTrue(diagnosis['registry_has_websocket_manager'])
-                print("✅ WebSocket diagnostics functional")
+                print("CHECK WebSocket diagnostics functional")
             except Exception as e:
                 self.fail(f"WebSocket diagnostics failed: {e}")
 
@@ -329,7 +329,7 @@ class AgentRegistrySSotConsolidationTests(SSotAsyncTestCase):
                 # Method access should be very fast (< 0.1 seconds)
                 self.assertLess(avg_method_time, 0.1, "Method access too slow")
 
-            print("✅ Performance consistency validated after consolidation")
+            print("CHECK Performance consistency validated after consolidation")
 
         except Exception as e:
             self.fail(f"Performance test failed: {e}")
@@ -386,7 +386,7 @@ class AgentRegistrySSotConsolidationTests(SSotAsyncTestCase):
 
             self.assertLess(object_growth, 1000, "Potential memory leak in registry creation")
 
-            print("✅ Import stability validated")
+            print("CHECK Import stability validated")
 
         except Exception as e:
             self.fail(f"Import stability test failed: {e}")
@@ -411,13 +411,13 @@ class AgentRegistrySSotConsolidationTests(SSotAsyncTestCase):
             registry.llm_manager = mock_llm_manager
             await registry.set_websocket_manager_async(mock_websocket_manager)
 
-            # Test Golden Path sequence: User login → Agent creation → AI response
+            # Test Golden Path sequence: User login -> Agent creation -> AI response
             test_user_id = "golden_path_user"
 
             # Step 1: User session creation (after login)
             user_session = await registry.get_user_session(test_user_id)
             self.assertIsNotNone(user_session)
-            print("✅ Step 1: User session created successfully")
+            print("CHECK Step 1: User session created successfully")
 
             # Step 2: Agent creation for user
             try:
@@ -431,17 +431,17 @@ class AgentRegistrySSotConsolidationTests(SSotAsyncTestCase):
                 )
 
                 if agent is not None:
-                    print("✅ Step 2: Agent created successfully")
+                    print("CHECK Step 2: Agent created successfully")
                 else:
-                    print("⚠️  Step 2: Agent creation returned None (expected if factories not registered)")
+                    print("WARNING️  Step 2: Agent creation returned None (expected if factories not registered)")
 
             except KeyError as e:
                 if "No factory registered" in str(e):
-                    print("⚠️  Step 2: Agent factory not registered (expected behavior)")
+                    print("WARNING️  Step 2: Agent factory not registered (expected behavior)")
                 else:
                     raise e
             except Exception as e:
-                print(f"⚠️  Step 2: Agent creation failed with: {e}")
+                print(f"WARNING️  Step 2: Agent creation failed with: {e}")
 
             # Step 3: Tool dispatcher creation (critical for AI responses)
             try:
@@ -451,23 +451,23 @@ class AgentRegistrySSotConsolidationTests(SSotAsyncTestCase):
                     enable_admin_tools=False
                 )
                 self.assertIsNotNone(tool_dispatcher)
-                print("✅ Step 3: Tool dispatcher created successfully")
+                print("CHECK Step 3: Tool dispatcher created successfully")
             except Exception as e:
-                print(f"⚠️  Step 3: Tool dispatcher creation failed: {e}")
+                print(f"WARNING️  Step 3: Tool dispatcher creation failed: {e}")
 
             # Step 4: User session monitoring
             monitoring_report = await registry.monitor_all_users()
             self.assertIsInstance(monitoring_report, dict)
             self.assertIn('total_users', monitoring_report)
             self.assertGreater(monitoring_report['total_users'], 0)
-            print("✅ Step 4: User monitoring functional")
+            print("CHECK Step 4: User monitoring functional")
 
             # Step 5: Cleanup (after user logout)
             cleanup_result = await registry.cleanup_user_session(test_user_id)
             self.assertEqual(cleanup_result['status'], 'cleaned')
-            print("✅ Step 5: User session cleanup successful")
+            print("CHECK Step 5: User session cleanup successful")
 
-            print("✅ GOLDEN PATH VALIDATED: User flow infrastructure works after consolidation")
+            print("CHECK GOLDEN PATH VALIDATED: User flow infrastructure works after consolidation")
             print("💰 BUSINESS VALUE PROTECTED: $500K+ ARR chat functionality supported")
 
         except Exception as e:
@@ -493,14 +493,14 @@ class AgentRegistrySSotConsolidationTests(SSotAsyncTestCase):
 
                 if 'compliance_score' in compliance_status:
                     score = compliance_status['compliance_score']
-                    print(f"✅ SSOT Compliance Score: {score}%")
+                    print(f"CHECK SSOT Compliance Score: {score}%")
 
                     # After consolidation, compliance should be high
                     self.assertGreater(score, 80.0, "SSOT compliance score too low")
 
                 if 'status' in compliance_status:
                     status = compliance_status['status']
-                    print(f"✅ SSOT Compliance Status: {status}")
+                    print(f"CHECK SSOT Compliance Status: {status}")
 
                     # Status should be compliant
                     self.assertIn(status, ['fully_compliant', 'mostly_compliant'])
@@ -522,9 +522,9 @@ class AgentRegistrySSotConsolidationTests(SSotAsyncTestCase):
                         self.assertTrue(factory_status[indicator],
                                       f"{indicator} should be True after consolidation")
 
-                print("✅ Factory integration status validated")
+                print("CHECK Factory integration status validated")
 
-            print("✅ SSOT COMPLIANCE METRICS: Consolidation success quantified")
+            print("CHECK SSOT COMPLIANCE METRICS: Consolidation success quantified")
 
         except Exception as e:
             self.fail(f"SSOT compliance metrics test failed: {e}")
@@ -550,7 +550,7 @@ if __name__ == '__main__':
         print("🎉 ALL TESTS PASSED: SSOT consolidation successful!")
         print("💰 BUSINESS VALUE: $500K+ ARR chat functionality protected")
     else:
-        print("⚠️  Some tests failed - consolidation may be incomplete")
+        print("WARNING️  Some tests failed - consolidation may be incomplete")
 
     if result.failures:
         print("\nFAILURES:")

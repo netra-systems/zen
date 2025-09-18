@@ -22,7 +22,7 @@ BUSINESS VALUE:
 TESTING APPROACH:
 - Uses real staging.netrasystems.ai endpoints for integration testing
 - Measures precise end-to-end response times with sub-second accuracy
-- Tests complete user journey from auth → WebSocket → agent → response
+- Tests complete user journey from auth -> WebSocket -> agent -> response
 - Monitors system resource utilization during performance tests
 - Initially designed to FAIL to demonstrate current performance gaps
 - Uses SSOT testing patterns with real services (no mocks)
@@ -348,7 +348,7 @@ class IntegratedPerformanceTests(SSotAsyncTestCase):
                 f"{INTEGRATED_PERFORMANCE_SLA['max_complete_user_flow_time']}s limit"
             )
 
-            print(f"✅ GOLDEN PATH FLOW COMPLETED: {complete_flow_duration:.3f}s (within {INTEGRATED_PERFORMANCE_SLA['max_complete_user_flow_time']}s SLA)")
+            print(f"CHECK GOLDEN PATH FLOW COMPLETED: {complete_flow_duration:.3f}s (within {INTEGRATED_PERFORMANCE_SLA['max_complete_user_flow_time']}s SLA)")
 
         except AssertionError as e:
             # Log SLA violation for analysis
@@ -359,11 +359,11 @@ class IntegratedPerformanceTests(SSotAsyncTestCase):
                 "severity": "critical"
             }
             self.performance_data["violations"].append(violation)
-            print(f"❌ SLA VIOLATION: {e}")
+            print(f"X SLA VIOLATION: {e}")
             raise
 
         except Exception as e:
-            print(f"❌ GOLDEN PATH FLOW FAILED: {e}")
+            print(f"X GOLDEN PATH FLOW FAILED: {e}")
             raise
 
     async def _perform_authentication_flow(self):

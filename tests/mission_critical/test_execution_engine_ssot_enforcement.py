@@ -1,13 +1,13 @@
 "ExecutionEngine SSOT Enforcement - Mission Critical Validation"
 
 Business Value Justification:
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Stability & System Integrity 
-- Value Impact: Prevents ExecutionEngine duplication cascade failures affecting $500K+ ARR
+- Value Impact: Prevents ExecutionEngine duplication cascade failures affecting $500K+ plus ARR
 - Strategic Impact: Enables safe SSOT consolidation without breaking changes
 
 CRITICAL SSOT VALIDATION:
-This test enforces the single source of truth pattern for ExecutionEngine implementations,
+    This test enforces the single source of truth pattern for ExecutionEngine implementations,
 ensuring UserExecutionEngine remains the canonical implementation and preventing
 legacy adapter usage that could destabilize the Golden Path user flow.
 
@@ -31,7 +31,8 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 
 class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
     Validates ExecutionEngine SSOT compliance and prevents legacy adapter usage."
-    Validates ExecutionEngine SSOT compliance and prevents legacy adapter usage."
+    Validates ExecutionEngine SSOT compliance and prevents legacy adapter usage.""
+
 
     def setUp(self):
         "Set up SSOT validation test environment."
@@ -72,7 +73,8 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
             
         except ImportError as e:
             self.fail(fCRITICAL: Canonical UserExecutionEngine cannot be imported: {e})"
-            self.fail(fCRITICAL: Canonical UserExecutionEngine cannot be imported: {e})"
+            self.fail(fCRITICAL: Canonical UserExecutionEngine cannot be imported: {e})""
+
             
     def test_no_legacy_adapter_imports_in_production_code(self):
         "Validate no production code imports legacy ExecutionEngine adapters."
@@ -89,7 +91,7 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
         # Scan all Python files in netra_backend (excluding tests)
         for py_file in self.netra_backend_root.rglob(*.py):
             # Skip test files and __pycache__
-            if "test in str(py_file).lower() or __pycache__" in str(py_file):
+            if "test in str(py_file).lower() or __pycache__ in str(py_file):"
                 continue
                 
             try:
@@ -107,7 +109,8 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
             len(violations), 0,
             fSSOT VIOLATION: Legacy ExecutionEngine imports found in production code:\n + 
             \n.join(violations)"
-            \n.join(violations)"
+            \n.join(violations)""
+
         )
 
     def test_single_execution_engine_class_definition(self):
@@ -138,14 +141,15 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
         for class_def in execution_engine_classes:
             if UserExecutionEngine not in class_def:
                 # Allow interface definitions but not implementations
-                if Interface" not in class_def and "IExecutionEngine not in class_def:
+                if Interface" not in class_def and IExecutionEngine not in class_def:"
                     violations.append(class_def)
         
         self.assertLessEqual(
             len(violations), 2,  # Allow some flexibility during transition
             fSSOT VIOLATION: Multiple ExecutionEngine implementations found (should only be UserExecutionEngine):\n +
             \n.join(violations)"
-            \n.join(violations)"
+            \n.join(violations)""
+
         )
 
     def test_legacy_files_marked_for_deprecation(self):
@@ -233,7 +237,7 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
                 # Check if factory methods exist and what they create
                 for attr_name in dir(factory_module):
                     attr = getattr(factory_module, attr_name)
-                    if callable(attr) and ("create in attr_name.lower() or get" in attr_name.lower()):
+                    if callable(attr) and ("create in attr_name.lower() or get in attr_name.lower()):"
                         # This is a factory method - validate it creates UserExecutionEngine
                         if hasattr(attr, '__annotations__'):
                             return_type = attr.__annotations__.get('return', None)
@@ -256,7 +260,7 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
         non_ssot_imports = []
         
         for py_file in self.netra_backend_root.rglob(*.py):
-            if "test in str(py_file).lower() or __pycache__" in str(py_file):
+            if "test in str(py_file).lower() or __pycache__ in str(py_file):"
                 continue
                 
             try:
@@ -282,16 +286,19 @@ class ExecutionEngineSSotEnforcementTests(SSotBaseTestCase):
         self.assertLessEqual(
             len(non_ssot_imports), 3,  # Allow some during transition period
             fSSOT VIOLATION: Non-canonical ExecutionEngine imports found:\n + "
-            fSSOT VIOLATION: Non-canonical ExecutionEngine imports found:\n + "
+            fSSOT VIOLATION: Non-canonical ExecutionEngine imports found:\n + ""
+
             \n.join(non_ssot_imports) +
             f\nAll ExecutionEngine imports should use canonical path: {canonical_import}"
-            f\nAll ExecutionEngine imports should use canonical path: {canonical_import}"
+            f\nAll ExecutionEngine imports should use canonical path: {canonical_import}""
+
         )
 
     def addWarning(self, message):
         "Add a warning message that doesn't fail the test."
         print(fWARNING: {message}"")"
-        print(fWARNING: {message}"")"
+        print(fWARNING: {message}"")""
+
 
 
 if __name__ == '__main__':

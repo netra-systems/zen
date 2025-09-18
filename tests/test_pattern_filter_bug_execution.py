@@ -205,20 +205,20 @@ if __name__ == "__main__":
     
     try:
         test_pattern_filter_bug_demonstration()
-        print("✓ Bug demonstration completed")
+        print("CHECK Bug demonstration completed")
     except AssertionError as e:
         print(f"✗ Bug confirmed: {e}")
         
     print()
     try:
         test_bug_location_analysis()
-        print("✓ Bug location analysis completed")
+        print("CHECK Bug location analysis completed")
     except AssertionError as e:
         print(f"✗ Analysis failed: {e}")
         
     print()
     test_category_specific_behavior_demonstration()
-    print("✓ Category behavior demonstration completed")
+    print("CHECK Category behavior demonstration completed")
     
     print()
     print("=== BUG SUMMARY ===")

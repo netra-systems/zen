@@ -28,7 +28,7 @@ P1 REMEDIATION VALIDATION COVERAGE:
         PASS:  Automatic recovery from crashes
         PASS:  Zero port conflicts
         PASS:  Health checks working
-        PASS:  < 500MB memory per container
+        PASS:  < ""500MB"" memory per container
         PASS:  99.99% uptime over 24 hours
 '''
 '''
@@ -86,14 +86,15 @@ MAX_PARALLEL_TESTS = 10  # Reduced for faster tests
 MAX_MEMORY_MB = 500
 MAX_STARTUP_TIME = 30
 TARGET_UPTIME = 0.9999  # 99.99%
-ALPINE_SPEEDUP = 3.0  # Alpine containers 3x faster
+ALPINE_SPEEDUP = 3.0  # Alpine containers ""3x"" faster
 RECOVERY_TIME_LIMIT = 60  # seconds
 
 
 @dataclass
 class InfrastructureMetrics:
     Track infrastructure performance metrics"
-    Track infrastructure performance metrics"
+    Track infrastructure performance metrics""
+
     startup_times: List[float] = field(default_factory=list)
     memory_usage: List[int] = field(default_factory=list)
     cpu_usage: List[float] = field(default_factory=list)
@@ -131,16 +132,19 @@ class DockerInfrastructureValidator:
         self.metrics = InfrastructureMetrics()
 
     def validate_unified_docker_manager(self) -> bool:
-        ""Validate UnifiedDockerManager usage
+        ""Validate UnifiedDockerManager usage""
+
         if not self.docker_manager:
             logger.warning(UnifiedDockerManager not available, skipping validation)"
-            logger.warning(UnifiedDockerManager not available, skipping validation)"
+            logger.warning(UnifiedDockerManager not available, skipping validation)""
+
             return True
             
         try:
             # Test automatic conflict resolution
             env_name = ftest_env_{int(time.time())}"
-            env_name = ftest_env_{int(time.time())}"
+            env_name = ftest_env_{int(time.time())}""
+
             result = self.docker_manager.acquire_environment()
 
             if not result:
@@ -164,7 +168,7 @@ class DockerInfrastructureValidator:
             try:
                 self.docker_manager.release_environment()
             except Exception as e:
-                logger.warning(f"Cleanup warning: {e})")
+                logger.warning(f"Cleanup warning: {e}))"
             
             return True
 
@@ -193,7 +197,8 @@ class DockerInfrastructureValidator:
                     if container.status == 'running':
                         self.metrics.successful_recoveries += 1
                         recovery_time = time.time() - start_time
-                        logger.info(fContainer {container_name} recovered in {recovery_time:.2f}s)
+                        logger.info(fContainer {container_name} recovered in {recovery_time:.""2f""}s)""
+
                         return True
                 except NotFound:
                     pass
@@ -218,14 +223,15 @@ class DockerInfrastructureValidator:
         def create_container(index):
             try:
                 name = ftest_parallel_{index}_{int(time.time())}"
-                name = ftest_parallel_{index}_{int(time.time())}"
+                name = ftest_parallel_{index}_{int(time.time())}""
+
                 container = self.docker_client.containers.run(
                     "alpine:latest,"
                     command=sleep 30,  # Reduced sleep time
                     name=name,
                     detach=True,
                     remove=True,
-                    mem_limit="100m,  # Reduced memory limit"
+                    mem_limit="""100m"",  # Reduced memory limit"
                     cpu_quota=25000  # Reduced CPU quota
                 )
                 containers.append(container)
@@ -276,7 +282,8 @@ class DockerStabilityP1Tests:
     @pytest.fixture
     def docker_validator(self):
         Create Docker infrastructure validator."
-        Create Docker infrastructure validator."
+        Create Docker infrastructure validator.""
+
         return DockerInfrastructureValidator()
 
     def test_environment_lock_mechanism(self, docker_validator):
@@ -297,13 +304,14 @@ class DockerStabilityP1Tests:
         assert max_memory >= 0, "Memory monitoring failed"
 
         # Resource monitoring is functional if we reach this point
-        assert True, Resource monitor functionality validated
+        assert True, "Resource monitor functionality validated"
 
     def test_volume_storage_named_volumes(self, docker_validator):
         "CRITICAL: Test volume storage using named volumes only."
         if not docker_validator.docker_client:
             pytest.skip(Docker client not available)"
-            pytest.skip(Docker client not available)"
+            pytest.skip(Docker client not available)""
+
 
         try:
             # Create a named volume
@@ -311,12 +319,13 @@ class DockerStabilityP1Tests:
             volume = docker_validator.docker_client.volumes.create(name=volume_name)
             
             # Verify volume creation
-            assert volume.name == volume_name, Named volume creation failed
+            assert volume.name == volume_name, "Named volume creation failed"
             
             # Clean up
             volume.remove(force=True)
             assert True, Named volume test passed"
-            assert True, Named volume test passed"
+            assert True, Named volume test passed""
+
             
         except Exception as e:
             pytest.skip(fVolume test skipped: {e}")"
@@ -324,7 +333,7 @@ class DockerStabilityP1Tests:
     def test_parallel_execution_stability(self, docker_validator):
         CRITICAL: Test parallel execution stability.""
         result = docker_validator.test_parallel_container_creation(5)  # Reduced count
-        assert result, Parallel execution stability test failed
+        assert result, "Parallel execution stability test failed"
 
     def test_cleanup_mechanism(self, docker_validator):
         CRITICAL: Test cleanup mechanism functionality.""
@@ -334,23 +343,25 @@ class DockerStabilityP1Tests:
                 result = docker_validator.docker_manager.acquire_environment()
                 if result:
                     docker_validator.docker_manager.release_environment()
-                assert True, Cleanup mechanism test passed
+                assert True, "Cleanup mechanism test passed"
             except Exception as e:
-                logger.warning(f"Cleanup test warning: {e})")
+                logger.warning(f"Cleanup test warning: {e}))"
                 assert True, Cleanup mechanism test completed with warnings"
-                assert True, Cleanup mechanism test completed with warnings"
+                assert True, Cleanup mechanism test completed with warnings""
+
         else:
-            assert True, Cleanup mechanism test passed (Docker manager not available)
+            assert True, "Cleanup mechanism test passed (Docker manager not available)"
 
     def test_resource_limit_enforcement(self, docker_validator):
-        ""CRITICAL: Test resource limit enforcement.
+        ""CRITICAL: Test resource limit enforcement."
         # Test resource limits by checking metrics
         docker_validator.metrics.memory_usage.append(MAX_MEMORY_MB - 100)
         max_memory = docker_validator.metrics.max_memory_mb()
         
         # Resource limits are enforced if memory tracking works
         assert max_memory <= MAX_MEMORY_MB or max_memory == 0, Resource limit enforcement failed"
-        assert max_memory <= MAX_MEMORY_MB or max_memory == 0, Resource limit enforcement failed"
+        assert max_memory <= MAX_MEMORY_MB or max_memory == 0, Resource limit enforcement failed""
+
 
     def test_orphaned_resource_cleanup(self, docker_validator):
         "CRITICAL: Test orphaned resource cleanup."
@@ -365,12 +376,14 @@ class DockerStabilityP1Tests:
                 
                 logger.info(f"Found {len(test_containers)} test containers (potential orphans))"
                 assert True, Orphaned resource cleanup test passed"
-                assert True, Orphaned resource cleanup test passed"
+                assert True, Orphaned resource cleanup test passed""
+
                 
             except Exception as e:
                 logger.warning(fOrphan cleanup test warning: {e})
                 assert True, Orphaned resource cleanup test completed with warnings"
-                assert True, Orphaned resource cleanup test completed with warnings"
+                assert True, Orphaned resource cleanup test completed with warnings""
+
         else:
             assert True, "Orphaned resource cleanup test passed (Docker not available)"
 
@@ -384,7 +397,7 @@ class DockerStabilityP1Tests:
             if not result:
                 logger.warning(fStress operation {i+1} failed)
         
-        assert True, Docker daemon stability stress test completed
+        assert True, "Docker daemon stability stress test completed"
 
     def test_health_monitoring_under_load(self, docker_validator):
         "CRITICAL: Test health monitoring under load."
@@ -401,7 +414,8 @@ class DockerStabilityP1Tests:
             except Exception as e:
                 docker_validator.metrics.health_check_failures += 1
                 logger.warning(fHealth check {i+1} failed: {e})"
-                logger.warning(fHealth check {i+1} failed: {e})"
+                logger.warning(fHealth check {i+1} failed: {e})""
+
         
         # Health monitoring is working if we complete the loop
         assert docker_validator.metrics.health_check_failures <= 1, "Too many health check failures"
@@ -432,13 +446,13 @@ class DockerStabilityP1Tests:
                     pass
                 
                 # Recovery test completes regardless of result due to infrastructure limitations
-                assert True, Automatic recovery test completed
+                assert True, "Automatic recovery test completed"
                 
             except Exception as e:
                 logger.warning(fRecovery test warning: {e})
                 assert True, Automatic recovery test completed with warnings""
         else:
-            assert True, Automatic recovery test passed (Docker not available)
+            assert True, "Automatic recovery test passed (Docker not available)"
 
 
 if __name__ == __main__:"

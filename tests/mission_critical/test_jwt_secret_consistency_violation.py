@@ -1,5 +1,5 @@
 """
-"""
+
  ALERT:  MISSION CRITICAL: JWT Secret Consistency SSOT Violation
 
 SSOT VIOLATION REPRODUCTION - Test #3 of 5
@@ -7,28 +7,29 @@ This test EXPOSES the violation where WebSocket and auth service use different
 JWT validation logic and potentially different secrets/algorithms.
 
 VIOLATION DETAILS:
-- WebSocket uses local JWT decode with configurable options
+    - WebSocket uses local JWT decode with configurable options
 - Auth service uses different JWT validation logic  
 - No consistency guarantee between WebSocket and auth service JWT handling
 - Different secret key access patterns (JWT_SECRET vs JWT_SECRET_KEY)
 
 EXPECTED BEHAVIOR:
-- BEFORE SSOT FIX: Test PASSES (proving inconsistency exists)
+    - BEFORE SSOT FIX: Test PASSES (proving inconsistency exists)
 - AFTER SSOT FIX: Test FAILS (proving consistent JWT handling through SSOT)
 
 Business Value Justification (BVJ):
-- Segment: Enterprise/Platform - Auth consistency critical for security
+    - Segment: Enterprise/Platform - Auth consistency critical for security
 - Business Goal: Security/Compliance - Consistent auth across all services  
 - Value Impact: Prevents auth tokens working in one service but not another
 - Revenue Impact: Auth inconsistencies could lose enterprise customers ($200K+ ARR)
 
 CRITICAL JWT CONSISTENCY REQUIREMENT:
-ALL services MUST use identical JWT validation logic through UnifiedAuthInterface.
+    ALL services MUST use identical JWT validation logic through UnifiedAuthInterface.
 "
-"
+""
+
 
 """
-"""
+
 import asyncio
 import json
 import logging  
@@ -50,19 +51,22 @@ logger = logging.getLogger(__name__)
 
 class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
     "
-    "
+    ""
+
     SSOT Violation Reproduction: Tests JWT secret/algorithm consistency across services.
     
     This test proves that WebSocket and auth service may use different JWT
     validation parameters, creating inconsistent auth behavior.
 "
-"
+""
+
 
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_websocket_auth_service_jwt_secret_inconsistency(self):
-    "
-    "
+        """
+    ""
+
         VIOLATION REPRODUCTION: WebSocket and auth service use different JWT secrets.
         
         CURRENT VIOLATION: Different secret key access patterns
@@ -76,7 +80,7 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
         # Test payload
         test_payload = {
             sub: consistency_test_user,
-            "iss: netra-auth-service", 
+            "iss: netra-auth-service, "
             aud: netra-backend,
             exp: int((datetime.now() + timedelta(hours=1)).timestamp()),"
             exp: int((datetime.now() + timedelta(hours=1)).timestamp()),"
@@ -87,7 +91,7 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
         env = get_env()
         
         # Test different secret key patterns that might be used
-        jwt_secret_key = env.get("JWT_SECRET_KEY, websocket-secret")
+        jwt_secret_key = env.get("JWT_SECRET_KEY, websocket-secret)"
         jwt_secret = env.get(JWT_SECRET, auth-service-secret)
         
         logger.info(f SEARCH:  JWT_SECRET_KEY: {jwt_secret_key[:10]}...)
@@ -96,7 +100,8 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
         # Create tokens with different secrets
         token_with_secret_key = jwt.encode(test_payload, jwt_secret_key, algorithm=HS256)
         token_with_secret = jwt.encode(test_payload, jwt_secret, algorithm=HS256)"
-        token_with_secret = jwt.encode(test_payload, jwt_secret, algorithm=HS256)"
+        token_with_secret = jwt.encode(test_payload, jwt_secret, algorithm=HS256)""
+
         
         logger.info(" SEARCH:  Testing JWT validation consistency...)"
         
@@ -125,14 +130,16 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
             # Test auth service with both token types  
             auth_service_results[secret_key_token] = await verify_token(token_with_secret_key)
             auth_service_results[secret_token] = await verify_token(token_with_secret)"
-            auth_service_results[secret_token] = await verify_token(token_with_secret)"
+            auth_service_results[secret_token] = await verify_token(token_with_secret)""
+
             
             logger.info(f" SEARCH:  Auth service results: {auth_service_results})"
             
         except Exception as e:
             logger.warning(f WARNING: [U+FE0F] Auth service validation error: {e})
             auth_service_results = {error: str(e)}"
-            auth_service_results = {error: str(e)}"
+            auth_service_results = {error: str(e)}""
+
         
         # Check for consistency violations
         violations_detected = []
@@ -174,7 +181,8 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
             logger.critical( ALERT:  AFTER SSOT FIX: All services should use identical JWT logic)
             
             assert len(violations_detected) > 0, fJWT CONSISTENCY VIOLATIONS: {violations_detected}"
-            assert len(violations_detected) > 0, fJWT CONSISTENCY VIOLATIONS: {violations_detected}"
+            assert len(violations_detected) > 0, fJWT CONSISTENCY VIOLATIONS: {violations_detected}""
+
             return True
         else:
             pytest.fail("VIOLATION NOT REPRODUCED: JWT validation appears consistent)"
@@ -191,7 +199,7 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
         logger.info( ALERT:  TESTING SSOT VIOLATION: JWT algorithm inconsistency)
         
         test_payload = {
-            sub": "algorithm_test_user,
+            sub": algorithm_test_user,"
             iss: netra-auth-service,
             exp: int((datetime.now() + timedelta(hours=1)).timestamp()),"
             exp: int((datetime.now() + timedelta(hours=1)).timestamp()),"
@@ -202,7 +210,7 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
         jwt_secret = env.get(JWT_SECRET_KEY, test-secret)
         
         # Create tokens with different algorithms
-        algorithms_to_test = [HS256", "HS512]
+        algorithms_to_test = [HS256", HS512]"
         
         violations_detected = []
         
@@ -237,7 +245,7 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
             logger.critical( ALERT:  ALGORITHM CONSISTENCY VIOLATION)"
             logger.critical(" ALERT:  All services should support same JWT algorithms)"
             
-            assert len(violations_detected) > 0, fJWT Algorithm violations: {violations_detected}
+            assert len(violations_detected) > 0, "fJWT Algorithm violations: {violations_detected}"
             return True
         else:
             logger.info(" PASS:  JWT algorithm consistency appears okay)"
@@ -246,7 +254,8 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_jwt_validation_options_inconsistency_violation(self):
-    ""
+    """
+
         VIOLATION REPRODUCTION: Different JWT validation options across services.
         
         CURRENT VIOLATION: WebSocket uses options={verify_signature: False}
@@ -260,16 +269,17 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
                 name: "expired_token,"
                 payload": {"
                     sub: expired_user,
-                    "iss: netra-auth-service", 
+                    "iss: netra-auth-service, "
                     exp: int((datetime.now() - timedelta(hours=1)).timestamp()),  # Expired
                     iat: int(datetime.now().timestamp())"
-                    iat: int(datetime.now().timestamp())"
+                    iat: int(datetime.now().timestamp())""
+
                 }
             },
             {
                 "name: no_exp_token,"
                 payload: {
-                    sub": "no_exp_user,
+                    sub": no_exp_user,"
                     iss: netra-auth-service,
                     iat: int(datetime.now().timestamp())"
                     iat: int(datetime.now().timestamp())"
@@ -279,7 +289,7 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
             {
                 "name: wrong_issuer_token,"
                 payload: {
-                    sub": "wrong_issuer_user,
+                    sub": wrong_issuer_user,"
                     iss: wrong-issuer,  # Wrong issuer
                     exp: int((datetime.now() + timedelta(hours=1)).timestamp()),"
                     exp: int((datetime.now() + timedelta(hours=1)).timestamp()),"
@@ -297,7 +307,7 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
         validation_inconsistencies = []
         
         for test_case in test_cases:
-            test_token = jwt.encode(test_case[payload"], jwt_secret, algorithm="HS256)
+            test_token = jwt.encode(test_case[payload"], jwt_secret, algorithm=HS256)"
             
             try:
                 # Test WebSocket validation (might be lenient due to verify_signature=False)
@@ -332,24 +342,27 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     @pytest.mark.integration
     async def test_jwt_cross_service_token_validity_violation(self):
-        "
-        "
+        """
+        ""
+
         INTEGRATION VIOLATION TEST: JWT tokens valid in one service but not another.
         
         This test demonstrates business impact where users get inconsistent
         auth behavior between WebSocket and REST API endpoints.
 "
-"
+""
+
         if NoDockerModeDetector.is_no_docker_mode():
             pytest.skip(Integration test requires services)"
-            pytest.skip(Integration test requires services)"
+            pytest.skip(Integration test requires services)""
+
             
         logger.info( ALERT:  TESTING BUSINESS IMPACT: Cross-service JWT inconsistency")"
         
         # Create a test token that might work in one service but not another
         test_payload = {
             sub: cross_service_user,
-            "iss: netra-auth-service",
+            "iss: netra-auth-service,"
             exp: int((datetime.now() + timedelta(hours=1)).timestamp()),
             iat: int(datetime.now().timestamp()),"
             iat: int(datetime.now().timestamp()),"
@@ -397,18 +410,19 @@ class JwtSecretConsistencyViolationTests(SSotAsyncTestCase):
             logger.critical( ALERT:  CUSTOMER IMPACT: User gets inconsistent auth behavior)
             logger.critical( ALERT:  Chat might work but API calls fail (or vice versa)")"
             
-            assert websocket_valid != auth_service_valid, CRITICAL VIOLATION: Cross-service JWT inconsistency affects customer experience
+            assert websocket_valid != auth_service_valid, "CRITICAL VIOLATION: Cross-service JWT inconsistency affects customer experience"
             return True
         else:
             pytest.fail(VIOLATION NOT REPRODUCED: Cross-service JWT validation is consistent)"
-            pytest.fail(VIOLATION NOT REPRODUCED: Cross-service JWT validation is consistent)"
+            pytest.fail(VIOLATION NOT REPRODUCED: Cross-service JWT validation is consistent)""
+
 
     def tearDown(self):
         "Clean up test artifacts."
         logger.info([U+1F9F9] JWT consistency violation test cleanup complete")"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # Run this test independently to verify violation reproduction  
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

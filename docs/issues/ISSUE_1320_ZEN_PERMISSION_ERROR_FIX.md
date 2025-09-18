@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Zen orchestrator commands were being silently blocked on Windows due to Claude CLI requiring approval for commands even when `--permission-mode=acceptEdits` was specified. This resulted in commands appearing to "not get through" with no visible error messages, causing significant user confusion and productivity loss.
+Zen orchestrator commands were being silently blocked on Windows due to Claude CLI requiring approval for commands even when `--permission-mode=bypassPermissions` was specified. This resulted in commands appearing to "not get through" with no visible error messages, causing significant user confusion and productivity loss.
 
 ## Problem Description
 
@@ -20,7 +20,7 @@ Zen orchestrator commands were being silently blocked on Windows due to Claude C
 - Users had no indication that their commands were blocked
 
 ### Root Cause
-The Claude CLI on Windows was not respecting the `acceptEdits` permission mode and still required manual approval for commands. The error was returned as JSON but never surfaced to the user:
+The Claude CLI on Windows was not respecting the `bypassPermissions` permission mode and still required manual approval for commands. The error was returned as JSON but never surfaced to the user:
 
 ```json
 {
@@ -47,11 +47,11 @@ def __post_init__(self):
     # Set permission mode based on platform if not explicitly set
     if self.permission_mode is None:
         # On Windows, use bypassPermissions to avoid approval prompts
-        # On Mac/Linux, acceptEdits should work fine
+        # On Mac/Linux, bypassPermissions should work fine
         if platform.system() == "Windows":
             self.permission_mode = "bypassPermissions"
         else:
-            self.permission_mode = "acceptEdits"
+            self.permission_mode = "bypassPermissions"
 ```
 
 ### 2. Enhanced Error Detection
@@ -76,7 +76,7 @@ Permission errors now display unmissable warning boxes:
 ╠════════════════════════════════════════════════════════════════════════════╣
 ║ SOLUTION: zen_orchestrator.py now uses platform-specific permission modes:  ║
 ║   • Windows: bypassPermissions (to avoid this exact error)                  ║
-║   • Mac/Linux: acceptEdits (standard mode)                                  ║
+║   • Mac/Linux: bypassPermissions (standard mode)                                  ║
 ║                                                                              ║
 ║ Current platform: Windows                                                   ║
 ║ Using permission mode: bypassPermissions                                    ║
@@ -125,8 +125,8 @@ Created comprehensive test suite `test_permission_fix_windows.py` that validates
 | Platform | Permission Mode | Behavior |
 |----------|----------------|----------|
 | Windows | `bypassPermissions` | Commands execute without approval prompts |
-| macOS | `acceptEdits` | Standard behavior maintained |
-| Linux | `acceptEdits` | Standard behavior maintained |
+| macOS | `bypassPermissions` | Standard behavior maintained |
+| Linux | `bypassPermissions` | Standard behavior maintained |
 
 ## Related Issues
 

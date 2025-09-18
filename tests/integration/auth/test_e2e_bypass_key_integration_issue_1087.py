@@ -86,7 +86,7 @@ class E2EBypassKeyIntegrationIssue1087Tests(SSotAsyncTestCase):
                         f"Key validation logic not working correctly."
                     )
 
-                    print(f"✅ PASS: E2E bypass key header validation successful")
+                    print(f"CHECK PASS: E2E bypass key header validation successful")
                     print(f"   Bypass Key: {self.test_bypass_key}")
                     print(f"   Test User: {self.test_user_email}")
 
@@ -101,7 +101,7 @@ class E2EBypassKeyIntegrationIssue1087Tests(SSotAsyncTestCase):
         REPRODUCTION TEST: This should initially FAIL, reproducing the current
         401 error from Issue #1087. After configuration fix, should PASS.
 
-        Expected: FAIL initially → PASS after fix
+        Expected: FAIL initially -> PASS after fix
         """
         try:
             from auth_service.auth_core.secret_loader import AuthSecretLoader
@@ -144,11 +144,11 @@ class E2EBypassKeyIntegrationIssue1087Tests(SSotAsyncTestCase):
                         f"This test reproduces Issue #1087."
                     )
 
-                    print(f"✅ REPRODUCTION CONFIRMED: 401 error correctly triggered")
+                    print(f"CHECK REPRODUCTION CONFIRMED: 401 error correctly triggered")
                     print(f"   Expected Error: {expected_error}")
 
                 else:
-                    print(f"✅ CONFIGURATION FIXED: Bypass key validation working")
+                    print(f"CHECK CONFIGURATION FIXED: Bypass key validation working")
 
         except ImportError as e:
             pytest.skip(f"Auth service components not available: {e}")
@@ -195,7 +195,7 @@ class E2EBypassKeyIntegrationIssue1087Tests(SSotAsyncTestCase):
                         f"Invalid keys must be rejected."
                     )
 
-                    print(f"✅ PASS: Invalid bypass key correctly rejected")
+                    print(f"CHECK PASS: Invalid bypass key correctly rejected")
                     print(f"   Expected Key: {expected_key}")
                     print(f"   Invalid Key: {provided_key}")
                     print(f"   Security validation working correctly")
@@ -211,7 +211,7 @@ class E2EBypassKeyIntegrationIssue1087Tests(SSotAsyncTestCase):
         REPRODUCTION TEST: This should FAIL until Issue #1087 is fixed,
         demonstrating the actual configuration problem in staging.
 
-        Expected: FAIL initially → PASS after configuration fix
+        Expected: FAIL initially -> PASS after configuration fix
         """
         try:
             from auth_service.auth_core.secret_loader import AuthSecretLoader
@@ -239,7 +239,7 @@ class E2EBypassKeyIntegrationIssue1087Tests(SSotAsyncTestCase):
             else:
                 # Configuration has been fixed
                 assert len(result) > 0, "Bypass key should be non-empty"
-                print(f"✅ CONFIGURATION FIXED: E2E bypass key configured in staging")
+                print(f"CHECK CONFIGURATION FIXED: E2E bypass key configured in staging")
                 print(f"   Key length: {len(result)} characters")
                 print(f"   Configuration source: {'Environment variable' if result else 'Secret Manager'}")
 
@@ -276,7 +276,7 @@ class E2EBypassKeyIntegrationIssue1087Tests(SSotAsyncTestCase):
                     f"Production must NEVER return E2E bypass keys."
                 )
 
-                print(f"✅ SECURITY VALIDATED: Production correctly blocks E2E bypass keys")
+                print(f"CHECK SECURITY VALIDATED: Production correctly blocks E2E bypass keys")
 
         except ImportError as e:
             pytest.skip(f"Auth service components not available: {e}")
@@ -325,10 +325,10 @@ class E2EBypassKeyIntegrationIssue1087Tests(SSotAsyncTestCase):
                         assert mock_token['access_token'] is not None, "Token generation failed"
                         assert mock_token['e2e_test_mode'] is True, "E2E mode not set"
 
-                        print(f"✅ PASS: Complete E2E bypass key workflow integration successful")
-                        print(f"   1. Configuration loading: ✅")
-                        print(f"   2. Key validation: ✅")
-                        print(f"   3. Token generation: ✅")
+                        print(f"CHECK PASS: Complete E2E bypass key workflow integration successful")
+                        print(f"   1. Configuration loading: CHECK")
+                        print(f"   2. Key validation: CHECK")
+                        print(f"   3. Token generation: CHECK")
                         print(f"   Access Token: {mock_token['access_token']}")
 
         except ImportError as e:

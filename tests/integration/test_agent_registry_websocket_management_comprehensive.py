@@ -2,7 +2,7 @@
 Comprehensive Integration Tests for Agent Registry and WebSocket Management
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise)
+    - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure Agent Registry properly manages agent lifecycles with WebSocket events for chat value
 - Value Impact: Validates that agents deliver real-time notifications enabling substantive user interactions
 - Strategic Impact: Core platform functionality ensuring 5 critical WebSocket events for business value delivery
@@ -12,7 +12,7 @@ delivers the 5 essential events (agent_started, agent_thinking, tool_executing, 
 that enable meaningful AI interactions and chat business value.
 
 Key Integration Areas Tested:
-1. Agent Registry initialization and configuration
+    1. Agent Registry initialization and configuration
 2. Agent registration and discovery processes  
 3. WebSocket manager integration with Agent Registry
 4. Agent execution context and WebSocket event emission
@@ -127,10 +127,10 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
             if expected_value_type == "cost_savings:"
                 savings_indicators = [
                     total_potential_monthly_savings, potential_savings, 
-                    coordinated_optimization_plan", "monthly_savings
+                    coordinated_optimization_plan", monthly_savings"
                 ]
                 has_savings = any(indicator in result_data for indicator in savings_indicators)
-                assert has_savings, fCost savings result missing savings indicators. Got: {list(result_data.keys())}
+                assert has_savings, "fCost savings result missing savings indicators. Got: {list(result_data.keys())}"
                 
                 # Verify quantifiable savings
                 savings_amount = (
@@ -140,15 +140,15 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                     0
                 )
                 assert savings_amount > 0, "Business value must quantify actual cost savings"
-                assert savings_amount >= 1000, fSavings must be enterprise-significant: ${savings_amount}
+                assert savings_amount >= 1000, "fSavings must be enterprise-significant: ${savings_amount}"
                 
             # Verify actionability - results must enable user action
-            actionable_indicators = [recommendations, next_steps", "priority_actions, implementation_phases]
+            actionable_indicators = [recommendations, next_steps", priority_actions, implementation_phases]"
             has_actionable_content = any(indicator in result_data for indicator in actionable_indicators)
-            assert has_actionable_content, Business value must include actionable recommendations
+            assert has_actionable_content, "Business value must include actionable recommendations"
         
     async def _cleanup_websocket_connections(self):
-        ""Clean up WebSocket connections after testing.
+        ""Clean up WebSocket connections after testing."
         # Clean up any real WebSocket connections
         try:
             if hasattr(self, 'websocket_manager') and hasattr(self.websocket_manager, 'cleanup'):
@@ -157,7 +157,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
             self.logger.warning(fWebSocket cleanup failed: {e})
     
     def _create_test_user_context(self, user_id: str = None) -> UserExecutionContext:
-        ""Create test user execution context using SSOT ID generation.
+        ""Create test user execution context using SSOT ID generation."
         # SSOT COMPLIANCE: Use UnifiedIdGenerator instead of direct UUID
         if not user_id:
             user_id = ftest_user_{UnifiedIdGenerator.generate_user_id()}
@@ -173,7 +173,8 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_01_agent_registry_initialization_with_websocket_integration(self, real_services_fixture):
-        ""
+        """"
+
         Test Agent Registry initialization with WebSocket manager integration.
         
         Validates that Agent Registry properly initializes with WebSocket capabilities
@@ -188,7 +189,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         await self.agent_registry.set_websocket_manager_async(self.websocket_manager)
         
         # Verify WebSocket integration
-        assert hasattr(self.agent_registry, 'websocket_manager')
+        assert hasattr(self.agent_registry, "'websocket_manager')"
         assert self.agent_registry.websocket_manager is not None
         
         # Validate registry health after WebSocket integration
@@ -218,7 +219,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         # Verify core agents are present
         core_agents = ['triage', 'data', 'optimization', 'actions']
         for agent_type in core_agents:
-            assert agent_type in registered_agents, fCore agent {agent_type} not registered
+            assert agent_type in registered_agents, "fCore agent {agent_type} not registered"
         
         # Verify no registration errors
         assert len(self.agent_registry.registration_errors) == 0, \
@@ -231,7 +232,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services  
     async def test_03_user_isolated_agent_creation_with_websocket_events(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test user-isolated agent creation with WebSocket event emission.
         
         Validates that agents are created with proper user isolation and emit
@@ -282,14 +283,14 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         
         # Verify business-critical WebSocket event structure
         for event in user_events:
-            assert "timestamp in event or user_id" in event, WebSocket events must have proper structure
+            assert "timestamp in event or user_id" in event, "WebSocket events must have proper structure"
             
         self.logger.info(f PASS:  User-isolated agent created with {len(user_events)} WebSocket events emitted)""
     
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_04_multi_user_agent_isolation_validation(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test multi-user agent isolation through Agent Registry.
         
         Validates that agents for different users are completely isolated
@@ -332,10 +333,10 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         bob_bridge = bob_session._websocket_bridge
         
         if alice_bridge:
-            await alice_bridge.emit_agent_started(agent_type=triage, message="Alice's agent started)"'
+            await alice_bridge.emit_agent_started(agent_type=triage, message="Alice's agent started)'"
             
         if bob_bridge:
-            await bob_bridge.emit_agent_started(agent_type=triage", message=Bob's agent started)"'
+            await bob_bridge.emit_agent_started(agent_type=triage", message=Bob's agent started)'"
         
         # Verify events are user-isolated
         alice_events = [e for e in self.websocket_events if e.get(user_id) == user_alice_context.user_id]
@@ -356,7 +357,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         all_bob_users = set(e.get(user_id) for e in bob_events)
         
         assert len(all_alice_users) == 1 and user_alice_context.user_id in all_alice_users, Alice events must be isolated""
-        assert len(all_bob_users) == 1 and user_bob_context.user_id in all_bob_users, Bob events must be isolated
+        assert len(all_bob_users) == 1 and user_bob_context.user_id in all_bob_users, "Bob events must be isolated"
         assert all_alice_users.isdisjoint(all_bob_users), User event isolation must be complete""
         
         self.logger.info(f" PASS:  Multi-user isolation validated: Alice={len(alice_events)} events, Bob={len(bob_events)} events)"
@@ -416,9 +417,9 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
             await bridge.emit_agent_completed(
                 result={
                     recommendations": ["
-                        {type: instance_optimization, savings: 2000},""
+                        {"type": instance_optimization, savings: 2000},""
                         {type": storage_cleanup, savings: 1500},"
-                        {"type: reserved_instances", savings: 1500}
+                        {"type: reserved_instances, savings: 1500}"
                     ],
                     total_potential_savings: 5000,""
                     "confidence: 0.87"
@@ -441,17 +442,17 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         
         # Verify event timing and ordering for user experience
         if len(user_events) > 1:
-            event_times = [e.get("timestamp) for e in user_events if e.get(timestamp")]
+            event_times = [e.get("timestamp) for e in user_events if e.get(timestamp)]"
             if len(event_times) > 1:
                 # Events should be properly sequenced
-                assert event_times == sorted(event_times), WebSocket events should be chronologically ordered
+                assert event_times == sorted(event_times), "WebSocket events should be chronologically ordered"
                 
         self.logger.info(f PASS:  Complete WebSocket event flow validated with {len(user_events)} events delivering business value)""
     
     @pytest.mark.integration  
     @pytest.mark.real_services
     async def test_06_websocket_event_ordering_validation(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test WebSocket event ordering for proper user experience.
         
         Validates that WebSocket events are emitted in the correct order
@@ -491,7 +492,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
             await bridge.emit_tool_completed(tool_name="resource_analyzer, result={analysis: complete)"
             
             await asyncio.sleep(0.1)
-            await bridge.emit_agent_completed(result={optimization_plan": "generated)
+            await bridge.emit_agent_completed(result={optimization_plan": generated)"
         
         # Verify event ordering
         user_events = [e for e in self.websocket_events if e.get(user_id) == user_context.user_id]
@@ -501,7 +502,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         event_types = [e["type] for e in sorted_events]"
         
         # Verify correct business flow order
-        expected_order = [agent_started, agent_thinking, tool_executing", "tool_completed, agent_completed]
+        expected_order = [agent_started, agent_thinking, tool_executing", tool_completed, agent_completed]"
         
         # Find the start of our test sequence
         start_idx = None
@@ -532,7 +533,8 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_07_agent_lifecycle_management_with_cleanup(self, real_services_fixture):
-    ""
+    """"
+
         Test agent lifecycle management with proper resource cleanup.
         
         Validates that agents are properly created, managed, and cleaned up
@@ -587,7 +589,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services  
     async def test_08_memory_leak_prevention_monitoring(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test memory leak prevention and monitoring capabilities.
         
         Validates that Agent Registry monitors resource usage and prevents
@@ -623,7 +625,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         for user_context in user_contexts:
             assert user_context.user_id in monitoring_report['users']
             user_metrics = monitoring_report['users'][user_context.user_id]
-            assert user_metrics['status'] in ['healthy', 'warning', 'error']
+            assert user_metrics['status'] in ['healthy', "'warning', 'error']"
             
         # Test memory threshold detection (should be healthy at current levels)
         assert len(monitoring_report['global_issues') == 0, \
@@ -644,7 +646,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_09_websocket_manager_failure_recovery(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test error handling when WebSocket manager fails or is unavailable.
         
         Validates that Agent Registry gracefully handles WebSocket failures
@@ -699,7 +701,8 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_10_agent_creation_error_handling(self, real_services_fixture):
-        ""
+        """"
+
         Test error handling during agent creation with proper error reporting.
         
         Validates that Agent Registry provides clear error messages and
@@ -718,7 +721,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                 websocket_manager=self.websocket_manager
             )
         error_msg = str(exc_info.value).lower()
-        assert non_existent_agent in error_msg or agent" in error_msg, "Error should reference the problematic agent type
+        assert non_existent_agent in error_msg or agent" in error_msg, Error should reference the problematic agent type"
         
         # Test creation with invalid user_id - enhanced error handling
         with pytest.raises((ValueError, TypeError)) as exc_info:
@@ -728,7 +731,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                 user_context=user_context,
                 websocket_manager=self.websocket_manager
             )
-        assert user_id in str(exc_info.value).lower(), Error message should mention user_id issue
+        assert user_id in str(exc_info.value).lower(), "Error message should mention user_id issue"
         
         with pytest.raises((ValueError, TypeError)) as exc_info:
             await self.agent_registry.create_agent_for_user(
@@ -783,7 +786,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         
         # Verify tool dispatcher is UnifiedToolDispatcher type (or mock for testing)
         # In real system this would be UnifiedToolDispatcher
-        assert hasattr(tool_dispatcher, 'execute_tool')
+        assert hasattr(tool_dispatcher, "'execute_tool')"
         
         # Test tool dispatcher factory pattern
         factory = self.agent_registry.tool_dispatcher_factory
@@ -804,7 +807,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_12_universal_registry_integration_compliance(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test Universal Registry integration compliance and SSOT patterns.
         
         Validates that Agent Registry properly extends UniversalRegistry
@@ -812,7 +815,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
 """Empty docstring."""
         # Verify Agent Registry extends UniversalRegistry
         from netra_backend.app.core.registry.universal_registry import UniversalAgentRegistry
-        assert isinstance(self.agent_registry, UniversalAgentRegistry)
+        assert isinstance(self.agent_registry, "UniversalAgentRegistry)"
         
         # Test SSOT registry methods
         self.agent_registry.register_default_agents()
@@ -846,7 +849,8 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_13_concurrent_agent_creation_performance(self, real_services_fixture):
-    ""
+    """"
+
         Test concurrent agent creation performance and thread safety.
         
         Validates that Agent Registry can handle concurrent agent creation
@@ -886,14 +890,14 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         
         # Verify success rate
         success_rate = len(successful_creations) / len(tasks)
-        assert success_rate >= 0.9, fSuccess rate too low: {success_rate:.2%}
+        assert success_rate >= 0.9, "fSuccess rate too low: {success_rate:.2%}"
         
         # Verify performance
         total_time = end_time - start_time
         avg_time_per_creation = total_time / len(successful_creations) if successful_creations else float('inf')
         
         # Should create agents reasonably quickly (less than 1 second per agent on average)
-        assert avg_time_per_creation < 1.0, fAgent creation too slow: {avg_time_per_creation:.2f}s per agent""
+        assert avg_time_per_creation < 1.0, fAgent creation too slow: {avg_time_per_creation:.""2f""}s per agent""
         
         # Verify no race conditions - all users should have their agents
         monitoring_report = await self.agent_registry.monitor_all_users()
@@ -905,12 +909,14 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
             for error in failed_creations[:3]:  # Log first few errors
                 self.logger.warning(fCreation error: {error})
         
-        self.logger.info(f PASS:  Concurrent performance validated: {len(successful_creations)}/{len(tasks)} agents created in {total_time:.2f}s)
+        self.logger.info(f PASS:  Concurrent performance validated: {len(successful_creations)}/{len(tasks)} agents created in {total_time:.""2f""}s)""
+
     
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_14_websocket_event_throughput_validation(self, real_services_fixture):
-        ""
+        """"
+
         Test WebSocket event throughput under concurrent load.
         
         Validates that WebSocket event system can handle high throughput
@@ -976,29 +982,31 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         event_delivery_rate = total_events_sent / expected_total_events if expected_total_events > 0 else 0
         
         assert event_delivery_rate >= 0.9, fEvent delivery rate too low: {event_delivery_rate:.2%}""
-        assert events_per_second >= 50, fEvent throughput too low: {events_per_second:.1f} events/second
+        assert events_per_second >= 50, "fEvent throughput too low: {events_per_second:.""1f""} events/second"
         
         # Validate all events were captured
         total_received_events = len([e for e in self.websocket_events 
-                                   if e.get(type) == agent_thinking and throughput_user_" in e.get("user_id, )]
+                                   if e.get(type) == agent_thinking and throughput_user_" in e.get(user_id, )]"
         
         assert total_received_events >= total_events_sent * 0.9, \
             fEvent loss detected: {total_received_events} received vs {total_events_sent} sent
         
         # Validate throughput meets business requirements for real-time experience
         if events_per_second < 50:
-            self.logger.warning(fWebSocket throughput below optimal: {events_per_second:.1f} events/second")"
+            self.logger.warning(fWebSocket throughput below optimal: {events_per_second:.""1f""} events/second")"
         if event_delivery_rate < 0.95:
             self.logger.warning(fEvent delivery rate concerning: {event_delivery_rate:.1%})
             
-        self.logger.info(f PASS:  WebSocket throughput validated: {events_per_second:.1f} events/second, {event_delivery_rate:.1%} delivery rate)
+        self.logger.info(f PASS:  WebSocket throughput validated: {events_per_second:.""1f""} events/second, {event_delivery_rate:.1%} delivery rate)""
+
     
     # ===================== BUSINESS VALUE VALIDATION TESTS =====================
     
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_15_end_to_end_business_value_delivery(self, real_services_fixture):
-    ""
+    """"
+
         Test end-to-end business value delivery through complete agent workflow.
         
         Validates that Agent Registry enables complete business value delivery
@@ -1058,7 +1066,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                         category: "oversized_resources, "
                         potential_savings": 1800,"
                         confidence: 0.87,
-                        action_required": "rightsizing_recommendations
+                        action_required": rightsizing_recommendations"
                     },
                     {
                         category: unattached_volumes,
@@ -1077,9 +1085,9 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
             # Final business value delivery
             business_value_result = {
                 recommendations: analysis_result[optimization_opportunities],
-                total_potential_monthly_savings: sum(opp[potential_savings") for opp in analysis_result["optimization_opportunities),
+                total_potential_monthly_savings: sum(opp[potential_savings") for opp in analysis_result[optimization_opportunities),"
                 roi_projection: {
-                    "annual_savings: sum(opp[potential_savings") for opp in analysis_result[optimization_opportunities) * 12,
+                    "annual_savings: sum(opp[potential_savings) for opp in analysis_result[optimization_opportunities) * 12,"
                     implementation_cost: 500,""
                     "payback_period_months: 0.17"
                 },
@@ -1124,12 +1132,12 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
             if total_potential_monthly_savings" in result_data:"
                 savings = result_data[total_potential_monthly_savings]
                 assert savings > 0, Business value must show actual cost savings""
-                assert savings >= 1000, fSavings amount should be significant for enterprise value: ${savings}
+                assert savings >= 1000, "fSavings amount should be significant for enterprise value: ${savings}"
             
             # Verify recommendations quality
             if recommendations in result_data:
                 recommendations = result_data["recommendations]"
-                assert isinstance(recommendations, list), Recommendations must be actionable list
+                assert isinstance(recommendations, "list), Recommendations must be actionable list"
                 assert len(recommendations) > 0, Must provide actionable recommendations""
                 
             # Verify confidence metrics exist for business decisions
@@ -1190,7 +1198,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                 agent_type="triage,"
                 result={
                     classification: cost_optimization_complex,
-                    required_agents: ["data, optimization"], 
+                    required_agents: ["data, optimization], "
                     priority: high,
                     "estimated_value: $5000_monthly_savings"
                 }
@@ -1203,7 +1211,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
             
             await bridge.emit_tool_executing(
                 tool_name="data_collector,"
-                parameters={sources: [aws_billing, usage_metrics", "performance_data]}
+                parameters={sources: [aws_billing, usage_metrics", performance_data]}"
             
             await bridge.emit_tool_completed(
                 tool_name=data_collector, 
@@ -1237,14 +1245,14 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                     total_monthly_savings: 4800,
                     implementation_phases: [""
                         {phase": 1, savings: 1200, timeline: immediate},"
-                        {phase": 2, "savings: 2100, timeline: 2_weeks}, 
-                        {phase: 3, "savings: 1500, timeline": 1_month}
+                        {phase": 2, savings: 2100, timeline: 2_weeks}, "
+                        {phase: 3, "savings: 1500, timeline: 1_month}"
                     ]
                 },
                 risk_assessment: low_risk_high_reward,
-                business_impact": "23% cost reduction with improved performance,
+                business_impact": 23% cost reduction with improved performance,"
                 coordination_success: True,
-                agents_involved: [triage", "data, optimization]
+                agents_involved: [triage", data, optimization]"
             }
             
             await bridge.emit_tool_completed(
@@ -1272,7 +1280,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         
         # Verify final business value delivery
         final_completed_events = [e for e in user_events 
-                                if e[type] == agent_completed and e.get(agent_type") == "optimization]
+                                if e[type] == agent_completed and e.get(agent_type") == optimization]"
         
         assert len(final_completed_events) == 1
         final_result = final_completed_events[0]
@@ -1293,7 +1301,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_17_agent_registry_database_persistence_integration(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test Agent Registry integration with real database services.
         
         Validates that agents created through Agent Registry can interact
@@ -1341,7 +1349,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                     
                     await bridge.emit_tool_executing(
                         tool_name=database_query,
-                        parameters={query_type: analysis", "target: cost_data}
+                        parameters={query_type: analysis", target: cost_data}"
                     
                     # Simulate successful database operation
                     await bridge.emit_tool_completed(
@@ -1355,7 +1363,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                     
                     await bridge.emit_agent_completed(
                         result={
-                            "database_integration: successful",
+                            "database_integration: successful,"
                             data_quality: high,
                             business_value: actionable_insights_generated""
                         }
@@ -1365,7 +1373,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                 
                 database_tool_events = [e for e in user_events 
                                       if e[type] == tool_executing and 
-                                      e.get(tool_name") == "database_query]
+                                      e.get(tool_name") == database_query]"
                 assert len(database_tool_events) >= 1
                 
                 self.logger.info( PASS:  Agent Registry database integration validated)
@@ -1431,7 +1439,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
             
             await bridge.emit_agent_completed(
                 result={
-                    cache_integration": "successful,
+                    cache_integration": successful,"
                     performance_optimized: True,
                     response_time_ms: 150,  # Fast due to cache""
                     business_value": immediate_insights_delivery"
@@ -1441,7 +1449,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         user_events = [e for e in self.websocket_events if e.get(user_id) == user_context.user_id]
         
         cache_events = [e for e in user_events 
-                       if e["type] == tool_executing" and 
+                       if e["type] == tool_executing and "
                        e.get(tool_name) == cache_manager]
         
         assert len(cache_events) >= 1, Cache integration events not found""
@@ -1456,14 +1464,14 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
             assert result_data.get("performance_optimized) is True"
             assert result_data.get(cache_integration) == successful
         
-        self.logger.info( PASS:  Agent Registry Redis cache integration validated)""
+        self.logger.info("PASS:  Agent Registry Redis cache integration validated))"
     
     # ===================== ADVANCED INTEGRATION SCENARIOS =====================
     
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_19_agent_registry_failure_resilience_comprehensive(self, real_services_fixture):
-"""Empty docstring."""
+    """Empty docstring."""
         Test Agent Registry resilience under various failure scenarios.
         
         Validates that Agent Registry maintains business value delivery
@@ -1516,7 +1524,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                 # Simulate tool failure, but agent continues
                 await bridge.emit_agent_completed(
                     result={
-                        "resilience_test: successful",
+                        "resilience_test: successful,"
                         partial_failures: handled_gracefully,
                         business_continuity: maintained""
                     }
@@ -1544,7 +1552,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         health_after = self.agent_registry.get_registry_health()
         
         # Registry should remain healthy
-        assert health_after['status'] in ['healthy', 'warning']  # Warning is acceptable under stress
+        assert health_after['status'] in ['healthy', "'warning']  # Warning is acceptable under stress"
         
         # Validate events were still delivered despite failures
         resilience_events = [e for e in self.websocket_events 
@@ -1558,7 +1566,8 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_20_comprehensive_business_value_integration_validation(self, real_services_fixture):
-    ""
+    """"
+
         Final comprehensive test validating complete business value integration.
         
         This test validates the complete integration of Agent Registry with
@@ -1638,7 +1647,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                 tool_name="ai_optimization_engine,"
                 parameters={
                     optimization_scope: comprehensive,
-                    risk_tolerance": "balanced,
+                    risk_tolerance": balanced,"
                     roi_target: 0.25,
                     implementation_timeline: phased_approach""
                 }
@@ -1661,7 +1670,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                         category: "network_optimization,"
                         monthly_savings": 1200,"
                         confidence: 0.88,
-                        implementation_effort": "high
+                        implementation_effort": high"
                     }
                 ],
                 total_monthly_savings: 8500,
@@ -1688,11 +1697,11 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                 },
                 detailed_recommendations: optimization_result[optimization_opportunities],
                 implementation_roadmap": {"
-                    phase_1: {timeline: immediate, savings": 2800, "effort: low},
-                    phase_2: {timeline: "2_weeks, savings": 4500, effort: medium},
-                    phase_3: {timeline": "1_month, savings: 1200, effort: high}
+                    phase_1: {timeline: immediate, savings": 2800, effort: low},"
+                    phase_2: {timeline: "2_weeks, savings: 4500, effort: medium},"
+                    phase_3: {timeline": 1_month, savings: 1200, effort: high}"
                 },
-                "risk_assessment: low_risk_high_reward",
+                "risk_assessment: low_risk_high_reward,"
                 business_impact: {
                     cost_reduction_percentage: 34,""
                     "performance_impact: improved,"
@@ -1704,7 +1713,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
                     Establish monitoring and optimization governance""
                 ],
                 comprehensive_integration_success: True,
-                total_business_value": "$102,0 annual savings with 6.8x ROI
+                total_business_value": $102,0 annual savings with 6.""8x"" ROI"
             }
             
             await bridge.emit_agent_completed(result=final_comprehensive_result)
@@ -1713,11 +1722,11 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         user_events = [e for e in self.websocket_events if e.get(user_id) == user_context.user_id]
         
         # Validate all critical WebSocket events were delivered
-        expected_events = [agent_started, agent_thinking", "tool_executing, tool_completed, agent_completed]
+        expected_events = [agent_started, agent_thinking", tool_executing, tool_completed, agent_completed]"
         assert_websocket_events_sent(user_events, expected_events)
         
         # Validate comprehensive business value delivery
-        completed_events = [e for e in user_events if e[type"] == "agent_completed]
+        completed_events = [e for e in user_events if e[type"] == agent_completed]"
         assert len(completed_events) >= 1
         
         final_business_result = completed_events[0]
@@ -1729,9 +1738,9 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
             # Validate executive summary
             exec_summary = result_data.get(executive_summary", {)"
             if exec_summary:
-                assert exec_summary.get(identified_monthly_savings, 0) > 5000
+                assert exec_summary.get(identified_monthly_savings, "0) > 5000"
                 assert exec_summary.get(roi", 0) > 3.0"
-                assert exec_summary.get(payback_period, ).replace( months, ").replace("months, ) 
+                assert exec_summary.get(payback_period, ).replace( months, ").replace(months, ) "
                 
             # Validate implementation roadmap
             roadmap = result_data.get(implementation_roadmap, {)
@@ -1747,7 +1756,7 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         
         # Validate system health after comprehensive workflow
         final_health = self.agent_registry.get_registry_health()
-        assert final_health['status'] in ['healthy', 'warning']
+        assert final_health['status'] in ['healthy', "'warning']"
         
         # Validate monitoring capabilities
         monitoring_report = await self.agent_registry.monitor_all_users()
@@ -1759,6 +1768,6 @@ class AgentRegistryWebSocketManagementComprehensiveTests(BaseIntegrationTest):
         self.logger.info(f    ->  Agents created: {len(agents)} agents")"
         self.logger.info(f    ->  Business value: ${result_data.get('executive_summary', {}.get('annual_savings_projection', 0):,} annual savings potential)
         self.logger.info(f    ->  System health: {final_health['status']})""
-        self.logger.info(f"    ->  Integration success: Agent Registry + WebSocket management delivering complete business value")
+        self.logger.info(f"    ->  Integration success: Agent Registry + WebSocket management delivering complete business value)"
 
 )))))))))))))))))))))))))))))))))))))))

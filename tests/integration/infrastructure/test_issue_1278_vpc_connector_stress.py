@@ -250,7 +250,7 @@ class TestIssue1278VpcConnectorStress(BaseIntegrationTest):
         # CRITICAL TEST: High Redis failure rate indicates VPC connector cascade
         if redis_failure_rate > 0.25:  # >25% Redis failure rate
             pytest.fail(
-                f"Issue #1278 VPC connector → Redis cascade failure: "
+                f"Issue #1278 VPC connector -> Redis cascade failure: "
                 f"Redis failure rate {redis_failure_rate:.1%} "
                 f"({cascade_failures}/{redis_connection_attempts}) "
                 f"with average connection time {avg_connection_time:.1f}s"

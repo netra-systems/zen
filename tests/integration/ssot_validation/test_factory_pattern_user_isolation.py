@@ -84,7 +84,7 @@ class FactoryPatternUserIsolationTests(SSotAsyncTestCase):
                         f"Agent user context contaminated: expected {user_id}, got {agent.user_context.user_id}"
                     )
             
-            print(f"\n✅ Agent Factory User Isolation VERIFIED:")
+            print(f"\nCHECK Agent Factory User Isolation VERIFIED:")
             print(f"  Created {len(user_agents)} isolated agent instances")
             for user_id, info in user_agents.items():
                 print(f"    User {user_id}: Agent ID {info['agent_id']}")
@@ -128,7 +128,7 @@ class FactoryPatternUserIsolationTests(SSotAsyncTestCase):
                 f"IDs: {manager_ids}"
             )
             
-            print(f"\n✅ WebSocket Manager Factory Isolation VERIFIED:")
+            print(f"\nCHECK WebSocket Manager Factory Isolation VERIFIED:")
             print(f"  Created {len(user_managers)} isolated manager instances")
             for user_id, info in user_managers.items():
                 print(f"    User {user_id}: Manager ID {info['manager_id']}")
@@ -213,7 +213,7 @@ class FactoryPatternUserIsolationTests(SSotAsyncTestCase):
                 f"Concurrent execution used same agent instances (isolation violation). IDs: {agent_ids}"
             )
             
-            print(f"\n✅ Concurrent User Execution Isolation VERIFIED:")
+            print(f"\nCHECK Concurrent User Execution Isolation VERIFIED:")
             print(f"  Executed {len(successful_results)} concurrent user sessions")
             for user_id, result in user_data_map.items():
                 print(f"    User {user_id}: Agent ID {result['agent_id']}, Data: {result['data']}")
@@ -255,9 +255,9 @@ class FactoryPatternUserIsolationTests(SSotAsyncTestCase):
         for test_name, result in prevention_results.items():
             if result.get('prevented'):
                 successful_preventions += 1
-                print(f"  ✅ {test_name}: Singleton prevented via {result.get('method', 'unknown')}")
+                print(f"  CHECK {test_name}: Singleton prevented via {result.get('method', 'unknown')}")
             else:
-                print(f"  ⚠️  {test_name}: Singleton not prevented - {result.get('details', 'unknown issue')}")
+                print(f"  WARNING️  {test_name}: Singleton not prevented - {result.get('details', 'unknown issue')}")
         
         # Document findings
         print(f"\n🔒 Singleton Prevention Results:")
@@ -365,7 +365,7 @@ class FactoryPatternRegressionTests(SSotAsyncTestCase):
                 f"Factory returned duplicate instances: {instances}"
             )
             
-            print(f"\n✅ Factory Instance Lifecycle Test:")
+            print(f"\nCHECK Factory Instance Lifecycle Test:")
             print(f"  Created {len(instances)} unique instances")
             print(f"  Instance IDs: {instances}")
             
@@ -399,7 +399,7 @@ class FactoryPatternRegressionTests(SSotAsyncTestCase):
                 self.assertEqual(agent1.user_context.user_id, "user1")
                 self.assertEqual(agent2.user_context.user_id, "user2")
             
-            print(f"\n✅ Factory Memory Isolation Test:")
+            print(f"\nCHECK Factory Memory Isolation Test:")
             print(f"  Agent1 ID: {id(agent1)}, User: {getattr(agent1, 'user_context', {}).get('user_id', 'unknown')}")
             print(f"  Agent2 ID: {id(agent2)}, User: {getattr(agent2, 'user_context', {}).get('user_id', 'unknown')}")
             

@@ -17,6 +17,7 @@ from shared.isolated_environment import get_env
 from shared.logging.unified_logging_ssot import get_logger
 
 from netra_backend.app.config import get_config
+from netra_backend.app.core.configuration.unified_secrets import get_secrets_manager
 
 logger = get_logger(__name__)
 
@@ -37,16 +38,20 @@ class RedisConnectionHandler:
         """Initialize Redis connection handler with environment configuration."""
         self.env = get_env().get("ENVIRONMENT", "development").lower()
         self._config = get_config()
+        self._secrets_manager = get_secrets_manager()
         self._connection_pool = None
         self._connection_info = self._build_connection_info()
         
     def _build_connection_info(self) -> Dict[str, Any]:
         """Build Redis connection information based on environment."""
-        # Get base configuration
-        host = get_env().get("REDIS_HOST", "localhost")
-        port = int(get_env().get("REDIS_PORT", "6379"))
-        db = int(get_env().get("REDIS_DB", "0"))
-        password = get_env().get("REDIS_PASSWORD")
+        # Get configuration using unified secrets manager (supports GCP Secret Manager)
+        host = self._secrets_manager.get_secret("REDIS_HOST", "localhost")
+        port = int(self._secrets_manager.get_secret("REDIS_PORT", "6379"))
+        db = int(self._secrets_manager.get_secret("REDIS_DB", "0"))
+        password = self._secrets_manager.get_secret("REDIS_PASSWORD")
+
+        # Log which source was used for debugging
+        logger.info(f"Redis configuration loaded - Host: {host}, Port: {port}, DB: {db}, Password: {'***' if password else 'None'}")
         
         # Environment-specific host resolution
         if self.env == "staging":
@@ -63,17 +68,25 @@ class RedisConnectionHandler:
                 host = get_env().get("REDIS_PRODUCTION_HOST") or "redis-production.internal"
                 logger.warning(f"Overriding localhost Redis with production host: {host}")
         
-        # Build connection info
+        # Build connection info with WebSocket authentication monitoring optimizations
         connection_info = {
             "host": host,
             "port": port,
             "db": db,
             "password": password if password else None,
             "environment": self.env,
-            "socket_timeout": 5,
-            "socket_connect_timeout": 5,
+            # Issue #1300: Enhanced timeout settings for WebSocket authentication monitoring
+            "socket_timeout": 10,  # Increased from 5s for reliable WebSocket auth checks
+            "socket_connect_timeout": 10,  # Increased from 5s for better connection stability
             "retry_on_timeout": True,
-            "health_check_interval": 30
+            "health_check_interval": 15,  # Reduced from 30s for faster failure detection
+            # Enhanced connection settings for WebSocket monitoring
+            "socket_keepalive": True,
+            "socket_keepalive_options": {
+                "TCP_KEEPIDLE": 1,
+                "TCP_KEEPINTVL": 3,
+                "TCP_KEEPCNT": 5
+            }
         }
         
         # Add SSL configuration for staging/production
@@ -95,6 +108,7 @@ class RedisConnectionHandler:
                 # Use SSOT Redis import pattern
                 import redis
                 
+                # Enhanced connection pool configuration for WebSocket authentication monitoring
                 pool_config = {
                     "host": self._connection_info["host"],
                     "port": self._connection_info["port"],
@@ -103,8 +117,16 @@ class RedisConnectionHandler:
                     "socket_connect_timeout": self._connection_info["socket_connect_timeout"],
                     "retry_on_timeout": self._connection_info["retry_on_timeout"],
                     "health_check_interval": self._connection_info["health_check_interval"],
-                    "max_connections": 20,
-                    "connection_class": redis.Connection
+                    # Issue #1300: Enhanced pool settings for WebSocket authentication monitoring
+                    "max_connections": 50,  # Increased for concurrent WebSocket sessions
+                    "connection_class": redis.Connection,
+                    # Connection pool optimizations for WebSocket monitoring
+                    "socket_keepalive": True,
+                    "socket_keepalive_options": {
+                        "TCP_KEEPIDLE": 1,
+                        "TCP_KEEPINTVL": 3,
+                        "TCP_KEEPCNT": 5
+                    }
                 }
                 
                 # Add password if provided

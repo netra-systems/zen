@@ -1,25 +1,26 @@
 """
-"""
+
 Mission Critical Business Value Protection Tests for ClickHouse Exception Handling - Issue #731.
 
 These tests protect business-critical functionality by ensuring that ClickHouse
 exception handling maintains system stability and prevents revenue-impacting failures.
 
 Business Value Protection:
-- $500K+ ARR: Protects analytics pipeline reliability
+    - $500K+ plus ARR: Protects analytics pipeline reliability
 - Customer Experience: Ensures clear error reporting and graceful degradation
 """
-"""
+
 - System Stability: Prevents cascading failures from ClickHouse issues
 - Operational Efficiency: Enables faster troubleshooting through specific exceptions
 "
-"
+""
+
 
 import pytest
 import asyncio
 from unittest.mock import Mock, patch, AsyncMock
 from netra_backend.app.db.clickhouse import ClickHouseService, get_clickhouse_service
-from netra_backend.app.db.transaction_errors import (
+from netra_backend.app.db.transaction_errors import ()
     TableNotFoundError, CacheError, ConnectionError, TimeoutError,
     PermissionError, SchemaError, classify_error
 )
@@ -46,7 +47,7 @@ class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
         with pytest.raises(TableNotFoundError) as exc_info:
             await self.service.execute(
                 INSERT INTO user_analytics (user_id, action, timestamp) VALUES (%s, %s, %s)","
-                {user_id: user123, action: login", "timestamp: 2024-1-1},
+                {user_id: user123, action: login", timestamp: 2024-1-1},"
                 user_id=user123,
                 operation_context=analytics_collection""
             )
@@ -55,7 +56,8 @@ class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
         error_message = str(exc_info.value)
         assert Table not found error in error_message
         assert user_analytics in error_message"
-        assert user_analytics in error_message"
+        assert user_analytics in error_message""
+
 
         # BUSINESS VALUE: Operations team can immediately identify missing table issue
         # rather than generic "something went wrong error"
@@ -73,10 +75,11 @@ class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
         with pytest.raises(PermissionError) as exc_info:
             await self.service.execute(
                 SELECT SUM(revenue) FROM revenue_metrics WHERE date >= %s,
-                {"date: 2024-1-1"},
+                {"date: 2024-1-1},"
                 user_id=admin_user,
                 operation_context=revenue_calculation"
-                operation_context=revenue_calculation"
+                operation_context=revenue_calculation""
+
             )
 
         # Verify exception enables proper escalation
@@ -92,7 +95,8 @@ class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
         # Test scenario: Customer data query failure needs specific classification
         mock_client = AsyncMock()
         mock_client.execute.side_effect = Exception(Connection timeout while accessing customer_data)"
-        mock_client.execute.side_effect = Exception(Connection timeout while accessing customer_data)"
+        mock_client.execute.side_effect = Exception(Connection timeout while accessing customer_data)""
+
 
         self.service._client = mock_client
 
@@ -140,7 +144,7 @@ class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
 
         self.service._client = mock_client
 
-        large_dataset = [{id: i, "data: fbatch_data_{i}"} for i in range(1000)]
+        large_dataset = [{id: i, "data: fbatch_data_{i}} for i in range(1000)]"
 
         # Batch processing failure should raise specific exception
         with pytest.raises(TableNotFoundError) as exc_info:
@@ -164,7 +168,8 @@ class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
                 raise Exception("Permission denied for tenant_a)"
             elif tenant_b in str(params):
                 raise Exception(Table 'tenant_b_data' does not exist)"
-                raise Exception(Table 'tenant_b_data' does not exist)"
+                raise Exception(Table 'tenant_b_data' does not exist)""
+
             else:
                 return [{status": success}]"
 
@@ -175,10 +180,11 @@ class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
         with pytest.raises(PermissionError):
             await self.service.execute(
                 SELECT * FROM tenant_data WHERE tenant_id = %s,
-                {"tenant_id: tenant_a"},
+                {"tenant_id: tenant_a},"
                 user_id=tenant_a_user,
                 operation_context=tenant_data_access"
-                operation_context=tenant_data_access"
+                operation_context=tenant_data_access""
+
             )
 
         # Tenant B should get table not found error
@@ -217,7 +223,8 @@ class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
                 "SELECT * FROM large_analytics_table ORDER BY timestamp DESC LIMIT 1000000,"
                 user_id=analytics_user,
                 operation_context=performance_critical_query"
-                operation_context=performance_critical_query"
+                operation_context=performance_critical_query""
+
             )
 
         # Verify exception provides performance context
@@ -229,11 +236,12 @@ class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
         # and trigger infrastructure scaling before customer impact
 
     async def test_data_consistency_exception_classification(self):
-        ""MISSION CRITICAL: Data consistency issues must be properly classified.
+        ""MISSION CRITICAL: Data consistency issues must be properly classified."
         # Test scenario: Data integrity problems need specific error handling
         mock_client = AsyncMock()
         mock_client.execute.side_effect = Exception(Cache corruption detected during data validation)"
-        mock_client.execute.side_effect = Exception(Cache corruption detected during data validation)"
+        mock_client.execute.side_effect = Exception(Cache corruption detected during data validation)""
+
 
         self.service._client = mock_client
 
@@ -249,7 +257,8 @@ class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
         error_message = str(exc_info.value)
         assert Cache error in error_message
         assert corruption in error_message"
-        assert corruption in error_message"
+        assert corruption in error_message""
+
 
         # BUSINESS VALUE: Data integrity monitoring can trigger immediate cache rebuild
         # maintaining data accuracy for business decisions
@@ -276,7 +285,8 @@ class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
         assert Permission error" in error_message"
         assert audit_trail in error_message
         assert insufficient privileges in error_message"
-        assert insufficient privileges in error_message"
+        assert insufficient privileges in error_message""
+
 
         # BUSINESS VALUE: Compliance team gets immediate notification of access issues
         # ensuring audit requirements are met and regulatory compliance maintained
@@ -304,7 +314,8 @@ class ClickHouseExceptionBusinessValueTests(SSotAsyncTestCase):
                         "SELECT * FROM recovery_test_table,"
                         user_id=disaster_recovery_system,
                         operation_context=disaster_recovery_validation"
-                        operation_context=disaster_recovery_validation"
+                        operation_context=disaster_recovery_validation""
+
                     )
 
         # BUSINESS VALUE: Disaster recovery automation can make appropriate decisions

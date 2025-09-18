@@ -68,7 +68,7 @@ class InstanceConfig:
     name: Optional[str] = None
     description: Optional[str] = None
     allowed_tools: List[str] = None
-    permission_mode: str = "acceptEdits"
+    permission_mode: str = "bypassPermissions"
     output_format: str = "stream-json"  # Default to stream-json for real-time output
     session_id: Optional[str] = None
     clear_history: bool = False
@@ -1383,157 +1383,157 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
     return [
         InstanceConfig(
             command="/gitcommitgardener",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/refreshgardener",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/createtestsv2 agent goldenpath messages work, unit",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/gcploggardener",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/createtestsv2 agent goldenpath messages work, integration",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/createtestsv2 agent goldenpath messages work, e2e",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/ssotgardener message routing",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/ssotgardener websockets or auth",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/ssotgardener tests",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/ssotgardener removing legacy",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/ssotgardener agent goldenpath messages work",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/gcploggardener",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/gitissueprogressorv3 agents",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/gitissueprogressorv3 p0",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/gitissueprogressorv3 agents",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/gitissueprogressorv3 goldenpath",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/gitissueprogressorv3 tests p1",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/failingtestsgardener agents",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/failingtestsgardener critical",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/gcploggardener",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/ssotgardener removing legacy",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/gitissueprogressorv3 removing legacy",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/testgardener",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/runtests all, unit",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/runtests critical, e2e",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/runtests all, integration",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/runtests agents, e2e gcp",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/prmergergit",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/gitcommitgardener",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/gcploggardener",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         ),
         InstanceConfig(
             command="/ultimate-test-deploy-loop",
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format=output_format
         )
     ]

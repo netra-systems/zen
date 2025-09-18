@@ -76,7 +76,7 @@ class EnvironmentAccessSSOTComplianceTests(SSotBaseTestCase):
             self.fail(f'DETECTION FAILURE: Failed to detect known environment access violations: {missing_detections}. The environment compliance detection system is not working correctly.')
         if production_violations:
             violation_details = '\n'.join([f'  - {v.file_path}:{v.line_number} - {v.description}\n    Code: {v.code_snippet}' for v in production_violations])
-            self.fail(f"ENVIRONMENT ACCESS VIOLATION: {len(production_violations)} files use direct os.environ access:\n{violation_details}\n\nREMEDIATION REQUIRED:\n1. Import: from dev_launcher.isolated_environment import IsolatedEnvironment\n2. Replace: os.environ.get('VAR') → IsolatedEnvironment.get_env('VAR')\n3. Replace: os.getenv('VAR') → IsolatedEnvironment.get_env('VAR')\n4. Use environment context managers for test isolation\n\nSECURITY IMPACT: Direct environment access threatens multi-user isolation and $500K+ ARR security")
+            self.fail(f"ENVIRONMENT ACCESS VIOLATION: {len(production_violations)} files use direct os.environ access:\n{violation_details}\n\nREMEDIATION REQUIRED:\n1. Import: from dev_launcher.isolated_environment import IsolatedEnvironment\n2. Replace: os.environ.get('VAR') -> IsolatedEnvironment.get_env('VAR')\n3. Replace: os.getenv('VAR') -> IsolatedEnvironment.get_env('VAR')\n4. Use environment context managers for test isolation\n\nSECURITY IMPACT: Direct environment access threatens multi-user isolation and $500K+ ARR security")
 
     def test_isolated_environment_usage_in_test_files(self):
         """

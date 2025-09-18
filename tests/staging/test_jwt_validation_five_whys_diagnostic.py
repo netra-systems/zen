@@ -17,7 +17,6 @@ import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, Any
 import httpx
-import jwt
 import pytest
 from shared.isolated_environment import get_env
 from shared.jwt_secret_manager import get_jwt_secret_manager, get_unified_jwt_secret

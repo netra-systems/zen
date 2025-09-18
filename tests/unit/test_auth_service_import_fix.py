@@ -99,28 +99,28 @@ if __name__ == "__main__":
     
     try:
         test_instance.test_auth_service_import_success()
-        print("✅ AuthService import test passed")
+        print("CHECK AuthService import test passed")
         
         test_instance.test_auth_service_is_backend_auth_integration()
-        print("✅ AuthService alias test passed")
+        print("CHECK AuthService alias test passed")
         
         test_instance.test_auth_service_instantiation()
-        print("✅ AuthService instantiation test passed")
+        print("CHECK AuthService instantiation test passed")
         
         test_instance.test_auth_service_in_all_exports()
-        print("✅ AuthService exports test passed")
+        print("CHECK AuthService exports test passed")
         
         test_instance.test_backward_compatibility_imports()
-        print("✅ Backward compatibility imports test passed")
+        print("CHECK Backward compatibility imports test passed")
         
         test_instance.test_auth_user_is_user_alias()
-        print("✅ AuthUser alias test passed")
+        print("CHECK AuthUser alias test passed")
         
         test_instance.test_auth_service_methods_available()
-        print("✅ AuthService methods test passed")
+        print("CHECK AuthService methods test passed")
         
         print("\n🎉 All AuthService import fix tests passed!")
         
     except Exception as e:
-        print(f"❌ Test failed: {e}")
+        print(f"X Test failed: {e}")
         raise

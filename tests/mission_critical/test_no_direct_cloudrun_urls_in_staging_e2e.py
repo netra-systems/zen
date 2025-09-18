@@ -5,13 +5,13 @@ BUSINESS CRITICAL: E2E tests MUST validate the same infrastructure path users ex
 Direct Cloud Run URLs bypass load balancers and create infrastructure mismatches.
 
 FAILURE IMPACT:
-- Load balancer issues go undetected
+    - Load balancer issues go undetected
 - Staging doesn't mirror production architecture'
 - False confidence in deployment readiness
 - Production incidents from infrastructure gaps
 
 This test enforces the remediation completed per:
-reports/remediation/LOAD_BALANCER_ENDPOINT_REMEDIATION_PLAN.md
+    reports/remediation/LOAD_BALANCER_ENDPOINT_REMEDIATION_PLAN.md
 
 
 import pytest
@@ -27,7 +27,8 @@ sys.path.insert(0, str(project_root))
 
 
 class CloudRunURLComplianceTests:
-    ""Mission critical tests to prevent direct Cloud Run URL regression
+    ""Mission critical tests to prevent direct Cloud Run URL regression""
+
     
     # FORBIDDEN: Direct Cloud Run URL patterns
     FORBIDDEN_PATTERNS = [
@@ -58,7 +59,8 @@ class CloudRunURLComplianceTests:
         netra_backend/app/core/network_constants.py,"
         netra_backend/app/core/network_constants.py,"
         tests/e2e/e2e_test_config.py"
-        tests/e2e/e2e_test_config.py"
+        tests/e2e/e2e_test_config.py""
+
     ]
     
     @pytest.fixture
@@ -78,7 +80,8 @@ class CloudRunURLComplianceTests:
     @pytest.fixture 
     def core_config_files(self) -> List[Path]:
         Get core configuration files"
-        Get core configuration files"
+        Get core configuration files""
+
         config_files = []
         
         for file_path in self.CORE_CONFIG_FILES:
@@ -89,8 +92,9 @@ class CloudRunURLComplianceTests:
         return config_files
     
     def test_no_direct_cloudrun_urls_in_e2e_tests(self, e2e_test_files):
-    "
-    "
+        """
+    ""
+
         MISSION CRITICAL: E2E tests must NOT use direct Cloud Run URLs
         
         Validates that all E2E tests use load balancer endpoints:
@@ -101,7 +105,8 @@ class CloudRunURLComplianceTests:
         NEVER direct Cloud Run URLs like:
         - netra-backend-staging-pnovr5vsba-uc.a.run.app
         "
-        "
+        ""
+
         violations = []
         
         for file_path in e2e_test_files:
@@ -136,16 +141,19 @@ class CloudRunURLComplianceTests:
                 error_msg += f"Line: {violation['line']}\n"
                 error_msg += fURL: {violation['content']}\n
                 error_msg += Fix: Replace with appropriate load balancer endpoint\n\n"
-                error_msg += Fix: Replace with appropriate load balancer endpoint\n\n"
+                error_msg += Fix: Replace with appropriate load balancer endpoint\n\n""
+
             
             error_msg += REMEDIATION:\n"
-            error_msg += REMEDIATION:\n"
+            error_msg += REMEDIATION:\n""
+
             error_msg += Run: python scripts/migrate_test_urls_to_load_balancer.py\n
             
             pytest.fail(error_msg)
     
     def test_core_config_uses_load_balancer_endpoints(self, core_config_files):
-        ""
+        """
+
         MISSION CRITICAL: Core configuration files must use load balancer endpoints
         
         Validates URLConstants and E2E config use proper staging domains.
@@ -175,7 +183,8 @@ class CloudRunURLComplianceTests:
         
         if violations:
             error_msg = \n ALERT:  DIRECT CLOUD RUN URLs IN CORE CONFIGURATION!\n\n"
-            error_msg = \n ALERT:  DIRECT CLOUD RUN URLs IN CORE CONFIGURATION!\n\n"
+            error_msg = \n ALERT:  DIRECT CLOUD RUN URLs IN CORE CONFIGURATION!\n\n""
+
             error_msg += Core configuration files MUST use load balancer endpoints.\n
             error_msg += These are SSOT files that affect ALL tests and services.\n\n""
             
@@ -185,18 +194,21 @@ class CloudRunURLComplianceTests:
                 error_msg += f"URL: {violation['content']}\n\n"
             
             error_msg += CRITICAL: Update network_constants.py and e2e_test_config.py immediately!\n"
-            error_msg += CRITICAL: Update network_constants.py and e2e_test_config.py immediately!\n"
+            error_msg += CRITICAL: Update network_constants.py and e2e_test_config.py immediately!\n""
+
             
             pytest.fail(error_msg)
     
     def test_staging_tests_use_proper_domains(self, e2e_test_files):
-    "
-    "
+        """
+    ""
+
         Validate that tests referencing staging use proper load balancer domains
         
         Files that mention "staging should use netrasystems.ai domains."
 "
-"
+""
+
         staging_files_without_proper_domains = []
         
         for file_path in e2e_test_files:
@@ -236,17 +248,20 @@ class CloudRunURLComplianceTests:
             error_msg += \nThese files reference staging but may not use proper load balancer endpoints.\n"
             error_msg += \nThese files reference staging but may not use proper load balancer endpoints.\n"
             error_msg += Update to use: api.staging.netrasystems.ai, app.staging.netrasystems.ai, auth.staging.netrasystems.ai\n"
-            error_msg += Update to use: api.staging.netrasystems.ai, app.staging.netrasystems.ai, auth.staging.netrasystems.ai\n"
+            error_msg += Update to use: api.staging.netrasystems.ai, app.staging.netrasystems.ai, auth.staging.netrasystems.ai\n""
+
             
             # This is a warning, not a hard failure
             pytest.skip(error_msg)
     
     def test_load_balancer_compliance_validation_exists(self):
-    "
-    "
+        """
+    ""
+
         Ensure compliance validation script exists and is executable
         "
-        "
+        ""
+
         validator_script = project_root / scripts / validate_load_balancer_compliance.py
         
         assert validator_script.exists(), (
@@ -270,15 +285,18 @@ class CloudRunURLComplianceTests:
         assert netra-backend-staging-pnovr5vsba-uc.a.run.app in script_content, ("
         assert netra-backend-staging-pnovr5vsba-uc.a.run.app in script_content, ("
             Compliance validator missing Cloud Run URL detection"
-            Compliance validator missing Cloud Run URL detection"
+            Compliance validator missing Cloud Run URL detection""
+
         )
     
     def test_migration_script_exists_and_functional(self):
-    "
-    "
+        """
+    ""
+
         Ensure URL migration script exists for future remediation
         "
-        "
+        ""
+
         migration_script = project_root / scripts / migrate_test_urls_to_load_balancer.py
         
         assert migration_script.exists(), (
@@ -296,7 +314,8 @@ class CloudRunURLComplianceTests:
         
         assert dry_run in script_content, (
             Migration script missing dry-run capability"
-            Migration script missing dry-run capability"
+            Migration script missing dry-run capability""
+
         )
         
         assert rollback" in script_content, ("

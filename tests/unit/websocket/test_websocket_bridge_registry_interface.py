@@ -9,7 +9,7 @@ EXPECTED BEHAVIOR: These tests MUST ALWAYS PASS - they protect business continui
 Any failures indicate breaking changes that affect $500K+ ARR functionality.
 
 Business Impact:
-- Protects Golden Path: Users login → get AI responses
+- Protects Golden Path: Users login -> get AI responses
 - Ensures WebSocket event delivery for real-time chat experience
 - Maintains $500K+ ARR chat functionality reliability
 - Validates enterprise customer real-time communication
@@ -399,7 +399,7 @@ class WebSocketBridgeRegistryInterfaceTests(SSotAsyncTestCase):
         Test 5: Golden Path WebSocket flow protection (MUST ALWAYS PASS)
 
         Validates that the complete WebSocket flow for Golden Path
-        (login → agent events → AI response) remains functional.
+        (login -> agent events -> AI response) remains functional.
 
         CRITICAL: This is the core $500K+ ARR user experience
         """
@@ -523,14 +523,14 @@ class WebSocketBridgeRegistryInterfaceTests(SSotAsyncTestCase):
         logger.info(f"Overall Protection Score: {business_protection_score:.1%}")
         logger.info("Protected Areas:")
         for area, protected in self.business_value_metrics.items():
-            status = "✓ PROTECTED" if protected else "✗ AT RISK"
+            status = "CHECK PROTECTED" if protected else "✗ AT RISK"
             logger.info(f"  - {area}: {status}")
 
-        logger.info(f"WebSocket Event Delivery: {'✓' if self.business_value_metrics.get('websocket_event_delivery') else '✗'}")
-        logger.info(f"User Session Isolation: {'✓' if self.business_value_metrics.get('user_session_isolation') else '✗'}")
-        logger.info(f"Real-time Communication: {'✓' if self.business_value_metrics.get('real_time_communication') else '✗'}")
-        logger.info(f"Multi-user Support: {'✓' if self.business_value_metrics.get('multi_user_support') else '✗'}")
-        logger.info(f"Golden Path Protection: {'✓' if self.business_value_metrics.get('golden_path_protection') else '✗'}")
+        logger.info(f"WebSocket Event Delivery: {'CHECK' if self.business_value_metrics.get('websocket_event_delivery') else '✗'}")
+        logger.info(f"User Session Isolation: {'CHECK' if self.business_value_metrics.get('user_session_isolation') else '✗'}")
+        logger.info(f"Real-time Communication: {'CHECK' if self.business_value_metrics.get('real_time_communication') else '✗'}")
+        logger.info(f"Multi-user Support: {'CHECK' if self.business_value_metrics.get('multi_user_support') else '✗'}")
+        logger.info(f"Golden Path Protection: {'CHECK' if self.business_value_metrics.get('golden_path_protection') else '✗'}")
 
         # Business value should be highly protected
         self.assertGreaterEqual(business_protection_score, 0.8,

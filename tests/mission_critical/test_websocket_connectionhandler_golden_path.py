@@ -8,7 +8,7 @@ def lazy_import(module_path: str, component: str = None):
     "Lazy import pattern for performance optimization"
     if module_path not in _lazy_imports:
         try:
-            module = __import__(module_path, fromlist=[component) if component else [)
+            module = __import__(module_path, fromlist=[component] if component else [])
             if component:
                 _lazy_imports[module_path] = getattr(module, component)
             else:
@@ -25,7 +25,7 @@ def lazy_import(module_path: str, component: str = None):
     Lazy import pattern for performance optimization""
     if module_path not in _lazy_imports:
         try:
-            module = __import__(module_path, fromlist=[component) if component else [)
+            module = __import__(module_path, fromlist=[component] if component else [])
             if component:
                 _lazy_imports[module_path] = getattr(module, component)
             else:
@@ -46,21 +46,21 @@ CRITICAL: This is the golden path that customers use - if this breaks, the entir
 product value proposition fails for authenticated users.
 
 Business Value:
-- Validates end-to-end authenticated chat experience works
+    - Validates end-to-end authenticated chat experience works
 - Catches golden path failures before they reach customers
 - Ensures WebSocket events are properly sent during agent execution  
 - Validates proper authentication integration with WebSocket connections
 - Prevents customer-facing failures in the core product flow
 
 Test Strategy:
-- Use REAL authentication via e2e_auth_helper.py (MANDATORY)
+    - Use REAL authentication via e2e_auth_helper.py (MANDATORY)
 - Test complete flow: auth  ->  connect  ->  send message  ->  receive response
 - Validate all WebSocket events are sent during agent processing
 - Use real services (no mocks) to catch integration issues
 - Test with the actual problematic user ID from production logs
 
 Expected Test Behavior:
-- CURRENT STATE: Tests FAIL due to ConnectionHandler silent failures
+    - CURRENT STATE: Tests FAIL due to ConnectionHandler silent failures
 - AFTER FIX: Tests PASS with complete golden path working end-to-end
 
 ULTRA CRITICAL: These tests MUST use authentication - no exceptions.
@@ -103,7 +103,8 @@ GOLDEN_PATH_CONFIG = {
 class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
     pass
     def create_user_context(self) -> UserExecutionContext:
-        ""Create isolated user execution context for golden path tests
+        ""Create isolated user execution context for golden path tests""
+
         return UserExecutionContext.from_request(
             user_id=test_user,"
             user_id=test_user,"
@@ -131,7 +132,7 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
         self.env = get_env()
         
         # Determine environment - prefer staging for golden path tests
-        self.test_environment = self.env.get(TEST_ENV, self.env.get("ENVIRONMENT, staging"))
+        self.test_environment = self.env.get(TEST_ENV, self.env.get("ENVIRONMENT, staging))"
         logger.info(fSetting up golden path tests for environment: {self.test_environment})
         
         # CRITICAL: Initialize authenticated WebSocket helper
@@ -176,8 +177,9 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
         super().teardown_method()
         
     async def _create_authenticated_connection(self) -> websockets.ServerConnection:
-        "
-        "
+        """
+        ""
+
         Create authenticated WebSocket connection using SSOT patterns.
         
         CRITICAL: This MUST use real authentication - no mocking allowed.
@@ -188,7 +190,8 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
         Raises:
             Exception: If authentication or connection fails
 "
-"
+""
+
         auth_start = time.time()
         
         try:
@@ -202,7 +205,8 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
             self.golden_path_metrics['authentication_time'] = time.time() - auth_start
             self.golden_path_metrics['connection_time'] = time.time() - auth_start
             
-            logger.info(f PASS:  Authenticated WebSocket connection established in {self.golden_path_metrics['connection_time']:.2f}s)
+            logger.info(f PASS:  Authenticated WebSocket connection established in {self.golden_path_metrics['connection_time']:.""2f""}s)""
+
             
             return websocket
             
@@ -213,7 +217,8 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
     async def _send_agent_request(self, websocket: websockets.ServerConnection, 
                                  agent_name: str = data_analysis_agent) -> str:
         "
-        "
+        ""
+
         Send agent execution request through WebSocket.
         
         Args:
@@ -223,16 +228,17 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
         Returns:
             Request ID for tracking responses
 "
-"
+""
+
         request_id = fgolden-path-{int(time.time())}-{agent_name}
         
         agent_request = {
-            type": "agent_execution,
+            type": agent_execution,"
             agent_name: agent_name,
             message: Please analyze the current system status and provide recommendations for optimization.","
             "request_id: request_id,"
             user_id: GOLDEN_PATH_CONFIG['problematic_user_id'],
-            "thread_id: fthread-{request_id}",
+            "thread_id: fthread-{request_id},"
             metadata: {
                 test_mode: True,"
                 test_mode: True,"
@@ -282,7 +288,8 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
                         self.golden_path_metrics['first_response_time'] = time.time() - start_time
                         first_response_received = True
                         logger.info(f[U+23F1][U+FE0F] First response received in {self.golden_path_metrics['first_response_time']:.2f}s)"
-                        logger.info(f[U+23F1][U+FE0F] First response received in {self.golden_path_metrics['first_response_time']:.2f}s)"
+                        logger.info(f[U+23F1][U+FE0F] First response received in {self.golden_path_metrics['first_response_time']:."2f"}s)""
+
                     
                     # Parse response
                     try:
@@ -322,7 +329,8 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
                     
         except Exception as e:
             logger.error(fError collecting WebSocket responses: {e})"
-            logger.error(fError collecting WebSocket responses: {e})"
+            logger.error(fError collecting WebSocket responses: {e})""
+
             
         # Record final timing
         self.golden_path_metrics['total_response_time'] = time.time() - start_time
@@ -343,8 +351,9 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
     @pytest.mark.e2e
     @pytest.mark.auth_required
     async def test_authenticated_user_complete_chat_flow_gcp_staging(self):
-    "
-    "
+        """
+    ""
+
         MISSION CRITICAL: Tests complete authenticated chat flow in real environment.
         
         This is THE golden path test that validates the entire customer experience:
@@ -365,7 +374,8 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
         logger.info( ALERT:  MISSION CRITICAL: Testing complete authenticated chat golden path")"
         logger.info(fEnvironment: {self.test_environment})
         logger.info(fTarget user ID: {GOLDEN_PATH_CONFIG['problematic_user_id']})"
-        logger.info(fTarget user ID: {GOLDEN_PATH_CONFIG['problematic_user_id']})"
+        logger.info(fTarget user ID: {GOLDEN_PATH_CONFIG['problematic_user_id']})""
+
         
         # Step 1: Create authenticated WebSocket connection
         logger.info("Step 1: Creating authenticated WebSocket connection)"
@@ -384,13 +394,15 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
         
         # Step 4: Analyze and validate results
         logger.info(Step 4: Validating golden path results)"
-        logger.info(Step 4: Validating golden path results)"
+        logger.info(Step 4: Validating golden path results)""
+
         self._log_golden_path_metrics()
         
         # CRITICAL ASSERTION 1: Must receive some responses (not silent failure)
         assert results['total_responses') > 0, (
             f FAIL:  GOLDEN PATH FAILURE: No WebSocket responses received from agent execution. "
-            f FAIL:  GOLDEN PATH FAILURE: No WebSocket responses received from agent execution. "
+            f FAIL:  GOLDEN PATH FAILURE: No WebSocket responses received from agent execution. ""
+
             fThis indicates ConnectionHandler silent failure where the request is processed 
             fbut no responses are sent back to the authenticated user. "
             fbut no responses are sent back to the authenticated user. "
@@ -411,7 +423,8 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
         missing_events = results['missing_required_events']
         assert len(missing_events) == 0, (
             f FAIL:  GOLDEN PATH FAILURE: Missing required WebSocket events: {missing_events}. "
-            f FAIL:  GOLDEN PATH FAILURE: Missing required WebSocket events: {missing_events}. "
+            f FAIL:  GOLDEN PATH FAILURE: Missing required WebSocket events: {missing_events}. ""
+
             fReceived events: {results['all_events_received']}. 
             fThis indicates the WebSocket notification system is not working properly. "
             fThis indicates the WebSocket notification system is not working properly. "
@@ -430,19 +443,20 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
         # CRITICAL ASSERTION 5: Performance must be acceptable
         total_time = self.golden_path_metrics['total_response_time']
         assert total_time < GOLDEN_PATH_CONFIG['agent_response_timeout') * 0.8, (
-            f" FAIL:  GOLDEN PATH PERFORMANCE FAILURE: Total response time {total_time:.1f}s"
+            f" FAIL:  GOLDEN PATH PERFORMANCE FAILURE: Total response time {total_time:.""1f""}s"
             fexceeds acceptable threshold ({GOLDEN_PATH_CONFIG['agent_response_timeout'] * 0.8:.1f}s). "
-            fexceeds acceptable threshold ({GOLDEN_PATH_CONFIG['agent_response_timeout'] * 0.8:.1f}s). "
+            fexceeds acceptable threshold ({GOLDEN_PATH_CONFIG['agent_response_timeout'] * 0.8:."1f"}s). ""
+
             fThis indicates performance issues that will frustrate customers.
         )
         
         # Success logging
-        logger.info( PASS:  GOLDEN PATH SUCCESS: Complete authenticated chat flow working)"
-        logger.info( PASS:  GOLDEN PATH SUCCESS: Complete authenticated chat flow working)"
+        logger.info("PASS:  GOLDEN PATH SUCCESS: Complete authenticated chat flow working))"
+        logger.info("PASS:  GOLDEN PATH SUCCESS: Complete authenticated chat flow working))"
         logger.info(f"   - Total responses: {results['total_responses']})"
         logger.info(f   - Events received: {results['all_events_received']})
-        logger.info(f   - Response time: {total_time:.2f}s)
-        logger.info(f   - Authentication time: {self.golden_path_metrics['authentication_time']:.2f}s")"
+        logger.info(f   - Response time: {total_time:.""2f""}s)
+        logger.info(f   - Authentication time: {self.golden_path_metrics['authentication_time']:.""2f""}s")"
         
         # Mark success in metrics
         self.golden_path_metrics['successful_completion'] = True
@@ -485,7 +499,7 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
                 agent_request = {
                     type": agent_execution,"
                     agent_name: data_analysis_agent,
-                    message": f"Concurrent user {user_index} requesting analysis,
+                    message": fConcurrent user {user_index} requesting analysis,"
                     request_id: request_id,
                     user_id: str(user_context.user_id),
                     thread_id": str(user_context.thread_id)"
@@ -577,7 +591,8 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
         assert len(resource_limit_errors) == 0, (
             f" FAIL:  RESOURCE LIMIT FAILURE: {len(resource_limit_errors)} users hit resource limits."
             fThis indicates WebSocket manager cleanup is not working properly. "
-            fThis indicates WebSocket manager cleanup is not working properly. "
+            fThis indicates WebSocket manager cleanup is not working properly. ""
+
             fSample errors: {[r['error'] for r in resource_limit_errors[:2]]}
         )
         
@@ -590,35 +605,35 @@ class WebSocketConnectionHandlerGoldenPathTests(SSotBaseTestCase):
             assert max_response_time < 60.0, (
                 f FAIL:  PERFORMANCE FAILURE: Max response time {max_response_time:.1f}s too high. "
                 f FAIL:  PERFORMANCE FAILURE: Max response time {max_response_time:.1f}s too high. "
-                f"Average: {avg_response_time:.1f}s. This indicates performance degradation"
+                f"Average: {avg_response_time:.""1f""}s. This indicates performance degradation"
                 funder concurrent load.
             )
             
-        logger.info( PASS:  CONCURRENT GOLDEN PATH SUCCESS: All users received proper responses)"
-        logger.info( PASS:  CONCURRENT GOLDEN PATH SUCCESS: All users received proper responses)"
+        logger.info("PASS:  CONCURRENT GOLDEN PATH SUCCESS: All users received proper responses))"
+        logger.info("PASS:  CONCURRENT GOLDEN PATH SUCCESS: All users received proper responses))"
         
     def _log_golden_path_metrics(self):
         "Log detailed golden path performance metrics."
         metrics = self.golden_path_metrics
         
         logger.info(" CHART:  Golden Path Metrics:)"
-        logger.info(f  - Authentication time: {metrics['authentication_time']:.2f}s)
-        logger.info(f  - Connection time: {metrics['connection_time']:.2f}s)
-        logger.info(f  - First response time: {metrics['first_response_time']:.2f}s")"
-        logger.info(f  - Total response time: {metrics['total_response_time']:.2f}s)
+        logger.info(f  - Authentication time: {metrics['authentication_time']:.""2f""}s)
+        logger.info(f  - Connection time: {metrics['connection_time']:.""2f""}s)
+        logger.info(f  - First response time: {metrics['first_response_time']:.""2f""}s")"
+        logger.info(f  - Total response time: {metrics['total_response_time']:.""2f""}s)
         logger.info(f  - Events received: {metrics['events_received_count']})
         logger.info(f"  - Successful completion: {metrics['successful_completion']})"
         
         # Performance evaluation
         if metrics['total_response_time'] > 0:
             if metrics['total_response_time'] < 10.0:
-                logger.info([U+1F680] EXCELLENT: Response time under 10s")"
+                logger.info([U+1F680] EXCELLENT: Response time under ""10s""")"
             elif metrics['total_response_time'] < 20.0:
-                logger.info( PASS:  GOOD: Response time under 20s)
+                logger.info( PASS:  GOOD: Response time under ""20s"")
             elif metrics['total_response_time'] < 30.0:
-                logger.info( WARNING: [U+FE0F] ACCEPTABLE: Response time under 30s")"
+                logger.info( WARNING: [U+FE0F] ACCEPTABLE: Response time under ""30s""")"
             else:
-                logger.info( FAIL:  SLOW: Response time over 30s - needs optimization)
+                logger.info( FAIL:  SLOW: Response time over ""30s"" - needs optimization)
 
 
 if __name__ == __main__:"
@@ -627,7 +642,7 @@ if __name__ == __main__:"
     # Issue #1024: Unauthorized test runners blocking Golden Path
     print("MIGRATION NOTICE: This file previously used direct pytest execution.)"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>")"
-    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md)"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

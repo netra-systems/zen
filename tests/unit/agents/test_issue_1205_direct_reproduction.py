@@ -55,7 +55,7 @@ class Issue1205DirectReproductionTests(SSotAsyncTestCase, unittest.TestCase):
             except TypeError as e:
                 # This is the expected bug
                 if "unexpected keyword argument 'context'" in str(e):
-                    print(f"✓ Issue #1205 reproduced: {e}")
+                    print(f"CHECK Issue #1205 reproduced: {e}")
                     # This confirms the bug exists
                     pytest.fail(f"CONFIRMED Issue #1205 TypeError: {e}")
                 else:
@@ -78,7 +78,7 @@ class Issue1205DirectReproductionTests(SSotAsyncTestCase, unittest.TestCase):
 
         # This assertion confirms the signature mismatch
         if params != ['agent_name', 'context']:
-            print(f"✓ Issue #1205 confirmed: Signature mismatch")
+            print(f"CHECK Issue #1205 confirmed: Signature mismatch")
             print(f"  Current:  {params}")
             print(f"  Expected: ['agent_name', 'context']")
 

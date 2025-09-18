@@ -123,7 +123,7 @@ class GCPStagingSecurityValidationTests:
         print(f'   Environment: GCP Cloud Run Staging')
         print(f'   Concurrent enterprise users tested: {len(enterprise_users)}')
         for failure in staging_failures:
-            print(f"   ❌ {failure['sector']} sector ({failure['compliance']}):")
+            print(f"   X {failure['sector']} sector ({failure['compliance']}):")
             print(f"      Customer: {failure['customer']}")
             print(f"      User: {failure['user_id']}")
             print(f"      Error: {failure['error'][:100]}...")
@@ -197,7 +197,7 @@ class GCPStagingSecurityValidationTests:
         print('   Journey Status: COMPLETELY DISRUPTED')
         total_expected_value = 0
         for disruption in journey_disruption:
-            print(f"   ❌ Step '{disruption['step']}' FAILED:")
+            print(f"   X Step '{disruption['step']}' FAILED:")
             print(f"      Description: {disruption['description']}")
             print(f"      Failure time: {disruption['failure_time']:.3f} seconds")
             print(f"      Customer impact: {disruption['customer_impact']}")

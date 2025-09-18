@@ -592,10 +592,10 @@ class PerformanceRegressionTests(SSotAsyncTestCase):
                     "timestamp": baseline.timestamp
                 })
 
-                print(f"✅ BASELINE ESTABLISHED: {scenario['metric']} = {baseline.baseline_value:.1f} ± {baseline.standard_deviation:.1f}")
+                print(f"CHECK BASELINE ESTABLISHED: {scenario['metric']} = {baseline.baseline_value:.1f} ± {baseline.standard_deviation:.1f}")
 
             except ValueError as e:
-                print(f"❌ BASELINE FAILED: {scenario['name']} - {e}")
+                print(f"X BASELINE FAILED: {scenario['name']} - {e}")
                 continue
 
         self.regression_test_data["baselines_established"] = list(established_baselines.keys())
@@ -758,7 +758,7 @@ class PerformanceRegressionTests(SSotAsyncTestCase):
                 f"{PERFORMANCE_REGRESSION_SLA['critical_regression_threshold_percent']}% critical threshold"
             )
 
-        print(f"✅ AUTHENTICATION REGRESSION TEST: {baseline.baseline_value:.1f}ms baseline, "
+        print(f"CHECK AUTHENTICATION REGRESSION TEST: {baseline.baseline_value:.1f}ms baseline, "
               f"{regression_analysis.regression_percent:+.1f}% change detected")
 
     @pytest.mark.asyncio
@@ -821,7 +821,7 @@ class PerformanceRegressionTests(SSotAsyncTestCase):
             f"CRITICAL REGRESSION RATE VIOLATION: {critical_regression_rate:.1f}% > 20% maximum rate"
         )
 
-        print(f"✅ COMPREHENSIVE REGRESSION SUITE: {len(baselines)} metrics tracked, "
+        print(f"CHECK COMPREHENSIVE REGRESSION SUITE: {len(baselines)} metrics tracked, "
               f"{sla_compliance_rate:.1f}% SLA compliance")
 
     @pytest.mark.asyncio
@@ -905,7 +905,7 @@ class PerformanceRegressionTests(SSotAsyncTestCase):
             f"TREND-BASED PREDICTION VIOLATION: {trend_based_prediction:.1f}% < 10% minimum predicted regression"
         )
 
-        print(f"✅ TREND ANALYSIS: {detected_trend_direction} trend detected, "
+        print(f"CHECK TREND ANALYSIS: {detected_trend_direction} trend detected, "
               f"{trend_based_prediction:.1f}% regression predicted")
 
     @pytest.mark.asyncio
@@ -1000,7 +1000,7 @@ class PerformanceRegressionTests(SSotAsyncTestCase):
                 f"EXTREME HISTORICAL REGRESSION: {abs(historical_regression.regression_percent):.1f}% > 50% variance limit"
             )
 
-        print(f"✅ HISTORICAL DATA MANAGEMENT: {len(historical_measurements)} data points, "
+        print(f"CHECK HISTORICAL DATA MANAGEMENT: {len(historical_measurements)} data points, "
               f"{query_duration_ms:.1f}ms query time, {data_completeness:.1f}% completeness")
 
     @pytest.mark.asyncio
@@ -1129,5 +1129,5 @@ class PerformanceRegressionTests(SSotAsyncTestCase):
         self.regression_test_data["sla_alerts"] = sla_alerts
         self.regression_test_data["sla_compliance_rate"] = sla_compliance_rate
 
-        print(f"✅ SLA COMPLIANCE MONITORING: {sla_compliance_rate:.1f}% compliance rate, "
+        print(f"CHECK SLA COMPLIANCE MONITORING: {sla_compliance_rate:.1f}% compliance rate, "
               f"{len(sla_violations)} violations, {len(sla_alerts)} alerts generated")

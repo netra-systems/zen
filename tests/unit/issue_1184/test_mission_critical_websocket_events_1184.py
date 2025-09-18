@@ -2,7 +2,7 @@
 Mission critical WebSocket event delivery tests for Issue 1184.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Mission Critical Infrastructure
+- Segment: ALL (Free -> Enterprise) - Mission Critical Infrastructure
 - Business Goal: Ensure reliable WebSocket event delivery for Golden Path user flow
 - Value Impact: Tests the 5 required WebSocket events critical to chat functionality
 - Strategic Impact: Validates $500K+ ARR chat infrastructure without Docker dependencies
@@ -108,7 +108,7 @@ class MissionCriticalWebSocketEvents1184Tests(SSotAsyncTestCase):
             assert isinstance(event_data, dict), f"Event data should be dict, got {type(event_data)}"
             assert len(event_data) > 0, f"Event data should not be empty for {event_type}"
 
-        logger.info("✅ All 5 required WebSocket events validated successfully")
+        logger.info("CHECK All 5 required WebSocket events validated successfully")
 
     @pytest.mark.mission_critical
     @pytest.mark.issue_1184
@@ -153,7 +153,7 @@ class MissionCriticalWebSocketEvents1184Tests(SSotAsyncTestCase):
         manager2_duplicate = get_websocket_manager(user_context=user2_context)
         assert manager2 is manager2_duplicate, "Same user should get same manager instance"
 
-        logger.info("✅ WebSocket manager user isolation validated successfully")
+        logger.info("CHECK WebSocket manager user isolation validated successfully")
 
     @pytest.mark.mission_critical
     @pytest.mark.issue_1184
@@ -205,7 +205,7 @@ class MissionCriticalWebSocketEvents1184Tests(SSotAsyncTestCase):
         manager_ids = [id(m) for m in rapid_managers]
         assert len(set(manager_ids)) == 10, "All rapid managers should be unique"
 
-        logger.info("✅ WebSocket infrastructure resilience validated")
+        logger.info("CHECK WebSocket infrastructure resilience validated")
 
     @pytest.mark.mission_critical
     @pytest.mark.issue_1184
@@ -269,4 +269,4 @@ class MissionCriticalWebSocketEvents1184Tests(SSotAsyncTestCase):
         # Should process all Golden Path events
         assert len(events_processed) == 5, f"Golden Path event processing incomplete: {events_processed}"
 
-        logger.info("✅ WebSocket manager Golden Path integration validated")
+        logger.info("CHECK WebSocket manager Golden Path integration validated")

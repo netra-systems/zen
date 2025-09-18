@@ -221,7 +221,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
             self.record_metric("golden_path_auth_success", True)
             self.record_metric("connection_count", len(active_connections))
             
-            self.logger.info(f"✅ PASS: Golden path JWT authentication successful for user {golden_user_id}")
+            self.logger.info(f"CHECK PASS: Golden path JWT authentication successful for user {golden_user_id}")
             
         finally:
             await websocket_manager.shutdown()
@@ -296,7 +296,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
             self.record_metric("security_attacks_blocked", len(attack_vectors))
             self.record_metric("system_recovery_successful", True)
             
-            self.logger.info("✅ PASS: Authentication security boundaries verified - system protected")
+            self.logger.info("CHECK PASS: Authentication security boundaries verified - system protected")
             
         finally:
             await websocket_manager.shutdown()
@@ -382,7 +382,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
             self.record_metric("session_messages_sent", 4)  # 1 start + 3 followup
             self.record_metric("session_cleanup_successful", True)
             
-            self.logger.info("✅ PASS: WebSocket session management successful without Docker")
+            self.logger.info("CHECK PASS: WebSocket session management successful without Docker")
             
         finally:
             await websocket_manager.shutdown()
@@ -458,7 +458,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
                     # Clean up for next test
                     await websocket_manager.remove_connection(connection_info.connection_id)
                 
-                self.logger.info(f"✅ Valid origin '{origin}' handled correctly")
+                self.logger.info(f"CHECK Valid origin '{origin}' handled correctly")
             
             # Test invalid origins (should be blocked)
             invalid_origins = [
@@ -487,7 +487,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
             self.record_metric("valid_origins_tested", len(valid_origins))
             self.record_metric("invalid_origins_blocked", len(invalid_origins))
             
-            self.logger.info("✅ PASS: CORS validation working in staging environment")
+            self.logger.info("CHECK PASS: CORS validation working in staging environment")
             
         finally:
             await websocket_manager.shutdown()
@@ -604,7 +604,7 @@ class GoldenPathWebSocketAuthNonDockerTests(SSotAsyncTestCase):
             self.record_metric("timeout_cleanup_successful", True)
             self.record_metric("reconnection_successful", True)
             
-            self.logger.info("✅ PASS: Authentication timeout and cleanup handling successful")
+            self.logger.info("CHECK PASS: Authentication timeout and cleanup handling successful")
             
         finally:
             await websocket_manager.shutdown()

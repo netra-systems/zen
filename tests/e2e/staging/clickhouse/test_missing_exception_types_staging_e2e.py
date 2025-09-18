@@ -456,7 +456,7 @@ class MissingClickHouseExceptionTypesStagingE2ETests(SSotAsyncTestCase):
         """
         EXPECTED TO FAIL: Test demonstrates complete E2E workflow gaps in staging.
         
-        Current Problem: End-to-end staging workflows (deployment → validation → rollback)
+        Current Problem: End-to-end staging workflows (deployment -> validation -> rollback)
         lack comprehensive error classification, impacting operational reliability.
         
         Expected Failure: This test should fail because staging E2E workflows

@@ -210,7 +210,7 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
         # Generate detailed failure message for remediation guidance
         if violations:
             failure_message = [
-                f"❌ WEBSOCKET FACTORY DEPRECATION VIOLATIONS DETECTED ❌",
+                f"X WEBSOCKET FACTORY DEPRECATION VIOLATIONS DETECTED X",
                 f"",
                 f"Found {total_violation_instances} deprecated get_websocket_manager_factory() usages across {total_violation_files} files.",
                 f"These violations must be eliminated to achieve SSOT compliance.",
@@ -231,17 +231,17 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
                 f"🔧 REMEDIATION GUIDE:",
                 f"",
                 f"1. Replace deprecated factory imports:",
-                f"   ❌ from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory",
-                f"   ✅ from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager",
+                f"   X from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory",
+                f"   CHECK from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager, get_websocket_manager",
                 f"",
                 f"2. Replace deprecated factory usage:",
-                f"   ❌ factory = get_websocket_manager_factory()",
-                f"   ❌ manager = factory.create_manager()",
-                f"   ✅ manager = get_websocket_manager()  # Direct SSOT usage",
+                f"   X factory = get_websocket_manager_factory()",
+                f"   X manager = factory.create_manager()",
+                f"   CHECK manager = get_websocket_manager()  # Direct SSOT usage",
                 f"",
                 f"3. Update instantiation patterns:",
-                f"   ❌ WebSocketManagerFactory().create_manager()",  
-                f"   ✅ WebSocketManager()  # Direct instantiation when needed",
+                f"   X WebSocketManagerFactory().create_manager()",  
+                f"   CHECK WebSocketManager()  # Direct instantiation when needed",
                 f"",
                 f"4. Verify canonical imports in SSOT_IMPORT_REGISTRY.md",
                 f"",
@@ -259,9 +259,9 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
         self.record_metric("test_result", "PASS")
         
         # Success message
-        print("✅ WEBSOCKET FACTORY DEPRECATION COMPLIANCE ACHIEVED")
-        print("✅ Zero deprecated get_websocket_manager_factory() usages detected")
-        print("✅ SSOT WebSocket architecture enforced")
+        print("CHECK WEBSOCKET FACTORY DEPRECATION COMPLIANCE ACHIEVED")
+        print("CHECK Zero deprecated get_websocket_manager_factory() usages detected")
+        print("CHECK SSOT WebSocket architecture enforced")
     
     def test_websocket_manager_ssot_compliance(self):
         """
@@ -309,7 +309,7 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
         # SSOT compliance requires 100% canonical usage (0% deprecated)
         if deprecated_instances > 0:
             failure_message = [
-                f"❌ WEBSOCKET MANAGER SSOT COMPLIANCE VIOLATION ❌",
+                f"X WEBSOCKET MANAGER SSOT COMPLIANCE VIOLATION X",
                 f"",
                 f"SSOT Compliance Ratio: {ssot_compliance_ratio:.1%} (Target: 100%)",
                 f"Canonical Usage: {canonical_instances} instances across {canonical_files} files",
@@ -339,13 +339,13 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
         
         # Verify minimum canonical usage exists (not just absence of deprecated)
         if canonical_instances == 0:
-            pytest.fail("❌ NO CANONICAL WEBSOCKET USAGE DETECTED - Expected WebSocketManager usage")
+            pytest.fail("X NO CANONICAL WEBSOCKET USAGE DETECTED - Expected WebSocketManager usage")
             
         # Success state (POST-REMEDIATION)
         self.record_metric("ssot_compliance_achieved", True)
-        print(f"✅ WEBSOCKET SSOT COMPLIANCE: {ssot_compliance_ratio:.1%}")
-        print(f"✅ Canonical Usage: {canonical_instances} instances")
-        print(f"✅ Deprecated Usage: {deprecated_instances} instances")
+        print(f"CHECK WEBSOCKET SSOT COMPLIANCE: {ssot_compliance_ratio:.1%}")
+        print(f"CHECK Canonical Usage: {canonical_instances} instances")
+        print(f"CHECK Deprecated Usage: {deprecated_instances} instances")
     
     def test_no_duplicate_websocket_managers(self):
         """
@@ -363,7 +363,7 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
         canonical_file = self.netra_backend_root / "app" / "websocket_core" / "unified_manager.py"
         
         if not canonical_file.exists():
-            pytest.fail("❌ CANONICAL WEBSOCKET MANAGER FILE NOT FOUND: unified_manager.py")
+            pytest.fail("X CANONICAL WEBSOCKET MANAGER FILE NOT FOUND: unified_manager.py")
         
         # Verify canonical implementation exists
         manager_class_patterns = [
@@ -373,7 +373,7 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
         canonical_matches = self._scan_file_for_patterns(canonical_file, manager_class_patterns)
         
         if not canonical_matches:
-            pytest.fail("❌ CANONICAL UNIFIED WEBSOCKET MANAGER CLASS NOT FOUND")
+            pytest.fail("X CANONICAL UNIFIED WEBSOCKET MANAGER CLASS NOT FOUND")
         
         # Scan production code for any duplicate manager implementations
         duplicate_patterns = [
@@ -399,7 +399,7 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
         
         if total_duplicate_classes > 0:
             failure_message = [
-                f"❌ DUPLICATE WEBSOCKET MANAGER IMPLEMENTATIONS DETECTED ❌",
+                f"X DUPLICATE WEBSOCKET MANAGER IMPLEMENTATIONS DETECTED X",
                 f"",
                 f"SSOT Violation: {total_duplicate_classes} duplicate WebSocket manager classes found",
                 f"SSOT Requirement: Only UnifiedWebSocketManager should exist",
@@ -425,9 +425,9 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
             
         # Success
         self.record_metric("ssot_manager_compliance", True)
-        print("✅ SINGLE WEBSOCKET MANAGER IMPLEMENTATION VALIDATED")
-        print("✅ Only canonical UnifiedWebSocketManager exists")
-        print(f"✅ Found {len(canonical_matches)} canonical implementation(s)")
+        print("CHECK SINGLE WEBSOCKET MANAGER IMPLEMENTATION VALIDATED")
+        print("CHECK Only canonical UnifiedWebSocketManager exists")
+        print(f"CHECK Found {len(canonical_matches)} canonical implementation(s)")
     
     def test_websocket_import_consistency(self):
         """
@@ -483,7 +483,7 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
         # Import consistency requires 100% canonical imports
         if non_canonical_count > 0:
             failure_message = [
-                f"❌ WEBSOCKET IMPORT CONSISTENCY VIOLATIONS ❌",
+                f"X WEBSOCKET IMPORT CONSISTENCY VIOLATIONS X",
                 f"",
                 f"Import Consistency: {consistency_ratio:.1%} (Target: 100%)",
                 f"Canonical Imports: {canonical_count}",
@@ -502,11 +502,11 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
                 f"",
                 f"🔧 IMPORT STANDARDIZATION:",
                 f"",
-                f"✅ PREFERRED CANONICAL IMPORTS:",
+                f"CHECK PREFERRED CANONICAL IMPORTS:",
                 f"   from netra_backend.app.websocket_core.canonical_import_patterns import WebSocketManager",
                 f"   from netra_backend.app.websocket_core.canonical_import_patterns import get_websocket_manager",
                 f"",
-                f"❌ ELIMINATE NON-CANONICAL IMPORTS:",
+                f"X ELIMINATE NON-CANONICAL IMPORTS:",
                 f"   from netra_backend.app.websocket_core.websocket_manager_factory import *",
                 f"   from netra_backend.app.websocket_core.unified_manager import *",
                 f"   from netra_backend.app.websocket_core.legacy_manager import *",
@@ -522,8 +522,8 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
         
         # Success state
         self.record_metric("import_consistency_achieved", True)
-        print(f"✅ WEBSOCKET IMPORT CONSISTENCY: {consistency_ratio:.1%}")
-        print(f"✅ All {canonical_count} imports use canonical patterns")
+        print(f"CHECK WEBSOCKET IMPORT CONSISTENCY: {consistency_ratio:.1%}")
+        print(f"CHECK All {canonical_count} imports use canonical patterns")
     
     def test_factory_deprecation_warning_enforcement(self):
         """
@@ -543,7 +543,7 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
         if not factory_file.exists():
             # Factory completely removed - ideal state
             self.record_metric("factory_file_status", "REMOVED")
-            print("✅ DEPRECATED FACTORY FILE COMPLETELY REMOVED")
+            print("CHECK DEPRECATED FACTORY FILE COMPLETELY REMOVED")
             return
         
         # If factory file exists, verify it contains proper deprecation warnings
@@ -561,7 +561,7 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
         
         if len(factory_warnings) == 0:
             pytest.fail(
-                f"❌ DEPRECATED FACTORY FILE EXISTS WITHOUT PROPER WARNINGS\n"
+                f"X DEPRECATED FACTORY FILE EXISTS WITHOUT PROPER WARNINGS\n"
                 f"File: {factory_file.relative_to(self.project_root)}\n"
                 f"Required: Deprecation warnings for get_websocket_manager_factory()\n"
                 f"Add: logger.warning('get_websocket_manager_factory is deprecated. Use WebSocketManager directly.')"
@@ -569,7 +569,7 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
         
         # Success - deprecation warnings present
         self.record_metric("deprecation_warnings_compliant", True)
-        print("✅ DEPRECATED FACTORY FUNCTIONS HAVE PROPER WARNINGS")
+        print("CHECK DEPRECATED FACTORY FUNCTIONS HAVE PROPER WARNINGS")
         for line_num, warning_text in factory_warnings:
             print(f"   Line {line_num}: {warning_text[:80]}...")
     
@@ -631,7 +631,7 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
         
         if failed_requirements:
             failure_message = [
-                f"❌ WEBSOCKET SSOT ARCHITECTURE VALIDATION FAILED ❌",
+                f"X WEBSOCKET SSOT ARCHITECTURE VALIDATION FAILED X",
                 f"",
                 f"SSOT Compliance Score: {ssot_compliance_score:.1f}% (Target: 100%)",
                 f"",
@@ -645,7 +645,7 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
             ]
             
             for requirement in failed_requirements:
-                failure_message.append(f"❌ {requirement}")
+                failure_message.append(f"X {requirement}")
                 
             failure_message.extend([
                 f"",
@@ -663,9 +663,9 @@ class WebSocketFactoryDeprecationViolationsTests(SSotBaseTestCase):
         self.record_metric("websocket_ssot_architecture_compliant", True)
         
         print("🏆 WEBSOCKET SSOT ARCHITECTURE VALIDATION COMPLETE")
-        print(f"✅ SSOT Compliance Score: {ssot_compliance_score:.1f}%")
-        print("✅ All architecture requirements satisfied")
-        print("✅ WebSocket factory deprecation remediation COMPLETE")
+        print(f"CHECK SSOT Compliance Score: {ssot_compliance_score:.1f}%")
+        print("CHECK All architecture requirements satisfied")
+        print("CHECK WebSocket factory deprecation remediation COMPLETE")
 
     def teardown_method(self, method=None):
         """Clean up after WebSocket factory deprecation violation tests."""

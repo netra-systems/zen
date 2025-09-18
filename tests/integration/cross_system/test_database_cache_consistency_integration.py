@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Data consistency failures could cause $500K+ ARR customer churn
 
 This integration test module validates the critical consistency between database persistence
-and cache layers (Redis, in-memory). The 3-tier architecture (Redis → PostgreSQL → ClickHouse)
+and cache layers (Redis, in-memory). The 3-tier architecture (Redis -> PostgreSQL -> ClickHouse)
 must maintain consistency to ensure users receive accurate, up-to-date information and
 AI agents operate on consistent data across all business operations.
 
@@ -585,7 +585,7 @@ class DatabaseCacheConsistencyIntegrationTests(SSotAsyncTestCase):
     
     async def test_tier_migration_consistency_coordination(self):
         """
-        Test data consistency during tier migrations (hot→warm→cold).
+        Test data consistency during tier migrations (hot->warm->cold).
         
         Business value: Data aging and migration must maintain consistency to
         ensure historical context remains available for AI analysis and reporting.

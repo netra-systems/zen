@@ -73,7 +73,7 @@ class Issue724ConfigurationManagerIntegrationTests(BaseIntegrationTest):
             is_staging_staging = logger._is_staging_env()
             assert is_dev_staging is False, 'Should not detect dev in staging'
             assert is_staging_staging is True, 'Should detect staging environment'
-            print('✅ AuthTraceLogger environment detection integration working')
+            print('CHECK AuthTraceLogger environment detection integration working')
         except ImportError as e:
             pytest.skip(f'Could not import AuthTraceLogger: {e}')
 
@@ -97,7 +97,7 @@ class Issue724ConfigurationManagerIntegrationTests(BaseIntegrationTest):
             assert corpus_context_explicit is not None, 'Should create corpus context from explicit path'
             assert hasattr(corpus_context_env, 'user_id'), 'Should have user_id in context'
             assert corpus_context_env.user_id == 'integration_test_user', 'Should preserve user ID'
-            print('✅ Corpus admin path configuration integration working')
+            print('CHECK Corpus admin path configuration integration working')
         except ImportError as e:
             pytest.skip(f'Could not import corpus admin modules: {e}')
 
@@ -138,7 +138,7 @@ class Issue724ConfigurationManagerIntegrationTests(BaseIntegrationTest):
                 except Exception as e:
                     return None
             prod_response = asyncio.run(test_middleware_production())
-            print('✅ Error recovery middleware environment integration working')
+            print('CHECK Error recovery middleware environment integration working')
         except ImportError as e:
             pytest.skip(f'Could not import ErrorRecoveryMiddleware: {e}')
 
@@ -188,14 +188,14 @@ class Issue724ConfigurationManagerIntegrationTests(BaseIntegrationTest):
         print('=' * 60)
         modules_with_errors = [module for module, results in configuration_results.items() if 'error' in results]
         if modules_with_errors:
-            print(f'⚠️  Modules with errors: {modules_with_errors}')
+            print(f'WARNING️  Modules with errors: {modules_with_errors}')
         else:
-            print('✅ All modules instantiated successfully')
+            print('CHECK All modules instantiated successfully')
         assert len(configuration_results) == 3, f'Expected 3 modules tested, got {len(configuration_results)}'
         env_check1 = self.env.get('ENVIRONMENT')
         env_check2 = self.env.get('ENVIRONMENT')
         assert env_check1 == env_check2, 'IsolatedEnvironment should provide consistent values'
-        print('✅ Configuration consistency integration test completed')
+        print('CHECK Configuration consistency integration test completed')
 
     def test_environment_fallback_behavior_integration(self):
         """
@@ -232,10 +232,10 @@ class Issue724ConfigurationManagerIntegrationTests(BaseIntegrationTest):
         print('=' * 60)
         modules_with_errors = [module for module, results in fallback_results.items() if 'error' in results]
         if modules_with_errors:
-            print(f'⚠️  Modules with fallback errors: {modules_with_errors}')
+            print(f'WARNING️  Modules with fallback errors: {modules_with_errors}')
         else:
-            print('✅ All modules handle missing environment gracefully')
-        print('✅ Environment fallback behavior integration test completed')
+            print('CHECK All modules handle missing environment gracefully')
+        print('CHECK Environment fallback behavior integration test completed')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

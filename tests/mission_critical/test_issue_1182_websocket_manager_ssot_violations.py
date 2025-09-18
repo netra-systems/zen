@@ -83,7 +83,7 @@ class Issue1182WebSocketManagerSSOTViolationsTests(SSotBaseTestCase):
                         'methods': set([m for m in dir(cls) if not m.startswith('_')]),
                         'module_file': getattr(module, '__file__', 'unknown')
                     }
-                    self.logger.info(f"✓ Found manager: {location_name} at {module_path}")
+                    self.logger.info(f"CHECK Found manager: {location_name} at {module_path}")
             except ImportError:
                 # Expected for non-existent modules
                 continue
@@ -155,7 +155,7 @@ class Issue1182WebSocketManagerSSOTViolationsTests(SSotBaseTestCase):
                     module = importlib.import_module(module_part)
                     if hasattr(module, import_part):
                         working_imports.append(import_statement)
-                        self.logger.info(f"✓ Working import: {import_statement}")
+                        self.logger.info(f"CHECK Working import: {import_statement}")
                     else:
                         broken_imports.append(f"{import_statement} (class not found)")
                         
@@ -163,7 +163,7 @@ class Issue1182WebSocketManagerSSOTViolationsTests(SSotBaseTestCase):
                     module_part = import_statement.split("import ")[1]
                     importlib.import_module(module_part)
                     working_imports.append(import_statement)
-                    self.logger.info(f"✓ Working import: {import_statement}")
+                    self.logger.info(f"CHECK Working import: {import_statement}")
                     
             except ImportError as e:
                 broken_imports.append(f"{import_statement} ({str(e)})")
@@ -330,7 +330,7 @@ class Issue1182WebSocketManagerSSOTViolationsTests(SSotBaseTestCase):
         self.logger.info(f"   Race condition indicators: {race_condition_count}")
         
         for indicator in race_condition_indicators:
-            self.logger.warning(f"   ⚠️  {indicator}")
+            self.logger.warning(f"   WARNING️  {indicator}")
         
         # MISSION CRITICAL: This should FAIL if race conditions detected
         # Race conditions can cause data corruption and multi-user chat failures
@@ -476,7 +476,7 @@ class Issue1182WebSocketManagerSSOTViolationsTests(SSotBaseTestCase):
                 manager = self._try_get_golden_path_manager()
                 if manager:
                     golden_path_results['manager_initialization'] = True
-                    self.logger.info("✓ Manager initialization successful")
+                    self.logger.info("CHECK Manager initialization successful")
                 else:
                     golden_path_results['disruptions'].append("Manager initialization failed")
             except Exception as e:
@@ -488,7 +488,7 @@ class Issue1182WebSocketManagerSSOTViolationsTests(SSotBaseTestCase):
                 connection_capable = self._try_websocket_connection_test()
                 golden_path_results['websocket_connection'] = connection_capable
                 if connection_capable:
-                    self.logger.info("✓ WebSocket connection capable")
+                    self.logger.info("CHECK WebSocket connection capable")
                 else:
                     golden_path_results['disruptions'].append("WebSocket connection failure")
             except Exception as e:
@@ -500,7 +500,7 @@ class Issue1182WebSocketManagerSSOTViolationsTests(SSotBaseTestCase):
                 event_delivery_works = self._try_event_delivery_test()
                 golden_path_results['event_delivery'] = event_delivery_works
                 if event_delivery_works:
-                    self.logger.info("✓ Event delivery functional")
+                    self.logger.info("CHECK Event delivery functional")
                 else:
                     golden_path_results['disruptions'].append("Event delivery mechanism broken")
             except Exception as e:
@@ -512,7 +512,7 @@ class Issue1182WebSocketManagerSSOTViolationsTests(SSotBaseTestCase):
                 agent_integration_works = self._try_agent_integration_test()
                 golden_path_results['agent_execution'] = agent_integration_works
                 if agent_integration_works:
-                    self.logger.info("✓ Agent execution integration functional")
+                    self.logger.info("CHECK Agent execution integration functional")
                 else:
                     golden_path_results['disruptions'].append("Agent execution integration broken")
             except Exception as e:
@@ -720,10 +720,10 @@ class Issue1182WebSocketManagerSSOTViolationsTests(SSotBaseTestCase):
         
         if total_violations == 0:
             self.logger.info("🎯 NO CRITICAL VIOLATIONS: WebSocket Manager SSOT compliant")
-            self.logger.info("✅ $500K+ ARR business value protected")
+            self.logger.info("CHECK $500K+ ARR business value protected")
         else:
             self.logger.error(f"🚨 {total_violations} CRITICAL VIOLATIONS DETECTED")
-            self.logger.error("❌ BUSINESS VALUE AT RISK")
+            self.logger.error("X BUSINESS VALUE AT RISK")
         
         # Detailed violation analysis
         for violation in self.critical_violations:

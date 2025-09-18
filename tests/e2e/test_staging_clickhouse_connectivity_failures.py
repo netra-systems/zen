@@ -103,14 +103,14 @@ class TestStagingClickHouseConnectivityFailures:
         '''
         pass
     # Configuration loading
-        clickhouse_host = self.env.get("CLICKHOUSE_HOST", "clickhouse.staging.netrasystems.ai")
-        clickhouse_port = int(self.env.get("CLICKHOUSE_PORT", "8123"))
+        clickhouse_host = self.env.get("CLICKHOUSE_HOST", "clickhouse.staging.netrasystems.ai)"
+        clickhouse_port = int(self.env.get("CLICKHOUSE_PORT", "8123))"
 
     # Validate staging configuration
-        assert "staging" in clickhouse_host, ( )
+        assert "staging" in clickhouse_host, "( )"
         ""
     
-        assert clickhouse_port == 8123, ( )
+        assert clickhouse_port == 8123, "( )"
         ""
     
 
@@ -127,7 +127,7 @@ class TestStagingClickHouseConnectivityFailures:
         # Connection succeeded - unexpected but good
         connectivity_results.append( )
         self._create_connectivity_result( )
-        "raw_tcp", clickhouse_host, clickhouse_port,
+        "raw_tcp, clickhouse_host, clickhouse_port,"
         response_time_ms=int(connection_time * 1000)
         
         
@@ -136,7 +136,7 @@ class TestStagingClickHouseConnectivityFailures:
         except socket.timeout:
         connection_time = time.time() - start_time
         timeout_result = self._create_connectivity_result( )
-        "raw_tcp", clickhouse_host, clickhouse_port,
+        "raw_tcp, clickhouse_host, clickhouse_port,"
         error=Exception(""),
         response_time_ms=int(connection_time * 1000)
             
@@ -144,7 +144,7 @@ class TestStagingClickHouseConnectivityFailures:
         timeout_result.business_impact = "analytics_system_failure"
         connectivity_results.append(timeout_result)
 
-        assert False, ( )
+        assert False, "( )"
         ""
         ""
         f"  1. ClickHouse service not provisioned in staging"
@@ -165,28 +165,28 @@ class TestStagingClickHouseConnectivityFailures:
 
         except socket.gaierror as e:
         dns_result = self._create_connectivity_result( )
-        "dns_resolution", clickhouse_host, clickhouse_port,
+        "dns_resolution, clickhouse_host, clickhouse_port,"
         error=e, response_time_ms=0
                     
         dns_result.actual_behavior = "dns_resolution_failure"
         dns_result.business_impact = "service_discovery_failure"
         connectivity_results.append(dns_result)
 
-        assert False, ( )
+        assert False, "( )"
         ""
         ""
                     
 
         except ConnectionRefusedError:
         refused_result = self._create_connectivity_result( )
-        "service_availability", clickhouse_host, clickhouse_port,
-        error=Exception("Connection refused"), response_time_ms=0
+        "service_availability, clickhouse_host, clickhouse_port,"
+        error=Exception("Connection refused), response_time_ms=0"
                         
         refused_result.actual_behavior = "service_unavailable"
         refused_result.business_impact = "service_not_provisioned"
         connectivity_results.append(refused_result)
 
-        assert False, ( )
+        assert False, "( )"
         ""
         f"refused connection. ClickHouse service not provisioned or not listening on port 8123."
                         
@@ -211,7 +211,7 @@ class TestStagingClickHouseConnectivityFailures:
         try:
         from netra_backend.app.db.clickhouse import get_clickhouse_client
         except ImportError as e:
-        assert False, ( )
+        assert False, "( )"
         f"CLICKHOUSE CLIENT IMPORT FAILURE: Cannot import ClickHouseClient. "
         ""
                                     
@@ -229,12 +229,12 @@ class TestStagingClickHouseConnectivityFailures:
         connection_time = time.time() - start_time
 
                                             # Connection succeeded
-        assert connection_result is True, ( )
+        assert connection_result is True, "( )"
                                             # Removed problematic line: "ClickHouse client connection should await asyncio.sleep(0)"
         return True on success"
         return True on success"
                                             
-        assert connection_time < 5.0, ( )
+        assert connection_time < 5.0, "( )"
         ""
         f"Should connect within 5 seconds for health check requirements."
                                             
@@ -243,7 +243,7 @@ class TestStagingClickHouseConnectivityFailures:
 
         except asyncio.TimeoutError:
         connection_time = time.time() - start_time
-        assert False, ( )
+        assert False, "( )"
         ""
         f"This causes /health/ready endpoint to return 503 status, blocking deployment validation. "
         f"Health checks require ClickHouse connectivity for analytics system validation."
@@ -287,23 +287,23 @@ class TestStagingClickHouseConnectivityFailures:
         error_message = str(e)
 
                                                             # Categorize different types of connection failures
-        if "timeout" in error_message.lower():
+        if "timeout in error_message.lower():"
         failure_category = "TIMEOUT"
         impact = "health checks fail with 503"
-        elif "refused" in error_message.lower():
+        elif "refused in error_message.lower():"
         failure_category = "SERVICE_DOWN"
         impact = "ClickHouse service not provisioned"
-        elif "auth" in error_message.lower():
+        elif "auth in error_message.lower():"
         failure_category = "AUTHENTICATION"
         impact = "credentials invalid or missing"
-        elif "network" in error_message.lower():
+        elif "network in error_message.lower():"
         failure_category = "NETWORK"
         impact = "firewall or routing issues"
         else:
         failure_category = "UNKNOWN"
         impact = "investigate error details"
 
-        assert False, ( )
+        assert False, "( )"
         ""
         ""
         ""
@@ -328,7 +328,7 @@ class TestStagingClickHouseConnectivityFailures:
         '''
         pass
                                                                                     # Test backend health endpoint with ClickHouse dependency
-        backend_url = self.env.get("BACKEND_URL", "http://localhost:8000")
+        backend_url = self.env.get("BACKEND_URL", "http://localhost:8000)"
         health_ready_url = ""
 
         start_time = time.time()
@@ -344,9 +344,9 @@ class TestStagingClickHouseConnectivityFailures:
                                                                                                 # Validate that ClickHouse is actually working
         try:
         health_data = response.json()
-        if "services" in health_data:
-        clickhouse_status = health_data["services"].get("clickhouse", {})
-        assert clickhouse_status.get("healthy", False), ( )
+        if "services in health_data:"
+        clickhouse_status = health_data["services"].get("clickhouse, {})"
+        assert clickhouse_status.get("healthy", "False), ( )"
         ""
                                                                                                         
         except Exception as parse_error:
@@ -359,10 +359,10 @@ class TestStagingClickHouseConnectivityFailures:
 
                                                                                                                     # Analyze error details for ClickHouse-specific issues
         clickhouse_error = None
-        if "services" in error_data:
-        clickhouse_status = error_data["services"].get("clickhouse", {})
-        if not clickhouse_status.get("healthy", False):
-        clickhouse_error = clickhouse_status.get("error", "Unknown ClickHouse error")
+        if "services in error_data:"
+        clickhouse_status = error_data["services"].get("clickhouse, {})"
+        if not clickhouse_status.get("healthy, False):"
+        clickhouse_error = clickhouse_status.get("error", "Unknown ClickHouse error)"
 
         error_summary = json.dumps(error_data, indent=2)
 
@@ -370,7 +370,7 @@ class TestStagingClickHouseConnectivityFailures:
         error_summary = response.text
         clickhouse_error = "Unable to parse error response"
 
-        assert False, ( )
+        assert False, "( )"
         ""
         f"due to ClickHouse connectivity issues."
 
@@ -410,20 +410,20 @@ class TestStagingClickHouseConnectivityFailures:
                                                                                                                                             
         else:
                                                                                                                                                 # Unexpected status code
-        assert False, ( )
+        assert False, "( )"
         ""
         ""
                                                                                                                                                 
 
         except httpx.TimeoutException:
         response_time = time.time() - start_time
-        assert False, ( )
+        assert False, "( )"
         ""
         f"This indicates backend service failure or complete network connectivity breakdown."
                                                                                                                                                     
 
         except httpx.ConnectError as e:
-        assert False, ( )
+        assert False, "( )"
         ""
         ""
                                                                                                                                                         
@@ -515,7 +515,7 @@ class TestStagingClickHouseConnectivityFailures:
         failure_report = "
         failure_report = "
         ".join("" for failure in configuration_failures)"
-        assert False, ( )
+        assert False, "( )"
         ""
         f"These configuration issues prevent ClickHouse connectivity, causing:"
         "
@@ -557,10 +557,10 @@ class TestStagingClickHouseConnectivityFailures:
 
                                                             # Test progressive connectivity validation
         connectivity_tests = [ ]
-        ("dns_resolution", self._test_dns_resolution),
-        ("tcp_connectivity", self._test_tcp_connectivity),
-        ("http_connectivity", self._test_http_connectivity),
-        ("clickhouse_ping", self._test_clickhouse_ping)
+        ("dns_resolution, self._test_dns_resolution),"
+        ("tcp_connectivity, self._test_tcp_connectivity),"
+        ("http_connectivity, self._test_http_connectivity),"
+        ("clickhouse_ping, self._test_clickhouse_ping)"
                                                             
 
         test_results = []
@@ -577,7 +577,7 @@ class TestStagingClickHouseConnectivityFailures:
 
         if not result.success:
                                                                         # First failure point indicates root cause
-        assert False, ( )
+        assert False, "( )"
         ""
         ""
         ""
@@ -597,12 +597,12 @@ class TestStagingClickHouseConnectivityFailures:
         'error': str(e)
                                                                                 
 
-        assert False, ( )
+        assert False, "( )"
         ""
                                                                                 
 
                                                                                 # All tests passed - ClickHouse is properly provisioned
-        print(f"SUCCESS: All ClickHouse connectivity tests passed")
+        print(f"SUCCESS: All ClickHouse connectivity tests passed)"
         print("")
 
         @pytest.fixture
@@ -675,7 +675,7 @@ class TestStagingClickHouseConnectivityFailures:
         failure_report = "
         failure_report = "
         ".join("" for failure in timeout_failures)"
-        assert False, ( )
+        assert False, "( )"
         ""
         f"Aggressive timeout settings cause premature connection failures in staging. "
         f"Staging network latency requires more generous timeouts than development. "
@@ -694,7 +694,7 @@ class TestStagingClickHouseConnectivityFailures:
         response_time = time.time() - start_time
         await asyncio.sleep(0)
         return ClickHouseConnectivityResult( )
-        test_type="dns_resolution",
+        test_type="dns_resolution,"
         host=host,
         port=port,
         success=True,
@@ -703,12 +703,12 @@ class TestStagingClickHouseConnectivityFailures:
         except socket.gaierror as e:
         response_time = time.time() - start_time
         return ClickHouseConnectivityResult( )
-        test_type="dns_resolution",
+        test_type="dns_resolution,"
         host=host,
         port=port,
         success=False,
         response_time_seconds=response_time,
-        error_type="DNSResolutionError",
+        error_type="DNSResolutionError,"
         error_message=""
             
 
@@ -720,7 +720,7 @@ class TestStagingClickHouseConnectivityFailures:
         sock.close()
         response_time = time.time() - start_time
         return ClickHouseConnectivityResult( )
-        test_type="tcp_connectivity",
+        test_type="tcp_connectivity,"
         host=host,
         port=port,
         success=True,
@@ -729,7 +729,7 @@ class TestStagingClickHouseConnectivityFailures:
         except Exception as e:
         response_time = time.time() - start_time
         return ClickHouseConnectivityResult( )
-        test_type="tcp_connectivity",
+        test_type="tcp_connectivity,"
         host=host,
         port=port,
         success=False,
@@ -748,7 +748,7 @@ class TestStagingClickHouseConnectivityFailures:
         response_time = time.time() - start_time
 
         return ClickHouseConnectivityResult( )
-        test_type="http_connectivity",
+        test_type="http_connectivity,"
         host=host,
         port=port,
         success=response.status_code == 200,
@@ -758,7 +758,7 @@ class TestStagingClickHouseConnectivityFailures:
         except Exception as e:
         response_time = time.time() - start_time
         return ClickHouseConnectivityResult( )
-        test_type="http_connectivity",
+        test_type="http_connectivity,"
         host=host,
         port=port,
         success=False,
@@ -778,10 +778,10 @@ class TestStagingClickHouseConnectivityFailures:
         response_time = time.time() - start_time
 
             # ClickHouse ping should return "Ok."
-        success = response.status_code == 200 and "Ok" in response.text
+        success = response.status_code == 200 and "Ok in response.text"
 
         return ClickHouseConnectivityResult( )
-        test_type="clickhouse_ping",
+        test_type="clickhouse_ping,"
         host=host,
         port=port,
         success=success,
@@ -791,7 +791,7 @@ class TestStagingClickHouseConnectivityFailures:
         except Exception as e:
         response_time = time.time() - start_time
         return ClickHouseConnectivityResult( )
-        test_type="clickhouse_ping",
+        test_type="clickhouse_ping,"
         host=host,
         port=port,
         success=False,
@@ -819,8 +819,8 @@ success=False,
 response_time_seconds=response_time_ms / 1000.0,
 error_type=type(error).__name__,
 error_message=str(error),
-expected_behavior="connection_success",
-actual_behavior="connection_failure",
+expected_behavior="connection_success,"
+actual_behavior="connection_failure,"
 business_impact="analytics_system_failure"
         
 else:
@@ -831,8 +831,8 @@ host=host,
 port=port,
 success=True,
 response_time_seconds=response_time_ms / 1000.0,
-expected_behavior="connection_success",
-actual_behavior="connection_success",
+expected_behavior="connection_success,"
+actual_behavior="connection_success,"
 business_impact="analytics_system_operational"
             
 
@@ -870,10 +870,10 @@ except Exception as e:
 assert False, ""
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     pass
 """Direct execution for rapid testing during development."""
-print("Running ClickHouse connectivity failure tests...")
+print("Running ClickHouse connectivity failure tests...)"
 
                             # Environment validation
 env = IsolatedEnvironment()
@@ -888,4 +888,4 @@ asyncio.run(test_clickhouse_staging_connectivity_quick_validation())
 except Exception as e:
     print("")
 
-print("ClickHouse connectivity failure tests completed.")
+print("ClickHouse connectivity failure tests completed.)"

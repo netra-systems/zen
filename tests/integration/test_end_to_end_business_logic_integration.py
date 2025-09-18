@@ -8,14 +8,14 @@ Business Value Justification (BVJ):
 - Revenue Impact: Complete user journey validation for customer retention
 
 CRITICAL COVERAGE GAPS ADDRESSED:
-- Complete golden path user flow validation (Login → Chat → AI Response)
+- Complete golden path user flow validation (Login -> Chat -> AI Response)
 - Business logic integration across all system components
 - Real-world user scenario testing with actual data flows
 - Multi-service integration validation (Auth + Backend + WebSocket + LLM)
 - Enterprise customer workflow validation
 
 PHASE 3 TARGET: Complete business workflow validation
-COVERAGE IMPROVEMENT: Final contribution to 10.92% → 25%+ coverage increase
+COVERAGE IMPROVEMENT: Final contribution to 10.92% -> 25%+ coverage increase
 
 TEST INFRASTRUCTURE:
 - Full staging environment integration
@@ -25,7 +25,7 @@ TEST INFRASTRUCTURE:
 - Enterprise customer scenario testing
 
 BUSINESS-CRITICAL END-TO-END FLOWS:
-1. User Authentication → WebSocket Connection → Agent Execution → AI Response
+1. User Authentication -> WebSocket Connection -> Agent Execution -> AI Response
 2. Multi-user concurrent chat with proper isolation
 3. Complex business queries requiring multiple agents and tools
 4. Error recovery and user experience continuity
@@ -151,7 +151,7 @@ class EndToEndBusinessLogicIntegrationTests(SSotAsyncTestCase):
     @pytest.mark.timeout(60)
     async def test_complete_golden_path_user_journey(self):
         """
-        Test complete golden path: User Registration → Login → WebSocket → Chat → AI Response
+        Test complete golden path: User Registration -> Login -> WebSocket -> Chat -> AI Response
         COVERS: Complete $500K+ ARR customer journey validation
         """
         if not all([APP_AVAILABLE, AUTH_SERVICE_AVAILABLE, REALTIME_AVAILABLE, COMPLETE_AGENT_SYSTEM_AVAILABLE]):

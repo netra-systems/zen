@@ -5,7 +5,7 @@ E2E Staging Tests for Golden Path Without SingletonToFactoryBridge
 This test suite validates the complete Golden Path user flow works without
 the SingletonToFactoryBridge, ensuring safe removal of legacy code.
 
-Golden Path: Users login → get AI responses
+Golden Path: Users login -> get AI responses
 Critical for: $500K+ ARR protection
 
 Test Scope:
@@ -452,11 +452,11 @@ class TestGoldenPathWithoutBridge(SSotAsyncTestCase):
             self.assertIsInstance(factory_status, dict)
             golden_path_steps.append("Resource Management")
 
-            self.logger.info(f"Complete Golden Path validated: {' → '.join(golden_path_steps)}")
+            self.logger.info(f"Complete Golden Path validated: {' -> '.join(golden_path_steps)}")
 
         except Exception as e:
             failed_step = len(golden_path_steps)
-            completed_steps = ' → '.join(golden_path_steps)
+            completed_steps = ' -> '.join(golden_path_steps)
             self.fail(
                 f"Complete Golden Path failed at step {failed_step}: {e}. "
                 f"Completed steps: {completed_steps}"

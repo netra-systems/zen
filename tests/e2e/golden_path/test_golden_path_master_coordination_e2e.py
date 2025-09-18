@@ -4,7 +4,7 @@ Test Golden Path Master Coordination E2E
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure complete Golden Path master coordination maintains system excellence
-- Value Impact: Validates end-to-end coordination preserves login→AI response flow for $500K+ ARR
+- Value Impact: Validates end-to-end coordination preserves login->AI response flow for $500K+ ARR
 - Strategic Impact: Complete platform coordination validation ensuring all business value delivery
 
 Issue #1176: Master Plan Golden Path validation - Complete E2E master coordination

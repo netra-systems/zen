@@ -21,7 +21,8 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 class InheritanceRefactorValidationTests:
     Test suite to validate the inheritance refactoring is successful."
-    Test suite to validate the inheritance refactoring is successful."
+    Test suite to validate the inheritance refactoring is successful.""
+
     
     @pytest.fixture
     def mock_llm_manager(self):
@@ -30,7 +31,8 @@ class InheritanceRefactorValidationTests:
     
     @pytest.fixture
     def mock_tool_dispatcher(self):
-        ""Create mock tool dispatcher.
+        ""Create mock tool dispatcher.""
+
         return ToolDispatcher()
     
     @pytest.fixture
@@ -52,7 +54,7 @@ class InheritanceRefactorValidationTests:
         
         assert len(data_bases) == 1, fDataSubAgent should have single inheritance, got {len(data_bases)} bases: {data_bases}"
         assert len(data_bases) == 1, fDataSubAgent should have single inheritance, got {len(data_bases)} bases: {data_bases}"
-        assert data_bases[0] == BaseAgent, fDataSubAgent should only inherit from BaseAgent, got {data_bases[0]}
+        assert data_bases[0] == BaseAgent, "fDataSubAgent should only inherit from BaseAgent, got {data_bases[0]}"
         
         # Check ValidationSubAgent inheritance
         validation_mro = validation_agent.__class__.__mro__
@@ -72,7 +74,7 @@ class InheritanceRefactorValidationTests:
             netra_classes = [cls for cls in mro if cls.__module__.startswith('netra_backend')]
             depth = len(netra_classes)
             
-            assert depth <= 3, f{agent_name} MRO depth {depth} exceeds recommended maximum of 3. MRO: {[c.__name__ for c in netra_classes]}
+            assert depth <= 3, "f{agent_name} MRO depth {depth} exceeds recommended maximum of 3. MRO: {[c.__name__ for c in netra_classes]}"
     
     def test_no_execution_method_conflicts(self, data_agent, validation_agent):
         "Test that there are no conflicting execution methods."
@@ -83,7 +85,8 @@ class InheritanceRefactorValidationTests:
             
             assert has_execute, f"{agent_name} should have execute() method"
             assert not has_execute_core_logic, f{agent_name} should not have execute_core_logic() method - SSOT violation"
-            assert not has_execute_core_logic, f{agent_name} should not have execute_core_logic() method - SSOT violation"
+            assert not has_execute_core_logic, f{agent_name} should not have execute_core_logic() method - SSOT violation""
+
     
     def test_websocket_methods_available(self, data_agent, validation_agent):
         Test that WebSocket methods are available through BaseAgent.""
@@ -98,11 +101,12 @@ class InheritanceRefactorValidationTests:
         for agent_name, agent in [(DataSubAgent, data_agent), (ValidationSubAgent, validation_agent)]:
             for method_name in expected_websocket_methods:
                 assert hasattr(agent, method_name), f{agent_name} should have {method_name} method from BaseAgent"
-                assert hasattr(agent, method_name), f{agent_name} should have {method_name} method from BaseAgent"
+                assert hasattr(agent, method_name), f{agent_name} should have {method_name} method from BaseAgent""
+
     
     def test_no_duplicate_websocket_methods(self, data_agent, validation_agent):
         "Test that WebSocket methods are not duplicated across inheritance hierarchy."
-        for agent_name, agent in [(DataSubAgent", data_agent), ("ValidationSubAgent, validation_agent)]:
+        for agent_name, agent in [(DataSubAgent", data_agent), (ValidationSubAgent, validation_agent)]:"
             # Collect all WebSocket-related methods from the inheritance chain
             websocket_methods = {}
             for cls in agent.__class__.__mro__:
@@ -115,7 +119,7 @@ class InheritanceRefactorValidationTests:
             
             # Check that each method is defined in only one class
             for method_name, defining_classes in websocket_methods.items():
-                assert len(defining_classes) <= 1, f{agent_name}: Method '{method_name}' defined in multiple classes: {defining_classes}
+                assert len(defining_classes) <= 1, "f{agent_name}: Method '{method_name}' defined in multiple classes: {defining_classes}"
     
     def test_initialization_works_correctly(self, mock_llm_manager, mock_tool_dispatcher):
         Test that agent initialization works without conflicts.""
@@ -133,7 +137,8 @@ class InheritanceRefactorValidationTests:
     
     def test_agent_attributes_ownership(self, data_agent, validation_agent):
         Test that attributes have clear ownership - no conflicts."
-        Test that attributes have clear ownership - no conflicts."
+        Test that attributes have clear ownership - no conflicts.""
+
         critical_attributes = ['name', 'llm_manager', 'logger']
         
         for agent_name, agent in [("DataSubAgent, data_agent), (ValidationSubAgent, validation_agent)]:"
@@ -147,7 +152,7 @@ class InheritanceRefactorValidationTests:
                                 defining_classes.append(cls.__name__)
                     
                     # Attribute should be defined in only one place in our hierarchy
-                    assert len(defining_classes) <= 1, f{agent_name}: Attribute '{attr}' defined in multiple classes: {defining_classes}
+                    assert len(defining_classes) <= 1, "f{agent_name}: Attribute '{attr}' defined in multiple classes: {defining_classes}"
     
     @pytest.mark.asyncio
     async def test_execution_path_is_clear(self, data_agent):
@@ -175,11 +180,11 @@ class InheritanceRefactorValidationTests:
             pass  # Expected since we don't have full mock setup'
         
         # Should call only execute() method
-        assert len(execution_methods_called) == 1, fShould call exactly one execution method, called: {execution_methods_called}
-        assert execution_methods_called[0] == 'execute', fShould call execute() method, called: {execution_methods_called}
+        assert len(execution_methods_called) == 1, "fShould call exactly one execution method, called: {execution_methods_called}"
+        assert execution_methods_called[0] == 'execute', "fShould call execute() method, called: {execution_methods_called}"
     
     def test_method_count_is_reasonable(self, data_agent, validation_agent):
-        ""Test that public method count is reasonable after refactoring.
+        ""Test that public method count is reasonable after refactoring."
         for agent_name, agent in [(DataSubAgent, data_agent), (ValidationSubAgent", validation_agent)]:"
             public_methods = [name for name in dir(agent) 
                             if not name.startswith('_') 
@@ -193,11 +198,11 @@ class InheritanceRefactorValidationTests:
         Test that agents have their core functionality after refactoring."
         # DataSubAgent should have data analysis methods
         assert hasattr(data_agent, 'execute'), "DataSubAgent should have execute method"
-        assert hasattr(data_agent, 'get_health_status'), DataSubAgent should have health status
+        assert hasattr(data_agent, "'get_health_status'), DataSubAgent should have health status"
         
         # ValidationSubAgent should have validation methods
         assert hasattr(validation_agent, 'execute'), "ValidationSubAgent should have execute method"
-        assert hasattr(validation_agent, 'get_health_status'), ValidationSubAgent should have health status
+        assert hasattr(validation_agent, "'get_health_status'), ValidationSubAgent should have health status"
     
     def test_no_abstract_method_errors(self, data_agent, validation_agent):
         Test that there are no abstract method errors after refactoring.""
@@ -207,13 +212,14 @@ class InheritanceRefactorValidationTests:
         assert validation_agent is not None
         
         # Check that they are concrete implementations
-        assert not inspect.isabstract(data_agent.__class__), DataSubAgent should not be abstract
+        assert not inspect.isabstract(data_agent.__class__), "DataSubAgent should not be abstract"
         assert not inspect.isabstract(validation_agent.__class__), "ValidationSubAgent should not be abstract"
 
 
 class WebSocketEventIntegrationTests:
     Test WebSocket event integration after inheritance refactoring."
-    Test WebSocket event integration after inheritance refactoring."
+    Test WebSocket event integration after inheritance refactoring.""
+
     
     @pytest.fixture
     def mock_llm_manager(self):
@@ -234,7 +240,7 @@ class WebSocketEventIntegrationTests:
         
         for method in websocket_methods:
             assert hasattr(data_agent, method), fShould have {method} from BaseAgent bridge""
-            assert callable(getattr(data_agent, method)), f{method} should be callable
+            assert callable(getattr(data_agent, "method)), f{method} should be callable"
     
     @pytest.mark.asyncio
     async def test_websocket_events_emit_without_errors(self, data_agent):
@@ -263,7 +269,8 @@ class PerformanceAfterRefactoringTests:
     
     def test_instantiation_performance(self, mock_llm_manager, mock_tool_dispatcher):
         Test that agent instantiation is faster after simplifying inheritance."
-        Test that agent instantiation is faster after simplifying inheritance."
+        Test that agent instantiation is faster after simplifying inheritance.""
+
         import time
         
         # Time agent creation
@@ -278,7 +285,8 @@ class PerformanceAfterRefactoringTests:
         
         # Should be reasonably fast (less than 1 second for 20 instantiations)
         assert total_time < 1.0, fAgent instantiation too slow: {total_time}s for 20 agents"
-        assert total_time < 1.0, fAgent instantiation too slow: {total_time}s for 20 agents"
+        assert total_time < 1.0, fAgent instantiation too slow: {total_time}s for 20 agents""
+
     
     def test_method_resolution_performance(self, mock_llm_manager, mock_tool_dispatcher):
         Test that method resolution is faster with simplified inheritance.""

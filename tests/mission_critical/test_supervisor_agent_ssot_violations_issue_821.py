@@ -1,6 +1,6 @@
 "SSOT Violation Tests for Issue #821 - SupervisorAgent Consolidation"
 
-Business Value: Protect $500K+ ARR by ensuring single SupervisorAgent implementation
+Business Value: Protect $500K+ plus ARR by ensuring single SupervisorAgent implementation
 BVJ: ALL segments | Platform Stability | SSOT compliance prevents race conditions
 
 MISSION: Create tests that FAIL when multiple SupervisorAgent implementations exist
@@ -29,7 +29,8 @@ class SupervisorAgentSSOTViolationsTests(SSotBaseTestCase):
 
     def setUp(self):
         Set up test environment."
-        Set up test environment."
+        Set up test environment.""
+
         super().setUp()
         self.project_root = Path(__file__).parent.parent.parent
         self.netra_backend_path = self.project_root / netra_backend"
@@ -39,7 +40,8 @@ class SupervisorAgentSSOTViolationsTests(SSotBaseTestCase):
             self.fail(fProject root not found at: {self.project_root})
         if not self.netra_backend_path.exists():
             self.fail(fNetra backend path not found at: {self.netra_backend_path})"
-            self.fail(fNetra backend path not found at: {self.netra_backend_path})"
+            self.fail(fNetra backend path not found at: {self.netra_backend_path})""
+
 
     def test_only_one_supervisor_agent_class_definition_exists(self):
         "TEST THAT MUST FAIL: Only one SupervisorAgent class should exist in active code."
@@ -108,7 +110,8 @@ class SupervisorAgentSSOTViolationsTests(SSotBaseTestCase):
                 actual_file,
                 f"SSOT VIOLATION: SupervisorAgent found in {actual_file},"
                 fexpected only in {ssot_expected_path}"
-                fexpected only in {ssot_expected_path}"
+                fexpected only in {ssot_expected_path}""
+
             )
 
     def test_all_supervisor_agent_imports_use_ssot_path(self):
@@ -119,7 +122,8 @@ class SupervisorAgentSSOTViolationsTests(SSotBaseTestCase):
         
         import_violations = []
         expected_ssot_path = netra_backend.app.agents.supervisor_ssot"
-        expected_ssot_path = netra_backend.app.agents.supervisor_ssot"
+        expected_ssot_path = netra_backend.app.agents.supervisor_ssot""
+
         project_root = Path(__file__).parent.parent.parent
         netra_backend_path = project_root / "netra_backend"
 
@@ -156,7 +160,7 @@ class SupervisorAgentSSOTViolationsTests(SSotBaseTestCase):
         # Log findings for debugging
         print(f\n=== IMPORT VIOLATION SCAN RESULTS ===)"
         print(f\n=== IMPORT VIOLATION SCAN RESULTS ===)"
-        print(f"Non-SSOT SupervisorAgent imports found: {len(import_violations)})")
+        print(f"Non-SSOT SupervisorAgent imports found: {len(import_violations)}))"
         for violation in import_violations:
             print(f  - {violation['file']}:{violation['line']} -> {violation['content']})"
             print(f  - {violation['file']}:{violation['line']} -> {violation['content']})"
@@ -198,11 +202,13 @@ class SupervisorAgentSSOTViolationsTests(SSotBaseTestCase):
             # Log findings for debugging
             print(f\n=== REGISTRY VIOLATION SCAN RESULTS ===)
             print(fSupervisorAgent registrations found: {len(supervisor_registrations)})"
-            print(fSupervisorAgent registrations found: {len(supervisor_registrations)})"
+            print(fSupervisorAgent registrations found: {len(supervisor_registrations)})""
+
             for reg in supervisor_registrations:
-                print(f"  - {reg['name']} -> {reg['class']} from {reg['module']})")
+                print(f"  - {reg['name']} -> {reg['class']} from {reg['module']}))"
             print(=*50)"
-            print(=*50)"
+            print(=*50)""
+
 
             # ASSERTION: Should have at most ONE supervisor registration
             # This test FAILS if multiple supervisor registrations exist
@@ -216,20 +222,23 @@ class SupervisorAgentSSOTViolationsTests(SSotBaseTestCase):
             # If there is a registration, it should be from SSOT module
             if supervisor_registrations:
                 ssot_module = netra_backend.app.agents.supervisor_ssot"
-                ssot_module = netra_backend.app.agents.supervisor_ssot"
+                ssot_module = netra_backend.app.agents.supervisor_ssot""
+
                 actual_module = supervisor_registrations[0]['module']
                 self.assertEqual(
                     actual_module,
                     ssot_module,
                     fSSOT VIOLATION: SupervisorAgent registered from {actual_module}, "
-                    fSSOT VIOLATION: SupervisorAgent registered from {actual_module}, "
+                    fSSOT VIOLATION: SupervisorAgent registered from {actual_module}, ""
+
                     fexpected from {ssot_module}
                 )
 
         except ImportError as e:
             # If agent registry doesn't exist, that's not a violation for this test
             self.skipTest(fAgent registry not available: {e})"
-            self.skipTest(fAgent registry not available: {e})"
+            self.skipTest(fAgent registry not available: {e})""
+
 
     def test_supervisor_agent_import_path_consistency(self):
         "TEST THAT MUST FAIL: SupervisorAgent should be importable only from SSOT path."
@@ -273,10 +282,10 @@ class SupervisorAgentSSOTViolationsTests(SSotBaseTestCase):
 
         # Log findings for debugging
         print(f\n=== IMPORT PATH VIOLATION SCAN RESULTS ===)
-        print(f"Working violation paths found: {len(working_violation_paths)}")
+        print(f"Working violation paths found: {len(working_violation_paths)})"
         for violation in working_violation_paths:
             print(f  - {violation['path']} -> {violation['class']})
-        print("=*50")
+        print("=*50)"
 
         # ASSERTION: Should have zero working violation paths
         # This test FAILS if multiple import paths work

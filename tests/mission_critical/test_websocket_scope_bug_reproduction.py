@@ -2,10 +2,10 @@
 "MISSION CRITICAL TEST SUITE: WebSocket Scope Bug Reproduction - Issue #165"
 
 THIS TEST SUITE REPRODUCES THE EXACT WEBSOCKET SCOPE BUG CAUSING 100% CONNECTION FAILURES.
-Business Impact: $500K+ ARR - Complete WebSocket connection failure
+Business Impact: $500K+ plus ARR - Complete WebSocket connection failure
 
 Scope Bug Details:
-- Location: /netra_backend/app/routes/websocket.py lines 1433, 1452
+    - Location: /netra_backend/app/routes/websocket.py lines 1433, 1452
 - Error: NameError: name 'state_registry' is not defined
 - Cause: Variable scope isolation bug - initialized in function scope but accessed globally
 - Impact: 100% WebSocket connection failure rate affecting all chat functionality
@@ -14,13 +14,13 @@ This test suite is designed to FAIL initially to reproduce the exact bug conditi
 Tests will fail with expected NameError until the scope bug is fixed.
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise) 
+    - Segment: All (Free, Early, Mid, Enterprise) 
 - Business Goal: Restore WebSocket connection reliability
 - Value Impact: Fix 100% connection failure blocking all chat functionality
-- Strategic Impact: Core platform infrastructure required for $500K+ ARR
+- Strategic Impact: Core platform infrastructure required for $500K+ plus ARR
 
 REQUIREMENTS:
-- Unit tests only - No Docker required
+    - Unit tests only - No Docker required
 - Real websocket module imports
 - Tests MUST FAIL with exact NameError from scope bug
 - Validates business impact of scope isolation issue
@@ -50,7 +50,8 @@ from fastapi import WebSocket
 
 
 class WebSocketScopeBugReproductionTests:
-    ""
+    """
+
     Reproduce exact WebSocket scope bug from issue #165.
     
     These tests are designed to FAIL with the exact NameError that occurs
@@ -60,7 +61,8 @@ class WebSocketScopeBugReproductionTests:
     @pytest.mark.mission_critical
     @pytest.mark.unit
     async def test_state_registry_scope_isolation_bug(self):
-    ""
+    """
+
         REPRODUCER: Test exact NameError at lines 1433,1452 due to scope bug.
         
         This test reproduces the exact conditions where state_registry is
@@ -76,7 +78,8 @@ class WebSocketScopeBugReproductionTests:
         mock_websocket.headers = {
             authorization: Bearer test_token,
             sec-websocket-protocol: jwt-auth"
-            sec-websocket-protocol: jwt-auth"
+            sec-websocket-protocol: jwt-auth""
+
         }
         mock_websocket.accept = AsyncMock()
         mock_websocket.close = AsyncMock()
@@ -87,7 +90,7 @@ class WebSocketScopeBugReproductionTests:
             mock_env.get.side_effect = lambda key, default=None: {
                 "ENVIRONMENT: staging,  # Use staging to trigger Cloud Run paths"
                 TESTING: 0,
-                "E2E_TESTING: 0", 
+                "E2E_TESTING: 0, "
                 PYTEST_RUNNING: 0
             }.get(key, default)
             mock_get_env.return_value = mock_env
@@ -101,7 +104,8 @@ class WebSocketScopeBugReproductionTests:
                 mock_user_context.user_id = test_user_123"
                 mock_user_context.user_id = test_user_123"
                 mock_user_context.websocket_client_id = client_123" 
-                mock_user_context.websocket_client_id = client_123" 
+                mock_user_context.websocket_client_id = client_123""
+
                 mock_auth_result.user_context = mock_user_context
                 mock_auth_result.auth_result = Mock()
                 mock_auth_result.auth_result.to_dict = Mock(return_value={user_id: test_user_123)
@@ -136,7 +140,8 @@ class WebSocketScopeBugReproductionTests:
     @pytest.mark.mission_critical  
     @pytest.mark.unit
     async def test_websocket_connection_failure_rate(self):
-        ""
+        """
+
         REPRODUCER: Validate 100% connection failure rate due to scope bug.
         
         This test demonstrates that the scope bug causes ALL WebSocket 
@@ -203,18 +208,20 @@ class WebSocketScopeBugReproductionTests:
         logger.error(f   [U+2022] Scope bug failures: {scope_bug_rate}%)
         logger.error(f   [U+2022] Successful connections: {connection_attempts - failures})"
         logger.error(f   [U+2022] Successful connections: {connection_attempts - failures})"
-        logger.error(f"   [U+2022] Revenue at risk: $500K+ ARR (100% chat functionality blocked))"
+        logger.error(f"   [U+2022] Revenue at risk: $500K+ plus ARR (100% chat functionality blocked))"
         
         # This test should FAIL because we expect 100% failure rate
-        assert failure_rate == 100.0, fExpected 100% failure rate due to scope bug, got {failure_rate}%
+        assert failure_rate == 100.0, "fExpected 100% failure rate due to scope bug, got {failure_rate}%"
         assert name_errors > 0, Expected NameError for state_registry but none occurred"
-        assert name_errors > 0, Expected NameError for state_registry but none occurred"
+        assert name_errors > 0, Expected NameError for state_registry but none occurred""
+
         
     @pytest.mark.mission_critical
     @pytest.mark.unit  
     async def test_scope_bug_error_recovery_path(self):
-        "
-        "
+        """
+        ""
+
         REPRODUCER: Test error path that triggers scope bug conditions.
         
         This test validates that specific error recovery paths in the WebSocket
@@ -229,14 +236,14 @@ class WebSocketScopeBugReproductionTests:
         test_scenarios = [
             {
                 name: ID_MISMATCH_EMERGENCY_RECOVERY,
-                description": "Connection ID mismatch triggers emergency recovery using state_registry,
+                description": Connection ID mismatch triggers emergency recovery using state_registry,"
                 preliminary_id: prelim_123,
                 final_id: "final_456,  # Different - triggers mismatch"
                 state_machine_exists": False  # Triggers state_registry.register_connection"
             },
             {
                 name: PASS_THROUGH_SUCCESS_NO_STATE,
-                "description: Pass-through success but no existing state machine found",
+                "description: Pass-through success but no existing state machine found,"
                 preliminary_id: same_123, 
                 final_id: same_123",  # Same - triggers success path"
                 "state_machine_exists: False  # But no state machine - triggers state_registry"
@@ -247,7 +254,7 @@ class WebSocketScopeBugReproductionTests:
             logger.info(f SEARCH:  Testing scenario: {scenario['name']})
             
             mock_websocket = AsyncMock(spec=WebSocket)
-            mock_websocket.headers = {"authorization: Bearer test_token"}
+            mock_websocket.headers = {"authorization: Bearer test_token}"
             mock_websocket.accept = AsyncMock()
             mock_websocket.close = AsyncMock()
             
@@ -257,7 +264,8 @@ class WebSocketScopeBugReproductionTests:
                     mock_env.get.side_effect = lambda key, default=None: {
                         ENVIRONMENT: staging,
                         TESTING: 0"
-                        TESTING: 0"
+                        TESTING: 0""
+
                     }.get(key, default)
                     mock_get_env.return_value = mock_env
                     
@@ -309,7 +317,8 @@ class WebSocketScopeBugReproductionTests:
     @pytest.mark.mission_critical
     @pytest.mark.unit
     def test_scope_bug_static_analysis(self):
-    ""
+    """
+
         REPRODUCER: Static analysis of scope bug in websocket.py
         
         This test analyzes the actual source code to identify the exact
@@ -357,7 +366,8 @@ class WebSocketScopeBugReproductionTests:
             logger.error(f     Scope: {state_registry_definition['scope']})
         else:
             logger.error(   [U+2022] Definition: NOT FOUND)"
-            logger.error(   [U+2022] Definition: NOT FOUND)"
+            logger.error(   [U+2022] Definition: NOT FOUND)""
+
             
         logger.error(f"   [U+2022] References: {len(state_registry_references)} locations)"
         for ref in state_registry_references:
@@ -384,23 +394,25 @@ class WebSocketScopeBugReproductionTests:
             
         # This test should FAIL to document the scope bug
         assert len(found_problems) > 0, "Expected to find scope violations but none found"
-        assert state_registry_definition is not None, Expected to find state_registry definition
+        assert state_registry_definition is not None, "Expected to find state_registry definition"
         assert len(state_registry_references) > 0, Expected to find state_registry references"
-        assert len(state_registry_references) > 0, Expected to find state_registry references"
+        assert len(state_registry_references) > 0, Expected to find state_registry references""
+
         
         # Document the business impact
         logger.error([U+1F4B0] BUSINESS IMPACT OF SCOPE BUG:")"
         logger.error(   [U+2022] 100% WebSocket connection failure rate)
-        logger.error(   [U+2022] $500K+ ARR at risk due to chat functionality blocked")"
+        logger.error(   [U+2022] $500K+ plus ARR at risk due to chat functionality blocked")"
         logger.error(   [U+2022] No fallback mechanism - complete service failure)
         logger.error(   [U+2022] Critical infrastructure bug affecting all user tiers)"
-        logger.error(   [U+2022] Critical infrastructure bug affecting all user tiers)"
+        logger.error(   [U+2022] Critical infrastructure bug affecting all user tiers)""
+
         
         # Force test failure to highlight the critical issue
         pytest.fail(
             f"CRITICAL SCOPE BUG DETECTED: state_registry defined in function scope"
             fbut accessed in {len(state_registry_references)} nested locations. 
-            fThis causes 100% WebSocket connection failures affecting $500K+ ARR.
+            fThis causes 100% WebSocket connection failures affecting $500K+ plus ARR.
         )
 
 
@@ -410,8 +422,8 @@ if __name__ == __main__":"
     Run: python tests/mission_critical/test_websocket_scope_bug_reproduction.py
     ""
     logger.info( ALERT:  DIRECT EXECUTION: WebSocket Scope Bug Reproduction Tests)
-    logger.info([U+1F4B0] BUSINESS IMPACT: $500K+ ARR - 100% WebSocket connection failure)"
-    logger.info([U+1F4B0] BUSINESS IMPACT: $500K+ ARR - 100% WebSocket connection failure)"
+    logger.info([U+1F4B0] BUSINESS IMPACT: $500K plus ARR - 100% WebSocket connection failure)"
+    logger.info([U+1F4B0] BUSINESS IMPACT: $500K plus ARR - 100% WebSocket connection failure)"
     logger.info([U+1F527] PURPOSE: Reproduce exact NameError from variable scope isolation")"
     
     # MIGRATED: Use SSOT unified test runner

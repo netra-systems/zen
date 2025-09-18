@@ -15,7 +15,7 @@ CRITICAL COVERAGE GAPS ADDRESSED:
 - End-to-end agent execution workflows
 
 PHASE 2 TARGET: Comprehensive agent execution testing with real service integration
-COVERAGE IMPROVEMENT: Contributing to 10.92% → 25%+ coverage increase
+COVERAGE IMPROVEMENT: Contributing to 10.92% -> 25%+ coverage increase
 
 TEST INFRASTRUCTURE:
 - Real staging service connections (NO mocks for integration tests)

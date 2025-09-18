@@ -115,7 +115,7 @@ class RateLimiterRedisImportIssue517Tests(SSotBaseTestCase):
                 
             # Verify it's the exact error we expect
             self.assertIn("redis", str(context.exception).lower())
-            print(f"✓ Successfully reproduced the original NameError: {context.exception}")
+            print(f"CHECK Successfully reproduced the original NameError: {context.exception}")
 
             # Record success metric (SSOT pattern)
             self.record_metric("redis_import_error_reproduced", True)
@@ -170,7 +170,7 @@ class RateLimiterRedisImportIssue517Tests(SSotBaseTestCase):
         try:
             rate_limiter = ToolPermissionRateLimiter(redis_client=mock_redis)
             self.assertEqual(rate_limiter.redis, mock_redis)
-            print("✓ Type annotation validation successful")
+            print("CHECK Type annotation validation successful")
 
             # Record success metric (SSOT pattern)
             self.record_metric("type_annotation_validation", True)
@@ -239,7 +239,7 @@ class RateLimiterRedisImportIssue517Tests(SSotBaseTestCase):
         try:
             rate_limiter = ToolPermissionRateLimiter(redis_client=mock_redis)
             self.assertEqual(rate_limiter.redis, mock_redis)
-            print("✓ Mock redis client handled correctly")
+            print("CHECK Mock redis client handled correctly")
 
             # Record success metric (SSOT pattern)
             self.record_metric("redis_mock_handling", True)

@@ -325,7 +325,7 @@ class TestEnvironmentIsolation:
         """Test that environments are properly isolated."""
 
     def test_no_production_urls_in_staging(self):
-        """Test that staging doesn't accidentally use production URLs."""'
+        """Test that staging doesn't accidentally use production URLs.""'"
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=True):
         # Clear module cache
         modules = [ ]
@@ -362,7 +362,7 @@ class TestEnvironmentIsolation:
         ], ""
 
     def test_no_staging_urls_in_production(self):
-        """Test that production doesn't accidentally use staging URLs."""'
+        """Test that production doesn't accidentally use staging URLs.""'"
         pass
         with patch.dict(os.environ, {'ENVIRONMENT': 'production'}, clear=True):
         # Clear module cache
@@ -390,8 +390,8 @@ class TestEnvironmentIsolation:
         """Generate comprehensive URL alignment report."""
         logger.info(" )"
          + ="*60)"
-        logger.info("COMPREHENSIVE URL ALIGNMENT REPORT")
-        logger.info("="*60)
+        logger.info("COMPREHENSIVE URL ALIGNMENT REPORT)"
+        logger.info("=*60)"
 
         environments = ['development', 'staging', 'production']
         report = {}
@@ -448,7 +448,7 @@ class TestEnvironmentIsolation:
                                 # Validate alignment
         logger.info(" )"
          + -"*60)"
-        logger.info("VALIDATION RESULTS:")
+        logger.info("VALIDATION RESULTS:)"
 
         all_valid = True
         for env in environments:
@@ -469,12 +469,12 @@ class TestEnvironmentIsolation:
         all_valid = False
 
         if all_valid:
-        logger.info("[U+2713] All service URLs are properly aligned!")
+        logger.info("[U+2713] All service URLs are properly aligned!)"
         else:
-        logger.error("[U+2717] Service URL misalignment detected!")
-        raise AssertionError("Service URLs are not properly aligned")
+        logger.error("[U+2717] Service URL misalignment detected!)"
+        raise AssertionError("Service URLs are not properly aligned)"
 
-        logger.info("="*60)
+        logger.info("=*60)"
 
 
         if __name__ == '__main__':

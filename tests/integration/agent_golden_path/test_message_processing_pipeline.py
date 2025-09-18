@@ -16,7 +16,7 @@ CRITICAL REQUIREMENTS per CLAUDE.md:
 - Message queue processing order and reliability
 
 This module validates the complete message processing pipeline covering:
-1. End-to-end message pipeline validation (input → processing → response)
+1. End-to-end message pipeline validation (input -> processing -> response)
 2. Agent state preservation across multiple message exchanges
 3. Multi-turn conversation memory and context building
 4. Message queue processing order and reliability
@@ -68,7 +68,7 @@ class MessageProcessingPipelineTests(SSotAsyncTestCase):
     P0 Critical Integration Tests for Message Processing Pipeline.
 
     This test class validates the complete message processing pipeline:
-    Message Input → Processing → State Management → Response Delivery
+    Message Input -> Processing -> State Management -> Response Delivery
 
     Tests protect $500K+ ARR chat functionality by validating:
     - End-to-end message processing pipeline validation

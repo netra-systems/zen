@@ -56,13 +56,13 @@ class MessageRouterSSOTRegressionPreventionTests(SSotBaseTestCase):
             self.logger.info(f'    Compatibility: {compat}')
         total_implementations = implementation_count
         if total_implementations <= self.max_allowed_implementations:
-            self.logger.info('✅ SSOT COMPLIANCE: MessageRouter implementation count within limits')
+            self.logger.info('CHECK SSOT COMPLIANCE: MessageRouter implementation count within limits')
             canonical_found = any((impl['file_path'].endswith('websocket_core/handlers.py') for impl in implementation_analysis['implementations']))
             if not canonical_found:
                 self.fail(f'SSOT VIOLATION: Canonical MessageRouter implementation not found at {self.canonical_implementation}. This indicates improper consolidation.')
         else:
             violation_details = f'Found {total_implementations} MessageRouter implementations (max allowed: {self.max_allowed_implementations})'
-            self.logger.error(f'❌ SSOT VIOLATION: {violation_details}')
+            self.logger.error(f'X SSOT VIOLATION: {violation_details}')
             for impl in implementation_analysis['implementations']:
                 self.logger.error(f"  VIOLATION: {impl['file_path']} - {impl['implementation_type']}")
             self.fail(f'SSOT VIOLATION: Too many MessageRouter implementations detected. {violation_details}. This prevents SSOT consolidation and blocks Golden Path. Expected exactly {self.max_allowed_implementations} implementation after consolidation.')
@@ -152,7 +152,7 @@ class MessageRouterSSOTRegressionPreventionTests(SSotBaseTestCase):
             stats = router.get_stats()
             self.assertIsInstance(stats, dict, 'get_stats should return dictionary')
             self.assertIn('handler_count', stats, 'Stats should include handler count')
-            self.logger.info('✅ Canonical MessageRouter implementation is complete and functional')
+            self.logger.info('CHECK Canonical MessageRouter implementation is complete and functional')
         except ImportError as e:
             self.fail(f'Cannot import canonical MessageRouter: {e}')
         except Exception as e:
@@ -185,10 +185,10 @@ class MessageRouterSSOTRegressionPreventionTests(SSotBaseTestCase):
             for bad_import in non_canonical_imports:
                 self.logger.error(f'  NON-CANONICAL: {bad_import}')
         if len(non_canonical_imports) == 0:
-            self.logger.info('✅ SSOT COMPLIANCE: All MessageRouter imports use canonical path')
+            self.logger.info('CHECK SSOT COMPLIANCE: All MessageRouter imports use canonical path')
         else:
             violation_msg = f'SSOT VIOLATION: {len(non_canonical_imports)} non-canonical MessageRouter imports found'
-            self.logger.warning(f'⚠️ {violation_msg}')
+            self.logger.warning(f'WARNING️ {violation_msg}')
 
     def _scan_for_message_router_imports(self) -> Dict[str, List[Dict]]:
         """Scan codebase for MessageRouter imports."""
@@ -242,9 +242,9 @@ class MessageRouterSSOTRegressionPreventionTests(SSotBaseTestCase):
         self.logger.info(f"  Compatibility count: {current_fingerprint['compatibility_count']}")
         self.logger.info(f"  Total files: {current_fingerprint['total_files']}")
         if current_fingerprint['implementation_count'] == expected_implementation_count and current_fingerprint['compatibility_count'] == expected_compatibility_count:
-            self.logger.info('✅ SSOT COMPLIANCE: Implementation fingerprint matches expected post-consolidation state')
+            self.logger.info('CHECK SSOT COMPLIANCE: Implementation fingerprint matches expected post-consolidation state')
         else:
-            self.logger.warning(f"⚠️ CURRENT STATE: Implementation fingerprint indicates fragmentation. Expected after consolidation: {expected_implementation_count} implementations, {expected_compatibility_count} compatibility layers. Current: {current_fingerprint['implementation_count']} implementations, {current_fingerprint['compatibility_count']} compatibility layers.")
+            self.logger.warning(f"WARNING️ CURRENT STATE: Implementation fingerprint indicates fragmentation. Expected after consolidation: {expected_implementation_count} implementations, {expected_compatibility_count} compatibility layers. Current: {current_fingerprint['implementation_count']} implementations, {current_fingerprint['compatibility_count']} compatibility layers.")
             self.assertTrue(True, 'Implementation fingerprint recorded for future regression prevention')
 
     def _generate_implementation_fingerprint(self) -> Dict[str, Any]:

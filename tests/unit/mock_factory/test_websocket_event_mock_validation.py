@@ -286,7 +286,7 @@ class WebSocketEventMockValidationTests(SSotBaseTestCase):
         print(f"{'=' * 60}")
         print(f'Golden Path Events Tested: {len(self.GOLDEN_PATH_EVENTS)}')
         for event in self.GOLDEN_PATH_EVENTS:
-            print(f'  ✅ {event}')
+            print(f'  CHECK {event}')
         print(f'Event Mock Integration: Complete')
         print(f'Broadcasting Support: Validated')
         print(f'Error Handling: Tested')

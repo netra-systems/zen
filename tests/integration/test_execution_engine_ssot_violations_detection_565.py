@@ -156,17 +156,17 @@ class ExecutionEngineSSotViolationsDetection565Tests(SSotBaseTestCase):
         # CRITICAL VALIDATION: Should detect significant violations before fix
         if len(deprecated_imports) > 100:
             print(f"\n🚨 CRITICAL SSOT VIOLATION CONFIRMED:")
-            print(f"   ❌ {len(deprecated_imports)} deprecated imports detected")
-            print(f"   ❌ {len(files_with_violations)} files require migration")
-            print(f"   ❌ User isolation security vulnerability CONFIRMED")
-            print(f"   ⚠️  Issue #565 remediation is CRITICAL PRIORITY")
+            print(f"   X {len(deprecated_imports)} deprecated imports detected")
+            print(f"   X {len(files_with_violations)} files require migration")
+            print(f"   X User isolation security vulnerability CONFIRMED")
+            print(f"   WARNING️  Issue #565 remediation is CRITICAL PRIORITY")
             
             # This test SHOULD fail before remediation
             self.fail(f"SSOT VIOLATION DETECTED: {len(deprecated_imports)} deprecated ExecutionEngine imports found. "
                      f"Expected 0 after Issue #565 remediation.")
                      
         elif len(deprecated_imports) > 0:
-            print(f"\n⚠️ MINOR SSOT VIOLATIONS:")
+            print(f"\nWARNING️ MINOR SSOT VIOLATIONS:")
             print(f"   - {len(deprecated_imports)} deprecated imports remaining")
             print(f"   - Migration {((837 - len(deprecated_imports)) / 837 * 100):.1f}% complete")
             
@@ -175,10 +175,10 @@ class ExecutionEngineSSotViolationsDetection565Tests(SSotBaseTestCase):
                      f"Complete migration required for Issue #565.")
         
         else:
-            print(f"\n✅ SSOT COMPLIANCE ACHIEVED:")
-            print(f"   ✅ Zero deprecated ExecutionEngine imports detected")
-            print(f"   ✅ Migration to UserExecutionEngine complete")
-            print(f"   ✅ Issue #565 import remediation successful")
+            print(f"\nCHECK SSOT COMPLIANCE ACHIEVED:")
+            print(f"   CHECK Zero deprecated ExecutionEngine imports detected")
+            print(f"   CHECK Migration to UserExecutionEngine complete")
+            print(f"   CHECK Issue #565 import remediation successful")
 
     def test_02_user_execution_engine_factory_pattern_validation(self):
         """
@@ -246,14 +246,14 @@ class ExecutionEngineSSotViolationsDetection565Tests(SSotBaseTestCase):
         
         # Show violations
         if instantiation_violations:
-            print(f"\n❌ FACTORY PATTERN VIOLATIONS (first 5):")
+            print(f"\nX FACTORY PATTERN VIOLATIONS (first 5):")
             for i, violation in enumerate(instantiation_violations[:5]):
                 print(f"   {i+1}. {violation['file']}:{violation['line']}")
                 print(f"      {violation['content']}")
         
         # Show compliance examples
         if factory_compliance:
-            print(f"\n✅ PROPER FACTORY USAGE (sample):")
+            print(f"\nCHECK PROPER FACTORY USAGE (sample):")
             for i, compliance in enumerate(factory_compliance[:3]):
                 print(f"   {i+1}. {compliance['file']}:{compliance['line']}")
                 print(f"      {compliance['content']}")
@@ -264,18 +264,18 @@ class ExecutionEngineSSotViolationsDetection565Tests(SSotBaseTestCase):
         # VALIDATION: Factory pattern compliance required for user isolation
         if len(instantiation_violations) > 0:
             print(f"\n🚨 FACTORY PATTERN VIOLATION CONFIRMED:")
-            print(f"   ❌ {len(instantiation_violations)} direct instantiation violations")
-            print(f"   ❌ Shared state risk from non-factory instantiation")
-            print(f"   ⚠️  User isolation may be compromised")
+            print(f"   X {len(instantiation_violations)} direct instantiation violations")
+            print(f"   X Shared state risk from non-factory instantiation")
+            print(f"   WARNING️  User isolation may be compromised")
             
             self.fail(f"FACTORY PATTERN VIOLATION: {len(instantiation_violations)} direct UserExecutionEngine instantiations found. "
                      f"Use factory methods for proper user isolation.")
         
         else:
-            print(f"\n✅ FACTORY PATTERN COMPLIANCE:")
-            print(f"   ✅ No direct instantiation violations detected")
-            print(f"   ✅ {len(factory_compliance)} proper factory usages found")
-            print(f"   ✅ User isolation factory pattern implemented correctly")
+            print(f"\nCHECK FACTORY PATTERN COMPLIANCE:")
+            print(f"   CHECK No direct instantiation violations detected")
+            print(f"   CHECK {len(factory_compliance)} proper factory usages found")
+            print(f"   CHECK User isolation factory pattern implemented correctly")
 
     def test_03_user_execution_context_isolation_validation(self):
         """
@@ -369,7 +369,7 @@ class ExecutionEngineSSotViolationsDetection565Tests(SSotBaseTestCase):
         
         # Show violations
         if filtered_violations:
-            print(f"\n❌ USER CONTEXT VIOLATIONS (first 5):")
+            print(f"\nX USER CONTEXT VIOLATIONS (first 5):")
             for i, violation in enumerate(filtered_violations[:5]):
                 print(f"   {i+1}. {violation['file']}:{violation['line']}")
                 print(f"      {violation['content']}")
@@ -383,18 +383,18 @@ class ExecutionEngineSSotViolationsDetection565Tests(SSotBaseTestCase):
         
         if len(filtered_violations) > 10 or compliance_ratio < 0.8:
             print(f"\n🚨 USER CONTEXT ISOLATION VIOLATION:")
-            print(f"   ❌ {len(filtered_violations)} context isolation violations")
-            print(f"   ❌ Compliance ratio: {compliance_ratio:.1%}")
-            print(f"   ⚠️  User isolation may be compromised by hardcoded contexts")
+            print(f"   X {len(filtered_violations)} context isolation violations")
+            print(f"   X Compliance ratio: {compliance_ratio:.1%}")
+            print(f"   WARNING️  User isolation may be compromised by hardcoded contexts")
             
             self.fail(f"USER CONTEXT VIOLATION: {len(filtered_violations)} context isolation violations found. "
                      f"UserExecutionContext usage required for proper user isolation.")
         
         else:
-            print(f"\n✅ USER CONTEXT ISOLATION COMPLIANCE:")
-            print(f"   ✅ {len(filtered_violations)} minor violations (acceptable)")
-            print(f"   ✅ Compliance ratio: {compliance_ratio:.1%}")
-            print(f"   ✅ UserExecutionContext properly implemented for user isolation")
+            print(f"\nCHECK USER CONTEXT ISOLATION COMPLIANCE:")
+            print(f"   CHECK {len(filtered_violations)} minor violations (acceptable)")
+            print(f"   CHECK Compliance ratio: {compliance_ratio:.1%}")
+            print(f"   CHECK UserExecutionContext properly implemented for user isolation")
 
     def test_04_shared_state_vulnerability_detection(self):
         """
@@ -452,7 +452,7 @@ class ExecutionEngineSSotViolationsDetection565Tests(SSotBaseTestCase):
         
         # Show violations
         if shared_state_violations:
-            print(f"\n❌ SHARED STATE VIOLATIONS (first 5):")
+            print(f"\nX SHARED STATE VIOLATIONS (first 5):")
             for i, violation in enumerate(shared_state_violations[:5]):
                 print(f"   {i+1}. {violation['file']}:{violation['line']}")
                 print(f"      {violation['content']}")
@@ -463,17 +463,17 @@ class ExecutionEngineSSotViolationsDetection565Tests(SSotBaseTestCase):
         # VALIDATION: Shared state creates user isolation vulnerabilities
         if len(shared_state_violations) > 0:
             print(f"\n🚨 SHARED STATE VULNERABILITY CONFIRMED:")
-            print(f"   ❌ {len(shared_state_violations)} shared state patterns detected")
-            print(f"   ❌ Global variables risk user data contamination")
-            print(f"   ⚠️  User isolation security vulnerability exists")
+            print(f"   X {len(shared_state_violations)} shared state patterns detected")
+            print(f"   X Global variables risk user data contamination")
+            print(f"   WARNING️  User isolation security vulnerability exists")
             
             self.fail(f"SHARED STATE VULNERABILITY: {len(shared_state_violations)} shared state patterns found. "
                      f"Remove global/shared state for proper user isolation.")
         
         else:
-            print(f"\n✅ SHARED STATE SECURITY:")
-            print(f"   ✅ No dangerous shared state patterns detected")
-            print(f"   ✅ User isolation protected from global state contamination")
+            print(f"\nCHECK SHARED STATE SECURITY:")
+            print(f"   CHECK No dangerous shared state patterns detected")
+            print(f"   CHECK User isolation protected from global state contamination")
 
     def test_05_import_consistency_ssot_validation(self):
         """
@@ -547,7 +547,7 @@ class ExecutionEngineSSotViolationsDetection565Tests(SSotBaseTestCase):
         
         # Show inconsistencies
         if import_inconsistencies:
-            print(f"\n❌ IMPORT INCONSISTENCIES (first 5):")
+            print(f"\nX IMPORT INCONSISTENCIES (first 5):")
             for i, inconsistency in enumerate(import_inconsistencies[:5]):
                 print(f"   {i+1}. {inconsistency['file']}:{inconsistency['line']}")
                 print(f"      {inconsistency['content']}")
@@ -558,18 +558,18 @@ class ExecutionEngineSSotViolationsDetection565Tests(SSotBaseTestCase):
         # VALIDATION: Import consistency required for SSOT compliance
         if len(import_inconsistencies) > 0 or consistency_ratio < 0.9:
             print(f"\n🚨 IMPORT INCONSISTENCY VIOLATION:")
-            print(f"   ❌ {len(import_inconsistencies)} inconsistent import patterns")
-            print(f"   ❌ Consistency ratio: {consistency_ratio:.1%}")
-            print(f"   ⚠️  SSOT compliance requires consistent imports")
+            print(f"   X {len(import_inconsistencies)} inconsistent import patterns")
+            print(f"   X Consistency ratio: {consistency_ratio:.1%}")
+            print(f"   WARNING️  SSOT compliance requires consistent imports")
             
             self.fail(f"IMPORT INCONSISTENCY: {len(import_inconsistencies)} inconsistent imports found. "
                      f"Use consistent UserExecutionEngine imports for SSOT compliance.")
         
         else:
-            print(f"\n✅ IMPORT CONSISTENCY COMPLIANCE:")
-            print(f"   ✅ {len(ssot_compliant_imports)} SSOT compliant imports")
-            print(f"   ✅ Consistency ratio: {consistency_ratio:.1%}")
-            print(f"   ✅ Import patterns follow SSOT architecture")
+            print(f"\nCHECK IMPORT CONSISTENCY COMPLIANCE:")
+            print(f"   CHECK {len(ssot_compliant_imports)} SSOT compliant imports")
+            print(f"   CHECK Consistency ratio: {consistency_ratio:.1%}")
+            print(f"   CHECK Import patterns follow SSOT architecture")
 
     def test_06_comprehensive_ssot_violation_summary(self):
         """
@@ -600,7 +600,7 @@ class ExecutionEngineSSotViolationsDetection565Tests(SSotBaseTestCase):
         if violation_categories:
             print(f"\n📊 VIOLATION BREAKDOWN:")
             for category in violation_categories:
-                severity_icon = "🚨" if category['severity'] == 'CRITICAL' else "⚠️" if category['severity'] == 'HIGH' else "⚡"
+                severity_icon = "🚨" if category['severity'] == 'CRITICAL' else "WARNING️" if category['severity'] == 'HIGH' else "⚡"
                 print(f"   {severity_icon} {category['category'].replace('_', ' ').title()}: {category['count']} ({category['severity']})")
         
         # Business impact assessment
@@ -638,9 +638,9 @@ class ExecutionEngineSSotViolationsDetection565Tests(SSotBaseTestCase):
             print(f"   5. Validate UserExecutionContext isolation in all execution flows")
             print(f"\n🎯 PRIORITY: Complete Issue #565 remediation before production deployment")
         else:
-            print(f"   ✅ SSOT compliance achieved - no remediation needed")
-            print(f"   ✅ User isolation security validated")
-            print(f"   ✅ Production deployment ready")
+            print(f"   CHECK SSOT compliance achieved - no remediation needed")
+            print(f"   CHECK User isolation security validated")
+            print(f"   CHECK Production deployment ready")
         
         print("="*90)
         
@@ -666,11 +666,11 @@ if __name__ == '__main__':
     # Report final status
     if result.wasSuccessful():
         print("\n🎉 SUCCESS: SSOT compliance validation PASSED")
-        print("✅ Issue #565 migration completed successfully")
+        print("CHECK Issue #565 migration completed successfully")
         print("💰 $500K+ ARR protected through proper user isolation")
     else:
-        print("\n❌ SSOT VIOLATIONS DETECTED")
+        print("\nX SSOT VIOLATIONS DETECTED")
         print(f"   - Tests run: {result.testsRun}")
         print(f"   - Failures: {len(result.failures)}")
         print(f"   - Errors: {len(result.errors)}")
-        print("⚠️ Issue #565 remediation required before production deployment")
+        print("WARNING️ Issue #565 remediation required before production deployment")

@@ -106,7 +106,7 @@ class Issue1176ServiceAuthBreakdownIntegrationTests(BaseIntegrationTest):
                 
             except (AuthenticationError, HTTPException) as e:
                 # EXPECTED FAILURE: Reproduces production middleware breakdown
-                logger.error("✅ REPRODUCTION SUCCESS: Service authentication middleware breakdown")
+                logger.error("CHECK REPRODUCTION SUCCESS: Service authentication middleware breakdown")
                 logger.error(f"   Service Request Path: {service_request_context.path}")
                 logger.error(f"   Authentication Error: {e}")
                 logger.error("   ISSUE #1176: Middleware completely rejecting service requests")
@@ -179,7 +179,7 @@ class Issue1176ServiceAuthBreakdownIntegrationTests(BaseIntegrationTest):
         
         if service_validation_failures:
             # EXPECTED FAILURE: Complete service validation breakdown
-            logger.error("✅ REPRODUCTION SUCCESS: Auth service complete service validation failure")
+            logger.error("CHECK REPRODUCTION SUCCESS: Auth service complete service validation failure")
             logger.error(f"   Total Validation Failures: {len(service_validation_failures)}")
             logger.error("   Service Validation Breakdown Details:")
             for failure in service_validation_failures:
@@ -241,7 +241,7 @@ class Issue1176ServiceAuthBreakdownIntegrationTests(BaseIntegrationTest):
                 
             except HTTPException as e:
                 # EXPECTED FAILURE: Reproduces production database session error
-                logger.error("✅ REPRODUCTION SUCCESS: Database session service auth cascade failure")
+                logger.error("CHECK REPRODUCTION SUCCESS: Database session service auth cascade failure")
                 logger.error(f"   Request Path: {mock_request.path_info}")
                 logger.error(f"   HTTP Status: {e.status_code}")
                 logger.error(f"   Error Detail: {e.detail}")
@@ -255,7 +255,7 @@ class Issue1176ServiceAuthBreakdownIntegrationTests(BaseIntegrationTest):
                 
             except Exception as e:
                 # Other authentication-related failures also valid
-                logger.error("✅ REPRODUCTION SUCCESS: Database session authentication failure")
+                logger.error("CHECK REPRODUCTION SUCCESS: Database session authentication failure")
                 logger.error(f"   Exception Type: {type(e).__name__}")
                 logger.error(f"   Exception Message: {e}")
                 assert True, "Database session authentication failure reproduced"
@@ -344,7 +344,7 @@ class Issue1176ServiceAuthBreakdownIntegrationTests(BaseIntegrationTest):
         
         if communication_failures:
             # EXPECTED FAILURE: Complete service communication breakdown
-            logger.error("✅ REPRODUCTION SUCCESS: Service-to-service communication complete breakdown")
+            logger.error("CHECK REPRODUCTION SUCCESS: Service-to-service communication complete breakdown")
             logger.error(f"   Total Communication Failures: {len(communication_failures)}")
             logger.error("   Service Communication Breakdown Details:")
             for failure in communication_failures:
@@ -442,7 +442,7 @@ class Issue1176ServiceAuthBreakdownIntegrationTests(BaseIntegrationTest):
                 
                 if context_corruption_detected:
                     # EXPECTED FAILURE: Context corruption reproduced
-                    logger.error("✅ REPRODUCTION SUCCESS: Service user context corruption")
+                    logger.error("CHECK REPRODUCTION SUCCESS: Service user context corruption")
                     logger.error(f"   Original Service Context: {original_service_context}")
                     logger.error(f"   Final User ID: {final_user_id}")
                     logger.error(f"   Final User Type: {final_user_type}")
@@ -463,7 +463,7 @@ class Issue1176ServiceAuthBreakdownIntegrationTests(BaseIntegrationTest):
                 
             except (AuthenticationError, TokenInvalidError) as e:
                 # Also valid - authentication completely failing
-                logger.error("✅ REPRODUCTION SUCCESS: Service authentication complete failure")
+                logger.error("CHECK REPRODUCTION SUCCESS: Service authentication complete failure")
                 logger.error(f"   Authentication Error: {e}")
                 assert True, "Service authentication failure also reproduces Issue #1176"
 
@@ -531,7 +531,7 @@ class Issue1176ProductionReproductionIntegrationTests(BaseIntegrationTest):
                     
             except HTTPException as e:
                 # EXPECTED: Exact production error reproduction
-                logger.error("✅ EXACT PRODUCTION ERROR REPRODUCED")
+                logger.error("CHECK EXACT PRODUCTION ERROR REPRODUCED")
                 logger.error("=" * 80)
                 logger.error("PRODUCTION ERROR CONTEXT MATCHED:")
                 logger.error(f"   User ID: {production_error_context['user_id']}")

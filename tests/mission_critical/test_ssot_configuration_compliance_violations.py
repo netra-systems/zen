@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
 """
-"""
+
 Mission Critical Test Suite: Configuration Manager SSOT Compliance Violations Detection
 
 Business Value: Platform/Internal - System Reliability & Configuration Management
-Critical for $500K+ ARR protection through consistent configuration access patterns.
+Critical for $500K+ plus ARR protection through consistent configuration access patterns.
 
 PURPOSE: This test MUST FAIL with current SSOT violations and PASS after remediation.
 Detects direct environment variable access that bypasses SSOT configuration patterns.
 
 CRITICAL VIOLATIONS TO DETECT:
-1. netra_backend/app/logging/auth_trace_logger.py:284 - os.getenv('ENVIRONMENT')
+    1. netra_backend/app/logging/auth_trace_logger.py:284 - os.getenv('ENVIRONMENT')
 2. netra_backend/app/middleware/error_recovery_middleware.py:33 - os.environ.get('ENVIRONMENT')
 3. netra_backend/app/admin/corpus/unified_corpus_admin.py:155 - os.getenv('CORPUS_BASE_PATH')
 
 Expected Behavior:
-- CURRENT STATE: This test should FAIL due to 3 SSOT violations detected
+    - CURRENT STATE: This test should FAIL due to 3 SSOT violations detected
 - AFTER REMEDIATION: This test should PASS when violations are fixed using IsolatedEnvironment
 
 Test Strategy:
-- Scan source code for direct os.environ/os.getenv usage
+    - Scan source code for direct os.environ/os.getenv usage
 - Validate SSOT configuration manager usage patterns
 - Ensure IsolatedEnvironment compliance across all modules
 - Protect Golden Path user authentication and AI chat functionality
@@ -27,10 +27,12 @@ Test Strategy:
 Author: SSOT Gardener Agent - Step 2 Test Plan Execution
 Date: 2025-9-13
 "
-"
+""
+
 
 """
 """
+
 import ast
 import os
 import sys
@@ -96,7 +98,8 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
                 'file': 'netra_backend/app/middleware/error_recovery_middleware.py',
                 'line': 33,
                 'pattern': os.environ.get('ENVIRONMENT'),"
-                'pattern': os.environ.get('ENVIRONMENT'),"
+                'pattern': os.environ.get('ENVIRONMENT'),""
+
                 'variable': 'ENVIRONMENT',
                 'severity': 'CRITICAL',
                 'impact': 'Error handling inconsistency - affects system stability and user experience'
@@ -210,7 +213,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
     def determine_business_impact(self, env_var: str, file_path: str) -> str:
         Determine business impact of SSOT violation.
         if 'auth' in file_path.lower() and env_var == 'ENVIRONMENT':
-            return 'Authentication system inconsistency - affects $500K+ ARR Golden Path user auth'
+            return 'Authentication system inconsistency - affects $500K+ plus ARR Golden Path user auth'
         elif 'middleware' in file_path.lower() and env_var == 'ENVIRONMENT':
             return 'Error handling inconsistency - affects system stability and user experience'
         elif 'corpus' in file_path.lower() and env_var == 'CORPUS_BASE_PATH':
@@ -221,7 +224,8 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
             return 'Configuration consistency - affects development and deployment reliability'
 
     def scan_project_for_violations(self) -> SsotComplianceResults:
-        ""Scan entire project for SSOT configuration violations.
+        ""Scan entire project for SSOT configuration violations.""
+
         all_violations = []
         files_scanned = 0
         compliant_files = 0
@@ -282,7 +286,8 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
         )
 
     def test_detect_auth_trace_logger_ssot_violation(self):
-    ""
+    """
+
         MUST FAIL CURRENTLY - Detect SSOT violation in auth trace logger.
 
         This test specifically targets the known violation:
@@ -323,7 +328,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
         target_file = self.project_root / 'netra_backend/app/middleware/error_recovery_middleware.py'
 
         # Verify file exists
-        assert target_file.exists(), fTarget file not found: {target_file}
+        assert target_file.exists(), "fTarget file not found: {target_file}"
 
         # Scan for violations
         violations = self.scan_file_for_violations(target_file)
@@ -346,13 +351,15 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
         )
 
     def test_detect_corpus_admin_ssot_violation(self):
-    ""
+    """
+
         MUST FAIL CURRENTLY - Detect SSOT violation in unified corpus admin.
 
         This test specifically targets the known violation:
         netra_backend/app/admin/corpus/unified_corpus_admin.py:155 - os.getenv('CORPUS_BASE_PATH')
 "
-"
+""
+
         target_file = self.project_root / 'netra_backend/app/admin/corpus/unified_corpus_admin.py'
 
         # Verify file exists
@@ -379,8 +386,9 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
         )
 
     def test_comprehensive_ssot_configuration_compliance(self):
-        "
-        "
+        """
+        ""
+
         MUST FAIL CURRENTLY - Comprehensive scan for all SSOT configuration violations.
 
         This test scans the entire project and validates that all expected violations are found.
@@ -429,7 +437,8 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
             fSSOT violations but found {actual_total}. This indicates the test may not be working properly. 
             fExpected violations: {self.expected_violations}. 
             fFound violations: {violation_details}"
-            fFound violations: {violation_details}"
+            fFound violations: {violation_details}""
+
         )
 
         assert actual_critical >= expected_critical_violations, (
@@ -454,14 +463,16 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
             )
 
     def test_validate_isolated_environment_usage_patterns(self):
-    "
-    "
+        """
+    ""
+
         Test for proper IsolatedEnvironment usage patterns in SSOT-compliant files.
 
         This test identifies files that correctly use IsolatedEnvironment patterns
         and ensures they serve as examples for SSOT remediation.
 "
-"
+""
+
         compliant_files = []
         files_with_good_patterns = []
 
@@ -507,7 +518,7 @@ class SSotConfigurationComplianceViolationsTests(SSotBaseTestCase):
         )
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
     # Run the test to detect SSOT violations
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit

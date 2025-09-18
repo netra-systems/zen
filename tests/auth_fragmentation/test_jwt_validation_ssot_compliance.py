@@ -7,7 +7,7 @@ Validate that JWT validation follows Single Source of Truth patterns across all 
 Business Value Justification (BVJ):
 - Segment: Platform Infrastructure - Authentication Security
 - Goal: Golden Path Protection - $500K+ ARR user authentication flow
-- Value Impact: Eliminate authentication fragmentation blocking user login → AI responses
+- Value Impact: Eliminate authentication fragmentation blocking user login -> AI responses
 - Revenue Impact: Critical infrastructure protecting primary revenue stream
 
 Test Focus Areas:
@@ -58,7 +58,7 @@ class JWTValidationSSOTComplianceTests(SSotAsyncTestCase):
         assert hasattr(jwt_handler, 'validate_token_jwt'), 'JWT handler missing validate_token_jwt method'
         assert hasattr(jwt_handler, 'create_access_token'), 'JWT handler missing create_access_token method'
         assert callable(jwt_handler.validate_token), 'validate_token is not callable'
-        logger.info('✅ Auth service JWT validation is properly configured as SSOT')
+        logger.info('CHECK Auth service JWT validation is properly configured as SSOT')
 
     async def test_backend_delegates_to_auth_service(self):
         """
@@ -76,7 +76,7 @@ class JWTValidationSSOTComplianceTests(SSotAsyncTestCase):
             mock_validate.assert_called_once()
             assert result.valid is True
             assert result.user_id == self.test_user_id
-        logger.info('✅ Backend properly delegates JWT validation to auth service')
+        logger.info('CHECK Backend properly delegates JWT validation to auth service')
 
     async def test_no_local_jwt_validation_in_backend(self):
         """
@@ -96,7 +96,7 @@ class JWTValidationSSOTComplianceTests(SSotAsyncTestCase):
         if 'JWT_SECRET' in source and 'get_env' in source:
             jwt_violations.append('Found JWT_SECRET usage in backend auth')
         assert len(jwt_violations) == 0, f'SSOT violations found: {jwt_violations}'
-        logger.info('✅ Backend auth contains no local JWT validation logic')
+        logger.info('CHECK Backend auth contains no local JWT validation logic')
 
     async def test_auth_client_uses_ssot_endpoints(self):
         """
@@ -109,7 +109,7 @@ class JWTValidationSSOTComplianceTests(SSotAsyncTestCase):
         assert hasattr(self.auth_client.settings, 'base_url'), 'Auth client missing base_url'
         assert hasattr(self.auth_client, 'validate_token_jwt'), 'Auth client missing validate_token_jwt'
         assert callable(self.auth_client.validate_token_jwt), 'validate_token_jwt not callable'
-        logger.info('✅ Auth client properly configured for SSOT endpoints')
+        logger.info('CHECK Auth client properly configured for SSOT endpoints')
 
     async def test_jwt_validation_consistency_across_services(self):
         """
@@ -127,7 +127,7 @@ class JWTValidationSSOTComplianceTests(SSotAsyncTestCase):
             assert backend_result.user_id == expected_result['user_id']
             assert backend_result.email == expected_result['email']
             mock_auth_validate.assert_called_once_with(test_token)
-        logger.info('✅ JWT validation consistency verified across services')
+        logger.info('CHECK JWT validation consistency verified across services')
 
     async def test_jwt_error_handling_consistency(self):
         """
@@ -148,7 +148,7 @@ class JWTValidationSSOTComplianceTests(SSotAsyncTestCase):
             result = await self.backend_auth.validate_request_token(test_token)
             assert result.valid is False
             assert 'validation_exception' in result.error
-        logger.info('✅ JWT error handling consistency verified')
+        logger.info('CHECK JWT error handling consistency verified')
 
     async def test_auth_header_processing_ssot_compliance(self):
         """
@@ -169,7 +169,7 @@ class JWTValidationSSOTComplianceTests(SSotAsyncTestCase):
             result = await self.backend_auth.validate_request_token(invalid_header)
             assert result.valid is False
             assert result.error == 'invalid_authorization_header'
-        logger.info('✅ Authorization header processing SSOT compliance verified')
+        logger.info('CHECK Authorization header processing SSOT compliance verified')
 
     async def test_jwt_validation_caching_consistency(self):
         """
@@ -184,7 +184,7 @@ class JWTValidationSSOTComplianceTests(SSotAsyncTestCase):
             result1 = await self.backend_auth.validate_request_token(test_token)
             assert result1.valid is True
             assert mock_validate.call_count == 1
-        logger.info('✅ JWT validation caching behavior verified')
+        logger.info('CHECK JWT validation caching behavior verified')
 
     async def test_cross_service_jwt_validation_paths(self):
         """
@@ -204,7 +204,7 @@ class JWTValidationSSOTComplianceTests(SSotAsyncTestCase):
                     assert result.valid is True
             elif hasattr(validator, 'validate_token_jwt'):
                 pass
-        logger.info('✅ Cross-service JWT validation paths mapped and verified')
+        logger.info('CHECK Cross-service JWT validation paths mapped and verified')
 
 class JWTValidationFragmentationDetectionTests(SSotAsyncTestCase):
     """
@@ -230,13 +230,13 @@ class JWTValidationFragmentationDetectionTests(SSotAsyncTestCase):
         try:
             import netra_backend.app.auth_integration.auth as backend_auth
             if hasattr(backend_auth, 'auth_client'):
-                logger.info('✅ Backend auth properly uses auth service client')
+                logger.info('CHECK Backend auth properly uses auth service client')
             else:
                 fragmentation_indicators.append('Backend auth missing auth_client delegation')
         except ImportError as e:
             fragmentation_indicators.append(f'Failed to import backend auth: {e}')
         assert len(fragmentation_indicators) == 0, f'JWT fragmentation detected: {fragmentation_indicators}'
-        logger.info('✅ No duplicate JWT validation logic detected')
+        logger.info('CHECK No duplicate JWT validation logic detected')
 
     async def test_identify_authentication_entry_points(self):
         """
@@ -262,7 +262,7 @@ class JWTValidationFragmentationDetectionTests(SSotAsyncTestCase):
         except ImportError:
             pass
         assert len(entry_points) > 0, 'No authentication entry points found'
-        logger.info(f'✅ Identified {len(entry_points)} authentication entry points: {list(entry_points.keys())}')
+        logger.info(f'CHECK Identified {len(entry_points)} authentication entry points: {list(entry_points.keys())}')
 
     async def test_verify_no_hardcoded_jwt_secrets(self):
         """
@@ -279,7 +279,7 @@ class JWTValidationFragmentationDetectionTests(SSotAsyncTestCase):
         if jwt_secret_key:
             assert len(jwt_secret_key) > 10, 'JWT secret too short'
             assert jwt_secret_key != 'secret', 'Using default/weak JWT secret'
-        logger.info('✅ JWT secret configuration verified')
+        logger.info('CHECK JWT secret configuration verified')
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'
     print('MIGRATION NOTICE: Please use SSOT unified test runner')

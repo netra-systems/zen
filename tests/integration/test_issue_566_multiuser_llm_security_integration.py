@@ -12,7 +12,7 @@ VULNERABILITY SCOPE:
 - Cache persistence across request boundaries
 
 BUSINESS VALUE JUSTIFICATION:
-- Segment: ALL (Free → Enterprise) 
+- Segment: ALL (Free -> Enterprise) 
 - Business Goal: Prevent customer data breaches
 - Value Impact: Protect $500K+ ARR from security incidents
 - Strategic Impact: CRITICAL - GDPR/CCPA compliance

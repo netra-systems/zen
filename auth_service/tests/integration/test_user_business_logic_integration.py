@@ -38,6 +38,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional, List, Tuple
 import hashlib
 from dataclasses import asdict
+from sqlalchemy import text
 from shared.isolated_environment import get_env
 from test_framework.base_integration_test import BaseIntegrationTest
 from auth_service.auth_core.config import AuthConfig
@@ -87,7 +88,7 @@ class UserBusinessLogicIntegrationTests(BaseIntegrationTest):
             async with self.db.get_session() as session:
                 for email in self.test_users_created:
                     try:
-                        result = await session.execute('DELETE FROM auth_users WHERE email = :email', {'email': email})
+                        result = await session.execute(text('DELETE FROM auth_users WHERE email = :email'), {'email': email})
                         await session.commit()
                     except Exception:
                         await session.rollback()
@@ -124,7 +125,7 @@ class UserBusinessLogicIntegrationTests(BaseIntegrationTest):
                     session.add(user)
                     await session.commit()
                     self.test_users_created.append(scenario_data['email'])
-                    result = await session.execute('SELECT email, subscription_tier, trial_days_remaining, suggested_tier FROM auth_users WHERE email = :email', {'email': scenario_data['email']})
+                    result = await session.execute(text('SELECT email, subscription_tier, trial_days_remaining, suggested_tier FROM auth_users WHERE email = :email'), {'email': scenario_data['email']})
                     stored_user = result.fetchone()
                     assert stored_user is not None, f"User not found in database: {scenario_data['email']}"
                     assert stored_user.subscription_tier == scenario_data['expected_tier'].value
@@ -261,7 +262,7 @@ class UserBusinessLogicIntegrationTests(BaseIntegrationTest):
                 session.add(user)
                 await session.commit()
                 self.test_users_created.append(test_user_email)
-                db_result = await session.execute('SELECT email_verified, is_active, trial_expired FROM auth_users WHERE email = :email', {'email': test_user_email})
+                db_result = await session.execute(text('SELECT email_verified, is_active, trial_expired FROM auth_users WHERE email = :email'), {'email': test_user_email})
                 stored_user = db_result.fetchone()
                 assert stored_user.email_verified == scenario['account_data']['email_verified']
                 assert stored_user.is_active == (scenario['account_data']['status'] == 'active')
@@ -333,7 +334,7 @@ class UserBusinessLogicIntegrationTests(BaseIntegrationTest):
                         session.add(user)
                         await session.commit()
                         self.test_users_created.append(attempt['registration_data']['email'])
-                        db_result = await session.execute('SELECT subscription_tier, trial_days_remaining FROM auth_users WHERE email = :email', {'email': attempt['registration_data']['email']})
+                        db_result = await session.execute(text('SELECT subscription_tier, trial_days_remaining FROM auth_users WHERE email = :email'), {'email': attempt['registration_data']['email']})
                         stored_user = db_result.fetchone()
                         logger.warning(f" WARNING: [U+FE0F] POTENTIAL REVENUE LEAK: User {attempt['registration_data']['email']} stored with tier {stored_user.subscription_tier} - should be reviewed")
                     except Exception as e:
@@ -381,7 +382,7 @@ class UserBusinessLogicIntegrationTests(BaseIntegrationTest):
         logger.info(f'   Exceptions: {len(exceptions)}')
         assert len(successful_registrations) == 1, f'Expected exactly 1 successful registration, got {len(successful_registrations)}'
         async with self.db.get_session() as session:
-            result = await session.execute('SELECT COUNT(*) as count FROM auth_users WHERE email = :email', {'email': test_email})
+            result = await session.execute(text('SELECT COUNT(*) as count FROM auth_users WHERE email = :email'), {'email': test_email})
             user_count = result.fetchone().count
             assert user_count == 1, f'Expected exactly 1 user in database, found {user_count}'
             self.test_users_created.append(test_email)
@@ -410,18 +411,18 @@ class UserBusinessLogicIntegrationTests(BaseIntegrationTest):
             logger.info(f"[U+1F6AB] Testing manipulation: {attempt['name']}")
             if attempt.get('setup_expired'):
                 async with self.db.get_session() as session:
-                    await session.execute('UPDATE auth_users SET trial_days_remaining = 0, trial_expired = true WHERE email = :email', {'email': test_email})
+                    await session.execute(text('UPDATE auth_users SET trial_days_remaining = 0, trial_expired = true WHERE email = :email'), {'email': test_email})
                     await session.commit()
             async with self.db.get_session() as session:
-                result = await session.execute('SELECT trial_days_remaining, trial_expired FROM auth_users WHERE email = :email', {'email': test_email})
+                result = await session.execute(text('SELECT trial_days_remaining, trial_expired FROM auth_users WHERE email = :email'), {'email': test_email})
                 current_user = result.fetchone()
                 account_data = {'created_at': datetime.now(timezone.utc) - timedelta(days=20), 'email_verified': True, 'status': 'active', 'subscription_tier': SubscriptionTier.FREE, 'trial_expired': current_user.trial_expired if current_user else False}
                 lifecycle_result = self.user_business_logic.process_account_lifecycle(account_data)
                 if attempt['should_fail']:
                     try:
-                        await session.execute('UPDATE auth_users SET trial_days_remaining = :days WHERE email = :email', {'days': attempt['new_trial_days'], 'email': test_email})
+                        await session.execute(text('UPDATE auth_users SET trial_days_remaining = :days WHERE email = :email'), {'days': attempt['new_trial_days'], 'email': test_email})
                         await session.commit()
-                        verify_result = await session.execute('SELECT trial_days_remaining FROM auth_users WHERE email = :email', {'email': test_email})
+                        verify_result = await session.execute(text('SELECT trial_days_remaining FROM auth_users WHERE email = :email'), {'email': test_email})
                         updated_user = verify_result.fetchone()
                         if attempt['new_trial_days'] > 30:
                             logger.warning(f' WARNING: [U+FE0F] POTENTIAL REVENUE LEAK: Trial days set to {updated_user.trial_days_remaining}')

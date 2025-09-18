@@ -26,7 +26,7 @@ import pytest
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
-from netra_backend.app.services.websocket.quality_message_router import QualityMessageRouter
+from netra_backend.app.websocket_core.handlers import MessageRouter as QualityMessageRouter
 from netra_backend.app.services.quality_gate_service import QualityGateService
 from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
 from netra_backend.app.services.user_execution_context import UserExecutionContext

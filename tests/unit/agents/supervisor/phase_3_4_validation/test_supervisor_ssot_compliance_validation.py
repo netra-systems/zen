@@ -103,7 +103,7 @@ class SupervisorSsotComplianceValidationTests(SSotAsyncTestCase):
         self.assertNotIn("from netra_backend.app.agents.supervisor_consolidated", supervisor_source,
             "SSOT VIOLATION: Supervisor imports from legacy consolidated module")
         
-        logger.info("✅ SSOT import pattern compliance validated")
+        logger.info("CHECK SSOT import pattern compliance validated")
         
     def test_supervisor_modern_compatibility_alias(self):
         """
@@ -125,7 +125,7 @@ class SupervisorSsotComplianceValidationTests(SSotAsyncTestCase):
         self.assertEqual(SsotSupervisor, ModernSupervisor,
             "COMPATIBILITY VIOLATION: SSOT and Modern imports don't reference same class")
         
-        logger.info("✅ Supervisor modern compatibility validated")
+        logger.info("CHECK Supervisor modern compatibility validated")
         
     async def test_supervisor_factory_pattern_ssot_compliance(self):
         """
@@ -174,7 +174,7 @@ class SupervisorSsotComplianceValidationTests(SSotAsyncTestCase):
             "SSOT VIOLATION: Supervisors sharing factory instances (singleton pattern detected)"
         )
         
-        logger.info("✅ Factory pattern SSOT compliance validated")
+        logger.info("CHECK Factory pattern SSOT compliance validated")
         
     def test_supervisor_user_execution_context_ssot_patterns(self):
         """
@@ -204,7 +204,7 @@ class SupervisorSsotComplianceValidationTests(SSotAsyncTestCase):
         self.assertEqual(self.test_user_context.run_id, "ssot_test_run")
         self.assertEqual(self.test_user_context.websocket_client_id, "ssot_test_client")
         
-        logger.info("✅ UserExecutionContext SSOT integration validated")
+        logger.info("CHECK UserExecutionContext SSOT integration validated")
         
     def test_supervisor_no_duplicate_implementations(self):
         """
@@ -253,7 +253,7 @@ class SupervisorSsotComplianceValidationTests(SSotAsyncTestCase):
                 self.assertEqual(alias_class, actual_class,
                     f"SSOT VIOLATION: Alias in {alias_module} doesn't point to actual implementation")
         
-        logger.info("✅ No duplicate supervisor implementations found")
+        logger.info("CHECK No duplicate supervisor implementations found")
         
     async def test_supervisor_agent_registry_ssot_integration(self):
         """
@@ -285,7 +285,7 @@ class SupervisorSsotComplianceValidationTests(SSotAsyncTestCase):
         self.assertTrue(hasattr(factory, 'create_agent') or hasattr(factory, 'get_agent'),
             "SSOT VIOLATION: Agent factory missing SSOT agent creation methods")
         
-        logger.info("✅ Agent registry SSOT integration validated")
+        logger.info("CHECK Agent registry SSOT integration validated")
         
     def test_supervisor_websocket_integration_ssot_compliance(self):
         """
@@ -324,9 +324,9 @@ class SupervisorSsotComplianceValidationTests(SSotAsyncTestCase):
             # Note: Using hasattr check since we're working with mocks
             # In real implementation, these methods should exist
             if hasattr(mock_websocket_bridge, method_name):
-                logger.info(f"✓ WebSocket bridge has SSOT method: {method_name}")
+                logger.info(f"CHECK WebSocket bridge has SSOT method: {method_name}")
         
-        logger.info("✅ WebSocket integration SSOT compliance validated")
+        logger.info("CHECK WebSocket integration SSOT compliance validated")
         
     def test_supervisor_base_agent_inheritance_ssot_compliance(self):
         """
@@ -366,13 +366,13 @@ class SupervisorSsotComplianceValidationTests(SSotAsyncTestCase):
         self.assertIn("Orchestrates sub-agents", supervisor.description,
             "SSOT VIOLATION: Supervisor description not properly set")
         
-        logger.info("✅ BaseAgent inheritance SSOT compliance validated")
+        logger.info("CHECK BaseAgent inheritance SSOT compliance validated")
 
 
 # Execute tests if run directly
 if __name__ == "__main__":
     logger.info("🚀 Starting Phase 3.4 Supervisor SSOT Compliance Validation Tests")
-    logger.info("⚠️  EXPECTED: Tests may FAIL initially - this validates proper test behavior")
+    logger.info("WARNING️  EXPECTED: Tests may FAIL initially - this validates proper test behavior")
     
     # Run with asyncio
     import unittest

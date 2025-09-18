@@ -39,19 +39,19 @@ def lazy_import(module_path: str, component: str = None):
 "Mission Critical tests for GCP traceback capture validation."
 
 Business Value Justification (BVJ):
-- Segment: Enterprise - Mission Critical Production Reliability
-- Business Goal: Ensure zero production debugging blind spots for $500K+ ARR platform
+    - Segment: Enterprise - Mission Critical Production Reliability
+- Business Goal: Ensure zero production debugging blind spots for $500K+ plus ARR platform
 - Value Impact: Prevents complete production incident response failures 
 - Strategic Impact: Foundation for enterprise SLA compliance and 24/7 support commitments
 
 MISSION CRITICAL REQUIREMENTS:
-1. All production errors MUST have traceback information available in GCP Cloud Logging
+    1. All production errors MUST have traceback information available in GCP Cloud Logging
 2. No silent failures in error reporting pipeline
 3. Complete error context preservation for enterprise debugging
 4. Real-time error visibility for incident response teams
 
 CRITICAL ISSUE CONTEXT:
-Current production issue: GCP staging logs missing traceback information for caught exceptions
+    Current production issue: GCP staging logs missing traceback information for caught exceptions
 with exc_info=True, causing critical debugging blind spots during production incidents.
 
 These tests MUST initially FAIL to demonstrate the production-critical issue.
@@ -123,7 +123,8 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
                         exception_id": test_exception_id,"
                         production_scenario: True,
                         critical_test: True"
-                        critical_test: True"
+                        critical_test: True""
+
                     }
         
         # CRITICAL VALIDATION: Find the error log with traceback
@@ -146,20 +147,22 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
         assert traceback in error_field, fCRITICAL FAILURE: No traceback field in error for {test_exception_id}"
         assert traceback in error_field, fCRITICAL FAILURE: No traceback field in error for {test_exception_id}"
         assert error_field["traceback] is not None, fCRITICAL FAILURE: Traceback is None for {test_exception_id}"
-        assert len(error_field[traceback] > 0, fCRITICAL FAILURE: Traceback is empty for {test_exception_id)
+        assert len(error_field[traceback] > 0, "fCRITICAL FAILURE: Traceback is empty for {test_exception_id)"
         
         # CRITICAL ASSERTION 4: Traceback must contain meaningful content
         traceback_content = error_field["traceback]"
-        assert test_exception_id in traceback_content, fCRITICAL FAILURE: Exception ID not in traceback
+        assert test_exception_id in traceback_content, "fCRITICAL FAILURE: Exception ID not in traceback"
         assert production_exception_scenario in traceback_content, fCRITICAL FAILURE: Function name not in traceback"
-        assert production_exception_scenario in traceback_content, fCRITICAL FAILURE: Function name not in traceback"
+        assert production_exception_scenario in traceback_content, fCRITICAL FAILURE: Function name not in traceback""
+
         
         # CRITICAL ASSERTION 5: Exception type and value must be correct
         assert error_field["type] == ProductionCriticalError, fCRITICAL FAILURE: Wrong exception type"
         assert test_exception_id in error_field[value], f"CRITICAL FAILURE: Exception ID not in value"
         
         self.record_metric(critical_exc_info_test_passed, True)"
-        self.record_metric(critical_exc_info_test_passed, True)"
+        self.record_metric(critical_exc_info_test_passed, True)""
+
     
     def test_websocket_agent_error_traceback_critical(self):
         pass
@@ -189,7 +192,8 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
                             "agent_id: agent_id,"
                             error_type: websocket_agent,
                             critical: True"
-                            critical: True"
+                            critical: True""
+
                         }
         
         # Find WebSocket agent error logs
@@ -197,12 +201,13 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
             log for log in log_capture.logs
             if (log.get("severity) == ERROR and"
                 session_id in log.get(message, ) and
-                "websocket in log.get(message", ).lower())
+                "websocket in log.get(message, ).lower())"
         ]
         
         # CRITICAL: WebSocket errors MUST have traceback
         assert len(ws_error_logs) > 0, fCRITICAL FAILURE: No WebSocket error logs for session {session_id}"
-        assert len(ws_error_logs) > 0, fCRITICAL FAILURE: No WebSocket error logs for session {session_id}"
+        assert len(ws_error_logs) > 0, fCRITICAL FAILURE: No WebSocket error logs for session {session_id}""
+
         
         ws_error_log = ws_error_logs[0]
         assert self._has_complete_traceback(ws_error_log), f"CRITICAL FAILURE: WebSocket error missing complete traceback"
@@ -217,7 +222,8 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
         self.increment_websocket_events(1)
     
     def test_database_transaction_error_traceback_critical(self):
-    ""
+    """
+
         MISSION CRITICAL: Validate database transaction errors have complete traceback.
         
         Database errors are critical for data integrity incident response.
@@ -234,7 +240,8 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
                 except Exception:
                     self.logger.error(
                         fCritical database transaction error: {transaction_id},"
-                        fCritical database transaction error: {transaction_id},"
+                        fCritical database transaction error: {transaction_id},""
+
                         exc_info=True,
                         extra={
                             "transaction_id: transaction_id,"
@@ -254,7 +261,7 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
         assert len(db_error_logs) > 0, fCRITICAL FAILURE: No database error logs for transaction {transaction_id}""
         
         db_error_log = db_error_logs[0]
-        assert self._has_complete_traceback(db_error_log), fCRITICAL FAILURE: Database error missing complete traceback
+        assert self._has_complete_traceback(db_error_log), "fCRITICAL FAILURE: Database error missing complete traceback"
         
         # Validate database context in traceback
         traceback_content = db_error_log[error][traceback]
@@ -264,13 +271,15 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
         self.increment_db_query_count(1)
     
     def test_agent_llm_call_error_traceback_critical(self):
-        "
-        "
+        """
+        ""
+
         MISSION CRITICAL: Validate LLM call errors have complete traceback.
         
         LLM errors are critical for AI functionality debugging.
 "
-"
+""
+
         llm_call_id = fcritical_llm_{uuid.uuid4().hex[:8]}
         
         with self.temp_env_vars(
@@ -286,7 +295,7 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
                         exc_info=True,
                         extra={
                             llm_call_id: llm_call_id,
-                            "error_type: llm_call",
+                            "error_type: llm_call,"
                             critical: True
                         }
         
@@ -299,29 +308,32 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
         ]
         
         # CRITICAL: LLM errors MUST have traceback
-        assert len(llm_error_logs) > 0, fCRITICAL FAILURE: No LLM error logs for call {llm_call_id}
+        assert len(llm_error_logs) > 0, "fCRITICAL FAILURE: No LLM error logs for call {llm_call_id}"
         
         llm_error_log = llm_error_logs[0]
-        assert self._has_complete_traceback(llm_error_log), fCRITICAL FAILURE: LLM error missing complete traceback
+        assert self._has_complete_traceback(llm_error_log), "fCRITICAL FAILURE: LLM error missing complete traceback"
         
         # Validate LLM context in traceback
-        traceback_content = llm_error_log["error][traceback"]
-        assert llm_call_id in traceback_content, CRITICAL FAILURE: LLM call ID not in traceback
+        traceback_content = llm_error_log["error][traceback]"
+        assert llm_call_id in traceback_content, "CRITICAL FAILURE: LLM call ID not in traceback"
         
         self.record_metric(critical_llm_traceback_passed, True)"
-        self.record_metric(critical_llm_traceback_passed, True)"
+        self.record_metric(critical_llm_traceback_passed, True)""
+
         self.increment_llm_requests(1)
     
     def test_json_formatting_preserves_traceback_critical(self):
-    "
-    "
+        """
+    ""
+
         MISSION CRITICAL: Validate JSON formatting preserves traceback content.
         
         JSON formatting issues can corrupt traceback data in GCP logs.
         "
         "
         format_test_id = fcritical_format_{uuid.uuid4().hex[:8]}"
-        format_test_id = fcritical_format_{uuid.uuid4().hex[:8]}"
+        format_test_id = fcritical_format_{uuid.uuid4().hex[:8]}""
+
         
         # Create complex traceback with special characters
         try:
@@ -344,25 +356,26 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
         # Find formatting test logs
         format_error_logs = [
             log for log in log_capture.logs
-            if (log.get(severity") == "ERROR and
+            if (log.get(severity") == ERROR and"
                 format_test_id in log.get(message, ))
         ]
         
         assert len(format_error_logs) > 0, fCRITICAL FAILURE: No formatting test logs for {format_test_id}"
-        assert len(format_error_logs) > 0, fCRITICAL FAILURE: No formatting test logs for {format_test_id}"
+        assert len(format_error_logs) > 0, fCRITICAL FAILURE: No formatting test logs for {format_test_id}""
+
         
         format_error_log = format_error_logs[0]
         assert self._has_complete_traceback(format_error_log), f"CRITICAL FAILURE: Formatting test missing traceback"
         
         # CRITICAL: Validate JSON structure is valid
         json_str = json.dumps(format_error_log)
-        assert \n not in json_str, CRITICAL FAILURE: Unescaped newlines in JSON output
+        assert \n not in json_str, "CRITICAL FAILURE: Unescaped newlines in JSON output"
         
         # CRITICAL: Validate traceback content preservation
         traceback_content = format_error_log[error]["traceback]"
         assert format_test_id in traceback_content, CRITICAL FAILURE: Test ID not preserved in formatted traceback"
         assert format_test_id in traceback_content, CRITICAL FAILURE: Test ID not preserved in formatted traceback"
-        assert complex_traceback_scenario in traceback_content, CRITICAL FAILURE: Function name not preserved
+        assert complex_traceback_scenario in traceback_content, "CRITICAL FAILURE: Function name not preserved"
         
         self.record_metric("critical_json_formatting_passed, True)"
     
@@ -382,7 +395,8 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
             USER_ID=user_id,
             REQUEST_ID=request_id,
             PRODUCTION_SIMULATION=true"
-            PRODUCTION_SIMULATION=true"
+            PRODUCTION_SIMULATION=true""
+
         ):
             with self._capture_production_gcp_logs() as log_capture:
                 # Simulate complete production error flow
@@ -398,14 +412,14 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
         
         for log_entry in error_logs:
             if self._has_complete_traceback(log_entry):
-                message = log_entry.get("message, ").lower()
+                message = log_entry.get("message, ).lower()"
                 for stage in stages:
                     if stage.replace(_,  ) in message:
                         if stage not in stages_with_traceback:
                             stages_with_traceback.append(stage)
         
         # CRITICAL: All production stages must have traceback
-        assert len(stages_with_traceback) >= 2, fCRITICAL FAILURE: Not enough stages with traceback. Found: {stages_with_traceback}
+        assert len(stages_with_traceback) >= 2, "fCRITICAL FAILURE: Not enough stages with traceback. Found: {stages_with_traceback}"
         
         self.record_metric(critical_e2e_scenario_passed", True)"
     
@@ -437,10 +451,10 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
         # Find compatibility test logs
         compat_logs = [
             log for log in log_capture.logs
-            if compatibility_test_id in log.get(message", ")
+            if compatibility_test_id in log.get(message", )"
         ]
         
-        assert len(compat_logs) > 0, fCRITICAL FAILURE: No compatibility test logs for {compatibility_test_id}
+        assert len(compat_logs) > 0, "fCRITICAL FAILURE: No compatibility test logs for {compatibility_test_id}"
         
         compat_log = compat_logs[0]
         
@@ -454,8 +468,8 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
         
         required_error_fields = [type, value, traceback"]"
         for field in required_error_fields:
-            assert field in error_field, fCRITICAL FAILURE: Missing error.{field} for Error Reporting
-            assert error_field[field] is not None, fCRITICAL FAILURE: error.{field} is None
+            assert field in error_field, "fCRITICAL FAILURE: Missing error.{field} for Error Reporting"
+            assert error_field[field] is not None, "fCRITICAL FAILURE: error.{field} is None"
         
         self.record_metric("critical_gcp_compatibility_passed, True)"
     
@@ -463,7 +477,8 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
     
     def _simulate_production_exception_scenario(self, exception_id: str):
         Simulate realistic production exception scenario."
-        Simulate realistic production exception scenario."
+        Simulate realistic production exception scenario.""
+
         def user_request_handler():
             def authentication_layer():
                 def business_logic_layer():
@@ -478,7 +493,8 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
     
     def _simulate_critical_websocket_agent_error(self, session_id: str, agent_id: str):
         Simulate critical WebSocket agent error."
-        Simulate critical WebSocket agent error."
+        Simulate critical WebSocket agent error.""
+
         def websocket_message_handler():
             def agent_execution_pipeline():
                 def tool_execution():
@@ -490,7 +506,8 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
     
     def _simulate_critical_database_transaction_error(self, transaction_id: str):
         Simulate critical database transaction error."
-        Simulate critical database transaction error."
+        Simulate critical database transaction error.""
+
         def database_transaction():
             def connection_management():
                 def query_execution():
@@ -502,7 +519,8 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
     
     def _simulate_critical_llm_call_error(self, call_id: str):
         Simulate critical LLM call error."
-        Simulate critical LLM call error."
+        Simulate critical LLM call error.""
+
         def llm_request_handler():
             def prompt_processing():
                 def api_call():
@@ -514,7 +532,8 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
     
     def _simulate_complex_traceback_scenario(self, format_test_id: str):
         Simulate complex traceback with special characters."
-        Simulate complex traceback with special characters."
+        Simulate complex traceback with special characters.""
+
         def complex_function_with_unicode():
             def nested_function_with_quotes():
                 def deep_function_with_newlines():
@@ -528,7 +547,8 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
     
     def _simulate_gcp_compatibility_test_error(self, compatibility_test_id: str):
         Simulate GCP compatibility test error."
-        Simulate GCP compatibility test error."
+        Simulate GCP compatibility test error.""
+
         def gcp_service_integration():
             def cloud_logging_handler():
                 def error_reporting_integration():
@@ -588,7 +608,7 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
         
         # Validate severity values
         valid_severities = [DEFAULT", DEBUG, INFO, WARNING, ERROR", "CRITICAL]"
-        assert log_entry[severity] in valid_severities, fCRITICAL FAILURE: Invalid severity '{log_entry['severity']}'
+        assert log_entry[severity] in valid_severities, "fCRITICAL FAILURE: Invalid severity '{log_entry['severity']}'"
         
         # Validate timestamp format
         timestamp = log_entry[timestamp]
@@ -596,13 +616,13 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
         
         # Validate single-line JSON
         json_str = json.dumps(log_entry)
-        assert \n not in json_str, CRITICAL FAILURE: Multi-line JSON not compatible with GCP
+        assert \n not in json_str, "CRITICAL FAILURE: Multi-line JSON not compatible with GCP"
         
         # Validate labels structure if present
         if labels in log_entry:"
         if labels in log_entry:"
             labels = log_entry["labels]"
-            assert isinstance(labels, dict), CRITICAL FAILURE: Labels must be dict
+            assert isinstance(labels, "dict), CRITICAL FAILURE: Labels must be dict"
     
     @contextmanager
     def _capture_production_gcp_logs(self):
@@ -645,7 +665,8 @@ class GCPTracebackCaptureCriticalTests(SSotAsyncTestCase):
 # Custom exception classes for critical testing
 class ProductionCriticalError(Exception):
     Production critical error for testing."
-    Production critical error for testing."
+    Production critical error for testing.""
+
     pass
 
 
@@ -671,7 +692,8 @@ class ComplexFormattingError(Exception):
 
 class GCPCompatibilityError(Exception):
     GCP compatibility error for testing."
-    GCP compatibility error for testing."
+    GCP compatibility error for testing.""
+
     pass
 
 
@@ -681,13 +703,15 @@ class AuthenticationError(Exception):
 
 
 class AgentExecutionError(Exception):
-    ""Agent execution error for testing.
+    ""Agent execution error for testing.""
+
     pass
 
 
 class ResponseGenerationError(Exception):
     Response generation error for testing."""
     Response generation error for testing."""
+
     pass
 
 )))))))))))))

@@ -148,7 +148,7 @@ class TestDatabaseConnectivityIntegrationSimple(unittest.TestCase):
             # Rare success case - validate timing
             self.assertLess(result["duration"], 30.0,
                            "Successful initialization should be fast")
-            print(f"✅ SMD Phase 3 succeeded in {result['duration']:.2f}s - Infrastructure working")
+            print(f"CHECK SMD Phase 3 succeeded in {result['duration']:.2f}s - Infrastructure working")
         else:
             # Expected failure case for Issue #1278
             self.assertEqual(result["phase"], "DATABASE",
@@ -157,7 +157,7 @@ class TestDatabaseConnectivityIntegrationSimple(unittest.TestCase):
                          "Should timeout due to database connectivity")
             self.assertGreaterEqual(result["duration"], 30.0,
                                    "Should attempt for significant time before timeout")
-            print(f"❌ SMD Phase 3 failed after {result['duration']:.2f}s - Reproducing Issue #1278")
+            print(f"X SMD Phase 3 failed after {result['duration']:.2f}s - Reproducing Issue #1278")
 
     def test_error_propagation_through_lifespan_simulation(self):
         """
@@ -173,11 +173,11 @@ class TestDatabaseConnectivityIntegrationSimple(unittest.TestCase):
             try:
                 # Phase 1: Basic initialization
                 await asyncio.sleep(0.1)
-                print("✅ Phase 1 (INIT) completed")
+                print("CHECK Phase 1 (INIT) completed")
 
                 # Phase 2: Dependencies
                 await asyncio.sleep(0.1)
-                print("✅ Phase 2 (DEPENDENCIES) completed")
+                print("CHECK Phase 2 (DEPENDENCIES) completed")
 
                 # Phase 3: Database (problematic for Issue #1278)
                 db_timeout = float(os.environ.get('DATABASE_TIMEOUT_INITIALIZATION', '35.0'))
@@ -190,7 +190,7 @@ class TestDatabaseConnectivityIntegrationSimple(unittest.TestCase):
 
                     # Very rare success for Issue #1278 reproduction
                     if elapsed > 1.0 and (int(elapsed * 5) % 97) == 0:
-                        print("✅ Phase 3 (DATABASE) completed")
+                        print("CHECK Phase 3 (DATABASE) completed")
                         return {"status": "startup_success", "phases_completed": 3}
 
                 # Database timeout - create DeterministicStartupError
@@ -202,7 +202,7 @@ class TestDatabaseConnectivityIntegrationSimple(unittest.TestCase):
 
             except Exception as e:
                 # Lifespan should NOT swallow this error
-                print(f"❌ Lifespan startup failed: {e}")
+                print(f"X Lifespan startup failed: {e}")
                 return {
                     "status": "startup_failed",
                     "error": str(e),
@@ -217,7 +217,7 @@ class TestDatabaseConnectivityIntegrationSimple(unittest.TestCase):
             # Rare success - infrastructure working
             self.assertEqual(result["phases_completed"], 3,
                             "All phases should complete successfully")
-            print("✅ Lifespan startup SUCCESS - Infrastructure appears working")
+            print("CHECK Lifespan startup SUCCESS - Infrastructure appears working")
         else:
             # Expected failure for Issue #1278
             self.assertEqual(result["status"], "startup_failed",
@@ -228,7 +228,7 @@ class TestDatabaseConnectivityIntegrationSimple(unittest.TestCase):
                             "Should exit with code 3 for startup failure")
             self.assertIn("DATABASE", result["error"],
                          "Error should reference database phase")
-            print(f"❌ Lifespan startup FAILED - Reproducing Issue #1278: {result['error']}")
+            print(f"X Lifespan startup FAILED - Reproducing Issue #1278: {result['error']}")
 
     def test_connection_pool_timeout_behavior_simulation(self):
         """
@@ -293,14 +293,14 @@ class TestDatabaseConnectivityIntegrationSimple(unittest.TestCase):
                             "Should establish all pool connections")
             self.assertLess(result["duration"], 10.0,
                            "Pool creation should be reasonably fast when working")
-            print(f"✅ Connection pool ready with {result['connections']} connections in {result['duration']:.2f}s")
+            print(f"CHECK Connection pool ready with {result['connections']} connections in {result['duration']:.2f}s")
         else:
             # Pool creation failed - expected for Issue #1278
             self.assertIn("timeout", result["error"].lower(),
                          "Pool failure should be due to timeouts")
             self.assertGreaterEqual(result["duration"], 5.0,
                                    "Should attempt pool creation for reasonable time")
-            print(f"❌ Connection pool failed after {result['duration']:.2f}s - Issue #1278 reproduction: {result['error']}")
+            print(f"X Connection pool failed after {result['duration']:.2f}s - Issue #1278 reproduction: {result['error']}")
 
     def test_progressive_timeout_behavior_validation(self):
         """
@@ -352,7 +352,7 @@ class TestDatabaseConnectivityIntegrationSimple(unittest.TestCase):
             avg_success_time = sum(r['duration'] for r in successes) / len(successes)
             self.assertLess(avg_success_time, 5.0,
                            "Successful connections should be relatively fast")
-            print(f"✅ {len(successes)}/3 attempts succeeded (avg: {avg_success_time:.2f}s)")
+            print(f"CHECK {len(successes)}/3 attempts succeeded (avg: {avg_success_time:.2f}s)")
 
         if failures:
             # Some failures - validate they're infrastructure-related
@@ -363,7 +363,7 @@ class TestDatabaseConnectivityIntegrationSimple(unittest.TestCase):
             avg_failure_time = sum(r['duration'] for r in failures) / len(failures)
             self.assertGreater(avg_failure_time, 8.0,
                               "Failures should take significant time (not quick code errors)")
-            print(f"❌ {len(failures)}/3 attempts failed (avg: {avg_failure_time:.2f}s) - Infrastructure issue pattern")
+            print(f"X {len(failures)}/3 attempts failed (avg: {avg_failure_time:.2f}s) - Infrastructure issue pattern")
 
 
 if __name__ == '__main__':

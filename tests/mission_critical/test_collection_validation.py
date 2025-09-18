@@ -1,16 +1,13 @@
 """
-"""
+
 Mission Critical Test: Test Collection Validation for Issue #976
 
 This test validates that pytest test collection works correctly and identifies
 specific collection failures that prevent proper test execution.
 """
-"""
 
-"""
-"""
-"""
-"""
+
+
 import os
 import sys
 import subprocess
@@ -35,7 +32,8 @@ class CollectionValidationTests(SSotBaseTestCase):
         ]
     
     def test_pytest_collection_basic(self):
-        ""Test basic pytest collection functionality.
+        ""Test basic pytest collection functionality.""
+
         try:
             # Test collection in mission critical directory
             result = subprocess.run([
@@ -46,7 +44,7 @@ class CollectionValidationTests(SSotBaseTestCase):
             
             if result.returncode != 0:
                 print(f\nPytest collection failed:)
-                print(f"STDOUT: {result.stdout}")
+                print(f"STDOUT: {result.stdout})"
                 print(fSTDERR: {result.stderr})
                 
                 # Analyze specific errors
@@ -65,13 +63,15 @@ class CollectionValidationTests(SSotBaseTestCase):
             
             print(f\nSuccessfully collected {test_count} tests")"
             self.assertGreater(test_count, 0, Should collect at least some tests)"
-            self.assertGreater(test_count, 0, Should collect at least some tests)"
+            self.assertGreater(test_count, 0, Should collect at least some tests)""
+
             
         except subprocess.TimeoutExpired:
             assert False, Pytest collection timed out - possible infinite loop or deadlock"
-            assert False, Pytest collection timed out - possible infinite loop or deadlock"
+            assert False, Pytest collection timed out - possible infinite loop or deadlock""
+
         except Exception as e:
-            assert False, fUnexpected error during pytest collection: {e}
+            assert False, "fUnexpected error during pytest collection: {e}"
     
     def test_specific_problematic_files_collection(self):
         "Test collection of specific files that showed failures in Issue #976."
@@ -102,7 +102,7 @@ class CollectionValidationTests(SSotBaseTestCase):
                 result = subprocess.run([
                     sys.executable, -m, pytest,
                     str(file_path),
-                    --collect-only, --quiet", "--no-header
+                    --collect-only, --quiet", --no-header"
                 ], capture_output=True, text=True, timeout=30)
                 
                 if result.returncode == 0:
@@ -141,16 +141,16 @@ class CollectionValidationTests(SSotBaseTestCase):
         
         print(f\nCollection Results:)"
         print(f\nCollection Results:)"
-        print(f"Successful: {len(successful_files)})")
+        print(f"Successful: {len(successful_files)}))"
         print(fFailed: {len(failed_files)})
         
         if failed_files:
-            print(f"\nFailed Files Details:)")
+            print(f"\nFailed Files Details:))"
             for filename, result in failed_files.items("):"
                 print(f  {filename}: {result['status']})
                 if 'error_analysis' in result:
                     for error_type, count in result['error_analysis'].items():
-                        print(f"    {error_type}: {count})")
+                        print(f"    {error_type}: {count}))"
         
         # This test should initially fail to demonstrate the issue
         if failed_files:
@@ -165,7 +165,8 @@ class CollectionValidationTests(SSotBaseTestCase):
             netra_backend.app.core.configuration.base.get_config,"
             netra_backend.app.core.configuration.base.get_config,"
             netra_backend.app.websocket_core.manager.WebSocketManager"
-            netra_backend.app.websocket_core.manager.WebSocketManager"
+            netra_backend.app.websocket_core.manager.WebSocketManager""
+
         ]
         
         resolution_results = {}
@@ -180,7 +181,8 @@ class CollectionValidationTests(SSotBaseTestCase):
                 
             except ImportError as e:
                 resolution_results[import_path] = fImportError: {str(e)}"
-                resolution_results[import_path] = fImportError: {str(e)}"
+                resolution_results[import_path] = fImportError: {str(e)}""
+
             except NameError as e:
                 resolution_results[import_path] = f"NameError: {str(e)}"
             except Exception as e:
@@ -193,10 +195,11 @@ class CollectionValidationTests(SSotBaseTestCase):
             for import_path, error in failed_imports.items("):"
                 print(f  {import_path}: {error}")"
             
-            assert False, fImport resolution failed for {len(failed_imports)} paths
+            assert False, "fImport resolution failed for {len(failed_imports)} paths"
     
     def test_test_discovery_comprehensive(self):
-        ""Test comprehensive test discovery across all test directories.
+        ""Test comprehensive test discovery across all test directories.""
+
         discovery_results = {}
         
         for test_dir in self.test_directories:
@@ -269,15 +272,16 @@ class CollectionValidationTests(SSotBaseTestCase):
             elif result['status'] == 'collection_failed':
                 print(f    Name Errors: {result.get('name_errors', 0)})
                 print(f    Import Errors: {result.get('import_errors', 0)})"
-                print(f    Import Errors: {result.get('import_errors', 0)})"
+                print(f    Import Errors: {result.get('import_errors', 0)})""
+
                 failed_directories.append(Path(test_dir).name)
                 
             total_test_files += result.get('test_files', 0)
         
-        print(f"\nSummary:)")
+        print(f"\nSummary:))"
         print(f  Total test files found: {total_test_files})"
         print(f  Total test files found: {total_test_files})"
-        print(f"  Total tests collected: {total_collected})")
+        print(f"  Total tests collected: {total_collected}))"
         print(f  Failed directories: {len(failed_directories)})
         
         # This test should initially fail to demonstrate discovery issues
@@ -303,9 +307,10 @@ if __name__ == "__main__:"
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
     print(MIGRATION NOTICE: This file previously used direct pytest execution.)
-    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>")
+    print("Please use: python tests/unified_test_runner.py --category <appropriate_category>)"
     print(For more info: reports/TEST_EXECUTION_GUIDE.md)"
-    print(For more info: reports/TEST_EXECUTION_GUIDE.md)"
+    print(For more info: reports/TEST_EXECUTION_GUIDE.md)""
+
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

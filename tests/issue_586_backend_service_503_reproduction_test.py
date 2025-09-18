@@ -90,7 +90,7 @@ class BackendService503ReproductionTest:
                 print(f"Headers: {dict(response.headers)}")
                 
                 if response.status_code == 503:
-                    print("✅ EXPECTED FAILURE REPRODUCED: Backend service returned 503")
+                    print("CHECK EXPECTED FAILURE REPRODUCED: Backend service returned 503")
                     test_result.update({
                         "success": True,  # Success at reproducing the issue
                         "error_message": "Backend service unavailable (503)",
@@ -103,7 +103,7 @@ class BackendService503ReproductionTest:
                     self.error_patterns.append("backend_service_503")
                     
                 elif response.status_code == 200:
-                    print("❌ UNEXPECTED SUCCESS: Backend service is healthy")
+                    print("X UNEXPECTED SUCCESS: Backend service is healthy")
                     test_result.update({
                         "success": False,  # Failed to reproduce the issue
                         "error_message": "Service unexpectedly healthy",
@@ -115,7 +115,7 @@ class BackendService503ReproductionTest:
                     })
                     
                 else:
-                    print(f"⚠️  UNEXPECTED STATUS: Received {response.status_code}")
+                    print(f"WARNING️  UNEXPECTED STATUS: Received {response.status_code}")
                     test_result.update({
                         "success": True if response.status_code >= 500 else False,
                         "error_message": f"Unexpected status code: {response.status_code}",
@@ -127,7 +127,7 @@ class BackendService503ReproductionTest:
                     })
                     
         except httpx.TimeoutException as e:
-            print(f"✅ EXPECTED FAILURE: Backend service timeout")
+            print(f"CHECK EXPECTED FAILURE: Backend service timeout")
             test_result.update({
                 "success": True,  # Success at reproducing connection issues
                 "error_message": f"Backend service timeout: {str(e)}",
@@ -140,7 +140,7 @@ class BackendService503ReproductionTest:
             self.error_patterns.append("backend_timeout")
             
         except httpx.ConnectError as e:
-            print(f"✅ EXPECTED FAILURE: Backend service connection error")
+            print(f"CHECK EXPECTED FAILURE: Backend service connection error")
             test_result.update({
                 "success": True,  # Success at reproducing connection issues
                 "error_message": f"Backend connection failed: {str(e)}",
@@ -153,7 +153,7 @@ class BackendService503ReproductionTest:
             self.error_patterns.append("backend_connection_error")
             
         except Exception as e:
-            print(f"⚠️  UNEXPECTED ERROR: {str(e)}")
+            print(f"WARNING️  UNEXPECTED ERROR: {str(e)}")
             test_result.update({
                 "success": False,
                 "error_message": f"Unexpected error: {str(e)}",
@@ -191,7 +191,7 @@ class BackendService503ReproductionTest:
                 test_result["status_code"] = response.status_code
                 
                 if response.status_code == 503:
-                    print("✅ EXPECTED FAILURE: Backend not ready (503)")
+                    print("CHECK EXPECTED FAILURE: Backend not ready (503)")
                     test_result.update({
                         "success": True,
                         "error_message": "Backend service not ready",
@@ -200,14 +200,14 @@ class BackendService503ReproductionTest:
                     self.error_patterns.append("backend_not_ready")
                     
                 elif response.status_code == 200:
-                    print("❌ UNEXPECTED: Backend reports ready")
+                    print("X UNEXPECTED: Backend reports ready")
                     test_result.update({
                         "success": False,
                         "error_message": "Backend unexpectedly ready"
                     })
                     
         except Exception as e:
-            print(f"✅ EXPECTED ERROR: Connection failure - {str(e)}")
+            print(f"CHECK EXPECTED ERROR: Connection failure - {str(e)}")
             test_result.update({
                 "success": True,
                 "error_message": f"Connection failed: {str(e)}",
@@ -242,7 +242,7 @@ class BackendService503ReproductionTest:
                 test_result["status_code"] = response.status_code
                 
                 if response.status_code == 503:
-                    print("✅ EXPECTED FAILURE: Backend not alive (503)")
+                    print("CHECK EXPECTED FAILURE: Backend not alive (503)")
                     test_result.update({
                         "success": True,
                         "error_message": "Backend service not alive",
@@ -251,7 +251,7 @@ class BackendService503ReproductionTest:
                     self.error_patterns.append("backend_not_alive")
                     
         except Exception as e:
-            print(f"✅ EXPECTED ERROR: Liveness check failed - {str(e)}")
+            print(f"CHECK EXPECTED ERROR: Liveness check failed - {str(e)}")
             test_result.update({
                 "success": True,
                 "error_message": f"Liveness check failed: {str(e)}",
@@ -339,7 +339,7 @@ async def test_issue_586_backend_service_503_reproduction():
         "No error patterns detected. Issue #586 may be resolved or test needs adjustment."
     )
     
-    print(f"\n✅ Successfully reproduced Issue #586 backend service problems!")
+    print(f"\nCHECK Successfully reproduced Issue #586 backend service problems!")
     return results
 
 
@@ -352,10 +352,10 @@ if __name__ == "__main__":
         
         print(f"\n🎯 FINAL RESULT:")
         if results["successful_reproductions"] > 0:
-            print(f"✅ Issue #586 REPRODUCED: Found {results['successful_reproductions']} backend service failures")
+            print(f"CHECK Issue #586 REPRODUCED: Found {results['successful_reproductions']} backend service failures")
             print(f"Error patterns: {', '.join(results['error_patterns_found'])}")
         else:
-            print(f"❌ Issue #586 NOT REPRODUCED: Backend service appears healthy")
+            print(f"X Issue #586 NOT REPRODUCED: Backend service appears healthy")
             
         return results
     

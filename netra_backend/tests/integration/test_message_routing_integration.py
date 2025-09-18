@@ -32,7 +32,7 @@ from shared.types.core_types import (
 )
 
 # Message routing components
-from netra_backend.app.services.websocket.quality_message_router import QualityMessageRouter
+from netra_backend.app.websocket_core.handlers import MessageRouter as QualityMessageRouter
 from netra_backend.app.services.websocket.quality_metrics_handler import QualityMetricsHandler
 from netra_backend.app.services.websocket.quality_validation_handler import QualityValidationHandler
 from netra_backend.app.services.message_handlers import MessageHandlerService

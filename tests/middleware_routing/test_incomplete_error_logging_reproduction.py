@@ -341,7 +341,7 @@ class ErrorLoggingReproductionTests:
                 elif 'routing.py' in tb and 'line 716' in tb:
                     print('   🎯 MATCHES TARGET: routing.py line 716 pattern!')
                 elif len(tb.split('\n')) < 10:
-                    print('   ⚠️ SUSPICIOUS: Very short traceback')
+                    print('   WARNING️ SUSPICIOUS: Very short traceback')
         if self.exception_wrappers:
             print(f'\n🔗 EXCEPTION WRAPPING CHAIN ANALYSIS:')
             for i, wrapper in enumerate(self.exception_wrappers):

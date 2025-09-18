@@ -1,5 +1,5 @@
 """
-"""
+
 Mission Critical Test: MessageRouter SSOT Compliance Validation
 
 Tests that the MessageRouter SSOT violation is resolved and staging deployment will work.
@@ -7,14 +7,15 @@ This test validates that the MessageRouter Phase 1 proxy implementation is worki
 
 Business Value: Platform/Internal - System Stability & Golden Path Protection
 """
-"""
-- Protects $500K+ ARR chat functionality from MessageRouter routing conflicts
+
+- Protects $500K+ plus ARR chat functionality from MessageRouter routing conflicts
 - Ensures single canonical routing implementation for reliability
 - Validates staging deployment readiness after SSOT remediation
 
 GitHub Issue: #1077 - MessageRouter SSOT violations blocking golden path
 "
-"
+""
+
 
 import sys
 import os
@@ -39,7 +40,8 @@ class WebSocketTestHelper:
         "Send JSON message."
         if self._closed:
             raise RuntimeError(WebSocket is closed)"
-            raise RuntimeError(WebSocket is closed)"
+            raise RuntimeError(WebSocket is closed)""
+
         self.messages_sent.append(message)
 
     async def close(self, code: int = 1000, reason: str = "Normal closure):"
@@ -49,7 +51,8 @@ class WebSocketTestHelper:
 
     def get_messages(self) -> list:
         Get all sent messages."
-        Get all sent messages."
+        Get all sent messages.""
+
         return self.messages_sent.copy()
 
 
@@ -83,13 +86,14 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
         if hasattr(router, 'add_handler'):
             print(   [OK] Has add_handler() method (correct))
         else:
-            self.fail("   [FAIL] Missing add_handler() method")
+            self.fail("   [FAIL] Missing add_handler() method)"
 
         if hasattr(router, 'route_message'):
             print(   [OK] Has route_message() method (correct))
         else:
             self.fail(   [FAIL] Missing route_message() method)"
-            self.fail(   [FAIL] Missing route_message() method)"
+            self.fail(   [FAIL] Missing route_message() method)""
+
 
         if hasattr(router, 'handlers'):
             print(   [OK] Has handlers property (correct"))"
@@ -118,13 +122,15 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
                 print(   [OK] Core proxy has add_handler(") method)"
             else:
                 self.fail(   [FAIL] Core proxy missing add_handler() method)"
-                self.fail(   [FAIL] Core proxy missing add_handler() method)"
+                self.fail(   [FAIL] Core proxy missing add_handler() method)""
+
                 
             if hasattr(proxy_router, 'handlers'):
                 print(   [OK] Core proxy has handlers property")"
             else:
                 self.fail(   [FAIL] Core proxy missing handlers property)"
-                self.fail(   [FAIL] Core proxy missing handlers property)"
+                self.fail(   [FAIL] Core proxy missing handlers property)""
+
                 
         except ImportError as e:
             self.fail(f   [FAIL] Cannot import core proxy: {e}")"
@@ -147,7 +153,8 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
             # Get the canonical router
             router = get_message_router()
             print(f   [OK] Got canonical router with {len(router.handlers)} handlers)"
-            print(f   [OK] Got canonical router with {len(router.handlers)} handlers)"
+            print(f   [OK] Got canonical router with {len(router.handlers)} handlers)""
+
 
             # Create a mock handler for testing
             mock_handler = MagicMock()
@@ -170,12 +177,12 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
             router.remove_handler(mock_handler)
             print(   [OK] Successfully removed handler)
 
-            print(\n + "=*60")
+            print(\n + "=*60)"
             print([OK] AgentMessageHandler registration works correctly!)
             print(=*60)
 
         except AttributeError as e:
-            if "add_handler" in str(e):
+            if "add_handler in str(e):"
                 self.fail(f   [FAIL] Missing add_handler method: {e})
             else:
                 self.fail(f   [FAIL] Unexpected AttributeError: {e})
@@ -186,7 +193,7 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
         Test that WebSocket routing continues to work with SSOT MessageRouter.""
         print(\n + =*60)
         print(Testing WebSocket Routing Compatibility)
-        print("="*60)
+        print("=*60)"
 
         try:
             from netra_backend.app.websocket_core.handlers import get_message_router
@@ -197,7 +204,7 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
             test_websocket = WebSocketTestHelper()
             test_message = {
                 type: ping,
-                payload: {"test": True},
+                payload: {"test: True},"
                 timestamp: 1234567890
             }
             
@@ -207,7 +214,7 @@ class MessageRouterSSOTComplianceTests(SSotBaseTestCase):
             else:
                 self.fail(   [FAIL] route_message method missing or not callable)
 
-            print("\n" + =*60)
+            print("\n + =*60)"
             print([OK] WebSocket routing compatibility verified!")"
             print(=*60")"
 
@@ -225,4 +232,4 @@ if __name__ == __main__:
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()
     # sys.exit(result)
-print(f   - {test}: {traceback.split('Error:')[-1].strip(")}")
+print(f   - {test}: {traceback.split('Error:')[-1].strip(")})"

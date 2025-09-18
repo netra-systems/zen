@@ -1,22 +1,23 @@
 """
-"""
+
 SSOT Wrapper Function Detection Tests for Issue #1076
 
 Test Plan: Detect backward compatibility wrapper functions that create SSOT violations.
 Should FAIL initially (detecting violations) and PASS after remediation.
 
 Key violations to detect:
-1. Remaining wrapper functions in auth integration
+    1. Remaining wrapper functions in auth integration
 2. Backward compatibility functions that should be removed
 3. Functions that delegate to legacy patterns instead of using SSOT directly
 
 Related Issues: #1076 - SSOT compliance verification
 Priority: CRITICAL - These tests protect against regression during SSOT migration
 "
-"
+""
+
 
 """
-"""
+
 import pytest
 import ast
 import os
@@ -43,15 +44,16 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
         self.backward_compatibility_violations = []
 
     def test_auth_integration_wrapper_detection(self):
-        "
-        "
+        """
+        ""
+
         CRITICAL: Detect wrapper functions in auth integration that bypass SSOT.
 
         EXPECTED: Should FAIL initially - detects remaining wrapper functions
         REMEDIATION: Remove wrapper functions, use SSOT auth service directly
 "
 "
-        auth_integration_path = self.project_root / netra_backend / app" / "auth_integration
+        auth_integration_path = self.project_root / netra_backend / app" / auth_integration"
 
         if not auth_integration_path.exists():
             self.fail(fAuth integration path not found: {auth_integration_path})
@@ -121,7 +123,8 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
             "_fallback,"
             compat_,
             _compat"
-            _compat"
+            _compat""
+
         ]
 
         backward_compat_functions = []
@@ -129,8 +132,8 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
         # Search in key SSOT directories
         search_paths = [
             self.project_root / netra_backend" / app / auth_integration,"
-            self.project_root / "netra_backend / app" / core,
-            self.project_root / netra_backend / "app / websocket_core",
+            self.project_root / "netra_backend / app / core,"
+            self.project_root / netra_backend / "app / websocket_core,"
             self.project_root / shared
         ]
 
@@ -183,14 +186,16 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
             )
 
     def test_function_delegation_pattern_detection(self):
-        "
-        "
+        """
+        ""
+
         CRITICAL: Detect functions that delegate to legacy patterns instead of SSOT.
 
         EXPECTED: Should FAIL initially - detects delegation violations
         REMEDIATION: Update functions to use SSOT directly
 "
-"
+""
+
         delegation_violations = []
 
         # Search for functions that import and delegate to legacy modules
@@ -241,7 +246,8 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
             violation_details = \n.join(["
             violation_details = \n.join(["
                 f  - {v['file']):{v['line']) - {v['content']) (pattern: {v['pattern'])"
-                f  - {v['file']):{v['line']) - {v['content']) (pattern: {v['pattern'])"
+                f  - {v['file']):{v['line']) - {v['content']) (pattern: {v['pattern'])""
+
                 for v in delegation_violations
             ]
 
@@ -268,7 +274,7 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
         # Search in all Python files
         for py_file in self.project_root.rglob(*.py):
             if any(skip in str(py_file) for skip in [
-                __pycache__, .git", "venv, node_modules,
+                __pycache__, .git", venv, node_modules,"
                 tests/, test_, "_test"
             ]:
                 continue
@@ -319,7 +325,8 @@ class SSotWrapperFunctionDetectionTests(SSotBaseTestCase):
             violation_details = \n.join(["
             violation_details = \n.join(["
                 f  - {dup['function']}: {dup['file1']} vs {dup['file2']}"
-                f  - {dup['function']}: {dup['file1']} vs {dup['file2']}"
+                f  - {dup['function']}: {dup['file1']} vs {dup['file2']}""
+
                 for dup in business_duplicates[:10]  # Limit output
             ]
 

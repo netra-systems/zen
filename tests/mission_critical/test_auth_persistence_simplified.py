@@ -1,27 +1,29 @@
 """
-"""
+
 Simplified test for authentication persistence in multi-agent workflows.
 """
-"""
+
 Tests core auth persistence patterns without importing modules with singleton issues.
 """
 """
 
+
 """
 """
+
 import asyncio
 import uuid
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
 from netra_backend.app.websocket_core.context import WebSocketContext
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class AuthPersistenceCoreTests:
@@ -33,8 +35,8 @@ class AuthPersistenceCoreTests:
         payload = {
             sub: "test-user-123,"
             email": test@example.com,"
-            exp: datetime.utcnow() + timedelta(hours=1),
-            "iat: datetime.utcnow()"
+            exp: datetime.now(timezone.utc) + timedelta(hours=1),
+            "iat: datetime.now(timezone.utc)"
         }
         return jwt.encode(payload, test-secret, algorithm=HS256)
     
@@ -51,7 +53,8 @@ class AuthPersistenceCoreTests:
             run_id=str(uuid.uuid4()),
             websocket_connection_id=ws-1,
             metadata={auth_token: valid_token}"
-            metadata={auth_token: valid_token}"
+            metadata={auth_token: valid_token}""
+
         
         # Verify context properly initialized
         assert context.user_id == user_id
@@ -102,13 +105,14 @@ class AuthPersistenceCoreTests:
         
         async def create_user_context(user_id: str):
             Create a context for a specific user."
-            Create a context for a specific user."
+            Create a context for a specific user.""
+
             context = UserExecutionContext(
                 user_id=user_id,
                 thread_id=fthread_{user_id}","
                 run_id=str(uuid.uuid4()),
                 websocket_connection_id=fws_{user_id},
-                metadata={auth_token: valid_token, "user_data: fdata_{user_id}"}
+                metadata={auth_token: valid_token, "user_data: fdata_{user_id}}"
             results[user_id] = context
             await asyncio.sleep(0.1)  # Simulate some processing
             return context
@@ -121,7 +125,8 @@ class AuthPersistenceCoreTests:
         # Verify all contexts are properly isolated
         for i, context in enumerate(contexts):
             expected_user_id = fuser_{i}"
-            expected_user_id = fuser_{i}"
+            expected_user_id = fuser_{i}""
+
             assert context.user_id == expected_user_id
             assert context.thread_id == f"thread_{expected_user_id}"
             assert context.metadata[user_data] == fdata_{expected_user_id}
@@ -136,7 +141,8 @@ class AuthPersistenceCoreTests:
         v3_enabled = os.getenv(USE_WEBSOCKET_SUPERVISOR_V3, true).lower() == true"
         v3_enabled = os.getenv(USE_WEBSOCKET_SUPERVISOR_V3, true).lower() == true"
         assert v3_enabled, WebSocket v3 pattern should be enabled by default for security"
-        assert v3_enabled, WebSocket v3 pattern should be enabled by default for security"
+        assert v3_enabled, WebSocket v3 pattern should be enabled by default for security""
+
     
     @pytest.mark.asyncio
     async def test_auth_token_in_websocket_message(self, valid_token):
@@ -155,7 +161,8 @@ class AuthPersistenceCoreTests:
         # Verify message contains auth
         assert message.payload[auth_token] == valid_token
         assert message.thread_id == test-thread"
-        assert message.thread_id == test-thread"
+        assert message.thread_id == test-thread""
+
     
     @pytest.mark.asyncio
     async def test_token_refresh_preserves_user_identity(self):
@@ -169,7 +176,7 @@ class AuthPersistenceCoreTests:
             exp: datetime.utcnow() + timedelta(seconds=30),"
             iat": datetime.utcnow(),"
             session_id: session-1
-        }, "test-secret, algorithm=HS256")
+        }, "test-secret, algorithm=HS256)"
         
         # Refreshed token (same user, new expiry)
         refreshed_token = jwt.encode({
@@ -178,7 +185,7 @@ class AuthPersistenceCoreTests:
             exp: datetime.utcnow() + timedelta(hours=1),"
             "iat: datetime.utcnow(),"
             session_id: session-1  # Same session
-        }, test-secret", algorithm="HS256)
+        }, test-secret", algorithm=HS256)"
         
         # Decode both tokens
         original_claims = jwt.decode(original_token, test-secret, algorithms=[HS256)
@@ -188,7 +195,7 @@ class AuthPersistenceCoreTests:
         assert original_claims[sub"] == refreshed_claims[sub]"
         assert original_claims[session_id] == refreshed_claims[session_id]
         # But expiry should be updated
-        assert refreshed_claims[exp"] > original_claims["exp]
+        assert refreshed_claims[exp"] > original_claims[exp]"
 
 
 if __name__ == __main__":"

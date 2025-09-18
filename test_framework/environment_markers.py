@@ -546,3 +546,9 @@ prod_safe = env(TestEnvironment.PROD, readonly=True)
 dev_and_staging = env(TestEnvironment.DEV, TestEnvironment.STAGING)
 non_prod = env(TestEnvironment.TEST, TestEnvironment.DEV, TestEnvironment.STAGING)
 all_envs = env(TestEnvironment.TEST, TestEnvironment.DEV, TestEnvironment.STAGING, TestEnvironment.PROD)
+
+# Service-specific decorators
+requires_backend_service = env_requires(services=["backend_service"])
+requires_auth_service = env_requires(services=["auth_service"])
+requires_database = env_requires(services=["postgres"])
+requires_redis = env_requires(services=["redis"])

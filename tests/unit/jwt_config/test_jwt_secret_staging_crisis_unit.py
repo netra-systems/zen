@@ -265,7 +265,7 @@ class JWTConfigurationBusinessImpactTests(SSotBaseTestCase):
         """
         Test demonstrating Golden Path user flow blockage due to JWT config.
         
-        Golden Path: User login → AI responses
+        Golden Path: User login -> AI responses
         Blocked by: WebSocket authentication failures due to JWT misconfiguration
         """
         mock_env = Mock()

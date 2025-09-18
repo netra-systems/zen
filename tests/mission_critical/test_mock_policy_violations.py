@@ -1,18 +1,17 @@
 from shared.isolated_environment import get_env
 """
-"""
+
 env = get_env()
-Mission Critical Test Suite: Mock Usage Policy Violations"""
 Mission Critical Test Suite: Mock Usage Policy Violations"""
 This test suite ensures compliance with CLAUDE.md policy: "MOCKS = Abomination", "MOCKS are FORBIDDEN"
 Tests will FAIL if any mock usage is detected in test files, enforcing real service testing.
 
 Business Value: Platform/Internal - Test Reliability
-$500K+ ARR at risk from false test confidence and hidden integration failures
+$500K+ plus ARR at risk from false test confidence and hidden integration failures
 
 Author: Principal Engineer AI
 Date: 2025-8-30"""
-Date: 2025-8-30"""
+
 
 import ast
 import os
@@ -34,7 +33,6 @@ sys.path.insert(0, str(project_root))
 
 
 @dataclass"""
-@dataclass"""
     """Represents a single mock usage violation."""
     file_path: str
     line_number: int
@@ -42,7 +40,6 @@ sys.path.insert(0, str(project_root))
     code_snippet: str
     service: str
 
-    def __str__(self):"""
     def __str__(self):"""
         return "formatted_string"
 
@@ -78,9 +75,8 @@ class MockDetector(ast.NodeVisitor):
         for alias in node.names:
         self.violations.append(MockViolation( ))
         file_path=self.file_path,"""
-        file_path=self.file_path,"""
-        violation_type="Mock Import",
-        code_snippet="formatted_string",
+        violation_type="Mock Import,"
+        code_snippet="formatted_string,"
         service=self._get_service_name()
             
         self.imports.add(alias.name if not alias.asname else alias.asname)
@@ -93,8 +89,8 @@ class MockDetector(ast.NodeVisitor):
         self.violations.append(MockViolation( ))
         file_path=self.file_path,
         line_number=node.lineno,
-        violation_type="Mock Import",
-        code_snippet="formatted_string",
+        violation_type="Mock Import,"
+        code_snippet="formatted_string,"
         service=self._get_service_name()
             
         self.imports.add(alias.name if not alias.asname else alias.asname)
@@ -106,9 +102,8 @@ class MockDetector(ast.NodeVisitor):
         if func_name in self.MOCK_FUNCTIONS or func_name in self.imports:
         self.violations.append(MockViolation( ))
         file_path=self.file_path,"""
-        file_path=self.file_path,"""
-        violation_type="Mock Usage",
-        code_snippet="formatted_string",
+        violation_type="Mock Usage,"
+        code_snippet="formatted_string,"
         service=self._get_service_name()
         
         self.generic_visit(node)
@@ -120,8 +115,8 @@ class MockDetector(ast.NodeVisitor):
         self.violations.append(MockViolation( ))
         file_path=self.file_path,
         line_number=decorator.lineno,
-        violation_type="Patch Decorator",
-        code_snippet="formatted_string",
+        violation_type="Patch Decorator,"
+        code_snippet="formatted_string,"
         service=self._get_service_name()
             
         self.generic_visit(node)
@@ -133,9 +128,8 @@ class MockDetector(ast.NodeVisitor):
         if attr_name in self.MOCK_FUNCTIONS:
         self.violations.append(MockViolation( ))
         file_path=self.file_path,"""
-        file_path=self.file_path,"""
-        violation_type="Mock Attribute Access",
-        code_snippet="formatted_string",
+        violation_type="Mock Attribute Access,"
+        code_snippet="formatted_string,"
         service=self._get_service_name()
         
         self.generic_visit(node)
@@ -148,9 +142,8 @@ class MockDetector(ast.NodeVisitor):
         if 'patch' in func_name or func_name in self.imports:
         self.violations.append(MockViolation( ))
         file_path=self.file_path,"""
-        file_path=self.file_path,"""
-        violation_type="Mock Context Manager",
-        code_snippet="formatted_string",
+        violation_type="Mock Context Manager,"
+        code_snippet="formatted_string,"
         service=self._get_service_name()
                 
         self.generic_visit(node)
@@ -169,9 +162,8 @@ class MockDetector(ast.NodeVisitor):
 
         self.violations.append(MockViolation( ))
         file_path=self.file_path,"""
-        file_path=self.file_path,"""
-        violation_type="Mock Assignment",
-        code_snippet="formatted_string",
+        violation_type="Mock Assignment,"
+        code_snippet="formatted_string,"
         service=self._get_service_name()
                     
         self.generic_visit(node)
@@ -183,13 +175,11 @@ class MockDetector(ast.NodeVisitor):
         elif isinstance(node, ast.Attribute):
         return node.attr
         elif isinstance(node, ast.Call):"""
-        elif isinstance(node, ast.Call):"""
         return ""
 
     def _get_decorator_name(self, node) -> str:
         """Extract decorator name from AST node."""
         if isinstance(node, ast.Name):
-        return node.id"""
         return node.id"""
         return "formatted_string"
         elif isinstance(node, ast.Call):
@@ -212,10 +202,8 @@ class MockDetector(ast.NodeVisitor):
         return 'tests'
 
 """
-"""
         """Test suite to enforce mock usage policy across all services."""
 
-        @pytest.fixture"""
         @pytest.fixture"""
         """Setup test environment."""
         self.project_root = Path(__file__).resolve().parent.parent.parent
@@ -226,7 +214,6 @@ class MockDetector(ast.NodeVisitor):
         self.project_root / 'tests',
         self.project_root / 'dev_launcher' / 'tests',
     
-"""
 """
         """Scan directory for mock usage violations."""
         pass
@@ -251,15 +238,13 @@ class MockDetector(ast.NodeVisitor):
         violations.extend(detector.violations)
 
         except (SyntaxError, UnicodeDecodeError) as e:"""
-        except (SyntaxError, UnicodeDecodeError) as e:"""
-        print("formatted_string")
+        print("formatted_string)"
         continue
 
         return violations
 
     def _regex_mock_detection(self, py_file: Path, content: str) -> List[MockViolation]:
-        """Use regex to catch mock patterns that AST might miss.""""""
-        """Use regex to catch mock patterns that AST might miss.""""""
+        """Use regex to catch mock patterns that AST might miss."""Use regex to catch mock patterns that AST might miss."""
         lines = content.split(" )"
 
 class TestWebSocketConnection:
@@ -271,22 +256,18 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
 """
-"""
-        """Send JSON message.""""""
-        """Send JSON message.""""""
-        raise RuntimeError("WebSocket is closed")
+        """Send JSON message."""Send JSON message."""
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
         self.is_connected = False
 """
-"""
         """Get all sent messages."""
         await asyncio.sleep(0)
-        return self.messages_sent.copy()"""
         return self.messages_sent.copy()"""
         ")"
 
@@ -316,7 +297,7 @@ class TestWebSocketConnection:
         violations.append(MockViolation( ))
         file_path=str(py_file),
         line_number=line_num,
-        violation_type="formatted_string",
+        violation_type="formatted_string,"
         code_snippet=line.strip()[:100],
         service=self._get_service_name_from_path(str(py_file))
                 
@@ -338,22 +319,20 @@ class TestWebSocketConnection:
         else:
         return 'tests'
 """
-"""
         """
-        """
+
         CRITICAL: auth_service tests must not use mocks.
 
         Policy: Real service testing only"""
-        Policy: Real service testing only"""
         Impact: False authentication test confidence"""
-        Impact: False authentication test confidence"""
+
         pass
         auth_tests = self.project_root / 'auth_service' / 'tests'
         violations = self.scan_for_mock_usage(auth_tests)
 """
-"""
         report = "
-        report = "
+        report = ""
+
 
         Mock Policy Violations in auth_service:
         "
@@ -361,38 +340,40 @@ class TestWebSocketConnection:
         report += "=" * 60 + "
         report += "=" * 60 + "
         "
-        "
+        ""
+
         for v in violations[:10]:  # Show first 10 violations
         report += "formatted_string"
         if len(violations) > 10:
         report += "formatted_string"
         report += "
-        report += "
+        report += ""
+
         Required Action: Replace ALL mocks with real service tests
         "
         "
         report += "Use IsolatedEnvironment from test_framework/environment_isolation.py"
         "
-        "
+        ""
 
-        pytest.fail("formatted_string")
+
+        pytest.fail("formatted_string)"
 
     def test_no_mock_imports_in_analytics_service(self):
         """
-        """
+
         CRITICAL: analytics_service tests must not use mocks.
 
         Policy: Real service testing only"""
-        Policy: Real service testing only"""
         Impact: Hidden analytics integration failures"""
-        Impact: Hidden analytics integration failures"""
+
         pass
         analytics_tests = self.project_root / 'analytics_service' / 'tests'
         violations = self.scan_for_mock_usage(analytics_tests)
 """
-"""
         report = "
-        report = "
+        report = ""
+
 
         Mock Policy Violations in analytics_service:
         "
@@ -400,35 +381,37 @@ class TestWebSocketConnection:
         report += "=" * 60 + "
         report += "=" * 60 + "
         "
-        "
+        ""
+
         for v in violations[:10]:
         report += "formatted_string"
         if len(violations) > 10:
         report += "formatted_string"
         report += "
-        report += "
+        report += ""
+
         Required Action: Use real ClickHouse/Redis for testing
         "
-        "
+        ""
 
-        pytest.fail("formatted_string")
+
+        pytest.fail("formatted_string)"
 
     def test_no_mock_imports_in_netra_backend(self):
         """
-        """
+
         CRITICAL: netra_backend tests must not use mocks.
 
         Policy: Real service testing only"""
-        Policy: Real service testing only"""
         Impact: WebSocket and agent failures not detected"""
-        Impact: WebSocket and agent failures not detected"""
+
         pass
         backend_tests = self.project_root / 'netra_backend' / 'tests'
         violations = self.scan_for_mock_usage(backend_tests)
 """
-"""
         report = "
-        report = "
+        report = ""
+
 
         Mock Policy Violations in netra_backend:
         "
@@ -436,27 +419,29 @@ class TestWebSocketConnection:
         report += "=" * 60 + "
         report += "=" * 60 + "
         "
-        "
+        ""
+
         for v in violations[:10]:
         report += "formatted_string"
         if len(violations) > 10:
         report += "formatted_string"
         report += "
-        report += "
+        report += ""
+
         Required Action: Use real WebSocket connections and databases
         "
-        "
+        ""
 
-        pytest.fail("formatted_string")
+
+        pytest.fail("formatted_string)"
 
     def test_comprehensive_mock_audit(self):
         """
-        """
+
         COMPREHENSIVE: Full platform mock usage audit.
 """
-"""
         violation report across all services."""
-        violation report across all services."""
+
         pass
         all_violations = []
         service_violations = defaultdict(list)
@@ -468,7 +453,6 @@ class TestWebSocketConnection:
         for v in violations:
         service_violations[v.service].append(v)
 """
-"""
         report = "
         report = "
         " + "=" * 80 + "
@@ -478,7 +462,8 @@ class TestWebSocketConnection:
         "
         "
         report += "=" * 80 + "
-        report += "=" * 80 + "
+        report += "=" * 80 + ""
+
 
         "
         "
@@ -490,7 +475,8 @@ class TestWebSocketConnection:
         report += "-" * 40 + "
         report += "-" * 40 + "
         "
-        "
+        ""
+
 
                             # Group by violation type
         by_type = defaultdict(list)
@@ -527,18 +513,18 @@ class TestWebSocketConnection:
         report += "=" * 80 + "
         report += "=" * 80 + "
         "
-        "
+        ""
+
 
         pytest.fail(report)
 
     def test_isolated_environment_usage(self):
         """
-        """
+
         Verify tests use IsolatedEnvironment instead of direct os.environ.
 """
-"""
         Impact: Test pollution and flaky tests"""
-        Impact: Test pollution and flaky tests"""
+
         pass
         violations = []
 
@@ -560,12 +546,12 @@ class TestWebSocketConnection:
         count = content.count('os.environ[') + content.count('env.get(') ))
         violations.append((str(py_file), count))
 """
-"""
-        print("formatted_string")
+        print("formatted_string)"
 
         if violations:
         report = "
-        report = "
+        report = ""
+
 
         Direct os.environ Access Violations:
         "
@@ -573,28 +559,30 @@ class TestWebSocketConnection:
         report += "=" * 60 + "
         report += "=" * 60 + "
         "
-        "
+        ""
+
         for file_path, count in violations[:10]:
         short_path = file_path.split('/netra-apex/')[-1]
         report += "formatted_string"
         if len(violations) > 10:
         report += "formatted_string"
         report += "
-        report += "
+        report += ""
+
         Required: Use IsolatedEnvironment from test_framework
         "
-        "
+        ""
+
 
         pytest.fail(report)
 
     def test_real_service_configuration(self):
         """
-        """
+
         Verify tests are configured to use real services.
 """
-"""
         Impact: Integration issues not caught by tests"""
-        Impact: Integration issues not caught by tests"""
+
         pass
 required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test isolation',}
         'docker-compose': 'Using docker-compose for service dependencies',
@@ -620,9 +608,9 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
         if not re.search(pattern, content):
         missing_patterns[service_name].append(description)
 """
-"""
         report = "
-        report = "
+        report = ""
+
 
         Real Service Configuration Missing:
         "
@@ -630,13 +618,15 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
         report += "=" * 60 + "
         report += "=" * 60 + "
         "
-        "
+        ""
+
         for service, missing in missing_patterns.items():
         report += "formatted_string"
         for item in missing:
         report += "formatted_string"
         report += "
-        report += "
+        report += ""
+
         Required: Configure tests to use real services
 
         Insufficient Mock-Free Test Examples:
@@ -649,14 +639,17 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
         report += "formatted_string"
         report += "Each service needs proper examples of real service testing"
         "
-        "
+        ""
+
 
         if good_examples:
         report += "
-        report += "
+        report += ""
+
         Good examples found:
         "
-        "
+        ""
+
         for example in good_examples:
         short_path = example.split('/netra-apex/')[-1]
         report += "formatted_string"
@@ -666,12 +659,11 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
 
     def test_generate_remediation_report(self):
         """
-        """
+
         Generate detailed remediation report for mock removal.
 """
-"""
         with specific remediation steps for each service."""
-        with specific remediation steps for each service."""
+
         pass
         report_path = self.project_root / 'MOCK_REMEDIATION_PLAN.md'
 
@@ -686,15 +678,14 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
         service_violations[v.service].append(v)
 
                 # Generate remediation plan"""
-                # Generate remediation plan"""
         f.write("# Mock Usage Remediation Plan )"
 
         ")"
         f.write("## Executive Summary )"
 
         ")"
-        f.write("formatted_string")
-        f.write("formatted_string")
+        f.write("formatted_string)"
+        f.write("formatted_string)"
         f.write("- **Estimated Effort**: 2-3 days with multi-agent approach )"
 
         ")"
@@ -717,8 +708,8 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
         ")"
 
         for service, violations in service_violations.items():
-        f.write("formatted_string")
-        f.write("formatted_string")
+        f.write("formatted_string)"
+        f.write("formatted_string)"
 
                         # Group by file
         by_file = defaultdict(list)
@@ -730,10 +721,10 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
         ")"
         for file_path, file_violations in list(by_file.items())[:10]:
         short_path = file_path.split('/netra-apex/')[-1]
-        f.write("formatted_string")
+        f.write("formatted_string)"
 
         if len(by_file) > 10:
-        f.write("formatted_string")
+        f.write("formatted_string)"
 
         f.write(" )"
         **Replacement Strategy**:
@@ -793,7 +784,7 @@ required_patterns = {'IsolatedEnvironment': 'Using IsolatedEnvironment for test 
         f.write("- [ ] Architecture compliance > 90% )"
         ")"
 
-        print("formatted_string")
+        print("formatted_string)"
 
 
         if __name__ == '__main__':

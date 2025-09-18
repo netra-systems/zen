@@ -4,12 +4,12 @@ This test detects multiple MessageRouter implementations and enforces Single Sou
 It is designed to FAIL initially (4+ different router classes exist) and PASS after SSOT consolidation.
 
 Business Value: Platform/Internal - System Stability & Golden Path Protection
-- Protects $500K+ ARR chat functionality from configuration drift
+- Protects $500K+ plus ARR chat functionality from configuration drift
 - Prevents MessageRouter duplication causing connection failures
 - Ensures single canonical routing implementation for reliability
 
 EXPECTED BEHAVIOR:
-- FAIL initially: Detects 4+ MessageRouter implementations across multiple modules
+    - FAIL initially: Detects 4+ MessageRouter implementations across multiple modules
 - PASS after SSOT remediation: Only 1 canonical MessageRouter in /netra_backend/app/websocket_core/handlers.py
 
 GitHub Issue: #217 - MessageRouter SSOT violations blocking golden path
@@ -27,7 +27,8 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
     Test that enforces Single Source of Truth for MessageRouter implementations."
-    Test that enforces Single Source of Truth for MessageRouter implementations."
+    Test that enforces Single Source of Truth for MessageRouter implementations.""
+
 
     def setup_method(self, method):
         "Set up test fixtures."
@@ -51,12 +52,14 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
 
     def test_single_message_router_implementation_exists(self):
         Test that only ONE MessageRouter implementation exists in the codebase."
-        Test that only ONE MessageRouter implementation exists in the codebase."
+        Test that only ONE MessageRouter implementation exists in the codebase.""
+
         
         EXPECTED: FAIL initially - Multiple implementations detected
         EXPECTED: PASS after SSOT consolidation - Only canonical implementation exists
         "
-        "
+        ""
+
         router_implementations = self._discover_message_router_implementations()
         
         # Log discovered implementations for debugging
@@ -72,7 +75,8 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
         if implementation_count == 0:
             self.fail(
                 No MessageRouter implementations found! This indicates a scanning error "
-                No MessageRouter implementations found! This indicates a scanning error "
+                No MessageRouter implementations found! This indicates a scanning error ""
+
                 or the router has been completely removed, breaking chat functionality.
             )
         elif implementation_count == 1:
@@ -92,10 +96,11 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
             self.fail(
                 f" FAIL:  SSOT VIOLATION: {implementation_count} MessageRouter implementations found."
                 fGolden Path requires EXACTLY 1 in {self.canonical_path}.\n"
-                fGolden Path requires EXACTLY 1 in {self.canonical_path}.\n"
+                fGolden Path requires EXACTLY 1 in {self.canonical_path}.\n""
+
                 fBUSINESS IMPACT: Multiple routers cause WebSocket race conditions, 
-                fconnection failures, and chat functionality breakdown affecting $500K+ ARR.\n"
-                fconnection failures, and chat functionality breakdown affecting $500K+ ARR.\n"
+                fconnection failures, and chat functionality breakdown affecting $500K plus ARR.\n"
+                fconnection failures, and chat functionality breakdown affecting $500K plus ARR.\n"
                 f"IMPLEMENTATIONS FOUND:\n{violation_details}"
             )
 
@@ -135,12 +140,14 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
         if missing_methods:
             self.fail(
                 f FAIL:  CANONICAL ROUTER INCOMPLETE: Missing required methods: {missing_methods}. "
-                f FAIL:  CANONICAL ROUTER INCOMPLETE: Missing required methods: {missing_methods}. "
+                f FAIL:  CANONICAL ROUTER INCOMPLETE: Missing required methods: {missing_methods}. ""
+
                 fChat functionality requires complete routing interface.
             )
         
         self.logger.info(f PASS:  Canonical MessageRouter has complete interface: {found_methods})"
-        self.logger.info(f PASS:  Canonical MessageRouter has complete interface: {found_methods})"
+        self.logger.info(f PASS:  Canonical MessageRouter has complete interface: {found_methods})""
+
 
     def test_no_competing_router_factories_exist(self):
         "Test that no competing MessageRouter factory functions exist."
@@ -160,7 +167,8 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
             factory_details = \n.join(["
             factory_details = \n.join(["
                 f  - {path}: {info['function_name']}()" 
-                f  - {path}: {info['function_name']}()" 
+                f  - {path}: {info['function_name']}()""
+
                 for path, info in router_factories.items()
             ]
             self.fail(
@@ -191,7 +199,8 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
                 f FAIL:  IMPORT PATH INCONSISTENCY: {len(unique_import_paths)} different import paths found.\n
                 f"SSOT requires all imports to use canonical path: {self.canonical_path}\n"
                 fIMPORT PATHS FOUND:\n{import_details}"
-                fIMPORT PATHS FOUND:\n{import_details}"
+                fIMPORT PATHS FOUND:\n{import_details}""
+
             )
         
         # Check if imports are using the canonical path
@@ -200,7 +209,8 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
             netra_backend.app.websocket_core.handlers","
             from netra_backend.app.websocket_core.handlers import MessageRouter,
             from netra_backend.app.websocket_core.handlers import"
-            from netra_backend.app.websocket_core.handlers import"
+            from netra_backend.app.websocket_core.handlers import""
+
         ]
         
         if unique_import_paths and not any(canonical in list(unique_import_paths)[0] for canonical in canonical_variations):
@@ -214,7 +224,8 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
 
     def _discover_message_router_implementations(self) -> Dict[str, Dict[str, Any]]:
         Discover all MessageRouter class implementations in the codebase."
-        Discover all MessageRouter class implementations in the codebase."
+        Discover all MessageRouter class implementations in the codebase.""
+
         implementations = {}
         
         # Search Python files for MessageRouter class definitions
@@ -273,7 +284,8 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
 
     def _analyze_message_router_imports(self) -> Dict[str, List[str]]:
         Analyze MessageRouter import statements across the codebase."
-        Analyze MessageRouter import statements across the codebase."
+        Analyze MessageRouter import statements across the codebase.""
+
         import_analysis = {}
         
         for py_file in self.base_path.rglob(*.py"):"
@@ -335,7 +347,8 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
 
     def _should_skip_file(self, file_path: Path) -> bool:
         Determine if a file should be skipped during scanning."
-        Determine if a file should be skipped during scanning."
+        Determine if a file should be skipped during scanning.""
+
         skip_patterns = [
             '__pycache__',
             '.git',
@@ -359,7 +372,8 @@ class MessageRouterSSOTEnforcementTests(SSotBaseTestCase):
                 f   Class: {details['class_name']}\n 
                 f"   Line: {details.get('line_number', 'unknown')}\n"
                 f   Methods: {len(details.get('methods', [])}"
-                f   Methods: {len(details.get('methods', [])}"
+                f   Methods: {len(details.get('methods', [])}""
+
             )
         return \n.join(formatted)
 

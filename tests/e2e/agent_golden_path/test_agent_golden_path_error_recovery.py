@@ -141,7 +141,7 @@ class AgentGoldenPathErrorRecoveryTests(SSotAsyncTestCase):
         print(f'[RECOVERY] Timeout recovery test completed in {total_time:.2f}s')
         self.assertTrue(timeout_recovery_successful, f"RECOVERY FAILURE: System cannot recover from network timeouts. Business continuity is not maintained during network issues. Recovery attempts: {(len(recovery_attempts) if 'recovery_attempts' in locals() else 0)}")
         self.assertTrue(connection_resilience_validated, f'RECOVERY FAILURE: Basic connection resilience not validated. System may not handle network variability properly.')
-        print(f'[RECOVERY] ✓ Network timeout recovery validated in {total_time:.2f}s')
+        print(f'[RECOVERY] CHECK Network timeout recovery validated in {total_time:.2f}s')
 
     async def test_websocket_reconnection_recovery(self):
         """
@@ -200,9 +200,9 @@ class AgentGoldenPathErrorRecoveryTests(SSotAsyncTestCase):
         print(f'[RECONNECT] Reconnection recovery test completed in {total_time:.2f}s')
         self.assertTrue(reconnection_successful, f'RECONNECTION FAILURE: Users cannot reconnect after connection loss. Chat sessions become unusable after network interruptions. This severely impacts user experience and business continuity.')
         self.assertTrue(session_continuity_maintained, f'RECONNECTION FAILURE: Session continuity not maintained across reconnections. Users lose context and must restart conversations. This reduces chat effectiveness and user satisfaction.')
-        print(f'[RECONNECT] ✓ WebSocket reconnection recovery validated in {total_time:.2f}s')
+        print(f'[RECONNECT] CHECK WebSocket reconnection recovery validated in {total_time:.2f}s')
         if multiple_reconnects_working:
-            print(f'[RECONNECT] ✓ Multiple reconnections validated - robust connection recovery')
+            print(f'[RECONNECT] CHECK Multiple reconnections validated - robust connection recovery')
 
     async def test_service_degradation_graceful_fallback(self):
         """
@@ -264,11 +264,11 @@ class AgentGoldenPathErrorRecoveryTests(SSotAsyncTestCase):
         total_time = time.time() - test_start_time
         print(f'[FALLBACK] Service degradation test completed in {total_time:.2f}s')
         self.assertTrue(graceful_degradation_working, f'DEGRADATION FAILURE: System does not handle service degradation gracefully. No fallback mechanisms in place. Poor user experience during service issues.')
-        print(f'[FALLBACK] ✓ Service degradation graceful handling validated in {total_time:.2f}s')
+        print(f'[FALLBACK] CHECK Service degradation graceful handling validated in {total_time:.2f}s')
         if fallback_functionality_available:
-            print(f'[FALLBACK] ✓ Fallback functionality available during degradation')
+            print(f'[FALLBACK] CHECK Fallback functionality available during degradation')
         if error_messaging_appropriate:
-            print(f'[FALLBACK] ✓ Appropriate error messaging during service issues')
+            print(f'[FALLBACK] CHECK Appropriate error messaging during service issues')
 
     async def test_message_delivery_guarantees_during_instability(self):
         """
@@ -344,9 +344,9 @@ class AgentGoldenPathErrorRecoveryTests(SSotAsyncTestCase):
         total_time = time.time() - test_start_time
         print(f'[DELIVERY] Message delivery test completed in {total_time:.2f}s')
         self.assertTrue(message_delivery_reliable or instability_handling_working, f'DELIVERY FAILURE: Message delivery not reliable during network instability. Users may lose important messages during network issues. Delivery confirmations: {len(delivery_confirmations)}/{(len(messages_sent) if messages_sent else 0)}')
-        print(f'[DELIVERY] ✓ Message delivery guarantees validated in {total_time:.2f}s')
+        print(f'[DELIVERY] CHECK Message delivery guarantees validated in {total_time:.2f}s')
         if delivery_feedback_working:
-            print(f'[DELIVERY] ✓ Delivery feedback mechanisms working')
+            print(f'[DELIVERY] CHECK Delivery feedback mechanisms working')
 
     def _is_service_unavailable_error(self, error: Exception) -> bool:
         """Check if error indicates service unavailability rather than test failure."""

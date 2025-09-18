@@ -32,9 +32,24 @@ async def lifespan(app: FastAPI):
     yielded = False
     
     try:
-        # CRITICAL FIX: Wrap startup in try-catch to prevent generator corruption
-        start_time, logger = await run_complete_startup(app)
-        startup_success = True
+        # BYPASS STARTUP FOR TESTING - Check environment variable for bypass
+        from shared.isolated_environment import get_env
+        env = get_env()
+        if env.get("BYPASS_FULL_STARTUP", "").lower() == "true":
+            import time
+            import logging
+            start_time = time.time()
+            logger = logging.getLogger(__name__)
+            logger.warning("BYPASSING FULL STARTUP FOR TESTING - MINIMAL INITIALIZATION ONLY")
+            app.state.startup_successful = True
+            app.state.database_available = False
+            app.state.redis_available = False
+            app.state.startup_bypassed = True
+            startup_success = True
+        else:
+            # CRITICAL FIX: Wrap startup in try-catch to prevent generator corruption
+            start_time, logger = await run_complete_startup(app)
+            startup_success = True
         
         # Set a flag that startup completed successfully
         app.state.startup_successful = True

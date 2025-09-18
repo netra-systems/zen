@@ -227,11 +227,18 @@ class DatabaseConfigManager:
         })
         
         # Production-specific settings
+        # Determine appropriate isolation level based on database engine
+        db_url = self.env.get("DATABASE_URL", "")
+        if db_url.startswith("sqlite"):
+            isolation_level = "SERIALIZABLE"  # SQLite compatible isolation level
+        else:
+            isolation_level = "READ_COMMITTED"  # PostgreSQL and other databases
+
         config.update({
             "pool_timeout": 30,
             "pool_recycle": 3600,
             "echo": self.env.get("SQL_ECHO", "false").lower() == "true",
-            "isolation_level": "READ_COMMITTED"
+            "isolation_level": isolation_level
         })
         
         return config

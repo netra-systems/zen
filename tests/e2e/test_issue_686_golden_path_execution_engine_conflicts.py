@@ -2,7 +2,7 @@
 Issue #686: Golden Path ExecutionEngine Conflicts - E2E Tests
 
 Purpose: Demonstrate how ExecutionEngine SSOT violations break the Golden Path user flow
-Business Value: Protects core business flow worth $500K+ ARR (users login → receive AI responses)
+Business Value: Protects core business flow worth $500K+ ARR (users login -> receive AI responses)
 Test Environment: E2E tests with staging environment integration (no Docker required)
 
 Golden Path Flow:

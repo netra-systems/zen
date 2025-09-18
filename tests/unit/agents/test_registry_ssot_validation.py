@@ -85,8 +85,8 @@ class RegistrySSotValidationTests(SSotBaseTestCase):
             ]
             self.registry_violations.extend(violation_details)
         
-        logger.warning(f"❌ REGISTRY FRAGMENTATION: Found {non_canonical_registries} non-canonical registries")
-        logger.info(f"✅ CANONICAL: Found {canonical_registries} canonical registries")
+        logger.warning(f"X REGISTRY FRAGMENTATION: Found {non_canonical_registries} non-canonical registries")
+        logger.info(f"CHECK CANONICAL: Found {canonical_registries} canonical registries")
         
         # EXPECTED TO FAIL: Multiple registry classes indicate fragmentation
         self.assertGreater(
@@ -355,7 +355,7 @@ class RegistrySSotValidationTests(SSotBaseTestCase):
         
         # Log sample violations
         for violation in self.registry_violations[:5]:
-            logger.info(f"    ❌ {violation}")
+            logger.info(f"    X {violation}")
         
         if len(self.registry_violations) > 5:
             logger.info(f"    ... and {len(self.registry_violations) - 5} more violations")

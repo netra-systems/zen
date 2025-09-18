@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)  
 - Business Goal: Revenue Protection & User Experience
 - Value Impact: Validates 90% of platform value (chat functionality) works end-to-end
-- Strategic Impact: Protects $500K+ ARR by ensuring users login → get AI responses
+- Strategic Impact: Protects $500K+ ARR by ensuring users login -> get AI responses
 
 This test suite validates the complete Golden Path user flow in staging environment:
 1. User authentication and login
@@ -52,22 +52,22 @@ class GoldenPathUserFlowIssue620Tests(BaseE2ETest):
     @pytest.mark.staging
     @pytest.mark.golden_path
     async def test_golden_path_user_login_to_ai_response(self):
-        """Test complete Golden Path: User login → AI response delivery."""
+        """Test complete Golden Path: User login -> AI response delivery."""
         
-        print("🚀 Starting Golden Path E2E Test: User Login → AI Response")
+        print("🚀 Starting Golden Path E2E Test: User Login -> AI Response")
         
         # Step 1: User Authentication (simplified for staging)
         test_user = await self._create_test_user()
         auth_token = await self._authenticate_user(test_user)
         
         assert auth_token is not None, "User authentication should succeed"
-        print(f"✅ Step 1: User authenticated successfully (user_id: {test_user['user_id'][:8]}...)")
+        print(f"CHECK Step 1: User authenticated successfully (user_id: {test_user['user_id'][:8]}...)")
         
         # Step 2: Establish WebSocket Connection
         websocket_client = await self._create_websocket_connection(auth_token)
         
         assert websocket_client is not None, "WebSocket connection should be established"
-        print("✅ Step 2: WebSocket connection established")
+        print("CHECK Step 2: WebSocket connection established")
         
         # Step 3: Send AI Request and Track Response Time
         start_time = time.time()
@@ -76,19 +76,19 @@ class GoldenPathUserFlowIssue620Tests(BaseE2ETest):
         
         response_time = end_time - start_time
         assert response_time <= self.MAX_RESPONSE_TIME_SECONDS, f"Response time should be ≤{self.MAX_RESPONSE_TIME_SECONDS}s, got {response_time:.2f}s"
-        print(f"✅ Step 3: AI response received in {response_time:.2f}s (under {self.MAX_RESPONSE_TIME_SECONDS}s limit)")
+        print(f"CHECK Step 3: AI response received in {response_time:.2f}s (under {self.MAX_RESPONSE_TIME_SECONDS}s limit)")
         
         # Step 4: Validate WebSocket Events
         events_received = response_data.get('events', [])
         await self._validate_all_websocket_events(events_received)
         
-        print("✅ Step 4: All 5 critical WebSocket events validated")
+        print("CHECK Step 4: All 5 critical WebSocket events validated")
         
         # Step 5: Validate Response Quality
         final_response = response_data.get('final_response')
         await self._validate_response_quality(final_response)
         
-        print("✅ Step 5: AI response quality validated")
+        print("CHECK Step 5: AI response quality validated")
         
         # Cleanup
         await websocket_client.close()
@@ -117,7 +117,7 @@ class GoldenPathUserFlowIssue620Tests(BaseE2ETest):
             users.append(user)
             websocket_clients.append(client)
         
-        print(f"✅ Created {num_users} concurrent users with WebSocket connections")
+        print(f"CHECK Created {num_users} concurrent users with WebSocket connections")
         
         # Send AI requests concurrently
         start_time = time.time()
@@ -138,7 +138,7 @@ class GoldenPathUserFlowIssue620Tests(BaseE2ETest):
         assert len(successful_responses) == num_users, f"All {num_users} users should get responses"
         
         total_time = end_time - start_time
-        print(f"✅ All {num_users} users received AI responses in {total_time:.2f}s")
+        print(f"CHECK All {num_users} users received AI responses in {total_time:.2f}s")
         
         # Validate user isolation (each user got their own response)
         user_ids_in_responses = []
@@ -148,7 +148,7 @@ class GoldenPathUserFlowIssue620Tests(BaseE2ETest):
                 user_ids_in_responses.append(user_id)
         
         assert len(set(user_ids_in_responses)) == num_users, "Each user should get their own isolated response"
-        print("✅ User isolation validated - no cross-user contamination")
+        print("CHECK User isolation validated - no cross-user contamination")
         
         # Cleanup
         for client in websocket_clients:
@@ -206,7 +206,7 @@ class GoldenPathUserFlowIssue620Tests(BaseE2ETest):
                     break
                     
             except asyncio.TimeoutError:
-                print("⚠️  Timeout waiting for WebSocket events")
+                print("WARNING️  Timeout waiting for WebSocket events")
                 break
         
         # Validate event sequence
@@ -215,7 +215,7 @@ class GoldenPathUserFlowIssue620Tests(BaseE2ETest):
         
         await websocket_client.close()
         
-        print("✅ WebSocket event sequence validated successfully")
+        print("CHECK WebSocket event sequence validated successfully")
         return True
     
     @pytest.mark.e2e
@@ -266,10 +266,10 @@ class GoldenPathUserFlowIssue620Tests(BaseE2ETest):
         
         if error_response.get('type') == 'agent_error':
             assert 'error' in error_response, "Error response should contain error details"
-            print("✅ Error handled gracefully with error response")
+            print("CHECK Error handled gracefully with error response")
         elif error_response.get('type') == 'agent_completed':
             # System might use fallback agent
-            print("✅ Error handled gracefully with fallback agent")
+            print("CHECK Error handled gracefully with fallback agent")
         
         # Test recovery with valid request
         valid_request = {
@@ -303,7 +303,7 @@ class GoldenPathUserFlowIssue620Tests(BaseE2ETest):
         
         await websocket_client.close()
         
-        print("✅ Golden Path error recovery validated successfully")
+        print("CHECK Golden Path error recovery validated successfully")
         return True
     
     # Helper methods
@@ -349,7 +349,7 @@ class GoldenPathUserFlowIssue620Tests(BaseE2ETest):
             return websocket
             
         except Exception as e:
-            print(f"⚠️  WebSocket connection failed: {e}")
+            print(f"WARNING️  WebSocket connection failed: {e}")
             
             # Fallback: If staging WebSocket not available, create mock connection
             # This allows tests to run even if staging is down
@@ -393,7 +393,7 @@ class GoldenPathUserFlowIssue620Tests(BaseE2ETest):
                 """Mock close method."""
                 pass
         
-        print("⚠️  Using mock WebSocket connection (staging environment unavailable)")
+        print("WARNING️  Using mock WebSocket connection (staging environment unavailable)")
         return MockWebSocketConnection()
     
     async def _send_ai_request_and_wait(self, websocket_client, user: Dict[str, str], request_id: str = None) -> Dict[str, Any]:
@@ -434,7 +434,7 @@ class GoldenPathUserFlowIssue620Tests(BaseE2ETest):
                     break
                     
             except asyncio.TimeoutError:
-                print(f"⚠️  Timeout waiting for AI response after {time.time() - start_time:.1f}s")
+                print(f"WARNING️  Timeout waiting for AI response after {time.time() - start_time:.1f}s")
                 break
         
         return {
@@ -452,7 +452,7 @@ class GoldenPathUserFlowIssue620Tests(BaseE2ETest):
         for required_event in self.REQUIRED_WEBSOCKET_EVENTS:
             assert required_event in event_types, f"Required WebSocket event missing: {required_event}"
         
-        print(f"✅ All {len(self.REQUIRED_WEBSOCKET_EVENTS)} required WebSocket events received: {event_types}")
+        print(f"CHECK All {len(self.REQUIRED_WEBSOCKET_EVENTS)} required WebSocket events received: {event_types}")
     
     async def _validate_response_quality(self, final_response: Optional[Dict[str, Any]]) -> None:
         """Validate that the AI response meets quality criteria."""
@@ -477,7 +477,7 @@ class GoldenPathUserFlowIssue620Tests(BaseE2ETest):
         assert execution_time > 0, "Should have positive execution time"
         assert execution_time <= self.MAX_RESPONSE_TIME_SECONDS, f"Execution time should be ≤{self.MAX_RESPONSE_TIME_SECONDS}s"
         
-        print(f"✅ Response quality validated: success={success}, execution_time={execution_time:.2f}s")
+        print(f"CHECK Response quality validated: success={success}, execution_time={execution_time:.2f}s")
     
     async def _validate_event_sequence(self, event_types: List[str], events_with_timing: List[Dict]) -> None:
         """Validate that events are delivered in correct sequence."""
@@ -501,7 +501,7 @@ class GoldenPathUserFlowIssue620Tests(BaseE2ETest):
                 assert time_diff >= 0, "Events should be in chronological order"
                 assert time_diff <= 10.0, "Events should not be too far apart (max 10s between events)"
         
-        print(f"✅ Event sequence validated: {' → '.join(event_types[:5])}")
+        print(f"CHECK Event sequence validated: {' -> '.join(event_types[:5])}")
 
 
 class GoldenPathPerformanceTests(BaseE2ETest):
@@ -552,12 +552,12 @@ class GoldenPathPerformanceTests(BaseE2ETest):
             
             await websocket_client.close()
             
-            print(f"    ✅ {scenario['name']}: {response_time:.2f}s (under {scenario['expected_max_time']}s limit)")
+            print(f"    CHECK {scenario['name']}: {response_time:.2f}s (under {scenario['expected_max_time']}s limit)")
         
         # Print benchmark summary
         print("\n📊 PERFORMANCE BENCHMARK RESULTS:")
         for result in results:
-            status = "✅ PASS" if result['response_time'] <= result['expected_max'] else "❌ FAIL"
+            status = "CHECK PASS" if result['response_time'] <= result['expected_max'] else "X FAIL"
             print(f"  {result['scenario']}: {result['response_time']:.2f}s {status}")
         
         avg_response_time = sum(r['response_time'] for r in results) / len(results)
@@ -576,25 +576,25 @@ if __name__ == "__main__":
         try:
             # Test basic Golden Path
             result = await test_instance.test_golden_path_user_login_to_ai_response()
-            print("✅ Basic Golden Path test completed successfully")
+            print("CHECK Basic Golden Path test completed successfully")
             
         except Exception as e:
-            print(f"⚠️  Golden Path test failed (expected if staging unavailable): {e}")
+            print(f"WARNING️  Golden Path test failed (expected if staging unavailable): {e}")
             print("   This is normal if staging environment is not accessible")
             
         try:
             # Test WebSocket events
             await test_instance.test_golden_path_websocket_event_sequence()
-            print("✅ WebSocket event sequence test completed")
+            print("CHECK WebSocket event sequence test completed")
             
         except Exception as e:
-            print(f"⚠️  WebSocket test failed (expected if staging unavailable): {e}")
+            print(f"WARNING️  WebSocket test failed (expected if staging unavailable): {e}")
         
         print("\n" + "="*80)
         print("📊 GOLDEN PATH E2E TEST SUMMARY")
         print("="*80)
-        print("✅ Golden Path test suite created and functional")
-        print("⚠️  Tests require staging environment for full validation")
+        print("CHECK Golden Path test suite created and functional")
+        print("WARNING️  Tests require staging environment for full validation")
         print("🔄 Tests gracefully handle staging unavailability with mock connections")
         print("📈 Ready to validate Golden Path when staging is accessible")
         

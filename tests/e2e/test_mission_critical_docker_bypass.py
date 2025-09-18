@@ -2,7 +2,7 @@
 E2E tests for mission-critical Docker bypass mechanisms - NO DOCKER BUILDS REQUIRED
 
 Purpose: Validate staging fallback mechanisms when Docker Alpine builds fail
-Issue: #1082 - Docker Alpine build infrastructure failure (escalated P2→P1)
+Issue: #1082 - Docker Alpine build infrastructure failure (escalated P2->P1)
 Approach: Staging environment validation and fallback testing, no container operations
 
 MISSION CRITICAL: These tests must validate the staging bypass strategy

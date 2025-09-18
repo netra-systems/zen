@@ -35,7 +35,7 @@ from shared.isolated_environment import get_env
 
         # CLAUDE.md COMPLIANCE: Absolute imports only
 from netra_backend.app.schemas.user_plan import PlanTier
-from tests.e2e.agent_conversation_helpers import (
+from tests.e2e.agent_conversation_helpers import ()
     AgentConversationTestCore,
     ConversationFlowSimulator,
     ConversationFlowValidator,
@@ -48,10 +48,10 @@ class MissionCriticalWebSocketValidator:
     """Validates WebSocket events per CLAUDE.md requirements."""
 
     REQUIRED_EVENTS = {
-        "agent_started",
-        "agent_thinking",
-        "tool_executing",
-        "tool_completed",
+        "agent_started,"
+        "agent_thinking,"
+        "tool_executing,"
+        "tool_completed,"
         "agent_completed"
     }
 
@@ -63,13 +63,13 @@ class MissionCriticalWebSocketValidator:
 
     def record_event(self, event: Dict) -> None:
         """Record a WebSocket event."""
-        event_type = event.get("type", "unknown")
+        event_type = event.get("type", "unknown)"
         self.received_events.append({
             **event,
-            "received_at": time.time() - self.start_time
+            "received_at: time.time() - self.start_time"
         })
         self.event_counts[event_type] = self.event_counts.get(event_type, 0) + 1
-        logger.info(f"WebSocket event recorded: {event_type}")
+        logger.info(f"WebSocket event recorded: {event_type})"
 
     def validate_mission_critical_events(self) -> tuple[bool, List[str]]:
         """Validate all mission critical events were received."""
@@ -78,23 +78,23 @@ class MissionCriticalWebSocketValidator:
         # Check for missing required events
         missing = self.REQUIRED_EVENTS - set(self.event_counts.keys())
         if missing:
-            failures.append(f"Missing required events: {missing}")
+            failures.append(f"Missing required events: {missing})"
 
         # Validate event ordering
         if self.received_events:
-            first_event = self.received_events[0].get("type")
-            if first_event != "agent_started":
-                failures.append(f"First event should be agent_started, got {first_event}")
+            first_event = self.received_events[0].get("type)"
+            if first_event != "agent_started:"
+                failures.append(f"First event should be agent_started, got {first_event})"
 
-            last_event = self.received_events[-1].get("type")
-            if last_event not in ["agent_completed", "final_report"]:
-                failures.append(f"Last event should be completion event, got {last_event}")
+            last_event = self.received_events[-1].get("type)"
+            if last_event not in ["agent_completed", "final_report]:"
+                failures.append(f"Last event should be completion event, got {last_event})"
 
         # Validate tool event pairing
-        tool_starts = self.event_counts.get("tool_executing", 0)
-        tool_ends = self.event_counts.get("tool_completed", 0)
+        tool_starts = self.event_counts.get("tool_executing, 0)"
+        tool_ends = self.event_counts.get("tool_completed, 0)"
         if tool_starts != tool_ends:
-            failures.append(f"Tool events mismatch: {tool_starts} starts vs {tool_ends} ends")
+            failures.append(f"Tool events mismatch: {tool_starts} starts vs {tool_ends} ends)"
 
         return len(failures) == 0, failures
 
@@ -103,26 +103,26 @@ class MissionCriticalWebSocketValidator:
         is_valid, failures = self.validate_mission_critical_events()
 
         report = [
-            "=" * 80,
-            "MISSION CRITICAL WEBSOCKET EVENT VALIDATION",
-            "=" * 80,
+            "= * 80,"
+            "MISSION CRITICAL WEBSOCKET EVENT VALIDATION,"
+            "= * 80,"
             "",
             "Required Events Coverage:"
         ]
 
         for event in self.REQUIRED_EVENTS:
             count = self.event_counts.get(event, 0)
-            status = "✓ PASS:" if count > 0 else "✗ FAIL:"
-            report.append(f"  {status} {event} ({count} times)")
+            status = "CHECK PASS:" if count > 0 else "✗ FAIL:"
+            report.append(f"  {status} {event} ({count} times))"
 
         if failures:
             report.extend([
                 "",
                 "FAILURES:"
-            ] + [f"  - {f}" for f in failures])
+            ] + [f"  - {f} for f in failures])"
 
-        report.append("=" * 80)
-        return "\n".join(report)
+        report.append("= * 80)"
+        return "\n.join(report)"
 
 
         @pytest.mark.real_llm
@@ -152,7 +152,7 @@ class TestAgentOrchestrationRealLLM:
     def llm_timeout(self):
         """Get LLM timeout configuration - CLAUDE.md compliant."""
         env = get_env()
-        return int(env.get("TEST_LLM_TIMEOUT", "30"))
+        return int(env.get("TEST_LLM_TIMEOUT", "30))"
 
         @pytest.fixture
     def websocket_event_validator(self):
@@ -167,7 +167,7 @@ class TestAgentOrchestrationRealLLM:
 session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRISE)
 
         # Setup WebSocket event capture
-websocket_client = session_data.get("client")
+websocket_client = session_data.get("client)"
 event_capture_task = None
 
 if websocket_client and hasattr(websocket_client, 'recv'):
@@ -178,9 +178,9 @@ if websocket_client and hasattr(websocket_client, 'recv'):
 
 try:
     pass
-request = self._create_optimization_request(session_data["user_data"].id)
+request = self._create_optimization_request(session_data["user_data].id)"
 response = await self._execute_agent_with_llm(
-    session_data, request, "data", use_real_llm, llm_timeout
+    session_data, request, "data, use_real_llm, llm_timeout"
 )
                 
 
@@ -224,7 +224,7 @@ pass
 session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRISE)
 
                                             # Setup WebSocket event capture
-websocket_client = session_data.get("client")
+websocket_client = session_data.get("client)"
 event_capture_task = None
 
 if websocket_client and hasattr(websocket_client, 'recv'):
@@ -235,7 +235,7 @@ if websocket_client and hasattr(websocket_client, 'recv'):
 
 try:
     pass
-agents = ["triage", "data", "optimization"]
+agents = ["triage", "data", "optimization]"
 results = await self._execute_multi_agent_flow(
     session_data, agents, use_real_llm, llm_timeout
 )
@@ -280,30 +280,30 @@ flow_validator = ConversationFlowValidator()
 try:
                                                                                     # Execute multi-turn conversation
 conversation_flow = [ ]
-"Analyze my current AI infrastructure costs",
-"What specific optimizations do you recommend?",
+"Analyze my current AI infrastructure costs,"
+"What specific optimizations do you recommend?,"
 "Implement the top 3 cost reduction strategies"
                                                                                     
 
 context = []
 for i, message in enumerate(conversation_flow):
 request = self._create_contextual_request(
-    session_data["user_data"].id, message, context
+    session_data["user_data].id, message, context"
 )
                                                                                         
 response = await self._execute_agent_with_llm(
-    session_data, request, "optimization", use_real_llm, llm_timeout
+    session_data, request, "optimization, use_real_llm, llm_timeout"
 )
                                                                                         
-context.append({"message": message, "response": response})
+context.append({"message": message, "response: response})"
 
                                                                                         # Validate context preservation
-validation = await flow_validator.validate_conversation_context(session_data["session"])
+validation = await flow_validator.validate_conversation_context(session_data["session])"
 assert validation["context_continuity_maintained"], "Context not preserved"
 
 finally:
     pass
-await session_data["client"].close()
+await session_data["client].close()"
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -314,11 +314,11 @@ session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRIS
 
 try:
     pass
-request = self._create_performance_test_request(session_data["user_data"].id)
+request = self._create_performance_test_request(session_data["user_data].id)"
 
 start_time = time.time()
 response = await self._execute_agent_with_llm(
-    session_data, request, "performance", use_real_llm, llm_timeout
+    session_data, request, "performance, use_real_llm, llm_timeout"
 )
                                                                                                     
 execution_time = time.time() - start_time
@@ -335,7 +335,7 @@ assert response["status"] in ["success", "error"], "Agent execution had unexpect
 
 finally:
     pass
-await session_data["client"].close()
+await session_data["client].close()"
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -346,10 +346,10 @@ session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRIS
 try:
                                                                                                                         # Define agent chain
 chain = [ ]
-{"agent": "triage", "task": "Identify optimization opportunities"},
-{"agent": "data", "task": "Analyze current usage patterns"},
-{"agent": "optimization", "task": "Generate cost reduction plan"},
-{"agent": "implementation", "task": "Execute optimizations"}
+{"agent": "triage", "task": "Identify optimization opportunities},"
+{"agent": "data", "task": "Analyze current usage patterns},"
+{"agent": "optimization", "task": "Generate cost reduction plan},"
+{"agent": "implementation", "task": "Execute optimizations}"
                                                                                                                         
 
 chain_results = []
@@ -357,29 +357,29 @@ previous_output = None
 
 for step in chain:
 request = self._create_chain_request(
-    session_data["user_data"].id,
-    step["task"],
+    session_data["user_data].id,"
+    step["task],"
     previous_output
 )
                                                                                                                             
 response = await self._execute_agent_with_llm(
-    session_data, request, step["agent"], use_real_llm, llm_timeout
+    session_data, request, step["agent], use_real_llm, llm_timeout"
 )
                                                                                                                             
 chain_results.append({
-    "agent": step["agent"],
-    "response": response,
-    "execution_time": response.get("execution_time", 0)
+    "agent": step["agent],"
+    "response: response,"
+    "execution_time": response.get("execution_time, 0)"
 })
                                                                                                                             
-previous_output = response.get("content", "")
+previous_output = response.get("content", ")"
 
                                                                                                                             # Validate chain execution
 self._validate_chain_results(chain_results, use_real_llm)
 
 finally:
     pass
-await session_data["client"].close()
+await session_data["client].close()"
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -398,11 +398,11 @@ sessions.append(session)
 tasks = []
 for i, session_data in enumerate(sessions):
 request = self._create_concurrent_request( )
-session_data["user_data"].id,
+session_data["user_data].id,"
 ""
                                                                                                                                                 
 task = self._execute_agent_with_llm( )
-session_data, request, "optimization", use_real_llm, 30
+session_data, request, "optimization, use_real_llm, 30"
                                                                                                                                                 
 tasks.append(task)
 
@@ -425,7 +425,7 @@ assert total_time < 5.0, ""
 finally:
     pass
 for session_data in sessions:
-await session_data["client"].close()
+await session_data["client].close()"
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -436,8 +436,8 @@ session_data = await test_core.establish_conversation_session(PlanTier.PRO)
 try:
                                                                                                                                                                         # Test malformed request handling
 malformed_request = {
-    "type": "agent_request",
-    "user_id": session_data["user_data"].id,
+    "type": "agent_request,"
+    "user_id": session_data["user_data].id,"
     # Missing required fields
 }
                                                                                                                                                                         
@@ -451,7 +451,7 @@ assert response["status"] in ["error", "recovered"], "Error not handled properly
 
 finally:
     pass
-await session_data["client"].close()
+await session_data["client].close()"
 
                                                                                                                                                                             # Helper methods - CLAUDE.md Compliant
 
@@ -482,7 +482,7 @@ await asyncio.sleep(0.1)
 continue
 
                             # Validate message structure
-if isinstance(message, dict) and "type" in message:
+if isinstance(message, dict) and "type in message:"
     pass
 validator.record_event(message)
 
@@ -503,13 +503,13 @@ def _create_optimization_request(self, user_id: str) -> Dict[str, Any]:
 """Create optimization request."""
 await asyncio.sleep(0)
 return { }
-"type": "agent_request",
-"user_id": user_id,
-"message": "Analyze and optimize my AI infrastructure costs",
-"agent_type": "optimization",
-"context": { }
-"current_spend": 50000,
-"target_reduction": 0.3
+"type": "agent_request,"
+"user_id": "user_id,"
+"message": "Analyze and optimize my AI infrastructure costs,"
+"agent_type": "optimization,"
+"context: { }"
+"current_spend: 50000,"
+"target_reduction: 0.3"
     
     
 
@@ -517,43 +517,43 @@ def _create_contextual_request(self, user_id: str, message: str,
 context: List[Dict]) -> Dict[str, Any]:
 """Create request with context."""
 return { }
-"type": "agent_request",
-"user_id": user_id,
-"message": message,
-"context": context,
-"preserve_context": True
+"type": "agent_request,"
+"user_id": "user_id,"
+"message: message,"
+"context: context,"
+"preserve_context: True"
     
 
 def _create_performance_test_request(self, user_id: str) -> Dict[str, Any]:
     pass
 """Create performance test request."""
 return { }
-"type": "agent_request",
-"user_id": user_id,
-"message": "Quick performance analysis",
-"agent_type": "performance",
-"sla_target": 3.0
+"type": "agent_request,"
+"user_id": "user_id,"
+"message": "Quick performance analysis,"
+"agent_type": "performance,"
+"sla_target: 3.0"
     
 
 def _create_chain_request(self, user_id: str, task: str,
 previous_output: str = None) -> Dict[str, Any]:
 """Create chain execution request."""
 return { }
-"type": "agent_request",
-"user_id": user_id,
-"message": task,
-"chain_context": previous_output,
-"is_chain_step": True
+"type": "agent_request,"
+"user_id": "user_id,"
+"message: task,"
+"chain_context: previous_output,"
+"is_chain_step: True"
     
 
 def _create_concurrent_request(self, user_id: str, task: str) -> Dict[str, Any]:
     pass
 """Create concurrent execution request."""
 return { }
-"type": "agent_request",
-"user_id": user_id,
-"message": task,
-"concurrent": True,
+"type": "agent_request,"
+"user_id": "user_id,"
+"message: task,"
+"concurrent: True,"
 "priority": "high"
     
 
@@ -576,33 +576,33 @@ endpoint_url = ""
 
         # Create agent execute request payload
 agent_request = { }
-"type": agent_type,
-"message": request["message"],
-"context": request.get("context", {}),
-"simulate_delay": None,
-"force_failure": False,
-"force_retry": False
+"type: agent_type,"
+"message": request["message],"
+"context": request.get("context, {}),"
+"simulate_delay: None,"
+"force_failure: False,"
+"force_retry: False"
         
 
         # Add test-specific flags and WebSocket event enabling
-if request.get("force_failure"):
+if request.get("force_failure):"
     pass
-agent_request["force_failure"] = True
-if request.get("simulate_delay"):
+agent_request["force_failure] = True"
+if request.get("simulate_delay):"
     pass
-agent_request["simulate_delay"] = request["simulate_delay"]
+agent_request["simulate_delay"] = request["simulate_delay]"
 
                 # CLAUDE.md COMPLIANCE: Enable WebSocket events for mission critical validation
-agent_request["enable_websocket_events"] = True
-agent_request["validate_events"] = True
+agent_request["enable_websocket_events] = True"
+agent_request["validate_events] = True"
 
                 # Set real LLM environment variable for backend to use - CLAUDE.md compliant
-headers = {"Content-Type": "application/json"}
+headers = {"Content-Type": "application/json}"
 if use_real_llm:
                     # The backend will use real LLM when TEST_USE_REAL_LLM is set via IsolatedEnvironment
-env.set("TEST_USE_REAL_LLM", "true", source="test_agent_orchestration")
+env.set("TEST_USE_REAL_LLM", "true", source="test_agent_orchestration)"
                     # Add authorization if available
-auth_token = env.get("TEST_AUTH_TOKEN")
+auth_token = env.get("TEST_AUTH_TOKEN)"
 if auth_token:
     pass
 headers["Authorization"] = ""
@@ -620,27 +620,27 @@ response_data = await response.json()
 execution_time = time.time() - start_time
 
 return { }
-"status": response_data.get("status", "success"),
-"content": response_data.get("response", ""),
-"agent_type": response_data.get("agent", agent_type),
-"execution_time": response_data.get("execution_time", execution_time),
-"tokens_used": response_data.get("tokens_used", 0),
-"real_llm": use_real_llm,
-"circuit_breaker_state": response_data.get("circuit_breaker_state"),
-"websocket_events_sent": response_data.get("websocket_events_sent", False)
+"status": response_data.get("status", "success),"
+"content": response_data.get("response", "),"
+"agent_type": response_data.get("agent, agent_type),"
+"execution_time": response_data.get("execution_time, execution_time),"
+"tokens_used": response_data.get("tokens_used, 0),"
+"real_llm: use_real_llm,"
+"circuit_breaker_state": response_data.get("circuit_breaker_state),"
+"websocket_events_sent": response_data.get("websocket_events_sent, False)"
                                         
 else:
                                             # Handle HTTP error responses
-error_data = await response.json() if response.content_type == "application/json" else {}
+error_data = await response.json() if response.content_type == "application/json else {}"
 execution_time = time.time() - start_time
 
 return { }
-"status": "error",
-"error": error_data.get("detail", "formatted_string"),
-"agent_type": agent_type,
-"execution_time": execution_time,
-"real_llm": use_real_llm,
-"websocket_events_sent": False
+"status": "error,"
+"error": error_data.get("detail", "formatted_string),"
+"agent_type: agent_type,"
+"execution_time: execution_time,"
+"real_llm: use_real_llm,"
+"websocket_events_sent: False"
                                             
 
 except (aiohttp.ClientError, ConnectionError) as e:
@@ -648,22 +648,22 @@ except (aiohttp.ClientError, ConnectionError) as e:
 execution_time = time.time() - start_time
 logger.warning("")
 return { }
-"status": "error",
-"error": "",
-"agent_type": agent_type,
-"execution_time": execution_time,
-"real_llm": use_real_llm,
-"service_available": False
+"status": "error,"
+"error": ","
+"agent_type: agent_type,"
+"execution_time: execution_time,"
+"real_llm: use_real_llm,"
+"service_available: False"
                                                 
 
 except asyncio.TimeoutError:
     pass
 execution_time = time.time() - start_time
 return { }
-"status": "timeout",
-"agent_type": agent_type,
-"execution_time": execution_time,
-"real_llm": use_real_llm
+"status": "timeout,"
+"agent_type: agent_type,"
+"execution_time: execution_time,"
+"real_llm: use_real_llm"
                                                     
 
 except aiohttp.ClientConnectionError as e:
@@ -671,24 +671,24 @@ except aiohttp.ClientConnectionError as e:
 execution_time = time.time() - start_time
 logger.warning("")
 return { }
-"status": "error",
-"error": "",
-"agent_type": agent_type,
-"execution_time": execution_time,
-"real_llm": use_real_llm,
-"service_available": False
+"status": "error,"
+"error": ","
+"agent_type: agent_type,"
+"execution_time: execution_time,"
+"real_llm: use_real_llm,"
+"service_available: False"
                                                         
 except Exception as e:
     pass
 execution_time = time.time() - start_time
 logger.error("")
 return { }
-"status": "error",
-"error": str(e),
-"agent_type": agent_type,
-"execution_time": execution_time,
-"real_llm": use_real_llm,
-"service_available": True
+"status": "error,"
+"error: str(e),"
+"agent_type: agent_type,"
+"execution_time: execution_time,"
+"real_llm: use_real_llm,"
+"service_available: True"
                                                             
 
 async def _execute_multi_agent_flow(self, session_data: Dict[str, Any),
@@ -699,10 +699,10 @@ results = {}
 
 for agent in agents:
 request = {
-    "type": "agent_request",
-    "user_id": session_data["user_data"].id,
-    "message": "",
-    "agent_type": agent
+    "type": "agent_request,"
+    "user_id": session_data["user_data].id,"
+    "message": ","
+    "agent_type: agent"
 }
         
 
@@ -720,14 +720,14 @@ use_real_llm: bool) -> Dict[str, Any]:
 try:
     pass
 return await self._execute_agent_with_llm(
-    session_data, request, "error_test", use_real_llm, 10
+    session_data, request, "error_test, use_real_llm, 10"
 )
         
 except Exception as e:
     return {
-        "status": "error",
-        "error": str(e),
-        "recovered": False
+        "status": "error,"
+        "error: str(e),"
+        "recovered: False"
     }
             
 
@@ -740,7 +740,7 @@ assert response.get("agent_type") is not None, "Agent type missing"
 assert response.get("execution_time", 0) >= 0, "Invalid execution time (must be >= 0)"
 
     # Success response validation
-if response["status"] == "success":
+if response["status"] == "success:"
     pass
 assert response.get("execution_time", 0) > 0, "Successful responses should have positive execution time"
 if use_real_llm:
@@ -751,19 +751,19 @@ else:
 pass
 
                 # Error handling validation
-if response["status"] == "timeout":
+if response["status"] == "timeout:"
     pass
 timeout_mentioned = ( )
-"timeout" in response.get("content", "").lower() or
-"timeout" in response.get("error", "").lower()
+"timeout" in response.get("content", ").lower() or"
+"timeout" in response.get("error", ").lower()"
                     
 assert timeout_mentioned, "Timeout response should mention timeout"
 
-if response["status"] == "error":
+if response["status"] == "error:"
     pass
 error_info = ( )
-response.get("error") is not None or
-"error" in response.get("content", "").lower()
+response.get("error) is not None or"
+"error" in response.get("content", ").lower()"
                         
 assert error_info, "Error response should have error information"
 
@@ -775,7 +775,7 @@ if len(websocket_validator.received_events) > 0:
 logger.info("")
 else:
     pass
-logger.warning("No WebSocket events captured - may indicate connection issue")
+logger.warning("No WebSocket events captured - may indicate connection issue)"
 
 def _validate_multi_agent_results(self, results: Dict[str, Any),
 agents: List[str], use_real_llm: bool):
@@ -792,12 +792,12 @@ assert len(chain_results) > 0, "No chain results"
 
     # Individual step validation
 for result in chain_results:
-response_status = result.get("response", {}).get("status")
+response_status = result.get("response", {}).get("status)"
 assert response_status in ["success", "error", "timeout"], ""
 assert result.get("execution_time", 0) > 0, "Invalid execution time"
 
         # Chain timing validation with more lenient timeouts for real services
-total_time = sum(r.get("execution_time", 0) for r in chain_results)
+total_time = sum(r.get("execution_time, 0) for r in chain_results)"
 if use_real_llm:
             # More generous timeout for real LLM calls
 assert total_time < 60.0, ""
@@ -810,7 +810,7 @@ if websocket_validator and len(websocket_validator.received_events) > 0:
                     # For chain execution, we expect multiple completion events
 completion_events = [ ]
 event for event in websocket_validator.received_events
-if event.get("type") in ["agent_completed", "tool_completed"]
+if event.get("type") in ["agent_completed", "tool_completed]"
                     
 assert len(completion_events) >= len(chain_results), \
 ""
@@ -832,7 +832,7 @@ use_real_llm = env.get("TEST_USE_REAL_LLM", "false").lower() == "true"
 
 if not use_real_llm:
     pass
-pytest.skip("Real LLM testing not enabled")
+pytest.skip("Real LLM testing not enabled)"
 
             # Test throughput under load
 core = AgentConversationTestCore()
@@ -849,9 +849,9 @@ start_time = time.time()
 tasks = []
 for i in range(num_requests):
 request = { }
-"type": "agent_request",
-"user_id": session_data["user_data"].id,
-"message": "",
+"type": "agent_request,"
+"user_id": session_data["user_data].id,"
+"message": ","
 "agent_type": "performance"
                     
                     # Simplified execution for throughput test
@@ -863,7 +863,7 @@ total_time = time.time() - start_time
 throughput = num_requests / total_time
 assert throughput > 1.0, ""
 
-await session_data["client"].close()
+await session_data["client].close()"
 
 finally:
     pass

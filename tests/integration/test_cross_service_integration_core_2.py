@@ -82,7 +82,7 @@ class TestSyntaxFix:
         pass
         health_monitor.set_service_discovery(service_discovery)
 
-        assert hasattr(health_monitor, '_service_discovery')
+        assert hasattr(health_monitor, "'_service_discovery')"
         assert health_monitor._service_discovery is service_discovery
 
     def test_cross_service_health_status(self, health_monitor, service_discovery):
@@ -91,7 +91,7 @@ class TestSyntaxFix:
 
     # Register a test service
         health_monitor.register_service( )
-        "backend",
+        "backend,"
         lambda x: None True,  # Always healthy
         grace_period_seconds=30
     
@@ -106,7 +106,7 @@ class TestSyntaxFix:
         """Test cross-service connectivity verification."""
         pass
     # Set up service discovery with auth token
-        service_discovery.set_cross_service_auth_token("test-token")
+        service_discovery.set_cross_service_auth_token("test-token)"
         health_monitor.set_service_discovery(service_discovery)
 
     # Mock the accessibility check to return success
@@ -127,7 +127,7 @@ class TestSyntaxFix:
     # Update cross-service status
         status.update_cross_service_status(cors_enabled=True, service_discovery_active=True)
 
-        assert hasattr(status, 'cross_service_status')
+        assert hasattr(status, "'cross_service_status')"
         assert status.cross_service_status['cors_enabled'] is True
         assert status.cross_service_status['service_discovery_active'] is True
 
@@ -138,14 +138,14 @@ class TestSyntaxFix:
         with tempfile.TemporaryDirectory() as temp_dir:
         # Create required directory structure for LauncherConfig validation
         project_root = Path(temp_dir)
-        (project_root / "netra_backend" / "app").mkdir(parents=True)
-        (project_root / "dev_launcher").mkdir()
-        (project_root / "frontend").mkdir()
-        (project_root / "auth_service").mkdir()
+        (project_root / "netra_backend" / "app).mkdir(parents=True)"
+        (project_root / "dev_launcher).mkdir()"
+        (project_root / "frontend).mkdir()"
+        (project_root / "auth_service).mkdir()"
 
         # Create minimal required files
-        (project_root / "netra_backend" / "app" / "__init__.py").touch()
-        (project_root / "netra_backend" / "app" / "main.py").touch()
+        (project_root / "netra_backend" / "app" / "__init__.py).touch()"
+        (project_root / "netra_backend" / "app" / "main.py).touch()"
 
         config = LauncherConfig(project_root=project_root)
         config.load_secrets = False
@@ -212,7 +212,7 @@ class TestSyntaxFix:
         launcher = DevLauncher(launcher_config)
 
         assert launcher.service_discovery is not None
-        assert hasattr(launcher.service_discovery, 'get_all_service_origins')
-        assert hasattr(launcher.service_discovery, 'get_cross_service_auth_token')
+        assert hasattr(launcher.service_discovery, "'get_all_service_origins')"
+        assert hasattr(launcher.service_discovery, "'get_cross_service_auth_token')"
 
         pass

@@ -7,25 +7,21 @@ class TestWebSocketConnection:
         self.is_connected = True
         self._closed = False
 """
-"""
-        """Send JSON message.""""""
-        """Send JSON message.""""""
-        raise RuntimeError("WebSocket is closed")
+        """Send JSON message."""Send JSON message."""
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
         self.is_connected = False
 """
-"""
         """Get all sent messages."""
         await asyncio.sleep(0)
         return self.messages_sent.copy()"""
-        return self.messages_sent.copy()"""
         """
-        """
+
         MISSION CRITICAL: Database Session Isolation Test Suite
         =========================================================
         This comprehensive test suite verifies that database sessions are properly isolated
@@ -39,9 +35,8 @@ class TestWebSocketConnection:
         5. Transaction isolation must be maintained
         6. No session leakage between agents
         7. Proper session lifecycle management"""
-        7. Proper session lifecycle management"""
         These tests MUST FAIL until the session isolation refactoring is complete."""
-        These tests MUST FAIL until the session isolation refactoring is complete."""
+
 
 import asyncio
 import pytest
@@ -74,7 +69,6 @@ from shared.isolated_environment import get_env
         logger = central_logger.get_logger(__name__)
 
 """
-"""
         """Track database sessions to detect sharing and leakage."""
 
     def __init__(self):
@@ -84,7 +78,6 @@ from shared.isolated_environment import get_env
         self.session_access_log: List[Dict[str, Any]] = []
         self.shared_sessions: List[Dict[str, Any]] = []
         self.leaked_sessions: List[AsyncSession] = []
-"""
 """
         """Track a session for a specific user."""
         session_id = id(session)
@@ -106,21 +99,19 @@ from shared.isolated_environment import get_env
         'user1': existing_user,
         'user2': user_id,
         'context': context"""
-        'context': context"""
-        logger.error("formatted_string")
+        logger.error("formatted_string)"
         else:
         self.session_users[session_id] = user_id
         self.sessions[user_id] = session
 
     def check_leakage(self):
-        """Check for leaked sessions that weren't properly closed."""'
+        """Check for leaked sessions that weren't properly closed.""'"
         pass
         for user_id, session in self.sessions.items():
         if not session.is_active:
         continue
             # Session still active after request - potential leak"""
-            # Session still active after request - potential leak"""
-        logger.error("formatted_string")
+        logger.error("formatted_string)"
 
     def get_violations(self) -> Dict[str, Any]:
         """Get all detected violations."""
@@ -133,14 +124,12 @@ from shared.isolated_environment import get_env
 
 
         @pytest.fixture"""
-        @pytest.fixture"""
-        """Create a test database engine.""""""
-        """Create a test database engine.""""""
-        "sqlite+aiosqlite:///:memory:",
+        """Create a test database engine."""Create a test database engine."""
+        "sqlite+aiosqlite:///:memory:,"
         echo=False
         
         async with engine.begin() as conn:
-        await conn.execute(text("CREATE TABLE IF NOT EXISTS test_table (id INTEGER PRIMARY KEY, data TEXT)"))
+        await conn.execute(text("CREATE TABLE IF NOT EXISTS test_table (id INTEGER PRIMARY KEY, data TEXT)))"
         yield engine
         await engine.dispose()
 
@@ -158,22 +147,18 @@ from shared.isolated_environment import get_env
 
 
         @pytest.fixture"""
-        @pytest.fixture"""
-        """Use real service instance.""""""
-        """Use real service instance.""""""
+        """Use real service instance."""Use real service instance."""
         """Create a session tracker for testing."""
         pass
         return SessionTracker()
 
 """
-"""
         """Test database session isolation between concurrent users."""
 
 @pytest.mark.asyncio"""
-@pytest.mark.asyncio"""
-""""""
+"""
 This test should PASS to prove the anti-pattern is prevented."""
-This test should PASS to prove the anti-pattern is prevented."""
+
 pass
         # Test the core principle: SupervisorAgent should not accept db_session parameter
 llm_manager = Magic        websocket_bridge = Magic
@@ -183,9 +168,8 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
 constructor_params = inspect.signature(SupervisorAgent.__init__).parameters
 """
-"""
 assert 'db_session' not in constructor_params, "SupervisorAgent constructor should not accept db_session parameter"
-logger.info(" PASS:  SUCCESS: SupervisorAgent constructor prevents db_session parameter")
+logger.info(" PASS:  SUCCESS: SupervisorAgent constructor prevents db_session parameter)"
 
         # Test that the pattern is conceptually correct by verifying constructor signature
 expected_params = {'self', 'llm_manager', 'websocket_bridge'}
@@ -196,29 +180,27 @@ assert 'db_session' not in actual_params, "db_session should not be in construct
 assert 'llm_manager' in actual_params, "llm_manager should be required"
 assert 'websocket_bridge' in actual_params, "websocket_bridge should be required"
 
-logger.info("formatted_string")
+logger.info("formatted_string)"
 
         # The key test is the constructor signature - this proves the anti-pattern is prevented
         # The original anti-pattern would have allowed db_session as a constructor parameter
-logger.info(" PASS:  SUCCESS: SupervisorAgent prevents global session storage anti-pattern by design")
+logger.info(" PASS:  SUCCESS: SupervisorAgent prevents global session storage anti-pattern by design)"
 
         # Additional verification: confirm that sessions should be handled through context
         # This is the correct pattern - sessions come through execution context, not constructor
-logger.info(" PASS:  SUCCESS: Sessions are properly handled through UserExecutionContext, not global storage")
+logger.info(" PASS:  SUCCESS: Sessions are properly handled through UserExecutionContext, not global storage)"
 
 @pytest.mark.asyncio
     async def test_concurrent_users_share_supervisor_session(self, session_factory, session_tracker):
-""""""
+    """
 This test should PASS to prove proper isolation is maintained."""
-This test should PASS to prove proper isolation is maintained."""
+
 pass
 llm_manager = Magic        websocket_bridge = Magic
 results = []
 """
-"""
-"""Simulate a user request with proper session isolation.""""""
-"""Simulate a user request with proper session isolation.""""""
-session_tracker.track_session(session, user_id, "formatted_string")
+"""Simulate a user request with proper session isolation."""Simulate a user request with proper session isolation."""
+session_tracker.track_session(session, user_id, "formatted_string)"
 
         # With proper isolation, supervisor should not have stored sessions
 has_stored_session = hasattr(supervisor, 'db_session') and supervisor.db_session is not None
@@ -239,13 +221,13 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
 constructor_params = inspect.signature(SupervisorAgent.__init__).parameters
 assert 'db_session' not in constructor_params, "SupervisorAgent should not accept db_session"
-logger.info(" PASS:  SupervisorAgent constructor prevents session storage")
+logger.info(" PASS:  SupervisorAgent constructor prevents session storage)"
 
         # Create a mock supervisor representing proper isolation behavior
 supervisor = Magic        supervisor.db_session = None  # Proper isolation - no stored sessions
 
         # Simulate concurrent users
-users = ["formatted_string" for i in range(5)]
+users = ["formatted_string for i in range(5)]"
         # Removed problematic line: await asyncio.gather(*[ ))
 user_request(user_id, supervisor)
 for user_id in users
@@ -259,13 +241,13 @@ successful_operations = sum(1 for r in results if r.get('operation_success', Fal
 assert sessions_with_stored_session == 0, "formatted_string"
 assert successful_operations == len(users), f"All operations should succeed with proper session management"
 
-logger.info("formatted_string")
+logger.info("formatted_string)"
 
 @pytest.mark.asyncio
     async def test_agent_registry_singleton_pattern_breaks_isolation(self, session_factory, session_tracker):
-""""""
+    """
 CRITICAL TEST: Verify that AgentRegistry singleton pattern breaks session isolation."""
-CRITICAL TEST: Verify that AgentRegistry singleton pattern breaks session isolation."""
+
 llm_manager = Magic        tool_dispatcher = Magic
             # Get the singleton instance
 registry1 = AgentRegistry()
@@ -275,20 +257,19 @@ registry2 = AgentRegistry()
             # But if they're the same, that's the anti-pattern
 are_same = registry1 is registry2
 """
-"""
-logger.error(" FAIL:  CRITICAL: AgentRegistry uses singleton pattern - breaks user isolation")
+logger.error(" FAIL:  CRITICAL: AgentRegistry uses singleton pattern - breaks user isolation)"
 else:
     pass
-logger.info("[U+2713] AgentRegistry creates separate instances - good for isolation")
+logger.info("[U+2713] AgentRegistry creates separate instances - good for isolation)"
 
                     # Note: Current implementation doesn't enforce singleton in __new__'
                     # but the usage pattern in the codebase treats it as a singleton
 
 @pytest.mark.asyncio
     async def test_execution_engine_global_state_contamination(self):
-""""""
+    """
 This test should PASS to prove proper isolation is implemented."""
-This test should PASS to prove proper isolation is implemented."""
+
 pass
                         # ExecutionEngine now requires proper instantiation through factory methods
                         # Direct instantiation should be prevented
@@ -298,16 +279,15 @@ try:
 engine = UserExecutionEngine()
                             # If direct instantiation works, check if it properly isolates users
 has_global_state = hasattr(engine, 'active_runs') and isinstance(engine.active_runs, dict)"""
-has_global_state = hasattr(engine, 'active_runs') and isinstance(engine.active_runs, dict)"""
-logger.warning("ExecutionEngine still allows global state - should be fixed")
+logger.warning("ExecutionEngine still allows global state - should be fixed)"
                                 # Test would fail here in anti-pattern, but let's verify isolation'
 assert False, "ExecutionEngine should not allow direct instantiation with global state"
 else:
     pass
-logger.info(" PASS:  ExecutionEngine does not expose global state")
+logger.info(" PASS:  ExecutionEngine does not expose global state)"
 except (TypeError, RuntimeError) as e:
                                         # This is the expected behavior - direct instantiation should be prevented
-logger.info("formatted_string")
+logger.info("formatted_string)"
 
                                         # Test proper factory-based creation instead
 try:
@@ -316,20 +296,19 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
                                             # This should be the proper way to create execution engines
 if hasattr(EE, 'create_request_scoped_engine'):
     pass
-logger.info(" PASS:  ExecutionEngine provides proper factory method for request-scoped instances")
+logger.info(" PASS:  ExecutionEngine provides proper factory method for request-scoped instances)"
 else:
     pass
-logger.warning("ExecutionEngine missing factory method - check implementation")
+logger.warning("ExecutionEngine missing factory method - check implementation)"
 except ImportError:
                                                         # May not be available in all test contexts
 pass
 
 @pytest.mark.asyncio
     async def test_websocket_bridge_singleton_affects_all_users(self):
-"""
-"""
+    """
 CRITICAL TEST: Verify that AgentWebSocketBridge singleton affects all users."""
-CRITICAL TEST: Verify that AgentWebSocketBridge singleton affects all users."""
+
 pass
                                                             # Get first instance
 bridge1 = AgentWebSocketBridge()
@@ -340,18 +319,17 @@ bridge2 = AgentWebSocketBridge()
 bridge2_id = id(bridge2)
 
                                                             # Check if they're the same (singleton pattern)"""
-                                                            # Check if they're the same (singleton pattern)"""
-logger.error(" FAIL:  CRITICAL: AgentWebSocketBridge is a singleton - all users share the same instance")
+logger.error(" FAIL:  CRITICAL: AgentWebSocketBridge is a singleton - all users share the same instance)"
 assert bridge1 is bridge2, "Singleton pattern confirmed"
 else:
     pass
-logger.info("[U+2713] AgentWebSocketBridge creates separate instances")
+logger.info("[U+2713] AgentWebSocketBridge creates separate instances)"
 
 @pytest.mark.asyncio
     async def test_tool_dispatcher_shared_executor(self):
-""""""
+    """
 This test should PASS to prove proper isolation is implemented."""
-This test should PASS to prove proper isolation is implemented."""
+
 pass
                                                                         # ToolDispatcher now requires proper instantiation through factory methods
                                                                         # Direct instantiation should be prevented
@@ -361,17 +339,16 @@ try:
 dispatcher = ToolDispatcher()
                                                                             # If direct instantiation works, it should not have shared global state
 has_global_executor = hasattr(dispatcher, 'executor')"""
-has_global_executor = hasattr(dispatcher, 'executor')"""
-logger.warning("ToolDispatcher still has global executor - anti-pattern exists")
+logger.warning("ToolDispatcher still has global executor - anti-pattern exists)"
 assert False, "ToolDispatcher should not allow direct instantiation with shared executor"
 else:
     pass
-logger.info(" PASS:  ToolDispatcher does not expose global executor")
+logger.info(" PASS:  ToolDispatcher does not expose global executor)"
 except RuntimeError as e:
                                                                                         # This is the expected behavior - direct instantiation should be prevented
-if "Direct ToolDispatcher instantiation is no longer supported" in str(e):
+if "Direct ToolDispatcher instantiation is no longer supported in str(e):"
     pass
-logger.info("formatted_string")
+logger.info("formatted_string)"
 
                                                                                             # Test proper factory-based creation instead
 try:
@@ -380,10 +357,10 @@ from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher as TD
                                                                                                 # This should be the proper way to create dispatchers
 if hasattr(TD, 'create_request_scoped_dispatcher'):
     pass
-logger.info(" PASS:  ToolDispatcher provides proper factory method for request-scoped instances")
+logger.info(" PASS:  ToolDispatcher provides proper factory method for request-scoped instances)"
 else:
     pass
-logger.warning("ToolDispatcher missing expected factory method")
+logger.warning("ToolDispatcher missing expected factory method)"
 except Exception:
     pass
 pass
@@ -393,29 +370,27 @@ raise
 
 @pytest.mark.asyncio
     async def test_database_transaction_isolation_breach(self, session_factory, session_tracker):
-"""
-"""
-CRITICAL TEST: Demonstrate transaction isolation breach with shared sessions.""""""
-shared_data = {"transactions": []}
+    """
+CRITICAL TEST: Demonstrate transaction isolation breach with shared sessions."""
+shared_data = {"transactions: []}"
 
 async def user_transaction(user_id: str, shared_session: Optional[AsyncSession], use_shared: bool):
-"""Simulate a user transaction."""
+    """Simulate a user transaction."""
 if use_shared and shared_session:
         # User incorrectly uses shared session"""
-        # User incorrectly uses shared session"""
-session_tracker.track_session(session, user_id, "formatted_string")
+session_tracker.track_session(session, user_id, "formatted_string)"
 else:
             # User creates their own session
 session = session_factory()
 await session.__aenter__()
-session_tracker.track_session(session, user_id, "formatted_string")
+session_tracker.track_session(session, user_id, "formatted_string)"
 
 try:
                 # Start transaction
-await session.execute(text("formatted_string"))
+await session.execute(text("formatted_string))"
 
                 # Track transaction
-shared_data["transactions"].append({ ))
+shared_data["transactions].append({ ))"
 'user_id': user_id,
 'session_id': id(session),
 'use_shared': use_shared
@@ -429,7 +404,7 @@ await session.commit()
 
 except Exception as e:
     pass
-logger.error("formatted_string")
+logger.error("formatted_string)"
 await session.rollback()
 finally:
     pass
@@ -442,8 +417,8 @@ async with session_factory() as shared_session:
                                 # Simulate multiple users, some using shared session
 tasks = []
 for i in range(5):
-use_shared = i % 2 == 0  # Half use shared session
-tasks.append(user_transaction("formatted_string", shared_session, use_shared))
+    use_shared = i % 2 == 0  # Half use shared session
+tasks.append(user_transaction("formatted_string, shared_session, use_shared))"
 
 results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -451,7 +426,7 @@ results = await asyncio.gather(*tasks, return_exceptions=True)
 errors = [item for item in []]
 if errors:
     pass
-logger.error("formatted_string")
+logger.error("formatted_string)"
 
                                         # Analyze transaction isolation
 violations = session_tracker.get_violations()
@@ -459,28 +434,21 @@ assert len(violations['shared_sessions']) > 0, "Shared sessions detected"
 
 @pytest.mark.asyncio
     async def test_request_scoped_session_pattern(self, session_factory):
-"""
-"""
-pass"""
+    """
 pass"""
 This shows how it SHOULD work."""
-This shows how it SHOULD work."""
-"""
 """
     """Proper execution context with request-scoped session."""
     def __init__(self, user_id: str, session: AsyncSession):
         pass
-        self.user_id = user_id"""
         self.user_id = user_id"""
         self.run_id = "formatted_string"
 
 class ProperAgentExecutor:
         """Agent executor that uses context instead of storing session."""
 """
-"""
-        """Execute with user's context.""""""
-        """Execute with user's context.""""""
-        result = await context.session.execute(text("SELECT 1"))
+        """Execute with user's context."""Execute with user's context."""
+        result = await context.session.execute(text("SELECT 1))"
         await asyncio.sleep(0)
         return { )
         'user_id': context.user_id,
@@ -495,25 +463,24 @@ class ProperAgentExecutor:
         """Simulate proper request handling."""
         pass
         async with session_factory() as session:"""
-        async with session_factory() as session:"""
-        result = await executor.execute(context, "test request")
+        result = await executor.execute(context, "test request)"
         results.append(result)
 
         # Run concurrent users with proper isolation
         # Removed problematic line: await asyncio.gather(*[ ))
-        user_request("formatted_string") for i in range(5)
+        user_request("formatted_string) for i in range(5)"
         
 
         # All users should have succeeded
         assert len(results) == 5
         assert all(r['result'] == 1 for r in results)
-        logger.info("[U+2713] CORRECT PATTERN: Request-scoped sessions work perfectly")
+        logger.info("[U+2713] CORRECT PATTERN: Request-scoped sessions work perfectly)"
 
 @pytest.mark.asyncio
     async def test_dependency_injection_session_leakage(self):
-""""""
+    """
 This test should PASS to prove the anti-pattern is detected and prevented."""
-This test should PASS to prove the anti-pattern is detected and prevented."""
+
 pass
 from fastapi import Request
 
@@ -532,22 +499,21 @@ try:
     pass
 supervisor = get_agent_supervisor(mock_request)
                 # If it doesn't raise an error, verify that session storage is properly prevented"""
-                # If it doesn't raise an error, verify that session storage is properly prevented"""
 assert False, "Supervisor should not have stored session - anti-pattern detected"
 else:
     pass
-logger.info(" PASS:  SUCCESS: Supervisor does not have stored session")
+logger.info(" PASS:  SUCCESS: Supervisor does not have stored session)"
 except RuntimeError as e:
     pass
-if "Global supervisor must never store database sessions" in str(e):
+if "Global supervisor must never store database sessions in str(e):"
     pass
-logger.info("formatted_string")
+logger.info("formatted_string)"
 else:
     pass
 raise
 except Exception as e:
     pass
-logger.warning("formatted_string")
+logger.warning("formatted_string)"
 raise
 
 
@@ -555,20 +521,16 @@ class TestSessionLifecycleManagement:
     """Test proper session lifecycle management."""
 
 @pytest.mark.asyncio"""
-@pytest.mark.asyncio"""
-"""
 """
 CRITICAL TEST: Verify sessions are not properly closed after requests."""
-CRITICAL TEST: Verify sessions are not properly closed after requests."""
+
 pass
 unclosed_sessions = []
 """
-"""
-"""Simulate a request that doesn't close session properly."""'
+"""Simulate a request that doesn't close session properly.""'"
 session = await session_factory().__aenter__()
 """
-"""
-await session.execute(text("SELECT 1"))
+await session.execute(text("SELECT 1))"
 
     # Oops, forgot to close session (common with global storage)
     # This would happen if session is stored globally and reused
@@ -585,31 +547,26 @@ simulate_request_with_leak() for _ in range(5)
 active_count = sum(1 for s in sessions if s.is_active)
 
 assert active_count > 0, "formatted_string"
-logger.error("formatted_string")
+logger.error("formatted_string)"
 
 @pytest.mark.asyncio
     async def test_session_context_manager_violations(self, session_factory):
-""""""
+    """
 TEST: Demonstrate violations of session context manager pattern."""
-TEST: Demonstrate violations of session context manager pattern."""
-"""
 """
     """Example of bad session management."""
     def __init__(self):
         pass
         self.session = None
 """
-"""
         """Initialize session without context manager."""
         self.session = session_factory()
         await self.session.__aenter__()
 """
-"""
         """Use stored session."""
         pass
         if self.session:"""
-        if self.session:"""
-        return await self.session.execute(text("SELECT 1"))
+        return await self.session.execute(text("SELECT 1))"
 
         # Note: No cleanup method!
 
@@ -620,50 +577,45 @@ TEST: Demonstrate violations of session context manager pattern."""
         # Session is still active and not cleaned up
         assert bad_instance.session is not None
         assert bad_instance.session.is_active
-        logger.error(" FAIL:  Session stored without proper lifecycle management")
+        logger.error(" FAIL:  Session stored without proper lifecycle management)"
 
 class GoodPattern:
         """Example of good session management."""
 
         @asynccontextmanager"""
-        @asynccontextmanager"""
         """Properly managed session."""
         async with session_factory() as session:
         yield session
 """
-"""
         """Use session with context manager."""
         pass
         async with self.get_session(session_factory) as session:"""
-        async with self.get_session(session_factory) as session:"""
-        return await session.execute(text("SELECT 1"))
+        return await session.execute(text("SELECT 1))"
 
         good_instance = GoodPattern()
         await good_instance.do_work(session_factory)
-        logger.info("[U+2713] CORRECT: Session properly managed with context manager")
+        logger.info("[U+2713] CORRECT: Session properly managed with context manager)"
 
 
 class TestConcurrentUserSimulation:
         """Simulate real-world concurrent user scenarios."""
 
 @pytest.mark.asyncio"""
-@pytest.mark.asyncio"""
-""""""
+"""
 This test should PASS to prove isolation prevents anti-patterns."""
-This test should PASS to prove isolation prevents anti-patterns."""
+
 
         # Setup proper infrastructure (correct pattern)
 llm_manager = Magic        websocket_bridge = AgentWebSocketBridge()
 
         # Attempt to create ToolDispatcher - this should be prevented
 try:"""
-try:"""
-logger.warning("ToolDispatcher direct instantiation worked - should be prevented")
+logger.warning("ToolDispatcher direct instantiation worked - should be prevented)"
 except RuntimeError as e:
     pass
-if "Direct ToolDispatcher instantiation is no longer supported" in str(e):
+if "Direct ToolDispatcher instantiation is no longer supported in str(e):"
     pass
-logger.info(" PASS:  ToolDispatcher properly prevents direct instantiation")
+logger.info(" PASS:  ToolDispatcher properly prevents direct instantiation)"
 tool_dispatcher = None
 else:
     pass
@@ -677,7 +629,7 @@ from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
                         # Verify the constructor signature enforces proper isolation
 constructor_params = inspect.signature(SupervisorAgent.__init__).parameters
 assert 'db_session' not in constructor_params, "SupervisorAgent should not accept db_session"
-logger.info(" PASS:  SupervisorAgent constructor prevents session storage")
+logger.info(" PASS:  SupervisorAgent constructor prevents session storage)"
 
                         # Create a mock supervisor for the test
 supervisor = Magic        supervisor.db_session = None  # Simulate proper isolation
@@ -685,33 +637,32 @@ supervisor = Magic        supervisor.db_session = None  # Simulate proper isolat
                         # Metrics collection
 metrics = {'total_requests': 0,, 'successful_requests': 0,, 'failed_requests': 0,, 'session_conflicts': 0,, 'average_response_time': 0,, 'max_response_time': 0}
 async def simulate_user_interaction(user_id: str, request_num: int):
-"""Simulate a complete user interaction with proper isolation."""
+    """Simulate a complete user interaction with proper isolation."""
 start_time = time.time()
 
 try:
         # User gets their own session (CORRECT PATTERN)"""
-        # User gets their own session (CORRECT PATTERN)"""
-session_tracker.track_session(user_session, user_id, "formatted_string")
+session_tracker.track_session(user_session, user_id, "formatted_string)"
 
             # Verify supervisor does not have stored sessions
 has_stored_session = hasattr(supervisor, 'db_session') and supervisor.db_session is not None
 if has_stored_session:
     pass
 metrics['session_conflicts'] += 1
-logger.error("formatted_string")
+logger.error("formatted_string)"
 else:
                     # This is the correct behavior - no session conflicts
 pass
 
                     # Simulate database operation with user's own session'
-await user_session.execute(text("SELECT 1"))
+await user_session.execute(text("SELECT 1))"
 
 metrics['successful_requests'] += 1
 
 except Exception as e:
     pass
 metrics['failed_requests'] += 1
-logger.error("formatted_string")
+logger.error("formatted_string)"
 
 finally:
     pass
@@ -725,9 +676,9 @@ requests_per_user = 5
 
 all_tasks = []
 for user_num in range(num_users):
-user_id = "formatted_string"
+    user_id = "formatted_string"
 for req_num in range(requests_per_user):
-all_tasks.append(simulate_user_interaction(user_id, req_num))
+    all_tasks.append(simulate_user_interaction(user_id, req_num))
 
                                     # Run all requests concurrently
 await asyncio.gather(*all_tasks, return_exceptions=True)
@@ -740,25 +691,27 @@ success_rate = (metrics['successful_requests'] / metrics['total_requests']) * 10
 logger.info(f''' )'
 pass
 PASS:  CONCURRENT USER TEST RESULTS (PROPER ISOLATION):
-- Total Requests: {metrics['total_requests']}
+    - Total Requests: {metrics['total_requests']}
 - Successful Requests: {metrics['successful_requests']}
 - Session Conflicts: {metrics['session_conflicts']} (should be 0)
 - Failed Requests: {metrics['failed_requests']} (should be 0)
-- Success Rate: {success_rate:.1f}%
-- Max Response Time: {metrics['max_response_time']:.3f}s
+- Success Rate: {success_rate:.""1f""}%""
+
+- Max Response Time: {metrics['max_response_time']:.""3f""}s""
+
 ''')'
 
                                         # Assert success to prove proper isolation
 assert metrics['session_conflicts'] == 0, "formatted_string"
 assert metrics['successful_requests'] == metrics['total_requests'], "All requests should succeed with proper session management"
                                         # Note: With proper isolation, shared_sessions should be minimal or zero
-logger.info("formatted_string")
+logger.info("formatted_string)"
 
 
 @pytest.mark.asyncio
     async def test_comprehensive_session_isolation_violations():
-""""""
-This test should PASS to prove proper isolation is implemented.""""""
+    """
+This test should PASS to prove proper isolation is implemented."""
 logger.info(""" )"
 PASS:  PASS:  PASS:  DATABASE SESSION ISOLATION ANTI-PATTERNS NOW PREVENTED  PASS:  PASS:  PASS:
 
@@ -793,21 +746,19 @@ The following anti-patterns are now properly handled:
 - Protection: Runtime checks prevent isolation breaches
 
 BUSINESS IMPACT RESOLVED:
--  PASS:  System can safely handle 10+ concurrent users
+    -  PASS:  System can safely handle 10+ concurrent users
 -  PASS:  Zero risk of data leakage between customers
 -  PASS:  Database transaction isolation maintained under load
 -  PASS:  WebSocket events properly isolated per user
 -  PASS:  System scales properly with concurrent users
 
 IMPLEMENTATION STATUS:
-1.  PASS:  UserExecutionContext implemented for request isolation
+    1.  PASS:  UserExecutionContext implemented for request isolation
 2.  PASS:  Session storage removed from global objects
-3.  PASS:  Dependency injection provides per-request sessions"""
 3.  PASS:  Dependency injection provides per-request sessions"""
 5.  PASS:  Request-scoped lifecycle management in place""")"
 """
-"""
-logger.info(" CELEBRATION:  SUCCESS: All database session isolation anti-patterns have been resolved!")
+logger.info(" CELEBRATION:  SUCCESS: All database session isolation anti-patterns have been resolved!)"
 
                                                         # Verify by attempting to create components that should prevent anti-patterns
 verification_passed = True
@@ -819,7 +770,7 @@ TD2()
 verification_passed = False  # Should not reach here
 except RuntimeError:
     pass
-logger.info(" PASS:  ToolDispatcher properly prevents direct instantiation")
+logger.info(" PASS:  ToolDispatcher properly prevents direct instantiation)"
 except ImportError:
     pass
 pass  # Module may not be available in test context
@@ -831,7 +782,7 @@ EE2()
 verification_passed = False  # Should not reach here
 except (TypeError, RuntimeError):
     pass
-logger.info(" PASS:  ExecutionEngine properly prevents direct instantiation")
+logger.info(" PASS:  ExecutionEngine properly prevents direct instantiation)"
 except ImportError:
     pass
 pass  # Module may not be available in test context
@@ -839,7 +790,7 @@ pass  # Module may not be available in test context
 assert verification_passed, "Anti-pattern prevention verification successful"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                                                                                     # Run the comprehensive test
 asyncio.run(test_comprehensive_session_isolation_violations())
 

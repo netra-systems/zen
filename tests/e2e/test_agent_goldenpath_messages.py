@@ -176,23 +176,23 @@ class WebSocketEventMonitor:
         # Categorize critical business events
         if 'agent_started' in event_type or 'agent_beginning' in event_type:
             self.agent_started = True
-            logger.success("✅ CRITICAL EVENT: agent_started - User knows AI processing began")
+            logger.success("CHECK CRITICAL EVENT: agent_started - User knows AI processing began")
             
         elif 'agent_thinking' in event_type or 'reasoning' in event_type:
             self.agent_thinking = True
-            logger.success("✅ REAL-TIME EVENT: agent_thinking - User sees AI reasoning")
+            logger.success("CHECK REAL-TIME EVENT: agent_thinking - User sees AI reasoning")
             
         elif 'tool_executing' in event_type or 'tool_start' in event_type:
             self.tool_executing = True
-            logger.success("✅ TRANSPARENCY EVENT: tool_executing - User sees tool usage")
+            logger.success("CHECK TRANSPARENCY EVENT: tool_executing - User sees tool usage")
             
         elif 'tool_completed' in event_type or 'tool_result' in event_type:
             self.tool_completed = True
-            logger.success("✅ FEEDBACK EVENT: tool_completed - User sees tool results")
+            logger.success("CHECK FEEDBACK EVENT: tool_completed - User sees tool results")
             
         elif 'agent_completed' in event_type or 'final_result' in event_type or 'agent_finished' in event_type:
             self.agent_completed = True
-            logger.success("✅ COMPLETION EVENT: agent_completed - User knows processing finished")
+            logger.success("CHECK COMPLETION EVENT: agent_completed - User knows processing finished")
             
         else:
             logger.debug(f"📋 Other event: {event_type}")
@@ -202,16 +202,16 @@ class WebSocketEventMonitor:
         validation_errors = []
         
         if not self.agent_started:
-            validation_errors.append("❌ CRITICAL: No agent_started event - Users don't know AI processing began")
+            validation_errors.append("X CRITICAL: No agent_started event - Users don't know AI processing began")
             
         if not self.agent_thinking:
-            validation_errors.append("⚠️  WARNING: No agent_thinking events - Users can't see AI reasoning process")
+            validation_errors.append("WARNING️  WARNING: No agent_thinking events - Users can't see AI reasoning process")
             
         if not self.agent_completed:
-            validation_errors.append("❌ CRITICAL: No agent_completed event - Users don't know when processing finished")
+            validation_errors.append("X CRITICAL: No agent_completed event - Users don't know when processing finished")
             
         if len(self.events) == 0:
-            validation_errors.append("❌ FATAL: No WebSocket events received - Chat functionality completely broken")
+            validation_errors.append("X FATAL: No WebSocket events received - Chat functionality completely broken")
             
         return (len(validation_errors) == 0, validation_errors)
     
@@ -255,19 +255,19 @@ class WebSocketEventMonitor:
             f"📈 Event Rate: {metrics['event_rate']:.1f} events/second",
             "",
             "🔍 CRITICAL BUSINESS EVENT COVERAGE:",
-            f"  🚀 agent_started:   {'✅ RECEIVED' if self.agent_started else '❌ MISSING'}",
-            f"  🧠 agent_thinking:  {'✅ RECEIVED' if self.agent_thinking else '⚠️  MISSING'}",
-            f"  🔧 tool_executing:  {'✅ RECEIVED' if self.tool_executing else '⚠️  MISSING'}",
-            f"  ✅ tool_completed:  {'✅ RECEIVED' if self.tool_completed else '⚠️  MISSING'}",
-            f"  🏁 agent_completed: {'✅ RECEIVED' if self.agent_completed else '❌ MISSING'}",
+            f"  🚀 agent_started:   {'CHECK RECEIVED' if self.agent_started else 'X MISSING'}",
+            f"  🧠 agent_thinking:  {'CHECK RECEIVED' if self.agent_thinking else 'WARNING️  MISSING'}",
+            f"  🔧 tool_executing:  {'CHECK RECEIVED' if self.tool_executing else 'WARNING️  MISSING'}",
+            f"  CHECK tool_completed:  {'CHECK RECEIVED' if self.tool_completed else 'WARNING️  MISSING'}",
+            f"  🏁 agent_completed: {'CHECK RECEIVED' if self.agent_completed else 'X MISSING'}",
             "",
-            f"🎯 BUSINESS VALUE STATUS: {'✅ DELIVERING VALUE' if is_valid else '❌ VALUE AT RISK'}",
+            f"🎯 BUSINESS VALUE STATUS: {'CHECK DELIVERING VALUE' if is_valid else 'X VALUE AT RISK'}",
         ]
         
         if errors:
             report_lines.extend([
                 "",
-                "⚠️  CRITICAL ISSUES BLOCKING BUSINESS VALUE:",
+                "WARNING️  CRITICAL ISSUES BLOCKING BUSINESS VALUE:",
             ])
             for error in errors:
                 report_lines.append(f"  {error}")
@@ -342,7 +342,7 @@ class RealWebSocketConnection:
             )
             
             self.is_connected = True
-            logger.success(f"✅ WebSocket connected to staging environment")
+            logger.success(f"CHECK WebSocket connected to staging environment")
             
             # Start listening for messages
             asyncio.create_task(self._listen_for_messages())
@@ -350,7 +350,7 @@ class RealWebSocketConnection:
             return True
             
         except Exception as e:
-            logger.error(f"❌ Failed to connect to staging WebSocket: {e}")
+            logger.error(f"X Failed to connect to staging WebSocket: {e}")
             return False
     
     async def _listen_for_messages(self):
@@ -367,19 +367,19 @@ class RealWebSocketConnection:
                     self.event_monitor.record_event(data)
                     
                 except json.JSONDecodeError as e:
-                    logger.warning(f"⚠️  Invalid JSON in WebSocket message: {e}")
+                    logger.warning(f"WARNING️  Invalid JSON in WebSocket message: {e}")
                     
         except websockets.ConnectionClosed:
             logger.info("🔌 WebSocket connection closed by server")
             self.is_connected = False
         except Exception as e:
-            logger.error(f"❌ Error in WebSocket message listener: {e}")
+            logger.error(f"X Error in WebSocket message listener: {e}")
             self.is_connected = False
     
     async def send_message(self, message: Dict[str, Any]) -> bool:
         """Send message through WebSocket connection."""
         if not self.is_connected or not self.websocket:
-            logger.error("❌ Cannot send message - WebSocket not connected")
+            logger.error("X Cannot send message - WebSocket not connected")
             return False
             
         try:
@@ -388,7 +388,7 @@ class RealWebSocketConnection:
             return True
             
         except Exception as e:
-            logger.error(f"❌ Failed to send WebSocket message: {e}")
+            logger.error(f"X Failed to send WebSocket message: {e}")
             return False
     
     async def disconnect(self):
@@ -442,12 +442,12 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
             )
             
             if response.status_code != 200:
-                cls.logger.warning(f"⚠️  Staging backend health check failed: {response.status_code}")
+                cls.logger.warning(f"WARNING️  Staging backend health check failed: {response.status_code}")
             else:
-                cls.logger.success("✅ Staging backend is healthy")
+                cls.logger.success("CHECK Staging backend is healthy")
                 
         except Exception as e:
-            cls.logger.warning(f"⚠️  Could not validate staging environment: {e}")
+            cls.logger.warning(f"WARNING️  Could not validate staging environment: {e}")
     
     def setup_method(self, method=None):
         """Setup for each test method."""
@@ -489,9 +489,9 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
         logger.info(f"💰 BUSINESS VALUE SCORE: {business_score:.1f}/100.0")
         
         if business_score < 80.0:
-            logger.error(f"❌ BUSINESS VALUE AT RISK: Score {business_score:.1f} below threshold")
+            logger.error(f"X BUSINESS VALUE AT RISK: Score {business_score:.1f} below threshold")
         else:
-            logger.success(f"✅ BUSINESS VALUE PROTECTED: Score {business_score:.1f}")
+            logger.success(f"CHECK BUSINESS VALUE PROTECTED: Score {business_score:.1f}")
         
         super().teardown_method(method)
     
@@ -524,13 +524,13 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
             
             if not auth_result['success']:
                 self.test_result.errors.append(f"Authentication failed: {auth_result['error']}")
-                pytest.fail("❌ CRITICAL: User authentication failed - Golden Path blocked")
+                pytest.fail("X CRITICAL: User authentication failed - Golden Path blocked")
             
             self.test_result.user_authenticated = True
             user_id = auth_result['user_id']
             auth_token = auth_result['access_token']
             
-            logger.success(f"✅ User authenticated: {user_id}")
+            logger.success(f"CHECK User authenticated: {user_id}")
             
             # Phase 2: WebSocket Connection with Real Staging Infrastructure
             logger.info("🔌 Phase 2: Establishing WebSocket connection with staging infrastructure...")
@@ -539,10 +539,10 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
             connection_success = await websocket_conn.connect(auth_token, user_id)
             if not connection_success:
                 self.test_result.errors.append("WebSocket connection to staging failed")
-                pytest.fail("❌ CRITICAL: WebSocket connection failed - Chat infrastructure broken")
+                pytest.fail("X CRITICAL: WebSocket connection failed - Chat infrastructure broken")
             
             self.test_result.websocket_connected = True
-            logger.success("✅ WebSocket connected to staging environment")
+            logger.success("CHECK WebSocket connected to staging environment")
             
             # Phase 3: Send User Message and Initiate Agent Execution
             logger.info("💬 Phase 3: Sending user message and initiating agent execution...")
@@ -560,7 +560,7 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
             message_sent = await websocket_conn.send_message(user_message)
             if not message_sent:
                 self.test_result.errors.append("Failed to send user message through WebSocket")
-                pytest.fail("❌ CRITICAL: Cannot send messages - Chat functionality broken")
+                pytest.fail("X CRITICAL: Cannot send messages - Chat functionality broken")
             
             # Trigger agent execution through staging backend
             agent_execution_result = await self._trigger_real_agent_execution(
@@ -569,7 +569,7 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
             
             if agent_execution_result['success']:
                 self.test_result.agent_execution_started = True
-                logger.success("✅ Agent execution initiated successfully")
+                logger.success("CHECK Agent execution initiated successfully")
             else:
                 self.test_result.errors.append(f"Agent execution failed: {agent_execution_result['error']}")
                 
@@ -586,9 +586,9 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
             
             if not events_valid:
                 self.test_result.errors.extend(event_errors)
-                logger.error("❌ CRITICAL: Required WebSocket events missing")
+                logger.error("X CRITICAL: Required WebSocket events missing")
             else:
-                logger.success("✅ All critical WebSocket events received")
+                logger.success("CHECK All critical WebSocket events received")
             
             # Phase 5: Validate Agent Response Quality
             logger.info("🧠 Phase 5: Validating agent response quality and business value...")
@@ -600,9 +600,9 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
             
             if not response_validation['quality_valid']:
                 self.test_result.errors.extend(response_validation['errors'])
-                logger.error("❌ CRITICAL: Agent response quality insufficient")
+                logger.error("X CRITICAL: Agent response quality insufficient")
             else:
-                logger.success("✅ Agent response meets quality standards")
+                logger.success("CHECK Agent response meets quality standards")
             
             # Phase 6: Performance and Business Value Validation
             logger.info("📊 Phase 6: Validating performance and business value delivery...")
@@ -627,13 +627,13 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
             # Assert Golden Path Success
             if not self.test_result.is_golden_path_successful():
                 error_summary = "; ".join(self.test_result.errors)
-                pytest.fail(f"❌ GOLDEN PATH FAILED: {error_summary}")
+                pytest.fail(f"X GOLDEN PATH FAILED: {error_summary}")
                 
             logger.success("🎉 GOLDEN PATH VALIDATION COMPLETED SUCCESSFULLY")
             logger.success(f"💰 Business Value Score: {self.test_result.get_business_value_score():.1f}/100")
             
         except Exception as e:
-            logger.error(f"❌ FATAL ERROR in Golden Path test: {e}")
+            logger.error(f"X FATAL ERROR in Golden Path test: {e}")
             self.test_result.errors.append(f"Test execution failed: {str(e)}")
             self.test_result.success = False
             raise
@@ -817,7 +817,7 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
         if len(response_content.strip()) < 50:
             quality_checks.append("Response too short (< 50 characters)")
         elif len(response_content.strip()) > 500:
-            quality_checks.append("✅ Substantive response length")
+            quality_checks.append("CHECK Substantive response length")
         
         # Content quality indicators
         response_lower = response_content.lower()
@@ -830,32 +830,32 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
         
         found_indicators = [ind for ind in analysis_indicators if ind in response_lower]
         if len(found_indicators) >= 2:
-            quality_checks.append("✅ Contains relevant analysis content")
+            quality_checks.append("CHECK Contains relevant analysis content")
         else:
             quality_checks.append("Missing relevant analysis content")
         
         # Check for structured response
         if any(marker in response_content for marker in ['\n', '1.', '2.', '-', '*']):
-            quality_checks.append("✅ Well-structured response")
+            quality_checks.append("CHECK Well-structured response")
         
         # Check for non-generic content (avoid template responses)
         generic_phrases = ['sorry', 'cannot help', 'try again', 'error occurred']
         if not any(phrase in response_lower for phrase in generic_phrases):
-            quality_checks.append("✅ Non-generic, specific content")
+            quality_checks.append("CHECK Non-generic, specific content")
         else:
             quality_checks.append("Contains generic error phrases")
         
         # Determine overall quality
-        passed_checks = [check for check in quality_checks if check.startswith('✅')]
-        failed_checks = [check for check in quality_checks if not check.startswith('✅')]
+        passed_checks = [check for check in quality_checks if check.startswith('CHECK')]
+        failed_checks = [check for check in quality_checks if not check.startswith('CHECK')]
         
         if len(passed_checks) >= 2 and len(failed_checks) <= 1:
             validation_result['quality_valid'] = True
-            logger.success(f"✅ Response quality validation passed: {len(passed_checks)} criteria met")
+            logger.success(f"CHECK Response quality validation passed: {len(passed_checks)} criteria met")
         else:
             validation_result['quality_valid'] = False
             validation_result['errors'].extend(failed_checks)
-            logger.error(f"❌ Response quality insufficient: {len(failed_checks)} criteria failed")
+            logger.error(f"X Response quality insufficient: {len(failed_checks)} criteria failed")
         
         return validation_result
     
@@ -870,7 +870,7 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
             # await self._delete_test_user(auth_result)
             
         except Exception as e:
-            logger.warning(f"⚠️  User cleanup warning: {e}")
+            logger.warning(f"WARNING️  User cleanup warning: {e}")
     
     @pytest.mark.asyncio
     async def test_golden_path_error_scenarios(self):
@@ -885,7 +885,7 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
         websocket_failure_result = await self._test_websocket_connection_failure()
         assert not websocket_failure_result['success'], "Invalid WebSocket should fail"
         
-        logger.success("✅ Error scenario testing completed")
+        logger.success("CHECK Error scenario testing completed")
     
     async def _test_invalid_authentication(self) -> Dict[str, Any]:
         """Test authentication with invalid credentials."""
@@ -967,7 +967,7 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
                 performance_metrics['websocket_connection_time'] = time.time() - ws_start
                 
                 if connection_success:
-                    logger.success("✅ Performance test connections established")
+                    logger.success("CHECK Performance test connections established")
                     await websocket_conn.disconnect()
                 
                 await self._cleanup_test_user(auth_result)
@@ -978,7 +978,7 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
             self._validate_performance_slas(performance_metrics)
             
         except Exception as e:
-            logger.error(f"❌ Performance test error: {e}")
+            logger.error(f"X Performance test error: {e}")
             raise
     
     def _validate_performance_slas(self, metrics: Dict[str, float]):
@@ -997,10 +997,10 @@ class TestAgentGoldenPathMessages(SSotAsyncTestCase):
         
         if violations:
             violation_summary = "; ".join(violations)
-            logger.error(f"❌ SLA violations detected: {violation_summary}")
+            logger.error(f"X SLA violations detected: {violation_summary}")
             pytest.fail(f"Performance SLA violations: {violation_summary}")
         else:
-            logger.success("✅ All performance SLAs met")
+            logger.success("CHECK All performance SLAs met")
             
         # Record performance metrics
         for metric, value in metrics.items():

@@ -16,9 +16,14 @@ settings = get_config()
 from netra_backend.app.schemas.config import AppConfig
 from netra_backend.app.services.permission_service import PermissionService
 from netra_backend.app.services.audit_service import AuditService
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
+from netra_backend.app.monitoring.authentication_monitor_service import (
+    get_authentication_monitor_service,
+    get_auth_health_status,
+    AuthenticationHealthStatus
+)
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 audit_service = AuditService()
 
 router = APIRouter()
@@ -355,4 +360,156 @@ async def remove_default_log_table_for_context(
 
 # Enhanced admin dependency that validates JWT claims directly
 EnhancedAdminDep = Depends(require_admin_with_jwt_validation)
+
+
+# Issue #1300 Task 7: WebSocket Authentication Monitoring Dashboard Endpoints
+
+@router.get("/websocket-auth/health")
+async def get_websocket_auth_health(
+    request: Request,
+    current_user: schemas.UserBase = Depends(require_admin_with_jwt_validation)
+) -> Dict[str, Any]:
+    """
+    Get current WebSocket authentication health status.
+
+    Business Value:
+    - Real-time monitoring of WebSocket authentication reliability
+    - Proactive detection of authentication failures
+    - Operational visibility into chat functionality health
+    """
+    await log_admin_operation(
+        "GET_WEBSOCKET_AUTH_HEALTH",
+        current_user.id,
+        {"monitoring_endpoint": "websocket-auth-health"},
+        request.client.host if request.client else "unknown"
+    )
+
+    try:
+        health_status = await get_auth_health_status()
+        return health_status.to_dict()
+    except Exception as e:
+        logger.error(f"Failed to get WebSocket auth health: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Authentication monitoring service error: {str(e)}"
+        )
+
+
+@router.get("/websocket-auth/metrics")
+async def get_websocket_auth_metrics(
+    request: Request,
+    current_user: schemas.UserBase = Depends(require_admin_with_jwt_validation)
+) -> Dict[str, Any]:
+    """
+    Get comprehensive WebSocket authentication metrics.
+
+    Business Value:
+    - Detailed authentication performance analysis
+    - Success/failure rate tracking
+    - Connection lifecycle monitoring
+    - Circuit breaker status
+    """
+    await log_admin_operation(
+        "GET_WEBSOCKET_AUTH_METRICS",
+        current_user.id,
+        {"monitoring_endpoint": "websocket-auth-metrics"},
+        request.client.host if request.client else "unknown"
+    )
+
+    try:
+        monitor_service = get_authentication_monitor_service()
+        return monitor_service.get_authentication_stats()
+    except Exception as e:
+        logger.error(f"Failed to get WebSocket auth metrics: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Authentication monitoring service error: {str(e)}"
+        )
+
+
+@router.post("/websocket-auth/test-connection")
+async def test_websocket_auth_connection(
+    user_id: str,
+    request: Request,
+    current_user: schemas.UserBase = Depends(require_admin_with_jwt_validation)
+) -> Dict[str, Any]:
+    """
+    Test WebSocket authentication connection for a specific user.
+
+    Business Value:
+    - Admin troubleshooting capability
+    - Proactive connection health validation
+    - User-specific authentication issue diagnosis
+    """
+    await log_admin_operation(
+        "TEST_WEBSOCKET_AUTH_CONNECTION",
+        current_user.id,
+        {"test_user_id": user_id[:8] + "..." if len(user_id) > 8 else user_id},
+        request.client.host if request.client else "unknown"
+    )
+
+    try:
+        monitor_service = get_authentication_monitor_service()
+        result = await monitor_service.ensure_auth_connection_health(user_id)
+
+        return {
+            "user_id": user_id,
+            "connection_healthy": result,
+            "test_timestamp": datetime.now(timezone.utc).isoformat(),
+            "tested_by": current_user.id
+        }
+    except Exception as e:
+        logger.error(f"Failed to test WebSocket auth connection for user {user_id}: {e}")
+        return {
+            "user_id": user_id,
+            "connection_healthy": False,
+            "error": str(e),
+            "test_timestamp": datetime.now(timezone.utc).isoformat(),
+            "tested_by": current_user.id
+        }
+
+
+@router.get("/websocket-auth/session/{user_id}")
+async def monitor_websocket_auth_session(
+    user_id: str,
+    request: Request,
+    current_user: schemas.UserBase = Depends(require_admin_with_jwt_validation),
+    duration_ms: int = 30000
+) -> Dict[str, Any]:
+    """
+    Monitor WebSocket authentication session for a specific user.
+
+    Business Value:
+    - Real-time session monitoring
+    - Authentication state tracking
+    - User-specific troubleshooting support
+    """
+    await log_admin_operation(
+        "MONITOR_WEBSOCKET_AUTH_SESSION",
+        current_user.id,
+        {
+            "monitored_user_id": user_id[:8] + "..." if len(user_id) > 8 else user_id,
+            "duration_ms": duration_ms
+        },
+        request.client.host if request.client else "unknown"
+    )
+
+    try:
+        monitor_service = get_authentication_monitor_service()
+        result = await monitor_service.monitor_auth_session(user_id, duration_ms)
+
+        return {
+            **result,
+            "monitored_by": current_user.id,
+            "monitor_start_time": datetime.now(timezone.utc).isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Failed to monitor WebSocket auth session for user {user_id}: {e}")
+        return {
+            "user_id": user_id,
+            "monitoring_available": False,
+            "error": str(e),
+            "monitored_by": current_user.id,
+            "monitor_start_time": datetime.now(timezone.utc).isoformat()
+        }
 

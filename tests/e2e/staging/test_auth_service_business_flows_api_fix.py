@@ -72,7 +72,7 @@ class AuthServiceBusinessFlowsStagingAPIFixTests:
                         assert field in data, f"Registration response missing required field '{field}': {data}"
                     self.access_token = data['access_token']
                     self.user_id = data['user_id']
-                    logger.info(f'✅ User registration successful - User ID: {self.user_id}')
+                    logger.info(f'CHECK User registration successful - User ID: {self.user_id}')
             except aiohttp.ClientError as e:
                 pytest.skip(f'Staging auth service unavailable: {e}')
             except asyncio.TimeoutError:
@@ -101,7 +101,7 @@ class AuthServiceBusinessFlowsStagingAPIFixTests:
                     required_fields = ['access_token', 'user_id']
                     for field in required_fields:
                         assert field in data, f"Login response missing required field '{field}': {data}"
-                    logger.info('✅ User login successful')
+                    logger.info('CHECK User login successful')
             except aiohttp.ClientError as e:
                 pytest.skip(f'Staging auth service unavailable for login test: {e}')
             except asyncio.TimeoutError:
@@ -132,7 +132,7 @@ class AuthServiceBusinessFlowsStagingAPIFixTests:
                     assert 'user_id' in data, f'Token validation response missing user_id: {data}'
                     assert 'valid' in data, f'Token validation response missing valid field: {data}'
                     assert data['valid'] is True, f'Token should be valid: {data}'
-                    logger.info('✅ Token validation successful')
+                    logger.info('CHECK Token validation successful')
             except aiohttp.ClientError as e:
                 pytest.skip(f'Staging auth service unavailable for token test: {e}')
             except asyncio.TimeoutError:
@@ -157,7 +157,7 @@ class AuthServiceBusinessFlowsStagingAPIFixTests:
                     assert found_fields, f'Health response should contain at least one of {expected_fields}: {health_data}'
             except ValueError:
                 pass
-            logger.info('✅ Auth service health check successful')
+            logger.info('CHECK Auth service health check successful')
         except requests.exceptions.RequestException as e:
             pytest.skip(f'Staging auth service unavailable for health check: {e}')
         except requests.exceptions.Timeout:
@@ -182,7 +182,7 @@ class DockerAPISignatureVsStagingValidationTests:
             manager.acquire_environment(env_name='test', use_alpine=True, rebuild_images=True)
         except TypeError as e:
             api_signature_fails = True
-            logger.info(f'✅ Confirmed API signature issue exists: {e}')
+            logger.info(f'CHECK Confirmed API signature issue exists: {e}')
         assert api_signature_fails, 'API signature issue should exist to demonstrate Issue #552'
         env = get_env()
         staging_url = env.get('STAGING_AUTH_SERVICE_URL', 'https://auth-service-staging.netrasystems.ai')
@@ -192,7 +192,7 @@ class DockerAPISignatureVsStagingValidationTests:
                 response = requests.get(f'{staging_url}/health', timeout=10)
                 staging_works = response.status_code == 200
                 if staging_works:
-                    logger.info('✅ Staging auth service is operational')
+                    logger.info('CHECK Staging auth service is operational')
                 else:
                     logger.warning(f'Staging service response: {response.status_code}')
             except requests.exceptions.RequestException as e:

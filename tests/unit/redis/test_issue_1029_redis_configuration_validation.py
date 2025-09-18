@@ -80,12 +80,12 @@ class RedisIssue1029ConfigurationValidationTests(SSotBaseTestCase):
             print(f'📍 Environment: {builder.environment}')
             print(f'📍 Redis Host Available: {builder.redis_host}')
             print(f'📍 Has Connection Config: {builder.connection.has_config}')
-            assert not builder.connection.has_config, f'❌ ISSUE #1029 REPRODUCED: RedisConfigurationBuilder reports configuration available when redis-host-staging secret is missing! Host: {builder.redis_host}, Config Available: {builder.connection.has_config}'
+            assert not builder.connection.has_config, f'X ISSUE #1029 REPRODUCED: RedisConfigurationBuilder reports configuration available when redis-host-staging secret is missing! Host: {builder.redis_host}, Config Available: {builder.connection.has_config}'
             is_valid, error_message = builder.validate()
             print(f'📍 Configuration Valid: {is_valid}')
             print(f'📍 Validation Error: {error_message}')
-            assert not is_valid, f'❌ ISSUE #1029 REPRODUCED: Configuration validation passed when redis-host-staging secret is missing! This causes DNS resolution failure Error -3 connecting to undefined host.'
-            assert 'REDIS_HOST' in error_message, f"❌ ISSUE #1029 REPRODUCED: Validation error doesn't mention missing REDIS_HOST: '{error_message}'. Missing redis-host-staging secret should be clearly identified!"
+            assert not is_valid, f'X ISSUE #1029 REPRODUCED: Configuration validation passed when redis-host-staging secret is missing! This causes DNS resolution failure Error -3 connecting to undefined host.'
+            assert 'REDIS_HOST' in error_message, f"X ISSUE #1029 REPRODUCED: Validation error doesn't mention missing REDIS_HOST: '{error_message}'. Missing redis-host-staging secret should be clearly identified!"
 
     @pytest.mark.unit
     @pytest.mark.redis
@@ -115,14 +115,14 @@ class RedisIssue1029ConfigurationValidationTests(SSotBaseTestCase):
                 redis_url = builder.get_url_for_environment()
                 print(f'📍 Generated Redis URL: {redis_url}')
                 if config.get('REDIS_HOST') == '':
-                    assert redis_url is None or 'redis://:' in str(redis_url), f'❌ ISSUE #1029 REPRODUCED: Empty REDIS_HOST not properly handled. Empty host causes DNS Error -3!'
+                    assert redis_url is None or 'redis://:' in str(redis_url), f'X ISSUE #1029 REPRODUCED: Empty REDIS_HOST not properly handled. Empty host causes DNS Error -3!'
                 elif 'REDIS_HOST' not in config:
-                    assert redis_url is None or 'localhost' in str(redis_url), f'❌ ISSUE #1029 REPRODUCED: Missing REDIS_HOST fallback behavior. Missing host causes DNS Error -3 when no valid fallback!'
+                    assert redis_url is None or 'localhost' in str(redis_url), f'X ISSUE #1029 REPRODUCED: Missing REDIS_HOST fallback behavior. Missing host causes DNS Error -3 when no valid fallback!'
                 elif config.get('REDIS_HOST') == 'localhost':
                     print(f'📍 WARNING: localhost in GCP staging will fail to connect to Memory Store')
                 is_valid, error_message = builder.validate()
                 if config.get('REDIS_HOST') in ['', 'undefined-host'] or 'REDIS_HOST' not in config:
-                    assert not is_valid, f"❌ ISSUE #1029 REPRODUCED: Invalid Redis host configuration passed validation: {config.get('REDIS_HOST', 'MISSING')}"
+                    assert not is_valid, f"X ISSUE #1029 REPRODUCED: Invalid Redis host configuration passed validation: {config.get('REDIS_HOST', 'MISSING')}"
 
     @pytest.mark.unit
     @pytest.mark.redis
@@ -153,18 +153,18 @@ class RedisIssue1029ConfigurationValidationTests(SSotBaseTestCase):
             print(f"📍 VPC Connector: {builder.env.get('VPC_CONNECTOR', 'MISSING')}")
             redis_host = builder.redis_host
             print(f'📍 Redis Host from Builder: {redis_host}')
-            assert redis_host == issue_1029_ip, f'❌ ISSUE #1029 REPRODUCED: Builder modified Memory Store IP! Expected: {issue_1029_ip}, Got: {redis_host}'
+            assert redis_host == issue_1029_ip, f'X ISSUE #1029 REPRODUCED: Builder modified Memory Store IP! Expected: {issue_1029_ip}, Got: {redis_host}'
             is_internal_ip = redis_host.startswith('10.')
-            assert is_internal_ip, f'❌ ISSUE #1029 REPRODUCED: Memory Store IP {redis_host} not recognized as GCP internal IP (10.x.x.x). This causes connectivity issues!'
+            assert is_internal_ip, f'X ISSUE #1029 REPRODUCED: Memory Store IP {redis_host} not recognized as GCP internal IP (10.x.x.x). This causes connectivity issues!'
             redis_url = builder.get_url_for_environment()
             print(f'📍 Generated URL: {builder.mask_url_for_logging(redis_url)}')
             if redis_url:
-                assert issue_1029_ip in redis_url, f"❌ ISSUE #1029 REPRODUCED: Generated URL doesn't contain Memory Store IP! URL: {builder.mask_url_for_logging(redis_url)}"
+                assert issue_1029_ip in redis_url, f"X ISSUE #1029 REPRODUCED: Generated URL doesn't contain Memory Store IP! URL: {builder.mask_url_for_logging(redis_url)}"
             has_vpc_connector = bool(builder.env.get('VPC_CONNECTOR'))
             print(f'📍 VPC Connector Configured: {has_vpc_connector}')
             if not has_vpc_connector:
-                print(f'⚠️  WARNING: Memory Store IP {issue_1029_ip} requires VPC connector for access!')
-                print(f'⚠️  This could cause DNS resolution Error -3 without proper VPC connectivity!')
+                print(f'WARNING️  WARNING: Memory Store IP {issue_1029_ip} requires VPC connector for access!')
+                print(f'WARNING️  This could cause DNS resolution Error -3 without proper VPC connectivity!')
 
     @pytest.mark.unit
     @pytest.mark.redis
@@ -192,7 +192,7 @@ class RedisIssue1029ConfigurationValidationTests(SSotBaseTestCase):
             print(f"📍 Using Secret Manager: {builder.env.get('USE_GCP_SECRET_MANAGER')}")
             print(f"📍 GCP Project: {builder.env.get('GCP_PROJECT_ID')}")
             using_secret_manager = builder.env.get('USE_GCP_SECRET_MANAGER') == 'true'
-            assert using_secret_manager, f"❌ ISSUE #1029 REPRODUCED: Builder doesn't recognize Secret Manager usage flag"
+            assert using_secret_manager, f"X ISSUE #1029 REPRODUCED: Builder doesn't recognize Secret Manager usage flag"
             required_secrets = ['redis-host-staging', 'redis-port-staging', 'redis-password-staging']
             print(f'📍 Checking required component secrets...')
             for secret_name in required_secrets:
@@ -200,7 +200,7 @@ class RedisIssue1029ConfigurationValidationTests(SSotBaseTestCase):
             is_valid, error_message = builder.validate()
             print(f'📍 Configuration Valid: {is_valid}')
             print(f'📍 Validation Error: {error_message}')
-            assert not is_valid, f'❌ ISSUE #1029 REPRODUCED: Configuration validation passed without required component secrets! Missing secrets: {required_secrets}'
+            assert not is_valid, f'X ISSUE #1029 REPRODUCED: Configuration validation passed without required component secrets! Missing secrets: {required_secrets}'
 
     @pytest.mark.unit
     @pytest.mark.redis
@@ -241,8 +241,8 @@ class RedisIssue1029ConfigurationValidationTests(SSotBaseTestCase):
             print(f'📍 GCP Valid: {gcp_is_valid}')
             print(f'📍 GCP URL: {gcp_url}')
             print(f'📍 GCP Error: {gcp_error}')
-            assert not gcp_is_valid, f'❌ ISSUE #1029 REPRODUCED: GCP staging configuration passed validation without required Memory Store configuration! This leads to DNS Error -3.'
-            assert 'REDIS_HOST' in gcp_error, f"❌ ISSUE #1029 REPRODUCED: GCP validation error doesn't mention missing REDIS_HOST: '{gcp_error}'"
+            assert not gcp_is_valid, f'X ISSUE #1029 REPRODUCED: GCP staging configuration passed validation without required Memory Store configuration! This leads to DNS Error -3.'
+            assert 'REDIS_HOST' in gcp_error, f"X ISSUE #1029 REPRODUCED: GCP validation error doesn't mention missing REDIS_HOST: '{gcp_error}'"
         print(f'\n📍 Testing Complete GCP Configuration...')
         with patch.dict(os.environ, self.complete_gcp_config, clear=True):
             complete_env_vars = dict(os.environ)
@@ -289,8 +289,8 @@ class RedisIssue1029ConfigurationValidationTests(SSotBaseTestCase):
         with patch.dict(os.environ, self.gcp_staging_config, clear=True):
             builder = RedisConfigurationBuilder(dict(os.environ))
             is_valid, error = builder.validate()
-            assert not is_valid and 'REDIS_HOST' in error, f'❌ ISSUE #1029 FULLY REPRODUCED: Missing redis-host-staging secret causes configuration validation failure leading to DNS Error -3 when attempting Redis connection!'
-        print(f'\n✅ ISSUE #1029 SUCCESSFULLY REPRODUCED')
+            assert not is_valid and 'REDIS_HOST' in error, f'X ISSUE #1029 FULLY REPRODUCED: Missing redis-host-staging secret causes configuration validation failure leading to DNS Error -3 when attempting Redis connection!'
+        print(f'\nCHECK ISSUE #1029 SUCCESSFULLY REPRODUCED')
         print(f'=' * 80)
 if __name__ == '__main__':
     'MIGRATED: Use SSOT unified test runner'

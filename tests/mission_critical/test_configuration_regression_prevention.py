@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-"""
+
 Mission Critical: Configuration Regression Prevention Tests
 
 These tests ensure that configuration changes do not cause cascade failures
@@ -11,10 +11,11 @@ Based on CRITICAL_CONFIG_REGRESSION_AUDIT_REPORT.md findings.
 """
 """
 
+
 """
 """
 """
-"""
+
 import os
 import sys
 from test_framework.ssot.base_test_case import SSotBaseTestCase
@@ -35,10 +36,12 @@ from test_framework.ssot.isolated_test_helper import IsolatedTestCase
 
 class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
     "
-    "
+    ""
+
     Critical tests to prevent configuration regressions that cause cascade failures.
 "
-"
+""
+
     
     def setup_method(self, method=None):
         "Set up test environment."
@@ -52,7 +55,8 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
         }
     
     def test_service_secret_presence_all_environments(self):
-        ""
+        """
+
         Test that SERVICE_SECRET is properly configured across all environments.
         
         CRITICAL: SERVICE_SECRET has 173+ dependencies. Missing causes:
@@ -90,14 +94,16 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
                                     fSERVICE_SECRET missing from {env_file})
     
     def test_jwt_secret_resolution_consistency(self):
-        "
-        "
+        """
+        ""
+
         Test JWT secret resolution is consistent across services.
         
         Validates the unified JWT secret manager properly resolves
         secrets for all environments without conflicts.
 "
-"
+""
+
         from shared.jwt_secret_manager import get_jwt_secret_manager
         
         environments = ['development', 'test', 'staging', 'production']
@@ -194,14 +200,16 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
         env2.reset()
     
     def test_critical_config_dependencies(self):
-        "
-        "
+        """
+        ""
+
         Test that removing critical configs would be caught.
         
         Simulates what happens if someone tries to consolidate
         a critical config without understanding dependencies.
         "
-        "
+        ""
+
         critical_impacts = {
             'SERVICE_SECRET': [
                 'auth_service.auth_core.routes.auth_routes',
@@ -238,14 +246,16 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
                                     f{module_path} doesn't reference {config_key}")"
     
     def test_config_validation_at_startup(self):
-    "
-    "
+        """
+    ""
+
         Test that configuration validation happens at startup.
         
         Ensures AuthStartupValidator properly validates SERVICE_SECRET.
         "
-        "
-        from netra_backend.app.core.auth_startup_validator import (
+        ""
+
+        from netra_backend.app.core.auth_startup_validator import ()
             AuthStartupValidator, AuthComponent
         )
         
@@ -284,7 +294,8 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
                                SERVICE_CREDENTIALS should be invalid)
                 self.assertTrue(service_result.is_critical,
                               Missing SERVICE_SECRET should be critical)"
-                              Missing SERVICE_SECRET should be critical)"
+                              Missing SERVICE_SECRET should be critical)""
+
                 self.assertIn('SINGLE POINT OF FAILURE', service_result.error,
                             Should identify as single point of failure")"
         
@@ -292,11 +303,13 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
         asyncio.run(run_validation())
     
     def test_service_secret_strength_validation(self):
-    "
-    "
+        """
+    ""
+
         Test that weak SERVICE_SECRET values are rejected.
         "
-        "
+        ""
+
         from netra_backend.app.core.auth_startup_validator import AuthStartupValidator
         
         weak_secrets = [
@@ -344,7 +357,8 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
                                    fWeak pattern '{weak_secret[:20]}...' should be rejected)
     
     def test_environment_specific_config_isolation(self):
-    ""
+    """
+
         Test that environment-specific configs don't leak across environments.'
         
         E.g., staging configs should never appear in production.
@@ -385,7 +399,8 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
                 pass  # Actual validation would happen in deployment
     
     def test_configuration_change_detection(self):
-        ""
+        """
+
         Test that configuration changes are detectable.
         
         This is a placeholder for the configuration change tracker
@@ -421,10 +436,12 @@ class ConfigurationRegressionTests(SSotBaseTestCase, unittest.TestCase):
 
 class ConfigurationRegressionIntegrationTests(SSotBaseTestCase, unittest.TestCase):
     "
-    "
+    ""
+
     Integration tests for configuration regression prevention.
 "
-"
+""
+
     
     def setup_method(self, method=None):
         "Set up test environment."
@@ -438,7 +455,8 @@ class ConfigurationRegressionIntegrationTests(SSotBaseTestCase, unittest.TestCas
         }
     
     def test_cross_service_config_consistency(self):
-        ""
+        """
+
         Test that configuration is consistent across services.
 
         # This would normally import from actual services
@@ -476,10 +494,10 @@ class ConfigurationRegressionIntegrationTests(SSotBaseTestCase, unittest.TestCas
 if __name__ == __main__:
     # MIGRATED: Use SSOT unified test runner instead of direct pytest execution
     # Issue #1024: Unauthorized test runners blocking Golden Path
-    print("MIGRATION NOTICE: This file previously used direct pytest execution.")
+    print("MIGRATION NOTICE: This file previously used direct pytest execution.)"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)"
     print(Please use: python tests/unified_test_runner.py --category <appropriate_category>)"
-    print("For more info: reports/TEST_EXECUTION_GUIDE.md")
+    print("For more info: reports/TEST_EXECUTION_GUIDE.md)"
 
     # Uncomment and customize the following for SSOT execution:
     # result = run_tests_via_ssot_runner()

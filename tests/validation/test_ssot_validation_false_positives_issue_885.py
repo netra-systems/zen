@@ -264,7 +264,7 @@ class TestWebSocketManagerFunctionalSSOT(SSotBaseTestCase):
 
         # Both should be usable for WebSocket operations
         # (This is functional SSOT - unified interface despite architectural diversity)
-        print(f"✓ Functional SSOT achieved: {type(manager1).__name__}")
+        print(f"CHECK Functional SSOT achieved: {type(manager1).__name__}")
 
     def test_interface_consolidation_not_duplication(self):
         """
@@ -300,7 +300,7 @@ class TestWebSocketManagerFunctionalSSOT(SSotBaseTestCase):
         self.assertGreater(len(methods), 0,
                           "Protocol should define interface methods")
 
-        print(f"✓ Protocol defines {len(methods)} interface methods (good architecture)")
+        print(f"CHECK Protocol defines {len(methods)} interface methods (good architecture)")
 
     def test_factory_pattern_is_legitimate_architecture(self):
         """
@@ -482,7 +482,7 @@ class TestImprovedSSOTValidationLogic(SSotBaseTestCase):
         self.assertGreater(compliance_score, 85.0,
                           f"Improved validation should show high compliance: {compliance_score}%")
 
-        print(f"✓ Improved validation compliance score: {compliance_score}%")
+        print(f"CHECK Improved validation compliance score: {compliance_score}%")
 
     def test_improved_validation_detects_real_violations(self):
         """
@@ -506,7 +506,7 @@ class TestImprovedSSOTValidationLogic(SSotBaseTestCase):
         self.assertGreater(len(violations), 0,
                           "Improved validation should detect real violations")
 
-        print(f"✓ Improved validation detects {len(violations)} real violations")
+        print(f"CHECK Improved validation detects {len(violations)} real violations")
 
 
 class TestComplianceMetricCorrection(SSotBaseTestCase):
@@ -581,9 +581,9 @@ class TestComplianceMetricCorrection(SSotBaseTestCase):
         self.assertGreater(len(actionable_insights), 0,
                           "Metrics should provide actionable insights")
 
-        print(f"✓ Metric reliability: {metric_stability:.1%}")
-        print(f"✓ Metric accuracy: {metric_accuracy:.1%}")
-        print(f"✓ Actionable insights: {len(actionable_insights)}")
+        print(f"CHECK Metric reliability: {metric_stability:.1%}")
+        print(f"CHECK Metric accuracy: {metric_accuracy:.1%}")
+        print(f"CHECK Actionable insights: {len(actionable_insights)}")
 
     def _test_metric_stability(self) -> float:
         """Test that compliance metrics are stable across runs"""

@@ -1,22 +1,23 @@
 """
-"""
+
 Mission Critical: JWT SSOT Violations Blocking Golden Path
 
 MISSION CRITICAL: These tests detect SSOT violations that block Golden Path user flow.
 Issue #670 - P0 SSOT violations prevent proper JWT validation consolidation.
 
 CRITICAL BUSINESS IMPACT:
-- $500K+ ARR dependent on reliable authentication
+    - $500K+ plus ARR dependent on reliable authentication
 - Golden Path user flow requires consistent JWT validation
 - SSOT violations create authentication inconsistencies
 - Multiple JWT validation paths cause auth failures
 
 These tests are designed to FAIL initially, proving P0 SSOT violations block Golden Path.
 "
-"
+""
+
 
 """
-"""
+
 import asyncio
 import json
 import os
@@ -34,18 +35,20 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
     "
-    "
+    ""
+
     Mission critical tests that detect P0 SSOT violations blocking Golden Path.
     These tests MUST FAIL initially to prove violations exist and justify SSOT consolidation.
 "
-"
+""
+
 
     def setup_method(self, method):
         "Set up mission critical test environment."
         super().setup_method(method)
 
         # Test environment setup
-        self.set_env_var(ENVIRONMENT", "test)
+        self.set_env_var(ENVIRONMENT", test)"
         self.set_env_var(TESTING, true)
         self.set_env_var(JWT_SECRET_KEY, "test-secret-for-golden-path-testing)"
 
@@ -53,7 +56,7 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         self.golden_path_user = {
             user_id": fgolden_path_user_{uuid.uuid4().hex[:8]},"
             email: golden.path@netrasystems.ai,
-            permissions: ["chat, agents", read, write]
+            permissions: ["chat, agents, read, write]"
         }
 
         # Test JWT token for Golden Path validation
@@ -77,13 +80,13 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         payload = {
             sub": user_data[user_id],"
             email: user_data[email],
-            permissions": user_data["permissions],
+            permissions": user_data[permissions],"
             iat: int(time.time()),
             exp: int(time.time()) + 3600,  # 1 hour"
             exp: int(time.time()) + 3600,  # 1 hour"
             token_type": access,"
             iss: netra-auth-service,
-            aud": "netra-platform
+            aud": netra-platform"
         }
 
         # For testing, create a mock JWT token format
@@ -97,12 +100,14 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         ).decode().rstrip('=')
 
         signature = test_signature_for_golden_path"
-        signature = test_signature_for_golden_path"
+        signature = test_signature_for_golden_path""
+
         return f{header}.{payload_encoded}.{signature}
 
     def test_user_isolation_failures_due_to_jwt_violations(self):
-        "
-        "
+        """
+        ""
+
         CRITICAL TEST - DESIGNED TO FAIL
 
         Test that JWT SSOT violations cause user data leakage.
@@ -119,31 +124,32 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
 "
 "
         self.record_metric(user_isolation_test_started, True)"
-        self.record_metric(user_isolation_test_started, True)"
+        self.record_metric(user_isolation_test_started, True)""
+
 
         # Test multiple users with same JWT token processed differently
         test_users = [
             {user_id": user_a, email: user.a@test.com},"
-            {user_id": "user_b, email: user.b@test.com}
+            {user_id": user_b, email: user.b@test.com}"
         ]
 
         validation_results = {}
         isolation_violations = []
 
         # Test multiple JWT validation paths with same token
-        for i, validation_path in enumerate([path_1, "path_2, path_3"):
+        for i, validation_path in enumerate([path_1, "path_2, path_3):"
             try:
                 # Simulate different validation implementations
                 if validation_path == path_1:
                     # Simulate auth_client_core.validate_token
-                    result = {user_id": "user_a, source: auth_client_core}
+                    result = {user_id": user_a, source: auth_client_core}"
                 elif validation_path == path_2:"
                 elif validation_path == path_2:"
                     # Simulate user_auth_service.validate_token
                     result = {"user_id: user_b, source: user_auth_service}"
                 else:
                     # Simulate validators.validate_token
-                    result = {"user_id: user_a", source: validators}
+                    result = {"user_id: user_a, source: validators}"
 
                 validation_results[validation_path] = result
 
@@ -174,10 +180,11 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
             len(isolation_violations), 0,
             f\n🚨 MISSION CRITICAL USER ISOLATION VIOLATIONS:\n""
             f{'='*80}\n
-            fBUSINESS IMPACT: $500K+ ARR at risk from user data leakage\n
+            fBUSINESS IMPACT: $500K+ plus ARR at risk from user data leakage\n
             f"GOLDEN PATH IMPACT: Users may see other users' data\n"
             f{'='*80}\n"
-            f{'='*80}\n"
+            f{'='*80}\n""
+
             fISOLATION VIOLATIONS DETECTED:\n +
             '\n'.join(f  {i+1}. {violation} for i, violation in enumerate(isolation_violations)) +"
             '\n'.join(f  {i+1}. {violation} for i, violation in enumerate(isolation_violations)) +"
@@ -187,7 +194,8 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         )
 
     def test_websocket_authentication_inconsistency_violations(self):
-        ""
+        """
+
         CRITICAL TEST - DESIGNED TO FAIL
 
         Test WebSocket auth bypassing auth service SSOT.
@@ -259,14 +267,15 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
             auth_consistency_violations.append(
                 f"Backend files with JWT validation functions: {jwt_function_files}."
                 fOnly auth service should contain JWT validation functions."
-                fOnly auth service should contain JWT validation functions."
+                fOnly auth service should contain JWT validation functions.""
+
             )
 
         # Test 3: Simulate auth consistency between WebSocket and API
-        websocket_auth_result = {valid: True, user_id: "user_ws, source": websocket}
-        api_auth_result = {valid: True, "user_id: user_api", source: api}
+        websocket_auth_result = {valid: True, user_id: "user_ws, source: websocket}"
+        api_auth_result = {valid: True, "user_id: user_api, source: api}"
 
-        if websocket_auth_result["user_id] != api_auth_result[user_id"]:
+        if websocket_auth_result["user_id] != api_auth_result[user_id]:"
             auth_consistency_violations.append(
                 fWebSocket and API auth return different user IDs for same token: 
                 fWebSocket={websocket_auth_result['user_id']}, API={api_auth_result['user_id']}. 
@@ -277,7 +286,8 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         self.assertEqual(
             len(auth_consistency_violations), 0,
             f\n🚨 MISSION CRITICAL WEBSOCKET AUTH CONSISTENCY VIOLATIONS:\n"
-            f\n🚨 MISSION CRITICAL WEBSOCKET AUTH CONSISTENCY VIOLATIONS:\n"
+            f\n🚨 MISSION CRITICAL WEBSOCKET AUTH CONSISTENCY VIOLATIONS:\n""
+
             f{'='*80}\n
             fGOLDEN PATH IMPACT: WebSocket auth inconsistencies break chat flow\n"
             fGOLDEN PATH IMPACT: WebSocket auth inconsistencies break chat flow\n"
@@ -291,8 +301,9 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         )
 
     def test_jwt_secret_mismatch_authentication_failures(self):
-        "
-        "
+        """
+        ""
+
         CRITICAL TEST - DESIGNED TO FAIL
 
         Test different JWT secrets causing authentication failures.
@@ -320,7 +331,8 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
             os.environ.get.*JWT,"
             os.environ.get.*JWT,"
             env.get.*JWT"
-            env.get.*JWT"
+            env.get.*JWT""
+
         ]
 
         files_with_secret_access = []
@@ -355,7 +367,8 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
                 fBackend files directly accessing JWT secrets: 
                 f"{[item['file'] + ':' + ','.join(item['patterns'] for item in files_with_secret_access])."
                 fOnly auth service should access JWT secrets."
-                fOnly auth service should access JWT secrets."
+                fOnly auth service should access JWT secrets.""
+
             )
 
         # Test 2: Check for multiple JWT configuration patterns
@@ -397,7 +410,8 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
 
         # Simulate validation with different secret sources
         secret_sources = [backend_env, auth_config, direct_environ]"
-        secret_sources = [backend_env, auth_config, direct_environ]"
+        secret_sources = [backend_env, auth_config, direct_environ]""
+
         for source in secret_sources:
             try:
                 # In real implementation, would test actual validation
@@ -432,7 +446,8 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
             f{'='*80}\n
             f"SECURITY IMPACT: Multiple JWT secret access points create vulnerabilities\n"
             fGOLDEN PATH IMPACT: Secret mismatches cause authentication failures\n"
-            fGOLDEN PATH IMPACT: Secret mismatches cause authentication failures\n"
+            fGOLDEN PATH IMPACT: Secret mismatches cause authentication failures\n""
+
             f{'='*80}\n
             fSECRET ACCESS VIOLATIONS:\n +"
             fSECRET ACCESS VIOLATIONS:\n +"
@@ -447,7 +462,7 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         CRITICAL TEST - DESIGNED TO FAIL
 
         Test complete Golden Path authentication flow with JWT SSOT violations.
-        Violations should break the critical user journey: login → websocket → agent → response.
+        Violations should break the critical user journey: login -> websocket -> agent -> response.
 
         CRITICAL VIOLATIONS:
         1. Authentication inconsistencies prevent WebSocket connection
@@ -469,7 +484,8 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         login_token = self.golden_path_token
         if not login_token or len(login_token.split('.')) != 3:
             golden_path_failures.append(Step 1 FAILED: JWT token creation malformed)"
-            golden_path_failures.append(Step 1 FAILED: JWT token creation malformed)"
+            golden_path_failures.append(Step 1 FAILED: JWT token creation malformed)""
+
             login_success = False
 
         # Step 2: WebSocket authentication with JWT
@@ -480,8 +496,8 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
                 # Multiple validation paths would return different results
                 auth_attempts = [
                     {method": websocket_direct, result: user_ws},"
-                    {method": "auth_service_delegate, result: user_auth},
-                    {method: "fallback_validation, result": user_fallback}
+                    {method": auth_service_delegate, result: user_auth},"
+                    {method: "fallback_validation, result: user_fallback}"
                 ]
 
                 unique_results = set(attempt[result] for attempt in auth_attempts)
@@ -500,11 +516,12 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         if websocket_auth_success:
             try:
                 # Simulate agent execution - would fail if auth context inconsistent
-                agent_auth_validation = {user_id: user_agent, "permissions: [chat"]}
+                agent_auth_validation = {user_id: user_agent, "permissions: [chat]}"
                 websocket_user_id = user_ws  # From Step 2
 
                 if agent_auth_validation[user_id] != websocket_user_id:"
-                if agent_auth_validation[user_id] != websocket_user_id:"
+                if agent_auth_validation[user_id] != websocket_user_id:""
+
                     golden_path_failures.append(
                         f"Step 3 FAILED: Agent auth user ID ({agent_auth_validation['user_id'])"
                         fdiffers from WebSocket user ID ({websocket_user_id)
@@ -520,11 +537,11 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
         if agent_execution_success:
             try:
                 # Simulate WebSocket event delivery - requires consistent auth throughout
-                critical_events = [agent_started", "agent_thinking, agent_completed]
+                critical_events = [agent_started", agent_thinking, agent_completed]"
 
                 for event in critical_events:
                     # Each event delivery requires auth validation
-                    event_auth_check = {user_id: user_event", "event: event}
+                    event_auth_check = {user_id: user_event", event: event}"
 
                     # JWT violations would cause event auth to fail or return wrong user
                     if event_auth_check[user_id] != user_agent:
@@ -580,8 +597,8 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
             len(golden_path_failures), 0,
             f\n🚨 MISSION CRITICAL GOLDEN PATH BREAKDOWN:\n
             f{'='*80}\n
-            fBUSINESS IMPACT: $500K+ ARR Golden Path broken by JWT violations\n""
-            fUSER IMPACT: Users cannot complete login → AI response journey\n
+            fBUSINESS IMPACT: $500K+ plus ARR Golden Path broken by JWT violations\n""
+            fUSER IMPACT: Users cannot complete login -> AI response journey\n
             fCOMPLETION RATE: {completion_rate}% (Target: 100%)\n
             f"{'='*80}\n"
             fGOLDEN PATH FAILURES:\n" +"
@@ -595,6 +612,7 @@ class JWTSSOTGoldenPathViolationsTests(SSotAsyncTestCase):
     def teardown_method(self, method):
         Clean up mission critical test environment."""
         Clean up mission critical test environment."""
+
         super().teardown_method(method)
 
 

@@ -58,7 +58,7 @@ class SimpleSsotMigrationValidator:
         print(f"\n1. Scanning directory: {self.mission_critical_dir}")
         
         if not self.mission_critical_dir.exists():
-            print(f"   ❌ ERROR: Directory not found: {self.mission_critical_dir}")
+            print(f"   X ERROR: Directory not found: {self.mission_critical_dir}")
             return self.results
         
         for test_file in self.mission_critical_dir.glob("test_*.py"):
@@ -96,10 +96,10 @@ class SimpleSsotMigrationValidator:
         print(f"   Actual legacy files: {actual_legacy_files}")
         
         if actual_legacy_files == expected_legacy_files:
-            print("   ✅ File count matches Issue #1097 audit")
+            print("   CHECK File count matches Issue #1097 audit")
             self.results["validation_passed"] = True
         elif actual_legacy_files > expected_legacy_files:
-            print("   ⚠️  More files found than expected")
+            print("   WARNING️  More files found than expected")
             print("   Additional files may have been added since audit")
             self.results["validation_passed"] = True
         elif actual_legacy_files < expected_legacy_files:
@@ -107,7 +107,7 @@ class SimpleSsotMigrationValidator:
             print("   Some files may already be migrated!")
             self.results["validation_passed"] = True
         else:
-            print("   ❌ Unexpected file count")
+            print("   X Unexpected file count")
         
         print(f"\n4. Files requiring SSOT migration:")
         for legacy_file in sorted(self.results["legacy_files"]):
@@ -211,7 +211,7 @@ class SimpleSsotMigrationValidator:
             print("   🎉 No legacy files found - migration appears complete!")
             migration_ready = True
         elif total_legacy <= 5:
-            print(f"   ✅ {total_legacy} files remaining - migration nearly complete")
+            print(f"   CHECK {total_legacy} files remaining - migration nearly complete")
             migration_ready = True
         else:
             print(f"   📋 {total_legacy} files need migration - ready to proceed")
@@ -239,7 +239,7 @@ class SimpleSsotMigrationValidator:
         
         # Check if SSOT base test case exists
         if ssot_infrastructure["base_test_case_file"].exists():
-            print(f"   ✅ SSOT base test case found: {ssot_infrastructure['base_test_case_file']}")
+            print(f"   CHECK SSOT base test case found: {ssot_infrastructure['base_test_case_file']}")
             
             try:
                 content = ssot_infrastructure["base_test_case_file"].read_text()
@@ -259,9 +259,9 @@ class SimpleSsotMigrationValidator:
                 for pattern in required_patterns:
                     if pattern in content:
                         patterns_found += 1
-                        print(f"   ✅ {pattern}: Found")
+                        print(f"   CHECK {pattern}: Found")
                     else:
-                        print(f"   ❌ {pattern}: Missing")
+                        print(f"   X {pattern}: Missing")
                 
                 ssot_infrastructure["ssot_patterns_available"] = patterns_found >= len(required_patterns) - 1
                 
@@ -274,9 +274,9 @@ class SimpleSsotMigrationValidator:
                 print(f"   Environment isolation: {env_found}/{len(env_patterns)}")
                 
             except Exception as e:
-                print(f"   ❌ Error reading SSOT base test case: {e}")
+                print(f"   X Error reading SSOT base test case: {e}")
         else:
-            print(f"   ❌ SSOT base test case not found: {ssot_infrastructure['base_test_case_file']}")
+            print(f"   X SSOT base test case not found: {ssot_infrastructure['base_test_case_file']}")
         
         print(f"\n2. Migration Compatibility Assessment:")
         
@@ -291,17 +291,17 @@ class SimpleSsotMigrationValidator:
         ssot_infrastructure["migration_compatible"] = compatibility_score >= 2
         
         if ssot_infrastructure["migration_compatible"]:
-            print("   ✅ SSOT infrastructure is migration-compatible")
-            print("   ✅ Migration can proceed safely")
+            print("   CHECK SSOT infrastructure is migration-compatible")
+            print("   CHECK Migration can proceed safely")
         else:
-            print("   ⚠️  SSOT infrastructure may need updates")
-            print("   ⚠️  Review infrastructure before migration")
+            print("   WARNING️  SSOT infrastructure may need updates")
+            print("   WARNING️  Review infrastructure before migration")
         
         print(f"\n3. Infrastructure Summary:")
-        print(f"   SSOT base class: {'✅' if ssot_infrastructure['base_test_case_file'].exists() else '❌'}")
-        print(f"   SSOT patterns: {'✅' if ssot_infrastructure['ssot_patterns_available'] else '❌'}")
-        print(f"   Environment isolation: {'✅' if ssot_infrastructure['environment_isolation_available'] else '❌'}")
-        print(f"   Migration ready: {'✅' if ssot_infrastructure['migration_compatible'] else '❌'}")
+        print(f"   SSOT base class: {'CHECK' if ssot_infrastructure['base_test_case_file'].exists() else 'X'}")
+        print(f"   SSOT patterns: {'CHECK' if ssot_infrastructure['ssot_patterns_available'] else 'X'}")
+        print(f"   Environment isolation: {'CHECK' if ssot_infrastructure['environment_isolation_available'] else 'X'}")
+        print(f"   Migration ready: {'CHECK' if ssot_infrastructure['migration_compatible'] else 'X'}")
         
         self.results["ssot_infrastructure"] = ssot_infrastructure
         
@@ -315,7 +315,7 @@ class SimpleSsotMigrationValidator:
         print("="*70)
         
         if not self.results.get("migration_ready", False):
-            print("   ❌ Migration not ready - run analysis first")
+            print("   X Migration not ready - run analysis first")
             return {}
         
         complexity = self.results.get("complexity_assessment", {})
@@ -399,28 +399,28 @@ class SimpleSsotMigrationValidator:
             self.analyze_current_state()
             
             if not self.results["validation_passed"]:
-                print("\n❌ Current state validation failed")
+                print("\nX Current state validation failed")
                 return False
             
             # Step 2: Validate migration patterns
             patterns_ready = self.validate_migration_patterns()
             
             if not patterns_ready:
-                print("\n❌ Migration patterns validation failed")
+                print("\nX Migration patterns validation failed")
                 return False
             
             # Step 3: Validate SSOT infrastructure
             infrastructure_ready = self.validate_ssot_infrastructure()
             
             if not infrastructure_ready:
-                print("\n⚠️  SSOT infrastructure needs attention")
+                print("\nWARNING️  SSOT infrastructure needs attention")
                 # Don't fail here, just warn
             
             # Step 4: Generate migration plan
             migration_plan = self.generate_migration_plan()
             
             if not migration_plan:
-                print("\n❌ Migration plan generation failed")
+                print("\nX Migration plan generation failed")
                 return False
             
             # Final summary
@@ -428,11 +428,11 @@ class SimpleSsotMigrationValidator:
             print("FINAL VALIDATION SUMMARY")
             print("="*70)
             
-            print(f"✅ Current state analyzed: {self.results['total_files']} total files")
-            print(f"✅ Legacy files identified: {len(self.results['legacy_files'])}")
-            print(f"✅ Migration patterns validated: {patterns_ready}")
-            print(f"✅ SSOT infrastructure checked: {infrastructure_ready}")
-            print(f"✅ Migration plan generated: {len(migration_plan.get('phases', []))} phases")
+            print(f"CHECK Current state analyzed: {self.results['total_files']} total files")
+            print(f"CHECK Legacy files identified: {len(self.results['legacy_files'])}")
+            print(f"CHECK Migration patterns validated: {patterns_ready}")
+            print(f"CHECK SSOT infrastructure checked: {infrastructure_ready}")
+            print(f"CHECK Migration plan generated: {len(migration_plan.get('phases', []))} phases")
             
             overall_ready = (
                 self.results["validation_passed"] and
@@ -446,13 +446,13 @@ class SimpleSsotMigrationValidator:
                 print("   Migration plan is comprehensive")
                 print("   Risk mitigation strategies defined")
             else:
-                print("\n⚠️  MIGRATION NEEDS ATTENTION")
+                print("\nWARNING️  MIGRATION NEEDS ATTENTION")
                 print("   Some validation checks need resolution")
             
             return overall_ready
             
         except Exception as e:
-            print(f"\n❌ Validation failed with error: {e}")
+            print(f"\nX Validation failed with error: {e}")
             return False
 
 
@@ -468,11 +468,11 @@ def main():
     
     # Exit with appropriate code
     if success:
-        print("\n✅ SSOT Migration validation completed successfully!")
+        print("\nCHECK SSOT Migration validation completed successfully!")
         print("   Ready to proceed with Issue #1097 migration.")
         sys.exit(0)
     else:
-        print("\n❌ SSOT Migration validation completed with issues.")
+        print("\nX SSOT Migration validation completed with issues.")
         print("   Review validation results before proceeding.")
         sys.exit(1)
 

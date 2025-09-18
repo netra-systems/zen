@@ -276,42 +276,42 @@ if __name__ == "__main__":
 
     print("Testing chat orchestrator imports...")
     test.test_chat_orchestrator_imports()
-    print("✓ Chat orchestrator imports successful")
+    print("CHECK Chat orchestrator imports successful")
 
     print("Testing agent imports...")
     test.test_agent_imports()
-    print("✓ Agent imports successful")
+    print("CHECK Agent imports successful")
 
     print("Testing domain expert imports...")
     test.test_domain_expert_imports()
-    print("✓ Domain expert imports successful")
+    print("CHECK Domain expert imports successful")
 
     print("Testing tools imports...")
     test.test_tools_imports()
-    print("✓ Tools imports successful")
+    print("CHECK Tools imports successful")
 
     print("Testing guardrails imports...")
     test.test_guardrails_imports()
-    print("✓ Guardrails imports successful")
+    print("CHECK Guardrails imports successful")
 
     print("Testing semantic cache import...")
     test.test_semantic_cache_import()
-    print("✓ Semantic cache import successful")
+    print("CHECK Semantic cache import successful")
 
     print("Testing cross-module imports...")
     test.test_cross_module_imports()
-    print("✓ Cross-module imports successful")
+    print("CHECK Cross-module imports successful")
 
     print("Testing enum imports...")
     test.test_enum_imports()
-    print("✓ Enum imports successful")
+    print("CHECK Enum imports successful")
 
     print("Testing instantiation...")
     test.test_instantiation_without_dependencies()
-    print("✓ Instantiation successful")
+    print("CHECK Instantiation successful")
 
     print("Testing function-scoped imports...")
     test_all_imports_in_function()
-    print("✓ Function-scoped imports successful")
+    print("CHECK Function-scoped imports successful")
 
-    print("✓ All import tests passed!")
+    print("CHECK All import tests passed!")

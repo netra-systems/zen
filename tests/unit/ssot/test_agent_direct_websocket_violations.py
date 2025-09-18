@@ -280,7 +280,7 @@ class AgentDirectWebSocketViolationsTests(SSotBaseTestCase):
         # Violation detection requires zero direct instantiation
         if violation_instances > 0:
             failure_message = [
-                f"❌ DIRECT WEBSOCKET INSTANTIATION VIOLATIONS DETECTED ❌",
+                f"X DIRECT WEBSOCKET INSTANTIATION VIOLATIONS DETECTED X",
                 f"",
                 f"Found {violation_instances} direct WebSocket instantiation patterns across {violation_files} agent files.",
                 f"These violations break user isolation and must be eliminated.",
@@ -306,12 +306,12 @@ class AgentDirectWebSocketViolationsTests(SSotBaseTestCase):
                 f"",
                 f"🔧 BRIDGE PATTERN REMEDIATION:",
                 f"",
-                f"❌ ELIMINATE DIRECT INSTANTIATION:",
+                f"X ELIMINATE DIRECT INSTANTIATION:",
                 f"   websocket_manager = WebSocketManager()",
                 f"   manager = get_websocket_manager()",
                 f"   self.websocket_manager = WebSocketManager(config)",
                 f"",
-                f"✅ USE BRIDGE PATTERN:",
+                f"CHECK USE BRIDGE PATTERN:",
                 f"   # Get bridge from registry instead",
                 f"   bridge = await registry.get_websocket_bridge(user_id)",
                 f"   # Use bridge for all WebSocket operations",
@@ -334,8 +334,8 @@ class AgentDirectWebSocketViolationsTests(SSotBaseTestCase):
 
         # Success state
         self.record_metric("direct_instantiation_eliminated", True)
-        print("✅ NO DIRECT WEBSOCKET INSTANTIATION IN AGENTS")
-        print("✅ All WebSocket access through bridge pattern")
+        print("CHECK NO DIRECT WEBSOCKET INSTANTIATION IN AGENTS")
+        print("CHECK All WebSocket access through bridge pattern")
 
     def test_no_direct_websocket_method_calls_in_agents(self):
         """
@@ -410,7 +410,7 @@ class AgentDirectWebSocketViolationsTests(SSotBaseTestCase):
         # Method call violation detection requires zero direct calls
         if violation_instances > 0:
             failure_message = [
-                f"❌ DIRECT WEBSOCKET METHOD CALL VIOLATIONS DETECTED ❌",
+                f"X DIRECT WEBSOCKET METHOD CALL VIOLATIONS DETECTED X",
                 f"",
                 f"Found {violation_instances} direct websocket_manager.send_* calls across {violation_files} agent files.",
                 f"These direct calls bypass user isolation and violate bridge pattern requirements.",
@@ -439,12 +439,12 @@ class AgentDirectWebSocketViolationsTests(SSotBaseTestCase):
                 f"",
                 f"🔧 BRIDGE METHOD CALL CONVERSION:",
                 f"",
-                f"❌ ELIMINATE DIRECT CALLS:",
+                f"X ELIMINATE DIRECT CALLS:",
                 f"   await websocket_manager.send_agent_started(...)",
                 f"   await self.websocket_manager.send_agent_thinking(...)",
                 f"   websocket_manager.send_tool_executing(...)",
                 f"",
-                f"✅ USE BRIDGE CALLS:",
+                f"CHECK USE BRIDGE CALLS:",
                 f"   bridge = await registry.get_websocket_bridge(user_id)",
                 f"   await bridge.send_agent_started(...)",
                 f"   await bridge.send_agent_thinking(...)",
@@ -468,8 +468,8 @@ class AgentDirectWebSocketViolationsTests(SSotBaseTestCase):
 
         # Success state
         self.record_metric("direct_method_calls_eliminated", True)
-        print("✅ NO DIRECT WEBSOCKET METHOD CALLS IN AGENTS")
-        print(f"✅ Known Pattern Detection: {detection_ratio:.1%}")
+        print("CHECK NO DIRECT WEBSOCKET METHOD CALLS IN AGENTS")
+        print(f"CHECK Known Pattern Detection: {detection_ratio:.1%}")
 
     def test_no_websocket_constructor_parameters_in_agents(self):
         """
@@ -537,7 +537,7 @@ class AgentDirectWebSocketViolationsTests(SSotBaseTestCase):
         # Constructor parameter violation detection requires zero WebSocket parameters
         if total_violation_instances > 0:
             failure_message = [
-                f"❌ WEBSOCKET CONSTRUCTOR PARAMETER VIOLATIONS DETECTED ❌",
+                f"X WEBSOCKET CONSTRUCTOR PARAMETER VIOLATIONS DETECTED X",
                 f"",
                 f"Found {total_violation_instances} WebSocket constructor parameters across {total_violation_files} agent files.",
                 f"These parameters violate dependency injection patterns and prevent proper user isolation.",
@@ -577,12 +577,12 @@ class AgentDirectWebSocketViolationsTests(SSotBaseTestCase):
                 f"",
                 f"🔧 CONSTRUCTOR DEPENDENCY INJECTION REMEDIATION:",
                 f"",
-                f"❌ ELIMINATE WEBSOCKET PARAMETERS:",
+                f"X ELIMINATE WEBSOCKET PARAMETERS:",
                 f"   def __init__(self, websocket_manager: WebSocketManager, ...):",
                 f"   def __init__(self, websocket_manager: Optional[WebSocketManager] = None, ...):",
                 f"   def __init__(self, ..., websocket_manager, ...):",
                 f"",
-                f"✅ USE REGISTRY INJECTION:",
+                f"CHECK USE REGISTRY INJECTION:",
                 f"   def __init__(self, registry: AgentRegistry, ...):",
                 f"       self.registry = registry",
                 f"       # Bridge accessed dynamically per user",
@@ -605,8 +605,8 @@ class AgentDirectWebSocketViolationsTests(SSotBaseTestCase):
 
         # Success state
         self.record_metric("constructor_parameters_eliminated", True)
-        print("✅ NO WEBSOCKET CONSTRUCTOR PARAMETERS IN AGENTS")
-        print("✅ All agents use registry-based dependency injection")
+        print("CHECK NO WEBSOCKET CONSTRUCTOR PARAMETERS IN AGENTS")
+        print("CHECK All agents use registry-based dependency injection")
 
     def test_no_context_websocket_access_patterns_in_agents(self):
         """
@@ -653,7 +653,7 @@ class AgentDirectWebSocketViolationsTests(SSotBaseTestCase):
         # Context access violation detection requires zero context WebSocket access
         if violation_instances > 0:
             failure_message = [
-                f"❌ CONTEXT WEBSOCKET ACCESS VIOLATIONS DETECTED ❌",
+                f"X CONTEXT WEBSOCKET ACCESS VIOLATIONS DETECTED X",
                 f"",
                 f"Found {violation_instances} context WebSocket access patterns across {violation_files} agent files.",
                 f"These patterns bypass bridge isolation and violate user separation requirements.",
@@ -679,13 +679,13 @@ class AgentDirectWebSocketViolationsTests(SSotBaseTestCase):
                 f"",
                 f"🔧 CONTEXT ACCESS REMEDIATION:",
                 f"",
-                f"❌ ELIMINATE CONTEXT WEBSOCKET ACCESS:",
+                f"X ELIMINATE CONTEXT WEBSOCKET ACCESS:",
                 f"   await context.websocket_manager.send_*(...)",
                 f"   self.context.websocket_manager.send_*(...)",
                 f"   execution_context.websocket_manager.send_*(...)",
                 f"   user_context.websocket_manager.send_*(...)",
                 f"",
-                f"✅ USE REGISTRY BRIDGE ACCESS:",
+                f"CHECK USE REGISTRY BRIDGE ACCESS:",
                 f"   bridge = await self.registry.get_websocket_bridge(user_id)",
                 f"   await bridge.send_*(...)",
                 f"",
@@ -707,8 +707,8 @@ class AgentDirectWebSocketViolationsTests(SSotBaseTestCase):
 
         # Success state
         self.record_metric("context_access_eliminated", True)
-        print("✅ NO CONTEXT WEBSOCKET ACCESS IN AGENTS")
-        print("✅ All WebSocket access through proper bridge pattern")
+        print("CHECK NO CONTEXT WEBSOCKET ACCESS IN AGENTS")
+        print("CHECK All WebSocket access through proper bridge pattern")
 
     def test_agent_websocket_anti_pattern_comprehensive_validation(self):
         """
@@ -801,7 +801,7 @@ class AgentDirectWebSocketViolationsTests(SSotBaseTestCase):
 
         if failed_requirements:
             failure_message = [
-                f"❌ AGENT WEBSOCKET ANTI-PATTERN ELIMINATION VALIDATION FAILED ❌",
+                f"X AGENT WEBSOCKET ANTI-PATTERN ELIMINATION VALIDATION FAILED X",
                 f"",
                 f"Anti-Pattern Elimination Score: {anti_pattern_elimination_score:.1f}% (Target: 100%)",
                 f"",
@@ -821,7 +821,7 @@ class AgentDirectWebSocketViolationsTests(SSotBaseTestCase):
             failure_message.append(f"FAILED REQUIREMENTS:")
 
             for requirement in failed_requirements:
-                failure_message.append(f"❌ {requirement}")
+                failure_message.append(f"X {requirement}")
 
             failure_message.extend([
                 f"",
@@ -846,9 +846,9 @@ class AgentDirectWebSocketViolationsTests(SSotBaseTestCase):
         self.record_metric("agent_websocket_anti_patterns_eliminated", True)
 
         print("🏆 AGENT WEBSOCKET ANTI-PATTERN ELIMINATION COMPLETE")
-        print(f"✅ Anti-Pattern Elimination Score: {anti_pattern_elimination_score:.1f}%")
-        print("✅ All anti-pattern requirements satisfied")
-        print("✅ Bridge pattern compliance achieved across all agents")
+        print(f"CHECK Anti-Pattern Elimination Score: {anti_pattern_elimination_score:.1f}%")
+        print("CHECK All anti-pattern requirements satisfied")
+        print("CHECK Bridge pattern compliance achieved across all agents")
 
     def teardown_method(self, method=None):
         """Clean up after agent direct WebSocket violation tests."""

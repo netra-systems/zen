@@ -9,7 +9,7 @@ Business Value Justification:
 - Strategic Impact: Enables cleanup of unused legacy code while protecting Golden Path
 
 CRITICAL MISSION: These tests ensure that removing the SingletonToFactoryBridge
-doesn't break the Golden Path: users login → get AI responses
+doesn't break the Golden Path: users login -> get AI responses
 
 Test Strategy:
 1. Verify bridge is completely unused (no imports, no calls)
@@ -286,7 +286,7 @@ class TestSingletonBridgeRemovalValidation(SSotBaseTestCase):
 
     def test_golden_path_integrity_without_bridge(self):
         """
-        CRITICAL: Test that Golden Path (users login → get AI responses) works without bridge.
+        CRITICAL: Test that Golden Path (users login -> get AI responses) works without bridge.
 
         This is the ultimate validation that bridge removal won't break the core user flow.
         """

@@ -435,7 +435,7 @@ class Issue1263StagingStartupReproductionE2ETests(SSotAsyncTestCase):
                     f"expected < 20.0s for reliable user experience"
                 )
 
-                logger.info(f"✅ Golden Path validation successful: {total_golden_path_time:.2f}s total")
+                logger.info(f"CHECK Golden Path validation successful: {total_golden_path_time:.2f}s total")
 
         except Exception as e:
             golden_path_time = time.time() - golden_path_start

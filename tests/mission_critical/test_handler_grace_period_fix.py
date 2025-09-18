@@ -1,5 +1,5 @@
 """
-"""
+
 Test Handler Registration Grace Period Fix
 
 This test validates that the startup grace period prevents false ZERO handlers" warnings"
@@ -7,12 +7,12 @@ during normal application startup.
 
 CRITICAL: This test ensures startup stability by validating grace period behavior.
 """
-"""
+
 
 """
 """
 """
-"""
+
 import time
 import pytest
 from shared.isolated_environment import IsolatedEnvironment
@@ -33,9 +33,9 @@ class HandlerRegistrationGracePeriodTests:
         router = MessageRouter()
         
         # Should have startup time tracking
-        assert hasattr(router, 'startup_time')
-        assert hasattr(router, 'startup_grace_period_seconds')
-        assert hasattr(router, 'check_handler_status_with_grace_period')
+        assert hasattr(router, "'startup_time')"
+        assert hasattr(router, "'startup_grace_period_seconds')"
+        assert hasattr(router, "'check_handler_status_with_grace_period')"
         
         # Startup time should be recent (within last few seconds)
         current_time = time.time()
@@ -46,7 +46,8 @@ class HandlerRegistrationGracePeriodTests:
 
     def test_grace_period_status_during_startup(self):
         Test that status returns 'initializing' during grace period."
-        Test that status returns 'initializing' during grace period."
+        Test that status returns 'initializing' during grace period.""
+
         router = MessageRouter()
         
         # Clear handlers to simulate zero handlers during startup
@@ -61,7 +62,8 @@ class HandlerRegistrationGracePeriodTests:
         assert status["grace_period_active] is True"
         assert Startup in progress in status[message]
         assert status[elapsed_seconds] < router.startup_grace_period_seconds"
-        assert status[elapsed_seconds] < router.startup_grace_period_seconds"
+        assert status[elapsed_seconds] < router.startup_grace_period_seconds""
+
         
         # Restore handlers
         router.handlers = original_handlers
@@ -73,7 +75,7 @@ class HandlerRegistrationGracePeriodTests:
         # Should have default handlers
         status = router.check_handler_status_with_grace_period()
         
-        assert status[status"] == "initializing
+        assert status[status"] == initializing"
         assert status[handler_count] > 0
         assert status[grace_period_active] is True"
         assert status[grace_period_active] is True"
@@ -83,7 +85,8 @@ class HandlerRegistrationGracePeriodTests:
 
     def test_grace_period_expired_with_zero_handlers(self):
         Test that warnings appear after grace period expires with zero handlers."
-        Test that warnings appear after grace period expires with zero handlers."
+        Test that warnings appear after grace period expires with zero handlers.""
+
         router = MessageRouter()
         
         # Clear handlers and simulate expired grace period
@@ -99,7 +102,8 @@ class HandlerRegistrationGracePeriodTests:
             assert status[grace_period_active"] is False"
             assert No handlers registered after in status[message]
             assert status[elapsed_seconds] > router.startup_grace_period_seconds"
-            assert status[elapsed_seconds] > router.startup_grace_period_seconds"
+            assert status[elapsed_seconds] > router.startup_grace_period_seconds""
+
             
             # Should have logged a warning
             mock_logger.warning.assert_called_once()
@@ -133,11 +137,13 @@ class HandlerRegistrationGracePeriodTests:
         router.handlers.clear()
         
         # Get status during grace period - should be initializing"
-        # Get status during grace period - should be initializing"
+        # Get status during grace period - should be initializing""
+
         status = router.check_handler_status_with_grace_period()
         assert status[status] == initializing
         assert status[grace_period_active] is True"
-        assert status[grace_period_active] is True"
+        assert status[grace_period_active] is True""
+
         
         # This demonstrates that during grace period, we get initializing" instead of error"
         # The validator code has been updated to handle this case and log info instead of error
@@ -158,7 +164,8 @@ class HandlerRegistrationGracePeriodTests:
             
             assert status[status] == error
             assert status[grace_period_active] is False"
-            assert status[grace_period_active] is False"
+            assert status[grace_period_active] is False""
+
             
             # Should have logged a warning about zero handlers
             mock_logger.warning.assert_called_once()
@@ -173,7 +180,8 @@ class HandlerRegistrationGracePeriodTests:
         
         assert handler_status in stats
         handler_status = stats[handler_status]"
-        handler_status = stats[handler_status]"
+        handler_status = stats[handler_status]""
+
         
         # Should have all the expected fields
         assert status" in handler_status"
@@ -181,13 +189,14 @@ class HandlerRegistrationGracePeriodTests:
         assert elapsed_seconds" in handler_status"
         assert grace_period_active in handler_status
         assert message in handler_status"
-        assert message in handler_status"
+        assert message in handler_status""
+
         
         # During startup, should be initializing
         if handler_status["grace_period_active]:"
             assert handler_status[status] == initializing
         else:
-            assert handler_status[status"] in ["ready, error]
+            assert handler_status[status"] in ["ready, "error]"
 
 
 @pytest.mark.integration
@@ -203,8 +212,8 @@ class GracePeriodIntegrationTests:
         # Get fresh router - should have grace period tracking
         router = get_message_router()
         
-        assert hasattr(router, 'startup_time')
-        assert hasattr(router, 'check_handler_status_with_grace_period')
+        assert hasattr(router, "'startup_time')"
+        assert hasattr(router, "'check_handler_status_with_grace_period')"
         
         # Should be in grace period initially
         status = router.check_handler_status_with_grace_period()
@@ -213,10 +222,11 @@ class GracePeriodIntegrationTests:
         # Should be very recent startup
         assert elapsed < 2.0  # Should be very fresh
         assert status[grace_period_active] is True"
-        assert status[grace_period_active] is True"
+        assert status[grace_period_active] is True""
 
 
-if __name__ == "__main__":
+
+if __name__ == "__main__:"
     # MIGRATED: Use SSOT unified test runner
     # python tests/unified_test_runner.py --category unit
     pass  # TODO: Replace with appropriate SSOT test execution

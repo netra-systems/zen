@@ -1,21 +1,22 @@
 """
-"""
+
 Issue #519: Pytest Configuration Conflicts - Mission Critical Test Suite
 
 This test suite reproduces and validates pytest configuration conflicts that are blocking
 """
-"""
+
 the Mission Critical WebSocket Test Suite from running properly.
 
 Root Cause Analysis:
-- Duplicate --analyze-service-deps option definition (wildcard import + plugin auto-discovery)  
+    - Duplicate --analyze-service-deps option definition (wildcard import + plugin auto-discovery)  
 - Deprecated collect_ignore configuration patterns
 - Plugin loading conflicts from conftest.py wildcard imports
 
-Business Impact: HIGH - Blocking $500K+ ARR validation through Mission Critical tests
+Business Impact: HIGH - Blocking $500K+ plus ARR validation through Mission Critical tests
 Priority: P0 - Must resolve to protect business value
 "
-"
+""
+
 
 import subprocess
 import sys
@@ -93,7 +94,7 @@ class PytestConfigConflictsTests:
         
         # Verify it's specifically an option conflict'
         assert any(keyword in result.stderr.lower() for keyword in [
-            "already added, conflict", duplicate, option
+            "already added, conflict, duplicate, option"
         ), (
             fExpected option conflict error in stderr, but got:\n
             fSTDERR: {result.stderr}""
@@ -101,7 +102,8 @@ class PytestConfigConflictsTests:
 
     def test_phase1_reproduce_wildcard_import_issue(self):
         PHASE 1: Reproduce wildcard import causing plugin conflicts."
-        PHASE 1: Reproduce wildcard import causing plugin conflicts."
+        PHASE 1: Reproduce wildcard import causing plugin conflicts.""
+
         
         The issue is in /tests/conftest.py line 58:
         from test_framework.ssot.pytest_no_docker_plugin import *
@@ -125,7 +127,8 @@ class PytestConfigConflictsTests:
         # Verify the plugin defines pytest_addoption
         plugin_path = Path(__file__).parent.parent.parent / test_framework/ssot/pytest_no_docker_plugin.py
         assert plugin_path.exists(), fPlugin file not found at {plugin_path}"
-        assert plugin_path.exists(), fPlugin file not found at {plugin_path}"
+        assert plugin_path.exists(), fPlugin file not found at {plugin_path}""
+
         
         plugin_content = plugin_path.read_text()
         assert "def pytest_addoption(parser): in plugin_content, ("
@@ -135,7 +138,7 @@ class PytestConfigConflictsTests:
         
         # This confirms the root cause: wildcard import brings pytest_addoption
         # into conftest.py namespace, while pytest also auto-discovers the plugin
-        assert True, Wildcard import issue confirmed
+        assert True, "Wildcard import issue confirmed"
         
     def test_phase1_validate_plugin_auto_discovery(self):
         PHASE 1: Validate that pytest auto-discovers the conflicting plugin.""
@@ -145,12 +148,13 @@ class PytestConfigConflictsTests:
         
         # Run pytest with plugin discovery info
         cmd = [
-            sys.executable, -m", "pytest, 
+            sys.executable, -m", pytest, "
             --trace-config,
             --collect-only,"
             --collect-only,"
             -q"
-            -q"
+            -q""
+
         ]
         
         result = subprocess.run(
@@ -173,7 +177,7 @@ class PytestConfigConflictsTests:
         if result.returncode == 0 and not plugin_discovered:
             pytest.skip("Plugin auto-discovery not captured in trace output)"
             
-        assert True, fPlugin discovery behavior documented. Output: {output[:500]}...
+        assert True, "fPlugin discovery behavior documented. Output: {output[:500]}..."
 
 
 class PytestConfigDeprecationTests:
@@ -206,7 +210,8 @@ class PytestConfigDeprecationTests:
         assert has_norecursedirs, (
             Neither collect_ignore nor norecursedirs found in pyproject.toml. 
             Need proper file exclusion configuration."
-            Need proper file exclusion configuration."
+            Need proper file exclusion configuration.""
+
         )
         
     def test_phase1_validate_current_config_structure(self):
@@ -261,7 +266,7 @@ class EnvironmentConflictsTests:
                 fThis can cause plugin loading conflicts.
             )
         
-        assert True, fSingle pytest installation confirmed: {pytest_locations}
+        assert True, "fSingle pytest installation confirmed: {pytest_locations}"
         
     def test_phase1_check_venv_plugin_isolation(self):
         "PHASE 1: Check virtual environment plugin isolation."
@@ -274,7 +279,8 @@ class EnvironmentConflictsTests:
         
         if not in_venv:
             pytest.skip(Not running in virtual environment - plugin isolation not applicable)"
-            pytest.skip(Not running in virtual environment - plugin isolation not applicable)"
+            pytest.skip(Not running in virtual environment - plugin isolation not applicable)""
+
         
         # In venv, plugins should be isolated
         venv_path = Path(sys.prefix)

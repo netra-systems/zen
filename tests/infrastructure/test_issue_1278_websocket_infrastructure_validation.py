@@ -75,10 +75,10 @@ class TestIssue1278WebSocketInfrastructureValidation(SSotAsyncTestCase):
                 await pong_waiter
                 logger.info("WebSocket ping/pong successful")
                 
-            logger.info("✅ WebSocket basic connectivity successful")
+            logger.info("CHECK WebSocket basic connectivity successful")
             
         except Exception as e:
-            logger.error(f"❌ WebSocket basic connectivity failed: {e}")
+            logger.error(f"X WebSocket basic connectivity failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: WebSocket connectivity failure - {e}")
     
@@ -119,10 +119,10 @@ class TestIssue1278WebSocketInfrastructureValidation(SSotAsyncTestCase):
                 await websocket.send(json.dumps(test_message))
                 logger.info("Protocol test message sent")
                 
-            logger.info("✅ WebSocket subprotocol negotiation successful")
+            logger.info("CHECK WebSocket subprotocol negotiation successful")
             
         except Exception as e:
-            logger.error(f"❌ WebSocket subprotocol negotiation failed: {e}")
+            logger.error(f"X WebSocket subprotocol negotiation failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: WebSocket subprotocol failure - {e}")
     
@@ -181,10 +181,10 @@ class TestIssue1278WebSocketInfrastructureValidation(SSotAsyncTestCase):
             except (ConnectionClosed, InvalidStatusCode) as e:
                 logger.info(f"WebSocket properly rejected invalid origin: {e}")
             
-            logger.info("✅ WebSocket headers and origin validation working")
+            logger.info("CHECK WebSocket headers and origin validation working")
             
         except Exception as e:
-            logger.error(f"❌ WebSocket headers/origin validation failed: {e}")
+            logger.error(f"X WebSocket headers/origin validation failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: WebSocket headers/origin failure - {e}")
     
@@ -238,10 +238,10 @@ class TestIssue1278WebSocketInfrastructureValidation(SSotAsyncTestCase):
                 if error_responses:
                     logger.info(f"Error responses received: {len(error_responses)}")
                 
-            logger.info("✅ WebSocket message routing infrastructure functional")
+            logger.info("CHECK WebSocket message routing infrastructure functional")
             
         except Exception as e:
-            logger.error(f"❌ WebSocket message routing failed: {e}")
+            logger.error(f"X WebSocket message routing failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: WebSocket routing failure - {e}")
     
@@ -292,10 +292,10 @@ class TestIssue1278WebSocketInfrastructureValidation(SSotAsyncTestCase):
                 assert connection.closed, f"Connection {i+1} should be closed"
                 logger.info(f"Connection {i+1} closed gracefully")
             
-            logger.info("✅ WebSocket connection lifecycle management successful")
+            logger.info("CHECK WebSocket connection lifecycle management successful")
             
         except Exception as e:
-            logger.error(f"❌ WebSocket connection lifecycle failed: {e}")
+            logger.error(f"X WebSocket connection lifecycle failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: WebSocket lifecycle failure - {e}")
     
@@ -358,10 +358,10 @@ class TestIssue1278WebSocketInfrastructureValidation(SSotAsyncTestCase):
                 await websocket.send(json.dumps(recovery_message))
                 logger.info("Recovery message sent successfully")
             
-            logger.info("✅ WebSocket error handling and recovery functional")
+            logger.info("CHECK WebSocket error handling and recovery functional")
             
         except Exception as e:
-            logger.error(f"❌ WebSocket error handling failed: {e}")
+            logger.error(f"X WebSocket error handling failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: WebSocket error handling failure - {e}")
     
@@ -448,10 +448,10 @@ class TestIssue1278WebSocketInfrastructureValidation(SSotAsyncTestCase):
                 await websocket.send(json.dumps(session_test_message))
                 logger.info("Session persistence test message sent")
             
-            logger.info("✅ WebSocket load balancer integration functional")
+            logger.info("CHECK WebSocket load balancer integration functional")
             
         except Exception as e:
-            logger.error(f"❌ WebSocket load balancer integration failed: {e}")
+            logger.error(f"X WebSocket load balancer integration failed: {e}")
             # This failure is EXPECTED for Issue #1278
             raise AssertionError(f"Issue #1278 reproduction: WebSocket load balancer failure - {e}")
 

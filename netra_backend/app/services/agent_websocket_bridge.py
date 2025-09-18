@@ -220,8 +220,90 @@ class AgentWebSocketBridge(MonitorableComponent):
         self._registry = None
         self._thread_registry: Optional[ThreadRunRegistry] = None
         self._health_check_task = None
+        self._connection_pool = None
+        self._health_monitor = None
         logger.debug("Dependency references initialized")
-    
+
+    def configure(self, *args, **kwargs) -> None:
+        """Configure AgentWebSocketBridge with infrastructure components.
+
+        Supports two calling patterns:
+        1. Legacy: configure(connection_pool=None, agent_registry=None, health_monitor=None)
+        2. WebSocket: configure(websocket, run_id, thread_id, user_id) - for backward compatibility
+
+        This method provides post-initialization configuration of the bridge
+        with external dependencies. It follows the same pattern as other
+        factory classes in the system.
+        """
+        # Handle positional arguments (websocket, run_id, thread_id, user_id pattern)
+        if len(args) >= 4:
+            websocket, run_id, thread_id, user_id = args[:4]
+            logger.info(f"[U+1F527] AgentWebSocketBridge configure called with WebSocket pattern: websocket={type(websocket).__name__}, run_id={run_id}, thread_id={thread_id}, user_id={user_id}")
+
+            # Store WebSocket session information for this user context
+            self._configure_websocket_session(websocket, run_id, thread_id, user_id)
+            logger.info("[U+2713] AgentWebSocketBridge WebSocket session configuration completed")
+            return
+
+        # Handle keyword arguments (standard configuration pattern)
+        connection_pool = kwargs.get('connection_pool')
+        agent_registry = kwargs.get('agent_registry')
+        health_monitor = kwargs.get('health_monitor')
+
+        if connection_pool is not None:
+            self._connection_pool = connection_pool
+            logger.info(f"[U+1F527] AgentWebSocketBridge configured with connection pool: {type(connection_pool).__name__}")
+
+        if agent_registry is not None:
+            self._registry = agent_registry
+            logger.info(f"[U+1F527] AgentWebSocketBridge configured with agent registry: {type(agent_registry).__name__}")
+
+        if health_monitor is not None:
+            self._health_monitor = health_monitor
+            logger.info(f"[U+1F527] AgentWebSocketBridge configured with health monitor: {type(health_monitor).__name__}")
+
+        logger.info("[U+2713] AgentWebSocketBridge configuration completed successfully")
+
+    def _configure_websocket_session(self, websocket, run_id: str, thread_id: str, user_id: str) -> None:
+        """Configure WebSocket session for specific user context.
+
+        Args:
+            websocket: WebSocket connection object
+            run_id: Unique run identifier
+            thread_id: Thread identifier
+            user_id: User identifier
+        """
+        # Store session configuration
+        session_data = {
+            'websocket': websocket,
+            'run_id': run_id,
+            'thread_id': thread_id,
+            'user_id': user_id,
+            'configured_at': datetime.now(timezone.utc)
+        }
+
+        # Use run_id as key for session mapping
+        if not hasattr(self, '_websocket_sessions'):
+            self._websocket_sessions = {}
+
+        self._websocket_sessions[run_id] = session_data
+        logger.debug(f"WebSocket session configured for run_id={run_id}, user_id={user_id}")
+
+        # Register the run/thread mapping if registry is available
+        if hasattr(self, '_registry') and self._registry:
+            try:
+                # Attempt to register the mapping
+                if hasattr(self._registry, 'register_run_thread_mapping'):
+                    asyncio.create_task(self._registry.register_run_thread_mapping(
+                        run_id=run_id,
+                        thread_id=thread_id,
+                        metadata={'user_id': user_id, 'configured_via': 'configure_method'}
+                    ))
+                    logger.debug(f"Run-thread mapping registered for run_id={run_id}")
+            except Exception as e:
+                logger.warning(f"Could not register run-thread mapping: {e}")
+                # Continue without failing - this is non-critical
+
     @property
     def websocket_manager(self):
         """Get the WebSocket manager for this bridge.
@@ -2333,14 +2415,15 @@ class AgentWebSocketBridge(MonitorableComponent):
                 event_id = parameters.get('event_id')
             
             # Build standardized notification message with user_id for proper routing
+            # CRITICAL BUSINESS FIX: tool_name must be at top level for tool transparency
             notification = {
                 "type": "tool_executing",
                 "run_id": run_id,
                 "user_id": effective_user_context.user_id,  # PHASE 1 FIX: Include user_id for routing
                 "agent_name": effective_agent_name,
+                "tool_name": tool_name,  # BUSINESS CRITICAL: Tool transparency - moved to top level
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "data": {
-                    "tool_name": tool_name,
                     "parameters": self._sanitize_parameters(parameters) if parameters else {},
                     "status": "executing",
                     "message": f"{effective_agent_name} is using {tool_name}"
@@ -2483,16 +2566,17 @@ class AgentWebSocketBridge(MonitorableComponent):
                 event_id = result.get('event_id')
             
             # Build standardized notification message with user_id for proper routing
+            # CRITICAL BUSINESS FIX: tool_name must be at top level for tool transparency (matches tool_executing fix)
             sanitized_result = self._sanitize_result(result) if result else {}
             notification = {
                 "type": "tool_completed",
                 "run_id": run_id,
                 "user_id": effective_user_context.user_id,  # PHASE 1 FIX: Include user_id for routing
                 "agent_name": effective_agent_name,
+                "tool_name": tool_name,  # BUSINESS CRITICAL: Tool transparency - moved to top level (Issue #1039 consistency)
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "results": sanitized_result,  # FIX #935: Add top-level results field
                 "data": {
-                    "tool_name": tool_name,
                     "result": sanitized_result,  # Keep nested result for backward compatibility
                     "execution_time_ms": execution_time_ms,
                     "status": "completed",

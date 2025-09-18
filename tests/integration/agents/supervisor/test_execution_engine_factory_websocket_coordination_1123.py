@@ -7,7 +7,7 @@ EXPECTED BEHAVIOR: All tests in this file should INITIALLY FAIL to demonstrate
 the WebSocket coordination problems. They will pass after fixes are implemented.
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise)
+- Segment: All (Free -> Enterprise)
 - Business Goal: Ensure reliable service coordination for chat functionality
 - Value Impact: Prevents Golden Path initialization failures and WebSocket 1011 errors
 - Strategic Impact: Essential for $500K+ ARR chat reliability and real-time communication
@@ -295,7 +295,7 @@ class ExecutionEngineFactoryWebSocketCoordination1123Tests(SSotAsyncTestCase, Re
         """FAILING TEST: Reproduce execution chain coordination failures
 
         BVJ: All Segments - Ensures complete execution chain works for AI responses
-        EXPECTED: FAIL - Execution engine → WebSocket → agent chain coordination fails
+        EXPECTED: FAIL - Execution engine -> WebSocket -> agent chain coordination fails
         ISSUE: Chain coordination issues prevent Golden Path completion
         """
         try:
@@ -355,7 +355,7 @@ class ExecutionEngineFactoryWebSocketCoordination1123Tests(SSotAsyncTestCase, Re
             else:
                 failed_chains += 1
                 chain_failures.append({'chain': 'exception', 'error': str(result), 'success': False})
-        self.assertEqual(failed_chains, 0, f"EXECUTION CHAIN FAILURES: {failed_chains} out of {len(chain_scenarios)} execution chain tests failed. Factory → Engine → WebSocket → Agent chain is broken. Failures: {[f['error'] for f in chain_failures]}")
+        self.assertEqual(failed_chains, 0, f"EXECUTION CHAIN FAILURES: {failed_chains} out of {len(chain_scenarios)} execution chain tests failed. Factory -> Engine -> WebSocket -> Agent chain is broken. Failures: {[f['error'] for f in chain_failures]}")
         for result in chain_test_results:
             if result['success']:
                 max_chain_time = 2.0 if not result['load_simulation'] else 5.0

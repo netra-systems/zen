@@ -10,10 +10,10 @@ class TestWebSocketConnection:
     async def send_json(self, message: dict):
         """Send JSON message."""
         if self._closed:
-        raise RuntimeError("WebSocket is closed")
+        raise RuntimeError("WebSocket is closed)"
         self.messages_sent.append(message)
 
-    async def close(self, code: int = 1000, reason: str = "Normal closure"):
+    async def close(self, code: int = 1000, reason: str = "Normal closure):"
         """Close WebSocket connection."""
         pass
         self._closed = True
@@ -105,7 +105,7 @@ class DummyTestGenerator:
 
     def create_simple_test_file(self, file_path: Path, num_tests: int = 10) -> None:
         """Create a simple test file with specified number of tests"""
-        content = '''"""Generated test file for collection performance testing"""'
+        content = '''"""Generated test file for collection performance testing""'"
 
         import pytest
         import time
@@ -143,16 +143,16 @@ class TestGeneratedClass:
         assert value == expected
 
         @pytest.fixture)
-        {"key": "value1", "num": 1},
-        {"key": "value2", "num": 2},
-        {"key": "value3", "num": 3},
+        {"key": "value1", "num: 1},"
+        {"key": "value2", "num: 2},"
+        {"key": "value3", "num: 3},"
     
     def test_with_dict_parameters(self, data: Dict[str, Any]):
         """Test with dictionary parameters"""
         pass
-        assert "key" in data
-        assert "num" in data
-        assert isinstance(data["num"], int)
+        assert "key in data"
+        assert "num in data"
+        assert isinstance(data["num"], "int)"
         '''
         '''
 
@@ -174,13 +174,13 @@ class TestGeneratedClass:
         @pytest.fixture
     def sample_data():
         """Sample fixture"""
-        return {"test": "data", "numbers": [1, 2, 3]}
+        return {"test": "data", "numbers: [1, 2, 3]}"
 
     def test_with_fixture(sample_data):
         """Test using fixture"""
         pass
-        assert "test" in sample_data
-        assert len(sample_data["numbers"]) == 3
+        assert "test in sample_data"
+        assert len(sample_data["numbers]) == 3"
         '''
         '''
 
@@ -190,7 +190,7 @@ class TestGeneratedClass:
 
     def create_complex_test_file(self, file_path: Path, num_classes: int = 5, methods_per_class: int = 20) -> None:
         """Create a complex test file with multiple classes and inheritance"""
-        content = '''"""Complex generated test file with inheritance and fixtures"""'
+        content = '''"""Complex generated test file with inheritance and fixtures""'"
 
         import pytest
         import asyncio
@@ -205,7 +205,7 @@ class BaseTestClass(ABC):
         @pytest.fixture
     def setup_base(self):
         """Auto-used fixture for base setup"""
-        self.base_data = {"initialized": True}
+        self.base_data = {"initialized: True}"
         yield
     # Cleanup
         self.base_data = None
@@ -229,7 +229,7 @@ class TestGenerated{class_idx:02d}(BaseTestClass):
 
     def get_test_data(self) -> Dict[str, Any]:
         """Implementation of abstract method"""
-        return {{"class_id": {class_idx}, "methods": {methods_per_class}}}
+        return {{"class_id": {class_idx}, "methods: {methods_per_class}}}"
 
         @pytest.fixture
     def class_fixture(self):
@@ -240,7 +240,7 @@ class TestGenerated{class_idx:02d}(BaseTestClass):
     def method_fixture(self):
         """Method-scoped fixture"""
         pass
-        return {{"method_data": "test_value_{class_idx}"}}
+        return {{"method_data": "test_value_{class_idx}}}"
         '''
         '''
 
@@ -250,9 +250,9 @@ class TestGenerated{class_idx:02d}(BaseTestClass):
         content += f'''
     def test_method_{method_idx:03d}(self, class_fixture, method_fixture):
         """Generated test method {method_idx} for class {class_idx}"""
-        assert self.base_data["initialized"] is True
-        assert "class_{class_idx}" in class_fixture
-        assert "method_data" in method_fixture
+        assert self.base_data["initialized] is True"
+        assert "class_{class_idx} in class_fixture"
+        assert "method_data in method_fixture"
 
         @pytest.fixture)
         (1, 2), (2, 4), (3, 6), (4, 8)
@@ -299,7 +299,7 @@ class TestGenerated{class_idx:02d}(BaseTestClass):
                     # Add __init__.py files to make packages
         for dir_idx in range(num_dirs):
         init_file = self.base_dir / "formatted_string" / "__init__.py"
-        init_file.write_text('"""Generated test package"""', encoding='utf-8')
+        init_file.write_text('"""Generated test package""', encoding='utf-8')"
 
         return created_files
 
@@ -317,7 +317,7 @@ class TestGenerated{class_idx:02d}(BaseTestClass):
         subdir.mkdir(parents=True, exist_ok=True)
         conftest_path = subdir / "conftest.py"
 
-        conftest_content = f'''"""Generated conftest.py file {i}"""'
+        conftest_content = f'''"""Generated conftest.py file {i}""'"
 
         import pytest
         from typing import Any, Dict, List
@@ -331,7 +331,7 @@ class TestGenerated{class_idx:02d}(BaseTestClass):
         @pytest.fixture
     def module_fixture_{i}():
         """Module-scoped fixture {i}"""
-        return {{"module_id": {i}, "data": "test_data"}}
+        return {{"module_id": {i}, "data": "test_data}}"
 
         @pytest.fixture
     def function_fixture_{i}():
@@ -345,14 +345,14 @@ class TestGenerated{class_idx:02d}(BaseTestClass):
 
     def pytest_configure(config):
         """Configure pytest for this conftest {i}"""
-        config.addinivalue_line("markers", "formatted_string")
+        config.addinivalue_line("markers", "formatted_string)"
 
     def pytest_collection_modifyitems(config, items):
         """Modify collected items in conftest {i}"""
         pass
     # Add custom marker to tests in this scope
         for item in items:
-        if "formatted_string" in str(item.fspath):
+        if "formatted_string in str(item.fspath):"
         item.add_marker(pytest.mark.custom_marker_{i})
         '''
         '''
@@ -375,7 +375,7 @@ class PytestCollectionTester:
         if temp_dir:
         self.temp_dir = Path(temp_dir)
         else:
-        self.temp_dir = Path(tempfile.mkdtemp(prefix="pytest_collection_test_"))
+        self.temp_dir = Path(tempfile.mkdtemp(prefix="pytest_collection_test_))"
 
         self.test_generator = DummyTestGenerator(self.temp_dir)
         self.process = psutil.Process(os.getpid())
@@ -428,14 +428,14 @@ extra_args: Optional[List[str]] = None,
 timeout: Optional[float] = None) -> CollectionPerformanceResult:
 """Run pytest collection and measure performance"""
 
-args = ["--collect-only", "-q"] + [str(p) for p in test_paths]
+args = ["--collect-only", "-q] + [str(p) for p in test_paths]"
 if extra_args:
     args.extend(extra_args)
 
 with self.collection_tracking() as tracking:
     try:
                 # Run pytest as subprocess to isolate collection
-cmd = [sys.executable, "-m", "pytest"] + args
+cmd = [sys.executable, "-m", "pytest] + args"
 
 start_time = time.time()
 process = subprocess.Popen( )
@@ -484,14 +484,14 @@ if stderr:
 ")"
 
 if not collection_successful:
-    errors.append("formatted_string")
+    errors.append("formatted_string)"
 
 tracking['tests_collected'] = tests_collected
 tracking['files_processed'] = files_processed
 tracking['errors'] = errors
 
 except Exception as e:
-    tracking['errors'].append("formatted_string")
+    tracking['errors'].append("formatted_string)"
 tests_collected = 0
 files_processed = len(test_paths)
 collection_successful = False
@@ -569,31 +569,31 @@ class PytestCollectionPerformanceTests:
 
         # Verify we collected a reasonable number of tests
         expected_min_tests = num_files * 8  # At least 8 tests per file
-        assert result.total_tests_collected >= expected_min_tests, ( )
+        assert result.total_tests_collected >= expected_min_tests, "( )"
         "formatted_string"
         
 
         # Performance assertions
         max_collection_time = 60.0  # Should complete within 60 seconds
-        assert result.collection_time_seconds < max_collection_time, ( )
+        assert result.collection_time_seconds < max_collection_time, "( )"
         "formatted_string"
         
 
         # Memory usage assertions
         max_memory_mb = 500  # Should not use more than 500MB
-        assert result.peak_memory_mb < max_memory_mb, ( )
+        assert result.peak_memory_mb < max_memory_mb, "( )"
         "formatted_string"
         
 
         # Memory leak detection
         max_leaked_mb = 50  # Should not leak more than 50MB
-        assert result.memory_leaked_mb < max_leaked_mb, ( )
+        assert result.memory_leaked_mb < max_leaked_mb, "( )"
         "formatted_string"
         
 
         # Collection rate should be reasonable
         min_collection_rate = 50  # At least 50 tests/second
-        assert result.collection_rate_per_second >= min_collection_rate, ( )
+        assert result.collection_rate_per_second >= min_collection_rate, "( )"
         "formatted_string"
         
 
@@ -636,21 +636,21 @@ class PytestCollectionPerformanceTests:
         expected_files = num_dirs * files_per_dir
         expected_min_tests = expected_files * 10  # Conservative estimate
 
-        assert result.total_tests_collected >= expected_min_tests, ( )
+        assert result.total_tests_collected >= expected_min_tests, "( )"
         "formatted_string"
         "formatted_string"
     
 
     # Performance assertions for complex structure
         max_collection_time = 180.0  # 3 minutes for complex nested structure
-        assert result.collection_time_seconds < max_collection_time, ( )
+        assert result.collection_time_seconds < max_collection_time, "( )"
         "formatted_string"
         "formatted_string"
     
 
     # Memory usage should be reasonable even for complex structure
         max_memory_mb = 800  # Higher limit for complex structure
-        assert result.peak_memory_mb < max_memory_mb, ( )
+        assert result.peak_memory_mb < max_memory_mb, "( )"
         "formatted_string"
     
 
@@ -692,7 +692,7 @@ class PytestCollectionPerformanceTests:
 
         result = worker_tester.run_pytest_collection( )
         test_paths=file_subset,
-        extra_args=["formatted_string"],
+        extra_args=["formatted_string],"
         timeout=120.0
         
 
@@ -708,7 +708,7 @@ class PytestCollectionPerformanceTests:
         files_processed=len(file_subset),
         collection_rate_per_second=0,
         parallel_workers_used=1,
-        errors_encountered=["formatted_string"],
+        errors_encountered=["formatted_string],"
         timeout_occurred=True,
         collection_successful=False
             
@@ -752,7 +752,7 @@ class PytestCollectionPerformanceTests:
         files_processed=0,
         collection_rate_per_second=0,
         parallel_workers_used=1,
-        errors_encountered=["formatted_string"],
+        errors_encountered=["formatted_string],"
         timeout_occurred=True,
         collection_successful=False
                                             
@@ -763,7 +763,7 @@ class PytestCollectionPerformanceTests:
 
                                             # Verify at least half the workers succeeded
         successful_workers = [item for item in []]
-        assert len(successful_workers) >= num_workers // 2, ( )
+        assert len(successful_workers) >= num_workers // 2, "( )"
         "formatted_string"
                                             
 
@@ -774,19 +774,19 @@ class PytestCollectionPerformanceTests:
 
                                             # Verify reasonable collection occurred
         expected_min_tests = num_files * 8  # Conservative estimate
-        assert total_tests >= expected_min_tests // 2, (  # Allow for some worker failures )
+        assert total_tests >= expected_min_tests // 2, "(  # Allow for some worker failures )"
         "formatted_string"
                                             
 
                                             # Verify parallel collection didn't take too long'
         max_parallel_time = 150.0  # Should be faster than sequential
-        assert max_collection_time < max_parallel_time, ( )
+        assert max_collection_time < max_parallel_time, "( )"
         "formatted_string"
                                             
 
                                             # Verify not too many errors across all workers
         max_total_errors = num_workers * 2  # Allow up to 2 errors per worker
-        assert total_errors <= max_total_errors, ( )
+        assert total_errors <= max_total_errors, "( )"
         "formatted_string"
                                             
 
@@ -830,7 +830,7 @@ class PytestCollectionPerformanceTests:
         memory_measurements.append(measurement)
 
             # Verify this batch succeeded
-        assert result.collection_successful, ( )
+        assert result.collection_successful, "( )"
         "formatted_string"
             
 
@@ -849,7 +849,7 @@ class PytestCollectionPerformanceTests:
         memory_per_file = measurement['peak_memory_mb'] / batch_size
         max_memory_per_file = 0.5  # 0.5MB per file maximum
 
-        assert memory_per_file < max_memory_per_file, ( )
+        assert memory_per_file < max_memory_per_file, "( )"
         "formatted_string"
                     
 
@@ -857,7 +857,7 @@ class PytestCollectionPerformanceTests:
         time_per_file = measurement['collection_time'] / batch_size
         max_time_per_file = 0.1  # 0.1 seconds per file maximum
 
-        assert time_per_file < max_time_per_file, ( )
+        assert time_per_file < max_time_per_file, "( )"
         "formatted_string"
                     
 
@@ -865,7 +865,7 @@ class PytestCollectionPerformanceTests:
         max_leaked_per_file = 0.5  # 0.05MB per file
         leaked_per_file = measurement['memory_leaked'] / batch_size
 
-        assert leaked_per_file < max_leaked_per_file, ( )
+        assert leaked_per_file < max_leaked_per_file, "( )"
         "formatted_string"
                     
 
@@ -880,12 +880,12 @@ class PytestCollectionPerformanceTests:
         time_ratio = large_batch['collection_time'] / small_batch['collection_time']
 
                         # Memory growth should be sub-linear (better than O(n))
-        assert memory_ratio < file_ratio * 0.8, ( )
+        assert memory_ratio < file_ratio * 0.8, "( )"
         "formatted_string"
                         
 
                         # Time growth should be approximately linear or better
-        assert time_ratio <= file_ratio * 1.2, ( )
+        assert time_ratio <= file_ratio * 1.2, "( )"
         "formatted_string"
                         
 
@@ -913,9 +913,9 @@ class PytestCollectionPerformanceTests:
         for j in range(2 + (i % 2)):  # 2 or 3 imports
         target_idx = (i + j + 1) % num_modules
         if target_idx != i:  # Don"t import self"
-        import_targets.append("formatted_string")
+        import_targets.append("formatted_string)"
 
-        content = f'''"""Test module {i} with cross-imports for circular dependency testing"""'
+        content = f'''"""Test module {i} with cross-imports for circular dependency testing""'"
 
         import pytest
         import sys
@@ -934,10 +934,10 @@ class PytestCollectionPerformanceTests:
         content += f'''
         content += f'''
         try:
-        from {target} import shared_fixture_{target.split("_")[-1]}
+        from {target} import shared_fixture_{target.split("_)[-1]}"
         except ImportError:
                     Handle import failure gracefully
-    def shared_fixture_{target.split("_")[-1]}():
+    def shared_fixture_{target.split("_)[-1]}():"
         return "fallback_data_{target.split('_')[-1]}"
         '''
         '''
@@ -949,22 +949,22 @@ class PytestCollectionPerformanceTests:
         @pytest.fixture
     def shared_fixture_{i:02d}():
         """Shared fixture that other modules might import"""
-        return {{"module_id": {i}, "data": "shared_data_{i:02d}"}}
+        return {{"module_id": {i}, "data": "shared_data_{i:02d}}}"
 
 class TestCrossImport{i:02d}:
         """Test class with cross-module dependencies"""
 
     def test_local_functionality(self):
-        """Test that doesn't depend on imports"""'
+        """Test that doesn't depend on imports""'"
         assert {i} >= 0
-        assert isinstance({i}, int)
+        assert isinstance({i}, "int)"
 
         '''
         '''
 
     # Add tests that use imported fixtures (with fallback)
         for target in import_targets[:1]:  # Only use first import to avoid complexity
-        target_num = target.split("_")[-1]
+        target_num = target.split("_)[-1]"
         content += f'''
         content += f'''
     def test_with_imported_fixture(self):
@@ -1004,7 +1004,7 @@ class TestCrossImport{i:02d}:
     
 
     # The key assertion: collection should not timeout due to circular imports
-        assert not result.timeout_occurred, ( )
+        assert not result.timeout_occurred, "( )"
         "Collection timed out - likely due to circular import hanging. "
         "This indicates the collection process is not robust against import cycles."
     
@@ -1016,21 +1016,21 @@ class TestCrossImport{i:02d}:
         if 'import' in err.lower() or 'modulenotfounderror' in err.lower()]
 
         Some import errors are acceptable, but not complete failure
-        assert len(import_errors) < len(result.errors_encountered), ( )
+        assert len(import_errors) < len(result.errors_encountered), "( )"
         "All errors appear to be import-related, which suggests "
         "the test structure may be too complex"
         
 
         Should collect at least some tests even with import issues
         min_tests_expected = num_modules * 2  # At least 2 tests per module
-        assert result.total_tests_collected >= min_tests_expected, ( )
+        assert result.total_tests_collected >= min_tests_expected, "( )"
         "formatted_string"
         "formatted_string"
         
 
         Collection time should be reasonable even with import complexity
         max_collection_time = 120.0  # Should not take more than 2 minutes
-        assert result.collection_time_seconds < max_collection_time, ( )
+        assert result.collection_time_seconds < max_collection_time, "( )"
         "formatted_string"
         "formatted_string"
         
@@ -1067,7 +1067,7 @@ class TestCrossImport{i:02d}:
         pass  # Process might have already finished
 
                 # Run collection with planned interruption
-        cmd = [sys.executable, "-m", "pytest", "--collect-only", "-v", str(collection_tester.temp_dir)]
+        cmd = [sys.executable, "-m", "pytest", "--collect-only", "-v, str(collection_tester.temp_dir)]"
 
         start_time = time.time()
         process = subprocess.Popen( )
@@ -1098,7 +1098,7 @@ class TestCrossImport{i:02d}:
         interrupt_time = time.time() - start_time
 
                         # Verify interruption worked as expected
-        assert interrupt_time <= 10.0, ( )
+        assert interrupt_time <= 10.0, "( )"
         "formatted_string"
                         
 
@@ -1113,30 +1113,30 @@ class TestCrossImport{i:02d}:
         recovery_time = time.time() - recovery_start
 
                         # Verify recovery worked
-        assert recovery_result.collection_successful, ( )
+        assert recovery_result.collection_successful, "( )"
         "formatted_string"
                         
 
                         # Verify we can collect the expected number of tests after recovery
         expected_tests = num_files * 8  # Conservative estimate
-        assert recovery_result.total_tests_collected >= expected_tests, ( )
+        assert recovery_result.total_tests_collected >= expected_tests, "( )"
         "formatted_string"
         "formatted_string"
                         
 
                         # Verify recovery didn't take excessively long'
         max_recovery_time = 60.0
-        assert recovery_time < max_recovery_time, ( )
+        assert recovery_time < max_recovery_time, "( )"
         "formatted_string"
                         
 
                         # Test 3: Verify no corrupted cache files or state
                         # Check for any .pytest_cache or .pyc files that might indicate corruption
-        cache_files = list(collection_tester.temp_dir.rglob("*.pyc"))
-        cache_files.extend(list(collection_tester.temp_dir.rglob(".pytest_cache")))
+        cache_files = list(collection_tester.temp_dir.rglob("*.pyc))"
+        cache_files.extend(list(collection_tester.temp_dir.rglob(".pytest_cache)))"
 
                         # Should be minimal cache files after interruption and recovery
-        assert len(cache_files) < 50, ( )
+        assert len(cache_files) < 50, "( )"
         "formatted_string"
                         
 
@@ -1146,7 +1146,7 @@ class TestCrossImport{i:02d}:
         timeout=120.0
                         
 
-        assert final_result.collection_successful, ( )
+        assert final_result.collection_successful, "( )"
         "Final collection failed - system may not have fully recovered"
                         
 
@@ -1154,7 +1154,7 @@ class TestCrossImport{i:02d}:
         test_count_difference = abs( )
         final_result.total_tests_collected - recovery_result.total_tests_collected
                         
-        assert test_count_difference < 10, ( )
+        assert test_count_difference < 10, "( )"
         "formatted_string"
         "formatted_string"
                         

@@ -74,7 +74,7 @@ class StagingStartupFailureIssue1278E2ETests(BaseE2ETest):
     E2E tests for Issue #1278 - Staging startup failure reproduction.
 
     These tests reproduce the complete startup failure chain observed in GCP staging:
-    Database Timeout → SMD Phase 3 Failure → FastAPI Lifespan Breakdown → Container Exit Code 3
+    Database Timeout -> SMD Phase 3 Failure -> FastAPI Lifespan Breakdown -> Container Exit Code 3
 
     CRITICAL: These tests are designed to FAIL initially to prove the staging issue exists.
     """

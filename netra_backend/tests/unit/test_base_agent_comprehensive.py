@@ -82,9 +82,9 @@ class LegacyTestAgent(BaseAgent):
 class BaseAgentLifecycleManagementTests(SSotAsyncTestCase):
     """Test suite for agent lifecycle management and state transitions."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.test_agent = MockBaseAgent(name='TestLifecycleAgent', description='Agent for lifecycle testing', enable_reliability=True)
 
     async def asyncTearDown(self):
@@ -160,13 +160,13 @@ class BaseAgentLifecycleManagementTests(SSotAsyncTestCase):
 class BaseAgentUserIsolationTests(SSotAsyncTestCase):
     """Test suite for user context isolation and concurrent execution."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment."""
-        super().setUp()
+        super().setup_method(method)
 
     def create_test_context(self, user_id: str, thread_id: str=None, run_id: str=None) -> UserExecutionContext:
         """Create test user execution context."""
-        return UserExecutionContext(user_id=UserID(user_id), thread_id=ThreadID(thread_id or f'thread_{user_id}'), run_id=RunID(run_id or f'run_{user_id}_{int(time.time())}'), request_id=f'req_{user_id}_{int(time.time())}', operation_depth=1, agent_context={'user_request': f'Test request from {user_id}'}, metadata={})
+        return UserExecutionContext(user_id=UserID(user_id), thread_id=ThreadID(thread_id or f'thread_{user_id}'), run_id=RunID(run_id or f'run_{user_id}_{int(time.time())}'), request_id=f'req_{user_id}_{int(time.time())}', operation_depth=1, agent_context={'user_request': f'Test request from {user_id}'}, audit_metadata={})
 
     async def test_concurrent_user_execution_isolation(self):
         """Test that concurrent users are properly isolated during execution."""
@@ -215,9 +215,9 @@ class BaseAgentUserIsolationTests(SSotAsyncTestCase):
 class BaseAgentWebSocketIntegrationTests(SSotAsyncTestCase):
     """Test suite for WebSocket integration and real-time event emission."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.test_agent = MockBaseAgent(name='WebSocketTestAgent')
         self.mock_bridge = Mock()
 
@@ -254,9 +254,9 @@ class BaseAgentWebSocketIntegrationTests(SSotAsyncTestCase):
 class BaseAgentModernExecutionPatternsTests(SSotAsyncTestCase):
     """Test suite for modern execution patterns and UserExecutionContext compliance."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.modern_agent = MockBaseAgent(name='ModernAgent')
         self.legacy_agent = LegacyTestAgent(name='LegacyAgent')
 
@@ -267,7 +267,7 @@ class BaseAgentModernExecutionPatternsTests(SSotAsyncTestCase):
 
     def create_test_context(self, user_id: str='test_user') -> UserExecutionContext:
         """Create test user execution context."""
-        return UserExecutionContext(user_id=UserID(user_id), thread_id=ThreadID(f'thread_{user_id}'), run_id=RunID(f'run_{user_id}_{int(time.time())}'), request_id=f'req_{user_id}_{int(time.time())}', operation_depth=1, agent_context={'user_request': f'Test request from {user_id}'}, metadata={})
+        return UserExecutionContext(user_id=UserID(user_id), thread_id=ThreadID(f'thread_{user_id}'), run_id=RunID(f'run_{user_id}_{int(time.time())}'), request_id=f'req_{user_id}_{int(time.time())}', operation_depth=1, agent_context={'user_request': f'Test request from {user_id}'}, audit_metadata={})
 
     async def test_modern_execution_pattern_with_user_context(self):
         """Test that modern agents execute properly with UserExecutionContext."""

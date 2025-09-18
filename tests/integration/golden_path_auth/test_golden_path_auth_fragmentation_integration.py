@@ -11,7 +11,7 @@ TEST STRATEGY: Integration tests that simulate the complete Golden Path user flo
 and demonstrate where authentication fragmentation breaks the user experience.
 
 GOLDEN PATH AUTH FRAGMENTATION POINTS:
-1. Login → Chat initiation auth handoff failures
+1. Login -> Chat initiation auth handoff failures
 2. WebSocket connection auth during chat flow
 3. Agent execution auth context fragmentation
 4. Multi-user concurrent auth state corruption
@@ -123,24 +123,24 @@ class GoldenPathAuthFragmentationTests(BaseIntegrationTest):
                     "consistent_auth": False
                 }
 
-        # BUSINESS IMPACT ANALYSIS: How many users can complete login → chat flow?
+        # BUSINESS IMPACT ANALYSIS: How many users can complete login -> chat flow?
         successful_handoffs = sum(1 for r in handoff_results.values() if r.get("consistent_auth"))
         total_users = len(handoff_results)
 
-        print(f"GOLDEN PATH LOGIN→CHAT FRAGMENTATION EVIDENCE:")
+        print(f"GOLDEN PATH LOGIN->CHAT FRAGMENTATION EVIDENCE:")
         print(f"Handoff results: {handoff_results}")
         print(f"Successful handoffs: {successful_handoffs}/{total_users}")
         print(f"Business Impact: {(1 - successful_handoffs/total_users)*100:.1f}% user failure rate")
 
         # CRITICAL: If all handoffs succeed, fragmentation may be resolved
         if successful_handoffs == total_users:
-            print("WARNING: All login→chat handoffs succeeded - fragmentation may be resolved")
+            print("WARNING: All login->chat handoffs succeeded - fragmentation may be resolved")
         else:
-            print(f"CRITICAL FRAGMENTATION: {total_users - successful_handoffs} user types unable to complete login→chat flow")
+            print(f"CRITICAL FRAGMENTATION: {total_users - successful_handoffs} user types unable to complete login->chat flow")
 
         # Golden Path fragmentation should block some user types
         self.assertLess(successful_handoffs, total_users,
-                       "Expected login→chat auth fragmentation to block some users")
+                       "Expected login->chat auth fragmentation to block some users")
 
     async def test_golden_path_concurrent_user_auth_corruption(self):
         """
@@ -228,7 +228,7 @@ class GoldenPathAuthFragmentationTests(BaseIntegrationTest):
 
         for user_type, user_data in self.golden_path_users.items():
             try:
-                # Simulate Golden Path: User authenticated → Agent execution requested
+                # Simulate Golden Path: User authenticated -> Agent execution requested
                 user_context = await self._create_golden_path_user_context(user_data)
 
                 # Test different agent execution authentication paths

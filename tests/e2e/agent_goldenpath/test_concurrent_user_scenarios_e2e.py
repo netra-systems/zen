@@ -191,7 +191,7 @@ class ConcurrentUserScenariosE2ETests(SSotAsyncTestCase):
             assert critical_events_received >= 3, f"User {i} should receive at least 3 critical events, got {critical_events_received}. Events: {result['event_types']}"
         for i, result in enumerate(successful_results):
             assert result['response_length'] >= 50, f"User {i} response too short: {result['response_length']} chars"
-        self.logger.info(f'✅ Basic concurrent user isolation validated:')
+        self.logger.info(f'CHECK Basic concurrent user isolation validated:')
         self.logger.info(f"   Response Times: {[f'{t:.1f}s' for t in response_times]}")
         self.logger.info(f'   Average: {avg_response_time:.1f}s, Max: {max_response_time:.1f}s')
         self.logger.info('🏗️ Basic concurrent user isolation test complete')
@@ -258,7 +258,7 @@ class ConcurrentUserScenariosE2ETests(SSotAsyncTestCase):
             assert max_response_time < 120.0, f'Maximum response time under high load excessive: {max_response_time:.2f}s (max 120s)'
         total_events = sum((r['events_count'] for r in successful_results))
         assert total_events >= len(successful_results) * 3, f'Should receive adequate events under high load. Total events: {total_events}, Users: {len(successful_results)}'
-        self.logger.info(f'✅ High concurrency load test validated:')
+        self.logger.info(f'CHECK High concurrency load test validated:')
         self.logger.info(f'   Success Rate: {success_rate:.1%}')
         self.logger.info(f'   Performance: Avg {avg_response_time:.1f}s, Max {max_response_time:.1f}s')
         self.logger.info('🚀 High concurrency user load test complete')
@@ -333,7 +333,7 @@ class ConcurrentUserScenariosE2ETests(SSotAsyncTestCase):
             scenario = result['user_context']['agent_scenario']
             critical_events = len(result['critical_events'])
             assert critical_events >= 2, f"Agent {scenario['agent_type']} should deliver critical events. Got {critical_events}: {result['event_types']}"
-        self.logger.info(f'✅ Concurrent agent type isolation validated:')
+        self.logger.info(f'CHECK Concurrent agent type isolation validated:')
         self.logger.info(f"   Agent Types: {[s['agent_type'] for s in agent_scenarios]}")
         self.logger.info(f"   Response Times: {[f'{t:.1f}s' for t in response_times]}")
         self.logger.info(f'   Average Time: {avg_response_time:.1f}s')

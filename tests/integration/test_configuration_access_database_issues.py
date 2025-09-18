@@ -183,7 +183,7 @@ class DatabaseConfigurationTester:
                     # Test 2: IsolatedEnvironment construction
         try:
         for key, value in config_vars.items():
-        self.test_env.set(key, value, source="test")
+        self.test_env.set(key, value, source="test)"
 
         host = self.test_env.get('POSTGRES_HOST', 'localhost')
         user = self.test_env.get('POSTGRES_USER', 'postgres')
@@ -322,11 +322,11 @@ class TestConfigurationAccessDatabaseIssues:
         print(f" )"
         === CONFIGURATION ISSUES DETECTED ===")"
         for issue in issues:
-        print(""severity"]})")
+        print(""severity"]}))"
         print("")
         print("")
         if issue['examples']:
-        print("Examples:")
+        print("Examples:)"
         for example in issue['examples']:
         print("")
 
@@ -357,7 +357,7 @@ if method == 'issues':
     pass
 if result:
     pass
-print(f"  Issues detected:")
+print(f"  Issues detected:)"
 for issue in result:
     print("")
 continue
@@ -392,7 +392,7 @@ if critical_failures:
 for failure in critical_failures:
     print("")
 else:
-    print("No critical configuration failures detected")
+    print("No critical configuration failures detected)"
 
                                                                                                 # Test passes to document issues - actual fixes implemented in separate tests
 assert True, "Configuration pattern analysis completed"
@@ -421,18 +421,18 @@ for key in test_vars.keys()
         # Test with IsolatedEnvironment
 isolated_env = IsolatedEnvironment()
 for key, value in test_vars.items():
-isolated_env.set(key, value, source="test")
+isolated_env.set(key, value, source="test)"
 
 isolated_values = { }
 key: isolated_env.get(key)
 for key in test_vars.keys()
             
 
-print("Values from os.environ:")
+print("Values from os.environ:)"
 for key, value in os_environ_values.items():
     print("")
 
-print("Values from IsolatedEnvironment:")
+print("Values from IsolatedEnvironment:)"
 for key, value in isolated_values.items():
     print("")
 
@@ -487,7 +487,7 @@ original_postgres_vars[key] = env.get(key)
 
 print(f" )"
 === DATABASE CONFIG ISOLATION TEST ===")"
-print("Original environment values:")
+print("Original environment values:)"
 for key, value in original_postgres_vars.items():
     print("")
 
@@ -503,7 +503,7 @@ test_values = { }
 
             # Set test values in isolated environment
 for key, value in test_values.items():
-test_env.set(key, value, source="isolation_test")
+test_env.set(key, value, source="isolation_test)"
 
 print("")
 Isolated test values:")"
@@ -531,6 +531,6 @@ print("")
 PASS:  Database configuration isolation working correctly")"
 
 
-if __name__ == "__main__":
+if __name__ == "__main__:"
                                     # Run configuration analysis tests
-pytest.main([__file__, "-v", "-s", "--tb=short"])
+pytest.main([__file__, "-v", "-s", "--tb=short])"

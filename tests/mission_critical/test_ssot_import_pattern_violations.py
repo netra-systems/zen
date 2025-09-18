@@ -1,9 +1,9 @@
 """
-"""
+
 SSOT Import Pattern Violations Test Suite
 
 """
-"""
+
 Detects legacy test framework imports that violate Single Source of Truth principles.
 This test is designed to FAIL initially to detect current violations (51+ expected violations).
 
@@ -11,7 +11,7 @@ Business Value: Platform/Internal - System Stability & Development Velocity
 Validates SSOT import compliance to eliminate import confusion and circular dependencies.
 
 Test Strategy:
-1. Scan entire codebase for legacy test_framework.base imports
+    1. Scan entire codebase for legacy test_framework.base imports
 2. Identify imports that should use SSOT alternatives
 3. Flag non-existent import paths in SSOT_IMPORT_REGISTRY.md
 4. Generate actionable remediation plan
@@ -20,13 +20,14 @@ Expected Initial Results: FAILING (detecting current violations)
 Target State: PASSING (all imports use SSOT patterns)
 
 Compliance Rules:
-- NO imports from test_framework.base (deprecated)
+    - NO imports from test_framework.base (deprecated)
 - All test base classes MUST import from test_framework.ssot.base_test_case
 - All mock factories MUST import from test_framework.ssot.mock_factory
 - All orchestration MUST import from test_framework.ssot.orchestration
 - All imports MUST be verified in SSOT_IMPORT_REGISTRY.md
 "
-"
+""
+
 
 import ast
 import os
@@ -51,7 +52,8 @@ class ImportPatternViolation:
 
 
 class SSOTImportPatternViolationsTests(SSotBaseTestCase):
-    ""
+    """
+
     Mission Critical test suite to detect and validate SSOT import compliance.
     
     This test is designed to FAIL initially to expose current violations,
@@ -59,10 +61,12 @@ class SSOTImportPatternViolationsTests(SSotBaseTestCase):
     
     
     def setup_method(self, method):
-        ""Set up test environment.
+        ""Set up test environment.""
+
         super().setup_method(method)
         self.project_root = Path(/Users/anthony/Desktop/netra-apex)"
-        self.project_root = Path(/Users/anthony/Desktop/netra-apex)"
+        self.project_root = Path(/Users/anthony/Desktop/netra-apex)""
+
         self.violations = []
         
         # Legacy import patterns that violate SSOT
@@ -129,14 +133,16 @@ class SSOTImportPatternViolationsTests(SSotBaseTestCase):
         ]
         
     def test_detect_deprecated_base_imports(self):
-        "
-        "
+        """
+        ""
+
         CRITICAL: Detect deprecated test_framework.base imports.
         
         Expected violations: 20+ deprecated base imports
         Target: All imports use test_framework.ssot.base_test_case
 "
-"
+""
+
         base_violations = self._scan_for_import_violations('test_framework.base')
         
         violation_count = len(base_violations)
@@ -152,18 +158,21 @@ class SSOTImportPatternViolationsTests(SSotBaseTestCase):
                 fWith: from test_framework.ssot.base_test_case import SSotBaseTestCase\n\n
                 f"Replace: from test_framework.base import AsyncTestCase\n"
                 fWith: from test_framework.ssot.base_test_case import SSotAsyncTestCase"
-                fWith: from test_framework.ssot.base_test_case import SSotAsyncTestCase"
+                fWith: from test_framework.ssot.base_test_case import SSotAsyncTestCase""
+
             )
             
     def test_detect_deprecated_mock_factory_imports(self):
-    "
-    "
+        """
+    ""
+
         HIGH: Detect deprecated mock factory imports.
         
         Expected violations: 15+ deprecated mock imports
         Target: All mock imports use test_framework.ssot.mock_factory
         "
-        "
+        ""
+
         mock_violations = self._scan_for_import_violations('test_framework.mock_factory')
         
         violation_count = len(mock_violations)
@@ -174,7 +183,8 @@ class SSOTImportPatternViolationsTests(SSotBaseTestCase):
                 fDETECTED {violation_count} deprecated mock factory SSOT violations.\n
                 f"All mock creation MUST import from test_framework.ssot.mock_factory.\n\n"
                 fViolations found:\n{violation_details}\n\n"
-                fViolations found:\n{violation_details}\n\n"
+                fViolations found:\n{violation_details}\n\n""
+
                 fREMEDIATION:\n
                 fReplace: from test_framework.mock_factory import create_mock_agent\n"
                 fReplace: from test_framework.mock_factory import create_mock_agent\n"
@@ -199,21 +209,25 @@ class SSOTImportPatternViolationsTests(SSotBaseTestCase):
                 fAll orchestration MUST import from test_framework.ssot.orchestration.\n\n
                 f"Violations found:\n{violation_details}\n\n"
                 fREMEDIATION:\n"
-                fREMEDIATION:\n"
+                fREMEDIATION:\n""
+
                 fReplace: from test_framework.orchestration import DockerOrchestrator\n
                 fWith: from test_framework.ssot.orchestration import OrchestrationConfig"
-                fWith: from test_framework.ssot.orchestration import OrchestrationConfig"
+                fWith: from test_framework.ssot.orchestration import OrchestrationConfig""
+
             )
             
     def test_detect_nonexistent_import_attempts(self):
-    "
-    "
+        """
+    ""
+
         MEDIUM: Detect attempts to import from non-existent paths.
         
         Expected violations: 6+ nonexistent import attempts
         Target: All imports use verified paths from SSOT_IMPORT_REGISTRY.md
         "
-        "
+        ""
+
         nonexistent_violations = []
         
         for scan_dir in self._get_scan_directories():
@@ -227,15 +241,16 @@ class SSOTImportPatternViolationsTests(SSotBaseTestCase):
             violation_details = self._format_violations(nonexistent_violations)
             pytest.fail(
                 fDETECTED {violation_count} nonexistent import SSOT violations.\n"
-                fDETECTED {violation_count} nonexistent import SSOT violations.\n"
+                fDETECTED {violation_count} nonexistent import SSOT violations.\n""
+
                 fAll imports MUST use verified paths from SSOT_IMPORT_REGISTRY.md.\n\n
                 fViolations found:\n{violation_details}\n\n"
                 fViolations found:\n{violation_details}\n\n"
                 f"REMEDIATION: Consult SSOT_IMPORT_REGISTRY.md for correct import paths.\n"
                 fCommon fixes:\n
-                f- netra_backend.app.core.unified_configuration_manager → DOES NOT EXIST\n
-                f- test_framework.base_test_case → test_framework.ssot.base_test_case\n""
-                f- test_framework.mock_agents → test_framework.ssot.mock_factory
+                f- netra_backend.app.core.unified_configuration_manager -> DOES NOT EXIST\n
+                f- test_framework.base_test_case -> test_framework.ssot.base_test_case\n""
+                f- test_framework.mock_agents -> test_framework.ssot.mock_factory
             )
             
     def test_detect_try_except_import_patterns(self):
@@ -322,24 +337,24 @@ SSOT IMPORT PATTERN VIOLATIONS REPORT
 ====================================
 
 TOTAL VIOLATIONS: {total_violations}
-TARGET REDUCTION: {total_violations} violations → 0 violations
+TARGET REDUCTION: {total_violations} violations -> 0 violations
 
 VIOLATIONS BY TYPE:
-{self._format_violation_counts(violation_by_type)}
+    {self._format_violation_counts(violation_by_type)}
 
 VIOLATIONS BY SEVERITY:
-{self._format_violation_counts(violation_by_severity)}
+    {self._format_violation_counts(violation_by_severity)}
 
 HIGH-IMPACT FILES (3+ violations):
-{chr(10).join(f- {f}: {violation_by_file[f]} violations for f in high_impact_files)}
+    {chr(10).join(f- {f}: {violation_by_file[f]} violations for f in high_impact_files)}
 
 REMEDIATION PRIORITY:
-1. CRITICAL: Deprecated base imports ({violation_by_severity.get('CRITICAL', 0)} violations)
+    1. CRITICAL: Deprecated base imports ({violation_by_severity.get('CRITICAL', 0)} violations)
 2. HIGH: Deprecated factory imports ({violation_by_severity.get('HIGH', 0)} violations)
 3. MEDIUM: Nonexistent/try-except imports ({violation_by_severity.get('MEDIUM', 0)} violations)
 
 BUSINESS IMPACT:
-- Import Clarity: Eliminate developer confusion about correct import paths
+    - Import Clarity: Eliminate developer confusion about correct import paths
 - Circular Dependencies: Prevent import cycles through SSOT patterns
 - Build Reliability: Ensure imports resolve correctly in all environments
         
@@ -350,7 +365,8 @@ BUSINESS IMPACT:
             
     def _scan_for_import_violations(self, deprecated_type: str) -> List[ImportPatternViolation]:
         Scan codebase for specific type of import violations."
-        Scan codebase for specific type of import violations."
+        Scan codebase for specific type of import violations.""
+
         violations = []
         
         if deprecated_type not in self.deprecated_imports:
@@ -364,7 +380,7 @@ BUSINESS IMPACT:
         for scan_dir in self._get_scan_directories():
             if scan_dir.exists():
                 violations.extend(
-                    self._scan_directory_for_import_patterns(
+                    self._scan_directory_for_import_patterns()
                         scan_dir, deprecated_type, patterns, replacement, severity
                     )
                 )
@@ -401,7 +417,8 @@ BUSINESS IMPACT:
         
     def _scan_for_nonexistent_imports(self, directory: Path) -> List[ImportPatternViolation]:
         Scan for attempts to import from nonexistent paths."
-        Scan for attempts to import from nonexistent paths."
+        Scan for attempts to import from nonexistent paths.""
+
         violations = []
         
         for file_path in directory.rglob("*.py):"
@@ -431,7 +448,8 @@ BUSINESS IMPACT:
         violations = []
         
         for file_path in directory.rglob(*.py):"
-        for file_path in directory.rglob(*.py):"
+        for file_path in directory.rglob(*.py):""
+
             try:
                 with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                     content = f.read()
@@ -472,19 +490,23 @@ BUSINESS IMPACT:
         ]
         
     def _format_violations(self, violations: List[ImportPatternViolation) -> str:
-        ""Format violations for display.
+        ""Format violations for display.""
+
         if not violations:
             return No violations found."
-            return No violations found."
+            return No violations found.""
+
             
         formatted = []
         for violation in violations[:10]:  # Show first 10 violations
             formatted.append(
                 f  {violation.severity}: {violation.file_path}:{violation.line_number}\n"
-                f  {violation.severity}: {violation.file_path}:{violation.line_number}\n"
+                f  {violation.severity}: {violation.file_path}:{violation.line_number}\n""
+
                 f    Import: {violation.import_statement}\n
                 f    Fix: {violation.recommended_replacement}"
-                f    Fix: {violation.recommended_replacement}"
+                f    Fix: {violation.recommended_replacement}""
+
             )
             
         if len(violations) > 10:
@@ -497,5 +519,5 @@ BUSINESS IMPACT:
         formatted = []
         for violation_type, count in sorted(violation_counts.items(), key=lambda x: x[1], reverse=True):
             formatted.append(f- {violation_type}: {count} violations)
-        return "\n".join(formatted)
+        return "\n.join(formatted)"
 ))

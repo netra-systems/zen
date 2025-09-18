@@ -19,6 +19,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import BaseModel
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.logging_config import central_logger
@@ -221,7 +222,7 @@ class TransactionCoordinator:
             
             async with connection_manager.get_session() as session:
                 # For PostgreSQL, we can use SAVEPOINT for preparation
-                await session.execute("SAVEPOINT prepare_distributed_tx")
+                await session.execute(text("SAVEPOINT prepare_distributed_tx"))
                 
                 # Execute all operations within the savepoint
                 for operation in transaction.postgres_operations:
@@ -265,7 +266,7 @@ class TransactionCoordinator:
             
             async with connection_manager.get_session() as session:
                 # Release the savepoint - operations are already executed
-                await session.execute("RELEASE SAVEPOINT prepare_distributed_tx")
+                await session.execute(text("RELEASE SAVEPOINT prepare_distributed_tx"))
                 return True
                 
         except Exception as e:

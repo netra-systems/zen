@@ -52,7 +52,7 @@ class Issue597AuthImportValidationTests(SSotBaseTestCase):
         # Validate the error message indicates the function doesn't exist
         error_message = str(cm.exception)
         self.assertIn("validate_auth_at_startup", error_message)
-        self.logger.info(f"✅ EXPECTED FAILURE: ImportError caught as expected: {error_message}")
+        self.logger.info(f"CHECK EXPECTED FAILURE: ImportError caught as expected: {error_message}")
     
     def test_correct_import_validate_auth_startup_succeeds(self):
         """
@@ -66,7 +66,7 @@ class Issue597AuthImportValidationTests(SSotBaseTestCase):
             
             # Validate the function exists and is callable
             self.assertTrue(callable(validate_auth_startup))
-            self.logger.info("✅ SUCCESS: validate_auth_startup imported successfully")
+            self.logger.info("CHECK SUCCESS: validate_auth_startup imported successfully")
             
         except ImportError as e:
             self.fail(f"UNEXPECTED: validate_auth_startup import failed: {e}")
@@ -84,7 +84,7 @@ class Issue597AuthImportValidationTests(SSotBaseTestCase):
         import inspect
         self.assertTrue(inspect.iscoroutinefunction(validate_auth_startup))
         
-        self.logger.info("✅ SUCCESS: validate_auth_startup has correct signature (async function)")
+        self.logger.info("CHECK SUCCESS: validate_auth_startup has correct signature (async function)")
     
     @patch('netra_backend.app.core.auth_startup_validator.AuthStartupValidator')
     async def test_auth_startup_validator_can_be_called(self, mock_validator_class):
@@ -102,7 +102,7 @@ class Issue597AuthImportValidationTests(SSotBaseTestCase):
         # This should not raise any exceptions
         try:
             await validate_auth_startup()
-            self.logger.info("✅ SUCCESS: validate_auth_startup executed successfully")
+            self.logger.info("CHECK SUCCESS: validate_auth_startup executed successfully")
         except Exception as e:
             self.fail(f"UNEXPECTED: validate_auth_startup execution failed: {e}")
         
@@ -135,7 +135,7 @@ class Issue597AuthImportValidationTests(SSotBaseTestCase):
         self.assertIn("Critical auth validation failures", error_message)
         self.assertIn("test_component: Test error", error_message)
         
-        self.logger.info("✅ SUCCESS: Auth validation error handling works correctly")
+        self.logger.info("CHECK SUCCESS: Auth validation error handling works correctly")
     
     def test_module_exports_correct_function(self):
         """
@@ -149,7 +149,7 @@ class Issue597AuthImportValidationTests(SSotBaseTestCase):
         # Check that the incorrect function is NOT available
         self.assertFalse(hasattr(auth_module, 'validate_auth_at_startup'))
         
-        self.logger.info("✅ SUCCESS: Module exports correct function name")
+        self.logger.info("CHECK SUCCESS: Module exports correct function name")
     
     def test_import_from_multiple_consumers(self):
         """
@@ -168,7 +168,7 @@ class Issue597AuthImportValidationTests(SSotBaseTestCase):
             try:
                 # Use exec to test the import patterns
                 exec(pattern)
-                self.logger.info(f"✅ SUCCESS: Import pattern works: {pattern}")
+                self.logger.info(f"CHECK SUCCESS: Import pattern works: {pattern}")
             except ImportError as e:
                 self.fail(f"FAILED: Import pattern failed: {pattern} - Error: {e}")
     
@@ -188,7 +188,7 @@ class Issue597AuthImportValidationTests(SSotBaseTestCase):
             
             error_msg = str(cm.exception)
             self.assertIn("validate_auth_at_startup", error_msg)
-            self.logger.info(f"✅ EXPECTED FAILURE: Confirmed failing pattern: {pattern}")
+            self.logger.info(f"CHECK EXPECTED FAILURE: Confirmed failing pattern: {pattern}")
 
 
 @pytest.mark.unit
@@ -211,7 +211,7 @@ class Issue597IntegrationValidationTests(SSotBaseTestCase):
             import inspect
             self.assertTrue(inspect.iscoroutinefunction(validate_auth_startup))
             
-            logging.info("✅ SUCCESS: Startup integration import pattern validated")
+            logging.info("CHECK SUCCESS: Startup integration import pattern validated")
             
         except ImportError as e:
             self.fail(f"CRITICAL: Startup integration import still failing: {e}")
@@ -235,7 +235,7 @@ class Issue597IntegrationValidationTests(SSotBaseTestCase):
         
         try:
             exec(correct_import)
-            logging.info(f"✅ SUCCESS: Correct import pattern validated for all consumers")
+            logging.info(f"CHECK SUCCESS: Correct import pattern validated for all consumers")
         except ImportError as e:
             self.fail(f"CRITICAL: Correct import pattern failing: {e}")
 

@@ -42,7 +42,7 @@ try:
     parse_start_time = orchestrator_module.parse_start_time
 
 except Exception as e:
-    print(f"❌ Could not import claude-instance-orchestrator.py: {e}")
+    print(f"X Could not import claude-instance-orchestrator.py: {e}")
     print(f"Expected path: {scripts_path / 'claude-instance-orchestrator.py'}")
     print(f"File exists: {(scripts_path / 'claude-instance-orchestrator.py').exists()}")
     sys.exit(1)

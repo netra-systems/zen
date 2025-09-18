@@ -2,7 +2,7 @@
 Golden Path Infrastructure Validation Tests
 
 Tests to validate critical infrastructure components required for the golden path:
-- Users login → get AI responses
+- Users login -> get AI responses
 
 These tests are designed to run on GCP staging environment (non-Docker)
 and validate that infrastructure is properly configured for reliable golden path operation.

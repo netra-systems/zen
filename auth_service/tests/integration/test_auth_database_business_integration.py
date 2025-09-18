@@ -32,6 +32,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional, List, Tuple
 import hashlib
 from unittest.mock import AsyncMock
+from sqlalchemy import text
 
 from shared.isolated_environment import get_env
 from test_framework.base_integration_test import BaseIntegrationTest
@@ -167,14 +168,14 @@ class AuthDatabaseBusinessIntegrationTests(BaseIntegrationTest):
         
         async with self.db.get_session() as session:
             # Insert real user data into PostgreSQL
-            result = await session.execute("""
+            result = await session.execute(text("""
                 INSERT INTO users (id, email, name, password_hash, subscription_tier, max_queries_per_month, created_at, updated_at)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
                 RETURNING id, email, name, subscription_tier, created_at
-            """, 
-            user_id, 
+            """),
+            user_id,
             free_user_data["email"],
-            free_user_data["name"], 
+            free_user_data["name"],
             password_hash,
             free_user_data["subscription_tier"],
             free_user_data["max_queries_per_month"],

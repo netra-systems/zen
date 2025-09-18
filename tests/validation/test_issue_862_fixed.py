@@ -80,7 +80,7 @@ class Issue862FixValidationTests:
         assert hasattr(test_instance.execution_strategy, 'mode'), \
             "execution_strategy missing mode"
         
-        logger.info("✅ ServiceIndependentIntegrationTest initialization fixed")
+        logger.info("CHECK ServiceIndependentIntegrationTest initialization fixed")
         
     def test_agent_execution_test_base_initialization_fixed(self):
         """
@@ -104,7 +104,7 @@ class Issue862FixValidationTests:
         assert hasattr(test_instance, 'execution_mode'), "execution_mode missing from inheritance"
         assert hasattr(test_instance, 'execution_strategy'), "execution_strategy missing from inheritance"
         
-        logger.info("✅ AgentExecutionIntegrationTestBase initialization fixed")
+        logger.info("CHECK AgentExecutionIntegrationTestBase initialization fixed")
         
     def test_websocket_integration_test_base_initialization_fixed(self):
         """
@@ -123,7 +123,7 @@ class Issue862FixValidationTests:
         assert hasattr(test_instance, 'execution_mode')
         assert hasattr(test_instance, 'execution_strategy')
         
-        logger.info("✅ WebSocketIntegrationTestBase initialization fixed")
+        logger.info("CHECK WebSocketIntegrationTestBase initialization fixed")
         
     def test_auth_integration_test_base_initialization_fixed(self):
         """
@@ -142,7 +142,7 @@ class Issue862FixValidationTests:
         assert hasattr(test_instance, 'execution_mode')
         assert hasattr(test_instance, 'execution_strategy')
         
-        logger.info("✅ AuthIntegrationTestBase initialization fixed")
+        logger.info("CHECK AuthIntegrationTestBase initialization fixed")
         
     def test_database_integration_test_base_initialization_fixed(self):
         """
@@ -160,7 +160,7 @@ class Issue862FixValidationTests:
         assert hasattr(test_instance, 'execution_mode')
         assert hasattr(test_instance, 'execution_strategy')
         
-        logger.info("✅ DatabaseIntegrationTestBase initialization fixed")
+        logger.info("CHECK DatabaseIntegrationTestBase initialization fixed")
         
     def test_service_getter_methods_fixed(self):
         """
@@ -184,7 +184,7 @@ class Issue862FixValidationTests:
         logger.info(f"WebSocket service: {websocket_service is not None}")
         logger.info(f"Auth service: {auth_service is not None}")
         
-        logger.info("✅ Service getter methods fixed")
+        logger.info("CHECK Service getter methods fixed")
         
     def test_skip_methods_fixed(self):
         """
@@ -214,7 +214,7 @@ class Issue862FixValidationTests:
         except AttributeError:
             pytest.fail("skip_if_mock_mode raised AttributeError - not fixed")
         
-        logger.info("✅ Skip methods fixed")
+        logger.info("CHECK Skip methods fixed")
         
     def test_execution_confidence_assertion_fixed(self):
         """
@@ -233,7 +233,7 @@ class Issue862FixValidationTests:
         except AttributeError as e:
             pytest.fail(f"assert_execution_confidence_acceptable raised AttributeError - not fixed: {e}")
         
-        logger.info("✅ Execution confidence assertion fixed")
+        logger.info("CHECK Execution confidence assertion fixed")
         
     def test_business_value_assertion_fixed(self):
         """
@@ -258,7 +258,7 @@ class Issue862FixValidationTests:
         except AttributeError as e:
             pytest.fail(f"assert_business_value_delivered raised AttributeError - not fixed: {e}")
         
-        logger.info("✅ Business value assertion fixed")
+        logger.info("CHECK Business value assertion fixed")
         
     def test_get_execution_info_fixed(self):
         """
@@ -284,7 +284,7 @@ class Issue862FixValidationTests:
         except AttributeError as e:
             pytest.fail(f"get_execution_info raised AttributeError - not fixed: {e}")
         
-        logger.info("✅ get_execution_info fixed")
+        logger.info("CHECK get_execution_info fixed")
         
     @pytest.mark.asyncio
     async def test_async_setup_and_teardown_fixed(self):
@@ -312,7 +312,7 @@ class Issue862FixValidationTests:
         except Exception as e:
             pytest.fail(f"Async setup/teardown failed: {e}")
         
-        logger.info("✅ Async setup and teardown fixed")
+        logger.info("CHECK Async setup and teardown fixed")
         
     def test_collection_phase_simulation_fixed(self):
         """
@@ -359,7 +359,7 @@ class Issue862FixValidationTests:
         if collection_errors:
             pytest.fail(f"Collection phase still has errors:\n" + "\n".join(collection_errors))
         
-        logger.info(f"✅ Collection phase simulation fixed for {len(test_classes)} test classes")
+        logger.info(f"CHECK Collection phase simulation fixed for {len(test_classes)} test classes")
 
 
 class ActualServiceIndependentTestExecutionTests:
@@ -398,7 +398,7 @@ class ActualServiceIndependentTestExecutionTests:
             # Clean up
             await test_instance.asyncTearDown()
             
-            logger.info("✅ TestAgentExecutionHybrid can execute without AttributeError")
+            logger.info("CHECK TestAgentExecutionHybrid can execute without AttributeError")
             
         except ImportError:
             pytest.skip("TestAgentExecutionHybrid not available for testing")
@@ -448,7 +448,7 @@ class ActualServiceIndependentTestExecutionTests:
         assert all(mode == ExecutionMode.MOCK_SERVICES for mode in execution_modes), \
             "All instances should have consistent default execution mode"
         
-        logger.info(f"✅ Multiple test class instantiation fixed: {len(test_instances)} classes")
+        logger.info(f"CHECK Multiple test class instantiation fixed: {len(test_instances)} classes")
 
 
 if __name__ == "__main__":

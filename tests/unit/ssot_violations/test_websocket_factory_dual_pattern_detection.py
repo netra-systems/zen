@@ -179,12 +179,12 @@ class WebSocketFactoryDualPatternDetectionTests(SSotBaseTestCase):
         print(f"SSOT Imports Found: {len(ssot_imports)}")
         for imp in ssot_imports:
             line_num = import_lines.get(imp, "?")
-            print(f"  ✅ Line {line_num}: {imp}")
+            print(f"  CHECK Line {line_num}: {imp}")
 
         print(f"\nViolation Imports Found: {len(violation_imports)}")
         for imp in violation_imports:
             line_num = import_lines.get(imp, "?")
-            print(f"  ❌ Line {line_num}: {imp}")
+            print(f"  X Line {line_num}: {imp}")
 
         # CRITICAL ASSERTION: This should FAIL initially (dual pattern detected)
         if ssot_imports and violation_imports:
@@ -224,9 +224,9 @@ This test will PASS after dual pattern elimination.
 
         elif ssot_imports and not violation_imports:
             # Only SSOT patterns - this is success state after remediation
-            print(f"\n✅ SSOT COMPLIANCE ACHIEVED: Only canonical imports found")
-            print(f"✅ Dual pattern violation eliminated")
-            print(f"✅ AgentInstanceFactory follows SSOT WebSocket patterns")
+            print(f"\nCHECK SSOT COMPLIANCE ACHIEVED: Only canonical imports found")
+            print(f"CHECK Dual pattern violation eliminated")
+            print(f"CHECK AgentInstanceFactory follows SSOT WebSocket patterns")
             
             # Additional validation that factory is truly SSOT compliant
             self.assertGreater(len(ssot_imports), 0, "SSOT imports should be present")
@@ -294,11 +294,11 @@ This test will PASS after dual pattern elimination.
         print(f"\n=== METHOD PATTERN ANALYSIS - {file_path.name} ===")
         print(f"WebSocketManager usage patterns: {len(websocket_manager_usage)}")
         for line_num, pattern, line in websocket_manager_usage[:5]:  # Limit output
-            print(f"  ❌ Line {line_num}: {line[:80]}...")
+            print(f"  X Line {line_num}: {line[:80]}...")
 
         print(f"\nWebSocket bridge usage patterns: {len(websocket_bridge_usage)}")
         for line_num, pattern, line in websocket_bridge_usage[:5]:  # Limit output
-            print(f"  ✅ Line {line_num}: {line[:80]}...")
+            print(f"  CHECK Line {line_num}: {line[:80]}...")
 
         # CRITICAL ASSERTION: Check for mixed patterns (should FAIL initially)
         if websocket_manager_usage and websocket_bridge_usage:
@@ -333,9 +333,9 @@ REMEDIATION:
 
         elif websocket_bridge_usage and not websocket_manager_usage:
             # Only bridge usage - this is the success state
-            print(f"\n✅ CONSISTENT PATTERN ACHIEVED: Only bridge patterns found")
-            print(f"✅ Factory methods use SSOT AgentWebSocketBridge exclusively") 
-            print(f"✅ No direct WebSocketManager usage detected")
+            print(f"\nCHECK CONSISTENT PATTERN ACHIEVED: Only bridge patterns found")
+            print(f"CHECK Factory methods use SSOT AgentWebSocketBridge exclusively") 
+            print(f"CHECK No direct WebSocketManager usage detected")
             
             self.assertGreater(len(websocket_bridge_usage), 0, "Bridge usage should be present")
             
@@ -409,15 +409,15 @@ REMEDIATION:
         print(f"\n=== FACTORY INITIALIZATION ANALYSIS - {file_path.name} ===")
         print(f"WebSocketManager initialization: {len(initialization_patterns['websocket_manager'])}")
         for line_num, line in initialization_patterns['websocket_manager']:
-            print(f"  ❌ Line {line_num}: {line[:80]}...")
+            print(f"  X Line {line_num}: {line[:80]}...")
             
         print(f"\nWebSocket bridge initialization: {len(initialization_patterns['websocket_bridge'])}")
         for line_num, line in initialization_patterns['websocket_bridge']:
-            print(f"  ✅ Line {line_num}: {line[:80]}...")
+            print(f"  CHECK Line {line_num}: {line[:80]}...")
             
         print(f"\nMixed initialization patterns: {len(initialization_patterns['mixed_initialization'])}")
         for line_num, line in initialization_patterns['mixed_initialization']:
-            print(f"  ⚠️  Line {line_num}: {line[:80]}...")
+            print(f"  WARNING️  Line {line_num}: {line[:80]}...")
 
         # CRITICAL ASSERTION: Check initialization consistency
         manager_init = initialization_patterns['websocket_manager']
@@ -455,16 +455,16 @@ Factory must use single, consistent initialization pattern for all instances.
 
         elif bridge_init and not manager_init:
             # Only bridge initialization - success state
-            print(f"\n✅ CONSISTENT INITIALIZATION: Only bridge pattern found")
-            print(f"✅ Factory creates instances with consistent WebSocket access")
-            print(f"✅ SSOT compliance in runtime behavior achieved")
+            print(f"\nCHECK CONSISTENT INITIALIZATION: Only bridge pattern found")
+            print(f"CHECK Factory creates instances with consistent WebSocket access")
+            print(f"CHECK SSOT compliance in runtime behavior achieved")
             
             self.assertGreater(len(bridge_init), 0, "Bridge initialization should be present")
             
         else:
             # No initialization patterns found
             # For AgentInstanceFactory, this might be acceptable if it doesn't directly initialize WebSocket components
-            print(f"\n⚠️ NO WEBSOCKET INITIALIZATION: Factory may delegate WebSocket setup to other components")
+            print(f"\nWARNING️ NO WEBSOCKET INITIALIZATION: Factory may delegate WebSocket setup to other components")
             print(f"This may be acceptable if WebSocket setup is properly delegated")
             
             # This is not necessarily a failure - just document the finding
@@ -554,10 +554,10 @@ This test will PASS when Issue #1103 is fully resolved.
         else:
             # Complete remediation achieved - success state
             print(f"\n🎉 ISSUE #1103 REMEDIATION COMPLETE")
-            print(f"✅ All direct WebSocketManager imports eliminated")  
-            print(f"✅ SSOT AgentWebSocketBridge pattern implemented")
-            print(f"✅ No remaining violation patterns detected")
-            print(f"✅ Factory fragmentation SSOT violation resolved")
+            print(f"CHECK All direct WebSocketManager imports eliminated")  
+            print(f"CHECK SSOT AgentWebSocketBridge pattern implemented")
+            print(f"CHECK No remaining violation patterns detected")
+            print(f"CHECK Factory fragmentation SSOT violation resolved")
             
             # Validate positive indicators of success
             self.assertGreater(len(ssot_imports), 0, "SSOT imports should be present after remediation")
@@ -617,11 +617,11 @@ This test will PASS when Issue #1103 is fully resolved.
         print(f"\n=== STATIC IMPORT ANALYSIS - {file_path.name} ===")
         print(f"Direct WebSocketManager imports: {len(direct_websocket_imports)}")
         for imp in direct_websocket_imports:
-            print(f"  ❌ Line {imp['line']}: from {imp['module']} import {imp['name']}")
+            print(f"  X Line {imp['line']}: from {imp['module']} import {imp['name']}")
         
         print(f"\nSSOT Bridge imports: {len(ssot_bridge_imports)}")
         for imp in ssot_bridge_imports:
-            print(f"  ✅ Line {imp['line']}: from {imp['module']} import {imp['name']}")
+            print(f"  CHECK Line {imp['line']}: from {imp['module']} import {imp['name']}")
 
         # Validation assertions
         if direct_websocket_imports:
@@ -636,7 +636,7 @@ This test will PASS when Issue #1103 is fully resolved.
         self.assertGreater(len(ssot_bridge_imports), 0,
             "SSOT AgentWebSocketBridge imports should be present for proper factory pattern")
 
-        print(f"\n✅ STATIC ANALYSIS PASSED:")
+        print(f"\nCHECK STATIC ANALYSIS PASSED:")
         print(f"  - No direct WebSocketManager imports detected")  
         print(f"  - SSOT AgentWebSocketBridge imports present ({len(ssot_bridge_imports)})")
         print(f"  - Import pattern SSOT compliance achieved")

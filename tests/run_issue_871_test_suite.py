@@ -110,7 +110,7 @@ Starting execution at {datetime.now(timezone.utc).isoformat()}
             # Check if test file exists
             test_path = Path(test_file)
             if not test_path.exists():
-                print(f"❌ Test file not found: {test_file}")
+                print(f"X Test file not found: {test_file}")
                 results["tests"].append({
                     "file": test_file,
                     "status": "FILE_NOT_FOUND",
@@ -152,10 +152,10 @@ Starting execution at {datetime.now(timezone.utc).isoformat()}
             # Determine status
             if result.returncode == 0:
                 status = "PASSED"
-                print(f"✅ PASSED (unexpected - should fail initially)")
+                print(f"CHECK PASSED (unexpected - should fail initially)")
             elif result.returncode == 1:
                 status = "FAILED"
-                print(f"❌ FAILED (expected - proves SSOT violation)")
+                print(f"X FAILED (expected - proves SSOT violation)")
             else:
                 status = "ERROR"
                 print(f"💥 ERROR (test execution problem)")
@@ -218,8 +218,8 @@ Starting execution at {datetime.now(timezone.utc).isoformat()}
 
 EXECUTION SUMMARY:
   Total Tests: {summary['total_tests']}
-  Passed: {summary['total_passed']} ✅
-  Failed: {summary['total_failed']} ❌
+  Passed: {summary['total_passed']} CHECK
+  Failed: {summary['total_failed']} X
   Errors: {summary['total_errors']} 💥
 
 SSOT VIOLATION STATUS:
@@ -254,10 +254,10 @@ Generated: {execution_results['end_time']}
             print(f"\n📊 {category.upper()} CATEGORY BREAKDOWN:")
             print(f"  Description: {results['description']}")
             print(f"  Expected: {results['expected_status']}")
-            print(f"  Results: {results['summary']['passed']}✅ {results['summary']['failed']}❌ {results['summary']['errors']}💥")
+            print(f"  Results: {results['summary']['passed']}CHECK {results['summary']['failed']}X {results['summary']['errors']}💥")
 
             for test in results["tests"]:
-                status_emoji = {"PASSED": "✅", "FAILED": "❌", "ERROR": "💥", "TIMEOUT": "⏰"}.get(test["status"], "❓")
+                status_emoji = {"PASSED": "CHECK", "FAILED": "X", "ERROR": "💥", "TIMEOUT": "⏰"}.get(test["status"], "❓")
                 print(f"    {status_emoji} {test['file']} ({test.get('execution_time', 0):.1f}s)")
 
 

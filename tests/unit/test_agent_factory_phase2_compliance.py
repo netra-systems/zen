@@ -110,7 +110,7 @@ class TestAgentFactoryPhase2Compliance(SSotAsyncTestCase):
         self.assertEqual(factory._user_context, user_context)
         
         self.created_factories.append(factory)
-        logger.info("✅ PASS: SSOT factory creation properly requires user context")
+        logger.info("CHECK PASS: SSOT factory creation properly requires user context")
 
     async def test_factory_memory_isolation_patterns(self):
         """
@@ -155,7 +155,7 @@ class TestAgentFactoryPhase2Compliance(SSotAsyncTestCase):
                     self.assertEqual(metrics1['total_instances_created'], 0)
                     self.assertEqual(metrics2['total_instances_created'], 0)
         
-        logger.info("✅ PASS: Factory memory isolation patterns validated")
+        logger.info("CHECK PASS: Factory memory isolation patterns validated")
 
     async def test_user_execution_context_binding_enforcement(self):
         """
@@ -200,7 +200,7 @@ class TestAgentFactoryPhase2Compliance(SSotAsyncTestCase):
         self.assertIsInstance(agent, SimpleMockAgent)
         self.assertEqual(agent.user_context, user_context)
         
-        logger.info("✅ PASS: UserExecutionContext binding enforcement validated")
+        logger.info("CHECK PASS: UserExecutionContext binding enforcement validated")
 
     async def test_deprecated_configure_function_warnings(self):
         """
@@ -235,7 +235,7 @@ class TestAgentFactoryPhase2Compliance(SSotAsyncTestCase):
         # VALIDATION: Factory should still be created for backward compatibility
         self.assertIsInstance(factory, AgentInstanceFactory)
         
-        logger.info("✅ PASS: Deprecated configure function produces proper warnings")
+        logger.info("CHECK PASS: Deprecated configure function produces proper warnings")
 
     async def test_factory_performance_config_isolation(self):
         """
@@ -271,7 +271,7 @@ class TestAgentFactoryPhase2Compliance(SSotAsyncTestCase):
         metrics2_after = factory2.get_factory_metrics()
         self.assertEqual(metrics2_after['total_instances_created'], 0)
         
-        logger.info("✅ PASS: Factory performance configuration isolation validated")
+        logger.info("CHECK PASS: Factory performance configuration isolation validated")
 
     async def test_factory_cleanup_isolation(self):
         """
@@ -320,7 +320,7 @@ class TestAgentFactoryPhase2Compliance(SSotAsyncTestCase):
             self.assertGreater(metrics['active_contexts'], 0, 
                              f"Factory {i} should still have active contexts")
         
-        logger.info("✅ PASS: Factory cleanup isolation validated")
+        logger.info("CHECK PASS: Factory cleanup isolation validated")
 
     async def test_concurrent_factory_creation_safety(self):
         """
@@ -368,7 +368,7 @@ class TestAgentFactoryPhase2Compliance(SSotAsyncTestCase):
                     self.assertNotEqual(factory1, factory2)
                     self.assertNotEqual(factory1._user_context, factory2._user_context)
         
-        logger.info(f"✅ PASS: Concurrent factory creation safety validated ({concurrent_count} factories)")
+        logger.info(f"CHECK PASS: Concurrent factory creation safety validated ({concurrent_count} factories)")
 
     async def test_factory_weak_reference_support(self):
         """
@@ -413,7 +413,7 @@ class TestAgentFactoryPhase2Compliance(SSotAsyncTestCase):
         except Exception as e:
             logger.info(f"Weak reference handling: {e}")
         
-        logger.info("✅ PASS: Factory weak reference support validated")
+        logger.info("CHECK PASS: Factory weak reference support validated")
 
     async def test_ssot_compliance_validation(self):
         """
@@ -457,7 +457,7 @@ class TestAgentFactoryPhase2Compliance(SSotAsyncTestCase):
         self.assertTrue(hasattr(factory, 'user_execution_scope'))
         
         self.created_factories.append(factory)
-        logger.info("✅ PASS: Comprehensive SSOT compliance validated")
+        logger.info("CHECK PASS: Comprehensive SSOT compliance validated")
 
     async def test_factory_error_handling_isolation(self):
         """
@@ -518,7 +518,7 @@ class TestAgentFactoryPhase2Compliance(SSotAsyncTestCase):
         except Exception as e:
             self.fail(f"Good factory affected by error in other factory: {e}")
         
-        logger.info("✅ PASS: Factory error handling isolation validated")
+        logger.info("CHECK PASS: Factory error handling isolation validated")
 
 
 if __name__ == '__main__':

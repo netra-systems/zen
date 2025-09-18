@@ -97,30 +97,30 @@ class ExecutionEngineSSotValidation565Tests(unittest.TestCase):
             print(f"\nDEPRECATED ExecutionEngine imports found: {len(deprecated_imports)}")
             for dep_file in deprecated_imports:
                 rel_path = os.path.relpath(dep_file, self.project_root)
-                print(f"  ❌ {rel_path}")
+                print(f"  X {rel_path}")
             
             print(f"\nSSot UserExecutionEngine imports found: {len(ssot_imports)}")
             for ssot_file in ssot_imports:
                 rel_path = os.path.relpath(ssot_file, self.project_root)
-                print(f"  ✅ {rel_path}")
+                print(f"  CHECK {rel_path}")
             
             # Test passes if no deprecated imports in active code
             self.test_results['import_validation'] = len(deprecated_imports) == 0
             
             if len(deprecated_imports) == 0:
                 print(f"\n🎉 IMPORT VALIDATION: PASSED")
-                print("✅ No active code imports deprecated ExecutionEngine")
-                print("✅ Only SSOT UserExecutionEngine imports found")
+                print("CHECK No active code imports deprecated ExecutionEngine")
+                print("CHECK Only SSOT UserExecutionEngine imports found")
             else:
-                print(f"\n⚠️  IMPORT VALIDATION: FAILED")
-                print("❌ Active code still imports deprecated ExecutionEngine")
+                print(f"\nWARNING️  IMPORT VALIDATION: FAILED")
+                print("X Active code still imports deprecated ExecutionEngine")
                 
             self.assertEqual(len(deprecated_imports), 0, 
                            f"Found {len(deprecated_imports)} deprecated ExecutionEngine imports")
                            
         except Exception as e:
             self.validation_errors.append(f"Import validation failed: {str(e)}")
-            print(f"❌ Import validation error: {str(e)}")
+            print(f"X Import validation error: {str(e)}")
             raise
 
     def test_02_execution_factory_uses_ssot(self):
@@ -159,36 +159,36 @@ class ExecutionEngineSSotValidation565Tests(unittest.TestCase):
                     
                     # Check if factory imports/uses UserExecutionEngine (SSOT)
                     if 'UserExecutionEngine' in content:
-                        print(f"  ✅ {rel_path}: Uses SSOT UserExecutionEngine")
+                        print(f"  CHECK {rel_path}: Uses SSOT UserExecutionEngine")
                     elif 'ExecutionEngine' in content:
                         # Check if it's the deprecated one
                         if 'from netra_backend.app.agents.supervisor.execution_engine' in content:
-                            print(f"  ❌ {rel_path}: Uses deprecated ExecutionEngine")
+                            print(f"  X {rel_path}: Uses deprecated ExecutionEngine")
                             factory_uses_ssot = False
                             factory_issues.append(rel_path)
                         else:
-                            print(f"  ⚠️  {rel_path}: Contains ExecutionEngine reference (needs verification)")
+                            print(f"  WARNING️  {rel_path}: Contains ExecutionEngine reference (needs verification)")
                     else:
                         print(f"  ❓ {rel_path}: No ExecutionEngine references found")
                         
                 except (UnicodeDecodeError, PermissionError) as e:
-                    print(f"  ❌ Error reading {rel_path}: {e}")
+                    print(f"  X Error reading {rel_path}: {e}")
             
             self.test_results['factory_validation'] = factory_uses_ssot
             
             if factory_uses_ssot:
                 print(f"\n🎉 FACTORY VALIDATION: PASSED")
-                print("✅ All factories use SSOT UserExecutionEngine")
+                print("CHECK All factories use SSOT UserExecutionEngine")
             else:
-                print(f"\n⚠️  FACTORY VALIDATION: FAILED") 
-                print("❌ Some factories still use deprecated ExecutionEngine")
+                print(f"\nWARNING️  FACTORY VALIDATION: FAILED") 
+                print("X Some factories still use deprecated ExecutionEngine")
                 
             self.assertTrue(factory_uses_ssot, 
                           f"Factory issues found: {factory_issues}")
                           
         except Exception as e:
             self.validation_errors.append(f"Factory validation failed: {str(e)}")
-            print(f"❌ Factory validation error: {str(e)}")
+            print(f"X Factory validation error: {str(e)}")
             raise
 
     def test_03_user_execution_isolation_working(self):
@@ -208,7 +208,7 @@ class ExecutionEngineSSotValidation565Tests(unittest.TestCase):
             try:
                 # Import the SSOT engine
                 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-                print("✅ Successfully imported SSOT UserExecutionEngine")
+                print("CHECK Successfully imported SSOT UserExecutionEngine")
                 
                 # Try to create instances for different users
                 user1_context = {'user_id': 'user1', 'session_id': 'session1'}
@@ -218,41 +218,41 @@ class ExecutionEngineSSotValidation565Tests(unittest.TestCase):
                 engine1 = UserExecutionEngine(user_context=user1_context)
                 engine2 = UserExecutionEngine(user_context=user2_context)
                 
-                print("✅ Successfully created isolated UserExecutionEngine instances")
+                print("CHECK Successfully created isolated UserExecutionEngine instances")
                 
                 # Verify they have different user contexts
                 if hasattr(engine1, 'user_context') and hasattr(engine2, 'user_context'):
                     if engine1.user_context != engine2.user_context:
-                        print("✅ User contexts properly isolated")
+                        print("CHECK User contexts properly isolated")
                         user_isolation_working = True
                     else:
-                        print("❌ User contexts not properly isolated")
+                        print("X User contexts not properly isolated")
                 else:
-                    print("⚠️  User context attributes not found (may use different pattern)")
+                    print("WARNING️  User context attributes not found (may use different pattern)")
                     # Still mark as working if engines were created
                     user_isolation_working = True
                     
             except ImportError as e:
-                print(f"❌ Cannot import SSOT UserExecutionEngine: {e}")
+                print(f"X Cannot import SSOT UserExecutionEngine: {e}")
             except Exception as e:
-                print(f"❌ Error testing user isolation: {e}")
+                print(f"X Error testing user isolation: {e}")
                 print(f"Stack trace: {traceback.format_exc()}")
             
             self.test_results['user_isolation'] = user_isolation_working
             
             if user_isolation_working:
                 print(f"\n🎉 USER ISOLATION: PASSED")
-                print("✅ SSOT UserExecutionEngine provides proper user isolation")
+                print("CHECK SSOT UserExecutionEngine provides proper user isolation")
             else:
-                print(f"\n⚠️  USER ISOLATION: FAILED")
-                print("❌ User isolation not working or accessible")
+                print(f"\nWARNING️  USER ISOLATION: FAILED")
+                print("X User isolation not working or accessible")
                 
             self.assertTrue(user_isolation_working, 
                           "User isolation validation failed")
                           
         except Exception as e:
             self.validation_errors.append(f"User isolation validation failed: {str(e)}")
-            print(f"❌ User isolation validation error: {str(e)}")
+            print(f"X User isolation validation error: {str(e)}")
             raise
 
     def test_04_deprecated_file_not_imported(self):
@@ -297,9 +297,9 @@ class ExecutionEngineSSotValidation565Tests(unittest.TestCase):
                 ])
                 
                 if has_deprecation_warning:
-                    print("✅ Deprecated file contains deprecation warnings")
+                    print("CHECK Deprecated file contains deprecation warnings")
                 else:
-                    print("⚠️  Deprecated file lacks deprecation warnings")
+                    print("WARNING️  Deprecated file lacks deprecation warnings")
             else:
                 print("❓ No deprecated execution_engine.py found")
                 
@@ -307,7 +307,7 @@ class ExecutionEngineSSotValidation565Tests(unittest.TestCase):
                 rel_path = os.path.relpath(ssot_file, self.project_root)
                 print(f"📁 Found SSOT file: {rel_path}")
             else:
-                print("❌ No SSOT user_execution_engine.py found")
+                print("X No SSOT user_execution_engine.py found")
             
             # Assess impact: deprecated file exists but not actively used (based on test 1)
             deprecated_not_used = self.test_results.get('import_validation', False)
@@ -316,18 +316,18 @@ class ExecutionEngineSSotValidation565Tests(unittest.TestCase):
             
             if deprecated_not_used:
                 print(f"\n🎉 DEPRECATED IMPACT: PASSED")
-                print("✅ Deprecated file exists but not imported by active code")
-                print("✅ SSOT file properly implemented and used")
+                print("CHECK Deprecated file exists but not imported by active code")
+                print("CHECK SSOT file properly implemented and used")
             else:
-                print(f"\n⚠️  DEPRECATED IMPACT: FAILED")
-                print("❌ Deprecated file still actively used")
+                print(f"\nWARNING️  DEPRECATED IMPACT: FAILED")
+                print("X Deprecated file still actively used")
                 
             self.assertTrue(deprecated_not_used or deprecated_file is None,
                           "Deprecated file still has active impact")
                           
         except Exception as e:
             self.validation_errors.append(f"Deprecated file assessment failed: {str(e)}")
-            print(f"❌ Deprecated file assessment error: {str(e)}")
+            print(f"X Deprecated file assessment error: {str(e)}")
             raise
 
     def test_05_final_validation_summary(self):
@@ -339,32 +339,32 @@ class ExecutionEngineSSotValidation565Tests(unittest.TestCase):
         all_tests_passed = all(self.test_results.values())
         
         print(f"\nTest Results:")
-        print(f"  Import Validation: {'✅ PASSED' if self.test_results['import_validation'] else '❌ FAILED'}")
-        print(f"  Factory Validation: {'✅ PASSED' if self.test_results['factory_validation'] else '❌ FAILED'}")
-        print(f"  User Isolation: {'✅ PASSED' if self.test_results['user_isolation'] else '❌ FAILED'}")
-        print(f"  Deprecated Impact: {'✅ PASSED' if self.test_results['deprecated_impact'] else '❌ FAILED'}")
+        print(f"  Import Validation: {'CHECK PASSED' if self.test_results['import_validation'] else 'X FAILED'}")
+        print(f"  Factory Validation: {'CHECK PASSED' if self.test_results['factory_validation'] else 'X FAILED'}")
+        print(f"  User Isolation: {'CHECK PASSED' if self.test_results['user_isolation'] else 'X FAILED'}")
+        print(f"  Deprecated Impact: {'CHECK PASSED' if self.test_results['deprecated_impact'] else 'X FAILED'}")
         
         if self.validation_errors:
             print(f"\nValidation Errors:")
             for error in self.validation_errors:
-                print(f"  ❌ {error}")
+                print(f"  X {error}")
         
         print(f"\n" + "="*80)
         if all_tests_passed:
             print("🎉 RECOMMENDATION: CLOSE Issue #565 as ALREADY RESOLVED")
             print("="*80)
-            print("✅ ExecutionEngine SSOT consolidation is COMPLETE")
-            print("✅ All active code uses SSOT UserExecutionEngine")
-            print("✅ User isolation is working properly")
-            print("✅ Deprecated file exists but not actively used")
-            print("✅ $500K+ ARR business value is PROTECTED")
+            print("CHECK ExecutionEngine SSOT consolidation is COMPLETE")
+            print("CHECK All active code uses SSOT UserExecutionEngine")
+            print("CHECK User isolation is working properly")
+            print("CHECK Deprecated file exists but not actively used")
+            print("CHECK $500K+ ARR business value is PROTECTED")
             print("\nSimilar to Issue #564, this appears to be already resolved.")
         else:
-            print("⚠️  RECOMMENDATION: CONTINUE with Issue #565 remediation")
+            print("WARNING️  RECOMMENDATION: CONTINUE with Issue #565 remediation")
             print("="*80)
-            print("❌ ExecutionEngine SSOT fragmentation still exists")
-            print("❌ Active remediation required")
-            print("❌ Business value at risk until resolved")
+            print("X ExecutionEngine SSOT fragmentation still exists")
+            print("X Active remediation required")
+            print("X Business value at risk until resolved")
             print("\nProceed with Steps 3-6 for active remediation.")
         
         print("="*80)

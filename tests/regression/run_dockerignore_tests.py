@@ -114,7 +114,7 @@ class DockerignoreTestRunner:
 
             # Fail fast if requested and we have failures
             if fail_fast and (category_result.get('failures') or category_result.get('errors')):
-                print(f"❌ Stopping execution due to failures in {category}")
+                print(f"X Stopping execution due to failures in {category}")
                 break
 
         self.end_time = datetime.now(UTC)
@@ -205,7 +205,7 @@ class DockerignoreTestRunner:
                 })
 
             # Print category summary
-            status = "✅ PASSED" if not result.failures and not result.errors else "❌ FAILED"
+            status = "CHECK PASSED" if not result.failures and not result.errors else "X FAILED"
             print(f"   {status} - {result.testsRun} tests, "
                   f"{passed_count} passed, {len(result.failures)} failed, "
                   f"{len(result.errors)} errors, {len(result.skipped)} skipped")
@@ -221,7 +221,7 @@ class DockerignoreTestRunner:
                 'errors': [{'test': f'{category}_loader', 'traceback': str(e)}],
                 'skipped': []
             }
-            print(f"   ❌ ERROR - Failed to load/run {category} tests: {e}")
+            print(f"   X ERROR - Failed to load/run {category} tests: {e}")
             return error_result
 
     def _print_summary(self, results: Dict[str, Any]) -> None:
@@ -235,8 +235,8 @@ class DockerignoreTestRunner:
 
         print(f"⏱️  Duration: {duration:.2f} seconds")
         print(f"🧪 Total Tests: {summary['total_tests']}")
-        print(f"✅ Passed: {summary['passed']}")
-        print(f"❌ Failed: {summary['failed']}")
+        print(f"CHECK Passed: {summary['passed']}")
+        print(f"X Failed: {summary['failed']}")
         print(f"🚨 Errors: {summary['errors']}")
         print(f"⏭️  Skipped: {summary['skipped']}")
 
@@ -254,7 +254,7 @@ class DockerignoreTestRunner:
             tests_run = category_result.get('tests_run', 0)
             failures = len(category_result.get('failures', []))
             errors = len(category_result.get('errors', []))
-            status = "✅" if failures == 0 and errors == 0 else "❌"
+            status = "CHECK" if failures == 0 and errors == 0 else "X"
             print(f"   {status} {category}: {tests_run} tests ({failures} failures, {errors} errors)")
 
         print("=" * 60)

@@ -1,13 +1,13 @@
 """
-"""
+
 SSOT WebSocket Integration Tests for Issue #1076
 
 Test Plan: Verify WebSocket integration follows SSOT patterns and golden path works.
 Should FAIL initially (detecting integration violations) and PASS after remediation.
 
 Key violations to detect:
-"""
-"""
+    """
+
 1. WebSocket manager imports not using SSOT patterns
 2. Agent execution not properly integrated with SSOT WebSocket events
 3. Auth integration in WebSocket not using SSOT auth service
@@ -16,7 +16,8 @@ Key violations to detect:
 Related Issues: #1076 - SSOT compliance verification
 Priority: CRITICAL - WebSocket is 90% of business value through chat functionality
 "
-"
+""
+
 
 import pytest
 from pathlib import Path
@@ -41,19 +42,21 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
         return Path(__file__).parent.parent.parent
 
     def test_websocket_manager_ssot_import_compliance(self):
-        "
-        "
+        """
+        ""
+
         CRITICAL: Ensure WebSocket manager imports follow SSOT patterns.
 
         EXPECTED: Should FAIL initially - detects non-SSOT WebSocket imports
         REMEDIATION: Update all imports to use SSOT WebSocket manager
 "
-"
+""
+
         websocket_import_violations = []
 
         # Check all files that import WebSocket functionality
         search_paths = [
-            self.project_root / netra_backend / app" / "routes,
+            self.project_root / netra_backend / app" / routes,"
             self.project_root / netra_backend / app / agents","
             self.project_root / netra_backend / app / middleware,"
             self.project_root / netra_backend / app / middleware,"
@@ -137,7 +140,8 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
             )
 
     def test_websocket_auth_integration_ssot_compliance(self):
-    ""
+    """
+
         CRITICAL: Ensure WebSocket auth integration uses SSOT auth service.
 
         EXPECTED: Should FAIL initially - detects non-SSOT auth in WebSocket
@@ -147,9 +151,9 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
 
         # Check WebSocket files for auth integration patterns
         websocket_files = [
-            self.project_root / netra_backend" / "app / routes / websocket.py,
-            self.project_root / netra_backend / "app / routes" / websocket_ssot.py,
-            self.project_root / netra_backend / app / websocket_core" / "websocket_manager.py,
+            self.project_root / netra_backend" / app / routes / websocket.py,"
+            self.project_root / netra_backend / "app / routes / websocket_ssot.py,"
+            self.project_root / netra_backend / app / websocket_core" / websocket_manager.py,"
             self.project_root / netra_backend / app / websocket_core / "auth.py"
         ]
 
@@ -222,25 +226,28 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
                 fREMEDIATION REQUIRED:\n
                 f"1. Replace WebSocket auth integration with SSOT auth service\n"
                 f2. Use direct auth_service imports in WebSocket code\n"
-                f2. Use direct auth_service imports in WebSocket code\n"
+                f2. Use direct auth_service imports in WebSocket code\n""
+
                 f3. Remove auth_integration wrapper functions from WebSocket
             )
 
     def test_websocket_configuration_ssot_compliance(self):
-        "
-        "
+        """
+        ""
+
         CRITICAL: Ensure WebSocket configuration uses SSOT patterns.
 
         EXPECTED: Should FAIL initially - detects non-SSOT config in WebSocket
         REMEDIATION: Update WebSocket config to use SSOT configuration
 "
-"
+""
+
         websocket_config_violations = []
 
         # Check WebSocket files for configuration patterns
         websocket_files = [
-            self.project_root / netra_backend / app" / "routes / websocket.py,
-            self.project_root / netra_backend / app / "routes / websocket_ssot.py",
+            self.project_root / netra_backend / app" / routes / websocket.py,"
+            self.project_root / netra_backend / app / "routes / websocket_ssot.py,"
             self.project_root / netra_backend / app / websocket_core / websocket_manager.py","
             self.project_root / "netra_backend / app / websocket_core / auth.py"
         ]
@@ -250,7 +257,8 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
             "from netra_backend.app.core.configuration,"
             from dev_launcher.isolated_environment import IsolatedEnvironment,
             from shared.logging.unified_logging_ssot import get_logger"
-            from shared.logging.unified_logging_ssot import get_logger"
+            from shared.logging.unified_logging_ssot import get_logger""
+
         ]
 
         # Deprecated configuration patterns in WebSocket
@@ -302,23 +310,26 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
                 f1. Replace direct environment access with IsolatedEnvironment\n
                 f"2. Use SSOT configuration modules in WebSocket code\n"
                 f3. Replace legacy logging with SSOT logging in WebSocket"
-                f3. Replace legacy logging with SSOT logging in WebSocket"
+                f3. Replace legacy logging with SSOT logging in WebSocket""
+
             )
 
     def test_websocket_agent_event_integration_ssot_compliance(self):
-    "
-    "
+        """
+    ""
+
         CRITICAL: Ensure agent-WebSocket event integration follows SSOT patterns.
 
         EXPECTED: Should FAIL initially - detects non-SSOT agent-WebSocket integration
         REMEDIATION: Ensure agents use SSOT WebSocket manager for events
         "
-        "
+        ""
+
         agent_websocket_violations = []
 
         # Check agent files for WebSocket event integration
         agent_files = [
-            self.project_root / netra_backend / app / agents" / "supervisor,
+            self.project_root / netra_backend / app / agents" / supervisor,"
             self.project_backend / app / agents / registry.py,"
             self.project_backend / app / agents / registry.py,"
             self.project_root / "netra_backend / app / tools"
@@ -329,7 +340,8 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
             websocket_manager.emit(","
             WebSocketManager,
             websocket_notifier.notify("
-            websocket_notifier.notify("
+            websocket_notifier.notify(""
+
         ]
 
         # Deprecated agent-WebSocket integration patterns
@@ -348,7 +360,8 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
                 files_to_check = [agent_path]
             else:
                 files_to_check = list(agent_path.rglob(*.py))"
-                files_to_check = list(agent_path.rglob(*.py))"
+                files_to_check = list(agent_path.rglob(*.py))""
+
 
             for agent_file in files_to_check:
                 if agent_file.name.startswith(__") or test in agent_file.name.lower():"
@@ -398,7 +411,8 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
 
             self.fail(
                 fSSOT VIOLATION: Found {len(agent_websocket_violations)} agent-WebSocket integration violations:\n"
-                fSSOT VIOLATION: Found {len(agent_websocket_violations)} agent-WebSocket integration violations:\n"
+                fSSOT VIOLATION: Found {len(agent_websocket_violations)} agent-WebSocket integration violations:\n""
+
                 f{violation_details}\n
                 f{'... and more' if len(agent_websocket_violations) > 10 else ''}\n\n"
                 f{'... and more' if len(agent_websocket_violations) > 10 else ''}\n\n"
@@ -508,10 +522,12 @@ class SSotWebSocketIntegrationTests(SSotBaseTestCase):
                 fREMEDIATION REQUIRED:\n
                 f"1. Ensure all golden path files use SSOT patterns consistently\n"
                 f2. Update WebSocket manager to use SSOT imports\n"
-                f2. Update WebSocket manager to use SSOT imports\n"
+                f2. Update WebSocket manager to use SSOT imports\n""
+
                 f3. Ensure agents and tools use SSOT WebSocket, auth, config, and logging\n
                 f4. Verify complete golden path workflow uses SSOT architecture"
-                f4. Verify complete golden path workflow uses SSOT architecture"
+                f4. Verify complete golden path workflow uses SSOT architecture""
+
             )
 
 

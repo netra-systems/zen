@@ -17,7 +17,7 @@ CRITICAL REQUIREMENTS per CLAUDE.md:
 - Tests must pass or fail meaningfully (no test cheating allowed)
 
 This module tests the COMPLETE agent golden path message workflow covering:
-1. User sends message → Agent processes → AI response delivered
+1. User sends message -> Agent processes -> AI response delivered
 2. WebSocket events provide real-time user experience during processing
 3. Multi-user isolation prevents message cross-contamination (compliance critical)
 4. Error handling provides graceful user experience during failures
@@ -70,7 +70,7 @@ class AgentGoldenPathMessagesTests(SSotAsyncTestCase):
     P0 Critical Integration Tests for Agent Golden Path Message Processing.
 
     This test class validates the complete Golden Path user flow:
-    User Message → Agent Processing → AI Response Delivery
+    User Message -> Agent Processing -> AI Response Delivery
 
     Tests protect $500K+ ARR chat functionality by validating:
     - Complete message processing pipeline
@@ -213,7 +213,7 @@ class AgentGoldenPathMessagesTests(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_complete_user_message_to_ai_response_golden_path(self):
         """
-        Test complete Golden Path: User message → Agent processing → AI response delivery.
+        Test complete Golden Path: User message -> Agent processing -> AI response delivery.
 
         Business Value: $500K+ ARR protection - validates core chat functionality that
         delivers 90% of platform value through AI-powered conversations.

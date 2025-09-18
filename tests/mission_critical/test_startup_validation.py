@@ -1,19 +1,19 @@
 """
-"""
+
 Mission Critical: Startup Validation System Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal
+    - Segment: Platform/Internal
 - Business Goal: Zero critical startup failures in production
 """
-"""
+
 - Value Impact: Prevents broken systems from serving customers
 - Strategic Impact: Protects business reputation and revenue
 
 Infrastructure Test Specialist: Startup Validation System
 
 Team Delta Focus Areas:
-1. Service dependency resolution and validation
+    1. Service dependency resolution and validation
 2. Deterministic component count verification  
 3. Startup race condition prevention
 4. Resource management validation
@@ -28,7 +28,8 @@ Key Requirements:
  PASS:  No memory leaks
  PASS:  Connection pool validation
 "
-"
+""
+
 
 import pytest
 import asyncio
@@ -42,7 +43,7 @@ from unittest.mock import MagicMock, AsyncMock, patch
 
 # Absolute imports following CLAUDE.md guidelines
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.core.startup_validation import (
+from netra_backend.app.core.startup_validation import ()
     StartupValidator,
     ComponentStatus, 
     ComponentValidation,
@@ -56,14 +57,15 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 # Set test environment for infrastructure validation
 env = get_env()
 env.set(ENVIRONMENT", testing, test)"
-env.set("TESTING, true", test)
-env.set(STARTUP_TIMEOUT, "30, test")
+env.set("TESTING, true, test)"
+env.set(STARTUP_TIMEOUT, "30, test)"
 env.set(VALIDATE_RESOURCE_USAGE, true, "test)"
 
 
 class ResourceTracker:
     Track resource usage during validation tests."
-    Track resource usage during validation tests."
+    Track resource usage during validation tests.""
+
     
     def __init__(self):
         self.initial_memory = None
@@ -82,7 +84,8 @@ class ResourceTracker:
         gc.collect()
     
     def get_resource_usage(self) -> Dict[str, float]:
-        ""Get current resource usage delta.
+        ""Get current resource usage delta.""
+
         current_memory = self.process.memory_info().rss
         current_threads = self.process.num_threads()
         try:
@@ -118,7 +121,8 @@ class WebSocketTestHelper:
         self.is_connected = False
     
     async def get_messages(self) -> list:
-        ""Get all sent messages.
+        ""Get all sent messages.""
+
         await asyncio.sleep(0)
         return self.messages_sent.copy()
 
@@ -155,7 +159,8 @@ def validator():
 
 class StartupValidationTests:
     Test the startup validation system."
-    Test the startup validation system."
+    Test the startup validation system.""
+
     
     @pytest.mark.asyncio
     async def test_zero_agents_detected(self, mock_app, validator):
@@ -237,7 +242,7 @@ class StartupValidationTests:
     
     @pytest.mark.asyncio
     async def test_null_services_detected(self, mock_app, validator):
-        ""Test that None services are properly detected.
+        ""Test that None services are properly detected."
         # Set critical services to None
         mock_app.state.llm_manager = None
         mock_app.state.key_manager = None
@@ -327,7 +332,7 @@ class StartupValidationTests:
         for category, components in report['categories'].items():
             for component in components:
                 if component['critical'] and component['expected'] > 0:
-                    assert component['actual'] > 0, fCritical component {component['name']} has zero count
+                    assert component['actual'] > 0, "fCritical component {component['name']} has zero count"
     
     @pytest.mark.asyncio
     async def test_report_generation(self, mock_app, validator):
@@ -418,7 +423,7 @@ class StartupValidationTests:
                         app.state.agent_supervisor.registry = MagicMock()
                         app.state.agent_supervisor.registry.agents = {}  # Zero agents
                         
-                        # Phase validation should detect the zero agents within 30s
+                        # Phase validation should detect the zero agents within ""30s""
                         start_time = time.time()
                         with pytest.raises(DeterministicStartupError) as exc_info:
                             await asyncio.wait_for(
@@ -427,7 +432,7 @@ class StartupValidationTests:
                             )
                         
                         elapsed = time.time() - start_time
-                        assert elapsed < 30, fValidation took {elapsed:.2f}s, expected < 30s
+                        assert elapsed < 30, "fValidation took {elapsed:.""2f""}s, expected < ""30s"""
                         
                         # Should fail due to validation (any DeterministicStartupError is success)
                         error_message = str(exc_info.value).lower()
@@ -441,7 +446,8 @@ class StartupValidationTests:
 @pytest.mark.mission_critical
 class ServiceDependencyResolutionTests:
     Tests for service dependency resolution during startup validation."
-    Tests for service dependency resolution during startup validation."
+    Tests for service dependency resolution during startup validation.""
+
     
     @pytest.fixture
     def setup_resource_tracking(self):
@@ -453,10 +459,10 @@ class ServiceDependencyResolutionTests:
         
         # Verify no resource leaks
         resource_usage = self.resource_tracker.get_resource_usage()
-        assert resource_usage['memory_mb'] < 20, f"Memory leak: {resource_usage['memory_mb']:.2f}MB"
+        assert resource_usage['memory_mb'] < 20, f"Memory leak: {resource_usage['memory_mb']:.""2f""}MB"
         assert resource_usage['threads'] <= 1, fThread leak: {resource_usage['threads']} threads"
         assert resource_usage['threads'] <= 1, fThread leak: {resource_usage['threads']} threads"
-        assert resource_usage['file_descriptors'] <= 2, fFD leak: {resource_usage['file_descriptors']} descriptors
+        assert resource_usage['file_descriptors'] <= 2, "fFD leak: {resource_usage['file_descriptors']} descriptors"
     
     @pytest.mark.asyncio
     async def test_dependency_chain_validation(self, validator):
@@ -560,7 +566,8 @@ class ServiceDependencyResolutionTests:
 @pytest.mark.mission_critical
 class RaceConditionPreventionTests:
     Tests for preventing race conditions during startup validation."
-    Tests for preventing race conditions during startup validation."
+    Tests for preventing race conditions during startup validation.""
+
     
     @pytest.mark.asyncio
     async def test_concurrent_validation_requests(self, validator):
@@ -622,17 +629,18 @@ class RaceConditionPreventionTests:
             # All should succeed
             for success, report in results:
                 assert success
-                assert isinstance(report, dict)
+                assert isinstance(report, "dict)"
                 assert 'total_validations' in report
             
             # Should complete within reasonable time
-            assert elapsed < 15, fConcurrent validation took {elapsed:.2f}s, expected < 15s""
+            assert elapsed < 15, fConcurrent validation took {elapsed:."2f"}s, expected < "15s"""
 
 
 @pytest.mark.mission_critical  
 class ConnectionPoolValidationTests:
     Tests for connection pool validation during startup."
-    Tests for connection pool validation during startup."
+    Tests for connection pool validation during startup.""
+
     
     def test_database_connection_pool_health(self, validator):
         "Test database connection pool health validation."

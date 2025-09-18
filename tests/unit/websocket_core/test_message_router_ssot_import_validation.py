@@ -56,11 +56,11 @@ class MessageRouterSSOTImportValidationTests(SSotBaseTestCase):
         if len(successful_imports) == 1:
             canonical_path, canonical_class = successful_imports[0]
             self.assertEqual(canonical_path, self.expected_canonical_path, f'Single MessageRouter import should be from canonical path {self.expected_canonical_path}, got {canonical_path}')
-            self.logger.info(f'✅ SSOT COMPLIANCE: Single MessageRouter import from {canonical_path}')
+            self.logger.info(f'CHECK SSOT COMPLIANCE: Single MessageRouter import from {canonical_path}')
         else:
             violation_details = f'SSOT VIOLATION: Found {len(successful_imports)} MessageRouter implementations: '
             violation_details += ', '.join([f'{path} (id={hex(id(cls))})' for path, cls in successful_imports])
-            self.logger.error(f'❌ {violation_details}')
+            self.logger.error(f'X {violation_details}')
             self.fail(f'SSOT VIOLATION: Expected exactly 1 MessageRouter implementation, found {len(successful_imports)}. This proves fragmentation blocking Golden Path. Details: {violation_details}')
 
     def test_message_router_class_identity_uniqueness(self):
@@ -85,10 +85,10 @@ class MessageRouterSSOTImportValidationTests(SSotBaseTestCase):
         for location in class_locations:
             self.logger.info(f'  {location}')
         if len(message_router_classes) == 1:
-            self.logger.info('✅ SSOT COMPLIANCE: All MessageRouter imports return same class identity')
+            self.logger.info('CHECK SSOT COMPLIANCE: All MessageRouter imports return same class identity')
         else:
             violation_msg = f'SSOT VIOLATION: {len(message_router_classes)} different MessageRouter class objects detected'
-            self.logger.error(f'❌ {violation_msg}')
+            self.logger.error(f'X {violation_msg}')
             self.fail(f'SSOT VIOLATION: All MessageRouter imports must return same class identity. Found {len(message_router_classes)} different class objects, proving fragmentation. Class locations: {class_locations}')
 
     def test_canonical_import_path_accessibility(self):
@@ -99,7 +99,7 @@ class MessageRouterSSOTImportValidationTests(SSotBaseTestCase):
             self.assertIsNotNone(router)
             self.assertTrue(hasattr(router, 'handlers'))
             self.assertTrue(hasattr(router, 'add_handler'))
-            self.logger.info('✅ Canonical MessageRouter import path functional')
+            self.logger.info('CHECK Canonical MessageRouter import path functional')
         except ImportError as e:
             self.fail(f'Canonical MessageRouter import path not accessible: {e}')
         except Exception as e:

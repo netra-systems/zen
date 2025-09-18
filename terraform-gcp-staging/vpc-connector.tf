@@ -29,17 +29,17 @@ resource "google_vpc_access_connector" "staging_connector" {
   # Redis is in 10.166.0.0/16 network, so using 10.2.0.0/28 for connector (non-overlapping)
   ip_cidr_range = "10.2.0.0/28" # Non-overlapping CIDR for VPC connector routing to Redis network
 
-  # EMERGENCY PHASE 2 FIX: Critical scaling for golden path test execution (Issue #1278)
-  # Based on Five Whys analysis - emergency capacity increase to handle concurrent test execution
-  min_instances = 10  # EMERGENCY: Doubled from 5 to 10 for immediate baseline capacity
-  max_instances = 100 # EMERGENCY: Doubled from 50 to 100 for emergency peak capacity
+  # Issue #1300: Enhanced scaling for WebSocket authentication monitoring infrastructure
+  # Optimized for concurrent WebSocket sessions with authentication monitoring
+  min_instances = 12  # Enhanced from 10 for WebSocket authentication monitoring baseline
+  max_instances = 120 # Enhanced from 100 for WebSocket peak capacity with auth monitoring
 
-  # EMERGENCY: Enhanced throughput settings for concurrent test execution load
-  min_throughput = 500 # EMERGENCY: Increased from 300 to 500 for higher baseline
-  max_throughput = 2000 # EMERGENCY: Doubled from 1000 to 2000 for emergency peak
+  # Issue #1300: Enhanced throughput settings for WebSocket authentication monitoring
+  min_throughput = 600 # Increased from 500 for WebSocket authentication monitoring baseline
+  max_throughput = 2400 # Increased from 2000 for WebSocket auth monitoring peak load
 
-  # EMERGENCY PHASE 2 FIX: Upgraded machine type for critical test execution capacity
-  machine_type = "e2-standard-8" # EMERGENCY: Upgraded from e2-standard-4 to e2-standard-8
+  # Issue #1300: Optimized machine type for WebSocket authentication monitoring workload
+  machine_type = "e2-standard-8" # Sufficient for WebSocket authentication monitoring infrastructure
 
   # ISSUE #1177 FIX: Enhanced lifecycle management
   lifecycle {

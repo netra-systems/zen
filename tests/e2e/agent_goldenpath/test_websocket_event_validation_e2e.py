@@ -173,7 +173,7 @@ class WebSocketEventValidationE2ETests(SSotAsyncTestCase):
             websocket = await asyncio.wait_for(websockets.connect(self.__class__.staging_config.urls.websocket_url, additional_headers={'Authorization': f'Bearer {self.access_token}', 'X-Environment': 'staging', 'X-Test-Suite': 'websocket-events-e2e', 'X-Event-Validation': 'comprehensive'}, ssl=ssl_context, ping_interval=30, ping_timeout=10), timeout=20.0)
             connection_time = time.time() - connection_start
             event_metrics.append({'metric': 'websocket_connection_time', 'value': connection_time, 'timestamp': time.time(), 'success': True})
-            self.logger.info(f'✅ WebSocket connected for event validation in {connection_time:.2f}s')
+            self.logger.info(f'CHECK WebSocket connected for event validation in {connection_time:.2f}s')
             event_trigger_message = {'type': 'agent_request', 'agent': 'supervisor_agent', 'message': 'I need a comprehensive AI cost optimization analysis. Current spend is $18,000/month on GPT-4 with 50,000 daily requests. Analyze my usage patterns, calculate potential savings from intelligent routing, and provide specific implementation recommendations with ROI projections. Include performance impact analysis.', 'thread_id': self.thread_id, 'run_id': self.run_id, 'user_id': self.__class__.test_user_id, 'context': {'test_scenario': 'complete_event_validation', 'requires_tools': True, 'expected_events': self.__class__.critical_events, 'event_validation': 'comprehensive'}}
             message_send_start = time.time()
             await websocket.send(json.dumps(event_trigger_message))
@@ -243,7 +243,7 @@ class WebSocketEventValidationE2ETests(SSotAsyncTestCase):
             assert len(critical_events_received) == 5, f'Incomplete critical event delivery: {len(critical_events_received)}/5'
         except Exception as e:
             total_time = time.time() - event_test_start_time
-            self.logger.error(f'❌ WEBSOCKET EVENT VALIDATION FAILED')
+            self.logger.error(f'X WEBSOCKET EVENT VALIDATION FAILED')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             self.logger.error(f'   Event metrics collected: {len(event_metrics)}')
@@ -295,7 +295,7 @@ class WebSocketEventValidationE2ETests(SSotAsyncTestCase):
                             validation = self._validate_event_payload(event, event_type)
                             payload_validations[event_type] = validation
                             if not validation['payload_complete']:
-                                self.logger.warning(f"⚠️ Incomplete payload for {event_type}: missing fields: {validation['missing_fields']}, missing data: {validation['missing_data']}")
+                                self.logger.warning(f"WARNING️ Incomplete payload for {event_type}: missing fields: {validation['missing_fields']}, missing data: {validation['missing_data']}")
                         if event_type == 'agent_completed':
                             break
                     except asyncio.TimeoutError:
@@ -308,7 +308,7 @@ class WebSocketEventValidationE2ETests(SSotAsyncTestCase):
                     assert validation['has_required_fields'], f"Missing required fields for {event_type} in {scenario['name']}: {validation['missing_fields']}"
                     assert validation['has_required_data'], f"Missing required data for {event_type} in {scenario['name']}: {validation['missing_data']}"
                 payload_metrics.append({'scenario': scenario['name'], 'duration': scenario_duration, 'events_collected': len(scenario_events), 'payload_validations': len(payload_validations), 'incomplete_payloads': len(incomplete_payloads), 'all_payloads_complete': len(incomplete_payloads) == 0})
-                self.logger.info(f"✅ {scenario['name']}: {len(payload_validations)} payloads validated, Duration {scenario_duration:.1f}s")
+                self.logger.info(f"CHECK {scenario['name']}: {len(payload_validations)} payloads validated, Duration {scenario_duration:.1f}s")
             await websocket.close()
             total_payload_test_time = time.time() - payload_test_start_time
             total_validations = sum((m['payload_validations'] for m in payload_metrics))
@@ -321,7 +321,7 @@ class WebSocketEventValidationE2ETests(SSotAsyncTestCase):
             assert all((m['all_payloads_complete'] for m in payload_metrics)), f'Some scenarios had incomplete payloads. Metrics: {payload_metrics}'
         except Exception as e:
             total_time = time.time() - payload_test_start_time
-            self.logger.error(f'❌ WEBSOCKET PAYLOAD VALIDATION FAILED')
+            self.logger.error(f'X WEBSOCKET PAYLOAD VALIDATION FAILED')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             raise AssertionError(f'WebSocket payload validation failed after {total_time:.1f}s: {e}. Incomplete payloads break UI functionality and user experience.')
@@ -405,7 +405,7 @@ class WebSocketEventValidationE2ETests(SSotAsyncTestCase):
                 self.logger.info(f"   {event_type}: +{timing_info['relative_time']:.1f}s")
         except Exception as e:
             total_time = time.time() - timing_test_start_time
-            self.logger.error(f'❌ WEBSOCKET TIMING VALIDATION FAILED')
+            self.logger.error(f'X WEBSOCKET TIMING VALIDATION FAILED')
             self.logger.error(f'   Error: {str(e)}')
             self.logger.error(f'   Duration: {total_time:.1f}s')
             raise AssertionError(f'WebSocket timing validation failed after {total_time:.1f}s: {e}. Poor event timing breaks real-time user experience quality.')

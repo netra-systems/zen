@@ -8,7 +8,8 @@ from shared.isolated_environment import IsolatedEnvironment
 
 
 class SimpleWebSocketNotifier:
-    ""Simplified WebSocket notifier for testing that accepts direct parameters.
+    ""Simplified WebSocket notifier for testing that accepts direct parameters.""
+
     
     def __init__(self, websocket_manager):
         # Create user context for SSOT pattern
@@ -23,7 +24,8 @@ class SimpleWebSocketNotifier:
     
     def _create_context(self, connection_id: str, request_id: str, agent_name: str = test_agent") -> AgentExecutionContext:"
         Create a context object from simple parameters."
-        Create a context object from simple parameters."
+        Create a context object from simple parameters.""
+
         return AgentExecutionContext(
             agent_name=agent_name,
             thread_id=connection_id,  # Use connection_id as thread_id
@@ -55,7 +57,8 @@ class SimpleWebSocketNotifier:
     
     async def send_tool_completed(self, connection_id: str, request_id: str, tool_name: str, result: dict = None) -> None:
         Send tool completed with simple parameters."
-        Send tool completed with simple parameters."
+        Send tool completed with simple parameters.""
+
         context = self._create_context(connection_id, request_id)
         await self.notifier.send_tool_completed(context, tool_name, result or {)
     
@@ -65,7 +68,8 @@ class SimpleWebSocketNotifier:
         await self.notifier.send_final_report(context, report, duration_ms)
     
     async def send_agent_completed(self, connection_id: str, request_id: str, result: dict = None) -> None:
-        ""Send agent completed with simple parameters.
+        ""Send agent completed with simple parameters.""
+
         context = self._create_context(connection_id, request_id)
         duration_ms = (time.time() - context.started_at.timestamp()) * 1000
         await self.notifier.send_agent_completed(context, result or {}, duration_ms)
@@ -73,6 +77,7 @@ class SimpleWebSocketNotifier:
     async def send_agent_fallback(self, connection_id: str, request_id: str, fallback_type: str) -> None:
         Send agent fallback with simple parameters."""
         Send agent fallback with simple parameters."""
+
         context = self._create_context(connection_id, request_id)
         await self.notifier.send_fallback_notification(context, fallback_type)
 

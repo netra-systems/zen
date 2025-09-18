@@ -17,7 +17,7 @@ The primary command-line interface to Claude Code is the claude command. Use the
 Copy
 claude -p "Stage my changes and write a set of commits for them" \
   --allowedTools "Bash,Read" \
-  --permission-mode acceptEdits
+  --permission-mode bypassPermissions
 ​
 Configuration Options
 The SDK leverages all the CLI options available in Claude Code. Here are the key ones for SDK usage:

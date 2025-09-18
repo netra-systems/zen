@@ -1,16 +1,16 @@
 "Mission Critical: WebSocket 1011 Error Resolution Tests"
 
 Specifically validates that Redis SSOT consolidation prevents WebSocket 1011 errors
-that were blocking $500K+ ARR chat functionality.
+that were blocking $500K+ plus ARR chat functionality.
 
 Background:
-- WebSocket 1011 errors occurred due to competing Redis connection pools
+    - WebSocket 1011 errors occurred due to competing Redis connection pools
 - Multiple Redis managers caused race conditions during handshake
 - Connection pool conflicts prevented reliable WebSocket establishment
 - Chat functionality (90% of platform value) was severely impacted
 
 Success Criteria:
-- Zero WebSocket 1011 errors under normal load
+    - Zero WebSocket 1011 errors under normal load
 - 99%+ WebSocket connection success rate
 - Stable connections during concurrent user sessions
 - No Redis-related WebSocket failures
@@ -32,7 +32,8 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 class WebSocket1011FixesTests(SSotAsyncTestCase):
     Mission Critical: Test WebSocket 1011 error fixes through Redis SSOT."
-    Mission Critical: Test WebSocket 1011 error fixes through Redis SSOT."
+    Mission Critical: Test WebSocket 1011 error fixes through Redis SSOT.""
+
     
     def setUp(self):
         "Set up test fixtures."
@@ -41,7 +42,7 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
         self.websocket_connections = []
         
     async def asyncTearDown(self):
-        ""Async cleanup of test resources.
+        ""Async cleanup of test resources."
         # Close any WebSocket connections
         for ws in self.websocket_connections:
             try:
@@ -95,14 +96,15 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
                                f"Failed connections: {failed_connections})"
         
         self.assertGreaterEqual(connections_per_second, 5.0,
-                               fShould handle at least 5 connections/sec, got {connections_per_second:.2f}")"
+                               fShould handle at least 5 connections/sec, got {connections_per_second:.""2f""}")"
         
         # Log results for monitoring
         self.logger.info(fWebSocket race condition test results:)
         self.logger.info(f  Success rate: {success_rate:.1f}%)"
         self.logger.info(f  Success rate: {success_rate:.1f}%)"
         self.logger.info(f"  Successful: {successful_connections}/{len(results)})"
-        self.logger.info(f  Performance: {connections_per_second:.2f} connections/sec)
+        self.logger.info(f  Performance: {connections_per_second:.""2f""} connections/sec)""
+
         
         if failed_connections > 0:
             self.logger.warning(fHad {failed_connections} failed connections - investigating...)
@@ -113,13 +115,15 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
     
     async def test_redis_connection_pool_stability_under_websocket_load(self):
         MISSION CRITICAL: Test Redis connection pool remains stable under WebSocket load."
-        MISSION CRITICAL: Test Redis connection pool remains stable under WebSocket load."
+        MISSION CRITICAL: Test Redis connection pool remains stable under WebSocket load.""
+
         
         BUSINESS IMPACT: Ensures chat system can handle concurrent users without failures.
         ISSUE: Previous multiple connection pools caused instability under load.
         FIX: Single SSOT connection pool maintains stability.
         "
-        "
+        ""
+
         initial_status = redis_manager.get_status()
         
         # Simulate high-load WebSocket scenario with Redis operations
@@ -151,7 +155,7 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
                        Redis connection should remain stable under WebSocket load)
         
         # Failure count should not increase dramatically
-        failure_increase = final_status[consecutive_failures"] - initial_status.get("consecutive_failures, 0)
+        failure_increase = final_status[consecutive_failures"] - initial_status.get(consecutive_failures, 0)"
         self.assertLessEqual(failure_increase, 3,
                            fRedis failure count should not increase significantly under load, got +{failure_increase})
         
@@ -163,8 +167,8 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
         
         # Log load test results
         self.logger.info(fWebSocket load test results:)
-        self.logger.info(f  Session success rate: {success_rate:.1f}%)
-        self.logger.info(f"  Performance: {sessions_per_second:.2f} sessions/sec)"
+        self.logger.info(f  Session success rate: {success_rate:.""1f""}%)
+        self.logger.info(f"  Performance: {sessions_per_second:.""2f""} sessions/sec)"
         self.logger.info(f  Redis stability: {final_status['connected']}")"
         
         if exception_count > 0:
@@ -182,7 +186,8 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
         user_id = atomic_test_user"
         user_id = atomic_test_user"
         connection_id = fws_{user_id}_{int(time.time() * 1000)}"
-        connection_id = fws_{user_id}_{int(time.time() * 1000)}"
+        connection_id = fws_{user_id}_{int(time.time() * 1000)}""
+
         
         # Define all Redis keys that should be set atomically
         connection_key = fwebsocket:active:{connection_id}
@@ -199,7 +204,8 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
         # Verify all Redis keys were set correctly
         connection_data = await redis_manager.get(connection_key)
         self.assertIsNotNone(connection_data, Connection data should be set)"
-        self.assertIsNotNone(connection_data, Connection data should be set)"
+        self.assertIsNotNone(connection_data, Connection data should be set)""
+
         
         session_data = await redis_manager.get(session_key)
         self.assertEqual(session_data, valid_session", Session should be valid)"
@@ -212,7 +218,8 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
         for i in range(10):
             concurrent_user = f"concurrent_user_{i}"
             concurrent_connection = fws_{concurrent_user}_{int(time.time() * 1000)}_{i}"
-            concurrent_connection = fws_{concurrent_user}_{int(time.time() * 1000)}_{i}"
+            concurrent_connection = fws_{concurrent_user}_{int(time.time() * 1000)}_{i}""
+
             concurrent_handshakes.append(
                 self._perform_atomic_handshake(concurrent_user, concurrent_connection)
             )
@@ -233,7 +240,8 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
         3. Redis connection pool exhaustion
         4. Concurrent user authentication
 "
-"
+""
+
         
         # Condition 1: Rapid connect/disconnect cycles
         cycle_tasks = []
@@ -277,10 +285,10 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
         
         # Overall validation
         self.logger.info(WebSocket 1011 error condition test results:")"
-        self.logger.info(f  Rapid cycles: {cycle_success_rate:.1f}%)
-        self.logger.info(f  Timeout resilience: {timeout_success_rate:.1f}%)
+        self.logger.info(f  Rapid cycles: {cycle_success_rate:.""1f""}%)
+        self.logger.info(f  Timeout resilience: {timeout_success_rate:.""1f""}%)
         self.logger.info(f"  Pool exhaustion prevention: {pool_test_success})"
-        self.logger.info(f  Concurrent auth: {auth_success_rate:.1f}%")"
+        self.logger.info(f  Concurrent auth: {auth_success_rate:.""1f""}%")"
     
     async def _simulate_websocket_connection(self, user_id: str) -> bool:
         Simulate WebSocket connection with Redis operations.""
@@ -296,7 +304,8 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
                 user_id": user_id,"
                 connected_at: time.time(),
                 connection_id: connection_id"
-                connection_id: connection_id"
+                connection_id: connection_id""
+
             }
             
             success = await redis_manager.set(
@@ -318,12 +327,14 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
             # Verify session
             session = await redis_manager.get(session_key)
             if session != valid_session:"
-            if session != valid_session:"
+            if session != valid_session:""
+
                 return False
             
             # Simulate connection tracking
             tracking_key = fuser_connections:{user_id}"
-            tracking_key = fuser_connections:{user_id}"
+            tracking_key = fuser_connections:{user_id}""
+
             self.test_redis_keys.add(tracking_key)
             
             await redis_manager.lpush(tracking_key, connection_id)
@@ -355,7 +366,8 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
             
             # Simulate heartbeat
             heartbeat_key = fwebsocket:heartbeat:{user_id}"
-            heartbeat_key = fwebsocket:heartbeat:{user_id}"
+            heartbeat_key = fwebsocket:heartbeat:{user_id}""
+
             self.test_redis_keys.add(heartbeat_key)
             await redis_manager.set(heartbeat_key, str(time.time()), ex=30)
             
@@ -441,7 +453,8 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
             except asyncio.TimeoutError:
                 # Timeout should be handled gracefully
                 self.logger.debug(fConnection timeout for {user_id} - should be handled gracefully)"
-                self.logger.debug(fConnection timeout for {user_id} - should be handled gracefully)"
+                self.logger.debug(fConnection timeout for {user_id} - should be handled gracefully)""
+
                 return True  # Graceful timeout handling is success
             
         except Exception:
@@ -454,7 +467,7 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
             status = redis_manager.get_status()
             
             # Should have single connection
-            self.assertTrue(status[connected"], "Should have stable connection)
+            self.assertTrue(status[connected"], Should have stable connection)"
             
             # Perform many operations without exhausting pool
             operation_tasks = []
@@ -508,7 +521,8 @@ class WebSocket1011FixesTests(SSotAsyncTestCase):
             return False
     
     async def _cleanup_websocket_session(self, user_id: str):
-        ""Clean up WebSocket session Redis data.
+        ""Clean up WebSocket session Redis data.""
+
         try:
             # Get all keys for this user
             patterns = [
@@ -558,7 +572,8 @@ class WebSocketRedisIntegrationTests(SSotAsyncTestCase):
         try:
             # Should not throw exceptions even with circuit breaker open
             connection_id = fws_degraded_{user_id}"
-            connection_id = fws_degraded_{user_id}"
+            connection_id = fws_degraded_{user_id}""
+
             
             # These operations should fail gracefully
             await redis_manager.set(f"test:{connection_id}, data)"
@@ -594,7 +609,7 @@ class WebSocketRedisIntegrationTests(SSotAsyncTestCase):
         """Test WebSocket operations after Redis recovery."""
         try:
             # Should work normally after recovery
-            session_data = {"user_id: user_id, recovered": True}
+            session_data = {"user_id: user_id, recovered: True}"
             
             success = await redis_manager.store_session(user_id, session_data, 60)
             if not success:

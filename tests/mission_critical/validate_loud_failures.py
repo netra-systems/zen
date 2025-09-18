@@ -7,10 +7,12 @@ class TestWebSocketConnection:
         self._closed = False
 
     async def send_json(self, message: dict):
-        ""Send JSON message.
+        ""Send JSON message.""
+
         if self._closed:
         raise RuntimeError(WebSocket is closed)"
-        raise RuntimeError(WebSocket is closed)"
+        raise RuntimeError(WebSocket is closed)""
+
         self.messages_sent.append(message)
 
     async def close(self, code: int = 1000, reason: str = Normal closure"):"
@@ -20,7 +22,8 @@ class TestWebSocketConnection:
 
     def get_messages(self) -> list:
         Get all sent messages."
-        Get all sent messages."
+        Get all sent messages.""
+
         return self.messages_sent.copy()
 
         '''
@@ -68,7 +71,7 @@ class TestWebSocketConnection:
         try:
         await engine._send_tool_executing( )
         context=None,
-        tool_name="TestTool",
+        tool_name="TestTool,"
         tool_input={param: value}
                 
         print( FAIL:  FAILED: Should have raised WebSocketContextValidationError)
@@ -101,7 +104,7 @@ class TestWebSocketConnection:
         await engine._send_tool_executing( )
         context=mock_context,
         tool_name=TestTool,
-        tool_input={"param: value"}
+        tool_input={"param: value}"
                                 
         print( FAIL:  FAILED: Should have raised WebSocketBridgeUnavailableError)
         return False
@@ -121,7 +124,8 @@ class TestWebSocketConnection:
         Test that failed agent notifications raise WebSocketSendFailureError."
         print("")
         PASS:  Testing: Agent notification failure...)"
-        PASS:  Testing: Agent notification failure...)"
+        PASS:  Testing: Agent notification failure...)""
+
 
                                             # Create mock WebSocket bridge that returns failure
         websocket = TestWebSocketConnection()
@@ -135,7 +139,7 @@ class TestWebSocketConnection:
                                             
 
         try:
-        await emitter.notify_agent_started(TestAgent, {context: "data")
+        await emitter.notify_agent_started(TestAgent, {context: "data)"
         print( FAIL:  FAILED: Should have raised WebSocketSendFailureError)
         return False
         except WebSocketSendFailureError as e:
@@ -150,7 +154,8 @@ class TestWebSocketConnection:
 
     async def test_message_buffer_overflow():
         Test that message buffer overflow raises WebSocketBufferOverflowError."
-        Test that message buffer overflow raises WebSocketBufferOverflowError."
+        Test that message buffer overflow raises WebSocketBufferOverflowError.""
+
         print()
         PASS:  Testing: Message buffer overflow...")"
 
@@ -181,13 +186,14 @@ class TestWebSocketConnection:
         return True
         except Exception as e:
         print(formatted_string)"
-        print(formatted_string)"
+        print(formatted_string)""
+
         return False
 
 
     async def main():
         "Run all validation tests."
-        print(=" * 80")
+        print(=" * 80)"
         print(VALIDATING LOUD WEBSOCKET FAILURES)"
         print(VALIDATING LOUD WEBSOCKET FAILURES)"
         print(=" * 80)"
@@ -222,6 +228,6 @@ class TestWebSocketConnection:
         return failed == 0
 
 
-        if __name__ == "__main__":
+        if __name__ == "__main__:"
         success = asyncio.run(main())
         sys.exit(0 if success else 1)

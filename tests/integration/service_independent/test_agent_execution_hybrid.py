@@ -185,7 +185,7 @@ class AgentExecutionHybridTests(AgentExecutionIntegrationTestBase):
         assert database_service is not None, "Database service required"
         assert websocket_service is not None, "WebSocket service required for agent events"
         
-        # Test complete workflow: Triage → Data Helper → Supervisor → APEX Optimizer
+        # Test complete workflow: Triage -> Data Helper -> Supervisor -> APEX Optimizer
         workflow_stages = [
             {
                 "agent_type": "triage",

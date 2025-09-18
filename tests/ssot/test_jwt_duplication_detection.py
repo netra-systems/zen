@@ -13,7 +13,7 @@ BUSINESS VALUE: Enterprise/Platform - Security & Compliance
 - Ensures audit trail centralization
 - Maintains SSOT architectural compliance
 
-EXPECTED STATUS: FAIL (before SSOT refactor) → PASS (after SSOT refactor)
+EXPECTED STATUS: FAIL (before SSOT refactor) -> PASS (after SSOT refactor)
 
 These tests detect SSOT violations by scanning for:
 1. Direct JWT library imports in backend production code

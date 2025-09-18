@@ -66,7 +66,7 @@ class MultiUserAgentIsolationE2ETests(BaseE2ETest):
         for user in self.test_users:
             self.user_events[user.user_id] = []
             self.user_data_access[user.user_id] = set()
-        self.logger.info(f'✅ PASS: Multi-user isolation test environment ready - {len(self.test_users)} users authenticated')
+        self.logger.info(f'CHECK PASS: Multi-user isolation test environment ready - {len(self.test_users)} users authenticated')
 
     async def test_concurrent_execution_complete_isolation(self):
         """
@@ -144,7 +144,7 @@ class MultiUserAgentIsolationE2ETests(BaseE2ETest):
                 for event in user_events:
                     event_user_id = event.get('user_id')
                     assert event_user_id == user_id, f'Event cross-contamination: User {user_id} received event for {event_user_id}'
-        self.logger.info(f'✅ PASS: Concurrent multi-user isolation validated successfully')
+        self.logger.info(f'CHECK PASS: Concurrent multi-user isolation validated successfully')
         self.logger.info(f'👥 Concurrent users: {successful_users}')
         self.logger.info(f'🔒 Isolation violations: {total_violations} (MUST BE ZERO)')
         self.logger.info(f'🛡️ Data leaks prevented: {len(all_leaked_data)} (MUST BE ZERO)')
@@ -211,7 +211,7 @@ class MultiUserAgentIsolationE2ETests(BaseE2ETest):
         for instance_id in unique_instance_ids:
             assert len(instance_id) >= 8, f'Instance ID too short: {instance_id}'
             assert '-' in instance_id or len(instance_id) >= 16, f"Instance ID doesn't follow UUID pattern: {instance_id}"
-        self.logger.info(f'✅ PASS: Factory pattern isolation validated successfully')
+        self.logger.info(f'CHECK PASS: Factory pattern isolation validated successfully')
         self.logger.info(f'🏭 Factory tests: {successful_factory_tests}')
         self.logger.info(f'🔑 Unique instances: {len(unique_instance_ids)}')
         self.logger.info(f'🔒 Shared state detections: {shared_state_detections} (MUST BE ZERO)')
@@ -290,7 +290,7 @@ class MultiUserAgentIsolationE2ETests(BaseE2ETest):
                 else:
                     all_event_signatures.add(event_signature)
         assert len(duplicate_events) == 0, f'Duplicate events detected across users: {len(duplicate_events)}'
-        self.logger.info(f'✅ PASS: WebSocket event stream isolation validated')
+        self.logger.info(f'CHECK PASS: WebSocket event stream isolation validated')
         self.logger.info(f'📡 Total events: {total_events}')
         self.logger.info(f'🔀 Event streams: {len(event_collectors)}')
         self.logger.info(f'🚫 Cross-contamination: 0 (VALIDATED)')
@@ -360,7 +360,7 @@ class MultiUserAgentIsolationE2ETests(BaseE2ETest):
         cpu_variance = max(cpu_patterns) - min(cpu_patterns)
         assert memory_variance > 20, f'Memory usage too similar between users (low isolation): variance {memory_variance}MB'
         assert cpu_variance > 10, f'CPU usage too similar between users (low isolation): variance {cpu_variance}%'
-        self.logger.info(f'✅ PASS: Resource isolation validated successfully')
+        self.logger.info(f'CHECK PASS: Resource isolation validated successfully')
         self.logger.info(f'💾 Memory variance: {memory_variance}MB (isolation confirmed)')
         self.logger.info(f'⚡ CPU variance: {cpu_variance}% (isolation confirmed)')
         self.logger.info(f'📊 Total resource snapshots: {total_snapshots}')

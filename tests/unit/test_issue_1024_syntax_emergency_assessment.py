@@ -160,7 +160,7 @@ class Issue1024SyntaxEmergencyAssessmentTests(unittest.TestCase):
         if self.syntax_errors:
             print(f"\nTOP 10 SYNTAX ERRORS TO FIX:")
             for i, error in enumerate(self.syntax_errors[:10], 1):
-                priority = "🚨 CRITICAL" if error['critical'] else "⚠️  STANDARD"
+                priority = "🚨 CRITICAL" if error['critical'] else "WARNING️  STANDARD"
                 print(f"{i}. [{priority}] {error['file']}")
                 print(f"   Line {error['line']}: {error['error']}")
 

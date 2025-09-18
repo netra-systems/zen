@@ -88,23 +88,23 @@ class SSotImportRegistryComplianceIssue1196Tests(unittest.TestCase):
 
                 # Try to execute the import
                 exec(canonical_path)
-                print(f"    ✅ WORKS")
+                print(f"    CHECK WORKS")
 
             except ImportError as e:
                 registry_accuracy_issues.append(f"{component} canonical path BROKEN: {str(e)}")
-                print(f"    ❌ BROKEN: {str(e)}")
+                print(f"    X BROKEN: {str(e)}")
             except Exception as e:
                 registry_accuracy_issues.append(f"{component} canonical path ERROR: {str(e)}")
-                print(f"    ❌ ERROR: {str(e)}")
+                print(f"    X ERROR: {str(e)}")
 
             # Test alternative paths documented in registry
             for alt_path in paths["alternatives"]:
                 print(f"  Alternative: {alt_path}")
                 try:
                     exec(alt_path)
-                    print(f"    ⚠️  WORKS (should be deprecated)")
+                    print(f"    WARNING️  WORKS (should be deprecated)")
                 except ImportError as e:
-                    print(f"    ❌ BROKEN: {str(e)}")
+                    print(f"    X BROKEN: {str(e)}")
                     registry_accuracy_issues.append(f"{component} alternative path BROKEN: {alt_path} - {str(e)}")
 
         print(f"\nRegistry accuracy issues found: {len(registry_accuracy_issues)}")
@@ -228,21 +228,21 @@ class SSotImportRegistryComplianceIssue1196Tests(unittest.TestCase):
                 for j, import_stmt in enumerate(sequence):
                     print(f"  Step {j+1}: {import_stmt}")
                     exec(import_stmt)
-                    print(f"    ✅ SUCCESS")
+                    print(f"    CHECK SUCCESS")
 
-                print(f"  Sequence {i+1}: ✅ NO CIRCULAR DEPENDENCY")
+                print(f"  Sequence {i+1}: CHECK NO CIRCULAR DEPENDENCY")
 
             except ImportError as e:
                 if "circular" in str(e).lower() or "partially initialized" in str(e):
                     circular_dependency_errors.append(f"Sequence {i+1}: CIRCULAR DEPENDENCY - {str(e)}")
-                    print(f"  ❌ CIRCULAR DEPENDENCY: {str(e)}")
+                    print(f"  X CIRCULAR DEPENDENCY: {str(e)}")
                 else:
                     circular_dependency_errors.append(f"Sequence {i+1}: IMPORT ERROR - {str(e)}")
-                    print(f"  ❌ IMPORT ERROR: {str(e)}")
+                    print(f"  X IMPORT ERROR: {str(e)}")
 
             except Exception as e:
                 circular_dependency_errors.append(f"Sequence {i+1}: UNEXPECTED ERROR - {str(e)}")
-                print(f"  ❌ UNEXPECTED ERROR: {str(e)}")
+                print(f"  X UNEXPECTED ERROR: {str(e)}")
 
         print(f"\nCircular dependency errors found: {len(circular_dependency_errors)}")
         for error in circular_dependency_errors:
@@ -292,13 +292,13 @@ class SSotImportRegistryComplianceIssue1196Tests(unittest.TestCase):
                     f"WebSocketManager: Different classes from different import paths - "
                     f"canonical: {canonical_instance}, alternative: {alternative_instance}"
                 )
-                print(f"  ❌ INCONSISTENT: Different classes from different paths")
+                print(f"  X INCONSISTENT: Different classes from different paths")
             else:
-                print(f"  ✅ CONSISTENT: Same class from both paths")
+                print(f"  CHECK CONSISTENT: Same class from both paths")
 
         except Exception as e:
             initialization_inconsistencies.append(f"WebSocketManager initialization test failed: {str(e)}")
-            print(f"  ❌ ERROR: {str(e)}")
+            print(f"  X ERROR: {str(e)}")
 
         print(f"\nInitialization inconsistencies found: {len(initialization_inconsistencies)}")
         for inconsistency in initialization_inconsistencies:
@@ -337,7 +337,7 @@ class SSotImportRegistryComplianceIssue1196Tests(unittest.TestCase):
             # Check if this pattern works but isn't in our registry
             try:
                 exec(pattern)
-                print(f"    ✅ WORKS")
+                print(f"    CHECK WORKS")
 
                 # Check if it's documented in our registry
                 component = None
@@ -352,12 +352,12 @@ class SSotImportRegistryComplianceIssue1196Tests(unittest.TestCase):
                     all_documented_paths = [self.ssot_registry_imports[component]["canonical"]] + self.ssot_registry_imports[component]["alternatives"]
                     if pattern not in all_documented_paths:
                         missing_from_registry.append(f"{component}: Working import path not documented - {pattern}")
-                        print(f"    ❌ NOT DOCUMENTED in SSOT registry")
+                        print(f"    X NOT DOCUMENTED in SSOT registry")
                     else:
-                        print(f"    ✅ DOCUMENTED in SSOT registry")
+                        print(f"    CHECK DOCUMENTED in SSOT registry")
 
             except Exception as e:
-                print(f"    ❌ BROKEN: {str(e)}")
+                print(f"    X BROKEN: {str(e)}")
 
         print(f"\nUndocumented working imports found: {len(missing_from_registry)}")
         for missing in missing_from_registry:

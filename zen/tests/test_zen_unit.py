@@ -41,7 +41,7 @@ class TestInstanceConfig:
         assert config.command == "/test-command"
         assert config.name == "/test-command"  # Default name
         assert config.description == "Execute /test-command"  # Default description
-        assert config.permission_mode == "acceptEdits"
+        assert config.permission_mode == "bypassPermissions"
         assert config.output_format == "stream-json"
         assert config.session_id is None
         assert config.clear_history is False
@@ -177,7 +177,7 @@ class TestInstanceConfig:
         # Test starting with defaults
         config = InstanceConfig(command="/base-command")
         assert config.max_tokens_per_command is None
-        assert config.permission_mode == "acceptEdits"
+        assert config.permission_mode == "bypassPermissions"
         assert config.output_format == "stream-json"
 
         # Simulate configuration file override
@@ -205,7 +205,7 @@ class TestInstanceConfig:
         config = InstanceConfig(
             command="/test-command",
             max_tokens_per_command=1000,
-            permission_mode="acceptEdits",
+            permission_mode="bypassPermissions",
             output_format="stream-json"
         )
 
@@ -506,7 +506,7 @@ class TestDefaultInstances:
         for instance in instances:
             assert isinstance(instance, InstanceConfig)
             assert instance.command.startswith("/")  # All should be slash commands
-            assert instance.permission_mode == "acceptEdits"
+            assert instance.permission_mode == "bypassPermissions"
             assert instance.output_format == "stream-json"
 
     def test_create_default_instances_custom_format(self):
@@ -529,6 +529,94 @@ class TestDefaultInstances:
         assert any("/testgardener" in cmd for cmd in commands)
         assert any("/runtests" in cmd for cmd in commands)
         assert any("/ultimate-test-deploy-loop" in cmd for cmd in commands)
+
+
+class TestBudgetDisplayFeature:
+    """Test the budget display functionality in the main table"""
+
+    def test_get_budget_display_no_budget_manager(self):
+        """Test budget display when no budget manager is available"""
+        orchestrator = ClaudeInstanceOrchestrator(Path("/tmp"), budget_enforcement_mode="warn")
+        result = orchestrator._get_budget_display("test_instance")
+        assert result == "-"
+
+    def test_get_budget_display_no_instance(self):
+        """Test budget display when instance doesn't exist"""
+        from zen.token_budget.budget_manager import TokenBudgetManager
+
+        orchestrator = ClaudeInstanceOrchestrator(Path("/tmp"), budget_enforcement_mode="warn")
+        orchestrator.budget_manager = TokenBudgetManager()
+
+        result = orchestrator._get_budget_display("nonexistent_instance")
+        assert result == "-"
+
+    def test_get_budget_display_no_command_budget(self):
+        """Test budget display when command has no budget configured"""
+        from zen.token_budget.budget_manager import TokenBudgetManager
+
+        orchestrator = ClaudeInstanceOrchestrator(Path("/tmp"), budget_enforcement_mode="warn")
+        orchestrator.budget_manager = TokenBudgetManager()
+
+        # Add an instance
+        config = InstanceConfig(command="/test-command")
+        orchestrator.instances["test_instance"] = config
+
+        result = orchestrator._get_budget_display("test_instance")
+        assert result == "-"
+
+    def test_get_budget_display_with_budget(self):
+        """Test budget display when command has budget configured"""
+        from zen.token_budget.budget_manager import TokenBudgetManager
+
+        orchestrator = ClaudeInstanceOrchestrator(Path("/tmp"), budget_enforcement_mode="warn")
+        orchestrator.budget_manager = TokenBudgetManager()
+
+        # Add an instance
+        config = InstanceConfig(command="/test-command")
+        orchestrator.instances["test_instance"] = config
+
+        # Set a budget for the command
+        orchestrator.budget_manager.set_command_budget("/test-command", 5000)
+        orchestrator.budget_manager.record_usage("/test-command", 1200)
+
+        result = orchestrator._get_budget_display("test_instance")
+        assert result == "1.2K/5.0K"
+
+    def test_get_budget_display_with_complex_command(self):
+        """Test budget display with command that has arguments"""
+        from zen.token_budget.budget_manager import TokenBudgetManager
+
+        orchestrator = ClaudeInstanceOrchestrator(Path("/tmp"), budget_enforcement_mode="warn")
+        orchestrator.budget_manager = TokenBudgetManager()
+
+        # Add an instance with command arguments
+        config = InstanceConfig(command="/test-command arg1 arg2")
+        orchestrator.instances["test_instance"] = config
+
+        # Set a budget for the base command only
+        orchestrator.budget_manager.set_command_budget("/test-command", 10000)
+        orchestrator.budget_manager.record_usage("/test-command", 2500)
+
+        result = orchestrator._get_budget_display("test_instance")
+        assert result == "2.5K/10.0K"
+
+    def test_get_budget_display_formatting_millions(self):
+        """Test budget display formatting with millions of tokens"""
+        from zen.token_budget.budget_manager import TokenBudgetManager
+
+        orchestrator = ClaudeInstanceOrchestrator(Path("/tmp"), budget_enforcement_mode="warn")
+        orchestrator.budget_manager = TokenBudgetManager()
+
+        # Add an instance
+        config = InstanceConfig(command="/big-command")
+        orchestrator.instances["test_instance"] = config
+
+        # Set a large budget
+        orchestrator.budget_manager.set_command_budget("/big-command", 2000000)
+        orchestrator.budget_manager.record_usage("/big-command", 1500000)
+
+        result = orchestrator._get_budget_display("test_instance")
+        assert result == "1.5M/2.0M"
 
 
 if __name__ == "__main__":
