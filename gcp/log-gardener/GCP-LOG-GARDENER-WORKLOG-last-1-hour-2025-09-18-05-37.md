@@ -49,6 +49,13 @@
 4. Update this worklog with issue numbers
 
 ## GitHub Issues Created/Updated
-- [ ] Cluster 1 - WebSocket Bridge Factory: [Pending]
-- [ ] Cluster 2 - SQLAlchemy Database: [Pending]
-- [ ] Cluster 3 - Auth Client Import: [Pending]
+- [x] Cluster 1 - WebSocket Bridge Factory: **Issue #1333** (NEW) - "GCP-regression | P0 | WebSocket Bridge Factory Import Error - Missing reset_websocket_bridge_factory Function"
+- [x] Cluster 2 - SQLAlchemy Database: **Issue #1335** (NEW) + Updated **Issue #1310** (existing) - "GCP-regression | P0 | SQLAlchemy 2.x Migration - Backend Service Database Health Check Failures"
+- [x] Cluster 3 - Auth Client Import: **Issue #1337** (NEW) - "GCP-regression | P0 | Auth Client Integration - Missing get_auth_client Function"
+
+## Summary of Actions Taken
+- **3 New Issues Created**: #1333, #1335, #1337
+- **1 Existing Issue Updated**: #1310 (with regression comment)
+- **All issues labeled**: claude-code-generated-issue
+- **All issues prioritized**: P0 (Critical)
+- **Related issues linked**: Connected to Golden Path issues #1059, #1032, #1087, #1203
